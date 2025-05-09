@@ -1,0 +1,83 @@
+frontend/
+├── src/
+│   ├── domain/                    # Core data models and types (Entities)
+│   │   ├── entities/              # Data models for UI and API
+│   │   │   ├── user.ts            # User model (e.g., id, email, role)
+│   │   │   ├── application.ts     # Admission application model (e.g., id, status, documents)
+│   │   │   └── ...                # Future models (e.g., course, article for Weeks 3–5)
+│   │   └── types/                 # TypeScript interfaces for props and data
+│   │       ├── input.ts           # Props for Input component
+│   │       ├── button.ts          # Props for Button component
+│   │       ├── form.ts            # Props for Form component
+│   │       ├── user.ts            # Interface for User DTO
+│   │       ├── application.ts     # Interface for Application DTO
+│   │       └── ...                # Future types (e.g., course, article)
+│   ├── application/               # Business logic and API integration (Use Cases)
+│   │   ├── hooks/                 # Custom React hooks with TanStack Query
+│   │   │   ├── useAuth.ts         # Handles login/register logic
+│   │   │   ├── useAdmission.ts    # Handles application submission and offer acceptance
+│   │   │   └── ...                # Future hooks (e.g., useDashboard for Week 3)
+│   │   └── services/              # API calls with TanStack Query
+│   │       ├── auth.service.ts    # Mock/real API calls for login/register
+│   │       ├── admission.service.ts # Mock/real API calls for application/offer
+│   │       └── ...                # Future services (e.g., dashboard.service.ts)
+│   ├── presentation/              # UI components and pages (Interface Adapters)
+│   │   ├── components/            # Reusable UI components
+│   │   │   ├── Input.tsx          # Text, password, file inputs
+│   │   │   ├── Button.tsx         # Primary/secondary buttons
+│   │   │   ├── Form.tsx           # Form wrapper
+│   │   │   ├── ErrorMessage.tsx   # Validation error display
+│   │   │   ├── LoadingSpinner.tsx # Loading indicator
+│   │   │   └── ...                # Future components (e.g., Chart.tsx for Week 3)
+│   │   ├── pages/                 # Page-specific components
+│   │   │   ├── Auth/              # Authentication pages
+│   │   │   │   ├── Login.tsx      # Login form page
+│   │   │   │   ├── Register.tsx   # Register form page
+│   │   │   ├── Admission/         # Admission process pages
+│   │   │   │   ├── Apply.tsx      # Application form page
+│   │   │   │   ├── Offer.tsx      # Offer acceptance page
+│   │   │   └── ...                # Future pages (e.g., Dashboard for Week 3)
+│   │   └── redux/                 # Redux store and slices
+│   │       ├── store.ts           # Redux store configuration
+│   │       ├── auth.slice.ts      # Auth state (e.g., user, token)
+│   │       ├── admission.slice.ts # Admission state (e.g., application status)
+│   │       └── ...                # Future slices (e.g., dashboard.slice.ts)
+│   ├── frameworks/                # External tools and configs (Frameworks & Drivers)
+│   │   ├── config/                # Configuration files
+│   │   │   ├── env.ts             # Environment variables (e.g., VITE_API_URL)
+│   │   │   ├── tailwind.config.js # Tailwind CSS configuration
+│   │   │   └── ...                # Future configs (e.g., i18n for Week 4)
+│   │   ├── pwa/                   # PWA setup for Week 6
+│   │   │   ├── manifest.json      # Web app manifest
+│   │   │   ├── service-worker.ts  # Workbox service worker
+│   │   │   └── ...                # Future PWA files
+│   │   ├── query-client.ts        # TanStack Query client setup
+│   │   └── router.tsx             # React Router configuration
+│   ├── assets/                    # Static assets (images, icons)
+│   │   ├── logo.png               # University logo from Figma
+│   │   ├── favicon.ico            # Favicon
+│   │   └── ...                    # Future assets (e.g., icons for Week 3)
+│   ├── App.tsx                    # Main app entry point
+│   └── index.tsx                  # React DOM entry point
+├── public/                        # Public assets (e.g., manifest.json for PWA)
+├── tests/                         # Unit and integration tests
+│   ├── components/                # Component tests
+│   │   ├── Input.test.tsx         # Test Input component
+│   │   ├── Button.test.tsx        # Test Button component
+│   │   └── ...
+│   ├── hooks/                     # Hook tests
+│   │   ├── useAuth.test.ts        # Test useAuth hook
+│   │   ├── useAdmission.test.ts   # Test useAdmission hook
+│   │   └── ...
+│   └── ...                        # Future tests
+├── docs/                          # Documentation
+│   ├── components.md              # Component props and usage
+│   ├── ui-setup.md                # UI setup instructions
+│   └── ...                        # Future docs (e.g., PWA setup)
+├── .eslintrc.json                 # ESLint configuration
+├── .prettierrc                    # Prettier configuration
+├── .gitignore                     # Git ignore file
+├── package.json                   # Dependencies and scripts
+├── tsconfig.json                  # TypeScript configuration
+├── vite.config.ts                 # Vite configuration
+└── README.md                      # Project overview and setup instructions

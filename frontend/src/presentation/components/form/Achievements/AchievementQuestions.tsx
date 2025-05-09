@@ -1,0 +1,60 @@
+import React from 'react';
+import { Question } from './options';
+
+interface Props {
+  questions: Question[];
+  answers: { [key: number]: string };
+  onAnswerChange: (questionId: number, value: string) => void;
+}
+
+export const AchievementQuestions: React.FC<Props> = ({ questions, answers, onAnswerChange }) => (
+  <div className="mb-8 bg-white rounded-xl border border-cyan-100 overflow-hidden">
+    <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 border-b border-cyan-100">
+      <h3 className="text-lg font-medium text-cyan-900">Short Questions and Answers</h3>
+    </div>
+
+    <div className="p-6">
+      <div className="bg-cyan-50 border-l-4 border-cyan-400 p-4 rounded mb-6">
+        <p className="text-sm text-cyan-800 font-medium">This section is MANDATORY</p>
+      </div>
+
+      <div className="space-y-4 mb-6">
+        <p className="text-sm text-cyan-800">
+          As part of our admissions process, we would like to get to know you better through a series of 5 short response questions. 
+          This is a self-evaluation of your interests and suitability for the programme, so please answer simply and honestly in Standard English, 
+          and in your own words. Do not use any external aid such as Artificial Intelligence or Ghostwriting: doing so may have a negative impact 
+          on your application.
+        </p>
+        <p className="text-sm italic text-cyan-600">
+          Each question has a character limit, so avoid verbose answers and write straight to the point.
+        </p>
+      </div>
+
+      <div className="space-y-8">
+        {questions.map((q) => (
+          <div key={q.id} className="border border-cyan-100 rounded-lg p-4">
+            <label className="block mb-3 text-cyan-800 font-medium">
+              {q.id}. {q.question}
+              {q.hint && (
+                <span className="block mt-1 italic text-cyan-600 text-sm">
+                  {q.hint}
+                </span>
+              )}
+            </label>
+            <textarea
+              className="w-full h-32 border border-cyan-200 rounded-lg p-3 text-cyan-800 placeholder-cyan-400 focus:border-cyan-400 focus:ring-cyan-200 transition-colors"
+              value={answers[q.id]}
+              onChange={(e) => onAnswerChange(q.id, e.target.value)}
+              maxLength={q.maxLength}
+            />
+            <div className="flex justify-end mt-2">
+              <span className="text-sm text-cyan-600">
+                Character Count: {answers[q.id]?.length || 0} / {q.maxLength}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);

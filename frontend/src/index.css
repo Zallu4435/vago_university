@@ -76,6 +76,45 @@ body {
   background: rgba(255, 255, 255, 0.95);
 }
 
+/* Placeholder styles */
+input::placeholder {
+  color: #06b6d4 !important; /* Tailwind cyan-400 */
+  opacity: 1 !important;
+}
+
+/* Target the placeholder option for select globally */
+/* Set select text color globally */
+select {
+  color: #06b6d4 !important; /* Tailwind cyan-400 */
+}
+
+/* Set option text color globally */
+select option {
+  color: #06b6d4 !important; /* Tailwind cyan-400 */
+}
+
+/* Optional: Set background for select and options */
+select, select option {
+  background-color: #fff !important;
+}
+
+/* Option hover color (works in Firefox only) */
+select option:hover {
+  background-color: #e0f2fe !important; /* Tailwind cyan-100 */
+  color: #0ea5e9 !important;            /* Tailwind cyan-500 */
+}
+
+/* Textarea placeholder color */
+textarea::placeholder {
+  color: #06b6d4 !important; /* Tailwind cyan-400 */
+  opacity: 1 !important;
+}
+
+/* Global radio button color */
+input[type="radio"] {
+  accent-color: #06b6d4; /* Tailwind cyan-400 */
+}
+
 /* Section headers */
 .section-header {
   color: var(--color-text-accent);
@@ -265,3 +304,4 @@ body {
 .float-element {
   animation: float 6s ease-in-out infinite;
 }
+

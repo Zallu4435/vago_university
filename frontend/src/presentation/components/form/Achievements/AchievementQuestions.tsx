@@ -1,5 +1,6 @@
 import React from 'react';
 import { Question } from './options';
+import { Textarea } from '../../Textarea';
 
 interface Props {
   questions: Question[];
@@ -41,17 +42,16 @@ export const AchievementQuestions: React.FC<Props> = ({ questions, answers, onAn
                 </span>
               )}
             </label>
-            <textarea
-              className="w-full h-32 border border-cyan-200 rounded-lg p-3 text-cyan-800 placeholder-cyan-400 focus:border-cyan-400 focus:ring-cyan-200 transition-colors"
+            <Textarea
+              id={`question-${q.id}`}
               value={answers[q.id]}
-              onChange={(e) => onAnswerChange(q.id, e.target.value)}
+              onChange={e => onAnswerChange(q.id, e.target.value)}
               maxLength={q.maxLength}
+              rows={6}
+              required
+              placeholder="Type your answer here"
+              className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 text-cyan-800 placeholder-cyan-400"
             />
-            <div className="flex justify-end mt-2">
-              <span className="text-sm text-cyan-600">
-                Character Count: {answers[q.id]?.length || 0} / {q.maxLength}
-              </span>
-            </div>
           </div>
         ))}
       </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Input } from '../../Input';
 import { Button } from '../../Button';
+import { subjectFields } from './options';
 
 interface SubjectModalProps {
   showModal: boolean;
@@ -31,7 +32,6 @@ export const SubjectModal: React.FC<SubjectModalProps> = ({
       marksObtained,
       maxMarks,
     });
-    // Reset form
     setSubject('');
     setOtherSubject('');
     setMarksObtained('');
@@ -39,6 +39,13 @@ export const SubjectModal: React.FC<SubjectModalProps> = ({
   };
 
   if (!showModal) return null;
+
+  const fieldStateMap = {
+    subject, setSubject,
+    otherSubject, setOtherSubject,
+    marksObtained, setMarksObtained,
+    maxMarks, setMaxMarks,
+  };
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 backdrop-blur-sm">
@@ -52,47 +59,25 @@ export const SubjectModal: React.FC<SubjectModalProps> = ({
         </button>
         <h2 className="text-xl font-semibold mb-6 text-cyan-900">Add Subject</h2>
         <form onSubmit={handleSubmit}>
-          <Input 
-            id="subject" 
-            label="Subject" 
-            value={subject} 
-            onChange={e => setSubject(e.target.value)} 
-            required 
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
-            labelClassName="text-cyan-700"
-          />
-          <Input 
-            id="otherSubject" 
-            label="Other Subject" 
-            value={otherSubject} 
-            onChange={e => setOtherSubject(e.target.value)} 
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
-            labelClassName="text-cyan-700"
-          />
-          <Input 
-            id="marksObtained" 
-            label="Marks Obtained" 
-            value={marksObtained} 
-            onChange={e => setMarksObtained(e.target.value)} 
-            required 
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
-            labelClassName="text-cyan-700"
-          />
-          <Input 
-            id="maxMarks" 
-            label="Maximum Marks" 
-            value={maxMarks} 
-            onChange={e => setMaxMarks(e.target.value)} 
-            required 
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
-            labelClassName="text-cyan-700"
-          />
+          {subjectFields.map(field => (
+            <Input
+              key={field.id}
+              id={field.id}
+              label={field.label}
+              value={fieldStateMap[field.id]}
+              onChange={e => fieldStateMap[`set${field.id.charAt(0).toUpperCase() + field.id.slice(1)}`](e.target.value)}
+              required={field.required}
+              placeholder={field.placeholder}
+              className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
+              labelClassName="text-cyan-700"
+            />
+          ))}
           <div className="flex justify-end mt-6">
-            <Button 
-              label="Add" 
-              type="submit" 
-              variant="primary" 
-              className="bg-gradient-to-r from-cyan-400 to-blue-400 text-white px-4 py-2 rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all duration-300 shadow-sm relative overflow-hidden group" 
+            <Button
+              label="Add"
+              type="submit"
+              variant="primary"
+              className="bg-gradient-to-r from-cyan-400 to-blue-400 text-white px-4 py-2 rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all duration-300 shadow-sm relative overflow-hidden group"
             />
           </div>
         </form>

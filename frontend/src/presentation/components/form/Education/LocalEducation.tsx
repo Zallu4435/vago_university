@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Input } from '../../Input';
 import { Select } from '../../Select';
-import { Button } from '../../Button';
 import { countryOptions } from './options';
 
 export const LocalEducation: React.FC = () => {
@@ -27,6 +26,7 @@ export const LocalEducation: React.FC = () => {
             value={schoolName} 
             onChange={e => setSchoolName(e.target.value)} 
             required 
+            placeholder="Enter school or institution name"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
             labelClassName="text-cyan-700"
           />
@@ -37,6 +37,7 @@ export const LocalEducation: React.FC = () => {
             value={country} 
             onChange={e => setCountry(e.target.value)} 
             required 
+            placeholder="Select country"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
             labelClassName="text-cyan-700"
           />
@@ -46,6 +47,7 @@ export const LocalEducation: React.FC = () => {
             value={from} 
             onChange={e => setFrom(e.target.value)} 
             required 
+            placeholder="Start year"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
             labelClassName="text-cyan-700"
           />
@@ -55,6 +57,7 @@ export const LocalEducation: React.FC = () => {
             value={to} 
             onChange={e => setTo(e.target.value)} 
             required 
+            placeholder="End year"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
             labelClassName="text-cyan-700"
           />
@@ -64,6 +67,7 @@ export const LocalEducation: React.FC = () => {
             value={nationalID} 
             onChange={e => setNationalID(e.target.value)} 
             required 
+            placeholder="Enter national ID or registration number"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
             labelClassName="text-cyan-700"
           />
@@ -73,6 +77,7 @@ export const LocalEducation: React.FC = () => {
             value={localSchoolCategory} 
             onChange={e => setLocalSchoolCategory(e.target.value)} 
             required 
+            placeholder="Enter school category"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
             labelClassName="text-cyan-700"
           />
@@ -82,6 +87,7 @@ export const LocalEducation: React.FC = () => {
             value={stateOrProvince} 
             onChange={e => setStateOrProvince(e.target.value)} 
             required 
+            placeholder="Enter state or province"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
             labelClassName="text-cyan-700"
           />

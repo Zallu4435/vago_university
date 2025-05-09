@@ -41,5 +41,10 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
     );
   }
 
-  return <Payment onComplete={onPaymentComplete} />;
+  return (
+    <Payment
+      onComplete={onPaymentComplete}
+      onPrevious={() => setShowPayment(false)} // <-- Add this
+    />
+  );
 };

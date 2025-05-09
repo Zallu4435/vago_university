@@ -76,7 +76,6 @@ export const ChoiceOfStudy: React.FC = () => {
                       <td className="py-3 px-4 text-cyan-800">{choice.preferredMajor}</td>
                       <td className="py-3 px-4">
                         <Button 
-                          label="Remove" 
                           variant="outline" 
                           onClick={() => handleRemove(idx)}
                           className="text-cyan-600 hover:text-cyan-700 border border-cyan-300 hover:border-cyan-400 px-3 py-1 rounded-md relative overflow-hidden group" 

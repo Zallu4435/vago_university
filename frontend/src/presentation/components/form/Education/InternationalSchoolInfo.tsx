@@ -2,12 +2,9 @@ import React, { useState } from 'react';
 import { Input } from '../../Input';
 import { Select } from '../../Select';
 import { Button } from '../../Button';
-import { countryOptions } from './options';
+import { RadioGroup } from '../../RadioGroup';
+import { countryOptions, examOptions } from './options';
 import { SubjectModal } from './SubjectModal';
-
-const examOptions = [
-  { value: 'other', label: 'OTHER HIGH SCHOOL QUALIFICATION' },
-];
 
 export interface Subject {
   subject: string;
@@ -72,6 +69,7 @@ export const InternationalSchoolInfo: React.FC<Props> = ({ onNext }) => {
             value={schoolName} 
             onChange={e => setSchoolName(e.target.value)} 
             required 
+            placeholder="Enter school name"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
             labelClassName="text-cyan-700"
           />
@@ -82,6 +80,7 @@ export const InternationalSchoolInfo: React.FC<Props> = ({ onNext }) => {
             value={country} 
             onChange={e => setCountry(e.target.value)} 
             required 
+            placeholder="Select country"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
             labelClassName="text-cyan-700"
           />
@@ -91,6 +90,7 @@ export const InternationalSchoolInfo: React.FC<Props> = ({ onNext }) => {
             value={from} 
             onChange={e => setFrom(e.target.value)} 
             required 
+            placeholder="Start year"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
             labelClassName="text-cyan-700"
           />
@@ -100,6 +100,7 @@ export const InternationalSchoolInfo: React.FC<Props> = ({ onNext }) => {
             value={to} 
             onChange={e => setTo(e.target.value)} 
             required 
+            placeholder="End year"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
             labelClassName="text-cyan-700"
           />
@@ -110,6 +111,7 @@ export const InternationalSchoolInfo: React.FC<Props> = ({ onNext }) => {
             value={examination} 
             onChange={e => setExamination(e.target.value)} 
             required 
+            placeholder="Select examination"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
             labelClassName="text-cyan-700"
           />
@@ -119,22 +121,22 @@ export const InternationalSchoolInfo: React.FC<Props> = ({ onNext }) => {
             value={examMonthYear} 
             onChange={e => setExamMonthYear(e.target.value)} 
             required 
+            placeholder="e.g. June 2023"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
             labelClassName="text-cyan-700"
           />
-          <div className="md:col-span-2 flex items-center mt-2">
-            <label className="block text-sm font-medium text-cyan-700 mr-6">
-              Result Type<span className="text-red-500">*</span>
-            </label>
-            <label className="mr-6 flex items-center">
-              <input type="radio" name="resultType" value="actual" checked={resultType === 'actual'} onChange={() => setResultType('actual')} className="mr-1" />
-              Actual
-            </label>
-            <label className="flex items-center">
-              <input type="radio" name="resultType" value="predicted" checked={resultType === 'predicted'} onChange={() => setResultType('predicted')} className="mr-1" />
-              Predicted/Forecast
-            </label>
-          </div>
+          <RadioGroup
+            name="resultType"
+            label="Result Type"
+            options={[
+              { label: 'Actual', value: 'actual' },
+              { label: 'Predicted/Forecast', value: 'predicted' },
+            ]}
+            selectedValue={resultType}
+            onChange={val => setResultType(val as 'actual' | 'predicted')}
+            required
+            className="md:col-span-2 mt-2 text-cyan-700"
+          />
         </div>
 
         {/* Subjects Table */}

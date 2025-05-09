@@ -1,4 +1,3 @@
-
 // AlternativeContactSection.tsx
 import React from 'react';
 import { Input } from '../../Input';
@@ -26,6 +25,7 @@ export const AlternativeContactSection: React.FC<AlternativeContactSectionProps>
           options={field.options}
           value={formData[field.id as keyof PersonalInfo] as string}
           onChange={onInputChange}
+          placeholder={field.placeholder} // <-- add this
           className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
           labelClassName="text-cyan-700"
         />
@@ -36,6 +36,7 @@ export const AlternativeContactSection: React.FC<AlternativeContactSectionProps>
           label={field.label}
           value={formData[field.id as keyof PersonalInfo] as string}
           onChange={onInputChange}
+          placeholder={field.placeholder} // <-- add this
           className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
           labelClassName="text-cyan-700"
         />

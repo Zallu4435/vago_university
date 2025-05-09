@@ -2,9 +2,7 @@ import React from 'react';
 
 const paymentMethods = [
   { id: 'credit_card', name: 'Credit Card', icon: '💳' },
-  { id: 'debit_card', name: 'Debit Card', icon: '💳' },
-  { id: 'bank_transfer', name: 'Bank Transfer', icon: '🏦' },
-  { id: 'paypal', name: 'PayPal', icon: 'Ⓟ' },
+  { id: 'stripe', name: 'Stripe', icon: '🔐' }, // You can replace this with a Stripe icon image if needed
 ];
 
 interface PaymentMethodsProps {

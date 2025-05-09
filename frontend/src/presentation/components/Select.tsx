@@ -48,7 +48,9 @@ export const Select: React.FC<SelectProps> = ({
         required={required}
         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 ${className}`}
       >
-        <option value="">{placeholder}</option>
+        <option value="" disabled hidden style={{ color: '#06b6d4' }}>
+          {placeholder}
+        </option>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}

@@ -2,6 +2,7 @@ import React from 'react';
 import { Input } from '../../Input';
 import { Button } from '../../Button';
 import { Select } from '../../Select';
+import { Textarea } from '../../Textarea';
 import { getReferenceFields, getSelectFields } from './fields';
 
 interface ReferenceContact {
@@ -58,13 +59,13 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
         <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 border-b border-cyan-100">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-cyan-900">Add Achievement</h2>
-            <button
+            <Button
               onClick={onClose}
-              className="text-cyan-400 hover:text-cyan-600 transition-colors"
               aria-label="Close"
-            >
-              ×
-            </button>
+              label="×"
+              variant="ghost"
+              className="text-cyan-400 hover:text-cyan-600 transition-colors px-2 py-0 text-xl font-bold"
+            />
           </div>
         </div>
 
@@ -80,6 +81,7 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
                 value={field.value}
                 onChange={e => field.onChange(e.target.value)}
                 required
+                placeholder={field.placeholder}
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
               />
@@ -89,6 +91,7 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
               label="Name of Activity / Organisation / Employer"
               value={newAchievement.organizationName}
               onChange={e => setNewAchievement({ ...newAchievement, organizationName: e.target.value })}
+              placeholder="Enter organization or employer name"
               className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
               labelClassName="text-cyan-700"
             />
@@ -98,6 +101,7 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
               value={newAchievement.fromDate}
               onChange={e => setNewAchievement({ ...newAchievement, fromDate: e.target.value })}
               required
+              placeholder="MM/YYYY"
               className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
               labelClassName="text-cyan-700"
             />
@@ -107,26 +111,25 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
               value={newAchievement.toDate}
               onChange={e => setNewAchievement({ ...newAchievement, toDate: e.target.value })}
               required
+              placeholder="MM/YYYY"
               className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
               labelClassName="text-cyan-700"
             />
           </div>
 
           <div className="mb-6">
-            <Input
+            <Textarea
               id="description"
               label="Key Contribution Description"
               value={newAchievement.description}
               onChange={e => setNewAchievement({ ...newAchievement, description: e.target.value.slice(0, 1000) })}
               required
-              multiline
-              rows={4}
+              placeholder="Describe your achievement (max 1000 characters)"
               className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
               labelClassName="text-cyan-700"
+              maxLength={1000}
+              rows={4}
             />
-            <div className="text-right text-sm text-cyan-600 mt-1">
-              Character Count: {newAchievement.description.length} / 1000
-            </div>
           </div>
 
           {/* Reference Section */}
@@ -141,6 +144,7 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
                   type={field.type || 'text'}
                   value={field.value}
                   onChange={e => field.onChange(e.target.value)}
+                  placeholder={field.placeholder} // <-- now included!
                   className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                   labelClassName="text-cyan-700"
                 />
@@ -151,15 +155,15 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
 
         {/* Footer */}
         <div className="flex justify-end gap-4 p-6 bg-gray-50 border-t border-cyan-100">
-          <Button 
-            label="Cancel" 
-            variant="outline" 
+          <Button
+            label="Cancel"
+            variant="outline"
             onClick={onClose}
             className="text-cyan-600 border-cyan-200 hover:bg-cyan-50"
           />
-          <Button 
-            label="Submit" 
-            variant="primary" 
+          <Button
+            label="Submit"
+            variant="primary"
             onClick={onSubmit}
             className="bg-gradient-to-r from-cyan-400 to-blue-400 text-white hover:from-cyan-500 hover:to-blue-500"
           />

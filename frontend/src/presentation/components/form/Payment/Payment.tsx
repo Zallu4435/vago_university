@@ -6,9 +6,10 @@ import { Button } from '../../Button';
 
 interface PaymentProps {
   onComplete: () => void;
+  onPrevious: () => void; // Add this line
 }
 
-export const Payment: React.FC<PaymentProps> = ({ onComplete }) => {
+export const Payment: React.FC<PaymentProps> = ({ onComplete, onPrevious }) => {
   const [selectedMethod, setSelectedMethod] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -40,8 +41,8 @@ export const Payment: React.FC<PaymentProps> = ({ onComplete }) => {
         </div>
 
         <PaymentSummary 
-          amount={75.00}
-          currency="USD"
+          amount={1000.00}
+          currency="INR"
           description="Application Processing Fee"
         />
 
@@ -63,6 +64,7 @@ export const Payment: React.FC<PaymentProps> = ({ onComplete }) => {
           label="Previous"
           variant="outline"
           type="button"
+          onClick={onPrevious} // <-- Add this
           className="text-cyan-600 border-cyan-200 hover:bg-cyan-50 px-4 py-2 rounded-lg"
         />
         <Button

@@ -63,6 +63,7 @@ export const mainFields = [
     type: "select",
     options: salutationOptions,
     required: true,
+    placeholder: "Select salutation",
   },
   {
     id: "citizenship",
@@ -70,14 +71,16 @@ export const mainFields = [
     type: "select",
     options: citizenshipOptions,
     required: true,
+    placeholder: "Select citizenship",
   },
-  { id: "fullName", label: "Full Name", type: "input", required: true },
+  { id: "fullName", label: "Full Name", type: "input", required: true, placeholder: "Enter full name" },
   {
     id: "gender",
     label: "Gender",
     type: "select",
     options: genderOptions,
     required: true,
+    placeholder: "Select gender",
   },
   {
     id: "residentialStatus",
@@ -85,22 +88,25 @@ export const mainFields = [
     type: "select",
     options: residentialStatusOptions,
     required: true,
+    placeholder: "Select residential status",
   },
-  { id: "familyName", label: "Family Name / Surname", type: "input" },
+  { id: "familyName", label: "Family Name / Surname", type: "input", placeholder: "Enter family name" },
   {
     id: "race",
     label: "Race / Ethnic Group",
     type: "select",
     options: raceOptions,
     required: true,
+    placeholder: "Select race/ethnic group",
   },
-  { id: "givenName", label: "Given Name", type: "input" },
+  { id: "givenName", label: "Given Name", type: "input", placeholder: "Enter given name" },
   {
     id: "religion",
     label: "Religion",
     type: "select",
     options: religionOptions,
     required: true,
+    placeholder: "Select religion",
   },
   {
     id: "dateOfBirth",
@@ -115,14 +121,16 @@ export const mainFields = [
     type: "select",
     options: maritalStatusOptions,
     required: true,
+    placeholder: "Select marital status",
   },
-  { id: "postalCode", label: "Postal Code", type: "input", required: true },
-  { id: "passportNumber", label: "Passport Number", type: "input" },
+  { id: "postalCode", label: "Postal Code", type: "input", required: true, placeholder: "Enter postal code" },
+  { id: "passportNumber", label: "Passport Number", type: "input", placeholder: "Enter passport number" },
   {
     id: "blockNumber",
     label: "Block / House Number",
     type: "input",
     required: true,
+    placeholder: "Enter block/house number",
   },
   {
     id: "emailAddress",
@@ -130,29 +138,29 @@ export const mainFields = [
     type: "input",
     inputType: "email",
     required: true,
+    placeholder: "Enter email address",
   },
-  { id: "streetName", label: "Street Name", type: "input", required: true },
+  { id: "streetName", label: "Street Name", type: "input", required: true, placeholder: "Enter street name" },
   {
     id: "alternativeEmail",
     label: "Alternative Email",
     type: "input",
     inputType: "email",
+    placeholder: "Enter alternative email",
   },
-  { id: "buildingName", label: "Building Name", type: "input" },
-  { id: "floorNumber", label: "Floor Number", type: "input" },
-  { id: "unitNumber", label: "Unit Number", type: "input" },
-  { id: "stateCity", label: "State / City", type: "input" },
+  { id: "buildingName", label: "Building Name", type: "input", placeholder: "Enter building name" },
+  { id: "floorNumber", label: "Floor Number", type: "input", placeholder: "Enter floor number" },
+  { id: "unitNumber", label: "Unit Number", type: "input", placeholder: "Enter unit number" },
+  { id: "stateCity", label: "State / City", type: "input", placeholder: "Enter state or city" },
   {
     id: "country",
     label: "Country",
     type: "select",
     options: countryOptions,
     required: true,
+    placeholder: "Select country",
   },
 ];
-
-
-
 
 // for alternative contact
 const relationshipOptions = [
@@ -164,7 +172,7 @@ const relationshipOptions = [
 ];
 
 export const altContactFields = [
-  { id: 'alternateContactName', label: 'Name of Next of Kin / Guardian', type: 'input' },
-  { id: 'relationshipWithApplicant', label: 'Relationship with Applicant', type: 'select', options: relationshipOptions },
-  { id: 'occupation', label: 'Occupation', type: 'input' },
+  { id: 'alternateContactName', label: 'Name of Next of Kin / Guardian', type: 'input', placeholder: 'Enter name' },
+  { id: 'relationshipWithApplicant', label: 'Relationship with Applicant', type: 'select', options: relationshipOptions, placeholder: 'Select relationship' },
+  { id: 'occupation', label: 'Occupation', type: 'input', placeholder: 'Enter occupation' },
 ];

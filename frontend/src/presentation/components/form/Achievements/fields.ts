@@ -18,6 +18,7 @@ import {
       options: activityOptions,
       value: newAchievement.activity,
       onChange: (val: string) => setNewAchievement({ ...newAchievement, activity: val }),
+      placeholder: 'Select activity',
     },
     {
       id: 'positionHeld',
@@ -25,6 +26,7 @@ import {
       options: positionOptions,
       value: newAchievement.positionHeld,
       onChange: (val: string) => setNewAchievement({ ...newAchievement, positionHeld: val }),
+      placeholder: 'Select position',
     },
     {
       id: 'level',
@@ -32,6 +34,7 @@ import {
       options: levelOptions,
       value: newAchievement.level,
       onChange: (val: string) => setNewAchievement({ ...newAchievement, level: val }),
+      placeholder: 'Select level',
     },
     {
       id: 'levelOfAchievement',
@@ -39,6 +42,7 @@ import {
       options: levelOfAchievementOptions,
       value: newAchievement.levelOfAchievement,
       onChange: (val: string) => setNewAchievement({ ...newAchievement, levelOfAchievement: val }),
+      placeholder: 'Select level of achievement',
     },
   ];
   
@@ -51,18 +55,21 @@ import {
       label: 'First Name',
       value: referenceContact.firstName,
       onChange: (val: string) => setReferenceContact({ ...referenceContact, firstName: val }),
+      placeholder: 'Enter first name',
     },
     {
       id: 'refLastName',
       label: 'Last Name',
       value: referenceContact.lastName,
       onChange: (val: string) => setReferenceContact({ ...referenceContact, lastName: val }),
+      placeholder: 'Enter last name',
     },
     {
       id: 'refPosition',
       label: 'Position of Contact Person',
       value: referenceContact.position,
       onChange: (val: string) => setReferenceContact({ ...referenceContact, position: val }),
+      placeholder: 'Enter position',
     },
     {
       id: 'refEmail',
@@ -70,6 +77,7 @@ import {
       type: 'email',
       value: referenceContact.email,
       onChange: (val: string) => setReferenceContact({ ...referenceContact, email: val }),
+      placeholder: 'Enter email address',
     },
     {
       id: 'refPhoneCountry',
@@ -77,6 +85,7 @@ import {
       value: referenceContact.phone.country,
       onChange: (val: string) =>
         setReferenceContact({ ...referenceContact, phone: { ...referenceContact.phone, country: val } }),
+      placeholder: 'Country code (e.g. +65)',
     },
     {
       id: 'refPhoneArea',
@@ -84,6 +93,7 @@ import {
       value: referenceContact.phone.area,
       onChange: (val: string) =>
         setReferenceContact({ ...referenceContact, phone: { ...referenceContact.phone, area: val } }),
+      placeholder: 'Area code',
     },
     {
       id: 'refPhoneNumber',
@@ -91,6 +101,6 @@ import {
       value: referenceContact.phone.number,
       onChange: (val: string) =>
         setReferenceContact({ ...referenceContact, phone: { ...referenceContact.phone, number: val } }),
+      placeholder: 'Phone number',
     },
   ];
-  

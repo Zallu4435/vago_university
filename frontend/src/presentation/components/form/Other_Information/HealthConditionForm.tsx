@@ -32,13 +32,13 @@ const HealthConditionForm: React.FC<HealthConditionFormProps> = ({ onAddConditio
           <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 border-b border-cyan-100">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-medium text-cyan-900">Add Health Condition</h3>
-              <button
+              <Button
                 onClick={onClose}
-                className="text-cyan-400 hover:text-cyan-600 transition-colors"
                 aria-label="Close"
-              >
-                ×
-              </button>
+                label="×"
+                variant="ghost"
+                className="text-cyan-400 hover:text-cyan-600 transition-colors px-2 py-0 text-xl font-bold"
+              />
             </div>
           </div>
 
@@ -50,6 +50,7 @@ const HealthConditionForm: React.FC<HealthConditionFormProps> = ({ onAddConditio
                 value={newCondition.condition}
                 onChange={e => setNewCondition({ ...newCondition, condition: e.target.value })}
                 required
+                placeholder="Enter health or support condition"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
               />
@@ -60,6 +61,8 @@ const HealthConditionForm: React.FC<HealthConditionFormProps> = ({ onAddConditio
                 onChange={e => setNewCondition({ ...newCondition, details: e.target.value })}
                 rows={4}
                 required
+                placeholder="Provide details about your condition"
+                maxLength={500}
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
               />
@@ -67,15 +70,15 @@ const HealthConditionForm: React.FC<HealthConditionFormProps> = ({ onAddConditio
           </div>
 
           <div className="flex justify-end gap-4 p-6 bg-gray-50 border-t border-cyan-100">
-            <Button 
-              label="Cancel" 
-              variant="outline" 
+            <Button
+              label="Cancel"
+              variant="outline"
               onClick={onClose}
               className="text-cyan-600 border-cyan-200 hover:bg-cyan-50"
             />
-            <Button 
-              label="Add" 
-              variant="primary" 
+            <Button
+              label="Add"
+              variant="primary"
               onClick={handleAddCondition}
               className="bg-gradient-to-r from-cyan-400 to-blue-400 text-white hover:from-cyan-500 hover:to-blue-500"
             />

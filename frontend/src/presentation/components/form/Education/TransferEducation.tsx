@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Input } from '../../Input';
 import { Select } from '../../Select';
-import { Button } from '../../Button';
+import { Textarea } from '../../Textarea';
 import { countryOptions, universityOptions } from './options';
 
 export const TransferEducation: React.FC = () => {
@@ -30,6 +30,7 @@ export const TransferEducation: React.FC = () => {
             value={schoolName} 
             onChange={e => setSchoolName(e.target.value)} 
             required 
+            placeholder="Enter school or institution name"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
             labelClassName="text-cyan-700"
           />
@@ -40,6 +41,7 @@ export const TransferEducation: React.FC = () => {
             value={country} 
             onChange={e => setCountry(e.target.value)} 
             required 
+            placeholder="Select country"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
             labelClassName="text-cyan-700"
           />
@@ -49,6 +51,7 @@ export const TransferEducation: React.FC = () => {
             value={from} 
             onChange={e => setFrom(e.target.value)} 
             required 
+            placeholder="Start year"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
             labelClassName="text-cyan-700"
           />
@@ -58,6 +61,7 @@ export const TransferEducation: React.FC = () => {
             value={to} 
             onChange={e => setTo(e.target.value)} 
             required 
+            placeholder="End year"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
             labelClassName="text-cyan-700"
           />
@@ -68,6 +72,7 @@ export const TransferEducation: React.FC = () => {
             value={previousUniversity} 
             onChange={e => setPreviousUniversity(e.target.value)} 
             required 
+            placeholder="Select university"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
             labelClassName="text-cyan-700"
           />
@@ -78,6 +83,7 @@ export const TransferEducation: React.FC = () => {
               value={otherUniversity} 
               onChange={e => setOtherUniversity(e.target.value)} 
               required 
+              placeholder="Enter university name"
               className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
               labelClassName="text-cyan-700"
             />
@@ -88,6 +94,7 @@ export const TransferEducation: React.FC = () => {
             value={creditsEarned} 
             onChange={e => setCreditsEarned(e.target.value)} 
             required 
+            placeholder="Enter credits earned"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
             labelClassName="text-cyan-700"
           />
@@ -97,6 +104,7 @@ export const TransferEducation: React.FC = () => {
             value={gpa} 
             onChange={e => setGpa(e.target.value)} 
             required 
+            placeholder="Enter GPA"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
             labelClassName="text-cyan-700"
           />
@@ -106,20 +114,21 @@ export const TransferEducation: React.FC = () => {
             value={programStudied} 
             onChange={e => setProgramStudied(e.target.value)} 
             required 
+            placeholder="Enter program or major"
             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
             labelClassName="text-cyan-700"
           />
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-cyan-700 mb-1">
-              Reason for Transfer<span className="text-red-500">*</span>
-            </label>
-            <textarea
+            <Textarea
               id="reasonForTransfer"
+              label="Reason for Transfer"
               value={reasonForTransfer}
               onChange={e => setReasonForTransfer(e.target.value)}
-              className="shadow-sm focus:ring-cyan-400 focus:border-cyan-400 block w-full sm:text-sm border-cyan-200 rounded-md bg-white"
-              rows={3}
               required
+              placeholder="Explain your reason for transfer"
+              className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+              labelClassName="text-cyan-700"
+              rows={3}
             />
           </div>
         </div>

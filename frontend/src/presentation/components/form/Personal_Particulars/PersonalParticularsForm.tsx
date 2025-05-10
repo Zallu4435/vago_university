@@ -1,59 +1,61 @@
 // PersonalParticularsForm.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PersonalInfo } from '../../../../domain/types/formTypes';
 import { PersonalSection } from './PersonalSection';
 import { AlternativeContactSection } from './AlternativeContactSection';
 
 interface PersonalParticularsFormProps {
-  onNext: () => void;
   initialData?: PersonalInfo;
   onSave?: (data: PersonalInfo) => void;
 }
 
 export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = ({
-  onNext,
   initialData,
   onSave,
 }) => {
   const [formData, setFormData] = useState<PersonalInfo>(initialData || {
-    salutation: '',
-    fullName: '',
-    familyName: '',
-    givenName: '',
-    gender: '',
-    dateOfBirth: '',
-    postalCode: '',
-    blockNumber: '',
-    streetName: '',
-    buildingName: '',
-    floorNumber: '',
-    unitNumber: '',
-    stateCity: '',
-    country: '',
-    citizenship: '',
-    residentialStatus: '',
-    race: '',
-    religion: '',
-    maritalStatus: '',
-    passportNumber: '',
-    emailAddress: '',
-    alternativeEmail: '',
-    mobileCountry: '',
+    salutation: 'Mr',
+    fullName: 'John Michael Doe',
+    familyName: 'Doe',
+    givenName: 'John Michael',
+    gender: 'Male',
+    dateOfBirth: '1995-06-15',
+    postalCode: '123456',
+    blockNumber: '12A',
+    streetName: 'Orchard Road',
+    buildingName: 'Sunshine Residences',
+    floorNumber: '05',
+    unitNumber: '123',
+    stateCity: 'Singapore',
+    country: 'Singapore',
+    citizenship: 'Singaporean',
+    residentialStatus: 'Permanent Resident',
+    race: 'Chinese',
+    religion: 'Buddhism',
+    maritalStatus: 'Single',
+    passportNumber: 'A12345678',
+    emailAddress: 'john.doe@example.com',
+    alternativeEmail: 'john.m.doe@gmail.com',
+    mobileCountry: '+65',
     mobileArea: '',
-    mobileNumber: '',
-    phoneCountry: '',
+    mobileNumber: '91234567',
+    phoneCountry: '+65',
     phoneArea: '',
-    phoneNumber: '',
-    alternateContactName: '',
-    relationshipWithApplicant: '',
-    occupation: '',
-    altMobileCountry: '',
+    phoneNumber: '61234567',
+    alternateContactName: 'Jane Doe',
+    relationshipWithApplicant: 'Sister',
+    occupation: 'Teacher',
+    altMobileCountry: '+65',
     altMobileArea: '',
-    altMobileNumber: '',
-    altPhoneCountry: '',
+    altMobileNumber: '98765432',
+    altPhoneCountry: '+65',
     altPhoneArea: '',
-    altPhoneNumber: '',
+    altPhoneNumber: '68765432',
   });
+
+    useEffect(() => {
+    onSave(formData);
+  }, [formData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
@@ -61,14 +63,6 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
       ...prev,
       [id]: value,
     }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (onSave) {
-      onSave(formData);
-    }
-    onNext();
   };
 
   return (
@@ -79,7 +73,7 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
             Personal Particulars
           </h2>
         </div>
-        <form onSubmit={handleSubmit} className="p-4 md:p-6 lg:p-0">
+        {/* <form onSubmit={handleSubmit} className="p-4 md:p-6 lg:p-0"> */}
           <div className="bg-cyan-50/30 rounded-lg p-4 md:p-6">
             <PersonalSection formData={formData} onInputChange={handleInputChange} />
           </div>
@@ -101,7 +95,7 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
               <AlternativeContactSection formData={formData} onInputChange={handleInputChange} />
             </div>
           </div>
-        </form>
+        {/* </form> */}
       </div>
     </div>
   );

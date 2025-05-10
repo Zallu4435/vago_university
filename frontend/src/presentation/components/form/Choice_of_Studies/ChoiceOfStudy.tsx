@@ -1,27 +1,30 @@
 import React, { useState } from 'react';
 import { Button } from '../../Button';
 import { ProgrammeModal } from './ProgrammeModal';
+import { ProgrammeChoice } from '../../../../domain/types/formTypes';
 
-interface ProgrammeChoice {
-  programme: string;
-  preferredMajor: string;
+interface ChoiceOfStudyProps {
+  choices: ProgrammeChoice[];
+  onChange: (choices: ProgrammeChoice[]) => void;
 }
 
-export const ChoiceOfStudy: React.FC = () => {
-  const [choices, setChoices] = useState<ProgrammeChoice[]>([]);
+export const ChoiceOfStudy: React.FC<ChoiceOfStudyProps> = ({ choices, onChange }) => {
+  // const [choices, setChoices] = useState<ProgrammeChoice[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [newProgramme, setNewProgramme] = useState('');
   const [newMajor, setNewMajor] = useState('');
 
   const handleAddProgramme = (programme: string, major: string) => {
-    setChoices([...choices, { programme, preferredMajor: major }]);
+    const updatedChoices = [...choices, { programme, preferredMajor: major }];
+    onChange(updatedChoices);
     setNewProgramme('');
     setNewMajor('');
     setShowModal(false);
   };
 
   const handleRemove = (idx: number) => {
-    setChoices(choices.filter((_, i) => i !== idx));
+    const updated = choices.filter((_, i) => i !== idx);
+    onChange(updated);
   };
 
   return (

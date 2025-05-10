@@ -3,7 +3,8 @@ import React from 'react';
 interface DocumentUpload {
   id: string;
   name: string;
-  file: File | null;
+  fileName?: string;
+  fileType?: string;
 }
 
 interface DocumentUploadTableProps {
@@ -19,7 +20,7 @@ export const DocumentUploadTable: React.FC<DocumentUploadTableProps> = ({
 }) => {
   return (
     <div className="border border-cyan-200 rounded-lg overflow-hidden">
-      <table className="w-full">
+      <table className="w-full text-sm">
         <thead>
           <tr className="bg-cyan-50 border-b border-cyan-200">
             <th className="py-3 px-6 text-left text-cyan-800 font-medium w-1/6">Action</th>
@@ -46,18 +47,19 @@ export const DocumentUploadTable: React.FC<DocumentUploadTableProps> = ({
               </td>
               <td className="py-4 px-6 text-cyan-800">{doc.name}</td>
               <td className="py-4 px-6">
-                {doc.file && (
+                {doc.fileName ? (
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm text-cyan-600">
-                      {doc.file.name}
-                    </span>
-                    <button 
+                    <span className="text-sm text-cyan-600">{doc.fileName}</span>
+                    <button
                       onClick={() => onFileRemove(doc.id)}
                       className="text-red-400 hover:text-red-500"
+                      title="Remove"
                     >
                       ×
                     </button>
                   </div>
+                ) : (
+                  <span className="text-cyan-400 italic">No file uploaded</span>
                 )}
               </td>
             </tr>

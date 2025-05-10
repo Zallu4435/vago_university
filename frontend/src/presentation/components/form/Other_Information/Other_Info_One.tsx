@@ -1,20 +1,24 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import HealthConditionForm from './HealthConditionForm';
 import HealthConditionTable from './HealthConditionTable';
 import { Input } from '../../Input';
 import { Button } from '../../Button';
 import { radioOptions } from './options';
+import { HealthInfo } from '../../../../domain/types/formTypes';
 
 interface HealthCondition {
   condition: string;
   details: string;
 }
 
-interface OtherInfoOneProps {
+interface Props {
+  value: HealthInfo;
+  onChange: (data: HealthInfo) => void;
   onNext: () => void;
 }
 
-const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
+
+const Other_Info_One: React.FC<Props> = ({ value, onChange, onNext }) => {
   const [hasHealthSupport, setHasHealthSupport] = useState<boolean | null>(null);
   const [conditions, setConditions] = useState<HealthCondition[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -24,6 +28,23 @@ const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
       setConditions([...conditions, condition]);
     }
   };
+
+  useEffect(() => {
+    if (hasHealthSupport) {
+      const details = conditions.map(c => `${c.condition}: ${c.details}`).join('; ');
+      onChange({
+        medicalConditions: details,
+        disabilities: '',
+        specialNeeds: '',
+      });
+    } else if (hasHealthSupport === false) {
+      onChange({
+        medicalConditions: 'None',
+        disabilities: '',
+        specialNeeds: '',
+      });
+    }
+  }, [hasHealthSupport, conditions]);
 
 
   return (

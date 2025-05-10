@@ -3,6 +3,7 @@ export interface PersonalInfo {
     fullName: string;
     familyName: string;
     givenName: string;
+    gender: string;
     dateOfBirth: string;
     postalCode: string;
     blockNumber: string;
@@ -36,3 +37,122 @@ export interface PersonalInfo {
     altPhoneArea: string;
     altPhoneNumber: string;
   }
+
+  export interface ProgrammeChoice {
+  programme: string;
+  preferredMajor: string;
+}
+
+
+// domain/types/formTypes.ts
+
+export type StudentType = 'local' | 'transfer' | 'international';
+
+export interface LocalEducationData {
+  schoolName: string;
+  country: string;
+  from: string;
+  to: string;
+  nationalID: string;
+  localSchoolCategory: string;
+  stateOrProvince: string;
+}
+
+export interface TransferEducationData {
+  schoolName: string;
+  country: string;
+  from: string;
+  to: string;
+  previousUniversity: string;
+  otherUniversity?: string;
+  creditsEarned: string;
+  gpa: string;
+  programStudied: string;
+  reasonForTransfer: string;
+}
+
+export interface Subject {
+  subject: string;
+  grade: string;
+}
+
+export interface InternationalEducationData {
+  schoolName: string;
+  country: string;
+  from: string;
+  to: string;
+  examination: string;
+  examMonthYear: string;
+  resultType: 'actual' | 'predicted';
+  subjects: Subject[];
+}
+
+export interface EducationData {
+  studentType: StudentType;
+  local?: LocalEducationData;
+  transfer?: TransferEducationData;
+  international?: InternationalEducationData;
+}
+
+
+export interface ReferenceContact {
+  firstName: string;
+  lastName: string;
+  position: string;
+  email: string;
+  phone: {
+    country: string;
+    area: string;
+    number: string;
+  };
+}
+
+export interface Achievement {
+  activity: string;
+  level: string;
+  levelOfAchievement: string;
+  positionHeld: string;
+  organizationName: string;
+  fromDate: string;
+  toDate: string;
+  description: string;
+  reference?: ReferenceContact;
+}
+
+export interface AchievementSection {
+  questions: { [questionId: number]: string };
+  achievements: Achievement[];
+  hasNoAchievements: boolean;
+}
+
+
+export interface HealthInfo {
+  medicalConditions: string;
+  disabilities: string;
+  specialNeeds: string;
+}
+
+export interface LegalInfo {
+  criminalRecord: string;
+  legalProceedings: string;
+}
+
+export interface OtherInformationSection {
+  health: HealthInfo;
+  legal: LegalInfo;
+}
+
+
+export interface DocumentUpload {
+  id: string;
+  name: string;
+  fileName?: string;
+  fileType?: string;
+}
+
+
+export interface DeclarationSection {
+  privacyPolicy: boolean;
+  marketingEmail: boolean;
+  marketingCall: boolean;
+}

@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Input } from '../../Input';
 import { Select } from '../../Select';
 import { countryOptions } from './options';
+import { LocalEducationData } from '../../../../domain/types/formTypes';
 
-export const LocalEducation: React.FC = () => {
+interface Props {
+  value?: LocalEducationData | null | undefined;
+  onChange: (data: LocalEducationData) => void;
+}
+
+export const LocalEducation: React.FC<Props> = ({ value, onChange }) => {
   const [schoolName, setSchoolName] = useState('');
   const [country, setCountry] = useState('');
   const [from, setFrom] = useState('');
@@ -11,6 +17,19 @@ export const LocalEducation: React.FC = () => {
   const [nationalID, setNationalID] = useState('');
   const [localSchoolCategory, setLocalSchoolCategory] = useState('');
   const [stateOrProvince, setStateOrProvince] = useState('');
+
+useEffect(() => {
+  onChange({
+    schoolName,
+    country,  
+    from,
+    to,
+    nationalID,
+    localSchoolCategory,
+    stateOrProvince,
+  });
+}, [schoolName, country, from, to, nationalID, localSchoolCategory, stateOrProvince]);
+
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-xl border border-cyan-100">

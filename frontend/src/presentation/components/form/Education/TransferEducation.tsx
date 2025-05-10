@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Input } from '../../Input';
 import { Select } from '../../Select';
 import { Textarea } from '../../Textarea';
 import { countryOptions, universityOptions } from './options';
+import { TransferEducationData } from '../../../../domain/types/formTypes';
 
-export const TransferEducation: React.FC = () => {
+interface Props {
+  value?: TransferEducationData | null | undefined;
+  onChange: (data: TransferEducationData) => void;
+}
+
+export const TransferEducation: React.FC<Props> = ({ value, onChange }) => {
   const [schoolName, setSchoolName] = useState('');
   const [country, setCountry] = useState('');
   const [from, setFrom] = useState('');
@@ -15,6 +21,21 @@ export const TransferEducation: React.FC = () => {
   const [gpa, setGpa] = useState('');
   const [programStudied, setProgramStudied] = useState('');
   const [reasonForTransfer, setReasonForTransfer] = useState('');
+
+   useEffect(() => {
+    onChange({
+      schoolName,
+      country,
+      from,
+      to,
+      previousUniversity,
+      otherUniversity,
+      creditsEarned,
+      gpa,
+      programStudied,
+      reasonForTransfer,
+    });
+  }, [schoolName, country, from, to, previousUniversity, otherUniversity, creditsEarned, gpa, programStudied, reasonForTransfer]);
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-xl border border-cyan-100">

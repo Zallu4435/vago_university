@@ -1,32 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AchievementQuestions } from './AchievementQuestions';
 import { questions } from './options';
 import { AchievementList } from './AchievementList';
 import { AchievementModal } from './AchievementModal';
+import { AchievementSection } from '../../../../domain/types/formTypes';
 
-interface Achievement {
-  activity: string;
-  level: string;
-  levelOfAchievement: string;
-  positionHeld: string;
-  organizationName: string;
-  fromDate: string;
-  toDate: string;
-  description: string;
-  reference?: {
-    firstName: string;
-    lastName: string;
-    position: string;
-    email: string;
-    phone: {
-      country: string;
-      area: string;
-      number: string;
-    };
-  };
+interface Props {
+  initialData?: AchievementSection;
+  onSave: (data: AchievementSection) => void;
 }
 
-export const Achievements: React.FC = () => {
+export const Achievements: React.FC<Props> = ({ initialData, onSave }) => {
   const [answers, setAnswers] = useState<{ [key: number]: string }>(
     questions.reduce((acc, q) => ({ ...acc, [q.id]: '' }), {})
   );
@@ -120,6 +104,14 @@ export const Achievements: React.FC = () => {
       }
     });
   };
+
+    useEffect(() => {
+    onSave({
+      questions: answers,
+      achievements,
+      hasNoAchievements
+    });
+  }, [answers, achievements, hasNoAchievements]);
 
   const handleToggleNoAchievements = () => {
     setHasNoAchievements(!hasNoAchievements);

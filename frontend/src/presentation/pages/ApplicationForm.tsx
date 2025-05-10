@@ -4,24 +4,52 @@ import { PersonalParticularsForm } from '../components/form/Personal_Particulars
 import { ChoiceOfStudy } from '../components/form/Choice_of_Studies/ChoiceOfStudy';
 import { Education } from '../components/form/Education/Education';
 import { Achievements } from '../components/form/Achievements/Achievements';
-import { Documents } from '../components/form/Documents/Documents';
+import { Documents, DocumentUploadSection } from '../components/form/Documents/Documents';
 import { Declaration } from '../components/form/Declaration';
-import { PersonalInfo } from '../../domain/types/formTypes';
+import { AchievementSection, DeclarationSection, EducationData, OtherInformationSection, PersonalInfo, ProgrammeChoice } from '../../domain/types/formTypes';
 import Other_Info from '../components/form/Other_Information/Other_Info';
 import { FormSubmissionFlow } from '../components/form/FormSubmissionFlow';
 
+interface FormData {
+  personalInfo?: PersonalInfo;
+  choiceOfStudy?: ProgrammeChoice[];
+  education?: EducationData;
+  achievements?: AchievementSection;
+  otherInformation?: OtherInformationSection;
+  documents?: DocumentUploadSection;
+  declaration?: DeclarationSection; // ✅ add this
+
+}
+
 export const ApplicationForm: React.FC = () => {
   const [activeTab, setActiveTab] = useState('personalDetails');
-  const [personalInfo, setPersonalInfo] = useState<PersonalInfo | undefined>(undefined);
+  const [formData, setFormData] = useState<FormData>({});
   const [formProgress, setFormProgress] = useState(0);
   const [wavePosition, setWavePosition] = useState(0);
-
   const [showSummary, setShowSummary] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
+  const [declaration, setDeclaration] = useState<DeclarationSection>({
+    privacyPolicy: false,
+    marketingEmail: false,
+    marketingCall: false,
+  });
+
+
+  useEffect(() => {
+    const savedData = localStorage.getItem('applicationFormData');
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        setFormData({ personalInfo: parsedData.personalInfo });
+      } catch (error) {
+        console.error('Error parsing localStorage data:', error);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setWavePosition(prev => (prev + 1) % 100);
+      setWavePosition((prev) => (prev + 1) % 100);
     }, 150);
     return () => clearInterval(interval);
   }, []);
@@ -38,26 +66,95 @@ export const ApplicationForm: React.FC = () => {
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
-    const newIndex = tabs.findIndex(tab => tab.id === tabId);
+    const newIndex = tabs.findIndex((tab) => tab.id === tabId);
     setFormProgress(Math.floor((newIndex / (tabs.length - 1)) * 100));
   };
 
   const handleNextTab = () => {
-    const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
+    const currentIndex = tabs.findIndex((tab) => tab.id === activeTab);
     if (currentIndex < tabs.length - 1) {
       setActiveTab(tabs[currentIndex + 1].id);
       setFormProgress(Math.floor(((currentIndex + 1) / (tabs.length - 1)) * 100));
     }
   };
 
-  const handleSavePersonalInfo = (data: PersonalInfo) => {
-    setPersonalInfo(data);
-    console.log('Saved personal info:', data);
+  const handleUpdatePersonalInfo = (data: PersonalInfo) => {
+    setFormData((prev) => ({ ...prev, personalInfo: data }));
   };
 
-  const formData = {
-    personalInfo,
+  const handleUpdateChoiceOfStudy = (choices: ProgrammeChoice[]) => {
+    setFormData((prev) => ({ ...prev, choiceOfStudy: choices }));
   };
+
+  const handleUpdateEducation = (data: EducationData) => {
+    setFormData(prev => ({ ...prev, education: data }));
+  };
+
+  const handleUpdateAchievements = (data: AchievementSection) => {
+    setFormData(prev => ({ ...prev, achievements: data }));
+  };
+
+  const handleUpdateOtherInformation = (data: OtherInformationSection) => {
+    setFormData(prev => ({ ...prev, otherInformation: data }));
+  };
+
+  const handleSaveDocuments = (data: DocumentUploadSection) => {
+    setFormData(prev => ({ ...prev, documents: data }));
+  };
+
+
+  const handleSaveCurrentTab = () => {
+    if (activeTab === 'personalDetails') {
+      if (formData.personalInfo) {
+        console.log("personalInfo data", formData.personalInfo)
+        localStorage.setItem('applicationFormData', JSON.stringify(formData));
+        handleNextTab();
+      } else {
+        alert('Please complete personal details.');
+      }
+    } else if (activeTab === 'choiceOfStudy') {
+      if (formData.choiceOfStudy && formData.choiceOfStudy.length > 0) {
+        console.log("choice of study data", formData.choiceOfStudy)
+        localStorage.setItem('applicationFormData', JSON.stringify(formData));
+        handleNextTab();
+      } else {
+        alert('Please add at least one programme choice.');
+      }
+    } else if (activeTab === 'education') {
+      if (formData.education?.studentType) {
+        console.log("education data", formData.education)
+        localStorage.setItem('applicationFormData', JSON.stringify(formData));
+        handleNextTab();
+      } else {
+        alert('Please complete your education details.');
+      }
+    } else if (activeTab === 'achievements') {
+      if (formData.achievements) {
+        console.log("achievement data", formData.achievements)
+        localStorage.setItem('applicationFormData', JSON.stringify(formData));
+        handleNextTab();
+      } else {
+        alert('Please complete achievements section before proceeding.');
+      }
+    } else if (activeTab === 'otherInformation') {
+      if (formData.otherInformation) {
+        console.log('other_info data', formData.otherInformation)
+        localStorage.setItem('applicationFormData', JSON.stringify(formData));
+        handleNextTab();
+      } else {
+        alert('Please complete Other Information section.');
+      }
+    } else if (activeTab === 'documents') {
+      if (formData.documents) {
+        console.log("document data", formData.documents)
+        localStorage.setItem('applicationFormData', JSON.stringify(formData));
+        handleNextTab();
+      } else {
+        alert('Please upload required documents before proceeding.');
+      }
+    }
+  };
+
 
   if (showSummary) {
     return (
@@ -67,7 +164,7 @@ export const ApplicationForm: React.FC = () => {
           setShowSummary(false);
           setShowPayment(true);
         }}
-        onBackToForm={() => setShowSummary(false)} // <-- Add this line
+        onBackToForm={() => setShowSummary(false)}
       />
     );
   }
@@ -79,197 +176,251 @@ export const ApplicationForm: React.FC = () => {
         onPaymentComplete={() => {
           setShowPayment(false);
           setActiveTab('personalDetails');
+          localStorage.removeItem('applicationFormData');
+          setFormData({});
         }}
       />
     );
   }
 
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
-      <div className="relative overflow-hidden bg-gradient-to-r from-cyan-100 to-blue-200 p-8 rounded-xl shadow-md mb-8" 
+      <div
+        className="relative overflow-hidden bg-gradient-to-r from-cyan-100 to-blue-200 p-8 rounded-xl shadow-md mb-8"
         style={{
-          background: 'linear-gradient(135deg, rgba(224,242,254,0.8) 0%, rgba(186,230,253,0.9) 100%)'
-        }}>
+          background: 'linear-gradient(135deg, rgba(224,242,254,0.8) 0%, rgba(186,230,253,0.9) 100%)',
+        }}
+      >
         <div className="absolute inset-0 overflow-hidden opacity-10">
-          <div 
+          <div
             className="absolute inset-x-0 bottom-0 h-16 bg-white/20"
             style={{
               transform: `translateX(${wavePosition}%)`,
-              backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1200 120\' preserveAspectRatio=\'none\'%3E%3Cpath d=\'M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z\' fill=\'%23ffffff\'%3E%3C/path%3E%3C/svg%3E")',
+              backgroundImage:
+                'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1200 120\' preserveAspectRatio=\'none\'%3E%3Cpath d=\'M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z\' fill=\'%23ffffff\'%3E%3C/path%3E%3C/svg%3E")',
               backgroundSize: '1200px 100%',
-              animation: 'wave 18s linear infinite'
+              animation: 'wave 18s linear infinite',
             }}
           ></div>
-          <div 
+          <div
             className="absolute inset-x-0 bottom-0 h-24 bg-white/10"
             style={{
               transform: `translateX(-${wavePosition}%)`,
-              backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1200 120\' preserveAspectRatio=\'none\'%3E%3Cpath d=\'M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z\' fill=\'%23ffffff\'%3E%3C/path%3E%3C/svg%3E")',
+              backgroundImage:
+                'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1200 120\' preserveAspectRatio=\'none\'%3E%3Cpath d=\'M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z\' fill=\'%23ffffff\'%3E%3C/path%3E%3C/svg%3E")',
               backgroundSize: '1200px 100%',
-              animation: 'wave 15s linear infinite reverse'
+              animation: 'wave 15s linear infinite reverse',
             }}
           ></div>
         </div>
-        
         <div className="relative">
           <h1 className="text-3xl font-bold text-cyan-800 mb-2 flex items-center">
             <span className="mr-2">Your Journey Begins Here</span>
             <span className="inline-block w-2 h-8 bg-cyan-400 animate-pulse"></span>
           </h1>
           <p className="text-cyan-700 text-lg font-light">Complete all sections to submit your application</p>
-          
           <div className="w-full bg-cyan-200/70 rounded-full h-3 mt-6 overflow-hidden">
-            <div 
+            <div
               className="bg-gradient-to-r from-cyan-400 to-blue-500 h-3 rounded-full transition-all duration-700 relative"
               style={{ width: `${formProgress}%` }}
             >
-              <div className="absolute inset-0 bg-white/30" 
+              <div
+                className="absolute inset-0 bg-white/30"
                 style={{
-                  backgroundImage: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%)',
+                  backgroundImage:
+                    'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%)',
                   backgroundSize: '200% 100%',
-                  animation: 'shimmer 2s infinite'
+                  animation: 'shimmer 2s infinite',
                 }}
               ></div>
             </div>
           </div>
-          <div className="text-right text-cyan-700 text-sm mt-2 font-light">
-            {formProgress}% Complete
-          </div>
+          <div className="text-right text-cyan-700 text-sm mt-2 font-light">{formProgress}% Complete</div>
         </div>
       </div>
-      
       <FormTabs tabs={tabs} onTabClick={handleTabClick} />
-      
       <div className="bg-white shadow-sm p-6 rounded-xl border border-cyan-100 relative overflow-hidden">
-        <div className="absolute inset-0 bg-cyan-50/10 -z-10" 
+        <div
+          className="absolute inset-0 bg-cyan-50/10 -z-10"
           style={{
-            backgroundImage: 'radial-gradient(circle, rgba(186,230,253,0.1) 0%, rgba(224,242,254,0.05) 35%, rgba(255,255,255,0) 70%)'
+            backgroundImage:
+              'radial-gradient(circle, rgba(186,230,253,0.1) 0%, rgba(224,242,254,0.05) 35%, rgba(255,255,255,0) 70%)',
           }}
         ></div>
-        
         <div className="mb-4 border-b border-cyan-50 pb-4">
           <h2 className="text-2xl font-bold text-cyan-800 flex items-center">
-            <span>{tabs.find(tab => tab.id === activeTab)?.label}</span>
+            <span>{tabs.find((tab) => tab.id === activeTab)?.label}</span>
             <span className="ml-2 text-cyan-300 text-lg font-light">/</span>
-            <span className="ml-2 text-cyan-400 text-sm font-light">Step {tabs.findIndex(tab => tab.id === activeTab) + 1} of {tabs.length}</span>
+            <span className="ml-2 text-cyan-400 text-sm font-light">
+              Step {tabs.findIndex((tab) => tab.id === activeTab) + 1} of {tabs.length}
+            </span>
           </h2>
           <p className="text-cyan-600 mt-1 text-sm">
-            {activeTab === 'personalDetails' && "Tell us about yourself"}
-            {activeTab === 'choiceOfStudy' && "Select your preferred program"}
-            {activeTab === 'education' && "Share your educational background"}
-            {activeTab === 'achievements' && "Highlight your accomplishments"}
-            {activeTab === 'otherInformation' && "Additional details that might support your application"}
-            {activeTab === 'documents' && "Upload supporting documents"}
-            {activeTab === 'declaration' && "Review and confirm your application"}
+            {activeTab === 'personalDetails' && 'Tell us about yourself'}
+            {activeTab === 'choiceOfStudy' && 'Select your preferred program'}
+            {activeTab === 'education' && 'Share your educational background'}
+            {activeTab === 'achievements' && 'Highlight your accomplishments'}
+            {activeTab === 'otherInformation' && 'Additional details that might support your application'}
+            {activeTab === 'documents' && 'Upload supporting documents'}
+            {activeTab === 'declaration' && 'Review and confirm your application'}
           </p>
         </div>
         {activeTab === 'personalDetails' && (
-          <PersonalParticularsForm 
-            onNext={handleNextTab} 
-            initialData={personalInfo}
-            onSave={handleSavePersonalInfo}
+          <PersonalParticularsForm
+            // onNext={handleNextTab}
+            initialData={formData.personalInfo}
+            onSave={handleUpdatePersonalInfo}
           />
         )}
-
-        {activeTab === 'choiceOfStudy' && (
-          <ChoiceOfStudy />
-        )}
-
-        {activeTab === 'education' && (
-          <Education />
-        )}
-
-        {activeTab === 'achievements' && (
-          <Achievements />
-        )}
-
-        {activeTab === 'otherInformation' && (
-          <Other_Info />
-        )}
-
-        {activeTab === 'documents' && (
-          <Documents />
-        )}
-
-        {activeTab === 'declaration' && (
-          <Declaration />
-        )}
-        
+        {activeTab === 'choiceOfStudy' && <ChoiceOfStudy
+          choices={formData.choiceOfStudy || []}
+          onChange={handleUpdateChoiceOfStudy}
+        />}
+        {activeTab === 'education' && <Education
+          initialData={formData.education}
+          onSave={handleUpdateEducation}
+        />}
+        {activeTab === 'achievements' && <Achievements
+          initialData={formData.achievements}
+          onSave={handleUpdateAchievements}
+        />}
+        {activeTab === 'otherInformation' && <Other_Info
+          initialData={formData.otherInformation}
+          onSave={handleUpdateOtherInformation}
+        />
+        }
+        {activeTab === 'documents' && <Documents
+          initialData={formData.documents}
+          onSave={handleSaveDocuments}
+        />}
+        {activeTab === 'declaration' && <Declaration
+          value={declaration}
+          onChange={(data) => {
+            setDeclaration(data);
+            setFormData(prev => ({ ...prev, declaration: data }));
+            localStorage.setItem('applicationFormData', JSON.stringify({ ...formData, declaration: data }));
+          }}
+        />}
         <div className="flex justify-between mt-8 border-t border-cyan-50 pt-6">
-          <button 
+          <button
             onClick={() => {
-              const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
+              const currentIndex = tabs.findIndex((tab) => tab.id === activeTab);
               if (currentIndex > 0) {
                 setActiveTab(tabs[currentIndex - 1].id);
                 setFormProgress(Math.floor(((currentIndex - 1) / (tabs.length - 1)) * 100));
               }
             }}
             disabled={activeTab === 'personalDetails'}
-            className={`px-6 py-3 rounded-lg flex items-center transition-all duration-300 ${
-              activeTab === 'personalDetails' 
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                : 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200 hover:shadow-sm'
-            }`}
+            className={`px-6 py-3 rounded-lg flex items-center transition-all duration-300 ${activeTab === 'personalDetails'
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200 hover:shadow-sm'
+              }`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-2"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                clipRule="evenodd"
+              />
             </svg>
             Previous
           </button>
-          
           {activeTab !== 'declaration' ? (
-            <button 
-              onClick={handleNextTab}
+            <button
+              onClick={handleSaveCurrentTab}
               className="px-6 py-3 bg-gradient-to-r from-cyan-400 to-blue-400 text-white rounded-lg hover:from-cyan-500 hover:to-blue-500 flex items-center transition-all duration-300 shadow-sm relative overflow-hidden group"
             >
               <span className="relative z-10 flex items-center">
                 Save & Next
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </span>
-              <div className="absolute inset-0 -z-10 bg-white/20" 
+              <div
+                className="absolute inset-0 -z-10 bg-white/20"
                 style={{
-                  backgroundImage: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%)',
+                  backgroundImage:
+                    'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%)',
                   backgroundSize: '200% 100%',
-                  animation: 'shimmer 2s infinite'
+                  animation: 'shimmer 2s infinite',
                 }}
               ></div>
             </button>
           ) : (
             <button
-              className="px-8 py-3 bg-gradient-to-r from-cyan-400 to-cyan-600 text-white rounded-lg hover:from-cyan-500 hover:to-cyan-700 flex items-center transition-all duration-300 shadow-sm font-bold relative overflow-hidden group"
-              onClick={() => setShowSummary(true)}
+              className={`px-8 py-3 bg-gradient-to-r from-cyan-400 to-cyan-600 text-white rounded-lg font-bold relative overflow-hidden group transition-all duration-300 shadow-sm ${!declaration.privacyPolicy ? 'opacity-50 cursor-not-allowed' : 'hover:from-cyan-500 hover:to-cyan-700'
+                }`}
+              disabled={!declaration.privacyPolicy}
+              onClick={() => {
+                if (declaration.privacyPolicy) {
+                  setShowSummary(true);
+                } else {
+                  alert('Please agree to the Privacy Notice to proceed.');
+                }
+              }}
             >
               <span className="relative z-10 flex items-center">
                 Submit Application
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 ml-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </span>
-              <div className="absolute inset-0 -z-10 bg-white/20"
+              <div
+                className="absolute inset-0 -z-10 bg-white/20"
                 style={{
-                  backgroundImage: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%)',
+                  backgroundImage:
+                    'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%)',
                   backgroundSize: '200% 100%',
-                  animation: 'shimmer 3s infinite'
+                  animation: 'shimmer 3s infinite',
                 }}
               ></div>
             </button>
+
           )}
         </div>
       </div>
-      
-      <style jsx>{`
+      {/* <style jsx>{`
         @keyframes shimmer {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
+          0% {
+            background-position: 200% 0;
+          }
+          100% {
+            background-position: -200% 0;
+          }
         }
-        
         @keyframes wave {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-100%); }
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
         }
-      `}</style>
+      `}</style> */}
     </div>
   );
 };

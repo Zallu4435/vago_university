@@ -1,23 +1,35 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Input } from '../../Input';
 import { Button } from '../../Button';
 import { Textarea } from '../../Textarea';
 import { radioOptions } from './options';
-
-interface OtherInfoTwoProps {
+import { LegalInfo } from '../../../../domain/types/formTypes';
+interface Props {
+  value: LegalInfo;
+  onChange: (data: LegalInfo) => void;
   onBack: () => void;
-  onNext: () => void; // Missing prop for navigation
+  onNext: () => void;
 }
 
-export const Other_Info_Two: React.FC<OtherInfoTwoProps> = ({ onBack, onNext }) => {
+
+export const Other_Info_Two: React.FC<Props> = ({ value, onChange, onBack, onNext }) => {
   const [hasCriminalRecord, setHasCriminalRecord] = useState<boolean | null>(null);
   const [criminalDetails, setCriminalDetails] = useState('');
+  const [details, setDetails] = useState(value.criminalRecord || '');
 
   const handleDetailsChange = (value: string) => {
     if (value.length <= 1000) {
       setCriminalDetails(value);
     }
   };
+
+  useEffect(() => {
+    if (hasCriminalRecord) {
+      onChange({ criminalRecord: details, legalProceedings: '' });
+    } else if (hasCriminalRecord === false) {
+      onChange({ criminalRecord: 'None', legalProceedings: '' });
+    }
+  }, [hasCriminalRecord, details]);
 
   const handleNext = () => {
     if (hasCriminalRecord === null) {
@@ -64,7 +76,7 @@ export const Other_Info_Two: React.FC<OtherInfoTwoProps> = ({ onBack, onNext }) 
                   onChange={() => setHasCriminalRecord(opt.value)}
                   className="form-radio h-4 w-4 text-cyan-600 border-cyan-300 focus:ring-cyan-200"
                 />
-                <label 
+                <label
                   htmlFor={`criminal_record_${opt.label.toLowerCase()}`}
                   className="ml-2 text-cyan-800"
                 >
@@ -118,12 +130,12 @@ export const Other_Info_Two: React.FC<OtherInfoTwoProps> = ({ onBack, onNext }) 
       </div>
 
       <div className="flex justify-between p-6 border-t border-cyan-100">
-        <Button 
+        <Button
           label="Previous"
           onClick={onBack}
           className="text-cyan-600 border-cyan-200 hover:bg-cyan-50 px-4 py-2 rounded-lg transition-colors duration-300"
         />
-        <Button 
+        <Button
           label="Save and Next"
           onClick={handleNext}
           className="bg-gradient-to-r from-cyan-400 to-blue-400 text-white px-6 py-2 rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all duration-300 shadow-sm"

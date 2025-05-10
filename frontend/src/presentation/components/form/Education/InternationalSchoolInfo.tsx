@@ -14,6 +14,7 @@ export interface Subject {
 }
 
 interface Props {
+  initialData?: any;
   onNext: (data: {
     schoolName: string;
     country: string;
@@ -26,7 +27,7 @@ interface Props {
   }) => void;
 }
 
-export const InternationalSchoolInfo: React.FC<Props> = ({ onNext }) => {
+export const InternationalSchoolInfo: React.FC<Props> = ({initialData, onNext }) => {
   const [schoolName, setSchoolName] = useState('');
   const [country, setCountry] = useState('');
   const [from, setFrom] = useState('');

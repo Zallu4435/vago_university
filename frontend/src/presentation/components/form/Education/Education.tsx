@@ -1,12 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Select } from '../../Select';
 import { LocalEducation } from './LocalEducation';
 import { TransferEducation } from './TransferEducation';
 import { InternationalEducation } from './InternationalEducation';
 import { studentTypeOptions } from './options';
+import { EducationData, StudentType } from '../../../../domain/types/formTypes';
 
-export const Education: React.FC = () => {
-  const [studentType, setStudentType] = useState('local');
+interface EducationProps {
+  initialData?: EducationData;
+  onSave: (data: EducationData) => void;
+}
+
+export const Education: React.FC<EducationProps> = ({ initialData, onSave }) => {
+  const [studentType, setStudentType] = useState<StudentType>(initialData?.studentType || 'local');
+  const [localData, setLocalData] = useState(initialData?.local || null);
+  const [transferData, setTransferData] = useState(initialData?.transfer || null);
+  const [internationalData, setInternationalData] = useState(initialData?.international || null);
+
+  useEffect(() => {
+    onSave({
+      studentType,
+      local: localData || undefined,
+      transfer: transferData || undefined,
+      international: internationalData || undefined,
+    });
+  }, [studentType, localData, transferData, internationalData]);
+
 
   return (
     <div className="w-full max-w-screen-2xl mx-auto px-8">
@@ -27,18 +46,16 @@ export const Education: React.FC = () => {
             label="Student Type"
             options={studentTypeOptions}
             value={studentType}
-            onChange={e => setStudentType(e.target.value)}
+            onChange={e => setStudentType(e.target.value as StudentType)}
             required
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-            labelClassName="text-cyan-700"
           />
         </div>
       </div>
 
       <div className="transition-all duration-300">
-        {studentType === 'local' && <LocalEducation />}
-        {studentType === 'transfer' && <TransferEducation />}
-        {studentType === 'international' && <InternationalEducation />}
+        {studentType === 'local' && <LocalEducation value={localData} onChange={setLocalData} />}
+        {studentType === 'transfer' && <TransferEducation value={transferData} onChange={setTransferData} />}
+        {studentType === 'international' && <InternationalEducation value={internationalData} onChange={setInternationalData} />}
       </div>
     </div>
   );

@@ -1,33 +1,47 @@
-import React from 'react';
-import { Select } from '../../Select';
+import React, { useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../../Button';
+import { Select } from '../../Select';
 import { programmeOptions, majorOptions } from './options';
+import { createProgrammeChoiceSchema, ProgrammeChoiceFormData } from '../../../../domain/validation/ChoiceOfStudySchema';
 
 interface ProgrammeModalProps {
   showModal: boolean;
   onClose: () => void;
-  onSubmit: (programme: string, major: string) => void;
-  newProgramme: string;
-  setNewProgramme: (value: string) => void;
-  newMajor: string;
-  setNewMajor: (value: string) => void;
+  onSubmit: (data: ProgrammeChoiceFormData) => void;
+  choices: { programme: string; preferredMajor: string }[]; // Added to check duplicates
 }
 
 export const ProgrammeModal: React.FC<ProgrammeModalProps> = ({
   showModal,
   onClose,
   onSubmit,
-  newProgramme,
-  setNewProgramme,
-  newMajor,
-  setNewMajor,
+  choices,
 }) => {
+  const { control, handleSubmit, formState: { errors }, watch, reset } = useForm<ProgrammeChoiceFormData>({
+    resolver: zodResolver(createProgrammeChoiceSchema(choices)),
+    defaultValues: {
+      programme: '',
+      preferredMajor: '',
+    },
+    mode: 'onChange',
+  });
+
+  const selectedProgramme = watch('programme');
+
+  // Reset form when modal opens
+  useEffect(() => {
+    if (showModal) {
+      reset({ programme: '', preferredMajor: '' });
+    }
+  }, [showModal, reset]);
+
   if (!showModal) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newProgramme) return;
-    onSubmit(newProgramme, newMajor);
+  const onFormSubmit = (data: ProgrammeChoiceFormData) => {
+    console.log('ProgrammeModal submitting:', data);
+    onSubmit(data);
   };
 
   return (
@@ -41,34 +55,50 @@ export const ProgrammeModal: React.FC<ProgrammeModalProps> = ({
           ×
         </button>
         <h2 className="text-xl font-semibold mb-6 text-blue-900">Add Programme</h2>
-        <form onSubmit={handleSubmit}>
-          <Select
-            id="programme"
-            label="Programme"
-            options={programmeOptions}
-            value={newProgramme}
-            onChange={e => setNewProgramme(e.target.value)}
-            required
-            className="border-blue-200 focus:border-blue-400 focus:ring-blue-200 bg-white mb-4"
-            labelClassName="text-blue-700"
+        <form onSubmit={handleSubmit(onFormSubmit)}>
+          <Controller
+            name="programme"
+            control={control}
+            render={({ field }) => (
+              <Select
+                id="programme"
+                name="programme"
+                label="Programme"
+                options={programmeOptions}
+                value={field.value}
+                onChange={field.onChange}
+                required
+                className="border-blue-200 focus:border-blue-400 focus:ring-blue-200 bg-white mb-4"
+                labelClassName="text-blue-700"
+                error={errors.programme?.message}
+              />
+            )}
           />
-          <Select
-            id="preferredMajor"
-            label="Preferred Major"
-            options={majorOptions}
-            value={newMajor}
-            onChange={e => setNewMajor(e.target.value)}
-            disabled={!newProgramme}
-            required={!!newProgramme}
-            className="border-blue-200 focus:border-blue-400 focus:ring-blue-200 bg-white"
-            labelClassName="text-blue-700"
+          <Controller
+            name="preferredMajor"
+            control={control}
+            render={({ field }) => (
+              <Select
+                id="preferredMajor"
+                name="preferredMajor"
+                label="Preferred Major"
+                options={majorOptions}
+                value={field.value || ''}
+                onChange={field.onChange}
+                disabled={!selectedProgramme}
+                required={!!selectedProgramme && ['Engineering', 'Science'].includes(selectedProgramme)}
+                className="border-blue-200 focus:border-blue-400 focus:ring-blue-200 bg-white"
+                labelClassName="text-blue-700"
+                error={errors.preferredMajor?.message}
+              />
+            )}
           />
           <div className="flex justify-end mt-6">
-            <Button 
-              label="Add" 
-              type="submit" 
+            <Button
+              label="Add"
+              type="submit"
               variant="primary"
-              className="bg-gradient-to-r from-blue-400 to-sky-400 hover:from-blue-500 hover:to-sky-500 text-white px-6 py-2 rounded-lg transition-all duration-300 shadow-sm" 
+              className="bg-gradient-to-r from-blue-400 to-sky-400 hover:from-blue-500 hover:to-sky-500 text-white px-6 py-2 rounded-lg transition-all duration-300 shadow-sm"
             />
           </div>
         </form>

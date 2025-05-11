@@ -1,35 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '../../Input';
 import { Select } from '../../Select';
 import { countryOptions } from './options';
-import { LocalEducationData } from '../../../../domain/types/formTypes';
 
-interface Props {
-  value?: LocalEducationData | null | undefined;
-  onChange: (data: LocalEducationData) => void;
-}
-
-export const LocalEducation: React.FC<Props> = ({ value, onChange }) => {
-  const [schoolName, setSchoolName] = useState('');
-  const [country, setCountry] = useState('');
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [nationalID, setNationalID] = useState('');
-  const [localSchoolCategory, setLocalSchoolCategory] = useState('');
-  const [stateOrProvince, setStateOrProvince] = useState('');
-
-useEffect(() => {
-  onChange({
-    schoolName,
-    country,  
-    from,
-    to,
-    nationalID,
-    localSchoolCategory,
-    stateOrProvince,
-  });
-}, [schoolName, country, from, to, nationalID, localSchoolCategory, stateOrProvince]);
-
+// Note: This component assumes it is rendered within a FormProvider context
+// provided by a parent component (e.g., Education.tsx).
+export const LocalEducation: React.FC = () => {
+  const { control, formState: { errors } } = useFormContext();
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-xl border border-cyan-100">
@@ -39,79 +17,134 @@ useEffect(() => {
 
       <div className="p-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-          <Input 
-            id="schoolName" 
-            label="Name of School/Institution" 
-            value={schoolName} 
-            onChange={e => setSchoolName(e.target.value)} 
-            required 
-            placeholder="Enter school or institution name"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="local.schoolName"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="schoolName"
+                name="local.schoolName"
+                label="Name of School/Institution"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Enter school or institution name"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                labelClassName="text-cyan-700"
+                error={errors.local?.schoolName?.message}
+              />
+            )}
           />
-          <Select 
-            id="country" 
-            label="Country" 
-            options={countryOptions} 
-            value={country} 
-            onChange={e => setCountry(e.target.value)} 
-            required 
-            placeholder="Select country"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="local.country"
+            control={control}
+            render={({ field }) => (
+              <Select
+                id="country"
+                name="local.country"
+                label="Country"
+                options={countryOptions}
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Select country"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                labelClassName="text-cyan-700"
+                error={errors.local?.country?.message}
+              />
+            )}
           />
-          <Input 
-            id="from" 
-            label="From" 
-            value={from} 
-            onChange={e => setFrom(e.target.value)} 
-            required 
-            placeholder="Start year"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="local.from"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="from"
+                name="local.from"
+                label="From"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Start year"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                labelClassName="text-cyan-700"
+                error={errors.local?.from?.message}
+              />
+            )}
           />
-          <Input 
-            id="to" 
-            label="To" 
-            value={to} 
-            onChange={e => setTo(e.target.value)} 
-            required 
-            placeholder="End year"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="local.to"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="to"
+                name="local.to"
+                label="To"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="End year"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                labelClassName="text-cyan-700"
+                error={errors.local?.to?.message}
+              />
+            )}
           />
-          <Input 
-            id="nationalID" 
-            label="National ID/Registration Number" 
-            value={nationalID} 
-            onChange={e => setNationalID(e.target.value)} 
-            required 
-            placeholder="Enter national ID or registration number"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="local.nationalID"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="nationalID"
+                name="local.nationalID"
+                label="National ID/Registration Number"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Enter national ID or registration number"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                labelClassName="text-cyan-700"
+                error={errors.local?.nationalID?.message}
+              />
+            )}
           />
-          <Input 
-            id="localSchoolCategory" 
-            label="School Category" 
-            value={localSchoolCategory} 
-            onChange={e => setLocalSchoolCategory(e.target.value)} 
-            required 
-            placeholder="Enter school category"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="local.localSchoolCategory"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="localSchoolCategory"
+                name="local.localSchoolCategory"
+                label="School Category"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Enter school category"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                labelClassName="text-cyan-700"
+                error={errors.local?.localSchoolCategory?.message}
+              />
+            )}
           />
-          <Input 
-            id="stateOrProvince" 
-            label="State/Province" 
-            value={stateOrProvince} 
-            onChange={e => setStateOrProvince(e.target.value)} 
-            required 
-            placeholder="Enter state or province"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="local.stateOrProvince"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="stateOrProvince"
+                name="local.stateOrProvince"
+                label="State/Province"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Enter state or province"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                labelClassName="text-cyan-700"
+                error={errors.local?.stateOrProvince?.message}
+              />
+            )}
           />
         </div>
- 
       </div>
     </div>
   );

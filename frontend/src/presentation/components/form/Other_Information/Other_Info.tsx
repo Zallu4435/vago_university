@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useForm, FormProvider } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import Other_Info_One from './Other_Info_One';
-import { Other_Info_Two } from './Other_Info_Two';
-import { HealthInfo, LegalInfo, OtherInformationSection } from '../../../../domain/types/formTypes';
+import Other_Info_Two from './Other_Info_Two';
+import { OtherInformationFormData, OtherInformationSchema } from '../../../../domain/validation/OtherInfoSchema';
+import { OtherInformationSection } from '../../../../domain/types/formTypes';
 
 interface StepIndicatorProps {
   currentStep: number;
@@ -12,7 +15,6 @@ interface Props {
   initialData?: OtherInformationSection;
   onSave: (data: OtherInformationSection) => void;
 }
-
 
 const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }) => (
   <div className="max-w-4xl mx-auto mb-6">
@@ -42,50 +44,75 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }
 );
 
 const Other_Info: React.FC<Props> = ({ initialData, onSave }) => {
-  const [step, setStep] = useState(1);
+  const methods = useForm<OtherInformationFormData>({
+    resolver: zodResolver(OtherInformationSchema),
+    defaultValues: {
+      health: {
+        hasHealthSupport: initialData?.health?.hasHealthSupport ?? '',
+        conditions: initialData?.health?.conditions ?? [],
+        medicalConditions: initialData?.health?.medicalConditions ?? '',
+        disabilities: initialData?.health?.disabilities ?? '',
+        specialNeeds: initialData?.health?.specialNeeds ?? '',
+      },
+      legal: {
+        hasCriminalRecord: initialData?.legal?.hasCriminalRecord ?? '',
+        criminalRecord: initialData?.legal?.criminalRecord ?? '',
+        legalProceedings: initialData?.legal?.legalProceedings ?? '',
+      },
+    },
+    mode: 'onChange',
+  });
+
+  const { handleSubmit, trigger, formState: { errors }, watch } = methods;
+
+  const [step, setStep] = React.useState(1);
   const totalSteps = 2;
 
-  const [health, setHealth] = useState<HealthInfo>(initialData?.health || {
-    medicalConditions: '',
-    disabilities: '',
-    specialNeeds: '',
-  });
+  // console.log('Other_Info: Form values:', watch());
 
-  const [legal, setLegal] = useState<LegalInfo>(initialData?.legal || {
-    criminalRecord: '',
-    legalProceedings: '',
-  });
+  const handleNext = async () => {
+    const fieldsToValidate = step === 1 ? ['health'] : ['legal'];
+    const isValid = await trigger(fieldsToValidate, { shouldFocus: true });
+    console.log('Other_Info: Validation result:', { isValid, errors: JSON.stringify(errors, null, 2) });
+    if (isValid) {
+      setStep(Math.min(step + 1, totalSteps));
+    }
+  };
 
-  useEffect(() => {
-    onSave({ health, legal });
-  }, [health, legal]);
+  const handleBack = () => {
+    setStep(Math.max(step - 1, 1));
+  };
 
-
-  const handleNext = () => setStep(Math.min(step + 1, totalSteps));
-  const handleBack = () => setStep(Math.max(step - 1, 1));
+  const onSubmit = (data: OtherInformationFormData) => {
+    console.log('Other_Info: Saving data:', data);
+    onSave(data);
+  };
 
   return (
-    <div className="w-full max-w-screen-2xl mx-auto px-8 py-6">
-      <StepIndicator currentStep={step} totalSteps={totalSteps} />
-
-      {step === 1 && (
-        <Other_Info_One
-          value={health}
-          onChange={setHealth}
-          onNext={handleNext} />
-      )}
-      {step === 2 && (
-        <Other_Info_Two
-          value={legal}
-          onChange={setLegal}
-          onBack={handleBack}
-          onNext={() => {
-            onSave({ health, legal });
-            console.log('Form completed');
-          }}
-        />
-      )}
-    </div>
+    <FormProvider {...methods}>
+      <div className="w-full max-w-screen-2xl mx-auto px-8 py-6">
+        {errors.health?.message && (
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
+            <p className="text-sm text-red-700">{errors.health.message}</p>
+          </div>
+        )}
+        {errors.legal?.message && (
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
+            <p className="text-sm text-red-700">{errors.legal.message}</p>
+          </div>
+        )}
+        <StepIndicator currentStep={step} totalSteps={totalSteps} />
+        {step === 1 && (
+          <Other_Info_One onNext={handleNext} />
+        )}
+        {step === 2 && (
+          <Other_Info_Two
+            onBack={handleBack}
+            onNext={handleSubmit(onSubmit)}
+          />
+        )}
+      </div>
+    </FormProvider>
   );
 };
 

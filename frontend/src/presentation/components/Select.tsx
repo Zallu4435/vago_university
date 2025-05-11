@@ -1,62 +1,77 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
-interface SelectOption {
+interface Option {
   value: string;
   label: string;
 }
 
 interface SelectProps {
   id: string;
+  name?: string;
   label?: string;
-  placeholder?: string;
-  options: SelectOption[];
+  options: Option[];
   value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChange?: (value: string) => void;
+  onBlur?: () => void;
   required?: boolean;
-  disabled?: boolean;
+  placeholder?: string;
   className?: string;
   labelClassName?: string;
+  error?: string;
 }
 
-export const Select: React.FC<SelectProps> = ({
-  id,
-  label,
-  placeholder = "Please select",
-  options,
-  value,
-  onChange,
-  required = false,
-  disabled = false,
-  className = "",
-  labelClassName = "",
-}) => {
-  return (
-    <div className="mb-4">
-      {label && (
-        <label
-          htmlFor={id}
-          className={`block text-sm font-medium text-gray-700 mb-1 ${labelClassName}`}
+export const Select = forwardRef<HTMLSelectElement, SelectProps>(
+  (
+    {
+      id,
+      name,
+      label,
+      options,
+      value,
+      onChange,
+      onBlur,
+      required,
+      placeholder,
+      className = '',
+      labelClassName = '',
+      error,
+    },
+    ref
+  ) => {
+    return (
+      <div className="flex flex-col">
+        {label && (
+          <label htmlFor={id} className={`mb-2 text-sm font-medium ${labelClassName}`}>
+            {label}
+            {required && <span className="text-red-500">*</span>}
+          </label>
+        )}
+        <select
+          id={id}
+          name={name}
+          value={value || ''}
+          onChange={(e) => onChange?.(e.target.value)}
+          onBlur={onBlur}
+          ref={ref}
+          className={`px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${className} ${
+            error ? 'border-red-500' : 'border-gray-300'
+          }`}
         >
-          {label}{required && <span className="text-red-500">*</span>}
-        </label>
-      )}
-      <select
-        id={id}
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-        required={required}
-        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 ${className}`}
-      >
-        <option value="" disabled hidden style={{ color: '#06b6d4' }}>
-          {placeholder}
-        </option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-};
+          {placeholder && (
+            <option value="" disabled>
+              {placeholder}
+            </option>
+          )}
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        {error && <p className="mt-1 text-sm text-red-700">{error}</p>}
+      </div>
+    );
+  }
+);
+
+Select.displayName = 'Select';

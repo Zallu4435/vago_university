@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '../../Button';
 
 interface HealthCondition {
   condition: string;
@@ -7,9 +8,11 @@ interface HealthCondition {
 
 interface HealthConditionTableProps {
   conditions: HealthCondition[];
+  onRemove: (index: number) => void;
+  onEdit: (index: number) => void;
 }
 
-const HealthConditionTable: React.FC<HealthConditionTableProps> = ({ conditions }) => {
+const HealthConditionTable: React.FC<HealthConditionTableProps> = ({ conditions, onRemove, onEdit }) => {
   return (
     <div className="border border-cyan-200 rounded-lg overflow-hidden">
       <table className="w-full border-collapse">
@@ -21,6 +24,9 @@ const HealthConditionTable: React.FC<HealthConditionTableProps> = ({ conditions 
             <th className="px-6 py-3 text-left text-cyan-800 font-medium">
               Health and Support Condition Details*
             </th>
+            <th className="px-6 py-3 text-left text-cyan-800 font-medium">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -28,7 +34,7 @@ const HealthConditionTable: React.FC<HealthConditionTableProps> = ({ conditions 
             <tr>
               <td 
                 className="px-6 py-4 text-center text-cyan-600" 
-                colSpan={2}
+                colSpan={3}
               >
                 No record(s)
               </td>
@@ -45,6 +51,20 @@ const HealthConditionTable: React.FC<HealthConditionTableProps> = ({ conditions 
                 <td className="px-6 py-4 text-cyan-800">
                   {condition.details}
                 </td>
+                <td className="px-6 py-4 flex space-x-2">
+                  <Button
+                    label="Edit"
+                    variant="outline"
+                    onClick={() => onEdit(index)}
+                    className="text-cyan-600 border-cyan-200 hover:bg-cyan-50 px-3 py-1"
+                  />
+                  <Button
+                    label="Remove"
+                    variant="outline"
+                    onClick={() => onRemove(index)}
+                    className="text-red-600 border-red-200 hover:bg-red-50 px-3 py-1"
+                  />
+                </td>
               </tr>
             ))
           )}
@@ -53,6 +73,5 @@ const HealthConditionTable: React.FC<HealthConditionTableProps> = ({ conditions 
     </div>
   );
 };
-
 
 export default HealthConditionTable;

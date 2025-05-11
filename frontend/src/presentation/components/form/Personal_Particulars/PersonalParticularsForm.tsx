@@ -1,80 +1,109 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { useForm, FormProvider } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { PersonalInfo } from '../../../../domain/types/formTypes';
 import { PersonalSection } from './PersonalSection';
 import { AlternativeContactSection } from './AlternativeContactSection';
+import { personalFormSchema, PersonalFormData } from '../../../../domain/validation/PersonalFormSchema';
 
 interface PersonalParticularsFormProps {
   initialData?: PersonalInfo;
   onSave?: (data: PersonalInfo) => void;
+  triggerValidation?: any;
 }
 
 export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = ({
   initialData,
   onSave,
+  triggerValidation,
 }) => {
-  const [formData, setFormData] = useState<PersonalInfo>(initialData || {
-    salutation: 'Mr',
-    fullName: 'John Michael Doe',
-    familyName: 'Doe',
-    givenName: 'John Michael',
-    gender: 'Male',
-    dateOfBirth: '1995-06-15',
-    postalCode: '123456',
-    blockNumber: '12A',
-    streetName: 'Orchard Road',
-    buildingName: 'Sunshine Residences',
-    floorNumber: '05',
-    unitNumber: '123',
-    stateCity: 'Singapore',
-    country: 'Singapore',
-    citizenship: 'Singaporean',
-    residentialStatus: 'Permanent Resident',
-    race: 'Chinese',
-    religion: 'Buddhism',
-    maritalStatus: 'Single',
-    passportNumber: 'A12345678',
-    emailAddress: 'john.doe@example.com',
-    alternativeEmail: 'john.m.doe@gmail.com',
-    mobileCountry: '+65',
+  const defaultValues: PersonalFormData = {
+    salutation: '',
+    fullName: '',
+    familyName: '',
+    givenName: '',
+    gender: '',
+    dateOfBirth: '',
+    postalCode: '',
+    blockNumber: '',
+    streetName: '',
+    buildingName: '',
+    floorNumber: '',
+    unitNumber: '',
+    stateCity: '',
+    country: '',
+    citizenship: '',
+    residentialStatus: '',
+    race: '',
+    religion: '',
+    maritalStatus: '',
+    passportNumber: '',
+    emailAddress: '',
+    alternativeEmail: '',
+    mobileCountry: '',
     mobileArea: '',
-    mobileNumber: '91234567',
-    phoneCountry: '+65',
+    mobileNumber: '',
+    phoneCountry: '',
     phoneArea: '',
-    phoneNumber: '61234567',
-    alternateContactName: 'Jane Doe',
-    relationshipWithApplicant: 'Sister',
-    occupation: 'Teacher',
-    altMobileCountry: '+65',
+    phoneNumber: '',
+    alternateContactName: '',
+    relationshipWithApplicant: '',
+    occupation: '',
+    altMobileCountry: '',
     altMobileArea: '',
-    altMobileNumber: '98765432',
-    altPhoneCountry: '+65',
+    altMobileNumber: '',
+    altPhoneCountry: '',
     altPhoneArea: '',
-    altPhoneNumber: '68765432',
+    altPhoneNumber: '',
+  };
+
+  const methods = useForm<PersonalFormData>({
+    resolver: zodResolver(personalFormSchema),
+    defaultValues: initialData || defaultValues,
+    mode: 'all', // This validates on blur and onChange
+    criteriaMode: 'all', // Show all validation errors
+    reValidateMode: 'onChange', // Re-validate when values change
   });
 
-  // Use useEffect with initialData as a dependency, so it only updates when initialData changes
-  // This avoids the immediate call on mount when applicationId may not be ready
+  const { reset, formState: { errors, isDirty }, watch, trigger, clearErrors } = methods;
+
+  // Expose triggerValidation to parent
+  React.useImperativeHandle(triggerValidation, () => ({
+    trigger: async () => {
+      const isValid = await trigger();
+      console.log('Trigger validation result:', { isValid, errors });
+      return isValid;
+    },
+  }));
+
+  // Reset form when initialData changes
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
+      reset(initialData);
     }
-  }, [initialData]);
+  }, [initialData, reset]);
 
-  // Only save data on form field changes, not on component mount
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { id, value } = e.target;
-    const updatedData = {
-      ...formData,
-      [id]: value,
-    };
+  // Watch form data and call onSave when form is dirty
+// Setup a subscription to form changes instead of watch() in render
+  useEffect(() => {
+    // Subscribe to form changes
+    const subscription = watch((formData, { name, type }) => {
+      console.log('PersonalParticularsForm watch triggered', {
+        changedField: name,
+        type,
+        isDirty,
+        errors: Object.keys(errors).length > 0 ? errors : 'No errors',
+      });
+      
+      if (isDirty && onSave) {
+        console.log('Calling onSave with formData');
+        onSave(formData);
+      }
+    });
     
-    setFormData(updatedData);
-    
-    // Only call onSave after user interaction, not on initial mount
-    if (onSave) {
-      onSave(updatedData);
-    }
-  };
+    // Cleanup subscription on unmount
+    return () => subscription.unsubscribe();
+  }, [watch, isDirty, onSave, errors]);
 
   return (
     <div className="w-full max-w-screen-2xl mx-auto px-8">
@@ -84,28 +113,32 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
             Personal Particulars
           </h2>
         </div>
-        {/* <form onSubmit={handleSubmit} className="p-4 md:p-6 lg:p-0"> */}
-          <div className="bg-cyan-50/30 rounded-lg p-4 md:p-6">
-            <PersonalSection formData={formData} onInputChange={handleInputChange} />
-          </div>
-          {/* Emergency / Next of Kin Section */}
-          <div className="mt-8 rounded-xl border border-cyan-100 shadow-sm bg-white">
-            <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 border-b border-cyan-100 rounded-t-xl flex items-center gap-2">
-              <svg className="w-6 h-6 text-cyan-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 01-8 0M12 14v7m0 0H9m3 0h3m-6 0a9 9 0 1118 0c0 1.657-4.03 3-9 3s-9-1.343-9-3a9 9 0 0118 0z" />
-              </svg>
-              <div>
-                <h2 className="text-xl md:text-2xl font-bold text-cyan-800">
-                  Emergency / Next of Kin Contact Details
-                </h2>
-                <p className="text-sm font-normal text-cyan-500">For urgent communication</p>
+        
+        <FormProvider {...methods}>
+          <div className="p-4 md:p-6 lg:p-0">
+            <div className="bg-cyan-50/30 rounded-lg p-4 md:p-6">
+              <PersonalSection />
+            </div>
+            
+            {/* Emergency / Next of Kin Section */}
+            <div className="mt-8 rounded-xl border border-cyan-100 shadow-sm bg-white">
+              <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 border-b border-cyan-100 rounded-t-xl flex items-center gap-2">
+                <svg className="w-6 h-6 text-cyan-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 01-8 0M12 14v7m0 0H9m3 0h3m-6 0a9 9 0 1118 0c0 1.657-4.03 3-9 3s-9-1.343-9-3a9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-cyan-800">
+                    Emergency / Next of Kin Contact Details
+                  </h2>
+                  <p className="text-sm font-normal text-cyan-500">For urgent communication</p>
+                </div>
+              </div>
+              <div className="bg-cyan-50/30 rounded-b-xl p-4 md:p-6">
+                <AlternativeContactSection />
               </div>
             </div>
-            <div className="bg-cyan-50/30 rounded-b-xl p-4 md:p-6">
-              <AlternativeContactSection formData={formData} onInputChange={handleInputChange} />
-            </div>
           </div>
-        {/* </form> */}
+        </FormProvider>
       </div>
     </div>
   );

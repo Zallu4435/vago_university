@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../../Button';
 import { ProgrammeModal } from './ProgrammeModal';
 import { ProgrammeChoice } from '../../../../domain/types/formTypes';
+import { choiceOfStudySchema, ChoiceOfStudyFormData, ProgrammeChoiceFormData } from '../../../../domain/validation/ChoiceOfStudySchema';
 
 interface ChoiceOfStudyProps {
   choices: ProgrammeChoice[];
@@ -9,22 +12,36 @@ interface ChoiceOfStudyProps {
 }
 
 export const ChoiceOfStudy: React.FC<ChoiceOfStudyProps> = ({ choices, onChange }) => {
-  // const [choices, setChoices] = useState<ProgrammeChoice[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [newProgramme, setNewProgramme] = useState('');
-  const [newMajor, setNewMajor] = useState('');
+  const { formState: { errors }, setValue, trigger } = useForm<ChoiceOfStudyFormData>({
+    resolver: zodResolver(choiceOfStudySchema),
+    defaultValues: {
+      choices: choices || [],
+    },
+    mode: 'onChange',
+  });
 
-  const handleAddProgramme = (programme: string, major: string) => {
-    const updatedChoices = [...choices, { programme, preferredMajor: major }];
+  useEffect(() => {
+    // Update form state when props.choices change (e.g., from fetched data)
+    setValue('choices', choices);
+    trigger('choices'); // Re-validate when choices change
+  }, [choices, setValue, trigger]);
+
+  const handleAddProgramme = (data: ProgrammeChoiceFormData) => {
+    const updatedChoices = [...choices, { programme: data.programme, preferredMajor: data.preferredMajor || '' }];
+    console.log('Adding programme:', data, 'Updated choices:', updatedChoices);
+    setValue('choices', updatedChoices);
+    trigger('choices'); // Validate the updated choices
     onChange(updatedChoices);
-    setNewProgramme('');
-    setNewMajor('');
     setShowModal(false);
   };
 
   const handleRemove = (idx: number) => {
-    const updated = choices.filter((_, i) => i !== idx);
-    onChange(updated);
+    const updatedChoices = choices.filter((_, i) => i !== idx);
+    console.log('Removing programme at index:', idx, 'Updated choices:', updatedChoices);
+    setValue('choices', updatedChoices);
+    trigger('choices'); // Validate after removal
+    onChange(updatedChoices);
   };
 
   return (
@@ -46,14 +63,20 @@ export const ChoiceOfStudy: React.FC<ChoiceOfStudyProps> = ({ choices, onChange 
           </div>
         </div>
 
+        {errors.choices && (
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
+            <p className="text-sm text-red-700">{errors.choices.message}</p>
+          </div>
+        )}
+
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-medium text-cyan-800">Your Choices</h3>
-            <Button 
-              label="Add Programme" 
-              onClick={() => setShowModal(true)} 
+            <Button
+              label="Add Programme"
+              onClick={() => setShowModal(true)}
               variant="primary"
-                className="bg-gradient-to-r from-cyan-400 to-blue-400 text-white px-4 py-2 rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all duration-300 shadow-sm relative overflow-hidden group" 
+              className="bg-gradient-to-r from-cyan-400 to-blue-400 text-white px-4 py-2 rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all duration-300 shadow-sm relative overflow-hidden group"
             />
           </div>
           <div className="border border-cyan-200 rounded-lg overflow-hidden">
@@ -76,22 +99,23 @@ export const ChoiceOfStudy: React.FC<ChoiceOfStudyProps> = ({ choices, onChange 
                     <tr key={idx} className="border-b border-cyan-100 hover:bg-cyan-50">
                       <td className="py-3 px-4 text-cyan-800">{idx + 1}</td>
                       <td className="py-3 px-4 text-cyan-800">{choice.programme}</td>
-                      <td className="py-3 px-4 text-cyan-800">{choice.preferredMajor}</td>
+                      <td className="py-3 px-4 text-cyan-800">{choice.preferredMajor || '-'}</td>
                       <td className="py-3 px-4">
-                        <Button 
-                          variant="outline" 
+                        <button
+                          variant="outline"
                           onClick={() => handleRemove(idx)}
-                          className="text-cyan-600 hover:text-cyan-700 border border-cyan-300 hover:border-cyan-400 px-3 py-1 rounded-md relative overflow-hidden group" 
+                          className="text-cyan-600 hover:text-cyan-700 border border-cyan-300 hover:border-cyan-400 px-3 py-1 rounded-md relative overflow-hidden group"
                         >
                           <span className="relative z-10">Remove</span>
-                          <div className="absolute inset-0 -z-10 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" 
+                          <div
+                            className="absolute inset-0 -z-10 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"
                             style={{
                               backgroundImage: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%)',
                               backgroundSize: '200% 100%',
-                              animation: 'shimmer 2s infinite'
+                              animation: 'shimmer 2s infinite',
                             }}
                           />
-                        </Button>
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -106,10 +130,7 @@ export const ChoiceOfStudy: React.FC<ChoiceOfStudyProps> = ({ choices, onChange 
         showModal={showModal}
         onClose={() => setShowModal(false)}
         onSubmit={handleAddProgramme}
-        newProgramme={newProgramme}
-        setNewProgramme={setNewProgramme}
-        newMajor={newMajor}
-        setNewMajor={setNewMajor}
+        choices={choices} // Pass choices for duplicate validation
       />
     </div>
   );

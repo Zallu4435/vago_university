@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '../../Input';
 import { Button } from '../../Button';
-import { subjectFields } from './options';
+import { subjectSchema } from '../../../../domain/validation/EducationSchema';
 
 interface SubjectModalProps {
   showModal: boolean;
@@ -19,33 +21,41 @@ export const SubjectModal: React.FC<SubjectModalProps> = ({
   onClose,
   onSubmit,
 }) => {
-  const [subject, setSubject] = React.useState('');
-  const [otherSubject, setOtherSubject] = React.useState('');
-  const [marksObtained, setMarksObtained] = React.useState('');
-  const [maxMarks, setMaxMarks] = React.useState('');
+  const { control, handleSubmit, formState: { errors }, reset, watch } = useForm<{
+    subject: string;
+    otherSubject: string;
+    marksObtained: string;
+    maxMarks: string;
+  }>({
+    resolver: zodResolver(subjectSchema),
+    defaultValues: {
+      subject: '',
+      otherSubject: '',
+      marksObtained: '',
+      maxMarks: '',
+    },
+    mode: 'onChange',
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit({
-      subject,
-      otherSubject,
-      marksObtained,
-      maxMarks,
-    });
-    setSubject('');
-    setOtherSubject('');
-    setMarksObtained('');
-    setMaxMarks('');
+  const subjectValue = watch('subject');
+
+  useEffect(() => {
+    if (showModal) {
+      reset();
+    }
+  }, [showModal, reset]);
+
+  const onFormSubmit = (data: {
+    subject: string;
+    otherSubject: string;
+    marksObtained: string;
+    maxMarks: string;
+  }) => {
+    onSubmit(data);
+    onClose();
   };
 
   if (!showModal) return null;
-
-  const fieldStateMap = {
-    subject, setSubject,
-    otherSubject, setOtherSubject,
-    marksObtained, setMarksObtained,
-    maxMarks, setMaxMarks,
-  };
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 backdrop-blur-sm">
@@ -58,20 +68,77 @@ export const SubjectModal: React.FC<SubjectModalProps> = ({
           ×
         </button>
         <h2 className="text-xl font-semibold mb-6 text-cyan-900">Add Subject</h2>
-        <form onSubmit={handleSubmit}>
-          {subjectFields.map(field => (
-            <Input
-              key={field.id}
-              id={field.id}
-              label={field.label}
-              value={fieldStateMap[field.id]}
-              onChange={e => fieldStateMap[`set${field.id.charAt(0).toUpperCase() + field.id.slice(1)}`](e.target.value)}
-              required={field.required}
-              placeholder={field.placeholder}
-              className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
-              labelClassName="text-cyan-700"
+        <form onSubmit={handleSubmit(onFormSubmit)}>
+          <Controller
+            name="subject"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="subject"
+                label="Subject"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Enter subject"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
+                labelClassName="text-cyan-700"
+                error={errors.subject?.message}
+              />
+            )}
+          />
+          {subjectValue === 'other' && (
+            <Controller
+              name="otherSubject"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  id="otherSubject"
+                  label="Other Subject"
+                  value={field.value}
+                  onChange={field.onChange}
+                  required
+                  placeholder="Enter other subject name"
+                  className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
+                  labelClassName="text-cyan-700"
+                  error={errors.otherSubject?.message}
+                />
+              )}
             />
-          ))}
+          )}
+          <Controller
+            name="marksObtained"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="marksObtained"
+                label="Marks Obtained"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Enter marks obtained"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
+                labelClassName="text-cyan-700"
+                error={errors.marksObtained?.message}
+              />
+            )}
+          />
+          <Controller
+            name="maxMarks"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="maxMarks"
+                label="Maximum Marks"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Enter maximum marks"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
+                labelClassName="text-cyan-700"
+                error={errors.maxMarks?.message}
+              />
+            )}
+          />
           <div className="flex justify-end mt-6">
             <Button
               label="Add"

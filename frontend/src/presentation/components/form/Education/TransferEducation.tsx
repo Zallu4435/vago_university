@@ -1,41 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '../../Input';
 import { Select } from '../../Select';
 import { Textarea } from '../../Textarea';
 import { countryOptions, universityOptions } from './options';
-import { TransferEducationData } from '../../../../domain/types/formTypes';
 
-interface Props {
-  value?: TransferEducationData | null | undefined;
-  onChange: (data: TransferEducationData) => void;
-}
-
-export const TransferEducation: React.FC<Props> = ({ value, onChange }) => {
-  const [schoolName, setSchoolName] = useState('');
-  const [country, setCountry] = useState('');
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [previousUniversity, setPreviousUniversity] = useState('');
-  const [otherUniversity, setOtherUniversity] = useState('');
-  const [creditsEarned, setCreditsEarned] = useState('');
-  const [gpa, setGpa] = useState('');
-  const [programStudied, setProgramStudied] = useState('');
-  const [reasonForTransfer, setReasonForTransfer] = useState('');
-
-   useEffect(() => {
-    onChange({
-      schoolName,
-      country,
-      from,
-      to,
-      previousUniversity,
-      otherUniversity,
-      creditsEarned,
-      gpa,
-      programStudied,
-      reasonForTransfer,
-    });
-  }, [schoolName, country, from, to, previousUniversity, otherUniversity, creditsEarned, gpa, programStudied, reasonForTransfer]);
+export const TransferEducation: React.FC = () => {
+  const { control, formState: { errors }, watch } = useFormContext();
+  const previousUniversity = watch('transfer.previousUniversity');
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-xl border border-cyan-100">
@@ -45,113 +17,191 @@ export const TransferEducation: React.FC<Props> = ({ value, onChange }) => {
 
       <div className="p-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-          <Input 
-            id="schoolName" 
-            label="Name of School/Institution" 
-            value={schoolName} 
-            onChange={e => setSchoolName(e.target.value)} 
-            required 
-            placeholder="Enter school or institution name"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="transfer.schoolName"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="schoolName"
+                name="transfer.schoolName"
+                label="Name of School/Institution"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Enter school or institution name"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                labelClassName="text-cyan-700"
+                error={errors.transfer?.schoolName?.message}
+              />
+            )}
           />
-          <Select 
-            id="country" 
-            label="Country" 
-            options={countryOptions} 
-            value={country} 
-            onChange={e => setCountry(e.target.value)} 
-            required 
-            placeholder="Select country"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="transfer.country"
+            control={control}
+            render={({ field }) => (
+              <Select
+                id="country"
+                name="transfer.country"
+                label="Country"
+                options={countryOptions}
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Select country"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                labelClassName="text-cyan-700"
+                error={errors.transfer?.country?.message}
+              />
+            )}
           />
-          <Input 
-            id="from" 
-            label="From" 
-            value={from} 
-            onChange={e => setFrom(e.target.value)} 
-            required 
-            placeholder="Start year"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="transfer.from"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="from"
+                name="transfer.from"
+                label="From"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Start year"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                labelClassName="text-cyan-700"
+                error={errors.transfer?.from?.message}
+              />
+            )}
           />
-          <Input 
-            id="to" 
-            label="To" 
-            value={to} 
-            onChange={e => setTo(e.target.value)} 
-            required 
-            placeholder="End year"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="transfer.to"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="to"
+                name="transfer.to"
+                label="To"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="End year"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                labelClassName="text-cyan-700"
+                error={errors.transfer?.to?.message}
+              />
+            )}
           />
-          <Select 
-            id="previousUniversity" 
-            label="Previous University" 
-            options={universityOptions} 
-            value={previousUniversity} 
-            onChange={e => setPreviousUniversity(e.target.value)} 
-            required 
-            placeholder="Select university"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="transfer.previousUniversity"
+            control={control}
+            render={({ field }) => (
+              <Select
+                id="previousUniversity"
+                name="transfer.previousUniversity"
+                label="Previous University"
+                options={universityOptions}
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Select university"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                labelClassName="text-cyan-700"
+                error={errors.transfer?.previousUniversity?.message}
+              />
+            )}
           />
           {previousUniversity === 'other' && (
-            <Input 
-              id="otherUniversity" 
-              label="Other University Name" 
-              value={otherUniversity} 
-              onChange={e => setOtherUniversity(e.target.value)} 
-              required 
-              placeholder="Enter university name"
-              className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-              labelClassName="text-cyan-700"
+            <Controller
+              name="transfer.otherUniversity"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  id="otherUniversity"
+                  name="transfer.otherUniversity"
+                  label="Other University Name"
+                  value={field.value}
+                  onChange={field.onChange}
+                  required
+                  placeholder="Enter university name"
+                  className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                  labelClassName="text-cyan-700"
+                  error={errors.transfer?.otherUniversity?.message}
+                />
+              )}
             />
           )}
-          <Input 
-            id="creditsEarned" 
-            label="Credits Earned" 
-            value={creditsEarned} 
-            onChange={e => setCreditsEarned(e.target.value)} 
-            required 
-            placeholder="Enter credits earned"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="transfer.creditsEarned"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="creditsEarned"
+                name="transfer.creditsEarned"
+                label="Credits Earned"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Enter credits earned"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                labelClassName="text-cyan-700"
+                error={errors.transfer?.creditsEarned?.message}
+              />
+            )}
           />
-          <Input 
-            id="gpa" 
-            label="GPA" 
-            value={gpa} 
-            onChange={e => setGpa(e.target.value)} 
-            required 
-            placeholder="Enter GPA"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="transfer.gpa"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="gpa"
+                name="transfer.gpa"
+                label="GPA"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Enter GPA"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                labelClassName="text-cyan-700"
+                error={errors.transfer?.gpa?.message}
+              />
+            )}
           />
-          <Input 
-            id="programStudied" 
-            label="Program/Major Studied" 
-            value={programStudied} 
-            onChange={e => setProgramStudied(e.target.value)} 
-            required 
-            placeholder="Enter program or major"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="transfer.programStudied"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="programStudied"
+                name="transfer.programStudied"
+                label="Program/Major Studied"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Enter program or major"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                labelClassName="text-cyan-700"
+                error={errors.transfer?.programStudied?.message}
+              />
+            )}
           />
-          <div className="md:col-span-2">
-            <Textarea
-              id="reasonForTransfer"
-              label="Reason for Transfer"
-              value={reasonForTransfer}
-              onChange={e => setReasonForTransfer(e.target.value)}
-              required
-              placeholder="Explain your reason for transfer"
-              className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-              labelClassName="text-cyan-700"
-              rows={3}
-            />
-          </div>
+          <Controller
+            name="transfer.reasonForTransfer"
+            control={control}
+            render={({ field }) => (
+              <Textarea
+                id="reasonForTransfer"
+                name="transfer.reasonForTransfer"
+                label="Reason for Transfer"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Explain your reason for transfer"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
+                labelClassName="text-cyan-700"
+                rows={3}
+                error={errors.transfer?.reasonForTransfer?.message}
+              />
+            )}
+          />
         </div>
       </div>
     </div>

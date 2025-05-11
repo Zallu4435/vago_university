@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { FormTabs } from '../components/form/formTabs';
 import { PersonalParticularsForm } from '../components/form/Personal_Particulars/PersonalParticularsForm';
 import { ChoiceOfStudy } from '../components/form/Choice_of_Studies/ChoiceOfStudy';
@@ -38,6 +38,10 @@ export const ApplicationForm: React.FC = () => {
     marketingCall: false,
   });
   const [isInitializing, setIsInitializing] = useState(true);
+  const [validationAttempted, setValidationAttempted] = useState(false);
+
+  const personalFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
+  const educationFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
 
   const {
     createApplication,
@@ -73,14 +77,14 @@ export const ApplicationForm: React.FC = () => {
         try {
           const response = await createApplication(newApplicationId);
           console.log('createApplication response:', response);
-          setIsInitializing(false); // Allow form interactions after creation
+          setIsInitializing(false);
         } catch (error) {
           console.error('Failed to create application:', error);
           setSaveError('Failed to initialize application. Please refresh the page.');
           setIsInitializing(false);
         }
       } else {
-        setIsInitializing(false); // Already have applicationId
+        setIsInitializing(false);
       }
     };
     initializeApplication();
@@ -138,6 +142,7 @@ export const ApplicationForm: React.FC = () => {
     setActiveTab(tabId);
     const newIndex = tabs.findIndex((tab) => tab.id === tabId);
     setFormProgress(Math.floor((newIndex / (tabs.length - 1)) * 100));
+    setValidationAttempted(false);
   };
 
   const handleNextTab = () => {
@@ -145,31 +150,7 @@ export const ApplicationForm: React.FC = () => {
     if (currentIndex < tabs.length - 1) {
       setActiveTab(tabs[currentIndex + 1].id);
       setFormProgress(Math.floor(((currentIndex + 1) / (tabs.length - 1)) * 100));
-    }
-  };
-
-  const handleUpdatePersonalInfo = async (data: PersonalInfo) => {
-    if (isInitializing) {
-      console.log('Waiting for application initialization');
-      return;
-    }
-    console.log("hi hello from ", formData)
-    if (!formData.applicationId) {
-      setSaveError('No application ID found.');
-      console.error('applicationId missing in handleUpdatePersonalInfo');
-      return;
-    }
-    try {
-      setSaveError(null);
-      setFormData(prev => {
-        const updatedFormData = { ...prev, personalInfo: data };
-        console.log('Updated formData with personalInfo:', updatedFormData);
-        return updatedFormData;
-      });
-      calculateFormProgress({ ...formData, personalInfo: data });
-    } catch (error) {
-      console.error('Error updating personalInfo:', error);
-      setSaveError('Failed to update personal information. Please try again.');
+      setValidationAttempted(false);
     }
   };
 
@@ -178,23 +159,28 @@ export const ApplicationForm: React.FC = () => {
       console.log('Waiting for application initialization');
       return;
     }
+    console.log('handleSavePersonalInfo called, personalInfo:', formData.personalInfo);
     if (!formData.applicationId || !formData.personalInfo) {
       setSaveError('No application ID or personal info found.');
-      console.error('Missing applicationId or personalInfo:', formData);
+      console.error('Missing applicationId or personalInfo:', { 
+        applicationId: formData.applicationId, 
+        personalInfo: formData.personalInfo 
+      });
       return;
     }
     try {
       setSaveError(null);
-      console.log('Saving personalInfo:', formData.personalInfo);
+      console.log('Saving personalInfo to backend:', formData.personalInfo);
       await savePersonalInfo({ applicationId: formData.applicationId, data: formData.personalInfo });
       console.log('Personal info saved successfully');
+      calculateFormProgress(formData);
     } catch (error) {
       console.error('Error saving personalInfo:', error);
       setSaveError('Failed to save personal information. Please try again.');
     }
   };
 
-  const handleUpdateChoiceOfStudy = (choices: ProgrammeChoice[]) => {
+  const handleUpdateChoiceOfStudy = async (choices: ProgrammeChoice[]) => {
     if (isInitializing) {
       console.log('Waiting for application initialization');
       return;
@@ -206,35 +192,43 @@ export const ApplicationForm: React.FC = () => {
     try {
       setSaveError(null);
       setFormData(prev => ({ ...prev, choiceOfStudy: choices }));
+      console.log('Updated choiceOfStudy:', choices);
+      await saveChoiceOfStudy({ applicationId: formData.applicationId, data: choices });
+      console.log('Choice of study saved successfully');
       calculateFormProgress({ ...formData, choiceOfStudy: choices });
-      // Remove the API call here - we'll save only when the user clicks Save & Next
-      // await saveChoiceOfStudy({ applicationId: formData.applicationId, data: choices });
     } catch (error) {
+      console.error('Error saving choiceOfStudy:', error);
       setSaveError('Failed to update choice of study. Please try again.');
     }
   };
 
-  // Similarly, update all other handleUpdate functions to only update state
-  // For example, here's handleUpdateEducation:
   const handleUpdateEducation = async (data: EducationData) => {
+    if (isInitializing) {
+      console.log('Waiting for application initialization');
+      return;
+    }
     if (!formData.applicationId) {
       setSaveError('No application ID found.');
       return;
     }
     try {
       setSaveError(null);
+      console.log('handleUpdateEducation called with data:', data);
       setFormData(prev => ({ ...prev, education: data }));
+      await saveEducation({ applicationId: formData.applicationId, data });
+      console.log('Education saved to backend:', data);
       calculateFormProgress({ ...formData, education: data });
-      // Remove the API call here
-      // await saveEducation({ applicationId: formData.applicationId, data });
     } catch (error) {
+      console.error('Error saving education:', error);
       setSaveError('Failed to update education details. Please try again.');
     }
   };
 
-  // Do the same for other update handlers - here are all the handlers that need to be updated:
-
-  const handleUpdateAchievements = (data: AchievementSection) => {
+  const handleUpdateAchievements = async (data: AchievementSection) => {
+    if (isInitializing) {
+      console.log('Waiting for application initialization');
+      return;
+    }
     if (!formData.applicationId) {
       setSaveError('No application ID found.');
       return;
@@ -242,15 +236,21 @@ export const ApplicationForm: React.FC = () => {
     try {
       setSaveError(null);
       setFormData(prev => ({ ...prev, achievements: data }));
+      console.log('Updated achievements:', data);
+      await saveAchievements({ applicationId: formData.applicationId, data });
+      console.log('Achievements saved successfully');
       calculateFormProgress({ ...formData, achievements: data });
-      // Remove API call
-      // await saveAchievements({ applicationId: formData.applicationId, data });
     } catch (error) {
+      console.error('Error saving achievements:', error);
       setSaveError('Failed to update achievements. Please try again.');
     }
   };
 
-  const handleUpdateOtherInformation = (data: OtherInformationSection) => {
+  const handleUpdateOtherInformation = async (data: OtherInformationSection) => {
+    if (isInitializing) {
+      console.log('Waiting for application initialization');
+      return;
+    }
     if (!formData.applicationId) {
       setSaveError('No application ID found.');
       return;
@@ -258,15 +258,21 @@ export const ApplicationForm: React.FC = () => {
     try {
       setSaveError(null);
       setFormData(prev => ({ ...prev, otherInformation: data }));
+      console.log('Updated otherInformation:', data);
+      await saveOtherInfo({ applicationId: formData.applicationId, data });
+      console.log('Other information saved successfully');
       calculateFormProgress({ ...formData, otherInformation: data });
-      // Remove API call
-      // await saveOtherInfo({ applicationId: formData.applicationId, data });
     } catch (error) {
+      console.error('Error saving otherInformation:', error);
       setSaveError('Failed to update other information. Please try again.');
     }
   };
 
-  const handleSaveDocuments = (data: DocumentUploadSection) => {
+  const handleSaveDocuments = async (data: DocumentUploadSection) => {
+    if (isInitializing) {
+      console.log('Waiting for application initialization');
+      return;
+    }
     if (!formData.applicationId) {
       setSaveError('No application ID found.');
       return;
@@ -274,15 +280,21 @@ export const ApplicationForm: React.FC = () => {
     try {
       setSaveError(null);
       setFormData(prev => ({ ...prev, documents: data }));
+      console.log('Updated documents:', data);
+      await saveDocuments({ applicationId: formData.applicationId, data });
+      console.log('Documents saved successfully');
       calculateFormProgress({ ...formData, documents: data });
-      // Remove API call
-      // await saveDocuments({ applicationId: formData.applicationId, data });
     } catch (error) {
+      console.error('Error saving documents:', error);
       setSaveError('Failed to update documents. Please try again.');
     }
   };
 
-  const handleUpdateDeclaration = (data: DeclarationSection) => {
+  const handleUpdateDeclaration = async (data: DeclarationSection) => {
+    if (isInitializing) {
+      console.log('Waiting for application initialization');
+      return;
+    }
     if (!formData.applicationId) {
       setSaveError('No application ID found.');
       return;
@@ -291,10 +303,12 @@ export const ApplicationForm: React.FC = () => {
       setSaveError(null);
       setDeclaration(data);
       setFormData(prev => ({ ...prev, declaration: data }));
+      console.log('Updated declaration:', data);
+      await saveDeclaration({ applicationId: formData.applicationId, data });
+      console.log('Declaration saved successfully');
       calculateFormProgress({ ...formData, declaration: data });
-      // Remove API call
-      // await saveDeclaration({ applicationId: formData.applicationId, data });
     } catch (error) {
+      console.error('Error saving declaration:', error);
       setSaveError('Failed to update declaration. Please try again.');
     }
   };
@@ -310,38 +324,66 @@ export const ApplicationForm: React.FC = () => {
       return;
     }
 
-    console.log('Saving tab:', activeTab, 'formData:', formData);
+    console.log('handleSaveCurrentTab: Saving tab:', activeTab, 'formData:', formData);
+    
     if (activeTab === 'personalDetails') {
-      if (formData.personalInfo) {
-        await handleSavePersonalInfo(); // Keep this as is since it already handles API call
-        console.log("personalInfo saved:", formData.personalInfo);
-        handleNextTab();
+      setValidationAttempted(true);
+      
+      if (personalFormRef.current) {
+        const isValid = await personalFormRef.current.trigger();
+        console.log('PersonalDetails validation result:', { isValid, personalInfo: formData.personalInfo });
+        if (isValid && formData.personalInfo && Object.values(formData.personalInfo).some(val => val !== '' && val !== undefined && val !== null)) {
+          console.log('Proceeding to save personal info');
+          await handleSavePersonalInfo();
+          console.log('personalInfo saved:', formData.personalInfo);
+          handleNextTab();
+        } else {
+          console.log('Form validation failed or personalInfo is empty, staying on personalDetails tab');
+          setSaveError('Please fill in the required personal information fields.');
+        }
       } else {
-        alert('Please complete personal details.');
+        console.error('personalFormRef.current is null');
+        setSaveError('Form reference is missing. Please try again.');
       }
     } else if (activeTab === 'choiceOfStudy') {
       if (formData.choiceOfStudy && formData.choiceOfStudy.length > 0) {
         await saveChoiceOfStudy({ applicationId: formData.applicationId, data: formData.choiceOfStudy });
-        console.log("choice of study saved:", formData.choiceOfStudy);
+        console.log('choice of study saved:', formData.choiceOfStudy);
         handleNextTab();
       } else {
-        alert('Please add at least one programme choice.');
+        setSaveError('Please add at least one programme choice.');
       }
     } else if (activeTab === 'education') {
-      if (formData.education?.studentType) {
-        await saveEducation({ applicationId: formData.applicationId, data: formData.education });
-        console.log("education saved:", formData.education);
-        handleNextTab();
+      setValidationAttempted(true);
+      console.log('Education tab: Checking educationFormRef:', educationFormRef.current);
+      if (educationFormRef.current) {
+        const isValid = await educationFormRef.current.trigger();
+        console.log('Education validation result:', { isValid, education: formData.education });
+        if (isValid && formData.education?.studentType) {
+          await saveEducation({ applicationId: formData.applicationId, data: formData.education });
+          console.log('education saved:', formData.education);
+          handleNextTab();
+        } else {
+          alert(formData.education?.studentType === 'international' && !isValid
+              ? 'Please complete all required education details, including at least one English proficiency test.'
+              : 'Please complete all required education details, including student type.')
+          // setSaveError(
+          //   formData.education?.studentType === 'international' && !isValid
+          //     ? 'Please complete all required education details, including at least one English proficiency test.'
+          //     : 'Please complete all required education details, including student type.'
+          // );
+        }
       } else {
-        alert('Please complete your education details.');
+        console.error('educationFormRef.current is null');
+        setSaveError('Education form reference is missing. Please try again.');
       }
     } else if (activeTab === 'achievements') {
       if (formData.achievements) {
         await saveAchievements({ applicationId: formData.applicationId, data: formData.achievements });
-        console.log("achievements saved:", formData.achievements);
+        console.log('achievements saved:', formData.achievements);
         handleNextTab();
       } else {
-        alert('Please complete achievements section before proceeding.');
+        setSaveError('Please complete achievements section before proceeding.');
       }
     } else if (activeTab === 'otherInformation') {
       if (formData.otherInformation) {
@@ -349,23 +391,25 @@ export const ApplicationForm: React.FC = () => {
         console.log('otherInformation saved:', formData.otherInformation);
         handleNextTab();
       } else {
-        alert('Please complete Other Information section.');
+        alert('Please complete Other Information section.')
+        // setSaveError('Please complete Other Information section.');
       }
     } else if (activeTab === 'documents') {
       if (formData.documents) {
         await saveDocuments({ applicationId: formData.applicationId, data: formData.documents });
-        console.log("documents saved:", formData.documents);
+        console.log('documents saved:', formData.documents);
         handleNextTab();
       } else {
-        alert('Please upload required documents before proceeding.');
+        alert('Please upload required documents before proceeding.')
+        // setSaveError('Please upload required documents before proceeding.');
       }
     } else if (activeTab === 'declaration') {
       if (declaration.privacyPolicy) {
         await saveDeclaration({ applicationId: formData.applicationId, data: declaration });
-        console.log("declaration saved:", declaration);
+        console.log('declaration saved:', declaration);
         handleNextTab();
       } else {
-        alert('Please agree to the Privacy Notice to proceed.');
+        setSaveError('Please agree to the Privacy Notice to proceed.');
       }
     }
   };
@@ -513,33 +557,51 @@ export const ApplicationForm: React.FC = () => {
         {activeTab === 'personalDetails' && (
           <PersonalParticularsForm
             initialData={formData.personalInfo}
-            onSave={handleUpdatePersonalInfo}
+            onChange={(data) => {
+              console.log('PersonalParticularsForm onChange:', data);
+              setFormData(prev => ({ ...prev, personalInfo: data }));
+              calculateFormProgress({ ...formData, personalInfo: data });
+            }}
+            triggerValidation={personalFormRef}
           />
         )}
-        {activeTab === 'choiceOfStudy' && <ChoiceOfStudy
-          choices={formData.choiceOfStudy || []}
-          onChange={handleUpdateChoiceOfStudy}
-        />}
-        {activeTab === 'education' && <Education
-          initialData={formData.education}
-          onSave={handleUpdateEducation}
-        />}
-        {activeTab === 'achievements' && <Achievements
-          initialData={formData.achievements}
-          onSave={handleUpdateAchievements}
-        />}
-        {activeTab === 'otherInformation' && <Other_Info
-          initialData={formData.otherInformation}
-          onSave={handleUpdateOtherInformation}
-        />}
-        {activeTab === 'documents' && <Documents
-          initialData={formData.documents}
-          onSave={handleSaveDocuments}
-        />}
-        {activeTab === 'declaration' && <Declaration
-          value={declaration}
-          onChange={handleUpdateDeclaration}
-        />}
+        {activeTab === 'choiceOfStudy' && (
+          <ChoiceOfStudy
+            choices={formData.choiceOfStudy || []}
+            onChange={handleUpdateChoiceOfStudy}
+          />
+        )}
+        {activeTab === 'education' && (
+          <Education
+            initialData={formData.education}
+            onSave={handleUpdateEducation}
+            ref={educationFormRef}
+          />
+        )}
+        {activeTab === 'achievements' && (
+          <Achievements
+            initialData={formData.achievements}
+            onSave={handleUpdateAchievements}
+          />
+        )}
+        {activeTab === 'otherInformation' && (
+          <Other_Info
+            initialData={formData.otherInformation}
+            onSave={handleUpdateOtherInformation}
+          />
+        )}
+        {activeTab === 'documents' && (
+          <Documents
+            initialData={formData.documents}
+            onSave={handleSaveDocuments}
+          />
+        )}
+        {activeTab === 'declaration' && (
+          <Declaration
+            value={declaration}
+            onChange={handleUpdateDeclaration}
+          />
+        )}
         <div className="flex justify-between mt-8 border-t border-cyan-50 pt-6">
           <button
             onClick={() => {
@@ -550,10 +612,11 @@ export const ApplicationForm: React.FC = () => {
               }
             }}
             disabled={activeTab === 'personalDetails'}
-            className={`px-6 py-3 rounded-lg flex items-center transition-all duration-300 ${activeTab === 'personalDetails'
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200 hover:shadow-sm'
-              }`}
+            className={`px-6 py-3 rounded-lg flex items-center transition-all duration-300 ${
+              activeTab === 'personalDetails'
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200 hover:shadow-sm'
+            }`}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -573,8 +636,9 @@ export const ApplicationForm: React.FC = () => {
             <button
               onClick={handleSaveCurrentTab}
               disabled={isSaving}
-              className={`px-6 py-3 rounded-lg flex items-center transition-all duration-300 shadow-sm relative overflow-hidden group ${isSaving ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-cyan-400 to-blue-400 text-white hover:from-cyan-500 hover:to-blue-500'
-                }`}
+              className={`px-6 py-3 rounded-lg flex items-center transition-all duration-300 shadow-sm relative overflow-hidden group ${
+                isSaving ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-cyan-400 to-blue-400 text-white hover:from-cyan-500 hover:to-blue-500'
+              }`}
             >
               <span className={`relative z-10 flex items-center ${styles.shimmer}`}>
                 Save & Next
@@ -594,15 +658,16 @@ export const ApplicationForm: React.FC = () => {
             </button>
           ) : (
             <button
-              className={`px-8 py-3 bg-gradient-to-r from-cyan-400 to-cyan-600 text-white rounded-lg font-bold relative overflow-hidden group transition-all duration-300 shadow-sm ${!declaration.privacyPolicy || isSaving ? 'opacity-50 cursor-not-allowed' : 'hover:from-cyan-500 hover:to-cyan-700'
-                }`}
+              className={`px-8 py-3 bg-gradient-to-r from-cyan-400 to-cyan-600 text-white rounded-lg font-bold relative overflow-hidden group transition-all duration-300 shadow-sm ${
+                !declaration.privacyPolicy || isSaving ? 'opacity-50 cursor-not-allowed' : 'hover:from-cyan-500 hover:to-cyan-700'
+              }`}
               disabled={!declaration.privacyPolicy || isSaving}
               onClick={async () => {
                 if (declaration.privacyPolicy) {
                   await handleUpdateDeclaration(declaration);
                   setShowSummary(true);
                 } else {
-                  alert('Please agree to the Privacy Notice to proceed.');
+                  setSaveError('Please agree to the Privacy Notice to proceed.');
                 }
               }}
             >

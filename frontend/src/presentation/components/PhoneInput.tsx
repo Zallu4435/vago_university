@@ -1,74 +1,83 @@
 import React from 'react';
-import { Input } from './Input';
+import { useFormContext } from 'react-hook-form';
 
-interface PhoneInputProps {
-  countryId: string;
-  areaId: string;
-  numberId: string;
+interface FormPhoneInputProps {
+  countryName: string;
+  areaName: string;
+  numberName: string;
   label?: string;
-  countryValue?: string;
-  areaValue?: string;
-  numberValue?: string;
-  onCountryChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onAreaChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onNumberChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
+  countryError?: string;
+  areaError?: string;
+  numberError?: string;
   className?: string;
   labelClassName?: string;
 }
 
-export const PhoneInput: React.FC<PhoneInputProps> = ({
-  countryId,
-  areaId,
-  numberId,
+export const PhoneInput: React.FC<FormPhoneInputProps> = ({
+  countryName,
+  areaName,
+  numberName,
   label,
-  countryValue,
-  areaValue,
-  numberValue,
-  onCountryChange,
-  onAreaChange,
-  onNumberChange,
   required = false,
+  countryError,
+  areaError,
+  numberError,
   className = "",
   labelClassName = "",
 }) => {
+  const { register } = useFormContext();
+  const hasError = countryError || areaError || numberError;
+
   return (
     <div className="mb-4">
       {label && (
-        <label className={`block text-sm font-medium text-gray-700 mb-1 ${labelClassName}`}>
-          {label}{required && <span className="text-red-500">*</span>}
+        <label className={`block text-sm font-medium mb-1 ${hasError ? 'text-red-600' : labelClassName}`}>
+          {label}{required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       <div className="flex space-x-2">
         <div className="w-24">
-          <Input
-            id={countryId}
+          <input
+            {...register(countryName)}
             placeholder="Country"
-            value={countryValue}
-            onChange={onCountryChange}
-            required={required}
-            className={className}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 ${
+              countryError 
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50' 
+                : className
+            }`}
           />
+          {countryError && (
+            <p className="mt-1 text-xs text-red-600">{countryError}</p>
+          )}
         </div>
         <div className="w-24">
-          <Input
-            id={areaId}
+          <input
+            {...register(areaName)}
             placeholder="Area"
-            value={areaValue}
-            onChange={onAreaChange}
-            required={required}
-            className={className}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 ${
+              areaError 
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50' 
+                : className
+            }`}
           />
+          {areaError && (
+            <p className="mt-1 text-xs text-red-600">{areaError}</p>
+          )}
         </div>
         <div className="flex-1">
-          <Input
-            id={numberId}
+          <input
+            {...register(numberName)}
             placeholder="Number"
-            value={numberValue}
-            onChange={onNumberChange}
-            required={required}
-            className={className}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 ${
+              numberError 
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-200 bg-red-50' 
+                : className
+            }`}
           />
+          {numberError && (
+            <p className="mt-1 text-xs text-red-600">{numberError}</p>
+          )}
         </div>
       </div>
     </div>

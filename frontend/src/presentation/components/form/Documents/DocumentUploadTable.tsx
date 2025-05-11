@@ -1,11 +1,6 @@
 import React from 'react';
-
-interface DocumentUpload {
-  id: string;
-  name: string;
-  fileName?: string;
-  fileType?: string;
-}
+import { useFormContext } from 'react-hook-form';
+import { DocumentUpload } from '../../../../domain/validation/DocumentSchema';
 
 interface DocumentUploadTableProps {
   documents: DocumentUpload[];
@@ -16,8 +11,10 @@ interface DocumentUploadTableProps {
 export const DocumentUploadTable: React.FC<DocumentUploadTableProps> = ({
   documents,
   onFileUpload,
-  onFileRemove
+  onFileRemove,
 }) => {
+  const { formState: { errors } } = useFormContext();
+
   return (
     <div className="border border-cyan-200 rounded-lg overflow-hidden">
       <table className="w-full text-sm">
@@ -29,7 +26,7 @@ export const DocumentUploadTable: React.FC<DocumentUploadTableProps> = ({
           </tr>
         </thead>
         <tbody>
-          {documents.map(doc => (
+          {documents.map((doc, index) => (
             <tr key={doc.id} className="border-b border-cyan-100 hover:bg-cyan-50">
               <td className="py-4 px-6">
                 <label className="bg-gradient-to-r from-cyan-400 to-blue-400 text-white px-4 py-2 rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all duration-300 shadow-sm cursor-pointer inline-block">
@@ -60,6 +57,11 @@ export const DocumentUploadTable: React.FC<DocumentUploadTableProps> = ({
                   </div>
                 ) : (
                   <span className="text-cyan-400 italic">No file uploaded</span>
+                )}
+                {errors.documents?.[index] && (
+                  <p className="text-sm text-red-700 mt-1">
+                    {errors.documents[index]?.fileName?.message || 'File is required'}
+                  </p>
                 )}
               </td>
             </tr>

@@ -1,59 +1,50 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useFormContext, Controller, useFieldArray } from 'react-hook-form';
 import { Input } from '../../Input';
 import { Select } from '../../Select';
 import { Button } from '../../Button';
 import { RadioGroup } from '../../RadioGroup';
-import { countryOptions, examOptions } from './options';
 import { SubjectModal } from './SubjectModal';
+import { countryOptions, examOptions } from './options';
 
-export interface Subject {
-  subject: string;
-  otherSubject: string;
-  marksObtained: string;
-  maxMarks: string;
+interface InternationalSchoolInfoProps {
+  onNext: () => void;
 }
 
-interface Props {
-  initialData?: any;
-  onNext: (data: {
-    schoolName: string;
-    country: string;
-    from: string;
-    to: string;
-    examination: string;
-    examMonthYear: string;
-    resultType: 'actual' | 'predicted';
-    subjects: Subject[];
-  }) => void;
-}
+export const InternationalSchoolInfo: React.FC<InternationalSchoolInfoProps> = ({ onNext }) => {
+  const { control, formState: { errors }, trigger } = useFormContext();
+  const { fields: subjects, append, remove } = useFieldArray({
+    control,
+    name: 'international.subjects',
+  });
+  const [showSubjectModal, setShowSubjectModal] = React.useState(false);
 
-export const InternationalSchoolInfo: React.FC<Props> = ({initialData, onNext }) => {
-  const [schoolName, setSchoolName] = useState('');
-  const [country, setCountry] = useState('');
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [examination, setExamination] = useState('other');
-  const [examMonthYear, setExamMonthYear] = useState('');
-  const [resultType, setResultType] = useState<'actual' | 'predicted'>('actual');
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [showSubjectModal, setShowSubjectModal] = useState(false);
-
-  const handleAddSubject = (newSubject: Subject) => {
-    setSubjects([...subjects, newSubject]);
+  const handleAddSubject = async (newSubject: {
+    subject: string;
+    otherSubject: string;
+    marksObtained: string;
+    maxMarks: string;
+  }) => {
+    append(newSubject);
     setShowSubjectModal(false);
   };
 
-  const handleNext = () => {
-    onNext({
-      schoolName,
-      country,
-      from,
-      to,
-      examination,
-      examMonthYear,
-      resultType,
-      subjects,
-    });
+  const handleNext = async () => {
+    // Validate only the school-related fields and subjects
+    const fieldsToValidate = [
+      'international.schoolName',
+      'international.country',
+      'international.from',
+      'international.to',
+      'international.examination',
+      'international.examMonthYear',
+      'international.resultType',
+      'international.subjects',
+    ];
+    const isValid = await trigger(fieldsToValidate, { shouldFocus: true });
+    if (isValid) {
+      onNext();
+    }
   };
 
   return (
@@ -64,79 +55,134 @@ export const InternationalSchoolInfo: React.FC<Props> = ({initialData, onNext })
 
       <div className="p-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6 mb-8">
-          <Input 
-            id="schoolName" 
-            label="Name of School" 
-            value={schoolName} 
-            onChange={e => setSchoolName(e.target.value)} 
-            required 
-            placeholder="Enter school name"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="international.schoolName"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="schoolName"
+                name="international.schoolName"
+                label="Name of School"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Enter school name"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
+                labelClassName="text-cyan-700"
+                error={errors.international?.schoolName?.message}
+              />
+            )}
           />
-          <Select 
-            id="country" 
-            label="Country" 
-            options={countryOptions} 
-            value={country} 
-            onChange={e => setCountry(e.target.value)} 
-            required 
-            placeholder="Select country"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="international.country"
+            control={control}
+            render={({ field }) => (
+              <Select
+                id="country"
+                name="international.country"
+                label="Country"
+                options={countryOptions}
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Select country"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
+                labelClassName="text-cyan-700"
+                error={errors.international?.country?.message}
+              />
+            )}
           />
-          <Input 
-            id="from" 
-            label="From" 
-            value={from} 
-            onChange={e => setFrom(e.target.value)} 
-            required 
-            placeholder="Start year"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="international.from"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="from"
+                name="international.from"
+                label="From"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Start year"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
+                labelClassName="text-cyan-700"
+                error={errors.international?.from?.message}
+              />
+            )}
           />
-          <Input 
-            id="to" 
-            label="To" 
-            value={to} 
-            onChange={e => setTo(e.target.value)} 
-            required 
-            placeholder="End year"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="international.to"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="to"
+                name="international.to"
+                label="To"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="End year"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
+                labelClassName="text-cyan-700"
+                error={errors.international?.to?.message}
+              />
+            )}
           />
-          <Select 
-            id="examination" 
-            label="Examination" 
-            options={examOptions} 
-            value={examination} 
-            onChange={e => setExamination(e.target.value)} 
-            required 
-            placeholder="Select examination"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="international.examination"
+            control={control}
+            render={({ field }) => (
+              <Select
+                id="examination"
+                name="international.examination"
+                label="Examination"
+                options={examOptions}
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="Select examination"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
+                labelClassName="text-cyan-700"
+                error={errors.international?.examination?.message}
+              />
+            )}
           />
-          <Input 
-            id="examMonthYear" 
-            label="Exam Month/Year" 
-            value={examMonthYear} 
-            onChange={e => setExamMonthYear(e.target.value)} 
-            required 
-            placeholder="e.g. June 2023"
-            className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
-            labelClassName="text-cyan-700"
+          <Controller
+            name="international.examMonthYear"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="examMonthYear"
+                name="international.examMonthYear"
+                label="Exam Month/Year"
+                value={field.value}
+                onChange={field.onChange}
+                required
+                placeholder="e.g. 06/2023"
+                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
+                labelClassName="text-cyan-700"
+                error={errors.international?.examMonthYear?.message}
+              />
+            )}
           />
-          <RadioGroup
-            name="resultType"
-            label="Result Type"
-            options={[
-              { label: 'Actual', value: 'actual' },
-              { label: 'Predicted/Forecast', value: 'predicted' },
-            ]}
-            selectedValue={resultType}
-            onChange={val => setResultType(val as 'actual' | 'predicted')}
-            required
-            className="md:col-span-2 mt-2 text-cyan-700"
+          <Controller
+            name="international.resultType"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                name="international.resultType"
+                label="Result Type"
+                options={[
+                  { label: 'Actual', value: 'actual' },
+                  { label: 'Predicted/Forecast', value: 'predicted' },
+                ]}
+                selectedValue={field.value}
+                onChange={field.onChange}
+                required
+                className="md:col-span-2 mt-2 text-cyan-700"
+                error={errors.international?.resultType?.message}
+              />
+            )}
           />
         </div>
 
@@ -144,11 +190,11 @@ export const InternationalSchoolInfo: React.FC<Props> = ({initialData, onNext })
         <div className="border border-cyan-200 rounded-lg overflow-hidden mb-8">
           <div className="flex justify-between p-4 bg-gradient-to-r from-cyan-50 to-blue-50 border-b border-cyan-100">
             <h3 className="text-lg font-medium text-cyan-800">Subjects</h3>
-            <Button 
-              label="Add Subject" 
-              onClick={() => setShowSubjectModal(true)} 
+            <Button
+              label="Add Subject"
+              onClick={() => setShowSubjectModal(true)}
               variant="primary"
-              className="bg-gradient-to-r from-cyan-400 to-blue-400 text-white px-4 py-2 rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all duration-300 shadow-sm relative overflow-hidden group" 
+              className="bg-gradient-to-r from-cyan-400 to-blue-400 text-white px-4 py-2 rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all duration-300 shadow-sm relative overflow-hidden group"
             />
           </div>
           <table className="w-full text-sm">
@@ -158,22 +204,31 @@ export const InternationalSchoolInfo: React.FC<Props> = ({initialData, onNext })
                 <th className="py-3 px-4 text-left font-medium text-cyan-800">Other Subject</th>
                 <th className="py-3 px-4 text-left font-medium text-cyan-800">Marks Obtained</th>
                 <th className="py-3 px-4 text-left font-medium text-cyan-800">Maximum Marks</th>
+                <th className="py-3 px-4 text-left font-medium text-cyan-800">Actions</th>
               </tr>
             </thead>
             <tbody>
               {subjects.length === 0 ? (
                 <tr>
-                  <td className="py-2 px-3 text-gray-500" colSpan={4}>
+                  <td className="py-2 px-3 text-gray-500" colSpan={5}>
                     No record(s)
                   </td>
                 </tr>
               ) : (
                 subjects.map((subj, idx) => (
-                  <tr key={idx}>
-                    <td className="py-2 px-3 border-b">{subj.subject}</td>
-                    <td className="py-2 px-3 border-b">{subj.otherSubject}</td>
-                    <td className="py-2 px-3 border-b">{subj.marksObtained}</td>
-                    <td className="py-2 px-3 border-b">{subj.maxMarks}</td>
+                  <tr key={subj.id} className="border-b border-cyan-100">
+                    <td className="py-2 px-3">{subj.subject}</td>
+                    <td className="py-2 px-3">{subj.otherSubject || '-'}</td>
+                    <td className="py-2 px-3">{subj.marksObtained}</td>
+                    <td className="py-2 px-3">{subj.maxMarks}</td>
+                    <td className="py-2 px-3">
+                      <Button
+                        label="Remove"
+                        onClick={() => remove(idx)}
+                        variant="outline"
+                        className="text-cyan-600 hover:text-cyan-700 border border-cyan-300 hover:border-cyan-400 px-3 py-1 rounded-md"
+                      />
+                    </td>
                   </tr>
                 ))
               )}
@@ -182,12 +237,12 @@ export const InternationalSchoolInfo: React.FC<Props> = ({initialData, onNext })
         </div>
 
         <div className="flex justify-end">
-          <Button 
-            label="Next" 
-            type="button" 
-            variant="primary" 
+          <Button
+            label="Next"
+            type="button"
+            variant="primary"
             onClick={handleNext}
-            className="bg-gradient-to-r from-cyan-400 to-blue-400 text-white px-6 py-3 rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all duration-300 shadow-sm relative overflow-hidden group" 
+            className="bg-gradient-to-r from-cyan-400 to-blue-400 text-white px-6 py-3 rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all duration-300 shadow-sm relative overflow-hidden group"
           />
         </div>
       </div>

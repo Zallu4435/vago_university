@@ -1,46 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { Input } from '../../Input';
+import React from 'react';
+import { useFormContext } from 'react-hook-form';
 import { Button } from '../../Button';
 import { Textarea } from '../../Textarea';
 import { radioOptions } from './options';
-import { LegalInfo } from '../../../../domain/types/formTypes';
+
 interface Props {
-  value: LegalInfo;
-  onChange: (data: LegalInfo) => void;
   onBack: () => void;
   onNext: () => void;
 }
 
+export const Other_Info_Two: React.FC<Props> = ({ onBack, onNext }) => {
+  const { register, watch, setValue, formState: { errors }, trigger } = useFormContext();
+  const hasCriminalRecord = watch('legal.hasCriminalRecord');
 
-export const Other_Info_Two: React.FC<Props> = ({ value, onChange, onBack, onNext }) => {
-  const [hasCriminalRecord, setHasCriminalRecord] = useState<boolean | null>(null);
-  const [criminalDetails, setCriminalDetails] = useState('');
-  const [details, setDetails] = useState(value.criminalRecord || '');
-
-  const handleDetailsChange = (value: string) => {
-    if (value.length <= 1000) {
-      setCriminalDetails(value);
-    }
+  const handleCriminalRecordChange = (value: string) => {
+    setValue('legal.hasCriminalRecord', value, { shouldValidate: true });
+    setValue('legal.criminalRecord', value === 'true' ? '' : 'None', { shouldValidate: true });
   };
 
-  useEffect(() => {
-    if (hasCriminalRecord) {
-      onChange({ criminalRecord: details, legalProceedings: '' });
-    } else if (hasCriminalRecord === false) {
-      onChange({ criminalRecord: 'None', legalProceedings: '' });
+  const handleNext = async () => {
+    console.log('Other_Info_Two: Current values before validation:', {
+      hasCriminalRecord: watch('legal.hasCriminalRecord'),
+      criminalRecord: watch('legal.criminalRecord'),
+    });
+    const isValid = await trigger('legal', { shouldFocus: true });
+    console.log('Other_Info_Two: Validation result:', { 
+      isValid, 
+      errors: errors.legal ? JSON.stringify(errors.legal, null, 2) : 'No errors' 
+    });
+    if (isValid) {
+      onNext();
     }
-  }, [hasCriminalRecord, details]);
-
-  const handleNext = () => {
-    if (hasCriminalRecord === null) {
-      // Add validation warning
-      return;
-    }
-    if (hasCriminalRecord && !criminalDetails.trim()) {
-      // Add validation warning for empty details
-      return;
-    }
-    onNext();
   };
 
   return (
@@ -71,9 +61,12 @@ export const Other_Info_Two: React.FC<Props> = ({ value, onChange, onBack, onNex
                 <input
                   type="radio"
                   id={`criminal_record_${opt.label.toLowerCase()}`}
-                  name="criminal_record"
-                  checked={hasCriminalRecord === opt.value}
-                  onChange={() => setHasCriminalRecord(opt.value)}
+                  {...register('legal.hasCriminalRecord', {
+                    required: 'Please select whether you have a criminal record',
+                  })}
+                  value={String(opt.value)}
+                  checked={hasCriminalRecord === String(opt.value)}
+                  onChange={() => handleCriminalRecordChange(String(opt.value))}
                   className="form-radio h-4 w-4 text-cyan-600 border-cyan-300 focus:ring-cyan-200"
                 />
                 <label
@@ -84,10 +77,13 @@ export const Other_Info_Two: React.FC<Props> = ({ value, onChange, onBack, onNex
                 </label>
               </div>
             ))}
+            {errors.legal?.hasCriminalRecord && (
+              <p className="text-sm text-red-700 mt-2">{errors.legal.hasCriminalRecord.message}</p>
+            )}
           </div>
         </div>
 
-        {hasCriminalRecord && (
+        {hasCriminalRecord === 'true' && (
           <>
             <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded mb-6">
               <div className="flex">
@@ -108,20 +104,22 @@ export const Other_Info_Two: React.FC<Props> = ({ value, onChange, onBack, onNex
               <Textarea
                 id="criminal_details"
                 label="Details of Conviction"
-                value={criminalDetails}
-                onChange={e => handleDetailsChange(e.target.value)}
+                {...register('legal.criminalRecord', {
+                  required: 'Details are required if you have a criminal record',
+                  maxLength: { value: 1000, message: 'Details cannot exceed 1000 characters' },
+                })}
                 placeholder="Please provide a full statement of the relevant information..."
                 rows={5}
-                required
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
+                error={errors.legal?.criminalRecord?.message}
               />
               <div className="flex justify-between mt-2 text-sm">
                 <span className="text-cyan-600">
                   Please be as detailed as possible
                 </span>
                 <span className="text-cyan-600">
-                  Character Count: {criminalDetails.length} / 1000
+                  Character Count: {watch('legal.criminalRecord')?.length || 0} / 1000
                 </span>
               </div>
             </div>
@@ -144,3 +142,5 @@ export const Other_Info_Two: React.FC<Props> = ({ value, onChange, onBack, onNex
     </div>
   );
 };
+
+export default Other_Info_Two;

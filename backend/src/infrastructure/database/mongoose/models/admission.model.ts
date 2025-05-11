@@ -1,17 +1,17 @@
-// src/infrastructure/database/mongoose/models/admission.model.ts
-
 import mongoose from "mongoose";
 
 const admissionSchema = new mongoose.Schema(
   {
-    userId: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
-    personal: Object,
-    choiceOfStudy: Object,
-    education: Object,
-    achievements: Object,
-    otherInformation: Object,
-    documents: Object,
-    paymentDetails: Object,
+    applicationId: { type: String, required: true, unique: true },
+    userId: { type: mongoose.Types.ObjectId, ref: "User" }, // Optional
+    personal: { type: Object, default: {} },
+    choiceOfStudy: { type: Array, default: [] },
+    education: { type: Object, default: {} },
+    achievements: { type: Object, default: {} },
+    otherInformation: { type: Object, default: {} },
+    documents: { type: Object, default: {} },
+    declaration: { type: Object, default: {} },
+    paymentId: { type: mongoose.Types.ObjectId, ref: "Payment" },
   },
   { timestamps: true }
 );

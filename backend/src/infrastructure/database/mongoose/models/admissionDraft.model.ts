@@ -1,14 +1,18 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 interface IAdmissionDraft extends Document {
-  userId: string;
+  applicationId: string;
+  userId?: string;
   personal: any;
   choiceOfStudy: any;
   education: any;
   achievements: any;
   otherInformation: any;
   documents: any;
-  compltedSteps: string[];
+  declaration: any;
+  completedSteps: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 class AdmissionDraft {
@@ -17,21 +21,23 @@ class AdmissionDraft {
   constructor() {
     this.admissionDraftSchema = new Schema(
       {
-        userId: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
-        personal: { type: Object },
-        choiceOfStudy: { type: Object },
-        education: { type: Object },
-        achievements: { type: Object },
-        otherInformation: { type: Object },
-        documents: { type: Object },
-        completedSteps: [String],
+        applicationId: { type: String, required: true, unique: true },
+        userId: { type: mongoose.Types.ObjectId, ref: "User" },
+        personal: { type: Object, default: {} },
+        choiceOfStudy: { type: Array, default: [] },
+        education: { type: Object, default: {} },
+        achievements: { type: Object, default: {} },
+        otherInformation: { type: Object, default: {} },
+        documents: { type: Object, default: {} },
+        declaration: { type: Object, default: {} },
+        completedSteps: { type: [String], default: [] },
       },
       { timestamps: true }
     );
   }
 
-  get model () {
-    return mongoose.model<IAdmissionDraft>('AdmissionDraft', this.admissionDraftSchema);
+  get model() {
+    return mongoose.model<IAdmissionDraft>("AdmissionDraft", this.admissionDraftSchema);
   }
 }
 

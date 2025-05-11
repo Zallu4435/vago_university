@@ -1,4 +1,3 @@
-// PersonalParticularsForm.tsx
 import React, { useEffect, useState } from 'react';
 import { PersonalInfo } from '../../../../domain/types/formTypes';
 import { PersonalSection } from './PersonalSection';
@@ -53,16 +52,28 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
     altPhoneNumber: '68765432',
   });
 
-    useEffect(() => {
-    onSave(formData);
-  }, [formData]);
+  // Use useEffect with initialData as a dependency, so it only updates when initialData changes
+  // This avoids the immediate call on mount when applicationId may not be ready
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
+  // Only save data on form field changes, not on component mount
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    const updatedData = {
+      ...formData,
       [id]: value,
-    }));
+    };
+    
+    setFormData(updatedData);
+    
+    // Only call onSave after user interaction, not on initial mount
+    if (onSave) {
+      onSave(updatedData);
+    }
   };
 
   return (
@@ -77,7 +88,6 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
           <div className="bg-cyan-50/30 rounded-lg p-4 md:p-6">
             <PersonalSection formData={formData} onInputChange={handleInputChange} />
           </div>
-
           {/* Emergency / Next of Kin Section */}
           <div className="mt-8 rounded-xl border border-cyan-100 shadow-sm bg-white">
             <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 border-b border-cyan-100 rounded-t-xl flex items-center gap-2">

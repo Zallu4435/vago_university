@@ -1,15 +1,18 @@
-import { admissionDraft } from "../../../infrastructure/database/mongoose/models/admissionDraft.model";
+import { AdmissionDraft } from "../../../infrastructure/database/mongoose/models/admissionDraft.model";
 
 class CreateApplication {
   async execute(applicationId: string) {
     console.log(`Creating application with applicationId: ${applicationId}`);
-    let draft = await admissionDraft.model.findOne({ applicationId });
+
+    // Check if draft already exists
+    let draft = await AdmissionDraft.findOne({ applicationId });
     if (draft) {
       console.warn(`Application ID ${applicationId} already exists`);
       throw new Error("Application ID already exists");
     }
 
-    draft = new admissionDraft.model({
+    // Create new draft
+    draft = new AdmissionDraft({
       applicationId,
       personal: {},
       choiceOfStudy: [],
@@ -22,7 +25,9 @@ class CreateApplication {
     });
 
     await draft.save();
+
     console.log(`Created draft:`, draft);
+
     return draft.toObject(); // Ensure plain object is returned
   }
 }

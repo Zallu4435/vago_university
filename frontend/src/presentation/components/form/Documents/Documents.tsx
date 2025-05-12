@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DocumentInstructions } from './DocumentInstructions';
@@ -14,80 +14,116 @@ interface DocumentsProps {
   onSave: (data: DocumentUploadSection) => void;
 }
 
-export const Documents: React.FC<DocumentsProps> = ({ initialData, onSave }) => {
-  const defaultDocuments: DocumentUpload[] = [
-    { id: 'passport', name: 'Passport' },
-    { id: 'birthCert', name: 'Birth Certificate (in lieu of Passport)' },
-    { id: 'examResults', name: 'National Level High School Examination result slip' },
-    { id: 'ccaRecords', name: 'Co-curricular Activity Records' },
-    { id: 'achievements', name: 'Certificate of Achievement' },
-    { id: 'testimonials', name: 'Testimonials/Referee Letters' },
-  ];
+// Define the ref type
+interface DocumentsRef {
+  trigger: () => Promise<boolean>;
+}
 
-  const methods = useForm<DocumentUploadSectionFormData>({
-    resolver: zodResolver(DocumentUploadSectionSchema),
-    defaultValues: {
-      documents: initialData?.documents?.length === 6 ? initialData.documents : defaultDocuments,
-    },
-    mode: 'onChange',
-  });
+// Wrap with forwardRef
+export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
+  ({ initialData, onSave }, ref) => {
+    const defaultDocuments: DocumentUpload[] = [
+      { id: 'passport', name: 'Passport' },
+      { id: 'birthCert', name: 'Birth Certificate (in lieu of Passport)' },
+      { id: 'examResults', name: 'National Level High School Examination result slip' },
+      { id: 'ccaRecords', name: 'Co-curricular Activity Records' },
+      { id: 'achievements', name: 'Certificate of Achievement' },
+      { id: 'testimonials', name: 'Testimonials/Referee Letters' },
+    ];
 
-  const { setValue, formState: { errors }, watch } = methods;
+    const methods = useForm<DocumentUploadSectionFormData>({
+      resolver: zodResolver(DocumentUploadSectionSchema),
+      defaultValues: {
+        documents: initialData?.documents?.length === 6 ? initialData.documents : defaultDocuments,
+      },
+      mode: 'onChange',
+    });
 
-  const handleFileUpload = async (id: string, file: File) => {
-    if (!file) return;
+    const { setValue, formState: { errors }, watch, trigger } = methods;
 
-    const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
-    if (!validTypes.includes(file.type)) {
-      alert('Invalid file type. Allowed types are PDF, JPEG, JPG, PNG.');
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      alert('File size exceeds 10MB.');
-      return;
-    }
+    // Expose trigger method via ref
+    React.useImperativeHandle(ref, () => ({
+      trigger: async () => {
+        const isValid = await trigger();
+        console.log('Documents trigger validation result:', { isValid, errors });
+        return isValid;
+      },
+    }));
 
-    const documents = watch('documents');
-    const updatedDocuments = documents.map(doc =>
-      doc.id === id
-        ? { ...doc, fileName: file.name, fileType: file.type }
-        : doc
-    );
+    // Watch form data and call onSave when form changes
+    useEffect(() => {
+      const subscription = watch((formData, { name, type }) => {
+        console.log('Documents watch triggered', {
+          changedField: name,
+          type,
+          errors: Object.keys(errors).length > 0 ? errors : 'No errors',
+        });
+        if (formData.documents && onSave) {
+          console.log('Calling onSave with formData:', formData);
+          onSave(formData);
+        }
+      });
+      return () => subscription.unsubscribe();
+    }, [watch, onSave, errors]);
 
-    setValue('documents', updatedDocuments, { shouldValidate: true });
-    onSave({ documents: updatedDocuments });
-  };
+    const handleFileUpload = async (id: string, file: File) => {
+      if (!file) return;
 
-  const handleFileRemove = (id: string) => {
-    const documents = watch('documents');
-    const updatedDocuments = documents.map(doc =>
-      doc.id === id ? { ...doc, fileName: undefined, fileType: undefined } : doc
-    );
-    setValue('documents', updatedDocuments, { shouldValidate: true });
-    onSave({ documents: updatedDocuments });
-  };
+      const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+      if (!validTypes.includes(file.type)) {
+        alert('Invalid file type. Allowed types are PDF, JPEG, JPG, PNG.');
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size exceeds 10MB.');
+        return;
+      }
 
-  return (
-    <FormProvider {...methods}>
-      <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-xl border border-cyan-100">
-        <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 border-b border-cyan-100">
-          <h2 className="text-xl font-semibold text-cyan-900">Document Upload</h2>
+      const documents = watch('documents');
+      const updatedDocuments = documents.map(doc =>
+        doc.id === id
+          ? { ...doc, fileName: file.name, fileType: file.type }
+          : doc
+      );
+
+      setValue('documents', updatedDocuments, { shouldValidate: true });
+      onSave({ documents: updatedDocuments });
+    };
+
+    const handleFileRemove = (id: string) => {
+      const documents = watch('documents');
+      const updatedDocuments = documents.map(doc =>
+        doc.id === id ? { ...doc, fileName: undefined, fileType: undefined } : doc
+      );
+      setValue('documents', updatedDocuments, { shouldValidate: true });
+      onSave({ documents: updatedDocuments });
+    };
+
+    return (
+      <FormProvider {...methods}>
+        <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-xl border border-cyan-100">
+          <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 border-b border-cyan-100">
+            <h2 className="text-xl font-semibold text-cyan-900">Document Upload</h2>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {errors.documents && (
+              <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
+                <p className="text-sm text-red-700">{errors.documents.message}</p>
+              </div>
+            )}
+            <DocumentInstructions />
+            <DocumentUploadTable
+              documents={watch('documents')}
+              onFileUpload={handleFileUpload}
+              onFileRemove={handleFileRemove}
+            />
+          </div>
         </div>
+      </FormProvider>
+    );
+  }
+);
 
-        <div className="p-6 space-y-6">
-          {errors.documents && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
-              <p className="text-sm text-red-700">{errors.documents.message}</p>
-            </div>
-          )}
-          <DocumentInstructions />
-          <DocumentUploadTable
-            documents={watch('documents')}
-            onFileUpload={handleFileUpload}
-            onFileRemove={handleFileRemove}
-          />
-        </div>
-      </div>
-    </FormProvider>
-  );
-};
+// Optional: Set display name for better debugging
+Documents.displayName = 'Documents';

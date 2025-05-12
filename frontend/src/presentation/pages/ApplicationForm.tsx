@@ -12,6 +12,7 @@ import { FormSubmissionFlow } from '../components/form/FormSubmissionFlow';
 import { useApplicationForm, useApplicationData } from '../../application/hooks/useApplicationForm';
 import { generateUUID } from '../../frameworks/utils/uuid';
 import styles from './ApplicationForm.module.css';
+import { FormProvider, useForm } from 'react-hook-form';
 
 interface FormData {
   applicationId?: string;
@@ -26,22 +27,49 @@ interface FormData {
 
 export const ApplicationForm: React.FC = () => {
   const [activeTab, setActiveTab] = useState('personalDetails');
-  const [formData, setFormData] = useState<FormData>({});
   const [formProgress, setFormProgress] = useState(0);
   const [wavePosition, setWavePosition] = useState(0);
   const [showSummary, setShowSummary] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [declaration, setDeclaration] = useState<DeclarationSection>({
-    privacyPolicy: false,
-    marketingEmail: false,
-    marketingCall: false,
-  });
   const [isInitializing, setIsInitializing] = useState(true);
   const [validationAttempted, setValidationAttempted] = useState(false);
 
   const personalFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
   const educationFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
+  const achievementsFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
+  const documentsFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
+
+  const methods = useForm<FormData>({
+    defaultValues: {
+      applicationId: '',
+      personalInfo: undefined,
+      choiceOfStudy: [],
+      education: undefined,
+      achievements: {
+        questions: { 1: '', 2: '', 3: '', 4: '', 5: '' },
+        achievements: [],
+        hasNoAchievements: false,
+        showModal: false,
+        newAchievement: [],
+        referenceContact: {
+          firstName: '',
+          lastName: '',
+          position: '',
+          email: '',
+          phone: { country: '', area: '', number: '' },
+        },
+        editingIndex: null,
+      },
+      otherInformation: undefined,
+      documents: undefined,
+      declaration: { privacyPolicy: false, marketingEmail: false, marketingCall: false },
+    },
+    mode: 'onSubmit',
+  });
+
+  const { setValue, watch, trigger } = methods;
+  const formData = watch();
 
   const {
     createApplication,
@@ -61,7 +89,6 @@ export const ApplicationForm: React.FC = () => {
 
   const { data: fetchedData, isLoading: isFetching, error: fetchError } = useApplicationData(applicationId);
 
-  // Initialize application ID and create draft
   useEffect(() => {
     const initializeApplication = async () => {
       if (!applicationId) {
@@ -69,11 +96,7 @@ export const ApplicationForm: React.FC = () => {
         console.log('Generated new applicationId:', newApplicationId);
         localStorage.setItem('applicationId', newApplicationId);
         setApplicationId(newApplicationId);
-        setFormData(prev => {
-          const updatedFormData = { ...prev, applicationId: newApplicationId };
-          console.log('Updated formData:', updatedFormData);
-          return updatedFormData;
-        });
+        setValue('applicationId', newApplicationId, { shouldValidate: false });
         try {
           const response = await createApplication(newApplicationId);
           console.log('createApplication response:', response);
@@ -88,31 +111,30 @@ export const ApplicationForm: React.FC = () => {
       }
     };
     initializeApplication();
-  }, [applicationId, createApplication]);
+  }, [applicationId, createApplication, setValue]);
 
-  // Update formData when fetched data changes
   useEffect(() => {
     if (fetchedData) {
       console.log('Fetched data:', fetchedData);
-      const mappedData: FormData = {
-        applicationId: fetchedData.applicationId,
-        personalInfo: fetchedData.personal,
-        choiceOfStudy: fetchedData.choiceOfStudy,
-        education: fetchedData.education,
-        achievements: fetchedData.achievements,
-        otherInformation: fetchedData.otherInformation,
-        documents: fetchedData.documents,
-        declaration: fetchedData.declaration,
-      };
-      setFormData(mappedData);
-      if (fetchedData.declaration) {
-        setDeclaration(fetchedData.declaration);
+      console.log('Fetched personalInfo:', fetchedData.personal);
+      setValue('applicationId', fetchedData.applicationId ?? '', { shouldValidate: false });
+      if (fetchedData.personal) {
+        console.log('Setting personalInfo in form state:', fetchedData.personal);
+        setValue('personalInfo', fetchedData.personal, { shouldValidate: false });
+      } else {
+        console.log('No personal data in fetchedData, setting to undefined');
+        setValue('personalInfo', undefined, { shouldValidate: false });
       }
-      calculateFormProgress(mappedData);
+      if (fetchedData.choiceOfStudy) setValue('choiceOfStudy', fetchedData.choiceOfStudy, { shouldValidate: false });
+      if (fetchedData.education) setValue('education', fetchedData.education, { shouldValidate: false });
+      if (fetchedData.achievements) setValue('achievements', fetchedData.achievements, { shouldValidate: false });
+      if (fetchedData.otherInformation) setValue('otherInformation', fetchedData.otherInformation, { shouldValidate: false });
+      if (fetchedData.documents) setValue('documents', fetchedData.documents, { shouldValidate: false });
+      if (fetchedData.declaration) setValue('declaration', fetchedData.declaration, { shouldValidate: false });
+      calculateFormProgress(fetchedData);
     }
-  }, [fetchedData]);
+  }, [fetchedData, setValue]);
 
-  // Wave animation
   useEffect(() => {
     const interval = setInterval(() => {
       setWavePosition((prev) => (prev + 1) % 100);
@@ -120,7 +142,6 @@ export const ApplicationForm: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Calculate form progress
   const calculateFormProgress = (data: FormData) => {
     const sections = ['personalInfo', 'choiceOfStudy', 'education', 'achievements', 'otherInformation', 'documents', 'declaration'];
     const completedSections = sections.filter(section => !!data[section as keyof FormData]);
@@ -143,6 +164,7 @@ export const ApplicationForm: React.FC = () => {
     const newIndex = tabs.findIndex((tab) => tab.id === tabId);
     setFormProgress(Math.floor((newIndex / (tabs.length - 1)) * 100));
     setValidationAttempted(false);
+    setSaveError(null);
   };
 
   const handleNextTab = () => {
@@ -151,6 +173,7 @@ export const ApplicationForm: React.FC = () => {
       setActiveTab(tabs[currentIndex + 1].id);
       setFormProgress(Math.floor(((currentIndex + 1) / (tabs.length - 1)) * 100));
       setValidationAttempted(false);
+      setSaveError(null);
     }
   };
 
@@ -159,12 +182,11 @@ export const ApplicationForm: React.FC = () => {
       console.log('Waiting for application initialization');
       return;
     }
-    console.log('handleSavePersonalInfo called, personalInfo:', formData.personalInfo);
     if (!formData.applicationId || !formData.personalInfo) {
       setSaveError('No application ID or personal info found.');
-      console.error('Missing applicationId or personalInfo:', { 
-        applicationId: formData.applicationId, 
-        personalInfo: formData.personalInfo 
+      console.error('Missing applicationId or personalInfo:', {
+        applicationId: formData.applicationId,
+        personalInfo: formData.personalInfo
       });
       return;
     }
@@ -191,7 +213,7 @@ export const ApplicationForm: React.FC = () => {
     }
     try {
       setSaveError(null);
-      setFormData(prev => ({ ...prev, choiceOfStudy: choices }));
+      setValue('choiceOfStudy', choices, { shouldValidate: false });
       console.log('Updated choiceOfStudy:', choices);
       await saveChoiceOfStudy({ applicationId: formData.applicationId, data: choices });
       console.log('Choice of study saved successfully');
@@ -214,7 +236,7 @@ export const ApplicationForm: React.FC = () => {
     try {
       setSaveError(null);
       console.log('handleUpdateEducation called with data:', data);
-      setFormData(prev => ({ ...prev, education: data }));
+      setValue('education', data, { shouldValidate: false });
       await saveEducation({ applicationId: formData.applicationId, data });
       console.log('Education saved to backend:', data);
       calculateFormProgress({ ...formData, education: data });
@@ -224,7 +246,7 @@ export const ApplicationForm: React.FC = () => {
     }
   };
 
-  const handleUpdateAchievements = async (data: AchievementSection) => {
+  const handleUpdateAchievements = async (data: AchievementSection, validate: boolean = false) => {
     if (isInitializing) {
       console.log('Waiting for application initialization');
       return;
@@ -233,9 +255,20 @@ export const ApplicationForm: React.FC = () => {
       setSaveError('No application ID found.');
       return;
     }
+    const currentData = watch('achievements');
+    if (JSON.stringify(currentData) === JSON.stringify(data)) {
+      console.log('No changes in achievements data, skipping update');
+      return;
+    }
+    if (validate) {
+      if (!data.hasNoAchievements && data.achievements.length === 0) {
+        setSaveError('Please add at least one achievement or select "No Achievements to Report".');
+        return;
+      }
+    }
     try {
       setSaveError(null);
-      setFormData(prev => ({ ...prev, achievements: data }));
+      setValue('achievements', data, { shouldValidate: false });
       console.log('Updated achievements:', data);
       await saveAchievements({ applicationId: formData.applicationId, data });
       console.log('Achievements saved successfully');
@@ -257,7 +290,7 @@ export const ApplicationForm: React.FC = () => {
     }
     try {
       setSaveError(null);
-      setFormData(prev => ({ ...prev, otherInformation: data }));
+      setValue('otherInformation', data, { shouldValidate: false });
       console.log('Updated otherInformation:', data);
       await saveOtherInfo({ applicationId: formData.applicationId, data });
       console.log('Other information saved successfully');
@@ -279,7 +312,7 @@ export const ApplicationForm: React.FC = () => {
     }
     try {
       setSaveError(null);
-      setFormData(prev => ({ ...prev, documents: data }));
+      setValue('documents', data, { shouldValidate: false });
       console.log('Updated documents:', data);
       await saveDocuments({ applicationId: formData.applicationId, data });
       console.log('Documents saved successfully');
@@ -301,8 +334,7 @@ export const ApplicationForm: React.FC = () => {
     }
     try {
       setSaveError(null);
-      setDeclaration(data);
-      setFormData(prev => ({ ...prev, declaration: data }));
+      setValue('declaration', data, { shouldValidate: false });
       console.log('Updated declaration:', data);
       await saveDeclaration({ applicationId: formData.applicationId, data });
       console.log('Declaration saved successfully');
@@ -325,10 +357,9 @@ export const ApplicationForm: React.FC = () => {
     }
 
     console.log('handleSaveCurrentTab: Saving tab:', activeTab, 'formData:', formData);
-    
+
     if (activeTab === 'personalDetails') {
       setValidationAttempted(true);
-      
       if (personalFormRef.current) {
         const isValid = await personalFormRef.current.trigger();
         console.log('PersonalDetails validation result:', { isValid, personalInfo: formData.personalInfo });
@@ -339,23 +370,25 @@ export const ApplicationForm: React.FC = () => {
           handleNextTab();
         } else {
           console.log('Form validation failed or personalInfo is empty, staying on personalDetails tab');
-          setSaveError('Please fill in the required personal information fields.');
+          alert('Please fill in the required personal information fields.');
         }
       } else {
         console.error('personalFormRef.current is null');
-        setSaveError('Form reference is missing. Please try again.');
+        alert('Personal form reference is missing. Please try again.');
       }
     } else if (activeTab === 'choiceOfStudy') {
-      if (formData.choiceOfStudy && formData.choiceOfStudy.length > 0) {
+      setValidationAttempted(true);
+      const isValid = formData.choiceOfStudy && formData.choiceOfStudy.length > 0;
+      console.log('ChoiceOfStudy validation result:', { isValid, choiceOfStudy: formData.choiceOfStudy });
+      if (isValid) {
         await saveChoiceOfStudy({ applicationId: formData.applicationId, data: formData.choiceOfStudy });
         console.log('choice of study saved:', formData.choiceOfStudy);
         handleNextTab();
       } else {
-        setSaveError('Please add at least one programme choice.');
+        alert('Please add at least one programme choice.');
       }
     } else if (activeTab === 'education') {
       setValidationAttempted(true);
-      console.log('Education tab: Checking educationFormRef:', educationFormRef.current);
       if (educationFormRef.current) {
         const isValid = await educationFormRef.current.trigger();
         console.log('Education validation result:', { isValid, education: formData.education });
@@ -364,55 +397,123 @@ export const ApplicationForm: React.FC = () => {
           console.log('education saved:', formData.education);
           handleNextTab();
         } else {
-          alert(formData.education?.studentType === 'international' && !isValid
+          alert(
+            formData.education?.studentType === 'international' && !isValid
               ? 'Please complete all required education details, including at least one English proficiency test.'
-              : 'Please complete all required education details, including student type.')
-          // setSaveError(
-          //   formData.education?.studentType === 'international' && !isValid
-          //     ? 'Please complete all required education details, including at least one English proficiency test.'
-          //     : 'Please complete all required education details, including student type.'
-          // );
+              : 'Please complete all required education details, including student type.'
+          );
         }
       } else {
         console.error('educationFormRef.current is null');
-        setSaveError('Education form reference is missing. Please try again.');
+        alert('Education form reference is missing. Please try again.');
       }
     } else if (activeTab === 'achievements') {
-      if (formData.achievements) {
-        await saveAchievements({ applicationId: formData.applicationId, data: formData.achievements });
-        console.log('achievements saved:', formData.achievements);
-        handleNextTab();
+      setValidationAttempted(true);
+      if (achievementsFormRef.current) {
+        const isValid = await achievementsFormRef.current.trigger();
+        console.log('Achievements validation result:', { isValid, achievements: formData.achievements });
+        if (isValid && formData.achievements) {
+          await handleUpdateAchievements(formData.achievements, true);
+          console.log('achievements saved:', formData.achievements);
+          if (!saveError) {
+            handleNextTab();
+          }
+        } else {
+          alert(
+            formData.achievements?.hasNoAchievements
+              ? 'Please complete all required questions.'
+              : 'Please add at least one achievement or select "No Achievements to Report".'
+          );
+        }
       } else {
-        setSaveError('Please complete achievements section before proceeding.');
+        console.error('achievementsFormRef.current is null');
+        alert('Achievements form reference is missing. Please try again.');
       }
     } else if (activeTab === 'otherInformation') {
-      if (formData.otherInformation) {
+      setValidationAttempted(true);
+      const isValid = !!formData.otherInformation;
+      console.log('OtherInformation validation result:', { isValid, otherInformation: formData.otherInformation });
+      if (isValid && formData.otherInformation) {
         await saveOtherInfo({ applicationId: formData.applicationId, data: formData.otherInformation });
         console.log('otherInformation saved:', formData.otherInformation);
         handleNextTab();
       } else {
-        alert('Please complete Other Information section.')
-        // setSaveError('Please complete Other Information section.');
+        alert('Please complete the Other Information section.');
       }
     } else if (activeTab === 'documents') {
-      if (formData.documents) {
-        await saveDocuments({ applicationId: formData.applicationId, data: formData.documents });
-        console.log('documents saved:', formData.documents);
-        handleNextTab();
+      setValidationAttempted(true);
+      console.log('documentsFormRef:', documentsFormRef);
+      if (documentsFormRef.current) {
+        console.log('Validating documents form');
+        const isValid = await documentsFormRef.current.trigger();
+        console.log('Documents validation result:', { isValid, documents: formData.documents });
+        if (isValid && formData.documents) {
+          await saveDocuments({ applicationId: formData.applicationId, data: formData.documents });
+          console.log('documents saved:', formData.documents);
+          handleNextTab();
+        } else {
+          alert('Please upload all required documents.');
+        }
       } else {
-        alert('Please upload required documents before proceeding.')
-        // setSaveError('Please upload required documents before proceeding.');
+        console.error('documentsFormRef.current is null');
+        alert('Documents form reference is missing. Please try again.');
       }
     } else if (activeTab === 'declaration') {
-      if (declaration.privacyPolicy) {
-        await saveDeclaration({ applicationId: formData.applicationId, data: declaration });
-        console.log('declaration saved:', declaration);
+      setValidationAttempted(true);
+      const isValid = formData.declaration?.privacyPolicy === true;
+      console.log('Declaration validation result:', { isValid, declaration: formData.declaration });
+      if (isValid && formData.declaration) {
+        await saveDeclaration({ applicationId: formData.applicationId, data: formData.declaration });
+        console.log('declaration saved:', formData.declaration);
         handleNextTab();
       } else {
-        setSaveError('Please agree to the Privacy Notice to proceed.');
+        alert('Please agree to the Privacy Notice to proceed.');
       }
     }
   };
+
+const handleSubmitApplication = async () => {
+  if (isInitializing) {
+    console.log('Waiting for application initialization');
+    return;
+  }
+
+  if (!formData.applicationId) {
+    alert('No application ID found.');
+    return;
+  }
+
+  const validationResults = await Promise.all([
+    Promise.resolve(!!formData.personalInfo),
+    Promise.resolve(!!(formData.choiceOfStudy && formData.choiceOfStudy.length > 0)),
+    Promise.resolve(!!formData.education),
+    Promise.resolve(!!formData.achievements),
+    Promise.resolve(!!formData.otherInformation),
+    Promise.resolve(!!formData.documents),
+    Promise.resolve(!!formData.declaration?.privacyPolicy),
+  ]);
+
+  console.log('Full form validation results:', validationResults);
+
+  if (validationResults.every(result => result === true)) {
+    try {
+      setSaveError(null);
+      await handleUpdateDeclaration(formData.declaration!);
+      setShowSummary(true);
+    } catch (error) {
+      console.error('Error saving declaration:', error);
+      setSaveError('Failed to submit application. Please try again.');
+    }
+  } else {
+    setSaveError('Please complete all required fields in the form.');
+    const invalidSectionIndex = validationResults.findIndex(result => result === false);
+    if (invalidSectionIndex !== -1) {
+      setActiveTab(tabs[invalidSectionIndex].id);
+      console.log('Navigating to invalid section:', tabs[invalidSectionIndex].id);
+    }
+  }
+};
+
 
   if (isInitializing || isFetching) {
     return (
@@ -425,7 +526,7 @@ export const ApplicationForm: React.FC = () => {
     );
   }
 
-  if (fetchError || saveError) {
+  if (fetchError || (saveError && validationAttempted)) {
     return (
       <div className="container mx-auto py-8 px-4 max-w-6xl">
         <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
@@ -468,228 +569,229 @@ export const ApplicationForm: React.FC = () => {
           setActiveTab('personalDetails');
           localStorage.removeItem('applicationId');
           setApplicationId(undefined);
-          setFormData({});
+          setValue('applicationId', '', { shouldValidate: false });
+          setValue('personalInfo', undefined, { shouldValidate: false });
+          setValue('choiceOfStudy', [], { shouldValidate: false });
+          setValue('education', undefined, { shouldValidate: false });
+          setValue('achievements', undefined, { shouldValidate: false });
+          setValue('otherInformation', undefined, { shouldValidate: false });
+          setValue('documents', undefined, { shouldValidate: false });
+          setValue('declaration', { privacyPolicy: false, marketingEmail: false, marketingCall: false }, { shouldValidate: false });
         }}
       />
     );
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-6xl">
-      <div
-        className="relative overflow-hidden bg-gradient-to-r from-cyan-100 to-blue-200 p-8 rounded-xl shadow-md mb-8"
-        style={{
-          background: 'linear-gradient(135deg, rgba(224,242,254,0.8) 0%, rgba(186,230,253,0.9) 100%)',
-        }}
-      >
-        <div className="absolute inset-0 overflow-hidden opacity-10">
-          <div
-            className={`absolute inset-x-0 bottom-0 h-16 bg-white/20 ${styles.wave}`}
-            style={{
-              transform: `translateX(${wavePosition}%)`,
-              backgroundImage:
-                'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1200 120\' preserveAspectRatio=\'none\'%3E%3Cpath d=\'M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z\' fill=\'%23ffffff\'%3E%3C/path%3E%3C/svg%3E")',
-              backgroundSize: '1200px 100%',
-            }}
-          ></div>
-          <div
-            className={`absolute inset-x-0 bottom-0 h-24 bg-white/10 ${styles.waveReverse}`}
-            style={{
-              transform: `translateX(-${wavePosition}%)`,
-              backgroundImage:
-                'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1200 120\' preserveAspectRatio=\'none\'%3E%3Cpath d=\'M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z\' fill=\'%23ffffff\'%3E%3C/path%3E%3C/svg%3E")',
-              backgroundSize: '1200px 100%',
-            }}
-          ></div>
-        </div>
-        <div className="relative">
-          <h1 className="text-3xl font-bold text-cyan-800 mb-2 flex items-center">
-            <span className="mr-2">Your Journey Begins Here</span>
-            <span className="inline-block w-2 h-8 bg-cyan-400 animate-pulse"></span>
-          </h1>
-          <p className="text-cyan-700 text-lg font-light">Complete all sections to submit your application</p>
-          <div className="w-full bg-cyan-200/70 rounded-full h-3 mt-6 overflow-hidden">
+    <FormProvider {...methods}>
+      <div className="container mx-auto py-8 px-4 max-w-6xl">
+        <div
+          className="relative overflow-hidden bg-gradient-to-r from-cyan-100 to-blue-200 p-8 rounded-xl shadow-md mb-8"
+          style={{
+            background: 'linear-gradient(135deg, rgba(224,242,254,0.8) 0%, rgba(186,230,253,0.9) 100%)',
+          }}
+        >
+          <div className="absolute inset-0 overflow-hidden opacity-10">
             <div
-              className={`bg-gradient-to-r from-cyan-400 to-blue-500 h-3 rounded-full transition-all duration-700 relative ${styles.shimmer}`}
-              style={{ width: `${formProgress}%` }}
+              className={`absolute inset-x-0 bottom-0 h-16 bg-white/20 ${styles.wave}`}
+              style={{
+                transform: `translateX(${wavePosition}%)`,
+                backgroundImage:
+                  'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1200 120\' preserveAspectRatio=\'none\'%3E%3Cpath d=\'M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z\' fill=\'%23ffffff\'%3E%3C/path%3E%3C/svg%3E")',
+                backgroundSize: '1200px 100%',
+              }}
+            ></div>
+            <div
+              className={`absolute inset-x-0 bottom-0 h-24 bg-white/10 ${styles.waveReverse}`}
+              style={{
+                transform: `translateX(-${wavePosition}%)`,
+                backgroundImage:
+                  'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1200 120\' preserveAspectRatio=\'none\'%3E%3Cpath d=\'M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z\' fill=\'%23ffffff\'%3E%3C/path%3E%3C/svg%3E")',
+                backgroundSize: '1200px 100%',
+              }}
             ></div>
           </div>
-          <div className="text-right text-cyan-700 text-sm mt-2 font-light">{formProgress}% Complete</div>
+          <div className="relative">
+            <h1 className="text-3xl font-bold text-cyan-800 mb-2 flex items-center">
+              <span className="mr-2">Your Journey Begins Here</span>
+              <span className="inline-block w-2 h-8 bg-cyan-400 animate-pulse"></span>
+            </h1>
+            <p className="text-cyan-700 text-lg font-light">Complete all sections to submit your application</p>
+            <div className="w-full bg-cyan-200/70 rounded-full h-3 mt-6 overflow-hidden">
+              <div
+                className={`bg-gradient-to-r from-cyan-400 to-blue-500 h-3 rounded-full transition-all duration-700 relative ${styles.shimmer}`}
+                style={{ width: `${formProgress}%` }}
+              ></div>
+            </div>
+            <div className="text-right text-cyan-700 text-sm mt-2 font-light">{formProgress}% Complete</div>
+          </div>
         </div>
-      </div>
 
-      {formData.applicationId && (
-        <div className="mb-4 text-center">
-          <p className="text-sm text-cyan-700 bg-cyan-50 inline-block px-4 py-2 rounded-full">
-            Application ID: <span className="font-medium">{formData.applicationId}</span>
-            <span className="ml-2 text-xs text-cyan-500">(Save this ID to continue your application later)</span>
-          </p>
-        </div>
-      )}
+        {formData.applicationId && (
+          <div className="mb-4 text-center">
+            <p className="text-sm text-cyan-700 bg-cyan-50 inline-block px-4 py-2 rounded-full">
+              Application ID: <span className="font-medium">{formData.applicationId}</span>
+              <span className="ml-2 text-xs text-cyan-500">(Save this ID to continue your application later)</span>
+            </p>
+          </div>
+        )}
 
-      <FormTabs tabs={tabs} onTabClick={handleTabClick} />
-      <div className="bg-white shadow-sm p-6 rounded-xl border border-cyan-100 relative overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cyan-50/10 -z-10"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle, rgba(186,230,253,0.1) 0%, rgba(224,242,254,0.05) 35%, rgba(255,255,255,0) 70%)',
-          }}
-        ></div>
-        <div className="mb-4 border-b border-cyan-50 pb-4">
-          <h2 className="text-2xl font-bold text-cyan-800 flex items-center">
-            <span>{tabs.find((tab) => tab.id === activeTab)?.label}</span>
-            <span className="ml-2 text-cyan-300 text-lg font-light">/</span>
-            <span className="ml-2 text-cyan-400 text-sm font-light">
-              Step {tabs.findIndex((tab) => tab.id === activeTab) + 1} of {tabs.length}
-            </span>
-          </h2>
-          <p className="text-cyan-600 mt-1 text-sm">
-            {activeTab === 'personalDetails' && 'Tell us about yourself'}
-            {activeTab === 'choiceOfStudy' && 'Select your preferred program'}
-            {activeTab === 'education' && 'Share your educational background'}
-            {activeTab === 'achievements' && 'Highlight your accomplishments'}
-            {activeTab === 'otherInformation' && 'Additional details that might support your application'}
-            {activeTab === 'documents' && 'Upload supporting documents'}
-            {activeTab === 'declaration' && 'Review and confirm your application'}
-          </p>
-        </div>
-        {activeTab === 'personalDetails' && (
-          <PersonalParticularsForm
-            initialData={formData.personalInfo}
-            onChange={(data) => {
-              console.log('PersonalParticularsForm onChange:', data);
-              setFormData(prev => ({ ...prev, personalInfo: data }));
-              calculateFormProgress({ ...formData, personalInfo: data });
+        <FormTabs tabs={tabs} />
+        <div className="bg-white shadow-sm p-6 rounded-xl border border-cyan-100 relative overflow-hidden">
+          <div
+            className="absolute inset-0 bg-cyan-50/10 -z-10"
+            style={{
+              backgroundImage:
+                'radial-gradient(circle, rgba(186,230,253,0.1) 0%, rgba(224,242,254,0.05) 35%, rgba(255,255,255,0) 70%)',
             }}
-            triggerValidation={personalFormRef}
-          />
-        )}
-        {activeTab === 'choiceOfStudy' && (
-          <ChoiceOfStudy
-            choices={formData.choiceOfStudy || []}
-            onChange={handleUpdateChoiceOfStudy}
-          />
-        )}
-        {activeTab === 'education' && (
-          <Education
-            initialData={formData.education}
-            onSave={handleUpdateEducation}
-            ref={educationFormRef}
-          />
-        )}
-        {activeTab === 'achievements' && (
-          <Achievements
-            initialData={formData.achievements}
-            onSave={handleUpdateAchievements}
-          />
-        )}
-        {activeTab === 'otherInformation' && (
-          <Other_Info
-            initialData={formData.otherInformation}
-            onSave={handleUpdateOtherInformation}
-          />
-        )}
-        {activeTab === 'documents' && (
-          <Documents
-            initialData={formData.documents}
-            onSave={handleSaveDocuments}
-          />
-        )}
-        {activeTab === 'declaration' && (
-          <Declaration
-            value={declaration}
-            onChange={handleUpdateDeclaration}
-          />
-        )}
-        <div className="flex justify-between mt-8 border-t border-cyan-50 pt-6">
-          <button
-            onClick={() => {
-              const currentIndex = tabs.findIndex((tab) => tab.id === activeTab);
-              if (currentIndex > 0) {
-                setActiveTab(tabs[currentIndex - 1].id);
-                setFormProgress(Math.floor(((currentIndex - 1) / (tabs.length - 1)) * 100));
-              }
-            }}
-            disabled={activeTab === 'personalDetails'}
-            className={`px-6 py-3 rounded-lg flex items-center transition-all duration-300 ${
-              activeTab === 'personalDetails'
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200 hover:shadow-sm'
-            }`}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-2"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Previous
-          </button>
-          {activeTab !== 'declaration' ? (
-            <button
-              onClick={handleSaveCurrentTab}
-              disabled={isSaving}
-              className={`px-6 py-3 rounded-lg flex items-center transition-all duration-300 shadow-sm relative overflow-hidden group ${
-                isSaving ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-cyan-400 to-blue-400 text-white hover:from-cyan-500 hover:to-blue-500'
-              }`}
-            >
-              <span className={`relative z-10 flex items-center ${styles.shimmer}`}>
-                Save & Next
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+          ></div>
+          <div className="mb-4 border-b border-cyan-50 pb-4">
+            <h2 className="text-2xl font-bold text-cyan-800 flex items-center">
+              <span>{tabs.find((tab) => tab.id === activeTab)?.label}</span>
+              <span className="ml-2 text-cyan-300 text-lg font-light">/</span>
+              <span className="ml-2 text-cyan-400 text-sm font-light">
+                Step {tabs.findIndex((tab) => tab.id === activeTab) + 1} of {tabs.length}
               </span>
-            </button>
-          ) : (
+            </h2>
+            <p className="text-cyan-600 mt-1 text-sm">
+              {activeTab === 'personalDetails' && 'Tell us about yourself'}
+              {activeTab === 'choiceOfStudy' && 'Select your preferred program'}
+              {activeTab === 'education' && 'Share your educational background'}
+              {activeTab === 'achievements' && 'Highlight your accomplishments'}
+              {activeTab === 'otherInformation' && 'Additional details that might support your application'}
+              {activeTab === 'documents' && 'Upload supporting documents'}
+              {activeTab === 'declaration' && 'Review and confirm your application'}
+            </p>
+          </div>
+          {activeTab === 'personalDetails' && (
+            <PersonalParticularsForm
+              initialData={formData.personalInfo}
+              onChange={(data) => {
+                console.log('PersonalParticularsForm onChange:', data);
+                setValue('personalInfo', data, { shouldValidate: false });
+                calculateFormProgress({ ...formData, personalInfo: data });
+              }}
+              triggerValidation={personalFormRef}
+            />
+          )}
+          {activeTab === 'choiceOfStudy' && (
+            <ChoiceOfStudy
+              choices={formData.choiceOfStudy || []}
+              onChange={handleUpdateChoiceOfStudy}
+            />
+          )}
+          {activeTab === 'education' && (
+            <Education
+              initialData={formData.education}
+              onSave={handleUpdateEducation}
+              ref={educationFormRef}
+            />
+          )}
+          {activeTab === 'achievements' && (
+            <Achievements
+              initialData={formData.achievements}
+              onSave={(data) => handleUpdateAchievements(data, false)}
+              ref={achievementsFormRef}
+            />
+          )}
+          {activeTab === 'otherInformation' && (
+            <Other_Info
+              initialData={formData.otherInformation}
+              onSave={handleUpdateOtherInformation}
+            />
+          )}
+          {activeTab === 'documents' && (
+            <Documents
+              initialData={formData.documents}
+              onSave={handleSaveDocuments}
+              ref={documentsFormRef}
+            />
+          )}
+          {activeTab === 'declaration' && (
+            <Declaration
+              value={formData.declaration || { privacyPolicy: false, marketingEmail: false, marketingCall: false }}
+              onChange={handleUpdateDeclaration}
+            />
+          )}
+          <div className="flex justify-between mt-8 border-t border-cyan-50 pt-6">
             <button
-              className={`px-8 py-3 bg-gradient-to-r from-cyan-400 to-cyan-600 text-white rounded-lg font-bold relative overflow-hidden group transition-all duration-300 shadow-sm ${
-                !declaration.privacyPolicy || isSaving ? 'opacity-50 cursor-not-allowed' : 'hover:from-cyan-500 hover:to-cyan-700'
-              }`}
-              disabled={!declaration.privacyPolicy || isSaving}
-              onClick={async () => {
-                if (declaration.privacyPolicy) {
-                  await handleUpdateDeclaration(declaration);
-                  setShowSummary(true);
-                } else {
-                  setSaveError('Please agree to the Privacy Notice to proceed.');
+              onClick={() => {
+                const currentIndex = tabs.findIndex((tab) => tab.id === activeTab);
+                if (currentIndex > 0) {
+                  setActiveTab(tabs[currentIndex - 1].id);
+                  setFormProgress(Math.floor(((currentIndex - 1) / (tabs.length - 1)) * 100));
                 }
               }}
+              disabled={activeTab === 'personalDetails'}
+              className={`px-6 py-3 rounded-lg flex items-center transition-all duration-300 ${activeTab === 'personalDetails'
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200 hover:shadow-sm'
+                }`}
             >
-              <span className={`relative z-10 flex items-center ${styles.shimmer}`}>
-                Submit Application
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 ml-2"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-2"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Previous
             </button>
-          )}
+            {activeTab !== 'declaration' ? (
+              <button
+                onClick={handleSaveCurrentTab}
+                disabled={isSaving}
+                className={`px-6 py-3 rounded-lg flex items-center transition-all duration-300 shadow-sm relative overflow-hidden group ${isSaving ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-cyan-400 to-blue-400 text-white hover:from-cyan-500 hover:to-blue-500'
+                  }`}
+              >
+                <span className={`relative z-10 flex items-center ${styles.shimmer}`}>
+                  Save & Next
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </span>
+              </button>
+            ) : (
+              <button
+                className={`px-8 py-3 bg-gradient-to-r from-cyan-400 to-cyan-600 text-white rounded-lg font-bold relative overflow-hidden group transition-all duration-300 shadow-sm ${!formData.declaration?.privacyPolicy || isSaving ? 'opacity-50 cursor-not-allowed' : 'hover:from-cyan-500 hover:to-cyan-700'
+                  }`}
+                disabled={!formData.declaration?.privacyPolicy || isSaving}
+                onClick={handleSubmitApplication}
+              >
+                <span className={`relative z-10 flex items-center ${styles.shimmer}`}>
+                  Submit Application
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 ml-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </FormProvider>
   );
 };

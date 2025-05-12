@@ -10,168 +10,137 @@ import {
 } from '../../domain/types/formTypes';
 import { applicationController } from '../controller/ApplicationController';
 
+// Define payment result interface to match backend response
+interface PaymentResult {
+  paymentId: string;
+  status: string;
+  message?: string;
+}
+
+// Define submission result interface
+interface SubmissionResult {
+  message: string;
+  admission: any;
+}
+
 class ApplicationService {
-  /**
-   * Creates a new application with the given ID
-   * @param applicationId The unique identifier for the application
-   */
   async createApplication(applicationId: string): Promise<void> {
     try {
       await applicationController.createApplication(applicationId);
     } catch (error: any) {
       console.error('Error creating application:', error);
-      throw error;
+      throw new Error(error.response?.data?.error || error.message || 'Failed to create application');
     }
   }
 
-  /**
-   * Retrieves complete application data by ID
-   * @param applicationId The unique identifier for the application
-   */
   async getApplicationById(applicationId: string): Promise<FormData | null> {
     try {
       return await applicationController.getApplicationById(applicationId);
     } catch (error: any) {
       console.error('Error fetching application data:', error);
-      throw error;
+      throw new Error(error.response?.data?.error || error.message || 'Failed to fetch application data');
     }
   }
 
-  /**
-   * Save personal information section
-   * @param applicationId The application ID
-   * @param data Personal information data
-   */
   async savePersonalInfo(applicationId: string, data: PersonalInfo): Promise<FormData> {
     try {
       return await applicationController.saveSection(applicationId, 'personalInfo', data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving personal information:', error);
-      throw error;
+      throw new Error(error.response?.data?.error || error.message || 'Failed to save personal information');
     }
   }
 
-  /**
-   * Save choice of study section
-   * @param applicationId The application ID
-   * @param data Program choices data
-   */
   async saveChoiceOfStudy(applicationId: string, data: ProgrammeChoice[]): Promise<FormData> {
     try {
       return await applicationController.saveSection(applicationId, 'choiceOfStudy', data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving choice of study:', error);
-      throw error;
+      throw new Error(error.response?.data?.error || error.message || 'Failed to save choice of study');
     }
   }
 
-  /**
-   * Save education section
-   * @param applicationId The application ID
-   * @param data Education data
-   */
   async saveEducation(applicationId: string, data: EducationData): Promise<FormData> {
     try {
       return await applicationController.saveSection(applicationId, 'education', data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving education data:', error);
-      throw error;
+      throw new Error(error.response?.data?.error || error.message || 'Failed to save education data');
     }
   }
 
-  /**
-   * Save achievements section
-   * @param applicationId The application ID
-   * @param data Achievements data
-   */
   async saveAchievements(applicationId: string, data: AchievementSection): Promise<FormData> {
     try {
       return await applicationController.saveSection(applicationId, 'achievements', data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving achievements:', error);
-      throw error;
+      throw new Error(error.response?.data?.error || error.message || 'Failed to save achievements');
     }
   }
 
-  /**
-   * Save other information section
-   * @param applicationId The application ID
-   * @param data Other information data
-   */
   async saveOtherInfo(applicationId: string, data: OtherInformationSection): Promise<FormData> {
     try {
       return await applicationController.saveSection(applicationId, 'otherInformation', data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving other information:', error);
-      throw error;
+      throw new Error(error.response?.data?.error || error.message || 'Failed to save other information');
     }
   }
 
-  /**
-   * Save documents section
-   * @param applicationId The application ID
-   * @param data Document upload data
-   */
   async saveDocuments(applicationId: string, data: DocumentUploadSection): Promise<FormData> {
     try {
       return await applicationController.saveSection(applicationId, 'documents', data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving documents:', error);
-      throw error;
+      throw new Error(error.response?.data?.error || error.message || 'Failed to save documents');
     }
   }
 
-  /**
-   * Save declaration section
-   * @param applicationId The application ID
-   * @param data Declaration data
-   */
   async saveDeclaration(applicationId: string, data: DeclarationSection): Promise<FormData> {
     try {
       return await applicationController.saveSection(applicationId, 'declaration', data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving declaration:', error);
-      throw error;
+      throw new Error(error.response?.data?.error || error.message || 'Failed to save declaration');
     }
   }
 
-  /**
-   * Submit the final application to get payment link
-   * @param applicationId The ID of the application to submit
-   */
-  async submitApplication(applicationId: string): Promise<{ success: boolean; paymentUrl: string }> {
+  async processPayment(applicationId: string, paymentDetails: any): Promise<PaymentResult> {
     try {
-      return await applicationController.submitApplication(applicationId);
-    } catch (error) {
-      console.error('Error submitting application:', error);
-      throw error;
-    }
-  }
-  
-  /**
-   * Process payment for the application
-   * @param applicationId The application ID
-   * @param paymentDetails Payment information
-   */
-  async processPayment(applicationId: string, paymentDetails: any): Promise<{ success: boolean; applicationStatus: string }> {
-    try {
-      return await applicationController.processPayment(applicationId, paymentDetails);
-    } catch (error) {
+      const result = await applicationController.processPayment(applicationId, paymentDetails);
+      if (!result.paymentId || !result.status) {
+        throw new Error(result.message || 'Invalid payment response');
+      }
+      return {
+        paymentId: result.paymentId,
+        status: result.status,
+        message: result.message
+      };
+    } catch (error: any) {
       console.error('Error processing payment:', error);
-      throw error;
+      throw new Error(error.response?.data?.error || error.message || 'Failed to process payment');
     }
   }
-  
-  /**
-   * Check application status
-   * @param applicationId The ID of the application
-   */
+
+  async submitApplication(applicationId: string, paymentId: string): Promise<SubmissionResult> {
+    try {
+      const result = await applicationController.submitApplication(applicationId, paymentId);
+      return {
+        message: result.message || 'Application submitted successfully',
+        admission: result.admission
+      };
+    } catch (error: any) {
+      console.error('Error submitting application:', error);
+      throw new Error(error.response?.data?.error || error.message || 'Failed to submit application');
+    }
+  }
+
   async getApplicationStatus(applicationId: string): Promise<string> {
     try {
       return await applicationController.getApplicationStatus(applicationId);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching application status:', error);
-      throw error;
+      throw new Error(error.response?.data?.error || error.message || 'Failed to fetch application status');
     }
   }
 }

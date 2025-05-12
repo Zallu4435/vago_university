@@ -46,12 +46,13 @@ export const applicationController = {
   },
 
   /**
-   * Submits the application for payment
+   * Submits the application after payment
    * @param applicationId The application ID
+   * @param paymentId The payment ID from the payment process
    */
-  async submitApplication(applicationId: string): Promise<{ success: boolean; paymentUrl: string }> {
+  async submitApplication(applicationId: string, paymentId: string): Promise<{ message: string; admission: any }> {
     try {
-      const response = await httpClient.post(`/applications/${applicationId}/submit`);
+      const response = await httpClient.post('/admission/finalize', { applicationId, paymentId });
       return response.data;
     } catch (error: any) {
       console.error(`Error submitting application ${applicationId}:`, error);
@@ -64,9 +65,12 @@ export const applicationController = {
    * @param applicationId The application ID
    * @param paymentDetails Payment information
    */
-  async processPayment(applicationId: string, paymentDetails: any): Promise<{ success: boolean; applicationStatus: string }> {
+  async processPayment(
+    applicationId: string,
+    paymentDetails: any
+  ): Promise<{ paymentId: string; status: string; message: string }> {
     try {
-      const response = await httpClient.post(`/applications/${applicationId}/payment`, paymentDetails);
+      const response = await httpClient.post('/payment/process', { applicationId, paymentDetails });
       return response.data;
     } catch (error: any) {
       console.error(`Error processing payment for application ${applicationId}:`, error);
@@ -86,5 +90,5 @@ export const applicationController = {
       console.error(`Error fetching status for application ${applicationId}:`, error);
       throw error;
     }
-  }
+  },
 };

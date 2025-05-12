@@ -8,13 +8,13 @@ import { personalFormSchema, PersonalFormData } from '../../../../domain/validat
 
 interface PersonalParticularsFormProps {
   initialData?: PersonalInfo;
-  onSave?: (data: PersonalInfo) => void;
+  onChange?: (data: PersonalInfo) => void;
   triggerValidation?: any;
 }
 
 export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = ({
   initialData,
-  onSave,
+  onChange,
   triggerValidation,
 }) => {
   const defaultValues: PersonalFormData = {
@@ -60,12 +60,12 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
   const methods = useForm<PersonalFormData>({
     resolver: zodResolver(personalFormSchema),
     defaultValues: initialData || defaultValues,
-    mode: 'all', // This validates on blur and onChange
-    criteriaMode: 'all', // Show all validation errors
-    reValidateMode: 'onChange', // Re-validate when values change
+    mode: 'all',
+    criteriaMode: 'all',
+    reValidateMode: 'onChange',
   });
 
-  const { reset, formState: { errors, isDirty }, watch, trigger, clearErrors } = methods;
+  const { reset, formState: { errors, isDirty }, watch, trigger } = methods;
 
   // Expose triggerValidation to parent
   React.useImperativeHandle(triggerValidation, () => ({
@@ -76,17 +76,18 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
     },
   }));
 
-  // Reset form when initialData changes
+  // Reset form with initialData or defaultValues
   useEffect(() => {
-    if (initialData) {
-      reset(initialData);
-    }
+    console.log('PersonalParticularsForm: Received initialData:', initialData);
+    reset(initialData || defaultValues, {
+      keepDirty: false, // Reset dirty state to avoid triggering onChange unnecessarily
+      keepErrors: false, // Clear existing errors
+      keepValues: false, // Fully replace form values
+    });
   }, [initialData, reset]);
 
-  // Watch form data and call onSave when form is dirty
-// Setup a subscription to form changes instead of watch() in render
+  // Watch form data and call onChange when form is dirty
   useEffect(() => {
-    // Subscribe to form changes
     const subscription = watch((formData, { name, type }) => {
       console.log('PersonalParticularsForm watch triggered', {
         changedField: name,
@@ -95,15 +96,15 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
         errors: Object.keys(errors).length > 0 ? errors : 'No errors',
       });
       
-      if (isDirty && onSave) {
-        console.log('Calling onSave with formData');
-        onSave(formData);
+      console.log(formData, 'kokokokokokkookokkkko');
+      if (isDirty && onChange) {
+        console.log('Calling onChange with formData:', formData);
+        onChange(formData);
       }
     });
     
-    // Cleanup subscription on unmount
     return () => subscription.unsubscribe();
-  }, [watch, isDirty, onSave, errors]);
+  }, [watch, isDirty, onChange, errors]);
 
   return (
     <div className="w-full max-w-screen-2xl mx-auto px-8">

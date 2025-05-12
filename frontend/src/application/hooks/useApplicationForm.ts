@@ -24,8 +24,8 @@ export const useApplicationForm = () => {
       queryClient.invalidateQueries({ queryKey: ['application', applicationId] });
       toast.success('Application initialized');
     },
-    onError: () => {
-      toast.error('Failed to initialize application');
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to initialize application');
     }
   });
 
@@ -38,8 +38,8 @@ export const useApplicationForm = () => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
       toast.success('Personal information saved');
     },
-    onError: () => {
-      toast.error('Failed to save personal information');
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to save personal information');
     }
   });
 
@@ -52,8 +52,8 @@ export const useApplicationForm = () => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
       toast.success('Choice of study saved');
     },
-    onError: () => {
-      toast.error('Failed to save choice of study');
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to save choice of study');
     }
   });
 
@@ -66,8 +66,8 @@ export const useApplicationForm = () => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
       toast.success('Education information saved');
     },
-    onError: () => {
-      toast.error('Failed to save education information');
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to save education information');
     }
   });
 
@@ -80,8 +80,8 @@ export const useApplicationForm = () => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
       toast.success('Achievements saved');
     },
-    onError: () => {
-      toast.error('Failed to save achievements');
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to save achievements');
     }
   });
 
@@ -94,8 +94,8 @@ export const useApplicationForm = () => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
       toast.success('Other information saved');
     },
-    onError: () => {
-      toast.error('Failed to save other information');
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to save other information');
     }
   });
 
@@ -108,8 +108,8 @@ export const useApplicationForm = () => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
       toast.success('Documents uploaded successfully');
     },
-    onError: () => {
-      toast.error('Failed to upload documents');
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to upload documents');
     }
   });
 
@@ -122,35 +122,34 @@ export const useApplicationForm = () => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
       toast.success('Declaration saved');
     },
-    onError: () => {
-      toast.error('Failed to save declaration');
-    }
-  });
-
-  // Submit full application for payment
-  const { mutateAsync: submitApplication, isLoading: isSubmitting } = useMutation({
-    mutationFn: async (applicationId: string) => {
-      return await applicationService.submitApplication(applicationId);
-    },
-    onSuccess: (data) => {
-      toast.success('Application submitted successfully!');
-      return data;
-    },
-    onError: () => {
-      toast.error('Failed to submit application');
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to save declaration');
     }
   });
 
   // Process payment
-  const { mutateAsync: processPayment, isLoading: isProcessingPayment } = useMutation({
+const { mutateAsync: processPayment, isLoading: isProcessingPayment } = useMutation({
     mutationFn: async ({ applicationId, paymentDetails }: { applicationId: string, paymentDetails: any }) => {
       return await applicationService.processPayment(applicationId, paymentDetails);
     },
-    onSuccess: () => {
-      toast.success('Payment processed successfully!');
+    onSuccess: (data) => {
+      toast.success(data.message || 'Payment processed successfully!');
     },
-    onError: () => {
-      toast.error('Payment processing failed');
+    onError: (error: any) => {
+      toast.error(error.message || 'Payment processing failed');
+    }
+  });
+
+  // Submit application after payment
+  const { mutateAsync: submitApplication, isLoading: isSubmitting } = useMutation({
+    mutationFn: async ({ applicationId, paymentId }: { applicationId: string, paymentId: string }) => {
+      return await applicationService.submitApplication(applicationId, paymentId);
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || 'Application submitted successfully!');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to submit application');
     }
   });
 
@@ -163,8 +162,8 @@ export const useApplicationForm = () => {
     saveOtherInfo,
     saveDocuments,
     saveDeclaration,
-    submitApplication,
     processPayment,
+    submitApplication,
     isLoading: 
       isCreating ||
       isSavingPersonalInfo || 
@@ -187,7 +186,6 @@ export const useApplicationData = (applicationId: string | undefined) => {
     enabled: !!applicationId,
     staleTime: 60000,
     retry: (failureCount, error: any) => {
-      // Don't retry on 404 errors
       if (error?.response?.status === 404) return false;
       return failureCount < 3;
     },

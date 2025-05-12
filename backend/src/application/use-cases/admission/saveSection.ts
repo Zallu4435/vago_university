@@ -1,9 +1,10 @@
-import { admissionDraft } from "../../../infrastructure/database/mongoose/models/admissionDraft.model";
+import { AdmissionDraft } from "../../../infrastructure/database/mongoose/models/admissionDraft.model";
 
 class SaveSection {
   async execute(applicationId: string, section: string, data: any) {
     console.log(`Saving section ${section} for applicationId ${applicationId}:`, data);
-    let draft = await admissionDraft.model.findOne({ applicationId });
+
+    let draft = await AdmissionDraft.findOne({ applicationId });
     if (!draft) {
       console.error(`Draft not found for applicationId ${applicationId}`);
       throw new Error("Application draft not found");
@@ -26,11 +27,13 @@ class SaveSection {
     }
 
     draft[field] = data;
+
     if (!draft.completedSteps.includes(field)) {
       draft.completedSteps.push(field);
     }
 
     await draft.save();
+
     console.log(`Saved draft:`, draft.toObject());
     return draft.toObject();
   }

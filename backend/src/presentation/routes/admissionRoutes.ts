@@ -15,4 +15,9 @@ router.post('/applications/:applicationId/sections/:section', admissionControlle
 // Finalize admission (submit form and process payment)
 router.post('/admission/finalize', admissionController.handleFinalSubmit);
 
+
+
+router.post('/payment/process', admissionController.processPayment);
+
+
 export default router;

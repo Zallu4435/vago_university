@@ -1,9 +1,9 @@
-import { admissionDraft } from "../../../infrastructure/database/mongoose/models/admissionDraft.model";
+import { AdmissionDraft } from "../../../infrastructure/database/mongoose/models/admissionDraft.model";
 
 class GetApplication {
   async execute(applicationId: string) {
     console.log(`Fetching application with applicationId: ${applicationId}`);
-    const draft = await admissionDraft.model.findOne({ applicationId });
+    const draft = await AdmissionDraft.findOne({ applicationId });
     if (!draft) {
       console.warn(`Application not found for applicationId: ${applicationId}`);
       return null;

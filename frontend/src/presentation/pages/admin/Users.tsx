@@ -1,0 +1,392 @@
+import React, { useState, useEffect } from 'react';
+import { useUserManagement } from '../../../application/hooks/useUserManagement';
+import {
+  FiCheckCircle,
+  FiXCircle,
+  FiSearch,
+  FiFilter,
+  FiFileText,
+  FiUser,
+  FiMail,
+  FiChevronDown,
+  FiChevronUp,
+  FiArrowLeft,
+  FiArrowRight,
+  FiEye,
+} from 'react-icons/fi';
+import ApplicantDetails from '../../components/admin/ApplicantDetails';
+
+const UserManagement = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [selectedApplicant, setSelectedApplicant] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [customDateRange, setCustomDateRange] = useState({ startDate: '', endDate: '' });
+  const [expandedSections, setExpandedSections] = useState({
+    personal: true,
+    programs: true,
+    education: true,
+    achievements: true,
+    otherInfo: true,
+    documents: true,
+    declaration: true,
+    application: true,
+  });
+
+  const { users, totalPages, page, setPage, filters, setFilters, isLoading, error, getAdmissionDetails, approveAdmission, deleteAdmission } =
+    useUserManagement();
+
+  const programs = [
+    'All Programs',
+    'Computer Science',
+    'Business Administration',
+    'Engineering',
+    'Medicine',
+    'Arts & Social Sciences',
+  ];
+
+  const handleFilterChange = (field, value) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleCustomDateChange = (field, value) => {
+    setCustomDateRange((prev) => ({ ...prev, [field]: value }));
+  };
+
+  useEffect(() => {
+    if (filters.dateRange === 'custom' && customDateRange.startDate && customDateRange.endDate) {
+      setFilters((prev) => ({
+        ...prev,
+        startDate: customDateRange.startDate,
+        endDate: customDateRange.endDate,
+      }));
+    } else {
+      setFilters((prev) => ({
+        ...prev,
+        startDate: undefined,
+        endDate: undefined,
+      }));
+    }
+  }, [customDateRange, filters.dateRange, setFilters]);
+
+  const filteredAdmissions = users?.filter((admission) => {
+    const fullName = admission.fullName || '';
+    const email = admission.email || '';
+    const nameMatch = fullName.toLowerCase().includes(searchQuery.toLowerCase());
+    const emailMatch = email.toLowerCase().includes(searchQuery.toLowerCase());
+    return nameMatch || emailMatch;
+  });
+
+  const handleViewDetails = async (admission) => {
+    try {
+      const details = await getAdmissionDetails(admission._id);
+      console.log(details, "details");
+      setSelectedApplicant(details);
+      setShowDetails(true);
+    } catch (error) {
+      // Error toast is handled in the mutation
+    }
+  };
+
+  const handleSearchChange = (e) => setSearchQuery(e.target.value);
+  const handlePrevPage = () => setPage(page - 1);
+  const handleNextPage = () => setPage(page + 1);
+
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return dateString ? new Date(dateString).toLocaleDateString(undefined, options) : 'N/A';
+  };
+
+  const toggleSection = (section) => {
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        Error: {error.message}
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-blue-800">Admission Management</h1>
+        <p className="text-gray-600 mt-1">Review and process student admission applications</p>
+      </div>
+
+      <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+        {/* Header with search and filters */}
+        <div className="bg-gradient-to-r from-blue-700 to-blue-900 px-6 py-4 border-b">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <h3 className="text-lg font-semibold text-white">Admission Applications</h3>
+
+            <div className="flex items-center space-x-2">
+              <div className="relative">
+                <FiSearch
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={18}
+                />
+                <input
+                  type="text"
+                  placeholder="Search by name or email..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  className="w-64 pl-10 pr-3 py-2 bg-white bg-opacity-20 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-white text-white placeholder-blue-100"
+                />
+              </div>
+
+              <button
+                onClick={() => setFilterOpen(!filterOpen)}
+                className="flex items-center space-x-1 px-4 py-2 bg-white bg-opacity-20 border border-blue-300 rounded-md text-white hover:bg-opacity-30"
+              >
+                <FiFilter size={18} />
+                <span>Filters</span>
+                {filterOpen ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Filter options */}
+          {filterOpen && (
+            <div className="bg-white rounded-md p-4 mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select
+                  value={filters.status}
+                  onChange={(e) => handleFilterChange('status', e.target.value)}
+                  className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Program</label>
+                <select
+                  value={filters.program}
+                  onChange={(e) => handleFilterChange('program', e.target.value)}
+                  className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {programs.map((program, idx) => (
+                    <option key={idx} value={program.toLowerCase().replace(' ', '_')}>
+                      {program}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Application Date</label>
+                <select
+                  value={filters.dateRange}
+                  onChange={(e) => handleFilterChange('dateRange', e.target.value)}
+                  className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Dates</option>
+                  <option value="last_week">Last Week</option>
+                  <option value="last_month">Last Month</option>
+                  <option value="last_3_months">Last 3 Months</option>
+                  <option value="custom">Custom Range</option>
+                </select>
+                {filters.dateRange === 'custom' && (
+                  <div className="mt-2 space-y-2">
+                    <input
+                      type="date"
+                      value={customDateRange.startDate}
+                      onChange={(e) => handleCustomDateChange('startDate', e.target.value)}
+                      className="w-full border border-gray-300 rounded-md p-2"
+                    />
+                    <input
+                      type="date"
+                      value={customDateRange.endDate}
+                      onChange={(e) => handleCustomDateChange('endDate', e.target.value)}
+                      className="w-full border border-gray-300 rounded-md p-2"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Application list */}
+        <div className="px-6 py-4">
+          {filteredAdmissions?.length > 0 ? (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-700 bg-gray-50 border-b">
+                        Applicant
+                      </th>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-700 bg-gray-50 border-b">
+                        Email
+                      </th>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-700 bg-gray-50 border-b">
+                        Applied On
+                      </th>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-700 bg-gray-50 border-b">
+                        Status
+                      </th>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-700 bg-gray-50 border-b">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredAdmissions.map((admission) => (
+                      <tr key={admission._id} className="hover:bg-blue-50 border-b">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center">
+                            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                              <FiUser size={18} className="text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">{admission.fullName || 'N/A'}</p>
+                              <p className="text-xs text-gray-500">ID: {admission._id.substring(0, 8)}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-gray-600">
+                          <div className="flex items-center">
+                            <FiMail size={14} className="text-gray-400 mr-2" />
+                            {admission.email || 'N/A'}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-gray-600">{formatDate(admission.createdAt)}</td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              admission.status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : admission.status === 'approved'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}
+                          >
+                            {admission.status === 'pending' && '⏳ '}
+                            {admission.status === 'approved' && '✓ '}
+                            {admission.status === 'rejected' && '✕ '}
+                            {admission.status || 'pending'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex space-x-2">
+                            <button
+                              className="p-1 border border-gray-300 text-blue-600 hover:bg-blue-50 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              onClick={() => handleViewDetails(admission)}
+                              title="View Details"
+                            >
+                              <FiEye size={16} />
+                            </button>
+
+                            <button
+                              className={`p-1 border border-gray-300 text-green-600 hover:bg-green-50 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                                admission.status !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''
+                              }`}
+                              onClick={() => approveAdmission(admission._id)}
+                              disabled={admission.status !== 'pending'}
+                              title="Approve"
+                            >
+                              <FiCheckCircle size={16} />
+                            </button>
+
+                            <button
+                              className={`p-1 border border-gray-300 text-red-600 hover:bg-red-50 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 ${
+                                admission.status !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''
+                              }`}
+                              onClick={() => deleteAdmission(admission._id)}
+                              disabled={admission.status !== 'pending'}
+                              title="Delete"
+                            >
+                              <FiXCircle size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-between mt-6">
+                <p className="text-sm text-gray-500">
+                  Showing <span className="font-medium">{filteredAdmissions.length}</span> applications
+                </p>
+
+                <div className="flex items-center space-x-2">
+                  <button
+                    className={`inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${
+                      page === 1 ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                    onClick={handlePrevPage}
+                    disabled={page === 1}
+                  >
+                    <FiArrowLeft size={14} className="mr-1" />
+                    Previous
+                  </button>
+
+                  <span className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md">
+                    Page {page} of {totalPages || 1}
+                  </span>
+
+                  <button
+                    className={`inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${
+                      page === totalPages ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                    onClick={handleNextPage}
+                    disabled={page === totalPages}
+                  >
+                    Next
+                    <FiArrowRight size={14} className="ml-1" />
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <FiFileText size={32} className="text-blue-600" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-1">No Applications Found</h3>
+              <p className="text-gray-500 text-center max-w-sm">
+                There are no admission applications matching your current filters. Try adjusting your search criteria.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Applicant details modal */}
+      {showDetails && (
+        <ApplicantDetails
+          selectedApplicant={selectedApplicant}
+          showDetails={showDetails}
+          setShowDetails={setShowDetails}
+          approveAdmission={approveAdmission}
+          deleteAdmission={deleteAdmission}
+          expandedSections={expandedSections}
+          toggleSection={toggleSection}
+          formatDate={formatDate}
+        />
+      )}
+    </div>
+  );
+};
+
+export default UserManagement;

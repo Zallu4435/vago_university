@@ -1,25 +1,37 @@
-// import React from 'react';
-// import { useSelector } from 'react-redux';
-// import { Navigate } from 'react-router-dom';
-// // import { RootState } from '../redux/store';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
-// interface ProtectedRouteProps {
-//     children: React.ReactNode;
-//     allowedRoles: string[];
-// }
+interface ProtectedRouteProps {
+  allowedCollections: ('register' | 'admin' | 'user' | 'faculty')[];
+  isPublic?: boolean;
+}
 
-// const ProtectedRoute: React.FC<ProtectedRouteProps> = ({children, allowedRoles}) => {
-//     const { user, token } = useSelector((state: RootState) => state.auth);
+export const ProtectedRoute = ({ allowedCollections, isPublic = false }: ProtectedRouteProps) => {
+  const { token, collection } = useSelector((state: RootState) => state.auth);
 
-//     if (!user || !token) {
-//         return <Navigate to='/login' replace />
-//     }
+  if (!token && !isPublic) {
+    return <Navigate to="/login" replace />;
+  }
 
-//     if (!allowedRoles.includes(user.role)) {
-//         return <Navigate to='/unauthorized' replace />
-//     }
+  if (isPublic) {
+    return <Outlet />;
+  }
 
-//     return <>{children}</>
-// }
+  if (token && collection && !allowedCollections.includes(collection)) {
+    switch (collection) {
+      case 'register':
+        return <Navigate to="/admission" replace />;
+      case 'admin':
+        return <Navigate to="/admin" replace />;
+      case 'user':
+        return <Navigate to="/dashboard" replace />;
+      case 'faculty':
+        return <Navigate to="/faculty/courses" replace />;
+      default:
+        return <Navigate to="/login" replace />;
+    }
+  }
 
-// export default ProtectedRoute;
+  return <Outlet />; // ✅ Fix: Render children routes through Outlet
+};

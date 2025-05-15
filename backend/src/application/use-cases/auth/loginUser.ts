@@ -1,0 +1,73 @@
+import { Register } from '../../../infrastructure/database/mongoose/models/register.model';
+import { Admin } from '../../../infrastructure/database/mongoose/models/admin.model';
+import { User } from '../../../infrastructure/database/mongoose/models/user.model';
+import { Faculty } from '../../../infrastructure/database/mongoose/models/faculty.model';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+
+interface LoginParams {
+  email: string;
+  password: string;
+}
+
+interface LoginResponse {
+  token: string;
+  user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  collection: 'register' | 'admin' | 'user' | 'faculty';
+}
+
+class LoginUser {
+  async execute({ email, password }: LoginParams): Promise<LoginResponse> {
+    console.log(`Executing loginUser use case with params:`, { email });
+
+    let user;
+    let collection: 'register' | 'admin' | 'user' | 'faculty' = 'register';
+
+    user = await Register.findOne({ email });
+    if (!user) {
+      user = await Admin.findOne({ email });
+      collection = 'admin';
+    }
+    if (!user) {
+      user = await User.findOne({ email });
+      collection = 'user';
+    }
+    if (!user) {
+      user = await Faculty.findOne({ email });
+      collection = 'faculty';
+    }
+
+    if (!user) {
+      throw new Error('Invalid email or password');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new Error('Invalid email or password');
+    }
+
+    const token = jwt.sign(
+      { userId: user._id, email: user.email, collection },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '1h' }
+    );
+
+    console.log(`User logged in successfully: ${email} from ${collection} collection`);
+
+    return {
+      token,
+      user: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      },
+      collection,
+    };
+  }
+}
+
+export const loginUser = new LoginUser();

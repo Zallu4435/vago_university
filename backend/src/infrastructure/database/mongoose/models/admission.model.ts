@@ -12,6 +12,7 @@ const admissionSchema = new mongoose.Schema(
     documents: { type: Object, default: {} },
     declaration: { type: Object, default: {} },
     paymentId: { type: mongoose.Types.ObjectId, ref: "Payment" },
+    status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' }  
   },
   { timestamps: true }
 );

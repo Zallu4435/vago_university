@@ -8,7 +8,7 @@ export const applicationController = {
    */
   async createApplication(applicationId: string): Promise<void> {
     try {
-      await httpClient.post('/applications', { applicationId });
+      await httpClient.post('/admission/applications', { applicationId });
     } catch (error: any) {
       console.error('Error creating application:', error);
       throw error;
@@ -21,7 +21,7 @@ export const applicationController = {
    */
   async getApplicationById(applicationId: string): Promise<FormData | null> {
     try {
-      const response = await httpClient.get(`/applications/${applicationId}`);
+      const response = await httpClient.get(`/admission/applications/${applicationId}`);
       return response.data;
     } catch (error: any) {
       console.error(`Error fetching application ${applicationId}:`, error);
@@ -37,7 +37,7 @@ export const applicationController = {
    */
   async saveSection<T>(applicationId: string, section: string, data: T): Promise<FormData> {
     try {
-      const response = await httpClient.post(`/applications/${applicationId}/sections/${section}`, data);
+      const response = await httpClient.post(`/admission/applications/${applicationId}/sections/${section}`, data);
       return response.data;
     } catch (error: any) {
       console.error(`Error saving ${section} for application ${applicationId}:`, error);
@@ -70,7 +70,7 @@ export const applicationController = {
     paymentDetails: any
   ): Promise<{ paymentId: string; status: string; message: string }> {
     try {
-      const response = await httpClient.post('/payment/process', { applicationId, paymentDetails });
+      const response = await httpClient.post('/admission/payment/process', { applicationId, paymentDetails });
       return response.data;
     } catch (error: any) {
       console.error(`Error processing payment for application ${applicationId}:`, error);
@@ -84,7 +84,7 @@ export const applicationController = {
    */
   async getApplicationStatus(applicationId: string): Promise<string> {
     try {
-      const response = await httpClient.get(`/applications/${applicationId}/status`);
+      const response = await httpClient.get(`/admission/applications/${applicationId}/status`);
       return response.data.status;
     } catch (error: any) {
       console.error(`Error fetching status for application ${applicationId}:`, error);

@@ -10,9 +10,14 @@ import { AchievementSection, DeclarationSection, EducationData, OtherInformation
 import Other_Info from '../components/form/Other_Information/Other_Info';
 import { FormSubmissionFlow } from '../components/form/FormSubmissionFlow';
 import { useApplicationForm, useApplicationData } from '../../application/hooks/useApplicationForm';
-import { generateUUID } from '../../frameworks/utils/uuid';
 import styles from './ApplicationForm.module.css';
 import { FormProvider, useForm } from 'react-hook-form';
+
+// Placeholder for auth hook (replace with your actual auth implementation)
+const useAuth = () => {
+  // Simulated auth hook returning user data
+  return { user: { id: 'user123', token: 'mock-token' } }; // Replace with actual auth logic
+};
 
 interface FormData {
   applicationId?: string;
@@ -39,6 +44,9 @@ export const ApplicationForm: React.FC = () => {
   const educationFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
   const achievementsFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
   const documentsFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
+
+  const { user } = useAuth(); // Get authenticated user
+  const [applicationId, setApplicationId] = useState<string | undefined>(undefined);
 
   const methods = useForm<FormData>({
     defaultValues: {
@@ -83,46 +91,46 @@ export const ApplicationForm: React.FC = () => {
     isLoading: isSaving,
   } = useApplicationForm();
 
-  const [applicationId, setApplicationId] = useState<string | undefined>(() => {
-    return localStorage.getItem('applicationId') || undefined;
-  });
-
-  const { data: fetchedData, isLoading: isFetching, error: fetchError } = useApplicationData(applicationId);
+  // Fetch application data based on user ID
+  const { data: fetchedData, isLoading: isFetching, error: fetchError } = useApplicationData(user.id);
 
   useEffect(() => {
     const initializeApplication = async () => {
-      if (!applicationId) {
-        const newApplicationId = generateUUID();
-        console.log('Generated new applicationId:', newApplicationId);
-        localStorage.setItem('applicationId', newApplicationId);
-        setApplicationId(newApplicationId);
-        setValue('applicationId', newApplicationId, { shouldValidate: false });
+      if (isFetching) return; // Wait for data to load
+
+      if (fetchError) {
+        setSaveError('Failed to load application data. Please try again.');
+        setIsInitializing(false);
+        return;
+      }
+
+      if (fetchedData && fetchedData.applicationId) {
+        // Existing application found
+        setApplicationId(fetchedData.applicationId);
+        setValue('applicationId', fetchedData.applicationId, { shouldValidate: false });
+      } else {
+        // No existing application, create a new one
         try {
-          const response = await createApplication(newApplicationId);
-          console.log('createApplication response:', response);
-          setIsInitializing(false);
+          const response = await createApplication(user.id); // Backend generates applicationId
+          setApplicationId(response.applicationId);
+          setValue('applicationId', response.applicationId, { shouldValidate: false });
         } catch (error) {
           console.error('Failed to create application:', error);
-          setSaveError('Failed to initialize application. Please refresh the page.');
-          setIsInitializing(false);
+          setSaveError('Failed to initialize application. Please try again.');
         }
-      } else {
-        setIsInitializing(false);
       }
+      setIsInitializing(false);
     };
     initializeApplication();
-  }, [applicationId, createApplication, setValue]);
+  }, [fetchedData, isFetching, fetchError, user.id, createApplication, setValue]);
 
   useEffect(() => {
     if (fetchedData) {
       console.log('Fetched data:', fetchedData);
-      console.log('Fetched personalInfo:', fetchedData.personal);
       setValue('applicationId', fetchedData.applicationId ?? '', { shouldValidate: false });
       if (fetchedData.personal) {
-        console.log('Setting personalInfo in form state:', fetchedData.personal);
         setValue('personalInfo', fetchedData.personal, { shouldValidate: false });
       } else {
-        console.log('No personal data in fetchedData, setting to undefined');
         setValue('personalInfo', undefined, { shouldValidate: false });
       }
       if (fetchedData.choiceOfStudy) setValue('choiceOfStudy', fetchedData.choiceOfStudy, { shouldValidate: false });
@@ -472,55 +480,54 @@ export const ApplicationForm: React.FC = () => {
     }
   };
 
-const handleSubmitApplication = async () => {
-  if (isInitializing) {
-    console.log('Waiting for application initialization');
-    return;
-  }
-
-  if (!formData.applicationId) {
-    alert('No application ID found.');
-    return;
-  }
-
-  const validationResults = await Promise.all([
-    Promise.resolve(!!formData.personalInfo),
-    Promise.resolve(!!(formData.choiceOfStudy && formData.choiceOfStudy.length > 0)),
-    Promise.resolve(!!formData.education),
-    Promise.resolve(!!formData.achievements),
-    Promise.resolve(!!formData.otherInformation),
-    Promise.resolve(!!formData.documents),
-    Promise.resolve(!!formData.declaration?.privacyPolicy),
-  ]);
-
-  console.log('Full form validation results:', validationResults);
-
-  if (validationResults.every(result => result === true)) {
-    try {
-      setSaveError(null);
-      await handleUpdateDeclaration(formData.declaration!);
-      setShowSummary(true);
-    } catch (error) {
-      console.error('Error saving declaration:', error);
-      setSaveError('Failed to submit application. Please try again.');
+  const handleSubmitApplication = async () => {
+    if (isInitializing) {
+      console.log('Waiting for application initialization');
+      return;
     }
-  } else {
-    setSaveError('Please complete all required fields in the form.');
-    const invalidSectionIndex = validationResults.findIndex(result => result === false);
-    if (invalidSectionIndex !== -1) {
-      setActiveTab(tabs[invalidSectionIndex].id);
-      console.log('Navigating to invalid section:', tabs[invalidSectionIndex].id);
-    }
-  }
-};
 
+    if (!formData.applicationId) {
+      alert('No application ID found.');
+      return;
+    }
+
+    const validationResults = await Promise.all([
+      Promise.resolve(!!formData.personalInfo),
+      Promise.resolve(!!(formData.choiceOfStudy && formData.choiceOfStudy.length > 0)),
+      Promise.resolve(!!formData.education),
+      Promise.resolve(!!formData.achievements),
+      Promise.resolve(!!formData.otherInformation),
+      Promise.resolve(!!formData.documents),
+      Promise.resolve(!!formData.declaration?.privacyPolicy),
+    ]);
+
+    console.log('Full form validation results:', validationResults);
+
+    if (validationResults.every(result => result === true)) {
+      try {
+        setSaveError(null);
+        await handleUpdateDeclaration(formData.declaration!);
+        setShowSummary(true);
+      } catch (error) {
+        console.error('Error saving declaration:', error);
+        setSaveError('Failed to submit application. Please try again.');
+      }
+    } else {
+      setSaveError('Please complete all required fields in the form.');
+      const invalidSectionIndex = validationResults.findIndex(result => result === false);
+      if (invalidSectionIndex !== -1) {
+        setActiveTab(tabs[invalidSectionIndex].id);
+        console.log('Navigating to invalid section:', tabs[invalidSectionIndex].id);
+      }
+    }
+  };
 
   if (isInitializing || isFetching) {
     return (
       <div className="container mx-auto py-8 px-4 max-w-6xl flex items-center justify-center h-64">
         <div className="text-center">
           <div className="w-16 h-16 border-t-4 border-cyan-500 border-solid rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-cyan-700 text-lg">Initializing application...</p>
+          <p className="text-cyan-700 text-lg">Loading application...</p>
         </div>
       </div>
     );
@@ -539,6 +546,27 @@ const handleSubmitApplication = async () => {
             <div className="ml-3">
               <p className="text-sm text-red-700">
                 {fetchError ? 'Error loading your application. Please refresh the page or try again later.' : saveError}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="container mx-auto py-8 px-4 max-w-6xl">
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700">
+                You must be logged in to access the application form.
               </p>
             </div>
           </div>
@@ -567,7 +595,6 @@ const handleSubmitApplication = async () => {
         onPaymentComplete={() => {
           setShowPayment(false);
           setActiveTab('personalDetails');
-          localStorage.removeItem('applicationId');
           setApplicationId(undefined);
           setValue('applicationId', '', { shouldValidate: false });
           setValue('personalInfo', undefined, { shouldValidate: false });

@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export interface IUser extends Document {
+export interface IRegister extends Document {
   firstName: string;
   lastName: string;
   email: string;
@@ -8,7 +8,7 @@ export interface IUser extends Document {
   createdAt: Date;
 }
 
-const userSchema = new Schema<IUser>({
+const registerSchema = new Schema<IRegister>({
   firstName: { type: String, required: true, trim: true },
   lastName: { type: String, required: true, trim: true },
   email: {
@@ -23,4 +23,4 @@ const userSchema = new Schema<IUser>({
   createdAt: { type: Date, default: Date.now },
 });
 
-export const User = mongoose.model<IUser>('User', userSchema);
+export const Register = mongoose.model<IRegister>('Register', registerSchema);

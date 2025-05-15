@@ -1,6 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+import { Provider } from "react-redux";
+import store from "./presentation/redux/store";
 import App from "./App";
 
 // React Query setup
@@ -14,10 +16,12 @@ const queryClient = new QueryClient();
 ReactDOM.createRoot(document.getElementById("root")!).render(
   // <React.StrictMode>
   <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <Toaster position="top-right" reverseOrder={false} />
-      <App />
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <Toaster position="top-right" reverseOrder={false} />
+        <App />
+      </BrowserRouter>
+    </Provider>
   </QueryClientProvider>
   // </React.StrictMode>
 );

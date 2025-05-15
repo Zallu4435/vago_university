@@ -2,7 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import { config } from "./config/env";
-import admissionRoutes from "./presentation/routes/admissionRoutes";
+import indexRoute from './presentation/routes/index'
 
 const app = express();
 
@@ -18,7 +18,7 @@ app.use(
 app.use(express.json());
 
 // Routes
-app.use("/api", admissionRoutes);
+app.use("/api", indexRoute);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

@@ -13,7 +13,7 @@ router.get('/applications/:applicationId', admissionController.getApplication);
 router.post('/applications/:applicationId/sections/:section', admissionController.saveSection);
 
 // Finalize admission (submit form and process payment)
-router.post('/admission/finalize', admissionController.handleFinalSubmit);
+router.post('/finalize', admissionController.handleFinalSubmit);
 
 
 

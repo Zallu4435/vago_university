@@ -1,19 +1,30 @@
-import { AdmissionDraft } from "../../../infrastructure/database/mongoose/models/admissionDraft.model";
+import { AdmissionDraft } from '../../../infrastructure/database/mongoose/models/admissionDraft.model';
+import { v4 as uuidv4 } from 'uuid';
+import mongoose from 'mongoose';
 
 class CreateApplication {
-  async execute(applicationId: string) {
-    console.log(`Creating application with applicationId: ${applicationId}`);
+  async execute(registerId: string) {
+    console.log(`Creating application for registerId: ${registerId}`);
 
-    // Check if draft already exists
-    let draft = await AdmissionDraft.findOne({ applicationId });
-    if (draft) {
-      console.warn(`Application ID ${applicationId} already exists`);
-      throw new Error("Application ID already exists");
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(registerId)) {
+      throw new Error('Invalid registerId');
     }
+
+    // Check if draft already exists for user
+    let draft = await AdmissionDraft.findOne({ registerId });
+    if (draft) {
+      console.log(`Existing application found: ${draft.applicationId}`);
+      return draft.toObject();
+    }
+
+    // Generate unique applicationId
+    const applicationId = uuidv4();
 
     // Create new draft
     draft = new AdmissionDraft({
       applicationId,
+      registerId,
       personal: {},
       choiceOfStudy: [],
       education: {},
@@ -27,8 +38,7 @@ class CreateApplication {
     await draft.save();
 
     console.log(`Created draft:`, draft);
-
-    return draft.toObject(); // Ensure plain object is returned
+    return draft.toObject();
   }
 }
 

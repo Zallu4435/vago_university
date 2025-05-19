@@ -1,23 +1,22 @@
-import { Router } from "express";
-import { admissionController } from "../controllers/admissionController";
+import { Router } from 'express';
+import { admissionController } from '../controllers/admissionController';
+import { authMiddleware } from '../../shared/middlewares/authMiddleware';
 
 const router = Router();
 
-// Create a new application draft with applicationId
-router.post('/applications', admissionController.createApplication);
+// Create a new application draft for the authenticated user
+router.post('/applications', authMiddleware, admissionController.createApplication);
 
-// Fetch application draft by applicationId
-router.get('/applications/:applicationId', admissionController.getApplication);
+// Fetch application draft by userId
+router.get('/applications/user/:userId', authMiddleware, admissionController.getApplication);
 
 // Save section data (e.g., personalInfo, choiceOfStudy)
-router.post('/applications/:applicationId/sections/:section', admissionController.saveSection);
+router.post('/applications/:applicationId/sections/:section', authMiddleware, admissionController.saveSection);
+
+// Process payment
+router.post('/payment/process', authMiddleware, admissionController.processPayment);
 
 // Finalize admission (submit form and process payment)
-router.post('/finalize', admissionController.handleFinalSubmit);
-
-
-
-router.post('/payment/process', admissionController.processPayment);
-
+router.post('/finalize', authMiddleware, admissionController.handleFinalSubmit);
 
 export default router;

@@ -49,7 +49,7 @@ export const AchievementQuestions: React.FC<Props> = ({ questions, answers, onAn
               <Textarea
                 id={`question-${q.id}`}
                 {...register(`questions.${q.id}`)}
-                value={answers[q.id] || ''}
+                value={answers?.[String(q.id)] ?? ''}
                 onChange={e => {
                   console.log('AchievementQuestions: Textarea change', { questionId: q.id, value: e.target.value });
                   onAnswerChange(q.id, e.target.value);

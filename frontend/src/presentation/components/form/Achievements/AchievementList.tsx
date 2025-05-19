@@ -34,7 +34,7 @@ export const AchievementList: React.FC<Props> = ({
   onToggleNoAchievements
 }) => {
   const { formState: { errors } } = useFormContext();
-
+  
   return (
     <div className="mb-8 bg-white rounded-xl border border-cyan-100 overflow-hidden">
       <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 border-b border-cyan-100">
@@ -54,17 +54,17 @@ export const AchievementList: React.FC<Props> = ({
             <Button
               label="Add Achievement"
               onClick={onAdd}
-              disabled={achievements.length >= max || hasNoAchievements}
+              disabled={achievements?.length >= max || hasNoAchievements}
               className="bg-gradient-to-r from-cyan-400 to-blue-400 text-white px-4 py-2 rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all duration-300 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
         </div>
-      </div>
+      </div> 
 
       <div className="p-6">
         {errors.achievements?.achievements && (
           <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
-            <p className="text-sm text-red-700">{errors.achievements.achievements.message}</p>
+            <p className="text-sm text-red-700">{errors.achievements?.achievements.message}</p>
           </div>
         )}
 
@@ -89,14 +89,14 @@ export const AchievementList: React.FC<Props> = ({
                       <p className="text-sm mt-1">You have indicated that you have no achievements to list</p>
                     </td>
                   </tr>
-                ) : achievements.length === 0 ? (
+                ) : achievements?.achievements?.length === 0 ? (
                   <tr>
                     <td colSpan={columns.length + 1} className="px-6 py-4 text-center text-cyan-600">
                       No record(s)
                     </td>
                   </tr>
                 ) : (
-                  achievements.map((achievement, index) => (
+                  achievements?.achievements?.map((achievement, index) => (
                     <tr key={index} className="border-b border-cyan-100 hover:bg-cyan-50">
                       {columns.map((col, idx) => (
                         <td key={idx} className="px-6 py-4 text-cyan-800" style={{ minWidth: col.width }}>

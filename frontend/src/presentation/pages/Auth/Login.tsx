@@ -32,36 +32,39 @@ const LoginPage = () => {
 
   const mutation = useLoginUser();
 
-  const onSubmit = (data: FormData) => {
-    mutation.mutate(data, {
-      onSuccess: (response) => {
-        Cookies.set('auth_token', response.token, { secure: true, sameSite: 'strict' });
-        dispatch(setAuth({
-          token: response.token,
-          user: response.user,
-          collection: response.collection,
-        }));
-        alert('Login successful!');
-        switch (response.collection) {
-          case 'register':
-            navigate('/');
-            break;
-          case 'admin':
-            navigate('/admin');
-            break;
-          case 'user':
-            navigate('/dashboard');
-            break;
-          case 'faculty':
-            navigate('/faculty/courses');
-            break;
-        }
-      },
-      onError: (error: Error) => {
-        alert(`Login failed: ${error.message}`);
-      },
-    });
-  };
+
+// Ensure redirect logic matches your collections
+const onSubmit = (data: FormData) => {
+  mutation.mutate(data, {
+    onSuccess: (response) => {
+      Cookies.set('auth_token', response.token, { secure: true, sameSite: 'strict' });
+      console.log(response, "response from the checking side....")
+      dispatch(setAuth({
+        token: response.token,
+        user: response.user,
+        collection: response.collection,
+      }));
+      alert('Login successful!');
+      switch (response.collection) {
+        case 'register':
+          navigate('/admission');
+          break;
+        case 'admin':
+          navigate('/admin');
+          break;
+        case 'user':
+          navigate('/dashboard');
+          break;
+        case 'faculty':
+          navigate('/faculty/courses');
+          break;
+      }
+    },
+    onError: (error: Error) => {
+      alert(`Login failed: ${error.message}`);
+    },
+  });
+};
 
   return (
     <div

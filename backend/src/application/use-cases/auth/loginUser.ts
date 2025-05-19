@@ -64,6 +64,7 @@ class LoginUser {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        id: user?._id
       },
       collection,
     };

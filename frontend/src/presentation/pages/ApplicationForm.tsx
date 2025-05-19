@@ -12,11 +12,14 @@ import { FormSubmissionFlow } from '../components/form/FormSubmissionFlow';
 import { useApplicationForm, useApplicationData } from '../../application/hooks/useApplicationForm';
 import styles from './ApplicationForm.module.css';
 import { FormProvider, useForm } from 'react-hook-form';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../infrastructure/store/store';
+import { useNavigate } from 'react-router-dom';
 
-// Placeholder for auth hook (replace with your actual auth implementation)
+// Replace the placeholder useAuth hook with Redux selector
 const useAuth = () => {
-  // Simulated auth hook returning user data
-  return { user: { id: 'user123', token: 'mock-token' } }; // Replace with actual auth logic
+  const { token, user, collection } = useSelector((state: RootState) => state.auth);
+  return { token, user, collection };
 };
 
 interface FormData {
@@ -45,7 +48,7 @@ export const ApplicationForm: React.FC = () => {
   const achievementsFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
   const documentsFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
 
-  const { user } = useAuth(); // Get authenticated user
+  const { token, user, collection } = useAuth();
   const [applicationId, setApplicationId] = useState<string | undefined>(undefined);
 
   const methods = useForm<FormData>({
@@ -89,10 +92,38 @@ export const ApplicationForm: React.FC = () => {
     saveDocuments,
     saveDeclaration,
     isLoading: isSaving,
-  } = useApplicationForm();
+  } = useApplicationForm(token);
 
   // Fetch application data based on user ID
-  const { data: fetchedData, isLoading: isFetching, error: fetchError } = useApplicationData(user.id);
+  const { data: fetchedData, isLoading: isFetching, error: fetchError } = useApplicationData(user?.id, token);
+
+  const navigate = useNavigate();
+
+  // Redirect if not authenticated or wrong collection type
+  useEffect(() => {
+    if (!token || !user) {
+      console.log('No auth token or user found, redirecting to login');
+      navigate('/login');
+      return;
+    }
+
+    if (collection !== 'register') {
+      console.log('User is not in register collection, redirecting to appropriate dashboard');
+      switch (collection) {
+        case 'admin':
+          navigate('/admin');
+          break;
+        case 'user':
+          navigate('/dashboard');
+          break;
+        case 'faculty':
+          navigate('/faculty/courses');
+          break;
+        default:
+          navigate('/');
+      }
+    }
+  }, [token, user, collection, navigate]);
 
   useEffect(() => {
     const initializeApplication = async () => {
@@ -417,6 +448,7 @@ export const ApplicationForm: React.FC = () => {
       }
     } else if (activeTab === 'achievements') {
       setValidationAttempted(true);
+      console.log(formData.achievements, "formData.achievements")
       if (achievementsFormRef.current) {
         const isValid = await achievementsFormRef.current.trigger();
         console.log('Achievements validation result:', { isValid, achievements: formData.achievements });

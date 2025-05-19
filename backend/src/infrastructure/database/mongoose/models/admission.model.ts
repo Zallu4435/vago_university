@@ -1,9 +1,33 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Document, Model } from 'mongoose';
+import {
+  PersonalInfo,
+  ProgrammeChoice,
+  EducationData,
+  AchievementSection,
+  OtherInformationSection,
+  DocumentUploadSection,
+  DeclarationSection,
+} from '../../../../domain/types/formTypes';
 
-const admissionSchema = new mongoose.Schema(
+interface IAdmission extends Document {
+  applicationId: string;
+  registerId: mongoose.Types.ObjectId;
+  personal: PersonalInfo;
+  choiceOfStudy: ProgrammeChoice[];
+  education: EducationData;
+  achievements: AchievementSection;
+  otherInformation: OtherInformationSection;
+  documents: DocumentUploadSection;
+  declaration: DeclarationSection;
+  paymentId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const AdmissionSchema: Schema = new Schema(
   {
     applicationId: { type: String, required: true, unique: true },
-    userId: { type: mongoose.Types.ObjectId, ref: "User" }, // Optional
+    registerId: { type: Schema.Types.ObjectId, required: true, ref: 'Register' },
     personal: { type: Object, default: {} },
     choiceOfStudy: { type: Array, default: [] },
     education: { type: Object, default: {} },
@@ -11,10 +35,9 @@ const admissionSchema = new mongoose.Schema(
     otherInformation: { type: Object, default: {} },
     documents: { type: Object, default: {} },
     declaration: { type: Object, default: {} },
-    paymentId: { type: mongoose.Types.ObjectId, ref: "Payment" },
-    status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' }  
+    paymentId: { type: String, required: true },
   },
   { timestamps: true }
 );
 
-export const Admission = mongoose.model("Admission", admissionSchema);
+export const Admission: Model<IAdmission> = mongoose.models.Admission || mongoose.model<IAdmission>('Admission', AdmissionSchema);

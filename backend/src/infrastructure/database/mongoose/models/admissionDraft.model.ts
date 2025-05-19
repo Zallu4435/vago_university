@@ -1,10 +1,19 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Schema, Document, Model } from 'mongoose';
+// import {
+//   PersonalInfo,
+//   ProgrammeChoice,
+//   EducationData,
+//   AchievementSection,
+//   OtherInformationSection,
+//   DocumentUploadSection,
+//   DeclarationSection,
+// } from '../../../../domain/types/formTypes';
 
 interface IAdmissionDraft extends Document {
   applicationId: string;
-  userId?: string;
+  registerId: mongoose.Types.ObjectId;
   personal: any;
-  choiceOfStudy: any;
+  choiceOfStudy: any[];
   education: any;
   achievements: any;
   otherInformation: any;
@@ -18,7 +27,7 @@ interface IAdmissionDraft extends Document {
 const AdmissionDraftSchema: Schema = new Schema(
   {
     applicationId: { type: String, required: true, unique: true },
-    userId: { type: mongoose.Types.ObjectId, ref: "User" },
+    registerId: { type: Schema.Types.ObjectId, required: true, ref: 'Register' },
     personal: { type: Object, default: {} },
     choiceOfStudy: { type: Array, default: [] },
     education: { type: Object, default: {} },
@@ -31,4 +40,4 @@ const AdmissionDraftSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-export const AdmissionDraft: Model<IAdmissionDraft> = mongoose.models.AdmissionDraft || mongoose.model<IAdmissionDraft>("AdmissionDraft", AdmissionDraftSchema);
+export const AdmissionDraft: Model<IAdmissionDraft> = mongoose.models.AdmissionDraft || mongoose.model<IAdmissionDraft>('AdmissionDraft', AdmissionDraftSchema);

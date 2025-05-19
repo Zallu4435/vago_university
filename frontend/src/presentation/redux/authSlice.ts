@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import httpClient from '../../frameworks/api/httpClient';
 
 interface AuthState {
   token: string | null;
@@ -6,6 +7,7 @@ interface AuthState {
     firstName: string;
     lastName: string;
     email: string;
+    id?: string;
   } | null;
   collection: 'register' | 'admin' | 'user' | 'faculty' | null;
 }
@@ -24,7 +26,7 @@ const authSlice = createSlice({
       state,
       action: PayloadAction<{
         token: string;
-        user: { firstName: string; lastName: string; email: string };
+        user: { firstName: string; lastName: string; email: string; id?: string };
         collection: 'register' | 'admin' | 'user' | 'faculty';
       }>
     ) => {
@@ -32,7 +34,10 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.collection = action.payload.collection;
     },
-    clearAuth: (state) => {
+    logout: (state) => {
+      // Call logout API to clear cookie
+      httpClient.post('/auth/logout', {}, { withCredentials: true })
+        .catch(err => console.error('Logout API error:', err));
       state.token = null;
       state.user = null;
       state.collection = null;
@@ -40,5 +45,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setAuth, clearAuth } = authSlice.actions;
+export const { setAuth, logout } = authSlice.actions;
 export default authSlice.reducer;

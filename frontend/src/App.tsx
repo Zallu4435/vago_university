@@ -29,20 +29,25 @@ import { UGAdmissions } from './presentation/pages/ug_admissions/UGAdmissions';
 import UGProgrammes from './presentation/pages/ug_admissions/UGProgrammes';
 import { UGScholarships } from './presentation/pages/ug_admissions/UGScholarships';
 import { UGWhy_VAGO } from './presentation/pages/ug_admissions/UGWhy_VAGO';
-import DashboardPage from './presentation/pages/DashboardPage';
+import DashboardPage from './presentation/pages/user/StudentDashboard';
 import CanvasPage from './presentation/pages/CanvasPage';
-import FacultyCoursesPage from './presentation/pages/FacultyCoursesPage';
+import FacultyCoursesPage from './presentation/pages/FacultyDashboard';
 
 const App: React.FC = () => {
-  useRefreshToken();
+  const { isError, error } = useRefreshToken();
+
+  if (isError) {
+    console.log('Refresh token failed:', error);
+    store.dispatch({ type: 'auth/logout' }); // Use logout action
+  }
 
   return (
     <Provider store={store}>
       <Routes>
-        {/* Public Routes */}
+        {/* Public Routes (accessible by all except admin, and not /login or /register for logged-in) */}
         <Route
           element={
-            <ProtectedRoute allowedCollections={['register', 'admin', 'user', 'faculty']} isPublic={true} />
+            <ProtectedRoute allowedCollections={['register', 'user', 'faculty']} isPublic={true} />
           }
         >
           <Route element={<PublicLayout />}>
@@ -51,17 +56,7 @@ const App: React.FC = () => {
             <Route path="contact" element={<ContactUs />} />
             <Route path="education" element={<Education />} />
             <Route path="about" element={<About />} />
-            <Route path="login" element={<LoginPage />} />
-            <Route path="register" element={<RegisterPage />} />
           </Route>
-        </Route>
-
-        {/* UG Routes (accessible by register and user) */}
-        <Route
-          element={
-            <ProtectedRoute allowedCollections={['register', 'user']} isPublic={true} />
-          }
-        >
           <Route element={<UGLayout />}>
             <Route path="ug" element={<UGHome />} />
             <Route path="ug/admissions" element={<UGAdmissions />} />
@@ -69,6 +64,18 @@ const App: React.FC = () => {
             <Route path="ug/scholarships" element={<UGScholarships />} />
             <Route path="ug/why-vago" element={<UGWhy_VAGO />} />
             <Route path="ug/contact" element={<ContactUs />} />
+          </Route>
+        </Route>
+
+        {/* Login and Register Routes (unauthenticated only) */}
+        <Route
+          element={
+            <ProtectedRoute allowedCollections={[]} isPublic={true} />
+          }
+        >
+          <Route element={<PublicLayout />}>
+            <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
           </Route>
         </Route>
 
@@ -117,7 +124,7 @@ const App: React.FC = () => {
         </Route>
 
         {/* Fallback */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/register" replace />} />
       </Routes>
     </Provider>
   );

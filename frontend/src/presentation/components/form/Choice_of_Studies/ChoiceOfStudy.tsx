@@ -1,48 +1,52 @@
 import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useFormContext } from 'react-hook-form';
 import { Button } from '../../Button';
 import { ProgrammeModal } from './ProgrammeModal';
 import { ProgrammeChoice } from '../../../../domain/types/formTypes';
-import { choiceOfStudySchema, ChoiceOfStudyFormData, ProgrammeChoiceFormData } from '../../../../domain/validation/ChoiceOfStudySchema';
+import { ChoiceOfStudyFormData, ProgrammeChoiceFormData } from '../../../../domain/validation/ChoiceOfStudySchema';
+import isEqual from 'lodash/isEqual';
 
 interface ChoiceOfStudyProps {
-  choices: ProgrammeChoice[];
-  onChange: (choices: ProgrammeChoice[]) => void;
+  initialData?: ChoiceOfStudyFormData;
+  onChange?: (data: ChoiceOfStudyFormData) => void;
 }
 
-export const ChoiceOfStudy: React.FC<ChoiceOfStudyProps> = ({ choices, onChange }) => {
+export const ChoiceOfStudy: React.FC<ChoiceOfStudyProps> = ({ initialData, onChange }) => {
   const [showModal, setShowModal] = useState(false);
-  const { formState: { errors }, setValue, trigger } = useForm<ChoiceOfStudyFormData>({
-    resolver: zodResolver(choiceOfStudySchema),
-    defaultValues: {
-      choices: choices || [],
-    },
-    mode: 'onChange',
-  });
+  const { formState: { errors }, setValue, watch, reset } = useFormContext<ChoiceOfStudyFormData>();
+const currentChoices = watch('choices') || [];
 
   useEffect(() => {
-    // Update form state when props.choices change (e.g., from fetched data)
-    setValue('choices', choices);
-    trigger('choices'); // Re-validate when choices change
-  }, [choices, setValue, trigger]);
+    console.log('ChoiceOfStudy: Received initialData:', initialData);
+    if (initialData && !isEqual(initialData, currentChoices)) {
+      reset({ choices: initialData }, { keepDirty: false });
+      console.log('ChoiceOfStudy: Initialized with choices:', initialData);
+      if (onChange) {
+        onChange(initialData);
+      }
+    } else {
+      console.log('ChoiceOfStudy: Skipped reset, choices unchanged or invalid initialData');
+    }
+  }, [initialData, reset]);
 
-  const handleAddProgramme = (data: ProgrammeChoiceFormData) => {
-    const updatedChoices = [...choices, { programme: data.programme, preferredMajor: data.preferredMajor || '' }];
-    console.log('Adding programme:', data, 'Updated choices:', updatedChoices);
-    setValue('choices', updatedChoices);
-    trigger('choices'); // Validate the updated choices
-    onChange(updatedChoices);
-    setShowModal(false);
-  };
+const handleAddProgramme = (data: ProgrammeChoiceFormData) => {
+  const newChoice: ProgrammeChoice = { programme: data.programme, preferredMajor: data.preferredMajor || '' };
+  const updatedChoices = [...currentChoices, newChoice];
+  setValue('choices', updatedChoices, { shouldValidate: false });
+  if (onChange && !isEqual(updatedChoices, currentChoices)) {
+    onChange(updatedChoices); // <-- pass as array directly
+  }
+  setShowModal(false);
+};
 
-  const handleRemove = (idx: number) => {
-    const updatedChoices = choices.filter((_, i) => i !== idx);
-    console.log('Removing programme at index:', idx, 'Updated choices:', updatedChoices);
-    setValue('choices', updatedChoices);
-    trigger('choices'); // Validate after removal
-    onChange(updatedChoices);
-  };
+const handleRemove = (idx: number) => {
+  const updatedChoices = currentChoices.filter((_, i) => i !== idx);
+  setValue('choices', updatedChoices, { shouldValidate: false });
+  if (onChange && !isEqual(updatedChoices, currentChoices)) {
+    onChange(updatedChoices); // <-- pass as array directly
+  }
+};
+
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-xl border border-cyan-100">
@@ -90,19 +94,18 @@ export const ChoiceOfStudy: React.FC<ChoiceOfStudyProps> = ({ choices, onChange 
                 </tr>
               </thead>
               <tbody>
-                {choices.length === 0 ? (
+                {currentChoices.length === 0 ? (
                   <tr>
                     <td className="py-4 px-4 text-cyan-600" colSpan={4}>No record(s)</td>
                   </tr>
                 ) : (
-                  choices.map((choice, idx) => (
+                  currentChoices.map((choice: ProgrammeChoice, idx: number) => (
                     <tr key={idx} className="border-b border-cyan-100 hover:bg-cyan-50">
                       <td className="py-3 px-4 text-cyan-800">{idx + 1}</td>
                       <td className="py-3 px-4 text-cyan-800">{choice.programme}</td>
                       <td className="py-3 px-4 text-cyan-800">{choice.preferredMajor || '-'}</td>
                       <td className="py-3 px-4">
                         <button
-                          variant="outline"
                           onClick={() => handleRemove(idx)}
                           className="text-cyan-600 hover:text-cyan-700 border border-cyan-300 hover:border-cyan-400 px-3 py-1 rounded-md relative overflow-hidden group"
                         >
@@ -130,7 +133,7 @@ export const ChoiceOfStudy: React.FC<ChoiceOfStudyProps> = ({ choices, onChange 
         showModal={showModal}
         onClose={() => setShowModal(false)}
         onSubmit={handleAddProgramme}
-        choices={choices} // Pass choices for duplicate validation
+        choices={currentChoices}
       />
     </div>
   );

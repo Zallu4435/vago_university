@@ -4,24 +4,15 @@ import { Admin } from '../../../infrastructure/database/mongoose/models/admin.mo
 import { User } from '../../../infrastructure/database/mongoose/models/user.model';
 import { Faculty } from '../../../infrastructure/database/mongoose/models/faculty.model';
 
-interface RefreshTokenParams {
-  token: string;
-}
-
 interface RefreshTokenResponse {
   token: string;
-  user: {
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
+  user: { firstName: string; lastName: string; email: string };
   collection: 'register' | 'admin' | 'user' | 'faculty';
 }
 
 class RefreshToken {
-  async execute({ token }: RefreshTokenParams): Promise<RefreshTokenResponse> {
-    console.log(`Executing refreshToken use case`);
-
+  async execute({ token }: { token: string }): Promise<RefreshTokenResponse> {
+    console.log('Backend: Refreshing token'); // Debug
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as {
         userId: string;
@@ -57,18 +48,13 @@ class RefreshToken {
         { expiresIn: '1h' }
       );
 
-      console.log(`Token refreshed successfully for user: ${user.email}`);
-
       return {
         token: newToken,
-        user: {
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-        },
+        user: { firstName: user.firstName, lastName: user.lastName, email: user.email, id: user?._id },
         collection: decoded.collection,
       };
     } catch (error) {
+      console.error('Backend: Refresh token error:', error.message); // Debug
       throw new Error('Invalid or expired token');
     }
   }

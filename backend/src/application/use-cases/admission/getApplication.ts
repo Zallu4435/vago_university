@@ -1,11 +1,18 @@
-import { AdmissionDraft } from "../../../infrastructure/database/mongoose/models/admissionDraft.model";
+import { AdmissionDraft } from '../../../infrastructure/database/mongoose/models/admissionDraft.model';
+import mongoose from 'mongoose';
 
 class GetApplication {
-  async execute(applicationId: string) {
-    console.log(`Fetching application with applicationId: ${applicationId}`);
-    const draft = await AdmissionDraft.findOne({ applicationId });
+  async execute(registerId: string) {
+    console.log(`Fetching application for registerId: ${registerId}`);
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(registerId)) {
+      throw new Error('Invalid registerId');
+    }
+
+    const draft = await AdmissionDraft.findOne({ registerId });
     if (!draft) {
-      console.warn(`Application not found for applicationId: ${applicationId}`);
+      console.log(`Application not found for registerId: ${registerId}`);
       return null;
     }
     console.log(`Fetched draft:`, draft);

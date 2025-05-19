@@ -49,6 +49,8 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean> }, Prop
   const achievementData = watch();
   const previousDataRef = useRef<AchievementSection | null>(null);
 
+
+
   useEffect(() => {
     const isInitialRender = previousDataRef.current === null;
     const hasChanged = JSON.stringify(previousDataRef.current) !== JSON.stringify(achievementData);

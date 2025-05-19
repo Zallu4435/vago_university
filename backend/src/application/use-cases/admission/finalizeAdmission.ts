@@ -21,10 +21,10 @@ class FinalizeAdmission {
       payment.status = "completed";
       await payment.save();
     }
-
     // Create Admission Record
     const newAdmission = new Admission({
       applicationId,
+      registerId: draft.registerId,
       personal: draft.personal,
       choiceOfStudy: draft.choiceOfStudy,
       education: draft.education,

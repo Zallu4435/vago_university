@@ -1,24 +1,15 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import {
-  PersonalInfo,
-  ProgrammeChoice,
-  EducationData,
-  AchievementSection,
-  OtherInformationSection,
-  DocumentUploadSection,
-  DeclarationSection,
-} from '../../../../domain/types/formTypes';
 
 interface IAdmission extends Document {
   applicationId: string;
   registerId: mongoose.Types.ObjectId;
-  personal: PersonalInfo;
-  choiceOfStudy: ProgrammeChoice[];
-  education: EducationData;
-  achievements: AchievementSection;
-  otherInformation: OtherInformationSection;
-  documents: DocumentUploadSection;
-  declaration: DeclarationSection;
+  personal: any;
+  choiceOfStudy: any[];
+  education: any;
+  achievements: any;
+  otherInformation: any;
+  documents: any;
+  declaration: any;
   paymentId: string;
   createdAt: Date;
   updatedAt: Date;

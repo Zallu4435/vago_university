@@ -15,6 +15,8 @@ import {
   FiEye,
 } from 'react-icons/fi';
 import ApplicantDetails from '../../components/admin/ApplicantDetails';
+import ApprovalModal from '../../components/admin/ApprovalModal';
+import WarningModal from '../../components/WarningModal';
 
 const UserManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,9 +34,25 @@ const UserManagement = () => {
     declaration: true,
     application: true,
   });
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [selectedAdmission, setSelectedAdmission] = useState(null);
+  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
+  const [admissionToDelete, setAdmissionToDelete] = useState(null);
 
-  const { users, totalPages, page, setPage, filters, setFilters, isLoading, error, getAdmissionDetails, approveAdmission, deleteAdmission } =
-    useUserManagement();
+  const { 
+    users, 
+    totalPages, 
+    page, 
+    setPage, 
+    filters, 
+    setFilters, 
+    isLoading, 
+    error, 
+    getAdmissionDetails, 
+    approveAdmission, 
+    deleteAdmission, 
+    rejectAdmission 
+  } = useUserManagement();
 
   const programs = [
     'All Programs',
@@ -80,11 +98,64 @@ const UserManagement = () => {
   const handleViewDetails = async (admission) => {
     try {
       const details = await getAdmissionDetails(admission._id);
-      console.log(details, "details");
       setSelectedApplicant(details);
       setShowDetails(true);
     } catch (error) {
       // Error toast is handled in the mutation
+    }
+  };
+
+  const handleActionClick = (admission) => {
+    setSelectedAdmission(admission);
+    setShowApprovalModal(true);
+  };
+
+  const handleApprove = async (data) => {
+    try {
+      console.log(data, "data")
+      // If data contains admission property, use that
+      const admissionId = data.admission?._id || selectedAdmission?._id;
+      
+      if (!admissionId) {
+        throw new Error('No admission ID found');
+      }
+
+      await approveAdmission({
+        id: admissionId,
+        approvalData: {
+          programDetails: data.programDetails || '',
+          startDate: data.startDate || '',
+          scholarshipInfo: data.scholarshipInfo || '',
+          additionalNotes: data.additionalNotes || ''
+        }
+      });
+      
+      setShowApprovalModal(false);
+      setSelectedAdmission(null);
+    } catch (error) {
+      console.error('Error approving admission:', error);
+    }
+  };
+
+  const handleReject = async (reason) => {
+    try {
+      await rejectAdmission({
+        id: selectedAdmission._id,
+        reason
+      });
+      setShowApprovalModal(false);
+      setSelectedAdmission(null);
+    } catch (error) {
+      console.error('Error rejecting admission:', error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteAdmission(id);
+      // Optionally refresh the list or show a success message
+    } catch (error) {
+      console.error('Error deleting admission:', error);
     }
   };
 
@@ -298,9 +369,9 @@ const UserManagement = () => {
                               className={`p-1 border border-gray-300 text-green-600 hover:bg-green-50 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
                                 admission.status !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''
                               }`}
-                              onClick={() => approveAdmission(admission._id)}
+                              onClick={() => handleActionClick(admission)}
                               disabled={admission.status !== 'pending'}
-                              title="Approve"
+                              title="Take Action"
                             >
                               <FiCheckCircle size={16} />
                             </button>
@@ -309,7 +380,10 @@ const UserManagement = () => {
                               className={`p-1 border border-gray-300 text-red-600 hover:bg-red-50 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 ${
                                 admission.status !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''
                               }`}
-                              onClick={() => deleteAdmission(admission._id)}
+                              onClick={() => {
+                                setAdmissionToDelete(admission);
+                                setShowDeleteWarning(true);
+                              }}
                               disabled={admission.status !== 'pending'}
                               title="Delete"
                             >
@@ -378,11 +452,56 @@ const UserManagement = () => {
           selectedApplicant={selectedApplicant}
           showDetails={showDetails}
           setShowDetails={setShowDetails}
-          approveAdmission={approveAdmission}
-          deleteAdmission={deleteAdmission}
+          approveAdmission={handleApprove}
+          deleteAdmission={handleDelete}
           expandedSections={expandedSections}
           toggleSection={toggleSection}
           formatDate={formatDate}
+        />
+      )}
+
+      {/* Approval/Rejection Modal */}
+      {showApprovalModal && selectedAdmission && (
+        <ApprovalModal
+          isOpen={showApprovalModal}
+          onClose={() => {
+            setShowApprovalModal(false);
+            setSelectedAdmission(null);
+          }}
+          onApprove={(data) => {
+            approveAdmission({
+              admission: selectedAdmission,
+              ...data
+            });
+            setShowApprovalModal(false);
+            setShowDetails(false);
+          }}
+          onReject={(reason) => {
+            setShowApprovalModal(false);
+          }}
+          onDelete={handleDelete}
+          applicantName={selectedAdmission.fullName || 'Applicant'}
+        />
+      )}
+
+      {/* Warning Modal */}
+      {showDeleteWarning && admissionToDelete && (
+        <WarningModal
+          isOpen={showDeleteWarning}
+          onClose={() => {
+            setShowDeleteWarning(false);
+            setAdmissionToDelete(null);
+          }}
+          onConfirm={() => {
+            handleDelete(admissionToDelete._id);
+            setShowDeleteWarning(false);
+            setAdmissionToDelete(null);
+          }}
+          title="Delete Application"
+          message={`Are you sure you want to delete ${admissionToDelete.fullName}'s application? This action cannot be undone.`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          type="danger"
         />
       )}
     </div>

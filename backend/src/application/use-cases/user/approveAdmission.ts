@@ -1,8 +1,20 @@
 // backend/src/application/use-cases/admission/approveAdmission.ts
 import { Admission } from '../../../infrastructure/database/mongoose/models/admission.model';
+import { emailService } from '../../../infrastructure/services/email.service';
+import { config } from '../../../config/config';
+
+interface ApproveAdmissionParams {
+  id: string;
+  additionalInfo?: {
+    programDetails?: string;
+    startDate?: string;
+    scholarshipInfo?: string;
+    additionalNotes?: string;
+  };
+}
 
 class ApproveAdmission {
-  async execute(id: string): Promise<void> {
+  async execute({ id, additionalInfo }: ApproveAdmissionParams): Promise<void> {
     console.log(`Executing approveAdmission use case with id: ${id}`);
 
     const admission = await Admission.findById(id);
@@ -15,8 +27,45 @@ class ApproveAdmission {
       throw new Error('Admission already processed');
     }
 
-    admission.status = 'approved';
+    // Instead of directly approving, we send an email with a confirmation link
+    const confirmationToken = this.generateConfirmationToken();
+    
+    // Save the token and any additional info to the admission document
+    admission.confirmationToken = confirmationToken;
+    admission.tokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Token valid for 7 days
+    
+    if (additionalInfo) {
+      admission.programDetails = additionalInfo.programDetails;
+      admission.startDate = additionalInfo.startDate;
+      admission.scholarshipInfo = additionalInfo.scholarshipInfo;
+      admission.additionalNotes = additionalInfo.additionalNotes;
+    }
+    
     await admission.save();
+    
+    // Create confirmation links
+    const acceptUrl = `${config.frontendUrl}/confirm-admission/${id}/accept?token=${confirmationToken}`;
+    const rejectUrl = `${config.frontendUrl}/confirm-admission/${id}/reject?token=${confirmationToken}`;
+    
+    // Send email to the applicant
+    await emailService.sendAdmissionOfferEmail({
+      to: admission.personal.emailAddress,
+      name: admission.personal.fullName,
+      program: admission.program,
+      programDetails: admission.programDetails || '',
+      startDate: admission.createdAt.toDateString() || '',
+      scholarshipInfo: admission.scholarshipInfo || '',
+      additionalNotes: admission.additionalNotes || '',
+      acceptUrl,
+      rejectUrl,
+      expiryDays: 7
+    });
+  }
+  
+  private generateConfirmationToken(): string {
+    // Generate a random token
+    return Math.random().toString(36).substring(2, 15) + 
+           Math.random().toString(36).substring(2, 15);
   }
 }
 

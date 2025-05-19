@@ -14,6 +14,7 @@ const studentTypeOptions = [
 
 interface EducationProps {
   initialData?: EducationFormData;
+  onSave: (values: EducationFormData) => void;
 }
 
 interface EducationRef {
@@ -35,7 +36,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
-export const Education = forwardRef<EducationRef, EducationProps>(({ initialData }, ref) => {
+export const Education = forwardRef<EducationRef, EducationProps>(({ initialData, onSave }, ref) => {
   const methods = useFormContext();
   const { control, formState: { errors }, setValue, trigger, watch, getValues } = methods;
 
@@ -44,9 +45,7 @@ export const Education = forwardRef<EducationRef, EducationProps>(({ initialData
 
   // Initialize form with initialData
   useEffect(() => {
-    console.log('Education: Received initialData:', initialData);
     if (initialData) {
-      // Set each field individually to ensure proper initialization
       setValue('studentType', initialData.studentType || '');
       
       if (initialData.local) {
@@ -60,8 +59,6 @@ export const Education = forwardRef<EducationRef, EducationProps>(({ initialData
       if (initialData.international) {
         setValue('international', initialData.international);
       }
-      
-      console.log('Education: Initialized with data:', initialData);
     }
   }, [initialData, setValue]);
 
@@ -70,22 +67,19 @@ export const Education = forwardRef<EducationRef, EducationProps>(({ initialData
     trigger: async () => {
       try {
         const currentValues = getValues();
-        console.log('Education: trigger called, form values:', currentValues);
         
         // First check if studentType is selected
         if (!currentValues.studentType) {
-          console.log('Education: No student type selected');
           return false;
         }
         
         // Validate the form
         const isValid = await trigger();
         
-        console.log('Education: Validation result:', { 
-          isValid, 
-          studentType: currentValues.studentType,
-          errors: JSON.stringify(errors, null, 2) 
-        });
+        if (isValid) {
+          // Call onSave with the current form values
+          onSave(currentValues);
+        }
         
         return isValid;
       } catch (error) {

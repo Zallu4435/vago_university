@@ -21,13 +21,15 @@ interface FormSubmissionFlowProps {
   onPaymentComplete: () => void;
   onBackToForm?: () => void;
   onConfirm?: () => void;
+  token: string | null;
 }
 
 export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
   formData,
   onPaymentComplete,
   onBackToForm,
-  onConfirm
+  onConfirm,
+  token
 }) => {
   const [showPayment, setShowPayment] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -35,6 +37,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
     success: boolean | null;
     message: string | null;
   }>({ success: null, message: null });
+
 
   // Utility function to format different types of data
   const formatValue = (value: any): string => {
@@ -302,6 +305,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
       formData={formData}
       onComplete={() => setShowConfirmation(true)}
       onPrevious={() => setShowPayment(false)}
+      token={token}
     />
   );
 };

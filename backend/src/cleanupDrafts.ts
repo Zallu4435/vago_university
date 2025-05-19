@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import { config } from "./config/env";
+import { config } from "./config/config";
 import { admissionDraft } from "./infrastructure/database/mongoose/models/admissionDraft.model";
 
 async function cleanupOldDrafts() {
   try {
-    await mongoose.connect(config.mongoUri);
+    await mongoose.connect(config.database.mongoUri);
     console.log("MongoDB connected for cleanup");
 
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);

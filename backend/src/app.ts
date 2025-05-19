@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import { config } from "./config/env";
+import { config } from "./config/config";
 import indexRoute from './presentation/routes/index'
 
 const app = express();
@@ -28,7 +28,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 
 // MongoDB connection
 mongoose
-  .connect(config.mongoUri)
+  .connect(config.database.mongoUri)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 

@@ -84,7 +84,7 @@ class GetAdmissions {
     const projection = {
       _id: 1,
       'personal.fullName': 1,
-      'personal.email': 1,
+      'personal.emailAddress': 1,
       createdAt: 1,
       status: 1,
       program: 1,
@@ -99,10 +99,11 @@ class GetAdmissions {
       .lean();
 
     // Map fields to required structure
+    console.log(admissionsRaw, "jijijijijij")
     const admissions = admissionsRaw.map((admission) => ({
       _id: admission._id.toString(),
       fullName: admission.personal?.fullName || 'N/A',
-      email: admission.personal?.email || 'N/A',
+      email: admission.personal?.emailAddress || 'N/A',
       createdAt: admission.createdAt.toISOString(),
       status: admission.status || 'pending',
       program: admission.program || 'N/A',

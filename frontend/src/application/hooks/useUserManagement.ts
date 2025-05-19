@@ -46,13 +46,30 @@ export const useUserManagement = () => {
   });
 
   const { mutateAsync: approveAdmission } = useMutation({
-    mutationFn: (id: string) => userService.approveAdmission(id),
+    mutationFn: (data: { id: string; approvalData: {
+      programDetails: string;
+      startDate: string;
+      scholarshipInfo: string;
+      additionalNotes: string;
+    }}) => userService.approveAdmission(data.id, data.approvalData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admissions'] });
-      toast.success('Admission approved');
+      toast.success('Admission approved successfully');
     },
     onError: (error: any) => {
       toast.error(error.message || 'Failed to approve admission');
+    },
+  });
+
+  const { mutateAsync: rejectAdmission } = useMutation({
+    mutationFn: (data: { id: string; reason: string }) => 
+      userService.rejectAdmission(data.id, data.reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admissions'] });
+      toast.success('Admission rejected successfully');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to reject admission');
     },
   });
 
@@ -78,6 +95,7 @@ export const useUserManagement = () => {
     error,
     getAdmissionDetails,
     approveAdmission,
+    rejectAdmission,
     deleteAdmission,
   };
 };

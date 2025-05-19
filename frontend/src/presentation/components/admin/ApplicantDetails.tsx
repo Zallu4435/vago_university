@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FiUser, FiFileText, FiChevronRight, FiXCircle, FiCalendar, FiBook, FiGlobe } from 'react-icons/fi';
+import ApprovalModal from './ApprovalModal';
+import WarningModal from '../WarningModal';
 
 interface ApplicantDetailsProps {
   selectedApplicant: any;
   showDetails: boolean;
   setShowDetails: (value: boolean) => void;
-  approveAdmission: (id: string) => void;
+  approveAdmission: (data: any) => void;
   deleteAdmission: (id: string) => void;
   expandedSections: { [key: string]: boolean };
   toggleSection: (section: string) => void;
@@ -22,6 +24,9 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
   toggleSection,
   formatDate,
 }) => {
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showWarningModal, setShowWarningModal] = useState(false);
+
   if (!selectedApplicant || !showDetails) return null;
 
   return (
@@ -280,19 +285,13 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
           {(selectedApplicant.admission?.status || 'pending') === 'pending' && (
             <div className="mt-8 flex space-x-4">
               <button
-                onClick={() => {
-                  approveAdmission(selectedApplicant.admission._id);
-                  setShowDetails(false);
-                }}
+                onClick={() => setShowApprovalModal(true)}
                 className="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
               >
                 Approve
               </button>
               <button
-                onClick={() => {
-                  deleteAdmission(selectedApplicant.admission._id);
-                  setShowDetails(false);
-                }}
+                onClick={() => setShowWarningModal(true)}
                 className="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
               >
                 Delete
@@ -300,6 +299,46 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             </div>
           )}
         </div>
+
+        {showApprovalModal && (
+          <ApprovalModal
+            isOpen={showApprovalModal}
+            onClose={() => setShowApprovalModal(false)}
+            onApprove={(data) => {
+              approveAdmission({
+                admission: selectedApplicant.admission,
+                ...data
+              });
+              setShowApprovalModal(false);
+              setShowDetails(false);
+            }}
+            onReject={(reason) => {
+              setShowApprovalModal(false);
+            }}
+            onDelete={() => {
+              setShowApprovalModal(false);
+              setShowWarningModal(true);
+            }}
+            applicantName={selectedApplicant.admission?.personal?.fullName}
+          />
+        )}
+
+        {showWarningModal && (
+          <WarningModal
+            isOpen={showWarningModal}
+            onClose={() => setShowWarningModal(false)}
+            onConfirm={() => {
+              deleteAdmission(selectedApplicant.admission._id);
+              setShowWarningModal(false);
+              setShowDetails(false);
+            }}
+            title="Delete Application"
+            message={`Are you sure you want to delete ${selectedApplicant.admission?.personal?.fullName}'s application? This action cannot be undone.`}
+            confirmText="Delete"
+            cancelText="Cancel"
+            type="danger"
+          />
+        )}
       </div>
     </div>
   );

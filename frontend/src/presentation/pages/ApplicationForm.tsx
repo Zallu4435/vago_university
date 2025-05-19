@@ -13,7 +13,7 @@ import { useApplicationForm, useApplicationData } from '../../application/hooks/
 import styles from './ApplicationForm.module.css';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../infrastructure/store/store';
+import { RootState } from '../redux/store';
 import { useNavigate } from 'react-router-dom';
 
 // Replace the placeholder useAuth hook with Redux selector
@@ -31,6 +31,7 @@ interface FormData {
   otherInformation?: OtherInformationSection;
   documents?: DocumentUploadSection;
   declaration?: DeclarationSection;
+  registerId?: string;
 }
 
 export const ApplicationForm: React.FC = () => {
@@ -47,6 +48,7 @@ export const ApplicationForm: React.FC = () => {
   const educationFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
   const achievementsFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
   const documentsFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
+  const choiceOfStudyRef = useRef<{ trigger: () => Promise<boolean> }>(null);
 
   const { token, user, collection } = useAuth();
   const [applicationId, setApplicationId] = useState<string | undefined>(undefined);
@@ -75,6 +77,7 @@ export const ApplicationForm: React.FC = () => {
       otherInformation: undefined,
       documents: undefined,
       declaration: { privacyPolicy: false, marketingEmail: false, marketingCall: false },
+      registerId: user?.id,
     },
     mode: 'onSubmit',
   });
@@ -198,13 +201,13 @@ export const ApplicationForm: React.FC = () => {
     { id: 'declaration', label: 'Declaration', isActive: activeTab === 'declaration' },
   ];
 
-  const handleTabClick = (tabId: string) => {
-    setActiveTab(tabId);
-    const newIndex = tabs.findIndex((tab) => tab.id === tabId);
-    setFormProgress(Math.floor((newIndex / (tabs.length - 1)) * 100));
-    setValidationAttempted(false);
-    setSaveError(null);
-  };
+  // const handleTabClick = (tabId: string) => {
+  //   setActiveTab(tabId);
+  //   const newIndex = tabs.findIndex((tab) => tab.id === tabId);
+  //   setFormProgress(Math.floor((newIndex / (tabs.length - 1)) * 100));
+  //   setValidationAttempted(false);
+  //   setSaveError(null);
+  // };
 
   const handleNextTab = () => {
     const currentIndex = tabs.findIndex((tab) => tab.id === activeTab);
@@ -252,14 +255,16 @@ export const ApplicationForm: React.FC = () => {
     }
     try {
       setSaveError(null);
-      setValue('choiceOfStudy', choices, { shouldValidate: false });
-      console.log('Updated choiceOfStudy:', choices);
+      // Save to backend first
       await saveChoiceOfStudy({ applicationId: formData.applicationId, data: choices });
-      console.log('Choice of study saved successfully');
+      console.log('Choice of study saved to backend:', choices);
+      // Then update form data
+      setValue('choiceOfStudy', choices, { shouldValidate: false });
       calculateFormProgress({ ...formData, choiceOfStudy: choices });
     } catch (error) {
       console.error('Error saving choiceOfStudy:', error);
       setSaveError('Failed to update choice of study. Please try again.');
+      throw error; // Re-throw to prevent form progression
     }
   };
 
@@ -294,27 +299,22 @@ export const ApplicationForm: React.FC = () => {
       setSaveError('No application ID found.');
       return;
     }
-    const currentData = watch('achievements');
-    if (JSON.stringify(currentData) === JSON.stringify(data)) {
-      console.log('No changes in achievements data, skipping update');
-      return;
-    }
-    if (validate) {
-      if (!data.hasNoAchievements && data.achievements.length === 0) {
-        setSaveError('Please add at least one achievement or select "No Achievements to Report".');
-        return;
-      }
-    }
+
     try {
       setSaveError(null);
-      setValue('achievements', data, { shouldValidate: false });
-      console.log('Updated achievements:', data);
+      console.log('Saving achievements to backend:', data);
+      
+      // Save to backend first
       await saveAchievements({ applicationId: formData.applicationId, data });
       console.log('Achievements saved successfully');
+      
+      // Then update form data
+      setValue('achievements', data, { shouldValidate: false });
       calculateFormProgress({ ...formData, achievements: data });
     } catch (error) {
       console.error('Error saving achievements:', error);
       setSaveError('Failed to update achievements. Please try again.');
+      throw error; // Re-throw to prevent form progression
     }
   };
 
@@ -417,19 +417,26 @@ export const ApplicationForm: React.FC = () => {
       }
     } else if (activeTab === 'choiceOfStudy') {
       setValidationAttempted(true);
-      const isValid = formData.choiceOfStudy && formData.choiceOfStudy.length > 0;
-      console.log('ChoiceOfStudy validation result:', { isValid, choiceOfStudy: formData.choiceOfStudy });
-      if (isValid) {
-        await saveChoiceOfStudy({ applicationId: formData.applicationId, data: formData.choiceOfStudy });
-        console.log('choice of study saved:', formData.choiceOfStudy);
-        handleNextTab();
-      } else {
-        alert('Please add at least one programme choice.');
+      if (choiceOfStudyRef.current) {
+        const isValid = await choiceOfStudyRef.current.trigger();
+        console.log('ChoiceOfStudy validation result:', { isValid, choiceOfStudy: formData.choiceOfStudy });
+        if (isValid) {
+          try {
+            await handleUpdateChoiceOfStudy(formData.choiceOfStudy || []);
+            handleNextTab();
+          } catch (error) {
+            console.error('Error saving choice of study:', error);
+            setSaveError('Failed to save choice of study. Please try again.');
+          }
+        } else {
+          alert('Please add at least one programme choice.');
+        }
       }
     } else if (activeTab === 'education') {
       setValidationAttempted(true);
       if (educationFormRef.current) {
         const isValid = await educationFormRef.current.trigger();
+        console.log(formData, "formData.education")
         console.log('Education validation result:', { isValid, education: formData.education });
         if (isValid && formData.education?.studentType) {
           await saveEducation({ applicationId: formData.applicationId, data: formData.education });
@@ -448,15 +455,21 @@ export const ApplicationForm: React.FC = () => {
       }
     } else if (activeTab === 'achievements') {
       setValidationAttempted(true);
-      console.log(formData.achievements, "formData.achievements")
       if (achievementsFormRef.current) {
         const isValid = await achievementsFormRef.current.trigger();
         console.log('Achievements validation result:', { isValid, achievements: formData.achievements });
         if (isValid && formData.achievements) {
-          await handleUpdateAchievements(formData.achievements, true);
-          console.log('achievements saved:', formData.achievements);
-          if (!saveError) {
-            handleNextTab();
+          try {
+            // Save to backend
+            await handleUpdateAchievements(formData.achievements, true);
+            console.log('achievements saved successfully');
+            
+            if (!saveError) {
+              handleNextTab();
+            }
+          } catch (error) {
+            console.error('Error saving achievements:', error);
+            setSaveError('Failed to save achievements. Please try again.');
           }
         } else {
           alert(
@@ -616,6 +629,8 @@ export const ApplicationForm: React.FC = () => {
           setShowPayment(true);
         }}
         onBackToForm={() => setShowSummary(false)}
+        token={token}
+        isPayment={false}
       />
     );
   }
@@ -623,7 +638,10 @@ export const ApplicationForm: React.FC = () => {
   if (showPayment) {
     return (
       <FormSubmissionFlow
-        formData={formData}
+        formData={{
+          ...formData,
+          registerId: user?.id
+        }}
         onPaymentComplete={() => {
           setShowPayment(false);
           setActiveTab('personalDetails');
@@ -637,6 +655,8 @@ export const ApplicationForm: React.FC = () => {
           setValue('documents', undefined, { shouldValidate: false });
           setValue('declaration', { privacyPolicy: false, marketingEmail: false, marketingCall: false }, { shouldValidate: false });
         }}
+        token={token}
+        isPayment={true}
       />
     );
   }
@@ -735,8 +755,9 @@ export const ApplicationForm: React.FC = () => {
           )}
           {activeTab === 'choiceOfStudy' && (
             <ChoiceOfStudy
-              choices={formData.choiceOfStudy || []}
-              onChange={handleUpdateChoiceOfStudy}
+              initialData={formData.choiceOfStudy}
+              onSave={handleUpdateChoiceOfStudy}
+              ref={choiceOfStudyRef}
             />
           )}
           {activeTab === 'education' && (
@@ -749,7 +770,7 @@ export const ApplicationForm: React.FC = () => {
           {activeTab === 'achievements' && (
             <Achievements
               initialData={formData.achievements}
-              onSave={(data) => handleUpdateAchievements(data, false)}
+              onSave={handleUpdateAchievements}
               ref={achievementsFormRef}
             />
           )}
@@ -853,4 +874,4 @@ export const ApplicationForm: React.FC = () => {
       </div>
     </FormProvider>
   );
-};
+};  

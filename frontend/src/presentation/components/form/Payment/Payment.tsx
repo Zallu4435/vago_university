@@ -17,24 +17,35 @@ interface PaymentProps {
   };
   onComplete: () => void;
   onPrevious: () => void;
+  token: string | null;
 }
 
 export const Payment: React.FC<PaymentProps> = ({ 
   formData, 
   onComplete, 
-  onPrevious 
+  onPrevious,
+  token
 }) => {
   const [selectedMethod, setSelectedMethod] = useState<string>('stripe');
   const [isProcessing, setIsProcessing] = useState(false);
-  const { processPayment, submitApplication } = useApplicationForm();
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const { processPayment, submitApplication } = useApplicationForm(token);
   const [submissionStatus, setSubmissionStatus] = useState<{
     success: boolean | null;
     message: string | null;
   }>({ success: null, message: null });
 
   const handlePayment = async (paymentDetails?: { paymentMethodId: string }) => {
-    console.log('Starting payment process', { formData, selectedMethod, paymentDetails });
+    if (!token) {
+      setSubmissionStatus({
+        success: false,
+        message: 'Your session has expired. Please log in again.'
+      });
+      return;
+    }
+
     setIsProcessing(true);
+    setPaymentError(null);
     setSubmissionStatus({ success: null, message: null });
 
     try {
@@ -87,6 +98,7 @@ export const Payment: React.FC<PaymentProps> = ({
     } catch (error: any) {
       console.error('Payment and Submission Error:', error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to submit application. Please try again.';
+      setPaymentError(errorMessage);
       setSubmissionStatus({
         success: false,
         message: errorMessage,
@@ -107,6 +119,14 @@ export const Payment: React.FC<PaymentProps> = ({
       </div>
 
       <div className="p-6 space-y-6">
+        {/* Error Messages */}
+        {paymentError && (
+          <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-lg flex items-start gap-3">
+            <FaExclamationCircle className="text-red-500 mt-0.5 flex-shrink-0" size={20} />
+            <p className="text-sm text-red-800">{paymentError}</p>
+          </div>
+        )}
+
         {/* Status Notification */}
         {submissionStatus.message && (
           <div className={`
@@ -162,6 +182,7 @@ export const Payment: React.FC<PaymentProps> = ({
             amount={1000.00}
             currency="INR"
             onSubmit={handlePayment}
+            isProcessing={isProcessing}
           />
         )}
       </div>
@@ -173,7 +194,6 @@ export const Payment: React.FC<PaymentProps> = ({
           variant="outline"
           type="button"
           onClick={onPrevious}
-          icon={<FaArrowLeft />}
           className="text-cyan-600 border-cyan-200 hover:bg-cyan-50 px-4 py-2 rounded-lg flex items-center gap-2"
         />
       </div>

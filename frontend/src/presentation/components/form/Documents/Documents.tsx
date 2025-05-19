@@ -46,25 +46,19 @@ export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
       trigger: async () => {
         const isValid = await trigger();
         console.log('Documents trigger validation result:', { isValid, errors });
+        
+        // If validation passes, call onSave with the current data
+        if (isValid) {
+          const currentData = {
+            documents: watch('documents')
+          };
+          console.log('Calling onSave with current data:', currentData);
+          onSave(currentData);
+        }
+        
         return isValid;
       },
     }));
-
-    // Watch form data and call onSave when form changes
-    useEffect(() => {
-      const subscription = watch((formData, { name, type }) => {
-        console.log('Documents watch triggered', {
-          changedField: name,
-          type,
-          errors: Object.keys(errors).length > 0 ? errors : 'No errors',
-        });
-        if (formData.documents && onSave) {
-          console.log('Calling onSave with formData:', formData);
-          onSave(formData);
-        }
-      });
-      return () => subscription.unsubscribe();
-    }, [watch, onSave, errors]);
 
     const handleFileUpload = async (id: string, file: File) => {
       if (!file) return;
@@ -87,7 +81,6 @@ export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
       );
 
       setValue('documents', updatedDocuments, { shouldValidate: true });
-      onSave({ documents: updatedDocuments });
     };
 
     const handleFileRemove = (id: string) => {
@@ -96,7 +89,6 @@ export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
         doc.id === id ? { ...doc, fileName: undefined, fileType: undefined } : doc
       );
       setValue('documents', updatedDocuments, { shouldValidate: true });
-      onSave({ documents: updatedDocuments });
     };
 
     return (

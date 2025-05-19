@@ -45,36 +45,38 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean> }, Prop
     mode: 'onSubmit',
   });
 
-  const { setValue, watch, formState: { errors }, trigger } = methods;
+  const { setValue, watch, formState: { errors }, trigger, reset } = methods;
   const achievementData = watch();
   const previousDataRef = useRef<AchievementSection | null>(null);
 
-
-
   useEffect(() => {
-    const isInitialRender = previousDataRef.current === null;
-    const hasChanged = JSON.stringify(previousDataRef.current) !== JSON.stringify(achievementData);
-
-    const criticalFieldsChanged =
-      previousDataRef.current &&
-      (JSON.stringify(previousDataRef.current.questions) !== JSON.stringify(achievementData.questions) ||
-        JSON.stringify(previousDataRef.current.achievements) !== JSON.stringify(achievementData.achievements) ||
-        previousDataRef.current.hasNoAchievements !== achievementData.hasNoAchievements);
-
-    if (isInitialRender || (hasChanged && criticalFieldsChanged)) {
-      previousDataRef.current = JSON.parse(JSON.stringify(achievementData));
-      if (!isInitialRender && criticalFieldsChanged) {
-        console.log('Achievements: Saving data', achievementData);
-        onSave(achievementData);
-      }
+    // Only update the form data without saving to backend
+    if (initialData) {
+      reset(initialData, { keepDirty: false });
+      console.log('Achievements: Initialized with data:', initialData);
     }
-  }, [achievementData, onSave]);
+  }, [initialData, reset]);
 
   useImperativeHandle(ref, () => ({
     trigger: async () => {
       const isValid = await trigger(['questions', 'achievements', 'hasNoAchievements'], { shouldFocus: true });
-      console.log(isValid, 'from thie deom =psnosjndosndjosndjonsdjosndonsondjondjosndjon')
       console.log('Achievements: Validation result', { isValid, errors, achievementData });
+      
+      // If validation passes, call onSave with the current data
+      if (isValid) {
+        // Get the current form data directly from the form
+        const currentData = {
+          questions: achievementData.questions,
+          achievements: achievementData.achievements,
+          hasNoAchievements: achievementData.hasNoAchievements,
+          showModal: achievementData.showModal,
+          newAchievement: achievementData.newAchievement,
+          editingIndex: achievementData.editingIndex
+        };
+        console.log('Calling onSave with current data:', currentData);
+        onSave(currentData);
+      }
+      
       return isValid;
     },
   }));

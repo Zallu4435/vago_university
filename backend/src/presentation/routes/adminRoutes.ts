@@ -13,6 +13,8 @@ router.get('/:id', admissionController.getAdmissionById);
 // Approve an admission
 router.post('/:id/approve', admissionController.approveAdmission);
 
+router.post('/:id/reject', admissionController.rejectAdmission);
+
 // Delete an admission
 router.delete('/:id', admissionController.deleteAdmission);
 

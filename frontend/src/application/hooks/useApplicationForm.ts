@@ -149,8 +149,23 @@ export const useApplicationForm = (token: string | null) => {
   // Process payment
   const { mutateAsync: processPayment, isLoading: isProcessingPayment } = useMutation({
     mutationFn: async ({ applicationId, paymentDetails }: { applicationId: string, paymentDetails: any }) => {
-      if (!token) throw new Error('Authentication token is missing');
-      return await applicationService.processPayment(applicationId, paymentDetails, token);
+
+      console.log(token, 'token')
+      if (!token) {
+        console.error('useApplicationForm: Token is missing');
+        throw new Error('Authentication token is missing. Please log in again.');
+      }
+
+      console.log('Processing payment with token:', token);
+
+      try {
+        return await applicationService.processPayment(applicationId, paymentDetails, token);
+      } catch (error: any) {
+        if (error.message.includes('token') || error.response?.status === 401) {
+          throw new Error('Your session has expired. Please log in again.');
+        }
+        throw error;
+      }
     },
     onSuccess: (data) => {
       toast.success(data.message || 'Payment processed successfully!');

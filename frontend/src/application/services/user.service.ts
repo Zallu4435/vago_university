@@ -31,11 +31,24 @@ class UserService {
     }
   }
 
-  async approveAdmission(id: string): Promise<void> {
+  async approveAdmission(id: string, data: {
+    programDetails: string;
+    startDate: string;
+    scholarshipInfo: string;
+    additionalNotes: string;
+  }): Promise<void> {
     try {
-      await httpClient.post(`/admin/admissions/${id}/approve`);
+      await httpClient.post(`/admin/admissions/${id}/approve`, data);
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to approve admission');
+    }
+  }
+
+  async rejectAdmission(id: string, reason: string): Promise<void> {
+    try {
+      await httpClient.post(`/admin/admissions/${id}/reject`, { reason });
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to reject admission');
     }
   }
 

@@ -15,7 +15,7 @@ class DeleteAdmission {
       throw new Error('Can only delete pending admissions');
     }
 
-    await Admission.deleteOne({ _id: id });
+    // await Admission.deleteOne({ _id: id });
   }
 }
 

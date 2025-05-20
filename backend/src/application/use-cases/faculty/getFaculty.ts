@@ -44,7 +44,7 @@ class GetFaculty {
       const skip = (page - 1) * limit;
 
       const faculty = await FacultyRegister.find(query)
-        .select('fullName email phone department qualification experience aboutMe cvUrl certificatesUrl createdAt')
+        .select('fullName email phone department qualification experience aboutMe cvUrl certificatesUrl createdAt status')
         .skip(skip)
         .limit(limit)
         .lean()

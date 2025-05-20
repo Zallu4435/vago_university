@@ -12,4 +12,11 @@ router.get('/:id', facultyController.getFacultyById);
 // Approve a faculty registration
 router.post('/:id/approve', facultyController.approveFaculty);
 
+router.post('/:id/reject', facultyController.rejectFaculty);
+
+// Delete an admission
+// router.delete('/:id', facultyController.deleteAdmission);
+
+router.post('/:id/confirm/:action', facultyController.confirmOffer);
+
 export default router;

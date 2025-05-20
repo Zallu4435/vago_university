@@ -3,6 +3,8 @@ import { getFaculty } from '../../application/use-cases/faculty/getFaculty';
 import { getFacultyById } from '../../application/use-cases/faculty/getFacultyById';
 import { approveFaculty } from '../../application/use-cases/faculty/approveFaculty';
 import mongoose from 'mongoose';
+import { confirmFacultyOffer } from '../../application/use-cases/faculty/confirmFacultyOffer';
+import { rejectFaculty } from '../../application/use-cases/faculty/rejectFaculty';
 
 class FacultyController {
   async getFaculty(req: Request, res: Response, next: NextFunction) {
@@ -75,6 +77,7 @@ class FacultyController {
   async approveFaculty(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
+      console.log(req, "frontend request")
       const { department, startDate, additionalNotes } = req.body;
 
       console.log(`Received POST /api/admin/faculty/${id}/approve with details:`, {
@@ -85,7 +88,7 @@ class FacultyController {
 
       if (!mongoose.isValidObjectId(id)) {
         return res.status(400).json({ error: 'Invalid faculty ID' });
-      }
+      }  
 
       if (!department || !startDate) {
         return res.status(400).json({ error: 'Department and startDate are required' });
@@ -103,6 +106,60 @@ class FacultyController {
       res.status(200).json({ message: 'Faculty approval email sent' });
     } catch (err) {
       console.error(`Error in approveFaculty:`, err);
+      next(err);
+    }
+  }
+
+   async rejectFaculty(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      console.log(`Received POST /api/admin/faculty/${id}/reject`);
+
+      if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({ error: 'Invalid faculty ID' });
+      }
+
+      await rejectFaculty.execute(id);
+
+      res.status(200).json({ message: 'Faculty registration rejected' });
+    } catch (err) {
+      console.error(`Error in rejectFaculty:`, err);
+      next(err);
+    }
+  }
+
+  async confirmOffer(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id, action } = req.params;
+      const { token } = req.query;
+
+      console.log(`Received POST /api/admin/faculty/${id}/confirm/${action}`);
+
+      if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({ error: 'Invalid faculty ID' });
+      }
+
+      if (!token || typeof token !== 'string') {
+        return res.status(400).json({ error: 'Token is required' });
+      }
+
+      if (action !== 'accept' && action !== 'reject') {
+        return res.status(400).json({ error: 'Invalid action' });
+      }
+
+      await confirmFacultyOffer.execute({
+        facultyId: id,
+        token,
+        action: action as 'accept' | 'reject',
+      });
+
+      res.status(200).json({
+        message: action === 'accept'
+          ? 'Faculty offer accepted and faculty account created'
+          : 'Faculty offer rejected',
+      });
+    } catch (err) {
+      console.error(`Error in confirmOffer:`, err);
       next(err);
     }
   }

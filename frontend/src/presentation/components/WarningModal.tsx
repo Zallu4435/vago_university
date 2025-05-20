@@ -45,6 +45,12 @@ const WarningModal: React.FC<WarningModalProps> = ({
           button: 'bg-blue-600 hover:bg-blue-700 text-white',
           border: 'border-blue-200'
         };
+      default:
+        return {
+          icon: 'text-red-600',
+          button: 'bg-red-600 hover:bg-red-700 text-white',
+          border: 'border-red-200'
+        };
     }
   };
 

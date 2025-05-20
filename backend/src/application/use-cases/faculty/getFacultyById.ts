@@ -16,6 +16,8 @@ class GetFacultyById {
       return null;
     }
 
+    console.log(faculty)
+
     return {
       faculty,
     };

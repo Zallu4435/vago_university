@@ -33,13 +33,6 @@ class ApproveAdmission {
     // Save the token and any additional info to the admission document
     admission.confirmationToken = confirmationToken;
     admission.tokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Token valid for 7 days
-    
-    // if (additionalInfo) {
-    //   admission.programDetails = additionalInfo.programDetails;
-    //   admission.startDate = additionalInfo.startDate;
-    //   admission.scholarshipInfo = additionalInfo.scholarshipInfo;
-    //   admission.additionalNotes = additionalInfo.additionalNotes;
-    // }
 
     admission.status = 'offered';
     

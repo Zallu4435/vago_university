@@ -41,7 +41,7 @@ export const useFacultyManagement = () => {
   // Approve faculty mutation
   const approveFaculty = useMutation({
     mutationFn: (data: { id: string; approvalData: FacultyApprovalData }) => 
-      facultyService.approveFaculty(data),
+      facultyService.approveFaculty(data.id, data.approvalData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['faculty'] });
       toast.success('Faculty request approved successfully');

@@ -35,6 +35,7 @@ import FacultyCoursesPage from './presentation/pages/FacultyDashboard';
 import FacultyRequestForm from './presentation/pages/Auth/FacultyRequest';
 import ConfirmAdmission from './presentation/pages/ConfirmAdmission';
 import FacultyManagement from './presentation/pages/admin/FacultyManagement';
+import ConfirmFaculty from './presentation/pages/ConfirmFaculty';
 
 const App: React.FC = () => {
   const { isError, error } = useRefreshToken();
@@ -128,6 +129,9 @@ const App: React.FC = () => {
             <Route path="faculty/courses" element={<FacultyCoursesPage />} />
           </Route>
         </Route>
+
+        {/* Confirm Faculty Route */}
+        <Route path="/confirm-faculty/:id/:action" element={<ConfirmFaculty />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/register" replace />} />

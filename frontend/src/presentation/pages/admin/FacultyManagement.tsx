@@ -18,7 +18,6 @@ import {
 } from 'react-icons/fi';
 import { debounce } from 'lodash';
 import WarningModal from '../../components/WarningModal';
-import ApprovalModal from '../../components/admin/ApprovalModal';
 import FacultyDetailsModal from '../../components/admin/FacultyDetailsModal';
 
 const FacultyManagement = () => {
@@ -31,6 +30,7 @@ const FacultyManagement = () => {
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
   const [facultyToDelete, setFacultyToDelete] = useState(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [showApproveWarning, setShowApproveWarning] = useState(false);
 
   const {
     faculty,
@@ -87,25 +87,25 @@ const FacultyManagement = () => {
 
   const handleActionClick = (faculty) => {
     setSelectedFaculty(faculty);
-    setShowApprovalModal(true);
+    setShowApproveWarning(true);
   };
 
-  const handleApprove = async (data) => {
-    try {
-      await approveFaculty({
-        id: selectedFaculty._id,
-        approvalData: {
-          department: data.department || '',
-          role: data.role || '',
-          startDate: data.startDate || '',
-          additionalNotes: data.additionalNotes || ''
-        }
-      });
-      setShowApprovalModal(false);
-      setSelectedFaculty(null);
-    } catch (error) {
-      console.error('Error approving faculty:', error);
-    }
+  const handleApprove = () => {
+    if (!selectedFaculty) return;
+    
+    const approvalData = {
+      department: selectedFaculty.department || '',
+      role: 'Faculty',
+      startDate: new Date().toISOString(),
+      additionalNotes: ''
+    };
+
+    approveFaculty.mutate({
+      id: selectedFaculty._id,
+      approvalData
+    });
+    setShowApproveWarning(false);
+    setSelectedFaculty(null);
   };
 
   const handleReject = async (reason) => {
@@ -429,12 +429,9 @@ const FacultyManagement = () => {
                             </button>
 
                             <button
-                              className={`p-1 border border-gray-300 text-green-600 hover:bg-green-50 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                                faculty.status !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''
-                              }`}
+                              className="p-1 border border-gray-300 text-green-600 hover:bg-green-50 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                               onClick={() => handleActionClick(faculty)}
-                              disabled={faculty.status !== 'pending'}
-                              title="Take Action"
+                              title="Approve"
                             >
                               <FiCheckCircle size={16} />
                             </button>
@@ -509,18 +506,20 @@ const FacultyManagement = () => {
         </div>
       </div>
 
-      {/* Approval/Rejection Modal */}
-      {showApprovalModal && selectedFaculty && (
-        <ApprovalModal
-          isOpen={showApprovalModal}
+      {/* Approval Confirmation Modal */}
+      {showApproveWarning && selectedFaculty && (
+        <WarningModal
+          isOpen={showApproveWarning}
           onClose={() => {
-            setShowApprovalModal(false);
+            setShowApproveWarning(false);
             setSelectedFaculty(null);
           }}
-          onApprove={handleApprove}
-          onReject={handleReject}
-          onDelete={handleDelete}
-          applicantName={selectedFaculty.fullName || 'Applicant'}
+          onConfirm={handleApprove}
+          title="Approve Faculty"
+          message={`Are you sure you want to approve ${selectedFaculty.fullName}'s application?`}
+          confirmText="Approve"
+          cancelText="Cancel"
+          type="success"
         />
       )}
 

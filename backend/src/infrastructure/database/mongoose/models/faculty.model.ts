@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 export interface IFaculty extends Document {
   firstName: string;
@@ -21,6 +22,22 @@ const facultySchema = new Schema<IFaculty>({
   },
   password: { type: String, required: true, minlength: 8 },
   createdAt: { type: Date, default: Date.now },
+});
+
+// Pre-save middleware to hash password
+facultySchema.pre('save', async function (next) {
+  const faculty = this as IFaculty;
+
+  // Only hash the password if it has been modified (or is new)
+  if (!faculty.isModified('password')) return next();
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    faculty.password = await bcrypt.hash(faculty.password, salt);
+    next();
+  } catch (err) {
+    next(err as Error);
+  }
 });
 
 export const Faculty = mongoose.model<IFaculty>('Faculty', facultySchema);

@@ -34,6 +34,7 @@ import CanvasPage from './presentation/pages/CanvasPage';
 import FacultyCoursesPage from './presentation/pages/FacultyDashboard';
 import FacultyRequestForm from './presentation/pages/Auth/FacultyRequest';
 import ConfirmAdmission from './presentation/pages/ConfirmAdmission';
+import FacultyManagement from './presentation/pages/admin/FacultyManagement';
 
 const App: React.FC = () => {
   const { isError, error } = useRefreshToken();
@@ -101,6 +102,7 @@ const App: React.FC = () => {
           <Route element={<AdminLayout />}>
             <Route path="admin" element={<UniversityAdminDashboard />} />
             <Route path="admin/user" element={<UserManagement />} />
+            <Route path="admin/faculty" element={<FacultyManagement />} /> 
           </Route>
         </Route>
 

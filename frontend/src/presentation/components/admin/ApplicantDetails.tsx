@@ -12,6 +12,7 @@ interface ApplicantDetailsProps {
   expandedSections: { [key: string]: boolean };
   toggleSection: (section: string) => void;
   formatDate: (dateString: string) => string;
+  rejectAdmission: (data: { id: string; reason: string }) => void;
 }
 
 const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
@@ -19,15 +20,16 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
   showDetails,
   setShowDetails,
   approveAdmission,
-  deleteAdmission,
   expandedSections,
   toggleSection,
   formatDate,
+  rejectAdmission,
 }) => {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showWarningModal, setShowWarningModal] = useState(false);
 
   if (!selectedApplicant || !showDetails) return null;
+
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
@@ -291,10 +293,16 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
                 Approve
               </button>
               <button
-                onClick={() => setShowWarningModal(true)}
+                onClick={() => {
+                  rejectAdmission({
+                    id: selectedApplicant.admission._id,
+                    reason: 'Application rejected'
+                  });
+                  setShowDetails(false);
+                }}
                 className="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
               >
-                Delete
+                Reject
               </button>
             </div>
           )}

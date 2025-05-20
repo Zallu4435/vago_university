@@ -22,6 +22,7 @@ import {
 const sidebarItems = [
   { name: 'Dashboard', path: '/admin', icon: <MdDashboard size={20} /> },
   { name: 'User', path: '/admin/user', icon: <MdPeople size={20} /> },
+  { name: 'Faculty', path: '/admin/faculty', icon: <MdSchool size={20} /> },
   { name: 'Poster', path: '/admin/poster', icon: <MdImage size={20} /> },
   { name: 'Diploma Courses', path: '/admin/diploma-courses', icon: <MdSchool size={20} /> },
   { name: 'Events', path: '/admin/events', icon: <MdEvent size={20} /> },

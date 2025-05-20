@@ -55,15 +55,15 @@ export const ApplicationForm: React.FC = () => {
 
   const methods = useForm<FormData>({
     defaultValues: {
-      applicationId: '',
-      personalInfo: undefined,
+    applicationId: '',
+    personalInfo: undefined,
       choiceOfStudy: [],
       education: undefined,
-      achievements: {
-        questions: { 1: '', 2: '', 3: '', 4: '', 5: '' },
-        achievements: [],
-        hasNoAchievements: false,
-        showModal: false,
+    achievements: {
+      questions: { 1: '', 2: '', 3: '', 4: '', 5: '' },
+      achievements: [],
+      hasNoAchievements: false,
+      showModal: false,
         newAchievement: [],
         referenceContact: {
           firstName: '',
@@ -73,10 +73,10 @@ export const ApplicationForm: React.FC = () => {
           phone: { country: '', area: '', number: '' },
         },
         editingIndex: null,
-      },
-      otherInformation: undefined,
-      documents: undefined,
-      declaration: { privacyPolicy: false, marketingEmail: false, marketingCall: false },
+    },
+    otherInformation: undefined,
+    documents: undefined,
+    declaration: { privacyPolicy: false, marketingEmail: false, marketingCall: false },
       registerId: user?.id,
     },
     mode: 'onSubmit',
@@ -107,8 +107,8 @@ export const ApplicationForm: React.FC = () => {
     if (!token || !user) {
       console.log('No auth token or user found, redirecting to login');
       navigate('/login');
-      return;
-    }
+        return;
+      }
 
     if (collection !== 'register') {
       console.log('User is not in register collection, redirecting to appropriate dashboard');
@@ -384,7 +384,7 @@ export const ApplicationForm: React.FC = () => {
     }
   };
 
-  const handleSaveCurrentTab = async () => {
+ const handleSaveCurrentTab = async () => {
     if (isInitializing) {
       console.log('Waiting for application initialization');
       return;
@@ -420,18 +420,18 @@ export const ApplicationForm: React.FC = () => {
       if (choiceOfStudyRef.current) {
         const isValid = await choiceOfStudyRef.current.trigger();
         console.log('ChoiceOfStudy validation result:', { isValid, choiceOfStudy: formData.choiceOfStudy });
-        if (isValid) {
+      if (isValid) {
           try {
             await handleUpdateChoiceOfStudy(formData.choiceOfStudy || []);
-            handleNextTab();
+        handleNextTab();
           } catch (error) {
             console.error('Error saving choice of study:', error);
             setSaveError('Failed to save choice of study. Please try again.');
           }
-        } else {
+      } else {
           alert('Please add at least one programme choice.');
         }
-      }
+      }   
     } else if (activeTab === 'education') {
       setValidationAttempted(true);
       if (educationFormRef.current) {
@@ -464,8 +464,8 @@ export const ApplicationForm: React.FC = () => {
             await handleUpdateAchievements(formData.achievements, true);
             console.log('achievements saved successfully');
             
-            if (!saveError) {
-              handleNextTab();
+          if (!saveError) {
+            handleNextTab();
             }
           } catch (error) {
             console.error('Error saving achievements:', error);
@@ -563,7 +563,7 @@ export const ApplicationForm: React.FC = () => {
       if (invalidSectionIndex !== -1) {
         setActiveTab(tabs[invalidSectionIndex].id);
         console.log('Navigating to invalid section:', tabs[invalidSectionIndex].id);
-      }
+      } 
     }
   };
 
@@ -636,16 +636,16 @@ export const ApplicationForm: React.FC = () => {
   }
 
   if (showPayment) {
-    return (
+      return (
       <FormSubmissionFlow
         formData={{
           ...formData,
           registerId: user?.id
         }}
-        onPaymentComplete={() => {
-          setShowPayment(false);
-          setActiveTab('personalDetails');
-          setApplicationId(undefined);
+          onPaymentComplete={() => {
+            setShowPayment(false);
+            setActiveTab('personalDetails');
+            setApplicationId(undefined);
           setValue('applicationId', '', { shouldValidate: false });
           setValue('personalInfo', undefined, { shouldValidate: false });
           setValue('choiceOfStudy', [], { shouldValidate: false });
@@ -760,7 +760,7 @@ export const ApplicationForm: React.FC = () => {
               ref={choiceOfStudyRef}
             />
           )}
-          {activeTab === 'education' && (
+              {activeTab === 'education' && (
             <Education
               initialData={formData.education}
               onSave={handleUpdateEducation}
@@ -804,8 +804,8 @@ export const ApplicationForm: React.FC = () => {
               }}
               disabled={activeTab === 'personalDetails'}
               className={`px-6 py-3 rounded-lg flex items-center transition-all duration-300 ${activeTab === 'personalDetails'
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200 hover:shadow-sm'
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200 hover:shadow-sm'
                 }`}
             >
               <svg
@@ -874,4 +874,4 @@ export const ApplicationForm: React.FC = () => {
       </div>
     </FormProvider>
   );
-};  
+};

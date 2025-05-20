@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useUserManagement } from '../../../application/hooks/useUserManagement';
+// src/presentation/pages/admin/FacultyManagement.tsx
+import React, { useState, useCallback } from 'react';
+import { useFacultyManagement } from '../../../application/hooks/useFacultyManagement';
 import {
-  FiCheckCircle,
-  FiXCircle,
   FiSearch,
   FiFilter,
   FiFileText,
@@ -14,35 +13,27 @@ import {
   FiArrowRight,
   FiEye,
   FiRefreshCw,
+  FiCheckCircle,
+  FiXCircle,
 } from 'react-icons/fi';
-import ApplicantDetails from '../../components/admin/ApplicantDetails';
-import ApprovalModal from '../../components/admin/ApprovalModal';
-import WarningModal from '../../components/WarningModal';
 import { debounce } from 'lodash';
+import WarningModal from '../../components/WarningModal';
+import ApprovalModal from '../../components/admin/ApprovalModal';
+import FacultyDetailsModal from '../../components/admin/FacultyDetailsModal';
 
-const UserManagement = () => {
+const FacultyManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
-  const [selectedApplicant, setSelectedApplicant] = useState(null);
+  const [selectedFaculty, setSelectedFaculty] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [customDateRange, setCustomDateRange] = useState({ startDate: '', endDate: '' });
-  const [expandedSections, setExpandedSections] = useState({
-    personal: true,
-    programs: true,
-    education: true,
-    achievements: true,
-    otherInfo: true,
-    documents: true,
-    declaration: true,
-    application: true,
-  });
   const [showApprovalModal, setShowApprovalModal] = useState(false);
-  const [selectedAdmission, setSelectedAdmission] = useState(null);
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
-  const [admissionToDelete, setAdmissionToDelete] = useState(null);
+  const [facultyToDelete, setFacultyToDelete] = useState(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   const {
-    users,
+    faculty,
     totalPages,
     page,
     setPage,
@@ -50,19 +41,23 @@ const UserManagement = () => {
     setFilters,
     isLoading,
     error,
-    getAdmissionDetails,
-    approveAdmission,
-    deleteAdmission,
-    rejectAdmission
-  } = useUserManagement();
+    getFacultyDetails,
+    approveFaculty,
+    rejectFaculty,
+    deleteFaculty,
+    updateFacultyStatus
+  } = useFacultyManagement();
 
-  const programs = [
-    'All Programs',
+  const departments = [
+    'All Departments',
     'Computer Science',
-    'Business Administration',
+    'Mathematics',
+    'Physics',
+    'Chemistry',
+    'Biology',
     'Engineering',
-    'Medicine',
-    'Arts & Social Sciences',
+    'Humanities',
+    'Business',
   ];
 
   const handleFilterChange = (field, value) => {
@@ -80,100 +75,59 @@ const UserManagement = () => {
     setCustomDateRange((prev) => ({ ...prev, [field]: value }));
   };
 
-  useEffect(() => {
-    if (filters.dateRange === 'custom' && customDateRange.startDate && customDateRange.endDate) {
-      setFilters((prev) => ({
-        ...prev,
-        startDate: customDateRange.startDate,
-        endDate: customDateRange.endDate,
-      }));
-    } else {
-      setFilters((prev) => ({
-        ...prev,
-        startDate: undefined,
-        endDate: undefined,
-      }));
-    }
-  }, [customDateRange, filters.dateRange, setFilters]);
-
-  const filteredAdmissions = users?.filter((admission) => {
-    const fullName = admission.fullName || '';
-    const email = admission.email || '';
-    const nameMatch = fullName.toLowerCase().includes(searchQuery.toLowerCase());
-    const emailMatch = email.toLowerCase().includes(searchQuery.toLowerCase());
-    return nameMatch || emailMatch;
-  });
-
-  const handleViewDetails = async (admission) => {
+  const handleViewDetails = async (faculty) => {
     try {
-      const details = await getAdmissionDetails(admission._id);
-      setSelectedApplicant(details);
-      setShowDetails(true);
+      const details = await getFacultyDetails(faculty._id);
+      setSelectedFaculty(details);
+      setIsDetailsModalOpen(true);
     } catch (error) {
       // Error toast is handled in the mutation
     }
   };
 
-  const handleActionClick = (admission) => {
-    setSelectedAdmission(admission);
+  const handleActionClick = (faculty) => {
+    setSelectedFaculty(faculty);
     setShowApprovalModal(true);
   };
 
   const handleApprove = async (data) => {
     try {
-      console.log(data, "data")
-      // If data contains admission property, use that
-      const admissionId = data.admission?._id || selectedAdmission?._id;
-
-      if (!admissionId) {
-        throw new Error('No admission ID found');
-      }
-
-      await approveAdmission({
-        id: admissionId,
+      await approveFaculty({
+        id: selectedFaculty._id,
         approvalData: {
-          programDetails: data.programDetails || '',
+          department: data.department || '',
+          role: data.role || '',
           startDate: data.startDate || '',
-          scholarshipInfo: data.scholarshipInfo || '',
           additionalNotes: data.additionalNotes || ''
         }
       });
-
       setShowApprovalModal(false);
-      setSelectedAdmission(null);
+      setSelectedFaculty(null);
     } catch (error) {
-      console.error('Error approving admission:', error);
+      console.error('Error approving faculty:', error);
     }
   };
 
-  const handleReject = async (data) => {
+  const handleReject = async (reason) => {
     try {
-      // If data contains admission property, use that
-      console.log(data, "data");
-
-      const admissionId = data.id || selectedAdmission?._id;
-
-      if (!admissionId) {
-        throw new Error('No admission ID found');
-      }
-
-      await rejectAdmission({
-        id: admissionId,
-        reason: data.reason || 'Application rejected'
+      await rejectFaculty({
+        id: selectedFaculty._id,
+        reason
       });
       setShowApprovalModal(false);
-      setSelectedAdmission(null);
+      setSelectedFaculty(null);
     } catch (error) {
-      console.error('Error rejecting admission:', error);
+      console.error('Error rejecting faculty:', error);
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id) => {
     try {
-      await deleteAdmission(id);
-      // Optionally refresh the list or show a success message
+      await deleteFaculty(id);
+      setShowDeleteWarning(false);
+      setFacultyToDelete(null);
     } catch (error) {
-      console.error('Error deleting admission:', error);
+      console.error('Error deleting faculty:', error);
     }
   };
 
@@ -186,20 +140,24 @@ const UserManagement = () => {
     return dateString ? new Date(dateString).toLocaleDateString(undefined, options) : 'N/A';
   };
 
-  const toggleSection = (section) => {
-    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  };
-
   const handleResetFilters = () => {
     setFilters({
       status: 'all',
-      program: 'all_programs',
+      department: 'all_departments',
       dateRange: 'all',
       startDate: undefined,
       endDate: undefined
     });
     setCustomDateRange({ startDate: '', endDate: '' });
   };
+
+  const filteredFaculty = faculty?.filter((member) => {
+    const fullName = member.fullName || '';
+    const email = member.email || '';
+    const nameMatch = fullName.toLowerCase().includes(searchQuery.toLowerCase());
+    const emailMatch = email.toLowerCase().includes(searchQuery.toLowerCase());
+    return nameMatch || emailMatch;
+  });
 
   if (isLoading) {
     return (
@@ -220,15 +178,15 @@ const UserManagement = () => {
   return (
     <div className="container mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-blue-800">Admission Management</h1>
-        <p className="text-gray-600 mt-1">Review and process student admission applications</p>
+        <h1 className="text-3xl font-bold text-blue-800">Faculty Management</h1>
+        <p className="text-gray-600 mt-1">Manage faculty applications and members</p>
       </div>
 
       <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
         {/* Header with search and filters */}
         <div className="bg-gradient-to-r from-blue-700 to-blue-900 px-6 py-4 border-b">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <h3 className="text-lg font-semibold text-white">Admission Applications</h3>
+            <h3 className="text-lg font-semibold text-white">Faculty Applications</h3>
 
             <div className="flex items-center space-x-2">
               <div className="relative">
@@ -241,8 +199,9 @@ const UserManagement = () => {
                   placeholder="Search by name or email..."
                   value={searchQuery}
                   onChange={handleSearchChange}
-                  className={`w-64 pl-10 pr-3 py-2 bg-white bg-opacity-20 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-white ${searchQuery ? 'text-black' : 'text-white'
-                    } placeholder-blue-100`}
+                  className={`w-64 pl-10 pr-3 py-2 bg-white bg-opacity-20 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-white ${
+                    searchQuery ? 'text-black' : 'text-white'
+                  } placeholder-blue-100`}
                 />
               </div>
 
@@ -251,7 +210,7 @@ const UserManagement = () => {
                 className="flex items-center space-x-1 px-4 py-2 bg-white bg-opacity-20 border border-blue-300 rounded-md text-white hover:bg-opacity-30"
               >
                 <FiFilter size={18} />
-                <span className='text-black'>Filters</span>
+                <span className="text-black">Filters</span>
                 {filterOpen ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
               </button>
             </div>
@@ -287,20 +246,20 @@ const UserManagement = () => {
                   </select>
                 </div>
 
-                {/* Program Filter */}
+                {/* Department Filter */}
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Program</label>
+                  <label className="block text-sm font-medium text-gray-700">Department</label>
                   <select
-                    value={filters.program}
-                    onChange={(e) => debouncedFilterChange('program', e.target.value)}
+                    value={filters.department}
+                    onChange={(e) => debouncedFilterChange('department', e.target.value)}
                     className="w-full border border-gray-300 rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 bg-white"
                   >
-                    {programs.map((program, idx) => (
-                      <option 
-                        key={idx} 
-                        value={program === 'All Programs' ? 'all_programs' : program.toLowerCase().replace(/\s+/g, '_')}
+                    {departments.map((dept, idx) => (
+                      <option
+                        key={idx}
+                        value={dept === 'All Departments' ? 'all_departments' : dept.toLowerCase().replace(/\s+/g, '_')}
                       >
-                        {program}
+                        {dept}
                       </option>
                     ))}
                   </select>
@@ -348,7 +307,7 @@ const UserManagement = () => {
               </div>
 
               {/* Active Filters Display */}
-              {(filters.status !== 'all' || filters.program !== 'all_programs' || filters.dateRange !== 'all') && (
+              {(filters.status !== 'all' || filters.department !== 'all_departments' || filters.dateRange !== 'all') && (
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <div className="flex flex-wrap gap-2">
                     {filters.status !== 'all' && (
@@ -362,11 +321,11 @@ const UserManagement = () => {
                         </button>
                       </span>
                     )}
-                    {filters.program !== 'all_programs' && (
+                    {filters.department !== 'all_departments' && (
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-                        Program: {filters.program.replace(/_/g, ' ')}
+                        Department: {filters.department.replace(/_/g, ' ')}
                         <button
-                          onClick={() => debouncedFilterChange('program', 'all_programs')}
+                          onClick={() => debouncedFilterChange('department', 'all_departments')}
                           className="ml-2 text-blue-600 hover:text-blue-800"
                         >
                           ×
@@ -375,7 +334,7 @@ const UserManagement = () => {
                     )}
                     {filters.dateRange !== 'all' && (
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-                        Date: {filters.dateRange === 'custom' 
+                        Date: {filters.dateRange === 'custom'
                           ? `${customDateRange.startDate} to ${customDateRange.endDate}`
                           : filters.dateRange.replace(/_/g, ' ')}
                         <button
@@ -393,19 +352,22 @@ const UserManagement = () => {
           )}
         </div>
 
-        {/* Application list */}
+        {/* Faculty list */}
         <div className="px-6 py-4">
-          {filteredAdmissions?.length > 0 ? (
+          {filteredFaculty?.length > 0 ? (
             <>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr>
                       <th className="px-4 py-3 text-left font-semibold text-gray-700 bg-gray-50 border-b">
-                        Applicant
+                        Faculty
                       </th>
                       <th className="px-4 py-3 text-left font-semibold text-gray-700 bg-gray-50 border-b">
                         Email
+                      </th>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-700 bg-gray-50 border-b">
+                        Department
                       </th>
                       <th className="px-4 py-3 text-left font-semibold text-gray-700 bg-gray-50 border-b">
                         Applied On
@@ -419,69 +381,73 @@ const UserManagement = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredAdmissions.map((admission) => (
-                      <tr key={admission._id} className="hover:bg-blue-50 border-b">
+                    {filteredFaculty.map((faculty) => (
+                      <tr key={faculty._id} className="hover:bg-blue-50 border-b">
                         <td className="px-4 py-3">
                           <div className="flex items-center">
                             <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
                               <FiUser size={18} className="text-blue-600" />
                             </div>
                             <div>
-                              <p className="font-medium">{admission.fullName || 'N/A'}</p>
-                              <p className="text-xs text-gray-500">ID: {admission._id.substring(0, 8)}</p>
+                              <p className="font-medium">{faculty.fullName}</p>
+                              <p className="text-xs text-gray-500">ID: {faculty._id.substring(0, 8)}</p>
                             </div>
                           </div>
                         </td>
                         <td className="px-4 py-3 text-gray-600">
                           <div className="flex items-center">
                             <FiMail size={14} className="text-gray-400 mr-2" />
-                            {admission.email || 'N/A'}
+                            {faculty.email}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-gray-600">{formatDate(admission.createdAt)}</td>
+                        <td className="px-4 py-3 text-gray-600">{faculty.department}</td>
+                        <td className="px-4 py-3 text-gray-600">{formatDate(faculty.createdAt)}</td>
                         <td className="px-4 py-3">
                           <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${admission.status === 'pending'
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              faculty.status === 'pending'
                                 ? 'bg-yellow-100 text-yellow-800'
-                                : admission.status === 'approved'
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-red-100 text-red-800'
-                              }`}
+                                : faculty.status === 'approved'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}
                           >
-                            {admission.status === 'pending' && '⏳ '}
-                            {admission.status === 'approved' && '✓ '}
-                            {admission.status === 'rejected' && '✕ '}
-                            {admission.status || 'pending'}
+                            {faculty.status === 'pending' && '⏳ '}
+                            {faculty.status === 'approved' && '✓ '}
+                            {faculty.status === 'rejected' && '✕ '}
+                            {faculty.status || 'pending'}
                           </span>
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex space-x-2">
                             <button
                               className="p-1 border border-gray-300 text-blue-600 hover:bg-blue-50 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              onClick={() => handleViewDetails(admission)}
+                              onClick={() => handleViewDetails(faculty)}
                               title="View Details"
                             >
                               <FiEye size={16} />
                             </button>
 
                             <button
-                              className={`p-1 border border-gray-300 text-green-600 hover:bg-green-50 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${admission.status !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
-                              onClick={() => handleActionClick(admission)}
-                              disabled={admission.status !== 'pending'}
+                              className={`p-1 border border-gray-300 text-green-600 hover:bg-green-50 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                                faculty.status !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''
+                              }`}
+                              onClick={() => handleActionClick(faculty)}
+                              disabled={faculty.status !== 'pending'}
                               title="Take Action"
                             >
                               <FiCheckCircle size={16} />
                             </button>
 
                             <button
-                              className={`p-1 border border-gray-300 text-red-600 hover:bg-red-50 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 ${admission.status !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
+                              className={`p-1 border border-gray-300 text-red-600 hover:bg-red-50 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 ${
+                                faculty.status !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''
+                              }`}
                               onClick={() => {
-                                setAdmissionToDelete(admission);
+                                setFacultyToDelete(faculty);
                                 setShowDeleteWarning(true);
                               }}
-                              disabled={admission.status !== 'pending'}
+                              disabled={faculty.status !== 'pending'}
                               title="Delete"
                             >
                               <FiXCircle size={16} />
@@ -497,13 +463,14 @@ const UserManagement = () => {
               {/* Pagination */}
               <div className="flex items-center justify-between mt-6">
                 <p className="text-sm text-gray-500">
-                  Showing <span className="font-medium">{filteredAdmissions.length}</span> applications
+                  Showing <span className="font-medium">{filteredFaculty.length}</span> applications
                 </p>
 
                 <div className="flex items-center space-x-2">
                   <button
-                    className={`inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${page === 1 ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
+                    className={`inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${
+                      page === 1 ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                     onClick={handlePrevPage}
                     disabled={page === 1}
                   >
@@ -516,8 +483,9 @@ const UserManagement = () => {
                   </span>
 
                   <button
-                    className={`inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${page === totalPages ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
+                    className={`inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${
+                      page === totalPages ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                     onClick={handleNextPage}
                     disabled={page === totalPages}
                   >
@@ -534,78 +502,56 @@ const UserManagement = () => {
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-1">No Applications Found</h3>
               <p className="text-gray-500 text-center max-w-sm">
-                There are no admission applications matching your current filters. Try adjusting your search criteria.
+                There are no faculty applications matching your current filters. Try adjusting your search criteria.
               </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Applicant details modal */}
-      {showDetails && (
-        <ApplicantDetails
-          selectedApplicant={selectedApplicant}
-          showDetails={showDetails}
-          setShowDetails={setShowDetails}
-          approveAdmission={handleApprove}
-          rejectAdmission={handleReject}
-          expandedSections={expandedSections}
-          toggleSection={toggleSection}
-          formatDate={formatDate}
-        />
-      )}
-
       {/* Approval/Rejection Modal */}
-      {showApprovalModal && (
+      {showApprovalModal && selectedFaculty && (
         <ApprovalModal
           isOpen={showApprovalModal}
-          onClose={() => setShowApprovalModal(false)}
-          onApprove={(data) => {
-            approveAdmission({
-              admission: selectedApplicant.admission,
-              ...data
-            });
+          onClose={() => {
             setShowApprovalModal(false);
-            setShowDetails(false);
+            setSelectedFaculty(null);
           }}
-          onReject={(reason) => {
-            rejectAdmission({
-              id: selectedApplicant.admission._id,  // Pass the ID directly
-              reason: reason || 'Application rejected'
-            });
-            setShowApprovalModal(false);
-            setShowDetails(false);
-          }}
-          onDelete={() => {
-            setShowApprovalModal(false);
-            setShowWarningModal(true);
-          }}
-          applicantName={selectedApplicant.admission?.personal?.fullName}
+          onApprove={handleApprove}
+          onReject={handleReject}
+          onDelete={handleDelete}
+          applicantName={selectedFaculty.fullName || 'Applicant'}
         />
       )}
 
       {/* Warning Modal */}
-      {showDeleteWarning && admissionToDelete && (
+      {showDeleteWarning && facultyToDelete && (
         <WarningModal
           isOpen={showDeleteWarning}
           onClose={() => {
             setShowDeleteWarning(false);
-            setAdmissionToDelete(null);
+            setFacultyToDelete(null);
           }}
-          onConfirm={() => {
-            handleDelete(admissionToDelete._id);
-            setShowDeleteWarning(false);
-            setAdmissionToDelete(null);
-          }}
+          onConfirm={() => handleDelete(facultyToDelete._id)}
           title="Delete Application"
-          message={`Are you sure you want to delete ${admissionToDelete.fullName}'s application? This action cannot be undone.`}
+          message={`Are you sure you want to delete ${facultyToDelete.fullName}'s application? This action cannot be undone.`}
           confirmText="Delete"
           cancelText="Cancel"
           type="danger"
         />
       )}
+
+      {/* FacultyDetailsModal */}
+      <FacultyDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => {
+          setIsDetailsModalOpen(false);
+          setSelectedFaculty(null);
+        }}
+        faculty={selectedFaculty?.faculty}
+      />
     </div>
   );
 };
 
-export default UserManagement;
+export default FacultyManagement;

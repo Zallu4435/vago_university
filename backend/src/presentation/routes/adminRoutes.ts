@@ -18,4 +18,7 @@ router.post('/:id/reject', admissionController.rejectAdmission);
 // Delete an admission
 router.delete('/:id', admissionController.deleteAdmission);
 
+router.post('/:id/confirm/:action', admissionController.confirmOffer);
+
+
 export default router;

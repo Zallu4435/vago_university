@@ -5,7 +5,6 @@ import { config } from '../../config/config';
 interface AdmissionOfferEmailParams {
   to: string;
   name: string;
-  program: string;
   programDetails: string;
   startDate: string;
   scholarshipInfo: string;
@@ -33,7 +32,6 @@ class EmailService {
   async sendAdmissionOfferEmail({ 
     to, 
     name, 
-    program, 
     programDetails, 
     startDate, 
     scholarshipInfo,
@@ -45,7 +43,7 @@ class EmailService {
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <h2 style="color: #2a5885;">Congratulations, ${name}!</h2>
-        <p>We are pleased to inform you that your application to the <strong>${program}</strong> has been reviewed and accepted.</p>
+        <p>We are pleased to inform you that your application to the <strong>${programDetails}</strong> has been reviewed and accepted.</p>
         
         ${programDetails ? `<p><strong>Program Details:</strong> ${programDetails}</p>` : ''}
         ${startDate ? `<p><strong>Start Date:</strong> ${startDate}</p>` : ''}
@@ -75,7 +73,7 @@ class EmailService {
     await this.transporter.sendMail({
       from: `"Admissions Team" <${config.email.from}>`,
       to,
-      subject: `Admission Offer: ${program}`,
+      subject: `Admission Offer: ${programDetails}`,
       html: htmlContent,
     });
     

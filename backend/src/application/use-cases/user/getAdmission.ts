@@ -55,10 +55,11 @@ class GetAdmissions {
       filter.status = status;
     }
 
-    // Program filter
-    if (program && program !== 'all') {
-      filter.program = program;
-    }
+if (program && program !== 'all' && program !== 'all_programs') {
+  console.log(program, "programe fom the ")
+  console.log("hihihihih")
+  filter.choiceOfStudy = { $elemMatch: { programme: program } }; // ✅ Correct key
+}
 
     // Date range filter
     if (dateRange && dateRange !== 'all') {
@@ -87,7 +88,7 @@ class GetAdmissions {
       'personal.emailAddress': 1,
       createdAt: 1,
       status: 1,
-      program: 1,
+choiceOfStudy: 1, // if you want the whole array
     };
 
     // Fetch admissions with pagination, sorting, projection

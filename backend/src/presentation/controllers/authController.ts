@@ -1,17 +1,29 @@
-import { Request, Response, NextFunction } from 'express';
-import { registerUser } from '../../application/use-cases/auth/registerUser';
-import { loginUser } from '../../application/use-cases/auth/loginUser';
-import { refreshToken } from '../../application/use-cases/auth/refreshToken';
+import { Request, Response, NextFunction } from "express";
+import { registerUser } from "../../application/use-cases/auth/registerUser";
+import { loginUser } from "../../application/use-cases/auth/loginUser";
+import { refreshToken } from "../../application/use-cases/auth/refreshToken";
+import { registerFaculty } from "../../application/use-cases/auth/registerFaculty";
+import { upload } from "../../config/cloudinary.config";
 
 class AuthController {
+
+  uploadDocuments = upload.fields([
+    { name: "cv", maxCount: 1 },
+    { name: "certificates", maxCount: 5 },
+  ]);
+
   async register(req: Request, res: Response, next: NextFunction) {
     try {
       const { firstName, lastName, email, password } = req.body;
 
-      console.log(`Received POST /api/auth/register with body:`, { firstName, lastName, email });
+      console.log(`Received POST /api/auth/register with body:`, {
+        firstName,
+        lastName,
+        email,
+      });
 
       if (!firstName || !lastName || !email || !password) {
-        throw new Error('All fields are required');
+        throw new Error("All fields are required");
       }
 
       const result = await registerUser.execute({
@@ -35,7 +47,7 @@ class AuthController {
       console.log(`Received POST /api/auth/login with body:`, { email });
 
       if (!email || !password) {
-        throw new Error('Email and password are required');
+        throw new Error("Email and password are required");
       }
 
       const result = await loginUser.execute({
@@ -57,7 +69,7 @@ class AuthController {
       console.log(`Received POST /api/auth/refresh-token`);
 
       if (!token) {
-        throw new Error('Token is required');
+        throw new Error("Token is required");
       }
 
       const result = await refreshToken.execute({ token });
@@ -65,6 +77,53 @@ class AuthController {
       res.status(200).json(result);
     } catch (err) {
       console.error(`Error in refreshToken:`, err);
+      next(err);
+    }
+  }
+
+ async registerFaculty(req: Request, res: Response, next: NextFunction) {
+    try {
+      console.log(req, "body");
+      console.log(req.files, "files");
+      
+      const { fullName, email, phone, department, qualification, experience, aboutMe } = req.body;
+
+      console.log(`Received POST /api/auth/register-faculty with body:`, { fullName, email, phone, department });
+
+      if (!fullName || !email || !phone || !department || !qualification || !experience || !aboutMe) {
+        throw new Error('All required fields must be provided');
+      }
+
+      // Get file info from multer
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      
+      // Extract CV URL if available
+      let cvUrl: string | undefined;
+      if (files && files.cv && files.cv.length > 0) {
+        cvUrl = files.cv[0].path; // Cloudinary URL is stored in the path property
+      }
+
+      // Extract certificate URLs if available
+      let certificatesUrl: string[] | undefined;
+      if (files && files.certificates && files.certificates.length > 0) {
+        certificatesUrl = files.certificates.map(file => file.path);
+      }
+
+      const result = await registerFaculty.execute({
+        fullName,
+        email,
+        phone,
+        department,
+        qualification,
+        experience,
+        aboutMe,
+        cvUrl,
+        certificatesUrl,
+      });
+
+      res.status(201).json(result);
+    } catch (err) {
+      console.error(`Error in registerFaculty:`, err);
       next(err);
     }
   }

@@ -64,7 +64,7 @@ interface IAdmission extends Document {
   declaration: any;
   paymentId: string;
   rejectedBy: "admin" | "user" | null;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "offered" | "approved" | "rejected";
   confirmationToken: string | null;
   tokenExpiry: Date | null;
   createdAt: Date;
@@ -96,7 +96,7 @@ const AdmissionSchema: Schema = new Schema(
     // ✅ Added "offered" to represent email offer sent but waiting for user confirmation
     status: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
+      enum: ["pending", "offered", "approved", "rejected"],
       default: "pending",
     },
 

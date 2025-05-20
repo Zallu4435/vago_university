@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useUserManagement } from '../../../application/hooks/useUserManagement';
 import {
   FiCheckCircle,
@@ -13,10 +13,12 @@ import {
   FiArrowLeft,
   FiArrowRight,
   FiEye,
+  FiRefreshCw,
 } from 'react-icons/fi';
 import ApplicantDetails from '../../components/admin/ApplicantDetails';
 import ApprovalModal from '../../components/admin/ApprovalModal';
 import WarningModal from '../../components/WarningModal';
+import { debounce } from 'lodash';
 
 const UserManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -39,19 +41,19 @@ const UserManagement = () => {
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
   const [admissionToDelete, setAdmissionToDelete] = useState(null);
 
-  const { 
-    users, 
-    totalPages, 
-    page, 
-    setPage, 
-    filters, 
-    setFilters, 
-    isLoading, 
-    error, 
-    getAdmissionDetails, 
-    approveAdmission, 
-    deleteAdmission, 
-    rejectAdmission 
+  const {
+    users,
+    totalPages,
+    page,
+    setPage,
+    filters,
+    setFilters,
+    isLoading,
+    error,
+    getAdmissionDetails,
+    approveAdmission,
+    deleteAdmission,
+    rejectAdmission
   } = useUserManagement();
 
   const programs = [
@@ -66,6 +68,13 @@ const UserManagement = () => {
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
+
+  const debouncedFilterChange = useCallback(
+    debounce((field, value) => {
+      handleFilterChange(field, value);
+    }, 500),
+    []
+  );
 
   const handleCustomDateChange = (field, value) => {
     setCustomDateRange((prev) => ({ ...prev, [field]: value }));
@@ -115,7 +124,7 @@ const UserManagement = () => {
       console.log(data, "data")
       // If data contains admission property, use that
       const admissionId = data.admission?._id || selectedAdmission?._id;
-      
+
       if (!admissionId) {
         throw new Error('No admission ID found');
       }
@@ -129,7 +138,7 @@ const UserManagement = () => {
           additionalNotes: data.additionalNotes || ''
         }
       });
-      
+
       setShowApprovalModal(false);
       setSelectedAdmission(null);
     } catch (error) {
@@ -172,6 +181,17 @@ const UserManagement = () => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
+  const handleResetFilters = () => {
+    setFilters({
+      status: 'all',
+      program: 'all_programs',
+      dateRange: 'all',
+      startDate: undefined,
+      endDate: undefined
+    });
+    setCustomDateRange({ startDate: '', endDate: '' });
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -212,7 +232,8 @@ const UserManagement = () => {
                   placeholder="Search by name or email..."
                   value={searchQuery}
                   onChange={handleSearchChange}
-                  className="w-64 pl-10 pr-3 py-2 bg-white bg-opacity-20 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-white text-white placeholder-blue-100"
+                  className={`w-64 pl-10 pr-3 py-2 bg-white bg-opacity-20 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-white ${searchQuery ? 'text-black' : 'text-white'
+                    } placeholder-blue-100`}
                 />
               </div>
 
@@ -221,7 +242,7 @@ const UserManagement = () => {
                 className="flex items-center space-x-1 px-4 py-2 bg-white bg-opacity-20 border border-blue-300 rounded-md text-white hover:bg-opacity-30"
               >
                 <FiFilter size={18} />
-                <span>Filters</span>
+                <span className='text-black'>Filters</span>
                 {filterOpen ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
               </button>
             </div>
@@ -229,66 +250,136 @@ const UserManagement = () => {
 
           {/* Filter options */}
           {filterOpen && (
-            <div className="bg-white rounded-md p-4 mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select
-                  value={filters.status}
-                  onChange={(e) => handleFilterChange('status', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <div className="bg-white rounded-lg shadow-lg p-6 mt-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">Filter Applications</h3>
+                <button
+                  onClick={handleResetFilters}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors duration-200 flex items-center gap-2"
                 >
-                  <option value="all">All Statuses</option>
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
-                </select>
+                  <FiRefreshCw size={16} />
+                  Reset Filters
+                </button>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Program</label>
-                <select
-                  value={filters.program}
-                  onChange={(e) => handleFilterChange('program', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {programs.map((program, idx) => (
-                    <option key={idx} value={program.toLowerCase().replace(' ', '_')}>
-                      {program}
-                    </option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Status Filter */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Status</label>
+                  <select
+                    value={filters.status}
+                    onChange={(e) => debouncedFilterChange('status', e.target.value)}
+                    className="w-full border border-gray-300 rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 bg-white"
+                  >
+                    <option value="all">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+
+                {/* Program Filter */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Program</label>
+                  <select
+                    value={filters.program}
+                    onChange={(e) => debouncedFilterChange('program', e.target.value)}
+                    className="w-full border border-gray-300 rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 bg-white"
+                  >
+                    {programs.map((program, idx) => (
+                      <option 
+                        key={idx} 
+                        value={program === 'All Programs' ? 'all_programs' : program.toLowerCase().replace(/\s+/g, '_')}
+                      >
+                        {program}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Date Range Filter */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Application Date</label>
+                  <select
+                    value={filters.dateRange}
+                    onChange={(e) => debouncedFilterChange('dateRange', e.target.value)}
+                    className="w-full border border-gray-300 rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 bg-white"
+                  >
+                    <option value="all">All Dates</option>
+                    <option value="last_week">Last Week</option>
+                    <option value="last_month">Last Month</option>
+                    <option value="last_3_months">Last 3 Months</option>
+                    <option value="custom">Custom Range</option>
+                  </select>
+
+                  {/* Custom Date Range Inputs */}
+                  {filters.dateRange === 'custom' && (
+                    <div className="mt-3 space-y-3">
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Start Date</label>
+                        <input
+                          type="date"
+                          value={customDateRange.startDate}
+                          onChange={(e) => handleCustomDateChange('startDate', e.target.value)}
+                          className="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">End Date</label>
+                        <input
+                          type="date"
+                          value={customDateRange.endDate}
+                          onChange={(e) => handleCustomDateChange('endDate', e.target.value)}
+                          className="w-full border border-gray-300 rounded-md p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Application Date</label>
-                <select
-                  value={filters.dateRange}
-                  onChange={(e) => handleFilterChange('dateRange', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="all">All Dates</option>
-                  <option value="last_week">Last Week</option>
-                  <option value="last_month">Last Month</option>
-                  <option value="last_3_months">Last 3 Months</option>
-                  <option value="custom">Custom Range</option>
-                </select>
-                {filters.dateRange === 'custom' && (
-                  <div className="mt-2 space-y-2">
-                    <input
-                      type="date"
-                      value={customDateRange.startDate}
-                      onChange={(e) => handleCustomDateChange('startDate', e.target.value)}
-                      className="w-full border border-gray-300 rounded-md p-2"
-                    />
-                    <input
-                      type="date"
-                      value={customDateRange.endDate}
-                      onChange={(e) => handleCustomDateChange('endDate', e.target.value)}
-                      className="w-full border border-gray-300 rounded-md p-2"
-                    />
+              {/* Active Filters Display */}
+              {(filters.status !== 'all' || filters.program !== 'all_programs' || filters.dateRange !== 'all') && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex flex-wrap gap-2">
+                    {filters.status !== 'all' && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                        Status: {filters.status}
+                        <button
+                          onClick={() => debouncedFilterChange('status', 'all')}
+                          className="ml-2 text-blue-600 hover:text-blue-800"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    )}
+                    {filters.program !== 'all_programs' && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                        Program: {filters.program.replace(/_/g, ' ')}
+                        <button
+                          onClick={() => debouncedFilterChange('program', 'all_programs')}
+                          className="ml-2 text-blue-600 hover:text-blue-800"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    )}
+                    {filters.dateRange !== 'all' && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                        Date: {filters.dateRange === 'custom' 
+                          ? `${customDateRange.startDate} to ${customDateRange.endDate}`
+                          : filters.dateRange.replace(/_/g, ' ')}
+                        <button
+                          onClick={() => debouncedFilterChange('dateRange', 'all')}
+                          className="ml-2 text-blue-600 hover:text-blue-800"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    )}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -341,13 +432,12 @@ const UserManagement = () => {
                         <td className="px-4 py-3 text-gray-600">{formatDate(admission.createdAt)}</td>
                         <td className="px-4 py-3">
                           <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              admission.status === 'pending'
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${admission.status === 'pending'
                                 ? 'bg-yellow-100 text-yellow-800'
                                 : admission.status === 'approved'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}
                           >
                             {admission.status === 'pending' && '⏳ '}
                             {admission.status === 'approved' && '✓ '}
@@ -366,9 +456,8 @@ const UserManagement = () => {
                             </button>
 
                             <button
-                              className={`p-1 border border-gray-300 text-green-600 hover:bg-green-50 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                                admission.status !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''
-                              }`}
+                              className={`p-1 border border-gray-300 text-green-600 hover:bg-green-50 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${admission.status !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
                               onClick={() => handleActionClick(admission)}
                               disabled={admission.status !== 'pending'}
                               title="Take Action"
@@ -377,9 +466,8 @@ const UserManagement = () => {
                             </button>
 
                             <button
-                              className={`p-1 border border-gray-300 text-red-600 hover:bg-red-50 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 ${
-                                admission.status !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''
-                              }`}
+                              className={`p-1 border border-gray-300 text-red-600 hover:bg-red-50 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 ${admission.status !== 'pending' ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
                               onClick={() => {
                                 setAdmissionToDelete(admission);
                                 setShowDeleteWarning(true);
@@ -405,9 +493,8 @@ const UserManagement = () => {
 
                 <div className="flex items-center space-x-2">
                   <button
-                    className={`inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${
-                      page === 1 ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
+                    className={`inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${page === 1 ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                     onClick={handlePrevPage}
                     disabled={page === 1}
                   >
@@ -420,9 +507,8 @@ const UserManagement = () => {
                   </span>
 
                   <button
-                    className={`inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${
-                      page === totalPages ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
+                    className={`inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${page === totalPages ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                     onClick={handleNextPage}
                     disabled={page === totalPages}
                   >

@@ -34,12 +34,14 @@ class ApproveAdmission {
     admission.confirmationToken = confirmationToken;
     admission.tokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Token valid for 7 days
     
-    if (additionalInfo) {
-      admission.programDetails = additionalInfo.programDetails;
-      admission.startDate = additionalInfo.startDate;
-      admission.scholarshipInfo = additionalInfo.scholarshipInfo;
-      admission.additionalNotes = additionalInfo.additionalNotes;
-    }
+    // if (additionalInfo) {
+    //   admission.programDetails = additionalInfo.programDetails;
+    //   admission.startDate = additionalInfo.startDate;
+    //   admission.scholarshipInfo = additionalInfo.scholarshipInfo;
+    //   admission.additionalNotes = additionalInfo.additionalNotes;
+    // }
+
+    admission.status = 'offered';
     
     await admission.save();
     
@@ -51,11 +53,10 @@ class ApproveAdmission {
     await emailService.sendAdmissionOfferEmail({
       to: admission.personal.emailAddress,
       name: admission.personal.fullName,
-      program: admission.program,
-      programDetails: admission.programDetails || '',
+      programDetails: additionalInfo.programDetails || '',
       startDate: admission.createdAt.toDateString() || '',
-      scholarshipInfo: admission.scholarshipInfo || '',
-      additionalNotes: admission.additionalNotes || '',
+      scholarshipInfo: additionalInfo.scholarshipInfo || '',
+      additionalNotes: additionalInfo.additionalNotes || '',
       acceptUrl,
       rejectUrl,
       expiryDays: 7

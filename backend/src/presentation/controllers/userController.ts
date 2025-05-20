@@ -73,6 +73,7 @@ class AdmissionController {
   async approveAdmission(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
+      console.log(req.body, "body")
       const { programDetails, startDate, scholarshipInfo, additionalNotes } = req.body;
       
       console.log(`Received POST /api/admin/admissions/${id}/approve with details:`, {

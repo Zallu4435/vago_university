@@ -24,7 +24,7 @@ const RegisterPage = () => {
   const formAnimation = useAnimation(300);
   const backgroundAnimation = useAnimation(0);
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, watch, formState: { errors }, reset } = useForm<FormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       firstName: '',
@@ -52,6 +52,7 @@ const RegisterPage = () => {
       {
         onSuccess: () => {
           alert('Registration successful! Welcome to Horizon University.');
+          reset();
           navigate('/login');
         },
         onError: (error: Error) => {
@@ -185,6 +186,8 @@ const RegisterPage = () => {
 
               <div className="text-center text-sm text-cyan-700 mt-4">
                 Already enrolled? <Link to="/login" className="text-cyan-600 hover:underline font-medium">Sign in</Link>
+                <span className="mx-2">|</span>
+                <Link to="/faculty/request" className="text-cyan-600 hover:underline font-medium">Apply as Faculty</Link>
               </div>
             </form>
           </div>

@@ -32,6 +32,8 @@ import { UGWhy_VAGO } from './presentation/pages/ug_admissions/UGWhy_VAGO';
 import DashboardPage from './presentation/pages/user/StudentDashboard';
 import CanvasPage from './presentation/pages/CanvasPage';
 import FacultyCoursesPage from './presentation/pages/FacultyDashboard';
+import FacultyRequestForm from './presentation/pages/Auth/FacultyRequest';
+import ConfirmAdmission from './presentation/pages/ConfirmAdmission';
 
 const App: React.FC = () => {
   const { isError, error } = useRefreshToken();
@@ -44,6 +46,19 @@ const App: React.FC = () => {
   return (
     <Provider store={store}>
       <Routes>
+        {/* Login, Register and Faculty Request Routes (unauthenticated only) */}
+        <Route
+          element={
+            <ProtectedRoute allowedCollections={[]} isPublic={true} />
+          }
+        >
+          <Route element={<PublicLayout />}>
+            <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
+            <Route path="faculty/request" element={<FacultyRequestForm />} />
+          </Route>
+        </Route>
+
         {/* Public Routes (accessible by all except admin, and not /login or /register for logged-in) */}
         <Route
           element={
@@ -56,6 +71,7 @@ const App: React.FC = () => {
             <Route path="contact" element={<ContactUs />} />
             <Route path="education" element={<Education />} />
             <Route path="about" element={<About />} />
+            <Route path="confirm-admission/:id/:action" element={<ConfirmAdmission />} />
           </Route>
           <Route element={<UGLayout />}>
             <Route path="ug" element={<UGHome />} />
@@ -64,18 +80,6 @@ const App: React.FC = () => {
             <Route path="ug/scholarships" element={<UGScholarships />} />
             <Route path="ug/why-vago" element={<UGWhy_VAGO />} />
             <Route path="ug/contact" element={<ContactUs />} />
-          </Route>
-        </Route>
-
-        {/* Login and Register Routes (unauthenticated only) */}
-        <Route
-          element={
-            <ProtectedRoute allowedCollections={[]} isPublic={true} />
-          }
-        >
-          <Route element={<PublicLayout />}>
-            <Route path="login" element={<LoginPage />} />
-            <Route path="register" element={<RegisterPage />} />
           </Route>
         </Route>
 

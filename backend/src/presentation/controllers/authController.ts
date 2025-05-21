@@ -127,6 +127,24 @@ class AuthController {
       next(err);
     }
   }
+
+  async logout(req: Request, res: Response, next: NextFunction) {
+    try {
+      console.log(`Received POST /api/auth/logout`);
+
+      // Clear the auth_token cookie
+      res.clearCookie('auth_token', {
+        httpOnly: false, // Must be false since frontend sets the cookie
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+      });
+
+      res.status(200).json({ message: "Logged out successfully" });
+    } catch (err) {
+      console.error(`Error in logout:`, err);
+      next(err);
+    }
+  }
 }
 
 export const authController = new AuthController();

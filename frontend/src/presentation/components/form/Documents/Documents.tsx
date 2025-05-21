@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { DocumentInstructions } from './DocumentInstructions';
 import { DocumentUploadTable } from './DocumentUploadTable';
 import { DocumentUpload, DocumentUploadSectionFormData, DocumentUploadSectionSchema } from '../../../../domain/validation/DocumentSchema';
+import { toast } from 'react-hot-toast';
 
 export interface DocumentUploadSection {
   documents: DocumentUpload[];
@@ -65,11 +66,11 @@ export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
 
       const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
       if (!validTypes.includes(file.type)) {
-        alert('Invalid file type. Allowed types are PDF, JPEG, JPG, PNG.');
+        toast.error('Invalid file type. Allowed types are PDF, JPEG, JPG, PNG.');
         return;
       }
       if (file.size > 10 * 1024 * 1024) {
-        alert('File size exceeds 10MB.');
+        toast.error('File size exceeds 10MB.');
         return;
       }
 

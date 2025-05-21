@@ -5,10 +5,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaRegCheckCircle, FaRegIdCard, FaShieldAlt } from 'react-icons/fa';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
-import { registerSchema } from '../../../domain/validation/Register';
+import { registerSchema } from '../../../domain/validation/register';
 import { useRegisterUser } from '../../../application/hooks/useAuthQueries';
 import { usePasswordStrength } from '../../../application/hooks/usePasswordStrength';
 import { useAnimation } from '../../../application/hooks/useAnimation';
+import { toast } from 'react-hot-toast'; 
 
 interface FormData {
   firstName: string;
@@ -51,12 +52,12 @@ const RegisterPage = () => {
       },
       {
         onSuccess: () => {
-          alert('Registration successful! Welcome to Horizon University.');
+          toast.success('Registration successful! Welcome to Horizon University.');
           reset();
           navigate('/login');
         },
         onError: (error: Error) => {
-          alert(`Registration failed: ${error.message}`);
+          toast.error(`Registration failed: ${error.message}`);
         },
       }
     );

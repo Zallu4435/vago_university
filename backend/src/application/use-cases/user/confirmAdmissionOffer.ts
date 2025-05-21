@@ -1,4 +1,3 @@
-// backend/src/application/use-cases/admission/confirmAdmissionOffer.ts
 import { Admission } from '../../../infrastructure/database/mongoose/models/admission.model';
 import { User } from '../../../infrastructure/database/mongoose/models/user.model';
 import { Register } from '../../../infrastructure/database/mongoose/models/register.model'; 
@@ -35,23 +34,20 @@ class ConfirmAdmissionOffer {
       admission.status = 'approved';
       admission.rejectedBy = null;
 
-      // ✅ Step 1: Fetch hashed password from Register collection
       const registerUser = await Register.findById(admission.registerId);
       if (!registerUser) {
         throw new Error('Register user not found for this admission');
       }
 
-      // ✅ Step 2: Extract names
       const fullNameParts = admission.personal.fullName.split(' ');
       const firstName = fullNameParts[0];
       const lastName = fullNameParts.slice(1).join(' ') || '';
 
-      // ✅ Step 3: Create new user
       const user = new User({
         firstName,
         lastName,
         email: admission.personal.emailAddress,
-        password: registerUser.password, // Using hashed password
+        password: registerUser.password, 
         createdAt: new Date(),
       });
 
@@ -63,7 +59,6 @@ class ConfirmAdmissionOffer {
       throw new Error('Invalid action');
     }
 
-    // ✅ Clear the token
     admission.confirmationToken = null;
     admission.tokenExpiry = null;
     await admission.save();

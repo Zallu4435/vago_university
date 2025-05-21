@@ -29,7 +29,7 @@ import { UGAdmissions } from './presentation/pages/ug_admissions/UGAdmissions';
 import UGProgrammes from './presentation/pages/ug_admissions/UGProgrammes';
 import { UGScholarships } from './presentation/pages/ug_admissions/UGScholarships';
 import { UGWhy_VAGO } from './presentation/pages/ug_admissions/UGWhy_VAGO';
-import DashboardPage from './presentation/pages/user/StudentDashboard';
+import DashboardPage from './presentation/pages/user/Dashboard/StudentDashboard';
 import CanvasPage from './presentation/pages/CanvasPage';
 import FacultyCoursesPage from './presentation/pages/FacultyDashboard';
 import FacultyRequestForm from './presentation/pages/Auth/FacultyRequest';
@@ -42,7 +42,7 @@ const App: React.FC = () => {
 
   if (isError) {
     console.log('Refresh token failed:', error);
-    store.dispatch({ type: 'auth/logout' }); // Use logout action
+    store.dispatch({ type: 'auth/logout' }); 
   }
 
   return (

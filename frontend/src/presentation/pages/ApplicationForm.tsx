@@ -15,8 +15,8 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
-// Replace the placeholder useAuth hook with Redux selector
 const useAuth = () => {
   const { token, user, collection } = useSelector((state: RootState) => state.auth);
   return { token, user, collection };
@@ -97,12 +97,10 @@ export const ApplicationForm: React.FC = () => {
     isLoading: isSaving,
   } = useApplicationForm(token);
 
-  // Fetch application data based on user ID
   const { data: fetchedData, isLoading: isFetching, error: fetchError } = useApplicationData(user?.id, token);
 
   const navigate = useNavigate();
 
-  // Redirect if not authenticated or wrong collection type
   useEffect(() => {
     if (!token || !user) {
       console.log('No auth token or user found, redirecting to login');
@@ -130,7 +128,7 @@ export const ApplicationForm: React.FC = () => {
 
   useEffect(() => {
     const initializeApplication = async () => {
-      if (isFetching) return; // Wait for data to load
+      if (isFetching) return; 
 
       if (fetchError) {
         setSaveError('Failed to load application data. Please try again.');
@@ -143,9 +141,8 @@ export const ApplicationForm: React.FC = () => {
         setApplicationId(fetchedData.applicationId);
         setValue('applicationId', fetchedData.applicationId, { shouldValidate: false });
       } else {
-        // No existing application, create a new one
         try {
-          const response = await createApplication(user.id); // Backend generates applicationId
+          const response = await createApplication(user.id); 
           setApplicationId(response.applicationId);
           setValue('applicationId', response.applicationId, { shouldValidate: false });
         } catch (error) {
@@ -200,14 +197,6 @@ export const ApplicationForm: React.FC = () => {
     { id: 'documents', label: 'Documents', isActive: activeTab === 'documents' },
     { id: 'declaration', label: 'Declaration', isActive: activeTab === 'declaration' },
   ];
-
-  // const handleTabClick = (tabId: string) => {
-  //   setActiveTab(tabId);
-  //   const newIndex = tabs.findIndex((tab) => tab.id === tabId);
-  //   setFormProgress(Math.floor((newIndex / (tabs.length - 1)) * 100));
-  //   setValidationAttempted(false);
-  //   setSaveError(null);
-  // };
 
   const handleNextTab = () => {
     const currentIndex = tabs.findIndex((tab) => tab.id === activeTab);
@@ -409,11 +398,11 @@ export const ApplicationForm: React.FC = () => {
           handleNextTab();
         } else {
           console.log('Form validation failed or personalInfo is empty, staying on personalDetails tab');
-          alert('Please fill in the required personal information fields.');
+          toast.error('Please fill in the required personal information fields.');
         }
       } else {
         console.error('personalFormRef.current is null');
-        alert('Personal form reference is missing. Please try again.');
+        toast.error('Personal form reference is missing. Please try again.');
       }
     } else if (activeTab === 'choiceOfStudy') {
       setValidationAttempted(true);
@@ -429,7 +418,7 @@ export const ApplicationForm: React.FC = () => {
             setSaveError('Failed to save choice of study. Please try again.');
           }
       } else {
-          alert('Please add at least one programme choice.');
+        toast.error('Please add at least one programme choice.');
         }
       }   
     } else if (activeTab === 'education') {
@@ -443,7 +432,7 @@ export const ApplicationForm: React.FC = () => {
           console.log('education saved:', formData.education);
           handleNextTab();
         } else {
-          alert(
+          toast.error(
             formData.education?.studentType === 'international' && !isValid
               ? 'Please complete all required education details, including at least one English proficiency test.'
               : 'Please complete all required education details, including student type.'
@@ -451,7 +440,7 @@ export const ApplicationForm: React.FC = () => {
         }
       } else {
         console.error('educationFormRef.current is null');
-        alert('Education form reference is missing. Please try again.');
+        toast.error('Education form reference is missing. Please try again.');
       }
     } else if (activeTab === 'achievements') {
       setValidationAttempted(true);
@@ -472,7 +461,7 @@ export const ApplicationForm: React.FC = () => {
             setSaveError('Failed to save achievements. Please try again.');
           }
         } else {
-          alert(
+          toast.error(
             formData.achievements?.hasNoAchievements
               ? 'Please complete all required questions.'
               : 'Please add at least one achievement or select "No Achievements to Report".'
@@ -480,7 +469,7 @@ export const ApplicationForm: React.FC = () => {
         }
       } else {
         console.error('achievementsFormRef.current is null');
-        alert('Achievements form reference is missing. Please try again.');
+        toast.error('Achievements form reference is missing. Please try again.');
       }
     } else if (activeTab === 'otherInformation') {
       setValidationAttempted(true);
@@ -491,7 +480,7 @@ export const ApplicationForm: React.FC = () => {
         console.log('otherInformation saved:', formData.otherInformation);
         handleNextTab();
       } else {
-        alert('Please complete the Other Information section.');
+        toast.error('Please complete the Other Information section.');
       }
     } else if (activeTab === 'documents') {
       setValidationAttempted(true);
@@ -505,11 +494,11 @@ export const ApplicationForm: React.FC = () => {
           console.log('documents saved:', formData.documents);
           handleNextTab();
         } else {
-          alert('Please upload all required documents.');
+          toast.error('Please upload all required documents.');
         }
       } else {
         console.error('documentsFormRef.current is null');
-        alert('Documents form reference is missing. Please try again.');
+        toast.error('Documents form reference is missing. Please try again.');
       }
     } else if (activeTab === 'declaration') {
       setValidationAttempted(true);
@@ -520,7 +509,7 @@ export const ApplicationForm: React.FC = () => {
         console.log('declaration saved:', formData.declaration);
         handleNextTab();
       } else {
-        alert('Please agree to the Privacy Notice to proceed.');
+        toast.error('Please agree to the Privacy Notice to proceed.');
       }
     }
   };
@@ -532,7 +521,7 @@ export const ApplicationForm: React.FC = () => {
     }
 
     if (!formData.applicationId) {
-      alert('No application ID found.');
+      toast.error('No application ID found.');
       return;
     }
 

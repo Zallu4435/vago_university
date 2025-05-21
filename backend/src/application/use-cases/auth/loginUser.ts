@@ -2,6 +2,7 @@ import { Register } from '../../../infrastructure/database/mongoose/models/regis
 import { Admin } from '../../../infrastructure/database/mongoose/models/admin.model';
 import { User } from '../../../infrastructure/database/mongoose/models/user.model';
 import { Faculty } from '../../../infrastructure/database/mongoose/models/faculty.model';
+import { Admission } from '../../../infrastructure/database/mongoose/models/admission.model';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -16,6 +17,7 @@ interface LoginResponse {
     firstName: string;
     lastName: string;
     email: string;
+    id: string;
   };
   collection: 'register' | 'admin' | 'user' | 'faculty';
 }
@@ -27,18 +29,30 @@ class LoginUser {
     let user;
     let collection: 'register' | 'admin' | 'user' | 'faculty' = 'register';
 
-    user = await Register.findOne({ email });
-    if (!user) {
-      user = await Admin.findOne({ email });
+    user = await Admin.findOne({ email });
+    if (user) {
       collection = 'admin';
     }
+
     if (!user) {
       user = await User.findOne({ email });
-      collection = 'user';
+      if (user) collection = 'user';
     }
+
     if (!user) {
       user = await Faculty.findOne({ email });
-      collection = 'faculty';
+      if (user) collection = 'faculty';
+    }
+
+    if (!user) {
+      user = await Register.findOne({ email });
+      if (user) {
+        const admission = await Admission.findOne({ registerId: user._id });
+        if (admission) {
+          throw new Error('User has already made an admission and cannot log in from register.');
+        }
+        collection = 'register';
+      }
     }
 
     if (!user) {
@@ -64,11 +78,11 @@ class LoginUser {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        id: user?._id
+        id: user._id.toString()
       },
       collection,
     };
-  }
+  }    
 }
 
 export const loginUser = new LoginUser();

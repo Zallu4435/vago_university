@@ -10,6 +10,7 @@ import { loginSchema } from '../../../domain/validation/login';
 import { useLoginUser } from '../../../application/hooks/useAuthQueries';
 import { useAnimation } from '../../../application/hooks/useAnimation';
 import { setAuth } from '../../redux/authSlice';
+import { toast } from 'react-hot-toast';
 
 interface FormData {
   email: string;
@@ -33,7 +34,6 @@ const LoginPage = () => {
   const mutation = useLoginUser();
 
 
-// Ensure redirect logic matches your collections
 const onSubmit = (data: FormData) => {
   mutation.mutate(data, {
     onSuccess: (response) => {
@@ -44,7 +44,7 @@ const onSubmit = (data: FormData) => {
         user: response.user,
         collection: response.collection,
       }));
-      alert('Login successful!');
+      toast.success('Login successful!');
       switch (response.collection) {
         case 'register':
           navigate('/admission');
@@ -61,7 +61,7 @@ const onSubmit = (data: FormData) => {
       }
     },
     onError: (error: Error) => {
-      alert(`Login failed: ${error.message}`);
+      toast.error(`Login failed: ${error.message}`);
     },
   });
 };

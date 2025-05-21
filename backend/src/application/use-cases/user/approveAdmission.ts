@@ -27,22 +27,18 @@ class ApproveAdmission {
       throw new Error('Admission already processed');
     }
 
-    // Instead of directly approving, we send an email with a confirmation link
     const confirmationToken = this.generateConfirmationToken();
     
-    // Save the token and any additional info to the admission document
     admission.confirmationToken = confirmationToken;
-    admission.tokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Token valid for 7 days
+    admission.tokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); 
 
     admission.status = 'offered';
     
     await admission.save();
     
-    // Create confirmation links
     const acceptUrl = `${config.frontendUrl}/confirm-admission/${id}/accept?token=${confirmationToken}`;
     const rejectUrl = `${config.frontendUrl}/confirm-admission/${id}/reject?token=${confirmationToken}`;
     
-    // Send email to the applicant
     await emailService.sendAdmissionOfferEmail({
       to: admission.personal.emailAddress,
       name: admission.personal.fullName,
@@ -57,7 +53,6 @@ class ApproveAdmission {
   }
   
   private generateConfirmationToken(): string {
-    // Generate a random token
     return Math.random().toString(36).substring(2, 15) + 
            Math.random().toString(36).substring(2, 15);
   }

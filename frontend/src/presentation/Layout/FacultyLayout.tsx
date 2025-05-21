@@ -1,27 +1,29 @@
-import React from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
+import { useState } from 'react';
+import { Outlet } from 'react-router-dom';
+import Sidebar from '../pages/faculty/Sidebar';
+import Header from '../pages/faculty/Header';
 
-const FacultyLayout: React.FC = () => {
+export default function FacultyLayout() {
+  const [activeTab, setActiveTab] = useState('Dashboard');
+
+  const facultyName = 'Prof. Johnson';
+  const department = 'Computer Science';
+  const currentDate = 'Thursday, May 16, 2025';
+
   return (
-    <div className="min-h-screen flex">
-      <aside className="w-64 bg-blue-800 text-white p-4">
-        <h1 className="text-2xl font-bold mb-6">Faculty Portal</h1>
-        <nav>
-          <NavLink
-            to="/faculty/courses"
-            className={({ isActive }) =>
-              `block py-2 px-4 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-blue-700'}`
-            }
-          >
-            Courses
-          </NavLink>
-        </nav>
-      </aside>
-      <main className="flex-1 p-8">
-        <Outlet />
-      </main>
+    <div className="flex min-h-screen bg-gray-50 box-border">
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        facultyName={facultyName}
+        department={department}
+      />
+      <div className="ml-72 w-[calc(100%-18rem)] min-h-screen bg-gray-50 box-border">
+        <Header currentDate={currentDate} facultyName={facultyName} />
+        <main className="px-8 pt-6 pb-12 mt-20">
+          <Outlet context={{ activeTab, setActiveTab }} />
+        </main>
+      </div>
     </div>
   );
-};
-
-export default FacultyLayout;
+}

@@ -23,7 +23,7 @@ import LoginPage from './presentation/pages/Auth/Login';
 import RegisterPage from './presentation/pages/Auth/Register';
 import { ApplicationForm } from './presentation/pages/ApplicationForm';
 import UniversityAdminDashboard from './presentation/pages/admin/Dasboard';
-import UserManagement from './presentation/pages/admin/Users';
+import UserManagement from './presentation/pages/admin/User/UserManagement';
 import { UGHome } from './presentation/pages/ug_admissions/UGHome';
 import { UGAdmissions } from './presentation/pages/ug_admissions/UGAdmissions';
 import UGProgrammes from './presentation/pages/ug_admissions/UGProgrammes';
@@ -31,7 +31,7 @@ import { UGScholarships } from './presentation/pages/ug_admissions/UGScholarship
 import { UGWhy_VAGO } from './presentation/pages/ug_admissions/UGWhy_VAGO';
 import DashboardPage from './presentation/pages/user/Dashboard/StudentDashboard';
 import CanvasPage from './presentation/pages/CanvasPage';
-import FacultyCoursesPage from './presentation/pages/FacultyDashboard';
+import FacultyDashboard from './presentation/pages/faculty/FacultyDashboard';
 import FacultyRequestForm from './presentation/pages/Auth/FacultyRequest';
 import ConfirmAdmission from './presentation/pages/ConfirmAdmission';
 import FacultyManagement from './presentation/pages/admin/FacultyManagement';
@@ -126,7 +126,7 @@ const App: React.FC = () => {
           }
         >
           <Route element={<FacultyLayout />}>
-            <Route path="faculty/courses" element={<FacultyCoursesPage />} />
+            <Route path="faculty/courses" element={<FacultyDashboard />} />
           </Route>
         </Route>
 

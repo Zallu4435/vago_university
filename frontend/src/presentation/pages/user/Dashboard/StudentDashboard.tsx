@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import Header from '../Header';
-import Footer from '../Footer';
+import { useOutletContext } from 'react-router-dom';
 import WelcomeBanner from './WelcomeBanner';
 import Announcements from './Announcements';
 import Deadlines from './Deadlines';
@@ -14,8 +13,7 @@ import Communication from '../Communication/Communication';
 import Financial from '../Financial/Financial';
 
 export default function StudentDashboard() {
-  const [activeTab, setActiveTab] = useState('Dashboard');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useOutletContext();
 
   // Sample data from provided code
   const announcements = [
@@ -55,38 +53,28 @@ export default function StudentDashboard() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100">
-      <Header 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        mobileMenuOpen={mobileMenuOpen} 
-        setMobileMenuOpen={setMobileMenuOpen} 
-      />
-      <main className="flex-grow">
-        {activeTab === 'Dashboard' && (
-          <>
-            <WelcomeBanner />
-            <div className="container mx-auto px-4 py-12">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
-                <Announcements announcements={announcements} />
-                <Deadlines deadlines={deadlines} />
-                <QuickLinks />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 h-full">
-                <ScheduledClasses classes={classes} />
-                <OnlineSessionTopics onlineTopics={onlineTopics} handleVote={handleVote} />
-                <Calendar calendarDays={calendarDays} specialDates={specialDates} />
-              </div>
+    <>
+      {activeTab === 'Dashboard' && (
+        <>
+          <WelcomeBanner />
+          <div className="container mx-auto px-4 py-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
+              <Announcements announcements={announcements} />
+              <Deadlines deadlines={deadlines} />
+              <QuickLinks />
             </div>
-          </>
-        )}
-        {activeTab === 'Academics' && <Academics />}
-        {activeTab === 'Financial' && <Financial />}
-          {activeTab === 'Communication' && <Communication />}
-
-        {activeTab === 'Campus Life' && <CampusLife />}
-      </main>
-      <Footer />
-    </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 h-full">
+              <ScheduledClasses classes={classes} />
+              <OnlineSessionTopics onlineTopics={onlineTopics} handleVote={handleVote} />
+              <Calendar calendarDays={calendarDays} specialDates={specialDates} />
+            </div>
+          </div>
+        </>
+      )}
+      {activeTab === 'Academics' && <Academics />}
+      {activeTab === 'Financial' && <Financial />}
+      {activeTab === 'Communication' && <Communication />}
+      {activeTab === 'Campus Life' && <CampusLife />}
+    </>
   );
 }

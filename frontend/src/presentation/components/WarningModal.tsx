@@ -1,6 +1,5 @@
-// src/presentation/components/common/WarningModal.tsx
-import React from 'react';
-import { FiAlertTriangle } from 'react-icons/fi';
+import React, { useState, useEffect } from 'react';
+import { FiAlertTriangle, FiAlertCircle, FiInfo, FiX } from 'react-icons/fi';
 
 interface WarningModalProps {
   isOpen: boolean;
@@ -23,33 +22,68 @@ const WarningModal: React.FC<WarningModalProps> = ({
   cancelText = 'Cancel',
   type = 'danger'
 }) => {
+  const [animateIn, setAnimateIn] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      // Trigger animation after modal is displayed
+      setTimeout(() => setAnimateIn(true), 50);
+    } else {
+      setAnimateIn(false);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const getTypeStyles = () => {
     switch (type) {
       case 'danger':
         return {
-          icon: 'text-red-600',
-          button: 'bg-red-600 hover:bg-red-700 text-white',
-          border: 'border-red-200'
+          icon: <FiAlertTriangle size={26} />,
+          iconColor: 'text-red-400',
+          iconBg: 'bg-red-500/20',
+          iconBorder: 'border-red-500/30',
+          button: 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600',
+          buttonBorder: 'border-red-500/50',
+          buttonRing: 'focus:ring-red-500/50',
+          contentBg: 'bg-red-500/10',
+          contentBorder: 'border-red-500/30'
         };
       case 'warning':
         return {
-          icon: 'text-yellow-600',
-          button: 'bg-yellow-600 hover:bg-yellow-700 text-white',
-          border: 'border-yellow-200'
+          icon: <FiAlertCircle size={26} />,
+          iconColor: 'text-yellow-400',
+          iconBg: 'bg-yellow-500/20',
+          iconBorder: 'border-yellow-500/30',
+          button: 'bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600',
+          buttonBorder: 'border-yellow-500/50',
+          buttonRing: 'focus:ring-yellow-500/50',
+          contentBg: 'bg-yellow-500/10',
+          contentBorder: 'border-yellow-500/30'
         };
       case 'info':
         return {
-          icon: 'text-blue-600',
-          button: 'bg-blue-600 hover:bg-blue-700 text-white',
-          border: 'border-blue-200'
+          icon: <FiInfo size={26} />,
+          iconColor: 'text-blue-400',
+          iconBg: 'bg-blue-500/20',
+          iconBorder: 'border-blue-500/30',
+          button: 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600',
+          buttonBorder: 'border-blue-500/50',
+          buttonRing: 'focus:ring-blue-500/50',
+          contentBg: 'bg-blue-500/10',
+          contentBorder: 'border-blue-500/30'
         };
       default:
         return {
-          icon: 'text-red-600',
-          button: 'bg-red-600 hover:bg-red-700 text-white',
-          border: 'border-red-200'
+          icon: <FiAlertTriangle size={26} />,
+          iconColor: 'text-red-400',
+          iconBg: 'bg-red-500/20',
+          iconBorder: 'border-red-500/30',
+          button: 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600',
+          buttonBorder: 'border-red-500/50',
+          buttonRing: 'focus:ring-red-500/50',
+          contentBg: 'bg-red-500/10',
+          contentBorder: 'border-red-500/30'
         };
     }
   };
@@ -57,39 +91,110 @@ const WarningModal: React.FC<WarningModalProps> = ({
   const styles = getTypeStyles();
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg w-full max-w-md mx-4 shadow-xl">
-        <div className="p-6">
-          <div className="flex items-center justify-center mb-4">
-            <div className={`p-3 rounded-full ${styles.icon} bg-opacity-10`}>
-              <FiAlertTriangle size={24} />
+    <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm transition-all duration-300">
+      {/* Background overlay with particles */}
+      <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm">
+        {/* Ghost particles */}
+        {[...Array(25)].map((_, i) => (
+          <div 
+            key={i}
+            className="absolute rounded-full bg-purple-500/20 blur-sm"
+            style={{
+              width: `${Math.random() * 10 + 5}px`,
+              height: `${Math.random() * 10 + 5}px`,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animation: `floatParticle ${Math.random() * 10 + 15}s infinite ease-in-out`,
+              animationDelay: `${Math.random() * 5}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Modal container */}
+      <div 
+        className={`bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 
+                   rounded-xl border border-purple-500/30 shadow-2xl w-full max-w-md 
+                   relative overflow-hidden transition-all duration-500 transform mx-4
+                   ${animateIn ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
+      >
+        {/* Inner glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
+        
+        {/* Corner decorations */}
+        <div className="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-bl-full" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/10 rounded-tr-full" />
+
+        <div className="p-6 relative z-10">
+          {/* Icon header */}
+          <div className="flex items-center justify-center mb-6">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center 
+                          ${styles.iconBg} ${styles.iconColor} border ${styles.iconBorder}
+                          shadow-lg shadow-purple-500/10`}>
+              {styles.icon}
             </div>
           </div>
           
-          <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
-            {title}
-          </h3>
-          
-          <p className="text-gray-600 text-center mb-6">
-            {message}
-          </p>
+          {/* Content */}
+          <div className={`p-4 rounded-lg ${styles.contentBg} border ${styles.contentBorder} mb-6`}>
+            <h3 className="text-xl font-bold text-white text-center mb-3 text-shadow-sm">
+              {title}
+            </h3>
+            
+            <p className="text-purple-100 text-center">
+              {message}
+            </p>
+          </div>
 
+          {/* Buttons */}
           <div className="flex space-x-4">
             <button
               onClick={onClose}
-              className="flex-1 py-2 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              className="flex-1 py-2.5 px-4 border border-purple-500/30 rounded-lg text-purple-200 
+                        hover:bg-purple-500/10 transition-all duration-300 focus:outline-none 
+                        focus:ring-2 focus:ring-purple-500/50"
             >
               {cancelText}
             </button>
             <button
               onClick={onConfirm}
-              className={`flex-1 py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${type}-500 ${styles.button}`}
+              className={`flex-1 py-2.5 px-4 rounded-lg text-white shadow-lg
+                         ${styles.button} border ${styles.buttonBorder}
+                         transition-all duration-300 focus:outline-none focus:ring-2 ${styles.buttonRing}`}
             >
               {confirmText}
             </button>
           </div>
         </div>
       </div>
+
+      {/* CSS for animations and effects */}
+      <style jsx>{`
+        .text-shadow-sm {
+          text-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
+        }
+        
+        @keyframes floatParticle {
+          0% {
+            transform: translateY(0) translateX(0);
+            opacity: 0;
+          }
+          25% {
+            opacity: 0.8;
+          }
+          50% {
+            transform: translateY(-20px) translateX(10px);
+            opacity: 0.3;
+          }
+          75% {
+            opacity: 0.7;
+          }
+          100% {
+            transform: translateY(0) translateX(0);
+            opacity: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 };

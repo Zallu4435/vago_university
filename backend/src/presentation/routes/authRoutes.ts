@@ -12,5 +12,8 @@ router.post(
   authController.uploadDocuments, 
   authController.registerFaculty
 );
+router.post('/send-email-otp', authController.sendEmailOtp);
+router.post('/verify-email-otp', authController.verifyEmailOtp);
+router.post('/reset-password', authController.resetPassword);
 
 export default router;

@@ -1,94 +1,5 @@
-// // backend/src/infrastructure/services/email.service.ts
-// import nodemailer from 'nodemailer';
-// import { config } from '../../config/config';
-
-// interface AdmissionOfferEmailParams {
-//   to: string;
-//   name: string;
-//   programDetails: string;
-//   startDate: string;
-//   scholarshipInfo: string;
-//   additionalNotes: string;
-//   acceptUrl: string;
-//   rejectUrl: string;
-//   expiryDays: number;
-// }
-
-// class EmailService {
-//   private transporter: any;
-
-//   constructor() {
-//     this.transporter = nodemailer.createTransport({
-//       host: config.email.host,
-//       port: config.email.port,
-//       secure: config.email.secure,
-//       auth: {
-//         user: config.email.user,
-//         pass: config.email.password,
-//       },
-//     });
-//   }
-
-//   async sendAdmissionOfferEmail({ 
-//     to, 
-//     name, 
-//     programDetails, 
-//     startDate, 
-//     scholarshipInfo,
-//     additionalNotes,
-//     acceptUrl, 
-//     rejectUrl, 
-//     expiryDays 
-//   }: AdmissionOfferEmailParams): Promise<void> {
-//     const htmlContent = `
-//       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-//         <h2 style="color: #2a5885;">Congratulations, ${name}!</h2>
-//         <p>We are pleased to inform you that your application to the <strong>${programDetails}</strong> has been reviewed and accepted.</p>
-        
-//         ${programDetails ? `<p><strong>Program Details:</strong> ${programDetails}</p>` : ''}
-//         ${startDate ? `<p><strong>Start Date:</strong> ${startDate}</p>` : ''}
-//         ${scholarshipInfo ? `<p><strong>Scholarship Information:</strong> ${scholarshipInfo}</p>` : ''}
-//         ${additionalNotes ? `<p><strong>Additional Information:</strong> ${additionalNotes}</p>` : ''}
-        
-//         <p>Please confirm your admission by clicking one of the following options:</p>
-        
-//         <div style="margin: 30px 0;">
-//           <a href="${acceptUrl}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin-right: 15px;">
-//             Accept Offer
-//           </a>
-//           <a href="${rejectUrl}" style="background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
-//             Decline Offer
-//           </a>
-//         </div>
-        
-//         <p><strong>Important:</strong> This offer will expire in ${expiryDays} days. Please respond before then.</p>
-        
-//         <p>If you have any questions, please contact our admissions office.</p>
-        
-//         <p>Best regards,<br>
-//         The Admissions Team</p>
-//       </div>
-//     `;
-
-//     await this.transporter.sendMail({
-//       from: `"Admissions Team" <${config.email.from}>`,
-//       to,
-//       subject: `Admission Offer: ${programDetails}`,
-//       html: htmlContent,
-//     });
-    
-//     console.log(`Admission offer email sent to ${to}`);
-//   }
-// }
-
-// export const emailService = new EmailService();
-
-
-
-
-
-import nodemailer from 'nodemailer';
-import { config } from '../../config/config';
+import nodemailer from "nodemailer";
+import { config } from "../../config/config";
 
 interface AdmissionOfferEmailParams {
   to: string;
@@ -126,6 +37,12 @@ interface FacultyCredentialsEmailParams {
   additionalInstructions?: string;
 }
 
+interface PasswordResetOtpEmailParams {
+  to: string;
+  name: string;
+  otp: string;
+}
+
 class EmailService {
   private transporter: any;
 
@@ -141,26 +58,38 @@ class EmailService {
     });
   }
 
-  async sendAdmissionOfferEmail({ 
-    to, 
-    name, 
-    programDetails, 
-    startDate, 
+  async sendAdmissionOfferEmail({
+    to,
+    name,
+    programDetails,
+    startDate,
     scholarshipInfo,
     additionalNotes,
-    acceptUrl, 
-    rejectUrl, 
-    expiryDays 
+    acceptUrl,
+    rejectUrl,
+    expiryDays,
   }: AdmissionOfferEmailParams): Promise<void> {
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <h2 style="color: #2a5885;">Congratulations, ${name}!</h2>
         <p>We are pleased to inform you that your application to the <strong>${programDetails}</strong> has been reviewed and accepted.</p>
         
-        ${programDetails ? `<p><strong>Program Details:</strong> ${programDetails}</p>` : ''}
-        ${startDate ? `<p><strong>Start Date:</strong> ${startDate}</p>` : ''}
-        ${scholarshipInfo ? `<p><strong>Scholarship Information:</strong> ${scholarshipInfo}</p>` : ''}
-        ${additionalNotes ? `<p><strong>Additional Information:</strong> ${additionalNotes}</p>` : ''}
+        ${
+          programDetails
+            ? `<p><strong>Program Details:</strong> ${programDetails}</p>`
+            : ""
+        }
+        ${startDate ? `<p><strong>Start Date:</strong> ${startDate}</p>` : ""}
+        ${
+          scholarshipInfo
+            ? `<p><strong>Scholarship Information:</strong> ${scholarshipInfo}</p>`
+            : ""
+        }
+        ${
+          additionalNotes
+            ? `<p><strong>Additional Information:</strong> ${additionalNotes}</p>`
+            : ""
+        }
         
         <p>Please confirm your admission by clicking one of the following options:</p>
         
@@ -188,7 +117,7 @@ class EmailService {
       subject: `Admission Offer: ${programDetails}`,
       html: htmlContent,
     });
-    
+
     console.log(`Admission offer email sent to ${to}`);
   }
 
@@ -203,7 +132,7 @@ class EmailService {
     additionalNotes,
     acceptUrl,
     rejectUrl,
-    expiryDays
+    expiryDays,
   }: FacultyOfferEmailParams): Promise<void> {
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -217,11 +146,15 @@ class EmailService {
           // <p><strong>Position:</strong> ${position}</p>
           <p><strong>Department:</strong> ${department}</p>
           <p><strong>Start Date:</strong> ${startDate}</p>
-          ${salary ? `<p><strong>Salary:</strong> ${salary}</p>` : ''}
-          ${benefits ? `<p><strong>Benefits:</strong> ${benefits}</p>` : ''}
+          ${salary ? `<p><strong>Salary:</strong> ${salary}</p>` : ""}
+          ${benefits ? `<p><strong>Benefits:</strong> ${benefits}</p>` : ""}
         </div>
         
-        ${additionalNotes ? `<p><strong>Additional Information:</strong> ${additionalNotes}</p>` : ''}
+        ${
+          additionalNotes
+            ? `<p><strong>Additional Information:</strong> ${additionalNotes}</p>`
+            : ""
+        }
         
         <p>We are excited about the possibility of you joining our academic community and believe your expertise will be a valuable addition to our institution.</p>
         
@@ -253,7 +186,7 @@ class EmailService {
       subject: `Faculty Position Offer: ${position} in ${department}`,
       html: htmlContent,
     });
-    
+
     console.log(`Faculty offer email sent to ${to}`);
   }
 
@@ -264,7 +197,7 @@ class EmailService {
     password,
     loginUrl,
     department,
-    additionalInstructions
+    additionalInstructions,
   }: FacultyCredentialsEmailParams): Promise<void> {
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -284,7 +217,11 @@ class EmailService {
         
         <p><strong>Important:</strong> For security reasons, please change your password after your first login.</p>
         
-        ${additionalInstructions ? `<p><strong>Additional Instructions:</strong> ${additionalInstructions}</p>` : ''}
+        ${
+          additionalInstructions
+            ? `<p><strong>Additional Instructions:</strong> ${additionalInstructions}</p>`
+            : ""
+        }
         
         <p>The faculty dashboard will provide you with access to important resources, class schedules, student information, and other administrative tools.</p>
         
@@ -303,8 +240,44 @@ class EmailService {
       subject: `Your Faculty Dashboard Credentials`,
       html: htmlContent,
     });
-    
+
     console.log(`Faculty credentials email sent to ${to}`);
+  }
+
+  async sendPasswordResetOtpEmail({
+    to,
+    name,
+    otp,
+  }: PasswordResetOtpEmailParams): Promise<void> {
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #2a5885;">Password Reset Request</h2>
+        
+        <p>Dear ${name},</p>
+        
+        <p>We received a request to reset the password for your account. Please use the following One-Time Password (OTP) to proceed:</p>
+        
+        <div style="background-color: #f9f9f9; border-left: 4px solid #2a5885; padding: 15px; margin: 20px 0; text-align: center;">
+          <p style="font-size: 1.5rem; font-weight: bold; letter-spacing: 0.1rem; color: #1f2937;">${otp}</p>
+        </div>
+        
+        <p><strong>Important:</strong> This OTP is valid for 10 minutes. Do not share it with anyone.</p>
+        
+        <p>If you did not request a password reset, please ignore this email or contact our support team.</p>
+        
+        <p>Best regards,<br>
+        The Support Team</p>
+      </div>
+    `;
+
+    await this.transporter.sendMail({
+      from: `"Support Team" <${config.email.from}>`,
+      to,
+      subject: `Your Password Reset OTP`,
+      html: htmlContent,
+    });
+
+    console.log(`Password reset OTP email sent to ${to}`);
   }
 }
 

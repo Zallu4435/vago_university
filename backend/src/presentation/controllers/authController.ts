@@ -4,6 +4,9 @@ import { loginUser } from "../../application/use-cases/auth/loginUser";
 import { refreshToken } from "../../application/use-cases/auth/refreshToken";
 import { registerFaculty } from "../../application/use-cases/auth/registerFaculty";
 import { facultyUpload } from '../../config/cloudinary.config';
+import { sendEmailOtp } from "../../application/use-cases/auth/sendEmailOtp";
+import { verifyEmailOtp } from "../../application/use-cases/auth/verifyEmailOtp";
+import { resetPassword } from "../../application/use-cases/auth/resetPassword";
 
 class AuthController {
 
@@ -142,6 +145,63 @@ class AuthController {
       res.status(200).json({ message: "Logged out successfully" });
     } catch (err) {
       console.error(`Error in logout:`, err);
+      next(err);
+    }
+  }
+
+   async sendEmailOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = req.body;
+
+      console.log(`Received POST /api/auth/send-email-otp with body:`, { email });
+
+      if (!email) {
+        throw new Error('Email is required');
+      }
+
+      await sendEmailOtp.execute({ email });
+
+      res.status(200).json({ message: 'OTP sent successfully' });
+    } catch (err) {
+      console.error(`Error in sendEmailOtp:`, err);
+      next(err);
+    }
+  }
+
+  async verifyEmailOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, otp } = req.body;
+
+      console.log(`Received POST /api/auth/verify-email-otp with body:`, { email });
+
+      if (!email || !otp) {
+        throw new Error('Email and OTP are required');
+      }
+
+      const resetToken = await verifyEmailOtp.execute({ email, otp });
+
+      res.status(200).json({ resetToken });
+    } catch (err) {
+      console.error(`Error in verifyEmailOtp:`, err);
+      next(err);
+    }
+  }
+
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { resetToken, newPassword } = req.body;
+
+      console.log(`Received POST /api/auth/reset-password`);
+
+      if (!resetToken || !newPassword) {
+        throw new Error('Reset token and new password are required');
+      }
+
+      const loginResponse = await resetPassword.execute({ resetToken, newPassword });
+
+      res.status(200).json(loginResponse);
+    } catch (err) {
+      console.error(`Error in resetPassword:`, err);
       next(err);
     }
   }

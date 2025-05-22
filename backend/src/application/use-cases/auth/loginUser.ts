@@ -20,6 +20,7 @@ interface LoginResponse {
     id: string;
   };
   collection: 'register' | 'admin' | 'user' | 'faculty';
+  profilePicture: string;
 }
 
 class LoginUser {
@@ -78,7 +79,8 @@ class LoginUser {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        id: user._id.toString()
+        id: user._id.toString(),
+        profilePicture: user?.profilePicture
       },
       collection,
     };

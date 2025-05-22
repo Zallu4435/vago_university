@@ -1,8 +1,7 @@
-// src/infrastructure/config/cloudinary.config.ts
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import multer from 'multer';
-import { config as appConfig} from '../config/config'
+import { config as appConfig } from '../config/config';
 
 // Configure Cloudinary
 cloudinary.config({
@@ -11,8 +10,8 @@ cloudinary.config({
   api_secret: appConfig.cloudinary.apiSecret,
 });
 
-// Create storage engine for Multer with Cloudinary
-const storage = new CloudinaryStorage({
+// Storage engine for faculty documents
+const facultyStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'faculty-documents',
@@ -21,7 +20,20 @@ const storage = new CloudinaryStorage({
   } as any,
 });
 
-// Create multer upload instance
-const upload = multer({ storage });
+// Storage engine for profile pictures
+const profilePictureStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'profile-pictures',
+    allowed_formats: ['jpg', 'jpeg', 'png'],
+    transformation: [
+      { width: 200, height: 200, crop: 'fill', gravity: 'face', quality: 'auto' },
+    ],
+  } as any,
+});
 
-export { cloudinary, upload };
+// Multer instances
+const facultyUpload = multer({ storage: facultyStorage });
+const profilePictureUpload = multer({ storage: profilePictureStorage });
+
+export { cloudinary, facultyUpload, profilePictureUpload };

@@ -3,11 +3,11 @@ import { registerUser } from "../../application/use-cases/auth/registerUser";
 import { loginUser } from "../../application/use-cases/auth/loginUser";
 import { refreshToken } from "../../application/use-cases/auth/refreshToken";
 import { registerFaculty } from "../../application/use-cases/auth/registerFaculty";
-import { upload } from "../../config/cloudinary.config";
+import { facultyUpload } from '../../config/cloudinary.config';
 
 class AuthController {
 
-  uploadDocuments = upload.fields([
+  uploadDocuments = facultyUpload.fields([
     { name: "cv", maxCount: 1 },
     { name: "certificates", maxCount: 5 },
   ]);

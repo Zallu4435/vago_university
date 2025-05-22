@@ -6,6 +6,8 @@ export interface IUser extends Document {
   email: string;
   password: string;
   createdAt: Date;
+  phone?: string;
+  profilePicture?: string;
 }
 
 const userSchema = new Schema<IUser>({
@@ -21,6 +23,15 @@ const userSchema = new Schema<IUser>({
   },
   password: { type: String, required: true, minlength: 8 },
   createdAt: { type: Date, default: Date.now },
+  phone: {
+    type: String,
+    trim: true,
+    match: [/^\+?[0-9\- ]{7,15}$/, 'Please use a valid phone number'],
+  },
+  profilePicture: {
+    type: String,
+    trim: true,
+  },
 });
 
 export const User = mongoose.model<IUser>('User', userSchema);

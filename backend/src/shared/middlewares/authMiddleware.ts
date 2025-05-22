@@ -1,13 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { Register } from '../../infrastructure/database/mongoose/models/register.model';
+import { Admin } from '../../infrastructure/database/mongoose/models/admin.model';
+import { User } from '../../infrastructure/database/mongoose/models/user.model';
+import { Faculty } from '../../infrastructure/database/mongoose/models/faculty.model';
+import { Admission } from '../../infrastructure/database/mongoose/models/admission.model';
 
 interface JwtPayload {
   userId: string;
+  email: string;
   collection: 'register' | 'admin' | 'user' | 'faculty';
   firstName: string;
   lastName: string;
-  email: string;
 }
 
 declare global {
@@ -41,25 +45,44 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret') as JwtPayload;
     console.log('authMiddleware: Token decoded:', decoded);
 
-    if (decoded.collection !== 'register') {
-      console.error('authMiddleware: Access restricted, collection:', decoded.collection);
-      return res.status(403).json({ error: 'Access restricted to register users' });
+    let user;
+    switch (decoded.collection) {
+      case 'admin':
+        user = await Admin.findById(decoded.userId);
+        break;
+      case 'user':
+        user = await User.findById(decoded.userId);
+        break;
+      case 'faculty':
+        user = await Faculty.findById(decoded.userId);
+        break;
+      case 'register':
+        user = await Register.findById(decoded.userId);
+        if (user) {
+          const admission = await Admission.findOne({ registerId: user._id });
+          if (admission) {
+            console.error('authMiddleware: User has an admission and cannot access:', decoded.userId);
+            return res.status(403).json({ error: 'User has already made an admission' });
+          }
+        }
+        break;
+      default:
+        console.error('authMiddleware: Invalid collection:', decoded.collection);
+        return res.status(403).json({ error: 'Invalid user collection' });
     }
 
-    // Verify user exists in Register collection
-    const user = await Register.findById(decoded.userId);
     if (!user) {
-      console.error('authMiddleware: User not found for userId:', decoded.userId);
-      return res.status(401).json({ error: 'User not found in Register collection' });
+      console.error('authMiddleware: User not found for userId:', decoded.userId, 'in collection:', decoded.collection);
+      return res.status(401).json({ error: 'User not found in specified collection' });
     }
 
     // Attach user to request
     req.user = {
       id: decoded.userId,
       collection: decoded.collection,
-      firstName: decoded.firstName,
-      lastName: decoded.lastName,
-      email: decoded.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
     };
     console.log('authMiddleware: User attached to req.user:', req.user);
 

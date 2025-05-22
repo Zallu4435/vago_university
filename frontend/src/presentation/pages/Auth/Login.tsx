@@ -43,6 +43,7 @@ const onSubmit = (data: FormData) => {
         token: response.token,
         user: response.user,
         collection: response.collection,
+        profilePicture: response.profilePicture,
       }));
       toast.success('Login successful!');
       switch (response.collection) {
@@ -129,6 +130,9 @@ const onSubmit = (data: FormData) => {
                 <Link to="/register" className="text-cyan-600 hover:underline font-medium">Register</Link>
                 <span className="mx-2">|</span>
                 <Link to="/faculty/request" className="text-cyan-600 hover:underline font-medium">Apply as Faculty</Link>
+              </div>
+              <div className="text-center text-sm text-cyan-700 mt-4">
+                <Link to="/forgot-password" className="text-red-600 hover:underline font-medium">Forgot Password?</Link>
               </div>
             </form>
           </div>

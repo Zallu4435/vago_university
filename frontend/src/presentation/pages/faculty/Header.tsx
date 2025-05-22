@@ -2,7 +2,7 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { LuBell, LuLogOut } from 'react-icons/lu';
 
-export default function Header({ currentDate, facultyName }) {
+export default function Header({ currentDate, facultyName, onLogout }) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   return (
@@ -60,12 +60,9 @@ export default function Header({ currentDate, facultyName }) {
               <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">
                 Account Settings
               </a>
-              <a
-                href="#"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 flex items-center"
-              >
-                <LuLogOut size={16} className="mr-2" /> Log Out
-              </a>
+              <button onClick={onLogout} className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">
+                Log Out
+              </button>
             </div>
           )}
         </div>

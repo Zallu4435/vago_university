@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import httpClient from '../../frameworks/api/httpClient';
+import Cookies from 'js-cookie';
 
 interface AuthState {
   token: string | null;
@@ -33,11 +34,15 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.user = action.payload.user;
       state.collection = action.payload.collection;
+      state.profilePicture = action.payload.profilePicture;
     },
     logout: (state) => {
       // Call logout API to clear cookie
       httpClient.post('/auth/logout', {}, { withCredentials: true })
         .catch(err => console.error('Logout API error:', err));
+
+      Cookies.remove('auth_token', { secure: true, sameSite: 'strict' });
+
       state.token = null;
       state.user = null;
       state.collection = null;

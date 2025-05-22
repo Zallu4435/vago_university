@@ -1,7 +1,21 @@
-import { FaBell, FaBookOpen, FaSearch, FaBars, FaTimes } from 'react-icons/fa';
+import { useState } from 'react';
+import { FaBell, FaBookOpen, FaSearch, FaBars, FaTimes, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserAlt } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
-export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMobileMenuOpen }) {
+export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMobileMenuOpen, onLogout, userName, profilePicture }) {
   const tabs = ['Dashboard', 'Academics', 'Financial', 'Communication', 'Campus Life'];
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+
+  const toggleProfileDropdown = () => {
+    setIsProfileDropdownOpen(!isProfileDropdownOpen);
+  };
+
+  const handleDropdownAction = (action) => {
+    if (action === 'logout') {
+      onLogout();
+    }
+    setIsProfileDropdownOpen(false);
+  };
 
   return (
     <header className="relative z-10 bg-gradient-to-r from-amber-100 to-orange-100 shadow-lg">
@@ -9,7 +23,6 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
       
       <div className="container mx-auto px-4 py-3 relative z-10">
         <div className="flex items-center justify-between">
-          
           {/* Logo */}
           <div className="flex items-center space-x-2">
             <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-lg">
@@ -33,18 +46,63 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
 
           {/* Icons & User */}
           <div className="flex items-center space-x-4">
-            <button className="relative p-2 rounded-full hover:bg-white/20 transition" aria-label="Notifications">
+            <button className="cursor-pointer relative p-2 rounded-full hover:bg-white/20 transition" aria-label="Notifications">
               <FaBell className="text-orange-500" size={20} />
               <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center text-white">
                 3
               </span>
             </button>
 
-            <div className="hidden md:flex items-center space-x-2 bg-white/20 rounded-full px-3 py-1 backdrop-blur-md">
-              <div className="bg-white text-orange-500 rounded-full w-8 h-8 flex items-center justify-center font-medium shadow-md">
-                JS
-              </div>
-              <span className="text-gray-800">John Smith</span>
+            <div className="relative">
+              <button
+                onClick={toggleProfileDropdown}
+                className="cursor-pointer hidden md:flex items-center space-x-2 bg-white/20 rounded-full px-3 py-1 backdrop-blur-md hover:bg-white/30 transition"
+                aria-label="User Profile"
+              >
+                <div className="bg-white text-orange-500 rounded-full w-8 h-8 flex items-center justify-center font-medium shadow-md">
+                  {profilePicture ? (
+                    <img src={profilePicture} alt="User" className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    <FaUserAlt className="w-6 h-6 text-white" />
+                  )}
+                </div>
+                <span className="text-gray-800">{userName}</span>
+              </button>
+
+              {/* Profile Dropdown */}
+              {isProfileDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 transform transition-all duration-300">
+                  <ul className="py-2">
+                    <li>
+                      <button
+                        onClick={() => handleDropdownAction('settings')}
+                        className="w-full flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-orange-100 transition"
+                      >
+                        <FaCog className="text-orange-500" size={16} />
+                        <Link to="/settings">Settings</Link>
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        onClick={() => handleDropdownAction('help')}
+                        className="w-full flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-orange-100 transition"
+                      >
+                        <FaQuestionCircle className="text-orange-500" size={16} />
+                        <span>Help</span>
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        onClick={() => handleDropdownAction('logout')}
+                        className="w-full flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-orange-100 transition"
+                      >
+                        <FaSignOutAlt className="text-orange-500" size={16} />
+                        <span>Logout</span>
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
 
             <button 
@@ -101,6 +159,31 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
                     </button>
                   </li>
                 ))}
+                {/* Mobile Profile Options */}
+                <li>
+                  <button
+                    onClick={() => handleDropdownAction('settings')}
+                    className="w-full text-left px-4 py-2 rounded-lg text-gray-700 hover:bg-orange-100 transition"
+                  >
+                    Settings
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => handleDropdownAction('help')}
+                    className="w-full text-left px-4 py-2 rounded-lg text-gray-700 hover:bg-orange-100 transition"
+                  >
+                    Help
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => handleDropdownAction('logout')}
+                    className="w-full text-left px-4 py-2 rounded-lg text-gray-700 hover:bg-orange-100 transition"
+                  >
+                    Logout
+                  </button>
+                </li>
               </ul>
             </div>
           </div>

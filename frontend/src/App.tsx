@@ -36,9 +36,13 @@ import FacultyRequestForm from './presentation/pages/Auth/FacultyRequest';
 import ConfirmAdmission from './presentation/pages/ConfirmAdmission';
 import FacultyManagement from './presentation/pages/admin/FacultyManagement';
 import ConfirmFaculty from './presentation/pages/ConfirmFaculty';
+import Setting from './presentation/pages/user/Settings/Setting';
+import {ForgotPasswordModal} from './presentation/pages/ForgotPassword';
+import { useNavigate } from 'react-router-dom';
 
 const App: React.FC = () => {
   const { isError, error } = useRefreshToken();
+  const navigate = useNavigate();
 
   if (isError) {
     console.log('Refresh token failed:', error);
@@ -57,6 +61,7 @@ const App: React.FC = () => {
           <Route element={<PublicLayout />}>
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
+            <Route path="forgot-password" element={<ForgotPasswordModal isOpen={true} onClose={() => { navigate(-1) || navigate('/login') }} />} />
             <Route path="faculty/request" element={<FacultyRequestForm />} />
           </Route>
         </Route>
@@ -115,6 +120,7 @@ const App: React.FC = () => {
         >
           <Route element={<UserLayout />}>
             <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="settings" element={<Setting />} />
             <Route path="canvas" element={<CanvasPage />} />
           </Route>
         </Route>

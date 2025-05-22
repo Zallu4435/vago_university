@@ -30,7 +30,7 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
   }
 
   return (
-    <nav className="bg-white px-6 py-2 shadow border-t-4 border-cyan-300 z-10 relative">
+    <nav className="fixed top-[90px] left-0 right-0 z-40 bg-white px-6 py-2 shadow border-t-4 border-cyan-300">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex-1 flex justify-center">
           <ul className="flex gap-10 list-none">

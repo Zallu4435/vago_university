@@ -73,7 +73,7 @@ const eventColumns = [
     render: (event: Event) => (
       <div>
         <p className="font-medium text-gray-200">{event.name}</p>
-        <p className="text-xs text-gray-400">ID: {event.id}</p>
+        <p className="text-xs text-gray-400">ID: {event._id.slice(0, 7)}</p>
       </div>
     ),
     width: '20%',

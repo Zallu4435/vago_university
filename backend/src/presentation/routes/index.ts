@@ -8,6 +8,7 @@ import courseRoutes from './courseRoutes'
 import clubRoutes from './clubRoutes'
 import sportRoutes from './sportsRoutes'
 import eventRoutes from './eventsRoutes'
+import communicationRoutes from './communicationRoutes'
 
 const router = Router();
 
@@ -32,6 +33,9 @@ router.use('/admin/clubs', clubRoutes);
 router.use('/admin/sports', sportRoutes);
 
 router.use('/admin/events', eventRoutes);
+
+router.use('/admin/communication', communicationRoutes);
+
 
 
 

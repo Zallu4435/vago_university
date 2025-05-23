@@ -32,8 +32,29 @@ const profilePictureStorage = new CloudinaryStorage({
   } as any,
 });
 
-// Multer instances
-const facultyUpload = multer({ storage: facultyStorage });
-const profilePictureUpload = multer({ storage: profilePictureStorage });
+// Storage engine for message attachments
+const messageAttachmentStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'message-attachments',
+    allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
+    resource_type: 'auto', // Supports both images and raw files (e.g., txt)
+    transformation: [{ quality: 'auto' }],
+  } as any,
+});
 
-export { cloudinary, facultyUpload, profilePictureUpload };
+// Multer instances
+const facultyUpload = multer({ 
+  storage: facultyStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+});
+const profilePictureUpload = multer({ 
+  storage: profilePictureStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+});
+const messageAttachmentUpload = multer({ 
+  storage: messageAttachmentStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+});
+
+export { cloudinary, facultyUpload, profilePictureUpload, messageAttachmentUpload };

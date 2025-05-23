@@ -5,6 +5,9 @@ import auuthRoutes from './authRoutes';
 import facultyRoutes from './facultyRoutes'
 import profileRoutes from './profileRoutes'
 import courseRoutes from './courseRoutes'
+import clubRoutes from './clubRoutes'
+import sportRoutes from './sportsRoutes'
+import eventRoutes from './eventsRoutes'
 
 const router = Router();
 
@@ -23,6 +26,15 @@ router.use("/user", profileRoutes);
 router.use("/auth", auuthRoutes); 
 
 router.use('/admin/courses', courseRoutes);
+
+router.use('/admin/clubs', clubRoutes);
+
+router.use('/admin/sports', sportRoutes);
+
+router.use('/admin/events', eventRoutes);
+
+
+
 
 
 export default router;

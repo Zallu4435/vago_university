@@ -41,6 +41,9 @@ import {ForgotPasswordModal} from './presentation/pages/ForgotPassword';
 import { useNavigate } from 'react-router-dom';
 import VideoManagementPage from './presentation/pages/admin/vedio/VedioManagement';
 import AdminCourseManagement from './presentation/pages/admin/course/CourseManagement';
+import AdminClubManagement from './presentation/pages/admin/campusLife/clubs/ClubManagement';
+import AdminSportsManagement from './presentation/pages/admin/campusLife/sports/SportsManagement';
+import AdminEventsManagement from './presentation/pages/admin/campusLife/events/EventsManagement';
 
 const App: React.FC = () => {
   const { isError, error } = useRefreshToken();
@@ -113,6 +116,9 @@ const App: React.FC = () => {
             <Route path="admin/faculty" element={<FacultyManagement />} /> 
             <Route path="admin/course-management" element={<AdminCourseManagement />} />
             <Route path="admin/content" element={<VideoManagementPage />} />
+            <Route path="admin/clubs" element={<AdminClubManagement />} />
+            <Route path="admin/sports" element={<AdminSportsManagement />} />
+            <Route path="admin/events" element={<AdminEventsManagement />} />
           </Route>
         </Route>
 

@@ -8,7 +8,7 @@ interface GetFacultyParams {
   experience: string;
 }
 
-interface GetFacultyResponse {
+interface GetFacultyResponse { 
   faculty: any[];
   totalFaculty: number;
   totalPages: number;

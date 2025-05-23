@@ -1,27 +1,129 @@
 import React, { useState, useCallback } from 'react';
 import { useFacultyManagement } from '../../../application/hooks/useFacultyManagement';
-import {
-  FiFileText,
-  FiUsers,
-  FiClipboard,
-  FiBarChart2,
-} from 'react-icons/fi';
+import { FiFileText, FiUsers, FiClipboard, FiBarChart2, FiUser, FiMail, FiCalendar, FiBriefcase, FiEye, FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import { debounce } from 'lodash';
 import WarningModal from '../../components/WarningModal';
 import FacultyDetailsModal from '../../components/admin/FacultyDetailsModal';
 import Header from '../admin/User/Header';
 import Pagination from '../admin/User/Pagination';
-import ApplicationsTable from '../admin/User/ApplicationsTable'; // Import ApplicationsTable
+import ApplicationsTable from '../admin/User/ApplicationsTable';
 
-const FacultyManagement = () => {
+interface Faculty {
+  _id: string;
+  fullName: string;
+  email: string;
+  department: string;
+  status: string;
+  createdAt: string;
+}
+
+const formatDate = (dateString: string): string => {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+const DEPARTMENTS = [
+  'All Departments',
+  'Computer Science',
+  'Mathematics',
+  'Physics',
+  'Chemistry',
+  'Biology',
+  'Engineering',
+  'Humanities',
+  'Business',
+];
+
+const STATUSES = ['All Statuses', 'Pending', 'Approved', 'Rejected'];
+
+const facultyColumns = [
+  {
+    header: 'Applicant',
+    key: 'fullName',
+    render: (faculty: Faculty) => (
+      <div className="flex items-center">
+        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white shadow-lg relative overflow-hidden">
+          <div className="absolute inset-0 bg-purple-500/20 backdrop-blur-sm"></div>
+          <span className="relative z-10 font-medium text-lg">
+            {faculty.fullName?.[0]?.toUpperCase() || <FiUser />}
+          </span>
+        </div>
+        <div className="ml-3">
+          <p className="font-medium text-gray-200">{faculty.fullName || 'N/A'}</p>
+          <p className="text-xs text-gray-400">ID: {faculty._id.substring(0, 8)}</p>
+        </div>
+      </div>
+    ),
+    width: '20%',
+  },
+  {
+    header: 'Email',
+    key: 'email',
+    render: (faculty: Faculty) => (
+      <div className="flex items-center text-gray-300">
+        <FiMail size={14} className="text-purple-400 mr-2" />
+        <span className="text-sm">{faculty.email || 'N/A'}</span>
+      </div>
+    ),
+  },
+  {
+    header: 'Department',
+    key: 'department',
+    render: (faculty: Faculty) => (
+      <div className="flex items-center text-gray-300">
+        <FiBriefcase size={14} className="text-purple-400 mr-2" />
+        <span className="text-sm">{faculty.department || 'N/A'}</span>
+      </div>
+    ),
+  },
+  {
+    header: 'Applied On',
+    key: 'createdAt',
+    render: (faculty: Faculty) => (
+      <div className="flex items-center text-gray-300">
+        <FiCalendar size={14} className="text-purple-400 mr-2" />
+        <span className="text-sm">{formatDate(faculty.createdAt)}</span>
+      </div>
+    ),
+  },
+  {
+    header: 'Status',
+    key: 'status',
+    render: (faculty: Faculty) => (
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+          faculty.status.toLowerCase() === 'approved'
+            ? 'bg-green-900/30 text-green-400 border-green-500/30'
+            : faculty.status.toLowerCase() === 'rejected'
+            ? 'bg-red-900/30 text-red-400 border-red-500/30'
+            : 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
+        }`}
+        role="status"
+      >
+        <span
+          className="h-1.5 w-1.5 rounded-full mr-1.5"
+          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
+        ></span>
+        {faculty.status?.charAt(0).toUpperCase() + faculty.status?.slice(1) || 'Pending'}
+      </span>
+    ),
+  },
+];
+
+const FacultyManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [selectedFaculty, setSelectedFaculty] = useState(null);
-  const [showDetails, setShowDetails] = useState(false);
+  const [selectedFaculty, setSelectedFaculty] = useState<Faculty | null>(null);
   const [customDateRange, setCustomDateRange] = useState({ startDate: '', endDate: '' });
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
-  const [facultyToDelete, setFacultyToDelete] = useState(null);
+  const [facultyToDelete, setFacultyToDelete] = useState<Faculty | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [showApproveWarning, setShowApproveWarning] = useState(false);
 
@@ -38,37 +140,24 @@ const FacultyManagement = () => {
     approveFaculty,
     rejectFaculty,
     deleteFaculty,
-    updateFacultyStatus
   } = useFacultyManagement();
 
-  const departments = [
-    'All Departments',
-    'Computer Science',
-    'Mathematics',
-    'Physics',
-    'Chemistry',
-    'Biology',
-    'Engineering',
-    'Humanities',
-    'Business',
-  ];
-
-  const handleFilterChange = (field, value) => {
+  const handleFilterChange = (field: string, value: string) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
 
   const debouncedFilterChange = useCallback(
-    debounce((field, value) => {
+    debounce((field: string, value: string) => {
       handleFilterChange(field, value);
     }, 500),
     []
   );
 
-  const handleCustomDateChange = (field, value) => {
+  const handleCustomDateChange = (field: 'startDate' | 'endDate', value: string) => {
     setCustomDateRange((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleViewDetails = async (faculty) => {
+  const handleViewDetails = async (faculty: Faculty) => {
     try {
       const details = await getFacultyDetails(faculty._id);
       setSelectedFaculty(details);
@@ -78,7 +167,7 @@ const FacultyManagement = () => {
     }
   };
 
-  const handleActionClick = (faculty) => {
+  const handleActionClick = (faculty: Faculty) => {
     setSelectedFaculty(faculty);
     setShowApproveWarning(true);
   };
@@ -90,22 +179,23 @@ const FacultyManagement = () => {
       department: selectedFaculty.department || '',
       role: 'Faculty',
       startDate: new Date().toISOString(),
-      additionalNotes: ''
+      additionalNotes: '',
     };
 
     approveFaculty.mutate({
       id: selectedFaculty._id,
-      approvalData
+      approvalData,
     });
     setShowApproveWarning(false);
     setSelectedFaculty(null);
   };
 
-  const handleReject = async (reason) => {
+  const handleReject = async (reason: string) => {
+    if (!selectedFaculty) return;
     try {
       await rejectFaculty({
         id: selectedFaculty._id,
-        reason
+        reason,
       });
       setShowApprovalModal(false);
       setSelectedFaculty(null);
@@ -114,7 +204,7 @@ const FacultyManagement = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
     try {
       await deleteFaculty(id);
       setShowDeleteWarning(false);
@@ -124,34 +214,69 @@ const FacultyManagement = () => {
     }
   };
 
-  const handleSearchChange = (e) => setSearchQuery(e.target.value);
-
-  const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return dateString ? new Date(dateString).toLocaleDateString(undefined, options) : 'N/A';
-  };
-
   const handleResetFilters = () => {
     setFilters({
       status: 'all',
       department: 'all_departments',
       dateRange: 'all',
-      startDate: undefined,
-      endDate: undefined
     });
     setCustomDateRange({ startDate: '', endDate: '' });
   };
+
+  const facultyActions = [
+    {
+      icon: <FiEye size={16} />,
+      label: 'View Details',
+      onClick: handleViewDetails,
+      color: 'blue' as const,
+    },
+    {
+      icon: <FiCheckCircle size={16} />,
+      label: 'Approve',
+      onClick: handleActionClick,
+      color: 'green' as const,
+      disabled: (faculty: Faculty) => faculty.status !== 'pending',
+    },
+    {
+      icon: <FiXCircle size={16} />,
+      label: 'Delete',
+      onClick: (faculty: Faculty) => {
+        setFacultyToDelete(faculty);
+        setShowDeleteWarning(true);
+      },
+      color: 'red' as const,
+      disabled: (faculty: Faculty) => faculty.status !== 'pending',
+    },
+  ];
 
   const filteredFaculty = faculty?.filter((member) => {
     const fullName = member.fullName || '';
     const email = member.email || '';
     const nameMatch = fullName.toLowerCase().includes(searchQuery.toLowerCase());
     const emailMatch = email.toLowerCase().includes(searchQuery.toLowerCase());
-    return nameMatch || emailMatch;
-  }).map((member) => ({
-    ...member,
-    program: member.department // Map department to program for ApplicationsTable
-  }));
+    const statusMatch =
+      filters.status === 'all' ||
+      member.status.toLowerCase() === filters.status.toLowerCase();
+    const departmentMatch =
+      filters.department === 'all_departments' ||
+      member.department.toLowerCase().replace(/\s+/g, '_') === filters.department;
+    const dateMatch =
+      filters.dateRange === 'all' ||
+      (customDateRange.startDate &&
+        customDateRange.endDate &&
+        new Date(member.createdAt) >= new Date(customDateRange.startDate) &&
+        new Date(member.createdAt) <= new Date(customDateRange.endDate)) ||
+      (filters.dateRange === 'last_week' &&
+        new Date(member.createdAt) >=
+          new Date(new Date().setDate(new Date().getDate() - 7))) ||
+      (filters.dateRange === 'last_month' &&
+        new Date(member.createdAt) >=
+          new Date(new Date().setMonth(new Date().getMonth() - 1))) ||
+      (filters.dateRange === 'last_3_months' &&
+        new Date(member.createdAt) >=
+          new Date(new Date().setMonth(new Date().getMonth() - 3)));
+    return (nameMatch || emailMatch) && statusMatch && departmentMatch && dateMatch;
+  });
 
   if (isLoading) {
     return (
@@ -171,12 +296,9 @@ const FacultyManagement = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 relative">
-      {/* Background ghost effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-0 w-96 h-96 bg-purple-900/10 rounded-full blur-3xl"></div>
         <div className="absolute top-3/4 right-0 w-96 h-96 bg-blue-900/10 rounded-full blur-3xl"></div>
-
-        {/* Floating particles */}
         {[...Array(15)].map((_, i) => (
           <div
             key={i}
@@ -186,11 +308,7 @@ const FacultyManagement = () => {
               height: `${Math.random() * 12 + 4}px`,
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
-              animationName: 'floatingMist',
-              animationDuration: `${Math.random() * 15 + 20}s`,
-              animationTimingFunction: 'ease-in-out',
-              animationIterationCount: 'infinite',
-              animationDelay: `${Math.random() * 5}s`,
+              animation: `floatingMist ${Math.random() * 15 + 20}s ease-in-out infinite ${Math.random() * 5}s`,
             }}
           />
         ))}
@@ -201,25 +319,45 @@ const FacultyManagement = () => {
           title="Faculty Management"
           subtitle="Manage faculty applications and members"
           stats={[
-            { icon: <FiUsers />, title: "Total", value: faculty?.length || "0", change: "+5.2%", isPositive: true },
-            { icon: <FiClipboard />, title: "Pending", value: faculty?.filter(f => f.status === 'pending').length || "0", change: "-2.1%", isPositive: true },
-            { icon: <FiBarChart2 />, title: "Approval Rate", value: `${((faculty?.filter(f => f.status === 'approved').length / faculty?.length) * 100).toFixed(2)}%`, change: "+3.8%", isPositive: true }
+            {
+              icon: <FiUsers />,
+              title: 'Total',
+              value: faculty?.length || '0',
+              change: '+5.2%',
+              isPositive: true,
+            },
+            {
+              icon: <FiClipboard />,
+              title: 'Pending',
+              value: faculty?.filter((f) => f.status.toLowerCase() === 'pending').length || '0',
+              change: '-2.1%',
+              isPositive: true,
+            },
+            {
+              icon: <FiBarChart2 />,
+              title: 'Approval Rate',
+              value: `${((faculty?.filter((f) => f.status.toLowerCase() === 'approved').length / faculty?.length) * 100 || 0).toFixed(2)}%`,
+              change: '+3.8%',
+              isPositive: true,
+            },
           ]}
           tabs={[
-            { label: "All Faculty", icon: <FiUsers size={16} />, active: true },
-            { label: "Pending", icon: <FiClipboard size={16} />, active: false },
-            { label: "Departments", icon: <FiBarChart2 size={16} />, active: false }
+            { label: 'All Faculty', icon: <FiUsers size={16} />, active: true },
+            { label: 'Pending', icon: <FiClipboard size={16} />, active: false },
+            { label: 'Departments', icon: <FiBarChart2 size={16} />, active: false },
           ]}
-          searchPlaceholder="Search faculty..."
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          searchPlaceholder="Search faculty..."
           filters={filters}
-          programs={departments}
+          filterOptions={{
+            status: STATUSES,
+            department: DEPARTMENTS,
+          }}
           debouncedFilterChange={debouncedFilterChange}
           customDateRange={customDateRange}
           handleCustomDateChange={handleCustomDateChange}
           handleResetFilters={handleResetFilters}
-          filterField="department" // Specify department for FacultyManagement
         />
 
         <div className="mt-8">
@@ -228,12 +366,10 @@ const FacultyManagement = () => {
               {filteredFaculty?.length > 0 ? (
                 <>
                   <ApplicationsTable
-                    filteredAdmissions={filteredFaculty}
+                    data={filteredFaculty}
+                    columns={facultyColumns}
+                    actions={facultyActions}
                     formatDate={formatDate}
-                    handleViewDetails={handleViewDetails}
-                    handleActionClick={handleActionClick}
-                    setAdmissionToDelete={setFacultyToDelete}
-                    setShowDeleteWarning={setShowDeleteWarning}
                   />
                   <Pagination
                     page={page}
@@ -261,7 +397,6 @@ const FacultyManagement = () => {
         </div>
       </div>
 
-      {/* Approval Confirmation Modal */}
       {showApproveWarning && selectedFaculty && (
         <WarningModal
           isOpen={showApproveWarning}
@@ -278,7 +413,24 @@ const FacultyManagement = () => {
         />
       )}
 
-      {/* Warning Modal */}
+      {showApprovalModal && selectedFaculty && (
+        <WarningModal
+          isOpen={showApprovalModal}
+          onClose={() => {
+            setShowApprovalModal(false);
+            setSelectedFaculty(null);
+          }}
+          onConfirm={() => handleReject('No reason provided')}
+          title="Reject Faculty"
+          message={`Are you sure you want to reject ${selectedFaculty.fullName}'s application?`}
+          confirmText="Reject"
+          cancelText="Cancel"
+          type="danger"
+          showReasonInput
+          onReasonChange={(reason) => handleReject(reason)}
+        />
+      )}
+
       {showDeleteWarning && facultyToDelete && (
         <WarningModal
           isOpen={showDeleteWarning}
@@ -295,14 +447,13 @@ const FacultyManagement = () => {
         />
       )}
 
-      {/* FacultyDetailsModal */}
       <FacultyDetailsModal
         isOpen={isDetailsModalOpen}
         onClose={() => {
           setIsDetailsModalOpen(false);
           setSelectedFaculty(null);
         }}
-        faculty={selectedFaculty?.faculty}
+        faculty={selectedFaculty}
       />
 
       <style jsx>{`

@@ -183,14 +183,6 @@ const Sidebar = () => {
               </div>
             )}
             
-            {/* {collapsed && (
-              <div className="w-full flex justify-center relative z-10">
-                <div className="h-10 w-10 rounded-md bg-purple-500/30 flex items-center justify-center shadow-inner shadow-purple-300/10 border border-purple-400/20">
-                  <MdDashboard size={24} className="text-purple-100" />
-                </div>
-              </div>
-            )} */}
-            
             <button 
               onClick={toggleSidebar}
               className="relative z-10 p-2 rounded-full bg-purple-500/30 text-purple-100 hover:bg-purple-500/40 focus:outline-none hidden lg:flex items-center justify-center transition-all duration-200 border border-purple-400/20"

@@ -39,6 +39,8 @@ import ConfirmFaculty from './presentation/pages/ConfirmFaculty';
 import Setting from './presentation/pages/user/Settings/Setting';
 import {ForgotPasswordModal} from './presentation/pages/ForgotPassword';
 import { useNavigate } from 'react-router-dom';
+import VideoManagementPage from './presentation/pages/admin/vedio/VedioManagement';
+import AdminCourseManagement from './presentation/pages/admin/course/CourseManagement';
 
 const App: React.FC = () => {
   const { isError, error } = useRefreshToken();
@@ -109,6 +111,8 @@ const App: React.FC = () => {
             <Route path="admin" element={<UniversityAdminDashboard />} />
             <Route path="admin/user" element={<UserManagement />} />
             <Route path="admin/faculty" element={<FacultyManagement />} /> 
+            <Route path="admin/course-management" element={<AdminCourseManagement />} />
+            <Route path="admin/content" element={<VideoManagementPage />} />
           </Route>
         </Route>
 

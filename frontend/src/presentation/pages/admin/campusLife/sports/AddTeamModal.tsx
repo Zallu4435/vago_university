@@ -5,49 +5,54 @@ import { z } from 'zod';
 import { IoCloseOutline as X, IoAdd, IoTrash } from 'react-icons/io5';
 
 // Zod validation schema
-const clubSchema = z.object({
-  name: z.string().min(2, 'Club name must be at least 2 characters'),
-  type: z.string().min(1, 'Club type is required'),
-  members: z.string().regex(/^\d+$/, 'Members must be a number').optional().or(z.literal('')),
-  icon: z.string().default('🎓'),
+const teamSchema = z.object({
+  title: z.string().min(2, 'Team name must be at least 2 characters'),
+  type: z.string().min(1, 'Sport type is required'),
+  category: z.string().min(1, 'Team category is required'),
+  organizer: z.string().min(2, 'Organizer name is required'),
+  organizerType: z.enum(['department', 'club', 'student', 'administration', 'external'], {
+    errorMap: () => ({ message: 'Organizer type is required' }),
+  }),
+  icon: z.string().default('⚽'),
   color: z.string().default('#8B5CF6'),
-  status: z.enum(['active', 'inactive']).default('active').optional(),
-  role: z.string().min(1, 'Role is required'),
-  nextMeeting: z.string().optional(),
-  about: z.string().optional(),
-  createdBy: z.string().min(2, 'Creator name is required'),
-  upcomingEvents: z.array(
+  division: z.string().min(1, 'Division is required'),
+  headCoach: z.string().min(2, 'Head coach name is required'),
+  homeGames: z.number().min(0, 'Home games must be 0 or greater'),
+  record: z.string().regex(/^\d+-\d+-\d+$/, 'Record must be in format: W-L-T'),
+  upcomingGames: z.array(
     z.object({
       date: z.string().min(10, 'Date is required'),
       description: z.string().min(5, 'Description must be at least 5 characters'),
     })
-  ).optional(),
+  ).min(1, 'At least one upcoming game is required'),
+  participants: z.number().min(0, 'Participants must be 0 or greater').default(0),
+  status: z.enum(['active', 'inactive']).default('active'),
 });
 
-type ClubFormData = z.infer<typeof clubSchema>;
+type TeamFormData = z.infer<typeof teamSchema>;
 
-interface AddClubModalProps {
+interface AddTeamModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: ClubFormData) => void;
-  initialData?: Partial<ClubFormData>;
+  onSubmit: (data: TeamFormData) => void;
+  initialData?: Partial<TeamFormData>;
   isEditing?: boolean;
-  clubTypes: string[];
-  roles: string[];
-  icons: string[];
-  colors: string[];
+  sportTypes: string[];
+  coaches: string[];
+  divisions: string[];
+  teamCategories: string[];
 }
 
-const AddClubModal: React.FC<AddClubModalProps> = ({
+const AddTeamModal: React.FC<AddTeamModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
   initialData,
   isEditing = false,
-  clubTypes,
-  roles,
-  icons,
-  colors,
+  sportTypes,
+  coaches,
+  divisions,
+  teamCategories,
 }) => {
   const {
     control,
@@ -56,20 +61,23 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
     watch,
     setValue,
     reset,
-  } = useForm<ClubFormData>({
-    resolver: zodResolver(clubSchema),
+  } = useForm<TeamFormData>({
+    resolver: zodResolver(teamSchema),
     defaultValues: {
-      name: '',
+      title: '',
       type: '',
-      members: '',
-      icon: '🎓',
+      category: '',
+      organizer: '',
+      organizerType: 'department',
+      icon: '⚽',
       color: '#8B5CF6',
+      division: '',
+      headCoach: '',
+      homeGames: 0,
+      record: '0-0-0',
+      upcomingGames: [{ date: '', description: '' }],
+      participants: 0,
       status: 'active',
-      role: '',
-      nextMeeting: '',
-      about: '',
-      createdBy: '',
-      upcomingEvents: [],
       ...initialData,
     },
     mode: 'onChange',
@@ -77,47 +85,73 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'upcomingEvents',
+    name: 'upcomingGames',
   });
 
   const watchedIcon = watch('icon');
   const watchedColor = watch('color');
 
-  const handleFormSubmit = (data: ClubFormData) => {
-    const clubData = {
-      name: data.name,
+  const organizerTypeOptions = [
+    { value: 'department', label: 'Department', emoji: '🏛️' },
+    { value: 'club', label: 'Club', emoji: '🎉' },
+    { value: 'student', label: 'Student', emoji: '🎓' },
+    { value: 'administration', label: 'Administration', emoji: '📋' },
+    { value: 'external', label: 'External', emoji: '🌍' },
+  ];
+
+  const iconOptions = [
+    '📅', '🎉', '🏆', '🎭', '🎵', '🏃', '🍽️', '🎨', '📚', '💼',
+    '🔬', '🎯', '⚽', '🎪', '🎬', '🏛️', '🌟', '🎊', '🎓', '💡',
+    '🚀', '🎮', '🏋️', '🎤', '📸', '🎸', '🏆', '🎺', '🎻', '🎲'
+  ];
+
+  const colorOptions = [
+    '#8B5CF6', '#06B6D4', '#10B981', '#F59E0B', '#EF4444',
+    '#EC4899', '#6366F1', '#84CC16', '#F97316', '#8B5A2B',
+    '#DC2626', '#7C3AED', '#059669', '#DB2777', '#9333EA'
+  ];
+
+  const handleFormSubmit = (data: TeamFormData) => {
+    const teamData = {
+      title: data.title,
       type: data.type,
-      members: data.members || '',
+      category: data.category,
+      organizer: data.organizer,
+      organizerType: data.organizerType,
       icon: data.icon,
       color: data.color,
+      division: data.division,
+      headCoach: data.headCoach,
+      homeGames: data.homeGames,
+      record: data.record,
+      upcomingGames: data.upcomingGames,
+      participants: data.participants || 0,
       status: data.status || 'active',
-      role: data.role,
-      nextMeeting: data.nextMeeting || '',
-      about: data.about || '',
-      createdBy: data.createdBy,
-      upcomingEvents: data.upcomingEvents || [],
     };
-    onSubmit(clubData);
+    onSubmit(teamData);
     reset();
     onClose();
   };
 
   React.useEffect(() => {
     if (isOpen && initialData) {
-      reset({ ...initialData, upcomingEvents: initialData.upcomingEvents || [] });
+      reset({ ...initialData });
     } else if (isOpen && !isEditing) {
       reset({
-        name: '',
+        title: '',
         type: '',
-        members: '',
-        icon: '🎓',
+        category: '',
+        organizer: '',
+        organizerType: 'department',
+        icon: '⚽',
         color: '#8B5CF6',
+        division: '',
+        headCoach: '',
+        homeGames: 0,
+        record: '0-0-0',
+        upcomingGames: [{ date: '', description: '' }],
+        participants: 0,
         status: 'active',
-        role: '',
-        nextMeeting: '',
-        about: '',
-        createdBy: '',
-        upcomingEvents: [],
       });
     }
   }, [isOpen, initialData, isEditing, reset]);
@@ -127,11 +161,12 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
       <div className="relative w-full max-w-5xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl shadow-2xl border border-purple-500/20 max-h-[95vh] overflow-y-auto">
+        
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-gray-900/95 to-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 p-6 rounded-t-2xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div
+              <div 
                 className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-lg border border-gray-600"
                 style={{ backgroundColor: `${watchedColor}20`, borderColor: watchedColor }}
               >
@@ -139,10 +174,10 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-white">
-                  {isEditing ? 'Edit Club' : 'Create New Club'}
+                  {isEditing ? 'Edit Team' : 'Create New Team'}
                 </h2>
                 <p className="text-gray-400 text-sm">
-                  {isEditing ? 'Update your club details' : 'Fill in the details to create your club'}
+                  {isEditing ? 'Update your team details' : 'Fill in the details to create your team'}
                 </p>
               </div>
             </div>
@@ -158,42 +193,44 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
         {/* Form Content */}
         <div className="p-6">
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            {/* Left Column - Basic Info and Club Details */}
+            
+            {/* Left Column - Basic Info */}
             <div className="xl:col-span-2 space-y-6">
-              {/* Basic Information Section */}
               <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700/50">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
                   Basic Information
                 </h3>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Club Name */}
+                  {/* Team Title */}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Club Name *
+                      Team Name *
                     </label>
                     <Controller
-                      name="name"
+                      name="title"
                       control={control}
                       render={({ field }) => (
                         <input
                           {...field}
                           type="text"
                           className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.name ? 'border-red-500' : 'border-gray-600'
+                            errors.title ? 'border-red-500' : 'border-gray-600'
                           }`}
-                          placeholder="Enter club name"
+                          placeholder="Enter team name"
                         />
                       )}
                     />
-                    {errors.name && (
-                      <p className="mt-1 text-sm text-red-400">{errors.name.message}</p>
+                    {errors.title && (
+                      <p className="mt-1 text-sm text-red-400">{errors.title.message}</p>
                     )}
                   </div>
-                  {/* Club Type */}
+
+                  {/* Sport Type and Category */}
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Club Type *
+                      Sport Type *
                     </label>
                     <Controller
                       name="type"
@@ -205,11 +242,9 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                             errors.type ? 'border-red-500' : 'border-gray-600'
                           }`}
                         >
-                          <option value="">Select Type</option>
-                          {clubTypes.map((type) => (
-                            <option key={type} value={type}>
-                              {type}
-                            </option>
+                          <option value="">Select Sport</option>
+                          {sportTypes.filter(sport => sport !== 'All Sports').map(sport => (
+                            <option key={sport} value={sport}>{sport}</option>
                           ))}
                         </select>
                       )}
@@ -218,168 +253,202 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                       <p className="mt-1 text-sm text-red-400">{errors.type.message}</p>
                     )}
                   </div>
-                  {/* Role */}
+
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Role *
+                      Team Category *
                     </label>
                     <Controller
-                      name="role"
+                      name="category"
                       control={control}
                       render={({ field }) => (
                         <select
                           {...field}
                           className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.role ? 'border-red-500' : 'border-gray-600'
+                            errors.category ? 'border-red-500' : 'border-gray-600'
                           }`}
                         >
-                          <option value="">Select Role</option>
-                          {roles.map((role) => (
-                            <option key={role} value={role}>
-                              {role}
+                          <option value="">Select Category</option>
+                          {teamCategories.map(category => (
+                            <option key={category} value={category}>{category}</option>
+                          ))}
+                        </select>
+                      )}
+                    />
+                    {errors.category && (
+                      <p className="mt-1 text-sm text-red-400">{errors.category.message}</p>
+                    )}
+                  </div>
+
+                  {/* Organizer and Organizer Type */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Organizer *
+                    </label>
+                    <Controller
+                      name="organizer"
+                      control={control}
+                      render={({ field }) => (
+                        <input
+                          {...field}
+                          type="text"
+                          className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                            errors.organizer ? 'border-red-500' : 'border-gray-600'
+                          }`}
+                          placeholder="Organizer name"
+                        />
+                      )}
+                    />
+                    {errors.organizer && (
+                      <p className="mt-1 text-sm text-red-400">{errors.organizer.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Organizer Type *
+                    </label>
+                    <Controller
+                      name="organizerType"
+                      control={control}
+                      render={({ field }) => (
+                        <select
+                          {...field}
+                          className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                            errors.organizerType ? 'border-red-500' : 'border-gray-600'
+                          }`}
+                        >
+                          {organizerTypeOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.emoji} {option.label}
                             </option>
                           ))}
                         </select>
                       )}
                     />
-                    {errors.role && (
-                      <p className="mt-1 text-sm text-red-400">{errors.role.message}</p>
-                    )}
-                  </div>
-                  {/* Created By */}
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Created By *
-                    </label>
-                    <Controller
-                      name="createdBy"
-                      control={control}
-                      render={({ field }) => (
-                        <input
-                          {...field}
-                          type="text"
-                          className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.createdBy ? 'border-red-500' : 'border-gray-600'
-                          }`}
-                          placeholder="Enter creator name"
-                        />
-                      )}
-                    />
-                    {errors.createdBy && (
-                      <p className="mt-1 text-sm text-red-400">{errors.createdBy.message}</p>
+                    {errors.organizerType && (
+                      <p className="mt-1 text-sm text-red-400">{errors.organizerType.message}</p>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Club Details Section */}
+              {/* Team Details Section */}
               <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700/50">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                  Club Details
+                  Team Details
                 </h3>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Members */}
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Members
+                      Division *
                     </label>
                     <Controller
-                      name="members"
-                      control={control}
-                      render={({ field }) => (
-                        <input
-                          {...field}
-                          type="text"
-                          className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.members ? 'border-red-500' : 'border-gray-600'
-                          }`}
-                          placeholder="e.g., 12"
-                        />
-                      )}
-                    />
-                    {errors.members && (
-                      <p className="mt-1 text-sm text-red-400">{errors.members.message}</p>
-                    )}
-                  </div>
-                  {/* Status */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Status
-                    </label>
-                    <Controller
-                      name="status"
+                      name="division"
                       control={control}
                       render={({ field }) => (
                         <select
                           {...field}
                           className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.status ? 'border-red-500' : 'border-gray-600'
+                            errors.division ? 'border-red-500' : 'border-gray-600'
                           }`}
                         >
-                          <option value="active">Active</option>
-                          <option value="inactive">Inactive</option>
+                          <option value="">Select Division</option>
+                          {divisions.map(division => (
+                            <option key={division} value={division}>{division}</option>
+                          ))}
                         </select>
                       )}
                     />
-                    {errors.status && (
-                      <p className="mt-1 text-sm text-red-400">{errors.status.message}</p>
+                    {errors.division && (
+                      <p className="mt-1 text-sm text-red-400">{errors.division.message}</p>
                     )}
                   </div>
-                  {/* Next Meeting */}
+
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Next Meeting
+                      Head Coach *
                     </label>
                     <Controller
-                      name="nextMeeting"
+                      name="headCoach"
+                      control={control}
+                      render={({ field }) => (
+                        <select
+                          {...field}
+                          className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                            errors.headCoach ? 'border-red-500' : 'border-gray-600'
+                          }`}
+                        >
+                          <option value="">Select Coach</option>
+* {coaches.filter(coach => coach !== 'All Coaches').map(coach => (
+                            <option key={coach} value={coach}>{coach}</option>
+                          ))}
+                        </select>
+                      )}
+                    />
+                    {errors.headCoach && (
+                      <p className="mt-1 text-sm text-red-400">{errors.headCoach.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Home Games *
+                    </label>
+                    <Controller
+                      name="homeGames"
                       control={control}
                       render={({ field }) => (
                         <input
                           {...field}
-                          type="datetime-local"
-                          className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.nextMeeting ? 'border-red-500' : 'border-gray-600'
+                          type="number"
+                          min="0"
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                            errors.homeGames ? 'border-red-500' : 'border-gray-600'
                           }`}
                         />
                       )}
                     />
-                    {errors.nextMeeting && (
-                      <p className="mt-1 text-sm text-red-400">{errors.nextMeeting.message}</p>
+                    {errors.homeGames && (
+                      <p className="mt-1 text-sm text-red-400">{errors.homeGames.message}</p>
                     )}
                   </div>
-                  {/* About */}
-                  <div className="md:col-span-2">
+
+                  <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      About
+                      Record (W-L-T) *
                     </label>
                     <Controller
-                      name="about"
+                      name="record"
                       control={control}
                       render={({ field }) => (
-                        <textarea
+                        <input
                           {...field}
-                          rows={4}
+                          type="text"
+                          placeholder="0-0-0"
                           className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.about ? 'border-red-500' : 'border-gray-600'
+                            errors.record ? 'border-red-500' : 'border-gray-600'
                           }`}
-                          placeholder="Enter club description"
                         />
                       )}
                     />
-                    {errors.about && (
-                      <p className="mt-1 text-sm text-red-400">{errors.about.message}</p>
+                    {errors.record && (
+                      <p className="mt-1 text-sm text-red-400">{errors.record.message}</p>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Upcoming Events Section */}
+              {/* Upcoming Games Section */}
               <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700/50">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                  Upcoming Events
+                  Upcoming Games
                 </h3>
+
                 <div className="flex justify-end mb-4">
                   <button
                     type="button"
@@ -387,44 +456,41 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                     className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200"
                   >
                     <IoAdd size={16} />
-                    Add Event
+                    Add Game
                   </button>
                 </div>
+
                 <div className="space-y-4">
                   {fields.map((field, index) => (
-                    <div
-                      key={field.id}
-                      className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-700/30 rounded-xl border border-gray-600"
-                    >
+                    <div key={field.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-700/30 rounded-xl border border-gray-600">
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Event Date *
+                          Game Date *
                         </label>
                         <Controller
-                          name={`upcomingEvents.${index}.date`}
+                          name={`upcomingGames.${index}.date`}
                           control={control}
                           render={({ field }) => (
                             <input
                               {...field}
                               type="datetime-local"
                               className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                                errors.upcomingEvents?.[index]?.date ? 'border-red-500' : 'border-gray-600'
+                                errors.upcomingGames?.[index]?.date ? 'border-red-500' : 'border-gray-600'
                               }`}
                             />
                           )}
                         />
-                        {errors.upcomingEvents?.[index]?.date && (
-                          <p className="mt-1 text-sm text-red-400">
-                            {errors.upcomingEvents[index]?.date?.message}
-                          </p>
+                        {errors.upcomingGames?.[index]?.date && (
+                          <p className="mt-1 text-sm text-red-400">{errors.upcomingGames[index]?.date?.message}</p>
                         )}
                       </div>
+
                       <div>
                         <div className="flex items-center justify-between mb-2">
                           <label className="block text-sm font-medium text-gray-300">
-                            Event Description *
+                            Game Description *
                           </label>
-                          {fields.length > 0 && (
+                          {fields.length > 1 && (
                             <button
                               type="button"
                               onClick={() => remove(index)}
@@ -435,23 +501,21 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                           )}
                         </div>
                         <Controller
-                          name={`upcomingEvents.${index}.description`}
+                          name={`upcomingGames.${index}.description`}
                           control={control}
                           render={({ field }) => (
                             <input
                               {...field}
                               type="text"
-                              placeholder="Event description"
+                              placeholder="vs Team Name - Location"
                               className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                                errors.upcomingEvents?.[index]?.description ? 'border-red-500' : 'border-gray-600'
+                                errors.upcomingGames?.[index]?.description ? 'border-red-500' : 'border-gray-600'
                               }`}
                             />
                           )}
                         />
-                        {errors.upcomingEvents?.[index]?.description && (
-                          <p className="mt-1 text-sm text-red-400">
-                            {errors.upcomingEvents[index]?.description?.message}
-                          </p>
+                        {errors.upcomingGames?.[index]?.description && (
+                          <p className="mt-1 text-sm text-red-400">{errors.upcomingGames[index]?.description?.message}</p>
                         )}
                       </div>
                     </div>
@@ -467,19 +531,22 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                   Customization
                 </h3>
+
                 {/* Icon Selection */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-300 mb-3">
-                    Club Icon
+                    Team Icon
                   </label>
                   <div className="grid grid-cols-6 gap-2 p-4 bg-gray-700/30 rounded-xl border border-gray-600 max-h-40 overflow-y-auto">
-                    {icons.map((icon) => (
+                    {iconOptions.map((icon) => (
                       <button
                         key={icon}
                         type="button"
                         onClick={() => setValue('icon', icon)}
                         className={`w-10 h-10 text-xl rounded-lg transition-all duration-200 hover:scale-110 ${
-                          watchedIcon === icon ? 'bg-purple-600 shadow-lg' : 'bg-gray-600 hover:bg-gray-500'
+                          watchedIcon === icon
+                            ? 'bg-purple-600 shadow-lg'
+                            : 'bg-gray-600 hover:bg-gray-500'
                         }`}
                       >
                         {icon}
@@ -487,42 +554,50 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                     ))}
                   </div>
                 </div>
+
                 {/* Color Selection */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-300 mb-3">
-                    Club Color
+                    Team Color
                   </label>
                   <div className="grid grid-cols-5 gap-2 p-4 bg-gray-700/30 rounded-xl border border-gray-600">
-                    {colors.map((color) => (
+                    {colorOptions.map((color) => (
                       <button
                         key={color}
                         type="button"
                         onClick={() => setValue('color', color)}
                         className={`w-12 h-12 rounded-lg transition-all duration-200 hover:scale-110 ${
-                          watchedColor === color ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-800' : ''
+                          watchedColor === color
+                            ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-800'
+                            : ''
                         }`}
                         style={{ backgroundColor: color }}
                       />
                     ))}
                   </div>
                 </div>
+
                 {/* Preview */}
                 <div className="mt-6 p-4 bg-gray-700/30 rounded-xl border border-gray-600">
                   <div className="text-sm font-medium text-gray-300 mb-2">Preview</div>
-                  <div
+                  <div 
                     className="p-4 rounded-lg border-l-4 bg-gray-600/30"
                     style={{ borderLeftColor: watchedColor }}
                   >
                     <div className="flex items-center gap-3">
-                      <div
+                      <div 
                         className="w-8 h-8 rounded-lg flex items-center justify-center text-lg"
                         style={{ backgroundColor: `${watchedColor}20`, color: watchedColor }}
                       >
                         {watchedIcon}
                       </div>
                       <div>
-                        <div className="text-white font-medium">{watch('name') || 'Club Name'}</div>
-                        <div className="text-gray-400 text-sm">{watch('type') || 'Type'}</div>
+                        <div className="text-white font-medium">
+                          {watch('title') || 'Team Name'}
+                        </div>
+                        <div className="text-gray-400 text-sm">
+                          {watch('category') || 'Category'}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -552,7 +627,7 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                   {isEditing ? 'Updating...' : 'Creating...'}
                 </div>
               ) : (
-                isEditing ? 'Update Club' : 'Create Club'
+                isEditing ? 'Update Team' : 'Create Team'
               )}
             </button>
           </div>
@@ -562,4 +637,4 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
   );
 };
 
-export default AddClubModal;
+export default AddTeamModal;

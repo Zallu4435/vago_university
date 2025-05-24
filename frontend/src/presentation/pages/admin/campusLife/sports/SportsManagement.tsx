@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { 
+import {
   IoAdd as Plus,
   IoEyeOutline as Eye,
   IoCreateOutline as Edit,
@@ -17,20 +17,28 @@ import Header from '../../User/Header';
 import ApplicationsTable from '../../User/ApplicationsTable';
 import Pagination from '../../User/Pagination';
 import WarningModal from '../../../../components/WarningModal';
-import AddTeamModal from './AddTeamModa';
+import AddTeamModal from './AddTeamModal';
 import EventModal from './EventModal';
 import TeamDetailsModal from './TeamDetailsModal';
 import { useSportsManagement } from '../../../../../application/hooks/useSportsManagement';
 
 interface Team {
-  id: string;
-  name: string;
-  sportType: string;
-  coach: string;
+  title: string;
+  type: string;
+  headCoach: string;
   playerCount: number;
   status: string;
-  formedOn: string;
+  createdAt: string;
   logo: string;
+  category: string;
+  organizer: string;
+  organizerType: string;
+  icon: string;
+  color: string;
+  division: string;
+  homeGames: number;
+  record: string;
+  upcomingGames: { date: string; description: string }[];
 }
 
 interface Event {
@@ -67,6 +75,9 @@ interface PlayerRequest {
 const SPORT_TYPES = ['All Sports', 'Football', 'Basketball', 'Badminton', 'Athletics', 'Swimming'];
 const STATUSES = ['All Statuses', 'Active', 'Inactive', 'Upcoming', 'Completed', 'Pending', 'Approved', 'Rejected'];
 const COACHES = ['All Coaches', 'Dr. John Smith', 'Prof. Sarah Johnson', 'Mr. Mike Wilson'];
+const TEAM_CATEGORIES = ['Varsity', 'Club', 'Intramural'];
+const DIVISIONS = ['Division I', 'Division II', 'Division III'];
+
 
 const teamColumns = [
   {
@@ -74,10 +85,14 @@ const teamColumns = [
     key: 'name',
     render: (team: Team) => (
       <div className="flex items-center gap-3">
-        <span className="text-2xl">{team.logo}</span>
+        <span 
+          className="text-2xl w-8 h-8 rounded-lg flex items-center justify-center"
+          style={{ backgroundColor: `${team.color}20`, color: team.color }}
+        >
+          {team.icon}
+        </span>
         <div>
-          <p className="font-medium text-gray-200">{team.name}</p>
-          <p className="text-xs text-gray-400">ID: {team.id}</p>
+          <p className="font-medium text-gray-200">{team.title}</p>
         </div>
       </div>
     ),
@@ -89,7 +104,7 @@ const teamColumns = [
     render: (team: Team) => (
       <div className="flex items-center text-gray-300">
         <Trophy size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{team.sportType}</span>
+        <span className="text-sm">{team.type}</span>
       </div>
     ),
   },
@@ -99,7 +114,7 @@ const teamColumns = [
     render: (team: Team) => (
       <div className="flex items-center text-gray-300">
         <User size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{team.coach}</span>
+        <span className="text-sm">{team.headCoach}</span>
       </div>
     ),
   },
@@ -119,7 +134,7 @@ const teamColumns = [
     render: (team: Team) => (
       <span
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          team.status === 'Active'
+          team.status === 'active'
             ? 'bg-green-900/30 text-green-400 border-green-500/30'
             : 'bg-gray-900/30 text-gray-400 border-gray-500/30'
         }`}
@@ -138,7 +153,7 @@ const teamColumns = [
     render: (team: Team) => (
       <div className="flex items-center text-gray-300">
         <Calendar size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{team.formedOn}</span>
+        <span className="text-sm">{team.createdAt}</span>
       </div>
     ),
   },
@@ -383,6 +398,8 @@ const AdminSportsManagement: React.FC = () => {
     rejectPlayerRequest,
   } = useSportsManagement();
 
+  console.log('teams', teams);
+
   const [activeTab, setActiveTab] = useState<'teams' | 'events' | 'requests'>('teams');
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddTeamModal, setShowAddTeamModal] = useState(false);
@@ -393,16 +410,6 @@ const AdminSportsManagement: React.FC = () => {
   const [itemToDelete, setItemToDelete] = useState<{ id: string; type: 'team' | 'event' } | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  const [teamForm, setTeamForm] = useState({
-    name: '',
-    sportType: '',
-    coach: '',
-    playerCount: 0,
-    status: 'Active',
-    formedOn: new Date().toISOString().split('T')[0],
-    logo: '',
-  });
-
   const [eventForm, setEventForm] = useState({
     title: '',
     sportType: '',
@@ -412,18 +419,18 @@ const AdminSportsManagement: React.FC = () => {
     status: 'Upcoming',
   });
 
-  const filteredTeams = teams.filter((team) => {
+  const filteredTeams = teams?.filter((team) => {
     const matchesSearch = searchTerm
-      ? team.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        team.id.toLowerCase().includes(searchTerm.toLowerCase())
+      ? team.name.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
     const matchesSportType =
-      filters.sportType === 'all' || team.sportType.toLowerCase() === filters.sportType.toLowerCase();
+      filters.sportType === 'all' || team.type?.toLowerCase() === filters.type?.toLowerCase();
     const matchesStatus =
-      filters.status === 'all' || team.status.toLowerCase() === filters.status.toLowerCase();
+      filters.status === 'all' || team.status?.toLowerCase() === filters.status?.toLowerCase();
     const matchesCoach =
-      filters.coach === 'all' || team.coach.toLowerCase() === filters.coach.toLowerCase();
-    return matchesSearch && matchesSportType && matchesStatus && matchesCoach;
+      filters.coach === 'all' || team.headCoach?.toLowerCase() === filters.headCoach?.toLowerCase();
+
+      return matchesSearch && matchesSportType && matchesStatus && matchesCoach;
   });
 
   const filteredEvents = events.filter((event) => {
@@ -432,9 +439,9 @@ const AdminSportsManagement: React.FC = () => {
         event.id.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
     const matchesSportType =
-      filters.sportType === 'all' || event.sportType.toLowerCase() === filters.sportType.toLowerCase();
+      filters.sportType === 'All Sports' || event?.sportType?.toLowerCase() === filters.sportType?.toLowerCase();
     const matchesStatus =
-      filters.status === 'all' || event.status.toLowerCase() === filters.status.toLowerCase();
+      filters.status === 'All Statuses' || event.status?.toLowerCase() === filters.status?.toLowerCase();
     return matchesSearch && matchesSportType && matchesStatus;
   });
 
@@ -444,9 +451,9 @@ const AdminSportsManagement: React.FC = () => {
         request.id.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
     const matchesSportType =
-      filters.sportType === 'all' || request.sportType.toLowerCase() === filters.sportType.toLowerCase();
+      filters.sportType === 'All Sports' || request.sportType?.toLowerCase() === filters.sportType?.toLowerCase();
     const matchesStatus =
-      filters.status === 'all' || request.status.toLowerCase() === filters.status.toLowerCase();
+      filters.status === 'All Statuses' || request.status?.toLowerCase() === filters.status?.toLowerCase();
     return matchesSearch && matchesSportType && matchesStatus;
   });
 
@@ -456,37 +463,19 @@ const AdminSportsManagement: React.FC = () => {
         request.studentId.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
     const matchesSportType =
-      filters.sportType === 'all' || request.sport.toLowerCase() === filters.sportType.toLowerCase();
+      filters.sportType === 'All Sports' || request.sport?.toLowerCase() === filters.sportType?.toLowerCase();
     const matchesStatus =
-      filters.status === 'all' || request.status.toLowerCase() === filters.status.toLowerCase();
+      filters.status === 'All Statuses' || request.status?.toLowerCase() === filters.status?.toLowerCase();
     return matchesSearch && matchesSportType && matchesStatus;
   });
 
   const handleAddTeam = () => {
-    setTeamForm({
-      name: '',
-      sportType: '',
-      coach: '',
-      playerCount: 0,
-      status: 'Active',
-      formedOn: new Date().toISOString().split('T')[0],
-      logo: '',
-    });
-    setIsEditing(false);
     setSelectedTeam(null);
+    setIsEditing(false);
     setShowAddTeamModal(true);
   };
 
   const handleEditTeam = (team: Team) => {
-    setTeamForm({
-      name: team.name,
-      sportType: team.sportType,
-      coach: team.coach,
-      playerCount: team.playerCount,
-      status: team.status,
-      formedOn: team.formedOn,
-      logo: team.logo,
-    });
     setSelectedTeam(team);
     setIsEditing(true);
     setShowAddTeamModal(true);
@@ -497,12 +486,12 @@ const AdminSportsManagement: React.FC = () => {
     setShowTeamDetailsModal(true);
   };
 
-  const handleSaveTeam = async () => {
+  const handleSaveTeam = async (data: Team) => {
     try {
       if (isEditing && selectedTeam) {
-        await updateTeam({ id: selectedTeam._id, data: teamForm });
+        await updateTeam({ id: selectedTeam._id, data });
       } else {
-        await createTeam(teamForm);
+        await createTeam(data);
       }
       setShowAddTeamModal(false);
       setSelectedTeam(null);
@@ -575,7 +564,7 @@ const AdminSportsManagement: React.FC = () => {
   const debouncedFilterChange = useCallback(
     debounce((field: string, value: string) => {
       setFilters((prev) => ({ ...prev, [field]: value }));
-    }, 10000),
+    }, 300),
     []
   );
 
@@ -603,7 +592,7 @@ const AdminSportsManagement: React.FC = () => {
     {
       icon: <Trash2 size={16} />,
       label: 'Delete Team',
-      onClick: (team: Team) => handleDeleteItem(team.id, 'team'),
+      onClick: (team: Team) => handleDeleteItem(team._id, 'team'), // ID removed; adjust if backend requires identifier
       color: 'red' as const,
     },
   ];
@@ -633,13 +622,13 @@ const AdminSportsManagement: React.FC = () => {
     {
       icon: <CheckCircle size={16} />,
       label: 'Approve Request',
-      onClick: (request: TeamRequest) => handleApproveTeamRequest(request.id),
+      onClick: (request: TeamRequest) => handleApproveTeamRequest(request._id),
       color: 'green' as const,
     },
     {
       icon: <XCircle size={16} />,
       label: 'Reject Request',
-      onClick: (request: TeamRequest) => handleRejectTeamRequest(request.id),
+      onClick: (request: TeamRequest) => handleRejectTeamRequest(request._id),
       color: 'red' as const,
     },
     {
@@ -711,7 +700,7 @@ const AdminSportsManagement: React.FC = () => {
             {
               icon: <Users />,
               title: 'Active Teams',
-              value: teams.filter((t) => t.status === 'Active').length.toString(),
+              value: teams.filter((t) => t.status === 'active').length.toString(),
               change: '+10%',
               isPositive: true,
             },
@@ -733,7 +722,8 @@ const AdminSportsManagement: React.FC = () => {
               icon: <CheckCircle />,
               title: 'Pending Requests',
               value: (
-                teamRequests.length + playerRequests.filter((r) => r.status === 'Pending').length
+                teamRequests.filter((r) => r.status === 'Pending').length +
+                playerRequests.filter((r) => r.status === 'Pending').length
               ).toString(),
               change: '+8%',
               isPositive: true,
@@ -914,11 +904,27 @@ const AdminSportsManagement: React.FC = () => {
           setIsEditing(false);
         }}
         onSubmit={handleSaveTeam}
-        form={teamForm}
-        setForm={setTeamForm}
+        initialData={isEditing && selectedTeam ? {
+          title: selectedTeam.title,
+          type: selectedTeam.type,
+          category: selectedTeam.category,
+          organizer: selectedTeam.organizer,
+          organizerType: selectedTeam.organizerType,
+          icon: selectedTeam.icon,
+          color: selectedTeam.color,
+          division: selectedTeam.division,
+          headCoach: selectedTeam.headCoach,
+          homeGames: selectedTeam.homeGames,
+          record: selectedTeam.record,
+          upcomingGames: selectedTeam.upcomingGames || [{ date: '', description: '' }],
+          participants: selectedTeam.playerCount,
+          status: selectedTeam.status as 'active' | 'inactive',
+        } : undefined}
+        isEditing={isEditing}
         sportTypes={SPORT_TYPES}
         coaches={COACHES}
-        isEditing={isEditing}
+        divisions={DIVISIONS}
+        teamCategories={TEAM_CATEGORIES}
       />
 
       <EventModal

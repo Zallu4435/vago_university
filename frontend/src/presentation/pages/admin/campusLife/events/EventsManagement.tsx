@@ -23,20 +23,36 @@ import AddEventModal from './AddEventModal';
 import EventDetailsModal from './EventDetailsModal';
 import { useEventManagement } from '../../../../../application/hooks/useEventManagement';
 
-interface Event {
+const formatDate = (dateString: string): string => {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+export interface Event {
   id: string;
   name: string;
-  organizer: string;
-  organizerType: string;
-  type: string;
   date: string;
   time: string;
   venue: string;
+  organizerType: string;
+  type: string;
+  icon: string;
+  color: string;
+  description?: string;
+  fullTime: boolean;
+  additionalInfo?: string;
+  requirements?: string;
   status: string;
-  description: string;
+  participants: number;
   maxParticipants: number;
   registrationRequired: boolean;
-  participants: number;
   createdAt: string;
 }
 
@@ -91,7 +107,7 @@ const eventColumns = [
           <User size={14} className="text-purple-400 mr-2" />
         )}
         <div>
-          <p className="text-sm">{event.organizer}</p>
+          <p className="text-sm">{event.organizerType}</p>
           <p className="text-xs text-gray-400 capitalize">{event.organizerType}</p>
         </div>
       </div>
@@ -108,16 +124,10 @@ const eventColumns = [
     header: 'Date & Time',
     key: 'date',
     render: (event: Event) => (
-      <div>
         <div className="flex items-center text-gray-300">
           <Calendar size={14} className="text-purple-400 mr-2" />
-          <span className="text-sm">{event.date}</span>
+          <span className="text-sm">{formatDate(event.date)}</span>
         </div>
-        <div className="flex items-center text-gray-300">
-          <Clock size={14} className="text-purple-400 mr-2" />
-          <span className="text-sm">{event.time}</span>
-        </div>
-      </div>
     ),
   },
   {
@@ -126,7 +136,7 @@ const eventColumns = [
     render: (event: Event) => (
       <div className="flex items-center text-gray-300">
         <MapPin size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{event.venue}</span>
+        <span className="text-sm">{event.location}</span>
       </div>
     ),
   },
@@ -323,32 +333,17 @@ const AdminEventsManagement: React.FC = () => {
   const [itemToDelete, setItemToDelete] = useState<{ id: string; type: 'event' } | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  const [eventForm, setEventForm] = useState({
-    name: '',
-    organizer: '',
-    organizerType: '',
-    type: '',
-    date: '',
-    time: '',
-    venue: '',
-    status: 'upcoming',
-    description: '',
-    maxParticipants: 0,
-    registrationRequired: false,
-    participants: 0,
-  });
-
   const filteredEvents = events.filter((event) => {
     const matchesSearch = searchTerm
       ? event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.organizer.toLowerCase().includes(searchTerm.toLowerCase())
+        event._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.organizerType.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
     const matchesType =
       filters.type === 'All Types' || event.type.toLowerCase() === filters.type.toLowerCase();
     const matchesStatus =
       filters.status === 'All Statuses' || event.status.toLowerCase() === filters.status.toLowerCase();
-      const matchesOrganizer =
+    const matchesOrganizer =
       filters.organizer === 'All Organizers' ||
       event.organizerType.toLowerCase() === filters.organizer.toLowerCase();
     return matchesSearch && matchesType && matchesStatus && matchesOrganizer;
@@ -357,7 +352,7 @@ const AdminEventsManagement: React.FC = () => {
   const filteredEventRequests = eventRequests.filter((request) => {
     const matchesSearch = searchTerm
       ? request.eventName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        request._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         request.requestedBy.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
 
@@ -383,40 +378,12 @@ const AdminEventsManagement: React.FC = () => {
   });
 
   const handleAddEvent = () => {
-    setEventForm({
-      name: '',
-      organizer: '',
-      organizerType: '',
-      type: '',
-      date: '',
-      time: '',
-      venue: '',
-      status: 'upcoming',
-      description: '',
-      maxParticipants: 0,
-      registrationRequired: false,
-      participants: 0,
-    });
     setIsEditing(false);
     setSelectedEvent(null);
     setShowAddEventModal(true);
   };
 
   const handleEditEvent = (event: Event) => {
-    setEventForm({
-      name: event.name,
-      organizer: event.organizer,
-      organizerType: event.organizerType,
-      type: event.type,
-      date: event.date,
-      time: event.time,
-      venue: event.venue,
-      status: event.status,
-      description: event.description,
-      maxParticipants: event.maxParticipants,
-      registrationRequired: event.registrationRequired,
-      participants: event.participants,
-    });
     setSelectedEvent(event);
     setIsEditing(true);
     setShowAddEventModal(true);
@@ -427,12 +394,14 @@ const AdminEventsManagement: React.FC = () => {
     setShowEventDetailsModal(true);
   };
 
-  const handleSaveEvent = async () => {
+  const handleSaveEvent = async (data: any) => {
+
+    console.log('add datra', data);
     try {
-      if (isEditing && selectedEvent) {
-        await updateEvent({ id: selectedEvent._id, data: eventForm });
+      if (isEditing && selectedEvent && 'id' in selectedEvent) {
+        await updateEvent({ id: selectedEvent.id, data });
       } else {
-        await createEvent(eventForm);
+        await createEvent(data);
       }
       setShowAddEventModal(false);
       setSelectedEvent(null);
@@ -506,7 +475,7 @@ const AdminEventsManagement: React.FC = () => {
     {
       icon: <Trash2 size={16} />,
       label: 'Delete Event',
-      onClick: (event: Event) => handleDeleteEvent(event.id),
+      onClick: (event: Event) => handleDeleteEvent(event._id),
       color: 'red' as const,
     },
   ];
@@ -758,10 +727,22 @@ const AdminEventsManagement: React.FC = () => {
           setIsEditing(false);
         }}
         onSubmit={handleSaveEvent}
-        form={eventForm}
-        setForm={setEventForm}
-        eventTypes={EVENT_TYPES}
-        organizers={ORGANIZERS}
+        initialData={isEditing && selectedEvent ? {
+          title: selectedEvent.name,
+          date: selectedEvent.date,
+          time: selectedEvent.time,
+          location: selectedEvent.location,
+          organizer: selectedEvent.organizerType,
+          timeframe: selectedEvent.type,
+          icon: selectedEvent.icon,
+          color: selectedEvent.color,
+          description: selectedEvent.description,
+          fullTime: selectedEvent.fullTime,
+          additionalInfo: selectedEvent.additionalInfo,
+          requirements: selectedEvent.requirements,
+          maxParticipants: selectedEvent.maxParticipants,
+          registrationRequired: selectedEvent.registrationRequired,
+        } : undefined}
         isEditing={isEditing}
       />
 

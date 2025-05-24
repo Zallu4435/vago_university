@@ -5,6 +5,8 @@ import PropTypes from 'prop-types';
 export default function ClubsSection({ clubs }) {
   const [selectedClub, setSelectedClub] = useState(clubs[0]);
 
+  console.log(clubs);
+
   return (
     <>
       <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg p-4 mb-4 text-white shadow-lg">
@@ -29,25 +31,25 @@ export default function ClubsSection({ clubs }) {
             </div>
             <div className="bg-amber-100 px-4 py-2 font-medium text-gray-700">MY CLUBS</div>
             <div className="max-h-96 overflow-y-auto">
-              {clubs.map((club) => (
+              {clubs.data.map((club) => (
                 <div
-                  key={club.id}
+                  key={club?.id}
                   className={`p-3 border-b border-amber-200 hover:bg-amber-50 cursor-pointer ${
-                    selectedClub.id === club.id ? 'bg-amber-100' : ''
+                    selectedClub?.id === club?.id ? 'bg-amber-100' : ''
                   }`}
                   onClick={() => setSelectedClub(club)}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 rounded-full ${club.color} text-white flex items-center justify-center font-bold`}>
-                      {club.icon}
+                    <div className={`w-10 h-10 rounded-full ${club?.color} text-white flex items-center justify-center font-bold`}>
+                      {club?.icon}
                     </div>
                     <div className="flex-grow">
-                      <h4 className="font-semibold text-gray-800">{club.name}</h4>
+                      <h4 className="font-semibold text-gray-800">{club?.name}</h4>
                       <div className="text-sm text-gray-600">
-                        {club.role} • {club.nextMeeting}
+                        {club?.role} • {club?.nextMeeting}
                       </div>
                     </div>
-                    {selectedClub.id === club.id && (
+                    {selectedClub?.id === club?.id && (
                       <div className="w-2 h-2 rounded-full bg-orange-500"></div>
                     )}
                   </div>
@@ -59,30 +61,30 @@ export default function ClubsSection({ clubs }) {
         {/* Club Details */}
         <div className="w-full md:w-2/3 bg-white rounded-lg shadow-md overflow-hidden">
           <div className="flex items-center p-4 border-b border-amber-200">
-            <div className={`w-12 h-12 rounded-full ${selectedClub.color} text-white flex items-center justify-center font-bold mr-4`}>
-              {selectedClub.icon}
+            <div className={`w-12 h-12 rounded-full ${selectedClub?.color} text-white flex items-center justify-center font-bold mr-4`}>
+              {selectedClub?.icon}
             </div>
             <div className="flex-grow">
-              <h3 className="text-xl font-bold text-gray-800">{selectedClub.name}</h3>
-              <p className="text-gray-600">{selectedClub.type} • {selectedClub.members}</p>
+              <h3 className="text-xl font-bold text-gray-800">{selectedClub?.name}</h3>
+              <p className="text-gray-600">{selectedClub?.type} • {selectedClub?.members}</p>
             </div>
-            {selectedClub.status && (
+            {selectedClub?.status && (
               <div className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                {selectedClub.status}
+                {selectedClub?.status}
               </div>
             )}
           </div>
           <div className="p-6">
             <h4 className="text-lg font-bold text-orange-700 mb-2">About</h4>
-            <p className="text-gray-700 mb-6">{selectedClub.about}</p>
-            {selectedClub.upcomingEvents && (
+            <p className="text-gray-700 mb-6">{selectedClub?.about}</p>
+            {selectedClub?.upcomingEvents && (
               <>
                 <h4 className="text-lg font-bold text-orange-700 mb-2">Upcoming Events</h4>
                 <ul className="bg-amber-50 p-4 rounded-lg mb-4">
-                  {selectedClub.upcomingEvents.map((event, index) => (
+                  {selectedClub?.upcomingEvents?.map((event, index) => (
                     <li key={index} className="mb-3 flex">
                       <span className="text-orange-700 mr-2">•</span>
-                      <span>{event.date}: {event.description}</span>
+                      <span>{event?.date}: {event?.description}</span>
                     </li>
                   ))}
                 </ul>

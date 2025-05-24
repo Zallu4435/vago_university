@@ -44,7 +44,7 @@ class GetTeams {
       const skip = (page - 1) * limit;
 
       const teams = await TeamModel.find(query)
-        .select('name sportType coach playerCount status formedOn logo')
+        .select('title type headCoach playerCount status createdAt icon')
         .skip(skip)
         .limit(limit)
         .lean()

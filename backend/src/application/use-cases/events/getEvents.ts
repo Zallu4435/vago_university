@@ -44,7 +44,7 @@ class GetEvents {
       const skip = (page - 1) * limit;
 
       const events = await CampusEventModel.find(query)
-        .select('name organizer organizerType type date time venue status description maxParticipants registrationRequired participants createdAt')
+        .select('title organizer organizerType type date time location status description maxParticipants registrationRequired participants createdAt')
         .skip(skip)
         .limit(limit)
         .lean()

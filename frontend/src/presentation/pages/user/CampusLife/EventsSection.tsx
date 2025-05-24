@@ -5,6 +5,8 @@ import PropTypes from 'prop-types';
 export default function EventsSection({ events }) {
   const [selectedEvent, setSelectedEvent] = useState(events[0]);
 
+  console.log('events', events);
+
   return (
     <>
       <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg p-4 mb-4 text-white shadow-lg">
@@ -28,11 +30,11 @@ export default function EventsSection({ events }) {
               </div>
             </div>
             <div className="max-h-96 overflow-y-auto">
-              {events.map((event) => (
+              {events.data.map((event) => (
                 <div
-                  key={event.id}
+                  key={event._id}
                   className={`p-3 border-b border-amber-200 hover:bg-amber-50 cursor-pointer ${
-                    selectedEvent.id === event.id ? 'bg-amber-100' : ''
+                    selectedEvent?._id === event?._id ? 'bg-amber-100' : ''
                   }`}
                   onClick={() => setSelectedEvent(event)}
                 >
@@ -60,46 +62,46 @@ export default function EventsSection({ events }) {
         {/* Event Details */}
         <div className="w-full md:w-2/3 bg-white rounded-lg shadow-md overflow-hidden">
           <div className="flex items-center p-4 border-b border-amber-200">
-            <div className={`w-12 h-12 rounded-full ${selectedEvent.color} text-white flex items-center justify-center font-bold mr-4`}>
-              {selectedEvent.icon}
+            <div className={`w-12 h-12 rounded-full ${selectedEvent?.color} text-white flex items-center justify-center font-bold mr-4`}>
+              {selectedEvent?.icon}
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-800">{selectedEvent.title}</h3>
-              <p className="text-gray-600">Organized by {selectedEvent.organizer}</p>
+              <h3 className="text-xl font-bold text-gray-800">{selectedEvent?.title}</h3>
+              <p className="text-gray-600">Organized by {selectedEvent?.organizer}</p>
             </div>
             <div className="ml-auto text-right">
-              <div className="text-gray-700 font-medium">{selectedEvent.date}</div>
-              <div className="text-orange-600">{selectedEvent.time}</div>
+              <div className="text-gray-700 font-medium">{selectedEvent?.date}</div>
+              <div className="text-orange-600">{selectedEvent?.time}</div>
             </div>
           </div>
           <div className="p-6">
-            <h4 className="text-lg font-bold text-orange-700 mb-4">Annual {selectedEvent.title}</h4>
+            <h4 className="text-lg font-bold text-orange-700 mb-4">Annual {selectedEvent?.title}</h4>
             <p className="text-gray-700 mb-4">
               Join us for the biggest campus event of the spring semester!
             </p>
-            {selectedEvent.description && (
-              <p className="text-gray-700 mb-4">{selectedEvent.description}</p>
+              {selectedEvent?.description && (
+              <p className="text-gray-700 mb-4">{selectedEvent?.description}</p>
             )}
             <div className="bg-amber-50 p-4 rounded-lg mb-4">
               <div className="flex items-center mb-2">
                 <FaMapPin className="text-orange-600 mr-2" size={18} />
                 <span className="font-medium">Location:</span>
-                <span className="ml-2">{selectedEvent.location} {selectedEvent.id === 1 && '(Rain location: Indoor Arena)'}</span>
+                <span className="ml-2">{selectedEvent?.location} {selectedEvent?._id === 1 && '(Rain location: Indoor Arena)'}</span>
               </div>
               <div className="flex items-center mb-2">
                 <FaClock className="text-orange-600 mr-2" size={18} />
                 <span className="font-medium">Time:</span>
-                <span className="ml-2">{selectedEvent.fullTime || selectedEvent.time}</span>
+                <span className="ml-2">{selectedEvent?.time}</span>
               </div>
-              {selectedEvent.additionalInfo && (
+              {selectedEvent?.additionalInfo && (
                 <div className="mt-3 pt-3 border-t border-amber-200 text-gray-700">
-                  {selectedEvent.additionalInfo}
+                  {selectedEvent?.additionalInfo}
                 </div>
               )}
             </div>
-            {selectedEvent.requirements && (
+            {selectedEvent?.requirements && (
               <div className="bg-amber-100 p-3 rounded-lg text-sm text-orange-800">
-                {selectedEvent.requirements}
+                {selectedEvent?.requirements}
               </div>
             )}
           </div>

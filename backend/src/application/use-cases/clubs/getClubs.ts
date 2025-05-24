@@ -40,7 +40,7 @@ class GetClubs {
       const skip = (page - 1) * limit;
 
       const clubs = await ClubModel.find(query)
-        .select('name category description createdBy status createdAt')
+        .select('name category description type createdBy status createdAt members color icon')
         .skip(skip)
         .limit(limit)
         .lean()

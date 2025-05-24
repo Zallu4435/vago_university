@@ -9,6 +9,7 @@ import clubRoutes from './clubRoutes'
 import sportRoutes from './sportsRoutes'
 import eventRoutes from './eventsRoutes'
 import communicationRoutes from './communicationRoutes'
+import campusLifeRoutes from './campusLifeRoutes'
 
 const router = Router();
 
@@ -37,6 +38,7 @@ router.use('/admin/events', eventRoutes);
 router.use('/admin/communication', communicationRoutes);
 
 
+router.use('/campus-life', campusLifeRoutes);
 
 
 

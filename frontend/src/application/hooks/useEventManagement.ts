@@ -31,7 +31,6 @@ export const useEventManagement = () => {
         filters.status !== 'All Statuses' ? filters.status : undefined,
         filters.organizer !== 'All Organizers' ? filters.organizer : undefined
       ),
-    keepPreviousData: true,
   });
 
   const { data: eventRequestsData, isLoading: isLoadingRequests, error: requestsError } = useQuery({
@@ -45,7 +44,6 @@ export const useEventManagement = () => {
         filters.organizer !== 'All Organizers' ? filters.organizer : undefined
       ),
     enabled: false,
-    keepPreviousData: true,
   });
 
   const { data: participantsData, isLoading: isLoadingParticipants, error: participantsError } = useQuery({
@@ -57,7 +55,6 @@ export const useEventManagement = () => {
         filters.status !== 'All Statuses' ? filters.status : undefined
       ),
     enabled: false,
-    keepPreviousData: true,
   });
 
   const { mutateAsync: createEvent } = useMutation({
@@ -149,9 +146,52 @@ export const useEventManagement = () => {
     },
   });
 
+  // Function to fetch data based on active tab
+  const fetchDataForTab = async (tab: 'events' | 'requests' | 'participants') => {
+    try {
+      switch (tab) {
+        case 'requests':
+          const result = await queryClient.fetchQuery({
+            queryKey: ['eventRequests', page, filters, limit],
+            queryFn: () =>
+              eventService.getEventRequests(
+                page,
+                limit,
+                filters.type !== 'All Types' ? filters.type : undefined,
+                filters.status !== 'All Statuses' ? filters.status : undefined,
+                filters.organizer !== 'All Organizers' ? filters.organizer : undefined
+              ),
+            staleTime: 0,
+          });
+          break;
+        case 'participants':
+          await queryClient.fetchQuery({
+            queryKey: ['participants', page, filters, limit],
+            queryFn: () =>
+              eventService.getParticipants(
+                page,
+                limit,
+                filters.status !== 'All Statuses' ? filters.status : undefined
+              ),
+            staleTime: 0,
+          });
+          break;
+      }
+    } catch (error) {
+      console.error(`Error fetching ${tab} data:`, error);
+      throw error;
+    }
+  };
+
+  const handleTabChange = (tab: 'events' | 'requests' | 'participants') => {
+    if (tab !== 'events') {
+      fetchDataForTab(tab);
+    }
+  };
+
   return {
     events: eventsData?.events || [],
-    eventRequests: eventRequestsData?.events || [],
+    eventRequests: eventRequestsData?.eventRequests || [],
     participants: participantsData?.events || [],
     totalPages: eventsData?.totalPages || 0,
     page,
@@ -168,5 +208,7 @@ export const useEventManagement = () => {
     approveParticipant,
     rejectParticipant,
     removeParticipant,
+    fetchDataForTab,
+    handleTabChange,
   };
 };

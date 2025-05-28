@@ -7,11 +7,14 @@ import { getSports } from '../../application/use-cases/campus-life/getSports';
 import { getSportById } from '../../application/use-cases/campus-life/getSportById';
 import { getClubs } from '../../application/use-cases/campus-life/getClubs';
 import { getClubById } from '../../application/use-cases/campus-life/getClubById';
+import { joinClub } from '../../application/use-cases/campus-life/joinClub';
+import { joinSport } from '../../application/use-cases/campus-life/joinSport';
+import { joinEvent } from '../../application/use-cases/campus-life/joinEvent';
 
 class CampusLifeController {
   async getCampusLifeOverview(req: Request, res: Response, next: NextFunction) {
     try {
-      console.log(`Received GET /api/campus-life`);
+      // console.log(`Received GET /api/campus-life`);
 
       if (!req.user) {
         return res.status(401).json({ error: 'Unauthorized: User not authenticated' });
@@ -36,7 +39,7 @@ class CampusLifeController {
     try {
       const { page = '1', limit = '10', search = '', status = 'all' } = req.query;
 
-      console.log(`Received GET /api/campus-life/events with filters:`, { page, limit, search, status });
+      // console.log(`Received GET /api/campus-life/events with filters:`, { page, limit, search, status });
 
       if (isNaN(Number(page)) || isNaN(Number(limit)) || Number(page) < 1 || Number(limit) < 1) {
         return res.status(400).json({
@@ -91,7 +94,7 @@ class CampusLifeController {
     try {
       const { eventId } = req.params;
 
-      console.log(`Received GET /api/campus-life/events/${eventId}`);
+      // console.log(`Received GET /api/campus-life/events/${eventId}`);
 
       if (!mongoose.isValidObjectId(eventId)) {
         return res.status(400).json({
@@ -130,7 +133,7 @@ class CampusLifeController {
     try {
       const { type, search = '' } = req.query;
 
-      console.log(`Received GET /api/campus-life/sports with filters:`, { type, search });
+      // console.log(`Received GET /api/campus-life/sports with filters:`, { type, search });
 
       if (type && !['VARSITY SPORTS', 'INTRAMURAL SPORTS'].includes(String(type))) {
         return res.status(400).json({
@@ -171,7 +174,7 @@ class CampusLifeController {
     try {
       const { sportId } = req.params;
 
-      console.log(`Received GET /api/campus-life/sports/${sportId}`);
+      // console.log(`Received GET /api/campus-life/sports/${sportId}`);
 
       if (!mongoose.isValidObjectId(sportId)) {
         return res.status(400).json({
@@ -206,7 +209,7 @@ class CampusLifeController {
     try {
       const { search = '', type, status = 'all' } = req.query;
 
-      console.log(`Received GET /api/campus-life/clubs with filters:`, { search, type, status });
+      // console.log(`Received GET /api/campus-life/clubs with filters:`, { search, type, status });
 
       if (status && !['active', 'inactive', 'all'].includes(String(status))) {
         return res.status(400).json({
@@ -248,7 +251,7 @@ class CampusLifeController {
     try {
       const { clubId } = req.params;
 
-      console.log(`Received GET /api/campus-life/clubs/${clubId}`);
+      // console.log(`Received GET /api/campus-life/clubs/${clubId}`);
 
       if (!mongoose.isValidObjectId(clubId)) {
         return res.status(400).json({
@@ -269,6 +272,215 @@ class CampusLifeController {
       res.status(200).json(club);
     } catch (err: any) {
       console.error(`Error in getClubById:`, err);
+      res.status(err.message.includes('not found') ? 404 : 500).json({
+        error: {
+          message: err.message,
+          code: err.message.includes('not found') ? 'NOT_FOUND' : 'INTERNAL_SERVER_ERROR',
+          status: err.message.includes('not found') ? 404 : 500,
+        },
+      });
+    }
+  }
+
+  async joinClub(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { clubId } = req.params;
+      const { reason, additionalInfo } = req.body;
+
+      console.log(req.user)
+      const studentId = req.user?.id
+      console.log(`Received POST /api/campus-life/clubs/${clubId}/join`);
+      console.log(studentId, "lkokooooooooooooooooooooooooooooooooooooooooooo")
+
+      if (!mongoose.isValidObjectId(clubId)) {
+        return res.status(400).json({
+          error: {
+            message: 'Invalid club ID',
+            code: 'INVALID_ID',
+            status: 400,
+          },
+        });
+      }
+
+      if (!req.user) {
+        return res.status(401).json({ error: 'Unauthorized: User not authenticated' });
+      }
+
+      if (!reason || !studentId) {
+        return res.status(400).json({
+          error: {
+            message: 'Reason and studentId are required',
+            code: 'MISSING_FIELDS',
+            status: 400,
+          },
+        });
+      }
+
+      if (!mongoose.isValidObjectId(studentId)) {
+        return res.status(400).json({
+          error: {
+            message: 'Invalid student ID',
+            code: 'INVALID_ID',
+            status: 400,
+          },
+        });
+      }
+
+      const result = await joinClub.execute({
+        clubId,
+        studentId,
+        reason,
+        additionalInfo,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: 'Join request submitted successfully.',
+        requestId: result.requestId,
+        status: result.status,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err: any) {
+      console.error(`Error in joinClub:`, err);
+      res.status(err.message.includes('not found') ? 404 : 500).json({
+        error: {
+          message: err.message,
+          code: err.message.includes('not found') ? 'NOT_FOUND' : 'INTERNAL_SERVER_ERROR',
+          status: err.message.includes('not found') ? 404 : 500,
+        },
+      });
+    }
+  }
+
+  async joinSport(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { sportId } = req.params;
+      const { reason, additionalInfo } = req.body;
+
+      const studentId = req.user?.id
+
+      console.log(`Received POST /api/campus-life/sports/${sportId}/join`);
+
+      if (!mongoose.isValidObjectId(sportId)) {
+        return res.status(400).json({
+          error: {
+            message: 'Invalid sport ID',
+            code: 'INVALID_ID',
+            status: 400,
+          },
+        });
+      }
+
+      if (!req.user) {
+        return res.status(401).json({ error: 'Unauthorized: User not authenticated' });
+      }
+
+      if (!reason || !studentId) {
+        return res.status(400).json({
+          error: {
+            message: 'Reason and studentId are required',
+            code: 'MISSING_FIELDS',
+            status: 400,
+          },
+        });
+      }
+
+      if (!mongoose.isValidObjectId(studentId)) {
+        return res.status(400).json({
+          error: {
+            message: 'Invalid student ID',
+            code: 'INVALID_ID',
+            status: 400,
+          },
+        });
+      }
+
+      const result = await joinSport.execute({
+        sportId,
+        studentId,
+        reason,
+        additionalInfo,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: 'Join request submitted successfully.',
+        requestId: result.requestId,
+        status: result.status,
+        tryoutDate: result.tryoutDate,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err: any) {
+      console.error(`Error in joinSport:`, err);
+      res.status(err.message.includes('not found') ? 404 : 500).json({
+        error: {
+          message: err.message,
+          code: err.message.includes('not found') ? 'NOT_FOUND' : 'INTERNAL_SERVER_ERROR',
+          status: err.message.includes('not found') ? 404 : 500,
+        },
+      });
+    }
+  }
+
+  async joinEvent(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { eventId } = req.params;
+      const { reason, additionalInfo } = req.body;
+      const studentId = req.user?.id
+
+      console.log(`Received POST /api/campus-life/events/${eventId}/join`);
+
+      if (!mongoose.isValidObjectId(eventId)) {
+        return res.status(400).json({
+          error: {
+            message: 'Invalid event ID',
+            code: 'INVALID_ID',
+            status: 400,
+          },
+        });
+      }
+
+      if (!req.user) {
+        return res.status(401).json({ error: 'Unauthorized: User not authenticated' });
+      }
+
+      if (!reason || !studentId) {
+        return res.status(400).json({
+          error: {
+            message: 'Reason and studentId are required',
+            code: 'MISSING_FIELDS',
+            status: 400,
+          },
+        });
+      }
+
+      if (!mongoose.isValidObjectId(studentId)) {
+        return res.status(400).json({
+          error: {
+            message: 'Invalid student ID',
+            code: 'INVALID_ID',
+            status: 400,
+          },
+        });
+      }
+
+      const result = await joinEvent.execute({
+        eventId,
+        studentId,
+        reason,
+        additionalInfo,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: 'Join request submitted successfully.',
+        requestId: result.requestId,
+        status: result.status,
+        registrationCode: result.registrationCode,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err: any) {
+      console.error(`Error in joinEvent:`, err);
       res.status(err.message.includes('not found') ? 404 : 500).json({
         error: {
           message: err.message,

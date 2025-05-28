@@ -3,8 +3,6 @@ import { EventRequestModel, CampusEventModel } from '../../../infrastructure/dat
 class ApproveEventRequest {
   async execute(id: string): Promise<void> {
     try {
-      console.log(`Executing approveEventRequest use case with id:`, id);
-
       const eventRequest = await EventRequestModel.findById(id).catch((err) => {
         throw new Error(`Failed to find event request: ${err.message}`);
       });
@@ -17,23 +15,7 @@ class ApproveEventRequest {
         throw new Error('Event request is not in pending status');
       }
 
-      await CampusEventModel.create({
-        name: eventRequest.eventName,
-        organizer: eventRequest.requestedBy,
-        organizerType: eventRequest.requesterType,
-        type: eventRequest.type,
-        date: eventRequest.proposedDate,
-        time: '',
-        venue: eventRequest.proposedVenue,
-        status: 'upcoming',
-        description: eventRequest.description,
-        maxParticipants: eventRequest.expectedParticipants,
-        registrationRequired: true,
-        createdAt: eventRequest.requestedAt,
-      }).catch((err) => {
-        throw new Error(`Failed to create event: ${err.message}`);
-      });
-
+      // Approve the event request
       await EventRequestModel.findByIdAndUpdate(
         id,
         { status: 'approved', updatedAt: Date.now() },
@@ -41,6 +23,22 @@ class ApproveEventRequest {
       ).catch((err) => {
         throw new Error(`Failed to update event request: ${err.message}`);
       });
+
+      // Increment participants count in the CampusEventModel using eventId
+      const updatedEvent = await CampusEventModel.findByIdAndUpdate(
+        eventRequest.eventId,
+        { $inc: { participantsCount: 1 } },
+        { new: true }
+      ).catch((err) => {
+        throw new Error(`Failed to increment participants count: ${err.message}`);
+      });
+
+      if (!updatedEvent) {
+        console.warn(`No matching campus event found for ID: ${eventRequest.eventId}`);
+      } else {
+        console.log(`Participants count incremented for event ID: ${eventRequest.eventId}`);
+      }
+
     } catch (err) {
       console.error(`Error in approveEventRequest use case:`, err);
       throw err;

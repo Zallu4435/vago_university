@@ -1,19 +1,14 @@
 // src/application/hooks/useCampusLife.ts
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { campusLifeService } from '../services/campus-life.service';
-import { Event, Sport, Club, JoinRequest } from '../../domain/types/campus-life';
+import { Event, Sport, Club } from '../../domain/types/campus-life';
 
-export const useCampusLife = () => {
-  // Fetch all campus life data
-  const {
-    data: campusLifeData,
-    isLoading: isLoadingCampusLife,
-    error: campusLifeError,
-  } = useQuery({
-    queryKey: ['campusLife'],
-    queryFn: () => campusLifeService.getCampusLifeData(),
-  });
+export interface JoinRequest {
+  reason: string;
+  additionalInfo: string;
+}
 
+export const useCampusLife = (activeTab?: string) => {
   // Fetch events
   const {
     data: events,
@@ -22,6 +17,7 @@ export const useCampusLife = () => {
   } = useQuery({
     queryKey: ['events'],
     queryFn: () => campusLifeService.getEvents(),
+    enabled: activeTab === 'Events'
   });
 
   // Fetch sports
@@ -32,6 +28,7 @@ export const useCampusLife = () => {
   } = useQuery({
     queryKey: ['sports'],
     queryFn: () => campusLifeService.getSports(),
+    enabled: activeTab === 'Athletics'
   });
 
   // Fetch clubs
@@ -42,6 +39,7 @@ export const useCampusLife = () => {
   } = useQuery({
     queryKey: ['clubs'],
     queryFn: () => campusLifeService.getClubs(),
+    enabled: activeTab === 'Clubs'
   });
 
   // Join request mutations
@@ -74,19 +72,16 @@ export const useCampusLife = () => {
 
   return {
     // Data
-    campusLifeData,
     events: events || [],
     sports: sports || [],
     clubs: clubs || [],
     
     // Loading states
-    isLoadingCampusLife,
     isLoadingEvents,
     isLoadingSports,
     isLoadingClubs,
     
     // Errors
-    campusLifeError,
     eventsError,
     sportsError,
     clubsError,

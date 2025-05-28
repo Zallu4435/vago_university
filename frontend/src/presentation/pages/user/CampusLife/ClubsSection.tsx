@@ -11,14 +11,14 @@ export default function ClubsSection({ clubs }) {
 
   const handleJoinRequest = async (request: { reason: string; additionalInfo: string }) => {
     try {
-      await requestToJoinClub({ clubId: selectedClub.id, request });
+      await requestToJoinClub({ clubId: selectedClub._id, request });
       setShowJoinForm(false);
     } catch (error) {
       console.error('Failed to submit join request:', error);
     }
   };
 
-  console.log(clubs);
+  console.log(clubs, 'clubs');
 
   return (
     <>
@@ -44,96 +44,113 @@ export default function ClubsSection({ clubs }) {
             </div>
             <div className="bg-amber-100 px-4 py-2 font-medium text-gray-700">MY CLUBS</div>
             <div className="max-h-96 overflow-y-auto">
-              {clubs.data.map((club) => (
-                <div
-                  key={club?.id}
-                  className={`p-3 border-b border-amber-200 hover:bg-amber-50 cursor-pointer ${
-                    selectedClub?.id === club?.id ? 'bg-amber-100' : ''
-                  }`}
-                  onClick={() => setSelectedClub(club)}
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 rounded-full ${club?.color} text-white flex items-center justify-center font-bold`}>
-                      {club?.icon}
-                    </div>
-                    <div className="flex-grow">
-                      <h4 className="font-semibold text-gray-800">{club?.name}</h4>
-                      <div className="text-sm text-gray-600">
-                        {club?.role} • {club?.nextMeeting}
-                      </div>
-                    </div>
-                    {selectedClub?.id === club?.id && (
-                      <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                    )}
-                  </div>
+              {clubs?.data?.length === 0 ? (
+                <div className="p-6 text-center text-gray-500">
+                  <FaUsers className="mx-auto mb-2" size={24} />
+                  <p>No clubs available.</p>
                 </div>
-              ))}
+              ) : (
+                clubs?.data?.map((club) => (
+                  <div
+                    key={club?.id}
+                    className={`p-3 border-b border-amber-200 hover:bg-amber-50 cursor-pointer ${
+                      selectedClub?.id === club?.id ? 'bg-amber-100' : ''
+                    }`}
+                    onClick={() => setSelectedClub(club)}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-10 h-10 rounded-full ${club?.color} text-white flex items-center justify-center font-bold`}>
+                        {club?.icon}
+                      </div>
+                      <div className="flex-grow">
+                        <h4 className="font-semibold text-gray-800">{club?.name}</h4>
+                        <div className="text-sm text-gray-600">
+                          {club?.role} • {club?.nextMeeting}
+                        </div>
+                      </div>
+                      {selectedClub?.id === club?.id && (
+                        <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
         {/* Club Details */}
         <div className="w-full md:w-2/3 bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="flex items-center p-4 border-b border-amber-200">
-            <div className={`w-12 h-12 rounded-full ${selectedClub?.color} text-white flex items-center justify-center font-bold mr-4`}>
-              {selectedClub?.icon}
+          {!selectedClub ? (
+            <div className="p-8 text-center">
+              <FaUsers className="mx-auto mb-4 text-gray-400" size={48} />
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">Select a Club</h3>
+              <p className="text-gray-500">Select a club from the list to view its details.</p>
             </div>
-            <div className="flex-grow">
-              <h3 className="text-xl font-bold text-gray-800">{selectedClub?.name}</h3>
-              <p className="text-gray-600">{selectedClub?.type} • {selectedClub?.members}</p>
-            </div>
-            {selectedClub?.status && (
-              <div className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                {selectedClub?.status}
-              </div>
-            )}
-          </div>
-          <div className="p-6">
-            <h4 className="text-lg font-bold text-orange-700 mb-2">About</h4>
-            <p className="text-gray-700 mb-6">{selectedClub?.about}</p>
-            {selectedClub?.upcomingEvents && (
-              <>
-                <h4 className="text-lg font-bold text-orange-700 mb-2">Upcoming Events</h4>
-                <ul className="bg-amber-50 p-4 rounded-lg mb-4">
-                  {selectedClub?.upcomingEvents?.map((event, index) => (
-                    <li key={index} className="mb-3 flex">
-                      <span className="text-orange-700 mr-2">•</span>
-                      <span>{event?.date}: {event?.description}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex gap-3 mt-4">
-                  <button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2 px-4 rounded">
-                    Get Tickets
-                  </button>
-                  <button className="border border-orange-500 text-orange-500 hover:bg-amber-50 py-2 px-4 rounded">
-                    View Calendar
-                  </button>
+          ) : (
+            <>
+              <div className="flex items-center p-4 border-b border-amber-200">
+                <div className={`w-12 h-12 rounded-full ${selectedClub?.color} text-white flex items-center justify-center font-bold mr-4`}>
+                  {selectedClub?.icon}
                 </div>
-              </>
-            )}
-            {!showJoinForm ? (
-              <button
-                onClick={() => setShowJoinForm(true)}
-                className="mt-4 w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2 px-4 rounded"
-              >
-                Request to Join
-              </button>
-            ) : (
-              <div className="mt-4">
-                <JoinRequestForm
-                  onSubmit={handleJoinRequest}
-                  onCancel={() => setShowJoinForm(false)}
-                  isLoading={isJoiningClub}
-                  title={selectedClub?.name}
-                />
-                {joinClubError && (
-                  <div className="mt-2 text-red-500 text-sm">
-                    Failed to submit join request. Please try again.
+                <div className="flex-grow">
+                  <h3 className="text-xl font-bold text-gray-800">{selectedClub?.name}</h3>
+                  <p className="text-gray-600">{selectedClub?.type} • {selectedClub?.members}</p>
+                </div>
+                {selectedClub?.status && (
+                  <div className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    {selectedClub?.status}
                   </div>
                 )}
               </div>
-            )}
-          </div>
+              <div className="p-6">
+                <h4 className="text-lg font-bold text-orange-700 mb-2">About</h4>
+                <p className="text-gray-700 mb-6">{selectedClub?.about}</p>
+                {selectedClub?.upcomingEvents && (
+                  <>
+                    <h4 className="text-lg font-bold text-orange-700 mb-2">Upcoming Events</h4>
+                    <ul className="bg-amber-50 p-4 rounded-lg mb-4">
+                      {selectedClub?.upcomingEvents?.map((event, index) => (
+                        <li key={index} className="mb-3 flex">
+                          <span className="text-orange-700 mr-2">•</span>
+                          <span>{event?.date}: {event?.description}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="flex gap-3 mt-4">
+                      <button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2 px-4 rounded">
+                        Get Tickets
+                      </button>
+                      <button className="border border-orange-500 text-orange-500 hover:bg-amber-50 py-2 px-4 rounded">
+                        View Calendar
+                      </button>
+                    </div>
+                  </>
+                )}
+                {!showJoinForm ? (
+                  <button
+                    onClick={() => setShowJoinForm(true)}
+                    className="mt-4 w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2 px-4 rounded"
+                  >
+                    Request to Join
+                  </button>
+                ) : (
+                  <div className="mt-4">
+                    <JoinRequestForm
+                      onSubmit={handleJoinRequest}
+                      onCancel={() => setShowJoinForm(false)}
+                      isLoading={isJoiningClub}
+                      title={selectedClub?.name}
+                    />
+                    {joinClubError && (
+                      <div className="mt-2 text-red-500 text-sm">
+                        Failed to submit join request. Please try again.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>
@@ -141,26 +158,24 @@ export default function ClubsSection({ clubs }) {
 }
 
 ClubsSection.propTypes = {
-  clubs: PropTypes.shape({
-    data: PropTypes.arrayOf(
-      PropTypes.shape({
-        id: PropTypes.number.isRequired,
-        name: PropTypes.string.isRequired,
-        type: PropTypes.string.isRequired,
-        members: PropTypes.string.isRequired,
-        icon: PropTypes.string.isRequired,
-        color: PropTypes.string.isRequired,
-        status: PropTypes.string,
-        role: PropTypes.string.isRequired,
-        nextMeeting: PropTypes.string.isRequired,
-        about: PropTypes.string,
-        upcomingEvents: PropTypes.arrayOf(
-          PropTypes.shape({
-            date: PropTypes.string.isRequired,
-            description: PropTypes.string.isRequired,
-          })
-        ),
-      })
-    ).isRequired,
-  }).isRequired,
+  clubs: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      name: PropTypes.string.isRequired,
+      type: PropTypes.string.isRequired,
+      members: PropTypes.string.isRequired,
+      icon: PropTypes.string.isRequired,
+      color: PropTypes.string.isRequired,
+      status: PropTypes.string,
+      role: PropTypes.string.isRequired,
+      nextMeeting: PropTypes.string.isRequired,
+      about: PropTypes.string,
+      upcomingEvents: PropTypes.arrayOf(
+        PropTypes.shape({
+          date: PropTypes.string.isRequired,
+          description: PropTypes.string.isRequired,
+        })
+      ),
+    })
+  ).isRequired,
 };

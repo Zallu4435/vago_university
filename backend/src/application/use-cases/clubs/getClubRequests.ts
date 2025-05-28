@@ -6,8 +6,16 @@ interface GetClubRequestsParams {
   status: string;
 }
 
+interface ClubRequest {
+  id: string;
+  clubName: string;
+  requestedBy: string;
+  requestedAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
 interface GetClubRequestsResponse {
-  clubs: any[];
+  clubs: ClubRequest[];
   totalItems: number;
   totalPages: number;
   currentPage: number;
@@ -20,29 +28,29 @@ class GetClubRequests {
     status,
   }: GetClubRequestsParams): Promise<GetClubRequestsResponse> {
     try {
-      console.log(`Executing getClubRequests use case with params:`, {
-        page,
-        limit,
-        status,
-      });
-
       const query: any = {};
       if (status !== 'all') query.status = status;
 
-      const totalItems = await ClubRequestModel.countDocuments(query).catch((err) => {
-        throw new Error(`Failed to count club requests: ${err.message}`);
-      });
+      const totalItems = await ClubRequestModel.countDocuments(query);
       const totalPages = Math.ceil(totalItems / limit);
       const skip = (page - 1) * limit;
 
-      const clubs = await ClubRequestModel.find(query)
-        .select('name category description createdBy status rejectionReason')
+      const requests = await ClubRequestModel.find(query)
+        .populate('clubId', 'name type')       // Assuming clubId is a reference to Club
+        .populate('userId', 'email')       // Assuming userId is a reference to User
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .lean()
-        .catch((err) => {
-          throw new Error(`Failed to query club requests: ${err.message}`);
-        });
+        .lean();
+
+      const clubs = requests.map((request): ClubRequest => ({
+        id: request._id.toString(),
+        clubName: request.clubId?.name || 'Unknown Club',
+        requestedBy: request.userId?.email || 'Unknown User',
+        requestedAt: new Date(request.createdAt).toISOString(),
+        status: request.status,
+        type: request.clubId?.type
+      }));
 
       return {
         clubs,
@@ -51,8 +59,8 @@ class GetClubRequests {
         currentPage: page,
       };
     } catch (err) {
-      console.error(`Error in getClubRequests use case:`, err);
-      throw err;
+      console.error(`Error in GetClubRequests use case:`, err);
+      throw new Error('Failed to fetch club join requests.');
     }
   }
 }

@@ -1,31 +1,46 @@
-import { PlayerRequestModel } from '../../../infrastructure/database/mongoose/models/sports.model';
+import { SportRequestModel, TeamModel } from '../../../infrastructure/database/mongoose/models/sports.model';
 
 class ApprovePlayerRequest {
   async execute(id: string): Promise<void> {
     try {
-      console.log(`Executing approvePlayerRequest use case with id:`, id);
-
-      const playerRequest = await PlayerRequestModel.findById(id).catch((err) => {
-        throw new Error(`Failed to find player request: ${err.message}`);
+      const teamRequest = await SportRequestModel.findById(id).catch((err) => {
+        throw new Error(`Failed to find team request: ${err.message}`);
       });
 
-      if (!playerRequest) {
-        throw new Error('Player request not found');
+      if (!teamRequest) {
+        throw new Error('Team request not found');
       }
 
-      if (playerRequest.status !== 'pending') {
-        throw new Error('Player request is not in pending status');
+      if (teamRequest.status !== 'pending') {
+        throw new Error('Team request is not in pending status');
       }
 
-      await PlayerRequestModel.findByIdAndUpdate(
+      // Approve the team request
+      await SportRequestModel.findByIdAndUpdate(
         id,
         { status: 'approved', updatedAt: Date.now() },
         { runValidators: true }
       ).catch((err) => {
-        throw new Error(`Failed to update player request: ${err.message}`);
+        throw new Error(`Failed to update team request: ${err.message}`);
       });
-    } catch (err) {
-      console.error(`Error in approvePlayerRequest use case:`, err);
+
+      // Increment player count in the TeamModel using teamId
+      const updatedTeam = await TeamModel.findByIdAndUpdate(
+        teamRequest.sportId,
+        { $inc: { participants: 1 } },
+        { new: true }
+      ).catch((err) => {
+        throw new Error(`Failed to increment player count: ${err.message}`);
+      });
+
+      if (!updatedTeam) {
+        console.warn(`No matching team found for ID: ${teamRequest.sportId}`);
+      } else {
+        console.log(`Player count incremented for team ID: ${teamRequest.sportId}`);
+      }
+
+    } catch (err: any) {
+      console.error(`Error in approveTeamRequest use case:`, err);
       throw err;
     }
   }

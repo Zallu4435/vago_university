@@ -19,6 +19,7 @@ export const useSportsManagement = () => {
     coach: 'all',
   });
   const limit = 10;
+  const [activeTab, setActiveTab] = useState<'teams' | 'events' | 'requests'>('teams');
 
   // Only fetch teams when component mounts
   const { data: teamsData, isLoading: isLoadingTeams, error: teamsError } = useQuery({
@@ -31,7 +32,7 @@ export const useSportsManagement = () => {
         filters.status !== 'all' ? filters.status : undefined,
         filters.coach !== 'all' ? filters.coach : undefined
       ),
-    keepPreviousData: true,
+    enabled: activeTab === 'teams',
   });
 
   // Only fetch events when needed
@@ -44,8 +45,7 @@ export const useSportsManagement = () => {
         filters.sportType !== 'all' ? filters.sportType : undefined,
         filters.status !== 'all' ? filters.status : undefined
       ),
-    enabled: false,
-    keepPreviousData: true,
+    enabled: activeTab === 'events',
   });
 
   // Only fetch team requests when needed
@@ -57,8 +57,7 @@ export const useSportsManagement = () => {
         limit,
         filters.status !== 'all' ? filters.status : undefined
       ),
-    enabled: false,
-    keepPreviousData: true,
+    enabled: activeTab === 'requests',
   });
 
   // Only fetch player requests when needed
@@ -70,8 +69,7 @@ export const useSportsManagement = () => {
         limit,
         filters.status !== 'all' ? filters.status : undefined
       ),
-    enabled: false,
-    keepPreviousData: true,
+    enabled: activeTab === 'requests',
   });
 
   const { mutateAsync: createTeam } = useMutation({
@@ -205,9 +203,6 @@ export const useSportsManagement = () => {
 
   const handleTabChange = (tab: 'teams' | 'events' | 'requests') => {
     setActiveTab(tab);
-    if (tab !== 'teams') {
-      fetchDataForTab(tab);
-    }
   };
 
   return {
@@ -230,7 +225,6 @@ export const useSportsManagement = () => {
     rejectTeamRequest,
     approvePlayerRequest,
     rejectPlayerRequest,
-    fetchDataForTab,
     handleTabChange,
   };
 };

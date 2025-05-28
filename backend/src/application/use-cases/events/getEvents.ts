@@ -24,13 +24,13 @@ class GetEvents {
     organizer,
   }: GetEventsParams): Promise<GetEventsResponse> {
     try {
-      console.log(`Executing getEvents use case with params:`, {
-        page,
-        limit,
-        type,
-        status,
-        organizer,
-      });
+      // console.log(`Executing getEvents use case with params:`, {
+      //   page,
+      //   limit,
+      //   type,
+      //   status,
+      //   organizer,
+      // });
 
       const query: any = {};
       if (type !== 'all') query.type = type;

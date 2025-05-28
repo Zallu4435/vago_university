@@ -8,8 +8,18 @@ interface GetEventRequestsParams {
   organizer: string;
 }
 
+interface SimplifiedEventRequest {
+  eventName: string;
+  requestedId: string;
+  requestedBy: string;
+  type: string;
+  requestedDate: string;
+  status: string;
+  proposedDate: string;
+}
+
 interface GetEventRequestsResponse {
-  eventRequests: any[];
+  eventRequests: SimplifiedEventRequest[];
   totalItems: number;
   totalPages: number;
   currentPage: number;
@@ -24,33 +34,36 @@ class GetEventRequests {
     organizer,
   }: GetEventRequestsParams): Promise<GetEventRequestsResponse> {
     try {
-      console.log(`Executing getEventRequests use case with params:`, {
-        page,
-        limit,
-        type,
-        status,
-        organizer,
-      });
+      if (page < 1 || limit < 1) {
+        throw new Error('Invalid pagination parameters.');
+      }
 
       const query: any = {};
-      if (type !== 'all') query.type = type;
-      if (status !== 'all') query.status = status;
-      if (organizer !== 'all') query.requestedBy = organizer;
+      if (type && type !== 'all') query.type = type;
+      if (status && status !== 'all') query.status = status;
+      if (organizer && organizer !== 'all') query.requestedBy = organizer;
 
-      const totalItems = await EventRequestModel.countDocuments(query).catch((err) => {
-        throw new Error(`Failed to count event requests: ${err.message}`);
-      });
+      const totalItems = await EventRequestModel.countDocuments(query);
       const totalPages = Math.ceil(totalItems / limit);
       const skip = (page - 1) * limit;
 
-      const eventRequests = await EventRequestModel.find(query)
-        .select('eventName requestedBy requesterType type proposedDate proposedVenue status requestedAt description expectedParticipants rejectionReason')
+      const rawRequests = await EventRequestModel.find(query)
+        .populate('eventId', 'title eventType') // Assuming eventId is a reference to CampusEventModel
+        .populate('userId', 'email') // Assuming requestedBy is a reference to User
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .lean()
-        .catch((err) => {
-          throw new Error(`Failed to query event requests: ${err.message}`);
-        });
+        .lean();
+
+      const eventRequests: SimplifiedEventRequest[] = rawRequests.map((req: any) => ({
+        eventName: req.eventId?.title || 'Unknown Event',
+        requestedId: req._id.toString(),
+        requestedBy: req.userId?.email || 'Unknown User',
+        type: req.type,
+        proposedDate: req.createdAt,
+        status: req.status,
+        type: req.eventId?.eventType,
+      }));
 
       return {
         eventRequests,
@@ -58,9 +71,9 @@ class GetEventRequests {
         totalPages,
         currentPage: page,
       };
-    } catch (err) {
+    } catch (err: any) {
       console.error(`Error in getEventRequests use case:`, err);
-      throw err;
+      throw new Error(err.message || 'Failed to fetch event requests.');
     }
   }
 }

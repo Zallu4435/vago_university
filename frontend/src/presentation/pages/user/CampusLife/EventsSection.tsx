@@ -10,6 +10,7 @@ export default function EventsSection({ events }) {
   const { requestToJoinEvent, isJoiningEvent, joinEventError } = useCampusLife();
 
   const handleJoinRequest = async (request: { reason: string; additionalInfo: string }) => {
+    console.log('selectedEvent', selectedEvent);
     try {
       await requestToJoinEvent({ eventId: selectedEvent._id, request });
       setShowJoinForm(false);
@@ -18,7 +19,23 @@ export default function EventsSection({ events }) {
     }
   };
 
-  console.log('events', events);
+  console.log('eventshhahhahhah ', events);
+
+  if (!events.data || events.data.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="p-8 text-center">
+          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FaCalendarAlt className="text-amber-500" size={24} />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Events Available</h3>
+          <p className="text-gray-600">
+            There are no events scheduled at the moment. Check back later for updates.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -74,72 +91,86 @@ export default function EventsSection({ events }) {
         </div>
         {/* Event Details */}
         <div className="w-full md:w-2/3 bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="flex items-center p-4 border-b border-amber-200">
-            <div className={`w-12 h-12 rounded-full ${selectedEvent?.color} text-white flex items-center justify-center font-bold mr-4`}>
-              {selectedEvent?.icon}
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-gray-800">{selectedEvent?.title}</h3>
-              <p className="text-gray-600">Organized by {selectedEvent?.organizer}</p>
-            </div>
-            <div className="ml-auto text-right">
-              <div className="text-gray-700 font-medium">{selectedEvent?.date}</div>
-              <div className="text-orange-600">{selectedEvent?.time}</div>
-            </div>
-          </div>
-          <div className="p-6">
-            <h4 className="text-lg font-bold text-orange-700 mb-4">Annual {selectedEvent?.title}</h4>
-            <p className="text-gray-700 mb-4">
-              Join us for the biggest campus event of the spring semester!
-            </p>
-            {selectedEvent?.description && (
-              <p className="text-gray-700 mb-4">{selectedEvent?.description}</p>
-            )}
-            <div className="bg-amber-50 p-4 rounded-lg mb-4">
-              <div className="flex items-center mb-2">
-                <FaMapPin className="text-orange-600 mr-2" size={18} />
-                <span className="font-medium">Location:</span>
-                <span className="ml-2">{selectedEvent?.location} {selectedEvent?._id === 1 && '(Rain location: Indoor Arena)'}</span>
+          {!selectedEvent ? (
+            <div className="p-8 text-center">
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FaCalendarAlt className="text-amber-500" size={24} />
               </div>
-              <div className="flex items-center mb-2">
-                <FaClock className="text-orange-600 mr-2" size={18} />
-                <span className="font-medium">Time:</span>
-                <span className="ml-2">{selectedEvent?.time}</span>
-              </div>
-              {selectedEvent?.additionalInfo && (
-                <div className="mt-3 pt-3 border-t border-amber-200 text-gray-700">
-                  {selectedEvent?.additionalInfo}
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Select an Event</h3>
+              <p className="text-gray-600">
+                Choose an event from the list to view its details and register if interested.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center p-4 border-b border-amber-200">
+                <div className={`w-12 h-12 rounded-full ${selectedEvent?.color} text-white flex items-center justify-center font-bold mr-4`}>
+                  {selectedEvent?.icon}
                 </div>
-              )}
-            </div>
-            {selectedEvent?.requirements && (
-              <div className="bg-amber-100 p-3 rounded-lg text-sm text-orange-800">
-                {selectedEvent?.requirements}
+                <div>
+                  <h3 className="text-xl font-bold text-gray-800">{selectedEvent?.title}</h3>
+                  <p className="text-gray-600">Organized by {selectedEvent?.organizer}</p>
+                </div>
+                <div className="ml-auto text-right">
+                  <div className="text-gray-700 font-medium">{selectedEvent?.date}</div>
+                  <div className="text-orange-600">{selectedEvent?.time}</div>
+                </div>
               </div>
-            )}
-            {!showJoinForm ? (
-              <button
-                onClick={() => setShowJoinForm(true)}
-                className="mt-4 w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2 px-4 rounded"
-              >
-                Register for Event
-              </button>
-            ) : (
-              <div className="mt-4">
-                <JoinRequestForm
-                  onSubmit={handleJoinRequest}
-                  onCancel={() => setShowJoinForm(false)}
-                  isLoading={isJoiningEvent}
-                  title={selectedEvent?.title}
-                />
-                {joinEventError && (
-                  <div className="mt-2 text-red-500 text-sm">
-                    Failed to submit registration request. Please try again.
+              <div className="p-6">
+                <h4 className="text-lg font-bold text-orange-700 mb-4">Annual {selectedEvent?.title}</h4>
+                <p className="text-gray-700 mb-4">
+                  Join us for the biggest campus event of the spring semester!
+                </p>
+                {selectedEvent?.description && (
+                  <p className="text-gray-700 mb-4">{selectedEvent?.description}</p>
+                )}
+                <div className="bg-amber-50 p-4 rounded-lg mb-4">
+                  <div className="flex items-center mb-2">
+                    <FaMapPin className="text-orange-600 mr-2" size={18} />
+                    <span className="font-medium">Location:</span>
+                    <span className="ml-2">{selectedEvent?.location} {selectedEvent?._id === 1 && '(Rain location: Indoor Arena)'}</span>
+                  </div>
+                  <div className="flex items-center mb-2">
+                    <FaClock className="text-orange-600 mr-2" size={18} />
+                    <span className="font-medium">Time:</span>
+                    <span className="ml-2">{selectedEvent?.time}</span>
+                  </div>
+                  {selectedEvent?.additionalInfo && (
+                    <div className="mt-3 pt-3 border-t border-amber-200 text-gray-700">
+                      {selectedEvent?.additionalInfo}
+                    </div>
+                  )}
+                </div>
+                {selectedEvent?.requirements && (
+                  <div className="bg-amber-100 p-3 rounded-lg text-sm text-orange-800">
+                    {selectedEvent?.requirements}
+                  </div>
+                )}
+                {!showJoinForm ? (
+                  <button
+                    onClick={() => setShowJoinForm(true)}
+                    className="mt-4 w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2 px-4 rounded"
+                  >
+                    Register for Event
+                  </button>
+                ) : (
+                  <div className="mt-4">
+                    <JoinRequestForm
+                      onSubmit={handleJoinRequest}
+                      onCancel={() => setShowJoinForm(false)}
+                      isLoading={isJoiningEvent}
+                      title={selectedEvent?.title}
+                    />
+                    {joinEventError && (
+                      <div className="mt-2 text-red-500 text-sm">
+                        Failed to submit registration request. Please try again.
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
     </>

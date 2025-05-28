@@ -28,7 +28,7 @@ interface AthleticsSectionProps {
 }
 
 export default function AthleticsSection({ sports }: AthleticsSectionProps) {
-  const [selectedSport, setSelectedSport] = useState<Sport | null>(sports.data[0] || null);
+  const [selectedSport, setSelectedSport] = useState<Sport | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showJoinForm, setShowJoinForm] = useState(false);
   const { requestToJoinSport, isJoiningSport, joinSportError } = useCampusLife();
@@ -43,6 +43,7 @@ export default function AthleticsSection({ sports }: AthleticsSectionProps) {
     }
   };
 
+  console.log(sports, 'sports');  
   // Normalize and filter sports
   const normalizedSports = useMemo(() => {
     return sports.data
@@ -67,6 +68,22 @@ export default function AthleticsSection({ sports }: AthleticsSectionProps) {
       );
   }, [sports.data, searchTerm]);
 
+  if (!sports.data || sports.data.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="p-8 text-center">
+          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FaTrophy className="text-amber-500" size={24} />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Sports Available</h3>
+          <p className="text-gray-600">
+            There are no sports teams available at the moment. Check back later for updates.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg p-4 mb-4 text-white shadow-lg">
@@ -75,160 +92,158 @@ export default function AthleticsSection({ sports }: AthleticsSectionProps) {
           <span className="bg-amber-200 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">Spring 2025</span>
         </div>
       </div>
-      {sports.data.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <h4 className="text-lg font-semibold text-gray-800 mb-2">No Sports Available</h4>
-          <p className="text-gray-600">No sports teams found for the current season.</p>
-        </div>
-      ) : (
-        <div className="flex flex-col md:flex-row gap-4">
-          {/* Sports List (Sidebar) */}
-          <div className="w-full md:w-1/3 bg-white rounded-lg shadow-md">
-            <div className="p-3 border-b border-amber-200">
-              <div className="relative">
-                <FaSearch className="absolute left-3 top-3 text-gray-400" size={16} />
-                <input
-                  type="text"
-                  placeholder="Search sports..."
-                  className="w-full pl-10 pr-4 py-2 border border-amber-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
-              <div className="bg-amber-100 px-4 py-2 font-medium text-gray-700 sticky top-0 z-10">ALL SPORTS</div>
-              {normalizedSports.length > 0 ? (
-                normalizedSports.map((sport) => (
-                  <div
-                    key={sport._id}
-                    className={`p-3 border-b border-amber-200 hover:bg-amber-50 cursor-pointer ${
-                      selectedSport?._id === sport._id ? 'bg-amber-100' : ''
-                    }`}
-                    onClick={() => setSelectedSport(sport)}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold"
-                        style={{ backgroundColor: sport.color }}
-                      >
-                        {sport.icon}
-                      </div>
-                      <div className="flex-grow">
-                        <h4 className="font-semibold text-gray-800">{sport.title}</h4>
-                        <div className="text-sm text-gray-600">{sport.participants} players</div>
-                      </div>
-                      {selectedSport?._id === sport._id && (
-                        <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                      )}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="p-3 text-gray-600 text-sm">No sports found.</div>
-              )}
+      <div className="flex flex-col md:flex-row gap-4">
+        {/* Sports List (Sidebar) */}
+        <div className="w-full md:w-1/3 bg-white rounded-lg shadow-md">
+          <div className="p-3 border-b border-amber-200">
+            <div className="relative">
+              <FaSearch className="absolute left-3 top-3 text-gray-400" size={16} />
+              <input
+                type="text"
+                placeholder="Search sports..."
+                className="w-full pl-10 pr-4 py-2 border border-amber-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
           </div>
-          {/* Sport Details */}
-          <div className="w-full md:w-2/3 bg-white rounded-lg shadow-md overflow-hidden">
-            {selectedSport ? (
-              <>
-                <div className="flex items-center p-4 border-b border-amber-200">
-                  <div
-                    className="w-12 h-12 rounded-full text-white flex items-center justify-center font-bold mr-4"
-                    style={{ backgroundColor: selectedSport.color }}
-                  >
-                    {selectedSport.icon}
-                  </div>
-                  <div className="flex-grow">
-                    <h3 className="text-xl font-bold text-gray-800">{selectedSport.title}</h3>
-                    <p className="text-gray-600">{selectedSport.division}</p>
-                  </div>
-                  {selectedSport.type === 'Basketball' && (
-                    <div className="bg-amber-300 text-amber-800 px-3 py-1 rounded-full text-sm font-medium">
-                      <FaTrophy className="inline mr-1" size={14} /> Season!
-                    </div>
-                  )}
-                </div>
-                <div className="p-6">
-                  <h4 className="text-lg font-bold text-orange-700 mb-4">Team Information</h4>
-                  <div className="bg-amber-50 p-4 rounded-lg mb-4">
-                    <div className="mb-2">
-                      <span className="font-medium">Head Coach:</span>
-                      <span className="ml-2">{selectedSport.headCoach}</span>
-                    </div>
-                    <div className="mb-2">
-                      <span className="font-medium">Home Games:</span>
-                      <span className="ml-2">{selectedSport.homeGames}</span>
-                    </div>
-                    <div className="mb-2">
-                      <span className="font-medium">Current Record:</span>
-                      <span className="ml-2">{selectedSport.record}</span>
-                    </div>
-                  </div>
-                  {selectedSport.upcomingGames?.length > 0 ? (
-                    <>
-                      <h4 className="text-lg font-bold text-orange-700 mb-2">Upcoming Games</h4>
-                      <ul className="bg-amber-50 p-4 rounded-lg mb-4">
-                        {selectedSport.upcomingGames.map((game, index) => (
-                          <li key={index} className="mb-2 flex">
-                            <span className="text-orange-700 mr-2">•</span>
-                            <span>
-                              {new Date(game.date).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                              })}
-                              : {game.description}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                      <div className="flex gap-3 mt-4">
-                        <button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2 px-4 rounded">
-                          Get Tickets
-                        </button>
-                        <button className="border border-orange-500 text-orange-500 hover:bg-amber-50 py-2 px-4 rounded">
-                          Team Roster
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <p className="text-gray-600">No upcoming games scheduled.</p>
-                  )}
-                  {!showJoinForm ? (
-                    <button
-                      onClick={() => setShowJoinForm(true)}
-                      className="mt-4 w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2 px-4 rounded"
+          <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
+            <div className="bg-amber-100 px-4 py-2 font-medium text-gray-700 sticky top-0 z-10">ALL SPORTS</div>
+            {normalizedSports.length > 0 ? (
+              normalizedSports.map((sport) => (
+                <div
+                  key={sport._id}
+                  className={`p-3 border-b border-amber-200 hover:bg-amber-50 cursor-pointer ${
+                    selectedSport?._id === sport._id ? 'bg-amber-100' : ''
+                  }`}
+                  onClick={() => setSelectedSport(sport)}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div
+                      className="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold"
+                      style={{ backgroundColor: sport.color }}
                     >
-                      Try Out for Team
-                    </button>
-                  ) : (
-                    <div className="mt-4">
-                      <JoinRequestForm
-                        onSubmit={handleJoinRequest}
-                        onCancel={() => setShowJoinForm(false)}
-                        isLoading={isJoiningSport}
-                        title={selectedSport.title}
-                      />
-                      {joinSportError && (
-                        <div className="mt-2 text-red-500 text-sm">
-                          Failed to submit tryout request. Please try again.
-                        </div>
-                      )}
+                      {sport.icon}
                     </div>
-                  )}
+                    <div className="flex-grow">
+                      <h4 className="font-semibold text-gray-800">{sport.title}</h4>
+                      <div className="text-sm text-gray-600">{sport.participants} players</div>
+                    </div>
+                    {selectedSport?._id === sport._id && (
+                      <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                    )}
+                  </div>
                 </div>
-              </>
+              ))
             ) : (
-              <div className="p-6 text-center">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">No Sport Selected</h4>
-                <p className="text-gray-600">Select a sport from the list to view details.</p>
-              </div>
+              <div className="p-3 text-gray-600 text-sm">No sports found.</div>
             )}
           </div>
         </div>
-      )}
+        {/* Sport Details */}
+        <div className="w-full md:w-2/3 bg-white rounded-lg shadow-md overflow-hidden">
+          {!selectedSport ? (
+            <div className="p-8 text-center">
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FaTrophy className="text-amber-500" size={24} />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Select a Sport</h3>
+              <p className="text-gray-600">
+                Choose a sport from the list to view its details and try out for the team.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center p-4 border-b border-amber-200">
+                <div
+                  className="w-12 h-12 rounded-full text-white flex items-center justify-center font-bold mr-4"
+                  style={{ backgroundColor: selectedSport.color }}
+                >
+                  {selectedSport.icon}
+                </div>
+                <div className="flex-grow">
+                  <h3 className="text-xl font-bold text-gray-800">{selectedSport.title}</h3>
+                  <p className="text-gray-600">{selectedSport.division}</p>
+                </div>
+                {selectedSport.type === 'Basketball' && (
+                  <div className="bg-amber-300 text-amber-800 px-3 py-1 rounded-full text-sm font-medium">
+                    <FaTrophy className="inline mr-1" size={14} /> Season!
+                  </div>
+                )}
+              </div>
+              <div className="p-6">
+                <h4 className="text-lg font-bold text-orange-700 mb-4">Team Information</h4>
+                <div className="bg-amber-50 p-4 rounded-lg mb-4">
+                  <div className="mb-2">
+                    <span className="font-medium">Head Coach:</span>
+                    <span className="ml-2">{selectedSport.headCoach}</span>
+                  </div>
+                  <div className="mb-2">
+                    <span className="font-medium">Home Games:</span>
+                    <span className="ml-2">{selectedSport.homeGames}</span>
+                  </div>
+                  <div className="mb-2">
+                    <span className="font-medium">Current Record:</span>
+                    <span className="ml-2">{selectedSport.record}</span>
+                  </div>
+                </div>
+                {selectedSport.upcomingGames?.length > 0 ? (
+                  <>
+                    <h4 className="text-lg font-bold text-orange-700 mb-2">Upcoming Games</h4>
+                    <ul className="bg-amber-50 p-4 rounded-lg mb-4">
+                      {selectedSport.upcomingGames.map((game, index) => (
+                        <li key={index} className="mb-2 flex">
+                          <span className="text-orange-700 mr-2">•</span>
+                          <span>
+                            {new Date(game.date).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })}
+                            : {game.description}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="flex gap-3 mt-4">
+                      <button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2 px-4 rounded">
+                        Get Tickets
+                      </button>
+                      <button className="border border-orange-500 text-orange-500 hover:bg-amber-50 py-2 px-4 rounded">
+                        Team Roster
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-gray-600">No upcoming games scheduled.</p>
+                )}
+                {!showJoinForm ? (
+                  <button
+                    onClick={() => setShowJoinForm(true)}
+                    className="mt-4 w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2 px-4 rounded"
+                  >
+                    Try Out for Team
+                  </button>
+                ) : (
+                  <div className="mt-4">
+                    <JoinRequestForm
+                      onSubmit={handleJoinRequest}
+                      onCancel={() => setShowJoinForm(false)}
+                      isLoading={isJoiningSport}
+                      title={selectedSport.title}
+                    />
+                    {joinSportError && (
+                      <div className="mt-2 text-red-500 text-sm">
+                        Failed to submit tryout request. Please try again.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </>
   );
 }

@@ -25,10 +25,8 @@ export const useClubManagement = () => {
       clubService.getClubs(
         page,
         limit,
-        filters.category !== 'all' ? filters.category : undefined,
         filters.status !== 'all' ? filters.status : undefined
       ),
-    keepPreviousData: true,
   });
 
   const { data: clubRequestsData, isLoading: isLoadingRequests, error: requestsError } = useQuery({
@@ -40,7 +38,6 @@ export const useClubManagement = () => {
         filters.status !== 'all' ? filters.status : undefined
       ),
     enabled: false,
-    keepPreviousData: true,
   });
 
   const { data: memberRequestsData, isLoading: isLoadingMembers, error: membersError } = useQuery({
@@ -52,8 +49,43 @@ export const useClubManagement = () => {
         filters.status !== 'all' ? filters.status : undefined
       ),
     enabled: false,
-    keepPreviousData: true,
   });
+
+  const fetchDataForTab = async (tab: string) => {
+    try {
+      if (tab === 'requests') {
+        const result = await queryClient.fetchQuery({
+          queryKey: ['clubRequests', page, filters, limit],
+          queryFn: () =>
+            clubService.getClubRequests(
+              page,
+              limit,
+              filters.status !== 'all' ? filters.status : undefined
+            ),
+          staleTime: 0,
+        });
+      } else if (tab === 'members') {
+        const result = await queryClient.fetchQuery({
+          queryKey: ['memberRequests', page, filters, limit],
+          queryFn: () =>
+            clubService.getMemberRequests(
+              page,
+              limit,
+              filters.status !== 'all' ? filters.status : undefined
+            ),
+          staleTime: 0,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching data for tab:', error);
+    }
+  };
+
+  const handleTabChange = (tab: string) => {
+    if (tab === 'requests' || tab === 'members') {
+      fetchDataForTab(tab);
+    }
+  };
 
   const { mutateAsync: createClub } = useMutation({
     mutationFn: (data: Omit<Club, 'id' | 'members'>) => clubService.createClub(data),
@@ -90,45 +122,83 @@ export const useClubManagement = () => {
   });
 
   const { mutateAsync: approveClubRequest } = useMutation({
-    mutationFn: (id: string) => clubService.approveClubRequest(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clubRequests', 'clubs'] });
+    mutationFn: async (id: string) => {
+      console.log('Approving club request:', id);
+      await clubService.approveClubRequest(id);
+    },
+    onSuccess: async () => {
+      console.log('Club request approved, invalidating queries...');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['clubRequests'] }),
+        queryClient.invalidateQueries({ queryKey: ['clubs'] })
+      ]);
+      console.log('Queries invalidated, refetching data...');
+      await fetchDataForTab('requests');
+      console.log('Data refetched');
       toast.success('Club request approved successfully');
     },
     onError: (error: any) => {
+      console.error('Error approving club request:', error);
       toast.error(error.message || 'Failed to approve club request');
     },
   });
 
   const { mutateAsync: rejectClubRequest } = useMutation({
-    mutationFn: (id: string) => clubService.rejectClubRequest(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clubRequests'] });
+    mutationFn: async (id: string) => {
+      console.log('Rejecting club request:', id);
+      await clubService.rejectClubRequest(id);
+    },
+    onSuccess: async () => {
+      console.log('Club request rejected, invalidating queries...');
+      await queryClient.invalidateQueries({ queryKey: ['clubRequests'] });
+      console.log('Queries invalidated, refetching data...');
+      await fetchDataForTab('requests');
+      console.log('Data refetched');
       toast.success('Club request rejected successfully');
     },
     onError: (error: any) => {
+      console.error('Error rejecting club request:', error);
       toast.error(error.message || 'Failed to reject club request');
     },
   });
 
   const { mutateAsync: approveMemberRequest } = useMutation({
-    mutationFn: (id: string) => clubService.approveMemberRequest(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['memberRequests', 'clubs'] });
+    mutationFn: async (id: string) => {
+      console.log('Approving member request:', id);
+      await clubService.approveMemberRequest(id);
+    },
+    onSuccess: async () => {
+      console.log('Member request approved, invalidating queries...');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['memberRequests'] }),
+        queryClient.invalidateQueries({ queryKey: ['clubs'] })
+      ]);
+      console.log('Queries invalidated, refetching data...');
+      await fetchDataForTab('members');
+      console.log('Data refetched');
       toast.success('Member request approved successfully');
     },
     onError: (error: any) => {
+      console.error('Error approving member request:', error);
       toast.error(error.message || 'Failed to approve member request');
     },
   });
 
   const { mutateAsync: rejectMemberRequest } = useMutation({
-    mutationFn: (id: string) => clubService.rejectMemberRequest(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['memberRequests'] });
+    mutationFn: async (id: string) => {
+      console.log('Rejecting member request:', id);
+      await clubService.rejectMemberRequest(id);
+    },
+    onSuccess: async () => {
+      console.log('Member request rejected, invalidating queries...');
+      await queryClient.invalidateQueries({ queryKey: ['memberRequests'] });
+      console.log('Queries invalidated, refetching data...');
+      await fetchDataForTab('members');
+      console.log('Data refetched');
       toast.success('Member request rejected successfully');
     },
     onError: (error: any) => {
+      console.error('Error rejecting member request:', error);
       toast.error(error.message || 'Failed to reject member request');
     },
   });
@@ -136,7 +206,7 @@ export const useClubManagement = () => {
   return {
     clubs: clubsData?.clubs || [],
     clubRequests: clubRequestsData?.clubs || [],
-    memberRequests: memberRequestsData?.clubs || [],
+    memberRequests: memberRequestsData?.memberRequests || [],
     totalPages: clubsData?.totalPages || 0,
     page,
     setPage,
@@ -151,5 +221,7 @@ export const useClubManagement = () => {
     rejectClubRequest,
     approveMemberRequest,
     rejectMemberRequest,
+    fetchDataForTab,
+    handleTabChange,
   };
 };

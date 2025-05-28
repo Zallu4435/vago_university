@@ -151,19 +151,14 @@ class SportsController {
 
   async getTeamRequests(req: Request, res: Response, next: NextFunction) {
     try {
-      const { page = '1', limit = '10', status = 'all' } = req.query;
-
-      console.log(`Received GET /api/admin/sports/team-requests with filters:`, {
-        page,
-        limit,
-        status,
-      });
+      const { page = '1', limit = '10', status = 'all', type = 'all' } = req.query;
 
       if (isNaN(Number(page)) || isNaN(Number(limit)) || Number(page) < 1 || Number(limit) < 1) {
         return res.status(400).json({ error: 'Invalid page or limit parameters', code: 400 });
       }
 
       const result = await getTeamRequests.execute({
+        type: String(type),
         page: Number(page),
         limit: Number(limit),
         status: String(status),
@@ -221,19 +216,15 @@ class SportsController {
 
   async getPlayerRequests(req: Request, res: Response, next: NextFunction) {
     try {
-      const { page = '1', limit = '10', status = 'all' } = req.query;
+      const { page = '1', limit = '10', status = 'all', type = 'all' } = req.query;
 
-      console.log(`Received GET /api/admin/sports/player-requests with filters:`, {
-        page,
-        limit,
-        status,
-      });
 
       if (isNaN(Number(page)) || isNaN(Number(limit)) || Number(page) < 1 || Number(limit) < 1) {
         return res.status(400).json({ error: 'Invalid page or limit parameters', code: 400 });
       }
 
       const result = await getPlayerRequests.execute({
+        type: String(type),
         page: Number(page),
         limit: Number(limit),
         status: String(status),
@@ -271,17 +262,12 @@ class SportsController {
   async rejectPlayerRequest(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const { reason } = req.body;
-      console.log(`Received POST /api/admin/sports/player-requests/${id}/reject with reason:`, reason);
 
       if (!mongoose.isValidObjectId(id)) {
         return res.status(400).json({ error: 'Invalid player request ID', code: 400 });
       }
-      if (!reason) {
-        return res.status(400).json({ error: 'Reason is required for rejection', code: 400 });
-      }
 
-      await rejectPlayerRequest.execute({ id, reason });
+      await rejectPlayerRequest.execute({ id });
       res.status(200).json({ message: 'Player request rejected successfully' });
     } catch (err) {
       console.error(`Error in rejectPlayerRequest:`, err);

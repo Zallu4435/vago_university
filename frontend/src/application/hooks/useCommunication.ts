@@ -79,8 +79,8 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
       message: '',
       attachments: [],
       isAdmin,
-    });
-  };
+  });
+};
 
   const handleDeleteMessage = (messageId: string, tab: 'inbox' | 'sent') => {
     deleteMessageMutation.mutate(messageId);

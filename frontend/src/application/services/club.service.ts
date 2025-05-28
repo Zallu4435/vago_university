@@ -60,9 +60,10 @@ class ClubService {
     status?: string
   ): Promise<ClubApiResponse> {
     try {
-      const response = await httpClient.get<ClubApiResponse>('/admin/clubs/club-requests', {
+      const response = await httpClient.get('/admin/clubs/club-requests', {
         params: { page, limit, status },
       });
+      console.log(response.data, 'response.data');
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch club requests');

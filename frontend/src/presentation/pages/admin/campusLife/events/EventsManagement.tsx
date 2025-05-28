@@ -1,20 +1,17 @@
 import React, { useState, useCallback } from 'react';
-import { 
+import {
   IoAdd as Plus,
   IoEyeOutline as Eye,
   IoCreateOutline as Edit,
   IoTrashOutline as Trash2,
   IoCalendarOutline as Calendar,
-  IoTimeOutline as Clock,
   IoLocationOutline as MapPin,
-  IoPeopleOutline as Users,
-  IoCheckmarkCircleOutline as CheckCircle,
-  IoCloseCircleOutline as XCircle,
   IoBusinessOutline as Building,
   IoSchoolOutline as GraduationCap,
   IoPersonOutline as User,
 } from 'react-icons/io5';
 import { debounce } from 'lodash';
+import toast from 'react-hot-toast';
 import Header from '../../User/Header';
 import ApplicationsTable from '../../User/ApplicationsTable';
 import Pagination from '../../User/Pagination';
@@ -36,7 +33,7 @@ const formatDate = (dateString: string): string => {
 };
 
 export interface Event {
-  id: string;
+  _id: string;
   name: string;
   date: string;
   time: string;
@@ -50,14 +47,14 @@ export interface Event {
   additionalInfo?: string;
   requirements?: string;
   status: string;
-  participants: number;
   maxParticipants: number;
   registrationRequired: boolean;
   createdAt: string;
+  organizer: string;
 }
 
 interface EventRequest {
-  id: string;
+  _id: string;
   eventName: string;
   requestedBy: string;
   requesterType: string;
@@ -70,17 +67,15 @@ interface EventRequest {
   expectedParticipants: number;
 }
 
-interface Participant {
-  id: string;
-  name: string;
-  studentId: string;
-  registeredAt: string;
+interface Filters {
+  [key: string]: string;
+  category: string;
   status: string;
 }
 
-const EVENT_TYPES = ['All Types', 'workshop', 'seminar', 'fest', 'competition', 'exhibition'];
-const STATUSES = ['All Statuses', 'upcoming', 'completed', 'cancelled', 'pending', 'approved', 'rejected'];
-const ORGANIZERS = ['All Organizers', 'department', 'club', 'student'];
+const EVENT_TYPES = ['All', 'Workshop', 'Seminar', 'Fest', 'Competition', 'Exhibition'];
+const STATUSES = ['All', 'Upcoming', 'Completed', 'Cancelled', 'Pending', 'Approved', 'Rejected'];
+const ORGANIZERS = ['All', 'Department', 'Club', 'Student'];
 
 const eventColumns = [
   {
@@ -96,19 +91,18 @@ const eventColumns = [
   },
   {
     header: 'Organizer',
-    key: 'organizer',
+    key: 'organizerType',
     render: (event: Event) => (
       <div className="flex items-center text-gray-300">
-        {event.organizerType === 'department' ? (
+        {event.organizerType.toLowerCase() === 'department' ? (
           <Building size={14} className="text-purple-400 mr-2" />
-        ) : event.organizerType === 'club' ? (
-          <Users size={14} className="text-purple-400 mr-2" />
+        ) : event.organizerType.toLowerCase() === 'club' ? (
+          <GraduationCap size={14} className="text-purple-400 mr-2" />
         ) : (
           <User size={14} className="text-purple-400 mr-2" />
         )}
         <div>
-          <p className="text-sm">{event.organizerType}</p>
-          <p className="text-xs text-gray-400 capitalize">{event.organizerType}</p>
+          <p className="text-sm capitalize">{event.organizerType}</p>
         </div>
       </div>
     ),
@@ -124,10 +118,10 @@ const eventColumns = [
     header: 'Date & Time',
     key: 'date',
     render: (event: Event) => (
-        <div className="flex items-center text-gray-300">
-          <Calendar size={14} className="text-purple-400 mr-2" />
-          <span className="text-sm">{formatDate(event.date)}</span>
-        </div>
+      <div className="flex items-center text-gray-300">
+        <Calendar size={14} className="text-purple-400 mr-2" />
+        <span className="text-sm">{formatDate(event.date)}</span>
+      </div>
     ),
   },
   {
@@ -136,7 +130,7 @@ const eventColumns = [
     render: (event: Event) => (
       <div className="flex items-center text-gray-300">
         <MapPin size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{event.location}</span>
+        <span className="text-sm">{event.venue}</span>
       </div>
     ),
   },
@@ -161,18 +155,6 @@ const eventColumns = [
       </span>
     ),
   },
-  {
-    header: 'Participants',
-    key: 'participants',
-    render: (event: Event) => (
-      <div className="flex items-center text-gray-300">
-        <Users size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">
-          {event.participants}/{event.maxParticipants}
-        </span>
-      </div>
-    ),
-  },
 ];
 
 const eventRequestColumns = [
@@ -182,7 +164,7 @@ const eventRequestColumns = [
     render: (request: EventRequest) => (
       <div>
         <p className="font-medium text-gray-200">{request.eventName}</p>
-        <p className="text-xs text-gray-400">ID: {request.id}</p>
+        <p className="text-xs text-gray-400">ID: {request.requestedId}</p>
       </div>
     ),
     width: '20%',
@@ -192,16 +174,16 @@ const eventRequestColumns = [
     key: 'requestedBy',
     render: (request: EventRequest) => (
       <div className="flex items-center text-gray-300">
-        {request.requesterType === 'department' ? (
+        {request.requesterType?.toLowerCase() === 'department' ? (
           <Building size={14} className="text-purple-400 mr-2" />
-        ) : request.requesterType === 'club' ? (
-          <Users size={14} className="text-purple-400 mr-2" />
+        ) : request.requesterType?.toLowerCase() === 'club' ? (
+          <GraduationCap size={14} className="text-purple-400 mr-2" />
         ) : (
           <User size={14} className="text-purple-400 mr-2" />
         )}
         <div>
           <p className="text-sm">{request.requestedBy}</p>
-          <p className="text-xs text-gray-400 capitalize">{request.requesterType}</p>
+          <p className="text-xs text-gray-400 capitalize">{request?.requesterType}</p>
         </div>
       </div>
     ),
@@ -219,17 +201,7 @@ const eventRequestColumns = [
     render: (request: EventRequest) => (
       <div className="flex items-center text-gray-300">
         <Calendar size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{request.proposedDate}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Venue',
-    key: 'proposedVenue',
-    render: (request: EventRequest) => (
-      <div className="flex items-center text-gray-300">
-        <MapPin size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{request.proposedVenue}</span>
+        <span className="text-sm">{formatDate(request.proposedDate)}</span>
       </div>
     ),
   },
@@ -256,57 +228,10 @@ const eventRequestColumns = [
   },
 ];
 
-const participantColumns = [
-  {
-    header: 'Student',
-    key: 'name',
-    render: (participant: Participant) => (
-      <div className="flex items-center">
-        <User size={14} className="text-purple-400 mr-2" />
-        <div>
-          <p className="font-medium text-gray-200">{participant.name}</p>
-          <p className="text-xs text-gray-400">{participant.studentId}</p>
-        </div>
-      </div>
-    ),
-    width: '20%',
-  },
-  {
-    header: 'Registered At',
-    key: 'registeredAt',
-    render: (participant: Participant) => (
-      <div className="flex items-center text-gray-300">
-        <Calendar size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{participant.registeredAt}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Status',
-    key: 'status',
-    render: (participant: Participant) => (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          participant.status === 'confirmed'
-            ? 'bg-green-900/30 text-green-400 border-green-500/30'
-            : 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
-        }`}
-      >
-        <span
-          className="h-1.5 w-1.5 rounded-full mr-1.5"
-          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
-        ></span>
-        {participant.status.charAt(0).toUpperCase() + participant.status.slice(1)}
-      </span>
-    ),
-  },
-];
-
 const AdminEventsManagement: React.FC = () => {
   const {
     events,
     eventRequests,
-    participants,
     totalPages,
     page,
     setPage,
@@ -319,19 +244,23 @@ const AdminEventsManagement: React.FC = () => {
     deleteEvent,
     approveEventRequest,
     rejectEventRequest,
-    approveParticipant,
-    rejectParticipant,
-    removeParticipant,
+    handleTabChange,
   } = useEventManagement();
 
-  const [activeTab, setActiveTab] = useState<'events' | 'requests' | 'participants'>('events');
+  const [activeTab, setActiveTab] = useState<'events' | 'requests'>('events');
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddEventModal, setShowAddEventModal] = useState(false);
   const [showEventDetailsModal, setShowEventDetailsModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | EventRequest | null>(null);
-  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<{ id: string; type: 'event' } | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const [showWarningModal, setShowWarningModal] = useState(false);
+  const [itemToAction, setItemToAction] = useState<{
+    id: string;
+    type: 'event' | 'eventRequest';
+    action: 'delete' | 'reject';
+  } | null>(null);
+
+  console.log(events, 'events');
+  console.log(eventRequests, 'eventRequests');
 
   const filteredEvents = events.filter((event) => {
     const matchesSearch = searchTerm
@@ -339,53 +268,34 @@ const AdminEventsManagement: React.FC = () => {
         event._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         event.organizerType.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
-    const matchesType =
-      filters.type === 'All Types' || event.type.toLowerCase() === filters.type.toLowerCase();
+    const matchesCategory =
+      filters.category === 'all' || event.type?.toLowerCase() === filters.category?.toLowerCase();
     const matchesStatus =
-      filters.status === 'All Statuses' || event.status.toLowerCase() === filters.status.toLowerCase();
-    const matchesOrganizer =
-      filters.organizer === 'All Organizers' ||
-      event.organizerType.toLowerCase() === filters.organizer.toLowerCase();
-    return matchesSearch && matchesType && matchesStatus && matchesOrganizer;
+      filters.status === 'All Statuses' || event.status?.toLowerCase() === filters.status?.toLowerCase();
+    return matchesSearch && matchesCategory && matchesStatus;
   });
 
   const filteredEventRequests = eventRequests.filter((request) => {
     const matchesSearch = searchTerm
-      ? request.eventName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.requestedBy.toLowerCase().includes(searchTerm.toLowerCase())
+      ? request.eventName?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+        request._id?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+        request.requestedBy?.toLowerCase().includes(searchTerm?.toLowerCase())
       : true;
-
-    const matchesType =
-      filters.type === 'All Types' || request.type.toLowerCase() === filters.type.toLowerCase();
+    const matchesCategory =
+      filters.organizer === 'All Organizers' || request.type?.toLowerCase() === filters.organizer?.toLowerCase();
     const matchesStatus =
-      filters.status === 'All Statuses' || request.status.toLowerCase() === filters.status.toLowerCase();
-    const matchesOrganizer =
-      filters.organizer === 'All Organizers' ||
-      request.requesterType.toLowerCase() === filters.organizer.toLowerCase();
-    return matchesSearch && matchesType && matchesStatus && matchesOrganizer;
-  });
-
-  const filteredParticipants = participants.filter((participant) => {
-    const matchesSearch = searchTerm
-      ? participant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        participant.studentId.toLowerCase().includes(searchTerm.toLowerCase())
-      : true;
-    const matchesStatus =
-      filters.status === 'All Statuses' ||
-      participant.status.toLowerCase() === filters.status.toLowerCase();
-    return matchesSearch && matchesStatus;
+      filters.status === 'All Statuses' || request.status?.toLowerCase() === filters.status?.toLowerCase();
+    console.log(matchesStatus, 'matchesStatus', filters.status);
+    return matchesSearch && matchesCategory && matchesStatus;
   });
 
   const handleAddEvent = () => {
-    setIsEditing(false);
     setSelectedEvent(null);
     setShowAddEventModal(true);
   };
 
   const handleEditEvent = (event: Event) => {
     setSelectedEvent(event);
-    setIsEditing(true);
     setShowAddEventModal(true);
   };
 
@@ -394,68 +304,70 @@ const AdminEventsManagement: React.FC = () => {
     setShowEventDetailsModal(true);
   };
 
-  const handleSaveEvent = async (data: any) => {
-
-    console.log('add datra', data);
+  const handleSaveEvent = async (data: Omit<Event, '_id' | 'createdAt'>) => {
     try {
-      if (isEditing && selectedEvent && 'id' in selectedEvent) {
-        await updateEvent({ id: selectedEvent.id, data });
+      if (selectedEvent && '_id' in selectedEvent) {
+        await updateEvent({ id: selectedEvent._id, data });
+        toast.success('Event updated successfully');
       } else {
         await createEvent(data);
+        toast.success('Event created successfully');
       }
       setShowAddEventModal(false);
       setSelectedEvent(null);
-      setIsEditing(false);
-    } catch (error) {
-      console.error('Error saving event:', error);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to save event');
     }
   };
 
   const handleDeleteEvent = (id: string) => {
-    setItemToDelete({ id, type: 'event' });
-    setShowDeleteWarning(true);
+    setItemToAction({ id, type: 'event', action: 'delete' });
+    setShowWarningModal(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (itemToDelete) {
-      deleteEvent(itemToDelete.id);
-      setShowDeleteWarning(false);
-      setItemToDelete(null);
+  const handleApproveEventRequest = async (id: string) => {
+    try {
+      await approveEventRequest(id);
+      toast.success('Event request approved');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to approve event request');
     }
   };
 
-  const handleApproveEventRequest = (id: string) => {
-    approveEventRequest(id);
-  };
-
   const handleRejectEventRequest = (id: string) => {
-    rejectEventRequest(id);
+    setItemToAction({ id, type: 'eventRequest', action: 'reject' });
+    setShowWarningModal(true);
   };
 
-  const handleApproveParticipant = (id: string) => {
-    approveParticipant(id);
-  };
-
-  const handleRejectParticipant = (id: string) => {
-    rejectParticipant(id);
-  };
-
-  const handleRemoveParticipant = (id: string) => {
-    removeParticipant(id);
+  const handleConfirmAction = async () => {
+    if (itemToAction) {
+      try {
+        if (itemToAction.type === 'event' && itemToAction.action === 'delete') {
+          await deleteEvent(itemToAction.id);
+          toast.success('Event deleted successfully');
+        } else if (itemToAction.type === 'eventRequest' && itemToAction.action === 'reject') {
+          await rejectEventRequest(itemToAction.id);
+          toast.success('Event request rejected');
+        }
+        setShowWarningModal(false);
+        setItemToAction(null);
+      } catch (error: any) {
+        toast.error(error.message || 'Failed to perform action');
+      }
+    }
   };
 
   const debouncedFilterChange = useCallback(
     debounce((field: string, value: string) => {
       setFilters((prev) => ({ ...prev, [field]: value }));
-    }, 1000),
+    }, 300),
     []
   );
 
   const handleResetFilters = () => {
     setFilters({
-      type: 'All Types',
-      status: 'All Statuses',
-      organizer: 'All Organizers',
+      category: 'All',
+      status: 'All',
     });
   };
 
@@ -482,47 +394,24 @@ const AdminEventsManagement: React.FC = () => {
 
   const eventRequestActions = [
     {
-      icon: <CheckCircle size={16} />,
-      label: 'Approve Request',
-      onClick: (request: EventRequest) => handleApproveEventRequest(request.id),
-      color: 'green' as const,
-      disabled: (request: EventRequest) => request.status !== 'pending',
-    },
-    {
-      icon: <XCircle size={16} />,
-      label: 'Reject Request',
-      onClick: (request: EventRequest) => handleRejectEventRequest(request.id),
-      color: 'red' as const,
-      disabled: (request: EventRequest) => request.status !== 'pending',
-    },
-    {
       icon: <Eye size={16} />,
       label: 'View Request',
       onClick: handleViewEvent,
       color: 'blue' as const,
     },
-  ];
-
-  const participantActions = [
     {
-      icon: <CheckCircle size={16} />,
-      label: 'Approve Participant',
-      onClick: (participant: Participant) => handleApproveParticipant(participant.id),
+      icon: <Edit size={16} />,
+      label: 'Approve Request',
+      onClick: (request: EventRequest) => handleApproveEventRequest(request._id),
       color: 'green' as const,
-      disabled: (participant: Participant) => participant.status !== 'pending',
-    },
-    {
-      icon: <XCircle size={16} />,
-      label: 'Reject Participant',
-      onClick: (participant: Participant) => handleRejectParticipant(participant.id),
-      color: 'red' as const,
-      disabled: (participant: Participant) => participant.status !== 'pending',
+      disabled: (request: EventRequest) => request.status !== 'pending',
     },
     {
       icon: <Trash2 size={16} />,
-      label: 'Remove Participant',
-      onClick: (participant: Participant) => handleRemoveParticipant(participant.id),
+      label: 'Reject Request',
+      onClick: (request: EventRequest) => handleRejectEventRequest(request._id),
       color: 'red' as const,
+      disabled: (request: EventRequest) => request.status !== 'pending',
     },
   ];
 
@@ -535,10 +424,10 @@ const AdminEventsManagement: React.FC = () => {
   }
 
   if (error) {
-  return (
+    return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-red-500">Error: {error.message}</div>
-        </div>
+      </div>
     );
   }
 
@@ -560,76 +449,70 @@ const AdminEventsManagement: React.FC = () => {
             }}
           />
         ))}
-        </div>
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         <Header
-          title="Events Management"
-          subtitle="Manage campus events, requests, and participants"
+          title="Event Management"
+          subtitle="Manage campus events and event requests"
           stats={[
             {
               icon: <Calendar />,
               title: 'Total Events',
-              value: events.length.toString(),
+              value: filteredEvents.length.toString(),
               change: '+10%',
               isPositive: true,
             },
             {
-              icon: <CheckCircle />,
+              icon: <Edit />,
               title: 'Pending Requests',
-              value: eventRequests.filter((r) => r.status === 'pending').length.toString(),
+              value: filteredEventRequests.filter((r) => r.status === 'pending').length.toString(),
               change: '+5%',
               isPositive: true,
             },
             {
-              icon: <Users />,
-              title: 'Total Participants',
-              value: participants.length.toString(),
-              change: '+15%',
-              isPositive: true,
-            },
-            {
-              icon: <GraduationCap />,
+              icon: <Calendar />,
               title: 'Upcoming Events',
-              value: events.filter((e) => e.status === 'upcoming').length.toString(),
+              value: filteredEvents.filter((e) => e.status === 'upcoming').length.toString(),
               change: '+8%',
               isPositive: true,
             },
           ]}
           tabs={[
             { label: 'Events', icon: <Calendar size={16} />, active: activeTab === 'events' },
-            { label: 'Requests', icon: <CheckCircle size={16} />, active: activeTab === 'requests' },
-            { label: 'Participants', icon: <Users size={16} />, active: activeTab === 'participants' },
+            { label: 'Event Requests', icon: <Edit size={16} />, active: activeTab === 'requests' },
           ]}
           searchQuery={searchTerm}
           setSearchQuery={setSearchTerm}
-          searchPlaceholder="Search events, requests, or participants..."
+          searchPlaceholder="Search events or requests..."
           filters={filters}
           filterOptions={{
-            type: EVENT_TYPES,
+            category: EVENT_TYPES,
             status: STATUSES,
-            organizer: ORGANIZERS,
           }}
           debouncedFilterChange={debouncedFilterChange}
           handleResetFilters={handleResetFilters}
           onTabClick={(index) => {
-            const tabMap = ['events', 'requests', 'participants'];
-            setActiveTab(tabMap[index] as 'events' | 'requests' | 'participants');
+            const tabMap = ['events', 'requests'];
+            const newTab = tabMap[index] as 'events' | 'requests';
+            setActiveTab(newTab);
+            handleTabChange(newTab);
           }}
         />
 
         <div className="mt-8">
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
             <div className="px-6 py-5">
-            {activeTab === 'events' && (
-              <button
+              {activeTab === 'events' && (
+                <button
                   onClick={handleAddEvent}
                   className="mb-4 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-              >
+                  aria-label="Add new event"
+                >
                   <Plus size={16} />
                   Add Event
-              </button>
-            )}
+                </button>
+              )}
 
               {activeTab === 'events' && filteredEvents.length > 0 && (
                 <>
@@ -661,31 +544,13 @@ const AdminEventsManagement: React.FC = () => {
                     onFirstPage={() => setPage(1)}
                     onLastPage={() => setPage(totalPages)}
                   />
-                                </>
-                              )}
-              {activeTab === 'participants' && filteredParticipants.length > 0 && (
-                <>
-                  <ApplicationsTable
-                    data={filteredParticipants}
-                    columns={participantColumns}
-                    actions={participantActions}
-                  />
-                  <Pagination
-                    page={page}
-                    totalPages={totalPages}
-                    itemsCount={filteredParticipants.length}
-                    itemName="participants"
-                    onPageChange={setPage}
-                    onFirstPage={() => setPage(1)}
-                    onLastPage={() => setPage(totalPages)}
-                  />
-                                  </>
-                                )}
+                </>
+              )}
               {activeTab === 'events' && filteredEvents.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <Calendar size={32} className="text-purple-400" />
-                              </div>
+                  </div>
                   <h3 className="text-lg font-medium text-white mb-1">No Events Found</h3>
                   <p className="text-gray-400 text-center max-w-sm">
                     There are no events matching your current filters. Try adjusting your search criteria.
@@ -695,55 +560,47 @@ const AdminEventsManagement: React.FC = () => {
               {activeTab === 'requests' && filteredEventRequests.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
-                    <CheckCircle size={32} className="text-purple-400" />
-            </div>
+                    <Edit size={32} className="text-purple-400" />
+                  </div>
                   <h3 className="text-lg font-medium text-white mb-1">No Event Requests Found</h3>
                   <p className="text-gray-400 text-center max-w-sm">
                     There are no event requests matching your current filters.
                   </p>
+                </div>
+              )}
+            </div>
           </div>
-        )}
-              {activeTab === 'participants' && filteredParticipants.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
-                    <Users size={32} className="text-purple-400" />
+        </div>
       </div>
-                  <h3 className="text-lg font-medium text-white mb-1">No Participants Found</h3>
-                  <p className="text-gray-400 text-center max-w-sm">
-                    There are no participants matching your current filters.
-                          </p>
-                        </div>
-                      )}
-                        </div>
-                    </div>
-                      </div>
-                      </div>
 
       <AddEventModal
         isOpen={showAddEventModal}
         onClose={() => {
           setShowAddEventModal(false);
           setSelectedEvent(null);
-          setIsEditing(false);
         }}
         onSubmit={handleSaveEvent}
-        initialData={isEditing && selectedEvent ? {
-          title: selectedEvent.name,
+        initialData={selectedEvent ? {
+          name: selectedEvent.name,
           date: selectedEvent.date,
           time: selectedEvent.time,
-          location: selectedEvent.location,
-          organizer: selectedEvent.organizerType,
-          timeframe: selectedEvent.type,
+          venue: selectedEvent.venue,
+          organizerType: selectedEvent.organizerType,
+          type: selectedEvent.type,
           icon: selectedEvent.icon,
           color: selectedEvent.color,
           description: selectedEvent.description,
           fullTime: selectedEvent.fullTime,
           additionalInfo: selectedEvent.additionalInfo,
           requirements: selectedEvent.requirements,
+          status: selectedEvent.status,
           maxParticipants: selectedEvent.maxParticipants,
           registrationRequired: selectedEvent.registrationRequired,
+          organizer: selectedEvent.organizer,
         } : undefined}
-        isEditing={isEditing}
+        isEditing={!!selectedEvent}
+        eventTypes={EVENT_TYPES.filter(type => type !== 'All')}
+        organizers={ORGANIZERS.filter(org => org !== 'All')}
       />
 
       <EventDetailsModal
@@ -754,19 +611,23 @@ const AdminEventsManagement: React.FC = () => {
       />
 
       <WarningModal
-        isOpen={showDeleteWarning}
+        isOpen={showWarningModal}
         onClose={() => {
-          setShowDeleteWarning(false);
-          setItemToDelete(null);
+          setShowWarningModal(false);
+          setItemToAction(null);
         }}
-        onConfirm={handleConfirmDelete}
-        title="Delete Event"
-        message={
-          itemToDelete
-            ? `Are you sure you want to delete this event? This action cannot be undone.`
-            : ''
+        onConfirm={handleConfirmAction}
+        title={
+          itemToAction?.type === 'event'
+            ? 'Delete Event'
+            : 'Reject Event Request'
         }
-        confirmText="Delete"
+        message={
+          itemToAction?.type === 'event'
+            ? 'Are you sure you want to delete this event? This action cannot be undone.'
+            : 'Are you sure you want to reject this event request?'
+        }
+        confirmText={itemToAction?.type === 'event' ? 'Delete' : 'Reject'}
         cancelText="Cancel"
         type="danger"
       />

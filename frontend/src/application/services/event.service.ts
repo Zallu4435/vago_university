@@ -63,11 +63,29 @@ class EventService {
     organizer?: string
   ): Promise<EventApiResponse> {
     try {
+      // Only include parameters that have values
+      const params: Record<string, string | number> = {
+        page,
+        limit
+      };
+
+      if (type && type !== 'All Types') {
+        params.type = type;
+      }
+      if (status && status !== 'All Statuses') {
+        params.status = status;
+      }
+      if (organizer && organizer !== 'All Organizers') {
+        params.organizer = organizer;
+      }
+
+      console.log('Fetching event requests with params:', params);
       const response = await httpClient.get<EventApiResponse>('/admin/events/requests', {
-        params: { page, limit, type, status, organizer },
+        params
       });
       return response.data;
     } catch (error: any) {
+      console.error('Error fetching event requests:', error.response?.data || error);
       throw new Error(error.response?.data?.error || 'Failed to fetch event requests');
     }
   }

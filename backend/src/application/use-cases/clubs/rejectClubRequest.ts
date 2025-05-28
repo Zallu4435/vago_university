@@ -6,10 +6,11 @@ interface RejectClubRequestParams {
 }
 
 class RejectClubRequest {
-  async execute({ id, reason }: RejectClubRequestParams): Promise<void> {
+  async execute({ id }: RejectClubRequestParams): Promise<void> {
     try {
-      console.log(`Executing rejectClubRequest use case with id:`, id, `and reason:`, reason);
+      console.log(`Executing rejectClubRequest use case with id:`, id, `and reason:`);
 
+      console.log(id, "qegfopieaqygdyo8eaqgduayigsdg")
       const clubRequest = await ClubRequestModel.findById(id).catch((err) => {
         throw new Error(`Failed to find club request: ${err.message}`);
       });
@@ -24,7 +25,7 @@ class RejectClubRequest {
 
       await ClubRequestModel.findByIdAndUpdate(
         id,
-        { status: 'rejected', rejectionReason: reason, updatedAt: Date.now() },
+        { status: 'rejected', updatedAt: Date.now() },
         { runValidators: true }
       ).catch((err) => {
         throw new Error(`Failed to update club request: ${err.message}`);

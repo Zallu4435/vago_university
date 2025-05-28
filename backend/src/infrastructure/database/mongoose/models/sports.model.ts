@@ -46,61 +46,29 @@ teamSchema.pre('save', function (next) {
   next();
 });
 
-const eventSchema = new Schema({
-  title: { type: String, required: true },
-  sportType: { type: String, required: true },
-  teams: [{ type: String, required: true }],
-  dateTime: { type: String, required: true },
-  venue: { type: String, required: true },
-  status: { type: String, required: true, enum: ['upcoming', 'completed', 'cancelled'] },
+
+
+
+
+const sportRequestSchema = new Schema({
+  sportId: { type: Schema.Types.ObjectId, ref: "Team", required: true },
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  status: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: "pending",
+    required: true,
+  },
+  whyJoin: { type: String, required: true, trim: true }, 
+  additionalInfo: { type: String, trim: true, default: "" },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
 
-// Update updatedAt on save
-eventSchema.pre('save', function (next) {
-  this.updatedAt = new Date();
-  next();
-});
+// ✅ Define indexes separately
+sportRequestSchema.index({ clubId: 1 });
+sportRequestSchema.index({ userId: 1 });
 
-const teamRequestSchema = new Schema({
-  teamName: { type: String, required: true },
-  sportType: { type: String, required: true },
-  requestedBy: { type: String, required: true },
-  reason: { type: String, required: true },
-  requestedAt: { type: String, required: true },
-  status: { type: String, required: true, enum: ['pending', 'approved', 'rejected'] },
-  rejectionReason: { type: String },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-});
-
-// Update updatedAt on save
-teamRequestSchema.pre('save', function (next) {
-  this.updatedAt = new Date();
-  next();
-});
-
-const playerRequestSchema = new Schema({
-  studentName: { type: String, required: true },
-  studentId: { type: String, required: true },
-  team: { type: String, required: true },
-  sport: { type: String, required: true },
-  reason: { type: String, required: true },
-  requestedAt: { type: String, required: true },
-  status: { type: String, required: true, enum: ['pending', 'approved', 'rejected'] },
-  rejectionReason: { type: String },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-});
-
-// Update updatedAt on save
-playerRequestSchema.pre('save', function (next) {
-  this.updatedAt = new Date();
-  next();
-});
 
 export const TeamModel = model('Team', teamSchema);
-export const EventModel = model('Event', eventSchema);
-export const TeamRequestModel = model('TeamRequest', teamRequestSchema);
-export const PlayerRequestModel = model('PlayerRequest', playerRequestSchema);
+export const SportRequestModel = model("SportRequest", sportRequestSchema);

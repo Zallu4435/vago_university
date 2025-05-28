@@ -8,8 +8,6 @@ interface RejectEventRequestParams {
 class RejectEventRequest {
   async execute({ id, reason }: RejectEventRequestParams): Promise<void> {
     try {
-      console.log(`Executing rejectEventRequest use case with id:`, id, `and reason:`, reason);
-
       const eventRequest = await EventRequestModel.findById(id).catch((err) => {
         throw new Error(`Failed to find event request: ${err.message}`);
       });
@@ -24,11 +22,16 @@ class RejectEventRequest {
 
       await EventRequestModel.findByIdAndUpdate(
         id,
-        { status: 'rejected', rejectionReason: reason, updatedAt: Date.now() },
+        {
+          status: 'rejected',
+          rejectionReason: reason,
+          updatedAt: Date.now(),
+        },
         { runValidators: true }
       ).catch((err) => {
         throw new Error(`Failed to update event request: ${err.message}`);
       });
+
     } catch (err) {
       console.error(`Error in rejectEventRequest use case:`, err);
       throw err;

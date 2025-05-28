@@ -18,10 +18,15 @@ export default function CampusLife() {
     eventsError,
     sportsError,
     clubsError
-  } = useCampusLife();
+  } = useCampusLife(activeTab);
 
   // Loading state
-  if (isLoadingEvents || isLoadingSports || isLoadingClubs) {
+  const isLoading = 
+    (activeTab === 'Events' && isLoadingEvents) ||
+    (activeTab === 'Clubs' && isLoadingClubs) ||
+    (activeTab === 'Athletics' && isLoadingSports);
+
+  if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-12">
         <div className="flex items-center justify-center h-64">
@@ -32,11 +37,16 @@ export default function CampusLife() {
   }
 
   // Error state
-  if (eventsError || sportsError || clubsError) {
+  const error = 
+    (activeTab === 'Events' && eventsError) ||
+    (activeTab === 'Clubs' && clubsError) ||
+    (activeTab === 'Athletics' && sportsError);
+
+  if (error) {
     return (
       <div className="container mx-auto px-4 py-12">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p>Error loading campus life data. Please try again later.</p>
+          <p>Error loading {activeTab.toLowerCase()} data. Please try again later.</p>
         </div>
       </div>
     );
@@ -47,7 +57,9 @@ export default function CampusLife() {
       <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-lg p-4 mb-4 shadow-md">
         <h2 className="text-xl font-bold text-gray-800">Campus Life</h2>
         <p className="text-gray-600">
-          {events.length} Upcoming Events | Spring 2025 | Club: {clubs.length} Memberships
+          {activeTab === 'Events' && `${events.length} Upcoming Events`}
+          {activeTab === 'Clubs' && `${clubs.length} Clubs Available`}
+          {activeTab === 'Athletics' && `${sports.length} Sports Teams`}
         </p>
       </div>
       <CampusLifeTabs activeTab={activeTab} setActiveTab={setActiveTab} />

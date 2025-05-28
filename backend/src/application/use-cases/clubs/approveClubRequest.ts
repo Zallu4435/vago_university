@@ -3,40 +3,46 @@ import { ClubRequestModel, ClubModel } from '../../../infrastructure/database/mo
 class ApproveClubRequest {
   async execute(id: string): Promise<void> {
     try {
-      console.log(`Executing approveClubRequest use case with id:`, id);
+      console.log(`[ApproveClubRequest] Executing with request ID: ${id}`);
 
-      const clubRequest = await ClubRequestModel.findById(id).catch((err) => {
-        throw new Error(`Failed to find club request: ${err.message}`);
-      });
-
+      // Fetch the request first
+      const clubRequest = await ClubRequestModel.findById(id).lean();
       if (!clubRequest) {
-        throw new Error('Club request not found');
+        throw new Error('Club request not found.');
       }
 
       if (clubRequest.status !== 'pending') {
-        throw new Error('Club request is not in pending status');
+        throw new Error('Only pending club requests can be approved.');
       }
 
-      await ClubModel.create({
-        name: clubRequest.name,
-        category: clubRequest.category,
-        description: clubRequest.description,
-        createdBy: clubRequest.createdBy,
-        status: 'active',
-      }).catch((err) => {
-        throw new Error(`Failed to create club: ${err.message}`);
-      });
-
-      await ClubRequestModel.findByIdAndUpdate(
+      // Approve the request
+      const updatedRequest = await ClubRequestModel.findByIdAndUpdate(
         id,
-        { status: 'approved', updatedAt: Date.now() },
-        { runValidators: true }
-      ).catch((err) => {
-        throw new Error(`Failed to update club request: ${err.message}`);
-      });
+        { status: 'approved', updatedAt: new Date() },
+        { new: true, runValidators: true }
+      );
+
+      if (!updatedRequest) {
+        throw new Error('Failed to update the club request.');
+      }
+
+      // Increment club's member count
+      const updatedClub = await ClubModel.findByIdAndUpdate(
+        clubRequest.clubId,
+        {
+          $inc: { enteredMembers: 1 },
+          updatedAt: new Date(),
+        },
+        { new: true, runValidators: true }
+      );
+
+      if (!updatedClub) {
+        throw new Error('Failed to update the club members count.');
+      }
+
     } catch (err) {
-      console.error(`Error in approveClubRequest use case:`, err);
-      throw err;
+      console.error(`[ApproveClubRequest] Error:`, err);
+      throw new Error(`ApproveClubRequest failed: ${err.message}`);
     }
   }
 }

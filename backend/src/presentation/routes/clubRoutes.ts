@@ -3,6 +3,10 @@ import { clubController } from '../controllers/clubController';
 
 const router = Router();
 
+router.get('/club-requests', clubController.getClubRequests);
+router.post('/club-requests/:id/approve', clubController.approveClubRequest);
+router.post('/club-requests/:id/reject', clubController.rejectClubRequest);
+
 // Club management routes
 router.get('/', clubController.getClubs);
 router.get('/:id', clubController.getClubById);
@@ -11,9 +15,6 @@ router.put('/:id', clubController.updateClub);
 router.delete('/:id', clubController.deleteClub);
 
 // Club request management routes
-router.get('/club-requests', clubController.getClubRequests);
-router.post('/club-requests/:id/approve', clubController.approveClubRequest);
-router.post('/club-requests/:id/reject', clubController.rejectClubRequest);
 
 // Member request management routes
 router.get('/member-requests', clubController.getMemberRequests);

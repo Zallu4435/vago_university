@@ -87,7 +87,7 @@ const MessageDetailsModal: React.FC<MessageDetailsModalProps> = ({
                 {message.recipients && (
                   <div className="mt-3">
                     <span className="font-medium text-gray-300">Recipients:</span>
-                    <p className="text-white">{message.recipients}</p>
+                    <p className="text-white">{message.recipientsCount}</p>
                   </div>
                 )}
               </div>
@@ -115,7 +115,7 @@ const MessageDetailsModal: React.FC<MessageDetailsModalProps> = ({
             </div>
 
             <div className="flex justify-between items-center mt-6">
-              <div className="flex space-x-3">
+              <div className="flex space-x-3">  
                 {message.from && (
                   <button
                     onClick={onReply}

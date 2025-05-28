@@ -1,8 +1,62 @@
 import { useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
+import { useCourseRegistration } from '../../../../application/hooks/useAcademic';
+import CourseDetailsModal from './CourseDetailsModal';
 
-export default function CourseRegistration({ courses, enrolledCredits, waitlistedCredits }) {
+interface Course {
+  id: number;
+  title: string;
+  specialization: string;
+  faculty: string;
+  credits: number;
+  schedule: string;
+  maxEnrollment: number;
+  currentEnrollment: number;
+  description?: string;
+  prerequisites?: string[];
+}
+
+interface CourseRegistrationProps {
+  courses: Course[];
+  enrolledCredits: number;
+  waitlistedCredits: number;
+}
+
+interface EnrollmentData {
+  term: string;
+  section: string;
+  reason: string;
+}
+
+export default function CourseRegistration({ courses, enrolledCredits, waitlistedCredits }: CourseRegistrationProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { registerForCourse, isRegistering } = useCourseRegistration();
+
+  const handleEnrollClick = (course: Course) => {
+    setSelectedCourse(course);
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmEnrollment = async (enrollmentData: EnrollmentData) => {
+    if (selectedCourse) {
+      try {
+        console.log(selectedCourse , 'kaopijoihUSDHaihb')
+        await registerForCourse({
+          courseId: selectedCourse._id,
+          term: enrollmentData.term,
+          section: enrollmentData.section,
+          reason: enrollmentData.reason
+        });
+        setIsModalOpen(false);
+        setSelectedCourse(null);
+      } catch (error) {
+        console.error('Failed to enroll in course:', error);
+        // You might want to show an error message to the user here
+      }
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 mt-6">
@@ -79,13 +133,16 @@ export default function CourseRegistration({ courses, enrolledCredits, waitliste
               <tbody>
                 {courses.map((course) => (
                   <tr key={course.id} className="border-b border-amber-100 hover:bg-amber-50">
-                    <td className="py-3 px-4 text-gray-800 font-medium">{course.code}</td>
+                    <td className="py-3 px-4 text-gray-800 font-medium">{course.specialization}</td>
                     <td className="py-3 px-4 text-gray-600">{course.title}</td>
                     <td className="py-3 px-4 text-gray-600">{course.credits}</td>
-                    <td className="py-3 px-4 text-gray-600">{course.instructor}</td>
+                    <td className="py-3 px-4 text-gray-600">{course.faculty}</td>
                     <td className="py-3 px-4 text-gray-600">{course.schedule}</td>
                     <td className="py-3 px-4 text-center">
-                      <button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-1 px-3 rounded-md transition duration-200 text-sm">
+                      <button 
+                        onClick={() => handleEnrollClick(course)}
+                        className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-1 px-3 rounded-md transition duration-200 text-sm"
+                      >
                         Add
                       </button>
                     </td>
@@ -96,6 +153,19 @@ export default function CourseRegistration({ courses, enrolledCredits, waitliste
           </div>
         </div>
       </div>
+
+      {selectedCourse && (
+        <CourseDetailsModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedCourse(null);
+          }}
+          onConfirm={handleConfirmEnrollment}
+          course={selectedCourse}
+          isEnrolling={isRegistering}
+        />
+      )}
     </div>
   );
 }

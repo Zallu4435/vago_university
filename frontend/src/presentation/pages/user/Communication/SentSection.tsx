@@ -1,131 +1,136 @@
 import { useState } from 'react';
-import { FaSearch, FaChevronRight, FaReply, FaShareSquare } from 'react-icons/fa';
-import PropTypes from 'prop-types';
+import { useCommunicationManagement } from '../../../../application/hooks/useCommunication';
+import { Message } from '../../../../domain/types/communication';
+import ComposeMessageModal from './ComposeMessageModal';
 
-export default function SentSection({ messages }) {
-  const [selectedMessage, setSelectedMessage] = useState(messages[0]);
+export default function SentSection() {
+  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [isComposing, setIsComposing] = useState(false);
+  const {
+    sentMessages,
+    isLoadingSent,
+    handleDeleteMessage,
+    handleSendMessage
+  } = useCommunicationManagement();
+
+  const handleMessageClick = (message: Message) => {
+    setSelectedMessage(message);
+  };
+
+  const handleDelete = (messageId: string) => {
+    handleDeleteMessage(messageId, 'sent');
+    if (selectedMessage?.id === messageId) {
+      setSelectedMessage(null);
+    }
+  };
+
+  if (isLoadingSent) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg p-4 mb-4 text-white shadow-lg">
-        <div className="flex justify-between items-center">
-          <h3 className="text-xl font-bold">Sent Messages</h3>
-          <span className="bg-amber-200 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">Spring 2025</span>
-        </div>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-gray-800">Sent Messages</h2>
+        <button
+          onClick={() => setIsComposing(true)}
+          className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+        >
+          Compose Message
+        </button>
       </div>
-      <div className="flex flex-col md:flex-row">
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Message List */}
-        <div className="w-full md:w-1/3 border-r border-amber-200">
-          <div className="p-2">
-            <div className="relative">
-              <FaSearch className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-              <input
-                className="w-full pl-10 pr-4 py-2 rounded-md border border-amber-300 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
-                placeholder="Search sent messages..."
-              />
-            </div>
+        <div className="md:col-span-1 bg-white rounded-lg shadow-lg overflow-hidden">
+          <div className="p-4 border-b border-gray-200">
+            <h2 className="text-xl font-semibold">Sent Messages</h2>
           </div>
-          <div className="divide-y divide-amber-100">
-            {messages.map((message) => (
+          <div className="divide-y divide-gray-200">
+            {sentMessages.map((message) => (
               <div
                 key={message.id}
-                className={`p-3 cursor-pointer hover:bg-amber-100 flex ${
-                  selectedMessage.id === message.id ? 'bg-amber-100' : ''
+                className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors duration-150 ${
+                  selectedMessage?.id === message.id ? 'bg-orange-50' : ''
                 }`}
-                onClick={() => setSelectedMessage(message)}
+                onClick={() => handleMessageClick(message)}
               >
-                <div className={`w-8 h-8 rounded-full ${message.color} text-white flex items-center justify-center mr-3 flex-shrink-0`}>
-                  {message.icon}
-                </div>
-                <div className="flex-grow min-w-0">
-                  <div className="flex justify-between">
-                    <span className="font-medium text-gray-800">{message.recipient}</span>
-                    <span className="text-xs text-gray-500">{message.date}</span>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-medium text-gray-900">{message.subject}</h3>
+                    <p className="text-sm text-gray-500 truncate">{message.content}</p>
                   </div>
-                  <p className="text-sm text-gray-600 truncate">{message.subject}</p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(message.id);
+                    }}
+                    className="text-gray-400 hover:text-red-500 transition-colors duration-150"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <div className="mt-2 flex justify-between items-center text-sm text-gray-500">
+                  <span>To: {message.recipients.map((r) => r.name).join(', ')}</span>
+                  <span>{new Date(message.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-        {/* Message Detail */}
-        <div className="w-full md:w-2/3 p-4">
-          <div className="mb-4">
-            <div className="flex items-center mb-2">
-              <div className={`w-10 h-10 rounded-full ${selectedMessage.color} text-white flex items-center justify-center mr-3`}>
-                {selectedMessage.icon}
-              </div>
-              <div>
-                <h4 className="font-medium text-lg text-gray-800">{selectedMessage.recipient}</h4>
-                <div className="text-sm text-gray-500 flex items-center">
-                  <span>{selectedMessage.email}</span>
-                  <span className="mx-2">•</span>
-                  <span>{selectedMessage.date} {selectedMessage.time}</span>
-                </div>
-              </div>
-            </div>
-            <h3 className="text-xl font-semibold text-orange-700 mb-3">{selectedMessage.subject}</h3>
-            <div className="bg-amber-50 p-4 rounded-lg border-l-4 border-orange-500 mb-4">
-              {selectedMessage.content.map((paragraph, index) => (
-                <p key={index} className="mb-3">{paragraph}</p>
-              ))}
-            </div>
-            {selectedMessage.reply && (
-              <div className="bg-amber-100 p-3 rounded-lg flex items-start border border-amber-200 mb-4">
-                <FaReply className="h-5 w-5 text-orange-600 mr-2 mt-0.5" />
-                <div>
-                  <p className="text-sm text-orange-800 font-medium">{selectedMessage.reply.title}</p>
-                  <p className="text-sm text-gray-600">{selectedMessage.reply.content}</p>
-                </div>
-              </div>
+            {sentMessages.length === 0 && (
+              <div className="p-4 text-center text-gray-500">No messages found</div>
             )}
           </div>
-          <div className="border-t border-amber-200 pt-4">
-            <div className="flex justify-between mb-3">
-              <h4 className="text-gray-700 font-medium">Reply</h4>
-              <div className="flex space-x-2">
-                <button className="bg-amber-200 hover:bg-amber-300 text-gray-700 px-3 py-1 rounded-md text-sm flex items-center">
-                  <FaShareSquare className="h-4 w-4 mr-1" /> Forward
-                </button>
-                <button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-3 py-1 rounded-md text-sm flex items-center">
-                  <FaReply className="h-4 w-4 mr-1" /> Reply
-                </button>
+        </div>
+
+        {/* Message Details */}
+        <div className="md:col-span-2 bg-white rounded-lg shadow-lg overflow-hidden">
+          {selectedMessage ? (
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedMessage.subject}</h2>
+                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                    <span>From: {selectedMessage.sender.name}</span>
+                    <span>To: {selectedMessage.recipients.map(r => r.name).join(', ')}</span>
+                  </div>
+                </div>
+                <div className="text-sm text-gray-500">
+                  {new Date(selectedMessage.createdAt).toLocaleString()}
+                </div>
+              </div>
+              <div className="prose max-w-none">
+                <p className="text-gray-700 whitespace-pre-wrap">{selectedMessage.content}</p>
               </div>
             </div>
-            <textarea
-              className="w-full border border-amber-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-orange-500 h-24 text-sm"
-              placeholder="Type your reply here..."
-              defaultValue={selectedMessage.replyDraft || ''}
-            ></textarea>
-            <div className="flex justify-end mt-2">
-              <button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-2 rounded-md flex items-center">
-                Send Response <FaChevronRight className="ml-1 h-4 w-4" />
-              </button>
+          ) : (
+            <div className="flex items-center justify-center h-64 text-gray-500">
+              Select a message to view its details
             </div>
-          </div>
+          )}
         </div>
       </div>
-    </>
+
+      <ComposeMessageModal 
+        isOpen={isComposing} 
+        onClose={() => setIsComposing(false)}
+        onSend={handleSendMessage}
+      />
+    </div>
   );
 }
-
-SentSection.propTypes = {
-  messages: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      recipient: PropTypes.string.isRequired,
-      email: PropTypes.string.isRequired,
-      subject: PropTypes.string.isRequired,
-      date: PropTypes.string.isRequired,
-      time: PropTypes.string.isRequired,
-      content: PropTypes.arrayOf(PropTypes.string).isRequired,
-      icon: PropTypes.string.isRequired,
-      color: PropTypes.string.isRequired,
-      reply: PropTypes.shape({
-        title: PropTypes.string.isRequired,
-        content: PropTypes.string.isRequired,
-      }),
-      replyDraft: PropTypes.string,
-    })
-  ).isRequired,
-};

@@ -1,46 +1,46 @@
-import { Schema, model, models } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
-const inboxMessageSchema = new Schema({
-  id: { type: String, required: true, unique: true },
-  from: { type: String, required: true },
-  email: { type: String, required: true },
-  subject: { type: String, required: true },
-  date: { type: String, required: true },
-  time: { type: String, required: true },
-  status: { type: String, required: true, enum: ['unread', 'read'] },
-  content: { type: String, required: true },
-  recipientId: { type: String, required: true },
-  thread: [{
-    id: { type: String, required: true },
-    from: { type: String, required: true },
-    content: { type: String, required: true },
-    date: { type: String, required: true },
-    time: { type: String, required: true },
+export interface IMessage extends Document {
+  subject: string;
+  content: string;
+  sender: {
+    _id: mongoose.Types.ObjectId;
+    name: string;
+    email: string;
+    role: string;
+  };
+  recipients: Array<{
+    _id: mongoose.Types.ObjectId;
+    name: string;
+    email: string;
+    role: string;
+    status: 'read' | 'unread';
+  }>;
+  isBroadcast: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const MessageSchema = new Schema<IMessage>({
+  subject: { type: String, required: true, trim: true },
+  message: { type: String, required: true, trim: true },
+  sender: {
+    _id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    name: { type: String, required: true, trim: true },
+    email: { type: String, required: true, trim: true },
+    role: { type: String, required: true, trim: true },
+  },
+  recipients: [{
+    _id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    name: { type: String, required: true, trim: true },
+    email: { type: String, required: true, trim: true },
+    role: { type: String, required: true, trim: true },
+    status: { type: String, enum: ['read', 'unread'], default: 'unread' },
   }],
-  isArchived: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now },
-});
+  isBroadcast: { type: Boolean, default: false },
+}, { timestamps: true });
 
-const sentMessageSchema = new Schema({
-  id: { type: String, required: true, unique: true },
-  to: { type: String, required: true },
-  subject: { type: String, required: true },
-  date: { type: String, required: true },
-  time: { type: String, required: true },
-  status: { type: String, required: true, enum: ['delivered', 'opened'] },
-  content: { type: String, required: true },
-  recipients: { type: Number, required: true },
-  senderId: { type: String, required: true },
-  attachments: [{
-    public_id: { type: String, required: true },
-    secure_url: { type: String, required: true },
-    filename: { type: String, required: true },
-    format: { type: String, required: true },
-    bytes: { type: Number, required: true },
-  }],
-  createdAt: { type: Date, default: Date.now },
-});
+MessageSchema.index({ 'sender._id': 1, createdAt: -1 });
+MessageSchema.index({ 'recipients._id': 1, 'recipients.status': 1, createdAt: -1 });
 
-// Prevent model overwriting
-export const InboxMessageModel = models.InboxMessage || model('InboxMessage', inboxMessageSchema);
-export const SentMessageModel = models.SentMessage || model('SentMessage', sentMessageSchema);
+export const MessageModel = mongoose.models.Message || mongoose.model<IMessage>('Message', MessageSchema);

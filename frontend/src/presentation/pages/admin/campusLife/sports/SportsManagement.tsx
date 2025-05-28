@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import {
+import { 
   IoAdd as Plus,
   IoEyeOutline as Eye,
   IoCreateOutline as Edit,
@@ -226,7 +226,7 @@ const eventColumns = [
           style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
         ></span>
         {event.status}
-      </span>
+        </span>
     ),
   },
 ];
@@ -239,7 +239,7 @@ const teamRequestColumns = [
       <div>
         <p className="font-medium text-gray-200">{request.teamName}</p>
         <p className="text-xs text-gray-400">ID: {request.id}</p>
-      </div>
+            </div>
     ),
     width: '20%',
   },
@@ -250,7 +250,7 @@ const teamRequestColumns = [
       <div className="flex items-center text-gray-300">
         <Trophy size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{request.sportType}</span>
-      </div>
+          </div>
     ),
   },
   {
@@ -260,7 +260,7 @@ const teamRequestColumns = [
       <div className="flex items-center text-gray-300">
         <User size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{request.requestedBy}</span>
-      </div>
+        </div>
     ),
   },
   {
@@ -308,10 +308,10 @@ const playerRequestColumns = [
     header: 'Student',
     key: 'studentName',
     render: (request: PlayerRequest) => (
-      <div>
+                    <div>
         <p className="font-medium text-gray-200">{request.studentName}</p>
         <p className="text-xs text-gray-400">{request.studentId}</p>
-      </div>
+                    </div>
     ),
     width: '20%',
   },
@@ -322,7 +322,7 @@ const playerRequestColumns = [
       <div className="flex items-center text-gray-300">
         <Users size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{request.team}</span>
-      </div>
+                  </div>
     ),
   },
   {
@@ -332,7 +332,7 @@ const playerRequestColumns = [
       <div className="flex items-center text-gray-300">
         <Trophy size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{request.sport}</span>
-      </div>
+                  </div>
     ),
   },
   {
@@ -493,7 +493,7 @@ const AdminSportsManagement: React.FC = () => {
       } else {
         await createTeam(data);
       }
-      setShowAddTeamModal(false);
+                setShowAddTeamModal(false);
       setSelectedTeam(null);
       setIsEditing(false);
     } catch (error) {
@@ -660,7 +660,7 @@ const AdminSportsManagement: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-      </div>
+            </div>
     );
   }
 
@@ -668,7 +668,7 @@ const AdminSportsManagement: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-red-500">Error: {error.message}</div>
-      </div>
+            </div>
     );
   }
 
@@ -690,8 +690,8 @@ const AdminSportsManagement: React.FC = () => {
             }}
           />
         ))}
-      </div>
-
+            </div>
+            
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         <Header
           title="Sports Management"
@@ -759,22 +759,22 @@ const AdminSportsManagement: React.FC = () => {
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
             <div className="px-6 py-5">
               {activeTab === 'teams' && (
-                <button
+            <button
                   onClick={handleAddTeam}
                   className="mb-4 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                >
+            >
                   <Plus size={16} />
                   Add Team
-                </button>
+            </button>
               )}
               {activeTab === 'events' && (
-                <button
+            <button
                   onClick={() => setShowEventModal(true)}
                   className="mb-4 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                 >
                   <Calendar size={16} />
-                  Schedule Event
-                </button>
+              Schedule Event
+            </button>
               )}
 
               {activeTab === 'teams' && filteredTeams.length > 0 && (
@@ -810,7 +810,7 @@ const AdminSportsManagement: React.FC = () => {
                 </>
               )}
               {activeTab === 'requests' && (
-                <div className="space-y-6">
+          <div className="space-y-6">
                   {filteredTeamRequests.length > 0 && (
                     <>
                       <h3 className="text-lg font-medium text-white">Team Creation Requests</h3>
@@ -853,36 +853,36 @@ const AdminSportsManagement: React.FC = () => {
                     <div className="flex flex-col items-center justify-center py-12">
                       <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                         <CheckCircle size={32} className="text-purple-400" />
-                      </div>
+        </div>
                       <h3 className="text-lg font-medium text-white mb-1">No Requests Found</h3>
                       <p className="text-gray-400 text-center max-w-sm">
                         There are no team or player requests matching your current filters.
-                      </p>
-                    </div>
+                </p>
+              </div>
                   )}
-                </div>
+              </div>
               )}
               {activeTab === 'teams' && filteredTeams.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <Users size={32} className="text-purple-400" />
-                  </div>
+            </div>
                   <h3 className="text-lg font-medium text-white mb-1">No Teams Found</h3>
                   <p className="text-gray-400 text-center max-w-sm">
                     There are no teams matching your current filters. Try adjusting your search criteria.
-                  </p>
-                </div>
+                </p>
+              </div>
               )}
               {activeTab === 'events' && filteredEvents.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <Calendar size={32} className="text-purple-400" />
-                  </div>
+              </div>
                   <h3 className="text-lg font-medium text-white mb-1">No Events Found</h3>
                   <p className="text-gray-400 text-center max-w-sm">
                     There are no events matching your current filters. Try adjusting your search criteria.
-                  </p>
-                </div>
+                </p>
+              </div>
               )}
             </div>
           </div>

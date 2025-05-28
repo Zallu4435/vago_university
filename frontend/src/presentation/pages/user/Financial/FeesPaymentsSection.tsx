@@ -1,16 +1,34 @@
 import { useState } from 'react';
-import PropTypes from 'prop-types';
+import { useFinancial } from '../../../../application/hooks/useFinancial';
+import { PaymentForm } from '../../../../domain/types/financial';
 
-export default function FeesPaymentsSection({ studentInfo, currentCharges, paymentHistory }) {
-  const [paymentAmount, setPaymentAmount] = useState('3450.00');
-  const [paymentMethod, setPaymentMethod] = useState('credit');
+interface FeesPaymentsSectionProps {
+  studentInfo: any;
+  currentCharges: any[];
+  paymentHistory: any[];
+}
+
+export default function FeesPaymentsSection({ studentInfo, currentCharges, paymentHistory }: FeesPaymentsSectionProps) {
+  const { makePayment, loading, error } = useFinancial();
+  const [paymentAmount, setPaymentAmount] = useState(studentInfo?.accountBalance || 0);
+  const [paymentMethod, setPaymentMethod] = useState<'Credit Card' | 'Bank Transfer' | 'Financial Aid'>('Credit Card');
 
   const totalDue = () => {
     let total = 0;
     currentCharges.forEach((charge) => {
-      total += parseFloat(charge.amount.replace('$', '').replace(',', ''));
+      total += charge.amount;
     });
-    return total.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    return total;
+  };
+
+  const handlePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const payment: PaymentForm = {
+      amount: paymentAmount,
+      method: paymentMethod,
+      term: studentInfo?.term || 'Spring 2025'
+    };
+    await makePayment(payment);
   };
 
   return (
@@ -21,6 +39,7 @@ export default function FeesPaymentsSection({ studentInfo, currentCharges, payme
           <span className="bg-amber-200 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">Spring 2025</span>
         </div>
       </div>
+
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Current Charges */}
@@ -35,12 +54,12 @@ export default function FeesPaymentsSection({ studentInfo, currentCharges, payme
                       className={index !== currentCharges.length - 1 ? 'border-b border-amber-200' : ''}
                     >
                       <td className="py-3 text-orange-800">{charge.description}</td>
-                      <td className="py-3 text-right text-orange-800 font-medium">{charge.amount}</td>
+                      <td className="py-3 text-right text-orange-800 font-medium">${charge.amount.toLocaleString()}</td>
                     </tr>
                   ))}
                   <tr className="border-t-2 border-amber-300">
                     <td className="py-3 text-orange-800 font-semibold">Total Due</td>
-                    <td className="py-3 text-right text-orange-800 font-bold">{totalDue()}</td>
+                    <td className="py-3 text-right text-orange-800 font-bold">${totalDue().toLocaleString()}</td>
                   </tr>
                 </tbody>
               </table>
@@ -50,64 +69,82 @@ export default function FeesPaymentsSection({ studentInfo, currentCharges, payme
           <div>
             <h4 className="text-lg font-semibold text-orange-800 mb-4 border-b border-amber-200 pb-2">Make a Payment</h4>
             <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
-              <div className="mb-4">
-                <label htmlFor="paymentAmount" className="block text-orange-800 font-medium mb-1">
-                  Payment Amount: $
-                </label>
-                <input
-                  type="text"
-                  id="paymentAmount"
-                  className="w-full border border-amber-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  value={paymentAmount}
-                  onChange={(e) => setPaymentAmount(e.target.value)}
-                />
-              </div>
-              <div className="mb-4">
-                <p className="block text-orange-800 font-medium mb-2">Payment Method:</p>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <label className="flex items-center text-orange-800">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="credit"
-                      checked={paymentMethod === 'credit'}
-                      onChange={() => setPaymentMethod('credit')}
-                      className="mr-2 accent-orange-500"
-                    />
-                    Credit Card
-                  </label>
-                  <label className="flex items-center text-orange-800">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="bank"
-                      checked={paymentMethod === 'bank'}
-                      onChange={() => setPaymentMethod('bank')}
-                      className="mr-2 accent-orange-500"
-                    />
-                    Bank Transfer
-                  </label>
-                  <label className="flex items-center text-orange-800">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="aid"
-                      checked={paymentMethod === 'aid'}
-                      onChange={() => setPaymentMethod('aid')}
-                      className="mr-2 accent-orange-500"
-                    />
-                    Financial Aid
-                  </label>
+              {error && (
+                <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+                  {error}
                 </div>
-              </div>
-              <div className="flex justify-between gap-2">
-                <button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2 px-4 rounded-md transition duration-200 flex-grow">
-                  Proceed to Payment
-                </button>
-                <button className="bg-amber-600 hover:bg-amber-700 text-white py-2 px-4 rounded-md transition duration-200">
-                  Pay Full
-                </button>
-              </div>
+              )}
+              <form onSubmit={handlePayment}>
+                <div className="mb-4">
+                  <label htmlFor="paymentAmount" className="block text-orange-800 font-medium mb-1">
+                    Payment Amount: $
+                  </label>
+                  <input
+                    type="number"
+                    id="paymentAmount"
+                    className="w-full border border-amber-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(parseFloat(e.target.value))}
+                    required
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                <div className="mb-4">
+                  <p className="block text-orange-800 font-medium mb-2">Payment Method:</p>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <label className="flex items-center text-orange-800">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="Credit Card"
+                        checked={paymentMethod === 'Credit Card'}
+                        onChange={() => setPaymentMethod('Credit Card')}
+                        className="mr-2 accent-orange-500"
+                      />
+                      Credit Card
+                    </label>
+                    <label className="flex items-center text-orange-800">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="Bank Transfer"
+                        checked={paymentMethod === 'Bank Transfer'}
+                        onChange={() => setPaymentMethod('Bank Transfer')}
+                        className="mr-2 accent-orange-500"
+                      />
+                      Bank Transfer
+                    </label>
+                    <label className="flex items-center text-orange-800">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="Financial Aid"
+                        checked={paymentMethod === 'Financial Aid'}
+                        onChange={() => setPaymentMethod('Financial Aid')}
+                        className="mr-2 accent-orange-500"
+                      />
+                      Financial Aid
+                    </label>
+                  </div>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2 px-4 rounded-md transition duration-200 flex-grow disabled:opacity-50"
+                  >
+                    {loading ? 'Processing...' : 'Proceed to Payment'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentAmount(totalDue())}
+                    className="bg-amber-600 hover:bg-amber-700 text-white py-2 px-4 rounded-md transition duration-200"
+                  >
+                    Pay Full
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
@@ -133,7 +170,7 @@ export default function FeesPaymentsSection({ studentInfo, currentCharges, payme
                     <td className="py-3 px-4 text-orange-900">{payment.date}</td>
                     <td className="py-3 px-4 text-orange-800">{payment.description}</td>
                     <td className="py-3 px-4 text-orange-800">{payment.method}</td>
-                    <td className="py-3 px-4 text-right text-orange-800 font-medium">{payment.amount}</td>
+                    <td className="py-3 px-4 text-right text-orange-800 font-medium">${payment.amount.toLocaleString()}</td>
                     <td className="py-3 px-4 text-center">
                       <button className="text-orange-600 hover:text-orange-800 underline">View</button>
                     </td>
@@ -147,27 +184,3 @@ export default function FeesPaymentsSection({ studentInfo, currentCharges, payme
     </>
   );
 }
-
-FeesPaymentsSection.propTypes = {
-  studentInfo: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    accountBalance: PropTypes.string.isRequired,
-    paymentDueDate: PropTypes.string.isRequired,
-    financialAidStatus: PropTypes.string.isRequired,
-  }).isRequired,
-  currentCharges: PropTypes.arrayOf(
-    PropTypes.shape({
-      description: PropTypes.string.isRequired,
-      amount: PropTypes.string.isRequired,
-    })
-  ).isRequired,
-  paymentHistory: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      date: PropTypes.string.isRequired,
-      description: PropTypes.string.isRequired,
-      method: PropTypes.string.isRequired,
-      amount: PropTypes.string.isRequired,
-    })
-  ).isRequired,
-};

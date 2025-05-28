@@ -1,4 +1,13 @@
-export default function DegreeAudit({ studentInfo, programInfo, progressInfo, requirementsInfo }) {
+import { StudentInfo, ProgramInfo, ProgressInfo, RequirementsInfo } from '../../../../application/services/academicService';
+
+interface DegreeAuditProps {
+  studentInfo: StudentInfo;
+  programInfo: ProgramInfo;
+  progressInfo: ProgressInfo;
+  requirementsInfo: RequirementsInfo;
+}
+
+export default function DegreeAudit({ studentInfo, programInfo, progressInfo, requirementsInfo }: DegreeAuditProps) {
     return (
       <div className="container mx-auto px-4 mt-6">
         <div className="relative overflow-hidden rounded-t-2xl shadow-md bg-gradient-to-r from-orange-600 to-amber-500">

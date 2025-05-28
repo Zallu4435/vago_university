@@ -310,7 +310,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                     )}
                   </div>
 
-                  <div>
+            <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       Organizer *
                     </label>
@@ -318,9 +318,9 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                       name="organizer"
                       control={control}
                       render={({ field }) => (
-                        <input
+              <input
                           {...field}
-                          type="text"
+                type="text"
                           className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
                             errors.organizer ? 'border-red-500' : 'border-gray-600'
                           }`}
@@ -331,10 +331,10 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                     {errors.organizer && (
                       <p className="mt-1 text-sm text-red-400">{errors.organizer.message}</p>
                     )}
-                  </div>
+            </div>
 
                   {/* Organizer Type */}
-                  <div>
+            <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       Organizer Type *
                     </label>
@@ -342,7 +342,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                       name="organizerType"
                       control={control}
                       render={({ field }) => (
-                        <select
+              <select
                           {...field}
                           className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
                             errors.organizerType ? 'border-red-500' : 'border-gray-600'
@@ -351,18 +351,18 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                           {organizerTypeOptions.map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.emoji} {option.label}
-                            </option>
-                          ))}
-                        </select>
+                  </option>
+                ))}
+              </select>
                       )}
                     />
                     {errors.organizerType && (
                       <p className="mt-1 text-sm text-red-400">{errors.organizerType.message}</p>
                     )}
-                  </div>
+            </div>
 
                   {/* Event Type */}
-                  <div>
+            <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       Event Type *
                     </label>
@@ -370,7 +370,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                       name="eventType"
                       control={control}
                       render={({ field }) => (
-                        <select
+              <select
                           {...field}
                           className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
                             errors.eventType ? 'border-red-500' : 'border-gray-600'
@@ -379,18 +379,18 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                           {eventTypeOptions.map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.emoji} {option.label}
-                            </option>
-                          ))}
-                        </select>
+                  </option>
+                ))}
+              </select>
                       )}
                     />
                     {errors.eventType && (
                       <p className="mt-1 text-sm text-red-400">{errors.eventType.message}</p>
                     )}
-                  </div>
+            </div>
 
                   {/* Max Participants */}
-                  <div>
+            <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       Max Participants *
                     </label>
@@ -455,7 +455,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                       control={control}
                       render={({ field }) => (
                         <label className="flex items-center gap-3 p-4 bg-gray-700/30 rounded-xl border border-gray-600 cursor-pointer hover:bg-gray-700/50 transition-all duration-200">
-                          <input
+              <input
                             type="checkbox"
                             checked={field.value}
                             onChange={field.onChange}
@@ -467,8 +467,8 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                           </div>
                         </label>
                       )}
-                    />
-                  </div>
+              />
+            </div>
 
                   {/* Full Time Toggle */}
                   <div className="md:col-span-2">
@@ -483,14 +483,14 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                             onChange={field.onChange}
                             className="w-5 h-5 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500 focus:ring-2"
                           />
-                          <div>
+            <div>
                             <div className="text-white font-medium">Full-time Event</div>
                             <div className="text-gray-400 text-sm">This event runs for the entire day</div>
                           </div>
                         </label>
                       )}
-                    />
-                  </div>
+              />
+            </div>
                 </div>
               </div>
 
@@ -502,7 +502,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                 </h3>
                 
                 <div className="space-y-4">
-                  <div>
+            <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       Description
                     </label>
@@ -517,11 +517,11 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                           placeholder="Describe your event..."
                         />
                       )}
-                    />
-                  </div>
+              />
+            </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+            <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
                         Additional Information
                       </label>
@@ -536,10 +536,10 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                             placeholder="Any additional details..."
                           />
                         )}
-                      />
-                    </div>
+              />
+            </div>
 
-                    <div>
+            <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
                         Requirements
                       </label>
@@ -593,7 +593,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                 </div>
 
                 {/* Color Selection */}
-                <div>
+            <div>
                   <label className="block text-sm font-medium text-gray-300 mb-3">
                     Event Color
                   </label>
@@ -627,8 +627,8 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                         style={{ backgroundColor: `${watchedColor}20`, color: watchedColor }}
                       >
                         {watchedIcon}
-                      </div>
-                      <div>
+            </div>
+            <div>
                         <div className="text-white font-medium">
                           {watch('title') || 'Event Title'}
                         </div>
@@ -639,7 +639,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                     </div>
                   </div>
                 </div>
-              </div>
+            </div>
             </div>
           </div>
 

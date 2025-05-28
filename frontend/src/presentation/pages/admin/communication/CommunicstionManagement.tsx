@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { 
+import {
   IoMailOutline as Mail,
   IoMailOpenOutline as Inbox,
   IoSendOutline as Send,
@@ -13,29 +13,41 @@ import {
   IoEllipseOutline as Circle,
   IoAttachOutline as Paperclip,
   IoCloseOutline as X,
-  IoPersonOutline as Users
+  IoPersonOutline as Users,
 } from 'react-icons/io5';
-import { useCommunicationManagement } from '../../../../application/hooks/useCommunicationManagement';
+import { useCommunicationManagement } from '../../../../application/hooks/useCommunication';
 import Header from '../User/Header';
 import ApplicationsTable from '../User/ApplicationsTable';
 import Pagination from '../User/Pagination';
 import WarningModal from '../../../components/WarningModal';
-import ComposeMessageModal from './ComposeMessageModal';
-import MessageDetailsModal from './MessageDetailsModal';
+import ComposeMessageModal from './ComposeMessageModal'; // Shared with user side
+import MessageDetailsModal from './MessageDetailsModal'; // Shared with user side
 import debounce from 'lodash/debounce';
 
 interface Message {
   id: string;
-  from?: string;
-  email?: string;
-  to?: string;
   subject: string;
-  date: string;
-  time: string;
-  status: 'unread' | 'read' | 'delivered' | 'opened';
   content: string;
-  thread?: { id: string; from: string; content: string; date: string; time: string }[];
-  recipients?: number;
+  sender: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
+  recipients: Array<{
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    status: 'read' | 'unread';
+  }>;
+  isBroadcast: boolean;
+  createdAt: string;
+  updatedAt: string;
+  status: 'read' | 'unread' | 'delivered' | 'opened';
+  recipientsCount: number;
+  date?: string;
+  time?: string;
 }
 
 const STATUSES = ['All Statuses', 'Unread', 'Read', 'Delivered', 'Opened'];
@@ -60,9 +72,9 @@ const inboxColumns = [
         <Mail size={14} className="text-purple-400 mr-2" />
         <div>
           <p className={`text-sm ${message.status === 'unread' ? 'font-semibold text-gray-200' : 'text-gray-300'}`}>
-            {message.from}
+            {message.sender?.name || message.from}
           </p>
-          <p className="text-xs text-gray-400">{message.email}</p>
+          <p className="text-xs text-gray-400">{message.sender?.email || message.email}</p>
         </div>
       </div>
     ),
@@ -100,7 +112,7 @@ const inboxColumns = [
           className="h-1.5 w-1.5 rounded-full mr-1.5"
           style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
         ></span>
-        {message.status.charAt(0).toUpperCase() + message.status.slice(1)}
+        {message.status?.charAt(0).toUpperCase() + message?.status?.slice(1)}
       </span>
     ),
   },
@@ -113,7 +125,7 @@ const sentColumns = [
     render: (message: Message) => (
       <div className="flex items-center text-gray-300">
         <Mail size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{message.to}</span>
+        <span className="text-sm">{message.recipients?.[0]?.email || message.recipients?.[0]?.name || message.to}</span>
       </div>
     ),
     width: '20%',
@@ -160,7 +172,7 @@ const sentColumns = [
     render: (message: Message) => (
       <div className="flex items-center text-gray-300">
         <Users size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{message.recipients || 1}</span>
+        <span className="text-sm">{message.recipientsCount || 1}</span>
       </div>
     ),
   },
@@ -168,32 +180,25 @@ const sentColumns = [
 
 const CommunicationManagement: React.FC = () => {
   const {
-    // Data
     inboxMessages,
     sentMessages,
     totalInboxPages,
     totalSentPages,
-    
-    // Loading states
     isLoadingInbox,
     isLoadingSent,
-    
-    // State
     page,
     setPage,
     searchTerm,
     setSearchTerm,
     filters,
     setFilters,
-    
-    // Handlers
     handleSendMessage,
     handleReplyMessage,
     handleDeleteMessage,
     handleArchiveMessage,
     handleViewMessage,
     fetchSentMessages,
-  } = useCommunicationManagement();
+  } = useCommunicationManagement({ isAdmin: true }); // Pass isAdmin flag
 
   const [activeTab, setActiveTab] = useState<'inbox' | 'sent' | 'compose'>('inbox');
   const [showComposeModal, setShowComposeModal] = useState(false);
@@ -220,7 +225,7 @@ const CommunicationManagement: React.FC = () => {
 
   const handleConfirmDelete = () => {
     if (messageToDelete) {
-      handleDeleteMessage(messageToDelete._id, activeTab as 'inbox' | 'sent');
+      handleDeleteMessage(messageToDelete.id, activeTab as 'inbox' | 'sent'); // Use id instead of _id
       setShowDeleteWarning(false);
       setMessageToDelete(null);
     }
@@ -268,20 +273,17 @@ const CommunicationManagement: React.FC = () => {
     },
   ];
 
-  // Handle tab changes
   const handleTabChange = (index: number) => {
     const tabMap = ['inbox', 'sent', 'compose'];
     const newTab = tabMap[index] as 'inbox' | 'sent' | 'compose';
     setActiveTab(newTab);
     setPage(1);
 
-    // Only fetch sent messages when switching to sent tab
     if (newTab === 'sent') {
       fetchSentMessages();
     }
   };
 
-  // Debounced search handler
   const debouncedSearch = useCallback(
     debounce((value: string) => {
       setSearchTerm(value);
@@ -290,10 +292,9 @@ const CommunicationManagement: React.FC = () => {
     []
   );
 
-  // Debounced filter handler
   const debouncedFilterChange = useCallback(
     debounce((field: string, value: string) => {
-      setFilters(prev => ({ ...prev, [field]: value }));
+      setFilters((prev) => ({ ...prev, [field]: value }));
       setPage(1);
     }, 500),
     []
@@ -321,8 +322,8 @@ const CommunicationManagement: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         <Header
-          title="Communication Management"
-          subtitle="Manage all incoming and outgoing messages"
+          title="Admin Communication Management"
+          subtitle="Manage all incoming and outgoing messages for admin"
           stats={[
             {
               icon: <Inbox />,
@@ -358,7 +359,7 @@ const CommunicationManagement: React.FC = () => {
           filterOptions={{
             status: STATUSES,
             from: ['All Senders', 'John Smith', 'Sarah Johnson', 'Mike Davis'],
-            to: ['All Recipients', 'All Students', 'Sarah Johnson'],
+            to: ['All Recipients', 'All Students', 'All Faculty', 'All Staff', 'Freshman Students', 'Sophomore Students', 'Junior Students', 'Senior Students', 'Individual User'],
           }}
           debouncedFilterChange={debouncedFilterChange}
           handleResetFilters={() => setFilters({ status: 'All Statuses', from: 'All Senders', to: 'All Recipients' })}
@@ -380,11 +381,7 @@ const CommunicationManagement: React.FC = () => {
                 <>
                   {activeTab === 'inbox' && !isLoadingInbox && inboxMessages.length > 0 && (
                     <>
-                      <ApplicationsTable
-                        data={inboxMessages}
-                        columns={inboxColumns}
-                        actions={inboxActions}
-                      />
+                      <ApplicationsTable data={inboxMessages} columns={inboxColumns} actions={inboxActions} />
                       <Pagination
                         page={page}
                         totalPages={totalInboxPages}
@@ -398,11 +395,7 @@ const CommunicationManagement: React.FC = () => {
                   )}
                   {activeTab === 'sent' && !isLoadingSent && sentMessages.length > 0 && (
                     <>
-                      <ApplicationsTable
-                        data={sentMessages}
-                        columns={sentColumns}
-                        actions={sentActions}
-                      />
+                      <ApplicationsTable data={sentMessages} columns={sentColumns} actions={sentActions} />
                       <Pagination
                         page={page}
                         totalPages={totalSentPages}
@@ -433,7 +426,6 @@ const CommunicationManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Compose Message Modal */}
       <ComposeMessageModal
         isOpen={showComposeModal}
         initialForm={
@@ -448,7 +440,7 @@ const CommunicationManagement: React.FC = () => {
         }
         userGroups={USER_GROUPS}
         onSend={(form) => {
-          handleSendMessage(form);
+          handleSendMessage({ ...form, isAdmin: true }); // Pass isAdmin flag
           setShowComposeModal(false);
           setSelectedMessage(null);
         }}
@@ -458,7 +450,6 @@ const CommunicationManagement: React.FC = () => {
         }}
       />
 
-      {/* Message Details Modal */}
       <MessageDetailsModal
         isOpen={showMessageDetails}
         message={selectedMessage!}
@@ -471,7 +462,7 @@ const CommunicationManagement: React.FC = () => {
           setShowMessageDetails(false);
         }}
         onDelete={() => {
-          handleDeleteMessage(selectedMessage!._id, activeTab as 'inbox' | 'sent');
+          handleDeleteMessage(selectedMessage!.id, activeTab as 'inbox' | 'sent'); // Use id instead of _id
           setShowMessageDetails(false);
         }}
         onClose={() => {
@@ -481,7 +472,6 @@ const CommunicationManagement: React.FC = () => {
         messageType={activeTab as 'inbox' | 'sent'}
       />
 
-      {/* Warning Modal */}
       <WarningModal
         isOpen={showDeleteWarning}
         onClose={() => {

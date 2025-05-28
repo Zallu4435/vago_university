@@ -569,7 +569,7 @@ const AdminClubManagement: React.FC = () => {
   ];
 
   if (isLoading) {
-    return (
+  return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
       </div>
@@ -668,13 +668,13 @@ const AdminClubManagement: React.FC = () => {
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
             <div className="px-6 py-5">
               {activeTab === 'clubs' && (
-                <button
+                        <button
                   onClick={handleAddClub}
                   className="mb-4 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                 >
                   <Plus size={16} />
                   Add Club
-                </button>
+                        </button>
               )}
 
               {activeTab === 'clubs' && filteredClubs.length > 0 && (
@@ -731,18 +731,18 @@ const AdminClubManagement: React.FC = () => {
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <Users size={32} className="text-purple-400" />
-                  </div>
+              </div>
                   <h3 className="text-lg font-medium text-white mb-1">No Clubs Found</h3>
                   <p className="text-gray-400 text-center max-w-sm">
                     There are no clubs matching your current filters. Try adjusting your search criteria.
                   </p>
-                </div>
-              )}
+        </div>
+      )}
               {activeTab === 'requests' && filteredClubRequests.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <CheckCircle size={32} className="text-purple-400" />
-                  </div>
+            </div>
                   <h3 className="text-lg font-medium text-white mb-1">No Club Requests Found</h3>
                   <p className="text-gray-400 text-center max-w-sm">
                     There are no club requests matching your current filters.
@@ -753,17 +753,17 @@ const AdminClubManagement: React.FC = () => {
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <Users size={32} className="text-purple-400" />
-                  </div>
+              </div>
                   <h3 className="text-lg font-medium text-white mb-1">No Membership Requests Found</h3>
                   <p className="text-gray-400 text-center max-w-sm">
                     There are no membership requests matching your current filters.
                   </p>
-                </div>
-              )}
+                            </div>
+                          )}
             </div>
           </div>
         </div>
-      </div>
+            </div>
 
       <AddClubModal
         isOpen={showAddClubModal}

@@ -2,26 +2,30 @@
 
 export interface Message {
     id: string;
-    from?: string;
-    email?: string;
-    to?: string;
     subject: string;
-    date: string;
-    time: string;
-    status: 'unread' | 'read' | 'delivered' | 'opened';
     content: string;
-    thread?: {
+    sender: {
       id: string;
-      from: string;
-      content: string;
-      date: string;
-      time: string;
-    }[];
-    recipients?: number;
+      name: string;
+      email: string;
+      role: string;
+    };
+    recipients: Array<{
+      id: string;
+      name: string;
+      email: string;
+      role: string;
+      status: 'read' | 'unread';
+    }>;
+    isBroadcast: boolean;
+    createdAt: string;
+    updatedAt: string;
+    status: 'read' | 'unread' | 'delivered' | 'opened';
+    recipientsCount: number;
   }
   
   export interface MessageForm {
-    to: { value: string; label: string }[];
+    to: Array<{ value: string; label: string }>;
     subject: string;
     message: string;
     attachments: File[];
@@ -30,4 +34,11 @@ export interface Message {
   export interface MessageApiResponse {
     data: Message[];
     total: number;
+  }
+
+  export interface Admin {
+    _id: string;
+    name: string;
+    email: string;
+    role: string;
   }

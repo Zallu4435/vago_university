@@ -1,5 +1,14 @@
-export default function AcademicRecords({ studentInfo, gradeInfo, academicHistory }) {
-    return (
+import { StudentInfo, GradeInfo, AcademicHistory } from '../../../../application/services/academicService';
+
+interface AcademicRecordsProps {
+  studentInfo: StudentInfo;
+  gradeInfo: GradeInfo;
+  academicHistory: AcademicHistory[];
+}
+
+export default function AcademicRecords({ studentInfo, gradeInfo, academicHistory }: AcademicRecordsProps) {
+    
+  return (
       <div className="container mx-auto px-4 mt-6">
         <div className="relative overflow-hidden rounded-t-2xl shadow-md bg-gradient-to-r from-orange-600 to-amber-500">
           <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 opacity-30"></div>

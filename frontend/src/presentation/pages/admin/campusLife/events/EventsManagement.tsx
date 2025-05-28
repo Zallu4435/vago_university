@@ -535,10 +535,10 @@ const AdminEventsManagement: React.FC = () => {
   }
 
   if (error) {
-    return (
+  return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-red-500">Error: {error.message}</div>
-      </div>
+        </div>
     );
   }
 
@@ -560,7 +560,7 @@ const AdminEventsManagement: React.FC = () => {
             }}
           />
         ))}
-      </div>
+        </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         <Header
@@ -621,15 +621,15 @@ const AdminEventsManagement: React.FC = () => {
         <div className="mt-8">
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
             <div className="px-6 py-5">
-              {activeTab === 'events' && (
-                <button
+            {activeTab === 'events' && (
+              <button
                   onClick={handleAddEvent}
                   className="mb-4 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                >
+              >
                   <Plus size={16} />
                   Add Event
-                </button>
-              )}
+              </button>
+            )}
 
               {activeTab === 'events' && filteredEvents.length > 0 && (
                 <>
@@ -661,8 +661,8 @@ const AdminEventsManagement: React.FC = () => {
                     onFirstPage={() => setPage(1)}
                     onLastPage={() => setPage(totalPages)}
                   />
-                </>
-              )}
+                                </>
+                              )}
               {activeTab === 'participants' && filteredParticipants.length > 0 && (
                 <>
                   <ApplicationsTable
@@ -679,13 +679,13 @@ const AdminEventsManagement: React.FC = () => {
                     onFirstPage={() => setPage(1)}
                     onLastPage={() => setPage(totalPages)}
                   />
-                </>
-              )}
+                                  </>
+                                )}
               {activeTab === 'events' && filteredEvents.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <Calendar size={32} className="text-purple-400" />
-                  </div>
+                              </div>
                   <h3 className="text-lg font-medium text-white mb-1">No Events Found</h3>
                   <p className="text-gray-400 text-center max-w-sm">
                     There are no events matching your current filters. Try adjusting your search criteria.
@@ -696,28 +696,28 @@ const AdminEventsManagement: React.FC = () => {
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <CheckCircle size={32} className="text-purple-400" />
-                  </div>
+            </div>
                   <h3 className="text-lg font-medium text-white mb-1">No Event Requests Found</h3>
                   <p className="text-gray-400 text-center max-w-sm">
                     There are no event requests matching your current filters.
                   </p>
-                </div>
-              )}
+          </div>
+        )}
               {activeTab === 'participants' && filteredParticipants.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <Users size={32} className="text-purple-400" />
-                  </div>
+      </div>
                   <h3 className="text-lg font-medium text-white mb-1">No Participants Found</h3>
                   <p className="text-gray-400 text-center max-w-sm">
                     There are no participants matching your current filters.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+                          </p>
+                        </div>
+                      )}
+                        </div>
+                    </div>
+                      </div>
+                      </div>
 
       <AddEventModal
         isOpen={showAddEventModal}

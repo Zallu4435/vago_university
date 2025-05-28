@@ -29,8 +29,8 @@ declare global {
 }
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-  console.log('authMiddleware: Processing request for', req.path);
-  console.log('authMiddleware: Headers:', req.headers);
+  // console.log('authMiddleware: Processing request for', req.path);
+  // console.log('authMiddleware: Headers:', req.headers);
 
   try {
     const authHeader = req.headers.authorization;
@@ -40,10 +40,10 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     }
 
     const token = authHeader.split(' ')[1];
-    console.log('authMiddleware: Token received:', token.slice(0, 10) + '...');
+    // console.log('authMiddleware: Token received:', token.slice(0, 10) + '...');
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret') as JwtPayload;
-    console.log('authMiddleware: Token decoded:', decoded);
+    // console.log('authMiddleware: Token decoded:', decoded);
 
     let user;
     switch (decoded.collection) {
@@ -84,7 +84,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
       lastName: user.lastName,
       email: user.email,
     };
-    console.log('authMiddleware: User attached to req.user:', req.user);
+    // console.log('authMiddleware: User attached to req.user:', req.user);
 
     next();
   } catch (error: any) {

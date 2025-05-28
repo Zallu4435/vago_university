@@ -1,9 +1,22 @@
 import { useState } from 'react';
 import { FaSearch, FaUsers } from 'react-icons/fa';
 import PropTypes from 'prop-types';
+import { useCampusLife } from '../../../../application/hooks/useCampusLife';
+import JoinRequestForm from './JoinRequestForm';
 
 export default function ClubsSection({ clubs }) {
   const [selectedClub, setSelectedClub] = useState(clubs[0]);
+  const [showJoinForm, setShowJoinForm] = useState(false);
+  const { requestToJoinClub, isJoiningClub, joinClubError } = useCampusLife();
+
+  const handleJoinRequest = async (request: { reason: string; additionalInfo: string }) => {
+    try {
+      await requestToJoinClub({ clubId: selectedClub.id, request });
+      setShowJoinForm(false);
+    } catch (error) {
+      console.error('Failed to submit join request:', error);
+    }
+  };
 
   console.log(clubs);
 
@@ -98,6 +111,28 @@ export default function ClubsSection({ clubs }) {
                 </div>
               </>
             )}
+            {!showJoinForm ? (
+              <button
+                onClick={() => setShowJoinForm(true)}
+                className="mt-4 w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2 px-4 rounded"
+              >
+                Request to Join
+              </button>
+            ) : (
+              <div className="mt-4">
+                <JoinRequestForm
+                  onSubmit={handleJoinRequest}
+                  onCancel={() => setShowJoinForm(false)}
+                  isLoading={isJoiningClub}
+                  title={selectedClub?.name}
+                />
+                {joinClubError && (
+                  <div className="mt-2 text-red-500 text-sm">
+                    Failed to submit join request. Please try again.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -106,24 +141,26 @@ export default function ClubsSection({ clubs }) {
 }
 
 ClubsSection.propTypes = {
-  clubs: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      name: PropTypes.string.isRequired,
-      type: PropTypes.string.isRequired,
-      members: PropTypes.string.isRequired,
-      icon: PropTypes.string.isRequired,
-      color: PropTypes.string.isRequired,
-      status: PropTypes.string,
-      role: PropTypes.string.isRequired,
-      nextMeeting: PropTypes.string.isRequired,
-      about: PropTypes.string,
-      upcomingEvents: PropTypes.arrayOf(
-        PropTypes.shape({
-          date: PropTypes.string.isRequired,
-          description: PropTypes.string.isRequired,
-        })
-      ),
-    })
-  ).isRequired,
+  clubs: PropTypes.shape({
+    data: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        name: PropTypes.string.isRequired,
+        type: PropTypes.string.isRequired,
+        members: PropTypes.string.isRequired,
+        icon: PropTypes.string.isRequired,
+        color: PropTypes.string.isRequired,
+        status: PropTypes.string,
+        role: PropTypes.string.isRequired,
+        nextMeeting: PropTypes.string.isRequired,
+        about: PropTypes.string,
+        upcomingEvents: PropTypes.arrayOf(
+          PropTypes.shape({
+            date: PropTypes.string.isRequired,
+            description: PropTypes.string.isRequired,
+          })
+        ),
+      })
+    ).isRequired,
+  }).isRequired,
 };

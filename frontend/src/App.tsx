@@ -45,6 +45,7 @@ import AdminClubManagement from './presentation/pages/admin/campusLife/clubs/Clu
 import AdminSportsManagement from './presentation/pages/admin/campusLife/sports/SportsManagement';
 import AdminEventsManagement from './presentation/pages/admin/campusLife/events/EventsManagement';
 import CommunicationManagement from './presentation/pages/admin/communication/CommunicstionManagement';
+import PaymentManagement from './presentation/pages/admin/payment/PaymentManagement';
 
 const App: React.FC = () => {
   const { isError, error } = useRefreshToken();
@@ -121,6 +122,7 @@ const App: React.FC = () => {
             <Route path="admin/sports" element={<AdminSportsManagement />} />
             <Route path="admin/events" element={<AdminEventsManagement />} />
             <Route path="admin/communication" element={<CommunicationManagement />} />
+            <Route path="admin/payment" element={<PaymentManagement />} />
           </Route>
         </Route>
 

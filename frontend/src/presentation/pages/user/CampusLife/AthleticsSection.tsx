@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react';
 import { FaSearch, FaTrophy } from 'react-icons/fa';
 import PropTypes from 'prop-types';
+import { useCampusLife } from '../../../../application/hooks/useCampusLife';
+import JoinRequestForm from './JoinRequestForm';
 
 interface Sport {
   _id: string;
@@ -28,6 +30,18 @@ interface AthleticsSectionProps {
 export default function AthleticsSection({ sports }: AthleticsSectionProps) {
   const [selectedSport, setSelectedSport] = useState<Sport | null>(sports.data[0] || null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showJoinForm, setShowJoinForm] = useState(false);
+  const { requestToJoinSport, isJoiningSport, joinSportError } = useCampusLife();
+
+  const handleJoinRequest = async (request: { reason: string; additionalInfo: string }) => {
+    if (!selectedSport) return;
+    try {
+      await requestToJoinSport({ sportId: selectedSport._id, request });
+      setShowJoinForm(false);
+    } catch (error) {
+      console.error('Failed to submit join request:', error);
+    }
+  };
 
   // Normalize and filter sports
   const normalizedSports = useMemo(() => {
@@ -181,6 +195,28 @@ export default function AthleticsSection({ sports }: AthleticsSectionProps) {
                     </>
                   ) : (
                     <p className="text-gray-600">No upcoming games scheduled.</p>
+                  )}
+                  {!showJoinForm ? (
+                    <button
+                      onClick={() => setShowJoinForm(true)}
+                      className="mt-4 w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2 px-4 rounded"
+                    >
+                      Try Out for Team
+                    </button>
+                  ) : (
+                    <div className="mt-4">
+                      <JoinRequestForm
+                        onSubmit={handleJoinRequest}
+                        onCancel={() => setShowJoinForm(false)}
+                        isLoading={isJoiningSport}
+                        title={selectedSport.title}
+                      />
+                      {joinSportError && (
+                        <div className="mt-2 text-red-500 text-sm">
+                          Failed to submit tryout request. Please try again.
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </>

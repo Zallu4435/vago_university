@@ -1,9 +1,22 @@
 import { useState } from 'react';
 import { FaSearch, FaCalendarAlt, FaClock, FaMapPin } from 'react-icons/fa';
 import PropTypes from 'prop-types';
+import { useCampusLife } from '../../../../application/hooks/useCampusLife';
+import JoinRequestForm from './JoinRequestForm';
 
 export default function EventsSection({ events }) {
   const [selectedEvent, setSelectedEvent] = useState(events[0]);
+  const [showJoinForm, setShowJoinForm] = useState(false);
+  const { requestToJoinEvent, isJoiningEvent, joinEventError } = useCampusLife();
+
+  const handleJoinRequest = async (request: { reason: string; additionalInfo: string }) => {
+    try {
+      await requestToJoinEvent({ eventId: selectedEvent._id, request });
+      setShowJoinForm(false);
+    } catch (error) {
+      console.error('Failed to submit join request:', error);
+    }
+  };
 
   console.log('events', events);
 
@@ -79,7 +92,7 @@ export default function EventsSection({ events }) {
             <p className="text-gray-700 mb-4">
               Join us for the biggest campus event of the spring semester!
             </p>
-              {selectedEvent?.description && (
+            {selectedEvent?.description && (
               <p className="text-gray-700 mb-4">{selectedEvent?.description}</p>
             )}
             <div className="bg-amber-50 p-4 rounded-lg mb-4">
@@ -104,6 +117,28 @@ export default function EventsSection({ events }) {
                 {selectedEvent?.requirements}
               </div>
             )}
+            {!showJoinForm ? (
+              <button
+                onClick={() => setShowJoinForm(true)}
+                className="mt-4 w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2 px-4 rounded"
+              >
+                Register for Event
+              </button>
+            ) : (
+              <div className="mt-4">
+                <JoinRequestForm
+                  onSubmit={handleJoinRequest}
+                  onCancel={() => setShowJoinForm(false)}
+                  isLoading={isJoiningEvent}
+                  title={selectedEvent?.title}
+                />
+                {joinEventError && (
+                  <div className="mt-2 text-red-500 text-sm">
+                    Failed to submit registration request. Please try again.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -112,21 +147,23 @@ export default function EventsSection({ events }) {
 }
 
 EventsSection.propTypes = {
-  events: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      title: PropTypes.string.isRequired,
-      date: PropTypes.string.isRequired,
-      time: PropTypes.string.isRequired,
-      location: PropTypes.string.isRequired,
-      organizer: PropTypes.string.isRequired,
-      timeframe: PropTypes.string.isRequired,
-      icon: PropTypes.string.isRequired,
-      color: PropTypes.string.isRequired,
-      description: PropTypes.string,
-      fullTime: PropTypes.string,
-      additionalInfo: PropTypes.string,
-      requirements: PropTypes.string,
-    })
-  ).isRequired,
+  events: PropTypes.shape({
+    data: PropTypes.arrayOf(
+      PropTypes.shape({
+        _id: PropTypes.string.isRequired,
+        title: PropTypes.string.isRequired,
+        date: PropTypes.string.isRequired,
+        time: PropTypes.string.isRequired,
+        location: PropTypes.string.isRequired,
+        organizer: PropTypes.string.isRequired,
+        timeframe: PropTypes.string.isRequired,
+        icon: PropTypes.string.isRequired,
+        color: PropTypes.string.isRequired,
+        description: PropTypes.string,
+        fullTime: PropTypes.string,
+        additionalInfo: PropTypes.string,
+        requirements: PropTypes.string,
+      })
+    ).isRequired,
+  }).isRequired,
 };

@@ -1,5 +1,5 @@
 // src/application/services/campus-life.service.ts
-import { CampusLifeResponse, Event, Sport, Club } from '../../domain/types/campus-life';
+import { CampusLifeResponse, Event, Sport, Club, JoinRequest } from '../../domain/types/campus-life';
 import httpClient from '../../frameworks/api/httpClient';
 
 class CampusLifeService {
@@ -34,6 +34,30 @@ class CampusLifeService {
     try {
       const response = await httpClient.get('/campus-life/clubs');
       return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async requestToJoinClub(clubId: string, request: JoinRequest): Promise<void> {
+    try {
+      await httpClient.post(`/campus-life/clubs/${clubId}/join`, request);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async requestToJoinSport(sportId: string, request: JoinRequest): Promise<void> {
+    try {
+      await httpClient.post(`/campus-life/sports/${sportId}/join`, request);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async requestToJoinEvent(eventId: string, request: JoinRequest): Promise<void> {
+    try {
+      await httpClient.post(`/campus-life/events/${eventId}/join`, request);
     } catch (error) {
       throw error;
     }

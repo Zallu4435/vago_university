@@ -17,7 +17,8 @@ import {
   MdFolder,
   MdArticle,
   MdHelpCenter,
-  MdLogout
+  MdLogout,
+  MdPayment
 } from 'react-icons/md';
 
 const sidebarItems = [
@@ -37,6 +38,7 @@ const sidebarItems = [
   { name: 'Material', path: '/admin/material', icon: <MdFolder size={20} /> },
   { name: 'Content', path: '/admin/content', icon: <MdArticle size={20} /> },
   { name: 'Enquiry', path: '/admin/enquiry', icon: <MdHelpCenter size={20} /> },
+  { name: 'Payment', path: '/admin/payment', icon: <MdPayment size={20} /> },
 ];
 
 // Group sidebar items into categories for better organization
@@ -64,6 +66,10 @@ const groupedItems = [
   {
     category: "Communication",
     items: [sidebarItems[9], sidebarItems[10], sidebarItems[12], sidebarItems[15]] // Assignment Submission, Communication Tool, Notification System, Enquiry
+  },
+  {
+    category: "Payment",
+    items: [sidebarItems[16]] // Payment
   }
 ];
 

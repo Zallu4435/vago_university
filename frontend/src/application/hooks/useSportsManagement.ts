@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { sportsService } from '../services/sports.service';
-import { Team, Event, TeamRequest, PlayerRequest, SportsApiResponse } from '../../domain/types/sports';
+import { Team } from '../../domain/types/sports';
 
 interface Filters {
   sportType: string;
   status: string;
-  coach: string;
+  dateRange: string;
 }
 
 export const useSportsManagement = () => {
@@ -16,60 +16,89 @@ export const useSportsManagement = () => {
   const [filters, setFilters] = useState<Filters>({
     sportType: 'all',
     status: 'all',
-    coach: 'all',
+    dateRange: 'all',
   });
+  const [activeTab, setActiveTab] = useState<'teams' | 'requests'>('teams');
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
   const limit = 10;
-  const [activeTab, setActiveTab] = useState<'teams' | 'events' | 'requests'>('teams');
 
-  // Only fetch teams when component mounts
+  const getDateRangeFilter = (dateRange: string): string | undefined => {
+    if (!dateRange || dateRange === 'all') return undefined;
+
+    const now = new Date();
+    const startDate = new Date();
+
+    switch (dateRange.toLowerCase()) {
+      case 'last_week':
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case 'last_month':
+        startDate.setMonth(now.getMonth() - 1);
+        break;
+      case 'last_3_months':
+        startDate.setMonth(now.getMonth() - 3);
+        break;
+      case 'last_6_months':
+        startDate.setMonth(now.getMonth() - 6);
+        break;
+      case 'last_year':
+        startDate.setFullYear(now.getFullYear() - 1);
+        break;
+      default:
+        return undefined;
+    }
+
+    const dateRangeString = `${startDate.toISOString()},${now.toISOString()}`;
+    return dateRangeString;
+  };
+
   const { data: teamsData, isLoading: isLoadingTeams, error: teamsError } = useQuery({
     queryKey: ['teams', page, filters, limit],
-    queryFn: () =>
-      sportsService.getTeams(
+    queryFn: () => {
+      const dateRange = getDateRangeFilter(filters.dateRange);
+      return sportsService.getTeams(
         page,
         limit,
         filters.sportType !== 'all' ? filters.sportType : undefined,
         filters.status !== 'all' ? filters.status : undefined,
-        filters.coach !== 'all' ? filters.coach : undefined
-      ),
+        dateRange
+      );
+    },
     enabled: activeTab === 'teams',
   });
 
-  // Only fetch events when needed
-  const { data: eventsData, isLoading: isLoadingEvents, error: eventsError } = useQuery({
-    queryKey: ['events', page, filters, limit],
-    queryFn: () =>
-      sportsService.getEvents(
+  const { data: playerRequestsData, isLoading: isLoadingPlayerRequests, error: playerRequestsError } = useQuery({
+    queryKey: ['playerRequests', page, filters, limit],
+    queryFn: () => {
+      const dateRange = getDateRangeFilter(filters.dateRange);
+      return sportsService.getPlayerRequests(
         page,
         limit,
         filters.sportType !== 'all' ? filters.sportType : undefined,
-        filters.status !== 'all' ? filters.status : undefined
-      ),
-    enabled: activeTab === 'events',
-  });
-
-  // Only fetch team requests when needed
-  const { data: teamRequestsData, isLoading: isLoadingTeamRequests, error: teamRequestsError } = useQuery({
-    queryKey: ['teamRequests', page, filters, limit],
-    queryFn: () =>
-      sportsService.getTeamRequests(
-        page,
-        limit,
-        filters.status !== 'all' ? filters.status : undefined
-      ),
+        filters.status !== 'all' ? filters.status : undefined,
+        dateRange
+      );
+    },
     enabled: activeTab === 'requests',
   });
 
-  // Only fetch player requests when needed
-  const { data: playerRequestsData, isLoading: isLoadingPlayerRequests, error: playerRequestsError } = useQuery({
-    queryKey: ['playerRequests', page, filters, limit],
-    queryFn: () =>
-      sportsService.getPlayerRequests(
-        page,
-        limit,
-        filters.status !== 'all' ? filters.status : undefined
-      ),
-    enabled: activeTab === 'requests',
+  const { data: teamDetails, isLoading: isLoadingTeamDetails } = useQuery({
+    queryKey: ['teamDetails', selectedTeamId],
+    queryFn: () => {
+      if (!selectedTeamId) throw new Error('No team ID provided');
+      return sportsService.getTeamDetails(selectedTeamId);
+    },
+    enabled: !!selectedTeamId,
+  });
+
+  const { data: requestDetails, isLoading: isLoadingRequestDetails } = useQuery({
+    queryKey: ['requestDetails', selectedRequestId],
+    queryFn: () => {
+      if (!selectedRequestId) throw new Error('No request ID provided');
+      return sportsService.getRequestDetails(selectedRequestId);
+    },
+    enabled: !!selectedRequestId,
   });
 
   const { mutateAsync: createTeam } = useMutation({
@@ -106,39 +135,6 @@ export const useSportsManagement = () => {
     },
   });
 
-  const { mutateAsync: scheduleEvent } = useMutation({
-    mutationFn: (data: Omit<Event, 'id'>) => sportsService.scheduleEvent(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['events'] });
-      toast.success('Event scheduled successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to schedule event');
-    },
-  });
-
-  const { mutateAsync: approveTeamRequest } = useMutation({
-    mutationFn: (id: string) => sportsService.approveTeamRequest(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teamRequests', 'teams'] });
-      toast.success('Team request approved successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to approve team request');
-    },
-  });
-
-  const { mutateAsync: rejectTeamRequest } = useMutation({
-    mutationFn: (id: string) => sportsService.rejectTeamRequest(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teamRequests'] });
-      toast.success('Team request rejected successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to reject team request');
-    },
-  });
-
   const { mutateAsync: approvePlayerRequest } = useMutation({
     mutationFn: (id: string) => sportsService.approvePlayerRequest(id),
     onSuccess: () => {
@@ -161,70 +157,82 @@ export const useSportsManagement = () => {
     },
   });
 
-  // Function to fetch data based on active tab
-  const fetchDataForTab = async (tab: 'teams' | 'events' | 'requests') => {
-    switch (tab) {
-      case 'events':
-        await queryClient.fetchQuery({
-          queryKey: ['events', page, filters, limit],
-          queryFn: () =>
-            sportsService.getEvents(
-              page,
-              limit,
-              filters.sportType !== 'all' ? filters.sportType : undefined,
-              filters.status !== 'all' ? filters.status : undefined
-            ),
-        });
-        break;
-      case 'requests':
-        await Promise.all([
-          queryClient.fetchQuery({
-            queryKey: ['teamRequests', page, filters, limit],
-            queryFn: () =>
-              sportsService.getTeamRequests(
-                page,
-                limit,
-                filters.status !== 'all' ? filters.status : undefined
-              ),
-          }),
-          queryClient.fetchQuery({
-            queryKey: ['playerRequests', page, filters, limit],
-            queryFn: () =>
-              sportsService.getPlayerRequests(
-                page,
-                limit,
-                filters.status !== 'all' ? filters.status : undefined
-              ),
-          }),
-        ]);
-        break;
+  const { mutateAsync: getESportRequestDetails } = useMutation({
+    mutationFn: (id: string) => sportsService.getESportRequestDetails(id),
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to fetch event request details');
+    },
+  });
+
+  const handleTabChange = (tab: 'teams' | 'requests') => {
+    setActiveTab(tab);
+    setPage(1);
+
+    if (tab === 'teams') {
+      queryClient.fetchQuery({
+        queryKey: ['teams', page, filters, limit],
+        queryFn: () => {
+          const dateRange = getDateRangeFilter(filters.dateRange);
+          return sportsService.getTeams(
+            page,
+            limit,
+            filters.sportType !== 'all' ? filters.sportType : undefined,
+            filters.status !== 'all' ? filters.status : undefined,
+            dateRange
+          );
+        },
+      });
+    } else if (tab === 'requests') {
+      queryClient.fetchQuery({
+        queryKey: ['playerRequests', page, filters, limit],
+        queryFn: () => {
+          const dateRange = getDateRangeFilter(filters.dateRange);
+          return sportsService.getPlayerRequests(
+            page,
+            limit,
+            filters.sportType !== 'all' ? filters.sportType : undefined,
+            filters.status !== 'all' ? filters.status : undefined,
+            dateRange
+          );
+        },
+      });
     }
   };
 
-  const handleTabChange = (tab: 'teams' | 'events' | 'requests') => {
-    setActiveTab(tab);
+  const handleViewTeam = (teamId: string) => {
+    setSelectedTeamId(teamId);
+  };
+
+  const handleEditTeam = (teamId: string) => {
+    setSelectedTeamId(teamId);
+  };
+
+  const handleViewRequest = (requestId: string) => {
+    setSelectedRequestId(requestId);
   };
 
   return {
     teams: teamsData?.teams || [],
-    events: eventsData?.events || [],
-    teamRequests: teamRequestsData?.teamRequests || [],
     playerRequests: playerRequestsData?.playerRequests || [],
-    totalPages: teamsData?.totalPages || 0,
+    totalPages: activeTab === 'teams' ? teamsData?.totalPages || 0 : playerRequestsData?.totalPages || 0,
     page,
     setPage,
     filters,
     setFilters,
-    isLoading: isLoadingTeams || isLoadingEvents || isLoadingTeamRequests || isLoadingPlayerRequests,
-    error: teamsError || eventsError || teamRequestsError || playerRequestsError,
+    isLoading: isLoadingTeams || isLoadingPlayerRequests || isLoadingTeamDetails || isLoadingRequestDetails,
+    error: teamsError || playerRequestsError,
     createTeam,
     updateTeam,
     deleteTeam,
-    scheduleEvent,
-    approveTeamRequest,
-    rejectTeamRequest,
     approvePlayerRequest,
     rejectPlayerRequest,
     handleTabChange,
+    teamDetails,
+    handleViewTeam,
+    handleEditTeam,
+    setSelectedTeamId,
+    requestDetails,
+    handleViewRequest,
+    isLoadingRequestDetails,
   };
 };

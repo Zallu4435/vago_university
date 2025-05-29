@@ -1,10 +1,8 @@
-import { ClubModel } from '../../../infrastructure/database/mongoose/models/club.model';
+import { ClubModel } from "../../../infrastructure/database/mongoose/models/club.model";
 
 class GetClubById {
   async execute(id: string): Promise<any> {
     try {
-      console.log(`Executing getClubById use case with id:`, id);
-
       const club = await ClubModel.findById(id)
         .lean()
         .catch((err) => {
@@ -12,7 +10,7 @@ class GetClubById {
         });
 
       if (!club) {
-        throw new Error('Club not found');
+        throw new Error("Club not found");
       }
 
       return club;

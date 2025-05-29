@@ -1,4 +1,4 @@
-import { ClubModel } from '../../../infrastructure/database/mongoose/models/club.model';
+import { ClubModel } from "../../../infrastructure/database/mongoose/models/club.model";
 
 interface CreateClubParams {
   name: string;
@@ -11,9 +11,6 @@ interface CreateClubParams {
 class CreateClub {
   async execute(data: CreateClubParams): Promise<any> {
     try {
-      console.log(`Executing createClub use case with data:`, data);
-
-      // Convert status to lowercase before saving
       const sanitizedData = {
         ...data,
         status: data.status.toLowerCase(),
@@ -30,6 +27,5 @@ class CreateClub {
     }
   }
 }
-
 
 export const createClub = new CreateClub();

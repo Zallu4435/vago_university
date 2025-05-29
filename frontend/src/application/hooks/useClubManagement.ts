@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { clubService } from '../services/club.service';
-import { Club, ClubRequest, MemberRequest, ClubApiResponse } from '../../domain/types/club';
+import { Club } from '../../domain/types/club';
 
 interface Filters {
   category: string;
@@ -56,7 +56,6 @@ export const useClubManagement = () => {
     }
 
     const dateRangeString = `${startDate.toISOString()},${now.toISOString()}`;
-    console.log('Date range string:', dateRangeString);
     return dateRangeString;
   };
 
@@ -66,14 +65,6 @@ export const useClubManagement = () => {
       const dateRange = getDateRangeFilter(filters.dateRange);
       const category = filters.category !== 'All' ? filters.category.toLowerCase().replace(/\s+/g, '_') : undefined;
       const status = filters.status !== 'All' ? filters.status.toLowerCase().replace(/\s+/g, '_') : undefined;
-      
-      console.log('Clubs API call with filters:', {
-        page,
-        limit,
-        category,
-        status,
-        dateRange
-      });
 
       return clubService.getClubs(
         page,
@@ -92,14 +83,6 @@ export const useClubManagement = () => {
       const dateRange = getDateRangeFilter(filters.dateRange);
       const category = filters.category !== 'All' ? filters.category.toLowerCase().replace(/\s+/g, '_') : undefined;
       const status = filters.status !== 'All' ? filters.status.toLowerCase().replace(/\s+/g, '_') : undefined;
-      
-      console.log('Club Requests API call with filters:', {
-        page,
-        limit,
-        category,
-        status,
-        dateRange
-      });
 
       return clubService.getClubRequests(
         page,
@@ -112,28 +95,6 @@ export const useClubManagement = () => {
     enabled: activeTab === 'requests',
   });
 
-  const { data: memberRequestsData, isLoading: isLoadingMembers, error: membersError } = useQuery({
-    queryKey: ['memberRequests', page, filters, limit],
-    queryFn: () => {
-      const dateRange = getDateRangeFilter(filters.dateRange);
-      const status = filters.status !== 'All' ? filters.status.toLowerCase().replace(/\s+/g, '_') : undefined;
-      
-      console.log('Member Requests API call with filters:', {
-        page,
-        limit,
-        status,
-        dateRange
-      });
-
-      return clubService.getMemberRequests(
-        page,
-        limit,
-        status,
-        dateRange
-      );
-    },
-    enabled: activeTab === 'members',
-  });
 
   const { data: selectedClub, isLoading: isLoadingClubDetails, error: clubDetailsError } = useQuery({
     queryKey: ['clubDetails', selectedClubId],
@@ -170,14 +131,6 @@ export const useClubManagement = () => {
           const dateRange = getDateRangeFilter(filters.dateRange);
           const category = filters.category !== 'All' ? filters.category.toLowerCase().replace(/\s+/g, '_') : undefined;
           const status = filters.status !== 'All' ? filters.status.toLowerCase().replace(/\s+/g, '_') : undefined;
-          
-          console.log('Clubs API call with filters (tab change):', {
-            page,
-            limit,
-            category,
-            status,
-            dateRange
-          });
 
           return clubService.getClubs(
             page,
@@ -195,41 +148,11 @@ export const useClubManagement = () => {
           const dateRange = getDateRangeFilter(filters.dateRange);
           const category = filters.category !== 'All' ? filters.category.toLowerCase().replace(/\s+/g, '_') : undefined;
           const status = filters.status !== 'All' ? filters.status.toLowerCase().replace(/\s+/g, '_') : undefined;
-          
-          console.log('Club Requests API call with filters (tab change):', {
-            page,
-            limit,
-            category,
-            status,
-            dateRange
-          });
 
           return clubService.getClubRequests(
             page,
             limit,
             category,
-            status,
-            dateRange
-          );
-        },
-      });
-    } else if (tab === 'members') {
-      queryClient.fetchQuery({
-        queryKey: ['memberRequests', page, filters, limit],
-        queryFn: () => {
-          const dateRange = getDateRangeFilter(filters.dateRange);
-          const status = filters.status !== 'All' ? filters.status.toLowerCase().replace(/\s+/g, '_') : undefined;
-          
-          console.log('Member Requests API call with filters (tab change):', {
-            page,
-            limit,
-            status,
-            dateRange
-          });
-
-          return clubService.getMemberRequests(
-            page,
-            limit,
             status,
             dateRange
           );
@@ -294,52 +217,27 @@ export const useClubManagement = () => {
     },
   });
 
-  const { mutateAsync: approveMemberRequest } = useMutation({
-    mutationFn: (id: string) => clubService.approveMemberRequest(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['memberRequests', 'clubs'] });
-      toast.success('Member request approved successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to approve member request');
-    },
-  });
-
-  const { mutateAsync: rejectMemberRequest } = useMutation({
-    mutationFn: (id: string) => clubService.rejectMemberRequest(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['memberRequests'] });
-      toast.success('Member request rejected successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to reject member request');
-    },
-  });
-
 
   return {
     clubs: clubsData?.clubs || [],
     clubRequests: clubRequestsData?.clubs || [],
-    memberRequests: memberRequestsData?.memberRequests || [],
     totalPages:
       activeTab === 'clubs'
         ? clubsData?.totalPages || 0
         : activeTab === 'requests'
-        ? clubRequestsData?.totalPages || 0
-        : memberRequestsData?.totalPages || 0,
+          ? clubRequestsData?.totalPages || 0
+          : 0,
     page,
     setPage,
     filters,
     setFilters,
-    isLoading: isLoadingClubs || isLoadingRequests || isLoadingMembers,
-    error: clubsError || requestsError || membersError,
+    isLoading: isLoadingClubs || isLoadingRequests ,
+    error: clubsError || requestsError,
     createClub,
     updateClub,
     deleteClub,
     approveClubRequest,
     rejectClubRequest,
-    approveMemberRequest,
-    rejectMemberRequest,
     handleTabChange,
     getClubDetails,
     getClubRequestDetails,

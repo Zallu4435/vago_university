@@ -1,5 +1,5 @@
 import httpClient from '../../frameworks/api/httpClient';
-import { Team, Event, TeamRequest, PlayerRequest, SportsApiResponse } from '../../domain/types/sports';
+import { Team, PlayerRequest, SportsApiResponse } from '../../domain/types/sports';
 
 class SportsService {
   async getTeams(
@@ -7,31 +7,50 @@ class SportsService {
     limit: number,
     sportType?: string,
     status?: string,
-    coach?: string
+    coach?: string,
+    dateRange?: string
   ): Promise<SportsApiResponse> {
     try {
-      const response = await httpClient.get<SportsApiResponse>('/admin/sports/teams', {
-        params: { page, limit, sportType, status, coach },
-      });
+      const params: Record<string, string | number> = { page, limit };
+      if (sportType && sportType !== 'All') params.sportType = sportType;
+      if (status && status !== 'All') params.status = status;
+      if (coach && coach !== 'All') params.coach = coach;
+      if (dateRange && dateRange !== 'All') {
+        const [startDate, endDate] = dateRange.split(',');
+        params.startDate = startDate;
+        params.endDate = endDate;
+      }
+
+      const response = await httpClient.get<SportsApiResponse>('/admin/sports/teams', { params });
       return response.data;
     } catch (error: any) {
+      console.error('getTeams error:', error);
       throw new Error(error.response?.data?.error || 'Failed to fetch teams');
     }
   }
 
-  async getEvents(
+  async getPlayerRequests(
     page: number,
     limit: number,
     sportType?: string,
-    status?: string
+    status?: string,
+    dateRange?: string
   ): Promise<SportsApiResponse> {
     try {
-      const response = await httpClient.get<SportsApiResponse>('/admin/sports/events', {
-        params: { page, limit, sportType, status },
-      });
+      const params: Record<string, string | number> = { page, limit };
+      if (sportType && sportType !== 'All') params.sportType = sportType;
+      if (status && status !== 'All') params.status = status;
+      if (dateRange && dateRange !== 'All') {
+        const [startDate, endDate] = dateRange.split(',');
+        params.startDate = startDate;
+        params.endDate = endDate;
+      }
+
+      const response = await httpClient.get<SportsApiResponse>('/admin/sports/player-requests', { params });
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch events');
+      console.error('getPlayerRequests error:', error);
+      throw new Error(error.response?.data?.error || 'Failed to fetch player requests');
     }
   }
 
@@ -61,61 +80,6 @@ class SportsService {
     }
   }
 
-  async scheduleEvent(data: Omit<Event, 'id'>): Promise<Event> {
-    try {
-      const response = await httpClient.post<Event>('/admin/sports/events', data);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to schedule event');
-    }
-  }
-
-  async getTeamRequests(
-    page: number,
-    limit: number,
-    status?: string
-  ): Promise<SportsApiResponse> {
-    try {
-      const response = await httpClient.get<SportsApiResponse>('/admin/sports/team-requests', {
-        params: { page, limit, status },
-      });
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch team requests');
-    }
-  }
-
-  async approveTeamRequest(id: string): Promise<void> {
-    try {
-      await httpClient.post(`/admin/sports/team-requests/${id}/approve`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to approve team request');
-    }
-  }
-
-  async rejectTeamRequest(id: string): Promise<void> {
-    try {
-      await httpClient.post(`/admin/sports/team-requests/${id}/reject`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to reject team request');
-    }
-  }
-
-  async getPlayerRequests(
-    page: number,
-    limit: number,
-    status?: string
-  ): Promise<SportsApiResponse> {
-    try {
-      const response = await httpClient.get<SportsApiResponse>('/admin/sports/player-requests', {
-        params: { page, limit, status },
-      });
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch player requests');
-    }
-  }
-
   async approvePlayerRequest(id: string): Promise<void> {
     try {
       await httpClient.post(`/admin/sports/player-requests/${id}/approve`);
@@ -129,6 +93,35 @@ class SportsService {
       await httpClient.post(`/admin/sports/player-requests/${id}/reject`);
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to reject player request');
+    }
+  }
+
+  async getTeamDetails(id: string): Promise<Team> {
+    try {
+      const response = await httpClient.get(`/admin/sports/teams/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching team details:', error);
+      throw error;
+    }
+  }
+
+  async getESportRequestDetails(id: string): Promise<PlayerRequest> {
+    try {
+      const response = await httpClient.get<PlayerRequest>(`/admin/sports/player-requests/${id}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to fetch sports request details');
+    }
+  }
+
+  async getRequestDetails(id: string): Promise<PlayerRequest> {
+    try {
+      const response = await httpClient.get(`/admin/sports/player-requests/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching request details:', error);
+      throw error;
     }
   }
 }

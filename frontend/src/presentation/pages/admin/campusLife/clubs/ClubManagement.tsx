@@ -241,7 +241,6 @@ const AdminClubManagement: React.FC = () => {
   const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<ClubRequest | null>(null);
 
-  console.log(clubRequests, "clubRequests");
   const filteredClubs = clubs.filter((club) => {
     const matchesSearch = searchQuery
       ? club.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -263,7 +262,6 @@ const AdminClubManagement: React.FC = () => {
       : true;
     const matchesCategory =
       filters.category === 'All' || request.type?.toLowerCase() === filters.category.toLowerCase();
-    console.log(matchesCategory, filters.category, request.type, "jijisjij");
     const matchesStatus =
       filters.status === 'All' || request.status?.toLowerCase() === filters.status.toLowerCase();
     return matchesSearch && matchesCategory && matchesStatus;
@@ -276,9 +274,7 @@ const AdminClubManagement: React.FC = () => {
 
   const handleEditClub = async (club: Club) => {
     try {
-      console.log(club, "kokokkookclub");
       const id = club.id || club._id;
-      console.log(id, "id");
       const details = await getClubDetails(id);
       setSelectedClub(details);
       setShowAddClubModal(true);
@@ -305,9 +301,7 @@ const AdminClubManagement: React.FC = () => {
 
   const handleViewRequest = async (request: ClubRequest) => {
     try {
-      console.log('View request clicked:', request);
       const details = await getClubRequestDetails(request.id);
-      console.log('Request details:', details);
       setSelectedRequest(details);
       setShowRequestDetailsModal(true);
     } catch (error) {
@@ -403,7 +397,7 @@ const AdminClubManagement: React.FC = () => {
     {
       icon: <Trash2 />,
       label: 'Delete Club',
-      onClick: (club: Club) => handleDeleteClub(club._id),
+      onClick: (club: Club) => handleDeleteClub(club.id),
       color: 'red' as const,
     },
   ];

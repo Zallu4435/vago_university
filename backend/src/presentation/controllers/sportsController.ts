@@ -1,33 +1,39 @@
-import { Request, Response, NextFunction } from 'express';
-import mongoose from 'mongoose';
-import { getTeams } from '../../application/use-cases/sports/getTeams';
-import { createTeam } from '../../application/use-cases/sports/createTeam';
-import { updateTeam } from '../../application/use-cases/sports/updateTeam';
-import { deleteTeam } from '../../application/use-cases/sports/deleteTeam';
-import { getEvents } from '../../application/use-cases/sports/getEvents';
-import { createEvent } from '../../application/use-cases/sports/createEvent';
-import { getTeamRequests } from '../../application/use-cases/sports/getTeamRequests';
-import { approveTeamRequest } from '../../application/use-cases/sports/approveTeamRequest';
-import { rejectTeamRequest } from '../../application/use-cases/sports/rejectTeamRequest';
-import { getPlayerRequests } from '../../application/use-cases/sports/getPlayerRequests';
-import { approvePlayerRequest } from '../../application/use-cases/sports/approvePlayerRequest';
-import { rejectPlayerRequest } from '../../application/use-cases/sports/rejectPlayerRequest';
-
+import { Request, Response, NextFunction } from "express";
+import mongoose from "mongoose";
+import { getTeams } from "../../application/use-cases/sports/getTeams";
+import { createTeam } from "../../application/use-cases/sports/createTeam";
+import { updateTeam } from "../../application/use-cases/sports/updateTeam";
+import { deleteTeam } from "../../application/use-cases/sports/deleteTeam";
+import { getEvents } from "../../application/use-cases/sports/getEvents";
+import { createEvent } from "../../application/use-cases/sports/createEvent";
+import { getTeamRequests } from "../../application/use-cases/sports/getTeamRequests";
+import { approveTeamRequest } from "../../application/use-cases/sports/approveTeamRequest";
+import { rejectTeamRequest } from "../../application/use-cases/sports/rejectTeamRequest";
+import { getPlayerRequests } from "../../application/use-cases/sports/getPlayerRequests";
+import { approvePlayerRequest } from "../../application/use-cases/sports/approvePlayerRequest";
+import { rejectPlayerRequest } from "../../application/use-cases/sports/rejectPlayerRequest";
+import { getTeamById } from "../../application/use-cases/sports/GetTeamById";
+import { getTeamRequestDetails } from "../../application/use-cases/sports/GetTeamRequestDetails";
 class SportsController {
   async getTeams(req: Request, res: Response, next: NextFunction) {
     try {
-      const { page = '1', limit = '10', sportType = 'all', status = 'all', coach = 'all' } = req.query;
+      const {
+        page = "1",
+        limit = "10",
+        sportType = "all",
+        status = "all",
+        coach = "all",
+      } = req.query;
 
-      console.log(`Received GET /api/admin/sports/teams with filters:`, {
-        page,
-        limit,
-        sportType,
-        status,
-        coach,
-      });
-
-      if (isNaN(Number(page)) || isNaN(Number(limit)) || Number(page) < 1 || Number(limit) < 1) {
-        return res.status(400).json({ error: 'Invalid page or limit parameters', code: 400 });
+      if (
+        isNaN(Number(page)) ||
+        isNaN(Number(limit)) ||
+        Number(page) < 1 ||
+        Number(limit) < 1
+      ) {
+        return res
+          .status(400)
+          .json({ error: "Invalid page or limit parameters", code: 400 });
       }
 
       const result = await getTeams.execute({
@@ -46,10 +52,12 @@ class SportsController {
       });
     } catch (err) {
       console.error(`Error in getTeams:`, err);
+      res
+        .status(400)
+        .json({ error: err.message || "Failed to fetch teams", code: 400 });
       next(err);
     }
   }
-
   async createTeam(req: Request, res: Response, next: NextFunction) {
     try {
       const teamData = req.body;
@@ -67,15 +75,18 @@ class SportsController {
     try {
       const { id } = req.params;
       const teamData = req.body;
-      console.log(`Received PUT /api/admin/sports/teams/${id} with data:`, teamData);
+      console.log(
+        `Received PUT /api/admin/sports/teams/${id} with data:`,
+        teamData
+      );
 
       if (!mongoose.isValidObjectId(id)) {
-        return res.status(400).json({ error: 'Invalid team ID', code: 400 });
+        return res.status(400).json({ error: "Invalid team ID", code: 400 });
       }
 
       const team = await updateTeam.execute(id, teamData);
       if (!team) {
-        return res.status(404).json({ error: 'Team not found', code: 404 });
+        return res.status(404).json({ error: "Team not found", code: 404 });
       }
 
       res.status(200).json(team);
@@ -91,11 +102,11 @@ class SportsController {
       console.log(`Received DELETE /api/admin/sports/teams/${id}`);
 
       if (!mongoose.isValidObjectId(id)) {
-        return res.status(400).json({ error: 'Invalid team ID', code: 400 });
+        return res.status(400).json({ error: "Invalid team ID", code: 400 });
       }
 
       await deleteTeam.execute(id);
-      res.status(200).json({ message: 'Team deleted successfully' });
+      res.status(200).json({ message: "Team deleted successfully" });
     } catch (err) {
       console.error(`Error in deleteTeam:`, err);
       next(err);
@@ -104,7 +115,12 @@ class SportsController {
 
   async getEvents(req: Request, res: Response, next: NextFunction) {
     try {
-      const { page = '1', limit = '10', sportType = 'all', status = 'all' } = req.query;
+      const {
+        page = "1",
+        limit = "10",
+        sportType = "all",
+        status = "all",
+      } = req.query;
 
       console.log(`Received GET /api/admin/sports/events with filters:`, {
         page,
@@ -113,8 +129,15 @@ class SportsController {
         status,
       });
 
-      if (isNaN(Number(page)) || isNaN(Number(limit)) || Number(page) < 1 || Number(limit) < 1) {
-        return res.status(400).json({ error: 'Invalid page or limit parameters', code: 400 });
+      if (
+        isNaN(Number(page)) ||
+        isNaN(Number(limit)) ||
+        Number(page) < 1 ||
+        Number(limit) < 1
+      ) {
+        return res
+          .status(400)
+          .json({ error: "Invalid page or limit parameters", code: 400 });
       }
 
       const result = await getEvents.execute({
@@ -139,7 +162,10 @@ class SportsController {
   async createEvent(req: Request, res: Response, next: NextFunction) {
     try {
       const eventData = req.body;
-      console.log(`Received POST /api/admin/sports/events with data:`, eventData);
+      console.log(
+        `Received POST /api/admin/sports/events with data:`,
+        eventData
+      );
 
       const event = await createEvent.execute(eventData);
       res.status(201).json(event);
@@ -151,17 +177,45 @@ class SportsController {
 
   async getTeamRequests(req: Request, res: Response, next: NextFunction) {
     try {
-      const { page = '1', limit = '10', status = 'all', type = 'all' } = req.query;
+      const {
+        page = "1",
+        limit = "10",
+        status = "all",
+        sportType = "all",
+        startDate,
+        endDate,
+      } = req.query;
 
-      if (isNaN(Number(page)) || isNaN(Number(limit)) || Number(page) < 1 || Number(limit) < 1) {
-        return res.status(400).json({ error: 'Invalid page or limit parameters', code: 400 });
+      console.log(
+        `Received GET /api/admin/sports/team-requests with filters:`,
+        {
+          page,
+          limit,
+          sportType,
+          status,
+          startDate,
+          endDate,
+        }
+      );
+
+      if (
+        isNaN(Number(page)) ||
+        isNaN(Number(limit)) ||
+        Number(page) < 1 ||
+        Number(limit) < 1
+      ) {
+        return res
+          .status(400)
+          .json({ error: "Invalid page or limit parameters", code: 400 });
       }
 
       const result = await getTeamRequests.execute({
-        type: String(type),
         page: Number(page),
         limit: Number(limit),
+        type: String(sportType), // Map sportType to type
         status: String(status),
+        startDate: startDate ? String(startDate) : undefined,
+        endDate: endDate ? String(endDate) : undefined,
       });
 
       res.status(200).json({
@@ -172,6 +226,10 @@ class SportsController {
       });
     } catch (err) {
       console.error(`Error in getTeamRequests:`, err);
+      res.status(400).json({
+        error: err.message || "Failed to fetch team requests",
+        code: 400,
+      });
       next(err);
     }
   }
@@ -179,14 +237,18 @@ class SportsController {
   async approveTeamRequest(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      console.log(`Received POST /api/admin/sports/team-requests/${id}/approve`);
+      console.log(
+        `Received POST /api/admin/sports/team-requests/${id}/approve`
+      );
 
       if (!mongoose.isValidObjectId(id)) {
-        return res.status(400).json({ error: 'Invalid team request ID', code: 400 });
+        return res
+          .status(400)
+          .json({ error: "Invalid team request ID", code: 400 });
       }
 
       await approveTeamRequest.execute(id);
-      res.status(200).json({ message: 'Team request approved successfully' });
+      res.status(200).json({ message: "Team request approved successfully" });
     } catch (err) {
       console.error(`Error in approveTeamRequest:`, err);
       next(err);
@@ -197,17 +259,24 @@ class SportsController {
     try {
       const { id } = req.params;
       const { reason } = req.body;
-      console.log(`Received POST /api/admin/sports/team-requests/${id}/reject with reason:`, reason);
+      console.log(
+        `Received POST /api/admin/sports/team-requests/${id}/reject with reason:`,
+        reason
+      );
 
       if (!mongoose.isValidObjectId(id)) {
-        return res.status(400).json({ error: 'Invalid team request ID', code: 400 });
+        return res
+          .status(400)
+          .json({ error: "Invalid team request ID", code: 400 });
       }
       if (!reason) {
-        return res.status(400).json({ error: 'Reason is required for rejection', code: 400 });
+        return res
+          .status(400)
+          .json({ error: "Reason is required for rejection", code: 400 });
       }
 
       await rejectTeamRequest.execute({ id, reason });
-      res.status(200).json({ message: 'Team request rejected successfully' });
+      res.status(200).json({ message: "Team request rejected successfully" });
     } catch (err) {
       console.error(`Error in rejectTeamRequest:`, err);
       next(err);
@@ -216,18 +285,45 @@ class SportsController {
 
   async getPlayerRequests(req: Request, res: Response, next: NextFunction) {
     try {
-      const { page = '1', limit = '10', status = 'all', type = 'all' } = req.query;
+      const {
+        page = "1",
+        limit = "10",
+        status = "all",
+        sportType = "all",
+        startDate,
+        endDate,
+      } = req.query;
 
+      console.log(
+        `Received GET /api/admin/sports/player-requests with filters:`,
+        {
+          page,
+          limit,
+          sportType,
+          status,
+          startDate,
+          endDate,
+        }
+      );
 
-      if (isNaN(Number(page)) || isNaN(Number(limit)) || Number(page) < 1 || Number(limit) < 1) {
-        return res.status(400).json({ error: 'Invalid page or limit parameters', code: 400 });
+      if (
+        isNaN(Number(page)) ||
+        isNaN(Number(limit)) ||
+        Number(page) < 1 ||
+        Number(limit) < 1
+      ) {
+        return res
+          .status(400)
+          .json({ error: "Invalid page or limit parameters", code: 400 });
       }
 
       const result = await getPlayerRequests.execute({
-        type: String(type),
         page: Number(page),
         limit: Number(limit),
+        type: String(sportType), // Map sportType to type
         status: String(status),
+        startDate: startDate ? String(startDate) : undefined,
+        endDate: endDate ? String(endDate) : undefined,
       });
 
       res.status(200).json({
@@ -238,6 +334,10 @@ class SportsController {
       });
     } catch (err) {
       console.error(`Error in getPlayerRequests:`, err);
+      res.status(400).json({
+        error: err.message || "Failed to fetch player requests",
+        code: 400,
+      });
       next(err);
     }
   }
@@ -245,14 +345,18 @@ class SportsController {
   async approvePlayerRequest(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      console.log(`Received POST /api/admin/sports/player-requests/${id}/approve`);
+      console.log(
+        `Received POST /api/admin/sports/player-requests/${id}/approve`
+      );
 
       if (!mongoose.isValidObjectId(id)) {
-        return res.status(400).json({ error: 'Invalid player request ID', code: 400 });
+        return res
+          .status(400)
+          .json({ error: "Invalid player request ID", code: 400 });
       }
 
       await approvePlayerRequest.execute(id);
-      res.status(200).json({ message: 'Player request approved successfully' });
+      res.status(200).json({ message: "Player request approved successfully" });
     } catch (err) {
       console.error(`Error in approvePlayerRequest:`, err);
       next(err);
@@ -264,13 +368,67 @@ class SportsController {
       const { id } = req.params;
 
       if (!mongoose.isValidObjectId(id)) {
-        return res.status(400).json({ error: 'Invalid player request ID', code: 400 });
+        return res
+          .status(400)
+          .json({ error: "Invalid player request ID", code: 400 });
       }
 
       await rejectPlayerRequest.execute({ id });
-      res.status(200).json({ message: 'Player request rejected successfully' });
+      res.status(200).json({ message: "Player request rejected successfully" });
     } catch (err) {
       console.error(`Error in rejectPlayerRequest:`, err);
+      next(err);
+    }
+  }
+
+  async getTeamById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({ error: "Invalid team ID", code: 400 });
+      }
+
+      const team = await getTeamById.execute(id);
+      if (!team) {
+        return res.status(404).json({ error: "Team not found", code: 404 });
+      }
+
+      res.status(200).json(team);
+    } catch (err) {
+      console.error(`Error in getTeamById:`, err);
+      res
+        .status(500)
+        .json({ error: err.message || "Failed to fetch team", code: 500 });
+      next(err);
+    }
+  }
+
+  async getTeamRequestDetails(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "Invalid team request ID",
+          statusCode: 400,
+        });
+      }
+
+      const teamRequest = await getTeamRequestDetails.execute(id);
+      res.status(200).json({ data: teamRequest });
+    } catch (err: any) {
+      console.error(`Error in getTeamRequestDetails:`, err);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: err.message,
+        statusCode: 500,
+      });
       next(err);
     }
   }

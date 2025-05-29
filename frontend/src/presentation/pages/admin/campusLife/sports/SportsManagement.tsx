@@ -18,6 +18,7 @@ import WarningModal from '../../../../components/WarningModal';
 import AddTeamModal from './AddTeamModal';
 import TeamDetailsModal from './TeamDetailsModal';
 import { useSportsManagement } from '../../../../../application/hooks/useSportsManagement';
+import TeamRequestDetailsModal from './TeamRequestDetailsModal';
 
 const formatDate = (dateString: string): string => {
   if (!dateString) return 'N/A';
@@ -52,17 +53,19 @@ interface Team {
 }
 
 interface PlayerRequest {
-  teamName: string;
   requestId: string;
+  teamName: string;
   requestedBy: string;
   type: string;
   requestedDate: string;
   status: string;
 }
 
-const SPORT_TYPES = ['All Sports', 'Football', 'Basketball', 'Badminton', 'Athletics', 'Swimming'];
-const STATUSES = ['All Statuses', 'Active', 'Inactive', 'Pending', 'Approved', 'Rejected'];
-const COACHES = ['All Coaches', 'Dr. John Smith', 'Prof. Sarah Johnson', 'Mr. Mike Wilson'];
+const SPORT_TYPES = ['All', 'Football', 'Basketball', 'Badminton', 'Athletics', 'Swimming'];
+const TEAM_STATUSES = ['All', 'Active', 'Inactive'];
+const REQUEST_STATUSES = ['All', 'Pending', 'Approved', 'Rejected'];
+const COACHES = ['All', 'Dr. John Smith', 'Prof. Sarah Johnson', 'Mr. Mike Wilson'];
+const DATE_RANGES = ['All', 'Last Week', 'Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'];
 const TEAM_CATEGORIES = ['Varsity', 'Club', 'Intramural'];
 const DIVISIONS = ['Division I', 'Division II', 'Division III'];
 
@@ -80,10 +83,11 @@ const teamColumns = [
         </span>
         <div>
           <p className="font-medium text-gray-200">{team.title}</p>
+          <p className="text-xs text-gray-400">ID: {team._id?.slice(0, 7)}</p>
         </div>
       </div>
     ),
-    width: '15%',
+    width: '20%',
   },
   {
     header: 'Sport',
@@ -120,14 +124,14 @@ const teamColumns = [
     key: 'status',
     render: (team: Team) => (
       <span
-        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
           team.status === 'Active'
             ? 'bg-green-900/30 text-green-400 border-green-500/30'
             : 'bg-gray-900/30 text-gray-400 border-gray-500/30'
         }`}
       >
         <span
-          className="h-2 w-2 rounded-full mr-2"
+          className="h-1.5 w-1.5 rounded-full mr-1.5"
           style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
         ></span>
         {team.status}
@@ -151,12 +155,12 @@ const playerRequestColumns = [
     header: 'Student',
     key: 'studentName',
     render: (request: PlayerRequest) => (
-                    <div>
+      <div>
         <p className="font-medium text-gray-200">{request.requestedBy}</p>
-        <p className="text-xs text-gray-400">{request.requestId}</p>
-                    </div>
+        <p className="text-xs text-gray-400">ID: {request?.requestId?.slice(0, 7)}</p>
+      </div>
     ),
-    width: '25%',
+    width: '20%',
   },
   {
     header: 'Team',
@@ -165,7 +169,7 @@ const playerRequestColumns = [
       <div className="flex items-center text-gray-300">
         <Users size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{request.teamName}</span>
-                  </div>
+      </div>
     ),
   },
   {
@@ -175,11 +179,11 @@ const playerRequestColumns = [
       <div className="flex items-center text-gray-300">
         <Trophy size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{request.type}</span>
-                  </div>
+      </div>
     ),
   },
   {
-    header: 'Date',
+    header: 'Requested Date',
     key: 'requestedAt',
     render: (request: PlayerRequest) => (
       <div className="flex items-center text-gray-300">
@@ -193,16 +197,16 @@ const playerRequestColumns = [
     key: 'status',
     render: (request: PlayerRequest) => (
       <span
-        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
           request.status === 'pending'
             ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
             : request.status === 'approved'
-            ? 'bg-green-900/30 text-green-400 border-green-500/30'
-            : 'bg-red-900/30 text-red-400 border-red-500/30'
+              ? 'bg-green-900/30 text-green-400 border-green-500/30'
+              : 'bg-red-900/30 text-red-400 border-red-500/30'
         }`}
       >
         <span
-          className="h-2 w-2 rounded-full mr-2"
+          className="h-1.5 w-1.5 rounded-full mr-1.5"
           style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
         ></span>
         {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
@@ -228,79 +232,172 @@ const AdminSportsManagement: React.FC = () => {
     approvePlayerRequest,
     rejectPlayerRequest,
     handleTabChange,
+    teamDetails,
+    handleViewTeam,
+    handleEditTeam,
+    setSelectedTeamId,
+    requestDetails,
+    handleViewRequest,
   } = useSportsManagement();
 
   const [activeTab, setActiveTab] = useState<'teams' | 'requests'>('teams');
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddTeamModal, setShowAddTeamModal] = useState(false);
   const [showTeamDetailsModal, setShowTeamDetailsModal] = useState(false);
-  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ id: string; type: 'team' } | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showApproveWarning, setShowApproveWarning] = useState(false);
   const [showRejectWarning, setShowRejectWarning] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<PlayerRequest | null>(null);
+  const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
 
   const debouncedFilterChange = useCallback(
-    debounce((field: string, value: string) => {
-      setFilters((prev) => ({ ...prev, [field]: value }));
+    debounce((field: string, value: string) => {      
+      // Format date range value
+      let formattedValue = value;
+      if (field === 'dateRange') {
+        formattedValue = value.toLowerCase().replace(/\s+/g, '_');
+      }
+
+      setFilters((prev) => {
+        const newFilters = { ...prev, [field]: formattedValue || 'all' };
+        return newFilters;
+      });
     }, 300),
     [setFilters]
   );
 
-  console.log(teams, 'teams');
-  console.log(playerRequests, 'playerRequests');
+  const handleResetFilters = () => {
+    setFilters({
+      sportType: 'all',
+      status: 'all',
+      dateRange: 'all'
+    });
+    setSearchTerm('');
+  };
+
+  // Update the tab change handler
+  const handleTabChangeWithFilters = (tab: 'teams' | 'requests') => {
+    setActiveTab(tab);
+    handleTabChange(tab);
+    setFilters({
+      sportType: 'all',
+      status: 'all',
+      dateRange: 'all'
+    });
+    setPage(1);
+  };
+
+
+  
 
   const filteredTeams = teams?.filter((team) => {
-    const matchesSearch = team.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSportType = filters.sportType === 'all' || 
-      team.type?.toLowerCase() === filters.sportType?.toLowerCase();
-    const matchesStatus = filters.status === 'all' || 
-      team.status?.toLowerCase() === filters.status?.toLowerCase();
-    const matchesCoach = filters.coach === 'all' || 
-      team.headCoach?.toLowerCase() === filters.coach?.toLowerCase();
-      return matchesSearch && matchesSportType && matchesStatus && matchesCoach;
+    const matchesSearch = searchTerm
+      ? team.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        team.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        team.headCoach.toLowerCase().includes(searchTerm.toLowerCase())
+      : true;
+    const matchesSportType = filters.sportType.toLowerCase() === 'all' || 
+      team.type?.toLowerCase() === filters.sportType.toLowerCase();
+    const matchesStatus = filters.status.toLowerCase() === 'all' || 
+      team.status?.toLowerCase() === filters.status.toLowerCase();
+    let matchesDateRange = true;
+    if (filters.dateRange && filters.dateRange.toLowerCase() !== 'all' && team.createdAt) {
+      const teamDate = new Date(team.createdAt);
+      const now = new Date();
+      const diffTime = Math.abs(now.getTime() - teamDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      switch (filters.dateRange.toLowerCase()) {
+        case 'last_week':
+          matchesDateRange = diffDays <= 7;
+          break;
+        case 'last_month':
+          matchesDateRange = diffDays <= 30;
+          break;
+        case 'last_3_months':
+          matchesDateRange = diffDays <= 90;
+          break;
+        case 'last_6_months':
+          matchesDateRange = diffDays <= 180;
+          break;
+        case 'last_year':
+          matchesDateRange = diffDays <= 365;
+          break;
+        default:
+          matchesDateRange = true;
+      }
+    }
+    return matchesSearch && matchesSportType && matchesStatus && matchesDateRange;
   }) || [];
 
   const filteredPlayerRequests = playerRequests?.filter((request) => {
     const matchesSearch = searchTerm
-      ? request.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.studentId.toLowerCase().includes(searchTerm.toLowerCase())
+      ? request.requestedBy.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        request.requestId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        request.teamName.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
-    const matchesSportType = filters.sportType === 'all' || 
-      request.sport?.toLowerCase() === filters.sportType?.toLowerCase();
-    const matchesStatus = filters.status === 'all' || 
-      request.status?.toLowerCase() === filters.status?.toLowerCase();
-    return matchesSearch && matchesSportType && matchesStatus;
+    const matchesSportType = filters.sportType.toLowerCase() === 'all' || 
+      request.type?.toLowerCase() === filters.sportType.toLowerCase();
+    const matchesStatus = filters.status.toLowerCase() === 'all' || 
+      request.status?.toLowerCase() === filters.status.toLowerCase();
+    let matchesDateRange = true;
+    if (filters.dateRange && filters.dateRange.toLowerCase() !== 'all' && request.requestedDate) {
+      const requestDate = new Date(request.requestedDate);
+      const now = new Date();
+      const diffTime = Math.abs(now.getTime() - requestDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      switch (filters.dateRange.toLowerCase()) {
+        case 'last_week':
+          matchesDateRange = diffDays <= 7;
+          break;
+        case 'last_month':
+          matchesDateRange = diffDays <= 30;
+          break;
+        case 'last_3_months':
+          matchesDateRange = diffDays <= 90;
+          break;
+        case 'last_6_months':
+          matchesDateRange = diffDays <= 180;
+          break;
+        case 'last_year':
+          matchesDateRange = diffDays <= 365;
+          break;
+        default:
+          matchesDateRange = true;
+      }
+    }
+    return matchesSearch && matchesSportType && matchesStatus && matchesDateRange;
   }) || [];
 
   const handleAddTeam = () => {
-    setSelectedTeam(null);
+    setSelectedTeamId(null);
     setIsEditing(false);
     setShowAddTeamModal(true);
   };
 
-  const handleEditTeam = (team: Team) => {
-    setSelectedTeam(team);
+  const handleViewTeamClick = (team: Team) => {
+    handleViewTeam(team._id);
+    setShowTeamDetailsModal(true);
+  };
+
+  const handleEditTeamClick = (team: Team) => {
+    handleEditTeam(team._id);
     setIsEditing(true);
     setShowAddTeamModal(true);
   };
 
-  const handleViewTeam = (team: Team) => {
-    setSelectedTeam(team);
-    setShowTeamDetailsModal(true);
-  };
-
   const handleSaveTeam = async (data: Team) => {
     try {
-      if (isEditing && selectedTeam) {
-        await updateTeam({ id: selectedTeam.id, data });
+      if (isEditing && teamDetails) {
+        await updateTeam({ id: teamDetails._id, data });
       } else {
         await createTeam(data);
       }
-                setShowAddTeamModal(false);
-      setSelectedTeam(null);
+      setShowAddTeamModal(false);
+      setSelectedTeamId(null);
       setIsEditing(false);
     } catch (error) {
       console.error('Error saving team:', error);
@@ -315,7 +412,7 @@ const AdminSportsManagement: React.FC = () => {
   const handleConfirmDelete = async () => {
     if (itemToDelete) {
       try {
-          await deleteTeam(itemToDelete.id);
+        await deleteTeam(itemToDelete.id);
         setShowDeleteWarning(false);
         setItemToDelete(null);
       } catch (error) {
@@ -337,47 +434,38 @@ const AdminSportsManagement: React.FC = () => {
   const handleConfirmApprove = async () => {
     if (selectedRequest) {
       try {
-        await approvePlayerRequest(selectedRequest.requestId);
+        await approvePlayerRequest(selectedRequest._id);
         setShowApproveWarning(false);
         setSelectedRequest(null);
-    } catch (error) {
-      console.error('Error approving player request:', error);
+      } catch (error) {
+        console.error('Error approving player request:', error);
       }
     }
   };
 
   const handleConfirmReject = async () => {
     if (selectedRequest) {
-    try {
-        await rejectPlayerRequest(selectedRequest.requestId);
+      try {
+        await rejectPlayerRequest(selectedRequest._id);
         setShowRejectWarning(false);
         setSelectedRequest(null);
-    } catch (error) {
-      console.error('Error rejecting player request:', error);
+      } catch (error) {
+        console.error('Error rejecting player request:', error);
       }
     }
-  };
-
-  const handleResetFilters = () => {
-    setFilters({
-      sportType: 'All Sports',
-      status: 'All Statuses',
-      coach: 'All Coaches',
-    });
-    setSearchTerm('');
   };
 
   const teamActions = [
     {
       icon: <Eye size={16} />,
       label: 'View Team',
-      onClick: handleViewTeam,
+      onClick: handleViewTeamClick,
       color: 'blue' as const,
     },
     {
       icon: <Edit size={16} />,
       label: 'Edit Team',
-      onClick: handleEditTeam,
+      onClick: handleEditTeamClick,
       color: 'green' as const,
     },
     {
@@ -393,8 +481,8 @@ const AdminSportsManagement: React.FC = () => {
       icon: <Eye size={16} />,
       label: 'View Details',
       onClick: (request: PlayerRequest) => {
-        setSelectedRequest(request);
-        setShowTeamDetailsModal(true);
+        handleViewRequest(request.requestId);
+        setShowRequestDetailsModal(true);
       },
       color: 'blue' as const,
     },
@@ -418,7 +506,7 @@ const AdminSportsManagement: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-            </div>
+      </div>
     );
   }
 
@@ -434,7 +522,7 @@ const AdminSportsManagement: React.FC = () => {
             Reset and Try Again
           </button>
         </div>
-            </div>
+      </div>
     );
   }
 
@@ -443,8 +531,21 @@ const AdminSportsManagement: React.FC = () => {
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-0 w-96 h-96 bg-purple-900/10 rounded-full blur-3xl"></div>
         <div className="absolute top-3/4 right-0 w-96 h-96 bg-blue-900/10 rounded-full blur-3xl"></div>
-            </div>
-            
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-purple-500/10 blur-md"
+            style={{
+              width: `${Math.random() * 12 + 4}px`,
+              height: `${Math.random() * 12 + 4}px`,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animation: `floatingMist ${Math.random() * 15 + 20}s ease-in-out infinite ${Math.random() * 5}s`,
+            }}
+          />
+        ))}
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         <Header
           title="Sports Management"
@@ -452,15 +553,15 @@ const AdminSportsManagement: React.FC = () => {
           stats={[
             {
               icon: <Users />,
-              title: 'Active Teams',
-              value: filteredTeams.filter((t) => t.status === 'Active').length.toString(),
+              title: 'Total Teams',
+              value: filteredTeams.length.toString(),
               change: '+10%',
               isPositive: true,
             },
             {
               icon: <CheckCircle />,
               title: 'Pending Requests',
-              value: filteredPlayerRequests.filter((r) => r.status === 'Pending').length.toString(),
+              value: filteredPlayerRequests.filter((r) => r.status === 'pending').length.toString(),
               change: '+8%',
               isPositive: true,
             },
@@ -482,17 +583,15 @@ const AdminSportsManagement: React.FC = () => {
           filters={filters}
           filterOptions={{
             sportType: SPORT_TYPES,
-            status: STATUSES,
-            coach: COACHES,
+            status: activeTab === 'teams' ? TEAM_STATUSES : REQUEST_STATUSES,
+            dateRange: DATE_RANGES,
           }}
           debouncedFilterChange={debouncedFilterChange}
           handleResetFilters={handleResetFilters}
           onTabClick={(index) => {
             const tabMap = ['teams', 'requests'];
             const newTab = tabMap[index] as 'teams' | 'requests';
-            setActiveTab(newTab);
-            handleTabChange(newTab);
-            setPage(1);
+            handleTabChangeWithFilters(newTab);
           }}
         />
 
@@ -500,13 +599,14 @@ const AdminSportsManagement: React.FC = () => {
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
             <div className="px-6 py-5">
               {activeTab === 'teams' && (
-            <button
+                <button
                   onClick={handleAddTeam}
                   className="mb-6 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200"
-            >
+                  aria-label="Add new team"
+                >
                   <Plus size={16} />
                   Add Team
-            </button>
+                </button>
               )}
 
               {activeTab === 'teams' && filteredTeams.length > 0 && (
@@ -524,46 +624,30 @@ const AdminSportsManagement: React.FC = () => {
                 </>
               )}
 
-              {activeTab === 'requests' && (
-                <div className="space-y-8">
-                  {filteredPlayerRequests.length > 0 && (
-                    <>
-                      <h3 className="text-lg font-medium text-white">Player Enrollment Requests</h3>
-                      <ApplicationsTable
-                        data={filteredPlayerRequests}
-                        columns={playerRequestColumns}
-                        actions={playerRequestActions}
-                      />
-                      <Pagination
-                        page={page}
-                        totalPages={totalPages}
-                        itemsCount={filteredPlayerRequests.length}
-                        itemName="player requests"
-                        onPageChange={setPage}
-                        onFirstPage={() => setPage(1)}
-                        onLastPage={() => setPage(totalPages)}
-                      />
-                    </>
-                  )}
-                  {filteredPlayerRequests.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-12">
-                      <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
-                        <CheckCircle size={32} className="text-purple-400" />
-        </div>
-                      <h3 className="text-lg font-medium text-white mb-2">No Player Requests Found</h3>
-                      <p className="text-gray-400 text-center max-w-md">
-                        There are no player requests matching your current filters. Try adjusting your search criteria or create a new team.
-                </p>
-              </div>
-                  )}
-              </div>
+              {activeTab === 'requests' && filteredPlayerRequests.length > 0 && (
+                <>
+                  <ApplicationsTable
+                    data={filteredPlayerRequests}
+                    columns={playerRequestColumns}
+                    actions={playerRequestActions}
+                  />
+                  <Pagination
+                    page={page}
+                    totalPages={totalPages}
+                    itemsCount={filteredPlayerRequests.length}
+                    itemName="player requests"
+                    onPageChange={setPage}
+                    onFirstPage={() => setPage(1)}
+                    onLastPage={() => setPage(totalPages)}
+                  />
+                </>
               )}
 
               {activeTab === 'teams' && filteredTeams.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <Users size={32} className="text-purple-400" />
-            </div>
+                  </div>
                   <h3 className="text-lg font-medium text-white mb-2">No Teams Found</h3>
                   <p className="text-gray-400 text-center max-w-md">
                     There are no teams matching your current filters. Try adjusting your search criteria or create a new team.
@@ -571,11 +655,24 @@ const AdminSportsManagement: React.FC = () => {
                   <button
                     onClick={handleAddTeam}
                     className="mt-4 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200"
+                    aria-label="Create new team"
                   >
                     <Plus size={16} />
                     Create New Team
                   </button>
-              </div>
+                </div>
+              )}
+
+              {activeTab === 'requests' && filteredPlayerRequests.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
+                    <CheckCircle size={32} className="text-purple-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-white mb-2">No Player Requests Found</h3>
+                  <p className="text-gray-400 text-center max-w-md">
+                    There are no player requests matching your current filters. Try adjusting your search criteria.
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -584,38 +681,41 @@ const AdminSportsManagement: React.FC = () => {
 
       <TeamDetailsModal
         isOpen={showTeamDetailsModal}
-        onClose={() => setShowTeamDetailsModal(false)}
-        team={selectedTeam}
-        onEdit={handleEditTeam}
+        onClose={() => {
+          setShowTeamDetailsModal(false);
+          setSelectedTeamId(null);
+        }}
+        team={teamDetails}
+        onEdit={handleEditTeamClick}
       />
 
       <AddTeamModal
         isOpen={showAddTeamModal}
         onClose={() => {
           setShowAddTeamModal(false);
-          setSelectedTeam(null);
+          setSelectedTeamId(null);
           setIsEditing(false);
         }}
         onSubmit={handleSaveTeam}
-        initialData={isEditing && selectedTeam ? {
-          title: selectedTeam.title,
-          type: selectedTeam.type,
-          category: selectedTeam.category,
-          organizer: selectedTeam.organizer,
-          organizerType: selectedTeam.organizerType,
-          icon: selectedTeam.icon,
-          color: selectedTeam.color,
-          division: selectedTeam.division,
-          headCoach: selectedTeam.headCoach,
-          homeGames: selectedTeam.homeGames,
-          record: selectedTeam.record,
-          upcomingGames: selectedTeam.upcomingGames || [{ date: '', description: '' }],
-          participants: selectedTeam.playerCount,
-          status: selectedTeam.status as 'Active' | 'Inactive',
+        initialData={isEditing && teamDetails ? {
+          title: teamDetails.title,
+          type: teamDetails.type,
+          category: teamDetails.category,
+          organizer: teamDetails.organizer,
+          organizerType: teamDetails.organizerType,
+          icon: teamDetails.icon,
+          color: teamDetails.color,
+          division: teamDetails.division,
+          headCoach: teamDetails.headCoach,
+          homeGames: teamDetails.homeGames,
+          record: teamDetails.record,
+          upcomingGames: teamDetails.upcomingGames || [{ date: '', description: '' }],
+          participants: teamDetails.playerCount,
+          status: teamDetails.status as 'Active' | 'Inactive',
         } : undefined}
         isEditing={isEditing}
-        sportTypes={SPORT_TYPES}
-        coaches={COACHES}
+        sportTypes={SPORT_TYPES.filter(type => type !== 'All')}
+        coaches={COACHES.filter(coach => coach !== 'All')}
         divisions={DIVISIONS}
         teamCategories={TEAM_CATEGORIES}
       />
@@ -641,7 +741,7 @@ const AdminSportsManagement: React.FC = () => {
           setSelectedRequest(null);
         }}
         onConfirm={handleConfirmApprove}
-        title="Approve Request"
+        title="Approve Player Request"
         message="Are you sure you want to approve this player request?"
         confirmText="Approve"
         cancelText="Cancel"
@@ -655,11 +755,22 @@ const AdminSportsManagement: React.FC = () => {
           setSelectedRequest(null);
         }}
         onConfirm={handleConfirmReject}
-        title="Reject Request"
+        title="Reject Player Request"
         message="Are you sure you want to reject this player request?"
         confirmText="Reject"
         cancelText="Cancel"
         type="danger"
+      />
+
+      <TeamRequestDetailsModal
+        isOpen={showRequestDetailsModal}
+        onClose={() => {
+          setShowRequestDetailsModal(false);
+          setSelectedRequest(null);
+        }}
+        request={requestDetails?.data}
+        onApprove={handleConfirmApprove}
+        onReject={handleConfirmReject}
       />
 
       <style jsx>{`
@@ -682,4 +793,4 @@ const AdminSportsManagement: React.FC = () => {
   );
 };
 
-export default AdminSportsManagement;
+export { AdminSportsManagement as default };

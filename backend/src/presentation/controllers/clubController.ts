@@ -73,7 +73,6 @@ class ClubController {
   async getClubById(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      console.log(`Received GET /api/admin/clubs/${id}`);
 
       if (!mongoose.isValidObjectId(id)) {
         return res.status(400).json({ error: "Invalid club ID", code: 400 });
@@ -94,7 +93,6 @@ class ClubController {
   async createClub(req: Request, res: Response, next: NextFunction) {
     try {
       const clubData = req.body;
-      console.log(`Received POST /api/admin/clubs with data:`, clubData);
 
       const club = await createClub.execute(clubData);
       res.status(201).json(club);
@@ -108,7 +106,6 @@ class ClubController {
     try {
       const { id } = req.params;
       const clubData = req.body;
-      console.log(`Received PUT /api/admin/clubs/${id} with data:`, clubData);
 
       if (!mongoose.isValidObjectId(id)) {
         return res.status(400).json({ error: "Invalid club ID", code: 400 });
@@ -129,7 +126,6 @@ class ClubController {
   async deleteClub(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      console.log(`Received DELETE /api/admin/clubs/${id}`);
 
       if (!mongoose.isValidObjectId(id)) {
         return res.status(400).json({ error: "Invalid club ID", code: 400 });
@@ -206,7 +202,6 @@ class ClubController {
   async approveClubRequest(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      console.log(`Received POST /api/admin/club-requests/${id}/approve`);
 
       if (!mongoose.isValidObjectId(id)) {
         return res
@@ -225,9 +220,6 @@ class ClubController {
   async rejectClubRequest(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      console.log(
-        `Received POST /api/admin/club-requests/${id}/reject with reason:`
-      );
 
       if (!mongoose.isValidObjectId(id)) {
         return res

@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
-import { ClubRequestModel, ClubModel } from "../../../infrastructure/database/mongoose/models/club.model";
+import {
+  ClubRequestModel,
+  ClubModel,
+} from "../../../infrastructure/database/mongoose/models/club.model";
 import { User as UserModel } from "../../../infrastructure/database/mongoose/models/user.model";
 
 interface GetClubRequestDetailsInput {
@@ -35,9 +38,10 @@ class GetClubRequestDetails {
         throw new Error("Invalid club request ID");
       }
 
-      // Fetch the club request
       const clubRequest = await ClubRequestModel.findById(id)
-        .select('clubId userId status whyJoin additionalInfo createdAt updatedAt')
+        .select(
+          "clubId userId status whyJoin additionalInfo createdAt updatedAt"
+        )
         .lean()
         .catch((err) => {
           throw new Error(`Failed to fetch club request: ${err.message}`);
@@ -47,9 +51,8 @@ class GetClubRequestDetails {
         throw new Error("Club request not found");
       }
 
-      // Fetch the associated club
       const club = await ClubModel.findById(clubRequest.clubId)
-        .select('name type about nextMeeting enteredMembers')
+        .select("name type about nextMeeting enteredMembers")
         .lean()
         .catch((err) => {
           throw new Error(`Failed to fetch club: ${err.message}`);
@@ -59,11 +62,10 @@ class GetClubRequestDetails {
         throw new Error("Associated club not found");
       }
 
-      // Fetch the associated user (if userId exists)
       let user = null;
       if (clubRequest.userId) {
         user = await UserModel.findById(clubRequest.userId)
-          .select('firstName lastName email')
+          .select("firstName lastName email")
           .lean()
           .catch((err) => {
             throw new Error(`Failed to fetch user: ${err.message}`);
@@ -76,13 +78,13 @@ class GetClubRequestDetails {
         createdAt: clubRequest.createdAt.toISOString(),
         updatedAt: clubRequest.updatedAt.toISOString(),
         whyJoin: clubRequest.whyJoin,
-        additionalInfo: clubRequest.additionalInfo || '',
+        additionalInfo: clubRequest.additionalInfo || "",
         club: {
           id: club._id.toString(),
           name: club.name,
           type: club.type,
-          about: club.about || '',
-          nextMeeting: club.nextMeeting || '',
+          about: club.about || "",
+          nextMeeting: club.nextMeeting || "",
           enteredMembers: club.enteredMembers || 0,
         },
         user: user

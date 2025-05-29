@@ -32,20 +32,9 @@ export interface ClubRequest {
     upcomingEvents: { date: string; description: string }[];
 }
 
-export interface MemberRequest {
-    _id: string;
-    clubId: string;
-    clubName: string;
-    requestedBy: string;
-    requestedAt: string;
-    status: string;
-    rejectionReason: string;
-}
-
 export interface ClubApiResponse {
     clubs: Club[];
     clubRequests: ClubRequest[];
-    memberRequests: MemberRequest[];
     totalPages: number;
     currentPage: number;
     totalItems: number;

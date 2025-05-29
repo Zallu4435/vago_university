@@ -1,6 +1,6 @@
 // src/application/services/club.service.ts
 import httpClient from '../../frameworks/api/httpClient';
-import { Club, ClubRequest, MemberRequest, ClubApiResponse } from '../../domain/types/club';
+import { Club, ClubRequest, ClubApiResponse } from '../../domain/types/club';
 
 class ClubService {
   async getClubs(
@@ -66,7 +66,6 @@ class ClubService {
       const response = await httpClient.get('/admin/clubs/club-requests', {
         params: { page, limit, category, status, dateRange },
       });
-      console.log(response.data, 'response.data');
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch club requests');
@@ -86,38 +85,6 @@ class ClubService {
       await httpClient.post(`/admin/clubs/club-requests/${id}/reject`);
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to reject club request');
-    }
-  }
-
-  async getMemberRequests(
-    page: number,
-    limit: number,
-    status?: string,
-    dateRange?: string
-  ): Promise<ClubApiResponse> {
-    try {
-      const response = await httpClient.get<ClubApiResponse>('/admin/clubs/member-requests', {
-        params: { page, limit, status, dateRange },
-      });
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch member requests');
-    }
-  }
-
-  async approveMemberRequest(id: string): Promise<void> {
-    try {
-      await httpClient.post(`/admin/clubs/member-requests/${id}/approve`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to approve member request');
-    }
-  }
-
-  async rejectMemberRequest(id: string): Promise<void> {
-    try {
-      await httpClient.post(`/admin/clubs/member-requests/${id}/reject`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to reject member request');
     }
   }
 

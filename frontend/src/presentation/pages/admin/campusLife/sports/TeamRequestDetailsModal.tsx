@@ -4,19 +4,41 @@ import {
   IoCalendarOutline as Calendar,
   IoPeopleOutline as Users,
   IoPersonOutline as User,
+  IoTrophyOutline as Trophy,
   IoInformationCircleOutline as Info,
-  IoMailOutline as Mail,
-  IoIdCardOutline as IdCard,
+  IoCheckmarkCircleOutline as Check,
+  IoCloseCircleOutline as Reject,
   IoHeartOutline as Heart,
   IoDocumentTextOutline as DocumentText,
-  IoSparklesOutline as Sparkles,
-  IoStarOutline as Star,
-  IoTimeOutline as Clock,
+  IoMailOutline as Mail,
+  IoIdCardOutline as IdCard,
 } from 'react-icons/io5';
 import { IconType } from 'react-icons';
 
 type StatusType = 'pending' | 'approved' | 'rejected';
 type AccentType = 'purple' | 'blue' | 'green' | 'pink' | 'cyan' | 'gold';
+
+interface TeamRequestDetails {
+  id: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  whyJoin: string;
+  additionalInfo: string;
+  team: {
+    id: string;
+    name: string;
+    sportType: string;
+    coach: string;
+    playerCount: number;
+    division: string;
+  };
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
 
 interface StatusBadgeProps {
   status: StatusType;
@@ -25,7 +47,7 @@ interface StatusBadgeProps {
 interface InfoCardProps {
   icon: IconType;
   label: string;
-  value: string;
+  value: string | number;
   accent?: AccentType;
   highlight?: boolean;
 }
@@ -58,13 +80,13 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
     },
   };
 
-  const config = statusConfig[status] || statusConfig.pending;
+  const config = statusConfig[status];
 
   return (
     <div
-      className={`inline-flex items-center px-6 py-3 rounded-full text-sm font-bold border backdrop-blur-sm shadow-xl ${config.bg} ${config.text} ${config.border} ${config.glow} ${config.pulse}`}
+      className={`inline-flex items-center px-6 py-3 rounded-full text-sm font-bold border backdrop-blur-sm shadow-xl ${config?.bg} ${config?.text} ${config?.border} ${config?.glow} ${config?.pulse}`}
     >
-      <span className="mr-3 text-lg animate-bounce">{config.icon}</span>
+      <span className="mr-3 text-lg animate-bounce">{config?.icon}</span>
       <span className="capitalize tracking-wide">{status}</span>
     </div>
   );
@@ -126,7 +148,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ icon: Icon, label, value, accent = 
           <div className={`p-3 rounded-xl border backdrop-blur-sm ${colors.icon}`}>
             <Icon size={22} className="drop-shadow-sm" />
           </div>
-          {highlight && <Star size={16} className="text-yellow-400 animate-pulse" />}
+          {highlight && <Users size={16} className="text-yellow-400 animate-pulse" />}
         </div>
         <div className="space-y-2">
           <span className="block text-xs font-bold text-gray-400 uppercase tracking-widest opacity-80">{label}</span>
@@ -137,33 +159,15 @@ const InfoCard: React.FC<InfoCardProps> = ({ icon: Icon, label, value, accent = 
   );
 };
 
-const formatDate = (dateString: string): string => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};
-
-const formatDateTime = (dateString: string): string => {
-  return new Date(dateString).toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
-interface ClubRequestDetailsModalProps {
+interface TeamRequestDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  request: ClubRequestDetails | null;
+  request: TeamRequestDetails | null;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
 }
 
-const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
+const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
   isOpen,
   onClose,
   request,
@@ -172,8 +176,25 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
 }) => {
   if (!isOpen || !request) return null;
 
-  const { data } = request;
-  const { club, user } = data;
+  const { team, user } = request;
+
+  const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const formatDateTime = (dateString: string): string => {
+    return new Date(dateString).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-lg overflow-y-auto h-full w-full z-50 flex items-start justify-center p-4">
@@ -193,13 +214,13 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-2xl border border-purple-400/30 backdrop-blur-sm">
-                  <Sparkles size={24} className="text-purple-300" />
+                  <Trophy size={24} className="text-purple-300" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-black bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent">
-                    {club.name}
+                    {team?.name}
                   </h2>
-                  <p className="text-sm text-gray-400 mt-1 font-medium">Request ID: {data.id}</p>
+                  <p className="text-sm text-gray-400 mt-1 font-medium">Request ID: {request.id}</p>
                 </div>
               </div>
               <button
@@ -215,18 +236,16 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
           <div className="relative z-10 p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
             {/* Status and Key Info Row */}
             <div className="flex flex-wrap items-center justify-between mb-10 gap-6">
-              <StatusBadge status={data.status} />
+              <StatusBadge status={request.status as StatusType} />
               <div className="flex items-center space-x-8 text-sm font-medium">
                 <div className="flex items-center space-x-3 px-4 py-2 bg-purple-500/10 rounded-full border border-purple-400/20">
                   <Calendar size={18} className="text-purple-400" />
-                  <span className="text-purple-200">{formatDate(data.createdAt)}</span>
+                  <span className="text-purple-200">{formatDate(request.createdAt)}</span>
                 </div>
-                {club.nextMeeting && (
-                  <div className="flex items-center space-x-3 px-4 py-2 bg-blue-500/10 rounded-full border border-blue-400/20">
-                    <Calendar size={18} className="text-blue-400" />
-                    <span className="text-blue-200">Next Meeting: {formatDate(club.nextMeeting)}</span>
-                  </div>
-                )}
+                <div className="flex items-center space-x-3 px-4 py-2 bg-blue-500/10 rounded-full border border-blue-400/20">
+                  <Users size={18} className="text-blue-400" />
+                  <span className="text-blue-200">{team?.playerCount} Players</span>
+                </div>
               </div>
             </div>
 
@@ -240,35 +259,17 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
                 highlight={true}
               />
               <InfoCard icon={Mail} label="Contact Email" value={user?.email || 'N/A'} accent="blue" />
-              <InfoCard icon={IdCard} label="Club ID" value={club.id} accent="cyan" />
-              <InfoCard icon={Info} label="Club Type" value={club.type} accent="green" />
+              <InfoCard icon={Trophy} label="Sport Type" value={team?.sportType} accent="green" />
+              <InfoCard icon={User} label="Coach" value={team?.coach} accent="pink" />
+              <InfoCard icon={IdCard} label="Team ID" value={team?.id} accent="cyan" />
               <InfoCard
-                icon={Users}
-                label="Members"
-                value={`${club.enteredMembers} Members`}
-                accent="pink"
-              />
-              <InfoCard
-                icon={Clock}
+                icon={Calendar}
                 label="Last Updated"
-                value={formatDateTime(data.updatedAt)}
+                value={formatDateTime(request?.updatedAt)}
                 accent="gold"
               />
-            </div>
-
-            {/* Description Section */}
-            <div className="mb-10">
-              <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-2xl p-8 border border-purple-500/30 backdrop-blur-sm shadow-xl">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="p-2 bg-purple-500/20 rounded-lg border border-purple-400/30">
-                    <Info size={24} className="text-purple-400" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white">Club Description</h3>
-                </div>
-                <div className="bg-gray-800/40 rounded-xl p-6 border border-gray-600/20">
-                  <p className="text-gray-200 leading-relaxed text-lg">{club.about || 'No description available'}</p>
-                </div>
-              </div>
+              <InfoCard icon={Users} label="Player Count" value={team?.playerCount} accent="purple" />
+              <InfoCard icon={Trophy} label="Division" value={team?.division} accent="blue" />
             </div>
 
             {/* Why Join Section */}
@@ -281,13 +282,13 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
                   <h3 className="text-xl font-bold text-white">Why Join</h3>
                 </div>
                 <div className="bg-gray-800/40 rounded-xl p-6 border border-gray-600/20">
-                  <p className="text-gray-200 leading-relaxed text-lg">{data.whyJoin}</p>
+                  <p className="text-gray-200 leading-relaxed text-lg">{request?.whyJoin}</p>
                 </div>
               </div>
             </div>
 
             {/* Additional Info Section */}
-            {data.additionalInfo && (
+            {request?.additionalInfo && (
               <div className="mb-10">
                 <div className="bg-gradient-to-r from-cyan-900/30 to-indigo-900/30 rounded-2xl p-8 border border-cyan-500/30 backdrop-blur-sm shadow-xl">
                   <div className="flex items-center space-x-3 mb-6">
@@ -297,7 +298,7 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
                     <h3 className="text-xl font-bold text-white">Additional Information</h3>
                   </div>
                   <div className="bg-gray-800/40 rounded-xl p-6 border border-gray-600/20">
-                    <p className="text-gray-200 leading-relaxed text-lg">{data.additionalInfo}</p>
+                    <p className="text-gray-200 leading-relaxed text-lg">{request?.additionalInfo}</p>
                   </div>
                 </div>
               </div>
@@ -317,14 +318,18 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
                     <div className="bg-gray-800/40 rounded-xl p-6 border border-gray-600/20">
                       <div className="flex items-center space-x-3 mb-3">
                         <User size={20} className="text-blue-400" />
-                        <span className="text-sm font-medium text-gray-400 uppercase tracking-wider">Full Name</span>
+                        <span className="text-sm font-medium text-gray-400 uppercase tracking-wider">
+                          Full Name
+                        </span>
                       </div>
                       <p className="text-white font-semibold text-lg">{user.name}</p>
                     </div>
                     <div className="bg-gray-800/40 rounded-xl p-6 border border-gray-600/20">
                       <div className="flex items-center space-x-3 mb-3">
                         <Mail size={20} className="text-cyan-400" />
-                        <span className="text-sm font-medium text-gray-400 uppercase tracking-wider">Email Address</span>
+                        <span className="text-sm font-medium text-gray-400 uppercase tracking-wider">
+                          Email Address
+                        </span>
                       </div>
                       <p className="text-white font-semibold text-lg break-all">{user.email}</p>
                     </div>
@@ -341,6 +346,36 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
               >
                 Close
               </button>
+              {request.status === 'pending' && (
+                <>
+                  <button
+                    onClick={() => onApprove?.(request.id)}
+                    className="px-8 py-4 text-sm font-bold text-white bg-gradient-to-r from-emerald-600 to-green-600 border border-transparent rounded-2xl hover:from-emerald-700 hover:to-green-700 transition-all duration-300 shadow-xl hover:shadow-emerald-500/30 transform hover:scale-105 flex items-center space-x-2"
+                  >
+                    <Check size={18} />
+                    <span>Approve Request</span>
+                  </button>
+                  <button
+                    onClick={() => onReject?.(request.id)}
+                    className="px-8 py-4 text-sm font-bold text-white bg-gradient-to-r from-red-600 to-rose-600 border border-transparent rounded-2xl hover:from-red-700 hover:to-rose-700 transition-all duration-300 shadow-xl hover:shadow-red-500/30 transform hover:scale-105 flex items-center space-x-2"
+                  >
+                    <Reject size={18} />
+                    <span>Reject Request</span>
+                  </button>
+                </>
+              )}
+              {request.status === 'approved' && (
+                <div className="flex items-center space-x-3 px-6 py-3 bg-emerald-500/20 border border-emerald-400/30 rounded-2xl">
+                  <Check size={20} className="text-emerald-400" />
+                  <span className="text-emerald-300 font-semibold">Request Approved</span>
+                </div>
+              )}
+              {request.status === 'rejected' && (
+                <div className="flex items-center space-x-3 px-6 py-3 bg-red-500/20 border border-red-400/30 rounded-2xl">
+                  <Reject size={20} className="text-red-400" />
+                  <span className="text-red-300 font-semibold">Request Rejected</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -349,4 +384,4 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
   );
 };
 
-export default ClubRequestDetailsModal;
+export default TeamRequestDetailsModal;

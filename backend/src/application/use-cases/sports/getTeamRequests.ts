@@ -5,7 +5,8 @@ interface GetTeamRequestsParams {
   limit: number;
   type: string;
   status: string;
-  // requestedBy: string;
+  startDate?: string; // Added for date range filtering
+  endDate?: string; // Added for date range filtering
 }
 
 interface SimplifiedTeamRequest {
@@ -30,17 +31,41 @@ class GetTeamRequests {
     limit,
     type,
     status,
-    // requestedBy,
+    startDate,
+    endDate,
   }: GetTeamRequestsParams): Promise<GetTeamRequestsResponse> {
     try {
+      console.log(`Executing getTeamRequests use case with params:`, {
+        page,
+        limit,
+        type,
+        status,
+        startDate,
+        endDate,
+      });
+
       if (page < 1 || limit < 1) {
         throw new Error('Invalid pagination parameters.');
       }
 
       const query: any = {};
-      if (type && type !== 'all') query.sportType = type;
-      if (status && status !== 'all') query.status = status;
-      // if (requestedBy && requestedBy !== 'all') query.requestedBy = requestedBy;
+      if (type && type !== 'all') {
+        query.sportType = { $regex: `^${type}$`, $options: 'i' }; // Case-insensitive match
+      }
+      if (status && status !== 'all') {
+        query.status = { $regex: `^${status}$`, $options: 'i' }; // Case-insensitive match
+      }
+      if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          throw new Error('Invalid date format in startDate or endDate parameters');
+        }
+        query.createdAt = {
+          $gte: start,
+          $lte: end,
+        };
+      }
 
       const totalItems = await SportRequestModel.countDocuments(query).catch((err) => {
         throw new Error(`Failed to count team requests: ${err.message}`);
@@ -49,8 +74,8 @@ class GetTeamRequests {
       const skip = (page - 1) * limit;
 
       const rawRequests = await SportRequestModel.find(query)
-        .populate('sportId', 'title type') // Assuming eventId is a reference to CampusEventModel
-        .populate('userId', 'email') 
+        .populate('sportId', 'title type') // Assuming sportId is a reference to a model with title and type
+        .populate('userId', 'email') // Assuming userId is a reference to a model with email
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -62,7 +87,7 @@ class GetTeamRequests {
       const teamRequests: SimplifiedTeamRequest[] = rawRequests.map((req: any) => ({
         teamName: req.sportId?.title || 'Unknown Team',
         requestId: req._id.toString(),
-        requestedBy: req.sportId?.email || 'Unknown User',
+        requestedBy: req.userId?.email || 'Unknown User', // Corrected to use userId
         type: req.sportId?.type || 'Unknown',
         requestedDate: req.createdAt,
         status: req.status,

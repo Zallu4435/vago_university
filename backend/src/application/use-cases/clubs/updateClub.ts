@@ -1,4 +1,4 @@
-import { ClubModel } from '../../../infrastructure/database/mongoose/models/club.model';
+import { ClubModel } from "../../../infrastructure/database/mongoose/models/club.model";
 
 interface UpdateClubParams {
   name?: string;
@@ -10,21 +10,19 @@ interface UpdateClubParams {
 class UpdateClub {
   async execute(id: string, data: UpdateClubParams): Promise<any> {
     try {
-      console.log(`Executing updateClub use case with id:`, id, `and data:`, data);
-
       const club = await ClubModel.findByIdAndUpdate(
         id,
         { ...data, updatedAt: Date.now() },
         { new: true, runValidators: true }
       )
-        .select('name category description createdBy status')
+        .select("name category description createdBy status")
         .lean()
         .catch((err) => {
           throw new Error(`Failed to update club: ${err.message}`);
         });
 
       if (!club) {
-        throw new Error('Club not found');
+        throw new Error("Club not found");
       }
 
       return club;

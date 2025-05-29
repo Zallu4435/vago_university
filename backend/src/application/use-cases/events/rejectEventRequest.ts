@@ -1,4 +1,4 @@
-import { EventRequestModel } from '../../../infrastructure/database/mongoose/models/events.model';
+import { EventRequestModel } from "../../../infrastructure/database/mongoose/models/events.model";
 
 interface RejectEventRequestParams {
   id: string;
@@ -13,17 +13,17 @@ class RejectEventRequest {
       });
 
       if (!eventRequest) {
-        throw new Error('Event request not found');
+        throw new Error("Event request not found");
       }
 
-      if (eventRequest.status !== 'pending') {
-        throw new Error('Event request is not in pending status');
+      if (eventRequest.status !== "pending") {
+        throw new Error("Event request is not in pending status");
       }
 
       await EventRequestModel.findByIdAndUpdate(
         id,
         {
-          status: 'rejected',
+          status: "rejected",
           rejectionReason: reason,
           updatedAt: Date.now(),
         },
@@ -31,7 +31,6 @@ class RejectEventRequest {
       ).catch((err) => {
         throw new Error(`Failed to update event request: ${err.message}`);
       });
-
     } catch (err) {
       console.error(`Error in rejectEventRequest use case:`, err);
       throw err;

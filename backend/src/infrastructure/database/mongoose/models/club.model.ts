@@ -1,6 +1,5 @@
 import { Schema, model } from "mongoose";
 
-// Club Schema
 const clubSchema = new Schema({
   name: { type: String, required: true, trim: true },
   type: { type: String, required: true, trim: true },
@@ -24,7 +23,6 @@ const clubSchema = new Schema({
   ],
 });
 
-// ✅ Define indexes after schema creation
 clubSchema.index({ name: 1 });
 clubSchema.index({ type: 1 });
 
@@ -32,10 +30,6 @@ clubSchema.pre("save", function (next) {
   this.updatedAt = new Date();
   next();
 });
-
-
-
-
 
 const clubRequestSchema = new Schema({
   clubId: { type: Schema.Types.ObjectId, ref: "Club", required: true },
@@ -46,13 +40,12 @@ const clubRequestSchema = new Schema({
     default: "pending",
     required: true,
   },
-  whyJoin: { type: String, required: true, trim: true }, 
+  whyJoin: { type: String, required: true, trim: true },
   additionalInfo: { type: String, trim: true, default: "" },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
 
-// ✅ Define indexes separately
 clubRequestSchema.index({ clubId: 1 });
 clubRequestSchema.index({ userId: 1 });
 

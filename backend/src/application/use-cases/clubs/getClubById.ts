@@ -6,7 +6,6 @@ class GetClubById {
       console.log(`Executing getClubById use case with id:`, id);
 
       const club = await ClubModel.findById(id)
-        .select('name category description createdBy status')
         .lean()
         .catch((err) => {
           throw new Error(`Failed to query club: ${err.message}`);

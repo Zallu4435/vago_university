@@ -7,11 +7,12 @@ class ClubService {
     page: number,
     limit: number,
     category?: string,
-    status?: string
+    status?: string,
+    dateRange?: string
   ): Promise<ClubApiResponse> {
     try {
       const response = await httpClient.get<ClubApiResponse>('/admin/clubs', {
-        params: { page, limit, category, status },
+        params: { page, limit, category, status, dateRange },
       });
       return response.data;
     } catch (error: any) {
@@ -57,11 +58,13 @@ class ClubService {
   async getClubRequests(
     page: number,
     limit: number,
-    status?: string
+    category?: string,
+    status?: string,
+    dateRange?: string
   ): Promise<ClubApiResponse> {
     try {
       const response = await httpClient.get('/admin/clubs/club-requests', {
-        params: { page, limit, status },
+        params: { page, limit, category, status, dateRange },
       });
       console.log(response.data, 'response.data');
       return response.data;
@@ -89,11 +92,12 @@ class ClubService {
   async getMemberRequests(
     page: number,
     limit: number,
-    status?: string
+    status?: string,
+    dateRange?: string
   ): Promise<ClubApiResponse> {
     try {
       const response = await httpClient.get<ClubApiResponse>('/admin/clubs/member-requests', {
-        params: { page, limit, status },
+        params: { page, limit, status, dateRange },
       });
       return response.data;
     } catch (error: any) {
@@ -114,6 +118,15 @@ class ClubService {
       await httpClient.post(`/admin/clubs/member-requests/${id}/reject`);
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to reject member request');
+    }
+  }
+
+  async getClubRequestDetails(id: string): Promise<ClubRequest> {
+    try {
+      const response = await httpClient.get<ClubRequest>(`/admin/clubs/club-requests/${id}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to fetch event request details');
     }
   }
 }

@@ -1,6 +1,6 @@
 // src/application/services/event.service.ts
 import httpClient from '../../frameworks/api/httpClient';
-import { Event, EventRequest, Participant, EventApiResponse } from '../../domain/types/event';
+import { Event, EventRequest, EventApiResponse } from '../../domain/types/event';
 
 class EventService {
   async getEvents(
@@ -11,7 +11,6 @@ class EventService {
     dateRange?: string
   ): Promise<EventApiResponse> {
     try {
-      console.log('getEvents service input:', { page, limit, type, status, dateRange });
       const params: Record<string, string | number> = {
         page,
         limit
@@ -25,12 +24,10 @@ class EventService {
       }
       if (dateRange && dateRange !== 'All') {
         const [startDate, endDate] = dateRange.split(',');
-        console.log('Parsed date range:', { startDate, endDate });
         params.startDate = startDate;
         params.endDate = endDate;
       }
 
-      console.log('Final request params:', params);
       const response = await httpClient.get<EventApiResponse>('/admin/events', {
         params
       });
@@ -84,7 +81,6 @@ class EventService {
     dateRange?: string
   ): Promise<EventApiResponse> {
     try {
-      console.log('getEventRequests service input:', { page, limit, type, status, dateRange });
       const params: Record<string, string | number> = {
         page,
         limit
@@ -98,12 +94,10 @@ class EventService {
       }
       if (dateRange && dateRange !== 'All') {
         const [startDate, endDate] = dateRange.split(',');
-        console.log('Parsed date range:', { startDate, endDate });
         params.startDate = startDate;
         params.endDate = endDate;
       }
 
-      console.log('Final request params:', params);
       const response = await httpClient.get<EventApiResponse>('/admin/events/requests', {
         params
       });
@@ -130,44 +124,6 @@ class EventService {
     }
   }
 
-  async getParticipants(
-    page: number,
-    limit: number,
-    status?: string
-  ): Promise<EventApiResponse> {
-    try {
-      const response = await httpClient.get<EventApiResponse>('/admin/events/participants', {
-        params: { page, limit, status },
-      });
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch participants');
-    }
-  }
-
-  async approveParticipant(id: string): Promise<void> {
-    try {
-      await httpClient.post(`/admin/events/participants/${id}/approve`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to approve participant');
-    }
-  }
-
-  async rejectParticipant(id: string): Promise<void> {
-    try {
-      await httpClient.post(`/admin/events/participants/${id}/reject`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to reject participant');
-    }
-  }
-
-  async removeParticipant(id: string): Promise<void> {
-    try {
-      await httpClient.delete(`/admin/events/participants/${id}`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to remove participant');
-    }
-  }
 
   async getEventRequestDetails(id: string): Promise<EventRequest> {
     try {

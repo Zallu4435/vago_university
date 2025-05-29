@@ -15,6 +15,7 @@ import Pagination from '../../User/Pagination';
 import WarningModal from '../../../../components/WarningModal';
 import AddClubModal from './AddClubModal';
 import ClubDetailsModal from './ClubDetailsModal';
+import ClubRequestDetailsModal from './ClubRequestDetailsModal';
 import { useClubManagement } from '../../../../../application/hooks/useClubManagement';
 
 const formatDate = (dateString: string): string => {
@@ -30,7 +31,7 @@ const formatDate = (dateString: string): string => {
 };
 
 interface Club {
-  _id: string;
+  id: string;
   name: string;
   type: string;
   members: string;
@@ -63,8 +64,9 @@ interface ClubRequest {
 }
 
 const CATEGORIES = ['All', 'Tech', 'Cultural', 'Sports', 'Arts', 'Academic'];
-const CLUB_TYPES = ['Tech', 'Cultural', 'Sports', 'Arts', 'Academic'];
-const STATUSES = ['All', 'Active', 'Inactive', 'Pending', 'Approved', 'Rejected'];
+const CLUB_STATUSES = ['All', 'Active', 'Inactive'];
+const REQUEST_STATUSES = ['All', 'Pending', 'Approved', 'Rejected'];
+const DATE_RANGES = ['All', 'Last Week', 'Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'];
 const ICONS = ['🎓', '🎨', '⚽', '💻', '🎭', '📚', '🎤', '🎮', '🏆', '🔬'];
 const COLORS = ['#8B5CF6', '#06B6D4', '#EF4444', '#10B981', '#F59E0B', '#EC4899', '#6366F1', '#84CC16', '#F97316', '#DC2626'];
 
@@ -82,7 +84,7 @@ const clubColumns = [
         </span>
         <div>
           <p className="font-medium text-gray-200">{club.name}</p>
-          <p className="text-xs text-gray-400">ID: {club._id}</p>
+          <p className="text-xs text-gray-400">ID: {club.id?.slice(0, 7)}</p>
         </div>
       </div>
     ),
@@ -130,11 +132,10 @@ const clubColumns = [
     key: 'status',
     render: (club: Club) => (
       <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          club.status === 'active'
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${club.status.toLowerCase() === 'active'
             ? 'bg-green-900/30 text-green-400 border-green-500/30'
             : 'bg-red-900/30 text-red-400 border-red-500/30'
-        }`}
+          }`}
       >
         <span
           className="h-1.5 w-1.5 rounded-full mr-1.5"
@@ -153,7 +154,7 @@ const clubRequestColumns = [
     render: (request: ClubRequest) => (
       <div>
         <p className="font-medium text-gray-200">{request.clubName}</p>
-        <p className="text-xs text-gray-400">ID: {request.id}</p>
+        <p className="text-xs text-gray-400">ID: {request.id?.slice(0, 7)}</p>
       </div>
     ),
     width: '20%',
@@ -187,17 +188,16 @@ const clubRequestColumns = [
     key: 'status',
     render: (request: ClubRequest) => (
       <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          request.status === 'pending'
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${request.status.toLowerCase() === 'pending'
             ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
-            : request.status === 'approved'
-            ? 'bg-green-900/30 text-green-400 border-green-500/30'
-            : 'bg-red-900/30 text-red-400 border-red-500/30'
-        }`}
+            : request.status.toLowerCase() === 'approved'
+              ? 'bg-green-900/30 text-green-400 border-green-500/30'
+              : 'bg-red-900/30 text-red-400 border-red-500/30'
+          }`}
       >
         <span
           className="h-1.5 w-1.5 rounded-full mr-1.5"
-          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
+          style={{ boxShadow: '0 0 8px currentColor', backgroundColor: 'currentColor' }}
         ></span>
         {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
       </span>
@@ -222,46 +222,50 @@ const AdminClubManagement: React.FC = () => {
     approveClubRequest,
     rejectClubRequest,
     handleTabChange,
+    getClubDetails,
+    getClubRequestDetails,
+    isLoadingClubDetails,
   } = useClubManagement();
 
-  console.log(clubRequests, 'clubRequests');
-  console.log(clubs, 'clubs');
-
   const [activeTab, setActiveTab] = useState<'clubs' | 'requests'>('clubs');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [showAddClubModal, setShowAddClubModal] = useState(false);
   const [showClubDetailsModal, setShowClubDetailsModal] = useState(false);
   const [selectedClub, setSelectedClub] = useState<Club | ClubRequest | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [itemToAction, setItemToAction] = useState<{
     id: string;
-    type: 'club' | 'clubRequest';
+    type: 'club' | 'request';
     action: 'delete' | 'reject';
   } | null>(null);
+  const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<ClubRequest | null>(null);
 
+  console.log(clubRequests, "clubRequests");
   const filteredClubs = clubs.filter((club) => {
-    const matchesSearch = searchTerm
-      ? club.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        club._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        club.createdBy.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = searchQuery
+      ? club.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      club._id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      club.createdBy?.toLowerCase().includes(searchQuery.toLowerCase())
       : true;
     const matchesCategory =
-      filters.category === 'all' || club.type.toLowerCase() === filters.category.toLowerCase();
+      filters.category === 'All' || club.type?.toLowerCase() === filters.category.toLowerCase();
     const matchesStatus =
-      filters.status === 'all' || club.status.toLowerCase() === filters.status.toLowerCase();
+      filters.status === 'All' || club.status?.toLowerCase() === filters.status.toLowerCase();
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
   const filteredClubRequests = clubRequests.filter((request) => {
-    const matchesSearch = searchTerm
-      ? request.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.requestedBy.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = searchQuery
+      ? request.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request._id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.requestedBy?.toLowerCase().includes(searchQuery.toLowerCase())
       : true;
     const matchesCategory =
-      filters.category === 'all' || request.type.toLowerCase() === filters.category.toLowerCase();
+      filters.category === 'All' || request.type?.toLowerCase() === filters.category.toLowerCase();
+    console.log(matchesCategory, filters.category, request.type, "jijisjij");
     const matchesStatus =
-      filters.status === 'all' || request.status.toLowerCase() === filters.status.toLowerCase();
+      filters.status === 'All' || request.status?.toLowerCase() === filters.status.toLowerCase();
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
@@ -270,14 +274,46 @@ const AdminClubManagement: React.FC = () => {
     setShowAddClubModal(true);
   };
 
-  const handleEditClub = (club: Club) => {
-    setSelectedClub(club);
-    setShowAddClubModal(true);
+  const handleEditClub = async (club: Club) => {
+    try {
+      console.log(club, "kokokkookclub");
+      const id = club.id || club._id;
+      console.log(id, "id");
+      const details = await getClubDetails(id);
+      setSelectedClub(details);
+      setShowAddClubModal(true);
+    } catch (error) {
+      console.error('Error fetching club details:', error);
+      toast.error('Failed to fetch club details');
+    }
   };
 
-  const handleViewClub = (club: Club | ClubRequest) => {
-    setSelectedClub(club);
-    setShowClubDetailsModal(true);
+  const handleViewClub = async (club: Club | ClubRequest) => {
+    try {
+      if ('id' in club) {
+        const details = await getClubDetails(club.id);
+        setSelectedClub(details);
+      } else {
+        setSelectedClub(club);
+      }
+      setShowClubDetailsModal(true);
+    } catch (error) {
+      console.error('Error fetching club details:', error);
+      toast.error('Failed to fetch club details');
+    }
+  };
+
+  const handleViewRequest = async (request: ClubRequest) => {
+    try {
+      console.log('View request clicked:', request);
+      const details = await getClubRequestDetails(request.id);
+      console.log('Request details:', details);
+      setSelectedRequest(details);
+      setShowRequestDetailsModal(true);
+    } catch (error) {
+      console.error('Error fetching request details:', error);
+      toast.error('Failed to fetch request details');
+    }
   };
 
   const handleSaveClub = async (data: Omit<Club, '_id' | 'createdAt'>) => {
@@ -301,7 +337,7 @@ const AdminClubManagement: React.FC = () => {
     setShowWarningModal(true);
   };
 
-  const handleApproveClubRequest = async (id: string) => {
+  const handleApproveRequest = async (id: string) => {
     try {
       await approveClubRequest(id);
       toast.success('Club request approved');
@@ -310,8 +346,8 @@ const AdminClubManagement: React.FC = () => {
     }
   };
 
-  const handleRejectClubRequest = (id: string) => {
-    setItemToAction({ id, type: 'clubRequest', action: 'reject' });
+  const handleRejectRequest = (id: string) => {
+    setItemToAction({ id, type: 'request', action: 'reject' });
     setShowWarningModal(true);
   };
 
@@ -321,7 +357,7 @@ const AdminClubManagement: React.FC = () => {
         if (itemToAction.type === 'club' && itemToAction.action === 'delete') {
           await deleteClub(itemToAction.id);
           toast.success('Club deleted successfully');
-        } else if (itemToAction.type === 'clubRequest' && itemToAction.action === 'reject') {
+        } else if (itemToAction.type === 'request' && itemToAction.action === 'reject') {
           await rejectClubRequest(itemToAction.id);
           toast.success('Club request rejected');
         }
@@ -344,7 +380,9 @@ const AdminClubManagement: React.FC = () => {
     setFilters({
       category: 'All',
       status: 'All',
+      dateRange: 'All',
     });
+    setSearchQuery('');
   };
 
   const clubActions = [
@@ -353,15 +391,17 @@ const AdminClubManagement: React.FC = () => {
       label: 'View Club',
       onClick: handleViewClub,
       color: 'blue' as const,
+      disabled: isLoadingClubDetails,
     },
     {
-      icon: <Edit size={16} />,
+      icon: <Edit />,
       label: 'Edit Club',
       onClick: handleEditClub,
       color: 'green' as const,
+      disabled: isLoadingClubDetails,
     },
     {
-      icon: <Trash2 size={16} />,
+      icon: <Trash2 />,
       label: 'Delete Club',
       onClick: (club: Club) => handleDeleteClub(club._id),
       color: 'red' as const,
@@ -372,22 +412,23 @@ const AdminClubManagement: React.FC = () => {
     {
       icon: <Eye size={16} />,
       label: 'View Request',
-      onClick: handleViewClub,
+      onClick: handleViewRequest,
       color: 'blue' as const,
+      disabled: isLoadingClubDetails,
     },
     {
       icon: <Edit size={16} />,
       label: 'Approve Request',
-      onClick: (request: ClubRequest) => handleApproveClubRequest(request._id),
+      onClick: (request: ClubRequest) => handleApproveRequest(request._id),
       color: 'green' as const,
-      disabled: (request: ClubRequest) => request.status !== 'pending',
+      disabled: (request: ClubRequest) => request.status !== 'pending' || isLoadingClubDetails,
     },
     {
       icon: <Trash2 size={16} />,
       label: 'Reject Request',
-      onClick: (request: ClubRequest) => handleRejectClubRequest(request._id),
+      onClick: (request: ClubRequest) => handleRejectRequest(request._id),
       color: 'red' as const,
-      disabled: (request: ClubRequest) => request.status !== 'pending',
+      disabled: (request: ClubRequest) => request.status !== 'pending' || isLoadingClubDetails,
     },
   ];
 
@@ -442,14 +483,14 @@ const AdminClubManagement: React.FC = () => {
             {
               icon: <Edit />,
               title: 'Pending Requests',
-              value: filteredClubRequests.filter((r) => r.status === 'pending').length.toString(),
+              value: filteredClubRequests.filter((r) => r.status.toLowerCase() === 'pending').length.toString(),
               change: '+5%',
               isPositive: true,
             },
             {
               icon: <Building />,
               title: 'Active Clubs',
-              value: filteredClubs.filter((c) => c.status === 'active').length.toString(),
+              value: filteredClubs.filter((c) => c.status.toLowerCase() === 'active').length.toString(),
               change: '+8%',
               isPositive: true,
             },
@@ -458,13 +499,14 @@ const AdminClubManagement: React.FC = () => {
             { label: 'Clubs', icon: <Building size={16} />, active: activeTab === 'clubs' },
             { label: 'Club Requests', icon: <Edit size={16} />, active: activeTab === 'requests' },
           ]}
-          searchQuery={searchTerm}
-          setSearchQuery={setSearchTerm}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
           searchPlaceholder="Search clubs or requests..."
           filters={filters}
           filterOptions={{
             category: CATEGORIES,
-            status: STATUSES,
+            status: activeTab === 'clubs' ? CLUB_STATUSES : REQUEST_STATUSES,
+            dateRange: DATE_RANGES,
           }}
           debouncedFilterChange={debouncedFilterChange}
           handleResetFilters={handleResetFilters}
@@ -473,6 +515,12 @@ const AdminClubManagement: React.FC = () => {
             const newTab = tabMap[index] as 'clubs' | 'requests';
             setActiveTab(newTab);
             handleTabChange(newTab);
+            setFilters({
+              category: 'All',
+              status: 'All',
+              dateRange: 'All',
+            });
+            setSearchQuery('');
           }}
         />
 
@@ -553,24 +601,27 @@ const AdminClubManagement: React.FC = () => {
         isOpen={showAddClubModal}
         onClose={() => {
           setShowAddClubModal(false);
-          setSelectedClub(null);
         }}
         onSubmit={handleSaveClub}
-        initialData={selectedClub ? {
-          name: selectedClub.name,
-          type: selectedClub.type,
-          members: selectedClub.members,
-          icon: selectedClub.icon,
-          color: selectedClub.color,
-          status: selectedClub.status,
-          role: selectedClub.role,
-          nextMeeting: selectedClub.nextMeeting,
-          about: selectedClub.about,
-          createdBy: selectedClub.createdBy,
-          upcomingEvents: selectedClub.upcomingEvents,
-        } : undefined}
+        initialData={
+          selectedClub
+            ? {
+              name: selectedClub.name,
+              type: selectedClub.type,
+              members: selectedClub.members,
+              icon: selectedClub.icon,
+              color: selectedClub.color,
+              status: selectedClub.status,
+              role: selectedClub.role,
+              nextMeeting: selectedClub.nextMeeting,
+              about: selectedClub.about,
+              createdBy: selectedClub.createdBy,
+              upcomingEvents: selectedClub.upcomingEvents,
+            }
+            : undefined
+        }
         isEditing={!!selectedClub}
-        clubTypes={CLUB_TYPES}
+        clubTypes={CATEGORIES.filter((type) => type !== 'All')}
         roles={['Admin', 'President', 'Advisor']}
         icons={ICONS}
         colors={COLORS}
@@ -578,9 +629,23 @@ const AdminClubManagement: React.FC = () => {
 
       <ClubDetailsModal
         isOpen={showClubDetailsModal}
-        onClose={() => setShowClubDetailsModal(false)}
+        onClose={() => {
+          setShowClubDetailsModal(false);
+          setSelectedClub(null);
+        }}
         club={selectedClub}
         onEdit={handleEditClub}
+      />
+
+      <ClubRequestDetailsModal
+        isOpen={showRequestDetailsModal}
+        onClose={() => {
+          setShowRequestDetailsModal(false);
+          setSelectedRequest(null);
+        }}
+        request={selectedRequest}
+        onApprove={(id) => handleApproveRequest(id)}
+        onReject={(id) => handleRejectRequest(id)}
       />
 
       <WarningModal
@@ -590,11 +655,7 @@ const AdminClubManagement: React.FC = () => {
           setItemToAction(null);
         }}
         onConfirm={handleConfirmAction}
-        title={
-          itemToAction?.type === 'club'
-            ? 'Delete Club'
-            : 'Reject Club Request'
-        }
+        title={itemToAction?.type === 'club' ? 'Delete Club' : 'Reject Club Request'}
         message={
           itemToAction?.type === 'club'
             ? 'Are you sure you want to delete this club? This action cannot be undone.'

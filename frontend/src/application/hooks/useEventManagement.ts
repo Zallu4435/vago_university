@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { eventService } from '../services/event.service';
-import { Event, EventRequest, Participant, EventApiResponse } from '../../domain/types/event';
+import { Event  } from '../../domain/types/event';
 
 interface Filters {
   eventType: string;
@@ -27,7 +27,6 @@ export const useEventManagement = () => {
     const now = new Date();
     const startDate = new Date();
 
-    // Convert to lowercase for case-insensitive comparison
     const range = dateRange.toLowerCase();
 
     switch (range) {
@@ -71,7 +70,7 @@ export const useEventManagement = () => {
         dateRange
       );
     },
-    enabled: activeTab === 'events', // Only fetch events when events tab is active
+    enabled: activeTab === 'events', 
   });
 
   const { data: eventRequestsData, isLoading: isLoadingRequests, error: requestsError } = useQuery({
@@ -86,18 +85,7 @@ export const useEventManagement = () => {
         dateRange
       );
     },
-    enabled: activeTab === 'requests', // Only fetch event requests when requests tab is active
-  });
-
-  const { data: participantsData, isLoading: isLoadingParticipants, error: participantsError } = useQuery({
-    queryKey: ['participants', page, filters, limit],
-    queryFn: () =>
-      eventService.getParticipants(
-        page,
-        limit,
-        filters.status !== 'All' ? filters.status : undefined
-      ),
-    enabled: activeTab === 'participants', // Only fetch participants when participants tab is active
+    enabled: activeTab === 'requests', 
   });
 
   const { mutateAsync: createEvent } = useMutation({
@@ -156,39 +144,6 @@ export const useEventManagement = () => {
     },
   });
 
-  const { mutateAsync: approveParticipant } = useMutation({
-    mutationFn: (id: string) => eventService.approveParticipant(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['participants', 'events'] });
-      toast.success('Participant approved successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to approve participant');
-    },
-  });
-
-  const { mutateAsync: rejectParticipant } = useMutation({
-    mutationFn: (id: string) => eventService.rejectParticipant(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['participants'] });
-      toast.success('Participant rejected successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to reject participant');
-    },
-  });
-
-  const { mutateAsync: removeParticipant } = useMutation({
-    mutationFn: (id: string) => eventService.removeParticipant(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['participants'] });
-      toast.success('Participant removed successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to remove participant');
-    },
-  });
-
   const { mutateAsync: getEventDetails } = useMutation({
     mutationFn: (id: string) => eventService.getEventDetails(id),
     onError: (error: any) => {
@@ -205,9 +160,8 @@ export const useEventManagement = () => {
 
   const handleTabChange = (tab: 'events' | 'requests' | 'participants') => {
     setActiveTab(tab);
-    setPage(1); // Reset page when changing tabs
+    setPage(1); 
 
-    // Trigger the appropriate query based on the active tab
     if (tab === 'events') {
       queryClient.fetchQuery({
         queryKey: ['events', page, filters, limit],
@@ -236,38 +190,24 @@ export const useEventManagement = () => {
           );
         },
       });
-    } else if (tab === 'participants') {
-      queryClient.fetchQuery({
-        queryKey: ['participants', page, filters, limit],
-        queryFn: () =>
-          eventService.getParticipants(
-            page,
-            limit,
-            filters.status !== 'All' ? filters.status : undefined
-          ),
-      });
     }
   };
 
   return {
     events: eventsData?.events || [],
     eventRequests: eventRequestsData?.eventRequests || [],
-    participants: participantsData?.events || [],
     totalPages: activeTab === 'events' ? eventsData?.totalPages || 0 : eventRequestsData?.totalPages || 0,
     page,
     setPage,
     filters,
     setFilters,
-    isLoading: isLoadingEvents || isLoadingRequests || isLoadingParticipants,
-    error: eventsError || requestsError || participantsError,
+    isLoading: isLoadingEvents || isLoadingRequests ,
+    error: eventsError || requestsError,
     createEvent,
     updateEvent,
     deleteEvent,
     approveEventRequest,
     rejectEventRequest,
-    approveParticipant,
-    rejectParticipant,
-    removeParticipant,
     getEventDetails,
     getEventRequestDetails,
     handleTabChange,

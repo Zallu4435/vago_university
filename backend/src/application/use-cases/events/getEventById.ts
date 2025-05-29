@@ -1,10 +1,8 @@
-import { CampusEventModel } from '../../../infrastructure/database/mongoose/models/events.model';
+import { CampusEventModel } from "../../../infrastructure/database/mongoose/models/events.model";
 
 class GetEventById {
   async execute(id: string): Promise<any> {
     try {
-      console.log(`Executing getEventById use case with id:`, id);
-
       const event = await CampusEventModel.findById(id)
         .lean()
         .catch((err) => {
@@ -12,7 +10,7 @@ class GetEventById {
         });
 
       if (!event) {
-        throw new Error('Event not found');
+        throw new Error("Event not found");
       }
 
       return event;

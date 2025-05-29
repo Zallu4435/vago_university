@@ -30,13 +30,6 @@ export interface Event {
     expectedParticipants: number;
   }
   
-  export interface Participant {
-    id: string;
-    name: string;
-    studentId: string;
-    registeredAt: string;
-    status: string;
-  }
   
   export interface EventApiResponse {
     events: Event[];

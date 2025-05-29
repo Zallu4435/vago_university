@@ -143,13 +143,12 @@ const eventColumns = [
     key: 'status',
     render: (event: Event) => (
       <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          event.status === 'upcoming'
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${event.status === 'upcoming'
             ? 'bg-blue-900/30 text-blue-400 border-blue-500/30'
             : event.status === 'completed'
-            ? 'bg-green-900/30 text-green-400 border-green-500/30'
-            : 'bg-red-900/30 text-red-400 border-red-500/30'
-        }`}
+              ? 'bg-green-900/30 text-green-400 border-green-500/30'
+              : 'bg-red-900/30 text-red-400 border-red-500/30'
+          }`}
       >
         <span
           className="h-1.5 w-1.5 rounded-full mr-1.5"
@@ -214,13 +213,12 @@ const eventRequestColumns = [
     key: 'status',
     render: (request: EventRequest) => (
       <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          request.status === 'pending'
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${request.status === 'pending'
             ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
             : request.status === 'approved'
-            ? 'bg-green-900/30 text-green-400 border-green-500/30'
-            : 'bg-red-900/30 text-red-400 border-red-500/30'
-        }`}
+              ? 'bg-green-900/30 text-green-400 border-green-500/30'
+              : 'bg-red-900/30 text-red-400 border-red-500/30'
+          }`}
       >
         <span
           className="h-1.5 w-1.5 rounded-full mr-1.5"
@@ -270,8 +268,8 @@ const AdminEventsManagement: React.FC = () => {
   const filteredEvents = events.filter((event) => {
     const matchesSearch = searchTerm
       ? event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.organizerType?.toLowerCase().includes(searchTerm.toLowerCase())
+      event._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.organizerType?.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
 
     const matchesEventType =
@@ -314,8 +312,8 @@ const AdminEventsManagement: React.FC = () => {
   const filteredEventRequests = eventRequests.filter((request) => {
     const matchesSearch = searchTerm
       ? request.eventName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.requestedBy?.toLowerCase().includes(searchTerm.toLowerCase())
+      request._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.requestedBy?.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
 
     const matchesEventType =
@@ -409,7 +407,6 @@ const AdminEventsManagement: React.FC = () => {
 
   const handleViewRequest = async (request: EventRequest) => {
     try {
-      console.log(request);
       const details = await getEventRequestDetails(request.requestedId);
       setSelectedRequest(details);
       setShowRequestDetailsModal(true);

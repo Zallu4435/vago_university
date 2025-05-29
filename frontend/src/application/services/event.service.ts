@@ -8,14 +8,35 @@ class EventService {
     limit: number,
     type?: string,
     status?: string,
-    organizer?: string
+    dateRange?: string
   ): Promise<EventApiResponse> {
     try {
+      console.log('getEvents service input:', { page, limit, type, status, dateRange });
+      const params: Record<string, string | number> = {
+        page,
+        limit
+      };
+
+      if (type && type !== 'All') {
+        params.type = type;
+      }
+      if (status && status !== 'All') {
+        params.status = status;
+      }
+      if (dateRange && dateRange !== 'All') {
+        const [startDate, endDate] = dateRange.split(',');
+        console.log('Parsed date range:', { startDate, endDate });
+        params.startDate = startDate;
+        params.endDate = endDate;
+      }
+
+      console.log('Final request params:', params);
       const response = await httpClient.get<EventApiResponse>('/admin/events', {
-        params: { page, limit, type, status, organizer },
+        params
       });
       return response.data;
     } catch (error: any) {
+      console.error('getEvents error:', error);
       throw new Error(error.response?.data?.error || 'Failed to fetch events');
     }
   }
@@ -60,32 +81,35 @@ class EventService {
     limit: number,
     type?: string,
     status?: string,
-    organizer?: string
+    dateRange?: string
   ): Promise<EventApiResponse> {
     try {
-      // Only include parameters that have values
+      console.log('getEventRequests service input:', { page, limit, type, status, dateRange });
       const params: Record<string, string | number> = {
         page,
         limit
       };
 
-      if (type && type !== 'All Types') {
+      if (type && type !== 'All') {
         params.type = type;
       }
-      if (status && status !== 'All Statuses') {
+      if (status && status !== 'All') {
         params.status = status;
       }
-      if (organizer && organizer !== 'All Organizers') {
-        params.organizer = organizer;
+      if (dateRange && dateRange !== 'All') {
+        const [startDate, endDate] = dateRange.split(',');
+        console.log('Parsed date range:', { startDate, endDate });
+        params.startDate = startDate;
+        params.endDate = endDate;
       }
 
-      console.log('Fetching event requests with params:', params);
+      console.log('Final request params:', params);
       const response = await httpClient.get<EventApiResponse>('/admin/events/requests', {
         params
       });
       return response.data;
     } catch (error: any) {
-      console.error('Error fetching event requests:', error.response?.data || error);
+      console.error('getEventRequests error:', error);
       throw new Error(error.response?.data?.error || 'Failed to fetch event requests');
     }
   }
@@ -142,6 +166,15 @@ class EventService {
       await httpClient.delete(`/admin/events/participants/${id}`);
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to remove participant');
+    }
+  }
+
+  async getEventRequestDetails(id: string): Promise<EventRequest> {
+    try {
+      const response = await httpClient.get<EventRequest>(`/admin/events/requests/${id}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to fetch event request details');
     }
   }
 }

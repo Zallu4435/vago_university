@@ -1,5 +1,5 @@
 export default function AcademicInfo({ major = "Computer Science", academicStanding = "Good", advisor = "Dr. Emma Wilson" }) {
-    return (
+  return (
       <div className="relative z-0 bg-gradient-to-r from-amber-100 to-orange-100 border-b border-amber-200">
         <div className="absolute inset-0 bg-white/30 backdrop-blur-sm"></div>
         <div className="container mx-auto px-4 py-6 relative z-10">

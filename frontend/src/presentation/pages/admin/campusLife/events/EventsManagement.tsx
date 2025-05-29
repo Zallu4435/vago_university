@@ -18,6 +18,7 @@ import Pagination from '../../User/Pagination';
 import WarningModal from '../../../../components/WarningModal';
 import AddEventModal from './AddEventModal';
 import EventDetailsModal from './EventDetailsModal';
+import EventRequestDetailsModal from './EventRequestDetailsModal';
 import { useEventManagement } from '../../../../../application/hooks/useEventManagement';
 
 const formatDate = (dateString: string): string => {
@@ -34,12 +35,12 @@ const formatDate = (dateString: string): string => {
 
 export interface Event {
   _id: string;
-  name: string;
+  title: string;
   date: string;
   time: string;
-  venue: string;
+  location: string;
   organizerType: string;
-  type: string;
+  eventType: string;
   icon: string;
   color: string;
   description?: string;
@@ -69,28 +70,31 @@ interface EventRequest {
 
 interface Filters {
   [key: string]: string;
-  category: string;
+  eventType: string;
+  dateRange: string;
   status: string;
 }
 
 const EVENT_TYPES = ['All', 'Workshop', 'Seminar', 'Fest', 'Competition', 'Exhibition'];
-const STATUSES = ['All', 'Upcoming', 'Completed', 'Cancelled', 'Pending', 'Approved', 'Rejected'];
+const EVENT_STATUSES = ['All', 'Upcoming', 'Completed', 'Cancelled'];
+const REQUEST_STATUSES = ['All', 'Pending', 'Approved', 'Rejected'];
+const DATE_RANGES = ['All', 'Last Week', 'Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'];
 const ORGANIZERS = ['All', 'Department', 'Club', 'Student'];
 
 const eventColumns = [
   {
     header: 'Event',
-    key: 'name',
+    key: 'title',
     render: (event: Event) => (
       <div>
-        <p className="font-medium text-gray-200">{event.name}</p>
+        <p className="font-medium text-gray-200">{event.title}</p>
         <p className="text-xs text-gray-400">ID: {event._id.slice(0, 7)}</p>
       </div>
     ),
     width: '20%',
   },
   {
-    header: 'Organizer',
+    header: 'Organizer Type',
     key: 'organizerType',
     render: (event: Event) => (
       <div className="flex items-center text-gray-300">
@@ -109,9 +113,9 @@ const eventColumns = [
   },
   {
     header: 'Type',
-    key: 'type',
+    key: 'eventType',
     render: (event: Event) => (
-      <div className="text-sm text-gray-300 capitalize">{event.type}</div>
+      <div className="text-sm text-gray-300 capitalize">{event.eventType}</div>
     ),
   },
   {
@@ -126,11 +130,11 @@ const eventColumns = [
   },
   {
     header: 'Venue',
-    key: 'venue',
+    key: 'location',
     render: (event: Event) => (
       <div className="flex items-center text-gray-300">
         <MapPin size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{event.venue}</span>
+        <span className="text-sm">{event.location}</span>
       </div>
     ),
   },
@@ -164,7 +168,7 @@ const eventRequestColumns = [
     render: (request: EventRequest) => (
       <div>
         <p className="font-medium text-gray-200">{request.eventName}</p>
-        <p className="text-xs text-gray-400">ID: {request.requestedId}</p>
+        <p className="text-xs text-gray-400">ID: {request.requestedId?.slice(0, 7)}</p>
       </div>
     ),
     width: '20%',
@@ -245,13 +249,17 @@ const AdminEventsManagement: React.FC = () => {
     approveEventRequest,
     rejectEventRequest,
     handleTabChange,
+    getEventDetails,
+    getEventRequestDetails,
   } = useEventManagement();
 
   const [activeTab, setActiveTab] = useState<'events' | 'requests'>('events');
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddEventModal, setShowAddEventModal] = useState(false);
   const [showEventDetailsModal, setShowEventDetailsModal] = useState(false);
+  const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | EventRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<EventRequest | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [itemToAction, setItemToAction] = useState<{
     id: string;
@@ -259,34 +267,92 @@ const AdminEventsManagement: React.FC = () => {
     action: 'delete' | 'reject';
   } | null>(null);
 
-  console.log(events, 'events');
-  console.log(eventRequests, 'eventRequests');
-
   const filteredEvents = events.filter((event) => {
     const matchesSearch = searchTerm
-      ? event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.organizerType.toLowerCase().includes(searchTerm.toLowerCase())
+      ? event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.organizerType?.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
-    const matchesCategory =
-      filters.category === 'all' || event.type?.toLowerCase() === filters.category?.toLowerCase();
+
+    const matchesEventType =
+      filters.eventType === 'All' || event.eventType?.toLowerCase() === filters.eventType.toLowerCase();
+
     const matchesStatus =
-      filters.status === 'All Statuses' || event.status?.toLowerCase() === filters.status?.toLowerCase();
-    return matchesSearch && matchesCategory && matchesStatus;
+      filters.status === 'All' || event.status?.toLowerCase() === filters.status.toLowerCase();
+
+    let matchesDateRange = true;
+    if (filters.dateRange && filters.dateRange !== 'All' && event.date) {
+      const eventDate = new Date(event.date);
+      const now = new Date();
+      const diffTime = Math.abs(now.getTime() - eventDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      switch (filters.dateRange) {
+        case 'Last Week':
+          matchesDateRange = diffDays <= 7;
+          break;
+        case 'Last Month':
+          matchesDateRange = diffDays <= 30;
+          break;
+        case 'Last 3 Months':
+          matchesDateRange = diffDays <= 90;
+          break;
+        case 'Last 6 Months':
+          matchesDateRange = diffDays <= 180;
+          break;
+        case 'Last Year':
+          matchesDateRange = diffDays <= 365;
+          break;
+        default:
+          matchesDateRange = true;
+      }
+    }
+
+    return matchesSearch && matchesEventType && matchesStatus && matchesDateRange;
   });
 
   const filteredEventRequests = eventRequests.filter((request) => {
     const matchesSearch = searchTerm
-      ? request.eventName?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
-        request._id?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
-        request.requestedBy?.toLowerCase().includes(searchTerm?.toLowerCase())
+      ? request.eventName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        request._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        request.requestedBy?.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
-    const matchesCategory =
-      filters.organizer === 'All Organizers' || request.type?.toLowerCase() === filters.organizer?.toLowerCase();
+
+    const matchesEventType =
+      filters.eventType === 'All' || request.type?.toLowerCase() === filters.eventType.toLowerCase();
+
     const matchesStatus =
-      filters.status === 'All Statuses' || request.status?.toLowerCase() === filters.status?.toLowerCase();
-    console.log(matchesStatus, 'matchesStatus', filters.status);
-    return matchesSearch && matchesCategory && matchesStatus;
+      filters.status === 'All' || request.status?.toLowerCase() === filters.status.toLowerCase();
+
+    let matchesDateRange = true;
+    if (filters.dateRange && filters.dateRange !== 'All' && request.proposedDate) {
+      const requestDate = new Date(request.proposedDate);
+      const now = new Date();
+      const diffTime = Math.abs(now.getTime() - requestDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      switch (filters.dateRange) {
+        case 'Last Week':
+          matchesDateRange = diffDays <= 7;
+          break;
+        case 'Last Month':
+          matchesDateRange = diffDays <= 30;
+          break;
+        case 'Last 3 Months':
+          matchesDateRange = diffDays <= 90;
+          break;
+        case 'Last 6 Months':
+          matchesDateRange = diffDays <= 180;
+          break;
+        case 'Last Year':
+          matchesDateRange = diffDays <= 365;
+          break;
+        default:
+          matchesDateRange = true;
+      }
+    }
+
+    return matchesSearch && matchesEventType && matchesStatus && matchesDateRange;
   });
 
   const handleAddEvent = () => {
@@ -294,14 +360,30 @@ const AdminEventsManagement: React.FC = () => {
     setShowAddEventModal(true);
   };
 
-  const handleEditEvent = (event: Event) => {
-    setSelectedEvent(event);
-    setShowAddEventModal(true);
+  const handleEditEvent = async (event: Event) => {
+    try {
+      const details = await getEventDetails(event._id);
+      setSelectedEvent(details);
+      setShowAddEventModal(true);
+    } catch (error) {
+      console.error('Error fetching event details:', error);
+      toast.error('Failed to fetch event details');
+    }
   };
 
-  const handleViewEvent = (event: Event | EventRequest) => {
-    setSelectedEvent(event);
-    setShowEventDetailsModal(true);
+  const handleViewEvent = async (event: Event | EventRequest) => {
+    try {
+      if ('_id' in event) {
+        const details = await getEventDetails(event._id);
+        setSelectedEvent(details);
+      } else {
+        setSelectedEvent(event);
+      }
+      setShowEventDetailsModal(true);
+    } catch (error) {
+      console.error('Error fetching event details:', error);
+      toast.error('Failed to fetch event details');
+    }
   };
 
   const handleSaveEvent = async (data: Omit<Event, '_id' | 'createdAt'>) => {
@@ -325,18 +407,38 @@ const AdminEventsManagement: React.FC = () => {
     setShowWarningModal(true);
   };
 
-  const handleApproveEventRequest = async (id: string) => {
+  const handleViewRequest = async (request: EventRequest) => {
+    try {
+      console.log(request);
+      const details = await getEventRequestDetails(request.requestedId);
+      setSelectedRequest(details);
+      setShowRequestDetailsModal(true);
+    } catch (error) {
+      console.error('Error fetching request details:', error);
+      toast.error('Failed to fetch request details');
+    }
+  };
+
+  const handleApproveRequest = async (id: string) => {
     try {
       await approveEventRequest(id);
       toast.success('Event request approved');
+      setShowRequestDetailsModal(false);
+      setSelectedRequest(null);
     } catch (error: any) {
       toast.error(error.message || 'Failed to approve event request');
     }
   };
 
-  const handleRejectEventRequest = (id: string) => {
-    setItemToAction({ id, type: 'eventRequest', action: 'reject' });
-    setShowWarningModal(true);
+  const handleRejectRequest = async (id: string) => {
+    try {
+      await rejectEventRequest(id);
+      toast.success('Event request rejected');
+      setShowRequestDetailsModal(false);
+      setSelectedRequest(null);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to reject event request');
+    }
   };
 
   const handleConfirmAction = async () => {
@@ -357,19 +459,23 @@ const AdminEventsManagement: React.FC = () => {
     }
   };
 
-  const debouncedFilterChange = useCallback(
-    debounce((field: string, value: string) => {
-      setFilters((prev) => ({ ...prev, [field]: value }));
-    }, 300),
-    []
-  );
-
   const handleResetFilters = () => {
     setFilters({
-      category: 'All',
+      eventType: 'All',
+      dateRange: 'All',
       status: 'All',
     });
   };
+
+  const debouncedFilterChange = useCallback(
+    debounce((field: string, value: string) => {
+      setFilters((prev) => ({
+        ...prev,
+        [field]: value || 'All',
+      }));
+    }, 300),
+    []
+  );
 
   const eventActions = [
     {
@@ -396,20 +502,23 @@ const AdminEventsManagement: React.FC = () => {
     {
       icon: <Eye size={16} />,
       label: 'View Request',
-      onClick: handleViewEvent,
+      onClick: handleViewRequest,
       color: 'blue' as const,
     },
     {
       icon: <Edit size={16} />,
       label: 'Approve Request',
-      onClick: (request: EventRequest) => handleApproveEventRequest(request._id),
+      onClick: (request: EventRequest) => handleApproveRequest(request._id),
       color: 'green' as const,
       disabled: (request: EventRequest) => request.status !== 'pending',
     },
     {
       icon: <Trash2 size={16} />,
       label: 'Reject Request',
-      onClick: (request: EventRequest) => handleRejectEventRequest(request._id),
+      onClick: (request: EventRequest) => {
+        setItemToAction({ id: request._id, type: 'eventRequest', action: 'reject' });
+        setShowWarningModal(true);
+      },
       color: 'red' as const,
       disabled: (request: EventRequest) => request.status !== 'pending',
     },
@@ -454,7 +563,7 @@ const AdminEventsManagement: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         <Header
           title="Event Management"
-          subtitle="Manage campus events and event requests"
+          subtitle="Manage campus events and activities"
           stats={[
             {
               icon: <Calendar />,
@@ -464,17 +573,17 @@ const AdminEventsManagement: React.FC = () => {
               isPositive: true,
             },
             {
-              icon: <Edit />,
-              title: 'Pending Requests',
-              value: filteredEventRequests.filter((r) => r.status === 'pending').length.toString(),
-              change: '+5%',
+              icon: <Calendar />,
+              title: 'Upcoming Events',
+              value: filteredEvents.filter((e) => e.status?.toLowerCase() === 'upcoming').length.toString(),
+              change: '+8%',
               isPositive: true,
             },
             {
-              icon: <Calendar />,
-              title: 'Upcoming Events',
-              value: filteredEvents.filter((e) => e.status === 'upcoming').length.toString(),
-              change: '+8%',
+              icon: <Building />,
+              title: 'Department Events',
+              value: filteredEvents.filter((e) => e.organizerType?.toLowerCase() === 'department').length.toString(),
+              change: '+5%',
               isPositive: true,
             },
           ]}
@@ -487,8 +596,9 @@ const AdminEventsManagement: React.FC = () => {
           searchPlaceholder="Search events or requests..."
           filters={filters}
           filterOptions={{
-            category: EVENT_TYPES,
-            status: STATUSES,
+            eventType: EVENT_TYPES,
+            dateRange: DATE_RANGES,
+            status: activeTab === 'events' ? EVENT_STATUSES : REQUEST_STATUSES,
           }}
           debouncedFilterChange={debouncedFilterChange}
           handleResetFilters={handleResetFilters}
@@ -497,6 +607,11 @@ const AdminEventsManagement: React.FC = () => {
             const newTab = tabMap[index] as 'events' | 'requests';
             setActiveTab(newTab);
             handleTabChange(newTab);
+            setFilters({
+              eventType: 'All',
+              dateRange: 'All',
+              status: 'All',
+            });
           }}
         />
 
@@ -581,12 +696,12 @@ const AdminEventsManagement: React.FC = () => {
         }}
         onSubmit={handleSaveEvent}
         initialData={selectedEvent ? {
-          name: selectedEvent.name,
+          title: selectedEvent.title,
           date: selectedEvent.date,
           time: selectedEvent.time,
-          venue: selectedEvent.venue,
+          location: selectedEvent.location,
           organizerType: selectedEvent.organizerType,
-          type: selectedEvent.type,
+          eventType: selectedEvent.eventType,
           icon: selectedEvent.icon,
           color: selectedEvent.color,
           description: selectedEvent.description,
@@ -605,9 +720,23 @@ const AdminEventsManagement: React.FC = () => {
 
       <EventDetailsModal
         isOpen={showEventDetailsModal}
-        onClose={() => setShowEventDetailsModal(false)}
+        onClose={() => {
+          setShowEventDetailsModal(false);
+          setSelectedEvent(null);
+        }}
         event={selectedEvent}
         onEdit={handleEditEvent}
+      />
+
+      <EventRequestDetailsModal
+        isOpen={showRequestDetailsModal}
+        onClose={() => {
+          setShowRequestDetailsModal(false);
+          setSelectedRequest(null);
+        }}
+        request={selectedRequest}
+        onApprove={handleApproveRequest}
+        onReject={handleRejectRequest}
       />
 
       <WarningModal

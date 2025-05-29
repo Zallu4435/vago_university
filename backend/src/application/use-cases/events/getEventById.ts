@@ -6,7 +6,6 @@ class GetEventById {
       console.log(`Executing getEventById use case with id:`, id);
 
       const event = await CampusEventModel.findById(id)
-        .select('name organizer organizerType type date time venue status description maxParticipants registrationRequired participants createdAt')
         .lean()
         .catch((err) => {
           throw new Error(`Failed to query event: ${err.message}`);

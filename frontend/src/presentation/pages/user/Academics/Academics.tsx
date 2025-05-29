@@ -96,6 +96,7 @@ export default function Academics() {
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
     </div>
   );
+  console.log(studentInfo, 'studentInfo');
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100">
@@ -111,6 +112,7 @@ export default function Academics() {
             <LoadingSpinner />
           ) : (
             <CourseRegistration
+              studentInfo={studentInfo || fallbackStudentInfo}
               courses={courses?.courses || fallbackCourses}
               enrolledCredits={0}
               waitlistedCredits={0}

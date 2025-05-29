@@ -12,67 +12,77 @@ import { getParticipants } from "../../application/use-cases/events/getParticipa
 import { approveParticipant } from "../../application/use-cases/events/approveParticipant";
 import { rejectParticipant } from "../../application/use-cases/events/rejectParticipant";
 import { deleteParticipant } from "../../application/use-cases/events/deleteParticipant";
+import { getEventRequestDetails } from "../../application/use-cases/events/getEventRequestDetails";
 
 class EventsController {
   async getEvents(req: Request, res: Response, next: NextFunction) {
-    try {
-      const {
-        page = "1",
-        limit = "10",
-        type = "all",
-        status = "all",
-        organizer = "all",
-      } = req.query;
+  try {
+    const {
+      page = "1",
+      limit = "10",
+      type = "all",
+      status = "all",
+      startDate,
+      endDate,
+    } = req.query;
 
-      // console.log(`Received GET /api/admin/events with filters:`, {
-      //   page,
-      //   limit,
-      //   type,
-      //   status,
-      //   organizer,
-      // });
-
-      if (
-        isNaN(Number(page)) ||
-        isNaN(Number(limit)) ||
-        Number(page) < 1 ||
-        Number(limit) < 1
-      ) {
-        return res.status(400).json({
-          error: "Bad Request",
-          message: "Invalid page or limit parameters",
-          statusCode: 400,
-        });
-      }
-
-      const result = await getEvents.execute({
-        page: Number(page),
-        limit: Number(limit),
-        type: String(type),
-        status: String(status),
-        organizer: String(organizer),
-      });
-
-      res.status(200).json({
-        events: result.events,
-        totalPages: result.totalPages,
-        totalItems: result.totalItems,
-        currentPage: result.currentPage,
-      });
-    } catch (err: any) {
-      console.error(`Error in getEvents:`, err);
-      res.status(500).json({
-        error: "Internal Server Error",
-        message: err.message,
-        statusCode: 500,
+    if (
+      isNaN(Number(page)) ||
+      isNaN(Number(limit)) ||
+      Number(page) < 1 ||
+      Number(limit) < 1
+    ) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid page or limit parameters",
+        statusCode: 400,
       });
     }
+
+    // Validate date parameters if provided
+    if (startDate && isNaN(Date.parse(String(startDate)))) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid startDate format",
+        statusCode: 400,
+      });
+    }
+    if (endDate && isNaN(Date.parse(String(endDate)))) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid endDate format",
+        statusCode: 400,
+      });
+    }
+
+    const result = await getEvents.execute({
+      page: Number(page),
+      limit: Number(limit),
+      type: String(type),
+      status: String(status),
+      startDate: startDate ? new Date(String(startDate)) : undefined,
+      endDate: endDate ? new Date(String(endDate)) : undefined,
+    });
+
+    res.status(200).json({
+      events: result.events,
+      totalPages: result.totalPages,
+      totalItems: result.totalItems,
+      currentPage: result.currentPage,
+    });
+  } catch (err: any) {
+    console.error(`Error in getEvents:`, err);
+    res.status(500).json({
+      error: "Internal Server Error",
+      message: err.message,
+      statusCode: 500,
+    });
   }
+}
 
   async getEventById(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      // console.log(`Received GET /api/admin/events/${id}`);
 
       if (!mongoose.isValidObjectId(id)) {
         return res.status(400).json({
@@ -105,7 +115,6 @@ class EventsController {
   async createEvent(req: Request, res: Response, next: NextFunction) {
     try {
       const eventData = req.body;
-      console.log(`Received POST /api/admin/events with data:`, eventData);
 
       const event = await createEvent.execute(eventData);
       res.status(201).json(event);
@@ -123,7 +132,6 @@ class EventsController {
     try {
       const { id } = req.params;
       const eventData = req.body;
-      console.log(`Received PUT /api/admin/events/${id} with data:`, eventData);
 
       if (!mongoose.isValidObjectId(id)) {
         return res.status(400).json({
@@ -156,7 +164,6 @@ class EventsController {
   async deleteEvent(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      console.log(`Received DELETE /api/admin/events/${id}`);
 
       if (!mongoose.isValidObjectId(id)) {
         return res.status(400).json({
@@ -178,63 +185,77 @@ class EventsController {
     }
   }
 
-  async getEventRequests(req: Request, res: Response, next: NextFunction) {
-    try {
+ async getEventRequests(req: Request, res: Response, next: NextFunction) {
+  try {
+    const {
+      page = "1",
+      limit = "10",
+      type = "all",
+      status = "all",
+      startDate,
+      endDate,
+    } = req.query;
 
-      const {
-        page = "1",
-        limit = "10",
-        type = "all",
-        status = "all",
-        organizer = "all",
-      } = req.query;
+    const pageNumber = parseInt(page as string, 10);
+    const limitNumber = parseInt(limit as string, 10);
 
-      const pageNumber = parseInt(page as string, 10);
-      const limitNumber = parseInt(limit as string, 10);
-
-      if (
-        isNaN(pageNumber) ||
-        isNaN(limitNumber) ||
-        pageNumber < 1 ||
-        limitNumber < 1
-      ) {
-        return res.status(400).json({
-          error: "Bad Request",
-          message: "Invalid page or limit parameters",
-          statusCode: 400,
-        });
-      }
-
-      console.log("reached unde the andndndnnnd")
-
-      const result = await getEventRequests.execute({
-        page: Number(page),
-        limit: Number(limit),
-        type: String(type),
-        status: String(status),
-        organizer: String(organizer),
-      });
-
-      res.status(200).json({
-        eventRequests: result.eventRequests,
-        totalPages: result.totalPages,
-        totalItems: result.totalItems,
-        currentPage: result.currentPage,
-      });
-    } catch (err: any) {
-      console.error(`Error in getEventRequests:`, err);
-      res.status(500).json({
-        error: "Internal Server Error",
-        message: err.message,
-        statusCode: 500,
+    if (
+      isNaN(pageNumber) ||
+      isNaN(limitNumber) ||
+      pageNumber < 1 ||
+      limitNumber < 1
+    ) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid page or limit parameters",
+        statusCode: 400,
       });
     }
+
+    // Validate date parameters if provided
+    if (startDate && isNaN(Date.parse(String(startDate)))) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid startDate format",
+        statusCode: 400,
+      });
+    }
+    if (endDate && isNaN(Date.parse(String(endDate)))) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid endDate format",
+        statusCode: 400,
+      });
+    }
+
+    const result = await getEventRequests.execute({
+      page: pageNumber,
+      limit: limitNumber,
+      type: String(type),
+      status: String(status),
+      startDate: startDate ? new Date(String(startDate)) : undefined,
+      endDate: endDate ? new Date(String(endDate)) : undefined,
+    });
+
+    res.status(200).json({
+      eventRequests: result.eventRequests,
+      totalPages: result.totalPages,
+      totalItems: result.totalItems,
+      currentPage: result.currentPage,
+    });
+  } catch (err: any) {
+    console.error(`Error in getEventRequests:`, err);
+    res.status(500).json({
+      error: "Internal Server Error",
+      message: err.message,
+      statusCode: 500,
+    });
   }
+}
 
   async approveEventRequest(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      console.log(`Received POST /api/admin/events/requests/${id}/approve`);
 
       if (!mongoose.isValidObjectId(id)) {
         return res.status(400).json({
@@ -281,131 +302,24 @@ class EventsController {
     }
   }
 
-  async getParticipants(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { page = "1", limit = "10", status = "all" } = req.query;
-
-      console.log(`Received GET /api/admin/events/participants with filters:`, {
-        page,
-        limit,
-        status,
-      });
-
-      if (
-        isNaN(Number(page)) ||
-        isNaN(Number(limit)) ||
-        Number(page) < 1 ||
-        Number(limit) < 1
-      ) {
-        return res.status(400).json({
-          error: "Bad Request",
-          message: "Invalid page or limit parameters",
-          statusCode: 400,
-        });
-      }
-
-      const result = await getParticipants.execute({
-        page: Number(page),
-        limit: Number(limit),
-        status: String(status),
-      });
-
-      res.status(200).json({
-        participants: result.participants,
-        totalPages: result.totalPages,
-        totalItems: result.totalItems,
-        currentPage: result.currentPage,
-      });
-    } catch (err: any) {
-      console.error(`Error in getParticipants:`, err);
-      res.status(500).json({
-        error: "Internal Server Error",
-        message: err.message,
-        statusCode: 500,
-      });
-    }
-  }
-
-  async approveParticipant(req: Request, res: Response, next: NextFunction) {
+  async getEventRequestDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
-      console.log(`Received POST /api/admin/events/participants/${id}/approve`);
 
       if (!mongoose.isValidObjectId(id)) {
         return res.status(400).json({
-          error: "Bad Request",
-          message: "Invalid participant ID",
+          error: 'Bad Request',
+          message: 'Invalid event request ID',
           statusCode: 400,
         });
       }
 
-      await approveParticipant.execute(id);
-      res.status(200).json({ message: "Participant approved successfully" });
+      const eventRequest = await getEventRequestDetails.execute(id);
+      res.status(200).json({ data: eventRequest });
     } catch (err: any) {
-      console.error(`Error in approveParticipant:`, err);
+      console.error(`Error in getEventRequestDetails:`, err);
       res.status(500).json({
-        error: "Internal Server Error",
-        message: err.message,
-        statusCode: 500,
-      });
-    }
-  }
-
-  async rejectParticipant(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { id } = req.params;
-      const { reason } = req.body;
-      console.log(
-        `Received POST /api/admin/events/participants/${id}/reject with reason:`,
-        reason
-      );
-
-      if (!mongoose.isValidObjectId(id)) {
-        return res.status(400).json({
-          error: "Bad Request",
-          message: "Invalid participant ID",
-          statusCode: 400,
-        });
-      }
-      if (!reason) {
-        return res.status(400).json({
-          error: "Bad Request",
-          message: "Reason is required for rejection",
-          statusCode: 400,
-        });
-      }
-
-      await rejectParticipant.execute({ id, reason });
-      res.status(200).json({ message: "Participant rejected successfully" });
-    } catch (err: any) {
-      console.error(`Error in rejectParticipant:`, err);
-      res.status(500).json({
-        error: "Internal Server Error",
-        message: err.message,
-        statusCode: 500,
-      });
-    }
-  }
-
-  async deleteParticipant(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { id } = req.params;
-      console.log(`Received DELETE /api/admin/events/participants/${id}`);
-
-      if (!mongoose.isValidObjectId(id)) {
-        return res.status(400).json({
-          error: "Bad Request",
-          message: "Invalid participant ID",
-          statusCode: 400,
-        });
-      }
-
-      await deleteParticipant.execute(id);
-      res.status(200).json({ message: "Participant deleted successfully" });
-    } catch (err: any) {
-      console.error(`Error in deleteParticipant:`, err);
-      res.status(500).json({
-        error: "Internal Server Error",
+        error: 'Internal Server Error',
         message: err.message,
         statusCode: 500,
       });

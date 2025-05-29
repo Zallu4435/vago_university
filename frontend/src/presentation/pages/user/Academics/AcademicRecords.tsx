@@ -27,7 +27,7 @@ export default function AcademicRecords({ studentInfo, gradeInfo, academicHistor
               <h3 className="text-lg font-semibold text-gray-800 mb-2 border-b border-amber-200 pb-2">Student Information</h3>
               <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-4 rounded-xl border border-amber-200">
                 <p className="text-gray-600">
-                  Name: {studentInfo.name} | ID: {studentInfo.id} | Major: {studentInfo.major} | Academic Standing: {studentInfo.academicStanding}
+                  Name: {studentInfo.name} | Email: {studentInfo.email} | Major: {studentInfo.major} | Academic Standing: {studentInfo.academicStanding}
                 </p>
               </div>
             </div>

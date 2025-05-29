@@ -151,10 +151,10 @@ const playerRequestColumns = [
     header: 'Student',
     key: 'studentName',
     render: (request: PlayerRequest) => (
-      <div>
+                    <div>
         <p className="font-medium text-gray-200">{request.requestedBy}</p>
         <p className="text-xs text-gray-400">{request.requestId}</p>
-      </div>
+                    </div>
     ),
     width: '25%',
   },
@@ -165,7 +165,7 @@ const playerRequestColumns = [
       <div className="flex items-center text-gray-300">
         <Users size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{request.teamName}</span>
-      </div>
+                  </div>
     ),
   },
   {
@@ -175,7 +175,7 @@ const playerRequestColumns = [
       <div className="flex items-center text-gray-300">
         <Trophy size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{request.type}</span>
-      </div>
+                  </div>
     ),
   },
   {
@@ -260,7 +260,7 @@ const AdminSportsManagement: React.FC = () => {
       team.status?.toLowerCase() === filters.status?.toLowerCase();
     const matchesCoach = filters.coach === 'all' || 
       team.headCoach?.toLowerCase() === filters.coach?.toLowerCase();
-    return matchesSearch && matchesSportType && matchesStatus && matchesCoach;
+      return matchesSearch && matchesSportType && matchesStatus && matchesCoach;
   }) || [];
 
   const filteredPlayerRequests = playerRequests?.filter((request) => {
@@ -299,7 +299,7 @@ const AdminSportsManagement: React.FC = () => {
       } else {
         await createTeam(data);
       }
-      setShowAddTeamModal(false);
+                setShowAddTeamModal(false);
       setSelectedTeam(null);
       setIsEditing(false);
     } catch (error) {
@@ -315,7 +315,7 @@ const AdminSportsManagement: React.FC = () => {
   const handleConfirmDelete = async () => {
     if (itemToDelete) {
       try {
-        await deleteTeam(itemToDelete.id);
+          await deleteTeam(itemToDelete.id);
         setShowDeleteWarning(false);
         setItemToDelete(null);
       } catch (error) {
@@ -340,20 +340,20 @@ const AdminSportsManagement: React.FC = () => {
         await approvePlayerRequest(selectedRequest.requestId);
         setShowApproveWarning(false);
         setSelectedRequest(null);
-      } catch (error) {
-        console.error('Error approving player request:', error);
+    } catch (error) {
+      console.error('Error approving player request:', error);
       }
     }
   };
 
   const handleConfirmReject = async () => {
     if (selectedRequest) {
-      try {
+    try {
         await rejectPlayerRequest(selectedRequest.requestId);
         setShowRejectWarning(false);
         setSelectedRequest(null);
-      } catch (error) {
-        console.error('Error rejecting player request:', error);
+    } catch (error) {
+      console.error('Error rejecting player request:', error);
       }
     }
   };
@@ -418,7 +418,7 @@ const AdminSportsManagement: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-      </div>
+            </div>
     );
   }
 
@@ -434,7 +434,7 @@ const AdminSportsManagement: React.FC = () => {
             Reset and Try Again
           </button>
         </div>
-      </div>
+            </div>
     );
   }
 
@@ -443,8 +443,8 @@ const AdminSportsManagement: React.FC = () => {
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-0 w-96 h-96 bg-purple-900/10 rounded-full blur-3xl"></div>
         <div className="absolute top-3/4 right-0 w-96 h-96 bg-blue-900/10 rounded-full blur-3xl"></div>
-      </div>
-
+            </div>
+            
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         <Header
           title="Sports Management"
@@ -500,13 +500,13 @@ const AdminSportsManagement: React.FC = () => {
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
             <div className="px-6 py-5">
               {activeTab === 'teams' && (
-                <button
+            <button
                   onClick={handleAddTeam}
                   className="mb-6 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200"
-                >
+            >
                   <Plus size={16} />
                   Add Team
-                </button>
+            </button>
               )}
 
               {activeTab === 'teams' && filteredTeams.length > 0 && (
@@ -549,21 +549,21 @@ const AdminSportsManagement: React.FC = () => {
                     <div className="flex flex-col items-center justify-center py-12">
                       <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                         <CheckCircle size={32} className="text-purple-400" />
-                      </div>
+        </div>
                       <h3 className="text-lg font-medium text-white mb-2">No Player Requests Found</h3>
                       <p className="text-gray-400 text-center max-w-md">
                         There are no player requests matching your current filters. Try adjusting your search criteria or create a new team.
-                      </p>
-                    </div>
+                </p>
+              </div>
                   )}
-                </div>
+              </div>
               )}
 
               {activeTab === 'teams' && filteredTeams.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <Users size={32} className="text-purple-400" />
-                  </div>
+            </div>
                   <h3 className="text-lg font-medium text-white mb-2">No Teams Found</h3>
                   <p className="text-gray-400 text-center max-w-md">
                     There are no teams matching your current filters. Try adjusting your search criteria or create a new team.
@@ -575,7 +575,7 @@ const AdminSportsManagement: React.FC = () => {
                     <Plus size={16} />
                     Create New Team
                   </button>
-                </div>
+              </div>
               )}
             </div>
           </div>

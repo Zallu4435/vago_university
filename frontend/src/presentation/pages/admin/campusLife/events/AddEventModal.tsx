@@ -17,7 +17,7 @@ const eventSchema = z.object({
   eventType: z.enum(['workshop', 'seminar', 'fest', 'competition', 'exhibition', 'conference', 'hackathon', 'cultural', 'sports', 'academic'], {
     errorMap: () => ({ message: 'Event type is required' }),
   }),
-  timeframe: z.string().min(1, 'Timeframe is required'),
+  timeframe: z.string().optional(),
   icon: z.string().default('📅'),
   color: z.string().default('#8B5CF6'),
   description: z.string().optional(),

@@ -5,7 +5,7 @@ import {
   FinancialAidApplicationModel,
   ScholarshipModel,
   ScholarshipApplicationModel,
-} from '../../../infrastructure/database/mongoose/models/financial.models';
+} from '../../../infrastructure/database/mongoose/models/financial.model';
 import { v4 as uuidv4 } from 'uuid';
 import { v2 as cloudinary } from 'cloudinary';
 import mongoose from 'mongoose';

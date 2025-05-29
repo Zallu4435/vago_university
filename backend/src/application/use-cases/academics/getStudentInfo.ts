@@ -1,21 +1,10 @@
 import mongoose from 'mongoose';
-import { User as UserModel} from '../../../infrastructure/database/mongoose/models/user.model';
+import { User as UserModel } from '../../../infrastructure/database/mongoose/models/user.model';
 import { ProgramModel } from '../../../infrastructure/database/mongoose/models/studentProgram.model';
 import { EnrollmentModel } from '../../../infrastructure/database/mongoose/models/enrollment.model';
 
 interface GetStudentInfoInput {
   userId: string;
-}
-
-interface Course {
-  code: string;
-  title: string;
-  credits: number;
-  instructor: string;
-  schedule: string;
-  id: number;
-  term: string;
-  section: string;
 }
 
 interface GetStudentInfoOutput {
@@ -26,9 +15,9 @@ interface GetStudentInfoOutput {
   profilePicture?: string;
   major: string;
   catalogYear: string;
-  academicStanding: string; // Placeholder, as not in User or Program schema
-  advisor: string; // Placeholder, as not in User or Program schema
-  enrolledCourses: Course[];
+  academicStanding: string;
+  advisor: string;
+  pendingCredits: number;
 }
 
 class GetStudentInfo {
@@ -41,7 +30,7 @@ class GetStudentInfo {
         throw new Error('Invalid student ID');
       }
 
-      // Fetch user details 
+      // Fetch user details
       const user = await UserModel.findById(userId)
         .select('firstName lastName email phone profilePicture')
         .lean()
@@ -52,9 +41,10 @@ class GetStudentInfo {
       if (!user) {
         throw new Error('Student not found');
       }
+
       // Fetch program details
       const program = await ProgramModel.findOne({ studentId: userId })
-        .select('degree catalogYear')
+        .select('degree catalogYear credits')
         .lean()
         .catch((err) => {
           throw new Error(`Failed to fetch program info: ${err.message}`);
@@ -64,45 +54,42 @@ class GetStudentInfo {
         throw new Error('Program information not found');
       }
 
-      // Fetch approved enrollments and populate course details
-      const enrollments = await EnrollmentModel.find({ 
-        userId, 
-        status: 'Approved' 
+      // Fetch pending enrollments and populate course credits
+      const pendingEnrollments = await EnrollmentModel.find({
+        studentId: userId,
+        status: { $regex: /^pending$/, $options: 'i' }, // Case-insensitive match for 'pending'
       })
-        .select('courseId term section')
         .populate({
           path: 'courseId',
-          select: 'code title credits instructor schedule id',
-          model: 'Course'
+          select: 'credits', // Only need credits for pendingCredits
         })
         .lean()
         .catch((err) => {
           throw new Error(`Failed to fetch enrollments: ${err.message}`);
         });
 
-      // Map enrollments to course details
-      const enrolledCourses = enrollments.map((enrollment) => ({
-        code: enrollment.courseId.code,
-        title: enrollment.courseId.title,
-        credits: enrollment.courseId.credits,
-        instructor: enrollment.courseId.instructor,
-        schedule: enrollment.courseId.schedule,
-        id: enrollment.courseId.id,
-        term: enrollment.term,
-        section: enrollment.section,
-      }));
+        console.log(pendingEnrollments, "pendingEnrollments credits");
+      // Calculate pending credits
+
+      const pendingCredits = pendingEnrollments
+        .filter((enrollment) => enrollment.courseId) // Ensure courseId is populated
+        .reduce((sum, enrollment) => sum + (enrollment.courseId.credits || 0), 0);
+
+
+        console.log(pendingCredits, "pending credits");
 
       return {
-        name: `${user.firstName} ${user.lastName}`,
+        name: `${user.firstName} ${user.lastName}`.trim(),
         id: userId,
         email: user.email,
         phone: user.phone,
         profilePicture: user.profilePicture,
         major: program.degree,
         catalogYear: program.catalogYear,
-        academicStanding: 'Good', // Placeholder, as not in schema
-        advisor: 'Unknown', // Placeholder, as not in schema
-        enrolledCourses,
+        credits: program.credits,
+        academicStanding: 'Good', // Placeholder
+        advisor: 'Unknown', // Placeholder
+        pendingCredits,
       };
     } catch (err) {
       console.error(`Error in getStudentInfo use case:`, err);
@@ -112,4 +99,3 @@ class GetStudentInfo {
 }
 
 export const getStudentInfo = new GetStudentInfo();
-

@@ -5,7 +5,8 @@ interface GetEventsParams {
   limit: number;
   type: string;
   status: string;
-  organizer: string;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 interface GetEventsResponse {
@@ -21,21 +22,35 @@ class GetEvents {
     limit,
     type,
     status,
-    organizer,
+    startDate,
+    endDate,
   }: GetEventsParams): Promise<GetEventsResponse> {
     try {
-      // console.log(`Executing getEvents use case with params:`, {
-      //   page,
-      //   limit,
-      //   type,
-      //   status,
-      //   organizer,
-      // });
+      console.log(`Executing getEvents use case with params:`, {
+        page,
+        limit,
+        type,
+        status,
+        startDate,
+        endDate,
+      });
 
       const query: any = {};
-      if (type !== 'all') query.type = type;
+      if (type !== 'all') query.eventType = type; // Using eventType as per previous update
       if (status !== 'all') query.status = status;
-      if (organizer !== 'all') query.organizer = organizer;
+
+      // Add date range filter if startDate or endDate is provided
+      if (startDate || endDate) {
+        query.date = {};
+        if (startDate) {
+          // Convert startDate to YYYY-MM-DD format
+          query.date.$gte = startDate.toISOString().split('T')[0];
+        }
+        if (endDate) {
+          // Convert endDate to YYYY-MM-DD format
+          query.date.$lte = endDate.toISOString().split('T')[0];
+        }
+      }
 
       const totalItems = await CampusEventModel.countDocuments(query).catch((err) => {
         throw new Error(`Failed to count events: ${err.message}`);
@@ -44,7 +59,7 @@ class GetEvents {
       const skip = (page - 1) * limit;
 
       const events = await CampusEventModel.find(query)
-        .select('title organizer organizerType type date time location status description maxParticipants registrationRequired participants createdAt')
+        .select('title organizerType eventType date location status')
         .skip(skip)
         .limit(limit)
         .lean()

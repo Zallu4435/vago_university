@@ -14,19 +14,21 @@ interface Course {
   currentEnrollment: number;
   description?: string;
   prerequisites?: string[];
+
 }
 
 interface CourseRegistrationProps {
   courses: Course[];
   enrolledCredits: number;
   waitlistedCredits: number;
+  studentInfo: StudentInfo;
 }
 
 interface EnrollmentData {
   reason: string;
 }
 
-export default function CourseRegistration({ courses, enrolledCredits, waitlistedCredits }: CourseRegistrationProps) {
+export default function CourseRegistration({ studentInfo, courses, enrolledCredits, waitlistedCredits }: CourseRegistrationProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,7 +73,7 @@ export default function CourseRegistration({ courses, enrolledCredits, waitliste
           <h3 className="text-lg font-semibold text-gray-800 mb-2">Registration Status</h3>
           <div className="text-gray-600">
             <p className="mb-1">Time Ticket: May 15, 9:00 AM</p>
-            <p>Credits Eligible: 18</p>
+            <p>Credits Eligible: 20</p>
           </div>
         </div>
         <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-4 rounded-xl border border-amber-200 flex flex-col justify-between">
@@ -83,8 +85,8 @@ export default function CourseRegistration({ courses, enrolledCredits, waitliste
         <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-4 rounded-xl border border-amber-200">
           <h3 className="text-lg font-semibold text-gray-800 mb-2">Current Registration</h3>
           <div className="text-gray-600">
-            <p className="mb-1">Enrolled: {enrolledCredits} credits</p>
-            <p>Waitlisted: {waitlistedCredits} credits</p>
+            <p className="mb-1">Enrolled: {20 - Number(studentInfo.credits)} credits</p>
+            <p>Waitlisted: {studentInfo.pendingCredits} credits</p>
           </div>
         </div>
       </div>

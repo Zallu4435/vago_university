@@ -86,7 +86,7 @@ export default function InboxSection() {
                 </div>
               </div>
               <div className="mt-2 flex justify-between items-center text-sm text-gray-500">
-                <span>{message.sender.email}</span>
+                <span>From: {message.sender.email}</span>
                 <span>{new Date(message.createdAt).toLocaleDateString()}</span>
               </div>
             </div>

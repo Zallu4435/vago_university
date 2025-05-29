@@ -1,4 +1,3 @@
-// src/application/hooks/useEventManagement.ts
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
@@ -6,44 +5,88 @@ import { eventService } from '../services/event.service';
 import { Event, EventRequest, Participant, EventApiResponse } from '../../domain/types/event';
 
 interface Filters {
-  type: string;
+  eventType: string;
+  dateRange: string;
   status: string;
-  organizer: string;
 }
 
 export const useEventManagement = () => {
   const queryClient = useQueryClient();
   const [page, setPage] = useState<number>(1);
   const [filters, setFilters] = useState<Filters>({
-    type: 'All Types',
-    status: 'All Statuses',
-    organizer: 'All Organizers',
+    eventType: 'All',
+    dateRange: 'All',
+    status: 'All',
   });
+  const [activeTab, setActiveTab] = useState<'events' | 'requests' | 'participants'>('events');
   const limit = 10;
+
+  const getDateRangeFilter = (dateRange: string): string | undefined => {
+    if (!dateRange || dateRange === 'All') return undefined;
+
+    const now = new Date();
+    const startDate = new Date();
+
+    // Convert to lowercase for case-insensitive comparison
+    const range = dateRange.toLowerCase();
+
+    switch (range) {
+      case 'last_week':
+      case 'last week':
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case 'last_month':
+      case 'last month':
+        startDate.setMonth(now.getMonth() - 1);
+        break;
+      case 'last_3_months':
+      case 'last 3 months':
+        startDate.setMonth(now.getMonth() - 3);
+        break;
+      case 'last_6_months':
+      case 'last 6 months':
+        startDate.setMonth(now.getMonth() - 6);
+        break;
+      case 'last_year':
+      case 'last year':
+        startDate.setFullYear(now.getFullYear() - 1);
+        break;
+      default:
+        return undefined;
+    }
+
+    const dateRangeString = `${startDate.toISOString()},${now.toISOString()}`;
+    return dateRangeString;
+  };
 
   const { data: eventsData, isLoading: isLoadingEvents, error: eventsError } = useQuery({
     queryKey: ['events', page, filters, limit],
-    queryFn: () =>
-      eventService.getEvents(
+    queryFn: () => {
+      const dateRange = getDateRangeFilter(filters.dateRange);
+      return eventService.getEvents(
         page,
         limit,
-        filters.type !== 'All Types' ? filters.type : undefined,
-        filters.status !== 'All Statuses' ? filters.status : undefined,
-        filters.organizer !== 'All Organizers' ? filters.organizer : undefined
-      ),
+        filters.eventType !== 'All' ? filters.eventType : undefined,
+        filters.status !== 'All' ? filters.status : undefined,
+        dateRange
+      );
+    },
+    enabled: activeTab === 'events', // Only fetch events when events tab is active
   });
 
   const { data: eventRequestsData, isLoading: isLoadingRequests, error: requestsError } = useQuery({
     queryKey: ['eventRequests', page, filters, limit],
-    queryFn: () =>
-      eventService.getEventRequests(
+    queryFn: () => {
+      const dateRange = getDateRangeFilter(filters.dateRange);
+      return eventService.getEventRequests(
         page,
         limit,
-        filters.type !== 'All Types' ? filters.type : undefined,
-        filters.status !== 'All Statuses' ? filters.status : undefined,
-        filters.organizer !== 'All Organizers' ? filters.organizer : undefined
-      ),
-    enabled: false,
+        filters.eventType !== 'All' ? filters.eventType : undefined,
+        filters.status !== 'All' ? filters.status : undefined,
+        dateRange
+      );
+    },
+    enabled: activeTab === 'requests', // Only fetch event requests when requests tab is active
   });
 
   const { data: participantsData, isLoading: isLoadingParticipants, error: participantsError } = useQuery({
@@ -52,9 +95,9 @@ export const useEventManagement = () => {
       eventService.getParticipants(
         page,
         limit,
-        filters.status !== 'All Statuses' ? filters.status : undefined
+        filters.status !== 'All' ? filters.status : undefined
       ),
-    enabled: false,
+    enabled: activeTab === 'participants', // Only fetch participants when participants tab is active
   });
 
   const { mutateAsync: createEvent } = useMutation({
@@ -69,7 +112,7 @@ export const useEventManagement = () => {
   });
 
   const { mutateAsync: updateEvent } = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Event> }) => 
+    mutationFn: ({ id, data }: { id: string; data: Partial<Event> }) =>
       eventService.updateEvent(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
@@ -146,46 +189,63 @@ export const useEventManagement = () => {
     },
   });
 
-  // Function to fetch data based on active tab
-  const fetchDataForTab = async (tab: 'events' | 'requests' | 'participants') => {
-    try {
-      switch (tab) {
-        case 'requests':
-          const result = await queryClient.fetchQuery({
-            queryKey: ['eventRequests', page, filters, limit],
-            queryFn: () =>
-              eventService.getEventRequests(
-                page,
-                limit,
-                filters.type !== 'All Types' ? filters.type : undefined,
-                filters.status !== 'All Statuses' ? filters.status : undefined,
-                filters.organizer !== 'All Organizers' ? filters.organizer : undefined
-              ),
-            staleTime: 0,
-          });
-          break;
-        case 'participants':
-          await queryClient.fetchQuery({
-            queryKey: ['participants', page, filters, limit],
-            queryFn: () =>
-              eventService.getParticipants(
-                page,
-                limit,
-                filters.status !== 'All Statuses' ? filters.status : undefined
-              ),
-            staleTime: 0,
-          });
-          break;
-      }
-    } catch (error) {
-      console.error(`Error fetching ${tab} data:`, error);
-      throw error;
-    }
-  };
+  const { mutateAsync: getEventDetails } = useMutation({
+    mutationFn: (id: string) => eventService.getEventDetails(id),
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to fetch event details');
+    },
+  });
+
+  const { mutateAsync: getEventRequestDetails } = useMutation({
+    mutationFn: (id: string) => eventService.getEventRequestDetails(id),
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to fetch event request details');
+    },
+  });
 
   const handleTabChange = (tab: 'events' | 'requests' | 'participants') => {
-    if (tab !== 'events') {
-      fetchDataForTab(tab);
+    setActiveTab(tab);
+    setPage(1); // Reset page when changing tabs
+
+    // Trigger the appropriate query based on the active tab
+    if (tab === 'events') {
+      queryClient.fetchQuery({
+        queryKey: ['events', page, filters, limit],
+        queryFn: () => {
+          const dateRange = getDateRangeFilter(filters.dateRange);
+          return eventService.getEvents(
+            page,
+            limit,
+            filters.eventType !== 'All' ? filters.eventType : undefined,
+            filters.status !== 'All' ? filters.status : undefined,
+            dateRange
+          );
+        },
+      });
+    } else if (tab === 'requests') {
+      queryClient.fetchQuery({
+        queryKey: ['eventRequests', page, filters, limit],
+        queryFn: () => {
+          const dateRange = getDateRangeFilter(filters.dateRange);
+          return eventService.getEventRequests(
+            page,
+            limit,
+            filters.eventType !== 'All' ? filters.eventType : undefined,
+            filters.status !== 'All' ? filters.status : undefined,
+            dateRange
+          );
+        },
+      });
+    } else if (tab === 'participants') {
+      queryClient.fetchQuery({
+        queryKey: ['participants', page, filters, limit],
+        queryFn: () =>
+          eventService.getParticipants(
+            page,
+            limit,
+            filters.status !== 'All' ? filters.status : undefined
+          ),
+      });
     }
   };
 
@@ -193,7 +253,7 @@ export const useEventManagement = () => {
     events: eventsData?.events || [],
     eventRequests: eventRequestsData?.eventRequests || [],
     participants: participantsData?.events || [],
-    totalPages: eventsData?.totalPages || 0,
+    totalPages: activeTab === 'events' ? eventsData?.totalPages || 0 : eventRequestsData?.totalPages || 0,
     page,
     setPage,
     filters,
@@ -208,7 +268,8 @@ export const useEventManagement = () => {
     approveParticipant,
     rejectParticipant,
     removeParticipant,
-    fetchDataForTab,
+    getEventDetails,
+    getEventRequestDetails,
     handleTabChange,
   };
 };

@@ -5,6 +5,7 @@ import { authMiddleware } from '../../shared/middlewares/authMiddleware';
 const router = Router();
 
 router.get('/requests', authMiddleware,eventsController.getEventRequests);
+router.get('/requests/:id', authMiddleware, eventsController.getEventRequestDetails);
 router.post('/requests/:id/approve', authMiddleware, eventsController.approveEventRequest);
 router.post('/requests/:id/reject', authMiddleware, eventsController.rejectEventRequest);
 
@@ -15,12 +16,5 @@ router.post('/', authMiddleware, eventsController.createEvent);
 router.put('/:id', authMiddleware, eventsController.updateEvent);
 router.delete('/:id', authMiddleware, eventsController.deleteEvent);
     
-// Event request management routes
-
-// Participant management routes
-router.get('/participants', authMiddleware, eventsController.getParticipants);
-router.post('/participants/:id/approve', authMiddleware, eventsController.approveParticipant);
-router.post('/participants/:id/reject', authMiddleware, eventsController.rejectParticipant);
-router.delete('/participants/:id', authMiddleware, eventsController.deleteParticipant);
 
 export default router;

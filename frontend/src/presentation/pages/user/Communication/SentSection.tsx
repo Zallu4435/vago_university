@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { useCommunicationManagement } from '../../../../application/hooks/useCommunication';
 import { Message } from '../../../../domain/types/communication';
 import ComposeMessageModal from './ComposeMessageModal';
+import WarningModal from '../../../components/WarningModal';
 
 export default function SentSection() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [isComposing, setIsComposing] = useState(false);
+  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
+  const [messageToDelete, setMessageToDelete] = useState<Message | null>(null);
   const {
     sentMessages,
     isLoadingSent,
@@ -17,10 +20,19 @@ export default function SentSection() {
     setSelectedMessage(message);
   };
 
-  const handleDelete = (messageId: string) => {
-    handleDeleteMessage(messageId, 'sent');
-    if (selectedMessage?.id === messageId) {
-      setSelectedMessage(null);
+  const handleDelete = (message: Message) => {
+    setMessageToDelete(message);
+    setShowDeleteWarning(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (messageToDelete) {
+      handleDeleteMessage(messageToDelete.id, 'sent');
+      if (selectedMessage?.id === messageToDelete.id) {
+        setSelectedMessage(null);
+      }
+      setShowDeleteWarning(false);
+      setMessageToDelete(null);
     }
   };
 
@@ -67,7 +79,7 @@ export default function SentSection() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDelete(message.id);
+                      handleDelete(message);
                     }}
                     className="text-gray-400 hover:text-red-500 transition-colors duration-150"
                   >
@@ -130,6 +142,20 @@ export default function SentSection() {
         isOpen={isComposing} 
         onClose={() => setIsComposing(false)}
         onSend={handleSendMessage}
+      />
+
+      <WarningModal
+        isOpen={showDeleteWarning}
+        onClose={() => {
+          setShowDeleteWarning(false);
+          setMessageToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Delete Message"
+        message={messageToDelete ? `Are you sure you want to delete "${messageToDelete.subject}"? This action cannot be undone.` : ''}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
       />
     </div>
   );

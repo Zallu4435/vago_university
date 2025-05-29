@@ -54,11 +54,6 @@ const STATUSES = ['All Statuses', 'Unread', 'Read', 'Delivered', 'Opened'];
 const USER_GROUPS = [
   { value: 'all-students', label: 'All Students' },
   { value: 'all-faculty', label: 'All Faculty' },
-  { value: 'all-staff', label: 'All Staff' },
-  { value: 'freshman', label: 'Freshman Students' },
-  { value: 'sophomore', label: 'Sophomore Students' },
-  { value: 'junior', label: 'Junior Students' },
-  { value: 'senior', label: 'Senior Students' },
   { value: 'individual', label: 'Individual User' },
 ];
 const ITEMS_PER_PAGE = 10;
@@ -93,7 +88,7 @@ const inboxColumns = [
     render: (message: Message) => (
       <div className="flex items-center text-gray-300">
         <Clock size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{`${message.date} ${message.time}`}</span>
+        <span className="text-sm">{`${message.updatedAt}`}</span>
       </div>
     ),
   },
@@ -143,7 +138,7 @@ const sentColumns = [
     render: (message: Message) => (
       <div className="flex items-center text-gray-300">
         <Clock size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{`${message.date} ${message.time}`}</span>
+        <span className="text-sm">{`${message.updatedAt}`}</span>
       </div>
     ),
   },
@@ -198,6 +193,7 @@ const CommunicationManagement: React.FC = () => {
     handleArchiveMessage,
     handleViewMessage,
     fetchSentMessages,
+    fetchUsers,
   } = useCommunicationManagement({ isAdmin: true }); // Pass isAdmin flag
 
   const [activeTab, setActiveTab] = useState<'inbox' | 'sent' | 'compose'>('inbox');
@@ -206,6 +202,9 @@ const CommunicationManagement: React.FC = () => {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState<Message | null>(null);
+
+  console.log(inboxMessages, "hahahahahhahah");
+  console.log(sentMessages, "kokokokokok");
 
   const handleViewMessageWithModal = (message: Message) => {
     setSelectedMessage(message);
@@ -342,7 +341,7 @@ const CommunicationManagement: React.FC = () => {
             {
               icon: <Users />,
               title: 'Total Recipients',
-              value: sentMessages.reduce((sum, m) => sum + (m.recipients || 1), 0).toString(),
+              value: 0,
               change: '+1250',
               isPositive: true,
             },
@@ -431,16 +430,17 @@ const CommunicationManagement: React.FC = () => {
         initialForm={
           selectedMessage
             ? {
-                to: [{ value: selectedMessage.email!, label: selectedMessage.from! }],
+                to: [{ value: selectedMessage.sender.id, label: selectedMessage.sender.name }],
                 subject: `Re: ${selectedMessage.subject}`,
                 message: '',
                 attachments: [],
+                isAdmin: true
               }
-            : { to: [], subject: '', message: '', attachments: [] }
+            : { to: [], subject: '', message: '', attachments: [], isAdmin: true }
         }
         userGroups={USER_GROUPS}
         onSend={(form) => {
-          handleSendMessage({ ...form, isAdmin: true }); // Pass isAdmin flag
+          handleSendMessage({ ...form, isAdmin: true });
           setShowComposeModal(false);
           setSelectedMessage(null);
         }}
@@ -448,6 +448,7 @@ const CommunicationManagement: React.FC = () => {
           setShowComposeModal(false);
           setSelectedMessage(null);
         }}
+        fetchUsers={fetchUsers}
       />
 
       <MessageDetailsModal

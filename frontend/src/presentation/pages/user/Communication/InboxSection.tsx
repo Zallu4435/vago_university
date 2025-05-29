@@ -3,9 +3,12 @@ import { useCommunicationManagement } from '../../../../application/hooks/useCom
 import { Message } from '../../../../domain/types/communication';
 import { FaSearch, FaChevronRight } from 'react-icons/fa';
 import PropTypes from 'prop-types';
+import WarningModal from '../../../components/WarningModal';
 
 export default function InboxSection() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
+  const [messageToDelete, setMessageToDelete] = useState<Message | null>(null);
   const {
     inboxMessages: messages,
     isLoadingInbox: isLoading,
@@ -20,10 +23,19 @@ export default function InboxSection() {
     }
   };
 
-  const handleDelete = (messageId: string) => {
-    handleDeleteMessage(messageId, 'inbox');
-    if (selectedMessage?.id === messageId) {
-      setSelectedMessage(null);
+  const handleDelete = (message: Message) => {
+    setMessageToDelete(message);
+    setShowDeleteWarning(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (messageToDelete) {
+      handleDeleteMessage(messageToDelete.id, 'inbox');
+      if (selectedMessage?.id === messageToDelete.id) {
+        setSelectedMessage(null);
+      }
+      setShowDeleteWarning(false);
+      setMessageToDelete(null);
     }
   };
 
@@ -63,7 +75,7 @@ export default function InboxSection() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDelete(message.id);
+                      handleDelete(message);
                     }}
                     className="text-gray-400 hover:text-red-500 transition-colors duration-150"
                   >
@@ -74,7 +86,7 @@ export default function InboxSection() {
                 </div>
               </div>
               <div className="mt-2 flex justify-between items-center text-sm text-gray-500">
-                <span>{message.sender.name}</span>
+                <span>{message.sender.email}</span>
                 <span>{new Date(message.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
@@ -111,6 +123,20 @@ export default function InboxSection() {
           </div>
         )}
       </div>
+
+      <WarningModal
+        isOpen={showDeleteWarning}
+        onClose={() => {
+          setShowDeleteWarning(false);
+          setMessageToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Delete Message"
+        message={messageToDelete ? `Are you sure you want to delete "${messageToDelete.subject}"? This action cannot be undone.` : ''}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 }

@@ -8,6 +8,15 @@ interface UseCommunicationManagementProps {
   isAdmin?: boolean;
 }
 
+type RecipientType = 'all_students' | 'all_faculty' | 'all_users' | 'individual_students' | 'individual_faculty';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
 export const useCommunicationManagement = ({ isAdmin = false }: UseCommunicationManagementProps = {}) => {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,7 +58,7 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
   });
 
   const sendMessageMutation = useMutation({
-    mutationFn: (form: MessageForm) => communicationService.sendMessage({ ...form, isAdmin }),
+    mutationFn: (form: MessageForm) => communicationService.sendMessage(form),
     onSuccess: () => {
       sentQuery.refetch();
     },
@@ -69,7 +78,7 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
   });
 
   const handleSendMessage = (form: MessageForm) => {
-    sendMessageMutation.mutate(form);
+    sendMessageMutation.mutate({ ...form, isAdmin });
   };
 
   const handleReplyMessage = (message: Message) => {
@@ -79,8 +88,8 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
       message: '',
       attachments: [],
       isAdmin,
-  });
-};
+    });
+  };
 
   const handleDeleteMessage = (messageId: string, tab: 'inbox' | 'sent') => {
     deleteMessageMutation.mutate(messageId);
@@ -134,12 +143,92 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
       role: 'admin',
       status: msg.status === 'read' ? 'read' : 'unread'
     }],
+    attachments: msg.attachments || [],
     isBroadcast: msg.isBroadcast,
     createdAt: msg.createdAt,
     updatedAt: msg.updatedAt,
     status: msg.status,
     recipientsCount: msg.recipients
   });
+
+  const fetchUsers = useCallback(async (type: RecipientType, search?: string): Promise<User[]> => {
+    try {
+      const users = await communicationService.fetchUsers(type, search);
+      return users;
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      throw error;
+    }
+  }, []);
+
+  const handleSendMessageCallback = useCallback(async (form: MessageForm) => {
+    try {
+      const message = await communicationService.sendMessage(form);
+      sentQuery.refetch();
+      return message;
+    } catch (error) {
+      console.error('Error sending message:', error);
+      throw error;
+    }
+  }, [sentQuery]);
+
+  const handleViewMessageCallback = useCallback(async (message: Message) => {
+    try {
+      await communicationService.markAsRead(message.id, isAdmin);
+      inboxQuery.refetch();
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+    }
+  }, [inboxQuery, isAdmin]);
+
+  const handleDeleteMessageCallback = useCallback(async (messageId: string, type: 'inbox' | 'sent') => {
+    try {
+      await communicationService.deleteMessage(messageId, isAdmin);
+      if (type === 'inbox') {
+        inboxQuery.refetch();
+      } else {
+        sentQuery.refetch();
+      }
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      throw error;
+    }
+  }, [inboxQuery, sentQuery, isAdmin]);
+
+  const loadInboxMessages = useCallback(async () => {
+    try {
+      await communicationService.getInboxMessages({
+        page,
+        limit: ITEMS_PER_PAGE,
+        search: searchTerm || undefined,
+        status: filters.status !== 'All Statuses' ? (filters.status.toLowerCase() as 'read' | 'unread') : undefined,
+        from: filters.from !== 'All Senders' ? filters.from : undefined,
+        isAdmin,
+      });
+      inboxQuery.refetch();
+    } catch (error) {
+      console.error('Error loading inbox messages:', error);
+    }
+  }, [inboxQuery, page, searchTerm, filters, isAdmin]);
+
+  const loadSentMessages = useCallback(async () => {
+    try {
+      await communicationService.getSentMessages({
+        page,
+        limit: ITEMS_PER_PAGE,
+        search: searchTerm || undefined,
+        status:
+          filters.status !== 'All Statuses'
+            ? (filters.status.toLowerCase() as 'read' | 'unread' | 'delivered' | 'opened')
+            : undefined,
+        to: filters.to !== 'All Recipients' ? filters.to : undefined,
+        isAdmin,
+      });
+      sentQuery.refetch();
+    } catch (error) {
+      console.error('Error loading sent messages:', error);
+    }
+  }, [sentQuery, page, searchTerm, filters, isAdmin]);
 
   return {
     inboxMessages: (inboxQuery.data?.messages || []).map(mapMessage),
@@ -162,5 +251,11 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
     fetchSentMessages,
     debouncedSearch,
     debouncedFilterChange,
+    fetchUsers,
+    handleSendMessageCallback,
+    handleViewMessageCallback,
+    handleDeleteMessageCallback,
+    loadInboxMessages,
+    loadSentMessages,
   };
 };

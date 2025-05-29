@@ -20,7 +20,7 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
     initialForm?.to || []
   );
   const [subject, setSubject] = useState(initialForm?.subject || '');
-  const [content, setContent] = useState(initialForm?.content || '');
+  const [message, setMessage] = useState(initialForm?.message || '');
   const [attachments, setAttachments] = useState<string[]>(initialForm?.attachments || []);
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [isLoadingAdmins, setIsLoadingAdmins] = useState(false);
@@ -51,13 +51,13 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
     const form: MessageForm = {
       to: recipients,
       subject,
-      content,
+      message,
       attachments,
       isAdmin: false
     };
     onSend(form);
     setSubject('');
-    setContent('');
+    setMessage('');
     setRecipients([]);
     setAttachments([]);
     onClose();
@@ -126,8 +126,8 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
             <div>
               <label className="block text-sm font-medium text-gray-700">Message</label>
               <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 rows={6}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
                 required

@@ -15,22 +15,6 @@ interface RequestFilters {
   status: string;
 }
 
-interface EnrollmentRequest {
-  id: string;
-  studentName: string;
-  courseTitle: string;
-  requestedAt: string;
-  status: string;
-  specialization: string;
-}
-
-interface EnrollmentResponse {
-  enrollments: EnrollmentRequest[];
-  totalPages: number;
-  totalEnrollments: number;
-  currentPage: number;
-}
-
 export const useCourseManagement = () => {
   const queryClient = useQueryClient();
   const [page, setPage] = useState<number>(1);
@@ -57,7 +41,7 @@ export const useCourseManagement = () => {
       ),
   });
 
-  const { data: enrollmentRequestsData, isLoading: isLoadingRequests } = useQuery<EnrollmentResponse, Error>({
+  const { data: enrollmentRequestsData, isLoading: isLoadingRequests } = useQuery<{ requests: EnrollmentRequest[]; totalPages: number }, Error>({
     queryKey: ['course-enrollments', page, requestFilters, limit],
     queryFn: () =>
       courseService.getEnrollmentRequests(

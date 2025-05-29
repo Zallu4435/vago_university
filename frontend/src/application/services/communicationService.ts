@@ -1,5 +1,13 @@
 import { Message, MessageForm, Admin } from '../../domain/types/communication';
 import httpClient from '../../frameworks/api/httpClient';
+type RecipientType = 'all_students' | 'all_faculty' | 'all_users' | 'individual_students' | 'individual_faculty';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
 
 export class CommunicationService {
   private static instance: CommunicationService;
@@ -53,14 +61,32 @@ export class CommunicationService {
     }
   }
 
+  async fetchUsers(type: RecipientType, search?: string): Promise<User[]> {
+    const response = await httpClient.get(`/communication/admin/users`, {
+      params: {
+        type,
+        search,
+      },
+    });
+    return response.data;
+  }
+
   async sendMessage(form: MessageForm): Promise<Message> {
-    try {
-      const baseUrl = this.getBaseUrl(form.isAdmin || false);
-      const response = await httpClient.post(`${baseUrl}/send`, form);
-      return response.data.data;
-    } catch (error) {
-      throw new Error('Failed to send message');
-    }
+    const formData = new FormData();
+    formData.append('to', JSON.stringify(form.to));
+    formData.append('subject', form.subject);
+    formData.append('message', form.message);
+    form.attachments.forEach((file) => {
+      formData.append('attachments', file);
+    });
+
+    const endpoint = form.isAdmin ? '/communication/admin/messages' : '/communication/admin/messages';
+    const response = await httpClient.post(endpoint, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
   }
 
   async deleteMessage(messageId: string, isAdmin: boolean = false): Promise<void> {
@@ -97,6 +123,10 @@ export class CommunicationService {
     } catch (error) {
       throw new Error('Failed to fetch user groups');
     }
+  }
+
+  async markMessageAsRead(messageId: string): Promise<void> {
+    await httpClient.patch(`/messages/${messageId}/read`);
   }
 }
 

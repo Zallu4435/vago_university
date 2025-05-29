@@ -17,13 +17,20 @@ export interface IMessage extends Document {
     status: 'read' | 'unread';
   }>;
   isBroadcast: boolean;
+  attachments: Array<{
+    filename: string;
+    path: string;
+    contentType: string;
+    size: number;
+    public_id: string;
+  }>;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const MessageSchema = new Schema<IMessage>({
   subject: { type: String, required: true, trim: true },
-  message: { type: String, required: true, trim: true },
+  content: { type: String, required: true, trim: true }, 
   sender: {
     _id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     name: { type: String, required: true, trim: true },
@@ -38,6 +45,13 @@ const MessageSchema = new Schema<IMessage>({
     status: { type: String, enum: ['read', 'unread'], default: 'unread' },
   }],
   isBroadcast: { type: Boolean, default: false },
+  attachments: [{
+    filename: { type: String, required: true },
+    path: { type: String, required: true }, // Cloudinary URL
+    contentType: { type: String, required: true },
+    size: { type: Number, required: true },
+    public_id: { type: String, required: true }, // Cloudinary public_id for file management
+  }],
 }, { timestamps: true });
 
 MessageSchema.index({ 'sender._id': 1, createdAt: -1 });

@@ -1,6 +1,15 @@
 // src/presentation/pages/admin/communication/modals/ComposeMessageModal.tsx
-import React, { useState, useRef } from 'react';
-import { IoAttachOutline as Paperclip, IoCloseOutline as X } from 'react-icons/io5';
+import React, { useState, useRef, useEffect } from 'react';
+import { IoAttachOutline as Paperclip, IoCloseOutline as X, IoSearchOutline as Search } from 'react-icons/io5';
+
+type RecipientType = 'all_students' | 'all_faculty' | 'all_users' | 'individual_students' | 'individual_faculty';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
 
 interface ComposeMessageModalProps {
   initialForm: {
@@ -9,7 +18,6 @@ interface ComposeMessageModalProps {
     message: string;
     attachments: File[];
   };
-  userGroups: { value: string; label: string }[];
   onSend: (form: {
     to: { value: string; label: string }[];
     subject: string;
@@ -18,17 +26,64 @@ interface ComposeMessageModalProps {
   }) => void;
   onCancel: () => void;
   isOpen: boolean;
+  fetchUsers: (type: RecipientType, search?: string) => Promise<User[]>;
 }
+
+const RECIPIENT_TYPES = [
+  { value: 'all_students', label: 'All Students' },
+  { value: 'all_faculty', label: 'All Faculty' },
+  { value: 'all_users', label: 'All Students and Faculty' },
+  { value: 'individual_students', label: 'Individual Students' },
+  { value: 'individual_faculty', label: 'Individual Faculty' },
+];
 
 const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
   initialForm,
-  userGroups,
   onSend,
   onCancel,
   isOpen,
+  fetchUsers,
 }) => {
   const [form, setForm] = useState(initialForm);
+  const [recipientType, setRecipientType] = useState<RecipientType>('all_students');
+  const [users, setUsers] = useState<User[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (recipientType === 'individual_students' || recipientType === 'individual_faculty') {
+      loadUsers();
+    } else {
+      setUsers([]);
+    }
+  }, [recipientType]);
+
+  const loadUsers = async (search?: string) => {
+    if (!isOpen) return;
+    
+    setIsLoadingUsers(true);
+    try {
+      const fetchedUsers = await fetchUsers(recipientType, search);
+      console.log(fetchedUsers?.data, "kokokokokok");
+      setUsers(fetchedUsers?.data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
+  const handleSearch = (value: string) => { 
+    setSearchTerm(value);
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      loadUsers(value);
+    }, 300);
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -54,11 +109,24 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
     setForm({ to: [], subject: '', message: '', attachments: [] });
   };
 
+  const handleRecipientTypeChange = (type: RecipientType) => {
+    setRecipientType(type);
+    if (type === 'all_students' || type === 'all_faculty' || type === 'all_users') {
+      setForm(prev => ({
+        ...prev,
+        to: [{ value: type, label: RECIPIENT_TYPES.find(t => t.value === type)?.label || '' }]
+      }));
+    } else {
+      setForm(prev => ({ ...prev, to: [] }));
+      loadUsers(); // Load users immediately when switching to individual selection
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center">
-      <div className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl mx-4 border border-purple-500/20">
+    <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center overflow-y-auto py-8">
+      <div className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl mx-4 border border-purple-500/20 my-8">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-semibold text-white">
@@ -75,26 +143,107 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
-                To <span className="text-red-400">*</span>
+                Recipient Type <span className="text-red-400">*</span>
               </label>
               <select
-                multiple
-                value={form.to.map((t) => t.value)}
-                onChange={(e) => {
-                  const selected = Array.from(e.target.selectedOptions).map((option) => ({
-                    value: option.value,
-                    label: option.text,
-                  }));
-                  setForm((prev) => ({ ...prev, to: selected }));
-                }}
+                value={recipientType}
+                onChange={(e) => handleRecipientTypeChange(e.target.value as RecipientType)}
                 className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               >
-                {userGroups.map((group) => (
-                  <option key={group.value} value={group.value}>
-                    {group.label}
+                {RECIPIENT_TYPES.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
                   </option>
                 ))}
               </select>
+            </div>
+
+            {(recipientType === 'individual_students' || recipientType === 'individual_faculty') && (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Search Recipients
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    placeholder="Search by name or email..."
+                    className="w-full pl-10 pr-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                </div>
+
+                <div className="mt-2 max-h-60 overflow-y-auto bg-gray-700 rounded-lg">
+                  {isLoadingUsers ? (
+                    <div className="p-4 text-center text-gray-400">Loading...</div>
+                  ) : users?.length > 0 ? (
+                    <div className="divide-y divide-gray-600">
+                      {users.map((user) => (
+                        <div
+                          key={user._id}
+                          className={`p-2 hover:bg-gray-600 cursor-pointer flex items-center justify-between ${
+                            form.to.some(t => t.value === user._id) ? 'bg-purple-900/30' : ''
+                          }`}
+                          onClick={() => {
+                            const isSelected = form.to.some(t => t.value === user._id);
+                            if (isSelected) {
+                              setForm(prev => ({
+                                ...prev,
+                                to: prev.to.filter(t => t.value !== user._id)
+                              }));
+                            } else {
+                              setForm(prev => ({
+                                ...prev,
+                                to: [...prev.to, { value: user._id, label: user.email }]
+                              }));
+                            }
+                          }}
+                        >
+                          <div>
+                            <div className="text-white">{user.name || "user name"}</div>
+                            <div className="text-sm text-gray-400">{user.email}</div>
+                          </div>
+                          {form.to.some(t => t.value === user._id) && (
+                            <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center">
+                              <X size={12} className="text-white" />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center text-gray-400">No users found</div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Selected Recipients
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {form.to.map((recipient) => (
+                  <div
+                    key={recipient.value}
+                    className="flex items-center gap-1 bg-purple-900/30 text-purple-300 px-2 py-1 rounded-full text-sm"
+                  >
+                    <span>{recipient.label}</span>
+                    <button
+                      onClick={() => {
+                        setForm((prev) => ({
+                          ...prev,
+                          to: prev.to.filter((t) => t.value !== recipient.value),
+                        }));
+                      }}
+                      className="hover:text-red-400"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div>

@@ -1,5 +1,5 @@
-import React from 'react';
-import { FiXCircle } from 'react-icons/fi';
+import React, { useState } from 'react';
+import { FiXCircle, FiPlus, FiX } from 'react-icons/fi';
 
 interface CourseFormProps {
   isOpen: boolean;
@@ -22,7 +22,7 @@ const CourseForm: React.FC<CourseFormProps> = ({
   faculties,
   terms,
 }) => {
-  const [formData, setFormData] = React.useState({
+  const [formData, setFormData] = useState({
     title: '',
     description: '',
     specialization: '',
@@ -34,6 +34,41 @@ const CourseForm: React.FC<CourseFormProps> = ({
     term: '',
     ...initialData,
   });
+
+  const [newPrerequisite, setNewPrerequisite] = useState('');
+
+  const handleAddPrerequisite = () => {
+    if (newPrerequisite.trim() && !formData.prerequisites.includes(newPrerequisite.trim())) {
+      setFormData({
+        ...formData,
+        prerequisites: [...formData.prerequisites, newPrerequisite.trim()],
+      });
+      setNewPrerequisite('');
+    }
+  };
+
+  const handleRemovePrerequisite = (prerequisite: string) => {
+    setFormData({
+      ...formData,
+      prerequisites: formData.prerequisites.filter((p) => p !== prerequisite),
+    });
+  };
+
+  const handleSubmit = () => {
+    // Validate required fields
+    if (!formData.title || !formData.specialization || !formData.faculty || !formData.term) {
+      return;
+    }
+
+    // Convert numeric fields to numbers
+    const submitData = {
+      ...formData,
+      credits: Number(formData.credits),
+      maxEnrollment: Number(formData.maxEnrollment),
+    };
+
+    onSubmit(submitData);
+  };
 
   if (!isOpen) return null;
 
@@ -78,6 +113,7 @@ const CourseForm: React.FC<CourseFormProps> = ({
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 className="w-full px-3 py-2 bg-gray-900/50 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                required
               />
             </div>
 
@@ -98,6 +134,7 @@ const CourseForm: React.FC<CourseFormProps> = ({
                   value={formData.specialization}
                   onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
                   className="w-full px-3 py-2 bg-gray-900/50 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                  required
                 >
                   <option value="">Select Specialization</option>
                   {specializations
@@ -117,6 +154,7 @@ const CourseForm: React.FC<CourseFormProps> = ({
                   value={formData.credits}
                   onChange={(e) => setFormData({ ...formData, credits: parseInt(e.target.value) || 0 })}
                   className="w-full px-3 py-2 bg-gray-900/50 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                  min="0"
                 />
               </div>
             </div>
@@ -127,6 +165,7 @@ const CourseForm: React.FC<CourseFormProps> = ({
                 value={formData.faculty}
                 onChange={(e) => setFormData({ ...formData, faculty: e.target.value })}
                 className="w-full px-3 py-2 bg-gray-900/50 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                required
               >
                 <option value="">Select Faculty</option>
                 {faculties
@@ -145,6 +184,7 @@ const CourseForm: React.FC<CourseFormProps> = ({
                 value={formData.term}
                 onChange={(e) => setFormData({ ...formData, term: e.target.value })}
                 className="w-full px-3 py-2 bg-gray-900/50 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                required
               >
                 <option value="">Select Term</option>
                 {terms
@@ -176,7 +216,45 @@ const CourseForm: React.FC<CourseFormProps> = ({
                   value={formData.maxEnrollment}
                   onChange={(e) => setFormData({ ...formData, maxEnrollment: parseInt(e.target.value) || 0 })}
                   className="w-full px-3 py-2 bg-gray-900/50 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                  min="0"
                 />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-purple-300 mb-1">Prerequisites</label>
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newPrerequisite}
+                    onChange={(e) => setNewPrerequisite(e.target.value)}
+                    placeholder="Enter prerequisite course"
+                    className="flex-1 px-3 py-2 bg-gray-900/50 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                  />
+                  <button
+                    onClick={handleAddPrerequisite}
+                    className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  >
+                    <FiPlus size={20} />
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {formData.prerequisites.map((prerequisite, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-1 px-3 py-1 bg-purple-900/30 text-purple-300 rounded-full"
+                    >
+                      <span>{prerequisite}</span>
+                      <button
+                        onClick={() => handleRemovePrerequisite(prerequisite)}
+                        className="text-purple-300 hover:text-white"
+                      >
+                        <FiX size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -189,8 +267,8 @@ const CourseForm: React.FC<CourseFormProps> = ({
               Cancel
             </button>
             <button
-              onClick={() => onSubmit(formData)}
-              className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700"
+              onClick={handleSubmit}
+              className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!formData.title || !formData.specialization || !formData.faculty || !formData.term}
             >
               {isEditing ? 'Update Course' : 'Add Course'}

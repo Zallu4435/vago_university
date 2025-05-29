@@ -4,8 +4,6 @@ interface CourseDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (enrollmentData: {
-    term: string;
-    section: string;
     reason: string;
   }) => void;
   course: {
@@ -32,20 +30,15 @@ export default function CourseDetailsModal({
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [enrollmentData, setEnrollmentData] = useState({
-    term: 'Fall 2025',
-    section: '01',
     reason: ''
   });
 
-  console.log(course);
 
   useEffect(() => {
     if (isOpen) {
       setIsAnimating(true);
       setShowConfirmation(false);
       setEnrollmentData({
-        term: 'Fall 2025',
-        section: '01',
         reason: ''
       });
     }
@@ -234,41 +227,7 @@ export default function CourseDetailsModal({
                     </p>
                   </div>
 
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="term" className="block text-sm font-medium text-gray-700 mb-1">
-                        Term
-                      </label>
-                      <select
-                        id="term"
-                        name="term"
-                        value={enrollmentData.term}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                      >
-                        <option value="Fall 2025">Fall 2025</option>
-                        <option value="Spring 2026">Spring 2026</option>
-                        <option value="Summer 2026">Summer 2026</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label htmlFor="section" className="block text-sm font-medium text-gray-700 mb-1">
-                        Section
-                      </label>
-                      <select
-                        id="section"
-                        name="section"
-                        value={enrollmentData.section}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                      >
-                        <option value="01">Section 01</option>
-                        <option value="02">Section 02</option>
-                        <option value="03">Section 03</option>
-                      </select>
-                    </div>
-
+                  <div className="space-y-4">        
                     <div>
                       <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-1">
                         Reason for Enrollment

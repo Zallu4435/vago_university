@@ -17,7 +17,7 @@ interface RegisterCourseOutput {
 }
 
 class RegisterCourse {
-  async execute({ studentId, courseId, term, section, reason }: RegisterCourseInput): Promise<RegisterCourseOutput> {
+  async execute({ studentId, courseId, reason }: RegisterCourseInput): Promise<RegisterCourseOutput> {
     try {
       console.log(`Executing registerCourse use case for studentId: ${studentId}, courseId: ${courseId}`);
 
@@ -33,7 +33,6 @@ class RegisterCourse {
       const existingEnrollment = await EnrollmentModel.findOne({
         studentId,
         courseId,
-        term,
         status: { $in: ['Pending', 'Approved'] },
       }).lean();
       if (existingEnrollment) {
@@ -43,8 +42,6 @@ class RegisterCourse {
       const enrollment = new EnrollmentModel({
         studentId,
         courseId,
-        term,
-        section,
         status: 'Pending',
         requestedAt: new Date(),
         reason,

@@ -23,8 +23,6 @@ interface CourseRegistrationProps {
 }
 
 interface EnrollmentData {
-  term: string;
-  section: string;
   reason: string;
 }
 
@@ -45,8 +43,6 @@ export default function CourseRegistration({ courses, enrolledCredits, waitliste
         console.log(selectedCourse , 'kaopijoihUSDHaihb')
         await registerForCourse({
           courseId: selectedCourse._id,
-          term: enrollmentData.term,
-          section: enrollmentData.section,
           reason: enrollmentData.reason
         });
         setIsModalOpen(false);

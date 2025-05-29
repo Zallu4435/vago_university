@@ -3,12 +3,32 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { courseService } from '../services/course.service';
-import { Course, CourseApiResponse, CourseDetails } from '../../domain/types/course';
+import { Course, CourseApiResponse, CourseDetails, EnrollmentRequest } from '../../domain/types/course';
 
 interface Filters {
   specialization: string;
   faculty: string;
   term: string;
+}
+
+interface RequestFilters {
+  status: string;
+}
+
+interface EnrollmentRequest {
+  id: string;
+  studentName: string;
+  courseTitle: string;
+  requestedAt: string;
+  status: string;
+  specialization: string;
+}
+
+interface EnrollmentResponse {
+  enrollments: EnrollmentRequest[];
+  totalPages: number;
+  totalEnrollments: number;
+  currentPage: number;
 }
 
 export const useCourseManagement = () => {
@@ -19,9 +39,13 @@ export const useCourseManagement = () => {
     faculty: 'all',
     term: 'all',
   });
+  const [requestFilters, setRequestFilters] = useState<RequestFilters>({
+    status: 'all',
+  });
+  const [activeTab, setActiveTab] = useState<'courses' | 'requests'>('courses');
   const limit = 10;
 
-  const { data, isLoading, error } = useQuery<CourseApiResponse, Error>({
+  const { data: coursesData, isLoading, error } = useQuery<CourseApiResponse, Error>({
     queryKey: ['courses', page, filters, limit],
     queryFn: () =>
       courseService.getCourses(
@@ -31,14 +55,17 @@ export const useCourseManagement = () => {
         filters.faculty !== 'all' ? filters.faculty : undefined,
         filters.term !== 'all' ? filters.term : undefined
       ),
-    keepPreviousData: true,
   });
 
-  const { mutateAsync: getCourseDetails } = useMutation({
-    mutationFn: (id: string) => courseService.getCourseDetails(id),
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to fetch course details');
-    },
+  const { data: enrollmentRequestsData, isLoading: isLoadingRequests } = useQuery<EnrollmentResponse, Error>({
+    queryKey: ['course-enrollments', page, requestFilters, limit],
+    queryFn: () =>
+      courseService.getEnrollmentRequests(
+        page,
+        limit,
+        requestFilters.status !== 'all' ? requestFilters.status : undefined
+      ),
+    enabled: activeTab === 'requests',
   });
 
   const { mutateAsync: createCourse } = useMutation({
@@ -75,44 +102,58 @@ export const useCourseManagement = () => {
     },
   });
 
-  const { mutateAsync: approveEnrollment } = useMutation({
-    mutationFn: ({ courseId, enrollmentId }: { courseId: string; enrollmentId: string }) =>
-      courseService.approveEnrollment(courseId, enrollmentId),
+  const { mutateAsync: approveEnrollmentRequest } = useMutation({
+    mutationFn: (requestId: string) => courseService.approveEnrollmentRequest(requestId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['courses'] });
-      toast.success('Enrollment approved successfully');
+      queryClient.invalidateQueries({ queryKey: ['course-enrollments'] });
+      toast.success('Enrollment request approved successfully');
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to approve enrollment');
+      toast.error(error.message || 'Failed to approve enrollment request');
     },
   });
 
-  const { mutateAsync: rejectEnrollment } = useMutation({
-    mutationFn: ({ courseId, enrollmentId, reason }: { courseId: string; enrollmentId: string; reason: string }) =>
-      courseService.rejectEnrollment(courseId, enrollmentId, reason),
+  const { mutateAsync: rejectEnrollmentRequest } = useMutation({
+    mutationFn: ({ requestId, reason }: { requestId: string; reason: string }) =>
+      courseService.rejectEnrollmentRequest(requestId, reason),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['courses'] });
-      toast.success('Enrollment rejected successfully');
+      queryClient.invalidateQueries({ queryKey: ['course-enrollments'] });
+      toast.success('Enrollment request rejected successfully');
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to reject enrollment');
+      toast.error(error.message || 'Failed to reject enrollment request');
     },
   });
 
+  const { mutateAsync: getEnrollmentRequestDetails } = useMutation({
+    mutationFn: (requestId: string) => courseService.getEnrollmentRequestDetails(requestId),
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to fetch enrollment request details');
+    },
+  });
+
+  console.log(enrollmentRequestsData, 'enrollmentRequestsData');
   return {
-    courses: data?.courses || [],
-    totalPages: data?.totalPages || 0,
+    courses: coursesData?.courses || [],
+    totalPages: coursesData?.totalPages || 0,
     page,
     setPage,
     filters,
     setFilters,
     isLoading,
     error,
-    getCourseDetails,
     createCourse,
     updateCourse,
     deleteCourse,
-    approveEnrollment,
-    rejectEnrollment,
+    enrollmentRequests: enrollmentRequestsData?.enrollments || [],
+    enrollmentRequestsTotalPages: enrollmentRequestsData?.totalPages || 0,
+    isLoadingRequests,
+    approveEnrollmentRequest,
+    rejectEnrollmentRequest,
+    getEnrollmentRequestDetails,
+    requestFilters,
+    setRequestFilters,
+    activeTab,
+    setActiveTab,
   };
 };

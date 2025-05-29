@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { FiPlus, FiEye, FiEdit, FiTrash2, FiBook, FiBriefcase, FiUser, FiHash, FiClock, FiUsers, FiBookOpen, FiClipboard, FiBarChart2 } from 'react-icons/fi';
+import { FiPlus, FiEye, FiEdit, FiTrash2, FiBook, FiBriefcase, FiUser, FiHash, FiClock, FiUsers, FiBookOpen, FiClipboard, FiBarChart2, FiCheck, FiX } from 'react-icons/fi';
 import { useCourseManagement } from '../../../../application/hooks/useCourseManagement';
 import WarningModal from '../../../components/WarningModal';
 import Header from '../User/Header';
@@ -21,6 +21,15 @@ interface Course {
   description?: string;
   prerequisites?: string[];
   term: string;
+}
+
+interface EnrollmentRequest {
+  id: string;
+  studentName: string;
+  courseTitle: string;
+  requestedAt: string;
+  status: string;
+  specialization: string;
 }
 
 const SPECIALIZATIONS = [
@@ -106,6 +115,68 @@ const courseColumns = [
   },
 ];
 
+const enrollmentRequestColumns = [
+  {
+    header: 'Student Name',
+    key: 'studentName',
+    render: (request: EnrollmentRequest) => (
+      <div className="flex items-center text-gray-300">
+        <FiUser size={14} className="text-purple-400 mr-2" />
+        <span className="text-sm">{request.studentName || 'N/A'}</span>
+      </div>
+    ),
+  },
+  {
+    header: 'Course',
+    key: 'courseTitle',
+    render: (request: EnrollmentRequest) => (
+      <div className="flex items-center text-gray-300">
+        <FiBook size={14} className="text-purple-400 mr-2" />
+        <span className="text-sm">{request.courseTitle || 'N/A'}</span>
+      </div>
+    ),
+  },
+  {
+    header: 'Specialization',
+    key: 'specialization',
+    render: (request: EnrollmentRequest) => (
+      <div className="flex items-center text-gray-300">
+        <FiBriefcase size={14} className="text-purple-400 mr-2" />
+        <span className="text-sm">{request.specialization || 'N/A'}</span>
+      </div>
+    ),
+  },
+  {
+    header: 'Requested At',
+    key: 'requestedAt',
+    render: (request: EnrollmentRequest) => (
+      <div className="flex items-center text-gray-300">
+        <FiClock size={14} className="text-purple-400 mr-2" />
+        <span className="text-sm">{new Date(request.requestedAt).toLocaleDateString()}</span>
+      </div>
+    ),
+  },
+  {
+    header: 'Status',
+    key: 'status',
+    render: (request: EnrollmentRequest) => (
+      <div className="flex items-center">
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${
+            request.status === 'Pending'
+              ? 'bg-yellow-500/20 text-yellow-400'
+              : request.status === 'Approved'
+              ? 'bg-green-500/20 text-green-400'
+              : 'bg-red-500/20 text-red-400'
+          }`}
+        >
+          {request.status}
+        </span>
+      </div>
+    ),
+  },
+];
+
 const AdminCourseManagement: React.FC = () => {
   const {
     courses,
@@ -119,9 +190,18 @@ const AdminCourseManagement: React.FC = () => {
     createCourse,
     updateCourse,
     deleteCourse,
+    enrollmentRequests,
+    enrollmentRequestsTotalPages,
+    isLoadingRequests,
+    approveEnrollmentRequest,
+    rejectEnrollmentRequest,
+    getEnrollmentRequestDetails,
+    requestFilters,
+    setRequestFilters,
+    activeTab,
+    setActiveTab,
   } = useCourseManagement();
 
-  const [activeTab, setActiveTab] = useState<'courses' | 'active' | 'analytics'>('courses');
   const [searchTerm, setSearchTerm] = useState('');
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [showCourseDetail, setShowCourseDetail] = useState(false);
@@ -129,7 +209,12 @@ const AdminCourseManagement: React.FC = () => {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
+  const [showApproveWarning, setShowApproveWarning] = useState(false);
+  const [showRejectWarning, setShowRejectWarning] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<EnrollmentRequest | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
 
+  console.log(enrollmentRequests, 'enrollmentRequests');
   const [courseForm, setCourseForm] = useState({
     title: '',
     description: '',
@@ -167,13 +252,7 @@ const AdminCourseManagement: React.FC = () => {
       !filters.term ||
       course.term?.toLowerCase() === filters.term?.toLowerCase();
 
-    // Active tab filter
-    const matchesTab =
-      activeTab === 'courses' ||
-      (activeTab === 'active' && course.currentEnrollment > 0) ||
-      activeTab === 'analytics'; // Analytics tab shows all courses for now
-
-    return matchesSearch && matchesSpecialization && matchesFaculty && matchesTerm && matchesTab;
+    return matchesSearch && matchesSpecialization && matchesFaculty && matchesTerm;
   });
 
   const handleAddCourse = () => {
@@ -213,14 +292,15 @@ const AdminCourseManagement: React.FC = () => {
     setShowCourseDetail(true);
   };
 
-  const handleSaveCourse = async () => {
+  const handleSaveCourse = async (formData: any) => {
     try {
       if (editingCourse) {
-        await updateCourse({ id: editingCourse._id, data: courseForm });
+        await updateCourse({ id: editingCourse._id, data: formData });
       } else {
-        await createCourse(courseForm);
+        await createCourse(formData);
       }
       setShowCourseModal(false);
+      setEditingCourse(null);
     } catch (error) {
       console.error('Error saving course:', error);
     }
@@ -239,6 +319,31 @@ const AdminCourseManagement: React.FC = () => {
         setCourseToDelete(null);
       } catch (error) {
         console.error('Error deleting course:', error);
+      }
+    }
+  };
+
+  const handleConfirmApprove = async () => {
+    if (selectedRequest) {
+      try {
+        await approveEnrollmentRequest(selectedRequest.id);
+        setShowApproveWarning(false);
+        setSelectedRequest(null);
+      } catch (error) {
+        console.error('Error approving request:', error);
+      }
+    }
+  };
+
+  const handleConfirmReject = async () => {
+    if (selectedRequest && rejectReason) {
+      try {
+        await rejectEnrollmentRequest({ requestId: selectedRequest.id, reason: rejectReason });
+        setShowRejectWarning(false);
+        setSelectedRequest(null);
+        setRejectReason('');
+      } catch (error) {
+        console.error('Error rejecting request:', error);
       }
     }
   };
@@ -279,6 +384,38 @@ const AdminCourseManagement: React.FC = () => {
       label: 'Delete Course',
       onClick: handleDeleteCourse,
       color: 'red' as const,
+    },
+  ];
+
+  const enrollmentRequestActions = [
+    {
+      icon: <FiEye size={16} />,
+      label: 'View Details',
+      onClick: (request: EnrollmentRequest) => {
+        setSelectedRequest(request);
+        setShowCourseDetail(true);
+      },
+      color: 'blue' as const,
+    },
+    {
+      icon: <FiCheck size={16} />,
+      label: 'Approve',
+      onClick: (request: EnrollmentRequest) => {
+        setSelectedRequest(request);
+        setShowApproveWarning(true);
+      },
+      color: 'green' as const,
+      disabled: (request: EnrollmentRequest) => request.status.toLowerCase() !== 'pending',
+    },
+    {
+      icon: <FiX size={16} />,
+      label: 'Reject',
+      onClick: (request: EnrollmentRequest) => {
+        setSelectedRequest(request);
+        setShowRejectWarning(true);
+      },
+      color: 'red' as const,
+      disabled: (request: EnrollmentRequest) => request.status.toLowerCase() !== 'pending',
     },
   ];
 
@@ -346,9 +483,8 @@ const AdminCourseManagement: React.FC = () => {
             },
           ]}
           tabs={[
-            { label: 'All Courses', icon: <FiBookOpen size={16} />, active: activeTab === 'courses' },
-            { label: 'Active', icon: <FiClipboard size={16} />, active: activeTab === 'active' },
-            { label: 'Analytics', icon: <FiBarChart2 size={16} />, active: activeTab === 'analytics' },
+            { label: 'Courses', icon: <FiBookOpen size={16} />, active: activeTab === 'courses' },
+            { label: 'Requests', icon: <FiClipboard size={16} />, active: activeTab === 'requests' },
           ]}
           searchQuery={searchTerm}
           setSearchQuery={setSearchTerm}
@@ -362,22 +498,28 @@ const AdminCourseManagement: React.FC = () => {
           debouncedFilterChange={debouncedFilterChange}
           handleResetFilters={handleResetFilters}
           onTabClick={(index) => {
-            const tabMap = ['courses', 'active', 'analytics'];
-            setActiveTab(tabMap[index] as 'courses' | 'active' | 'analytics');
+            const tabMap = ['courses', 'requests'];
+            setActiveTab(tabMap[index] as 'courses' | 'requests');
+            if (tabMap[index] === 'requests') {
+              setPage(1);
+            }
           }}
         />
 
         <div className="mt-8">
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
             <div className="px-6 py-5">
-                          <button
-                onClick={handleAddCourse}
-                className="mb-4 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                          >
-                <FiPlus size={16} />
-                Add Course
-                          </button>
-              {filteredCourses.length > 0 ? (
+              {activeTab === 'courses' && (
+                <button
+                  onClick={handleAddCourse}
+                  className="mb-4 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                  <FiPlus size={16} />
+                  Add Course
+                </button>
+              )}
+
+              {activeTab === 'courses' && filteredCourses.length > 0 && (
                 <>
                   <ApplicationsTable
                     data={filteredCourses}
@@ -394,7 +536,47 @@ const AdminCourseManagement: React.FC = () => {
                     onLastPage={() => setPage(totalPages)}
                   />
                 </>
-              ) : (
+              )}
+
+              {activeTab === 'requests' && (
+                <div className="space-y-8">
+                  <h3 className="text-lg font-medium text-white">Course Enrollment Requests</h3>
+                  {isLoadingRequests ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+                    </div>
+                  ) : enrollmentRequests.length > 0 ? (
+                    <>
+                      <ApplicationsTable
+                        data={enrollmentRequests}
+                        columns={enrollmentRequestColumns}
+                        actions={enrollmentRequestActions}
+                      />
+                      <Pagination
+                        page={page}
+                        totalPages={enrollmentRequestsTotalPages}
+                        itemsCount={enrollmentRequests.length}
+                        itemName="requests"
+                        onPageChange={(newPage) => setPage(newPage)}
+                        onFirstPage={() => setPage(1)}
+                        onLastPage={() => setPage(enrollmentRequestsTotalPages)}
+                      />
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
+                        <FiClipboard size={32} className="text-purple-400" />
+                      </div>
+                      <h3 className="text-lg font-medium text-white mb-1">No Requests Found</h3>
+                      <p className="text-gray-400 text-center max-w-sm">
+                        There are no course enrollment requests at the moment.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'courses' && filteredCourses.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <FiBookOpen size={32} className="text-purple-400" />
@@ -443,6 +625,54 @@ const AdminCourseManagement: React.FC = () => {
         confirmText="Delete"
         cancelText="Cancel"
         type="danger"
+      />
+
+      <WarningModal
+        isOpen={showApproveWarning}
+        onClose={() => {
+          setShowApproveWarning(false);
+          setSelectedRequest(null);
+        }}
+        onConfirm={handleConfirmApprove}
+        title="Approve Enrollment Request"
+        message={selectedRequest ? `Are you sure you want to approve the enrollment request for ${selectedRequest.studentName}?` : ''}
+        confirmText="Approve"
+        cancelText="Cancel"
+        type="success"
+      />
+
+      <WarningModal
+        isOpen={showRejectWarning}
+        onClose={() => {
+          setShowRejectWarning(false);
+          setSelectedRequest(null);
+          setRejectReason('');
+        }}
+        onConfirm={handleConfirmReject}
+        title="Reject Enrollment Request"
+        message={
+          <div className="space-y-4">
+            <p>Are you sure you want to reject the enrollment request for {selectedRequest?.studentName}?</p>
+            <div>
+              <label htmlFor="rejectReason" className="block text-sm font-medium text-gray-300 mb-1">
+                Reason for Rejection
+              </label>
+              <textarea
+                id="rejectReason"
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                rows={3}
+                placeholder="Enter reason for rejection..."
+                required
+              />
+            </div>
+          </div>
+        }
+        confirmText="Reject"
+        cancelText="Cancel"
+        type="danger"
+        disabled={!rejectReason.trim()}
       />
 
       <style jsx>{`

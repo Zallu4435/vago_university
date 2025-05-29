@@ -1,6 +1,6 @@
 // src/application/services/course.service.ts
 import httpClient from '../../frameworks/api/httpClient';
-import { Course, CourseApiResponse, CourseDetails } from '../../domain/types/course';
+import { Course, CourseApiResponse, CourseDetails, EnrollmentRequest } from '../../domain/types/course';
 
 class CourseService {
   async getCourses(
@@ -56,13 +56,12 @@ class CourseService {
   }
 
   async getEnrollmentRequests(
-    courseId: string,
     page: number,
     limit: number,
     status?: string
-  ): Promise<CourseApiResponse> {
+  ): Promise<{ requests: EnrollmentRequest[]; totalPages: number }> {
     try {
-      const response = await httpClient.get<CourseApiResponse>(`/admin/courses/${courseId}/enrollments`, {
+      const response = await httpClient.get<{ requests: EnrollmentRequest[]; totalPages: number }>('/admin/courses/course-enrollments', {
         params: { page, limit, status },
       });
       return response.data;
@@ -71,19 +70,28 @@ class CourseService {
     }
   }
 
-  async approveEnrollment(courseId: string, enrollmentId: string): Promise<void> {
+  async approveEnrollmentRequest(requestId: string): Promise<void> {
     try {
-      await httpClient.post(`/admin/courses/${courseId}/enrollments/${enrollmentId}/approve`);
+      await httpClient.post(`/admin/courses/course-enrollments/${requestId}/approve`);
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to approve enrollment');
+      throw new Error(error.response?.data?.error || 'Failed to approve enrollment request');
     }
   }
 
-  async rejectEnrollment(courseId: string, enrollmentId: string, reason: string): Promise<void> {
+  async rejectEnrollmentRequest(requestId: string, reason: string): Promise<void> {
     try {
-      await httpClient.post(`/admin/courses/${courseId}/enrollments/${enrollmentId}/reject`, { reason });
+      await httpClient.post(`/admin/courses/course-enrollments/${requestId}/reject`, { reason });
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to reject enrollment');
+      throw new Error(error.response?.data?.error || 'Failed to reject enrollment request');
+    }
+  }
+
+  async getEnrollmentRequestDetails(requestId: string): Promise<EnrollmentRequest> {
+    try {
+      const response = await httpClient.get<EnrollmentRequest>(`/admin/courses/course-enrollments/${requestId}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to fetch enrollment request details');
     }
   }
 }

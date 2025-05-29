@@ -15,8 +15,6 @@ export interface IEnrollmentDocument extends Document {
 const EnrollmentSchema = new Schema<IEnrollmentDocument>({
   studentId: { type: Schema.Types.ObjectId, required: true, ref: 'User', index: true },
   courseId: { type: Schema.Types.ObjectId, required: true, ref: 'Course', index: true },
-  term: { type: String, required: true, trim: true, index: true },
-  section: { type: String, required: true, trim: true },
   status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
   requestedAt: { type: Date, default: Date.now },
   reason: { type: String, trim: true },

@@ -220,11 +220,11 @@ class AcademicController {
   async registerCourse(req: Request, res: Response, next: NextFunction) {
     try {
       const { courseId } = req.params;
-      const { term, section } = req.body;
+      const { reason } = req.body;
 
       console.log(
         `Received POST /api/academic/register/${courseId} with body:`,
-        { term, section }
+        { reason }
       );
 
       if (!mongoose.isValidObjectId(courseId)) {
@@ -237,7 +237,7 @@ class AcademicController {
         });
       }
 
-      if (!term || !section) {
+      if (!reason ) {
         return res.status(400).json({
           error: {
             message: "Term and section are required",
@@ -260,8 +260,7 @@ class AcademicController {
       const result = await registerCourse.execute({
         studentId: req.user.id,
         courseId,
-        term,
-        section,
+        reason
       });
 
       res.status(200).json(result);

@@ -131,25 +131,14 @@ class CourseController {
 
   async getEnrollments(req: Request, res: Response, next: NextFunction) {
     try {
-      const { courseId } = req.params;
       const { page = '1', limit = '10', status = 'all' } = req.query;
 
-      console.log(`Received GET /api/admin/courses/${courseId}/enrollments with filters:`, {
-        courseId,
-        page,
-        limit,
-        status,
-      });
 
-      if (!mongoose.isValidObjectId(courseId)) {
-        return res.status(400).json({ error: 'Invalid course ID', code: 400 });
-      }
       if (isNaN(Number(page)) || isNaN(Number(limit)) || Number(page) < 1 || Number(limit) < 1) {
         return res.status(400).json({ error: 'Invalid page or limit parameters', code: 400 });
       }
 
       const result = await getEnrollments.execute({
-        courseId,
         page: Number(page),
         limit: Number(limit),
         status: String(status),
@@ -169,17 +158,13 @@ class CourseController {
 
   async approveEnrollment(req: Request, res: Response, next: NextFunction) {
     try {
-      const { courseId, enrollmentId } = req.params;
-      console.log(`Received POST /api/admin/courses/${courseId}/enrollments/${enrollmentId}/approve`);
+      const { enrollmentId } = req.params;
 
-      if (!mongoose.isValidObjectId(courseId)) {
-        return res.status(400).json({ error: 'Invalid course ID', code: 400 });
-      }
       if (!mongoose.isValidObjectId(enrollmentId)) {
         return res.status(400).json({ error: 'Invalid enrollment ID', code: 400 });
       }
 
-      await approveEnrollment.execute({ courseId, enrollmentId });
+      await approveEnrollment.execute({ enrollmentId });
       res.status(200).json({ message: 'Enrollment approved successfully' });
     } catch (err) {
       console.error(`Error in approveEnrollment:`, err);
@@ -189,13 +174,9 @@ class CourseController {
 
   async rejectEnrollment(req: Request, res: Response, next: NextFunction) {
     try {
-      const { courseId, enrollmentId } = req.params;
+      const { enrollmentId } = req.params;
       const { reason } = req.body; // Removed sanitize
-      console.log(`Received POST /api/admin/courses/${courseId}/enrollments/${enrollmentId}/reject with reason:`, reason);
 
-      if (!mongoose.isValidObjectId(courseId)) {
-        return res.status(400).json({ error: 'Invalid course ID', code: 400 });
-      }
       if (!mongoose.isValidObjectId(enrollmentId)) {
         return res.status(400).json({ error: 'Invalid enrollment ID', code: 400 });
       }
@@ -203,7 +184,7 @@ class CourseController {
         return res.status(400).json({ error: 'Reason is required for rejection', code: 400 });
       }
 
-      await rejectEnrollment.execute({ courseId, enrollmentId, reason });
+      await rejectEnrollment.execute({ enrollmentId, reason });
       res.status(200).json({ message: 'Enrollment rejected successfully' });
     } catch (err) {
       console.error(`Error in rejectEnrollment:`, err);

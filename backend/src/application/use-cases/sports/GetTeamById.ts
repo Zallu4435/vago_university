@@ -1,4 +1,4 @@
-import { TeamModel } from '../../../infrastructure/database/mongoose/models/sports.model';
+import { TeamModel } from "../../../infrastructure/database/mongoose/models/sports.model";
 
 class GetTeamById {
   async execute(id: string): Promise<any> {
@@ -10,7 +10,7 @@ class GetTeamById {
         });
 
       if (!team) {
-        throw new Error('Team not found');
+        throw new Error("Team not found");
       }
 
       return team;

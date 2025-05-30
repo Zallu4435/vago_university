@@ -24,6 +24,7 @@ const CourseSchema = new Schema(
     maxEnrollment: { type: Number, required: true, min: 1 },
     currentEnrollment: { type: Number, default: 0, min: 0 },
     description: { type: String, trim: true },
+    term: {  type: String, trim: true, },
     prerequisites: [{ type: String, trim: true }],
   },
   {

@@ -1,4 +1,4 @@
-import { TeamModel } from '../../../infrastructure/database/mongoose/models/sports.model';
+import { TeamModel } from "../../../infrastructure/database/mongoose/models/sports.model";
 
 interface CreateTeamParams {
   name: string;
@@ -13,9 +13,6 @@ interface CreateTeamParams {
 class CreateTeam {
   async execute(data: CreateTeamParams): Promise<any> {
     try {
-      console.log(`Executing createTeam use case with data:`, data);
-
-      // Make status lowercase
       const normalizedData = {
         ...data,
         status: data.status.toLowerCase(),

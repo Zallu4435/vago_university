@@ -1,6 +1,9 @@
-import mongoose from 'mongoose';
-import { SportRequestModel, TeamModel } from '../../../infrastructure/database/mongoose/models/sports.model';
-import { User as UserModel } from '../../../infrastructure/database/mongoose/models/user.model';
+import mongoose from "mongoose";
+import {
+  SportRequestModel,
+  TeamModel,
+} from "../../../infrastructure/database/mongoose/models/sports.model";
+import { User as UserModel } from "../../../infrastructure/database/mongoose/models/user.model";
 
 interface GetTeamRequestDetailsInput {
   id: string;
@@ -32,35 +35,37 @@ class GetTeamRequestDetails {
   async execute(id: string): Promise<TeamRequestDetails> {
     try {
       if (!mongoose.isValidObjectId(id)) {
-        throw new Error('Invalid team request ID');
+        throw new Error("Invalid team request ID");
       }
 
       const teamRequest = await SportRequestModel.findById(id)
-        .select('sportId userId status whyJoin additionalInfo createdAt updatedAt')
+        .select(
+          "sportId userId status whyJoin additionalInfo createdAt updatedAt"
+        )
         .lean()
         .catch((err) => {
           throw new Error(`Failed to fetch team request: ${err.message}`);
         });
 
       if (!teamRequest) {
-        throw new Error('Team request not found');
+        throw new Error("Team request not found");
       }
 
       const team = await TeamModel.findById(teamRequest.sportId)
-        .select('title type headCoach participants division')
+        .select("title type headCoach participants division")
         .lean()
         .catch((err) => {
           throw new Error(`Failed to fetch team: ${err.message}`);
         });
 
       if (!team) {
-        throw new Error('Associated team not found');
+        throw new Error("Associated team not found");
       }
 
       let user = null;
       if (teamRequest.userId) {
         user = await UserModel.findById(teamRequest.userId)
-          .select('firstName lastName email')
+          .select("firstName lastName email")
           .lean()
           .catch((err) => {
             throw new Error(`Failed to fetch user: ${err.message}`);
@@ -73,14 +78,14 @@ class GetTeamRequestDetails {
         createdAt: teamRequest.createdAt.toISOString(),
         updatedAt: teamRequest.updatedAt.toISOString(),
         whyJoin: teamRequest.whyJoin,
-        additionalInfo: teamRequest.additionalInfo || '',
+        additionalInfo: teamRequest.additionalInfo || "",
         team: {
           id: team._id.toString(),
           name: team.title,
           sportType: team.type,
-          coach: team.headCoach || 'Unknown',
+          coach: team.headCoach || "Unknown",
           playerCount: team.participants || 0,
-          division: team.division || 'N/A',
+          division: team.division || "N/A",
         },
         user: user
           ? {

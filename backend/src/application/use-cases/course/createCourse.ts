@@ -1,4 +1,4 @@
-import { CourseModel } from '../../../infrastructure/database/mongoose/models/course.model';
+import { CourseModel } from "../../../infrastructure/database/mongoose/models/course.model";
 
 interface CreateCourseParams {
   title: string;
@@ -14,8 +14,6 @@ interface CreateCourseParams {
 class CreateCourse {
   async execute(data: CreateCourseParams): Promise<any> {
     try {
-      console.log(`Executing createCourse use case with data:`, data);
-
       const course = await CourseModel.create(data).catch((err) => {
         throw new Error(`Failed to create course: ${err.message}`);
       });

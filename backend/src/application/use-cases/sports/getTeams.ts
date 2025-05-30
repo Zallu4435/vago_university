@@ -5,7 +5,7 @@ interface GetTeamsParams {
   limit: number;
   sportType: string;
   status: string;
-  coach: string; // Expecting a string like "startDate,endDate"
+  coach: string;
 }
 
 interface GetTeamsResponse {

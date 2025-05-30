@@ -8,6 +8,7 @@ import ApplicationsTable from '../User/ApplicationsTable';
 import { debounce } from 'lodash';
 import CourseDetails from './CourseDetails';
 import CourseForm from './CourseForm';
+import EnrollmentRequestDetails from './EnrollmentRequestDetails';
 
 interface Course {
   _id: string;
@@ -24,12 +25,31 @@ interface Course {
 }
 
 interface EnrollmentRequest {
-  id: string;
+  _id: string;
   studentName: string;
   courseTitle: string;
   requestedAt: string;
   status: string;
   specialization: string;
+  term: string;
+  studentId: string;
+  studentEmail: string;
+  studentPhone?: string;
+  reason?: string;
+  previousCourses?: {
+    courseId: string;
+    courseName: string;
+    grade: string;
+    term: string;
+  }[];
+  academicStanding?: {
+    gpa: number;
+    creditsCompleted: number;
+    standing: 'Good' | 'Warning' | 'Probation';
+  };
+  additionalNotes?: string;
+  lastUpdatedAt: string;
+  updatedBy?: string;
 }
 
 const SPECIALIZATIONS = [
@@ -50,6 +70,7 @@ const SPECIALIZATIONS = [
 
 const FACULTIES = ['All Faculties', 'Dr. Sarah Johnson', 'Dr. Michael Chen'];
 const TERMS = ['All Terms', 'Fall 2024', 'Spring 2024', 'Summer 2024'];
+const REQUEST_STATUSES = ['All', 'Pending', 'Approved', 'Rejected'];
 
 const courseColumns = [
   {
@@ -147,6 +168,16 @@ const enrollmentRequestColumns = [
     ),
   },
   {
+    header: 'Term',
+    key: 'term',
+    render: (request: EnrollmentRequest) => (
+      <div className="flex items-center text-gray-300">
+        <FiClock size={14} className="text-purple-400 mr-2" />
+        <span className="text-sm">{request.term || 'N/A'}</span>
+      </div>
+    ),
+  },
+  {
     header: 'Requested At',
     key: 'requestedAt',
     render: (request: EnrollmentRequest) => (
@@ -160,19 +191,21 @@ const enrollmentRequestColumns = [
     header: 'Status',
     key: 'status',
     render: (request: EnrollmentRequest) => (
-      <div className="flex items-center">
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+          request.status === 'Pending'
+            ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
+            : request.status === 'Approved'
+            ? 'bg-green-900/30 text-green-400 border-green-500/30'
+            : 'bg-red-900/30 text-red-400 border-red-500/30'
+        }`}
+      >
         <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
-            request.status === 'Pending'
-              ? 'bg-yellow-500/20 text-yellow-400'
-              : request.status === 'Approved'
-              ? 'bg-green-500/20 text-green-400'
-              : 'bg-red-500/20 text-red-400'
-          }`}
-        >
-          {request.status}
-        </span>
-      </div>
+          className="h-1.5 w-1.5 rounded-full mr-1.5"
+          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
+        ></span>
+        {request.status}
+      </span>
     ),
   },
 ];
@@ -199,105 +232,34 @@ const AdminCourseManagement: React.FC = () => {
     requestFilters,
     setRequestFilters,
     activeTab,
-    setActiveTab,
+    handleTabChange,
+    courseDetails,
+    isLoadingCourseDetails,
+    handleViewCourse,
+    handleEditCourse,
+    requestDetails,
+    isLoadingRequestDetails,
+    handleViewRequest,
   } = useCourseManagement();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [showCourseDetail, setShowCourseDetail] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
+  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
   const [showApproveWarning, setShowApproveWarning] = useState(false);
   const [showRejectWarning, setShowRejectWarning] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<EnrollmentRequest | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [showRequestDetails, setShowRequestDetails] = useState(false);
 
-  console.log(enrollmentRequests, 'enrollmentRequests');
-  const [courseForm, setCourseForm] = useState({
-    title: '',
-    description: '',
-    specialization: '',
-    credits: 0,
-    faculty: '',
-    schedule: '',
-    maxEnrollment: 0,
-    prerequisites: [] as string[],
-    term: '',
-  });
-
-  const filteredCourses = (courses || [])?.filter((course) => {
-    // Search filter
-    const matchesSearch = searchTerm
-      ? course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course._id.toLowerCase().includes(searchTerm.toLowerCase())
-      : true;
-
-    // Specialization filter
-    const matchesSpecialization =
-      filters.specialization === 'all' ||
-      !filters.specialization ||
-      course.specialization?.toLowerCase() === filters.specialization?.toLowerCase();
-
-    // Faculty filter
-    const matchesFaculty =
-      filters.faculty === 'all' ||
-      !filters.faculty ||
-      course.faculty?.toLowerCase() === filters.faculty?.toLowerCase();
-
-    // Term filter
-    const matchesTerm =
-      filters.term === 'all' ||
-      !filters.term ||
-      course.term?.toLowerCase() === filters.term?.toLowerCase();
-
-    return matchesSearch && matchesSpecialization && matchesFaculty && matchesTerm;
-  });
-
-  const handleAddCourse = () => {
-    setEditingCourse(null);
-    setCourseForm({
-      title: '',
-      description: '',
-      specialization: '',
-      credits: 0,
-      faculty: '',
-      schedule: '',
-      maxEnrollment: 0,
-      prerequisites: [],
-      term: '',
-    });
-    setShowCourseModal(true);
-  };
-
-  const handleEditCourse = (course: Course) => {
-    setEditingCourse(course);
-    setCourseForm({
-      title: course.title,
-      description: course.description || '',
-      specialization: course.specialization,
-      credits: course.credits,
-      faculty: course.faculty,
-      schedule: course.schedule,
-      maxEnrollment: course.maxEnrollment,
-      prerequisites: course.prerequisites || [],
-      term: course.term,
-    });
-    setShowCourseModal(true);
-  };
-
-  const handleViewCourse = (course: Course) => {
-    setSelectedCourse(course);
-    setShowCourseDetail(true);
-  };
-
-  const handleSaveCourse = async (formData: any) => {
+  const handleSaveCourse = async (formData: Partial<Course>) => {
     try {
       if (editingCourse) {
         await updateCourse({ id: editingCourse._id, data: formData });
       } else {
-        await createCourse(formData);
+        await createCourse(formData as Omit<Course, '_id' | 'currentEnrollment'>);
       }
       setShowCourseModal(false);
       setEditingCourse(null);
@@ -306,83 +268,33 @@ const AdminCourseManagement: React.FC = () => {
     }
   };
 
-  const handleDeleteCourse = (course: Course) => {
-    setCourseToDelete(course);
-    setShowDeleteWarning(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (courseToDelete) {
-      try {
-        await deleteCourse(courseToDelete._id);
-        setShowDeleteWarning(false);
-        setCourseToDelete(null);
-      } catch (error) {
-        console.error('Error deleting course:', error);
-      }
-    }
-  };
-
-  const handleConfirmApprove = async () => {
-    if (selectedRequest) {
-      try {
-        await approveEnrollmentRequest(selectedRequest.id);
-        setShowApproveWarning(false);
-        setSelectedRequest(null);
-      } catch (error) {
-        console.error('Error approving request:', error);
-      }
-    }
-  };
-
-  const handleConfirmReject = async () => {
-    if (selectedRequest && rejectReason) {
-      try {
-        await rejectEnrollmentRequest({ requestId: selectedRequest.id, reason: rejectReason });
-        setShowRejectWarning(false);
-        setSelectedRequest(null);
-        setRejectReason('');
-      } catch (error) {
-        console.error('Error rejecting request:', error);
-      }
-    }
-  };
-
-  const debouncedFilterChange = useCallback(
-    debounce((field: string, value: string) => {
-      setFilters((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
-    }, 300),
-    []
-  );
-
-  const handleResetFilters = () => {
-    setFilters({
-      specialization: 'All Specializations',
-      faculty: 'All Faculties',
-      term: 'All Terms',
-    });
-  };
-
   const courseActions = [
     {
       icon: <FiEye size={16} />,
       label: 'View Course',
-      onClick: handleViewCourse,
+      onClick: (course: Course) => {
+        handleViewCourse(course._id);
+        setShowCourseDetail(true);
+      },
       color: 'blue' as const,
     },
     {
       icon: <FiEdit size={16} />,
       label: 'Edit Course',
-      onClick: handleEditCourse,
+      onClick: (course: Course) => {
+        handleEditCourse(course._id);
+        setEditingCourse(course);
+        setShowCourseModal(true);
+      },
       color: 'green' as const,
     },
     {
       icon: <FiTrash2 size={16} />,
       label: 'Delete Course',
-      onClick: handleDeleteCourse,
+      onClick: (course: Course) => {
+        setCourseToDelete(course);
+        setShowDeleteWarning(true);
+      },
       color: 'red' as const,
     },
   ];
@@ -392,8 +304,8 @@ const AdminCourseManagement: React.FC = () => {
       icon: <FiEye size={16} />,
       label: 'View Details',
       onClick: (request: EnrollmentRequest) => {
-        setSelectedRequest(request);
-        setShowCourseDetail(true);
+        handleViewRequest(request.id);
+        setShowRequestDetails(true);
       },
       color: 'blue' as const,
     },
@@ -419,8 +331,85 @@ const AdminCourseManagement: React.FC = () => {
     },
   ];
 
+  const debouncedFilterChange = useCallback(
+    debounce((field: string, value: string) => {
+      if (activeTab === 'courses') {
+        setFilters((prev) => ({
+          ...prev,
+          [field]: value,
+        }));
+      } else {
+        setRequestFilters((prev) => ({
+          ...prev,
+          [field]: value,
+        }));
+      }
+      setPage(1); // Reset to first page on filter change
+    }, 300),
+    [setFilters, setRequestFilters, activeTab]
+  );
+
+  const handleResetFilters = () => {
+    if (activeTab === 'courses') {
+      setFilters({
+        specialization: 'All Specializations',
+        faculty: 'All Faculties',
+        term: 'All Terms',
+      });
+    } else {
+      setRequestFilters({
+        status: 'All',
+        specialization: 'All Specializations',
+        term: 'All Terms',
+      });
+    }
+    setPage(1);
+  };
+
+  const handleAddCourse = () => {
+    setEditingCourse(null);
+    setShowCourseModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (courseToDelete) {
+      try {
+        await deleteCourse(courseToDelete._id);
+        setShowDeleteWarning(false);
+        setCourseToDelete(null);
+      } catch (error) {
+        console.error('Error deleting course:', error);
+      }
+    }
+  };
+
+  const handleConfirmApprove = async () => {
+    if (selectedRequest) {
+      try {
+        await approveEnrollmentRequest(selectedRequest._id);
+        setShowApproveWarning(false);
+        setSelectedRequest(null);
+      } catch (error) {
+        console.error('Error approving request:', error);
+      }
+    }
+  };
+
+  const handleConfirmReject = async () => {
+    if (selectedRequest && rejectReason) {
+      try {
+        await rejectEnrollmentRequest({ requestId: selectedRequest._id, reason: rejectReason });
+        setShowRejectWarning(false);
+        setSelectedRequest(null);
+        setRejectReason('');
+      } catch (error) {
+        console.error('Error rejecting request:', error);
+      }
+    }
+  };
+
   if (isLoading) {
-  return (
+    return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
       </div>
@@ -463,14 +452,14 @@ const AdminCourseManagement: React.FC = () => {
             {
               icon: <FiBookOpen />,
               title: 'Total Courses',
-              value: courses?.length || '0',
+              value: courses?.length.toString() || '0',
               change: '+5.2%',
               isPositive: true,
             },
             {
               icon: <FiClipboard />,
               title: 'Active Courses',
-              value: courses?.filter((c) => c.currentEnrollment > 0).length || '0',
+              value: courses?.filter((c) => c.currentEnrollment > 0).length.toString() || '0',
               change: '+2.1%',
               isPositive: true,
             },
@@ -488,21 +477,26 @@ const AdminCourseManagement: React.FC = () => {
           ]}
           searchQuery={searchTerm}
           setSearchQuery={setSearchTerm}
-          searchPlaceholder="Search courses..."
-          filters={filters}
-          filterOptions={{
-            specialization: SPECIALIZATIONS,
-            faculty: FACULTIES,
-            term: TERMS,
-          }}
+          searchPlaceholder="Search courses or requests..."
+          filters={activeTab === 'courses' ? filters : requestFilters}
+          filterOptions={
+            activeTab === 'courses'
+              ? {
+                  specialization: SPECIALIZATIONS,
+                  faculty: FACULTIES,
+                  term: TERMS,
+                }
+              : {
+                  status: REQUEST_STATUSES,
+                  specialization: SPECIALIZATIONS,
+                  term: TERMS,
+                }
+          }
           debouncedFilterChange={debouncedFilterChange}
           handleResetFilters={handleResetFilters}
           onTabClick={(index) => {
             const tabMap = ['courses', 'requests'];
-            setActiveTab(tabMap[index] as 'courses' | 'requests');
-            if (tabMap[index] === 'requests') {
-              setPage(1);
-            }
+            handleTabChange(tabMap[index] as 'courses' | 'requests');
           }}
         />
 
@@ -519,17 +513,17 @@ const AdminCourseManagement: React.FC = () => {
                 </button>
               )}
 
-              {activeTab === 'courses' && filteredCourses.length > 0 && (
+              {activeTab === 'courses' && courses.length > 0 && (
                 <>
                   <ApplicationsTable
-                    data={filteredCourses}
+                    data={courses}
                     columns={courseColumns}
                     actions={courseActions}
                   />
                   <Pagination
                     page={page}
                     totalPages={totalPages || 1}
-                    itemsCount={filteredCourses.length}
+                    itemsCount={courses.length}
                     itemName="courses"
                     onPageChange={(newPage) => setPage(newPage)}
                     onFirstPage={() => setPage(1)}
@@ -576,7 +570,7 @@ const AdminCourseManagement: React.FC = () => {
                 </div>
               )}
 
-              {activeTab === 'courses' && filteredCourses.length === 0 && (
+              {activeTab === 'courses' && courses.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <FiBookOpen size={32} className="text-purple-400" />
@@ -599,17 +593,31 @@ const AdminCourseManagement: React.FC = () => {
           onSubmit={handleSaveCourse}
           initialData={editingCourse}
           isEditing={!!editingCourse}
-          specializations={SPECIALIZATIONS}
-          faculties={FACULTIES}
-          terms={TERMS}
+          specializations={SPECIALIZATIONS.filter((s) => s !== 'All Specializations')}
+          faculties={FACULTIES.filter((f) => f !== 'All Faculties')}
+          terms={TERMS.filter((t) => t !== 'All Terms')}
         />
       )}
 
-      {showCourseDetail && selectedCourse && (
+      {showCourseDetail && courseDetails && (
         <CourseDetails
           isOpen={showCourseDetail}
-          onClose={() => setShowCourseDetail(false)}
-          course={selectedCourse}
+          onClose={() => {
+            setShowCourseDetail(false);
+          }}
+          course={courseDetails}
+          isLoading={isLoadingCourseDetails}
+        />
+      )}
+
+      {showRequestDetails && (
+        <EnrollmentRequestDetails
+          isOpen={showRequestDetails}
+          onClose={() => {
+            setShowRequestDetails(false);
+          }}
+          request={requestDetails?.data}
+          isLoading={isLoadingRequestDetails}
         />
       )}
 

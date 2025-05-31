@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { FaTimes, FaCrop, FaUpload, FaCheck } from 'react-icons/fa';
+import { FaTimes, FaCrop, FaUpload, FaCheck, FaSearchPlus, FaSearchMinus, FaUndo, FaRedo } from 'react-icons/fa';
 
 // Image Cropper Component
 export const ImageCropper = ({
@@ -24,36 +24,47 @@ export const ImageCropper = ({
     const img = imageRef.current;
 
     // Set canvas size for square crop
-    const outputSize = 300;
+    const outputSize = 200;
     canvas.width = outputSize;
     canvas.height = outputSize;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Calculate the source coordinates on the original image
-    const containerSize = 400;
-    const scaleRatio = img.naturalWidth / containerSize;
-
-    const sourceX = (cropData.x * scaleRatio) / cropData.scale;
-    const sourceY = (cropData.y * scaleRatio) / cropData.scale;
-    const sourceSize = (cropData.size * scaleRatio) / cropData.scale;
+    // Get the container dimensions
+    const containerSize = 300;
+    
+    // Calculate the actual displayed image dimensions
+    const imgDisplayWidth = containerSize * cropData.scale;
+    const imgDisplayHeight = containerSize * cropData.scale;
+    
+    // Calculate the ratio between natural image size and displayed size
+    const scaleX = img.naturalWidth / imgDisplayWidth;
+    const scaleY = img.naturalHeight / imgDisplayHeight;
+    
+    // Calculate crop coordinates relative to the natural image size
+    const cropX = cropData.x * scaleX;
+    const cropY = cropData.y * scaleY;
+    const cropSize = cropData.size * Math.min(scaleX, scaleY);
 
     // Save context state
     ctx.save();
 
-    // Apply rotation around center
-    ctx.translate(outputSize / 2, outputSize / 2);
-    ctx.rotate((cropData.rotate * Math.PI) / 180);
+    // Apply rotation around center if needed
+    if (cropData.rotate !== 0) {
+      ctx.translate(outputSize / 2, outputSize / 2);
+      ctx.rotate((cropData.rotate * Math.PI) / 180);
+      ctx.translate(-outputSize / 2, -outputSize / 2);
+    }
 
     // Draw the cropped portion
     ctx.drawImage(
       img,
-      sourceX,
-      sourceY,
-      sourceSize,
-      sourceSize,
-      -outputSize / 2,
-      -outputSize / 2,
+      cropX,
+      cropY,
+      cropSize,
+      cropSize,
+      0,
+      0,
       outputSize,
       outputSize
     );
@@ -118,9 +129,9 @@ export const ImageCropper = ({
 
   const handleReset = () => {
     onCropChange({
-      x: 100,
-      y: 100,
-      size: 200,
+      x: 75,
+      y: 75,
+      size: 150,
       scale: 1,
       rotate: 0,
     });
@@ -143,8 +154,8 @@ export const ImageCropper = ({
         const newX = e.clientX - containerRect.left - startX;
         const newY = e.clientY - containerRect.top - startY;
 
-        const maxX = 400 - cropData.size;
-        const maxY = 400 - cropData.size;
+        const maxX = 300 - cropData.size;
+        const maxY = 300 - cropData.size;
 
         onCropChange({
           ...cropData,
@@ -167,11 +178,11 @@ export const ImageCropper = ({
 
       const handleMouseMove = (e) => {
         const deltaX = e.clientX - startX;
-        const newSize = Math.max(80, Math.min(startSize + deltaX, 300));
+        const newSize = Math.max(80, Math.min(startSize + deltaX, 280));
 
         // Adjust position if crop area goes out of bounds
-        const maxX = 400 - newSize;
-        const maxY = 400 - newSize;
+        const maxX = 300 - newSize;
+        const maxY = 300 - newSize;
 
         onCropChange({
           ...cropData,
@@ -196,7 +207,7 @@ export const ImageCropper = ({
     const scale = size / cropData.size;
     return {
       backgroundImage: `url(${selectedImage})`,
-      backgroundSize: `${400 * cropData.scale * scale}px ${400 * cropData.scale * scale}px`,
+      backgroundSize: `${300 * cropData.scale * scale}px ${300 * cropData.scale * scale}px`,
       backgroundPosition: `-${cropData.x * scale * cropData.scale}px -${
         cropData.y * scale * cropData.scale
       }px`,
@@ -207,22 +218,24 @@ export const ImageCropper = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
       {imageLoadError && (
-        <div className="text-red-400 text-center">
-          Unable to load the image. Please upload a new image.
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+          <p className="text-red-600 text-sm font-medium">Unable to load the image</p>
+          <p className="text-red-500 text-xs mt-1">Please upload a new image to continue.</p>
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Main Cropper */}
-        <div className="flex-1">
-          <div className="relative bg-black/30 rounded-2xl p-4 backdrop-blur-sm">
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">Crop Your Image</h3>
             <div
-              className="crop-container relative mx-auto border border-gray-600 rounded-xl overflow-hidden"
-              style={{ width: '400px', height: '400px' }}
+              className="crop-container relative mx-auto border-2 border-gray-300 rounded-lg overflow-hidden bg-gray-50"
+              style={{ width: '300px', height: '300px' }}
             >
               <img
                 ref={imageRef}
@@ -241,7 +254,7 @@ export const ImageCropper = ({
 
               {/* Crop Overlay */}
               <div
-                className="absolute border-2 border-cyan-400 rounded-full shadow-lg cursor-move select-none"
+                className="absolute border-3 border-blue-500 rounded-full shadow-xl cursor-move select-none"
                 style={{
                   left: `${cropData.x}px`,
                   top: `${cropData.y}px`,
@@ -251,12 +264,12 @@ export const ImageCropper = ({
                 }}
                 onMouseDown={(e) => handleMouseDown(e, 'move')}
               >
-                <div className="absolute inset-0 bg-cyan-400/10 rounded-full"></div>
-                <div className="absolute inset-2 border border-cyan-300/50 rounded-full"></div>
+                <div className="absolute inset-0 bg-blue-500/20 rounded-full"></div>
+                <div className="absolute inset-1 border-2 border-blue-400/60 rounded-full border-dashed"></div>
 
                 {/* Resize Handle */}
                 <div
-                  className="absolute -bottom-2 -right-2 w-4 h-4 bg-cyan-400 rounded-full border-2 border-white shadow-lg cursor-se-resize"
+                  className="absolute -bottom-2 -right-2 w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg cursor-se-resize hover:bg-blue-600 transition-colors hover:scale-110"
                   onMouseDown={(e) => {
                     e.stopPropagation();
                     handleMouseDown(e, 'resize');
@@ -276,81 +289,89 @@ export const ImageCropper = ({
                 }}
               />
             </div>
-            <p className="text-cyan-300 text-sm text-center mt-4">
-              Drag to move • Drag corner to resize • Scale: {cropData.scale.toFixed(1)}x
-            </p>
+            <div className="mt-4 text-center">
+              <p className="text-gray-600 text-sm">
+                <span className="font-medium">Drag to move</span> • <span className="font-medium">Drag corner to resize</span>
+              </p>
+              <p className="text-gray-500 text-xs mt-1">Scale: {cropData.scale.toFixed(1)}x • Rotation: {cropData.rotate}°</p>
+            </div>
           </div>
         </div>
 
         {/* Preview Panel */}
-        <div className="flex flex-col items-center min-w-40">
-          <p className="text-cyan-300 text-sm mb-4 font-medium">Preview</p>
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <h4 className="text-lg font-semibold text-gray-800 text-center mb-4">Preview</h4>
 
-          {/* Large Preview */}
-          <div className="w-32 h-32 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 p-1 shadow-xl mb-4">
-            <div className="w-full h-full rounded-full overflow-hidden" style={getPreviewStyle(128)} />
-          </div>
-
-          {/* Size Previews */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 p-0.5">
-                <div
-                  className="w-full h-full rounded-full overflow-hidden"
-                  style={getPreviewStyle(48)}
-                />
-              </div>
-              <span className="text-gray-300 text-xs">Medium (48px)</span>
+            {/* Large Preview */}
+            <div className="w-32 h-32 rounded-full bg-gray-100 border-2 border-gray-200 shadow-md mx-auto mb-6 overflow-hidden">
+              <div className="w-full h-full" style={getPreviewStyle(128)} />
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 p-0.5">
-                <div
-                  className="w-full h-full rounded-full overflow-hidden"
-                  style={getPreviewStyle(32)}
-                />
+
+            {/* Size Previews */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600 text-sm font-medium">Large (128px)</span>
+                <div className="w-16 h-16 rounded-full bg-gray-100 border border-gray-200 overflow-hidden">
+                  <div className="w-full h-full" style={getPreviewStyle(64)} />
+                </div>
               </div>
-              <span className="text-gray-300 text-xs">Small (32px)</span>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600 text-sm font-medium">Medium (64px)</span>
+                <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 overflow-hidden">
+                  <div className="w-full h-full" style={getPreviewStyle(40)} />
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600 text-sm font-medium">Small (32px)</span>
+                <div className="w-6 h-6 rounded-full bg-gray-100 border border-gray-200 overflow-hidden">
+                  <div className="w-full h-full" style={getPreviewStyle(24)} />
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Controls */}
-      <div className="bg-white/5 rounded-2xl p-4 backdrop-blur-sm">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
         <div className="flex flex-wrap gap-3 justify-center">
           <button
             onClick={handleReset}
-            className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white px-4 py-2 rounded-lg flex items-center transition-all duration-300 text-sm"
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md hover:-translate-y-0.5"
           >
-            <FaCrop className="w-3 h-3 mr-2" />
+            <FaUndo className="w-3 h-3 mr-2" />
             Reset
           </button>
           <button
             onClick={handleZoomIn}
-            className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-300 text-sm"
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md hover:-translate-y-0.5"
           >
+            <FaSearchPlus className="w-3 h-3 mr-2" />
             Zoom In
           </button>
           <button
             onClick={handleZoomOut}
-            className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-300 text-sm"
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md hover:-translate-y-0.5"
           >
+            <FaSearchMinus className="w-3 h-3 mr-2" />
             Zoom Out
           </button>
           <button
             onClick={handleRotate}
-            className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-300 text-sm"
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md hover:-translate-y-0.5"
           >
+            <FaRedo className="w-3 h-3 mr-2" />
             Rotate 90°
           </button>
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-4 justify-center pt-4">
+      <div className="flex gap-4 justify-center pt-2">
         <button
           onClick={handleApply}
-          className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white px-8 py-3 rounded-xl flex items-center font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+          className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg flex items-center text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
           disabled={imageLoadError}
         >
           <FaCheck className="w-4 h-4 mr-2" />
@@ -358,14 +379,14 @@ export const ImageCropper = ({
         </button>
         <button
           onClick={onCancel}
-          className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-400 hover:to-pink-400 text-white px-8 py-3 rounded-xl flex items-center font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+          className="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-lg flex items-center text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
         >
           <FaTimes className="w-4 h-4 mr-2" />
           Cancel
         </button>
         <button
           onClick={onChooseDifferent}
-          className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white px-8 py-3 rounded-xl flex items-center font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+          className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg flex items-center text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
         >
           <FaUpload className="w-4 h-4 mr-2" />
           Choose Different
@@ -374,3 +395,5 @@ export const ImageCropper = ({
     </div>
   );
 };
+
+export default ImageCropper;

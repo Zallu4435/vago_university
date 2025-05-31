@@ -3,18 +3,14 @@ import { useCommunicationManagement } from '../../../../application/hooks/useCom
 import { Message } from '../../../../domain/types/communication';
 import ComposeMessageModal from './ComposeMessageModal';
 import WarningModal from '../../../components/WarningModal';
+import { FaPaperPlane, FaTrash, FaPlus } from 'react-icons/fa';
 
 export default function SentSection() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [isComposing, setIsComposing] = useState(false);
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState<Message | null>(null);
-  const {
-    sentMessages,
-    isLoadingSent,
-    handleDeleteMessage,
-    handleSendMessage
-  } = useCommunicationManagement();
+  const { sentMessages, isLoadingSent, handleDeleteMessage, handleSendMessage } = useCommunicationManagement();
 
   const handleMessageClick = (message: Message) => {
     setSelectedMessage(message);
@@ -45,104 +41,111 @@ export default function SentSection() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-800">Sent Messages</h2>
-        <button
-          onClick={() => setIsComposing(true)}
-          className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-        >
-          Compose Message
-        </button>
+    <div className="relative">
+      {/* Header */}
+      <div className="relative overflow-hidden rounded-t-2xl shadow-xl bg-gradient-to-r from-amber-600 to-orange-500 group mb-6">
+        <div className="absolute inset-0 bg-gradient-to-r from-amber-500/30 to-orange-600/30"></div>
+        <div className="absolute -top-8 -left-8 w-48 h-48 rounded-full bg-gradient-to-br from-yellow-300/30 to-orange-300/30 blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-gradient-to-br from-amber-200/20 to-orange-200/20 blur-2xl animate-pulse delay-700"></div>
+        <div className="relative z-10 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent"></div>
+                <FaPaperPlane size={20} className="text-white relative z-10" />
+              </div>
+              <div className="absolute -inset-1 bg-gradient-to-br from-orange-400/30 to-amber-500/30 rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </div>
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">
+                Sent Messages
+              </h2>
+              <div className="h-1 w-16 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full mt-1 group-hover:w-24 transition-all duration-300"></div>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsComposing(true)}
+            className="group/btn bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2 px-4 rounded-full transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 flex items-center space-x-2"
+          >
+            <FaPlus size={12} />
+            <span>Compose Message</span>
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Message List */}
-        <div className="md:col-span-1 bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="p-4 border-b border-gray-200">
-            <h2 className="text-xl font-semibold">Sent Messages</h2>
-          </div>
-          <div className="divide-y divide-gray-200">
+        <div className="lg:col-span-1 relative overflow-hidden rounded-2xl shadow-xl bg-white/70 backdrop-blur-md border border-amber-100/50 group hover:shadow-2xl transition-all duration-500">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-200/0 to-amber-200/0 group-hover:from-orange-200/20 group-hover:to-amber-200/20 rounded-2xl blur transition-all duration-300"></div>
+          <div className="relative z-10 divide-y divide-amber-100/50">
             {sentMessages.map((message) => (
               <div
                 key={message.id}
-                className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors duration-150 ${
-                  selectedMessage?.id === message.id ? 'bg-orange-50' : ''
+                className={`p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${
+                  selectedMessage?.id === message.id ? 'bg-orange-50/70' : ''
                 }`}
                 onClick={() => handleMessageClick(message)}
               >
                 <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-medium text-gray-900">{message.subject}</h3>
-                    <p className="text-sm text-gray-500 truncate">{message.content}</p>
+                  <div className="flex-1">
+                    <h3 className="font-medium text-gray-900 text-sm sm:text-base truncate">{message.subject}</h3>
+                    <p className="text-sm text-gray-500 truncate mt-1">{message.content}</p>
                   </div>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDelete(message);
                     }}
-                    className="text-gray-400 hover:text-red-500 transition-colors duration-150"
+                    className="ml-2 text-gray-400 hover:text-red-500 transition-colors duration-300"
                   >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
+                    <FaTrash size={16} />
                   </button>
                 </div>
-                <div className="mt-2 flex justify-between items-center text-sm text-gray-500">
-                  <span>To: {message.recipients.map((r) => r.name).join(', ')}</span>
-                  <span>{new Date(message.createdAt).toLocaleDateString()}</span>
+                <div className="mt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs text-gray-500">
+                  <span className="truncate">To: {message.recipients.map((r) => r.name).join(', ')}</span>
+                  <span className="mt-1 sm:mt-0">{new Date(message.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
             ))}
             {sentMessages.length === 0 && (
-              <div className="p-4 text-center text-gray-500">No messages found</div>
+              <div className="p-4 text-center text-gray-500 text-sm">No messages found</div>
             )}
           </div>
         </div>
 
         {/* Message Details */}
-        <div className="md:col-span-2 bg-white rounded-lg shadow-lg overflow-hidden">
-          {selectedMessage ? (
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedMessage.subject}</h2>
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
-                    <span>From: {selectedMessage.sender.name}</span>
-                    <span>To: {selectedMessage.recipients.map(r => r.name).join(', ')}</span>
+        <div className="lg:col-span-2 relative overflow-hidden rounded-2xl shadow-xl bg-white/70 backdrop-blur-md border border-amber-100/50 group hover:shadow-2xl transition-all duration-500">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-200/0 to-amber-200/0 group-hover:from-orange-200/20 group-hover:to-amber-200/20 rounded-2xl blur transition-all duration-300"></div>
+          <div className="relative z-10 p-4 sm:p-6">
+            {selectedMessage ? (
+              <div>
+                <div className="flex flex-col sm:flex-row justify-between items-start mb-4 sm:mb-6">
+                  <div>
+                    <h2 className="text-lg sm:text-2xl font-bold text-gray-900 mb-2">{selectedMessage.subject}</h2>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-gray-500">
+                      <span>From: {selectedMessage.sender.name}</span>
+                      <span>To: {selectedMessage.recipients.map((r) => r.name).join(', ')}</span>
+                    </div>
+                  </div>
+                  <div className="text-xs sm:text-sm text-gray-500 mt-2 sm:mt-0">
+                    {new Date(selectedMessage.createdAt).toLocaleString()}
                   </div>
                 </div>
-                <div className="text-sm text-gray-500">
-                  {new Date(selectedMessage.createdAt).toLocaleString()}
+                <div className="prose max-w-none text-sm sm:text-base">
+                  <p className="text-gray-700 whitespace-pre-wrap">{selectedMessage.content}</p>
                 </div>
               </div>
-              <div className="prose max-w-none">
-                <p className="text-gray-700 whitespace-pre-wrap">{selectedMessage.content}</p>
+            ) : (
+              <div className="flex items-center justify-center h-48 sm:h-64 text-gray-500 text-sm sm:text-base">
+                Select a message to view its details
               </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-64 text-gray-500">
-              Select a message to view its details
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
-      <ComposeMessageModal 
-        isOpen={isComposing} 
-        onClose={() => setIsComposing(false)}
-        onSend={handleSendMessage}
-      />
+      <ComposeMessageModal isOpen={isComposing} onClose={() => setIsComposing(false)} onSend={handleSendMessage} />
 
       <WarningModal
         isOpen={showDeleteWarning}

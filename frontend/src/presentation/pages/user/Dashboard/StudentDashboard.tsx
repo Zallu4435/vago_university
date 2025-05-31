@@ -25,8 +25,6 @@ export default function StudentDashboard() {
   const deadlines = [
     { title: 'CS301 Assignment Due', date: 'Tomorrow', urgent: true },
     { title: 'BIO220 Project Submission', date: 'May 5' },
-    { title: 'MATH154 Midterm Exam', date: 'May 10' },
-    { title: 'Course Registration for Fall 2025', date: 'May 15' }
   ];
 
   const classes = [

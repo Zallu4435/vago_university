@@ -72,185 +72,260 @@ export default function ProfileSettings() {
     setShowProfileModal(false);
   };
 
-  // Fallback UI when no profile data is available
-  if (!profile && !isLoading && !error) {
+  // Loading state
+  if (isLoading) {
     return (
-      <div className="flex-1 p-6">
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl h-full overflow-hidden">
-          <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 p-8 border-b border-white/10">
-            <h1 className="text-3xl font-bold text-white mb-2">Profile Settings</h1>
-            <p className="text-cyan-300">Set up your personal information</p>
-          </div>
-          <div className="p-8">
-            <div className="bg-white/10 backdrop-blur-lg rounded-3xl border border-white/20 p-8 shadow-xl">
-              <div className="flex items-center mb-8">
-                <div className="relative group">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 p-1 shadow-xl flex items-center justify-center">
-                    <FaUserAlt className="w-12 h-12 text-white" />
-                  </div>
-                  <button
-                    onClick={() => setShowProfileModal(true)}
-                    className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
-                  >
-                    <FaCamera className="w-5 h-5 text-white" />
-                  </button>
-                </div>
-                <div className="ml-6">
-                  <h2 className="text-2xl font-bold text-white mb-1">Create Your Profile</h2>
-                  <p className="text-gray-300 text-sm">No profile data found</p>
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-                <FaUser className="w-5 h-5 mr-3 text-cyan-400" />
-                Create Your Profile
-              </h3>
-              <p className="text-gray-300 mb-6">Please enter your details below.</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="space-y-2 relative">
-                  <label className="text-cyan-300 text-sm font-medium flex items-center">
-                    <FaIdCard className="w-4 h-4 mr-2" />
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.firstName}
-                    onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    className="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
-                    placeholder="Enter first name"
-                  />
-                </div>
-                <div className="space-y-2 relative">
-                  <label className="text-cyan-300 text-sm font-medium flex items-center">
-                    <FaIdCard className="w-4 h-4 mr-2" />
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.lastName}
-                    onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    className="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
-                    placeholder="Enter last name"
-                  />
-                </div>
-                <div className="space-y-2 relative">
-                  <label className="text-cyan-300 text-sm font-medium flex items-center">
-                    <FaPhone className="w-4 h-4 mr-2" />
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
-                    placeholder="Enter phone number"
-                  />
-                </div>
-                <div className="space-y-2 relative">
-                  <label className="text-cyan-300 text-sm font-medium flex items-center">
-                    <FaEnvelope className="w-4 h-4 mr-2" />
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    className="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
-                    placeholder="Enter email address"
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end mt-8">
-                <button
-                  onClick={handleSaveChanges}
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white px-8 py-4 rounded-xl flex items-center font-medium transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1 transform"
-                >
-                  <FiSave className="w-5 h-5 mr-3" />
-                  Save Profile
-                </button>
-              </div>
-            </div>
+      <div className="flex-1 p-8">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm h-full flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-3 border-slate-200 border-t-sky-500 rounded-full animate-spin mx-auto mb-4"></div>
+            <h2 className="text-xl font-bold text-slate-800 mb-2">Loading Profile</h2>
+            <p className="text-slate-600">Please wait...</p>
           </div>
         </div>
-        <ProfilePictureModal
-          isOpen={showProfileModal}
-          onClose={() => setShowProfileModal(false)}
-          currentImage={formData.profilePicture}
-          onImageUpdate={handleProfilePictureUpdate}
-        />
       </div>
     );
   }
 
-  if (isLoading) return <div className="flex-1 p-6 text-white text-center">Loading...</div>;
-  if (error) return <div className="flex-1 p-6 text-red-400 text-center">Error: {error.message}</div>;
+  // Error state
+  if (error) {
+    return (
+      <div className="flex-1 p-8">
+        <div className="bg-white rounded-2xl border border-red-200 shadow-sm h-full flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FiX className="w-6 h-6 text-red-600" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-800 mb-2">Error Loading Profile</h2>
+            <p className="text-red-600">{error.message}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
+  // Fallback UI when no profile data is available
+  if (!profile && !isLoading && !error) {
+    return (
+      <div className="flex-1 p-8">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm h-full overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-sky-50 to-slate-50 p-6 border-b border-slate-200">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-sky-500 rounded-xl flex items-center justify-center shadow-sm">
+                <FaUser className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-800">Create Profile</h1>
+                <p className="text-slate-600">Set up your personal information</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="bg-slate-50 rounded-xl border border-slate-200 p-6">
+              {/* Profile Header */}
+              <div className="flex items-center mb-6">
+                <div className="relative group">
+                  <div className="w-20 h-20 rounded-xl bg-sky-100 border-2 border-sky-200 flex items-center justify-center shadow-sm">
+                    <FaUserAlt className="w-8 h-8 text-sky-600" />
+                  </div>
+                  <button
+                    onClick={() => setShowProfileModal(true)}
+                    className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center"
+                  >
+                    <FaCamera className="w-5 h-5 text-white" />
+                  </button>
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-sky-500 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                    <FiEdit className="w-3 h-3 text-white" />
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <h2 className="text-xl font-bold text-slate-800 mb-1">Welcome!</h2>
+                  <p className="text-slate-600 text-sm">Complete your profile to get started</p>
+                </div>
+              </div>
+
+              {/* Form Section */}
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
+                  <div className="w-6 h-6 bg-sky-500 rounded-lg flex items-center justify-center mr-3">
+                    <FaUser className="w-3 h-3 text-white" />
+                  </div>
+                  Personal Information
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-slate-700 text-sm font-medium flex items-center">
+                      <FaIdCard className="w-4 h-4 mr-2 text-slate-500" />
+                      First Name
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.firstName}
+                      onChange={(e) => handleInputChange('firstName', e.target.value)}
+                      className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200"
+                      placeholder="Enter your first name"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-slate-700 text-sm font-medium flex items-center">
+                      <FaIdCard className="w-4 h-4 mr-2 text-slate-500" />
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.lastName}
+                      onChange={(e) => handleInputChange('lastName', e.target.value)}
+                      className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200"
+                      placeholder="Enter your last name"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-slate-700 text-sm font-medium flex items-center">
+                      <FaPhone className="w-4 h-4 mr-2 text-slate-500" />
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200"
+                      placeholder="Enter your phone number"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-slate-700 text-sm font-medium flex items-center">
+                      <FaEnvelope className="w-4 h-4 mr-2 text-slate-500" />
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200"
+                      placeholder="Enter your email address"
+                    />
+                  </div>
+                </div>
+
+                {/* Save Button */}
+                <div className="flex justify-end pt-4">
+                  <button
+                    onClick={handleSaveChanges}
+                    className="bg-sky-500 hover:bg-sky-600 text-white px-6 py-3 rounded-lg flex items-center font-medium transition-all duration-200 shadow-sm hover:shadow-md"
+                  >
+                    <FiSave className="w-4 h-4 mr-2" />
+                    Create Profile
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ProfilePictureModal
+            isOpen={showProfileModal}
+            onClose={() => setShowProfileModal(false)}
+            currentImage={formData.profilePicture}
+            onImageUpdate={handleProfilePictureUpdate}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Main profile view
   return (
-    <div className="flex-1 p-6">
-      <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl h-full overflow-hidden">
+    <div className="flex-1 p-8">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm h-full overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 p-8 border-b border-white/10">
-          <h1 className="text-3xl font-bold text-white mb-2">Profile Settings</h1>
-          <p className="text-cyan-300">Manage your personal information and preferences</p>
+        <div className="bg-gradient-to-r from-sky-50 to-slate-50 p-6 border-b border-slate-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-sky-500 rounded-xl flex items-center justify-center shadow-sm">
+                <FaUser className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-800">Profile Settings</h1>
+                <p className="text-slate-600">Manage your personal information and preferences</p>
+              </div>
+            </div>
+            <div className="px-3 py-1.5 bg-green-100 rounded-lg text-green-700 text-sm font-medium border border-green-200">
+              Online
+            </div>
+          </div>
         </div>
 
-        {/* Profile Card */}
-        <div className="p-8">
-          <div className="bg-white/10 backdrop-blur-lg rounded-3xl border border-white/20 p-8 mb-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+        <div className="p-6 space-y-6">
+          {/* Profile Card */}
+          <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 hover:shadow-sm transition-all duration-200">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
                 <div className="relative group">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 p-1 shadow-xl flex items-center justify-center">
+                  <div className="w-20 h-20 rounded-xl bg-sky-100 border-2 border-sky-200 shadow-sm overflow-hidden">
                     {profile?.profilePicture ? (
                       <img
                         src={profile.profilePicture}
                         alt="Profile"
-                        className="w-full h-full rounded-full object-cover"
+                        className="w-full h-full object-cover"
                       />
                     ) : (
-                      <FaUserAlt className="w-12 h-12 text-white" />
+                      <div className="w-full h-full flex items-center justify-center">
+                        <FaUserAlt className="w-8 h-8 text-sky-600" />
+                      </div>
                     )}
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
                   <button
                     onClick={() => setShowProfileModal(true)}
-                    className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
+                    className="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center"
                   >
                     <FaCamera className="w-5 h-5 text-white" />
                   </button>
                 </div>
-                <div className="ml-6">
-                  <h2 className="text-2xl font-bold text-white mb-1">
+                <div className="ml-4">
+                  <h2 className="text-xl font-bold text-slate-800 mb-1">
                     {formData.firstName} {formData.lastName}
                   </h2>
-                  <p className="text-cyan-300 mb-1">Student ID: UNI-2024-001</p>
-                  <p className="text-gray-300 text-sm">{formData.email}</p>
+                  <p className="text-sky-600 mb-1 font-medium text-sm">Student ID: UNI-2024-001</p>
+                  <p className="text-slate-600 text-sm">{formData.email}</p>
                 </div>
               </div>
               <button
                 onClick={handleEditToggle}
                 className={`${
                   isEditing
-                    ? 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-400 hover:to-pink-400'
-                    : 'bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400'
-                } text-white px-6 py-3 rounded-xl flex items-center transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5`}
+                    ? 'bg-red-500 hover:bg-red-600 text-white'
+                    : 'bg-sky-500 hover:bg-sky-600 text-white'
+                } px-4 py-2 rounded-lg flex items-center transition-all duration-200 shadow-sm hover:shadow-md text-sm font-medium`}
               >
-                {isEditing ? <FiX className="w-4 h-4 mr-2" /> : <FiEdit className="w-4 h-4 mr-2" />}
+                {isEditing ? (
+                  <FiX className="w-4 h-4 mr-2" />
+                ) : (
+                  <FiEdit className="w-4 h-4 mr-2" />
+                )}
                 {isEditing ? 'Cancel' : 'Edit Profile'}
               </button>
             </div>
           </div>
 
-          {/* Form */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-3xl border border-white/20 p-8 shadow-xl">
-            <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-              <FaUser className="w-5 h-5 mr-3 text-cyan-400" />
+          {/* Form Section */}
+          <div className="bg-slate-50 rounded-xl border border-slate-200 p-6">
+            <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
+              <div className="w-6 h-6 bg-sky-500 rounded-lg flex items-center justify-center mr-3">
+                <FaUser className="w-3 h-3 text-white" />
+              </div>
               Personal Information
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div className="space-y-2 relative">
-                <label className="text-cyan-300 text-sm font-medium flex items-center">
-                  <FaIdCard className="w-4 h-4 mr-2" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="space-y-2">
+                <label className="text-slate-700 text-sm font-medium flex items-center">
+                  <FaIdCard className="w-4 h-4 mr-2 text-slate-500" />
                   First Name
                 </label>
                 <input
@@ -258,15 +333,15 @@ export default function ProfileSettings() {
                   value={formData.firstName}
                   onChange={(e) => handleInputChange('firstName', e.target.value)}
                   disabled={!isEditing}
-                  className={`w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300 backdrop-blur-sm ${
-                    !isEditing ? 'opacity-70 cursor-not-allowed' : ''
+                  className={`w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200 ${
+                    !isEditing ? 'opacity-60 cursor-not-allowed bg-slate-100' : ''
                   }`}
                 />
               </div>
 
-              <div className="space-y-2 relative">
-                <label className="text-cyan-300 text-sm font-medium flex items-center">
-                  <FaIdCard className="w-4 h-4 mr-2" />
+              <div className="space-y-2">
+                <label className="text-slate-700 text-sm font-medium flex items-center">
+                  <FaIdCard className="w-4 h-4 mr-2 text-slate-500" />
                   Last Name
                 </label>
                 <input
@@ -274,15 +349,15 @@ export default function ProfileSettings() {
                   value={formData.lastName}
                   onChange={(e) => handleInputChange('lastName', e.target.value)}
                   disabled={!isEditing}
-                  className={`w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300 backdrop-blur-sm ${
-                    !isEditing ? 'opacity-70 cursor-not-allowed' : ''
+                  className={`w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200 ${
+                    !isEditing ? 'opacity-60 cursor-not-allowed bg-slate-100' : ''
                   }`}
                 />
               </div>
 
-              <div className="space-y-2 relative">
-                <label className="text-cyan-300 text-sm font-medium flex items-center">
-                  <FaPhone className="w-4 h-4 mr-2" />
+              <div className="space-y-2">
+                <label className="text-slate-700 text-sm font-medium flex items-center">
+                  <FaPhone className="w-4 h-4 mr-2 text-slate-500" />
                   Phone Number
                 </label>
                 <input
@@ -290,52 +365,56 @@ export default function ProfileSettings() {
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   disabled={!isEditing}
-                  className={`w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300 backdrop-blur-sm ${
-                    !isEditing ? 'opacity-70 cursor-not-allowed' : ''
+                  className={`w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200 ${
+                    !isEditing ? 'opacity-60 cursor-not-allowed bg-slate-100' : ''
                   }`}
                 />
               </div>
 
-              <div className="space-y-2 relative">
-                <label className="text-cyan-300 text-sm font-medium flex items-center">
-                  <FaEnvelope className="w-4 h-4 mr-2" />
+              <div className="space-y-2">
+                <label className="text-slate-700 text-sm font-medium flex items-center">
+                  <FaEnvelope className="w-4 h-4 mr-2 text-slate-500" />
                   Email Address
                 </label>
                 <input
                   type="email"
                   value={formData.email}
                   readOnly={true}
-                  className="w-full cursor-not-allowed px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300 backdrop-blur-sm opacity-70 cursor-not-allowed"
+                  className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg text-slate-600 transition-all duration-200 cursor-not-allowed"
                 />
               </div>
             </div>
 
             {/* Password Section */}
-            <div className="border-t border-white/10 pt-8">
+            <div className="border-t border-slate-200 pt-6">
               <div className="flex items-center justify-between mb-4">
-                <h4 className="text-cyan-300 text-sm font-medium flex items-center">
-                  <FaShieldAlt className="w-4 h-4 mr-2" />
-                  Password Security
-                </h4>
+                <div className="flex items-center">
+                  <div className="w-6 h-6 bg-orange-500 rounded-lg flex items-center justify-center mr-3">
+                    <FaShieldAlt className="w-3 h-3 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="text-slate-800 font-medium">Password Security</h4>
+                    <p className="text-slate-500 text-sm">Last changed: 30 days ago</p>
+                  </div>
+                </div>
                 <button
                   onClick={() => setShowPasswordModal(true)}
-                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white px-6 py-2 rounded-xl flex items-center transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg flex items-center transition-all duration-200 shadow-sm hover:shadow-md text-sm font-medium"
                 >
                   <FaShieldAlt className="w-4 h-4 mr-2" />
                   Change Password
                 </button>
               </div>
-              <p className="text-gray-400 text-sm">Last changed: 30 days ago</p>
             </div>
 
             {/* Save Button */}
             {isEditing && (
-              <div className="flex justify-end mt-8">
+              <div className="flex justify-end pt-6 border-t border-slate-200">
                 <button
                   onClick={handleSaveChanges}
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white px-8 py-4 rounded-xl flex items-center font-medium transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1 transform"
+                  className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg flex items-center font-medium transition-all duration-200 shadow-sm hover:shadow-md"
                 >
-                  <FiSave className="w-5 h-5 mr-3" />
+                  <FiSave className="w-4 h-4 mr-2" />
                   Save Changes
                 </button>
               </div>

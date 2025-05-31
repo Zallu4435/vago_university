@@ -134,9 +134,17 @@ const App: React.FC = () => {
         >
           <Route element={<UserLayout />}>
             <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="settings" element={<Setting />} />
             <Route path="canvas" element={<CanvasPage />} />
           </Route>
+        </Route>
+
+        {/* Settings Route (user only, independent layout) */}
+        <Route
+          element={
+            <ProtectedRoute allowedCollections={['user']} />
+          }
+        >
+          <Route path="settings" element={<Setting />} />
         </Route>
 
         {/* Faculty Routes (faculty only) */}

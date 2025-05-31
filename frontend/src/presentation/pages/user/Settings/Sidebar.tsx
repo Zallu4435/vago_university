@@ -27,20 +27,19 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, user }) {
     
 
   return (
-    <div className="w-80 p-6 relative">
-      <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl h-full flex flex-col">
+    <div className="w-72 p-6 bg-slate-50">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm h-full flex flex-col">
         {/* Header */}
-        <div className="p-8 text-center border-b border-white/10">
-          <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center justify-center shadow-lg">
-            <FaGraduationCap className="w-10 h-10 text-white" />
+        <div className="p-6 text-center border-b border-slate-200">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-sky-500 flex items-center justify-center shadow-sm">
+            <FaGraduationCap className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-xl font-bold text-white mb-1">EduPortal</h2>
-          <p className="text-cyan-300 text-sm">Student Dashboard</p>
+          <h2 className="text-lg font-bold text-slate-800 mb-1">EduPortal</h2>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-6">
-          <ul className="space-y-3">
+        <nav className="flex-1 p-4">
+          <ul className="space-y-2">
             {sidebarItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -48,19 +47,18 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, user }) {
                 <li key={item.id}>
                   <button
                     onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center px-6 py-4 rounded-2xl transition-all duration-300 group relative overflow-hidden ${
+                    className={`w-full flex items-center px-4 py-3 rounded-lg transition-all duration-200 group relative ${
                       isActive 
-                        ? 'bg-gradient-to-r from-cyan-500/30 to-blue-500/30 text-white shadow-lg border border-cyan-400/30' 
-                        : 'text-gray-300 hover:bg-white/10 hover:text-white'
+                        ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-sm' 
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'
                     }`}
                   >
+                    <Icon className={`w-4 h-4 mr-3 transition-colors duration-200 ${
+                      isActive ? 'text-sky-600' : 'text-slate-500 group-hover:text-slate-600'
+                    }`} />
+                    <span className="font-medium text-sm">{item.label}</span>
                     {isActive && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-blue-500/20 animate-pulse rounded-2xl"></div>
-                    )}
-                    <Icon className={`w-5 h-5 mr-4 relative z-10 transition-transform duration-300 ${isActive ? 'scale-110 text-cyan-300' : 'group-hover:scale-105'}`} />
-                    <span className="relative z-10 font-medium">{item.label}</span>
-                    {isActive && (
-                      <div className="absolute right-2 w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
+                      <div className="absolute right-3 w-2 h-2 bg-sky-500 rounded-full"></div>
                     )}
                   </button>
                 </li>
@@ -70,23 +68,28 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, user }) {
         </nav>
 
         {/* User Section */}
-        <div className="p-6 border-t border-white/10">
-          <div className="flex items-center mb-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center justify-center mr-3 shadow-lg">
-              {user.profilePicture ? (
-                <img src={user.profilePicture} alt="User" className="w-full h-full rounded-full object-cover" />
+        <div className="p-4 border-t border-slate-200">
+          <div className="flex items-center mb-4 p-3 bg-slate-50 rounded-lg">
+            <div className="w-10 h-10 rounded-lg bg-sky-100 border border-sky-200 flex items-center justify-center mr-3 shadow-sm">
+              {user?.profilePicture ? (
+                <img src={user.profilePicture} alt="User" className="w-full h-full rounded-lg object-cover" />
               ) : (
-                <FaUserAlt className="w-6 h-6 text-white" />
+                <FaUserAlt className="w-5 h-5 text-sky-600" />
               )}
             </div>
-            <div className="flex-1">
-              <p className="text-white font-medium text-sm">{user.firstName} {user.lastName}</p>
-              <p className="text-cyan-300 text-xs">{user.email}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-slate-800 font-medium text-sm truncate">
+                {user?.firstName} {user?.lastName}
+              </p>
+              <p className="text-slate-500 text-xs truncate">{user?.email}</p>
             </div>
           </div>
-          <button className="w-full flex items-center justify-center px-4 py-3 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 rounded-xl transition-all duration-300 border border-red-500/30">
+          <button 
+            onClick={onLogout}
+            className="w-full flex items-center justify-center px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 rounded-lg transition-all duration-200 border border-red-200 hover:border-red-300"
+          >
             <FiLogOut className="w-4 h-4 mr-2" />
-            <button className="text-sm font-medium" onClick={onLogout}>Logout</button>
+            <span className="text-sm font-medium">Logout</span>
           </button>
         </div>
       </div>

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useFinancial } from '../../../../application/hooks/useFinancial';
+import { FaMoneyBillWave } from 'react-icons/fa';
 import FinancialTabs from './FinancialTabs';
 import FeesPaymentsSection from './FeesPaymentsSection';
 import FinancialAidSection from './FinancialAidSection';
 import ScholarshipsSection from './ScholarshipsSection';
+import { useFinancial } from '../../../../application/hooks/useFinancial';
 
 const mockStudentFinancialInfo = {
   accountBalance: 2500.00,
@@ -74,77 +75,119 @@ export default function Financial() {
     getCurrentCharges,
     getPaymentHistory,
     loading,
-    error
+    error,
   } = useFinancial();
 
   const [activeTab, setActiveTab] = useState('Fees and Payments');
-  const [studentInfo, setStudentInfo] = useState<any>(null);
-  const [currentCharges, setCurrentCharges] = useState<any[]>([]);
-  const [paymentHistory, setPaymentHistory] = useState<any[]>([]);
+  const [studentInfo, setStudentInfo] = useState(null);
+  const [currentCharges, setCurrentCharges] = useState([]);
+  const [paymentHistory, setPaymentHistory] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const [info, charges, history] = await Promise.all([
-        // getStudentFinancialInfo(),
-        getCurrentCharges(),
-        getPaymentHistory()
-      ]);
-      if (info) setStudentInfo(info);
-      if (charges) setCurrentCharges(charges);
-      if (history) setPaymentHistory(history);
-    };
-    fetchData();
-  }, [ getCurrentCharges, getPaymentHistory]);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const [info, charges, history] = await Promise.all([
+  //         getStudentFinancialInfo(),
+  //         getCurrentCharges(),
+  //         getPaymentHistory(),
+  //       ]);
+  //       setStudentInfo(info || {});
+  //       setCurrentCharges(charges || []);
+  //       setPaymentHistory(history || []);
+  //     } catch (err) {
+  //       console.error('Error fetching financial data:', err);
+  //     }
+  //   };
+  //   fetchData();
+  // }, [getStudentFinancialInfo, getCurrentCharges, getPaymentHistory]);
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-white/90">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="bg-red-100 text-red-700 p-4 rounded-lg">
-          {error}
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-white/90">
+        <div className="relative overflow-hidden rounded-2xl shadow-xl bg-white/70 backdrop-blur-md border border-amber-100/50 p-4 sm:p-6 max-w-md w-full">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-200/0 to-amber-200/0 group-hover:from-orange-200/20 group-hover:to-amber-200/20 rounded-2xl blur transition-all duration-300"></div>
+          <div className="relative z-10 text-red-600 text-sm sm:text-base text-center">
+            {error}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="bg-gradient-to-r from-amber-100 to-orange-100 p-4 rounded-lg shadow-sm mb-4">
-        <h2 className="text-xl font-bold text-gray-800">Financial Services</h2>
-        <div className="flex flex-col md:flex-row md:justify-between mt-2 text-gray-600">
-          <div>
-            <span className="font-medium">Account Balance:</span> ${mockStudentFinancialInfo?.accountBalance?.toLocaleString() || '0.00'}
-          </div>
-          <div className="mt-1 md:mt-0">
-            <span className="font-medium">Payment Due:</span> {mockStudentFinancialInfo?.paymentDueDate || 'N/A'}
-          </div>
-          <div className="mt-1 md:mt-0">
-            <span className="font-medium">Financial Aid Status:</span>
-            <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-sm ml-1">
-              {mockStudentFinancialInfo?.financialAidStatus || 'Not Applied'}
-            </span>
+    <div className="min-h-screen flex flex-col relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-white/90">
+      {/* Background layers */}
+      <div className="absolute inset-0 bg-gradient-to-br from-amber-100/80 to-white/90"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-orange-100/20 to-amber-100/20"></div>
+      <div className="absolute -bottom-16 -right-16 w-96 h-96 rounded-full bg-gradient-to-br from-yellow-300/30 to-orange-300/30 blur-3xl animate-pulse"></div>
+      <div className="absolute -top-16 -left-16 w-64 h-64 rounded-full bg-gradient-to-br from-amber-200/20 to-orange-200/20 blur-2xl animate-pulse delay-700"></div>
+
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        {/* Header */}
+        <div className="group relative overflow-hidden rounded-2xl shadow-xl bg-white/70 backdrop-blur-md mb-6 border border-amber-100/50 hover:border-orange-200/50 hover:shadow-2xl transition-all duration-300">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-200/0 to-amber-200/0 group-hover:from-orange-200/20 group-hover:to-amber-200/20 rounded-2xl blur transition-all duration-300"></div>
+          <div className="relative z-10 p-4 sm:p-6">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent"></div>
+                  <FaMoneyBillWave size={20} className="text-white relative z-10" />
+                </div>
+                <div className="absolute -inset-1 bg-gradient-to-br from-orange-400/30 to-amber-500/30 rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-700 bg-clip-text text-transparent">
+                  Financial Services
+                </h2>
+                <div className="h-1 w-16 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full mt-1 group-hover:w-24 transition-all duration-300"></div>
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600">
+              <div>
+                <span className="font-medium">Account Balance:</span>{' '}
+                ${studentInfo?.accountBalance?.toLocaleString() || '0.00'}
+              </div>
+              <div>
+                <span className="font-medium">Payment Due:</span>{' '}
+                {studentInfo?.paymentDueDate || 'N/A'}
+              </div>
+              <div>
+                <span className="font-medium">Financial Aid Status:</span>{' '}
+                <span
+                  className={`px-2 py-0.5 rounded-full text-xs ${
+                    studentInfo?.financialAidStatus === 'Approved'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
+                  {studentInfo?.financialAidStatus || 'Not Applied'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
+
+        <FinancialTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        <div className="mt-6">
+          {activeTab === 'Fees and Payments' && (
+            <FeesPaymentsSection
+              studentInfo={studentInfo || mockStudentFinancialInfo || {}}
+              currentCharges={currentCharges}
+              paymentHistory={paymentHistory}
+            />
+          )}
+          {activeTab === 'Financial Aid' && <FinancialAidSection />}
+          {activeTab === 'Scholarships' && <ScholarshipsSection />}
+        </div>
       </div>
-      <FinancialTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-      {activeTab === 'Fees and Payments' && (
-        <FeesPaymentsSection
-          studentInfo={mockStudentFinancialInfo}
-          currentCharges={currentCharges}
-          paymentHistory={paymentHistory}
-        />
-      )}
-      {activeTab === 'Financial Aid' && <FinancialAidSection />}
-      {activeTab === 'Scholarships' && <ScholarshipsSection />}
     </div>
   );
 }

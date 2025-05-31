@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaCheck, FaEye, FaEyeSlash, FaShieldAlt, FaTimes } from "react-icons/fa";
 
 interface PasswordChangeModalProps {
@@ -26,6 +26,18 @@ export const PasswordChangeModal = ({
     newPassword: false,
     confirmPassword: false
   });
+
+  // Prevent background scrolling when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   const handlePasswordUpdate = (field: string, value: string) => {
     setPasswords(prev => ({ ...prev, [field]: value }));
@@ -61,98 +73,106 @@ export const PasswordChangeModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl p-8 max-w-md w-full">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-white flex items-center">
-            <FaShieldAlt className="w-5 h-5 mr-3 text-orange-400" />
-            Change Password
-          </h3>
-          <button
-            onClick={handleClose}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            <FaTimes className="w-5 h-5" />
-          </button>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-sky-50 to-slate-50 -m-6 mb-4 p-4 rounded-t-2xl border-b border-slate-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-sky-500 rounded-lg flex items-center justify-center shadow-sm">
+                <FaShieldAlt className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">Change Password</h3>
+                <p className="text-slate-600 text-xs">Update your account password</p>
+              </div>
+            </div>
+            <button
+              onClick={handleClose}
+              className="text-slate-400 hover:text-slate-600 transition-colors p-1.5 hover:bg-slate-100 rounded-lg"
+            >
+              <FaTimes className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         <div className="space-y-6">
           <div className="space-y-2">
-            <label className="text-cyan-300 text-sm font-medium">Current Password</label>
+            <label className="text-slate-800 text-sm font-medium">Current Password</label>
             <div className="relative">
               <input
                 type={showPasswords.currentPassword ? "text" : "password"}
                 value={passwords.currentPassword}
                 onChange={(e) => handlePasswordUpdate('currentPassword', e.target.value)}
-                className="w-full px-4 py-4 pr-12 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all duration-200"
                 placeholder="Enter current password"
               />
               <button
                 type="button"
                 onClick={() => togglePasswordVisibility('currentPassword')}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-200"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors duration-200"
               >
-                {showPasswords.currentPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
+                {showPasswords.currentPassword ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-cyan-300 text-sm font-medium">New Password</label>
+            <label className="text-slate-800 text-sm font-medium">New Password</label>
             <div className="relative">
               <input
                 type={showPasswords.newPassword ? "text" : "password"}
                 value={passwords.newPassword}
                 onChange={(e) => handlePasswordUpdate('newPassword', e.target.value)}
-                className="w-full px-4 py-4 pr-12 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all duration-200"
                 placeholder="Enter new password"
               />
               <button
                 type="button"
                 onClick={() => togglePasswordVisibility('newPassword')}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-200"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors duration-200"
               >
-                {showPasswords.newPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
+                {showPasswords.newPassword ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-cyan-300 text-sm font-medium">Confirm New Password</label>
+            <label className="text-slate-800 text-sm font-medium">Confirm New Password</label>
             <div className="relative">
               <input
                 type={showPasswords.confirmPassword ? "text" : "password"}
                 value={passwords.confirmPassword}
                 onChange={(e) => handlePasswordUpdate('confirmPassword', e.target.value)}
-                className="w-full px-4 py-4 pr-12 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all duration-200"
                 placeholder="Confirm new password"
               />
               <button
                 type="button"
                 onClick={() => togglePasswordVisibility('confirmPassword')}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-200"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors duration-200"
               >
-                {showPasswords.confirmPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
+                {showPasswords.confirmPassword ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
               </button>
             </div>
             {passwords.newPassword && passwords.confirmPassword && passwords.newPassword !== passwords.confirmPassword && (
-              <p className="text-red-400 text-sm">Passwords do not match</p>
+              <p className="text-red-500 text-xs">Passwords do not match</p>
             )}
           </div>
 
-          <div className="flex gap-4 pt-4">
+          <div className="flex gap-3 pt-4">
             <button
               onClick={handleSubmit}
               disabled={!isValid}
-              className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="flex-1 bg-sky-500 hover:bg-sky-600 disabled:bg-slate-400 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-md text-sm font-medium"
             >
-              <FaCheck className="w-4 h-4 mr-2" />
+              <FaCheck className="w-3.5 h-3.5 mr-1.5" />
               Update Password
             </button>
             <button
               onClick={handleClose}
-              className="flex-1 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-400 hover:to-pink-400 text-white px-6 py-3 rounded-xl flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-md text-sm font-medium"
             >
-              <FaTimes className="w-4 h-4 mr-2" />
+              <FaTimes className="w-3.5 h-3.5 mr-1.5" />
               Cancel
             </button>
           </div>

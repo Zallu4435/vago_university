@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { FaTimes, FaUpload, FaEdit, FaImage, FaUserAlt } from 'react-icons/fa';
+import { useRef, useState, useEffect } from 'react';
+import { FaTimes, FaUpload, FaEdit, FaImage, FaUserAlt, FaCamera } from 'react-icons/fa';
 import { ImageCropper } from './ImageCropper';
 
 export const ProfilePictureModal = ({
@@ -18,6 +18,18 @@ export const ProfilePictureModal = ({
     rotate: 0,
   });
   const fileInputRef = useRef(null);
+
+  // Prevent background scrolling when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   const handleImageSelect = (event) => {
     const file = event.target.files[0];
@@ -95,74 +107,103 @@ export const ProfilePictureModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl p-8 max-w-4xl w-full max-h-screen overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-white">Update Profile Picture</h3>
-          <button
-            onClick={handleClose}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            <FaTimes className="w-5 h-5" />
-          </button>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-sky-50 to-slate-50 -m-6 mb-4 p-4 rounded-t-2xl border-b border-slate-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-sky-500 rounded-lg flex items-center justify-center shadow-sm">
+                <FaCamera className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">Update Profile Picture</h3>
+                <p className="text-slate-600 text-xs">Upload or edit your profile image</p>
+              </div>
+            </div>
+            <button
+              onClick={handleClose}
+              className="text-slate-400 hover:text-slate-600 transition-colors p-1.5 hover:bg-slate-100 rounded-lg"
+            >
+              <FaTimes className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {!showCropper ? (
           <div className="text-center">
             {/* Current Image Display */}
-            <div className="w-32 h-32 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 p-1 shadow-xl mx-auto mb-6 flex items-center justify-center">
-              {currentImage ? (
-                <img
-                  src={currentImage}
-                  alt="Current Profile"
-                  className="w-full h-full rounded-full object-cover"
-                />
-              ) : (
-                <FaUserAlt className="w-16 h-16 text-white" />
-              )}
+            <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 mb-4">
+              <div className="w-24 h-24 rounded-xl bg-sky-100 border-2 border-sky-200 shadow-sm mx-auto mb-4 overflow-hidden">
+                {currentImage ? (
+                  <img
+                    src={currentImage}
+                    alt="Current Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <FaUserAlt className="w-8 h-8 text-sky-600" />
+                  </div>
+                )}
+              </div>
+
+              <h4 className="text-base font-semibold text-slate-800 mb-1">
+                {currentImage ? 'Current Profile Picture' : 'No Profile Picture'}
+              </h4>
+              <p className="text-slate-600 text-xs">
+                {currentImage ? 'You can edit or replace your current image' : 'Upload your first profile picture'}
+              </p>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
-              {/* Edit Current Image Button */}
-              {currentImage && (
-                <button
-                  onClick={handleEditCurrent}
-                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white px-6 py-3 rounded-xl flex items-center transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-                >
-                  <FaEdit className="w-4 h-4 mr-2" />
-                  Edit Current Image
-                </button>
-              )}
+            <div className="space-y-3 mb-4">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                {/* Edit Current Image Button */}
+                {currentImage && (
+                  <button
+                    onClick={handleEditCurrent}
+                    className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg flex items-center transition-all duration-200 shadow-sm hover:shadow-md text-sm font-medium"
+                  >
+                    <FaEdit className="w-3.5 h-3.5 mr-1.5" />
+                    Edit Current Image
+                  </button>
+                )}
 
-              {/* Choose New Image Button */}
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white px-6 py-3 rounded-xl flex items-center transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-              >
-                <FaUpload className="w-4 h-4 mr-2" />
-                Choose New Picture
-              </button>
+                {/* Choose New Image Button */}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-lg flex items-center transition-all duration-200 shadow-sm hover:shadow-md text-sm font-medium"
+                >
+                  <FaUpload className="w-3.5 h-3.5 mr-1.5" />
+                  {currentImage ? 'Upload New Picture' : 'Choose Picture'}
+                </button>
+              </div>
             </div>
 
             {/* Helper Text */}
-            <div className="space-y-2">
-              <p className="text-gray-400 text-sm">
-                {currentImage ? 'Edit your current image or upload a new one' : 'Upload a new profile picture'}
-              </p>
-              <p className="text-gray-500 text-xs">
-                Supported formats: JPG, PNG, GIF (max. 5MB)
-              </p>
-            </div>
-
-            {/* Additional Info */}
-            {currentImage && (
-              <div className="mt-6 p-4 bg-white/5 rounded-xl backdrop-blur-sm">
-                <div className="flex items-center justify-center gap-2 text-cyan-300 text-sm">
-                  <FaImage className="w-4 h-4" />
-                  <span>Current image can be cropped and adjusted</span>
+            <div className="bg-slate-50 rounded-xl border border-slate-200 p-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-center gap-2 text-slate-700">
+                  <FaImage className="w-3.5 h-3.5 text-sky-500" />
+                  <span className="font-medium text-xs">Image Requirements</span>
+                </div>
+                <div className="space-y-0.5 text-slate-600 text-xs">
+                  <p>• Supported formats: JPG, PNG, GIF</p>
+                  <p>• Maximum file size: 5MB</p>
+                  <p>• Recommended: Square images work best</p>
                 </div>
               </div>
-            )}
+
+              {/* Additional Info for existing image */}
+              {currentImage && (
+                <div className="mt-3 pt-3 border-t border-slate-200">
+                  <div className="flex items-center justify-center gap-2 text-sky-600 text-xs">
+                    <FaEdit className="w-3.5 h-3.5" />
+                    <span>Your current image can be cropped and adjusted</span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <ImageCropper

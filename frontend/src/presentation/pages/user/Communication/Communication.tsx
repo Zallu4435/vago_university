@@ -1,163 +1,57 @@
+
 import { useState } from 'react';
 import CommunicationTabs from './CommunicationTabs';
 import InboxSection from './InboxSection';
 import SentSection from './SentSection';
+import { FaEnvelope } from 'react-icons/fa';
 
 export default function Communication() {
   const [activeTab, setActiveTab] = useState('Inbox');
 
-  // Inbox messages
-  const inboxMessages = [
-    {
-      id: 1,
-      sender: 'Financial Aid Office',
-      email: 'financial.aid@university.edu',
-      subject: 'Scholarship Awarded - Your application has been approved',
-      date: 'April 30, 2025',
-      time: '10:32AM',
-      content: [
-        'Dear John Smith,',
-        'We are pleased to inform you that you have been awarded the Academic Excellence Scholarship for the 2025-2028 academic year. This scholarship will provide $5,000 towards your tuition and fees.',
-        'The scholarship funds will be applied to your student account by May 15, 2025.',
-        'Please log into the Financial Services section to review the details and acknowledge receipt of this award.',
-        'Congratulations on your achievement!',
-        'Sincerely,',
-        'University Financial Aid Office'
-      ],
-      icon: 'FA',
-      color: 'bg-orange-500',
-      unread: true,
-    },
-    {
-      id: 2,
-      sender: 'Academic Department',
-      email: 'academics@university.edu',
-      subject: 'Course Registration Reminder - Please complete by May 15',
-      date: 'April 29, 2025',
-      time: 'Yesterday',
-      content: [
-        'Dear John Smith,',
-        'This is a reminder to complete your course registration for the Fall 2025 semester by May 15, 2025.',
-        'Please log into the Academics section to select your courses.',
-        'Best regards,',
-        'Academic Department'
-      ],
-      icon: 'AD',
-      color: 'bg-green-500',
-      unread: true,
-    },
-    {
-      id: 3,
-      sender: 'Housing Department',
-      email: 'housing@university.edu',
-      subject: 'Room Assignment Update - Your housing request has been processed',
-      date: 'April 28, 2025',
-      time: 'Apr 28',
-      content: [
-        'Dear John Smith,',
-        'Your housing request for the 2025-2026 academic year has been processed.',
-        'You have been assigned to Room 305 in West Hall.',
-        'Please contact us if you have any questions.',
-        'Sincerely,',
-        'Housing Department'
-      ],
-      icon: 'HD',
-      color: 'bg-yellow-500',
-      unread: true,
-    },
-    {
-      id: 4,
-      sender: 'IT Services',
-      email: 'it.support@university.edu',
-      subject: 'System Maintenance Notice - The student portal will be unavailable on May 10',
-      date: 'April 24, 2025',
-      time: 'Apr 24',
-      content: [
-        'Dear John Smith,',
-        'The student portal will undergo scheduled maintenance on May 10, 2025, from 12:00 AM to 6:00 AM.',
-        'During this time, the portal will be unavailable.',
-        'We apologize for any inconvenience.',
-        'Best regards,',
-        'IT Services'
-      ],
-      icon: 'IT',
-      color: 'bg-gray-500',
-      unread: false,
-    },
-  ];
-
-  // Sent messages
-  const sentMessages = [
-    {
-      id: 1,
-      recipient: 'To: Academic Advisor',
-      email: 'advisor@university.edu',
-      subject: 'Course Registration Question - I\'m trying to register for the Computer Science seminar',
-      date: 'April 29, 2025',
-      time: '3:45 PM',
-      content: [
-        'Dear Academic Advisor,',
-        'I\'m trying to register for the Computer Science seminar (CS 450) for the Fall 2025 semester, but I\'m receiving an error message saying I don\'t meet the prerequisites. I believe I\'ve completed all required courses.',
-        'Could you please review my record and advise on how to proceed?',
-        'Thank you for your help!',
-        'Sincerely,',
-        'John Smith'
-      ],
-      icon: 'JS',
-      color: 'bg-blue-500',
-      reply: {
-        title: 'Reply received from advisor@university.edu - April 30, 2025 9:15 AM',
-        content: 'I\'ve checked your records and you\'re missing CS 325, which is a prerequisite. Would you like to enroll in CS 325 for the summer session?'
-      },
-      replyDraft: 'Yes, I would like to enroll in CS 325 for the summer session. Could you please help me with the registration process?'
-    },
-    {
-      id: 2,
-      recipient: 'To: Housing Department',
-      email: 'housing@university.edu',
-      subject: 'Room Change Request - Due to my medical condition, I need to request a room change',
-      date: 'April 22, 2025',
-      time: 'Apr 22',
-      content: [
-        'Dear Housing Department,',
-        'Due to my medical condition, I need to request a room change for the 2025-2026 academic year.',
-        'Please let me know the process for submitting this request.',
-        'Thank you,',
-        'John Smith'
-      ],
-      icon: 'JS',
-      color: 'bg-blue-500',
-    },
-    {
-      id: 3,
-      recipient: 'To: IT Support',
-      email: 'it.support@university.edu',
-      subject: 'Password Reset Request - I need help resetting my student portal password',
-      date: 'April 15, 2025',
-      time: 'Apr 15',
-      content: [
-        'Dear IT Support,',
-        'I need help resetting my student portal password.',
-        'Please provide instructions for the reset process.',
-        'Best regards,',
-        'John Smith'
-      ],
-      icon: 'JS',
-      color: 'bg-blue-500',
-    },
-  ];
-
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-lg p-4 mb-4 shadow-md">
-        <h2 className="text-xl font-bold text-gray-800">Communication Center</h2>
-        <div className="text-sm text-gray-600">
-          3 Unread Messages | Last Checked: April 29, 2025 | Connected Accounts: 2
+    <div className="min-h-screen flex flex-col relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-white/90">
+      {/* Background layers */}
+      <div className="absolute inset-0 bg-gradient-to-br from-amber-100/80 to-white/90"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-orange-100/20 to-amber-100/20"></div>
+      <div className="absolute -bottom-16 -right-16 w-96 h-96 rounded-full bg-gradient-to-br from-yellow-300/30 to-orange-300/30 blur-3xl animate-pulse"></div>
+      <div className="absolute -top-16 -left-16 w-64 h-64 rounded-full bg-gradient-to-br from-amber-200/20 to-orange-200/20 blur-2xl animate-pulse delay-700"></div>
+
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        {/* Header */}
+        <div className="group relative overflow-hidden rounded-2xl shadow-xl bg-white/70 backdrop-blur-md mb-6 border border-amber-100/50 hover:border-orange-200/50 hover:shadow-2xl transition-all duration-300">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-200/0 to-amber-200/0 group-hover:from-orange-200/20 group-hover:to-amber-200/20 rounded-2xl blur transition-all duration-300"></div>
+          <div className="relative z-10 p-4 sm:p-6">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent"></div>
+                  <FaEnvelope size={20} className="text-white relative z-10" />
+                </div>
+                <div className="absolute -inset-1 bg-gradient-to-br from-orange-400/30 to-amber-500/30 rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-700 bg-clip-text text-transparent">
+                  Communication Center
+                </h2>
+                <div className="h-1 w-16 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full mt-1 group-hover:w-24 transition-all duration-300"></div>
+              </div>
+            </div>
+            <div className="mt-2 text-sm text-gray-600 flex flex-wrap gap-x-4 gap-y-1">
+              <span>3 Unread Messages</span>
+              <span>|</span>
+              <span>Last Checked: April 29, 2025</span>
+              <span>|</span>
+              <span>Connected Accounts: 2</span>
+            </div>
+          </div>
+        </div>
+
+        <CommunicationTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        <div className="mt-6">
+          {activeTab === 'Inbox' && <InboxSection />}
+          {activeTab === 'Sent' && <SentSection />}
         </div>
       </div>
-      <CommunicationTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-      {activeTab === 'Inbox' && <InboxSection messages={inboxMessages} />}
-      {activeTab === 'Sent' && <SentSection messages={sentMessages} />}
     </div>
   );
 }

@@ -33,9 +33,17 @@ const ApprovalModal = ({
     if (isOpen) {
       // Trigger animation after modal is displayed
       setTimeout(() => setAnimateIn(true), 50);
+      // Prevent body scrolling when modal is open
+      document.body.style.overflow = 'hidden';
     } else {
       setAnimateIn(false);
+      // Restore body scrolling when modal is closed
+      document.body.style.overflow = 'auto';
     }
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -57,10 +65,20 @@ const ApprovalModal = ({
     return <FiTrash2 className="text-red-400" size={24} />;
   };
 
+  const getButtonStyles = () => {
+    if (action === 'approve') {
+      return 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 focus:ring-blue-500/50 border border-blue-500/50';
+    } else if (action === 'reject') {
+      return 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 focus:ring-red-500/50 border border-red-500/50';
+    } else {
+      return 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 focus:ring-red-500/50 border border-red-500/50';
+    }
+  };
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm transition-all duration-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
       {/* Background overlay with particles */}
-      <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm">
+      <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm">
         {/* Ghost particles */}
         {[...Array(30)].map((_, i) => (
           <div 
@@ -82,7 +100,7 @@ const ApprovalModal = ({
       <div 
         className={`bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 
                    rounded-xl border border-purple-500/30 shadow-2xl w-full max-w-md 
-                   relative overflow-hidden transition-all duration-500 transform
+                   relative overflow-y-auto max-h-[90vh] transition-all duration-500 transform
                    ${animateIn ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
       >
         {/* Inner glow effect */}
@@ -315,16 +333,6 @@ const ApprovalModal = ({
       `}</style>
     </div>
   );
-  
-  function getButtonStyles() {
-    if (action === 'approve') {
-      return 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 focus:ring-blue-500/50 border border-blue-500/50';
-    } else if (action === 'reject') {
-      return 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 focus:ring-red-500/50 border border-red-500/50';
-    } else {
-      return 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 focus:ring-red-500/50 border border-red-500/50';
-    }
-  }
 };
 
 // Action button component (approve, reject, delete)

@@ -16,6 +16,7 @@ export const useFacultyManagement = () => {
   });
 
   const queryClient = useQueryClient();
+  const limit = 10; // Number of items per page
 
   // Fetch faculty list
   const {
@@ -24,7 +25,26 @@ export const useFacultyManagement = () => {
     error
   } = useQuery({
     queryKey: ['faculty', page, filters],
-    queryFn: () => facultyService.getFaculty({ page, ...filters })
+    queryFn: () => {
+      // Clean up filter values before sending to API
+      const cleanFilters = {
+        status: filters.status === 'all' ? undefined : filters.status,
+        department: filters.department === 'all_departments' ? undefined : filters.department,
+        dateRange: filters.dateRange === 'all' ? undefined : filters.dateRange,
+        startDate: filters.startDate,
+        endDate: filters.endDate
+      };
+
+      return facultyService.getFaculty(
+        page,
+        limit,
+        cleanFilters.status,
+        cleanFilters.department,
+        cleanFilters.dateRange,
+        cleanFilters.startDate,
+        cleanFilters.endDate
+      );
+    }
   });
 
   // Get faculty details

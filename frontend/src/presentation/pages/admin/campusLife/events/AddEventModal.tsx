@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { IoCloseOutline as X } from 'react-icons/io5';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
@@ -103,6 +103,18 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
     }
   }, [isOpen, initialData, isEditing, reset]);
 
+  // Prevent backend scrolling when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('no-scroll');
+    } else {
+      document.body.classList.remove('no-scroll');
+    }
+    return () => {
+      document.body.classList.remove('no-scroll');
+    };
+  }, [isOpen]);
+
   const timeframeOptions = [
     { value: 'morning', label: 'Morning (6AM-12PM)', emoji: '🌅' },
     { value: 'afternoon', label: 'Afternoon (12PM-6PM)', emoji: '☀️' },
@@ -170,48 +182,81 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
     onSubmit(eventData);
   };
 
+  // Particle effect
+  const ghostParticles = Array(30)
+    .fill(0)
+    .map((_, i) => ({
+      size: Math.random() * 10 + 5,
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      animDuration: Math.random() * 10 + 15,
+      animDelay: Math.random() * 5,
+    }));
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
-      <div className="relative w-full max-w-5xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl shadow-2xl border border-purple-500/20 max-h-[95vh] overflow-y-auto">
-        
+    <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      {/* Background particles */}
+      {ghostParticles.map((particle, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full bg-purple-500/20 blur-sm"
+          style={{
+            width: `${particle.size}px`,
+            height: `${particle.size}px`,
+            top: `${particle.top}%`,
+            left: `${particle.left}%`,
+            animation: `floatParticle ${particle.animDuration}s infinite ease-in-out`,
+            animationDelay: `${particle.animDelay}s`,
+          }}
+        />
+      ))}
+
+      {/* Main Container */}
+      <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-5xl max-h-[90vh] rounded-2xl border border-purple-500/30 shadow-2xl overflow-hidden relative">
+        {/* Inner glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
+
+        {/* Corner decorations */}
+        <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
+        <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
+
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-gray-900/95 to-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 p-6 rounded-t-2xl">
+        <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div 
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-lg border border-gray-600"
+                className="w-16 h-16 rounded-full flex items-center justify-center text-2xl shadow-lg border border-purple-500/30"
                 style={{ backgroundColor: `${watchedColor}20`, borderColor: watchedColor }}
               >
                 {watchedIcon}
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">
+                <h2 className="text-2xl font-bold text-purple-100">
                   {isEditing ? 'Edit Event' : 'Create New Event'}
                 </h2>
-                <p className="text-gray-400 text-sm">
+                <p className="text-purple-300 text-sm">
                   {isEditing ? 'Update your event details' : 'Fill in the details to create your event'}
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-all duration-200"
+              className="p-2 hover:bg-purple-500/20 rounded-full transition-colors"
             >
-              <X size={24} />
+              <X size={24} className="text-purple-300" />
             </button>
           </div>
         </div>
 
         {/* Form Content */}
-        <div className="p-6">
+        <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            
             {/* Left Column - Basic Info */}
             <div className="xl:col-span-2 space-y-6">
-              <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700/50">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-purple-100 mb-4 flex items-center gap-2">
                   <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
                   Basic Information
                 </h3>
@@ -219,7 +264,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Event Title */}
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-purple-300 mb-2">
                       Event Title *
                     </label>
                     <Controller
@@ -229,8 +274,8 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                         <input
                           {...field}
                           type="text"
-                          className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.title ? 'border-red-500' : 'border-gray-600'
+                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                            errors.title ? 'border-red-500' : 'border-purple-500/30'
                           }`}
                           placeholder="Enter your event title"
                         />
@@ -243,7 +288,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
 
                   {/* Date and Time */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-purple-300 mb-2">
                       Date *
                     </label>
                     <Controller
@@ -253,8 +298,8 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                         <input
                           {...field}
                           type="date"
-                          className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.date ? 'border-red-500' : 'border-gray-600'
+                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                            errors.date ? 'border-red-500' : 'border-purple-500/30'
                           }`}
                         />
                       )}
@@ -265,7 +310,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-purple-300 mb-2">
                       Time *
                     </label>
                     <Controller
@@ -275,8 +320,8 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                         <input
                           {...field}
                           type="time"
-                          className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.time ? 'border-red-500' : 'border-gray-600'
+                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                            errors.time ? 'border-red-500' : 'border-purple-500/30'
                           }`}
                         />
                       )}
@@ -288,7 +333,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
 
                   {/* Location and Organizer */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-purple-300 mb-2">
                       Location *
                     </label>
                     <Controller
@@ -298,8 +343,8 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                         <input
                           {...field}
                           type="text"
-                          className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.location ? 'border-red-500' : 'border-gray-600'
+                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                            errors.location ? 'border-red-500' : 'border-purple-500/30'
                           }`}
                           placeholder="Event location"
                         />
@@ -310,19 +355,19 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                     )}
                   </div>
 
-            <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <div>
+                    <label className="block text-sm font-medium text-purple-300 mb-2">
                       Organizer *
                     </label>
                     <Controller
                       name="organizer"
                       control={control}
                       render={({ field }) => (
-              <input
+                        <input
                           {...field}
-                type="text"
-                          className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.organizer ? 'border-red-500' : 'border-gray-600'
+                          type="text"
+                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                            errors.organizer ? 'border-red-500' : 'border-purple-500/30'
                           }`}
                           placeholder="Organizer name"
                         />
@@ -331,67 +376,67 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                     {errors.organizer && (
                       <p className="mt-1 text-sm text-red-400">{errors.organizer.message}</p>
                     )}
-            </div>
+                  </div>
 
                   {/* Organizer Type */}
-            <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <div>
+                    <label className="block text-sm font-medium text-purple-300 mb-2">
                       Organizer Type *
                     </label>
                     <Controller
                       name="organizerType"
                       control={control}
                       render={({ field }) => (
-              <select
+                        <select
                           {...field}
-                          className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.organizerType ? 'border-red-500' : 'border-gray-600'
+                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                            errors.organizerType ? 'border-red-500' : 'border-purple-500/30'
                           }`}
                         >
                           {organizerTypeOptions.map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.emoji} {option.label}
-                  </option>
-                ))}
-              </select>
+                            </option>
+                          ))}
+                        </select>
                       )}
                     />
                     {errors.organizerType && (
                       <p className="mt-1 text-sm text-red-400">{errors.organizerType.message}</p>
                     )}
-            </div>
+                  </div>
 
                   {/* Event Type */}
-            <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <div>
+                    <label className="block text-sm font-medium text-purple-300 mb-2">
                       Event Type *
                     </label>
                     <Controller
                       name="eventType"
                       control={control}
                       render={({ field }) => (
-              <select
+                        <select
                           {...field}
-                          className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.eventType ? 'border-red-500' : 'border-gray-600'
+                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                            errors.eventType ? 'border-red-500' : 'border-purple-500/30'
                           }`}
                         >
                           {eventTypeOptions.map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.emoji} {option.label}
-                  </option>
-                ))}
-              </select>
+                            </option>
+                          ))}
+                        </select>
                       )}
                     />
                     {errors.eventType && (
                       <p className="mt-1 text-sm text-red-400">{errors.eventType.message}</p>
                     )}
-            </div>
+                  </div>
 
                   {/* Max Participants */}
-            <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <div>
+                    <label className="block text-sm font-medium text-purple-300 mb-2">
                       Max Participants *
                     </label>
                     <Controller
@@ -402,8 +447,8 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                           {...field}
                           type="number"
                           min="0"
-                          className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.maxParticipants ? 'border-red-500' : 'border-gray-600'
+                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
+                            errors.maxParticipants ? 'border-red-500' : 'border-purple-500/30'
                           }`}
                           placeholder="Max participants"
                           onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
@@ -417,7 +462,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
 
                   {/* Timeframe */}
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-purple-300 mb-2">
                       Timeframe *
                     </label>
                     <Controller
@@ -430,10 +475,10 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                               key={option.value}
                               type="button"
                               onClick={() => field.onChange(option.value)}
-                              className={`p-3 rounded-xl border transition-all duration-200 text-center ${
+                              className={`p-3 rounded-lg border transition-all duration-200 text-center ${
                                 field.value === option.value
-                                  ? 'bg-purple-600 border-purple-500 text-white'
-                                  : 'bg-gray-700/50 border-gray-600 text-gray-300 hover:bg-gray-600/50'
+                                  ? 'bg-purple-600/30 border-purple-500/50 text-purple-100'
+                                  : 'bg-gray-900/60 border-purple-500/30 text-purple-300 hover:bg-purple-900/20'
                               }`}
                             >
                               <div className="text-lg">{option.emoji}</div>
@@ -454,21 +499,21 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                       name="registrationRequired"
                       control={control}
                       render={({ field }) => (
-                        <label className="flex items-center gap-3 p-4 bg-gray-700/30 rounded-xl border border-gray-600 cursor-pointer hover:bg-gray-700/50 transition-all duration-200">
-              <input
+                        <label className="flex items-center gap-3 p-4 bg-gray-900/60 rounded-lg border border-purple-500/30 cursor-pointer hover:bg-purple-900/20 transition-all duration-200">
+                          <input
                             type="checkbox"
                             checked={field.value}
                             onChange={field.onChange}
-                            className="w-5 h-5 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500 focus:ring-2"
+                            className="w-5 h-5 text-purple-600 bg-gray-900 border-purple-500/50 rounded focus:ring-purple-500 focus:ring-2"
                           />
                           <div>
-                            <div className="text-white font-medium">Registration Required</div>
-                            <div className="text-gray-400 text-sm">Participants must register to attend</div>
+                            <div className="text-purple-100 font-medium">Registration Required</div>
+                            <div className="text-purple-300 text-sm">Participants must register to attend</div>
                           </div>
                         </label>
                       )}
-              />
-            </div>
+                    />
+                  </div>
 
                   {/* Full Time Toggle */}
                   <div className="md:col-span-2">
@@ -476,34 +521,34 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                       name="fullTime"
                       control={control}
                       render={({ field }) => (
-                        <label className="flex items-center gap-3 p-4 bg-gray-700/30 rounded-xl border border-gray-600 cursor-pointer hover:bg-gray-700/50 transition-all duration-200">
+                        <label className="flex items-center gap-3 p-4 bg-gray-900/60 rounded-lg border border-purple-500/30 cursor-pointer hover:bg-purple-900/20 transition-all duration-200">
                           <input
                             type="checkbox"
                             checked={field.value}
                             onChange={field.onChange}
-                            className="w-5 h-5 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500 focus:ring-2"
+                            className="w-5 h-5 text-purple-600 bg-gray-900 border-purple-500/50 rounded focus:ring-purple-500 focus:ring-2"
                           />
-            <div>
-                            <div className="text-white font-medium">Full-time Event</div>
-                            <div className="text-gray-400 text-sm">This event runs for the entire day</div>
+                          <div>
+                            <div className="text-purple-100 font-medium">Full-time Event</div>
+                            <div className="text-purple-300 text-sm">This event runs for the entire day</div>
                           </div>
                         </label>
                       )}
-              />
-            </div>
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Description Section */}
-              <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700/50">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+              <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-purple-100 mb-4 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
                   Event Details
                 </h3>
                 
                 <div className="space-y-4">
-            <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <div>
+                    <label className="block text-sm font-medium text-purple-300 mb-2">
                       Description
                     </label>
                     <Controller
@@ -513,16 +558,16 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                         <textarea
                           {...field}
                           rows={4}
-                          className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 resize-none"
+                          className="w-full px-4 py-3 bg-gray-900/60 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 resize-none"
                           placeholder="Describe your event..."
                         />
                       )}
-              />
-            </div>
+                    />
+                  </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <div>
+                      <label className="block text-sm font-medium text-purple-300 mb-2">
                         Additional Information
                       </label>
                       <Controller
@@ -532,15 +577,15 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                           <textarea
                             {...field}
                             rows={3}
-                            className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 resize-none"
+                            className="w-full px-4 py-3 bg-gray-900/60 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 resize-none"
                             placeholder="Any additional details..."
                           />
                         )}
-              />
-            </div>
+                      />
+                    </div>
 
-            <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <div>
+                      <label className="block text-sm font-medium text-purple-300 mb-2">
                         Requirements
                       </label>
                       <Controller
@@ -550,7 +595,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                           <textarea
                             {...field}
                             rows={3}
-                            className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 resize-none"
+                            className="w-full px-4 py-3 bg-gray-900/60 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 resize-none"
                             placeholder="Event requirements..."
                           />
                         )}
@@ -563,18 +608,18 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
 
             {/* Right Column - Customization */}
             <div className="space-y-6">
-              <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700/50">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+              <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-purple-100 mb-4 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
                   Customization
                 </h3>
 
                 {/* Icon Selection */}
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                  <label className="block text-sm font-medium text-purple-300 mb-3">
                     Event Icon
                   </label>
-                  <div className="grid grid-cols-6 gap-2 p-4 bg-gray-700/30 rounded-xl border border-gray-600 max-h-40 overflow-y-auto">
+                  <div className="grid grid-cols-6 gap-2 p-4 bg-gray-900/60 rounded-lg border border-purple-500/30 max-h-40 overflow-y-auto custom-scrollbar">
                     {iconOptions.map((icon) => (
                       <button
                         key={icon}
@@ -582,8 +627,8 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                         onClick={() => setValue('icon', icon)}
                         className={`w-10 h-10 text-xl rounded-lg transition-all duration-200 hover:scale-110 ${
                           watchedIcon === icon
-                            ? 'bg-purple-600 shadow-lg'
-                            : 'bg-gray-600 hover:bg-gray-500'
+                            ? 'bg-purple-600/30 border-purple-500/50 shadow-lg'
+                            : 'bg-gray-900/60 border-purple-500/30 hover:bg-purple-900/20'
                         }`}
                       >
                         {icon}
@@ -593,11 +638,11 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                 </div>
 
                 {/* Color Selection */}
-            <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                <div>
+                  <label className="block text-sm font-medium text-purple-300 mb-3">
                     Event Color
                   </label>
-                  <div className="grid grid-cols-5 gap-2 p-4 bg-gray-700/30 rounded-xl border border-gray-600">
+                  <div className="grid grid-cols-5 gap-2 p-4 bg-gray-900/60 rounded-lg border border-purple-500/30">
                     {colorOptions.map((color) => (
                       <button
                         key={color}
@@ -605,7 +650,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                         onClick={() => setValue('color', color)}
                         className={`w-12 h-12 rounded-lg transition-all duration-200 hover:scale-110 ${
                           watchedColor === color
-                            ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-800'
+                            ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-900'
                             : ''
                         }`}
                         style={{ backgroundColor: color }}
@@ -615,10 +660,10 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                 </div>
 
                 {/* Preview */}
-                <div className="mt-6 p-4 bg-gray-700/30 rounded-xl border border-gray-600">
-                  <div className="text-sm font-medium text-gray-300 mb-2">Preview</div>
+                <div className="mt-6 p-4 bg-gray-900/60 rounded-lg border border-purple-500/30">
+                  <div className="text-sm font-medium text-purple-300 mb-2">Preview</div>
                   <div 
-                    className="p-4 rounded-lg border-l-4 bg-gray-600/30"
+                    className="p-4 rounded-lg border-l-4 bg-gray-900/60"
                     style={{ borderLeftColor: watchedColor }}
                   >
                     <div className="flex items-center gap-3">
@@ -627,49 +672,95 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                         style={{ backgroundColor: `${watchedColor}20`, color: watchedColor }}
                       >
                         {watchedIcon}
-            </div>
-            <div>
-                        <div className="text-white font-medium">
+                      </div>
+                      <div>
+                        <div className="text-purple-100 font-medium">
                           {watch('title') || 'Event Title'}
                         </div>
-                        <div className="text-gray-400 text-sm">
+                        <div className="text-purple-300 text-sm">
                           {watch('location') || 'Location'}
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-            </div>
+              </div>
             </div>
           </div>
 
           {/* Footer Actions */}
-          <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-gray-700">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-3 text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-xl font-medium transition-all duration-200"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              onClick={handleSubmit(onFormSubmit)}
-              className="px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-            >
-              {isSubmitting ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  {isEditing ? 'Updating...' : 'Creating...'}
-                </div>
-              ) : (
-                isEditing ? 'Update Event' : 'Create Event'
-              )}
-            </button>
+          <div className="border-t border-purple-500/30 bg-gray-900/80 p-6">
+            <div className="flex justify-end gap-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-gray-500/50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                onClick={handleSubmit(onFormSubmit)}
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-blue-500/50 flex items-center justify-center"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    {isEditing ? 'Updating...' : 'Creating...'}
+                  </div>
+                ) : (
+                  isEditing ? 'Update Event' : 'Create Event'
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .no-scroll {
+          overflow: hidden;
+        }
+
+        @keyframes floatParticle {
+          0% {
+            transform: translateY(0) translateX(0);
+            opacity: 0;
+          }
+          25% {
+            opacity: 0.8;
+          }
+          50% {
+            transform: translateY(-20px) translateX(10px);
+            opacity: 0.3;
+          }
+          75% {
+            opacity: 0.7;
+          }
+          100% {
+            transform: translateY(0) translateX(0);
+            opacity: 0;
+          }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(128, 90, 213, 0.1);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(139, 92, 246, 0.3);
+          border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(139, 92, 246, 0.5);
+        }
+      `}</style>
     </div>
   );
 };

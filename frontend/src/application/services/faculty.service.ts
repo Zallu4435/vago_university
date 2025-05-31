@@ -20,8 +20,20 @@ class FacultyService {
     endDate?: string
   ): Promise<FacultyApiResponse> {
     try {
+      const params: Record<string, string | number> = {
+        page,
+        limit
+      };
+
+      // Only add filter parameters if they have values
+      if (status) params.status = status;
+      if (department) params.department = department;
+      if (dateRange) params.dateRange = dateRange;
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
+
       const response = await httpClient.get<FacultyApiResponse>('/admin/faculty', {
-        params: { page, limit, status, department, dateRange, startDate, endDate }
+        params
       });
       return response.data;
     } catch (error: any) {

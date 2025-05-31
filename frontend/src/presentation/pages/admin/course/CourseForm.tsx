@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FiXCircle, FiPlus, FiX } from 'react-icons/fi';
+import React, { useEffect, useState } from 'react';
+import { FiXCircle, FiPlus, FiX, FiBook } from 'react-icons/fi';
 
 interface CourseFormProps {
   isOpen: boolean;
@@ -37,6 +37,18 @@ const CourseForm: React.FC<CourseFormProps> = ({
 
   const [newPrerequisite, setNewPrerequisite] = useState('');
 
+  // Prevent background scrolling when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('no-scroll');
+    } else {
+      document.body.classList.remove('no-scroll');
+    }
+    return () => {
+      document.body.classList.remove('no-scroll');
+    };
+  }, [isOpen]);
+
   const handleAddPrerequisite = () => {
     if (newPrerequisite.trim() && !formData.prerequisites.includes(newPrerequisite.trim())) {
       setFormData({
@@ -72,68 +84,100 @@ const CourseForm: React.FC<CourseFormProps> = ({
 
   if (!isOpen) return null;
 
+  // Particle effect
+  const ghostParticles = Array(30)
+    .fill(0)
+    .map((_, i) => ({
+      size: Math.random() * 10 + 5,
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      animDuration: Math.random() * 10 + 15,
+      animDelay: Math.random() * 5,
+    }));
+
   return (
-    <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center overflow-hidden">
-      {/* Floating ghost particles */}
-      {[...Array(15)].map((_, i) => (
+    <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      {/* Background particles */}
+      {ghostParticles.map((particle, i) => (
         <div
           key={i}
-          className="absolute rounded-full bg-purple-500/10 blur-md"
+          className="absolute rounded-full bg-purple-500/20 blur-sm"
           style={{
-            width: `${Math.random() * 12 + 4}px`,
-            height: `${Math.random() * 12 + 4}px`,
-            top: `${Math.random() * 100}%`,
-            left: `${Math.random() * 100}%`,
-            animation: `floatingMist ${Math.random() * 15 + 20}s ease-in-out infinite ${Math.random() * 5}s`,
+            width: `${particle.size}px`,
+            height: `${particle.size}px`,
+            top: `${particle.top}%`,
+            left: `${particle.left}%`,
+            animation: `floatParticle ${particle.animDuration}s infinite ease-in-out`,
+            animationDelay: `${particle.animDelay}s`,
           }}
         />
       ))}
 
-      {/* Main purple glow effects */}
-      <div className="absolute top-1/4 left-10 w-96 h-96 bg-purple-600/5 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-blue-600/5 rounded-full blur-3xl"></div>
+      {/* Main Modal Container */}
+      <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-2xl max-h-[90vh] rounded-2xl border border-purple-600/30 shadow-2xl overflow-hidden relative">
+        {/* Inner glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
 
-      <div className="relative w-full max-w-2xl mx-4 bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl border border-purple-500/20 overflow-hidden">
-        <div className="p-6 border-b border-purple-500/20 sticky top-0 bg-gray-800/70 backdrop-blur-md z-20 flex justify-between items-center">
-          <h3 className="text-xl font-bold text-purple-300">{isEditing ? 'Edit Course' : 'Add New Course'}</h3>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-full hover:bg-purple-900/30 transition-all duration-300 text-purple-300 hover:text-white"
-          >
-            <FiXCircle size={24} />
-          </button>
+        {/* Corner decorations */}
+        <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
+        <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
+
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center text-2xl shadow-lg border border-purple-600/30"
+                style={{ backgroundColor: '#8B5CF620', borderColor: '#8B5CF6' }}
+              >
+                <FiBook size={24} className="text-purple-300" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-purple-100">
+                  {isEditing ? 'Edit Course' : 'Add New Course'}
+                </h2>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-purple-500/20 rounded-full transition-colors"
+            >
+              <FiXCircle size={24} className="text-purple-300" />
+            </button>
+          </div>
         </div>
 
-        <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
+        {/* Content Section */}
+        <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-purple-300 mb-1">Course Title</label>
+            <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
+              <label className="block text-sm font-medium text-purple-300 mb-2">Course Title</label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-900/50 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-purple-300 mb-1">Description</label>
+            <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
+              <label className="block text-sm font-medium text-purple-300 mb-2">Description</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 bg-gray-900/50 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-purple-300 mb-1">Specialization</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
+                <label className="block text-sm font-medium text-purple-300 mb-2">Specialization</label>
                 <select
                   value={formData.specialization}
                   onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-900/50 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                  className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                   required
                 >
                   <option value="">Select Specialization</option>
@@ -147,24 +191,24 @@ const CourseForm: React.FC<CourseFormProps> = ({
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-purple-300 mb-1">Credits</label>
+              <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
+                <label className="block text-sm font-medium text-purple-300 mb-2">Credits</label>
                 <input
                   type="number"
                   value={formData.credits}
                   onChange={(e) => setFormData({ ...formData, credits: parseInt(e.target.value) || 0 })}
-                  className="w-full px-3 py-2 bg-gray-900/50 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                  className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                   min="0"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-purple-300 mb-1">Faculty</label>
+            <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
+              <label className="block text-sm font-medium text-purple-300 mb-2">Faculty</label>
               <select
                 value={formData.faculty}
                 onChange={(e) => setFormData({ ...formData, faculty: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-900/50 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 required
               >
                 <option value="">Select Faculty</option>
@@ -178,12 +222,12 @@ const CourseForm: React.FC<CourseFormProps> = ({
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-purple-300 mb-1">Term</label>
+            <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
+              <label className="block text-sm font-medium text-purple-300 mb-2">Term</label>
               <select
                 value={formData.term}
                 onChange={(e) => setFormData({ ...formData, term: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-900/50 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 required
               >
                 <option value="">Select Term</option>
@@ -197,32 +241,32 @@ const CourseForm: React.FC<CourseFormProps> = ({
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-purple-300 mb-1">Schedule</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
+                <label className="block text-sm font-medium text-purple-300 mb-2">Schedule</label>
                 <input
                   type="text"
                   value={formData.schedule}
                   onChange={(e) => setFormData({ ...formData, schedule: e.target.value })}
                   placeholder="e.g., MWF 10:00-11:45"
-                  className="w-full px-3 py-2 bg-gray-900/50 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                  className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-purple-300 mb-1">Max Enrollment</label>
+              <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
+                <label className="block text-sm font-medium text-purple-300 mb-2">Max Enrollment</label>
                 <input
                   type="number"
                   value={formData.maxEnrollment}
                   onChange={(e) => setFormData({ ...formData, maxEnrollment: parseInt(e.target.value) || 0 })}
-                  className="w-full px-3 py-2 bg-gray-900/50 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                  className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                   min="0"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-purple-300 mb-1">Prerequisites</label>
+            <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
+              <label className="block text-sm font-medium text-purple-300 mb-2">Prerequisites</label>
               <div className="space-y-2">
                 <div className="flex gap-2">
                   <input
@@ -230,11 +274,11 @@ const CourseForm: React.FC<CourseFormProps> = ({
                     value={newPrerequisite}
                     onChange={(e) => setNewPrerequisite(e.target.value)}
                     placeholder="Enter prerequisite course"
-                    className="flex-1 px-3 py-2 bg-gray-900/50 border border-purple-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                    className="flex-1 px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                   />
                   <button
                     onClick={handleAddPrerequisite}
-                    className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                    className="px-3 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-500 hover:to-blue-500 transition-colors"
                   >
                     <FiPlus size={20} />
                   </button>
@@ -243,7 +287,7 @@ const CourseForm: React.FC<CourseFormProps> = ({
                   {formData.prerequisites.map((prerequisite, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-1 px-3 py-1 bg-purple-900/30 text-purple-300 rounded-full"
+                      className="flex items-center gap-1 px-3 py-1 bg-gray-900/60 border border-purple-600/30 rounded-lg text-purple-300"
                     >
                       <span>{prerequisite}</span>
                       <button
@@ -259,37 +303,49 @@ const CourseForm: React.FC<CourseFormProps> = ({
             </div>
           </div>
 
-          <div className="flex justify-end space-x-3 mt-6">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-purple-300 bg-gray-900/50 border border-purple-500/20 rounded-lg hover:bg-gray-900/70"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSubmit}
-              className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!formData.title || !formData.specialization || !formData.faculty || !formData.term}
-            >
-              {isEditing ? 'Update Course' : 'Add Course'}
-            </button>
+          <div className="border-t border-purple-600/30 bg-gray-900/80 p-6">
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={onClose}
+                className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-gray-500/50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!formData.title || !formData.specialization || !formData.faculty || !formData.term}
+              >
+                {isEditing ? 'Update Course' : 'Add Course'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       <style jsx>{`
-        @keyframes floatingMist {
+        .no-scroll {
+          overflow: hidden;
+        }
+
+        @keyframes floatParticle {
           0% {
             transform: translateY(0) translateX(0);
-            opacity: 0.2;
+            opacity: 0;
+          }
+          25% {
+            opacity: 0.8;
           }
           50% {
-            transform: translateY(-20px) translateX(15px);
+            transform: translateY(-20px) translateX(10px);
+            opacity: 0.3;
+          }
+          75% {
             opacity: 0.7;
           }
           100% {
             transform: translateY(0) translateX(0);
-            opacity: 0.2;
+            opacity: 0;
           }
         }
 

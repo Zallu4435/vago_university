@@ -129,11 +129,9 @@ class CourseService {
     requestId: string
   ): Promise<EnrollmentRequest> {
     try {
-      console.log("Fetching enrollment request details for ID:", requestId);
       const response = await httpClient.get<EnrollmentRequest>(
         `/admin/courses/course-enrollments/${requestId}/details`
       );
-      console.log("Enrollment request details response:", response.data);
       return response.data;
     } catch (error: any) {
       console.error("Error fetching enrollment request details:", error);

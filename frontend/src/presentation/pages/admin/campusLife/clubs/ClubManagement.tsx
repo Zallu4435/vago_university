@@ -413,7 +413,7 @@ const AdminClubManagement: React.FC = () => {
     {
       icon: <Edit size={16} />,
       label: 'Approve Request',
-      onClick: (request: ClubRequest) => handleApproveRequest(request._id),
+      onClick: (request: ClubRequest) => handleApproveRequest(request.id),
       color: 'green' as const,
       disabled: (request: ClubRequest) => request.status !== 'pending' || isLoadingClubDetails,
     },

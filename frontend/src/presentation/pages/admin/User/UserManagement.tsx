@@ -367,8 +367,6 @@ const UserManagement: React.FC = () => {
           ]}
           tabs={[
             { label: 'All Applications', icon: <FiUsers size={16} />, active: true },
-            { label: 'Pending', icon: <FiClipboard size={16} />, active: false },
-            { label: 'Analytics', icon: <FiBarChart2 size={16} />, active: false },
           ]}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}

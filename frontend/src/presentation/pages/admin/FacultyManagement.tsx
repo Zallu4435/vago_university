@@ -17,6 +17,12 @@ interface Faculty {
   createdAt: string;
 }
 
+interface FacultyFilters {
+  status: string;
+  department: string;
+  dateRange: string;
+}
+
 const formatDate = (dateString: string): string => {
   if (!dateString) return 'N/A';
   const date = new Date(dateString);
@@ -143,7 +149,20 @@ const FacultyManagement: React.FC = () => {
   } = useFacultyManagement();
 
   const handleFilterChange = (field: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [field]: value }));
+    const cleanField = field.replace(/^page\[|\]$/g, '');
+    
+    const fieldMap: { [key: string]: keyof FacultyFilters } = {
+      'status': 'status',
+      'department': 'department',
+      'dateRange': 'dateRange'
+    };
+
+    const mappedField = fieldMap[cleanField] || cleanField;
+    
+    setFilters((prev) => ({
+      ...prev,
+      [mappedField]: value
+    }));
   };
 
   const debouncedFilterChange = useCallback(
@@ -343,8 +362,6 @@ const FacultyManagement: React.FC = () => {
           ]}
           tabs={[
             { label: 'All Faculty', icon: <FiUsers size={16} />, active: true },
-            { label: 'Pending', icon: <FiClipboard size={16} />, active: false },
-            { label: 'Departments', icon: <FiBarChart2 size={16} />, active: false },
           ]}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
@@ -453,7 +470,7 @@ const FacultyManagement: React.FC = () => {
           setIsDetailsModalOpen(false);
           setSelectedFaculty(null);
         }}
-        faculty={selectedFaculty}
+        faculty={selectedFaculty?.faculty}
       />
 
       <style jsx>{`

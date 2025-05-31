@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaGraduationCap, FaArrowRight, FaClock } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 interface ProgramCardProps {
     title: string;
@@ -7,13 +8,14 @@ interface ProgramCardProps {
     image: string;
     courses?: string[];
     comingSoon?: boolean;
+    departmentPath?: string;
 }
 
-const ProgramCard: React.FC<ProgramCardProps> = ({ title, description, image, courses, comingSoon }) => {
+const ProgramCard: React.FC<ProgramCardProps> = ({ title, description, image, courses, comingSoon, departmentPath }) => {
     return (
         <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 border border-cyan-100 transform hover:-translate-y-1">
             <div
-                className="w-full h-56 bg-gradient-to-r from-cyan-600 to-blue-600 relative group overflow-hidden"
+                className="w-full h-56 relative group overflow-hidden"
             >
                 {!comingSoon ? (
                     <>
@@ -22,10 +24,10 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ title, description, image, co
                             alt={title}
                             className="w-full h-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-500"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/60 to-transparent" />
                     </>
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-600">
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-600 to-gray-700">
                         <div className="text-center p-6">
                             <FaClock className="text-white text-4xl mx-auto mb-4 animate-pulse" />
                             <h3 className="text-2xl font-bold text-white">More Faculties Coming Soon</h3>
@@ -45,7 +47,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ title, description, image, co
                     <p className="text-cyan-600 mb-5 text-lg">{description}</p>
                     {courses && (
                         <div className="space-y-3 mb-4">
-                            <h4 className="font-semibold text-gray-700 mb-2">Featured Programs:</h4>
+                            <h4 className="font-semibold text-cyan-800 mb-2">Featured Programs:</h4>
                             {courses.map((course, index) => (
                                 <div key={index} className="flex items-center text-cyan-700 bg-cyan-50 p-2 rounded-lg">
                                     <FaGraduationCap className="mr-2 text-cyan-600" />
@@ -54,14 +56,19 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ title, description, image, co
                             ))}
                         </div>
                     )}
-                    <button className="mt-4 text-cyan-600 hover:text-cyan-700 flex items-center group font-medium">
+                    <Link
+                        to={departmentPath || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 text-cyan-600 hover:text-cyan-700 flex items-center group font-medium"
+                    >
                         Learn more
                         <FaArrowRight className="ml-2 group-hover:translate-x-2 transition-transform" />
-                    </button>
+                    </Link>
                 </div>
             ) : (
                 <div className="p-6 text-center">
-                    <p className="text-cyan-600 mb-5">Stay tuned as we expand our academic offerings with more specialized programs.</p>
+                    <p className="text-gray-700 mb-5">Stay tuned as we expand our academic offerings with more specialized programs.</p>
                     <button className="mt-4 text-cyan-600 hover:text-cyan-700 flex items-center group mx-auto justify-center font-medium">
                         Get notified
                         <FaArrowRight className="ml-2 group-hover:translate-x-2 transition-transform" />
@@ -78,13 +85,15 @@ const UGProgrammes: React.FC = () => {
             title: "School of Computing",
             description: "Shape the digital future through innovation and technology in our cutting-edge computing programs.",
             image: "/images/computing.jpg",
-            courses: ["Computer Science", "Information Systems", "Business Analytics"]
+            courses: ["Computer Science", "Information Systems", "Business Analytics"],
+            departmentPath: "/departments/computer-science"
         },
         {
             title: "Faculty of Business",
             description: "Develop business acumen and leadership skills for the global marketplace with our renowned faculty.",
             image: "/images/business.jpg",
-            courses: ["BBA", "BBA (Accountancy)", "Business Analytics"]
+            courses: ["BBA", "BBA (Accountancy)", "Business Analytics"],
+            departmentPath: "/departments/business"
         },
         {
             comingSoon: true,

@@ -79,7 +79,7 @@ const ApplicationProcess = () => {
                 }`}
                 onClick={() => handleStepClick(step.id)}
               >
-                <div className={`w-20 h-20 md:w-24 md:h-24 flex items-center justify-center mb-2 rounded-lg border-2 ${
+                <div className={`w-20 h-20 md:w-36 md:h-32 flex items-center justify-center mb-2 rounded-lg border-2 ${
                   activeStep === step.id 
                     ? 'bg-orange-50 border-orange-500 text-orange-600' 
                     : 'bg-gray-100 border-gray-300 text-gray-400'

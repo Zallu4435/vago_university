@@ -1,0 +1,564 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { FaArrowRight, FaGraduationCap, FaGlobeAmericas, FaDollarSign, FaUsers, FaCalendarAlt, FaStar } from 'react-icons/fa';
+
+interface DepartmentData {
+  poster: {
+    title: string;
+    subtitle: string;
+    description: string;
+    ctaText: string;
+  };
+  inMemoriam: {
+    title: string;
+    content: string;
+    linkText: string;
+  };
+  spotlight: Array<{
+    image: string;
+    title: string;
+    date: string;
+    description: string;
+    category: string;
+    readTime: string;
+  }>;
+  education: {
+    title: string;
+    undergraduate: {
+      title: string;
+      content: string;
+      features: string[];
+      image: string;
+    };
+    graduate: {
+      title: string;
+      content: string;
+      features: string[];
+      status: string;
+    };
+  };
+  byTheNumbers: {
+    title: string;
+    stats: Array<{
+      value: string;
+      label: string;
+      icon: React.ElementType;
+    }>;
+  };
+  events: Array<{
+    date: string;
+    month: string;
+    title: string;
+    description: string;
+    type: string;
+    attendees: string;
+  }>;
+}
+
+interface DepartmentDataMap {
+  [key: string]: DepartmentData;
+}
+
+interface VisibilityState {
+  [key: string]: boolean;
+}
+
+const DepartmentHome: React.FC = () => {
+  const [currentDepartment, setCurrentDepartment] = useState<string>('computer-science');
+  const [isVisible, setIsVisible] = useState<VisibilityState>({});
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // Intersection Observer for animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(prev => ({ ...prev, [entry.target.id]: true }));
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    observerRef.current = observer;
+
+    const elements = document.querySelectorAll('[data-animate]');
+    elements.forEach(el => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
+  const departmentData: DepartmentDataMap = {
+    'computer-science': {
+      poster: {
+        title: 'Welcome to the School of Computer Science',
+        subtitle: 'Leading the future of technology through innovation and research.',
+        description: 'Where cutting-edge research meets practical application. Join us in shaping the digital landscape of tomorrow.',
+        ctaText: 'Explore Programs',
+      },
+      inMemoriam: {
+        title: 'In Memoriam',
+        content: 'A pillar of 35+ years, Associate Professor Stephen Harris leaves behind a legacy in databases, data science, and quantum computing.',
+        linkText: 'Read More',
+      },
+      spotlight: [
+        {
+          image: 'computer-image.jpg',
+          title: 'The Hidden Dangers of AI',
+          date: '06-20-2025',
+          description: 'Can we determine what makes AI systems trustworthy and secure?',
+          category: 'Research',
+          readTime: '5 min read'
+        },
+        {
+          image: 'award-image.jpg',
+          title: 'Best Paper Award at ACM 2025',
+          date: '04-15-2025',
+          description: 'Faculty, student, and alumni team wins prestigious award.',
+          category: 'Achievement',
+          readTime: '3 min read'
+        },
+        {
+          image: 'student-image.jpg',
+          title: 'PhD Student Xu Poison Receives Honorable Mention',
+          date: '03-10-2025',
+          description: 'Awarded for outstanding research contributions.',
+          category: 'Student Success',
+          readTime: '4 min read'
+        },
+      ],
+      education: {
+        title: 'Education Excellence',
+        undergraduate: {
+          title: 'Undergraduate Programs',
+          content: 'Nurturing the next generation of leaders in tech through a diverse range of multidisciplinary programs.',
+          features: ['Hands-on Learning', 'Industry Partnerships', 'Research Opportunities'],
+          image: 'education-image.jpg',
+        },
+        graduate: {
+          title: 'Graduate Programs',
+          content: 'Advanced degrees designed for tomorrow\'s innovators and researchers.',
+          features: ['Cutting-edge Research', 'Expert Faculty', 'Global Network'],
+          status: 'Coming Soon'
+        },
+      },
+      byTheNumbers: {
+        title: 'Excellence by the Numbers',
+        stats: [
+          { value: '67', label: 'World-Class Faculty', icon: FaGraduationCap },
+          { value: '19,000+', label: 'Global Alumni Network', icon: FaGlobeAmericas },
+          { value: '$200M+', label: 'Research Funding', icon: FaDollarSign },
+          { value: '16+', label: 'Innovative Programs', icon: FaUsers },
+        ],
+      },
+      events: [
+        {
+          date: '07',
+          month: 'Mar',
+          title: 'Integrating Speech Recognition into NLP',
+          description: 'University Scholar Series',
+          type: 'Conference',
+          attendees: '200+'
+        },
+        {
+          date: '10',
+          month: 'Mar',
+          title: 'Soft Skills Workshop for Tech Students',
+          description: 'Career Center Event',
+          type: 'Workshop',
+          attendees: '50+'
+        },
+        {
+          date: '20',
+          month: 'Mar',
+          title: 'Tech Networking Event',
+          description: 'Alumni Mixer',
+          type: 'Networking',
+          attendees: '300+'
+        },
+      ],
+    },
+    'business': {
+      poster: {
+        title: 'Welcome to the School of Business',
+        subtitle: 'Shaping global leaders through excellence in business education.',
+        description: 'Transform your career with our world-renowned business programs. Lead with confidence in the global marketplace.',
+        ctaText: 'Discover Opportunities',
+      },
+      inMemoriam: {
+        title: 'In Memoriam',
+        content: 'Professor Emily Carter, a 40-year veteran, leaves a legacy in finance, leadership, and economic policy.',
+        linkText: 'Read More',
+      },
+      spotlight: [
+        {
+          image: 'business-image.jpg',
+          title: 'The Future of Global Markets',
+          date: '06-18-2025',
+          description: 'How will emerging economies shape the next decade?',
+          category: 'Market Analysis',
+          readTime: '7 min read'
+        },
+        {
+          image: 'award-image.jpg',
+          title: 'Best MBA Program 2025',
+          date: '04-12-2025',
+          description: 'Recognized by Global Business Review.',
+          category: 'Recognition',
+          readTime: '2 min read'
+        },
+        {
+          image: 'student-image.jpg',
+          title: 'MBA Student Wins National Case Competition',
+          date: '03-05-2025',
+          description: 'Team excels in strategic analysis and innovation.',
+          category: 'Student Success',
+          readTime: '5 min read'
+        },
+      ],
+      education: {
+        title: 'Educational Excellence',
+        undergraduate: {
+          title: 'Undergraduate Programs',
+          content: 'Preparing future business leaders through innovative programs in finance, marketing, and entrepreneurship.',
+          features: ['Real-world Projects', 'Mentorship Program', 'Global Exposure'],
+          image: 'business-education-image.jpg',
+        },
+        graduate: {
+          title: 'Graduate Programs',
+          content: 'Executive MBA and specialized master\'s programs for working professionals.',
+          features: ['Executive Education', 'Leadership Development', 'Strategic Thinking'],
+          status: 'Coming Soon'
+        },
+      },
+      byTheNumbers: {
+        title: 'Impact by the Numbers',
+        stats: [
+          { value: '45', label: 'Expert Faculty', icon: FaGraduationCap },
+          { value: '15,000+', label: 'Alumni Leaders', icon: FaUsers },
+          { value: '$150M+', label: 'Endowment Fund', icon: FaDollarSign },
+          { value: '12+', label: 'Specialized Programs', icon: FaGlobeAmericas },
+        ],
+      },
+      events: [
+        {
+          date: '05',
+          month: 'Mar',
+          title: 'Global Business Summit 2025',
+          description: 'Annual Conference',
+          type: 'Summit',
+          attendees: '500+'
+        },
+        {
+          date: '12',
+          month: 'Mar',
+          title: 'Entrepreneurship Workshop',
+          description: 'Startup Bootcamp',
+          type: 'Workshop',
+          attendees: '100+'
+        },
+        {
+          date: '22',
+          month: 'Mar',
+          title: 'Finance Networking Night',
+          description: 'Alumni and Industry Mixer',
+          type: 'Networking',
+          attendees: '250+'
+        },
+      ],
+    },
+  };
+
+  const data = departmentData[currentDepartment] || departmentData['computer-science'];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-cyan-50 via-white to-cyan-50 overflow-hidden">
+
+      <div className="relative">
+        {/* Hero Section */}
+        <section
+          id="hero"
+          data-animate
+          className={`relative h-96 bg-gradient-to-b from-cyan-600 to-blue-600 flex items-center justify-center transition-all duration-800 ${isVisible.hero ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}
+        >
+          <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+            <div className="space-y-6">
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+                {data.poster.title}
+              </h1>
+              <p className="text-base sm:text-lg text-cyan-100 max-w-3xl mx-auto">
+                {data.poster.subtitle}
+              </p>
+              <p className="text-sm text-cyan-200 max-w-2xl mx-auto mb-6">
+                {data.poster.description}
+              </p>
+              <button
+                className="group inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+              >
+                {data.poster.ctaText}
+                <FaArrowRight className="ml-2 group-hover:translate-x-2 transition-transform" />
+              </button>
+            </div>
+          </div>
+        </section>
+        {/* Spotlight Section */}
+        <section
+          id="spotlight"
+          data-animate
+          className={`py-20 bg-gradient-to-b from-cyan-50 via-white to-cyan-50 transition-all duration-1000 ${isVisible.spotlight ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}
+        >
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-cyan-800 mb-4">
+                In the Spotlight
+              </h2>
+              <p className="text-lg text-cyan-600 max-w-3xl mx-auto">
+                Discover our latest achievements, breakthroughs, and success stories
+              </p>
+              <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto mt-4" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {data.spotlight.map((item, index) => (
+                <article
+                  key={index}
+                  className="group bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl border border-cyan-100 transform hover:scale-105 transition-all duration-300"
+                >
+                  <div className="relative h-56 bg-gradient-to-r from-cyan-600 to-blue-600 overflow-hidden">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/60 to-transparent" />
+                    <div className="absolute top-4 left-4">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-cyan-400 to-blue-400 text-white">
+                        {item.category}
+                      </span>
+                    </div>
+                    <div className="absolute top-4 right-4 text-white text-sm bg-cyan-900/60 backdrop-blur-sm rounded-full px-3 py-1">
+                      {item.readTime}
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <time className="text-sm text-cyan-600 font-medium">{item.date}</time>
+                      <div className="flex items-center text-yellow-400">
+                        <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold text-cyan-800 mb-3 group-hover:text-cyan-600 transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-cyan-600 mb-6">{item.description}</p>
+                    <button className="inline-flex items-center text-cyan-600 font-medium hover:text-cyan-700 group">
+                      Read More
+                      <FaArrowRight className="ml-2 group-hover:translate-x-2 transition-transform" />
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Education Section */}
+        <section
+          id="education"
+          data-animate
+          className={`py-20 bg-gradient-to-b from-cyan-50 via-white to-cyan-50 transition-all duration-1000 ${isVisible.education ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}
+        >
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-cyan-800 mb-4">
+                {data.education.title}
+              </h2>
+              <p className="text-lg text-cyan-600 max-w-3xl mx-auto">
+                Empowering minds through innovative education and research
+              </p>
+              <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto mt-4" />
+            </div>
+
+            <div className="space-y-12">
+              {/* Undergraduate Programs */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-8 flex flex-col lg:flex-row items-center transition-all duration-300">
+                <div className="lg:w-1/2 space-y-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 rounded-full bg-cyan-100">
+                      <FaGraduationCap className="text-cyan-600 text-xl" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-cyan-800">{data.education.undergraduate.title}</h3>
+                  </div>
+                  <p className="text-cyan-600 leading-relaxed">{data.education.undergraduate.content}</p>
+                  <div className="space-y-3">
+                    {data.education.undergraduate.features.map((feature, index) => (
+                      <div key={index} className="flex items-center space-x-3">
+                        <FaGraduationCap className="text-cyan-600" />
+                        <span className="text-cyan-700">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <button className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg group">
+                    Learn More
+                    <FaArrowRight className="ml-2 group-hover:translate-x-2 transition-transform" />
+                  </button>
+                </div>
+                <div className="lg:w-1/2 mt-8 lg:mt-0 lg:pl-8">
+                  <div className="relative h-64 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-xl overflow-hidden">
+                    <img
+                      src={data.education.undergraduate.image}
+                      alt={data.education.undergraduate.title}
+                      className="w-full h-full object-cover opacity-80"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/60 to-transparent" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Graduate Programs */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-8 flex flex-col lg:flex-row-reverse items-center transition-all duration-300 opacity-75">
+                <div className="lg:w-1/2 space-y-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 rounded-full bg-cyan-100">
+                      <FaGraduationCap className="text-cyan-600 text-xl" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-cyan-800">{data.education.graduate.title}</h3>
+                  </div>
+                  <p className="text-cyan-600 leading-relaxed">{data.education.graduate.content}</p>
+                  <div className="space-y-3">
+                    {data.education.graduate.features.map((feature, index) => (
+                      <div key={index} className="flex items-center space-x-3">
+                        <FaGraduationCap className="text-cyan-600" />
+                        <span className="text-cyan-700">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-lg font-medium">
+                    {data.education.graduate.status}
+                    <FaCalendarAlt className="ml-2" />
+                  </div>
+                </div>
+                <div className="lg:w-1/2 mt-8 lg:mt-0 lg:pr-8">
+                  <div className="h-64 bg-gradient-to-r from-gray-300 to-gray-400 rounded-xl" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Statistics Section */}
+        <section
+          id="stats"
+          data-animate
+          className={`py-20 bg-gradient-to-b from-cyan-600 to-blue-600 transition-all duration-1000 ${isVisible.stats ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}
+        >
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-white">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold mb-4">{data.byTheNumbers.title}</h2>
+              <p className="text-lg text-cyan-100 max-w-3xl mx-auto">
+                Our achievements speak for themselves
+              </p>
+              <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto mt-4" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {data.byTheNumbers.stats.map((stat, index) => (
+                <div
+                  key={index}
+                  className="group bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-6 text-center transition-all duration-300 hover:scale-105"
+                >
+                  <div className="p-3 rounded-full bg-cyan-100 mx-auto mb-4">
+                    <stat.icon className="text-cyan-600 text-2xl" />
+                  </div>
+                  <div className="text-3xl font-bold text-cyan-600 mb-2">{stat.value}</div>
+                  <div className="text-sm text-cyan-600">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Events Section */}
+        <section
+          id="events"
+          data-animate
+          className={`py-20 bg-gradient-to-b from-cyan-50 via-white to-cyan-50 transition-all duration-1000 ${isVisible.events ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}
+        >
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-cyan-800 mb-4">
+                Upcoming Events
+              </h2>
+              <p className="text-lg text-cyan-600 max-w-3xl mx-auto">
+                Join us for exciting events, workshops, and networking opportunities
+              </p>
+              <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto mt-4" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {data.events.map((event, index) => (
+                <div
+                  key={index}
+                  className="group bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-6 transition-all duration-300 hover:scale-105"
+                >
+                  <div className="absolute -top-4 -left-4">
+                    <div className="w-16 h-16 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-lg shadow-lg flex flex-col items-center justify-center text-white">
+                      <div className="text-xl font-bold">{event.date}</div>
+                      <div className="text-xs font-medium">{event.month}</div>
+                    </div>
+                  </div>
+                  <div className="pt-8">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-cyan-100 text-cyan-600">
+                        {event.type}
+                      </span>
+                      <span className="text-sm text-cyan-600 font-medium">
+                        {event.attendees} attendees
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-bold text-cyan-800 mb-3 group-hover:text-cyan-600 transition-colors">
+                      {event.title}
+                    </h3>
+                    <p className="text-cyan-600 mb-6">{event.description}</p>
+                    <button className="inline-flex items-center text-cyan-600 font-medium hover:text-cyan-700 group">
+                      View Details
+                      <FaArrowRight className="ml-2 group-hover:translate-x-2 transition-transform" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <style>
+        {`
+          @keyframes fade-in {
+            from {
+              opacity: 0;
+              transform: translateY(20px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+
+          .animate-fade-in {
+            animation: fade-in 0.8s ease-out forwards;
+          }
+
+          .backdrop-blur-sm {
+            backdrop-filter: blur(4px);
+          }
+        `}
+      </style>
+    </div>
+  );
+};
+
+export default DepartmentHome;

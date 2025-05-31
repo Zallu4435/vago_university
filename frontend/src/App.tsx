@@ -12,6 +12,7 @@ import UGLayout from './presentation/Layout/UGLayout';
 import AdminLayout from './presentation/Layout/AdminLayout';
 import UserLayout from './presentation/Layout/UserLayout';
 import FacultyLayout from './presentation/Layout/FacultyLayout';
+import DepartmentLayout from './presentation/Layout/DepartmentLayout';
 
 // Pages
 import { Home } from './presentation/pages/main/Home';
@@ -46,6 +47,13 @@ import AdminSportsManagement from './presentation/pages/admin/campusLife/sports/
 import AdminEventsManagement from './presentation/pages/admin/campusLife/events/EventsManagement';
 import CommunicationManagement from './presentation/pages/admin/communication/CommunicstionManagement';
 import PaymentManagement from './presentation/pages/admin/payment/PaymentManagement';
+import ComputerScience from './presentation/pages/departments/ComputerScience';
+import Business from './presentation/pages/departments/Business';
+import DepartmentHome from './presentation/pages/departments/DepartmentHome';
+import DepartmentAbout from './presentation/pages/departments/DepartmentAbout';
+import DepartmentEducation from './presentation/pages/departments/DepartmentEducation';
+import DepartmentCommunity from './presentation/pages/departments/DepartmentCommunity';
+import DepartmentEntrepreneur from './presentation/pages/departments/DepartmentEntrepreneur';
 
 const App: React.FC = () => {
   const { isError, error } = useRefreshToken();
@@ -55,6 +63,24 @@ const App: React.FC = () => {
     console.log('Refresh token failed:', error);
     store.dispatch({ type: 'auth/logout' }); 
   }
+
+  // Define departments array
+  const departments = [
+    { path: 'computer-science', component: ComputerScience },
+    { path: 'business', component: Business },
+    // Add more departments here as needed
+    // { path: 'engineering', component: Engineering },
+  ];
+
+  // Define sub-routes for each department
+  const departmentSubRoutes = [
+    { path: '', element: <DepartmentHome /> }, // Home page for the department
+    { path: 'about', element: <DepartmentAbout /> },
+    { path: 'program', element: <DepartmentEducation /> },
+    { path: 'community', element: <DepartmentCommunity /> },
+    { path: 'entrepreneur', element: <DepartmentEntrepreneur /> },
+    { path: 'contact', element: <ContactUs /> }
+  ];
 
   return (
     <Provider store={store}>
@@ -160,6 +186,19 @@ const App: React.FC = () => {
 
         {/* Confirm Faculty Route */}
         <Route path="/confirm-faculty/:id/:action" element={<ConfirmFaculty />} />
+
+        {/* Department Routes */}
+        <Route path="/departments" element={<DepartmentLayout />}>
+          {departments.map((dept) => (
+            <Route key={dept.path} path={dept.path} element={<dept.component />}>
+              {departmentSubRoutes.map((subRoute, index) => (
+                <Route key={index} path={subRoute.path} element={subRoute.element} />
+              ))}
+            </Route>
+          ))}
+          {/* Redirect if department is not found */}
+          <Route path="*" element={<Navigate to="/departments/computer-science" replace />} />
+        </Route>
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/register" replace />} />

@@ -1,15 +1,18 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaRegCheckCircle, FaRegIdCard, FaShieldAlt } from 'react-icons/fa';
+import { useDispatch } from 'react-redux';
+import Cookies from 'js-cookie';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import { registerSchema } from '../../../domain/validation/register';
 import { useRegisterUser } from '../../../application/hooks/useAuthQueries';
 import { usePasswordStrength } from '../../../application/hooks/usePasswordStrength';
 import { useAnimation } from '../../../application/hooks/useAnimation';
-import { toast } from 'react-hot-toast'; 
+import { setAuth } from '../../redux/authSlice';
+import { toast } from 'react-hot-toast';
 
 interface FormData {
   firstName: string;
@@ -22,6 +25,8 @@ interface FormData {
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
   const formAnimation = useAnimation(300);
   const backgroundAnimation = useAnimation(0);
 
@@ -43,24 +48,56 @@ const RegisterPage = () => {
   const mutation = useRegisterUser();
 
   const onSubmit = (data: FormData) => {
-    mutation.mutate(
-      {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        password: data.password,
+    mutation.mutate(data, {
+      onSuccess: (response) => {
+        Cookies.set('auth_token', response.token, { secure: true, sameSite: 'strict' });
+        dispatch(setAuth({
+          token: response.token,
+          user: response.user,
+          collection: response.collection,
+          profilePicture: response.profilePicture,
+        }));
+        toast.success('Registration successful!');
+
+        // Get the current path to determine where to navigate back to
+        const currentPath = location.pathname;
+        
+        // If we're in a department section
+        if (currentPath.includes('/departments/')) {
+          const departmentPath = currentPath.split('/register')[0];
+          navigate(departmentPath);
+          return;
+        }
+        
+        // If we're in UG section
+        if (currentPath.includes('/ug/')) {
+          const ugPath = currentPath.split('/register')[0];
+          navigate(ugPath);
+          return;
+        }
+
+        // Default navigation based on user type
+        switch (response.collection) {
+          case 'register':
+            navigate('/admission');
+            break;
+          case 'admin':
+            navigate('/admin');
+            break;
+          case 'user':
+            navigate('/dashboard');
+            break;
+          case 'faculty':
+            navigate('/faculty/courses');
+            break;
+          default:
+            navigate('/');
+        }
       },
-      {
-        onSuccess: () => {
-          toast.success('Registration successful! Welcome to Horizon University.');
-          reset();
-          navigate('/login');
-        },
-        onError: (error: Error) => {
-          toast.error(`Registration failed: ${error.message}`);
-        },
-      }
-    );
+      onError: (error: Error) => {
+        toast.error(`Registration failed: ${error.message}`);
+      },
+    });
   };
 
   return (

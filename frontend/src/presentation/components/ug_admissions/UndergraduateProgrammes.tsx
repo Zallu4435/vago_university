@@ -11,7 +11,7 @@ interface ProgramCardProps {
 
 const ProgramCard: React.FC<ProgramCardProps> = ({ title, description, image, courses, comingSoon }) => {
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 border border-cyan-100 transform hover:-translate-y-1">
+    <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-cyan-100 transform hover:-translate-y-1">
       <div
         className="w-full h-56 bg-gradient-to-r from-cyan-600 to-blue-600 relative group overflow-hidden"
       >
@@ -20,12 +20,12 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ title, description, image, co
             <img
               src={image}
               alt={title}
-              className="w-full h-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-500"
+              className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/60 to-transparent" />
           </>
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-600">
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-600 to-blue-600">
             <div className="text-center p-6">
               <FaClock className="text-white text-4xl mx-auto mb-4 animate-pulse" />
               <h3 className="text-2xl font-bold text-white">More Faculties Coming Soon</h3>
@@ -45,7 +45,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ title, description, image, co
           <p className="text-cyan-600 mb-5 text-lg">{description}</p>
           {courses && (
             <div className="space-y-3 mb-4">
-              <h4 className="font-semibold text-gray-700 mb-2">Featured Programs:</h4>
+              <h4 className="font-semibold text-cyan-800 mb-2">Featured Programs:</h4>
               {courses.map((course, index) => (
                 <div key={index} className="flex items-center text-cyan-700 bg-cyan-50 p-2 rounded-lg">
                   <FaGraduationCap className="mr-2 text-cyan-600" />
@@ -116,7 +116,7 @@ const UndergraduateProgrammes: React.FC = () => {
         </div>
 
         <div className="text-center mt-16">
-          <button className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+          <button className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg">
             View All Programs
             <FaArrowRight className="ml-2" />
           </button>

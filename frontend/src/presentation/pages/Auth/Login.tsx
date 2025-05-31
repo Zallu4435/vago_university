@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaRegCheckCircle, FaRegIdCard, FaShieldAlt } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
 import Cookies from 'js-cookie';
@@ -19,6 +19,7 @@ interface FormData {
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const formAnimation = useAnimation(300);
   const backgroundAnimation = useAnimation(0);
@@ -33,39 +34,58 @@ const LoginPage = () => {
 
   const mutation = useLoginUser();
 
+  const onSubmit = (data: FormData) => {
+    mutation.mutate(data, {
+      onSuccess: (response) => {
+        Cookies.set('auth_token', response.token, { secure: true, sameSite: 'strict' });
+        dispatch(setAuth({
+          token: response.token,
+          user: response.user,
+          collection: response.collection,
+          profilePicture: response.profilePicture,
+        }));
+        toast.success('Login successful!');
 
-const onSubmit = (data: FormData) => {
-  mutation.mutate(data, {
-    onSuccess: (response) => {
-      Cookies.set('auth_token', response.token, { secure: true, sameSite: 'strict' });
-      console.log(response, "response from the checking side....")
-      dispatch(setAuth({
-        token: response.token,
-        user: response.user,
-        collection: response.collection,
-        profilePicture: response.profilePicture,
-      }));
-      toast.success('Login successful!');
-      switch (response.collection) {
-        case 'register':
-          navigate('/admission');
-          break;
-        case 'admin':
-          navigate('/admin');
-          break;
-        case 'user':
-          navigate('/dashboard');
-          break;
-        case 'faculty':
-          navigate('/faculty/courses');
-          break;
-      }
-    },
-    onError: (error: Error) => {
-      toast.error(`Login failed: ${error.message}`);
-    },
-  });
-};
+        // Get the current path to determine where to navigate back to
+        const currentPath = location.pathname;
+        
+        // If we're in a department section
+        if (currentPath.includes('/departments/')) {
+          const departmentPath = currentPath.split('/login')[0];
+          navigate(departmentPath);
+          return;
+        }
+        
+        // If we're in UG section
+        if (currentPath.includes('/ug/')) {
+          const ugPath = currentPath.split('/login')[0];
+          navigate(ugPath);
+          return;
+        }
+
+        // Default navigation based on user type
+        switch (response.collection) {
+          case 'register':
+            navigate('/admission');
+            break;
+          case 'admin':
+            navigate('/admin');
+            break;
+          case 'user':
+            navigate('/dashboard');
+            break;
+          case 'faculty':
+            navigate('/faculty/courses');
+            break;
+          default:
+            navigate('/');
+        }
+      },
+      onError: (error: Error) => {
+        toast.error(`Login failed: ${error.message}`);
+      },
+    });
+  };
 
   return (
     <div

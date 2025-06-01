@@ -1,22 +1,24 @@
 import PropTypes from 'prop-types';
+import { usePreferences } from '../../../context/PreferencesContext';
 
 export default function CommunicationTabs({ activeTab, setActiveTab }) {
   const tabs = ['Inbox', 'Sent'];
+  const { styles } = usePreferences();
 
   return (
-    <div className="relative overflow-hidden rounded-2xl shadow-xl bg-white/70 backdrop-blur-md border border-amber-100/50 group hover:shadow-2xl transition-all duration-500">
+    <div className={`relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
       {/* Background glow */}
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-200/0 to-amber-200/0 group-hover:from-orange-200/20 group-hover:to-amber-200/20 rounded-2xl blur transition-all duration-300"></div>
+      <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
 
-      <div className="relative z-10 flex flex-col sm:flex-row border-b border-amber-200/50">
+      <div className="relative z-10 flex flex-col sm:flex-row">
         {tabs.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`relative flex-1 py-3 px-4 sm:px-6 font-medium text-center transition-all duration-300 group/tab ${
               activeTab === tab
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-t-2xl sm:rounded-2xl'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-amber-100/50'
+                ? `bg-gradient-to-r ${styles.accent} text-white rounded-t-2xl sm:rounded-2xl`
+                : `${styles.textSecondary} hover:${styles.textPrimary} hover:bg-amber-100/50`
             }`}
           >
             <span className="relative z-10">{tab}</span>
@@ -24,7 +26,7 @@ export default function CommunicationTabs({ activeTab, setActiveTab }) {
               <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-t-2xl sm:rounded-2xl"></div>
             )}
             <div
-              className={`absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full transition-all duration-300 ${
+              className={`absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r ${styles.accent} rounded-full transition-all duration-300 ${
                 activeTab === tab ? 'w-full' : 'group-hover/tab:w-full'
               }`}
             ></div>

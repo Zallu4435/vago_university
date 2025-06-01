@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import { usePreferences } from '../../../context/PreferencesContext';
 import WelcomeBanner from './WelcomeBanner';
 import Announcements from './Announcements';
 import Deadlines from './Deadlines';
@@ -14,8 +15,12 @@ import Financial from '../Financial/Financial';
 
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useOutletContext();
+  const { styles } = usePreferences();
 
-  // Sample data from provided code
+  useEffect(() => {
+    console.log('StudentDashboard theme styles:', styles);
+  }, [styles]);
+
   const announcements = [
     { title: 'Library Hours Extended', date: 'Apr 24, 2025' },
     { title: 'Registration Deadline Approaching', date: 'Apr 28, 2025' },
@@ -51,11 +56,11 @@ export default function StudentDashboard() {
   };
 
   return (
-    <>
+    <div className={`flex flex-col ${styles.textPrimary}`}>
       {activeTab === 'Dashboard' && (
         <>
           <WelcomeBanner />
-          <div className="container mx-auto px-4 py-12">
+          <div className="px-4 py-12">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
               <Announcements announcements={announcements} />
               <Deadlines deadlines={deadlines} />
@@ -73,6 +78,6 @@ export default function StudentDashboard() {
       {activeTab === 'Financial' && <Financial />}
       {activeTab === 'Communication' && <Communication />}
       {activeTab === 'Campus Life' && <CampusLife />}
-    </>
+    </div>
   );
 }

@@ -1,10 +1,9 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+
 import { FaGraduationCap, FaClock } from 'react-icons/fa';
 
 const colleges = [
-  { id: 1, name: 'Computing', available: true, path: '/colleges/computing' },
-  { id: 2, name: 'Business', available: true, path: '/colleges/business' },
+  { id: 1, name: 'Computing', available: true, path: '/departments/computer-science' },
+  { id: 2, name: 'Business', available: true, path: '/departments/business' },
   { id: 3, name: 'Engineering', available: false },
   { id: 4, name: 'Sciences', available: false },
   { id: 5, name: 'Arts & Social Sciences', available: false },
@@ -33,16 +32,18 @@ const CollegesFacultiesSchools = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
           {colleges.map((college) => (
             college.available ? (
-              <Link
+              <a
                 key={college.id}
-                to={college.path}
+                href={college.path}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-6 py-4 rounded-lg 
                 hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 flex items-center 
                 justify-center gap-2 group"
               >
                 <FaGraduationCap className="text-xl" />
                 <span>{college.name}</span>
-              </Link>
+              </a>
             ) : (
               <div
                 key={college.id}

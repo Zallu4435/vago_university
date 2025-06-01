@@ -5,6 +5,7 @@ import {
   FaShieldAlt,
   FaArrowLeft,
   FaHome,
+  FaSlidersH,
 } from 'react-icons/fa';
 import {
   FiDownload,
@@ -18,6 +19,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../redux/store';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../../redux/authSlice';
+import PreferenceSettings from './PreferenceSettings';
 
 const UniversityDashboard = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -41,6 +43,8 @@ const UniversityDashboard = () => {
     switch (activeTab) {
       case 'profile':
         return <ProfileSettings />;
+      case 'preferences':
+        return <PreferenceSettings />
       case 'academic':
         return (
           <div className="flex-1 p-8">

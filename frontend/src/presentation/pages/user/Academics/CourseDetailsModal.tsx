@@ -1,5 +1,6 @@
 import { Fragment, useState, useEffect } from 'react';
 import { FaTimes, FaCheck, FaArrowRight } from 'react-icons/fa';
+import { usePreferences } from '../../../context/PreferencesContext';
 
 interface CourseDetailsModalProps {
   isOpen: boolean;
@@ -23,20 +24,17 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [enrollmentData, setEnrollmentData] = useState({ reason: '' });
+  const { styles, theme } = usePreferences();
 
   useEffect(() => {
     if (isOpen) {
       setIsAnimating(true);
       setShowConfirmation(false);
       setEnrollmentData({ reason: '' });
-      // Prevent background scrolling when modal is open
       document.body.style.overflow = 'hidden';
     } else {
-      // Re-enable background scrolling when modal is closed
       document.body.style.overflow = 'unset';
     }
-
-    // Cleanup function to ensure scrolling is re-enabled if component unmounts
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -90,35 +88,35 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
           }`}
         >
           {/* Main Modal */}
-          <div className="relative overflow-hidden rounded-3xl shadow-2xl bg-white/70 backdrop-blur-md border border-amber-100/50 group hover:shadow-2xl transition-all duration-500">
+          <div className={`relative overflow-hidden rounded-3xl shadow-2xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
             {/* Background glow */}
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-200/0 to-amber-200/0 group-hover:from-orange-200/20 group-hover:to-amber-200/20 rounded-3xl blur transition-all duration-300"></div>
-            <div className="absolute -top-16 -left-16 w-64 h-64 rounded-full bg-gradient-to-br from-yellow-300/30 to-orange-300/30 blur-3xl animate-pulse"></div>
-            <div className="absolute -bottom-16 -right-16 w-48 h-48 rounded-full bg-gradient-to-br from-amber-200/20 to-orange-200/20 blur-2xl animate-pulse delay-700"></div>
+            <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-3xl blur transition-all duration-300`}></div>
+            <div className={`absolute -top-16 -left-16 w-64 h-64 rounded-full bg-gradient-to-br ${styles.orb.primary} blur-3xl animate-pulse`}></div>
+            <div className={`absolute -bottom-16 -right-16 w-48 h-48 rounded-full bg-gradient-to-br ${styles.orb.secondary} blur-2xl animate-pulse delay-700`}></div>
 
             {/* Header */}
-            <div className="relative bg-gradient-to-r from-amber-500 to-orange-500 px-8 py-6 text-white overflow-hidden">
+            <div className={`relative bg-gradient-to-r ${styles.accent} px-8 py-6 text-white overflow-hidden`}>
               <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent"></div>
               <div className="relative z-10 flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-4 mb-2">
                     <div className="relative">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+                      <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${styles.accent} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
                         <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent"></div>
                         <span className="text-white text-2xl relative z-10">📚</span>
                       </div>
-                      <div className="absolute -inset-1 bg-gradient-to-br from-orange-400/30 to-amber-500/30 rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className={`absolute -inset-1 bg-gradient-to-br ${styles.orb.primary} rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300`}></div>
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent leading-tight">
+                      <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} bg-clip-text text-transparent leading-tight`}>
                         {course.title}
                       </h2>
-                      <div className="h-1 w-16 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full mt-1 group-hover:w-24 transition-all duration-300"></div>
+                      <div className={`h-1 w-16 bg-gradient-to-r ${styles.accent} rounded-full mt-1 group-hover:w-24 transition-all duration-300`}></div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-4 text-amber-100 text-sm">
-                    <span className="bg-white/20 px-3 py-1 rounded-full font-medium">{course.credits} Credits</span>
-                    <span className={isFullyBooked ? 'text-red-200' : 'text-amber-100'}>
+                    <span className={`bg-white/20 px-3 py-1 rounded-full font-medium`}>{course.credits} Credits</span>
+                    <span className={isFullyBooked ? styles.status.error : 'text-amber-100'}>
                       {availableSpots > 0 ? `${availableSpots} spots left` : 'Fully booked'}
                     </span>
                   </div>
@@ -139,45 +137,45 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-1">
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Specialization</p>
-                      <p className="text-lg font-semibold text-gray-900">{course.specialization}</p>
+                      <p className={`text-xs font-medium ${styles.textTertiary} uppercase tracking-wider`}>Specialization</p>
+                      <p className={`text-lg font-semibold ${styles.textPrimary}`}>{course.specialization}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Faculty</p>
-                      <p className="text-lg font-semibold text-gray-900">{course.faculty}</p>
+                      <p className={`text-xs font-medium ${styles.textTertiary} uppercase tracking-wider`}>Faculty</p>
+                      <p className={`text-lg font-semibold ${styles.textPrimary}`}>{course.faculty}</p>
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Schedule</p>
-                    <p className="text-lg font-semibold text-gray-900">{course.schedule}</p>
+                    <p className={`text-xs font-medium ${styles.textTertiary} uppercase tracking-wider`}>Schedule</p>
+                    <p className={`text-lg font-semibold ${styles.textPrimary}`}>{course.schedule}</p>
                   </div>
 
-                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 p-4 border border-amber-200/50 hover:border-orange-200/50 hover:shadow-lg transition-all duration-300 group/item">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-200/0 to-amber-200/0 group-hover/item:from-orange-200/20 group-hover/item:to-amber-200/20 rounded-2xl blur transition-all duration-300"></div>
+                  <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${styles.accentSecondary} p-4 border ${styles.border} hover:${styles.card.hover} transition-all duration-300 group/item`}>
+                    <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
                     <div className="relative z-10">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Enrollment Status</span>
+                        <span className={`text-xs font-medium ${theme == 'dark' ? 'text-white' : styles.textTertiary} uppercase tracking-wider`}>Enrollment Status</span>
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium ${
                             isFullyBooked
-                              ? 'bg-red-100 text-red-800'
+                              ? styles.status.error.replace('text-', 'bg-') + '/10 text-red-800'
                               : availableSpots <= 5
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-green-100 text-green-800'
+                              ? styles.status.warning.replace('text-', 'bg-') + '/10 text-yellow-800'
+                              : styles.status.success.replace('text-', 'bg-') + '/10 text-green-800'
                           }`}
                         >
                           {isFullyBooked ? 'Full' : availableSpots <= 5 ? 'Almost Full' : 'Available'}
                         </span>
                       </div>
                       <div className="flex items-center space-x-4">
-                        <div className="flex-1 bg-amber-200/50 rounded-full h-3 overflow-hidden">
+                        <div className={`flex-1 bg-amber-200/50 rounded-full h-3 overflow-hidden`}>
                           <div
-                            className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-1000"
+                            className={`h-full bg-gradient-to-r ${styles.accent} transition-all duration-1000`}
                             style={{ width: `${(course.currentEnrollment / course.maxEnrollment) * 100}%` }}
                           />
                         </div>
-                        <span className="text-sm font-semibold text-gray-700">
+                        <span className={`text-sm font-semibold ${styles.textSecondary}`}>
                           {course.currentEnrollment} / {course.maxEnrollment}
                         </span>
                       </div>
@@ -186,19 +184,19 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
 
                   {course.description && (
                     <div className="space-y-2">
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Description</p>
-                      <p className="text-gray-700 text-sm leading-relaxed">{course.description}</p>
+                      <p className={`text-xs font-medium ${styles.textTertiary} uppercase tracking-wider`}>Description</p>
+                      <p className={`text-sm leading-relaxed ${styles.textSecondary}`}>{course.description}</p>
                     </div>
                   )}
 
                   {course.prerequisites && course.prerequisites.length > 0 && (
                     <div className="space-y-2">
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Prerequisites</p>
+                      <p className={`text-xs font-medium ${styles.textTertiary} uppercase tracking-wider)`}>Prerequisites</p>
                       <div className="space-y-2">
                         {course.prerequisites.map((prereq, index) => (
                           <div key={index} className="flex items-center space-x-2">
-                            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                            <span className="text-gray-700 text-sm">{prereq}</span>
+                            <div className={`w-2 h-2 bg-gradient-to-r ${styles.accent} rounded-full`}></div>
+                            <span className={`text-sm ${styles.textSecondary}`}>{prereq}</span>
                           </div>
                         ))}
                       </div>
@@ -209,7 +207,7 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
                   <div className="flex space-x-4 pt-6 border-t border-amber-100/50">
                     <button
                       onClick={handleClose}
-                      className="group/btn flex-1 px-6 py-3 text-gray-700 bg-white/70 backdrop-blur-md border border-amber-200/50 hover:bg-amber-100/50 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105"
+                      className={`group/btn flex-1 px-6 py-3 ${styles.textSecondary} ${styles.card.background} border ${styles.border} hover:${styles.card.hover} rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105`}
                     >
                       <span className="flex items-center justify-center space-x-2">
                         <span>Cancel</span>
@@ -222,7 +220,7 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
                       className={`group/btn flex-1 px-6 py-3 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 ${
                         isFullyBooked
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white'
+                          : `bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white`
                       }`}
                     >
                       <span className="flex items-center justify-center space-x-2">
@@ -236,20 +234,20 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
                 // Confirmation View
                 <div className="space-y-6">
                   <div className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                    <div className={`w-16 h-16 bg-gradient-to-r ${styles.accent} rounded-full flex items-center justify-center mx-auto shadow-lg`}>
                       <FaCheck size={24} className="text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-700 bg-clip-text text-transparent mt-4 mb-2">
+                    <h3 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} bg-clip-text text-transparent mt-4 mb-2`}>
                       Confirm Enrollment
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className={`${styles.textSecondary} text-sm`}>
                       Please review and confirm your enrollment details for <strong>{course.title}</strong>
                     </p>
                   </div>
 
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="reason" className={`block text-sm font-medium ${styles.textSecondary} mb-1`}>
                         Reason for Enrollment
                       </label>
                       <textarea
@@ -259,7 +257,7 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
                         onChange={handleInputChange}
                         rows={3}
                         placeholder="Please provide a brief reason for enrolling in this course..."
-                        className="w-full px-4 py-2 bg-white/70 backdrop-blur-md border border-amber-100/50 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
+                        className={`w-full px-4 py-2 ${styles.input.background} border ${styles.input.border} rounded-lg focus:${styles.input.focus} transition-all duration-300`}
                       />
                     </div>
                   </div>
@@ -267,7 +265,7 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
                   <div className="flex space-x-4 pt-6 border-t border-amber-100/50">
                     <button
                       onClick={handleBackToDetails}
-                      className="group/btn flex-1 px-6 py-3 text-gray-700 bg-white/70 backdrop-blur-md border border-amber-200/50 hover:bg-amber-100/50 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105"
+                      className={`group/btn flex-1 px-6 py-3 ${styles.textSecondary} ${styles.card.background} border ${styles.border} hover:${styles.card.hover} rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105`}
                     >
                       <span className="flex items-center justify-center space-x-2">
                         <span>Back</span>
@@ -277,7 +275,7 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
                     <button
                       onClick={handleConfirmEnrollment}
                       disabled={isEnrolling || !enrollmentData.reason.trim()}
-                      className="group/btn flex-1 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      className={`group/btn flex-1 px-6 py-3 bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
                     >
                       <span className="flex items-center justify-center space-x-2">
                         {isEnrolling ? (

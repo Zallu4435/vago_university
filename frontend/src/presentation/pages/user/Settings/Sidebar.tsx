@@ -5,6 +5,7 @@ import {
     FaCreditCard,
     FaShieldAlt,
     FaUserAlt,
+    FaCog,
   } from 'react-icons/fa';
   import {
     FiDownload,
@@ -21,6 +22,7 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, user }) {
         { id: 'offline', icon: FiDownload, label: 'Offline Learning' },
         { id: 'notifications', icon: FiBell, label: 'Notifications' },
         { id: 'financial', icon: FaCreditCard, label: 'Financial Info' },
+        { id: 'preferences', icon: FaCog, label: 'Preferences' },
         { id: 'security', icon: FaShieldAlt, label: 'Security' },
         { id: 'support', icon: FiHelpCircle, label: 'Support' }
       ];

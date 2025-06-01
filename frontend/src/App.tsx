@@ -1,10 +1,11 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import store from './presentation/redux/store';
 import './index.css';
 import { useRefreshToken } from './application/hooks/useRefreshToken';
 import { ProtectedRoute } from './presentation/components/ProtectedRoute';
+import { PreferencesProvider } from './presentation/context/PreferencesContext';
 
 // Layouts
 import PublicLayout from './presentation/Layout/PublicLayout';
@@ -38,7 +39,6 @@ import ConfirmAdmission from './presentation/pages/ConfirmAdmission';
 import FacultyManagement from './presentation/pages/admin/FacultyManagement';
 import ConfirmFaculty from './presentation/pages/ConfirmFaculty';
 import Setting from './presentation/pages/user/Settings/Setting';
-import {ForgotPasswordModal} from './presentation/pages/ForgotPassword';
 import { useNavigate } from 'react-router-dom';
 import VideoManagementPage from './presentation/pages/admin/vedio/VedioManagement';
 import AdminCourseManagement from './presentation/pages/admin/course/CourseManagement';
@@ -54,6 +54,11 @@ import DepartmentAbout from './presentation/pages/departments/DepartmentAbout';
 import DepartmentEducation from './presentation/pages/departments/DepartmentEducation';
 import DepartmentCommunity from './presentation/pages/departments/DepartmentCommunity';
 import DepartmentEntrepreneur from './presentation/pages/departments/DepartmentEntrepreneur';
+import HelpSupportPage from './presentation/pages/HelpSupportPage';
+import ForgotPasswordModal from './presentation/pages/ForgotPassword';
+import ProgramPrerequisites from './presentation/pages/ProgramPrerequisites';
+import ScholarshipComponent from './presentation/pages/ScholarshipComponent';
+
 
 const App: React.FC = () => {
   const { isError, error } = useRefreshToken();
@@ -61,7 +66,7 @@ const App: React.FC = () => {
 
   if (isError) {
     console.log('Refresh token failed:', error);
-    store.dispatch({ type: 'auth/logout' }); 
+    store.dispatch({ type: 'auth/logout' });
   }
 
   // Define departments array
@@ -79,32 +84,49 @@ const App: React.FC = () => {
     { path: 'program', element: <DepartmentEducation /> },
     { path: 'community', element: <DepartmentCommunity /> },
     { path: 'entrepreneur', element: <DepartmentEntrepreneur /> },
-    { path: 'contact', element: <ContactUs /> }
+    { path: 'contact', element: <ContactUs /> },
+    // Add login and register as sub-routes under departments
+    {
+      path: 'login',
+      element: <LoginPage />,
+      state: { fromLayout: 'department' },
+    },
+    {
+      path: 'register',
+      element: <RegisterPage />,
+      state: { fromLayout: 'department' },
+    },
   ];
 
   return (
     <Provider store={store}>
       <Routes>
-        {/* Login, Register and Faculty Request Routes (unauthenticated only) */}
-        <Route
-          element={
-            <ProtectedRoute allowedCollections={[]} isPublic={true} />
-          }
-        >
+        {/* Login, Register, and Faculty Request Routes (unauthenticated only) */}
+        <Route element={<ProtectedRoute allowedCollections={[]} isPublic={true} />}>
           <Route element={<PublicLayout />}>
-            <Route path="login" element={<LoginPage />} />
-            <Route path="register" element={<RegisterPage />} />
-            <Route path="forgot-password" element={<ForgotPasswordModal isOpen={true} onClose={() => { navigate(-1) || navigate('/login') }} />} />
-            <Route path="faculty/request" element={<FacultyRequestForm />} />
+            <Route path="login" element={<LoginPage />} state={{ fromLayout: 'public' }} />
+            <Route path="register" element={<RegisterPage />} state={{ fromLayout: 'public' }} />
+            <Route
+              path="forgot-password"
+              element={
+                <ForgotPasswordModal
+                  isOpen={true}
+                  onClose={() => navigate(-1) || navigate('/login')}
+                />
+              }
+              state={{ fromLayout: 'public' }}
+            />
+            <Route path="faculty/request" element={<FacultyRequestForm />} state={{ fromLayout: 'public' }} />
+          </Route>
+
+          <Route element={<UGLayout />}>
+            <Route path="ug/login" element={<LoginPage />} state={{ fromLayout: 'ug' }} />
+            <Route path="ug/register" element={<RegisterPage />} state={{ fromLayout: 'ug' }} />
           </Route>
         </Route>
 
         {/* Public Routes (accessible by all except admin, and not /login or /register for logged-in) */}
-        <Route
-          element={
-            <ProtectedRoute allowedCollections={['register', 'user', 'faculty']} isPublic={true} />
-          }
-        >
+        <Route element={<ProtectedRoute allowedCollections={['register', 'user', 'faculty']} isPublic={true} />}>
           <Route element={<PublicLayout />}>
             <Route index element={<Home />} />
             <Route path="admissions" element={<Admissions />} />
@@ -112,6 +134,8 @@ const App: React.FC = () => {
             <Route path="education" element={<Education />} />
             <Route path="about" element={<About />} />
             <Route path="confirm-admission/:id/:action" element={<ConfirmAdmission />} />
+            <Route path='program-prerequisites' element={<ProgramPrerequisites />} />
+            <Route path='undergraduate-scholarships' element={<ScholarshipComponent />} />
           </Route>
           <Route element={<UGLayout />}>
             <Route path="ug" element={<UGHome />} />
@@ -124,24 +148,16 @@ const App: React.FC = () => {
         </Route>
 
         {/* Admission Route (register only) */}
-        <Route
-          element={
-            <ProtectedRoute allowedCollections={['register']} />
-          }
-        >
+        <Route element={<ProtectedRoute allowedCollections={['register']} />}>
           <Route path="admission" element={<ApplicationForm />} />
         </Route>
 
         {/* Admin Routes (admin only) */}
-        <Route
-          element={
-            <ProtectedRoute allowedCollections={['admin']} />
-          }
-        >
+        <Route element={<ProtectedRoute allowedCollections={['admin']} />}>
           <Route element={<AdminLayout />}>
             <Route path="admin" element={<UniversityAdminDashboard />} />
             <Route path="admin/user" element={<UserManagement />} />
-            <Route path="admin/faculty" element={<FacultyManagement />} /> 
+            <Route path="admin/faculty" element={<FacultyManagement />} />
             <Route path="admin/course-management" element={<AdminCourseManagement />} />
             <Route path="admin/content" element={<VideoManagementPage />} />
             <Route path="admin/clubs" element={<AdminClubManagement />} />
@@ -153,11 +169,7 @@ const App: React.FC = () => {
         </Route>
 
         {/* User Routes (user only) */}
-        <Route
-          element={
-            <ProtectedRoute allowedCollections={['user']} />
-          }
-        >
+        <Route element={<ProtectedRoute allowedCollections={['user']} />}>
           <Route element={<UserLayout />}>
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="canvas" element={<CanvasPage />} />
@@ -165,20 +177,13 @@ const App: React.FC = () => {
         </Route>
 
         {/* Settings Route (user only, independent layout) */}
-        <Route
-          element={
-            <ProtectedRoute allowedCollections={['user']} />
-          }
-        >
+        <Route element={<ProtectedRoute allowedCollections={['user']} />}>
           <Route path="settings" element={<Setting />} />
+          <Route path='help' element={<HelpSupportPage />} />
         </Route>
 
         {/* Faculty Routes (faculty only) */}
-        <Route
-          element={
-            <ProtectedRoute allowedCollections={['faculty']} />
-          }
-        >
+        <Route element={<ProtectedRoute allowedCollections={['faculty']} />}>
           <Route element={<FacultyLayout />}>
             <Route path="faculty/courses" element={<FacultyDashboard />} />
           </Route>
@@ -192,7 +197,12 @@ const App: React.FC = () => {
           {departments.map((dept) => (
             <Route key={dept.path} path={dept.path} element={<dept.component />}>
               {departmentSubRoutes.map((subRoute, index) => (
-                <Route key={index} path={subRoute.path} element={subRoute.element} />
+                <Route
+                  key={index}
+                  path={subRoute.path}
+                  element={subRoute.element}
+                  {...(subRoute.state ? { state: subRoute.state } : {})}
+                />
               ))}
             </Route>
           ))}

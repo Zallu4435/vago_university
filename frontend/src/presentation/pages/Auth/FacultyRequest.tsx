@@ -316,7 +316,7 @@ export default function FacultyRequestForm() {
   );
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6 md:p-8 max-w-4xl mx-auto">
+    <div className="bg-white shadow-md rounded-lg p-6 md:p-8 max-w-4xl mx-auto my-20">
       <div className="mb-8 text-center">
         <h2 className="text-2xl font-bold text-gray-800">Faculty Position Application</h2>
         <p className="text-gray-600 mt-2">Complete the form below to apply for a faculty position at our institution</p>

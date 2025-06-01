@@ -5,9 +5,11 @@ import CourseRegistration from './CourseRegistration';
 import AcademicRecords from './AcademicRecords';
 import DegreeAudit from './DegreeAudit';
 import { useStudentInfo, useGradeInfo, useCourses, useAcademicHistory, useProgramInfo, useProgressInfo, useRequirementsInfo } from '../../../../application/hooks/useAcademic';
+import { usePreferences } from '../../../context/PreferencesContext';
 
 export default function Academics() {
   const [activeSubTab, setActiveSubTab] = useState('Course Registration');
+  const { styles, theme } = usePreferences();
 
   // Fetch data
   const { data: studentInfo, isLoading: isLoadingStudentInfo } = useStudentInfo({});
@@ -80,18 +82,14 @@ export default function Academics() {
   // Loading component
   const LoadingSpinner = () => (
     <div className="flex items-center justify-center min-h-[400px]">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+      <div className={`animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 ${styles.button.primary.split(' ')[0]}`}></div>
     </div>
   );
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-white/90">
+    <div className={`min-h-screen flex flex-col relative overflow-hidden ${styles.background}`}>
       {/* Background layers */}
-      <div className="absolute inset-0 bg-gradient-to-br from-amber-100/80 to-white/90"></div>
-      <div className="absolute inset-0 bg-gradient-to-r from-orange-100/20 to-amber-100/20"></div>
-      <div className="absolute -bottom-16 -right-16 w-96 h-96 rounded-full bg-gradient-to-br from-yellow-300/30 to-orange-300/30 blur-3xl animate-pulse"></div>
-      <div className="absolute -top-16 -left-16 w-64 h-64 rounded-full bg-gradient-to-br from-amber-200/20 to-orange-200/20 blur-2xl animate-pulse delay-700"></div>
-
+   
       <div className="relative z-10 flex flex-col min-h-screen">
         <AcademicInfo
           major={studentInfo?.major || fallbackStudentInfo.major}

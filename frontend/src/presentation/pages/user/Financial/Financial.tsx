@@ -6,75 +6,23 @@ import FinancialAidSection from './FinancialAidSection';
 import ScholarshipsSection from './ScholarshipsSection';
 import { useFinancial } from '../../../../application/hooks/useFinancial';
 import { usePreferences } from '../../../context/PreferencesContext';
+import { MdCurrencyRupee } from 'react-icons/md';
 
-const mockStudentFinancialInfo = {
-  accountBalance: 2500.00,
-  paymentDueDate: '2024-04-15',
-  financialAidStatus: 'Approved',
-  studentId: 'STU123456',
-  name: 'John Doe',
-  semester: 'Spring 2024',
-  totalCharges: 5000.00,
-  totalPayments: 2500.00,
-  paymentPlan: {
-    status: 'Active',
-    monthlyAmount: 833.33,
-    remainingPayments: 3,
-    nextPaymentDate: '2024-04-15'
-  },
-  financialAid: {
-    totalAwarded: 2000.00,
-    disbursedAmount: 1000.00,
-    pendingAmount: 1000.00,
-    grants: [
-      {
-        name: 'Pell Grant',
-        amount: 1500.00,
-        status: 'Disbursed'
-      },
-      {
-        name: 'State Grant',
-        amount: 500.00,
-        status: 'Pending'
-      }
-    ],
-    loans: [
-      {
-        name: 'Federal Direct Loan',
-        amount: 2000.00,
-        status: 'Approved'
-      }
-    ]
-  },
-  scholarships: [
-    {
-      name: 'Academic Excellence',
-      amount: 1000.00,
-      status: 'Awarded',
-      disbursementDate: '2024-03-15'
-    }
-  ],
-  recentTransactions: [
-    {
-      date: '2024-03-01',
-      description: 'Tuition Payment',
-      amount: -1000.00,
-      type: 'Payment'
-    },
-    {
-      date: '2024-02-15',
-      description: 'Financial Aid Disbursement',
-      amount: 1500.00,
-      type: 'Credit'
-    }
-  ]
+const formatDate = (dateString: string): string => {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 };
 
 export default function Financial() {
   const {
     getStudentFinancialInfo,
-    getCurrentCharges,
-    getPaymentHistory,
     loading,
     error,
   } = useFinancial();
@@ -82,26 +30,20 @@ export default function Financial() {
 
   const [activeTab, setActiveTab] = useState('Fees and Payments');
   const [studentInfo, setStudentInfo] = useState(null);
-  const [currentCharges, setCurrentCharges] = useState([]);
-  const [paymentHistory, setPaymentHistory] = useState([]);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const [info, charges, history] = await Promise.all([
-  //         getStudentFinancialInfo(),
-  //         getCurrentCharges(),
-  //         getPaymentHistory(),
-  //       ]);
-  //       setStudentInfo(info || {});
-  //       setCurrentCharges(charges || []);
-  //       setPaymentHistory(history || []);
-  //     } catch (err) {
-  //       console.error('Error fetching financial data:', err);
-  //     }
-  //   };
-  //   fetchData();
-  // }, [getStudentFinancialInfo, getCurrentCharges, getPaymentHistory]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const info = await getStudentFinancialInfo();
+        console.log('API Response:', info);
+        setStudentInfo(info || {});
+      } catch (err) {
+        console.error('Error fetching financial data:', err);
+      }
+    };
+    fetchData();
+  }, [getStudentFinancialInfo]);
+
 
   if (loading) {
     return (
@@ -147,20 +89,21 @@ export default function Financial() {
               </div>
             </div>
             <div className={`mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm ${styles.textSecondary}`}>
-              <div>
-                <span className="font-medium">Account Balance:</span>{' '}
-                ${studentInfo?.accountBalance?.toLocaleString() || '0.00'}
+              <div className="flex items-center gap-1">
+                <span className="font-medium">Account Balance:</span>
+                <MdCurrencyRupee />
+                <span>{studentInfo?.info[0]?.amount?.toLocaleString() || '0.00'}</span>
               </div>
               <div>
                 <span className="font-medium">Payment Due:</span>{' '}
-                {studentInfo?.paymentDueDate || 'N/A'}
+                {formatDate(studentInfo?.info[0]?.paymentDueDate) || 'N/A'}
               </div>
               <div>
                 <span className="font-medium">Financial Aid Status:</span>{' '}
                 <span
                   className={`px-2 py-0.5 rounded-full text-xs ${studentInfo?.financialAidStatus === 'Approved'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-800'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800'
                     }`}
                 >
                   {studentInfo?.financialAidStatus || 'Not Applied'}
@@ -176,9 +119,8 @@ export default function Financial() {
         <div className="mt-6">
           {activeTab === 'Fees and Payments' && (
             <FeesPaymentsSection
-              studentInfo={studentInfo || mockStudentFinancialInfo || {}}
-              currentCharges={currentCharges}
-              paymentHistory={paymentHistory}
+              studentInfo={studentInfo?.info || []}
+              paymentHistory={studentInfo?.history || []}
             />
           )}
           {activeTab === 'Financial Aid' && <FinancialAidSection />}

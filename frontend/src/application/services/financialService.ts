@@ -26,7 +26,7 @@ import {
     async getStudentFinancialInfo(): Promise<StudentFinancialInfo> {
       try {
         const response = await httpClient.get(`${this.baseUrl}/student-info`);
-        return response.data.data;
+        return response.data;
       } catch (error) {
         throw new Error('Failed to fetch student financial info');
       }
@@ -163,6 +163,46 @@ import {
         return response.data.data;
       } catch (error) {
         throw new Error('Failed to upload document');
+      }
+    }
+
+    async createCharge(chargeData: {
+      title: string;
+      description: string;
+      amount: number;
+      term: string;
+      dueDate: string;
+      applicableFor: string;
+    }): Promise<Charge> {
+      try {
+        const response = await httpClient.post(`${this.adminBaseUrl}/charges`, chargeData);
+        return response.data.data;
+      } catch (error) {
+        throw new Error('Failed to create charge');
+      }
+    }
+
+    async getCharges(filters?: {
+      term?: string;
+      status?: string;
+      startDate?: string;
+    }): Promise<Charge[]> {
+      try {
+        const response = await httpClient.get(`${this.adminBaseUrl}/charges`, {
+          params: filters
+        });
+        return response.data.data;
+      } catch (error) {
+        throw new Error('Failed to fetch charges');
+      }
+    }
+
+    async getPaymentDetails(paymentId: string): Promise<Payment> {
+      try {
+        const response = await httpClient.get(`${this.adminBaseUrl}/payments/${paymentId}`);
+        return response.data.payment;
+      } catch (error) {
+        throw new Error('Failed to fetch payment details');
       }
     }
   }

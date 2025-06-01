@@ -15,4 +15,7 @@ router.post('/:id/reject', facultyController.rejectFaculty);
 
 router.post('/:id/confirm/:action', facultyController.confirmOffer);
 
+router.get('/:facultyId/document', facultyController.downloadCertificate);
+
+
 export default router;

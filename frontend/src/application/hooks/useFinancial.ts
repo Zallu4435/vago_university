@@ -23,6 +23,7 @@ export const useFinancial = () => {
       setLoading(true);
       setError(null);
       const data = await financialService.getStudentFinancialInfo();
+      console.log(data, 'data')
       return data;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -247,6 +248,59 @@ export const useFinancial = () => {
     }
   }, []);
 
+  const createCharge = useCallback(async (chargeData: {
+    title: string;
+    description: string;
+    amount: number;
+    term: string;
+    dueDate: string;
+    applicableFor: string;
+  }): Promise<Charge | null> => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await financialService.createCharge(chargeData);
+      return data;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const getCharges = useCallback(async (filters?: {
+    term?: string;
+    status?: string;
+    startDate?: string;
+  }): Promise<Charge[]> => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await financialService.getCharges(filters);
+      return data;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const getPaymentDetails = useCallback(async (paymentId: string): Promise<Payment | null> => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await financialService.getPaymentDetails(paymentId);
+      return data;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return {
     loading,
     error,
@@ -265,5 +319,8 @@ export const useFinancial = () => {
     applyForScholarship,
     updateScholarshipApplication,
     uploadDocument,
+    createCharge,
+    getCharges,
+    getPaymentDetails,
   };
 };

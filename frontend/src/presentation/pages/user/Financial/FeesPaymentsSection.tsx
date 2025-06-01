@@ -1,18 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaMoneyCheckAlt, FaTimes } from 'react-icons/fa';
 import { useFinancial } from '../../../../application/hooks/useFinancial';
 import { usePreferences } from '../../../context/PreferencesContext';
 
-export default function FeesPaymentsSection({ studentInfo, currentCharges, paymentHistory }) {
+export default function FeesPaymentsSection({ studentInfo, paymentHistory }) {
   const { makePayment, loading, error } = useFinancial();
   const { styles, theme } = usePreferences();
-  const [paymentAmount, setPaymentAmount] = useState(studentInfo?.accountBalance || 0);
-  const [paymentMethod, setPaymentMethod] = useState('Credit Card');
+  const [paymentAmount, setPaymentAmount] = useState(studentInfo[0]?.amount || 0);
+  const [paymentMethod, setPaymentMethod] = useState('Razorpay');
   const [amountError, setAmountError] = useState(null);
 
+  // Load Razorpay SDK dynamically
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
   const totalDue = () => {
-    return currentCharges.reduce((sum, charge) => sum + (charge.amount || 0), 0);
+    return studentInfo.reduce((sum, charge) => sum + (charge.amount || 0), 0);
   };
+
+  console.log(studentInfo, 'studentInfo');
 
   const handlePayment = async (e) => {
     e.preventDefault();
@@ -21,13 +34,57 @@ export default function FeesPaymentsSection({ studentInfo, currentCharges, payme
       return;
     }
     setAmountError(null);
-    const payment = {
-      amount: paymentAmount,
-      method: paymentMethod,
-      term: studentInfo?.term || 'Spring 2025',
-    };
-    await makePayment(payment);
-    setPaymentAmount(0);
+
+    try {
+      // Call backend to create Razorpay order
+      const payment = {
+        amount: paymentAmount,
+        method: paymentMethod,
+        term: studentInfo[0]?.term || 'Spring 2025',
+      };
+      const response = await makePayment(payment);
+
+      // Initialize Razorpay checkout
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Replace with your Razorpay Key ID
+        amount: paymentAmount * 100, // Razorpay expects amount in paise
+        currency: 'INR',
+        name: 'Your Institution Name',
+        description: `Payment for ${studentInfo[0]?.term || 'Spring 2025'} Fees`,
+        order_id: response.orderId, // Order ID from backend
+        handler: async (response) => {
+          // Handle successful payment
+          try {
+            await makePayment({
+              ...payment,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpaySignature: response.razorpay_signature,
+            });
+            setPaymentAmount(0);
+            alert('Payment successful!');
+          } catch (err) {
+            setAmountError('Payment verification failed.');
+          }
+        },
+        prefill: {
+          name: studentInfo[0]?.name || 'Student Name',
+          email: studentInfo[0]?.email || '',
+          contact: studentInfo[0]?.contact || '',
+        },
+        theme: {
+          color: '#F59E0B', // Amber color to match theme
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', (response) => {
+        setAmountError(`Payment failed: ${response.error.description}`);
+      });
+      rzp.open();
+    } catch (err) {
+      setAmountError('Failed to initiate payment.');
+    }
   };
 
   return (
@@ -69,30 +126,56 @@ export default function FeesPaymentsSection({ studentInfo, currentCharges, payme
               <div className={`relative overflow-hidden rounded-lg ${styles.card.background} p-4 border ${styles.border} group/item hover:${styles.card.hover} transition-all duration-300 flex-1 min-h-[200px] flex flex-col justify-between`}>
                 <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-lg blur transition-all duration-300`}></div>
                 <div className="relative z-10">
-                  {currentCharges.length === 0 ? (
-                    <p className={`text-sm ${styles.textSecondary}`}>No current charges.</p>
+                  {studentInfo.length === 0 ? (
+                    <p className={`text-sm ${styles.textSecondary} text-center py-4`}>No current charges.</p>
                   ) : (
-                    <table className="w-full text-sm sm:text-base">
-                      <tbody>
-                        {currentCharges.map((charge, index) => (
-                          <tr
-                            key={charge.id || index}
-                            className={index !== currentCharges.length - 1 ? `border-b ${styles.border}` : ''}
-                          >
-                            <td className={`py-2 ${styles.textPrimary}`}>{charge.description}</td>
-                            <td className={`py-2 text-right ${styles.textPrimary} font-medium`}>
-                              ${charge.amount?.toLocaleString() || '0.00'}
-                            </td>
-                          </tr>
-                        ))}
-                        <tr className={`border-t-2 ${styles.border}`}>
-                          <td className={`py-2 ${styles.textPrimary} font-semibold`}>Total Due</td>
-                          <td className={`py-2 text-right ${styles.textPrimary} font-bold`}>
-                            ${totalDue().toLocaleString() || '0.00'}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                    <div className="space-y-4">
+                      {studentInfo.map((charge) => (
+                        <div
+                          key={charge.id}
+                          className={`p-4 rounded-lg border ${styles.border} bg-gradient-to-r ${styles.card.background} hover:${styles.card.hover} transition-all duration-300 shadow-sm`}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h5 className={`text-base font-semibold ${styles.textPrimary}`}>
+                                {charge.chargeTitle || 'N/A'}
+                              </h5>
+                              {charge.chargeDescription && (
+                                <p className={`text-sm ${styles.textSecondary} mt-1`}>
+                                  {charge.chargeDescription}
+                                </p>
+                              )}
+                              {charge.term && (
+                                <p className={`text-sm ${styles.textSecondary} mt-1`}>
+                                  <span className="font-medium">Term:</span> {charge.term}
+                                </p>
+                              )}
+                              <p className={`text-sm ${styles.textSecondary} mt-1`}>
+                                <span className="font-medium">Due Date:</span>{' '}
+                                {charge.paymentDueDate
+                                  ? new Date(charge.paymentDueDate).toLocaleDateString('en-US', {
+                                      month: '2-digit',
+                                      day: '2-digit',
+                                      year: 'numeric',
+                                    })
+                                  : 'N/A'}
+                              </p>
+                            </div>
+                            <div className={`text-right ${styles.textPrimary} font-bold text-base`}>
+                              ${charge.amount?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      <div className={`p-4 rounded-lg border ${styles.border} bg-gradient-to-r ${styles.accent} ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                        <div className="flex justify-between items-center">
+                          <span className="font-semibold text-base">Total Due</span>
+                          <span className="font-bold text-base">
+                            ${totalDue().toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
@@ -108,6 +191,11 @@ export default function FeesPaymentsSection({ studentInfo, currentCharges, payme
                   {error && (
                     <div className={`mb-4 p-3 ${styles.status.error} rounded-lg text-sm`}>
                       {error}
+                    </div>
+                  )}
+                  {amountError && (
+                    <div className={`mb-4 p-3 ${styles.status.error} rounded-lg text-sm`}>
+                      {amountError}
                     </div>
                   )}
                   <form onSubmit={handlePayment} className="flex flex-col h-full justify-between">
@@ -128,27 +216,22 @@ export default function FeesPaymentsSection({ studentInfo, currentCharges, payme
                           disabled={loading}
                           placeholder="0.00"
                         />
-                        {amountError && (
-                          <p className={`mt-1 text-xs ${styles.status.error}`}>{amountError}</p>
-                        )}
                       </div>
                       <div>
                         <p className={`block text-sm font-medium ${styles.textPrimary} mb-2`}>Payment Method</p>
                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-wrap">
-                          {['Credit Card', 'Bank Transfer', 'Financial Aid'].map((method) => (
-                            <label key={method} className={`flex items-center text-sm ${styles.textSecondary} cursor-pointer`}>
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value={method}
-                                checked={paymentMethod === method}
-                                onChange={() => setPaymentMethod(method)}
-                                className={`mr-2 accent-amber-500 focus:ring-amber-500`}
-                                disabled={loading}
-                              />
-                              {method}
-                            </label>
-                          ))}
+                          <label className={`flex items-center text-sm ${styles.textSecondary} cursor-pointer`}>
+                            <input
+                              type="radio"
+                              name="paymentMethod"
+                              value="Razorpay"
+                              checked={paymentMethod === 'Razorpay'}
+                              onChange={() => setPaymentMethod('Razorpay')}
+                              className={`mr-2 accent-amber-500 focus:ring-amber-500`}
+                              disabled={loading}
+                            />
+                            Razorpay
+                          </label>
                         </div>
                       </div>
                     </div>
@@ -185,7 +268,7 @@ export default function FeesPaymentsSection({ studentInfo, currentCharges, payme
               <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-lg blur transition-all duration-300`}></div>
               <div className="relative z-10 overflow-x-auto">
                 {paymentHistory.length === 0 ? (
-                  <p className={`text-sm ${styles.textSecondary}`}>No payment history available.</p>
+                  <p className={`text-sm ${styles.textSecondary} text-center py-4`}>No payment history available.</p>
                 ) : (
                   <table className="min-w-full text-sm sm:text-base">
                     <thead>
@@ -203,11 +286,23 @@ export default function FeesPaymentsSection({ studentInfo, currentCharges, payme
                           key={payment.id || `${payment.date}-${payment.description}-${index}`}
                           className={`border-b ${styles.border} hover:bg-amber-100/50 transition-all duration-200`}
                         >
-                          <td className={`py-2 px-2 sm:px-4 ${styles.textPrimary}`}>{payment.date}</td>
-                          <td className={`py-2 px-2 sm:px-4 ${styles.textSecondary}`}>{payment.description}</td>
-                          <td className={`py-2 px-2 sm:px-4 ${styles.textSecondary}`}>{payment.method}</td>
+                          <td className={`py-2 px-2 sm:px-4 ${styles.textPrimary}`}>
+                            {payment.paidAt
+                              ? new Date(payment.paidAt).toLocaleDateString('en-US', {
+                                  month: '2-digit',
+                                  day: '2-digit',
+                                  year: 'numeric',
+                                })
+                              : 'N/A'}
+                          </td>
+                          <td className={`py-2 px-2 sm:px-4 ${styles.textSecondary}`}>
+                            {payment.chargeTitle || payment.description || 'N/A'}
+                          </td>
+                          <td className={`py-2 px-2 sm:px-4 ${styles.textSecondary}`}>
+                            {payment.method || 'N/A'}
+                          </td>
                           <td className={`py-2 px-2 sm:px-4 text-right ${styles.textPrimary} font-medium`}>
-                            ${payment.amount?.toLocaleString() || '0.00'}
+                            ${payment.amount?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}
                           </td>
                           <td className="py-2 px-2 sm:px-4 text-center">
                             <button className={`${styles.status.warning} hover:${styles.status.error} underline text-sm transition-all duration-200`}>

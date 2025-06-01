@@ -1,9 +1,9 @@
 // src/application/hooks/useFacultyManagement.ts
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { facultyService } from '../services/faculty.service';
 import toast from 'react-hot-toast';
 import { Faculty, FacultyApprovalData, FacultyFilters } from '../../domain/types/faculty.types';
+import { facultyService } from '../services/faculty.service';
 
 export const useFacultyManagement = () => {
   const [page, setPage] = useState(1);

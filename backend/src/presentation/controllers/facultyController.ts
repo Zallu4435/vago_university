@@ -5,6 +5,7 @@ import { approveFaculty } from "../../application/use-cases/faculty/approveFacul
 import mongoose from "mongoose";
 import { confirmFacultyOffer } from "../../application/use-cases/faculty/confirmFacultyOffer";
 import { rejectFaculty } from "../../application/use-cases/faculty/rejectFaculty";
+import { downloadCertificate } from "../../application/use-cases/faculty/downloadCertificate";
 
 class FacultyController {
   async getFaculty(req: Request, res: Response, next: NextFunction) {
@@ -162,6 +163,71 @@ class FacultyController {
       });
     } catch (err) {
       console.error(`Error in confirmOffer:`, err);
+      next(err);
+    }
+  }
+
+ async downloadCertificate(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { facultyId } = req.params;
+      const { url, type } = req.query;
+
+      console.log(`Received GET /api/admin/faculty/${facultyId}/certificate with url: ${url}, type: ${type}`);
+
+      if (!mongoose.isValidObjectId(facultyId)) {
+        return res.status(400).json({ error: 'Invalid faculty ID' });
+      }
+
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'Certificate URL is required' });
+      }
+
+      if (!url.match(/^https:\/\/res\.cloudinary\.com\/vago-university\/image\/upload\/v[0-9]+\/faculty-documents\/[a-zA-Z0-9]+\.pdf$/)) {
+        return res.status(400).json({ error: 'Invalid certificate URL' });
+      }
+
+      if (!type || !['cv', 'certificate'].includes(String(type).toLowerCase())) {
+        return res.status(400).json({ error: 'Invalid document type. Must be "cv" or "certificate"' });
+      }
+
+      // Assuming req.user is set by an authentication middleware
+      const userId = (req as any).user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      const { fileStream, fileSize, fileName } = await downloadCertificate.execute({
+        facultyId,
+        certificateUrl: url,
+        requestingUserId: userId,
+        type: String(type),
+      });
+
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+      res.setHeader('Content-Length', fileSize.toString());
+
+      fileStream.pipe(res);
+    } catch (err: any) {
+      console.error(`Error in downloadCertificate:`, err);
+
+      if (err.message === 'Faculty not found') {
+        return res.status(404).json({ error: 'Faculty not found' });
+      }
+      if (err.message === 'Certificate file not found') {
+        return res.status(404).json({ error: 'Certificate file not found' });
+      }
+      if (err.message === 'Unauthorized access to certificate') {
+        return res.status(403).json({ error: 'Unauthorized access to certificate' });
+      }
+      if (err.message === 'Authentication required') {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      if (err.message === 'Invalid document type. Must be "cv" or "certificate"') {
+        return res.status(400).json({ error: 'Invalid document type. Must be "cv" or "certificate"' });
+      }
+
+      res.status(500).json({ error: 'Failed to download certificate' });
       next(err);
     }
   }

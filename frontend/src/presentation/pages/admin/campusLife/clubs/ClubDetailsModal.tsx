@@ -46,13 +46,13 @@ const StatusBadge = ({ status }: { status: string }) => {
     },
   };
 
-  const config = statusConfig[status.toLowerCase()] || statusConfig.pending;
+  const config = statusConfig[status?.toLowerCase()] || statusConfig.pending;
 
   return (
     <span
       className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.bg} ${config.text} ${config.border}`}
     >
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {status?.charAt(0).toUpperCase() + status?.slice(1)}
     </span>
   );
 };
@@ -98,7 +98,7 @@ const ClubDetailsModal: React.FC<ClubDetailsModalProps> = ({ isOpen, onClose, cl
       animDelay: Math.random() * 5,
     }));
 
-  return (
+    return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       {/* Background particles */}
       {ghostParticles.map((particle, i) => (

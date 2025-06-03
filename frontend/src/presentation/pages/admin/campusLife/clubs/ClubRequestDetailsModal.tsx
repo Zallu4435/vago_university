@@ -96,7 +96,7 @@ const formatDateTime = (dateString: string): string => {
 };
 
 interface ClubRequestDetails {
-  data: {
+  clubRequest: {
     id: string;
     status: StatusType;
     createdAt: string;
@@ -135,8 +135,8 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
 }) => {
   if (!isOpen || !request) return null;
 
-  const { data } = request;
-  const { club, user } = data;
+  const { clubRequest } = request;
+  const { club, user } = clubRequest;
 
   // Particle effect
   const ghostParticles = Array(30)
@@ -188,9 +188,9 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-purple-100">{club.name}</h2>
-                <p className="text-sm text-purple-300">Request ID: {data.id}</p>
+                <p className="text-sm text-purple-300">Request ID: {clubRequest.id}</p>
                 <div className="flex items-center mt-2">
-                  <StatusBadge status={data.status} />
+                  <StatusBadge status={clubRequest.status} />
                 </div>
               </div>
             </div>
@@ -224,7 +224,7 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
             <InfoCard
               icon={Clock}
               label="Last Updated"
-              value={formatDateTime(data.updatedAt)}
+              value={formatDateTime(clubRequest.updatedAt)}
             />
           </div>
 
@@ -249,13 +249,13 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
                 <h3 className="ml-3 text-lg font-semibold text-purple-100">Why Join</h3>
               </div>
               <div className="p-6">
-                <p className="text-purple-200 leading-relaxed">{data.whyJoin}</p>
+                <p className="text-purple-200 leading-relaxed">{clubRequest.whyJoin}</p>
               </div>
             </div>
           </div>
 
           {/* Additional Info Section */}
-          {data.additionalInfo && (
+          {clubRequest.additionalInfo && (
             <div className="mb-8">
               <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg shadow-sm overflow-hidden">
                 <div className="p-4 bg-gray-900/60 flex items-center">
@@ -263,7 +263,7 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
                   <h3 className="ml-3 text-lg font-semibold text-purple-100">Additional Information</h3>
                 </div>
                 <div className="p-6">
-                  <p className="text-purple-200 leading-relaxed">{data.additionalInfo}</p>
+                  <p className="text-purple-200 leading-relaxed">{clubRequest.additionalInfo}</p>
                 </div>
               </div>
             </div>
@@ -302,17 +302,17 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
               >
                 Close
               </button>
-              {onApprove && data.status === 'pending' && (
+              {onApprove && clubRequest.status === 'pending' && (
                 <button
-                  onClick={() => onApprove(data.id)}
+                  onClick={() => onApprove(clubRequest.id)}
                   className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-blue-500/50"
                 >
                   Approve
                 </button>
               )}
-              {onReject && data.status === 'pending' && (
+              {onReject && clubRequest.status === 'pending' && (
                 <button
-                  onClick={() => onReject(data.id)}
+                  onClick={() => onReject(clubRequest.id)}
                   className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-blue-500/50"
                 >
                   Reject

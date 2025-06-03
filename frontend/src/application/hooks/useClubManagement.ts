@@ -220,7 +220,7 @@ export const useClubManagement = () => {
 
   return {
     clubs: clubsData?.clubs || [],
-    clubRequests: clubRequestsData?.clubs || [],
+    clubRequests: clubRequestsData?.data || [],
     totalPages:
       activeTab === 'clubs'
         ? clubsData?.totalPages || 0

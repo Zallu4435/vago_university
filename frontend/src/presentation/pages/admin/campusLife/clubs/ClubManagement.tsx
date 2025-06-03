@@ -123,7 +123,7 @@ const clubColumns = [
     key: 'members',
     render: (club: Club) => (
       <div className="flex items-center text-gray-300">
-        <span className="text-sm">{club.members || '0'}</span>
+        <span className="text-sm">{club.enteredMembers || '0'}</span>
       </div>
     ),
   },
@@ -154,7 +154,7 @@ const clubRequestColumns = [
     render: (request: ClubRequest) => (
       <div>
         <p className="font-medium text-gray-200">{request.clubName}</p>
-        <p className="text-xs text-gray-400">ID: {request.id?.slice(0, 7)}</p>
+        <p className="text-xs text-gray-400">ID: {request.requestedId?.slice(0, 7)}</p>
       </div>
     ),
     width: '20%',
@@ -236,7 +236,7 @@ const AdminClubManagement: React.FC = () => {
   const [itemToAction, setItemToAction] = useState<{
     id: string;
     type: 'club' | 'request';
-    action: 'delete' | 'reject';
+    action: 'delete' | 'reject' | 'approve';
   } | null>(null);
   const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<ClubRequest | null>(null);
@@ -301,7 +301,7 @@ const AdminClubManagement: React.FC = () => {
 
   const handleViewRequest = async (request: ClubRequest) => {
     try {
-      const details = await getClubRequestDetails(request.id);
+      const details = await getClubRequestDetails(request.requestedId);
       setSelectedRequest(details);
       setShowRequestDetailsModal(true);
     } catch (error) {
@@ -310,10 +310,10 @@ const AdminClubManagement: React.FC = () => {
     }
   };
 
-  const handleSaveClub = async (data: Omit<Club, '_id' | 'createdAt'>) => {
+  const handleSaveClub = async (data: Omit<Club, 'id' | 'createdAt'>) => {
     try {
-      if (selectedClub && '_id' in selectedClub) {
-        await updateClub({ id: selectedClub._id, data });
+      if (selectedClub && 'id' in selectedClub) {
+        await updateClub({ id: selectedClub.id, data });
         toast.success('Club updated successfully');
       } else {
         await createClub(data);
@@ -331,13 +331,9 @@ const AdminClubManagement: React.FC = () => {
     setShowWarningModal(true);
   };
 
-  const handleApproveRequest = async (id: string) => {
-    try {
-      await approveClubRequest(id);
-      toast.success('Club request approved');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to approve club request');
-    }
+  const handleApproveRequest = (id: string) => {
+    setItemToAction({ id, type: 'request', action: 'approve' });
+    setShowWarningModal(true);
   };
 
   const handleRejectRequest = (id: string) => {
@@ -351,12 +347,20 @@ const AdminClubManagement: React.FC = () => {
         if (itemToAction.type === 'club' && itemToAction.action === 'delete') {
           await deleteClub(itemToAction.id);
           toast.success('Club deleted successfully');
-        } else if (itemToAction.type === 'request' && itemToAction.action === 'reject') {
-          await rejectClubRequest(itemToAction.id);
-          toast.success('Club request rejected');
+        } else if (itemToAction.type === 'request') {
+          if (itemToAction.action === 'reject') {
+            await rejectClubRequest(itemToAction.id);
+            toast.success('Club request rejected');
+          } else if (itemToAction.action === 'approve') {
+            await approveClubRequest(itemToAction.id);
+            toast.success('Club request approved');
+          }
+          setShowRequestDetailsModal(false);
+          setSelectedRequest(null);
         }
         setShowWarningModal(false);
         setItemToAction(null);
+        handleTabChange(activeTab);
       } catch (error: any) {
         toast.error(error.message || 'Failed to perform action');
       }
@@ -413,14 +417,14 @@ const AdminClubManagement: React.FC = () => {
     {
       icon: <Edit size={16} />,
       label: 'Approve Request',
-      onClick: (request: ClubRequest) => handleApproveRequest(request.id),
+      onClick: (request: ClubRequest) => handleApproveRequest(request.requestedId),
       color: 'green' as const,
       disabled: (request: ClubRequest) => request.status !== 'pending' || isLoadingClubDetails,
     },
     {
       icon: <Trash2 size={16} />,
       label: 'Reject Request',
-      onClick: (request: ClubRequest) => handleRejectRequest(request._id),
+      onClick: (request: ClubRequest) => handleRejectRequest(request.requestedId),
       color: 'red' as const,
       disabled: (request: ClubRequest) => request.status !== 'pending' || isLoadingClubDetails,
     },
@@ -649,15 +653,29 @@ const AdminClubManagement: React.FC = () => {
           setItemToAction(null);
         }}
         onConfirm={handleConfirmAction}
-        title={itemToAction?.type === 'club' ? 'Delete Club' : 'Reject Club Request'}
+        title={
+          itemToAction?.type === 'club'
+            ? 'Delete Club'
+            : itemToAction?.action === 'approve'
+            ? 'Approve Club Request'
+            : 'Reject Club Request'
+        }
         message={
           itemToAction?.type === 'club'
             ? 'Are you sure you want to delete this club? This action cannot be undone.'
+            : itemToAction?.action === 'approve'
+            ? 'Are you sure you want to approve this club request?'
             : 'Are you sure you want to reject this club request?'
         }
-        confirmText={itemToAction?.type === 'club' ? 'Delete' : 'Reject'}
+        confirmText={
+          itemToAction?.type === 'club'
+            ? 'Delete'
+            : itemToAction?.action === 'approve'
+            ? 'Approve'
+            : 'Reject'
+        }
         cancelText="Cancel"
-        type="danger"
+        type={itemToAction?.action === 'approve' ? 'success' : 'danger'}
       />
 
       <style jsx>{`

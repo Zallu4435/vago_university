@@ -5,7 +5,7 @@ import auuthRoutes from "./authRoutes";
 import facultyRoutes from "./facultyRoutes";
 import profileRoutes from "./profileRoutes";
 import courseRoutes from "./courseRoutes";
-import clubRoutes from "./clubRoutes";
+import clubRoutes from "../http/clubs/clubRoutes";
 import sportRoutes from "./sportsRoutes";
 import eventRoutes from "../http/events/eventRoutes";
 // import communicationRoutes from './communicationRoutes'

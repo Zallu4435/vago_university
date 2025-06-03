@@ -23,7 +23,7 @@ class ClubService {
   async getClubDetails(id: string): Promise<Club> {
     try {
       const response = await httpClient.get<Club>(`/admin/clubs/${id}`);
-      return response.data;
+      return response.data.club;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch club details');
     }

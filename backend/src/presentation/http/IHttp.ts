@@ -46,7 +46,9 @@ export class HttpSuccess implements IHttpSuccess {
   }
 }
 
-export interface IController {
+export interface IController {}
+
+export interface IEventController extends IController {
   getEvents(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getEventById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   createEvent(httpRequest: IHttpRequest): Promise<IHttpResponse>;
@@ -54,9 +56,24 @@ export interface IController {
   deleteEvent(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
-export interface IEventRequestController {
+export interface IEventRequestController extends IController {
   getEventRequests(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   approveEventRequest(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   rejectEventRequest(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getEventRequestDetails(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface IClubsController extends IController {
+  getClubs(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getClubById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  createClub(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateClub(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  deleteClub(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface IClubRequestController extends IController {
+  getClubRequests(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  approveClubRequest(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  rejectClubRequest(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getClubRequestDetails(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }

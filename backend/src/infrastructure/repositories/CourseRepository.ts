@@ -1,4 +1,4 @@
-import { Course } from '../../domain/entities/Course';
+import { Course } from '../../domain/events/entities/Course';
 import { ICourseRepository } from '../../domain/repositories/ICourseRepository';
 import { CourseModel } from '../database/mongoose/models/course.model';
 

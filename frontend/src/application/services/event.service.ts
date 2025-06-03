@@ -41,7 +41,7 @@ class EventService {
   async getEventDetails(id: string): Promise<Event> {
     try {
       const response = await httpClient.get<Event>(`/admin/events/${id}`);
-      return response.data;
+      return response.data.event;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch event details');
     }

@@ -71,7 +71,7 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
   onApprove,
   onReject,
 }) => {
-  // Prevent backend scrolling when modal is open
+
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add('no-scroll');
@@ -85,8 +85,9 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
 
   if (!isOpen || !request) return null;
 
-  const { data } = request;
-  const { event, user } = data;
+  const { eventRequest } = request;
+
+  const { event, user } = eventRequest;
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -153,9 +154,9 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-purple-100">{event.title}</h2>
-                <p className="text-sm text-purple-300 mt-1">Request ID: {data.id}</p>
+                <p className="text-sm text-purple-300 mt-1">Request ID: {eventRequest.id}</p>
                 <div className="flex items-center mt-2 space-x-4">
-                  <StatusBadge status={data.status} />
+                  <StatusBadge status={eventRequest.status} />
                 </div>
               </div>
             </div>
@@ -176,7 +177,7 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
             <InfoCard icon={MapPin} label="Event Location" value={event.location} />
             <InfoCard icon={Calendar} label="Event Date" value={formatDate(event.date)} />
             <InfoCard icon={Mail} label="Contact Email" value={user.email} />
-            <InfoCard icon={Clock} label="Last Updated" value={formatDateTime(data.updatedAt)} />
+            <InfoCard icon={Clock} label="Last Updated" value={formatDateTime(eventRequest.updatedAt)} />
             <InfoCard icon={Users} label="Event ID" value={event.id} />
           </div>
 
@@ -201,13 +202,13 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
                 <h3 className="ml-3 text-lg font-semibold text-purple-100">Why Join</h3>
               </div>
               <div className="p-6">
-                <p className="text-purple-200 leading-relaxed">{data.whyJoin}</p>
+                <p className="text-purple-200 leading-relaxed">{eventRequest.whyJoin}</p>
               </div>
             </div>
           </div>
 
           {/* Additional Info Section */}
-          {data.additionalInfo && (
+          {eventRequest.additionalInfo && (
             <div className="mb-8">
               <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg shadow-sm overflow-hidden">
                 <div className="p-4 bg-gray-900/60 flex items-center">
@@ -215,7 +216,7 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
                   <h3 className="ml-3 text-lg font-semibold text-purple-100">Additional Information</h3>
                 </div>
                 <div className="p-6">
-                  <p className="text-purple-200 leading-relaxed">{data.additionalInfo}</p>
+                  <p className="text-purple-200 leading-relaxed">{eventRequest.additionalInfo}</p>
                 </div>
               </div>
             </div>
@@ -252,17 +253,17 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
               >
                 Close
               </button>
-              {data.status === 'pending' && (
+              {eventRequest.status === 'pending' && (
                 <>
                   <button
-                    onClick={() => onApprove?.(data.id)}
+                    onClick={() => onApprove?.(eventRequest.id)}
                     className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center border border-blue-500/50"
                   >
                     <Check size={18} className="mr-2" />
                     Approve Request
                   </button>
                   <button
-                    onClick={() => onReject?.(data.id)}
+                    onClick={() => onReject?.(eventRequest.id)}
                     className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center border border-red-500/50"
                   >
                     <Reject size={18} className="mr-2" />
@@ -270,13 +271,13 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
                   </button>
                 </>
               )}
-              {data.status === 'approved' && (
+              {eventRequest.status === 'approved' && (
                 <div className="flex items-center space-x-3 px-6 py-3 bg-green-600/30 border border-green-500/50 rounded-lg">
                   <Check size={20} className="text-green-100" />
                   <span className="text-green-100 font-semibold">Request Approved</span>
                 </div>
               )}
-              {data.status === 'rejected' && (
+              {eventRequest.status === 'rejected' && (
                 <div className="flex items-center space-x-3 px-6 py-3 bg-red-600/30 border border-red-500/50 rounded-lg">
                   <Reject size={20} className="text-red-100" />
                   <span className="text-red-100 font-semibold">Request Rejected</span>

@@ -7,7 +7,7 @@ import profileRoutes from "./profileRoutes";
 import courseRoutes from "./courseRoutes";
 import clubRoutes from "./clubRoutes";
 import sportRoutes from "./sportsRoutes";
-import eventRoutes from "./eventsRoutes";
+import eventRoutes from "../http/events/eventRoutes";
 // import communicationRoutes from './communicationRoutes'
 import campusLifeRoutes from "./campusLifeRoutes";
 import academicRoutes from "./academicRoutes";

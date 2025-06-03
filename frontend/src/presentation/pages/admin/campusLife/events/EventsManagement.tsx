@@ -34,7 +34,7 @@ const formatDate = (dateString: string): string => {
 };
 
 export interface Event {
-  _id: string;
+  id: string;
   title: string;
   date: string;
   time: string;
@@ -88,7 +88,7 @@ const eventColumns = [
     render: (event: Event) => (
       <div>
         <p className="font-medium text-gray-200">{event.title}</p>
-        <p className="text-xs text-gray-400">ID: {event._id.slice(0, 7)}</p>
+        <p className="text-xs text-gray-400">ID: {event.id?.slice(0, 7)}</p>
       </div>
     ),
     width: '20%',
@@ -98,9 +98,9 @@ const eventColumns = [
     key: 'organizerType',
     render: (event: Event) => (
       <div className="flex items-center text-gray-300">
-        {event.organizerType.toLowerCase() === 'department' ? (
+        {event.organizerType?.toLowerCase() === 'department' ? (
           <Building size={14} className="text-purple-400 mr-2" />
-        ) : event.organizerType.toLowerCase() === 'club' ? (
+        ) : event.organizerType?.toLowerCase() === 'club' ? (
           <GraduationCap size={14} className="text-purple-400 mr-2" />
         ) : (
           <User size={14} className="text-purple-400 mr-2" />
@@ -154,7 +154,7 @@ const eventColumns = [
           className="h-1.5 w-1.5 rounded-full mr-1.5"
           style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
         ></span>
-        {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+        {event.status?.charAt(0).toUpperCase() + event.status?.slice(1)}
       </span>
     ),
   },
@@ -262,13 +262,13 @@ const AdminEventsManagement: React.FC = () => {
   const [itemToAction, setItemToAction] = useState<{
     id: string;
     type: 'event' | 'eventRequest';
-    action: 'delete' | 'reject';
+    action: 'delete' | 'reject' | 'approve';
   } | null>(null);
 
   const filteredEvents = events.filter((event) => {
     const matchesSearch = searchTerm
       ? event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.organizerType?.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
 
@@ -360,8 +360,8 @@ const AdminEventsManagement: React.FC = () => {
 
   const handleEditEvent = async (event: Event) => {
     try {
-      const details = await getEventDetails(event._id);
-      setSelectedEvent(details);
+      const details = await getEventDetails(event.id);
+      setSelectedEvent({ ...details, id: event.id });
       setShowAddEventModal(true);
     } catch (error) {
       console.error('Error fetching event details:', error);
@@ -371,8 +371,8 @@ const AdminEventsManagement: React.FC = () => {
 
   const handleViewEvent = async (event: Event | EventRequest) => {
     try {
-      if ('_id' in event) {
-        const details = await getEventDetails(event._id);
+      if ('id' in event) {
+        const details = await getEventDetails(event.id);
         setSelectedEvent(details);
       } else {
         setSelectedEvent(event);
@@ -384,10 +384,10 @@ const AdminEventsManagement: React.FC = () => {
     }
   };
 
-  const handleSaveEvent = async (data: Omit<Event, '_id' | 'createdAt'>) => {
+  const handleSaveEvent = async (data: Omit<Event, 'id' | 'createdAt'>) => {
     try {
-      if (selectedEvent && '_id' in selectedEvent) {
-        await updateEvent({ id: selectedEvent._id, data });
+      if (selectedEvent && 'id' in selectedEvent) {
+        await updateEvent({ id: selectedEvent.id, data });
         toast.success('Event updated successfully');
       } else {
         await createEvent(data);
@@ -416,40 +416,26 @@ const AdminEventsManagement: React.FC = () => {
     }
   };
 
-  const handleApproveRequest = async (id: string) => {
-    try {
-      await approveEventRequest(id);
-      toast.success('Event request approved');
-      setShowRequestDetailsModal(false);
-      setSelectedRequest(null);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to approve event request');
-    }
-  };
-
-  const handleRejectRequest = async (id: string) => {
-    try {
-      await rejectEventRequest(id);
-      toast.success('Event request rejected');
-      setShowRequestDetailsModal(false);
-      setSelectedRequest(null);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to reject event request');
-    }
-  };
-
   const handleConfirmAction = async () => {
     if (itemToAction) {
       try {
         if (itemToAction.type === 'event' && itemToAction.action === 'delete') {
           await deleteEvent(itemToAction.id);
           toast.success('Event deleted successfully');
-        } else if (itemToAction.type === 'eventRequest' && itemToAction.action === 'reject') {
-          await rejectEventRequest(itemToAction.id);
-          toast.success('Event request rejected');
+        } else if (itemToAction.type === 'eventRequest') {
+          if (itemToAction.action === 'reject') {
+            await rejectEventRequest(itemToAction.id);
+            toast.success('Event request rejected');
+          } else if (itemToAction.action === 'approve') {
+            await approveEventRequest(itemToAction.id);
+            toast.success('Event request approved');
+          }
+          setShowRequestDetailsModal(false);
+          setSelectedRequest(null);
         }
         setShowWarningModal(false);
         setItemToAction(null);
+        handleTabChange(activeTab);
       } catch (error: any) {
         toast.error(error.message || 'Failed to perform action');
       }
@@ -490,7 +476,7 @@ const AdminEventsManagement: React.FC = () => {
     {
       icon: <Trash2 size={16} />,
       label: 'Delete Event',
-      onClick: (event: Event) => handleDeleteEvent(event._id),
+      onClick: (event: Event) => handleDeleteEvent(event.id),
       color: 'red' as const,
     },
   ];
@@ -505,7 +491,10 @@ const AdminEventsManagement: React.FC = () => {
     {
       icon: <Edit size={16} />,
       label: 'Approve Request',
-      onClick: (request: EventRequest) => handleApproveRequest(request._id),
+      onClick: (request: EventRequest) => {
+        setItemToAction({ id: request.requestedId, type: 'eventRequest', action: 'approve' });
+        setShowWarningModal(true);
+      },
       color: 'green' as const,
       disabled: (request: EventRequest) => request.status !== 'pending',
     },
@@ -513,7 +502,7 @@ const AdminEventsManagement: React.FC = () => {
       icon: <Trash2 size={16} />,
       label: 'Reject Request',
       onClick: (request: EventRequest) => {
-        setItemToAction({ id: request._id, type: 'eventRequest', action: 'reject' });
+        setItemToAction({ id: request.requestedId, type: 'eventRequest', action: 'reject' });
         setShowWarningModal(true);
       },
       color: 'red' as const,
@@ -693,22 +682,22 @@ const AdminEventsManagement: React.FC = () => {
         }}
         onSubmit={handleSaveEvent}
         initialData={selectedEvent ? {
-          title: selectedEvent.title,
-          date: selectedEvent.date,
-          time: selectedEvent.time,
-          location: selectedEvent.location,
-          organizerType: selectedEvent.organizerType,
-          eventType: selectedEvent.eventType,
-          icon: selectedEvent.icon,
-          color: selectedEvent.color,
-          description: selectedEvent.description,
-          fullTime: selectedEvent.fullTime,
-          additionalInfo: selectedEvent.additionalInfo,
-          requirements: selectedEvent.requirements,
-          status: selectedEvent.status,
-          maxParticipants: selectedEvent.maxParticipants,
-          registrationRequired: selectedEvent.registrationRequired,
-          organizer: selectedEvent.organizer,
+          title: selectedEvent._title,
+          date: selectedEvent._date,
+          time: selectedEvent._time,
+          location: selectedEvent._location,
+          organizerType: selectedEvent._organizerType,
+          eventType: selectedEvent._eventType,
+          icon: selectedEvent._icon,
+          color: selectedEvent._color,
+          description: selectedEvent._description,
+          fullTime: selectedEvent._fullTime,
+          additionalInfo: selectedEvent._additionalInfo,
+          requirements: selectedEvent._requirements,
+          status: selectedEvent._status,
+          maxParticipants: selectedEvent._maxParticipants,
+          registrationRequired: selectedEvent._registrationRequired,
+          organizer: selectedEvent._organizer,
         } : undefined}
         isEditing={!!selectedEvent}
         eventTypes={EVENT_TYPES.filter(type => type !== 'All')}
@@ -732,8 +721,14 @@ const AdminEventsManagement: React.FC = () => {
           setSelectedRequest(null);
         }}
         request={selectedRequest}
-        onApprove={handleApproveRequest}
-        onReject={handleRejectRequest}
+        onApprove={(id) => {
+          setItemToAction({ id, type: 'eventRequest', action: 'approve' });
+          setShowWarningModal(true);
+        }}
+        onReject={(id) => {
+          setItemToAction({ id, type: 'eventRequest', action: 'reject' });
+          setShowWarningModal(true);
+        }}
       />
 
       <WarningModal
@@ -746,16 +741,26 @@ const AdminEventsManagement: React.FC = () => {
         title={
           itemToAction?.type === 'event'
             ? 'Delete Event'
+            : itemToAction?.action === 'approve'
+            ? 'Approve Event Request'
             : 'Reject Event Request'
         }
         message={
           itemToAction?.type === 'event'
             ? 'Are you sure you want to delete this event? This action cannot be undone.'
+            : itemToAction?.action === 'approve'
+            ? 'Are you sure you want to approve this event request?'
             : 'Are you sure you want to reject this event request?'
         }
-        confirmText={itemToAction?.type === 'event' ? 'Delete' : 'Reject'}
+        confirmText={
+          itemToAction?.type === 'event'
+            ? 'Delete'
+            : itemToAction?.action === 'approve'
+            ? 'Approve'
+            : 'Reject'
+        }
         cancelText="Cancel"
-        type="danger"
+        type={itemToAction?.action === 'approve' ? 'success' : 'danger'}
       />
 
       <style jsx>{`

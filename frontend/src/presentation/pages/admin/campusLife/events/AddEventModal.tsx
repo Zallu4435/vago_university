@@ -179,6 +179,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
       status: data.status || 'upcoming',
     };
 
+    console.log(eventData, "eventData ")
     onSubmit(eventData);
   };
 
@@ -620,9 +621,9 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                     Event Icon
                   </label>
                   <div className="grid grid-cols-6 gap-2 p-4 bg-gray-900/60 rounded-lg border border-purple-500/30 max-h-40 overflow-y-auto custom-scrollbar">
-                    {iconOptions.map((icon) => (
+                    {iconOptions.map((icon, index) => (
                       <button
-                        key={icon}
+                        key={index}
                         type="button"
                         onClick={() => setValue('icon', icon)}
                         className={`w-10 h-10 text-xl rounded-lg transition-all duration-200 hover:scale-110 ${

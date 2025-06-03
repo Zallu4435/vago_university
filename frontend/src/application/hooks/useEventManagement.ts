@@ -194,7 +194,7 @@ export const useEventManagement = () => {
   };
 
   return {
-    events: eventsData?.events || [],
+    events: eventsData?.data || [],
     eventRequests: eventRequestsData?.eventRequests || [],
     totalPages: activeTab === 'events' ? eventsData?.totalPages || 0 : eventRequestsData?.totalPages || 0,
     page,

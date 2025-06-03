@@ -9,7 +9,8 @@ import {
   IoTrophyOutline as Trophy,
   IoSparklesOutline as Sparkles,
   IoTicketOutline as Ticket,
-  IoInformationCircleOutline as Info
+  IoInformationCircleOutline as Info,
+  IoBusinessOutline as Building // Added Building icon
 } from 'react-icons/io5';
 import { Event, EventRequest } from '../../../../../domain/types/event';
 
@@ -79,7 +80,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
     }
   };
 
-  const OrganizerIcon = getOrganizerIcon(event.organizerType);
+  const OrganizerIcon = getOrganizerIcon('_organizerType' in event ? event._organizerType : 'default');
 
   // Particle effect
   const ghostParticles = Array(30)
@@ -92,6 +93,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
       animDelay: Math.random() * 5,
     }));
 
+    console.log(event, "plpopopopopopo")
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       {/* Background particles */}
@@ -127,10 +129,10 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
                 <Sparkles size={28} className="text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-purple-100">{event.title}</h2>
-                <p className="text-sm text-purple-300 mt-1">Event ID: {event.id}</p>
+                <h2 className="text-2xl font-bold text-purple-100">{event._title}</h2>
+                <p className="text-sm text-purple-300 mt-1">Event ID: {event._id}</p>
                 <div className="flex items-center mt-2 space-x-4">
-                  <StatusBadge status={event.status} />
+                  <StatusBadge status={event._status} />
                 </div>
               </div>
             </div>
@@ -147,12 +149,12 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           {/* Key Info Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <InfoCard icon={OrganizerIcon} label="Organizer" value={event.organizer} />
-            <InfoCard icon={Ticket} label="Event Type" value={event.eventType} />
-            <InfoCard icon={MapPin} label="Venue" value={event.location} />
-            <InfoCard icon={Clock} label="Timeframe" value={event.timeframe} />
-            <InfoCard icon={Users} label="Participants" value={`${event.participants} / ${event.maxParticipants} registered`} />
-            <InfoCard icon={Calendar} label="Registration" value={event.registrationRequired ? "Required" : "Not Required"} />
+            <InfoCard icon={OrganizerIcon} label="Organizer" value={event._organizer} />
+            <InfoCard icon={Ticket} label="Event Type" value={event._eventType} />
+            <InfoCard icon={MapPin} label="Venue" value={event._location} />
+            <InfoCard icon={Clock} label="Timeframe" value={event._timeframe} />
+            <InfoCard icon={Users} label="Participants" value={`${event._participants} / ${event._maxParticipants} registered`} />
+            <InfoCard icon={Calendar} label="Registration" value={event._registrationRequired ? "Required" : "Not Required"} />
           </div>
 
           {/* Description Section */}
@@ -163,23 +165,23 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
                 <h3 className="ml-3 text-lg font-semibold text-purple-100">Event Description</h3>
               </div>
               <div className="p-6">
-                <p className="text-purple-200 leading-relaxed">{event.description}</p>
-                {event.additionalInfo && (
+                <p className="text-purple-200 leading-relaxed">{event._description}</p>
+                {event._additionalInfo && (
                   <div className="mt-4 p-4 bg-gray-900/60 rounded-lg border border-purple-500/30">
                     <h4 className="text-sm font-medium text-purple-300 mb-2 flex items-center">
                       <Sparkles size={16} className="mr-2" />
                       Additional Information
                     </h4>
-                    <p className="text-purple-200 text-sm">{event.additionalInfo}</p>
+                    <p className="text-purple-200 text-sm">{event._additionalInfo}</p>
                   </div>
                 )}
-                {event.requirements && (
+                {event._requirements && (
                   <div className="mt-4 p-4 bg-gray-900/60 rounded-lg border border-purple-500/30">
                     <h4 className="text-sm font-medium text-purple-300 mb-2 flex items-center">
                       <Trophy size={16} className="mr-2" />
                       Requirements
                     </h4>
-                    <p className="text-purple-200 text-sm">{event.requirements}</p>
+                    <p className="text-purple-200 text-sm">{event._requirements}</p>
                   </div>
                 )}
               </div>
@@ -195,7 +197,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
               >
                 Close
               </button>
-              {'title' in event && onEdit && (
+              {'_title' in event && onEdit && (
                 <button
                   onClick={() => {
                     onClose();

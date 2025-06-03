@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { FaBell, FaBookOpen, FaSearch, FaBars, FaTimes, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { usePreferences } from '../../context/PreferencesContext';
+import { useNotificationManagement } from '../../../application/hooks/useNotificationManagement';
+import { toast } from 'react-hot-toast';
 
 interface HeaderProps {
   activeTab: string;
@@ -18,8 +20,10 @@ type DropdownAction = 'settings' | 'help' | 'logout';
 export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMobileMenuOpen, onLogout, userName, profilePicture }: HeaderProps) {
   const tabs = ['Dashboard', 'Academics', 'Financial', 'Communication', 'Campus Life'];
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const navigate = useNavigate();
   const { styles, theme } = usePreferences();
+  const { notifications, markAsRead, getNotificationDetails } = useNotificationManagement();
 
   const toggleProfileDropdown = () => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
@@ -36,9 +40,28 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
     setIsProfileDropdownOpen(false);
   };
 
-  useEffect(() => {
-    console.log('Header theme styles:', styles);
-  }, [styles]);
+  const handleNotificationClick = async (notificationId: string) => {
+    try {
+      const details = await getNotificationDetails(notificationId);
+      if (details) {
+        // Navigate to the appropriate page based on notification type
+        if (details.type === 'course') {
+          navigate(`/courses/${details.courseId}`);
+        } else if (details.type === 'assignment') {
+          navigate(`/assignments/${details.assignmentId}`);
+        }
+        // Mark as read after viewing
+        await markAsRead(notificationId);
+        setIsNotificationOpen(false);
+      }
+    } catch (error) {
+      console.error('Error handling notification:', error);
+      toast.error('Failed to open notification');
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
 
   return (
     <header className={`relative z-[9998] ${styles.backgroundSecondary} shadow-2xl border-b ${styles.borderSecondary}`}>
@@ -93,13 +116,66 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
           <div className="flex items-center space-x-5">
             {/* Notification Bell */}
             <div className="relative group">
-              <button className={`relative p-3 rounded-xl ${styles.card.background} backdrop-blur-md ${styles.card.hover} transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105`} aria-label="Notifications">
+              <button 
+                onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                className={`relative p-3 rounded-xl ${styles.card.background} backdrop-blur-md ${styles.card.hover} transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105`} 
+                aria-label="Notifications"
+              >
                 <FaBell className={`${styles.icon.primary} group-hover:scale-110 transition-transform duration-200`} size={20} />
-                <div className={`absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br ${styles.status.error} rounded-full text-xs flex items-center justify-center text-white font-bold shadow-lg animate-pulse`}>
-                  3
-                </div>
+                {unreadCount > 0 && (
+                  <div className={`absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br ${styles.status.error} rounded-full text-xs flex items-center justify-center text-white font-bold shadow-lg animate-pulse`}>
+                    {unreadCount}
+                  </div>
+                )}
                 <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${styles.orb.primary} opacity-0 group-hover:opacity-10 transition-all duration-300`}></div>
               </button>
+
+              {/* Notification Dropdown */}
+              {isNotificationOpen && (
+                <div className={`absolute right-0 mt-3 w-96 ${styles.card.background} backdrop-blur-xl rounded-2xl shadow-2xl z-50 border ${styles.border}`}>
+                  <div className={`absolute inset-0 bg-gradient-to-br ${styles.backgroundSecondary} opacity-50`}></div>
+                  <div className="relative z-10">
+                    <div className={`px-4 py-3 border-b ${styles.borderSecondary} flex justify-between items-center`}>
+                      <h3 className={`font-medium ${styles.textPrimary}`}>Notifications</h3>
+                      <span className={`text-sm ${styles.textSecondary}`}>{notifications.length} total</span>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className={`px-4 py-6 text-center ${styles.textSecondary}`}>
+                          No notifications
+                        </div>
+                      ) : (
+                        notifications.map((notification) => (
+                          <button
+                            key={notification._id}
+                            onClick={() => handleNotificationClick(notification._id)}
+                            className={`w-full text-left px-4 py-3 hover:bg-opacity-50 transition-all duration-200 ${
+                              !notification.isRead ? `${styles.card.background} bg-opacity-50` : ''
+                            }`}
+                          >
+                            <div className="flex items-start space-x-3">
+                              <div className={`flex-shrink-0 w-2 h-2 mt-2 rounded-full ${
+                                !notification.isRead ? `${styles.status.primary}` : `${styles.textSecondary}`
+                              }`} />
+                              <div className="flex-1">
+                                <p className={`font-medium ${styles.textPrimary}`}>
+                                  {notification.title}
+                                </p>
+                                <p className={`text-sm ${styles.textSecondary} mt-1`}>
+                                  {notification.message}
+                                </p>
+                                <p className={`text-xs ${styles.textSecondary} mt-2`}>
+                                  {new Date(notification.createdAt).toLocaleString()}
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Profile Section */}

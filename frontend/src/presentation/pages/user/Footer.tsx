@@ -5,9 +5,6 @@ import { usePreferences } from '../../context/PreferencesContext';
 export default function Footer() {
   const { styles } = usePreferences();
 
-  useEffect(() => {
-    console.log('Footer theme styles:', styles);
-  }, [styles]);
 
   return (
     <footer className={`relative overflow-hidden border-t shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1),0_-2px_4px_-1px_rgba(0,0,0,0.06)] ${styles.border}`}>

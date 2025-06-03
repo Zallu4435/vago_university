@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../redux/store';
 import { usePreferences } from '../../../context/PreferencesContext';
@@ -7,10 +6,6 @@ export default function WelcomeBanner() {
   const { styles, theme } = usePreferences();
   const user = useSelector((state: RootState) => state.auth.user);
   const fullName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'Student';
-
-  useEffect(() => {
-    console.log('WelcomeBanner theme styles:', styles);
-  }, [styles]);
 
   return (
     <div className={`relative z-0 ${styles.backgroundSecondary} ${styles.borderSecondary} overflow-hidden`}>

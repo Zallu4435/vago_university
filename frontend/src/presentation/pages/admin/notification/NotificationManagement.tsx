@@ -1,0 +1,396 @@
+import React, { useState, useCallback } from 'react';
+import {
+  IoAdd as Plus,
+  IoEyeOutline as Eye,
+  IoTrashOutline as Trash2,
+  IoPersonOutline as User,
+  IoPeopleOutline as Group,
+} from 'react-icons/io5';
+import { debounce } from 'lodash';
+import toast from 'react-hot-toast';
+import AddNotificationModal from './AddNotificationModal';
+import NotificationDetailsModal from './NotificationDetailsModal';
+import { useNotificationManagement } from '../../../../application/hooks/useNotificationManagement';
+import WarningModal from '../../../components/WarningModal';
+import ApplicationsTable from '../User/ApplicationsTable';
+import Pagination from '../User/Pagination';
+import Header from '../User/Header';
+
+
+const formatDate = (dateString: string): string => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  
+    
+interface Notification {
+  _id: string;
+  title: string;
+  message: string;
+  recipientType: 'individual' | 'all_students' | 'all_faculty' | 'all';
+  recipientId?: string;
+  recipientName?: string;
+  createdBy: string;
+  createdAt: string;
+  status: 'sent' | 'failed';
+}
+
+const RECIPIENT_TYPES = ['All', 'Individual', 'All Students', 'All Faculty', 'All Students and Faculty'];
+const STATUSES = ['All', 'Sent', 'Failed'];
+
+const notificationColumns = [
+  {
+    header: 'Notification',
+    key: 'title',
+    render: (notification: Notification) => (
+      <div className="flex items-center gap-3">
+        <span
+          className="text-2xl w-8 h-8 rounded-lg flex items-center justify-center bg-purple-900/20 text-purple-500"
+        >
+          {notification.recipientType === 'individual' ? <User /> : <Group />}
+        </span>
+        <div>
+          <p className="font-medium text-gray-200">{notification.title}</p>
+          <p className="text-xs text-gray-400">ID: {notification._id?.slice(0, 7)}</p>
+        </div>
+      </div>
+    ),
+    width: '20%',
+  },
+  {
+    header: 'Recipient',
+    key: 'recipient',
+    render: (notification: Notification) => (
+      <div className="text-sm text-gray-300">
+        {notification.recipientType === 'individual'
+          ? notification.recipientName || 'N/A'
+          : notification.recipientType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+      </div>
+    ),
+  },
+  {
+    header: 'Created By',
+    key: 'createdBy',
+    render: (notification: Notification) => (
+      <div className="flex items-center text-gray-300">
+        <User size={14} className="text-purple-400 mr-2" />
+        <span className="text-sm">{notification.createdBy}</span>
+      </div>
+    ),
+  },
+  {
+    header: 'Created At',
+    key: 'createdAt',
+    render: (notification: Notification) => (
+      <div className="text-sm text-gray-300">{formatDate(notification.createdAt)}</div>
+    ),
+  },
+  {
+    header: 'Status',
+    key: 'status',
+    render: (notification: Notification) => (
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+          notification.status.toLowerCase() === 'sent'
+            ? 'bg-green-900/30 text-green-400 border-green-500/30'
+            : 'bg-red-900/30 text-red-400 border-red-500/30'
+        }`}
+      >
+        <span
+          className="h-1.5 w-1.5 rounded-full mr-1.5"
+          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
+        ></span>
+        {notification.status.charAt(0).toUpperCase() + notification.status.slice(1)}
+      </span>
+    ),
+  },
+];
+
+const NotificationManagement: React.FC = () => {
+  const {
+    notifications,
+    totalPages,
+    page,
+    setPage,
+    filters,
+    setFilters,
+    isLoading,
+    error,
+    createNotification,
+    deleteNotification,
+    getNotificationDetails,
+    isLoadingNotificationDetails,
+  } = useNotificationManagement();
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showAddNotificationModal, setShowAddNotificationModal] = useState(false);
+  const [showNotificationDetailsModal, setShowNotificationDetailsModal] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+  const [showWarningModal, setShowWarningModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+
+  const filteredNotifications = notifications.filter((notification) => {
+    const matchesSearch = searchQuery
+      ? notification.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        notification._id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        notification.createdBy?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (notification.recipientType === 'individual' &&
+          notification.recipientName?.toLowerCase().includes(searchQuery.toLowerCase()))
+      : true;
+    const matchesRecipientType =
+      filters.recipientType === 'All' ||
+      notification.recipientType.toLowerCase() === filters.recipientType.toLowerCase().replace(/\s+/g, '_');
+    const matchesStatus =
+      filters.status === 'All' || notification.status.toLowerCase() === filters.status.toLowerCase();
+    return matchesSearch && matchesRecipientType && matchesStatus;
+  });
+
+  const handleAddNotification = () => {
+    setSelectedNotification(null);
+    setShowAddNotificationModal(true);
+  };
+
+  const handleViewNotification = async (notification: Notification) => {
+    try {
+      const details = await getNotificationDetails(notification._id);
+      console.log(details, "plplplplplplplpl")
+      setSelectedNotification(details?.notifications);
+      setShowNotificationDetailsModal(true);
+    } catch (error) {
+      console.error('Error fetching notification details:', error);
+      toast.error('Failed to fetch notification details');
+    }
+  };
+
+  const handleSaveNotification = async (data: Omit<Notification, '_id' | 'createdAt' | 'status'>) => {
+    try {
+      await createNotification(data);
+      toast.success('Notification sent successfully');
+      setShowAddNotificationModal(false);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to send notification');
+    }
+  };
+
+  const handleDeleteNotification = (id: string) => {
+    setItemToDelete(id);
+    setShowWarningModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (itemToDelete) {
+      try {
+        await deleteNotification(itemToDelete);
+        toast.success('Notification deleted successfully');
+        setShowWarningModal(false);
+        setItemToDelete(null);
+      } catch (error: any) {
+        toast.error(error.message || 'Failed to delete notification');
+      }
+    }
+  };
+
+  const debouncedFilterChange = useCallback(
+    debounce((field: string, value: string) => {
+      setFilters((prev) => ({ ...prev, [field]: value }));
+    }, 300),
+    []
+  );
+
+  const handleResetFilters = () => {
+    setFilters({
+      recipientType: 'All',
+      status: 'All',
+      dateRange: 'All',
+    });
+    setSearchQuery('');
+  };
+
+  const notificationActions = [
+    {
+      icon: <Eye size={16} />,
+      label: 'View Notification',
+      onClick: handleViewNotification,
+      color: 'blue' as const,
+      disabled: isLoadingNotificationDetails,
+    },
+    {
+      icon: <Trash2 size={16} />,
+      label: 'Delete Notification',
+      onClick: (notification: Notification) => handleDeleteNotification(notification._id),
+      color: 'red' as const,
+    },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-500">Error: {error.message}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 relative">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-0 w-96 h-96 bg-purple-900/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-3/4 right-0 w-96 h-96 bg-blue-900/10 rounded-full blur-3xl"></div>
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-purple-500/10 blur-md"
+            style={{
+              width: `${Math.random() * 12 + 4}px`,
+              height: `${Math.random() * 12 + 4}px`,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animation: `floatingMist ${Math.random() * 15 + 20}s ease-in-out infinite ${Math.random() * 5}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+        <Header
+          title="Notification Management"
+          subtitle="Manage and send notifications to students and faculty"
+          stats={[
+            {
+              icon: <Group />,
+              title: 'Total Notifications',
+              value: filteredNotifications.length.toString(),
+              change: '+10%',
+              isPositive: true,
+            },
+            {
+              icon: <User />,
+              title: 'Sent Notifications',
+              value: filteredNotifications.filter((n) => n.status.toLowerCase() === 'sent').length.toString(),
+              change: '+5%',
+              isPositive: true,
+            },
+          ]}
+          tabs={[{ label: 'Notifications', icon: <Group size={16} />, active: true }]}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          searchPlaceholder="Search notifications..."
+          filters={filters}
+          filterOptions={{
+            recipientType: RECIPIENT_TYPES,
+            status: STATUSES,
+            dateRange: ['All', 'Last Week', 'Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'],
+          }}
+          debouncedFilterChange={debouncedFilterChange}
+          handleResetFilters={handleResetFilters}
+          onTabClick={() => {}}
+        />
+
+        <div className="mt-8">
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
+            <div className="px-6 py-5">
+              <button
+                onClick={handleAddNotification}
+                className="mb-4 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                aria-label="Add new notification"
+              >
+                <Plus size={16} />
+                Add Notification
+              </button>
+
+              {filteredNotifications.length > 0 && (
+                <>
+                  <ApplicationsTable data={filteredNotifications} columns={notificationColumns} actions={notificationActions} />
+                  <Pagination
+                    page={page}
+                    totalPages={totalPages}
+                    itemsCount={filteredNotifications.length}
+                    itemName="notifications"
+                    onPageChange={setPage}
+                    onFirstPage={() => setPage(1)}
+                    onLastPage={() => setPage(totalPages)}
+                  />
+                </>
+              )}
+              {filteredNotifications.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
+                    <Group size={32} className="text-purple-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-white mb-1">No Notifications Found</h3>
+                  <p className="text-gray-400 text-center max-w-sm">
+                    There are no notifications matching your current filters. Try adjusting your search criteria.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <AddNotificationModal
+        isOpen={showAddNotificationModal}
+        onClose={() => setShowAddNotificationModal(false)}
+        onSubmit={handleSaveNotification}
+        recipientTypes={RECIPIENT_TYPES.filter((type) => type !== 'All')}
+      />
+
+      <NotificationDetailsModal
+        isOpen={showNotificationDetailsModal}
+        onClose={() => {
+          setShowNotificationDetailsModal(false);
+          setSelectedNotification(null);
+        }}
+        notification={selectedNotification}
+      />
+
+      <WarningModal
+        isOpen={showWarningModal}
+        onClose={() => {
+          setShowWarningModal(false);
+          setItemToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Delete Notification"
+        message="Are you sure you want to delete this notification? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
+
+      <style jsx>{`
+        @keyframes floatingMist {
+          0% {
+            transform: translateY(0) translateX(0);
+            opacity: 0.2;
+          }
+          50% {
+            transform: translateY(-20px) translateX(15px);
+            opacity: 0.7;
+          }
+          100% {
+            transform: translateY(0) translateX(0);
+            opacity: 0.2;
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default NotificationManagement;

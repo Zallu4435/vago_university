@@ -7,9 +7,10 @@ const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Student Routes
-router.get('/charges', authMiddleware, financialController.getCurrentCharges);
-router.get('/payments', authMiddleware, financialController.getPaymentHistory);
+router.get('/student-info', authMiddleware, financialController.getStudentFinancialInfo);
 router.post('/payments', authMiddleware, financialController.makePayment);
+
+
 router.get('/financial-aid', authMiddleware, financialController.getFinancialAidApplications);
 router.post('/financial-aid', authMiddleware, financialController.applyForFinancialAid);
 router.get('/scholarships', authMiddleware, financialController.getAvailableScholarships);
@@ -28,7 +29,6 @@ router.get('/admin/scholarship-applications', authMiddleware, financialControlle
 router.get('/admin/charges', authMiddleware, financialController.getAllCharges);
 router.post('/admin/charges', authMiddleware, financialController.createCharge); 
 
-router.get('/student-info', authMiddleware, financialController.getStudentFinancialInfo);
 
 
 export default router;

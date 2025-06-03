@@ -5,9 +5,7 @@ import { usePreferences } from '../../../context/PreferencesContext';
 export default function Deadlines({ deadlines }) {
   const { styles, theme } = usePreferences();
 
-  useEffect(() => {
-    console.log('Deadlines theme styles:', styles);
-  }, [styles]);
+
 
   return (
     <div className={`relative overflow-hidden rounded-3xl shadow-xl ${styles.backgroundSecondary} group hover:shadow-2xl transition-all duration-500`}>

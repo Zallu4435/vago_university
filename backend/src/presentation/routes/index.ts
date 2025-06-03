@@ -13,8 +13,12 @@ import campusLifeRoutes from "./campusLifeRoutes";
 import academicRoutes from "./academicRoutes";
 import userCommunicationRoutes from "./useCommunicationRoutes";
 import financialRoutes from "./financial.route";
+import notificationRoutes from './notificationRouter'
+import fcmTokenRoute from './fcmTokenRoute'
 
 const router = Router();
+
+router.use('/fcm', fcmTokenRoute)
 
 router.use("/admission", admissionRoutes);
 
@@ -43,5 +47,9 @@ router.use("/campus-life", campusLifeRoutes);
 router.use("/academic", academicRoutes);
 
 router.use("/financial", financialRoutes);
+
+router.use("/admin/notifications", notificationRoutes);
+
+
 
 export default router;

@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { usePreferences } from '../../../context/PreferencesContext';
 import WelcomeBanner from './WelcomeBanner';
@@ -16,10 +15,6 @@ import Financial from '../Financial/Financial';
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useOutletContext();
   const { styles } = usePreferences();
-
-  useEffect(() => {
-    console.log('StudentDashboard theme styles:', styles);
-  }, [styles]);
 
   const announcements = [
     { title: 'Library Hours Extended', date: 'Apr 24, 2025' },

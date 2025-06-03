@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate-sw": "node scripts/generate-sw.js",
+    "predev": "npm run generate-sw",
+    "prebuild": "npm run generate-sw"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",

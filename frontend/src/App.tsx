@@ -58,6 +58,7 @@ import HelpSupportPage from './presentation/pages/HelpSupportPage';
 import ForgotPasswordModal from './presentation/pages/ForgotPassword';
 import ProgramPrerequisites from './presentation/pages/ProgramPrerequisites';
 import ScholarshipComponent from './presentation/pages/ScholarshipComponent';
+import NotificationManagement from './presentation/pages/admin/notification/NotificationManagement';
 
 
 const App: React.FC = () => {
@@ -165,6 +166,7 @@ const App: React.FC = () => {
             <Route path="admin/events" element={<AdminEventsManagement />} />
             <Route path="admin/communication" element={<CommunicationManagement />} />
             <Route path="admin/payment" element={<PaymentManagement />} />
+            <Route path="admin/notifications" element={<NotificationManagement />} />
           </Route>
         </Route>
 

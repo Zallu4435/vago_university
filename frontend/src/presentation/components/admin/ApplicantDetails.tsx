@@ -88,20 +88,15 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
   };
 
   const handleViewDocument = (document: any) => {
-    console.log('View document clicked:', document);
     if (!document) {
-      console.error('No document provided');
       return;
     }
     if (!document.url) {
-      console.error('Document URL is missing:', document);
       return;
     }
     if (onViewDocument) {
-      console.log('Using custom view handler');
       onViewDocument(document);
     } else {
-      console.log('Using default view handler, opening URL:', document.url);
       try {
         window.open(document.url, '_blank', 'noopener,noreferrer');
       } catch (error) {
@@ -111,7 +106,6 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
   };
 
   const handleDownloadDocument = (document: any) => {
-    console.log('Download document clicked:', document);
     if (!document) {
       console.error('No document provided');
       return;

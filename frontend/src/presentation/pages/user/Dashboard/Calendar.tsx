@@ -5,10 +5,6 @@ import { usePreferences } from '../../../context/PreferencesContext';
 export default function Calendar({ calendarDays, specialDates }) {
   const { styles, theme } = usePreferences();
 
-  useEffect(() => {
-    console.log('Calendar theme styles:', styles);
-  }, [styles]);
-
   return (
     <div className={`relative overflow-hidden rounded-3xl shadow-xl ${styles.backgroundSecondary} group hover:shadow-2xl transition-all duration-500`}>
       <div className={`absolute inset-0 bg-gradient-to-br ${styles.backgroundSecondary}`}></div>

@@ -33,35 +33,6 @@ export const useFinancial = () => {
     }
   }, []);
 
-  const getCurrentCharges = useCallback(async (): Promise<Charge[]> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await financialService.getCurrentCharges();
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const getPaymentHistory = useCallback(async (): Promise<Payment[]> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = isAdmin 
-        ? await financialService.getAllPayments()
-        : await financialService.getPaymentHistory();
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }, [isAdmin]);
 
   const getAllPayments = useCallback(async (): Promise<Payment[]> => {
     try {
@@ -305,8 +276,6 @@ export const useFinancial = () => {
     loading,
     error,
     getStudentFinancialInfo,
-    getCurrentCharges,
-    getPaymentHistory,
     getAllPayments,
     makePayment,
     getFinancialAidApplications,

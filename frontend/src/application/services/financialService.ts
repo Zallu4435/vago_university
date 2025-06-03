@@ -32,24 +32,6 @@ import {
       }
     }
   
-    async getCurrentCharges(): Promise<Charge[]> {
-      try {
-        const response = await httpClient.get(`${this.baseUrl}/charges`);
-        return response.data.data;
-      } catch (error) {
-        throw new Error('Failed to fetch current charges');
-      }
-    }
-  
-    async getPaymentHistory(): Promise<Payment[]> {
-      try {
-        const response = await httpClient.get(`${this.baseUrl}/payments`);
-        return response.data.data;
-      } catch (error) {
-        throw new Error('Failed to fetch payment history');
-      }
-    }
-  
     async getAllPayments(): Promise<Payment[]> {
       try {
         const response = await httpClient.get(`${this.adminBaseUrl}/payments`);

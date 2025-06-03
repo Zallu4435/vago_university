@@ -1,7 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import { getStudentFinancialInfo } from "../../application/use-cases/financial/GetStudentFinancialInfo";
-import { GetCurrentCharges } from "../../application/use-cases/financial/GetCurrentCharges";
-import { GetPaymentHistory } from "../../application/use-cases/financial/GetPaymentHistory";
 import { getAllPayments } from "../../application/use-cases/financial/GetAllPayments";
 import { makePayment } from "../../application/use-cases/financial/MakePayment";
 import { GetFinancialAidApplications } from "../../application/use-cases/financial/GetFinancialAidApplications";
@@ -37,45 +35,6 @@ export class FinancialController {
     }
   }
 
-  async getCurrentCharges(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    try {
-      const studentId = req.user?.id;
-      if (!studentId) throw new Error("User ID not found");
-      const { term } = req.query;
-      const charges = await GetCurrentCharges.execute(
-        studentId,
-        term as string
-      );
-      res.status(200).json({ data: charges });
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  async getPaymentHistory(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    try {
-      const studentId = req.user?.id;
-      if (!studentId) throw new Error("User ID not found");
-      const { startDate, endDate, status } = req.query;
-      const payments = await GetPaymentHistory.execute(studentId, {
-        startDate: startDate as string,
-        endDate: endDate as string,
-        status: status as "Completed" | "Pending" | "Failed",
-      });
-      res.status(200).json({ data: payments });
-    } catch (err) {
-      next(err);
-    }
-  }
-
   async getAllPayments(
     req: Request,
     res: Response,
@@ -105,7 +64,7 @@ export class FinancialController {
     }
   }
 
-  async getOnePayment (
+  async getOnePayment(
     req: Request,
     res: Response,
     next: NextFunction

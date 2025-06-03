@@ -5,9 +5,6 @@ import { usePreferences } from '../../../context/PreferencesContext';
 export default function QuickLinks() {
   const { styles, theme } = usePreferences();
 
-  useEffect(() => {
-    console.log('QuickLinks theme styles:', styles);
-  }, [styles]);
 
   const links = [
     { 

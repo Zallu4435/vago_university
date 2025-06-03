@@ -27,10 +27,6 @@ const UserLayout = () => {
     navigate('/login');
   };
 
-  // Debug theme changes
-  useEffect(() => {
-    console.log('UserLayout theme styles:', styles);
-  }, [styles]);
 
   return (
     <div className={`min-h-screen flex flex-col ${styles.background} ${styles.textPrimary}`}>

@@ -41,13 +41,13 @@ const StatusBadge = ({ status }: { status: string }) => {
     rejected: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },
   };
 
-  const config = statusConfig[status.toLowerCase()] || statusConfig.pending;
+  const config = statusConfig[status?.toLowerCase()] || statusConfig.pending;
 
   return (
     <span
       className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.bg} ${config.text} ${config.border}`}
     >
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {status?.charAt(0).toUpperCase() + status?.slice(1)}
     </span>
   );
 };
@@ -63,6 +63,8 @@ const InfoCard = ({ icon: Icon, label, value }: { icon: React.ComponentType<{ si
 );
 
 const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, team, onEdit }) => {
+
+  console.log(team, "popopopo")
   // Prevent background scrolling when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -80,7 +82,7 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
   console.log(team);
 
   const getOrganizerIcon = (type: string) => {
-    switch (type.toLowerCase()) {
+    switch (type?.toLowerCase()) {
       case 'student': return Users;
       case 'club': return Building;
       default: return User;
@@ -208,7 +210,7 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
           )}
 
           {/* Upcoming Games Section */}
-          {team.upcomingGames.length > 0 && (
+          {team?.upcomingGames?.length > 0 && (
             <div className="mb-8">
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg shadow-sm overflow-hidden">
                 <div className="p-4 bg-gray-900/60 flex items-center">

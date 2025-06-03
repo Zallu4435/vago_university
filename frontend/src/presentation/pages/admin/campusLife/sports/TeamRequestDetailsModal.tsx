@@ -18,24 +18,26 @@ import { IconType } from 'react-icons';
 type StatusType = 'pending' | 'approved' | 'rejected';
 
 interface TeamRequestDetails {
-  id: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  whyJoin: string;
-  additionalInfo: string;
-  team: {
+  sportRequest: {
     id: string;
-    name: string;
-    sportType: string;
-    coach: string;
-    playerCount: number;
-    division: string;
-  };
-  user?: {
-    id: string;
-    name: string;
-    email: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+    whyJoin: string;
+    additionalInfo: string;
+    sport: {
+      id: string;
+      title: string;
+      type: string;
+      headCoach: string;
+      playerCount: number;
+      division: string;
+    };
+    user: {
+      id: string;
+      name: string;
+      email: string;
+    };
   };
 }
 
@@ -60,9 +62,9 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
 
   return (
     <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.bg} ${config.text} ${config.border}`}
+      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config?.bg} ${config?.text} ${config?.border}`}
     >
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {status?.charAt(0).toUpperCase() + status?.slice(1)}
     </span>
   );
 };
@@ -106,7 +108,8 @@ const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
 
   if (!isOpen || !request) return null;
 
-  const { team, user } = request;
+  console.log(request, "qqqqqqqqqqqqqqqqqqqqq")
+  const { sport, user } = request.sportRequest;
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -175,10 +178,10 @@ const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
                 <Trophy size={24} className="text-purple-300" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-purple-100">{team?.name}</h2>
-                <p className="text-sm text-purple-300">Request ID: {request.id}</p>
+                <h2 className="text-2xl font-bold text-purple-100">{sport.title}</h2>
+                <p className="text-sm text-purple-300">Request ID: {request.sportRequest.id}</p>
                 <div className="flex items-center mt-2">
-                  <StatusBadge status={request.status as StatusType} />
+                  <StatusBadge status={request.sportRequest.status as StatusType} />
                 </div>
               </div>
             </div>
@@ -195,29 +198,29 @@ const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           {/* Status and Key Info Row */}
           <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
-            <StatusBadge status={request.status as StatusType} />
+            <StatusBadge status={request.sportRequest.status as StatusType} />
             <div className="flex items-center space-x-6 text-sm text-purple-300">
               <div className="flex items-center space-x-2">
                 <Calendar size={16} className="text-purple-400" />
-                <span>{formatDate(request.createdAt)}</span>
+                <span>{formatDate(request.sportRequest.createdAt)}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Users size={16} className="text-purple-400" />
-                <span>{team?.playerCount} Players</span>
+                <span>{sport.playerCount} Players</span>
               </div>
             </div>
           </div>
 
           {/* Main Info Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            <InfoCard icon={User} label="Requested By" value={user?.name || 'Unknown'} />
-            <InfoCard icon={Mail} label="Contact Email" value={user?.email || 'N/A'} />
-            <InfoCard icon={Trophy} label="Sport Type" value={team?.sportType} />
-            <InfoCard icon={User} label="Coach" value={team?.coach} />
-            <InfoCard icon={IdCard} label="Team ID" value={team?.id} />
-            <InfoCard icon={Calendar} label="Last Updated" value={formatDateTime(request?.updatedAt)} />
-            <InfoCard icon={Users} label="Player Count" value={team?.playerCount} />
-            <InfoCard icon={Trophy} label="Division" value={team?.division} />
+            <InfoCard icon={User} label="Requested By" value={user.name} />
+            <InfoCard icon={Mail} label="Contact Email" value={user.email} />
+            <InfoCard icon={Trophy} label="Sport Type" value={sport.type} />
+            <InfoCard icon={User} label="Coach" value={sport.headCoach} />
+            <InfoCard icon={IdCard} label="Team ID" value={sport.id} />
+            <InfoCard icon={Calendar} label="Last Updated" value={formatDateTime(request.sportRequest.updatedAt)} />
+            <InfoCard icon={Users} label="Player Count" value={sport.playerCount} />
+            <InfoCard icon={Trophy} label="Division" value={sport.division} />
           </div>
 
           {/* Why Join Section */}
@@ -228,13 +231,13 @@ const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
                 <h3 className="ml-3 text-lg font-semibold text-purple-100">Why Join</h3>
               </div>
               <div className="p-6">
-                <p className="text-purple-200 leading-relaxed">{request?.whyJoin}</p>
+                <p className="text-purple-200 leading-relaxed">{request.sportRequest.whyJoin}</p>
               </div>
             </div>
           </div>
 
           {/* Additional Info Section */}
-          {request?.additionalInfo && (
+          {request.sportRequest.additionalInfo && (
             <div className="mb-8">
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg shadow-sm overflow-hidden">
                 <div className="p-4 bg-gray-900/60 flex items-center">
@@ -242,39 +245,37 @@ const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
                   <h3 className="ml-3 text-lg font-semibold text-purple-100">Additional Information</h3>
                 </div>
                 <div className="p-6">
-                  <p className="text-purple-200 leading-relaxed">{request?.additionalInfo}</p>
+                  <p className="text-purple-200 leading-relaxed">{request.sportRequest.additionalInfo}</p>
                 </div>
               </div>
             </div>
           )}
 
           {/* Requester Information Section */}
-          {user && (
-            <div className="mb-8">
-              <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg shadow-sm overflow-hidden">
-                <div className="p-4 bg-gray-900/60 flex items-center">
-                  <User size={20} className="text-purple-300" />
-                  <h3 className="ml-3 text-lg font-semibold text-purple-100">Requester Information</h3>
+          <div className="mb-8">
+            <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg shadow-sm overflow-hidden">
+              <div className="p-4 bg-gray-900/60 flex items-center">
+                <User size={20} className="text-purple-300" />
+                <h3 className="ml-3 text-lg font-semibold text-purple-100">Requester Information</h3>
+              </div>
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-gray-900/60 rounded-lg p-4 border border-purple-600/30">
+                  <div className="flex items-center mb-2">
+                    <User size={18} className="text-purple-300" />
+                    <span className="ml-2 text-sm font-medium text-purple-300">Full Name</span>
+                  </div>
+                  <p className="text-white font-semibold">{user.name}</p>
                 </div>
-                <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gray-900/60 rounded-lg p-4 border border-purple-600/30">
-                    <div className="flex items-center mb-2">
-                      <User size={18} className="text-purple-300" />
-                      <span className="ml-2 text-sm font-medium text-purple-300">Full Name</span>
-                    </div>
-                    <p className="text-white font-semibold">{user.name}</p>
+                <div className="bg-gray-900/60 rounded-lg p-4 border border-purple-600/30">
+                  <div className="flex items-center mb-2">
+                    <Mail size={18} className="text-purple-300" />
+                    <span className="ml-2 text-sm font-medium text-purple-300">Email Address</span>
                   </div>
-                  <div className="bg-gray-900/60 rounded-lg p-4 border border-purple-600/30">
-                    <div className="flex items-center mb-2">
-                      <Mail size={18} className="text-purple-300" />
-                      <span className="ml-2 text-sm font-medium text-purple-300">Email Address</span>
-                    </div>
-                    <p className="text-white font-semibold break-all">{user.email}</p>
-                  </div>
+                  <p className="text-white font-semibold break-all">{user.email}</p>
                 </div>
               </div>
             </div>
-          )}
+          </div>
 
           {/* Action Buttons */}
           <div className="border-t border-purple-600/30 bg-gray-900/80 p-6">
@@ -285,17 +286,17 @@ const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
               >
                 Close
               </button>
-              {request.status === 'pending' && (
+              {request.sportRequest.status === 'pending' && (
                 <>
                   <button
-                    onClick={() => onApprove?.(request.id)}
+                    onClick={() => onApprove?.(request.sportRequest.id)}
                     className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-green-500/50 flex items-center space-x-2"
                   >
                     <Check size={18} />
                     <span>Approve Request</span>
                   </button>
                   <button
-                    onClick={() => onReject?.(request.id)}
+                    onClick={() => onReject?.(request.sportRequest.id)}
                     className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-red-500/50 flex items-center space-x-2"
                   >
                     <Reject size={18} />
@@ -303,13 +304,13 @@ const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
                   </button>
                 </>
               )}
-              {request.status === 'approved' && (
+              {request.sportRequest.status === 'approved' && (
                 <div className="flex items-center space-x-2 px-4 py-2 bg-green-600/30 border border-green-500/50 rounded-lg">
                   <Check size={18} className="text-green-100" />
                   <span className="text-green-100 font-semibold">Request Approved</span>
                 </div>
               )}
-              {request.status === 'rejected' && (
+              {request.sportRequest.status === 'rejected' && (
                 <div className="flex items-center space-x-2 px-4 py-2 bg-red-600/30 border border-red-500/50 rounded-lg">
                   <Reject size={18} className="text-red-100" />
                   <span className="text-red-100 font-semibold">Request Rejected</span>

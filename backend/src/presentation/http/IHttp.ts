@@ -77,3 +77,19 @@ export interface IClubRequestController extends IController {
   rejectClubRequest(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getClubRequestDetails(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
+
+export interface ISportsController extends IController {
+  getSports(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getSportById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  createSport(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateSport(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  deleteSport(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface ISportRequestController extends IController {
+  getSportRequests(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  approveSportRequest(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  rejectSportRequest(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getSportRequestDetails(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  joinSport(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}

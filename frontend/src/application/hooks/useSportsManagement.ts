@@ -211,9 +211,10 @@ export const useSportsManagement = () => {
     setSelectedRequestId(requestId);
   };
 
+
   return {
-    teams: teamsData?.teams || [],
-    playerRequests: playerRequestsData?.playerRequests || [],
+    teams: teamsData?.sports || [],
+    playerRequests: playerRequestsData?.data?.requests || [],
     totalPages: activeTab === 'teams' ? teamsData?.totalPages || 0 : playerRequestsData?.totalPages || 0,
     page,
     setPage,
@@ -227,7 +228,7 @@ export const useSportsManagement = () => {
     approvePlayerRequest,
     rejectPlayerRequest,
     handleTabChange,
-    teamDetails,
+    teamDetails : teamDetails?.data?.sport,
     handleViewTeam,
     handleEditTeam,
     setSelectedTeamId,

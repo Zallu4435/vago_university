@@ -188,7 +188,7 @@ const playerRequestColumns = [
     render: (request: PlayerRequest) => (
       <div className="flex items-center text-gray-300">
         <Users size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{formatDate(request.requestedDate)}</span>
+        <span className="text-sm">{formatDate(request.requestedAt)}</span>
       </div>
     ),
   },
@@ -238,7 +238,10 @@ const AdminSportsManagement: React.FC = () => {
     setSelectedTeamId,
     requestDetails,
     handleViewRequest,
+
   } = useSportsManagement();
+
+
 
   const [activeTab, setActiveTab] = useState<'teams' | 'requests'>('teams');
   const [searchTerm, setSearchTerm] = useState('');
@@ -289,8 +292,6 @@ const AdminSportsManagement: React.FC = () => {
     setPage(1);
   };
 
-
-  
 
   const filteredTeams = teams?.filter((team) => {
     const matchesSearch = searchTerm
@@ -379,12 +380,12 @@ const AdminSportsManagement: React.FC = () => {
   };
 
   const handleViewTeamClick = (team: Team) => {
-    handleViewTeam(team._id);
+    handleViewTeam(team.id);
     setShowTeamDetailsModal(true);
   };
 
   const handleEditTeamClick = (team: Team) => {
-    handleEditTeam(team._id);
+    handleEditTeam(team.id);
     setIsEditing(true);
     setShowAddTeamModal(true);
   };
@@ -434,8 +435,25 @@ const AdminSportsManagement: React.FC = () => {
   const handleConfirmApprove = async () => {
     if (selectedRequest) {
       try {
-        await approvePlayerRequest(selectedRequest._id);
+        await approvePlayerRequest(selectedRequest.requestId);
+        setPlayerRequests(prevRequests => 
+          prevRequests?.map(request => 
+            request.requestId === selectedRequest.requestId 
+              ? { ...request, status: 'approved' }
+              : request
+          )
+        );
+        if (requestDetails?.sportRequest?.id === selectedRequest.requestId) {
+          setRequestDetails(prev => ({
+            ...prev,
+            sportRequest: {
+              ...prev.sportRequest,
+              status: 'approved'
+            }
+          }));
+        }
         setShowApproveWarning(false);
+        setShowRequestDetailsModal(false);
         setSelectedRequest(null);
       } catch (error) {
         console.error('Error approving player request:', error);
@@ -446,8 +464,25 @@ const AdminSportsManagement: React.FC = () => {
   const handleConfirmReject = async () => {
     if (selectedRequest) {
       try {
-        await rejectPlayerRequest(selectedRequest._id);
+        await rejectPlayerRequest(selectedRequest.requestId);
+        setPlayerRequests(prevRequests => 
+          prevRequests?.map(request => 
+            request.requestId === selectedRequest.requestId 
+              ? { ...request, status: 'rejected' }
+              : request
+          )
+        );
+        if (requestDetails?.sportRequest?.id === selectedRequest.requestId) {
+          setRequestDetails(prev => ({
+            ...prev,
+            sportRequest: {
+              ...prev.sportRequest,
+              status: 'rejected'
+            }
+          }));
+        }
         setShowRejectWarning(false);
+        setShowRequestDetailsModal(false);
         setSelectedRequest(null);
       } catch (error) {
         console.error('Error rejecting player request:', error);

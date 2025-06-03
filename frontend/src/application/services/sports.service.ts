@@ -21,7 +21,7 @@ class SportsService {
         params.endDate = endDate;
       }
 
-      const response = await httpClient.get<SportsApiResponse>('/admin/sports/teams', { params });
+      const response = await httpClient.get<SportsApiResponse>('/admin/sports', { params });
       return response.data;
     } catch (error: any) {
       console.error('getTeams error:', error);
@@ -56,7 +56,7 @@ class SportsService {
 
   async createTeam(data: Omit<Team, 'id'>): Promise<Team> {
     try {
-      const response = await httpClient.post<Team>('/admin/sports/teams', data);
+      const response = await httpClient.post<Team>('/admin/sports', data);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to create team');
@@ -65,7 +65,7 @@ class SportsService {
 
   async updateTeam(id: string, data: Partial<Team>): Promise<Team> {
     try {
-      const response = await httpClient.put<Team>(`/admin/sports/teams/${id}`, data);
+      const response = await httpClient.put<Team>(`/admin/sports/${id}`, data);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to update team');
@@ -74,7 +74,7 @@ class SportsService {
 
   async deleteTeam(id: string): Promise<void> {
     try {
-      await httpClient.delete(`/admin/sports/teams/${id}`);
+      await httpClient.delete(`/admin/sports/${id}`);
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to delete team');
     }
@@ -98,7 +98,7 @@ class SportsService {
 
   async getTeamDetails(id: string): Promise<Team> {
     try {
-      const response = await httpClient.get(`/admin/sports/teams/${id}`);
+      const response = await httpClient.get(`/admin/sports/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching team details:', error);

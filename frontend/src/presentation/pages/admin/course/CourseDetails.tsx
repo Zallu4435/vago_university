@@ -97,7 +97,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ isOpen, onClose, course }
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-purple-100">{course.title}</h2>
-                <p className="text-sm text-purple-300">Course ID: {course._id.slice(-8).toUpperCase()}</p>
+                <p className="text-sm text-purple-300">Course ID: {course._id?.slice(-8).toUpperCase()}</p>
               </div>
             </div>
             <button
@@ -115,7 +115,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ isOpen, onClose, course }
           <div className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-6">
               <span className="px-4 py-2 bg-gray-800/80 border border-purple-600/30 rounded-lg text-sm text-purple-300">
-                ID: {course._id.slice(-8).toUpperCase()}
+                ID: {course._id?.slice(-8).toUpperCase()}
               </span>
               <span className="px-4 py-2 bg-gray-800/80 border border-purple-600/30 rounded-lg text-sm text-purple-300">
                 {availableSpots} spots available
@@ -125,7 +125,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ isOpen, onClose, course }
 
           {/* Key Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <InfoCard icon={<FiHash size={18} />} label="Credits" value={course.credits.toString()} />
+            <InfoCard icon={<FiHash size={18} />} label="Credits" value={course.credits?.toString()} />
             <InfoCard icon={<FiUsers size={18} />} label="Enrolled" value={`${course.currentEnrollment}/${course.maxEnrollment}`} />
             <InfoCard icon={<FiUsers size={18} />} label="Capacity" value={`${Math.round(enrollmentPercentage)}%`} />
             <InfoCard icon={<FiUsers size={18} />} label="Level" value="Advanced" />

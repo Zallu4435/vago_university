@@ -1,8 +1,8 @@
 export interface IHttpRequest {
   headers?: any;
   body?: any;
-  path?: any;
   query?: any;
+  params?: any;
 }
 
 export interface IHttpResponse {
@@ -11,7 +11,7 @@ export interface IHttpResponse {
 }
 
 export class HttpRequest implements IHttpRequest {
-  constructor(public headers?: any, public body?: any, public path?: any, public query?: any) {}
+  constructor(public headers?: any, public body?: any, public query?: any, public params?: any) {}
 }
 
 export interface IHttpErrors {
@@ -92,4 +92,19 @@ export interface ISportRequestController extends IController {
   rejectSportRequest(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getSportRequestDetails(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   joinSport(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface ICourseController extends IController {
+  getCourses(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getCourseById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  createCourse(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateCourse(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  deleteCourse(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface ICourseEnrollmentController extends IController {
+  getEnrollments(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getEnrollmentDetails(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  approveEnrollment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  rejectEnrollment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }

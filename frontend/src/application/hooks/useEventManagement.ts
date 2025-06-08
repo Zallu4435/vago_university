@@ -154,7 +154,7 @@ export const useEventManagement = () => {
   const { mutateAsync: getEventRequestDetails } = useMutation({
     mutationFn: (id: string) => eventService.getEventRequestDetails(id),
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to fetch event request details');
+      toast.error(error.message || 'Failed to fetch request details');
     },
   });
 

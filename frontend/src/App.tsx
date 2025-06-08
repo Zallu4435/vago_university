@@ -32,7 +32,6 @@ import UGProgrammes from './presentation/pages/ug_admissions/UGProgrammes';
 import { UGScholarships } from './presentation/pages/ug_admissions/UGScholarships';
 import { UGWhy_VAGO } from './presentation/pages/ug_admissions/UGWhy_VAGO';
 import DashboardPage from './presentation/pages/user/Dashboard/StudentDashboard';
-import CanvasPage from './presentation/pages/CanvasPage';
 import FacultyDashboard from './presentation/pages/faculty/FacultyDashboard';
 import FacultyRequestForm from './presentation/pages/Auth/FacultyRequest';
 import ConfirmAdmission from './presentation/pages/ConfirmAdmission';
@@ -59,7 +58,8 @@ import ForgotPasswordModal from './presentation/pages/ForgotPassword';
 import ProgramPrerequisites from './presentation/pages/ProgramPrerequisites';
 import ScholarshipComponent from './presentation/pages/ScholarshipComponent';
 import NotificationManagement from './presentation/pages/admin/notification/NotificationManagement';
-
+import ChatInterface from './presentation/pages/canvas/chat/ChatComponent';
+import StudentCanvas from './presentation/pages/canvas/CanvasPage';
 
 const App: React.FC = () => {
   const { isError, error } = useRefreshToken();
@@ -174,7 +174,7 @@ const App: React.FC = () => {
         <Route element={<ProtectedRoute allowedCollections={['user']} />}>
           <Route element={<UserLayout />}>
             <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="canvas" element={<CanvasPage />} />
+            <Route path="canvas" element={<StudentCanvas />} />
           </Route>
         </Route>
 

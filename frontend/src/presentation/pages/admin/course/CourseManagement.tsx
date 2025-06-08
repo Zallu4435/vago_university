@@ -242,6 +242,8 @@ const AdminCourseManagement: React.FC = () => {
     handleViewRequest,
   } = useCourseManagement();
 
+  console.log(courseDetails, "ppppp")
+
   const [searchTerm, setSearchTerm] = useState('');
   const [showCourseModal, setShowCourseModal] = useState(false);
   const [showCourseDetail, setShowCourseDetail] = useState(false);
@@ -257,9 +259,9 @@ const AdminCourseManagement: React.FC = () => {
   const handleSaveCourse = async (formData: Partial<Course>) => {
     try {
       if (editingCourse) {
-        await updateCourse({ id: editingCourse._id, data: formData });
+        await updateCourse({ id: editingCourse.id, data: formData });
       } else {
-        await createCourse(formData as Omit<Course, '_id' | 'currentEnrollment'>);
+        await createCourse(formData as Omit<Course, 'id' | 'currentEnrollment'>);
       }
       setShowCourseModal(false);
       setEditingCourse(null);
@@ -273,7 +275,7 @@ const AdminCourseManagement: React.FC = () => {
       icon: <FiEye size={16} />,
       label: 'View Course',
       onClick: (course: Course) => {
-        handleViewCourse(course._id);
+        handleViewCourse(course.id);
         setShowCourseDetail(true);
       },
       color: 'blue' as const,
@@ -282,8 +284,8 @@ const AdminCourseManagement: React.FC = () => {
       icon: <FiEdit size={16} />,
       label: 'Edit Course',
       onClick: (course: Course) => {
-        handleEditCourse(course._id);
-        setEditingCourse(course);
+        handleEditCourse(course.id);
+        setEditingCourse(courseDetails?.props);
         setShowCourseModal(true);
       },
       color: 'green' as const,
@@ -374,7 +376,7 @@ const AdminCourseManagement: React.FC = () => {
   const handleConfirmDelete = async () => {
     if (courseToDelete) {
       try {
-        await deleteCourse(courseToDelete._id);
+        await deleteCourse(courseToDelete.id);
         setShowDeleteWarning(false);
         setCourseToDelete(null);
       } catch (error) {
@@ -386,7 +388,7 @@ const AdminCourseManagement: React.FC = () => {
   const handleConfirmApprove = async () => {
     if (selectedRequest) {
       try {
-        await approveEnrollmentRequest(selectedRequest._id);
+        await approveEnrollmentRequest(selectedRequest.id);
         setShowApproveWarning(false);
         setSelectedRequest(null);
       } catch (error) {
@@ -398,7 +400,7 @@ const AdminCourseManagement: React.FC = () => {
   const handleConfirmReject = async () => {
     if (selectedRequest && rejectReason) {
       try {
-        await rejectEnrollmentRequest({ requestId: selectedRequest._id, reason: rejectReason });
+        await rejectEnrollmentRequest({ requestId: selectedRequest.id, reason: rejectReason });
         setShowRejectWarning(false);
         setSelectedRequest(null);
         setRejectReason('');
@@ -605,7 +607,7 @@ const AdminCourseManagement: React.FC = () => {
           onClose={() => {
             setShowCourseDetail(false);
           }}
-          course={courseDetails}
+          course={courseDetails?.props}
           isLoading={isLoadingCourseDetails}
         />
       )}

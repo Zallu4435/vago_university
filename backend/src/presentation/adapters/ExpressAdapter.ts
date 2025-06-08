@@ -10,8 +10,8 @@ export async function expressAdapter(
     const httpRequest: IHttpRequest = new HttpRequest(
       req.headers,
       req.body,
-      req.params,
-      req.query
+      req.query,
+      req.params
     );
     const response: IHttpResponse = await handler(httpRequest);
     res.status(response.statusCode).json(response.body);

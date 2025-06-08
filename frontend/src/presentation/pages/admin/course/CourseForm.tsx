@@ -23,19 +23,37 @@ const CourseForm: React.FC<CourseFormProps> = ({
   terms,
 }) => {
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    specialization: '',
-    credits: 0,
-    faculty: '',
-    schedule: '',
-    maxEnrollment: 0,
-    prerequisites: [] as string[],
-    term: '',
-    ...initialData,
+    title: initialData?.title || '',
+    description: initialData?.description || '',
+    specialization: initialData?.specialization || '',
+    credits: initialData?.credits || 0,
+    faculty: initialData?.faculty || '',
+    schedule: initialData?.schedule || '',
+    maxEnrollment: initialData?.maxEnrollment || 0,
+    prerequisites: initialData?.prerequisites || [],
+    term: initialData?.term || '',
   });
 
+  console.log(initialData, ':data from the course')
+
   const [newPrerequisite, setNewPrerequisite] = useState('');
+
+  // Update form data when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        title: initialData.title || '',
+        description: initialData.description || '',
+        specialization: initialData.specialization || '',
+        credits: initialData.credits || 0,
+        faculty: initialData.faculty || '',
+        schedule: initialData.schedule || '',
+        maxEnrollment: initialData.maxEnrollment || 0,
+        prerequisites: initialData.prerequisites || [],
+        term: initialData.term || '',
+      });
+    }
+  }, [initialData]);
 
   // Prevent background scrolling when modal is open
   useEffect(() => {

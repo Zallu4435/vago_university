@@ -1,34 +1,29 @@
-import { CourseModel } from '../../../infrastructure/database/mongoose/models/course.model';
+import { CourseModel } from '../../../infrastructure/database/mongoose/models/courses/CourseModel';
 
 interface GetCoursesInput {
   // No filters
 }
 
-interface Course {
-  code: string;
-  title: string;
-  credits: number;
-  instructor: string;
-  schedule: string;
-  id: number;
-}
-
-interface GetCoursesOutput {
-  courses: Course[];
+interface GetCoursesResponse {
+  courses: any[];
+  totalCourses: number;
+  totalPages: number;
+  currentPage: number;
 }
 
 class GetCourses {
-  async execute(): Promise<GetCoursesOutput>   {
+  async execute(): Promise<GetCoursesResponse> {
     try {
-      console.log(`Executing getCourses use case with no filters`);
-
       const courses = await CourseModel.find()
-        .lean()
-        .catch((err) => {
-          throw new Error(`Failed to fetch courses: ${err.message}`);
-        });
+        .select('title specialization faculty credits term')
+        .lean();
 
-      return { courses };
+      return {
+        courses,
+        totalCourses: courses.length,
+        totalPages: 1,
+        currentPage: 1
+      };
     } catch (err) {
       console.error(`Error in getCourses use case:`, err);
       throw err;

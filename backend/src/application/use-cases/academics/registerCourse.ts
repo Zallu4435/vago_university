@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { CourseModel } from '../../../infrastructure/database/mongoose/models/course.model';
-import { EnrollmentModel } from '../../../infrastructure/database/mongoose/models/enrollment.model';
+import { CourseModel } from '../../../infrastructure/database/mongoose/models/courses/CourseModel';
+import { EnrollmentModel } from '../../../infrastructure/database/mongoose/models/courses/CourseModel';
 
 interface RegisterCourseInput {
   studentId: string;

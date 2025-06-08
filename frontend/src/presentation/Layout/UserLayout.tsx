@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Header from '../pages/user/Header';
 import Footer from '../pages/user/Footer';
@@ -8,17 +8,17 @@ import { RootState } from '../redux/store';
 import { usePreferences } from '../context/PreferencesContext';
 
 const UserLayout = () => {
-  const [activeTab, setActiveTab] = useState('Dashboard');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const isCanvas = location.pathname.includes('/canvas');
+  const defaultTab = isCanvas ? 'Canvas Dashboard' : 'Dashboard';
+  const [activeTab, setActiveTab] = useState(defaultTab);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { styles } = usePreferences();
-  
   const isSettingsPage = location.pathname === '/settings';
   const isHelpPage = location.pathname === '/help';
 
   const user = useSelector((state: RootState) => state.auth.user);
   const fullName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim();
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -27,6 +27,15 @@ const UserLayout = () => {
     navigate('/login');
   };
 
+  // Update activeTab when URL changes
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.includes('/canvas')) {
+      setActiveTab('Canvas Dashboard');
+    } else if (path.includes('/dashboard')) {
+      setActiveTab('Dashboard');
+    }
+  }, [location.pathname]);
 
   return (
     <div className={`min-h-screen flex flex-col ${styles.background} ${styles.textPrimary}`}>

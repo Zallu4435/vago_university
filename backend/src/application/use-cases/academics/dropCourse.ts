@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { EnrollmentModel } from '../../../infrastructure/database/mongoose/models/enrollment.model';
+import { EnrollmentModel } from '../../../infrastructure/database/mongoose/models/courses/CourseModel';
 
 interface DropCourseInput {
   studentId: string;

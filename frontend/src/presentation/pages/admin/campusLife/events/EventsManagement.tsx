@@ -55,7 +55,7 @@ export interface Event {
 }
 
 interface EventRequest {
-  _id: string;
+  id: string;
   eventName: string;
   requestedBy: string;
   requesterType: string;
@@ -167,7 +167,7 @@ const eventRequestColumns = [
     render: (request: EventRequest) => (
       <div>
         <p className="font-medium text-gray-200">{request.eventName}</p>
-        <p className="text-xs text-gray-400">ID: {request.requestedId?.slice(0, 7)}</p>
+        <p className="text-xs text-gray-400">ID: {request.id?.slice(0, 7)}</p>
       </div>
     ),
     width: '20%',
@@ -312,7 +312,7 @@ const AdminEventsManagement: React.FC = () => {
   const filteredEventRequests = eventRequests.filter((request) => {
     const matchesSearch = searchTerm
       ? request.eventName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.requestedBy?.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
 
@@ -407,7 +407,9 @@ const AdminEventsManagement: React.FC = () => {
 
   const handleViewRequest = async (request: EventRequest) => {
     try {
-      const details = await getEventRequestDetails(request.requestedId);
+      console.log('Fetching details for request:', request);
+      const details = await getEventRequestDetails(request.id);
+      console.log('Received details:', details);
       setSelectedRequest(details);
       setShowRequestDetailsModal(true);
     } catch (error) {
@@ -492,7 +494,7 @@ const AdminEventsManagement: React.FC = () => {
       icon: <Edit size={16} />,
       label: 'Approve Request',
       onClick: (request: EventRequest) => {
-        setItemToAction({ id: request.requestedId, type: 'eventRequest', action: 'approve' });
+        setItemToAction({ id: request.id, type: 'eventRequest', action: 'approve' });
         setShowWarningModal(true);
       },
       color: 'green' as const,
@@ -502,7 +504,7 @@ const AdminEventsManagement: React.FC = () => {
       icon: <Trash2 size={16} />,
       label: 'Reject Request',
       onClick: (request: EventRequest) => {
-        setItemToAction({ id: request.requestedId, type: 'eventRequest', action: 'reject' });
+        setItemToAction({ id: request.id, type: 'eventRequest', action: 'reject' });
         setShowWarningModal(true);
       },
       color: 'red' as const,

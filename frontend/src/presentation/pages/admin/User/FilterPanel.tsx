@@ -87,7 +87,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                   options={filterOptions[field].map((item) => ({
                     value: item === `All ${field.charAt(0).toUpperCase() + field.slice(1)}s`
                       ? `all_${field}s`
-                      : item.toLowerCase().replace(/\s+/g, '_'),
+                      : item?.toLowerCase().replace(/\s+/g, '_'),
                     label: item,
                   }))}
                 />

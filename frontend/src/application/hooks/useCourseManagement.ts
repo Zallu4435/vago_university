@@ -57,6 +57,7 @@ export const useCourseManagement = () => {
         filters.faculty !== "All Faculties" ? filters.faculty : undefined,
         filters.term !== "All Terms" ? filters.term : undefined
       ),
+    enabled: activeTab === 'courses'
   });
 
   const {
@@ -75,6 +76,7 @@ export const useCourseManagement = () => {
           : undefined,
         requestFilters.term !== "All Terms" ? requestFilters.term : undefined
       ),
+    enabled: activeTab === 'requests'
   });
 
   const { data: courseDetails, isLoading: isLoadingCourseDetails } = useQuery<
@@ -204,7 +206,7 @@ export const useCourseManagement = () => {
   };
 
   return {
-    courses: coursesData?.courses || [],
+    courses: coursesData?.data || [],
     totalPages: coursesData?.totalPages || 0,
     page,
     setPage,
@@ -215,7 +217,7 @@ export const useCourseManagement = () => {
     createCourse,
     updateCourse,
     deleteCourse,
-    enrollmentRequests: enrollmentRequestsData?.enrollments || [],
+    enrollmentRequests: enrollmentRequestsData?.data || [],
     enrollmentRequestsTotalPages: enrollmentRequestsData?.totalPages || 0,
     isLoadingRequests,
     approveEnrollmentRequest,
@@ -225,7 +227,7 @@ export const useCourseManagement = () => {
     setRequestFilters,
     activeTab,
     handleTabChange,
-    courseDetails,
+    courseDetails : courseDetails?.course,
     isLoadingCourseDetails,
     handleViewCourse,
     handleEditCourse,

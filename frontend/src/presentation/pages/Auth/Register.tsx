@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaRegCheckCircle, FaRegIdCard, FaShieldAlt } from 'react-icons/fa';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import { registerSchema } from '../../../domain/validation/register';
@@ -24,6 +25,8 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const formAnimation = useAnimation(300);
   const backgroundAnimation = useAnimation(0);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
 
   const { register, handleSubmit, watch, formState: { errors }, reset } = useForm<FormData>({
     resolver: zodResolver(registerSchema),
@@ -116,14 +119,27 @@ const RegisterPage = () => {
               </div>
 
               <div>
-                <Input
-                  id="password"
-                  type="password"
-                  label="Password"
-                  {...register('password')}
-                  placeholder="••••••••"
-                  className="border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500"
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={isPasswordVisible ? "text" : "password"}
+                    label="Password"
+                    {...register('password')}
+                    placeholder="••••••••"
+                    className="border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onMouseDown={() => setIsPasswordVisible(true)}
+                    onMouseUp={() => setIsPasswordVisible(false)}
+                    onMouseLeave={() => setIsPasswordVisible(false)}
+                    onTouchStart={() => setIsPasswordVisible(true)}
+                    onTouchEnd={() => setIsPasswordVisible(false)}
+                    className="absolute right-3 top-[38px] text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    {isPasswordVisible ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                  </button>
+                </div>
                 {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password.message}</p>}
                 {password && (
                   <div className="mt-2">
@@ -141,14 +157,27 @@ const RegisterPage = () => {
               </div>
 
               <div>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  label="Confirm Password"
-                  {...register('confirmPassword')}
-                  placeholder="••••••••"
-                  className="border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500"
-                />
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={isConfirmPasswordVisible ? "text" : "password"}
+                    label="Confirm Password"
+                    {...register('confirmPassword')}
+                    placeholder="••••••••"
+                    className="border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onMouseDown={() => setIsConfirmPasswordVisible(true)}
+                    onMouseUp={() => setIsConfirmPasswordVisible(false)}
+                    onMouseLeave={() => setIsConfirmPasswordVisible(false)}
+                    onTouchStart={() => setIsConfirmPasswordVisible(true)}
+                    onTouchEnd={() => setIsConfirmPasswordVisible(false)}
+                    className="absolute right-3 top-[38px] text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    {isConfirmPasswordVisible ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                  </button>
+                </div>
                 {errors.confirmPassword && <p className="text-red-600 text-xs mt-1">{errors.confirmPassword.message}</p>}
               </div>
 

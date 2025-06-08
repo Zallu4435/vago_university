@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
+import { useLocation } from 'react-router-dom';
 import { usePreferences } from '../../context/PreferencesContext';
 
 export default function Footer() {
   const { styles } = usePreferences();
-
+  const location = useLocation();
+  const portalName = location.pathname.includes('/canvas') ? 'Student Canvas' : 'University Portal';
 
   return (
     <footer className={`relative overflow-hidden border-t shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1),0_-2px_4px_-1px_rgba(0,0,0,0.06)] ${styles.border}`}>
@@ -26,12 +28,12 @@ export default function Footer() {
           </div>
           <div>
             <p className={`text-2xl font-bold ${styles.textPrimary}`}>
-              University Portal
+              {portalName}
             </p>
             <div className={`h-1 w-16 bg-gradient-to-r ${styles.accent} rounded-full mt-1 group-hover:w-24 transition-all duration-300`}></div>
           </div>
         </div>
-        <p className={`font-medium mb-4 ${styles.textSecondary}`}>© 2025 University Portal. All rights reserved.</p>
+        <p className={`font-medium mb-4 ${styles.textSecondary}`}>© 2025 {portalName}. All rights reserved.</p>
         <div className="flex justify-center flex-wrap gap-x-6 gap-y-3">
           {[
             { text: 'Help Center', href: '#' },

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { FaBell, FaBookOpen, FaSearch, FaBars, FaTimes, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserAlt } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { FaBell, FaBookOpen, FaSearch, FaBars, FaTimes, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserAlt, FaExchangeAlt, FaChalkboardTeacher, FaTachometerAlt } from 'react-icons/fa';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { usePreferences } from '../../context/PreferencesContext';
 import { useNotificationManagement } from '../../../application/hooks/useNotificationManagement';
 import { toast } from 'react-hot-toast';
@@ -18,12 +18,19 @@ interface HeaderProps {
 type DropdownAction = 'settings' | 'help' | 'logout';
 
 export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMobileMenuOpen, onLogout, userName, profilePicture }: HeaderProps) {
-  const tabs = ['Dashboard', 'Academics', 'Financial', 'Communication', 'Campus Life'];
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const dashboardTabs = ['Dashboard', 'Academics', 'Financial', 'Communication', 'Campus Life'];
+  const canvasTabs = ['Dashboard', 'Diploma Course', 'Chat', 'Video Class', 'Materials', 'Assignments'];
+  const location = useLocation();
   const navigate = useNavigate();
   const { styles, theme } = usePreferences();
   const { notifications, markAsRead, getNotificationDetails } = useNotificationManagement();
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+
+  // Determine which tabs to show based on URL
+  const isCanvas = location.pathname.includes('/canvas');
+  const tabs = isCanvas ? canvasTabs : dashboardTabs;
+  const portalName = isCanvas ? 'Student Canvas' : 'University Portal';
 
   const toggleProfileDropdown = () => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
@@ -44,13 +51,11 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
     try {
       const details = await getNotificationDetails(notificationId);
       if (details) {
-        // Navigate to the appropriate page based on notification type
         if (details.type === 'course') {
           navigate(`/courses/${details.courseId}`);
         } else if (details.type === 'assignment') {
           navigate(`/assignments/${details.assignmentId}`);
         }
-        // Mark as read after viewing
         await markAsRead(notificationId);
         setIsNotificationOpen(false);
       }
@@ -60,8 +65,15 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const handlePortalToggle = () => {
+    if (isCanvas) {
+      navigate('/dashboard');
+    } else {
+      navigate('/canvas');
+    }
+  };
 
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
     <header className={`relative z-[9998] ${styles.backgroundSecondary} shadow-2xl border-b ${styles.borderSecondary}`}>
@@ -71,10 +83,10 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
         <div className={`absolute top-8 right-16 w-16 h-16 bg-gradient-to-br ${styles.orb.primary} rounded-full blur-lg animate-pulse delay-700`}></div>
         <div className={`absolute bottom-4 left-1/3 w-20 h-20 bg-gradient-to-br ${styles.orb.secondary} rounded-full blur-xl animate-pulse delay-1000`}></div>
       </div>
-      
+
       {/* Main gradient overlay */}
       <div className={`absolute inset-0 bg-gradient-to-r ${styles.accent} opacity-20 backdrop-blur-md`}></div>
-      
+
       <div className="container mx-auto px-6 py-4 relative z-10">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -87,21 +99,22 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
               <div className={`absolute -inset-1 bg-gradient-to-br ${styles.orb.primary} rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300`}></div>
             </div>
             <div className="hidden md:block">
-              <h1 className={`text-2xl font-bold ${theme == 'dark' ? 'text-white' : 'text-gray-800'} bg-clip-text`}>
-                University Portal
+              <h1 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} bg-clip-text`}>
+                {portalName}
               </h1>
               <div className={`h-0.5 w-0 bg-gradient-to-r ${styles.accent} group-hover:w-full transition-all duration-500`}></div>
             </div>
           </div>
 
-          {/* Search Bar */}
+          {/* Center Section - Search Bar & Portal Toggle */}
           <div className="hidden md:flex items-center space-x-4">
+            {/* Search Bar */}
             <div className="relative group">
               <div className={`absolute -inset-1 bg-gradient-to-r ${styles.orb.primary} rounded-full blur opacity-25 group-hover:opacity-75 transition-opacity duration-300`}></div>
               <div className={`relative ${styles.card.background} backdrop-blur-xl rounded-full px-6 py-3 shadow-lg border ${styles.border}`}>
                 <div className="flex items-center space-x-3">
                   <FaSearch className={`${styles.icon.primary} group-hover:scale-110 transition-transform duration-200`} size={18} />
-                  <input 
+                  <input
                     type="text"
                     placeholder="Search anything..."
                     className={`bg-transparent ${styles.textPrimary} placeholder-${styles.textSecondary.replace('text-', '')} focus:outline-none w-64 font-medium`}
@@ -110,15 +123,42 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
                 </div>
               </div>
             </div>
+
+            {/* Portal Toggle Button */}
+            <div className="relative group">
+              <div className={`absolute -inset-1 bg-gradient-to-r ${isCanvas ? 'from-purple-400 to-blue-400' : 'from-blue-400 to-indigo-400'} rounded-2xl blur opacity-25 group-hover:opacity-75 transition-opacity duration-300`}></div>
+              <button
+                onClick={handlePortalToggle}
+                className={`relative ${styles.card.background} backdrop-blur-xl rounded-2xl px-6 py-3 shadow-lg border ${styles.border} ${styles.card.hover} transition-all duration-300 hover:shadow-xl transform hover:scale-105 group`}
+                aria-label={`Switch to ${isCanvas ? 'Dashboard' : 'Canvas'}`}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-xl bg-gradient-to-br ${isCanvas ? 'from-purple-500 to-blue-500' : 'from-blue-500 to-indigo-500'} shadow-lg group-hover:shadow-xl transition-all duration-300`}>
+                    {isCanvas ? (
+                      <FaTachometerAlt className="text-white w-4 h-4" />
+                    ) : (
+                      <FaChalkboardTeacher className="text-white w-4 h-4" />
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className={`font-medium ${styles.textPrimary} group-hover:scale-105 transition-transform duration-200`}>
+                      {isCanvas ? 'Go to Dashboard' : 'Go to Canvas'}
+                    </span>
+                    <FaExchangeAlt className={`${styles.icon.primary} w-3 h-3 group-hover:rotate-180 transition-transform duration-300`} />
+                  </div>
+                </div>
+                <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${isCanvas ? 'from-purple-500/10 to-blue-500/10' : 'from-blue-500/10 to-indigo-500/10'} opacity-0 group-hover:opacity-100 transition-all duration-300`}></div>
+              </button>
+            </div>
           </div>
 
           {/* Icons & User Section */}
           <div className="flex items-center space-x-5">
             {/* Notification Bell */}
             <div className="relative group">
-              <button 
+              <button
                 onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                className={`relative p-3 rounded-xl ${styles.card.background} backdrop-blur-md ${styles.card.hover} transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105`} 
+                className={`relative p-3 rounded-xl ${styles.card.background} backdrop-blur-md ${styles.card.hover} transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105`}
                 aria-label="Notifications"
               >
                 <FaBell className={`${styles.icon.primary} group-hover:scale-110 transition-transform duration-200`} size={20} />
@@ -249,13 +289,13 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
             </div>
 
             {/* Mobile Menu Button */}
-            <button 
+            <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className={`md:hidden p-3 rounded-xl ${styles.card.background} backdrop-blur-md ${styles.card.hover} transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105`}
               aria-label="Toggle Mobile Menu"
             >
-              {mobileMenuOpen 
-                ? <FaTimes className={`${styles.icon.primary}`} size={20} /> 
+              {mobileMenuOpen
+                ? <FaTimes className={`${styles.icon.primary}`} size={20} />
                 : <FaBars className={`${styles.icon.primary}`} size={20} />}
             </button>
           </div>
@@ -268,11 +308,11 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
             <ul className={`relative flex space-x-8 ${styles.card.background} backdrop-blur-md rounded-2xl px-6 py-3 shadow-lg border ${styles.border}`}>
               {tabs.map((tab) => (
                 <li key={tab} className="relative">
-                  <button 
+                  <button
                     onClick={() => setActiveTab(tab)}
                     className={`relative px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
-                      activeTab === tab 
-                        ? `${styles.button.primary} shadow-lg transform scale-105` 
+                      activeTab === tab
+                        ? `${styles.button.primary} shadow-lg transform scale-105`
                         : `${styles.textPrimary} ${styles.card.hover}`
                     }`}
                   >
@@ -291,9 +331,31 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
         {mobileMenuOpen && (
           <div className={`md:hidden absolute top-full left-0 w-full ${styles.card.background} backdrop-blur-xl shadow-2xl z-[9999] border-t ${styles.borderSecondary}`}>
             <div className="p-6">
+              {/* Mobile Portal Toggle */}
+              <div className="mb-4">
+                <button
+                  onClick={handlePortalToggle}
+                  className={`w-full ${styles.card.background} backdrop-blur-xl rounded-2xl px-6 py-4 shadow-lg border ${styles.border} ${styles.card.hover} transition-all duration-300 group`}
+                >
+                  <div className="flex items-center justify-center space-x-3">
+                    <div className={`p-2 rounded-xl bg-gradient-to-br ${isCanvas ? 'from-purple-500 to-blue-500' : 'from-blue-500 to-indigo-500'} shadow-lg`}>
+                      {isCanvas ? (
+                        <FaTachometerAlt className="text-white w-4 h-4" />
+                      ) : (
+                        <FaChalkboardTeacher className="text-white w-4 h-4" />
+                      )}
+                    </div>
+                    <span className={`font-medium ${styles.textPrimary}`}>
+                      {isCanvas ? 'Switch to Dashboard' : 'Switch to Canvas'}
+                    </span>
+                    <FaExchangeAlt className={`${styles.icon.primary} w-3 h-3`} />
+                  </div>
+                </button>
+              </div>
+
               <div className="space-y-3">
                 {tabs.map((tab) => (
-                  <button 
+                  <button
                     key={tab}
                     onClick={() => {
                       setActiveTab(tab);
@@ -308,7 +370,6 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
                     {tab}
                   </button>
                 ))}
-                
                 <div className={`border-t ${styles.borderSecondary} pt-4 mt-4 space-y-2`}>
                   <button
                     onClick={() => handleDropdownAction('settings')}

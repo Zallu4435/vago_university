@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaRegCheckCircle, FaRegIdCard, FaShieldAlt } from 'react-icons/fa';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { useDispatch } from 'react-redux';
 import Cookies from 'js-cookie';
 import { Input } from '../../components/Input';
@@ -11,6 +12,7 @@ import { useLoginUser } from '../../../application/hooks/useAuthQueries';
 import { useAnimation } from '../../../application/hooks/useAnimation';
 import { setAuth } from '../../redux/authSlice';
 import { toast } from 'react-hot-toast';
+import { useState } from 'react';
 
 interface FormData {
   email: string;
@@ -22,6 +24,7 @@ const LoginPage = () => {
   const dispatch = useDispatch();
   const formAnimation = useAnimation(300);
   const backgroundAnimation = useAnimation(0);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(loginSchema),
@@ -95,14 +98,27 @@ const onSubmit = (data: FormData) => {
               </div>
 
               <div>
-                <Input
-                  id="password"
-                  type="password"
-                  label="Password"
-                  {...register('password')}
-                  placeholder="••••••••"
-                  className="border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500"
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={isPasswordVisible ? "text" : "password"}
+                    label="Password"
+                    {...register('password')}
+                    placeholder="••••••••"
+                    className="border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onMouseDown={() => setIsPasswordVisible(true)}
+                    onMouseUp={() => setIsPasswordVisible(false)}
+                    onMouseLeave={() => setIsPasswordVisible(false)}
+                    onTouchStart={() => setIsPasswordVisible(true)}
+                    onTouchEnd={() => setIsPasswordVisible(false)}
+                    className="absolute right-3 top-[38px] text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    {isPasswordVisible ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                  </button>
+                </div>
                 {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password.message}</p>}
               </div>
 

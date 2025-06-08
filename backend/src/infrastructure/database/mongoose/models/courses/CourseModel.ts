@@ -9,6 +9,7 @@ export interface ICourseDocument extends Document {
   maxEnrollment: number;
   currentEnrollment: number;
   description?: string;
+  term?: string;
   prerequisites?: string[];
   createdAt: Date;
   updatedAt: Date;
@@ -24,7 +25,7 @@ const CourseSchema = new Schema(
     maxEnrollment: { type: Number, required: true, min: 1 },
     currentEnrollment: { type: Number, default: 0, min: 0 },
     description: { type: String, trim: true },
-    term: {  type: String, trim: true, },
+    term: { type: String, trim: true },
     prerequisites: [{ type: String, trim: true }],
   },
   {
@@ -33,10 +34,28 @@ const CourseSchema = new Schema(
   }
 );
 
-// Indexes for performance optimization
 CourseSchema.index({ title: "text" });
 
-export const CourseModel = mongoose.model<ICourseDocument>(
-  "Course",
-  CourseSchema
-);
+export interface IEnrollmentDocument extends Document {
+  studentId: string;
+  courseId: string;
+  status: "Pending" | "Approved" | "Rejected";
+  requestedAt: Date;
+  reason?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const EnrollmentSchema = new Schema<IEnrollmentDocument>({
+  studentId: { type: Schema.Types.ObjectId, required: true, ref: "User", index: true },
+  courseId: { type: Schema.Types.ObjectId, required: true, ref: "Course", index: true },
+  status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
+  requestedAt: { type: Date, default: Date.now },
+  reason: { type: String, trim: true },
+}, { timestamps: true, toJSON: { virtuals: true } });
+
+EnrollmentSchema.index({ courseId: 1, status: 1 });
+EnrollmentSchema.index({ studentId: 1 });
+
+export const CourseModel = mongoose.model<ICourseDocument>("Course", CourseSchema);
+export const EnrollmentModel = mongoose.model<IEnrollmentDocument>("Enrollment", EnrollmentSchema);

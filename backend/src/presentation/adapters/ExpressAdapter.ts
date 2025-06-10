@@ -11,11 +11,13 @@ export async function expressAdapter(
       req.headers,
       req.body,
       req.query,
-      req.params
+      req.params,
+      req.user
     );
     const response: IHttpResponse = await handler(httpRequest);
     res.status(response.statusCode).json(response.body);
   } catch (error) {
+    console.error('ExpressAdapter - Error:', error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 }

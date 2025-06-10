@@ -14,23 +14,23 @@ interface JwtPayload {
   lastName: string;
 }
 
+interface AuthenticatedUser {
+  id: string;
+  collection: 'register' | 'admin' | 'user' | 'faculty';
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 declare global {
   namespace Express {
     interface Request {
-      user?: {
-        id: string;
-        collection: 'register' | 'admin' | 'user' | 'faculty';
-        firstName: string;
-        lastName: string;
-        email: string;
-      };
+      user: AuthenticatedUser;
     }
   }
 }
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-  // console.log('authMiddleware: Processing request for', req.path);
-  // console.log('authMiddleware: Headers:', req.headers);
 
   try {
     const authHeader = req.headers.authorization;
@@ -84,7 +84,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
       lastName: user.lastName,
       email: user.email,
     };
-    // console.log('authMiddleware: User attached to req.user:', req.user);
+
 
     next();
   } catch (error: any) {

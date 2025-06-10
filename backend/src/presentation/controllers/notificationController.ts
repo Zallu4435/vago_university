@@ -9,10 +9,6 @@ import { getAllNotifications } from '../../application/use-cases/notification/ge
 class NotificationController {
   async createNotification(req: Request, res: Response, next: NextFunction) {
     try {
-      console.log('createNotification: Request received:', {
-        body: req.body,
-        headers: req.headers,
-      });
 
       const { title, message, recipientType, recipientId, recipientName } = req.body;
       
@@ -47,7 +43,6 @@ class NotificationController {
         createdBy,
       });
 
-      console.log('createNotification: Notification created:', notification);
       res.status(201).json({ notificationId: notification._id });
     } catch (err: any) {
       console.error('createNotification: Error:', err);
@@ -57,10 +52,6 @@ class NotificationController {
 
   async getAllNotifications(req: Request, res: Response, next: NextFunction) {
     try {
-      console.log('getAllNotifications: Request received:', {
-        query: req.query,
-        headers: req.headers,
-      });
 
       if (!req.user) {
         console.error('getAllNotifications: req.user is undefined');
@@ -82,7 +73,6 @@ class NotificationController {
         dateRange: dateRange as string,
       }, req.user.collection);
 
-      console.log('getAllNotifications: Notifications fetched:', notifications);
       res.status(200).json(notifications);
     } catch (err: any) {
       console.error('getAllNotifications: Error:', err);
@@ -92,11 +82,7 @@ class NotificationController {
 
   async getIndividualNotification(req: Request, res: Response, next: NextFunction) {
     try {
-      console.log('getUserNotifications: Request received:', {
-        params: req.params,
-        query: req.query,
-        headers: req.headers,
-      });
+
 
       const { notificationId } = req.params;
 
@@ -112,7 +98,6 @@ class NotificationController {
 
       const notifications = await getIndividualNotification.execute(notificationId);
 
-      console.log('getUserNotifications: Notifications fetched:', notifications);
       res.status(200).json(notifications);
     } catch (err: any) {
       console.error('getUserNotifications: Error:', err);
@@ -122,10 +107,7 @@ class NotificationController {
 
   async deleteNotification(req: Request, res: Response, next: NextFunction) {
     try {
-      console.log('deleteNotification: Request received:', {
-        params: req.params,
-        headers: req.headers,
-      });
+
 
       const { notificationId } = req.params;
       if (!req.user) {
@@ -149,7 +131,6 @@ class NotificationController {
       }
 
       await deleteNotification.execute(notificationId);
-      console.log('deleteNotification: Notification deleted:', notificationId);
       res.status(200).json({ message: 'Notification deleted successfully' });
     } catch (err: any) {
       console.error('deleteNotification: Error:', err);

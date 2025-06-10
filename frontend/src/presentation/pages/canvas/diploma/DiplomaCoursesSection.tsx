@@ -1,49 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  FiLock, 
-  FiUnlock, 
-  FiPlay, 
-  FiDownload, 
-  FiBookmark, 
-  FiCheckCircle, 
-  FiClock, 
-  FiArrowLeft,
-  FiPlayCircle,
-  FiBookOpen,
-  FiAward,
-  FiUsers,
-  FiTrendingUp,
-  FiStar,
-  FiTarget,
-  FiGlobe,
-  FiCode,
-  FiPause,
-  FiSkipForward,
-  FiVolume2,
-  FiMaximize2,
-  FiSettings,
-  FiEye,
-  FiHeart,
-  FiShare2,
-  FiBarChart
+  FiArrowLeft, FiBookOpen, FiAward, FiHeart, FiShare2, FiDownload, FiBookmark, FiCheckCircle,
+  FiClock, FiUsers, FiStar, FiEye, FiTrendingUp, FiCode, FiBarChart
 } from 'react-icons/fi';
 import { usePreferences } from '../../../context/PreferencesContext';
+import { DiplomaCourse, ViewMode } from './types/DiplomaTypes';
+import { DiplomaCard } from './components/DiplomaCard';
+import { ChapterItem } from './components/ChapterItem';
+import { VideoPlayer } from './components/VideoPlayer';
 
 const DiplomaCoursesSection = () => {
   const { styles } = usePreferences();
-  const [currentView, setCurrentView] = useState('courses');
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [selectedChapter, setSelectedChapter] = useState(null);
+  const [currentView, setCurrentView] = useState<ViewMode>('courses');
+  const [selectedCourse, setSelectedCourse] = useState<DiplomaCourse | null>(null);
+  const [selectedChapter, setSelectedChapter] = useState<any>(null);
   const [userAdmitted, setUserAdmitted] = useState(true);
   const [completedChapters, setCompletedChapters] = useState(new Set(['1-1', '1-2']));
   const [bookmarkedChapters, setBookmarkedChapters] = useState(new Set(['1-3']));
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
 
   // Enhanced course data with more details
-  const diplomaCourses = [
+  const diplomaCourses: DiplomaCourse[] = [
     {
       id: 1,
       title: "Digital Marketing Fundamentals",
@@ -108,286 +86,21 @@ const DiplomaCoursesSection = () => {
     }
   ];
 
-  const getChapterTypeIcon = (type) => {
-    switch (type) {
-      case 'video': return FiPlay;
-      case 'interactive': return FiTarget;
-      case 'quiz': return FiCheckCircle;
-      case 'project': return FiCode;
-      default: return FiPlay;
+  useEffect(() => {
+    if (isPlaying) {
+      const interval = setInterval(() => {
+        setVideoProgress(prev => prev < 100 ? prev + 0.5 : 100);
+      }, 100);
+      return () => clearInterval(interval);
     }
-  };
+  }, [isPlaying]);
 
-  const getChapterTypeColor = (type) => {
-    switch (type) {
-      case 'video': return styles.status.info;
-      case 'interactive': return styles.status.success;
-      case 'quiz': return styles.status.warning;
-      case 'project': return styles.accentSecondary;
-      default: return styles.status.info;
-    }
-  };
-
-  const DiplomaCard = ({ course, index }) => {
-    const isAccessible = userAdmitted && !course.locked;
-    const IconComponent = course.icon;
-    const completedCount = course.chapters.filter(chapter => 
-      completedChapters.has(`${course.id}-${chapter.id}`)
-    ).length;
-    const progressPercentage = (completedCount / course.chapters.length) * 100;
-
-    return (
-      <div
-        className={`group relative overflow-hidden rounded-3xl transition-all duration-500 ${styles.cardHover} ${
-          !isAccessible ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
-        }`}
-        style={{ animationDelay: `${index * 100}ms` }}
-        onClick={() => isAccessible && handleViewDetails(course)}
-        aria-label={`View details for ${course.title}`}
-      >
-        {/* Background gradient */}
-        <div className={`absolute inset-0 ${course.bgColor} opacity-90`} />
-        
-        {/* Content overlay */}
-        <div className={`relative ${styles.card.background} ${styles.cardBorder} p-8 h-full`}>
-          {/* Header */}
-          <div className="flex items-start justify-between mb-6">
-            <div className={`w-16 h-16 rounded-2xl ${course.color} flex items-center justify-center ${styles.textPrimary} ${styles.cardShadow} group-hover:scale-110 transition-transform duration-300`}>
-              <IconComponent className="w-8 h-8" />
-            </div>
-            {!isAccessible && (
-              <div className={`${styles.button.secondary} p-2 rounded-full`}>
-                <FiLock className={`w-5 h-5 ${styles.icon.secondary}`} />
-              </div>
-            )}
-          </div>
-
-          {/* Course info */}
-          <div className="mb-6">
-            <h3 className={`text-2xl font-bold ${styles.textPrimary} mb-3 group-hover:${styles.accent} transition-colors`}>
-              {course.title}
-            </h3>
-            <p className={`${styles.textSecondary} text-sm leading-relaxed mb-4`}>
-              {course.description}
-            </p>
-            
-            {/* Course stats */}
-            <div className="flex items-center space-x-4 text-sm mb-4">
-              <div className="flex items-center">
-                <FiClock className={`w-4 h-4 mr-1 ${styles.icon.secondary}`} />
-                <span className={`${styles.textSecondary}`}>{course.duration}</span>
-              </div>
-              <div className="flex items-center">
-                <FiUsers className={`w-4 h-4 mr-1 ${styles.icon.secondary}`} />
-                <span className={`${styles.textSecondary}`}>{course.students.toLocaleString()}</span>
-              </div>
-              <div className="flex items-center">
-                <FiStar className="w-4 h-4 mr-1 text-yellow-500" />
-                <span className={`${styles.textSecondary}`}>{course.rating}</span>
-              </div>
-            </div>
-
-            {/* Difficulty badge */}
-            <div className="flex items-center justify-between mb-4">
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                course.difficulty === 'Beginner' ? styles.status.success :
-                course.difficulty === 'Intermediate' ? styles.status.warning :
-                styles.status.error
-              } ${styles.badgeBackground}`}>
-                {course.difficulty}
-              </span>
-              <span className={`${styles.textSecondary} text-xs`}>{completedCount}/{course.chapters.length} chapters</span>
-            </div>
-
-            {/* Progress bar */}
-            <div className={`w-full ${styles.progress.background} rounded-full h-2 mb-4`}>
-              <div
-                className={`h-2 rounded-full ${course.color} transition-all duration-1000`}
-                style={{ width: `${progressPercentage}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Action button */}
-          <button
-            disabled={!isAccessible}
-            className={`w-full py-4 px-6 rounded-2xl font-semibold transition-all duration-300 ${
-              isAccessible
-                ? `${course.color} ${styles.button.primary} ${styles.cardHover}`
-                : `${styles.button.secondary} cursor-not-allowed`
-            }`}
-            aria-label={isAccessible ? progressPercentage > 0 ? 'Continue course' : 'Start course' : 'Access restricted'}
-          >
-            {isAccessible ? (
-              progressPercentage > 0 ? 'Continue Learning' : 'Start Course'
-            ) : (
-              'Access Restricted'
-            )}
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  const ChapterItem = ({ chapter, courseId, isFirst, isPrevCompleted }) => {
-    const isCompleted = completedChapters.has(`${courseId}-${chapter.id}`);
-    const isAccessible = isFirst || isPrevCompleted;
-    const isBookmarked = bookmarkedChapters.has(`${courseId}-${chapter.id}`);
-    const TypeIcon = getChapterTypeIcon(chapter.type);
-
-    return (
-      <div
-        className={`group relative ${styles.card.background} rounded-2xl ${styles.cardBorder} transition-all duration-300 ${styles.cardHover} ${
-          isAccessible ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
-        }`}
-        onClick={() => isAccessible && handleViewChapter(chapter)}
-        aria-label={`View ${chapter.title}`}
-      >
-        <div className="p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center flex-1">
-              {/* Chapter status icon */}
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center mr-4 ${
-                isCompleted ? styles.status.success :
-                isAccessible ? styles.status.info : styles.button.secondary
-              }`}>
-                {isCompleted ? (
-                  <FiCheckCircle className={`w-6 h-6 ${styles.status.success}`} />
-                ) : !isAccessible ? (
-                  <FiLock className={`w-6 h-6 ${styles.icon.secondary}`} />
-                ) : (
-                  <TypeIcon className={`w-6 h-6 ${getChapterTypeColor(chapter.type)}`} />
-                )}
-              </div>
-
-              {/* Chapter info */}
-              <div className="flex-1">
-                <h4 className={`font-semibold text-lg mb-1 ${isAccessible ? styles.textPrimary : styles.textSecondary}`}>
-                  {chapter.title}
-                </h4>
-                <div className="flex items-center space-x-4 text-sm">
-                  <div className="flex items-center">
-                    <FiClock className={`w-4 h-4 mr-1 ${styles.icon.secondary}`} />
-                    <span className={`${styles.textSecondary}`}>{chapter.duration}</span>
-                  </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getChapterTypeColor(chapter.type)} ${styles.badgeBackground}`}>
-                    {chapter.type}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center space-x-3">
-              {/* Status badge */}
-              {isCompleted && (
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${styles.status.success} ${styles.badgeBackground}`}>
-                  Completed
-                </span>
-              )}
-              
-              {/* Bookmark button */}
-              {isAccessible && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleBookmark(courseId, chapter.id);
-                  }}
-                  className={`p-2 rounded-lg transition-colors ${
-                    isBookmarked 
-                      ? `${styles.status.error} ${styles.badgeBackground}`
-                      : `${styles.button.secondary} hover:${styles.status.error}`
-                  }`}
-                  aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
-                >
-                  <FiBookmark className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const VideoPlayer = () => {
-    useEffect(() => {
-      if (isPlaying) {
-        const interval = setInterval(() => {
-          setVideoProgress(prev => prev < 100 ? prev + 0.5 : 100);
-        }, 100);
-        return () => clearInterval(interval);
-      }
-    }, [isPlaying]);
-
-    return (
-      <div className={`relative ${styles.backgroundSecondary} rounded-2xl overflow-hidden aspect-video mb-6 group`}>
-        {/* Video placeholder */}
-        <div className={`absolute inset-0 ${styles.background} flex items-center justify-center`}>
-          <div className="text-center">
-            <div className={`w-20 h-20 rounded-full border-4 ${styles.borderSecondary} flex items-center justify-center mb-4 mx-auto transition-all duration-300 ${
-              isPlaying ? styles.backgroundSecondary : `${styles.button.secondary} hover:${styles.backgroundSecondary} cursor-pointer`
-            }`} onClick={() => setIsPlaying(!isPlaying)}>
-              {isPlaying ? (
-                <FiPause className={`w-8 h-8 ${styles.textPrimary}`} />
-              ) : (
-                <FiPlay className={`w-8 h-8 ${styles.textPrimary} ml-1`} />
-              )}
-            </div>
-            <p className={`${styles.textSecondary} text-sm`}>
-              {isPlaying ? 'Playing...' : 'Click to play video'}
-            </p>
-          </div>
-        </div>
-
-        {/* Video controls */}
-        <div className={`absolute bottom-0 left-0 right-0 ${styles.backgroundSecondary} p-4 transition-opacity duration-300 ${
-          isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-        }`}>
-          {/* Progress bar */}
-          <div className={`w-full ${styles.progress.background} rounded-full h-1 mb-3`}>
-            <div
-              className={`h-1 rounded-full ${styles.progress.fill} transition-all duration-300`}
-              style={{ width: `${videoProgress}%` }}
-            />
-          </div>
-
-          {/* Control buttons */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button onClick={() => setIsPlaying(!isPlaying)} className={`${styles.textPrimary} hover:${styles.textSecondary}`}>
-                {isPlaying ? <FiPause className="w-5 h-5" /> : <FiPlay className="w-5 h-5" />}
-              </button>
-              <button className={`${styles.textPrimary} hover:${styles.textSecondary}`}>
-                <FiSkipForward className="w-5 h-5" />
-              </button>
-              <button className={`${styles.textPrimary} hover:${styles.textSecondary}`}>
-                <FiVolume2 className="w-5 h-5" />
-              </button>
-              <span className={`${styles.textSecondary} text-sm`}>
-                {Math.floor(videoProgress * 0.45)}/45:00
-              </span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <button className={`${styles.textPrimary} hover:${styles.textSecondary}`}>
-                <FiSettings className="w-5 h-5" />
-              </button>
-              <button className={`${styles.textPrimary} hover:${styles.textSecondary}`}>
-                <FiMaximize2 className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const handleViewDetails = (course) => {
+  const handleViewDetails = (course: DiplomaCourse) => {
     setSelectedCourse(course);
     setCurrentView('details');
   };
 
-  const handleViewChapter = (chapter) => {
+  const handleViewChapter = (chapter: any) => {
     setSelectedChapter(chapter);
     setCurrentView('chapter');
     setVideoProgress(0);
@@ -401,7 +114,7 @@ const DiplomaCoursesSection = () => {
     }
   };
 
-  const handleBookmark = (courseId, chapterId) => {
+  const handleBookmark = (courseId: number, chapterId: number) => {
     const chapterKey = `${courseId}-${chapterId}`;
     setBookmarkedChapters(prev => {
       const newSet = new Set(prev);
@@ -459,7 +172,15 @@ const DiplomaCoursesSection = () => {
         {/* Courses grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {diplomaCourses.map((course, index) => (
-            <DiplomaCard key={course.id} course={course} index={index} />
+            <DiplomaCard
+              key={course.id}
+              course={course}
+              index={index}
+              styles={styles}
+              userAdmitted={userAdmitted}
+              completedChapters={completedChapters}
+              onViewDetails={handleViewDetails}
+            />
           ))}
         </div>
       </div>
@@ -483,24 +204,24 @@ const DiplomaCoursesSection = () => {
         <div className={`${styles.card.background} rounded-3xl p-8 ${styles.cardBorder} mb-8`}>
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center space-x-6">
-              <div className={`w-20 h-20 rounded-2xl ${selectedCourse.color} flex items-center justify-center ${styles.textPrimary} ${styles.cardShadow}`}>
-                <selectedCourse.icon className="w-10 h-10" />
+              <div className={`w-20 h-20 rounded-2xl ${selectedCourse?.color} flex items-center justify-center ${styles.textPrimary} ${styles.cardShadow}`}>
+                {selectedCourse?.icon && React.createElement(selectedCourse.icon, { className: 'w-10 h-10' })}
               </div>
               <div>
-                <h1 className={`text-4xl font-bold ${styles.textPrimary} mb-2`}>{selectedCourse.title}</h1>
-                <p className={`${styles.textSecondary} text-lg mb-4`}>{selectedCourse.description}</p>
+                <h1 className={`text-4xl font-bold ${styles.textPrimary} mb-2`}>{selectedCourse?.title}</h1>
+                <p className={`${styles.textSecondary} text-lg mb-4`}>{selectedCourse?.description}</p>
                 <div className="flex items-center space-x-6 text-sm">
                   <div className="flex items-center">
                     <FiClock className={`w-4 h-4 mr-1 ${styles.icon.secondary}`} />
-                    <span className={`${styles.textSecondary}`}>{selectedCourse.duration}</span>
+                    <span className={`${styles.textSecondary}`}>{selectedCourse?.duration}</span>
                   </div>
                   <div className="flex items-center">
                     <FiUsers className={`w-4 h-4 mr-1 ${styles.icon.secondary}`} />
-                    <span className={`${styles.textSecondary}`}>{selectedCourse.students.toLocaleString()} students</span>
+                    <span className={`${styles.textSecondary}`}>{selectedCourse?.students.toLocaleString()} students</span>
                   </div>
                   <div className="flex items-center">
                     <FiStar className="w-4 h-4 mr-1 text-yellow-500" />
-                    <span className={`${styles.textPrimary} font-medium`}>{selectedCourse.rating}</span>
+                    <span className={`${styles.textPrimary} font-medium`}>{selectedCourse?.rating}</span>
                   </div>
                 </div>
               </div>
@@ -524,23 +245,31 @@ const DiplomaCoursesSection = () => {
               Course Chapters
             </h2>
             <div className={`${styles.textSecondary} text-sm`}>
-              {selectedCourse.chapters.filter(chapter => 
+              {selectedCourse?.chapters.filter(chapter => 
                 completedChapters.has(`${selectedCourse.id}-${chapter.id}`)
-              ).length} of {selectedCourse.chapters.length} completed
+              ).length} of {selectedCourse?.chapters.length} completed
             </div>
           </div>
-
+        
           <div className="space-y-4">
-            {selectedCourse.chapters.map((chapter, index) => {
+            {selectedCourse?.chapters.map((chapter, index) => {
               const isFirst = index === 0;
               const prevChapterCompleted = index === 0 || completedChapters.has(`${selectedCourse.id}-${selectedCourse.chapters[index - 1].id}`);
+              const isCompleted = completedChapters.has(`${selectedCourse.id}-${chapter.id}`);
+              const isBookmarked = bookmarkedChapters.has(`${selectedCourse.id}-${chapter.id}`);
+              
               return (
                 <ChapterItem
                   key={chapter.id}
                   chapter={chapter}
                   courseId={selectedCourse.id}
+                  styles={styles}
                   isFirst={isFirst}
                   isPrevCompleted={prevChapterCompleted}
+                  isCompleted={isCompleted}
+                  isBookmarked={isBookmarked}
+                  onViewChapter={handleViewChapter}
+                  onBookmark={handleBookmark}
                 />
               );
             })}
@@ -551,8 +280,10 @@ const DiplomaCoursesSection = () => {
   );
 
   const renderChapterView = () => {
-    const isCompleted = completedChapters.has(`${selectedCourse.id}-${selectedChapter.id}`);
-    const isBookmarked = bookmarkedChapters.has(`${selectedCourse.id}-${selectedChapter.id}`);
+    const isCompleted = selectedCourse && selectedChapter && 
+      completedChapters.has(`${selectedCourse.id}-${selectedChapter.id}`);
+    const isBookmarked = selectedCourse && selectedChapter && 
+      bookmarkedChapters.has(`${selectedCourse.id}-${selectedChapter.id}`);
 
     return (
       <div className={`min-h-screen ${styles.background}`}>
@@ -572,11 +303,11 @@ const DiplomaCoursesSection = () => {
             {/* Chapter header */}
             <div className="flex justify-between items-start mb-8">
               <div>
-                <h1 className={`text-3xl font-bold ${styles.textPrimary} mb-2`}>{selectedChapter.title}</h1>
+                <h1 className={`text-3xl font-bold ${styles.textPrimary} mb-2`}>{selectedChapter?.title}</h1>
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center">
                     <FiClock className={`w-4 h-4 mr-1 ${styles.icon.secondary}`} />
-                    <span className={`${styles.textSecondary}`}>{selectedChapter.duration}</span>
+                    <span className={`${styles.textSecondary}`}>{selectedChapter?.duration}</span>
                   </div>
                   <div className="flex items-center">
                     <FiEye className={`w-4 h-4 mr-1 ${styles.icon.secondary}`} />
@@ -586,7 +317,7 @@ const DiplomaCoursesSection = () => {
               </div>
               <div className="flex space-x-3">
                 <button
-                  onClick={() => handleBookmark(selectedCourse.id, selectedChapter.id)}
+                  onClick={() => selectedCourse && selectedChapter && handleBookmark(selectedCourse.id, selectedChapter.id)}
                   className={`p-3 rounded-xl transition-colors ${
                     isBookmarked 
                       ? `${styles.status.error} ${styles.badgeBackground}`
@@ -603,7 +334,12 @@ const DiplomaCoursesSection = () => {
             </div>
 
             {/* Video player */}
-            <VideoPlayer />
+            <VideoPlayer
+              styles={styles}
+              isPlaying={isPlaying}
+              videoProgress={videoProgress}
+              onPlayPause={() => setIsPlaying(!isPlaying)}
+            />
 
             {/* Chapter notes */}
             <div className={`${styles.backgroundSecondary} rounded-2xl p-6 mb-8`}>
@@ -611,14 +347,14 @@ const DiplomaCoursesSection = () => {
                 <FiBookOpen className={`w-5 h-5 mr-2 ${styles.accent}`} />
                 Chapter Notes
               </h3>
-              <p className={`${styles.textSecondary} leading-relaxed`}>{selectedChapter.notes}</p>
+              <p className={`${styles.textSecondary} leading-relaxed`}>{selectedChapter?.notes}</p>
             </div>
 
             {/* Complete chapter button */}
             {!isCompleted ? (
               <button
                 onClick={handleCompleteChapter}
-                className={`w-full ${selectedCourse.color} ${styles.button.primary} py-4 px-6 rounded-2xl font-semibold ${styles.cardHover}`}
+                className={`w-full ${selectedCourse?.color} ${styles.button.primary} py-4 px-6 rounded-2xl font-semibold ${styles.cardHover}`}
                 aria-label="Mark chapter as complete"
               >
                 Mark as Complete

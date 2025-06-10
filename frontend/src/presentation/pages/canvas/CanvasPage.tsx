@@ -1,12 +1,12 @@
 import { useOutletContext } from 'react-router-dom';
 import { usePreferences } from '../../context/PreferencesContext';
-import ChatComponent from './chat/ChatComponent';
 import DiplomaCoursesSection from './diploma/DiplomaCoursesSection';
-import AssignmentsSection from './assignment/AssignmentsSection';
+import AssignmentsSection from './assignments/AssignmentsSection';
 import StudyMaterialsPage from './materials/StudyMaterialsPage';
 import UniversitySessionsDashboard from './sessions/UniversitySessionsDashboard';
 import VideoClassPage from './sessions/UniversitySessionsDashboard';
 import UniversityDashboard from './UniversityDashboard';
+import { ChatComponent } from './chat/ChatComponent';
 
 export default function StudentCanvas() {
   const [activeTab, setActiveTab] = useOutletContext<[string, (tab: string) => void]>();
@@ -23,7 +23,7 @@ export default function StudentCanvas() {
   ];
 
   const renderContent = () => {
-    switch (activeTab) {
+    switch (activeTab) {  
       case 'Dashboard':
         return <UniversityDashboard />;
       case 'Diploma Course':

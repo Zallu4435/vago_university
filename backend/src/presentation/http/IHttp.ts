@@ -3,6 +3,13 @@ export interface IHttpRequest {
   body?: any;
   query?: any;
   params?: any;
+  user?: {
+    id: string;
+    collection: 'register' | 'admin' | 'user' | 'faculty';
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
 }
 
 export interface IHttpResponse {
@@ -11,7 +18,19 @@ export interface IHttpResponse {
 }
 
 export class HttpRequest implements IHttpRequest {
-  constructor(public headers?: any, public body?: any, public query?: any, public params?: any) {}
+  constructor(
+    public headers?: any,
+    public body?: any,
+    public query?: any,
+    public params?: any,
+    public user?: {
+      id: string;
+      collection: 'register' | 'admin' | 'user' | 'faculty';
+      firstName: string;
+      lastName: string;
+      email: string;
+    }
+  ) {}
 }
 
 export interface IHttpErrors {

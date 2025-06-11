@@ -9,6 +9,16 @@ import {
   RemoveReactionRequestDTO,
   SearchUsersRequestDTO,
   CreateChatRequestDTO,
+  CreateGroupChatRequestDTO,
+  AddGroupMemberRequestDTO,
+  RemoveGroupMemberRequestDTO,
+  UpdateGroupAdminRequestDTO,
+  UpdateGroupSettingsRequestDTO,
+  UpdateGroupInfoRequestDTO,
+  LeaveGroupRequestDTO,
+  EditMessageRequestDTO,
+  DeleteMessageRequestDTO,
+  ReplyToMessageRequestDTO
 } from "../../../domain/chat/dtos/ChatRequestDTOs";
 import {
   GetChatsResponseDTO,
@@ -119,6 +129,157 @@ export class CreateChatUseCase {
       return result;
     } catch (error) {
       console.error('CreateChatUseCase - Error:', error);
+      throw error;
+    }
+  }
+}
+
+export class CreateGroupChatUseCase {
+  constructor(private chatRepository: IChatRepository) {}
+
+  async execute(params: CreateGroupChatRequestDTO): Promise<ChatSummaryDTO> {
+    console.log('CreateGroupChatUseCase - Executing with params:', params);
+    try {
+      const result = await this.chatRepository.createGroupChat(params);
+      console.log('CreateGroupChatUseCase - Result:', result);
+      return result;
+    } catch (error) {
+      console.error('CreateGroupChatUseCase - Error:', error);
+      throw error;
+    }
+  }
+}
+
+export class AddGroupMemberUseCase {
+  constructor(private chatRepository: IChatRepository) {}
+
+  async execute(params: AddGroupMemberRequestDTO): Promise<void> {
+    console.log('AddGroupMemberUseCase - Executing with params:', params);
+    try {
+      await this.chatRepository.addGroupMember(params);
+      console.log('AddGroupMemberUseCase - Success');
+    } catch (error) {
+      console.error('AddGroupMemberUseCase - Error:', error);
+      throw error;
+    }
+  }
+}
+
+export class RemoveGroupMemberUseCase {
+  constructor(private chatRepository: IChatRepository) {}
+
+  async execute(params: RemoveGroupMemberRequestDTO): Promise<void> {
+    console.log('RemoveGroupMemberUseCase - Executing with params:', params);
+    try {
+      await this.chatRepository.removeGroupMember(params);
+      console.log('RemoveGroupMemberUseCase - Success');
+    } catch (error) {
+      console.error('RemoveGroupMemberUseCase - Error:', error);
+      throw error;
+    }
+  }
+}
+
+export class UpdateGroupAdminUseCase {
+  constructor(private chatRepository: IChatRepository) {}
+
+  async execute(params: UpdateGroupAdminRequestDTO): Promise<void> {
+    console.log('UpdateGroupAdminUseCase - Executing with params:', params);
+    try {
+      await this.chatRepository.updateGroupAdmin(params);
+      console.log('UpdateGroupAdminUseCase - Success');
+    } catch (error) {
+      console.error('UpdateGroupAdminUseCase - Error:', error);
+      throw error;
+    }
+  }
+}
+
+export class UpdateGroupSettingsUseCase {
+  constructor(private chatRepository: IChatRepository) {}
+
+  async execute(params: UpdateGroupSettingsRequestDTO): Promise<void> {
+    console.log('UpdateGroupSettingsUseCase - Executing with params:', params);
+    try {
+      await this.chatRepository.updateGroupSettings(params);
+      console.log('UpdateGroupSettingsUseCase - Success');
+    } catch (error) {
+      console.error('UpdateGroupSettingsUseCase - Error:', error);
+      throw error;
+    }
+  }
+}
+
+export class UpdateGroupInfoUseCase {
+  constructor(private chatRepository: IChatRepository) {}
+
+  async execute(params: UpdateGroupInfoRequestDTO): Promise<void> {
+    console.log('UpdateGroupInfoUseCase - Executing with params:', params);
+    try {
+      await this.chatRepository.updateGroupInfo(params);
+      console.log('UpdateGroupInfoUseCase - Success');
+    } catch (error) {
+      console.error('UpdateGroupInfoUseCase - Error:', error);
+      throw error;
+    }
+  }
+}
+
+export class LeaveGroupUseCase {
+  constructor(private chatRepository: IChatRepository) {}
+
+  async execute(params: LeaveGroupRequestDTO): Promise<void> {
+    console.log('LeaveGroupUseCase - Executing with params:', params);
+    try {
+      await this.chatRepository.leaveGroup(params);
+      console.log('LeaveGroupUseCase - Success');
+    } catch (error) {
+      console.error('LeaveGroupUseCase - Error:', error);
+      throw error;
+    }
+  }
+}
+
+export class EditMessageUseCase {
+  constructor(private chatRepository: IChatRepository) {}
+
+  async execute(params: EditMessageRequestDTO): Promise<void> {
+    console.log('EditMessageUseCase - Executing with params:', params);
+    try {
+      await this.chatRepository.editMessage(params);
+      console.log('EditMessageUseCase - Message edited successfully');
+    } catch (error) {
+      console.error('EditMessageUseCase - Error:', error);
+      throw error;
+    }
+  }
+}
+
+export class DeleteMessageUseCase {
+  constructor(private chatRepository: IChatRepository) {}
+
+  async execute(params: DeleteMessageRequestDTO): Promise<void> {
+    console.log('DeleteMessageUseCase - Executing with params:', params);
+    try {
+      await this.chatRepository.deleteMessage(params);
+      console.log('DeleteMessageUseCase - Message deleted successfully');
+    } catch (error) {
+      console.error('DeleteMessageUseCase - Error:', error);
+      throw error;
+    }
+  }
+}
+
+export class ReplyToMessageUseCase {
+  constructor(private chatRepository: IChatRepository) {}
+
+  async execute(params: ReplyToMessageRequestDTO): Promise<void> {
+    console.log('ReplyToMessageUseCase - Executing with params:', params);
+    try {
+      await this.chatRepository.replyToMessage(params);
+      console.log('ReplyToMessageUseCase - Reply sent successfully');
+    } catch (error) {
+      console.error('ReplyToMessageUseCase - Error:', error);
       throw error;
     }
   }

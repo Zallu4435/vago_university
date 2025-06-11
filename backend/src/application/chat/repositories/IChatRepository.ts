@@ -8,6 +8,16 @@ import {
   RemoveReactionRequestDTO,
   SearchUsersRequestDTO,
   CreateChatRequestDTO,
+  CreateGroupChatRequestDTO,
+  AddGroupMemberRequestDTO,
+  RemoveGroupMemberRequestDTO,
+  UpdateGroupAdminRequestDTO,
+  UpdateGroupSettingsRequestDTO,
+  UpdateGroupInfoRequestDTO,
+  LeaveGroupRequestDTO,
+  EditMessageRequestDTO,
+  DeleteMessageRequestDTO,
+  ReplyToMessageRequestDTO
 } from "../../../domain/chat/dtos/ChatRequestDTOs";
 import {
   GetChatsResponseDTO,
@@ -28,4 +38,14 @@ export interface IChatRepository {
   getChatDetails(chatId: string): Promise<ChatDetailsResponseDTO | null>;
   searchUsers(params: SearchUsersRequestDTO): Promise<SearchUsersResponseDTO>;
   createChat(params: CreateChatRequestDTO): Promise<ChatSummaryDTO>;
+  createGroupChat(params: CreateGroupChatRequestDTO): Promise<ChatSummaryDTO>;
+  addGroupMember(params: AddGroupMemberRequestDTO): Promise<void>;
+  removeGroupMember(params: RemoveGroupMemberRequestDTO): Promise<void>;
+  updateGroupAdmin(params: UpdateGroupAdminRequestDTO): Promise<void>;
+  updateGroupSettings(params: UpdateGroupSettingsRequestDTO): Promise<void>;
+  updateGroupInfo(params: UpdateGroupInfoRequestDTO): Promise<void>;
+  leaveGroup(params: LeaveGroupRequestDTO): Promise<void>;
+  editMessage(params: EditMessageRequestDTO): Promise<void>;
+  deleteMessage(params: DeleteMessageRequestDTO): Promise<void>;
+  replyToMessage(params: ReplyToMessageRequestDTO): Promise<void>;
 } 

@@ -2,12 +2,11 @@ import { IconType } from 'react-icons';
 
 export interface User {
   id: string;
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
   avatar?: string;
-  type?: 'user' | 'faculty';
-  isOnline?: boolean;
+  status?: 'online' | 'offline' | 'away';
+  lastSeen?: Date;
 }
 
 export interface Attachment {
@@ -46,15 +45,22 @@ export interface Message {
   id: string;
   chatId: string;
   senderId: string;
+  senderName: string;
   content: string;
-  type: 'text' | 'file' | 'image' | 'audio' | 'video';
-  status: 'sending' | 'delivered' | 'read' | 'failed';
-  createdAt: string;
-  updatedAt: string;
-  attachments?: Attachment[];
-  replyTo?: string;
+  type: 'text' | 'image' | 'file' | 'audio' | 'video';
+  fileUrl?: string;
+  fileName?: string;
+  fileSize?: number;
+  fileType?: string;
+  replyToId?: string;
+  replyTo?: ReplyTo;
   forwardedFrom?: ForwardedFrom;
-  reactions?: Reaction[];
+  reactions: { [emoji: string]: string[] };
+  status: 'sending' | 'delivered' | 'read' | 'failed';
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt?: Date;
+  deletedFor?: string[];
   isDeleted?: boolean;
   deletedForEveryone?: boolean;
 }
@@ -69,10 +75,15 @@ export interface LastMessage {
   createdAt: string;
 }
 
-export interface GroupSettings {
-  onlyAdminsCanPost: boolean;
-  onlyAdminsCanAddMembers: boolean;
-  onlyAdminsCanChangeInfo: boolean;
+export interface GroupInfo {
+  description?: string;
+  rules?: string;
+  joinLink?: string;
+  settings: {
+    onlyAdminsCanPost: boolean;
+    onlyAdminsCanAddMembers: boolean;
+    onlyAdminsCanChangeInfo: boolean;
+  };
 }
 
 export interface Participant {
@@ -81,15 +92,19 @@ export interface Participant {
   lastName: string;
   email: string;
   avatar?: string;
-  type: string;
+  isOnline: boolean;
+  name?: string;
 }
 
 export interface Chat {
   id: string;
-  type: string;
+  type: 'direct' | 'group';
   name: string;
   avatar?: string;
   description?: string;
+  participants: Participant[];
+  admins: string[];
+  isAdmin: boolean;
   lastMessage?: {
     id: string;
     content: string;
@@ -98,22 +113,22 @@ export interface Chat {
     status: string;
     createdAt: Date;
   };
-  participants: Participant[];
-  admins?: string[];
-  unreadCount: number;
-  updatedAt: Date;
-  settings?: {
+  settings: {
     onlyAdminsCanPost: boolean;
     onlyAdminsCanAddMembers: boolean;
+    onlyAdminsCanChangeInfo: boolean;
   };
+  unreadCount: number;
+  updatedAt: Date;
 }
 
 export interface PaginatedResponse<T> {
-  items: T[];
+  data: T[];
   total: number;
   page: number;
   limit: number;
   hasMore: boolean;
+  items?: T[];
 }
 
 export interface Styles {

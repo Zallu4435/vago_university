@@ -1,5 +1,5 @@
 import { ChatController } from "../../../presentation/http/chat/ChatController";
-import { ChatRepository } from "../../../infrastructure/repositories/chat/ChatRepository";
+import { ChatRepository } from "../../repositories/chat/ChatRepository";
 import {
   GetChatsUseCase,
   SearchChatsUseCase,
@@ -11,20 +11,41 @@ import {
   GetChatDetailsUseCase,
   SearchUsersUseCase,
   CreateChatUseCase,
+  CreateGroupChatUseCase,
+  AddGroupMemberUseCase,
+  RemoveGroupMemberUseCase,
+  UpdateGroupAdminUseCase,
+  UpdateGroupSettingsUseCase,
+  UpdateGroupInfoUseCase,
+  LeaveGroupUseCase,
+  EditMessageUseCase,
+  DeleteMessageUseCase,
+  ReplyToMessageUseCase
 } from "../../../application/chat/useCases/ChatUseCases";
 
-export function getChatComposer(): ChatController {
-  const repository = new ChatRepository();
-  const getChatsUseCase = new GetChatsUseCase(repository);
-  const searchChatsUseCase = new SearchChatsUseCase(repository);
-  const getChatMessagesUseCase = new GetChatMessagesUseCase(repository);
-  const sendMessageUseCase = new SendMessageUseCase(repository);
-  const markMessagesAsReadUseCase = new MarkMessagesAsReadUseCase(repository);
-  const addReactionUseCase = new AddReactionUseCase(repository);
-  const removeReactionUseCase = new RemoveReactionUseCase(repository);
-  const getChatDetailsUseCase = new GetChatDetailsUseCase(repository);
-  const searchUsersUseCase = new SearchUsersUseCase(repository);
-  const createChatUseCase = new CreateChatUseCase(repository);
+export const getChatComposer = () => {
+  const chatRepository = new ChatRepository();
+  
+  const getChatsUseCase = new GetChatsUseCase(chatRepository);
+  const searchChatsUseCase = new SearchChatsUseCase(chatRepository);
+  const getChatMessagesUseCase = new GetChatMessagesUseCase(chatRepository);
+  const sendMessageUseCase = new SendMessageUseCase(chatRepository);
+  const markMessagesAsReadUseCase = new MarkMessagesAsReadUseCase(chatRepository);
+  const addReactionUseCase = new AddReactionUseCase(chatRepository);
+  const removeReactionUseCase = new RemoveReactionUseCase(chatRepository);
+  const getChatDetailsUseCase = new GetChatDetailsUseCase(chatRepository);
+  const searchUsersUseCase = new SearchUsersUseCase(chatRepository);
+  const createChatUseCase = new CreateChatUseCase(chatRepository);
+  const createGroupChatUseCase = new CreateGroupChatUseCase(chatRepository);
+  const addGroupMemberUseCase = new AddGroupMemberUseCase(chatRepository);
+  const removeGroupMemberUseCase = new RemoveGroupMemberUseCase(chatRepository);
+  const updateGroupAdminUseCase = new UpdateGroupAdminUseCase(chatRepository);
+  const updateGroupSettingsUseCase = new UpdateGroupSettingsUseCase(chatRepository);
+  const updateGroupInfoUseCase = new UpdateGroupInfoUseCase(chatRepository);
+  const leaveGroupUseCase = new LeaveGroupUseCase(chatRepository);
+  const editMessageUseCase = new EditMessageUseCase(chatRepository);
+  const deleteMessageUseCase = new DeleteMessageUseCase(chatRepository);
+  const replyToMessageUseCase = new ReplyToMessageUseCase(chatRepository);
 
   return new ChatController(
     getChatsUseCase,
@@ -36,6 +57,16 @@ export function getChatComposer(): ChatController {
     removeReactionUseCase,
     getChatDetailsUseCase,
     searchUsersUseCase,
-    createChatUseCase
+    createChatUseCase,
+    createGroupChatUseCase,
+    addGroupMemberUseCase,
+    removeGroupMemberUseCase,
+    updateGroupAdminUseCase,
+    updateGroupSettingsUseCase,
+    updateGroupInfoUseCase,
+    leaveGroupUseCase,
+    editMessageUseCase,
+    deleteMessageUseCase,
+    replyToMessageUseCase
   );
-} 
+}; 

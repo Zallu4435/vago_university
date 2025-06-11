@@ -6,15 +6,22 @@ interface EmojiPickerProps {
   show: boolean;
   onEmojiSelect: (emoji: string) => void;
   onClose: () => void;
+  position?: 'top' | 'bottom';
 }
 
-const EMOJIS = ['😊', '😂', '❤️', '👍', '🎉', '🔥', '👏', '🙌', '🤔', '😎'];
+const EMOJIS = [
+  '😊', '😂', '❤️', '👍', '🎉', '🔥', '👏', '🙌', '🤔', '😎',
+  '😍', '🥰', '😘', '😋', '🤣', '😅', '😭', '😢', '😡', '😤',
+  '😴', '🤗', '🤫', '🤐', '🤯', '😱', '😨', '😰', '😥', '😓',
+  '🤩', '🤪', '😇', '🥳', '😎', '🤓', '🧐', '😕', '🤨', '😐'
+];
 
 export const EmojiPicker: React.FC<EmojiPickerProps> = ({
   styles,
   show,
   onEmojiSelect,
-  onClose
+  onClose,
+  position = 'top'
 }) => {
   const pickerRef = useRef<HTMLDivElement>(null);
 
@@ -39,9 +46,17 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
   return (
     <div 
       ref={pickerRef}
-      className={`absolute bottom-full left-0 mb-2 p-2 rounded-lg shadow-lg border ${styles.border} ${styles.background} z-50`}
+      className="absolute bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-1.5 z-50"
+      style={{
+        width: '200px',
+        [position === 'top' ? 'bottom' : 'top']: '100%',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        marginTop: position === 'bottom' ? '4px' : '0',
+        marginBottom: position === 'top' ? '4px' : '0'
+      }}
     >
-      <div className="grid grid-cols-5 gap-1">
+      <div className="grid grid-cols-8 gap-0.5">
         {EMOJIS.map((emoji) => (
           <button
             key={emoji}
@@ -49,7 +64,8 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
               onEmojiSelect(emoji);
               onClose();
             }}
-            className={`w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles.button.secondary}`}
+            className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 text-base"
+            title={emoji}
           >
             {emoji}
           </button>

@@ -22,8 +22,21 @@ export interface ChatSummaryDTO {
     status: string;
     createdAt: Date;
   };
-  participants: string[];
+  participants: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    avatar?: string;
+    isOnline: boolean;
+  }[];
   admins?: string[];
+  isAdmin?: boolean;
+  settings?: {
+    onlyAdminsCanPost: boolean;
+    onlyAdminsCanAddMembers: boolean;
+    onlyAdminsCanChangeInfo: boolean;
+  };
   unreadCount: number;
   updatedAt: Date;
 }

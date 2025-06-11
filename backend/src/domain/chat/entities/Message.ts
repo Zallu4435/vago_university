@@ -6,6 +6,10 @@ export interface MessageProps {
   type: MessageType;
   status: MessageStatus;
   reactions: MessageReaction[];
+  isEdited: boolean;
+  isDeleted: boolean;
+  deletedForEveryone: boolean;
+  deletedFor: string[];
   createdAt: Date;
   updatedAt: Date;
   attachments?: MessageAttachment[];
@@ -19,10 +23,11 @@ export enum MessageType {
 }
 
 export enum MessageStatus {
+  Sending = "sending",
   Sent = "sent",
   Delivered = "delivered",
   Read = "read",
-  Failed = "failed"
+  Error = "error"
 }
 
 export interface MessageReaction {
@@ -36,6 +41,8 @@ export interface MessageAttachment {
   url: string;
   name: string;
   size: number;
+  thumbnail?: string;
+  duration?: number;
 }
 
 export class Message {
@@ -73,6 +80,22 @@ export class Message {
     return this.props.reactions;
   }
 
+  get isEdited(): boolean {
+    return this.props.isEdited;
+  }
+
+  get isDeleted(): boolean {
+    return this.props.isDeleted;
+  }
+
+  get deletedForEveryone(): boolean {
+    return this.props.deletedForEveryone;
+  }
+
+  get deletedFor(): string[] {
+    return this.props.deletedFor;
+  }
+
   get createdAt(): Date {
     return this.props.createdAt;
   }
@@ -87,6 +110,25 @@ export class Message {
 
   updateStatus(status: MessageStatus): void {
     this.props.status = status;
+    this.props.updatedAt = new Date();
+  }
+
+  editContent(newContent: string): void {
+    this.props.content = newContent;
+    this.props.isEdited = true;
+    this.props.updatedAt = new Date();
+  }
+
+  delete(userId: string, deleteForEveryone: boolean): void {
+    if (deleteForEveryone) {
+      this.props.isDeleted = true;
+      this.props.deletedForEveryone = true;
+      this.props.content = '';
+      this.props.attachments = [];
+    } else {
+      this.props.deletedFor.push(userId);
+      this.props.isDeleted = true;
+    }
     this.props.updatedAt = new Date();
   }
 

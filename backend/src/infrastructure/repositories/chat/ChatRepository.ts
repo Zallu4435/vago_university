@@ -8,6 +8,16 @@ import {
   RemoveReactionRequestDTO,
   SearchUsersRequestDTO,
   CreateChatRequestDTO,
+  CreateGroupChatRequestDTO,
+  AddGroupMemberRequestDTO,
+  RemoveGroupMemberRequestDTO,
+  UpdateGroupAdminRequestDTO,
+  UpdateGroupSettingsRequestDTO,
+  UpdateGroupInfoRequestDTO,
+  LeaveGroupRequestDTO,
+  EditMessageRequestDTO,
+  DeleteMessageRequestDTO,
+  ReplyToMessageRequestDTO
 } from "../../../domain/chat/dtos/ChatRequestDTOs";
 import {
   GetChatsResponseDTO,
@@ -23,6 +33,7 @@ import { MessageModel } from "../../../infrastructure/database/mongoose/models/c
 import { User as UserModel } from "../../../infrastructure/database/mongoose/models/user.model";
 import { Faculty as FacultyModel } from "../../../infrastructure/database/mongoose/models/faculty.model";
 import { MessageStatus } from "../../../domain/chat/entities/Message";
+import { MessageType } from "../../../domain/chat/entities/MessageType";
 
 export class ChatRepository implements IChatRepository {
   async getChats(params: GetChatsRequestDTO): Promise<GetChatsResponseDTO> {
@@ -592,17 +603,83 @@ export class ChatRepository implements IChatRepository {
     }
   }
 
-  async deleteMessage(messageId: string, userId: string, deleteForEveryone: boolean): Promise<void> {
+  async editMessage(params: EditMessageRequestDTO): Promise<void> {
     try {
-      if (deleteForEveryone) {
-        await MessageModel.findByIdAndUpdate(messageId, {
-          deletedForEveryone: true,
-          content: "This message was deleted",
-          attachments: []
+      const { chatId, messageId, content, userId } = params;
+
+      const message = await MessageModel.findOne({ _id: messageId, chatId });
+      if (!message) {
+        throw new Error('Message not found');
+      }
+
+      // Check if user is the sender
+      if (message.senderId.toString() !== userId) {
+        throw new Error('Not authorized to edit this message');
+      }
+
+      // Update message
+      message.content = content;
+      message.isEdited = true;
+      await message.save();
+
+      // Update chat's last message if this was the last message
+      const chat = await ChatModel.findById(chatId);
+      if (chat?.lastMessage?.id === messageId) {
+        await ChatModel.findByIdAndUpdate(chatId, {
+          lastMessage: {
+            ...chat.lastMessage,
+            content: content,
+            isEdited: true
+          }
         });
+      }
+    } catch (error) {
+      console.error('Error in editMessage repository:', error);
+      throw error;
+    }
+  }
+
+  async deleteMessage(params: DeleteMessageRequestDTO): Promise<void> {
+    try {
+      const { messageId, userId, deleteForEveryone } = params;
+
+      const message = await MessageModel.findOne({ _id: messageId });
+      if (!message) {
+        throw new Error('Message not found');
+      }
+
+      // Check if user is the sender for deleteForEveryone
+      if (deleteForEveryone && message.senderId.toString() !== userId) {
+        throw new Error('Not authorized to delete for everyone');
+      }
+
+      if (deleteForEveryone) {
+        // Delete for everyone
+        message.isDeleted = true;
+        message.deletedForEveryone = true;
+        message.content = 'This message was deleted';
+        message.attachments = [];
       } else {
-        await MessageModel.findByIdAndUpdate(messageId, {
-          $addToSet: { deletedFor: userId }
+        // Delete for me
+        if (!message.deletedFor) {
+          message.deletedFor = [];
+        }
+        message.deletedFor.push(userId);
+        message.isDeleted = true;
+      }
+
+      await message.save();
+
+      // Update chat's last message if this was the last message
+      const chat = await ChatModel.findById(message.chatId);
+      if (chat?.lastMessage?.id === messageId) {
+        await ChatModel.findByIdAndUpdate(message.chatId, {
+          lastMessage: {
+            ...chat.lastMessage,
+            content: deleteForEveryone ? 'This message was deleted' : chat.lastMessage.content,
+            isDeleted: true,
+            deletedForEveryone: deleteForEveryone
+          }
         });
       }
     } catch (error) {
@@ -736,25 +813,30 @@ export class ChatRepository implements IChatRepository {
     }
   }
 
-  async replyToMessage(messageId: string, replyContent: string, repliedBy: string): Promise<void> {
+  async replyToMessage(params: ReplyToMessageRequestDTO): Promise<void> {
     try {
+      const { chatId, messageId, content, userId } = params;
+
       const originalMessage = await MessageModel.findById(messageId);
-      if (!originalMessage) throw new Error('Original message not found');
+      if (!originalMessage) {
+        throw new Error('Original message not found');
+      }
 
       const newMessage = await MessageModel.create({
-        chatId: originalMessage.chatId,
-        senderId: repliedBy,
-        content: replyContent,
+        chatId,
+        senderId: userId,
+        content,
         type: MessageType.Text,
         status: MessageStatus.Sent,
         replyTo: {
           messageId: originalMessage._id.toString(),
           content: originalMessage.content,
-          senderId: originalMessage.senderId
+          senderId: originalMessage.senderId,
+          type: originalMessage.type
         }
       });
 
-      await ChatModel.findByIdAndUpdate(originalMessage.chatId, {
+      await ChatModel.findByIdAndUpdate(chatId, {
         lastMessage: {
           id: newMessage._id.toString(),
           content: newMessage.content,
@@ -767,6 +849,68 @@ export class ChatRepository implements IChatRepository {
       });
     } catch (error) {
       console.error('Error in replyToMessage repository:', error);
+      throw error;
+    }
+  }
+
+  async createGroupChat(params: CreateGroupChatRequestDTO): Promise<ChatSummaryDTO> {
+    try {
+      console.log('ChatRepository - createGroupChat - Params:', params);
+      const { creatorId, name, participants, description, settings } = params;
+
+      // Verify creator exists
+      const [userCreator, facultyCreator] = await Promise.all([
+        UserModel.findById(creatorId),
+        FacultyModel.findById(creatorId)
+      ]);
+
+      const creator = userCreator || facultyCreator;
+      if (!creator) {
+        throw new Error('Creator not found');
+      }
+
+      // Verify all participants exist
+      const [userParticipants, facultyParticipants] = await Promise.all([
+        UserModel.find({ _id: { $in: participants } }),
+        FacultyModel.find({ _id: { $in: participants } })
+      ]);
+
+      const allParticipants = [...userParticipants, ...facultyParticipants];
+      if (allParticipants.length !== participants.length) {
+        throw new Error('One or more participants not found');
+      }
+
+      // Ensure creator is included in participants
+      const finalParticipants = [...new Set([...participants, creatorId])];
+
+      // Create the group chat
+      const chat = await ChatModel.create({
+        type: 'group',
+        name,
+        description,
+        participants: finalParticipants,
+        createdBy: creatorId,
+        admins: [creatorId], // Creator is the first admin
+        settings: {
+          onlyAdminsCanPost: settings?.onlyAdminsCanPost || false,
+          onlyAdminsCanAddMembers: settings?.onlyAdminsCanAddMembers || false,
+          onlyAdminsCanChangeInfo: settings?.onlyAdminsCanChangeInfo || false
+        },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      return {
+        id: chat._id.toString(),
+        type: chat.type,
+        name: chat.name,
+        avatar: chat.avatar || '',
+        participants: chat.participants,
+        unreadCount: 0,
+        updatedAt: chat.updatedAt
+      };
+    } catch (error) {
+      console.error('Error in createGroupChat repository:', error);
       throw error;
     }
   }

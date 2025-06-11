@@ -118,7 +118,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             value={message}
             onChange={handleChange}
             placeholder={replyToMessage ? "Write a reply..." : "Type a message..."}
-            className={`w-full px-4 py-3 rounded-lg resize-none ${styles.input.background} ${styles.input.border} focus:outline-none focus:ring-2 ${styles.input.focus}`}
+            className={`w-full px-4 py-3 rounded-lg resize-none ${styles?.input?.background} ${styles?.input?.border} focus:outline-none focus:ring-2 ${styles?.input?.focus}`}
             rows={1}
             style={{ minHeight: '44px', maxHeight: '120px' }}
             onKeyDown={(e) => {
@@ -141,7 +141,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <div className="flex items-center space-x-1 flex-shrink-0">
           <label
             htmlFor="file-upload"
-            className={`p-2 rounded-full cursor-pointer hover:bg-opacity-80 ${styles.button.secondary}`}
+            className={`p-2 rounded-full cursor-pointer hover:bg-opacity-80 ${styles?.button?.secondary}`}
           >
             <FiPaperclip className="w-5 h-5" />
           </label>
@@ -149,7 +149,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           <button
             type="button"
             onClick={handleEmojiClick}
-            className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles.button.secondary}`}
+            className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles?.button?.secondary}`}
             title="Add emoji"
           >
             <FiSmile className="w-5 h-5" />
@@ -158,7 +158,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           <button
             type="button"
             onClick={onCameraSelect}
-            className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles.button.secondary}`}
+            className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles?.button?.secondary}`}
             title="Take photo"
           >
             <FiCamera className="w-5 h-5" />
@@ -169,7 +169,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             disabled={!message.trim()}
             className={`p-2 rounded-full transition-colors duration-200 ${
               message.trim()
-                ? `${styles.button.primary}`
+                ? `${styles?.button?.primary}`
                 : 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
             }`}
             title="Send message"

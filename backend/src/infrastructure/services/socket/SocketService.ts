@@ -315,13 +315,16 @@ export class SocketService {
   public async handleReaction(messageId: string, reaction: any) {
     const message = await this.chatRepository.getChatMessages({
       chatId: reaction.chatId,
+      userId: reaction.userId,
       page: 1,
       limit: 1,
     });
     if (message.data.length > 0) {
+      // If removing a reaction, send the userId only
+      const reactionData = reaction.emoji ? reaction : { userId: reaction.userId };
       this.chatNamespace.to(reaction.chatId).emit("messageReaction", {
         messageId,
-        reaction,
+        reaction: reactionData,
       });
     }
   }

@@ -12,6 +12,7 @@ import { FiPlus, FiSearch, FiX, FiUser } from 'react-icons/fi';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../presentation/redux/store';
 import { toast } from 'react-hot-toast';
+import CreateGroupModal from './components/CreateGroupModal';
 
 export const ChatComponent: React.FC = () => {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -36,6 +37,7 @@ export const ChatComponent: React.FC = () => {
   const styles = getStyles(isDarkMode);
   const [replyToMessage, setReplyToMessage] = useState<Message | null>(null);
   const [pendingUser, setPendingUser] = useState<User | null>(null);
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const token = useSelector((state: RootState) => state.auth.token);
@@ -45,7 +47,17 @@ export const ChatComponent: React.FC = () => {
   const fetchChats = async (page = 1) => {
     try {
       const response = await chatService.getChats(page);
-      setChats(prev => page === 1 ? response.data : [...prev, ...response.data]);
+      const formattedChats = response.data.map(chat => ({
+        ...chat,
+        participants: chat.participants.map(participant => ({
+          id: participant.id,
+          name: `${participant.firstName} ${participant.lastName}`,
+          email: participant.email,
+          avatar: participant.avatar,
+          isOnline: false
+        }))
+      }));
+      setChats(prev => page === 1 ? formattedChats : [...prev, ...formattedChats]);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching chats:', error);
@@ -212,6 +224,34 @@ export const ChatComponent: React.FC = () => {
             )
           );
         });
+
+        socketRef.current.on('messageReaction', (data: { messageId: string; reaction: any }) => {
+          setMessages(prevMessages => 
+            prevMessages.map(msg => {
+              if (msg.id === data.messageId) {
+                // If the reaction is being removed (no emoji), filter it out
+                if (!data.reaction.emoji) {
+                  return {
+                    ...msg,
+                    reactions: msg.reactions.filter(r => r.userId !== data.reaction.userId)
+                  };
+                }
+                // Otherwise, add or update the reaction
+                const existingReactionIndex = msg.reactions.findIndex(r => r.userId === data.reaction.userId);
+                if (existingReactionIndex >= 0) {
+                  const newReactions = [...msg.reactions];
+                  newReactions[existingReactionIndex] = data.reaction;
+                  return { ...msg, reactions: newReactions };
+                }
+                return {
+                  ...msg,
+                  reactions: [...msg.reactions, data.reaction]
+                };
+              }
+              return msg;
+            })
+          );
+        });
       } catch (error) {
         console.error('Error initializing socket:', error);
         setSocketError('Failed to initialize chat connection. Please refresh the page.');
@@ -360,19 +400,52 @@ export const ChatComponent: React.FC = () => {
   };
 
   const handleEditMessage = async (messageId: string, newContent: string) => {
-    if (!selectedChatId) return;
-
     try {
-      const updatedMessage = await chatService.editMessage(selectedChatId, messageId, newContent);
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === messageId
-            ? { ...msg, content: newContent, updatedAt: updatedMessage.updatedAt }
+      const response = await chatService.editMessage(selectedChatId!, messageId, newContent);
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          msg.id === messageId 
+            ? { ...msg, content: newContent, isEdited: true }
             : msg
         )
       );
     } catch (error) {
       console.error('Error editing message:', error);
+      // Show error notification
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: string, deleteForEveryone: boolean) => {
+    try {
+      await chatService.deleteMessage(selectedChatId!, messageId, deleteForEveryone);
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          msg.id === messageId 
+            ? { ...msg, isDeleted: true, deletedForEveryone: deleteForEveryone }
+            : msg
+        )
+      );
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      // Show error notification
+    }
+  };
+
+  const handleRemoveReaction = async (messageId: string, emoji: string) => {
+    try {
+      setMessages(prevMessages => 
+        prevMessages.map(msg => {
+          if (msg.id === messageId) {
+            return {
+              ...msg,
+              reactions: msg.reactions.filter(r => !(r.userId === currentUserId && r.emoji === emoji))
+            };
+          }
+          return msg;
+        })
+      );
+    } catch (error) {
+      console.error('Error updating message reactions:', error);
     }
   };
 
@@ -606,21 +679,6 @@ export const ChatComponent: React.FC = () => {
     );
   };
 
-  const handleDeleteMessage = async (messageId: string, deleteForEveryone: boolean) => {
-    try {
-      await chatService.deleteMessage(messageId, !deleteForEveryone);
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === messageId 
-            ? { ...msg, isDeleted: true, deletedForEveryone: deleteForEveryone } 
-            : msg
-        )
-      );
-    } catch (error) {
-      console.error('Failed to delete message:', error);
-    }
-  };
-
   // Add socket event listener for deleted messages
   useEffect(() => {
     if (socketRef.current) {
@@ -673,6 +731,7 @@ export const ChatComponent: React.FC = () => {
           setMessages={setMessages}
           setChats={setChats}
           onUserSelect={handleUserSelect}
+          onCreateGroup={() => setShowCreateGroup(true)}
         />
       </div>
       <div className="flex-1 flex flex-col">
@@ -685,34 +744,36 @@ export const ChatComponent: React.FC = () => {
               isDarkMode={isDarkMode}
               onToggleTheme={() => setIsDarkMode(!isDarkMode)}
             />
-            <div
-              className="flex-1 overflow-y-auto p-4"
-              onScroll={handleScroll}
-            >
-              {messages.map((message, index) => (
-                <ChatMessage
-                  key={message.id}
-                  message={message}
-                  previousMessage={index > 0 ? messages[index - 1] : undefined}
-                  styles={styles}
-                  onReaction={handleReaction}
-                  onDelete={handleDeleteMessage}
-                  onEdit={handleEditMessage}
-                  onReply={handleReplyToMessage}
-                  onForward={handleForwardMessage}
-                  currentUserId={currentUserId || ''}
-                />
-              ))}
-              <div ref={messagesEndRef} />
-              {isTyping && <TypingIndicator styles={styles} />}
+            <div className="flex flex-col h-[calc(100vh-160px)]">
+              <div
+                className="flex-1 overflow-y-auto p-4"
+                onScroll={handleScroll}
+              >
+                {messages.map((message, index) => (
+                  <ChatMessage
+                    key={message.id}
+                    message={message}
+                    previousMessage={index > 0 ? messages[index - 1] : undefined}
+                    styles={styles}
+                    onReaction={handleReaction}
+                    onDelete={handleDeleteMessage}
+                    onEdit={handleEditMessage}
+                    onReply={handleReplyToMessage}
+                    onForward={handleForwardMessage}
+                    currentUserId={currentUserId || ''}
+                  />
+                ))}
+                <div ref={messagesEndRef} />
+                {isTyping && <TypingIndicator styles={styles} />}
+              </div>
+              <ChatInput
+                onSendMessage={handleSendMessage}
+                onFileSelect={handleFileUpload}
+                onCameraSelect={handleCameraSelect}
+                onTyping={handleTyping}
+                styles={styles}
+              />
             </div>
-            <ChatInput
-              onSendMessage={handleSendMessage}
-              onFileSelect={handleFileUpload}
-              onCameraSelect={handleCameraSelect}
-              onTyping={handleTyping}
-              styles={styles}
-            />
           </>
         ) : pendingUser ? (
           <div className="flex flex-col h-full">
@@ -742,6 +803,25 @@ export const ChatComponent: React.FC = () => {
           </div>
         )}
       </div>
+      {showCreateGroup && (
+        <CreateGroupModal
+          onClose={() => setShowCreateGroup(false)}
+          onCreateGroup={async (params) => {
+            // Call your chatService.createGroupChat here
+            try {
+              const newGroup = await chatService.createGroupChat({
+                ...params,
+                creatorId: currentUser?.id || ''
+              });
+              setChats(prev => [newGroup, ...prev]);
+              setShowCreateGroup(false);
+            } catch (error) {
+              toast.error('Failed to create group');
+            }
+          }}
+          onSearch={handleSearch}
+        />
+      )}
     </div>
   );
 };

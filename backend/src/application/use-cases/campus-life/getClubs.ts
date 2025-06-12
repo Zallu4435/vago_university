@@ -1,4 +1,4 @@
-import { ClubModel } from "../../../infrastructure/database/mongoose/models/club.model";
+import { ClubModel } from "../../../infrastructure/database/mongoose/models/clubs/ClubModel";
 
 interface GetClubsParams {
   search: string;

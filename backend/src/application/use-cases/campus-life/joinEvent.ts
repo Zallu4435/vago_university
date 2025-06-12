@@ -1,4 +1,4 @@
-import { CampusEventModel, EventRequestModel } from '../../../infrastructure/database/mongoose/models/events.model';
+import { CampusEventModel, EventRequestModel } from '../../../infrastructure/database/mongoose/models/events/CampusEventModel';
 import mongoose from 'mongoose';
 
 interface JoinEventParams {

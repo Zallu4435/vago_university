@@ -1,4 +1,4 @@
-import { ClubModel, ClubRequestModel } from '../../../infrastructure/database/mongoose/models/club.model';
+import { ClubModel, ClubRequestModel } from '../../../infrastructure/database/mongoose/models/clubs/ClubModel';
 import mongoose from 'mongoose';
 
 interface JoinClubParams {

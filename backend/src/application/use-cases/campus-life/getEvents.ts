@@ -1,4 +1,4 @@
-import { CampusEventModel } from "../../../infrastructure/database/mongoose/models/events.model";
+import { CampusEventModel } from "../../../infrastructure/database/mongoose/models/events/CampusEventModel";
 
 interface GetEventsParams {
   page: number;

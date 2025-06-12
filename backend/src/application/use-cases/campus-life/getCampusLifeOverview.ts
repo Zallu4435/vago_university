@@ -1,5 +1,5 @@
-import { ClubModel } from "../../../infrastructure/database/mongoose/models/club.model";
-import { CampusEventModel } from "../../../infrastructure/database/mongoose/models/events.model";
+import { ClubModel } from "../../../infrastructure/database/mongoose/models/clubs/ClubModel";
+import { CampusEventModel } from "../../../infrastructure/database/mongoose/models/events/CampusEventModel";
 import { TeamModel } from "../../../infrastructure/database/mongoose/models/sports.model";
 
 

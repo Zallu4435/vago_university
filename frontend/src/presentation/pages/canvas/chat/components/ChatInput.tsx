@@ -1,64 +1,89 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiPaperclip, FiMic, FiSmile, FiSend, FiCamera, FiX } from 'react-icons/fi';
-import { Styles, Message } from '../types/ChatTypes';
+import { FiSend, FiSmile, FiPaperclip, FiX, FiCornerUpLeft } from 'react-icons/fi';
 import { EmojiPicker } from './EmojiPicker';
 import { AttachmentMenu } from './AttachmentMenu';
+import { Styles, Message } from '../types/ChatTypes';
 
 interface ChatInputProps {
-  styles: Styles;
-  onSendMessage: (text: string) => void;
-  onFileSelect: (file: File) => void;
-  onCameraSelect: () => void;
+  onSendMessage: (message: string, file?: File, replyTo?: Message) => void;
   onTyping: (isTyping: boolean) => void;
-  replyToMessage: Message | null;
-  onCancelReply: () => void;
+  styles: Styles;
+  replyToMessage?: Message | null;
+  onCancelReply?: () => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
-  styles,
   onSendMessage,
-  onFileSelect,
-  onCameraSelect,
   onTyping,
+  styles,
   replyToMessage,
   onCancelReply
 }) => {
   const [message, setMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim()) {
-      onSendMessage(message.trim());
+    if (message.trim() || selectedFile) {
+      onSendMessage(message.trim(), selectedFile || undefined, replyToMessage || undefined);
       setMessage('');
-      setIsTyping(false);
-      onTyping(false);
+      setSelectedFile(null);
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value);
+    onTyping(true);
     
-    // Handle typing indicator
-    if (!isTyping) {
-      setIsTyping(true);
-      onTyping(true);
-    }
-
-    // Clear existing timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
-
-    // Set new timeout
+    
     typingTimeoutRef.current = setTimeout(() => {
-      setIsTyping(false);
       onTyping(false);
     }, 2000);
+  };
+
+  const handleEmojiSelect = (emoji: string) => {
+    setMessage(prev => prev + emoji);
+    setShowEmojiPicker(false);
+  };
+
+  const handleFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleCameraSelect = () => {
+    // Camera handling logic
+  };
+
+  const handleAttachmentClick = () => {
+    setShowAttachmentMenu(!showAttachmentMenu);
+  };
+
+  const clearSelectedFile = () => {
+    setSelectedFile(null);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
   };
 
   useEffect(() => {
@@ -66,140 +91,114 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
     };
-  }, []);
-
-  const handleEmojiSelect = (emoji: string) => {
-    setMessage(prev => prev + emoji);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      onFileSelect(file);
-    }
-  };
-
-  const handleAttachmentClick = () => {
-    setShowAttachmentMenu(!showAttachmentMenu);
-    setShowEmojiPicker(false); // Close emoji picker if open
-  };
-
-  const handleEmojiClick = () => {
-    setShowEmojiPicker(!showEmojiPicker);
-    setShowAttachmentMenu(false); // Close attachment menu if open
-  };
+  }, [previewUrl]);
 
   return (
-    <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 relative">
-      {/* Reply preview */}
+    <div className="relative">
       {replyToMessage && (
-        <div className="mb-2 p-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-between">
-          <div className="flex-1">
-            <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Replying to {replyToMessage.senderName}
+        <div className={`absolute bottom-full left-0 right-0 p-4 ${styles.card.background} border ${styles.border} rounded-t-lg`}>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center space-x-2">
+              <FiCornerUpLeft className="text-gray-500" />
+              <span className="text-sm font-medium">Replying to {replyToMessage.senderName}</span>
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
-              {replyToMessage.content}
-            </div>
+            <button
+              onClick={onCancelReply}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <FiX className="w-5 h-5" />
+            </button>
           </div>
-          <button
-            onClick={onCancelReply}
-            className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full"
-          >
-            <FiX className="w-4 h-4 text-gray-500" />
-          </button>
+          <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
+            {replyToMessage.content}
+          </div>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex items-end space-x-2">
-        <div className="relative flex-1">
-          <textarea
-            value={message}
-            onChange={handleChange}
-            placeholder={replyToMessage ? "Write a reply..." : "Type a message..."}
-            className={`w-full px-4 py-3 rounded-lg resize-none ${styles?.input?.background} ${styles?.input?.border} focus:outline-none focus:ring-2 ${styles?.input?.focus}`}
-            rows={1}
-            style={{ minHeight: '44px', maxHeight: '120px' }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit(e);
-              }
-            }}
-          />
-          
-          {/* Emoji picker */}
+      {selectedFile && (
+        <div className={`absolute bottom-full left-0 right-0 p-4 ${styles.card.background} border ${styles.border} rounded-t-lg`}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium">{selectedFile.name}</span>
+            <button
+              onClick={clearSelectedFile}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <FiX className="w-5 h-5" />
+            </button>
+          </div>
+          {previewUrl && selectedFile.type.startsWith('image/') && (
+            <img
+              src={previewUrl}
+              alt="Preview"
+              className="max-h-40 rounded-lg object-contain"
+            />
+          )}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="flex items-center space-x-2 p-4">
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          className="hidden"
+          accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
+        />
+        
+        <button
+          type="button"
+          onClick={handleAttachmentClick}
+          className={`p-2 rounded-full ${styles.button.secondary}`}
+        >
+          <FiPaperclip className="w-5 h-5" />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+          className={`p-2 rounded-full ${styles.button.secondary}`}
+        >
+          <FiSmile className="w-5 h-5" />
+        </button>
+
+        <input
+          type="text"
+          value={message}
+          onChange={handleChange}
+          placeholder="Type a message..."
+          className={`flex-1 p-2 rounded-lg ${styles.input.background} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+        />
+
+        <button
+          type="submit"
+          disabled={!message.trim() && !selectedFile}
+          className={`p-2 rounded-full ${styles.button.primary} disabled:opacity-50`}
+        >
+          <FiSend className="w-5 h-5" />
+        </button>
+      </form>
+
+      {showEmojiPicker && (
+        <div className="absolute bottom-full right-0 mb-2">
           <EmojiPicker
-            styles={styles}
             show={showEmojiPicker}
             onEmojiSelect={handleEmojiSelect}
             onClose={() => setShowEmojiPicker(false)}
+            styles={styles}
+            position="bottom"
           />
         </div>
+      )}
 
-        <div className="flex items-center space-x-1 flex-shrink-0">
-          <label
-            htmlFor="file-upload"
-            className={`p-2 rounded-full cursor-pointer hover:bg-opacity-80 ${styles?.button?.secondary}`}
-          >
-            <FiPaperclip className="w-5 h-5" />
-          </label>
-
-          <button
-            type="button"
-            onClick={handleEmojiClick}
-            className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles?.button?.secondary}`}
-            title="Add emoji"
-          >
-            <FiSmile className="w-5 h-5" />
-          </button>
-
-          <button
-            type="button"
-            onClick={onCameraSelect}
-            className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles?.button?.secondary}`}
-            title="Take photo"
-          >
-            <FiCamera className="w-5 h-5" />
-          </button>
-
-          <button
-            type="submit"
-            disabled={!message.trim()}
-            className={`p-2 rounded-full transition-colors duration-200 ${
-              message.trim()
-                ? `${styles?.button?.primary}`
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-            }`}
-            title="Send message"
-          >
-            <FiSend className="w-5 h-5" />
-          </button>
-        </div>
-      </form>
-
-      {/* Hidden file input */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        className="hidden"
-        onChange={handleFileChange}
-        accept="image/*,.pdf,.doc,.docx"
-      />
-
-      {/* Attachment menu */}
       <AttachmentMenu
         styles={styles}
         showAttachmentMenu={showAttachmentMenu}
-        onFileSelect={() => {
-          fileInputRef.current?.click();
-          setShowAttachmentMenu(false);
-        }}
-        onCameraSelect={() => {
-          onCameraSelect();
-          setShowAttachmentMenu(false);
-        }}
+        onFileSelect={handleFileSelect}
+        onCameraSelect={handleCameraSelect}
         onClose={() => setShowAttachmentMenu(false)}
       />
     </div>

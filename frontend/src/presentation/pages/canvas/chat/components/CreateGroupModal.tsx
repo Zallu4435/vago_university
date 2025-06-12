@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiX, FiUser, FiCheck } from 'react-icons/fi';
+import { FiX, FiUser, FiCheck, FiMessageSquare, FiUsers, FiImage, FiLink, FiLock } from 'react-icons/fi';
 import { User } from '../types/ChatTypes';
 
 interface CreateGroupModalProps {
@@ -12,6 +12,9 @@ interface CreateGroupModalProps {
       onlyAdminsCanPost?: boolean;
       onlyAdminsCanAddMembers?: boolean;
       onlyAdminsCanChangeInfo?: boolean;
+      onlyAdminsCanPinMessages?: boolean;
+      onlyAdminsCanSendMedia?: boolean;
+      onlyAdminsCanSendLinks?: boolean;
     };
   }) => void;
   onSearch: (query: string) => Promise<{ data: User[] }>;
@@ -30,7 +33,10 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   const [settings, setSettings] = useState({
     onlyAdminsCanPost: false,
     onlyAdminsCanAddMembers: false,
-    onlyAdminsCanChangeInfo: false
+    onlyAdminsCanChangeInfo: false,
+    onlyAdminsCanPinMessages: false,
+    onlyAdminsCanSendMedia: false,
+    onlyAdminsCanSendLinks: false
   });
 
   const handleSearch = async (query: string) => {
@@ -181,39 +187,66 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Group Settings
               </label>
-              <div className="mt-2 space-y-2">
-                <label className="flex items-center">
+              <div className="mt-2 space-y-3">
+                <label className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                  <div className="flex items-center space-x-3">
+                    <FiMessageSquare className="text-gray-500 dark:text-gray-400" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Only admins can send messages</span>
+                  </div>
                   <input
                     type="checkbox"
                     checked={settings.onlyAdminsCanPost}
                     onChange={(e) => setSettings(prev => ({ ...prev, onlyAdminsCanPost: e.target.checked }))}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
                   />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                    Only admins can post messages
-                  </span>
                 </label>
-                <label className="flex items-center">
+                <label className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                  <div className="flex items-center space-x-3">
+                    <FiUsers className="text-gray-500 dark:text-gray-400" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Only admins can add members</span>
+                  </div>
                   <input
                     type="checkbox"
                     checked={settings.onlyAdminsCanAddMembers}
                     onChange={(e) => setSettings(prev => ({ ...prev, onlyAdminsCanAddMembers: e.target.checked }))}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
                   />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                    Only admins can add members
-                  </span>
                 </label>
-                <label className="flex items-center">
+                <label className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                  <div className="flex items-center space-x-3">
+                    <FiImage className="text-gray-500 dark:text-gray-400" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Only admins can send media</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.onlyAdminsCanSendMedia}
+                    onChange={(e) => setSettings(prev => ({ ...prev, onlyAdminsCanSendMedia: e.target.checked }))}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
+                  />
+                </label>
+                <label className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                  <div className="flex items-center space-x-3">
+                    <FiLink className="text-gray-500 dark:text-gray-400" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Only admins can send links</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.onlyAdminsCanSendLinks}
+                    onChange={(e) => setSettings(prev => ({ ...prev, onlyAdminsCanSendLinks: e.target.checked }))}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
+                  />
+                </label>
+                <label className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                  <div className="flex items-center space-x-3">
+                    <FiLock className="text-gray-500 dark:text-gray-400" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Only admins can change group info</span>
+                  </div>
                   <input
                     type="checkbox"
                     checked={settings.onlyAdminsCanChangeInfo}
                     onChange={(e) => setSettings(prev => ({ ...prev, onlyAdminsCanChangeInfo: e.target.checked }))}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
                   />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                    Only admins can change group info
-                  </span>
                 </label>
               </div>
             </div>

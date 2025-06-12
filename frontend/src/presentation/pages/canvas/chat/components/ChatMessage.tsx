@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Message, Styles } from '../types/ChatTypes';
 import { formatMessageTime, shouldShowDateHeader } from '../utils/chatUtils';
-import { FiCheck, FiCheckCircle, FiMoreVertical, FiTrash2, FiEdit2, FiShare2, FiCornerUpLeft, FiSmile } from 'react-icons/fi';
+import { FiCheck, FiCheckCircle, FiMoreVertical, FiTrash2, FiEdit2, FiShare2, FiCornerUpLeft, FiSmile, FiX, FiFile, FiReply } from 'react-icons/fi';
 import { MessageStatus } from './MessageStatus';
 import { EmojiPicker } from './EmojiPicker';
 import { chatService } from '../services/chatService';
 import { toast } from 'react-hot-toast';
+import { MediaPreview } from './MediaPreview';
 
 interface Reaction {
   emoji: string;
@@ -64,6 +65,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(message.content);
   const [showReactions, setShowReactions] = useState(false);
+  const [showMediaPreview, setShowMediaPreview] = useState(false);
   const reactionsRef = useRef<HTMLDivElement>(null);
   
   const menuRef = useRef<HTMLDivElement>(null);
@@ -112,6 +114,14 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     } catch (error) {
       console.error('Error removing reaction:', error);
       toast.error('Failed to remove reaction');
+    }
+  };
+
+  const handleMediaClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (message.attachments?.length > 0) {
+      setShowMediaPreview(true);
     }
   };
 
@@ -264,6 +274,84 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     return (
       <div className="relative">
         <p className="text-sm pr-8">{message.content}</p>
+
+        {message.attachments && message.attachments.length > 0 && (
+          <div className="mt-2 space-y-2">
+            {message.attachments.map((attachment) => {
+              switch (attachment.type) {
+                case 'image':
+                  return (
+                    <div key={attachment.id} className="relative group">
+                      <div
+                        className="cursor-pointer"
+                        onClick={handleMediaClick}
+                      >
+                        <img
+                          src={attachment.url}
+                          alt={attachment.name}
+                          className="max-w-sm rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                        />
+                      </div>
+                    </div>
+                  );
+                case 'video':
+                  return (
+                    <div key={attachment.id} className="relative">
+                      <video
+                        src={attachment.url}
+                        controls
+                        className="max-w-sm rounded-lg"
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
+                  );
+                case 'audio':
+                  return (
+                    <div key={attachment.id} className="relative">
+                      <audio
+                        src={attachment.url}
+                        controls
+                        className="w-full"
+                      >
+                        Your browser does not support the audio tag.
+                      </audio>
+                    </div>
+                  );
+                case 'file':
+                  return (
+                    <div key={attachment.id} className="flex items-center space-x-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div className="flex-shrink-0">
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {attachment.name}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {(attachment.size / 1024).toFixed(1)} KB
+                        </p>
+                      </div>
+                      <a
+                        href={attachment.url}
+                        download={attachment.name}
+                        className="flex-shrink-0 p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                      </a>
+                    </div>
+                  );
+                default:
+                  return null;
+              }
+            })}
+          </div>
+        )}
+
         {message.reactions && message.reactions.length > 0 && (
           <div className="mt-1" ref={reactionsRef}>
             <button
@@ -314,7 +402,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             )}
           </div>
         )}
-        {/* Add reaction button */}
+
         <div className="absolute right-0 top-0 hidden group-hover:flex items-center">
           <div className="relative">
             <button
@@ -378,7 +466,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             )}
           </div>
 
-          {/* Message Menu */}
           {!message.isDeleted && (
             <button
               onClick={() => setShowMenu(!showMenu)}
@@ -388,7 +475,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             </button>
           )}
 
-          {/* Message Menu Dropdown */}
           {showMenu && (
             <div ref={menuRef} className="absolute top-8 right-0 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1 z-10">
               {message.senderId === currentUserId && (
@@ -435,7 +521,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             </div>
           )}
 
-          {/* Delete Options */}
           {showDeleteOptions && (
             <div ref={deleteOptionsRef} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white dark:bg-gray-800 rounded-lg p-4 max-w-sm w-full mx-4">
@@ -461,6 +546,14 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           )}
         </div>
       </div>
+
+      {showMediaPreview && (
+        <MediaPreview
+          message={message}
+          onClose={() => setShowMediaPreview(false)}
+          styles={styles}
+        />
+      )}
     </>
   );
 };

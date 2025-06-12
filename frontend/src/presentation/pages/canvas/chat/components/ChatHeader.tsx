@@ -1,11 +1,12 @@
 import React from 'react';
-import { FiMoreVertical, FiPhone, FiVideo, FiInfo, FiSun, FiMoon } from 'react-icons/fi';
+import { FiMoreVertical, FiPhone, FiVideo, FiInfo, FiSun, FiMoon, FiSettings } from 'react-icons/fi';
 import { Chat, Styles } from '../types/ChatTypes';
 
 interface ChatHeaderProps {
   chat: Chat;
   styles: Styles;
   onInfoClick: () => void;
+  onSettingsClick: () => void;
   isDarkMode: boolean;
   onToggleTheme: () => void;
 }
@@ -14,6 +15,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   chat,
   styles,
   onInfoClick,
+  onSettingsClick,
   isDarkMode,
   onToggleTheme
 }) => {
@@ -37,7 +39,10 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             {chat.name}
           </h2>
           <p className={`text-sm ${styles?.text?.muted}`}>
-            {isOnline ? 'Online' : 'Offline'}
+            {chat.type === 'group' 
+              ? `${chat.participants.length} members`
+              : isOnline ? 'Online' : 'Offline'
+            }
           </p>
         </div>
       </div>
@@ -49,18 +54,31 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
         >
           {isDarkMode ? <FiSun className="w-5 h-5" /> : <FiMoon className="w-5 h-5" />}
         </button>
-        <button
-          className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles?.button?.secondary}`}
-          title="Voice call"
-        >
-          <FiPhone className="w-5 h-5" />
-        </button>
-        <button
-          className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles?.button?.secondary}`}
-          title="Video call"
-        >
-          <FiVideo className="w-5 h-5" />
-        </button>
+        {chat.type === 'direct' && (
+          <>
+            <button
+              className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles?.button?.secondary}`}
+              title="Voice call"
+            >
+              <FiPhone className="w-5 h-5" />
+            </button>
+            <button
+              className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles?.button?.secondary}`}
+              title="Video call"
+            >
+              <FiVideo className="w-5 h-5" />
+            </button>
+          </>
+        )}
+        {chat.type === 'group' && (
+          <button
+            onClick={onSettingsClick}
+            className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles?.button?.secondary}`}
+            title="Group settings"
+          >
+            <FiSettings className="w-5 h-5" />
+          </button>
+        )}
         <button
           className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles?.button?.secondary}`}
           title="Chat info"

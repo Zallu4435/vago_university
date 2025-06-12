@@ -13,6 +13,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../../presentation/redux/store';
 import { toast } from 'react-hot-toast';
 import CreateGroupModal from './components/CreateGroupModal';
+import GroupSettingsModal from './components/GroupSettingsModal';
 
 export const ChatComponent: React.FC = () => {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -32,6 +33,7 @@ export const ChatComponent: React.FC = () => {
   const [oldestMessageTimestamp, setOldestMessageTimestamp] = useState<string | null>(null);
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
   const [socketError, setSocketError] = useState<string | null>(null);
+  const [showGroupSettings, setShowGroupSettings] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const styles = getStyles(isDarkMode);
@@ -431,29 +433,9 @@ export const ChatComponent: React.FC = () => {
     }
   };
 
-  const handleRemoveReaction = async (messageId: string, emoji: string) => {
-    try {
-      setMessages(prevMessages => 
-        prevMessages.map(msg => {
-          if (msg.id === messageId) {
-            return {
-              ...msg,
-              reactions: msg.reactions.filter(r => !(r.userId === currentUserId && r.emoji === emoji))
-            };
-          }
-          return msg;
-        })
-      );
-    } catch (error) {
-      console.error('Error updating message reactions:', error);
-    }
-  };
 
-  const handleReplyToMessage = (messageId: string) => {
-    const message = messages.find(m => m.id === messageId);
-    if (message) {
-      setReplyToMessage(message);
-    }
+  const handleReplyToMessage = (message: Message) => {
+    setReplyToMessage(message);
   };
 
   const handleForwardMessage = async (messageId: string) => {
@@ -470,8 +452,8 @@ export const ChatComponent: React.FC = () => {
     }
   };
 
-  const handleSendMessage = async (message: string) => {
-    if (!message.trim()) return;
+  const handleSendMessage = async (message: string, file?: File, replyTo?: Message) => {
+    if (!message.trim() && !file) return;
 
     try {
       if (!selectedChatId && pendingUser) {
@@ -487,49 +469,105 @@ export const ChatComponent: React.FC = () => {
         // Update chats list
         setChats(prev => [newChat, ...(Array.isArray(prev) ? prev : [])]);
         
-        // Send the message
-        const sentMessage = await chatService.sendMessage(newChat.id, message);
+        let sentMessage;
+        if (file) {
+          const formData = new FormData();
+          formData.append('file', file);
+          if (message.trim()) {
+            formData.append('content', message.trim());
+          }
+          if (replyTo) {
+            formData.append('replyTo', JSON.stringify({
+              messageId: replyTo.id,
+              content: replyTo.content,
+              senderId: replyTo.senderId,
+              senderName: replyTo.senderName,
+              type: replyTo.type
+            }));
+          }
+          sentMessage = await chatService.sendFile(newChat.id, formData);
+        } else {
+          sentMessage = await chatService.sendMessage(newChat.id, message, replyTo);
+        }
         
-        // Format the message
+        // Format the message with WhatsApp-style reply
         const formattedMessage = formatMessage({
           ...sentMessage,
           senderId: currentUserId,
           senderName: `${currentUser?.firstName} ${currentUser?.lastName}`,
-          content: message, // Ensure content is set
-          type: 'text',
-          status: 'sending'
+          content: message.trim(),
+          type: file ? (file.type.startsWith('image/') ? 'image' : 'file') : 'text',
+          status: 'sending',
+          replyTo: replyTo ? {
+            id: replyTo.id,
+            content: replyTo.content,
+            senderId: replyTo.senderId,
+            senderName: replyTo.senderName,
+            type: replyTo.type,
+            createdAt: replyTo.createdAt
+          } : undefined
         });
         
         // Emit message through socket
         socketRef.current?.emit('message', formattedMessage);
         
-        // Update UI
+        // Update messages list
+        setMessages(prev => [...prev, formattedMessage]);
+        
+        // Update selected chat
         setSelectedChatId(newChat.id);
-        setSelectedChat(newChat);
         setPendingUser(null);
-        setMessages(prev => [...prev, formattedMessage]);
+        setReplyToMessage(null);
       } else if (selectedChatId) {
-        // Send message in existing chat
-        const sentMessage = await chatService.sendMessage(selectedChatId, message);
+        let sentMessage;
+        if (file) {
+          const formData = new FormData();
+          formData.append('file', file);
+          if (message.trim()) {
+            formData.append('content', message.trim());
+          }
+          if (replyTo) {
+            formData.append('replyTo', JSON.stringify({
+              messageId: replyTo.id,
+              content: replyTo.content,
+              senderId: replyTo.senderId,
+              senderName: replyTo.senderName,
+              type: replyTo.type
+            }));
+          }
+          sentMessage = await chatService.sendFile(selectedChatId, formData);
+        } else {
+          sentMessage = await chatService.sendMessage(selectedChatId, message, replyTo);
+        }
         
-        // Format the message
+        // Format the message with WhatsApp-style reply
         const formattedMessage = formatMessage({
           ...sentMessage,
           senderId: currentUserId,
           senderName: `${currentUser?.firstName} ${currentUser?.lastName}`,
-          content: message, // Ensure content is set
-          type: 'text',
-          status: 'sending'
+          content: message.trim(),
+          type: file ? (file.type.startsWith('image/') ? 'image' : 'file') : 'text',
+          status: 'sending',
+          replyTo: replyTo ? {
+            id: replyTo.id,
+            content: replyTo.content,
+            senderId: replyTo.senderId,
+            senderName: replyTo.senderName,
+            type: replyTo.type,
+            createdAt: replyTo.createdAt
+          } : undefined
         });
         
         // Emit message through socket
         socketRef.current?.emit('message', formattedMessage);
         
+        // Update messages list
         setMessages(prev => [...prev, formattedMessage]);
+        setReplyToMessage(null);
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error('Failed to send message. Please try again.');
+      toast.error('Failed to send message');
     }
   };
 
@@ -621,6 +659,167 @@ export const ChatComponent: React.FC = () => {
 
   const handleToggleTheme = () => {
     setIsDarkMode(prev => !prev);
+  };
+
+  const handleSettingsClick = () => {
+    setShowGroupSettings(true);
+  };
+
+  const handleUpdateGroup = async (updates: {
+    name?: string;
+    description?: string;
+    settings?: {
+      onlyAdminsCanPost?: boolean;
+      onlyAdminsCanAddMembers?: boolean;
+      onlyAdminsCanChangeInfo?: boolean;
+      onlyAdminsCanPinMessages?: boolean;
+      onlyAdminsCanSendMedia?: boolean;
+      onlyAdminsCanSendLinks?: boolean;
+    };
+  }) => {
+    if (!selectedChat || !currentUser) return;
+
+    try {
+      await chatService.updateGroupSettings(selectedChat.id, updates);
+      
+      // Refresh chat details
+      const updatedChat = await chatService.getChatById(selectedChat.id);
+      setSelectedChat(updatedChat);
+      setChats(chats.map(chat => 
+        chat.id === selectedChat.id ? updatedChat : chat
+      ));
+
+      toast.success('Group settings updated successfully');
+    } catch (error) {
+      console.error('Error updating group:', error);
+      toast.error('Failed to update group settings');
+    }
+  };
+
+  const handleAddMembers = async (selectedUsers: User[]) => {
+    if (!selectedChat || !currentUser) return;
+
+    try {
+      // Add each selected user to the group
+      for (const user of selectedUsers) {
+        await chatService.addGroupMember(selectedChat.id, user.id, currentUser.id);
+      }
+
+      // Refresh chat details
+      const updatedChat = await chatService.getChatById(selectedChat.id);
+      setSelectedChat(updatedChat);
+      setChats(chats.map(chat => 
+        chat.id === selectedChat.id ? updatedChat : chat
+      ));
+
+      setShowNewChat(false);
+      toast.success('Members added successfully');
+    } catch (error) {
+      console.error('Error adding members:', error);
+      toast.error('Failed to add members');
+    }
+  };
+
+  const handleRemoveMember = async (userId: string) => {
+    if (!selectedChat || !currentUser) return;
+
+    try {
+      await chatService.removeGroupMember(selectedChat.id, userId, currentUser.id);
+      
+      // Refresh chat details
+      const updatedChat = await chatService.getChatById(selectedChat.id);
+      setSelectedChat(updatedChat);
+      setChats(chats.map(chat => 
+        chat.id === selectedChat.id ? updatedChat : chat
+      ));
+
+      toast.success('Member removed successfully');
+    } catch (error) {
+      console.error('Error removing member:', error);
+      toast.error('Failed to remove member');
+    }
+  };
+
+  const handleMakeAdmin = async (userId: string) => {
+    if (!selectedChat) return;
+
+    try {
+      await chatService.makeAdmin(selectedChat.id, userId);
+      setChats(prev =>
+        prev.map(chat =>
+          chat.id === selectedChat.id
+            ? {
+                ...chat,
+                admins: [...chat.admins, userId]
+              }
+            : chat
+        )
+      );
+      setSelectedChat(prev => prev ? {
+        ...prev,
+        admins: [...prev.admins, userId]
+      } : null);
+      toast.success('Admin added successfully');
+    } catch (error) {
+      console.error('Error making admin:', error);
+      toast.error('Failed to make admin');
+    }
+  };
+
+  const handleRemoveAdmin = async (userId: string) => {
+    if (!selectedChat) return;
+
+    try {
+      await chatService.removeAdmin(selectedChat.id, userId);
+      setChats(prev =>
+        prev.map(chat =>
+          chat.id === selectedChat.id
+            ? {
+                ...chat,
+                admins: chat.admins.filter(id => id !== userId)
+              }
+            : chat
+        )
+      );
+      setSelectedChat(prev => prev ? {
+        ...prev,
+        admins: prev.admins.filter(id => id !== userId)
+      } : null);
+      toast.success('Admin removed successfully');
+    } catch (error) {
+      console.error('Error removing admin:', error);
+      toast.error('Failed to remove admin');
+    }
+  };
+
+  const handleLeaveGroup = async () => {
+    if (!selectedChat) return;
+
+    try {
+      await chatService.leaveGroup(selectedChat.id);
+      setChats(prev => prev.filter(chat => chat.id !== selectedChat.id));
+      setSelectedChat(null);
+      setShowGroupSettings(false);
+      toast.success('Left group successfully');
+    } catch (error) {
+      console.error('Error leaving group:', error);
+      toast.error('Failed to leave group');
+    }
+  };
+
+  const handleDeleteGroup = async () => {
+    if (!selectedChat || !currentUser) return;
+
+    try {
+      await chatService.leaveGroup(selectedChat.id, currentUser.id);
+      setChats(chats.filter(chat => chat.id !== selectedChat.id));
+      setSelectedChat(null);
+      setShowGroupSettings(false);
+      toast.success('Group deleted successfully');
+    } catch (error) {
+      console.error('Error deleting group:', error);
+      toast.error('Failed to delete group');
+    }
   };
 
   // Render search results
@@ -740,6 +939,7 @@ export const ChatComponent: React.FC = () => {
             <ChatHeader
               chat={selectedChat}
               onInfoClick={() => setShowInfo(true)}
+              onSettingsClick={handleSettingsClick}
               styles={styles}
               isDarkMode={isDarkMode}
               onToggleTheme={() => setIsDarkMode(!isDarkMode)}
@@ -772,6 +972,8 @@ export const ChatComponent: React.FC = () => {
                 onCameraSelect={handleCameraSelect}
                 onTyping={handleTyping}
                 styles={styles}
+                replyToMessage={replyToMessage}
+                onCancelReply={() => setReplyToMessage(null)}
               />
             </div>
           </>
@@ -820,6 +1022,20 @@ export const ChatComponent: React.FC = () => {
             }
           }}
           onSearch={handleSearch}
+        />
+      )}
+      {showGroupSettings && selectedChat && (
+        <GroupSettingsModal
+          chat={selectedChat}
+          currentUser={currentUser}
+          onClose={() => setShowGroupSettings(false)}
+          onUpdateGroup={handleUpdateGroup}
+          onAddMembers={handleAddMembers}
+          onRemoveMember={handleRemoveMember}
+          onMakeAdmin={handleMakeAdmin}
+          onRemoveAdmin={handleRemoveAdmin}
+          onLeaveGroup={handleLeaveGroup}
+          onDeleteGroup={handleDeleteGroup}
         />
       )}
     </div>

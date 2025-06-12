@@ -63,6 +63,14 @@ export interface Message {
   deletedFor?: string[];
   isDeleted?: boolean;
   deletedForEveryone?: boolean;
+  attachments?: {
+    id: string;
+    type: 'image' | 'file' | 'audio' | 'video';
+    url: string;
+    name: string;
+    size: number;
+    mimeType: string;
+  }[];
 }
 
 export interface LastMessage {
@@ -117,6 +125,9 @@ export interface Chat {
     onlyAdminsCanPost: boolean;
     onlyAdminsCanAddMembers: boolean;
     onlyAdminsCanChangeInfo: boolean;
+    onlyAdminsCanPinMessages: boolean;
+    onlyAdminsCanSendMedia: boolean;
+    onlyAdminsCanSendLinks: boolean;
   };
   unreadCount: number;
   updatedAt: Date;

@@ -1,55 +1,105 @@
-import React, { useState } from 'react';
-import { FiX, FiUser, FiCheck, FiTrash2, FiUserPlus, FiUserMinus } from 'react-icons/fi';
+import React, { useState, useEffect } from 'react';
+import { FiX, FiUser, FiEdit2, FiUsers, FiLock, FiMessageSquare, FiImage, FiLink, FiSearch, FiTrash2 } from 'react-icons/fi';
 import { Chat, User } from '../types/ChatTypes';
+import { chatService } from '../services/chatService';
 
 interface GroupSettingsModalProps {
-  chat: Chat;
   onClose: () => void;
-  onAddMember: (userId: string) => void;
-  onRemoveMember: (userId: string) => void;
-  onUpdateAdmin: (userId: string, isAdmin: boolean) => void;
-  onUpdateSettings: (settings: {
-    onlyAdminsCanPost?: boolean;
-    onlyAdminsCanAddMembers?: boolean;
-    onlyAdminsCanChangeInfo?: boolean;
-  }) => void;
-  onUpdateInfo: (info: {
+  chat: Chat;
+  currentUser: User;
+  onUpdateGroup: (updates: {
     name?: string;
     description?: string;
-    avatar?: string;
+    settings?: {
+      onlyAdminsCanPost?: boolean;
+      onlyAdminsCanAddMembers?: boolean;
+      onlyAdminsCanChangeInfo?: boolean;
+      onlyAdminsCanPinMessages?: boolean;
+      onlyAdminsCanSendMedia?: boolean;
+      onlyAdminsCanSendLinks?: boolean;
+    };
   }) => void;
+  onAddMembers: () => void;
+  onRemoveMember: (userId: string) => void;
+  onMakeAdmin: (userId: string) => void;
+  onRemoveAdmin: (userId: string) => void;
   onLeaveGroup: () => void;
-  onSearch: (query: string) => Promise<{ data: User[] }>;
+  onDeleteGroup: () => void;
 }
 
 const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
-  chat,
   onClose,
-  onAddMember,
+  chat,
+  currentUser,
+  onUpdateGroup,
+  onAddMembers,
   onRemoveMember,
-  onUpdateAdmin,
-  onUpdateSettings,
-  onUpdateInfo,
+  onMakeAdmin,
+  onRemoveAdmin,
   onLeaveGroup,
-  onSearch
+  onDeleteGroup
 }) => {
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [newName, setNewName] = useState(chat.name || '');
+  const [newDescription, setNewDescription] = useState(chat.description || '');
+  const [settings, setSettings] = useState({
+    onlyAdminsCanPost: chat.settings?.onlyAdminsCanPost || false,
+    onlyAdminsCanAddMembers: chat.settings?.onlyAdminsCanAddMembers || false,
+    onlyAdminsCanChangeInfo: chat.settings?.onlyAdminsCanChangeInfo || false,
+    onlyAdminsCanPinMessages: chat.settings?.onlyAdminsCanPinMessages || false,
+    onlyAdminsCanSendMedia: chat.settings?.onlyAdminsCanSendMedia || false,
+    onlyAdminsCanSendLinks: chat.settings?.onlyAdminsCanSendLinks || false
+  });
+  const [showMemberSearch, setShowMemberSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<User[]>([]);
-  const [showAddMember, setShowAddMember] = useState(false);
-  const [groupName, setGroupName] = useState(chat.name || '');
-  const [description, setDescription] = useState(chat.description || '');
-  const [settings, setSettings] = useState(chat.groupInfo?.settings || {
-    onlyAdminsCanPost: false,
-    onlyAdminsCanAddMembers: false,
-    onlyAdminsCanChangeInfo: false
-  });
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+
+  // Update local state when chat prop changes
+  useEffect(() => {
+    setNewName(chat.name || '');
+    setNewDescription(chat.description || '');
+    setSettings({
+      onlyAdminsCanPost: chat.settings?.onlyAdminsCanPost || false,
+      onlyAdminsCanAddMembers: chat.settings?.onlyAdminsCanAddMembers || false,
+      onlyAdminsCanChangeInfo: chat.settings?.onlyAdminsCanChangeInfo || false,
+      onlyAdminsCanPinMessages: chat.settings?.onlyAdminsCanPinMessages || false,
+      onlyAdminsCanSendMedia: chat.settings?.onlyAdminsCanSendMedia || false,
+      onlyAdminsCanSendLinks: chat.settings?.onlyAdminsCanSendLinks || false
+    });
+  }, [chat]);
+
+  const handleSaveName = () => {
+    if (newName.trim() && newName !== chat.name) {
+      onUpdateGroup({ name: newName.trim() });
+    }
+    setIsEditingName(false);
+  };
+
+  const handleSaveDescription = () => {
+    if (newDescription !== chat.description) {
+      onUpdateGroup({ description: newDescription.trim() });
+    }
+    setIsEditingDescription(false);
+  };
+
+  const handleSettingChange = (key: string, value: boolean) => {
+    const newSettings = { ...settings, [key]: value };
+    setSettings(newSettings);
+    onUpdateGroup({ settings: newSettings });
+  };
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
     if (query.trim()) {
       try {
-        const response = await onSearch(query);
-        setSearchResults(response.data.filter(user => !chat.participants.some(p => p.id === user.id)));
+        const response = await chatService.searchUsers(query);
+        // Filter out users who are already in the group
+        const filteredResults = response.items?.filter(
+          user => !chat.participants.some(p => p.id === user.id)
+        );
+        setSearchResults(filteredResults);
       } catch (error) {
         console.error('Search error:', error);
         setSearchResults([]);
@@ -60,22 +110,34 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
   };
 
   const handleUserSelect = (user: User) => {
-    onAddMember(user.id);
+    setSelectedUsers(prev => [...prev, user]);
     setSearchResults(prev => prev.filter(u => u.id !== user.id));
     setSearchQuery('');
-    setShowAddMember(false);
   };
 
-  const handleUpdateSettings = () => {
-    onUpdateSettings(settings);
+  const handleUserRemove = (userId: string) => {
+    setSelectedUsers(prev => prev.filter(user => user.id !== userId));
   };
 
-  const handleUpdateInfo = () => {
-    onUpdateInfo({
-      name: groupName,
-      description
-    });
+  const handleAddSelectedMembers = async () => {
+    try {
+      for (const user of selectedUsers) {
+        await chatService.addGroupMember(chat.id, user.id, currentUser.id);
+      }
+      setSelectedUsers([]);
+      setShowMemberSearch(false);
+      setSearchQuery('');
+      setSearchResults([]);
+      // Refresh chat details
+      const updatedChat = await chatService.getChatById(chat.id);
+      onUpdateGroup({});
+    } catch (error) {
+      console.error('Error adding members:', error);
+    }
   };
+
+  const isAdmin = chat.admins.includes(currentUser.id);
+  const isCreator = chat.admins[0] === currentUser.id;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -92,176 +154,104 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
 
         <div className="space-y-6">
           {/* Group Info Section */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Group Information</h3>
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="groupName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Group Name
-                </label>
-                <input
-                  type="text"
-                  id="groupName"
-                  value={groupName}
-                  onChange={(e) => setGroupName(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                  {chat.avatar ? (
+                    <img src={chat.avatar} alt={chat.name} className="w-full h-full rounded-full" />
+                  ) : (
+                    <FiUsers size={24} className="text-gray-500 dark:text-gray-400" />
+                  )}
+                </div>
+                <div>
+                  {isEditingName ? (
+                    <input
+                      type="text"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      onBlur={handleSaveName}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSaveName()}
+                      className="text-lg font-medium text-gray-900 dark:text-white bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500"
+                      autoFocus
+                    />
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">{chat.name}</h3>
+                      {isAdmin && (
+                        <button
+                          onClick={() => setIsEditingName(true)}
+                          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        >
+                          <FiEdit2 size={16} />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {chat.participants.length} members
+                  </p>
+                </div>
               </div>
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Description
-                </label>
+            </div>
+
+            <div className="mt-2">
+              {isEditingDescription ? (
                 <textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                  onBlur={handleSaveDescription}
+                  className="w-full text-sm text-gray-700 dark:text-gray-300 bg-transparent border border-gray-300 dark:border-gray-600 rounded-md p-2 focus:outline-none focus:border-blue-500"
                   rows={3}
+                  placeholder="Add a group description"
                 />
-              </div>
-              <button
-                onClick={handleUpdateInfo}
-                className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Update Group Info
-              </button>
+              ) : (
+                <div className="flex items-start space-x-2">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+                    {chat.description || 'No description'}
+                  </p>
+                  {isAdmin && (
+                    <button
+                      onClick={() => setIsEditingDescription(true)}
+                      className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    >
+                      <FiEdit2 size={16} />
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
           {/* Members Section */}
           <div>
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Members</h3>
-              <button
-                onClick={() => setShowAddMember(true)}
-                className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-              >
-                <FiUserPlus size={16} />
-                <span>Add Member</span>
-              </button>
-            </div>
-            <div className="space-y-2">
-              {chat.participants.map((participant) => (
-                <div
-                  key={participant.id}
-                  className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                      {participant.avatar ? (
-                        <img src={participant.avatar} alt={participant.name} className="w-full h-full rounded-full" />
-                      ) : (
-                        <FiUser size={16} className="text-gray-500 dark:text-gray-400" />
-                      )}
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">{participant.name}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">{participant.email}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {chat.admins.includes(participant.id) ? (
-                      <span className="text-xs text-blue-600 dark:text-blue-400">Admin</span>
-                    ) : (
-                      <button
-                        onClick={() => onUpdateAdmin(participant.id, true)}
-                        className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                      >
-                        Make Admin
-                      </button>
-                    )}
-                    {participant.id !== chat.creatorId && (
-                      <button
-                        onClick={() => onRemoveMember(participant.id)}
-                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                      >
-                        <FiUserMinus size={16} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Group Settings Section */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Group Settings</h3>
-            <div className="space-y-2">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={settings.onlyAdminsCanPost}
-                  onChange={(e) => setSettings(prev => ({ ...prev, onlyAdminsCanPost: e.target.checked }))}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
-                />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                  Only admins can post messages
-                </span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={settings.onlyAdminsCanAddMembers}
-                  onChange={(e) => setSettings(prev => ({ ...prev, onlyAdminsCanAddMembers: e.target.checked }))}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
-                />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                  Only admins can add members
-                </span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={settings.onlyAdminsCanChangeInfo}
-                  onChange={(e) => setSettings(prev => ({ ...prev, onlyAdminsCanChangeInfo: e.target.checked }))}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
-                />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                  Only admins can change group info
-                </span>
-              </label>
-            </div>
-            <button
-              onClick={handleUpdateSettings}
-              className="mt-3 w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Update Settings
-            </button>
-          </div>
-
-          {/* Leave Group Button */}
-          <button
-            onClick={onLeaveGroup}
-            className="w-full px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-          >
-            Leave Group
-          </button>
-        </div>
-
-        {/* Add Member Modal */}
-        {showAddMember && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-md p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Add Members</h3>
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Members</h4>
+              {isAdmin && (
                 <button
-                  onClick={() => setShowAddMember(false)}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  onClick={() => setShowMemberSearch(!showMemberSearch)}
+                  className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                 >
-                  <FiX size={24} />
+                  {showMemberSearch ? 'Cancel' : 'Add members'}
                 </button>
-              </div>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  placeholder="Search users..."
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
+              )}
+            </div>
+
+            {showMemberSearch && (
+              <div className="mb-4 space-y-4">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    placeholder="Search users..."
+                    className="w-full p-2 pl-8 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                  <FiSearch className="absolute left-2 top-3 text-gray-400" />
+                </div>
+
                 {searchResults.length > 0 && (
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-md max-h-48 overflow-y-auto">
+                  <div className="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-md">
                     {searchResults.map((user) => (
                       <button
                         key={user.id}
@@ -283,10 +273,175 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
                     ))}
                   </div>
                 )}
+
+                {selectedUsers.length > 0 && (
+                  <div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedUsers.map((user) => (
+                        <div
+                          key={user.id}
+                          className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 rounded-full px-3 py-1"
+                        >
+                          <span className="text-sm text-gray-900 dark:text-white">{user.name}</span>
+                          <button
+                            onClick={() => handleUserRemove(user.id)}
+                            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                          >
+                            <FiX size={16} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={handleAddSelectedMembers}
+                      className="mt-2 w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
+                    >
+                      Add Selected Members
+                    </button>
+                  </div>
+                )}
               </div>
+            )}
+
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {chat.participants.map((participant) => (
+                <div key={participant.id} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                      {participant.avatar ? (
+                        <img src={participant.avatar} alt={participant.name} className="w-full h-full rounded-full" />
+                      ) : (
+                        <FiUser size={16} className="text-gray-500 dark:text-gray-400" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {participant.name}
+                        {chat.admins.includes(participant.id) && (
+                          <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">(Admin)</span>
+                        )}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{participant.email}</p>
+                    </div>
+                  </div>
+                  {isAdmin && participant.id !== currentUser.id && (
+                    <div className="flex items-center space-x-2">
+                      {chat.admins.includes(participant.id) ? (
+                        <button
+                          onClick={() => onRemoveAdmin(participant.id)}
+                          className="text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                        >
+                          Remove admin
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => onMakeAdmin(participant.id)}
+                          className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          Make admin
+                        </button>
+                      )}
+                      <button
+                        onClick={() => onRemoveMember(participant.id)}
+                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                      >
+                        <FiTrash2 size={16} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
-        )}
+
+          {/* Group Settings Section */}
+          {isAdmin && (
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Group Settings</h4>
+              <div className="space-y-3">
+                <label className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                  <div className="flex items-center space-x-3">
+                    <FiMessageSquare className="text-gray-500 dark:text-gray-400" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Only admins can send messages</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.onlyAdminsCanPost}
+                    onChange={(e) => handleSettingChange('onlyAdminsCanPost', e.target.checked)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
+                  />
+                </label>
+                <label className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                  <div className="flex items-center space-x-3">
+                    <FiUsers className="text-gray-500 dark:text-gray-400" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Only admins can add members</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.onlyAdminsCanAddMembers}
+                    onChange={(e) => handleSettingChange('onlyAdminsCanAddMembers', e.target.checked)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
+                  />
+                </label>
+                <label className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                  <div className="flex items-center space-x-3">
+                    <FiImage className="text-gray-500 dark:text-gray-400" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Only admins can send media</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.onlyAdminsCanSendMedia}
+                    onChange={(e) => handleSettingChange('onlyAdminsCanSendMedia', e.target.checked)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
+                  />
+                </label>
+                <label className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                  <div className="flex items-center space-x-3">
+                    <FiLink className="text-gray-500 dark:text-gray-400" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Only admins can send links</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.onlyAdminsCanSendLinks}
+                    onChange={(e) => handleSettingChange('onlyAdminsCanSendLinks', e.target.checked)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
+                  />
+                </label>
+                <label className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                  <div className="flex items-center space-x-3">
+                    <FiLock className="text-gray-500 dark:text-gray-400" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Only admins can change group info</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.onlyAdminsCanChangeInfo}
+                    onChange={(e) => handleSettingChange('onlyAdminsCanChangeInfo', e.target.checked)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
+                  />
+                </label>
+              </div>
+            </div>
+          )}
+
+          {/* Danger Zone */}
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+            {isCreator ? (
+              <button
+                onClick={onDeleteGroup}
+                className="w-full text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+              >
+                Delete Group
+              </button>
+            ) : (
+              <button
+                onClick={onLeaveGroup}
+                className="w-full text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+              >
+                Leave Group
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

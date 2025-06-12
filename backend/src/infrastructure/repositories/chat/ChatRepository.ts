@@ -90,6 +90,7 @@ export class ChatRepository implements IChatRepository {
               avatar: user.avatar,
               isOnline: false // Default to false, update via socket if needed
             })),
+            admins: chat.admins,
             unreadCount,
             updatedAt: chat.updatedAt,
           };

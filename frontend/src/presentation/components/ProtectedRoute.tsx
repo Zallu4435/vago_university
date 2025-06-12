@@ -20,7 +20,7 @@ export const ProtectedRoute = ({ allowedCollections, isPublic = false }: Protect
       case 'user':
         return <Navigate to="/dashboard" replace />;
       case 'faculty':
-        return <Navigate to="/faculty/courses" replace />;
+        return <Navigate to="/faculty/" replace />;
       default:
         return <Navigate to="/" replace />;
     }
@@ -47,7 +47,7 @@ export const ProtectedRoute = ({ allowedCollections, isPublic = false }: Protect
       case 'user':
         return <Navigate to="/dashboard" replace />;
       case 'faculty':
-        return <Navigate to="/faculty/courses" replace />;
+        return <Navigate to="/faculty/" replace />;
       default:
         return <Navigate to="/register" replace />;
     }

@@ -5,7 +5,6 @@ import store from './presentation/redux/store';
 import './index.css';
 import { useRefreshToken } from './application/hooks/useRefreshToken';
 import { ProtectedRoute } from './presentation/components/ProtectedRoute';
-import { PreferencesProvider } from './presentation/context/PreferencesContext';
 
 // Layouts
 import PublicLayout from './presentation/Layout/PublicLayout';
@@ -58,8 +57,11 @@ import ForgotPasswordModal from './presentation/pages/ForgotPassword';
 import ProgramPrerequisites from './presentation/pages/ProgramPrerequisites';
 import ScholarshipComponent from './presentation/pages/ScholarshipComponent';
 import NotificationManagement from './presentation/pages/admin/notification/NotificationManagement';
-import ChatInterface from './presentation/pages/canvas/chat/ChatComponent';
 import StudentCanvas from './presentation/pages/canvas/CanvasPage';
+import DiplomaManagement from './presentation/pages/admin/diploma/DiplomaManagement';
+import MaterialManagement from './presentation/pages/admin/material/MaterialManagement';
+import AssignmentManagement from './presentation/pages/faculty/assignment/AssignmentManagement';
+import SessionManagement from './presentation/pages/faculty/sessions/SessionManagement';
 
 const App: React.FC = () => {
   const { isError, error } = useRefreshToken();
@@ -167,6 +169,9 @@ const App: React.FC = () => {
             <Route path="admin/communication" element={<CommunicationManagement />} />
             <Route path="admin/payment" element={<PaymentManagement />} />
             <Route path="admin/notifications" element={<NotificationManagement />} />
+            <Route path="admin/diploma-courses" element={<DiplomaManagement />} />
+            <Route path="admin/material" element={<MaterialManagement />} />
+    
           </Route>
         </Route>
 
@@ -187,7 +192,9 @@ const App: React.FC = () => {
         {/* Faculty Routes (faculty only) */}
         <Route element={<ProtectedRoute allowedCollections={['faculty']} />}>
           <Route element={<FacultyLayout />}>
-            <Route path="faculty/courses" element={<FacultyDashboard />} />
+            <Route path="faculty/" element={<FacultyDashboard />} />
+            <Route path="faculty/assignments" element={<AssignmentManagement />} />
+            <Route path="faculty/sessions" element={<SessionManagement />} />
           </Route>
         </Route>
 

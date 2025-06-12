@@ -1,37 +1,29 @@
 import React, { useState } from 'react';
-import { FiPlay, FiEdit, FiTrash2, FiUpload, FiEye, FiGrid, FiList, FiCalendar, FiClock, FiBookOpen, FiVideo, FiX } from 'react-icons/fi';
+import { FiPlay, FiEdit, FiTrash2, FiUpload, FiEye, FiGrid, FiList, FiCalendar, FiClock, FiBookOpen, FiVideo } from 'react-icons/fi';
 import { debounce } from 'lodash';
-import Header from '../User/Header'; // Import Header as used in UserManagement
-import Pagination from '../User/Pagination'; // Import Pagination as used in UserManagement
+import Header from '../User/Header';
+import Pagination from '../User/Pagination';
 import AddVideoModal from './AddVideoModal';
 import VideoPreviewModal from './VideoPreviewModal';
+import { useVideoManagement } from '../../../hooks/useVideoManagement';
 
 interface Video {
-  id: string;
+  _id: string; // Changed from id to _id
   title: string;
   duration: string;
   uploadedAt: string;
   module: number;
   status: string;
-  courseId: string;
+  diplomaId: string;
   description: string;
 }
 
-// Minimal FilterPanel stub to satisfy Header dependency
-interface FilterPanelProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  filterOpen: boolean;
-  setFilterOpen: (open: boolean) => void;
-  filters: { [key: string]: string | undefined };
-  filterOptions: { [key: string]: string[] | { id: string; name: string; videoCount: number }[] };
-  debouncedFilterChange: (field: string, value: string) => void;
-  customDateRange?: { startDate: string; endDate: string };
-  handleCustomDateChange?: (field: 'startDate' | 'endDate', value: string) => void;
-  handleResetFilters: () => void;
+interface Diploma {
+  _id: string;
+  title: string;
+  videoCount: number; // Derived from videoIds.length
 }
 
-// Main VideoManagementPage Component
 const VideoManagementPage = () => {
   const [viewMode, setViewMode] = useState('table');
   const [activeTab, setActiveTab] = useState('all');
@@ -39,91 +31,44 @@ const VideoManagementPage = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
-  const [filters, setFilters] = useState<{ [key: string]: string | undefined }>({ status: 'all', course: 'CS401' });
+  const [filters, setFilters] = useState<{ [key: string]: string | undefined }>({ status: 'all', diploma: '' });
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Sample data
-  const courses = [
-    { id: 'CS401', name: 'CS401 – Advanced Algorithms', videoCount: 12 },
-    { id: 'CS301', name: 'CS301 – Data Structures', videoCount: 8 },
-    { id: 'CS201', name: 'CS201 – Programming Fundamentals', videoCount: 15 },
-    { id: 'MATH201', name: 'MATH201 – Discrete Mathematics', videoCount: 6 }
-  ];
-
-  const videos = [
-    {
-      id: 'V001',
-      title: 'Introduction to Dynamic Programming',
-      duration: '25:30',
-      uploadedAt: '2024-01-15',
-      module: 1,
-      status: 'Published',
-      courseId: 'CS401',
-      description: 'Basic concepts and principles of dynamic programming'
-    },
-    {
-      id: 'V002',
-      title: 'Merge Sort Algorithm',
-      duration: '18:45',
-      uploadedAt: '2024-01-20',
-      module: 2,
-      status: 'Published',
-      courseId: 'CS401',
-      description: 'Detailed explanation of merge sort implementation'
-    },
-    {
-      id: 'V003',
-      title: 'Graph Traversal - BFS & DFS',
-      duration: '32:15',
-      uploadedAt: '2024-01-25',
-      module: 3,
-      status: 'Draft',
-      courseId: 'CS401',
-      description: 'Breadth-first and depth-first search algorithms'
-    },
-    {
-      id: 'V004',
-      title: 'Dijkstra\'s Shortest Path',
-      duration: '28:20',
-      uploadedAt: '2024-02-01',
-      module: 4,
-      status: 'Published',
-      courseId: 'CS401',
-      description: 'Finding shortest paths in weighted graphs'
-    }
-  ];
+  const {
+    diplomasData,
+    videosData,
+    isLoadingDiplomas,
+    isLoadingVideos,
+    handleSaveVideo,
+    handleDeleteVideo,
+  } = useVideoManagement(page, itemsPerPage, filters, activeTab);
 
   const filterOptions = {
     status: ['All Status', 'Published', 'Draft'],
-    courses,
+    diplomas: diplomasData?.diplomas || [],
   };
 
   const debouncedFilterChange = debounce((field: string, value: string) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
+    setPage(1);
   }, 500);
 
   const handleResetFilters = () => {
-    setFilters({ status: 'all', course: 'CS401' });
+    setFilters({ status: 'all', diploma: '' });
     setSearchQuery('');
+    setPage(1);
   };
 
-  const filteredVideos = videos
-    .filter(video => video.courseId === (filters.course || 'CS401'))
-    .filter(video => {
-      if (activeTab === 'published') return video.status === 'Published';
-      if (activeTab === 'drafts') return video.status === 'Draft';
-      return true;
-    })
+  const filteredVideos = (videosData?.videos || [])
+    .filter(video => 
+      filters.diploma ? video.diplomaId === filters.diploma : true
+    )
     .filter(video => 
       video.title.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .filter(video => {
-      if (filters.status === 'all') return true;
-      return video.status.toLowerCase() === (filters.status || 'all');
-    });
+    );
 
-  const totalPages = Math.ceil(filteredVideos.length / itemsPerPage);
+  const totalPages = videosData?.totalPages || Math.ceil(filteredVideos.length / itemsPerPage);
   const paginatedVideos = filteredVideos.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   const tabs = [
@@ -133,12 +78,12 @@ const VideoManagementPage = () => {
       active: activeTab === 'all' 
     },
     { 
-      label: `Published (${videos.filter(v => v.status === 'Published' && v.courseId === (filters.course || 'CS401')).length})`, 
+      label: `Published (${filteredVideos.filter(v => v.status === 'Published').length})`, 
       icon: <FiVideo size={16} />, 
       active: activeTab === 'published' 
     },
     { 
-      label: `Drafts (${videos.filter(v => v.status === 'Draft' && v.courseId === (filters.course || 'CS401')).length})`, 
+      label: `Drafts (${filteredVideos.filter(v => v.status === 'Draft').length})`, 
       icon: <FiVideo size={16} />, 
       active: activeTab === 'drafts' 
     }
@@ -150,15 +95,27 @@ const VideoManagementPage = () => {
     setPage(1);
   };
 
-  const handleSaveVideo = (videoData: Partial<Video>) => {
-    // TODO: Implement save logic
-    console.log('Saving video:', videoData);
+  const onSaveVideo = (videoData: Partial<Video>) => {
+    handleSaveVideo(videoData, filters.diploma || '', selectedVideo);
     setShowAddModal(false);
     setSelectedVideo(null);
   };
 
+  const onDeleteVideo = (video: Video) => {
+    handleDeleteVideo(video, filters.diploma || '');
+  };
+
+  if (isLoadingDiplomas || isLoadingVideos) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 relative">
+      {/* Rest of the JSX remains unchanged */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-0 w-96 h-96 bg-purple-900/10 rounded-full blur-3xl"></div>
         <div className="absolute top-3/4 right-0 w-96 h-96 bg-blue-900/10 rounded-full blur-3xl"></div>
@@ -180,7 +137,7 @@ const VideoManagementPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         <Header
           title="Video Management"
-          subtitle="Manage course video tutorials and content"
+          subtitle="Manage diploma video tutorials and content"
           tabs={tabs}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
@@ -263,7 +220,7 @@ const VideoManagementPage = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-700">
                     {paginatedVideos.map((video) => (
-                      <tr key={video.id} className="hover:bg-gray-700/50">
+                      <tr key={video._id} className="hover:bg-gray-700/50">
                         <td className="px-6 py-4">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-10 w-10">
@@ -276,7 +233,7 @@ const VideoManagementPage = () => {
                                 {video.title}
                               </div>
                               <div className="text-sm text-purple-300">
-                                ID: {video.id}
+                                ID: {video._id}
                               </div>
                             </div>
                           </div>
@@ -309,7 +266,7 @@ const VideoManagementPage = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-purple-300">
                           <div className="flex items-center">
                             <FiCalendar className="h-4 w-4 mr-1 text-purple-400" />
-                            {video.uploadedAt}
+                            {new Date(video.uploadedAt).toLocaleDateString()}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -326,7 +283,10 @@ const VideoManagementPage = () => {
                             >
                               <FiEdit className="h-4 w-4" />
                             </button>
-                            <button className="text-red-400 hover:text-red-300">
+                            <button
+                              onClick={() => onDeleteVideo(video)}
+                              className="text-red-400 hover:text-red-300"
+                            >
                               <FiTrash2 className="h-4 w-4" />
                             </button>
                           </div>
@@ -348,7 +308,7 @@ const VideoManagementPage = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {paginatedVideos.map((video) => (
-                  <div key={video.id} className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/30 rounded-xl shadow-lg hover:shadow-2xl transition-shadow">
+                  <div key={video._id} className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/30 rounded-xl shadow-lg hover:shadow-2xl transition-shadow">
                     <div className="aspect-video bg-gradient-to-br from-purple-500 to-blue-600 rounded-t-lg flex items-center justify-center">
                       <FiPlay className="h-8 w-8 text-white opacity-75" />
                     </div>
@@ -380,7 +340,7 @@ const VideoManagementPage = () => {
                         </div>
                         <div className="flex items-center">
                           <FiCalendar className="h-3 w-3 mr-1 text-purple-400" />
-                          {video.uploadedAt}
+                          {new Date(video.uploadedAt).toLocaleDateString()}
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
@@ -397,7 +357,10 @@ const VideoManagementPage = () => {
                           >
                             <FiEdit className="h-4 w-4" />
                           </button>
-                          <button className="p-1 text-purple-300 hover:text-red-400">
+                          <button
+                            onClick={() => onDeleteVideo(video)}
+                            className="p-1 text-purple-300 hover:text-red-400"
+                          >
                             <FiTrash2 className="h-4 w-4" />
                           </button>
                         </div>
@@ -420,13 +383,12 @@ const VideoManagementPage = () => {
         </div>
       </div>
 
-      {/* Modals rendered at root level */}
       <AddVideoModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         selectedVideo={selectedVideo}
-        courses={courses}
-        onSave={handleSaveVideo}
+        diplomas={diplomasData?.diplomas || []}
+        onSave={onSaveVideo}
       />
       <VideoPreviewModal
         isOpen={showPreviewModal}

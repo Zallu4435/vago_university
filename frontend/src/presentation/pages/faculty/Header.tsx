@@ -1,68 +1,192 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { LuBell, LuLogOut } from 'react-icons/lu';
+import { LuBell, LuLogOut, LuSearch, LuMoon, LuSun, LuSettings, LuUser } from 'react-icons/lu';
 
 export default function Header({ currentDate, facultyName, onLogout }) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const notifications = [
+    { id: 1, title: 'New assignment submitted', time: '2 min ago', type: 'info' },
+    { id: 2, title: 'Class reminder: Database Systems', time: '15 min ago', type: 'warning' },
+    { id: 3, title: 'Grade submission deadline', time: '1 hour ago', type: 'urgent' }
+  ];
+
+  const getInitials = (name) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
 
   return (
-    <header className="bg-white h-20 px-8 flex justify-between items-center shadow-sm fixed top-0 left-72 w-[calc(100%-18rem)] z-10 box-border">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800">Dashboard</h2>
-        <p className="text-purple-500">{currentDate}</p>
-      </div>
-      <div className="flex items-center space-x-4">
+    <header className="bg-white/80 backdrop-blur-xl h-20 px-8 flex justify-between items-center shadow-lg shadow-indigo-100/50 fixed top-0 left-72 w-[calc(100%-18rem)] z-50 border-b border-white/20">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 opacity-60"></div>
+      
+      <div className="relative z-10 flex items-center space-x-6">
         <div className="relative">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="bg-gray-100 rounded-full pl-10 pr-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all"
-          />
-          <svg
-            className="absolute left-3 top-2.5 text-gray-400"
-            width="16"
-            height="16"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+          <div className="relative">
+            <h2 className="text-3xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Dashboard
+            </h2>
+            <div className="flex items-center space-x-4 mt-1">
+              <p className="text-indigo-600 font-medium">{currentDate}</p>
+              <div className="h-4 w-px bg-gradient-to-b from-indigo-300 to-purple-300"></div>
+              <p className="text-sm text-gray-600 font-mono">
+                {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+              </p>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div className="relative z-10 flex items-center space-x-4">
+        {/* Search Bar */}
         <div className="relative">
-          <button className="bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition-colors relative">
-            <LuBell size={20} className="text-gray-600" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              3
-            </span>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search anything..."
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+              className="bg-white/90 backdrop-blur-sm rounded-full pl-12 pr-6 py-3 w-80 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all duration-200 text-gray-700 placeholder-gray-400 shadow-lg border border-white/50"
+            />
+            <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+              <LuSearch size={18} className={`transition-colors duration-200 ${searchFocused ? 'text-indigo-500' : 'text-gray-400'}`} />
+            </div>
+            {searchFocused && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-4">
+                <p className="text-sm text-gray-500">Popular searches</p>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {['Students', 'Attendance', 'Grades', 'Assignments'].map((term) => (
+                    <span key={term} className="px-3 py-1 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full text-sm text-indigo-700 cursor-pointer hover:from-indigo-200 hover:to-purple-200 transition-colors">
+                      {term}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Theme Toggle */}
+        <div className="relative">
+          <button
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            className="bg-white/90 backdrop-blur-sm p-3 rounded-full hover:bg-white transition-all duration-200 shadow-lg border border-white/50"
+          >
+            {isDarkMode ? (
+              <LuSun size={20} className="text-yellow-500" />
+            ) : (
+              <LuMoon size={20} className="text-indigo-600" />
+            )}
           </button>
         </div>
+
+        {/* Notifications */}
+        <div className="relative">
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="bg-white/90 backdrop-blur-sm p-3 rounded-full hover:bg-white transition-all duration-200 shadow-lg border border-white/50"
+          >
+            <LuBell size={20} className="text-pink-600" />
+            <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center shadow-lg">
+              {notifications.length}
+            </span>
+          </button>
+          
+          {showNotifications && (
+            <div className="absolute right-0 mt-3 w-80 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 z-50">
+              <div className="p-4 border-b border-gray-100">
+                <h3 className="text-lg font-bold text-gray-800">Notifications</h3>
+              </div>
+              <div className="max-h-80 overflow-y-auto">
+                {notifications.map((notification) => (
+                  <div key={notification.id} className="p-4 hover:bg-indigo-50/50 transition-colors border-b border-gray-50 last:border-b-0">
+                    <div className="flex items-start space-x-3">
+                      <div className={`w-2 h-2 rounded-full mt-2 ${
+                        notification.type === 'urgent' ? 'bg-red-500' :
+                        notification.type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+                      }`}></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-800">{notification.title}</p>
+                        <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="p-3 border-t border-gray-100">
+                <button className="w-full text-center text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                  View All Notifications
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Profile Menu */}
         <div className="relative">
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="flex items-center space-x-3 bg-gray-100 rounded-full pl-2 pr-4 py-1 hover:bg-gray-200 transition-colors"
+            className="flex items-center space-x-3 bg-white/90 backdrop-blur-sm rounded-full pl-2 pr-6 py-2 hover:bg-white transition-all duration-200 shadow-lg border border-white/50"
           >
-            <div className="bg-gradient-to-r from-purple-400 to-pink-400 h-8 w-8 rounded-full flex items-center justify-center text-white font-semibold">
-              PJ
+            <div className="relative">
+              <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 h-10 w-10 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                {getInitials(facultyName)}
+              </div>
             </div>
-            <span className="text-gray-700 text-sm font-medium">{facultyName}</span>
+            <div className="text-left">
+              <span className="text-gray-800 font-semibold block">{facultyName}</span>
+              <span className="text-xs text-gray-500">Faculty</span>
+            </div>
+            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
           </button>
+          
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg py-2 z-50 border border-gray-100">
-              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">
-                My Profile
-              </a>
-              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">
-                Account Settings
-              </a>
-              <button onClick={onLogout} className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">
-                Log Out
-              </button>
+            <div className="absolute right-0 mt-3 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 z-50">
+              <div className="p-4 border-b border-gray-100">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 h-12 w-12 rounded-full flex items-center justify-center text-white font-bold">
+                    {getInitials(facultyName)}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-800">{facultyName}</p>
+                    <p className="text-sm text-gray-500">Faculty Member</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-2">
+                {[
+                  { icon: <LuUser size={16} />, label: 'My Profile', color: 'text-indigo-600' },
+                  { icon: <LuSettings size={16} />, label: 'Account Settings', color: 'text-purple-600' },
+                ].map((item, index) => (
+                  <button
+                    key={index}
+                    className="flex items-center space-x-3 w-full px-3 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 rounded-xl transition-all duration-200"
+                  >
+                    <span className={`${item.color}`}>{item.icon}</span>
+                    <span className="font-medium">{item.label}</span>
+                  </button>
+                ))}
+                
+                <div className="border-t border-gray-100 mt-2 pt-2">
+                  <button 
+                    onClick={onLogout}
+                    className="flex items-center space-x-3 w-full px-3 py-3 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200"
+                  >
+                    <LuLogOut size={16} />
+                    <span className="font-medium">Log Out</span>
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -74,4 +198,5 @@ export default function Header({ currentDate, facultyName, onLogout }) {
 Header.propTypes = {
   currentDate: PropTypes.string.isRequired,
   facultyName: PropTypes.string.isRequired,
+  onLogout: PropTypes.func.isRequired,
 };

@@ -28,7 +28,7 @@ export default function FacultyLayout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 box-border">
+    <div className="flex h-screen overflow-hidden bg-gray-50">
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -36,11 +36,11 @@ export default function FacultyLayout() {
         department={department}
         onCollapse={handleSidebarCollapse}
       />
-      <div className={`flex-1 transition-all duration-300 ease-in-out ${collapsed ? 'ml-20' : 'ml-72'}`}>
+      <div className={`flex-1 transition-all duration-300 ease-in-out ${collapsed ? 'ml-20' : 'ml-72'} overflow-hidden`}>
         <div className="sticky top-0 z-50">
           <Header currentDate={currentDate} facultyName={fullName} onLogout={handleLogout} />
         </div>
-        <main className="mt-[70px]">
+        <main className="h-[calc(100vh-70px)] overflow-auto mt-20">
           <Outlet context={{ activeTab, setActiveTab }} />
         </main>
       </div>

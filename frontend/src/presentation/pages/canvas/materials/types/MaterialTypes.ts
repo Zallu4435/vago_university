@@ -1,23 +1,23 @@
 export interface Material {
-    id: number;
+    _id: string;
     title: string;
+    description: string;
     subject: string;
     course: string;
-    semester: string;
+    semester: number;
     type: string;
-    uploadedBy: string;
-    uploadDate: string;
-    downloads: number;
-    views: number;
-    fileSize: string;
-    description: string;
-    isNew: boolean;
-    isRestricted: boolean;
-    rating: number;
+    fileUrl: string;
+    thumbnailUrl: string;
     tags: string[];
-    thumbnail: string;
     difficulty: string;
     estimatedTime: string;
+    isNew: boolean;
+    isRestricted: boolean;
+    uploadedBy: string;
+    uploadedAt: string;
+    views: number;
+    downloads: number;
+    rating: number;
     isBookmarked: boolean;
     isLiked: boolean;
 }

@@ -15,8 +15,13 @@ import userCommunicationRoutes from "./useCommunicationRoutes";
 import financialRoutes from "./financial.route";
 import notificationRoutes from './notificationRouter'
 import fcmTokenRoute from './fcmTokenRoute'
+import diplomaRoutes from '../http/diploma/DiplomaRouter'
+import vedioRoutes from '../http/vedios/vedioRoutes'
+import materialRoutes from '../http/materials/materialRoutes'
+import userMaterialRoutes from '../http/materials/userMaterialRoutes'
 
 const router = Router();
+router.use("/materials", userMaterialRoutes);
 
 router.use('/fcm', fcmTokenRoute)
 
@@ -50,6 +55,11 @@ router.use("/financial", financialRoutes);
 
 router.use("/admin/notifications", notificationRoutes);
 
+router.use("/admin/diploma-courses", diplomaRoutes);
+
+router.use("/admin/vedio", vedioRoutes);
+
+router.use("/admin/materials", materialRoutes);
 
 
 export default router;

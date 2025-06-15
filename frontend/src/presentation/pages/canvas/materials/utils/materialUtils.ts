@@ -40,7 +40,7 @@ export const formatNumber = (num: number) => {
 };
 
 export const filterMaterials = (
-    materials: Material[],
+    materials: any[],
     searchTerm: string,
     selectedCourse: string,
     selectedType: string,
@@ -48,16 +48,19 @@ export const filterMaterials = (
     selectedDifficulty: string,
     sortBy: string
 ) => {
-    let filtered = materials.filter(material => {
-        const matchesSearch = material.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            material.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            material.uploadedBy.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            material.course.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            material.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    // Extract the actual material objects from the nested structure
+    const extractedMaterials = materials.map(item => item.props || item);
+
+    let filtered = extractedMaterials.filter(material => {
+        const matchesSearch = material.title?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+            material.subject?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+            material.uploadedBy?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+            material.course?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+            material.tags?.some((tag: string) => tag?.toLowerCase().includes(searchTerm?.toLowerCase()));
 
         const matchesCourse = !selectedCourse || material.course === selectedCourse;
         const matchesType = !selectedType || material.type === selectedType;
-        const matchesSemester = !selectedSemester || material.semester === selectedSemester;
+        const matchesSemester = !selectedSemester || material.semester === parseInt(selectedSemester);
         const matchesDifficulty = !selectedDifficulty || material.difficulty === selectedDifficulty;
 
         return matchesSearch && matchesCourse && matchesType && matchesSemester && matchesDifficulty;
@@ -66,9 +69,9 @@ export const filterMaterials = (
     filtered.sort((a, b) => {
         switch (sortBy) {
             case 'newest':
-                return new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime();
+                return new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime();
             case 'oldest':
-                return new Date(a.uploadDate).getTime() - new Date(b.uploadDate).getTime();
+                return new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime();
             case 'downloads':
                 return b.downloads - a.downloads;
             case 'views':

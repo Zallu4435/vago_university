@@ -5,7 +5,7 @@ interface DiplomaDetailsProps {
   isOpen: boolean;
   onClose: () => void;
   diploma: {
-    _id: string;
+    id: string;
     title: string;
     description: string;
     price: number;
@@ -84,7 +84,7 @@ const DiplomaDetails: React.FC<DiplomaDetailsProps> = ({ isOpen, onClose, diplom
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-purple-100">{diploma.title}</h2>
-                <p className="text-sm text-purple-300">Diploma ID: {diploma._id.slice(-8).toUpperCase()}</p>
+                <p className="text-sm text-purple-300">Diploma ID: {diploma.id.slice(-8).toUpperCase()}</p>
               </div>
             </div>
             <button
@@ -100,7 +100,7 @@ const DiplomaDetails: React.FC<DiplomaDetailsProps> = ({ isOpen, onClose, diplom
           <div className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-6">
               <span className="px-4 py-2 bg-gray-800/80 border border-purple-600/30 rounded-lg text-sm text-purple-300">
-                ID: {diploma._id.slice(-8).toUpperCase()}
+                ID: {diploma.id.slice(-8).toUpperCase()}
               </span>
               <span className="px-4 py-2 bg-gray-800/80 border border-purple-600/30 rounded-lg text-sm text-purple-300">
                 {diploma.status ? 'Active' : 'Inactive'}

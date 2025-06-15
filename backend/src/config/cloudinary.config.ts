@@ -43,6 +43,17 @@ const messageAttachmentStorage = new CloudinaryStorage({
   } as any,
 });
 
+// Storage engine for videos
+const videoStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'videos',
+    resource_type: 'video',
+    allowed_formats: ['mp4', 'mov', 'avi'],
+    transformation: [{ quality: 'auto' }],
+  } as any,
+});
+
 // Multer instances
 const facultyUpload = multer({ 
   storage: facultyStorage,
@@ -56,5 +67,9 @@ const messageAttachmentUpload = multer({
   storage: messageAttachmentStorage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
 });
+const videoUpload = multer({ 
+  storage: videoStorage,
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit for videos
+});
 
-export { cloudinary, facultyUpload, profilePictureUpload, messageAttachmentUpload };
+export { cloudinary, facultyUpload, profilePictureUpload, messageAttachmentUpload, videoUpload };

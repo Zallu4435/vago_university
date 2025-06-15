@@ -8,12 +8,12 @@ import VideoPreviewModal from './VideoPreviewModal';
 import { useVideoManagement } from '../../../hooks/useVideoManagement';
 
 interface Video {
-  _id: string; // Changed from id to _id
+  _id: string;
   title: string;
   duration: string;
   uploadedAt: string;
   module: number;
-  status: string;
+  status: "Published" | "Draft";
   diplomaId: string;
   description: string;
 }
@@ -21,7 +21,12 @@ interface Video {
 interface Diploma {
   _id: string;
   title: string;
-  videoCount: number; // Derived from videoIds.length
+  videoIds: string[];
+}
+
+interface Filters {
+  status: string;
+  category: string;
 }
 
 const VideoManagementPage = () => {
@@ -31,7 +36,7 @@ const VideoManagementPage = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
-  const [filters, setFilters] = useState<{ [key: string]: string | undefined }>({ status: 'all', diploma: '' });
+  const [filters, setFilters] = useState<Filters>({ status: 'all', category: '' });
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -46,23 +51,23 @@ const VideoManagementPage = () => {
 
   const filterOptions = {
     status: ['All Status', 'Published', 'Draft'],
-    diplomas: diplomasData?.diplomas || [],
+    categories: diplomasData?.diplomas.map(d => d.title) || [],
   };
 
-  const debouncedFilterChange = debounce((field: string, value: string) => {
+  const debouncedFilterChange = (field: string, value: string) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
     setPage(1);
-  }, 500);
+  };
 
   const handleResetFilters = () => {
-    setFilters({ status: 'all', diploma: '' });
+    setFilters({ status: 'all', category: '' });
     setSearchQuery('');
     setPage(1);
   };
 
   const filteredVideos = (videosData?.videos || [])
     .filter(video => 
-      filters.diploma ? video.diplomaId === filters.diploma : true
+      filters.category ? video.diplomaId === filters.category : true
     )
     .filter(video => 
       video.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -95,14 +100,14 @@ const VideoManagementPage = () => {
     setPage(1);
   };
 
-  const onSaveVideo = (videoData: Partial<Video>) => {
-    handleSaveVideo(videoData, filters.diploma || '', selectedVideo);
+  const onSaveVideo = (videoData: FormData | Partial<Video>) => {
+    handleSaveVideo(videoData, filters.category || '', selectedVideo);
     setShowAddModal(false);
     setSelectedVideo(null);
   };
 
   const onDeleteVideo = (video: Video) => {
-    handleDeleteVideo(video, filters.diploma || '');
+    handleDeleteVideo(video);
   };
 
   if (isLoadingDiplomas || isLoadingVideos) {

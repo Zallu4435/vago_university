@@ -3,6 +3,8 @@ export interface IHttpRequest {
   body?: any;
   query?: any;
   params?: any;
+  file?: Express.Multer.File;
+  files?: Express.Multer.File[];
   user?: {
     id: string;
     collection: 'register' | 'admin' | 'user' | 'faculty';
@@ -29,7 +31,9 @@ export class HttpRequest implements IHttpRequest {
       firstName: string;
       lastName: string;
       email: string;
-    }
+    },
+    public file?: Express.Multer.File,    
+    public files?: Express.Multer.File[]
   ) {}
 }
 
@@ -126,4 +130,38 @@ export interface ICourseEnrollmentController extends IController {
   getEnrollmentDetails(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   approveEnrollment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   rejectEnrollment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface IDiplomaController extends IController {
+  getDiplomas(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getDiplomaById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  createDiploma(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateDiploma(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  deleteDiploma(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface IVideoController extends IController {
+  getVideos(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getVideoById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  createVideo(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateVideo(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  deleteVideo(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface IMaterialController extends IController {
+  getMaterials(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getMaterialById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  createMaterial(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateMaterial(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  deleteMaterial(httpRequest: IHttpResponse): Promise<IHttpResponse>;
+}
+
+export interface IUserMaterialController extends IController {
+  getMaterials(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getMaterialById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  toggleBookmark(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  toggleLike(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  downloadMaterial(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getBookmarkedMaterials(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getLikedMaterials(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }

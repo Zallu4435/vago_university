@@ -146,81 +146,81 @@ export default function SessionManagement() {
   };
 
   return (
-    <div className="h-[calc(100vh-70px)] bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      <div className="h-full flex flex-col">
-        {/* Fixed Header Section */}
-        <div className="flex-none p-6">
-          <div className="max-w-7xl mx-auto space-y-8">
-            {/* Header */}
-            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                    Session Management
-                  </h2>
-                  <p className="text-gray-500">Manage live and recorded sessions for your courses</p>
-                </div>
-                <button
-                  onClick={() => setShowCreateModal(true)}
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl hover:from-indigo-600 hover:to-purple-700 transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2"
-                >
-                  <FaPlus size={16} />
-                  <span>Create Session</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Filters */}
-            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-6">
-              <div className="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
-                <div className="flex-1 relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                  <div className="relative bg-white rounded-2xl border-2 border-gray-100 focus-within:border-indigo-300 transition-all">
-                    <FaSearch size={20} className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
-                    <input
-                      type="text"
-                      placeholder="Search by title or instructor..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-14 pr-6 py-4 bg-transparent border-none focus:outline-none text-gray-700 placeholder-gray-400 text-lg"
-                    />
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+      <div className="h-full w-full px-6">
+        <div className="max-w-7xl mx-auto flex flex-col">
+          {/* Fixed Header Section */}
+          <div className="flex-none py-6">
+            <div className="space-y-8">
+              {/* Header */}
+              <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                      Session Management
+                    </h2>
+                    <p className="text-gray-500">Manage live and recorded sessions for your courses</p>
                   </div>
-                </div>
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="relative px-6 py-4 bg-white border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-300 text-gray-700 font-medium cursor-pointer hover:border-indigo-200 transition-all"
+                  <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl hover:from-indigo-600 hover:to-purple-700 transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2"
                   >
-                    <option value="all">All Status</option>
-                    <option value="upcoming">Upcoming</option>
-                    <option value="live">Live</option>
-                    <option value="completed">Completed</option>
-                  </select>
+                    <FaPlus size={16} />
+                    <span>Create Session</span>
+                  </button>
                 </div>
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                  <select
-                    value={filterCourse}
-                    onChange={(e) => setFilterCourse(e.target.value)}
-                    className="relative px-6 py-4 bg-white border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-300 text-gray-700 font-medium cursor-pointer hover:border-indigo-200 transition-all"
-                  >
-                    <option value="all">All Courses</option>
-                    <option>Database Systems</option>
-                    <option>Web Development</option>
-                    <option>Data Structures</option>
-                    <option>Algorithms</option>
-                  </select>
+              </div>
+
+              {/* Filters */}
+              <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-6">
+                <div className="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
+                  <div className="flex-1 relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                    <div className="relative bg-white rounded-2xl border-2 border-gray-100 focus-within:border-indigo-300 transition-all">
+                      <FaSearch size={20} className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                      <input
+                        type="text"
+                        placeholder="Search by title or instructor..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-14 pr-6 py-4 bg-transparent border-none focus:outline-none text-gray-700 placeholder-gray-400 text-lg"
+                      />
+                    </div>
+                  </div>
+                  <div className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                      className="relative px-6 py-4 bg-white border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-300 text-gray-700 font-medium cursor-pointer hover:border-indigo-200 transition-all"
+                    >
+                      <option value="all">All Status</option>
+                      <option value="upcoming">Upcoming</option>
+                      <option value="live">Live</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                  </div>
+                  <div className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                    <select
+                      value={filterCourse}
+                      onChange={(e) => setFilterCourse(e.target.value)}
+                      className="relative px-6 py-4 bg-white border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-300 text-gray-700 font-medium cursor-pointer hover:border-indigo-200 transition-all"
+                    >
+                      <option value="all">All Courses</option>
+                      <option>Database Systems</option>
+                      <option>Web Development</option>
+                      <option>Data Structures</option>
+                      <option>Algorithms</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Scrollable Table Section */}
-        <div className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto h-full">
+          {/* Scrollable Table Section */}
+          <div className="flex-1 pb-6">
             <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 h-full">
               <div className="h-full overflow-auto">
                 <table className="w-full">

@@ -11,22 +11,24 @@ interface Video {
   duration: string;
   uploadedAt: string;
   module: number;
-  status: string;
+  status: "Published" | "Draft";
   diplomaId: string;
   description: string;
+  videoFile?: File;
 }
 
 interface AddVideoModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedVideo: Video | null;
-  diplomas: { _id: string; title: string; videoCount: number }[];
-  onSave: (videoData: Partial<Video>) => void;
+  onSave: (videoData: FormData | Partial<Video>) => void;
 }
+
+const CATEGORIES = ['Programming', 'Data Science', 'Business', 'Design', 'Marketing'];
 
 const videoSchema = z.object({
   title: z.string().min(2, 'Video title must be at least 2 characters'),
-  diplomaId: z.string().min(1, 'Diploma is required'),
+  category: z.string().min(1, 'Category is required'),
   module: z.number().min(1, 'Module must be at least 1'),
   order: z.number().min(1, 'Order must be at least 1').optional(),
   description: z.string().optional(),
@@ -39,7 +41,6 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
   isOpen,
   onClose,
   selectedVideo,
-  diplomas,
   onSave,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -54,7 +55,7 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
     resolver: zodResolver(videoSchema),
     defaultValues: {
       title: selectedVideo?.title || '',
-      diplomaId: selectedVideo?.diplomaId || '',
+      category: selectedVideo?.diplomaId || '',
       module: selectedVideo?.module || 1,
       order: 1,
       description: selectedVideo?.description || '',
@@ -85,21 +86,35 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
   };
 
   const handleFormSubmit = async (data: VideoFormData) => {
-    if (!selectedFile) {
+    if (!selectedFile && !selectedVideo) {
       alert('Please select a video file');
       return;
     }
 
-    const videoData: Partial<Video> = {
-      title: data.title,
-      diplomaId: data.diplomaId,
-      module: data.module,
-      status: data.status,
-      description: data.description || '',
-      duration: '0:00', // This will be updated after video processing
-    };
+    if (!data.category) {
+      alert('Please select a category');
+      return;
+    }
 
-    onSave(videoData);
+    // Create FormData object
+    const formData = new FormData();
+    formData.append('title', data.title);
+    formData.append('category', data.category);
+    formData.append('module', data.module.toString());
+    formData.append('status', data.status);
+    formData.append('description', data.description || '');
+    formData.append('duration', '0:00');
+    if (selectedFile) {
+    formData.append('videoFile', selectedFile);
+    }
+
+    try {
+      await onSave(formData);
+      onClose();
+    } catch (error) {
+      console.error('Error saving video:', error);
+      alert(error instanceof Error ? error.message : 'Failed to save video');
+    }
   };
 
   if (!isOpen) return null;
@@ -153,29 +168,29 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
 
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
-                      Diploma *
+                      Category *
                     </label>
                     <Controller
-                      name="diplomaId"
+                      name="category"
                       control={control}
                       render={({ field }) => (
                         <select
                           {...field}
                           className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.diplomaId ? 'border-red-500' : 'border-purple-500/30'
+                            errors.category ? 'border-red-500' : 'border-purple-500/30'
                           }`}
                         >
-                          <option value="">Select a diploma</option>
-                          {diplomas.map((diploma) => (
-                            <option key={diploma._id} value={diploma._id}>
-                              {diploma.title}
+                          <option value="">Select a category</option>
+                          {CATEGORIES.map((category) => (
+                            <option key={category} value={category}>
+                              {category}
                             </option>
                           ))}
                         </select>
                       )}
                     />
-                    {errors.diplomaId && (
-                      <p className="mt-1 text-sm text-red-400">{errors.diplomaId.message}</p>
+                    {errors.category && (
+                      <p className="mt-1 text-sm text-red-400">{errors.category.message}</p>
                     )}
                   </div>
 
@@ -341,33 +356,31 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
               </div>
             </div>
 
-            <div className="border-t border-purple-500/30 bg-gray-900/80 p-6">
-              <div className="flex justify-end gap-4">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-gray-500/50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-blue-500/50 flex items-center justify-center"
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      {selectedVideo ? 'Updating...' : 'Saving...'}
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <FiCheck className="h-4 w-4" />
-                      <span>{selectedVideo ? 'Update Video' : 'Save Video'}</span>
-                    </div>
-                  )}
-                </button>
-              </div>
+            <div className="flex justify-end gap-4 mt-6">
+              <button
+                type="button"
+                onClick={onClose}
+                className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-gray-500/50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-blue-500/50 flex items-center justify-center"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    {selectedVideo ? 'Updating...' : 'Saving...'}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <FiCheck className="h-4 w-4" />
+                    <span>{selectedVideo ? 'Update Video' : 'Save Video'}</span>
+                  </div>
+                )}
+              </button>
             </div>
           </form>
         </div>

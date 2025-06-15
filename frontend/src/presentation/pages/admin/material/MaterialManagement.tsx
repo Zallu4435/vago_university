@@ -74,11 +74,10 @@ const materialColumns = [
     key: 'isRestricted',
     render: (material: Material) => (
       <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          material.isRestricted
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${material.isRestricted
             ? 'bg-red-900/30 text-red-400 border-red-500/30'
             : 'bg-green-900/30 text-green-400 border-green-500/30'
-        }`}
+          }`}
       >
         <span className="h-1.5 w-1.5 rounded-full mr-1.5" style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}></span>
         {material.isRestricted ? 'Restricted' : 'Public'}

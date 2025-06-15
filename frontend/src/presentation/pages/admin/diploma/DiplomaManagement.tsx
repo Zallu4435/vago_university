@@ -11,7 +11,7 @@ import EnrollmentDetails from './EnrollmentDetails';
 import { debounce } from 'lodash';
 
 interface Diploma {
-    _id: string;
+    id: string;
     title: string;
     description: string;
     price: number;
@@ -27,7 +27,7 @@ interface Diploma {
 }
 
 interface Enrollment {
-    _id: string;
+    id: string;
     studentName: string;
     studentEmail: string;
     courseTitle: string;
@@ -276,12 +276,12 @@ const DiplomaManagement: React.FC = () => {
     const handleSaveDiploma = async (formData: Partial<Diploma>) => {
         try {
             if (editingDiploma) {
-                await updateDiploma({ id: editingDiploma._id, data: formData });
+                await updateDiploma({ id: editingDiploma.id, data: formData });
             } else {
                 await createDiploma({
                     ...formData,
                     videoIds: [],
-                } as Omit<Diploma, '_id' | 'createdAt' | 'updatedAt'>);
+                } as Omit<Diploma, 'id' | 'createdAt' | 'updatedAt'>);
             }
             setShowDiplomaModal(false);
             setEditingDiploma(null);
@@ -292,7 +292,7 @@ const DiplomaManagement: React.FC = () => {
 
     const handleConfirmDelete = async () => {
         if (diplomaToDelete) {
-            await deleteDiploma(diplomaToDelete._id);
+            await deleteDiploma(diplomaToDelete.id);
             setShowDeleteWarning(false);
             setDiplomaToDelete(null);
         }
@@ -300,7 +300,7 @@ const DiplomaManagement: React.FC = () => {
 
     const handleConfirmApprove = async () => {
         if (selectedEnrollment) {
-            await approveEnrollment(selectedEnrollment._id);
+            await approveEnrollment(selectedEnrollment.id);
             setShowApproveWarning(false);
             setSelectedEnrollment(null);
         }
@@ -308,7 +308,7 @@ const DiplomaManagement: React.FC = () => {
 
     const handleConfirmReject = async () => {
         if (selectedEnrollment && rejectReason) {
-            await rejectEnrollment({ requestId: selectedEnrollment._id, reason: rejectReason });
+            await rejectEnrollment({ requestId: selectedEnrollment.id, reason: rejectReason });
             setShowRejectWarning(false);
             setSelectedEnrollment(null);
             setRejectReason('');
@@ -317,7 +317,7 @@ const DiplomaManagement: React.FC = () => {
 
     const handleConfirmReset = async () => {
         if (selectedEnrollment) {
-            await resetProgress(selectedEnrollment._id);
+            await resetProgress(selectedEnrollment.id);
             setShowResetWarning(false);
             setSelectedEnrollment(null);
         }
@@ -328,7 +328,7 @@ const DiplomaManagement: React.FC = () => {
             icon: <FiEye size={16} />,
             label: 'View Diploma',
             onClick: (diploma: Diploma) => {
-                handleViewDiploma(diploma._id);
+                handleViewDiploma(diploma.id);
                 setShowDiplomaDetail(true);
             },
             color: 'blue' as const,
@@ -337,7 +337,7 @@ const DiplomaManagement: React.FC = () => {
             icon: <FiEdit size={16} />,
             label: 'Edit Diploma',
             onClick: (diploma: Diploma) => {
-                handleEditDiploma(diploma._id);
+                handleEditDiploma(diploma.id);
                 setEditingDiploma(diploma);
                 setShowDiplomaModal(true);
             },
@@ -359,7 +359,7 @@ const DiplomaManagement: React.FC = () => {
             icon: <FiEye size={16} />,
             label: 'View Details',
             onClick: (enrollment: Enrollment) => {
-                handleViewEnrollment(enrollment._id);
+                handleViewEnrollment(enrollment.id);
                 setShowEnrollmentDetails(true);
             },
             color: 'blue' as const,

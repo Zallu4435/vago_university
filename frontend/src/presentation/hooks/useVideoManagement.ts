@@ -8,7 +8,7 @@ interface Video {
   duration: string;
   uploadedAt: string;
   module: number;
-  status: string;
+  status: "Published" | "Draft";
   diplomaId: string;
   description: string;
 }
@@ -16,10 +16,10 @@ interface Video {
 interface Diploma {
   _id: string;
   title: string;
-  videoCount: number;
+  videoIds: string[];
 }
 
-export const useVideoManagement = (page: number, itemsPerPage: number, filters: { status: string; diploma: string }, activeTab: string) => {
+export const useVideoManagement = (page: number, itemsPerPage: number, filters: { status: string; category: string }, activeTab: string) => {
   const queryClient = useQueryClient();
 
   // Fetch diplomas
@@ -27,20 +27,20 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
     queryKey: ['diplomas'],
     queryFn: async () => {
       const { diplomas } = await diplomaService.getDiplomas(1, 100);
-      return { diplomas: diplomas.map(d => ({ _id: d._id, title: d.title, videoCount: d.videoIds.length })) };
+      return { diplomas };
     },
   });
 
   // Fetch videos
   const { data: videosData, isLoading: isLoadingVideos } = useQuery<{ videos: Video[]; totalPages: number }, Error>({
     queryKey: ['videos', page, filters, activeTab],
-    queryFn: () => diplomaService.getVideos(filters.diploma || '', page, itemsPerPage, activeTab === 'all' ? undefined : activeTab),
+    queryFn: () => diplomaService.getVideos(filters.category || '', page, itemsPerPage, activeTab === 'all' ? undefined : activeTab),
   });
 
   // Create video mutation
   const createVideoMutation = useMutation({
-    mutationFn: ({ diplomaId, videoData }: { diplomaId: string; videoData: Omit<Video, '_id' | 'uploadedAt'> }) =>
-      diplomaService.createVideo(diplomaId, videoData),
+    mutationFn: ({ category, videoData }: { category: string; videoData: FormData }) =>
+      diplomaService.createVideo(category, videoData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['videos'] });
       queryClient.invalidateQueries({ queryKey: ['diplomas'] });
@@ -66,8 +66,7 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
 
   // Delete video mutation
   const deleteVideoMutation = useMutation({
-    mutationFn: ({ diplomaId, videoId }: { diplomaId: string; videoId: string }) =>
-      diplomaService.deleteVideo(diplomaId, videoId),
+    mutationFn: (videoId: string) => diplomaService.deleteVideo(videoId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['videos'] });
       queryClient.invalidateQueries({ queryKey: ['diplomas'] });
@@ -79,33 +78,37 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
   });
 
   // Handle video save (create or update)
-  const handleSaveVideo = (videoData: Partial<Video>, diplomaId: string, selectedVideo: Video | null) => {
-    if (!diplomaId) {
-      toast.error('Please select a diploma first');
-      return;
-    }
-
-    const data = {
-      title: videoData.title || '',
-      duration: videoData.duration || '',
-      module: videoData.module || 1,
-      status: videoData.status || 'Draft',
-      description: videoData.description || '',
-      diplomaId: diplomaId,
-    };
-
-    if (selectedVideo) {
-      updateVideoMutation.mutate({ videoId: selectedVideo._id, videoData: data });
-    } else {
-      createVideoMutation.mutate({ diplomaId, videoData: data });
+  const handleSaveVideo = async (videoData: FormData | Partial<Video>): Promise<void> => {
+    try {
+      if (videoData instanceof FormData) {
+        // For new video creation
+        const category = videoData.get('category');
+        if (!category) {
+          throw new Error('Please select a category for the new video');
+        }
+        await createVideoMutation.mutateAsync({ 
+          category: category.toString(), 
+          videoData 
+        });
+      } else {
+        // For video updates
+        if (!videoData._id) {
+          throw new Error('Video ID is required for updates');
+        }
+        await updateVideoMutation.mutateAsync({ 
+          videoId: videoData._id, 
+          videoData 
+        });
+      }
+    } catch (error) {
+      console.error('Error saving video:', error);
+      throw error;
     }
   };
 
   // Handle video delete
-  const handleDeleteVideo = (video: Video, diplomaId: string) => {
-    if (diplomaId) {
-      deleteVideoMutation.mutate({ diplomaId, videoId: video._id });
-    }
+  const handleDeleteVideo = (video: Video) => {
+    deleteVideoMutation.mutate(video._id);
   };
 
   return {

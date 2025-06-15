@@ -10,8 +10,8 @@ import { getFileIcon, getDifficultyColor, formatDate, formatNumber } from '../ut
 interface MaterialCardProps {
     material: Material;
     onDownload: (material: Material) => void;
-    onBookmark: (materialId: number) => void;
-    onLike: (materialId: number) => void;
+    onBookmark: (materialId: string) => void;
+    onLike: (materialId: string) => void;
     isBookmarked: boolean;
     isLiked: boolean;
 }
@@ -30,7 +30,7 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
         <div className={`group rounded-2xl shadow-sm transition-all duration-300 ${styles.card.border} overflow-hidden transform hover:-translate-y-1 flex flex-col h-[600px] w-full ${styles.card.background} ${styles.card.hover}`}>
             <div className="relative h-48 aspect-w-16 aspect-h-9 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                 <img
-                    src={material.thumbnail}
+                    src={material.thumbnailUrl}
                     alt={material.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
@@ -48,7 +48,7 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
                 </div>
                 <div className="absolute top-3 right-3 flex items-center space-x-1">
                     <button
-                        onClick={() => onBookmark(material.id)}
+                        onClick={() => onBookmark(material._id)}
                         className={`p-2 rounded-full backdrop-blur-sm transition-all duration-200 ${
                             isBookmarked || material.isBookmarked
                                 ? styles.button.primary
@@ -116,7 +116,7 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
                         <div className={`text-xs ${styles.textTertiary}`}>Views</div>
                     </div>
                     <div className="text-sm">
-                        <div className="flex items-center justify-center text-yellow-400 mb-1">
+                        <div className={`flex items-center justify-center text-yellow-400 mb-1`}>
                             <FiStar size={14} fill="currentColor" />
                         </div>
                         <div className={`font-semibold ${styles.textPrimary}`}>{material.rating}</div>
@@ -130,7 +130,10 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
                             <FiUser size={14} className={`mr-2 ${styles.icon.primary}`} />
                             <span className="truncate">{material.uploadedBy}</span>
                         </div>
-                        <span className={styles.textTertiary}>{material.fileSize}</span>
+                        <div className={`flex items-center ${styles.textTertiary} truncate max-w-[200px]`}>
+                            <FiCalendar size={14} className="mr-1" />
+                            <span className="truncate">{formatDate(material.uploadedAt)}</span>
+                        </div>
                     </div>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center truncate max-w-[200px]">
@@ -138,8 +141,8 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
                             <span className="truncate">{material.estimatedTime}</span>
                         </div>
                         <div className={`flex items-center ${styles.textTertiary} truncate max-w-[200px]`}>
-                            <FiCalendar size={14} className="mr-1" />
-                            <span className="truncate">{formatDate(material.uploadDate)}</span>
+                            <FiBook size={14} className="mr-1" />
+                            <span className="truncate">Semester {material.semester}</span>
                         </div>
                     </div>
                 </div>
@@ -154,7 +157,7 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
                         Download
                     </button>
                     <button
-                        onClick={() => onLike(material.id)}
+                        onClick={() => onLike(material._id)}
                         className={`p-2.5 rounded-xl transition-all duration-200 ${
                             isLiked || material.isLiked
                                 ? `${styles.status.error} ${styles.button.primary}`
@@ -165,10 +168,15 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
                         <FiHeart size={16} fill={isLiked || material.isLiked ? "currentColor" : "none"} />
                     </button>
                     <button
-                        className={`p-2.5 rounded-xl ${styles.button.secondary} transition-all duration-200`}
-                        aria-label={`Share ${material.title}`}
+                        onClick={() => onBookmark(material._id)}
+                        className={`p-2.5 rounded-xl transition-all duration-200 ${
+                            isBookmarked || material.isBookmarked
+                                ? styles.button.primary
+                                : styles.button.secondary
+                        }`}
+                        aria-label={`Bookmark ${material.title}`}
                     >
-                        <FiShare2 size={16} />
+                        <FiBookmark size={16} fill={isBookmarked || material.isBookmarked ? "currentColor" : "none"} />
                     </button>
                     <button
                         className={`p-2.5 rounded-xl ${styles.button.secondary} transition-all duration-200`}

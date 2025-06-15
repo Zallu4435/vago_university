@@ -3,17 +3,17 @@ import { Material } from '../types/MaterialTypes';
 import { usePreferences } from '../../../../context/PreferencesContext';
 import {
     FiDownload, FiBookmark, FiHeart, FiLock, FiStar,
-    FiEye, FiClock, FiCalendar, FiUser
+    FiEye, FiClock, FiCalendar, FiUser, FiBook
 } from 'react-icons/fi';
 import { getFileIcon, getDifficultyColor, formatDate, formatNumber } from '../utils/materialUtils';
 
 interface MaterialTableProps {
     materials: Material[];
     onDownload: (material: Material) => void;
-    onBookmark: (materialId: number) => void;
-    onLike: (materialId: number) => void;
-    bookmarkedMaterials: Set<number>;
-    likedMaterials: Set<number>;
+    onBookmark: (materialId: string) => void;
+    onLike: (materialId: string) => void;
+    bookmarkedMaterials: Set<string>;
+    likedMaterials: Set<string>;
 }
 
 const MaterialTable: React.FC<MaterialTableProps> = ({
@@ -78,14 +78,23 @@ const MaterialTable: React.FC<MaterialTableProps> = ({
                                         <div className="text-sm">
                                             <div className={`font-medium ${styles.textPrimary} truncate max-w-[150px]`}>{material.course}</div>
                                             <div className={`${styles.textSecondary} truncate max-w-[150px]`}>{material.subject}</div>
-                                            <div className={`text-xs ${styles.textTertiary} mt-1 truncate max-w-[150px]`}>{material.semester}</div>
+                                            <div className={`text-xs ${styles.textTertiary} mt-1 flex items-center truncate max-w-[150px]`}>
+                                                <FiBook size={12} className="mr-1" />
+                                                Semester {material.semester}
+                                            </div>
                                         </div>
                                     </td>
                                     <td className="py-6 px-6 w-[20%]">
                                         <div className="text-sm">
                                             <div className={`font-medium ${styles.textPrimary} truncate max-w-[150px]`}>{material.uploadedBy}</div>
-                                            <div className={`text-xs ${styles.textSecondary} mt-1 truncate max-w-[150px]`}>{formatDate(material.uploadDate)}</div>
-                                            <div className={`text-xs ${styles.textTertiary} truncate max-w-[150px]`}>{material.fileSize}</div>
+                                            <div className={`text-xs ${styles.textSecondary} mt-1 flex items-center truncate max-w-[150px]`}>
+                                                <FiCalendar size={12} className="mr-1" />
+                                                {formatDate(material.uploadedAt)}
+                                            </div>
+                                            <div className={`text-xs ${styles.textTertiary} flex items-center truncate max-w-[150px]`}>
+                                                <FiClock size={12} className="mr-1" />
+                                                {material.estimatedTime}
+                                            </div>
                                         </div>
                                     </td>
                                     <td className="py-6 px-6 w-[15%]">

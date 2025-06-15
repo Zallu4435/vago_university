@@ -109,9 +109,11 @@ export default function Submissions({ assignment, submissions = mockSubmissions,
     setShowReviewModal(true);
   };
 
-  const filteredSubmissions = submissions.filter(submission => {
-    const matchesSearch = submission.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        submission.studentId.toLowerCase().includes(searchTerm.toLowerCase());
+  console.log(submissions, "sopkspspokspokskpo")
+
+  const filteredSubmissions = submissions?.filter(submission => {
+    const matchesSearch = submission.studentName?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+                        submission.studentId?.toLowerCase().includes(searchTerm?.toLowerCase());
     const matchesStatus = filterStatus === 'all' || submission.status === filterStatus;
     return matchesSearch && matchesStatus;
   });

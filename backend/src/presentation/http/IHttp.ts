@@ -165,3 +165,16 @@ export interface IUserMaterialController extends IController {
   getBookmarkedMaterials(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getLikedMaterials(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
+
+export interface IAssignmentController extends IController {
+  getAssignments(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAssignmentById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  createAssignment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateAssignment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  deleteAssignment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getSubmissions(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getSubmissionById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  reviewSubmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  downloadSubmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAnalytics(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}

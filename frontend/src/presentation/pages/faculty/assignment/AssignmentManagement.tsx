@@ -1,17 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import AssignmentList from './AssignmentList';
 import Submissions from './Submissions';
-import Analytics from './Analytics';
+import Analytics from './components/Analytics';
 import CreateAssignmentModal from './CreateAssignmentModal';
-import { Assignment, NewAssignment, Submission } from './types';
 import ReviewModal from './ReviewModal';
+import { useAssignmentManagement } from './hooks/useAssignmentManagement';
+import { NewAssignment } from './types';
 
 export default function AssignmentManagement() {
     const [activeTab, setActiveTab] = useState('all-assignments');
-    const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showReviewModal, setShowReviewModal] = useState(false);
-    const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [newAssignment, setNewAssignment] = useState<NewAssignment>({
         title: '',
         subject: '',
@@ -20,82 +19,51 @@ export default function AssignmentManagement() {
         description: '',
         files: []
     });
-    const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
 
-    // Mock data for submissions
-    const mockSubmissions: Submission[] = [
-        {
-            id: 1,
-            assignmentId: 1,
-            studentId: 'ST001',
-            studentName: 'Alice Johnson',
-            submittedDate: '2024-12-18T10:30:00Z',
-            status: 'reviewed',
-            marks: 85,
-            feedback: 'Excellent work on the database design!',
-            isLate: false,
-            files: ['database_design.pdf'],
-            fileName: 'database_design.pdf',
-            fileSize: '2.3 MB'
-        },
-        {
-            id: 2,
-            assignmentId: 1,
-            studentId: 'ST002',
-            studentName: 'Bob Smith',
-            submittedDate: '2024-12-19T15:45:00Z',
-            status: 'pending',
-            marks: null,
-            feedback: '',
-            isLate: true,
-            files: ['db_project.zip'],
-            fileName: 'db_project.zip',
-            fileSize: '5.1 MB'
-        },
-        {
-            id: 3,
-            assignmentId: 1,
-            studentId: 'ST003',
-            studentName: 'Carol Davis',
-            submittedDate: '2024-12-17T09:15:00Z',
-            status: 'needs_correction',
-            marks: 65,
-            feedback: 'Good effort, but needs improvements in normalization.',
-            isLate: false,
-            files: ['library_db.sql'],
-            fileName: 'library_db.sql',
-            fileSize: '1.8 MB'
+    const {
+        assignments,
+        submissions,
+        analytics,
+        selectedAssignment,
+        selectedSubmission,
+        isLoading,
+        error,
+        setSelectedAssignment,
+        setSelectedSubmission,
+        setShowAnalytics,
+        handleCreateAssignment,
+        handleUpdateAssignment,
+        handleDeleteAssignment,
+        handleReviewSubmission,
+        handleDownloadSubmission,
+        isCreating,
+        isUpdating,
+        isDeleting,
+        isReviewing
+    } = useAssignmentManagement();
+
+    const handleReview = async (submissionId: string, reviewData: { marks: number; feedback: string; status: 'reviewed' | 'pending' | 'needs_correction' }) => {
+        if (!selectedAssignment) return;
+        const success = await handleReviewSubmission(selectedAssignment._id, submissionId, reviewData);
+        if (success) {
+            setSelectedSubmission(reviewData.status === 'reviewed' ? submissions.find(s => s._id === submissionId) || null : null);
         }
-    ];
-
-    // Initialize submissions when an assignment is selected
-    useEffect(() => {
-        if (selectedAssignment) {
-            // In a real application, you would fetch submissions from an API
-            // For now, we'll use mock data
-            setSubmissions(mockSubmissions.filter(sub => sub.assignmentId === selectedAssignment.id));
-        }
-    }, [selectedAssignment]);
-
-    const handleReview = (submissionId: number, reviewData: { marks: number; feedback: string; status: 'reviewed' | 'pending' | 'needs_correction' }) => {
-        setSubmissions(submissions.map(sub =>
-            sub.id === submissionId ? { ...sub, ...reviewData } : sub
-        ));
     };
 
-    const handleDownload = (submissionId: number) => {
-        const submission = submissions.find(s => s.id === submissionId);
-        if (submission) {
-            // Implement download logic here
-            console.log('Downloading submission:', submission);
-        }
+    const handleDownload = async (submissionId: string) => {
+        if (!selectedAssignment) return;
+        await handleDownloadSubmission(selectedAssignment._id, submissionId);
     };
 
     const handleTabChange = (tabId: string) => {
         setActiveTab(tabId);
         if (tabId === 'submissions' && !selectedAssignment) {
-            // If no assignment is selected, show the assignment list first
             setActiveTab('all-assignments');
+        }
+        if (tabId === 'analytics') {
+            setShowAnalytics(true);
+        } else {
+            setShowAnalytics(false);
         }
     };
 
@@ -124,44 +92,43 @@ export default function AssignmentManagement() {
                 </div>
 
                 {/* Enhanced Navigation Tabs */}
-                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 overflow-hidden">
-                    <div className="flex bg-gradient-to-r from-gray-50 to-gray-100/50">
-                        {tabs.map((tab, index) => (
-                            <button
-                                key={tab.id}
-                                onClick={() => handleTabChange(tab.id)}
-                                className={`flex-1 px-8 py-6 text-sm font-semibold transition-all duration-300 relative overflow-hidden group ${
-                                    activeTab === tab.id
-                                        ? 'text-white bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg'
-                                        : 'text-gray-600 hover:text-indigo-600 hover:bg-white/80'
-                                }`}
-                            >
-                                <div className="flex items-center justify-center space-x-3 relative z-10">
-                                    <span className="text-xl">{tab.icon}</span>
-                                    <span>{tab.name}</span>
-                                </div>
-                                {activeTab === tab.id && (
-                                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 animate-pulse opacity-20"></div>
-                                )}
-                                {activeTab !== tab.id && (
-                                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                                )}
-                            </button>
-                        ))}
+                <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 overflow-hidden">
+                    <div className="flex items-center justify-between p-4 border-b border-gray-100">
+                        <div className="flex space-x-2">
+                            {tabs.map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => handleTabChange(tab.id)}
+                                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${activeTab === tab.id
+                                            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
+                                            : 'text-gray-600 hover:bg-gray-50'
+                                        }`}
+                                >
+                                    <span className="mr-2">{tab.icon}</span>
+                                    {tab.name}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Tab Content with Enhanced Animation */}
                     <div className="p-8">
                         <div className="transition-all duration-500 ease-in-out">
                             {activeTab === 'all-assignments' && (
                                 <div className="animate-fadeIn">
                                     <AssignmentList
+                                        assignments={assignments}
+                                        isLoading={isLoading}
+                                        error={error}
                                         setSelectedAssignment={(assignment) => {
                                             setSelectedAssignment(assignment);
                                             setActiveTab('submissions');
                                         }}
                                         setActiveTab={setActiveTab}
                                         setShowCreateModal={setShowCreateModal}
+                                        onDelete={handleDeleteAssignment}
+                                        isDeleting={isDeleting}
+                                        onUpdate={handleUpdateAssignment}
+                                        isUpdating={isUpdating}
                                     />
                                 </div>
                             )}
@@ -170,18 +137,22 @@ export default function AssignmentManagement() {
                                     <Submissions
                                         assignment={selectedAssignment}
                                         submissions={submissions}
-                                        onReview={(submissionId, reviewData) => {
-                                            handleReview(submissionId, reviewData);
-                                            setSelectedSubmission(reviewData.status === 'reviewed' ? submissions.find(s => s.id === submissionId) : null);
-                                        }}
+                                        onReview={handleReview}
                                         onDownload={handleDownload}
                                         setShowReviewModal={setShowReviewModal}
+                                        isLoading={isLoading}
+                                        isReviewing={isReviewing}
                                     />
                                 </div>
                             )}
                             {activeTab === 'analytics' && (
                                 <div className="animate-fadeIn">
-                                    <Analytics />
+                                    <Analytics
+                                        analytics={analytics}
+                                        isLoading={isLoading}
+                                        onShow={() => setShowAnalytics(true)}
+                                        onHide={() => setShowAnalytics(false)}
+                                    />
                                 </div>
                             )}
                         </div>
@@ -210,6 +181,10 @@ export default function AssignmentManagement() {
                                 newAssignment={newAssignment}
                                 setNewAssignment={setNewAssignment}
                                 setShowCreateModal={setShowCreateModal}
+                                onSubmit={handleCreateAssignment}
+                                isLoading={isCreating}
+                                selectedAssignment={selectedAssignment}
+                                onUpdate={handleUpdateAssignment}
                             />
                         </div>
                     </div>
@@ -224,11 +199,8 @@ export default function AssignmentManagement() {
                         <div className="transform animate-scaleIn w-full max-w-2xl">
                             <ReviewModal
                                 submission={selectedSubmission}
-                                saveReview={(submissionId, reviewData) => {
-                                    handleReview(submissionId, reviewData);
-                                    setShowReviewModal(false);
-                                    setSelectedSubmission(null);
-                                }}
+                                saveReview={handleReview}
+                                isLoading={isReviewing}
                             />
                         </div>
                     </div>

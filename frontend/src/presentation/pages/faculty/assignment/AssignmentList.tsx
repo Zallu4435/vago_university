@@ -1,61 +1,79 @@
-import { useState, useEffect } from 'react';
-import { FaSearch, FaFilter, FaEllipsisH, FaCalendar, FaClock, FaPlus, FaUsers, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
-import { Assignment } from './types';
+import { useState } from 'react';
+import { FaSearch, FaFilter, FaCalendar, FaPlus, FaUsers, FaCheckCircle, FaTrash, FaEdit } from 'react-icons/fa';
+import { Assignment } from './types/index';
+import WarningModal from '../../../components/WarningModal';
+import { assignmentService } from './services/assignmentService';
 
 interface AssignmentListProps {
+  assignments: Assignment[];
+  isLoading: boolean;
+  error: any;
   setSelectedAssignment: (assignment: Assignment) => void;
   setActiveTab: (tab: string) => void;
   setShowCreateModal: (show: boolean) => void;
+  onDelete: (id: string) => Promise<{ success: boolean; error?: string }>;
+  isDeleting: boolean;
+  onUpdate: (id: string, data: Partial<Assignment>) => Promise<{ success: boolean; error?: string }>;
+  isUpdating: boolean;
 }
 
-export default function AssignmentList({ setSelectedAssignment, setActiveTab, setShowCreateModal }: AssignmentListProps) {
+export default function AssignmentList({
+  assignments,
+  isLoading,
+  error,
+  setSelectedAssignment,
+  setActiveTab,
+  setShowCreateModal,
+  onDelete,
+  isDeleting,
+  isUpdating
+}: AssignmentListProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [assignments, setAssignments] = useState<Assignment[]>([
-    {
-      id: 1,
-      title: 'Database Design Project',
-      description: 'Design and implement a complete database system for a library management system.',
-      dueDate: '2024-12-20',
-      createdDate: '2024-11-15',
-      totalStudents: 45,
-      submitted: 38,
-      reviewed: 25,
-      late: 5,
-      status: 'active',
-      subject: 'Database Systems',
-      maxMarks: 100
-    },
-    {
-      id: 2,
-      title: 'React Component Development',
-      description: 'Create a set of reusable React components with proper documentation.',
-      dueDate: '2024-12-15',
-      createdDate: '2024-11-10',
-      totalStudents: 45,
-      submitted: 42,
-      reviewed: 40,
-      late: 3,
-      status: 'active',
-      subject: 'Web Development',
-      maxMarks: 80
-    }
-  ]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [assignmentToDelete, setAssignmentToDelete] = useState<Assignment | null>(null);
+  const [isFetchingAssignment, setIsFetchingAssignment] = useState(false);
 
-  const filteredAssignments = assignments.filter(assignment =>
-    assignment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    assignment.subject.toLowerCase().includes(searchTerm.toLowerCase())
+  const handleDeleteClick = (assignment: Assignment) => {
+    setAssignmentToDelete(assignment);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (assignmentToDelete) {
+      const result = await onDelete(assignmentToDelete._id);
+      if (result.success) {
+        setShowDeleteModal(false);
+        setAssignmentToDelete(null);
+      }
+    }
+  };
+
+  const handleEditClick = async (assignment: Assignment) => {
+    try {
+      setIsFetchingAssignment(true);
+      const response = await assignmentService.getAssignmentById(assignment._id);
+      const updatedAssignment = response?.assignment;
+
+      setSelectedAssignment(updatedAssignment);
+      setShowCreateModal(true);
+    } catch (error) {
+      console.error('Error fetching assignment details:', error);
+    } finally {
+      setIsFetchingAssignment(false);
+    }
+  };
+
+  const filteredAssignments = assignments?.filter(assignment =>
+    assignment.title?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+    assignment.subject?.toLowerCase().includes(searchTerm?.toLowerCase())
   );
 
   const getSubjectIcon = (subject: string) => {
-    if (subject.toLowerCase().includes('database')) return '🗄️';
-    if (subject.toLowerCase().includes('web')) return '🌐';
-    if (subject.toLowerCase().includes('mobile')) return '📱';
-    if (subject.toLowerCase().includes('ai') || subject.toLowerCase().includes('machine')) return '🤖';
+    if (subject?.toLowerCase().includes('database')) return '🗄️';
+    if (subject?.toLowerCase().includes('web')) return '🌐';
+    if (subject?.toLowerCase().includes('mobile')) return '📱';
+    if (subject?.toLowerCase().includes('ai') || subject.toLowerCase().includes('machine')) return '🤖';
     return '📘';
-  };
-
-  const getProgressPercentage = (submitted: number, total: number) => {
-    return Math.round((submitted / total) * 100);
   };
 
   const getStatusColor = (status: string) => {
@@ -66,6 +84,26 @@ export default function AssignmentList({ setSelectedAssignment, setActiveTab, se
       default: return 'from-blue-500 to-indigo-600';
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-16">
+        <div className="w-32 h-32 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center mx-auto mb-6">
+          <span className="text-6xl">⚠️</span>
+        </div>
+        <h3 className="text-2xl font-bold text-gray-600 mb-2">Error loading assignments</h3>
+        <p className="text-gray-500 mb-6">{error.message || 'Please try again later'}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -116,14 +154,14 @@ export default function AssignmentList({ setSelectedAssignment, setActiveTab, se
       {/* Enhanced Assignments Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
         {filteredAssignments.map((assignment, index) => (
-          <div 
-            key={assignment.id} 
+          <div
+            key={assignment._id}
             className="group relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-8 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 animate-fadeInUp"
             style={{ animationDelay: `${index * 0.1}s` }}
           >
             {/* Gradient Border Effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-xl"></div>
-            
+
             {/* Card Content */}
             <div className="relative z-10">
               {/* Header */}
@@ -140,9 +178,22 @@ export default function AssignmentList({ setSelectedAssignment, setActiveTab, se
                   </h3>
                   <p className="text-sm text-indigo-600 font-medium mb-3">{assignment.subject}</p>
                 </div>
-                <button className="p-3 text-gray-400 hover:text-gray-600 rounded-xl hover:bg-gray-100 transition-all group">
-                  <FaEllipsisH size={16} />
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    className="p-3 text-gray-400 hover:text-blue-600 rounded-xl hover:bg-blue-50 transition-all"
+                    onClick={() => handleEditClick(assignment)}
+                    disabled={isUpdating || isFetchingAssignment}
+                  >
+                    <FaEdit size={16} />
+                  </button>
+                  <button
+                    className="p-3 text-gray-400 hover:text-red-600 rounded-xl hover:bg-red-50 transition-all"
+                    onClick={() => handleDeleteClick(assignment)}
+                    disabled={isDeleting}
+                  >
+                    <FaTrash size={16} />
+                  </button>
+                </div>
               </div>
 
               {/* Description */}
@@ -155,47 +206,25 @@ export default function AssignmentList({ setSelectedAssignment, setActiveTab, se
                 <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl p-4 text-center border border-indigo-200">
                   <div className="flex items-center justify-center space-x-2 mb-1">
                     <FaUsers className="text-indigo-600" size={16} />
-                    <p className="text-2xl font-bold text-indigo-600">{assignment.submitted}</p>
+                    <p className="text-2xl font-bold text-indigo-600">{assignment.totalSubmissions}</p>
                   </div>
                   <p className="text-xs text-indigo-600 font-medium">Submitted</p>
                 </div>
                 <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-4 text-center border border-green-200">
                   <div className="flex items-center justify-center space-x-2 mb-1">
                     <FaCheckCircle className="text-green-600" size={16} />
-                    <p className="text-2xl font-bold text-green-600">{assignment.reviewed}</p>
+                    <p className="text-2xl font-bold text-green-600">{assignment.averageMarks || 0}</p>
                   </div>
-                  <p className="text-xs text-green-600 font-medium">Reviewed</p>
+                  <p className="text-xs text-green-600 font-medium">Average Marks</p>
                 </div>
               </div>
 
-              {/* Progress Bar */}
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-600">Progress</span>
-                  <span className="text-sm font-bold text-gray-800">
-                    {getProgressPercentage(assignment.submitted, assignment.totalStudents)}%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-1000 ease-out"
-                    style={{ width: `${getProgressPercentage(assignment.submitted, assignment.totalStudents)}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Due Date and Late Status */}
+              {/* Due Date */}
               <div className="flex items-center justify-between text-sm mb-6">
                 <div className="flex items-center space-x-2 text-gray-600">
                   <FaCalendar size={14} className="text-indigo-500" />
                   <span className="font-medium">Due: {new Date(assignment.dueDate).toLocaleDateString()}</span>
                 </div>
-                {assignment.late > 0 && (
-                  <div className="flex items-center space-x-2 bg-red-50 text-red-600 px-3 py-1 rounded-full border border-red-200">
-                    <FaExclamationCircle size={12} />
-                    <span className="text-xs font-bold">{assignment.late} late</span>
-                  </div>
-                )}
               </div>
 
               {/* Action Button */}
@@ -233,9 +262,25 @@ export default function AssignmentList({ setSelectedAssignment, setActiveTab, se
         </div>
       )}
 
+      {/* Delete Warning Modal */}
+      <div className="relative z-[9999]">
+        <WarningModal
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setAssignmentToDelete(null);
+          }}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Assignment"
+          message={assignmentToDelete ? `Are you sure you want to delete "${assignmentToDelete.title}"? This action cannot be undone.` : ''}
+          confirmText="Delete"
+          cancelText="Cancel"
+          type="danger"
+        />
+      </div>
+
       {/* Custom Styles */}
-      <style jsx>{`
-        @keyframes fadeInUp {
+      <style>{`        @keyframes fadeInUp {
           from {
             opacity: 0;
             transform: translateY(30px);
@@ -248,12 +293,6 @@ export default function AssignmentList({ setSelectedAssignment, setActiveTab, se
         .animate-fadeInUp {
           animation: fadeInUp 0.6s ease-out forwards;
           opacity: 0;
-        }
-        .line-clamp-3 {
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
         }
       `}</style>
     </div>

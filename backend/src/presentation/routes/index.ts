@@ -19,6 +19,7 @@ import diplomaRoutes from '../http/diploma/DiplomaRouter'
 import vedioRoutes from '../http/vedios/vedioRoutes'
 import materialRoutes from '../http/materials/materialRoutes'
 import userMaterialRoutes from '../http/materials/userMaterialRoutes'
+import assignmentRoutes from '../http/assignments/assignmentRoutes'
 
 const router = Router();
 router.use("/materials", userMaterialRoutes);
@@ -61,5 +62,6 @@ router.use("/admin/vedio", vedioRoutes);
 
 router.use("/admin/materials", materialRoutes);
 
+router.use("/faculty/assignments", assignmentRoutes);
 
 export default router;

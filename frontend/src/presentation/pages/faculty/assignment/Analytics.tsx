@@ -1,181 +1,235 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import Chart from 'chart.js/auto';
-import { Assignment, Submission } from './types';
 
-export default function Analytics() {
-  const [assignments] = useState<Assignment[]>([
-    {
-      id: 1,
-      title: 'Database Design Project',
-      description: 'Design and implement a complete database system for a library management system.',
-      dueDate: '2024-12-20',
-      createdDate: '2024-11-15',
-      totalStudents: 45,
-      submitted: 38,
-      reviewed: 25,
-      late: 5,
-      status: 'active',
-      subject: 'Database Systems',
-      maxMarks: 100
-    },
-    {
-      id: 2,
-      title: 'React Component Development',
-      description: 'Create a set of reusable React components with proper documentation.',
-      dueDate: '2024-12-15',
-      createdDate: '2024-11-10',
-      totalStudents: 45,
-      submitted: 42,
-      reviewed: 40,
-      late: 3,
-      status: 'active',
-      subject: 'Web Development',
-      maxMarks: 80
-    }
-  ]);
+interface AnalyticsProps {
+    analytics: {
+        totalAssignments: number;
+        totalSubmissions: number;
+        submissionRate: number;
+        averageMarks: number;
+        averageSubmissionTimeHours: number;
+        submissionStatus: {
+            reviewed: number;
+            pending: number;
+            needs_correction: number;
+        };
+        lateSubmissions: number;
+        submissionsByDate: {
+            date: string;
+            count: number;
+        }[];
+        marksDistribution: {
+            range: string;
+            count: number;
+        }[];
+        subjectDistribution: {
+            subject: string;
+            assignments: number;
+            submissions: number;
+            submissionRate: number;
+        }[];
+    } | null;
+    isLoading: boolean;
+    onShow: () => void;
+    onHide: () => void;
+}
 
-  const [submissions] = useState<Submission[]>([
-    {
-      id: 1,
-      assignmentId: 1,
-      studentName: 'John Doe',
-      studentId: 'CS2021001',
-      submittedDate: '2024-12-18',
-      isLate: false,
-      status: 'completed',
-      marks: 85,
-      feedback: 'Excellent work on the database design. Good use of normalization principles.',
-      fileName: 'john_doe_db_project.zip',
-      fileSize: '2.4 MB'
-    },
-    {
-      id: 2,
-      assignmentId: 1,
-      studentName: 'Jane Smith',
-      studentId: 'CS2021002',
-      submittedDate: '2024-12-21',
-      isLate: true,
-      status: 'pending',
-      marks: null,
-      feedback: '',
-      fileName: 'jane_smith_db_project.zip',
-      fileSize: '1.8 MB'
-    },
-    {
-      id: 3,
-      assignmentId: 1,
-      studentName: 'Mike Johnson',
-      studentId: 'CS2021003',
-      submittedDate: '2024-12-19',
-      isLate: false,
-      status: 'needs_revision',
-      marks: 65,
-      feedback: 'Good effort but needs improvement in query optimization. Please revise and resubmit.',
-      fileName: 'mike_johnson_db_project.zip',
-      fileSize: '3.1 MB'
-    }
-  ]);
+export default function Analytics({ analytics, isLoading, onShow, onHide }: AnalyticsProps) {
+    useEffect(() => {
+        onShow();
+        return () => onHide();
+    }, [onShow, onHide]);
 
-  useEffect(() => {
-    let submissionChart: Chart | null = null;
-    let statusChart: Chart | null = null;
+    useEffect(() => {
+        if (!analytics || isLoading) return;
 
-    const ctx = document.getElementById('submissionChart') as HTMLCanvasElement;
-    if (ctx) {
-      submissionChart = new Chart(ctx.getContext('2d')!, {
-        type: 'bar',
-        data: {
-          labels: assignments.map(a => a.title),
-          datasets: [{
-            label: 'Submitted',
-            data: assignments.map(a => a.submitted),
-            backgroundColor: 'rgba(99, 102, 241, 0.6)',
-          }, {
-            label: 'Reviewed',
-            data: assignments.map(a => a.reviewed),
-            backgroundColor: 'rgba(16, 185, 129, 0.6)',
-          }, {
-            label: 'Late',
-            data: assignments.map(a => a.late),
-            backgroundColor: 'rgba(239, 68, 68, 0.6)',
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: { beginAtZero: true }
-          }
+        let submissionChart: Chart | null = null;
+        let statusChart: Chart | null = null;
+        let marksChart: Chart | null = null;
+        let subjectChart: Chart | null = null;
+
+        // Submission Status Chart
+        const statusCtx = document.getElementById('statusChart') as HTMLCanvasElement;
+        if (statusCtx) {
+            statusChart = new Chart(statusCtx.getContext('2d')!, {
+                type: 'pie',
+                data: {
+                    labels: ['Reviewed', 'Pending', 'Needs Correction'],
+                    datasets: [{
+                        data: [
+                            analytics.submissionStatus.reviewed,
+                            analytics.submissionStatus.pending,
+                            analytics.submissionStatus.needs_correction
+                        ],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.6)',
+                            'rgba(234, 179, 8, 0.6)',
+                            'rgba(239, 68, 68, 0.6)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Submission Status Distribution'
+                        }
+                    }
+                }
+            });
         }
-      });
-    }
 
-    const pieCtx = document.getElementById('statusChart') as HTMLCanvasElement;
-    if (pieCtx) {
-      statusChart = new Chart(pieCtx.getContext('2d')!, {
-        type: 'pie',
-        data: {
-          labels: ['Completed', 'Pending', 'Needs Revision'],
-          datasets: [{
-            data: [
-              submissions.filter(s => s.status === 'completed').length,
-              submissions.filter(s => s.status === 'pending').length,
-              submissions.filter(s => s.status === 'needs_revision').length
-            ],
-            backgroundColor: [
-              'rgba(16, 185, 129, 0.6)',
-              'rgba(234, 179, 8, 0.6)',
-              'rgba(239, 68, 68, 0.6)'
-            ]
-          }]
-        },
-        options: {
-          responsive: true
+        // Submissions by Date Chart
+        const submissionCtx = document.getElementById('submissionChart') as HTMLCanvasElement;
+        if (submissionCtx) {
+            submissionChart = new Chart(submissionCtx.getContext('2d')!, {
+                type: 'line',
+                data: {
+                    labels: analytics.submissionsByDate.map(d => d.date),
+                    datasets: [{
+                        label: 'Submissions',
+                        data: analytics.submissionsByDate.map(d => d.count),
+                        borderColor: 'rgba(99, 102, 241, 0.6)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Submissions Over Time'
+                        }
+                    }
+                }
+            });
         }
-      });
+
+        // Marks Distribution Chart
+        const marksCtx = document.getElementById('marksChart') as HTMLCanvasElement;
+        if (marksCtx) {
+            marksChart = new Chart(marksCtx.getContext('2d')!, {
+                type: 'bar',
+                data: {
+                    labels: analytics.marksDistribution.map(m => m.range),
+                    datasets: [{
+                        label: 'Number of Submissions',
+                        data: analytics.marksDistribution.map(m => m.count),
+                        backgroundColor: 'rgba(99, 102, 241, 0.6)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Marks Distribution'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Subject Distribution Chart
+        const subjectCtx = document.getElementById('subjectChart') as HTMLCanvasElement;
+        if (subjectCtx) {
+            subjectChart = new Chart(subjectCtx.getContext('2d')!, {
+                type: 'bar',
+                data: {
+                    labels: analytics.subjectDistribution.map(s => s.subject),
+                    datasets: [{
+                        label: 'Assignments',
+                        data: analytics.subjectDistribution.map(s => s.assignments),
+                        backgroundColor: 'rgba(99, 102, 241, 0.6)'
+                    }, {
+                        label: 'Submissions',
+                        data: analytics.subjectDistribution.map(s => s.submissions),
+                        backgroundColor: 'rgba(16, 185, 129, 0.6)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Subject-wise Distribution'
+                        }
+                    }
+                }
+            });
+        }
+
+        return () => {
+            if (submissionChart) submissionChart.destroy();
+            if (statusChart) statusChart.destroy();
+            if (marksChart) marksChart.destroy();
+            if (subjectChart) subjectChart.destroy();
+        };
+    }, [analytics, isLoading]);
+
+    if (isLoading) {
+        return (
+            <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 p-6">
+                <div className="animate-pulse">
+                    <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="h-64 bg-gray-200 rounded"></div>
+                        <div className="h-64 bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
-    return () => {
-      if (submissionChart) submissionChart.destroy();
-      if (statusChart) statusChart.destroy();
-    };
-  }, [assignments, submissions]);
+    if (!analytics) {
+        return (
+            <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 p-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">Assignment Analytics</h2>
+                <p className="text-gray-600">No analytics data available.</p>
+            </div>
+        );
+    }
 
-  return (
-    <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 p-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Assignment Analytics</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
-          <h3 className="text-lg font-medium text-gray-800 mb-4">Submission Overview</h3>
-          <canvas id="submissionChart" className="w-full"></canvas>
+    return (
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Assignment Analytics</h2>
+            
+            {/* Key Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                    <p className="text-sm text-gray-600">Total Assignments</p>
+                    <p className="text-2xl font-bold text-indigo-600">{analytics.totalAssignments}</p>
+                </div>
+                <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
+                    <p className="text-sm text-gray-600">Total Submissions</p>
+                    <p className="text-2xl font-bold text-emerald-600">{analytics.totalSubmissions}</p>
+                </div>
+                <div className="p-4 bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl">
+                    <p className="text-sm text-gray-600">Submission Rate</p>
+                    <p className="text-2xl font-bold text-violet-600">{(analytics.submissionRate * 100).toFixed(1)}%</p>
+                </div>
+                <div className="p-4 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl">
+                    <p className="text-sm text-gray-600">Average Marks</p>
+                    <p className="text-2xl font-bold text-yellow-600">{analytics.averageMarks.toFixed(1)}</p>
+                </div>
+            </div>
+
+            {/* Charts */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                    <canvas id="submissionChart" className="w-full"></canvas>
+                </div>
+                <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
+                    <canvas id="statusChart" className="w-full"></canvas>
+                </div>
+                <div className="p-6 bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl">
+                    <canvas id="marksChart" className="w-full"></canvas>
+                </div>
+                <div className="p-6 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl">
+                    <canvas id="subjectChart" className="w-full"></canvas>
+                </div>
+            </div>
         </div>
-        <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
-          <h3 className="text-lg font-medium text-gray-800 mb-4">Submission Status Distribution</h3>
-          <canvas id="statusChart" className="w-full"></canvas>
-        </div>
-      </div>
-      <div className="mt-6 p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl">
-        <h3 className="text-lg font-medium text-gray-800 mb-4">Performance Metrics</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-indigo-600">
-              {((submissions.reduce((sum, s) => sum + (s.marks || 0), 0) / submissions.filter(s => s.marks).length) || 0).toFixed(1)}
-            </p>
-            <p className="text-sm text-gray-500">Average Marks</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-green-600">
-              {(submissions.filter(s => s.status === 'completed').length / submissions.length * 100 || 0).toFixed(1)}%
-            </p>
-            <p className="text-sm text-gray-500">Completion Rate</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-red-600">
-              {(submissions.filter(s => s.isLate).length / submissions.length * 100 || 0).toFixed(1)}%
-            </p>
-            <p className="text-sm text-gray-500">Late Submission Rate</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }

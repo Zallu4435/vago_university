@@ -54,22 +54,59 @@ const videoStorage = new CloudinaryStorage({
   } as any,
 });
 
+// Storage engine for assignment files
+const assignmentStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'assignments',
+    allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
+    resource_type: 'auto',
+    transformation: [{ quality: 'auto' }],
+  } as any,
+  fileFilter: (req, file, cb) => {
+    console.log('Validating file:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype
+    });
+    
+    const allowedMimeTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain',
+      'image/jpeg',
+      'image/png'
+    ];
+    
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      console.error('Invalid file format:', file.mimetype);
+      cb(new Error('Invalid file format'));
+    }
+  }
+});
+
 // Multer instances
-const facultyUpload = multer({ 
+const facultyUpload = multer({
   storage: facultyStorage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
 });
-const profilePictureUpload = multer({ 
+const profilePictureUpload = multer({
   storage: profilePictureStorage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
 });
-const messageAttachmentUpload = multer({ 
+const messageAttachmentUpload = multer({
   storage: messageAttachmentStorage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
 });
-const videoUpload = multer({ 
+const videoUpload = multer({
   storage: videoStorage,
   limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit for videos
 });
+const assignmentUpload = multer({
+  storage: assignmentStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+});
 
-export { cloudinary, facultyUpload, profilePictureUpload, messageAttachmentUpload, videoUpload };
+export { cloudinary, facultyUpload, profilePictureUpload, messageAttachmentUpload, videoUpload, assignmentUpload };

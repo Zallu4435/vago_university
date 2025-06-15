@@ -6,14 +6,20 @@ export async function expressAdapter(
   res: Response,
   handler: (httpRequest: IHttpRequest) => Promise<IHttpResponse>
 ): Promise<void> {
-  try {
+  try {    
+    // Convert req.files to Express.Multer.File[] if it exists
+    const files = req.files ? (Array.isArray(req.files) ? req.files : Object.values(req.files).flat()) : undefined;
+    
     const httpRequest: IHttpRequest = new HttpRequest(
       req.headers,
       req.body,
       req.query,
       req.params,
-      req.user
+      req.user,
+      undefined, // single file
+      files // array of files
     );
+    
     const response: IHttpResponse = await handler(httpRequest);
     res.status(response.statusCode).json(response.body);
   } catch (error) {

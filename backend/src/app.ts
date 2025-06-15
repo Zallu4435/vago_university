@@ -7,7 +7,6 @@ import path from "path";
 import { createServer } from "http";
 import { SocketService } from "./infrastructure/services/socket/SocketService";
 import chatRouter from "./presentation/http/chat/chatRoutes";
-import materialRoutes from './presentation/http/materials/materialRoutes';
 
 const app = express();
 const httpServer = createServer(app);

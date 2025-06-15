@@ -1,44 +1,44 @@
 export interface Assignment {
-    id: number;
+    _id: string;
     title: string;
     subject: string;
     dueDate: string;
     maxMarks: number;
     description: string;
-    totalStudents: number;
-    submitted: number;
-    reviewed: number;
-    late: number;
-    status: 'active' | 'inactive';
-    createdDate: string;
-  }
-  
-  export interface Submission {
-    id: number;
-    assignmentId: number;
+    files: string[];
+    createdAt: string;
+    updatedAt: string;
+    status: 'active' | 'draft' | 'archived';
+    totalSubmissions: number;
+    averageMarks?: number;
+}
+
+export interface Submission {
+    _id: string;
+    assignmentId: string;
     studentId: string;
     studentName: string;
     submittedDate: string;
-    status: 'reviewed' | 'pending' | 'needs_correction';
-    marks: number | null;
+    status: 'submitted' | 'graded' | 'late';
+    marks: number;
     feedback: string;
     isLate: boolean;
     files: string[];
     fileName: string;
-    fileSize: string;
-  }
-  
-  export interface ReviewData {
+    fileSize: number;
+}
+
+export interface ReviewData {
     marks: number;
-    status: 'reviewed' | 'pending' | 'needs_correction';
+    status: 'graded' | 'late';
     feedback: string;
-  }
-  
-  export interface NewAssignment {
+}
+
+export interface NewAssignment {
     title: string;
     subject: string;
     dueDate: string;
     maxMarks: string;
     description: string;
-    files: string[];
-  }
+    files: File[];
+}

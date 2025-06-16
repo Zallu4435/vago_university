@@ -72,7 +72,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               <strong>Title:</strong> {assignment.title}
             </p>
             <p className={`text-sm ${styles.textSecondary} mb-1`}>
-              <strong>Course:</strong> {assignment.course}
+              <strong>Subject:</strong> {assignment.subject}
             </p>
             <p className={`text-sm ${styles.textSecondary}`}>
               <strong>Due:</strong> {formatDueDate(assignment.dueDate)}

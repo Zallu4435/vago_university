@@ -1,7 +1,7 @@
 import React from 'react';
-import { FiCalendar, FiClock, FiTrendingUp, FiStar, FiUpload, FiDownload, FiEye } from 'react-icons/fi';
+import { FiCalendar, FiClock, FiUpload, FiDownload, FiEye, FiFile } from 'react-icons/fi';
 import { Assignment } from '../types/AssignmentTypes';
-import { getDaysLeft, formatDueDate, getStatusColor, getUrgencyColor } from '../utils/assignmentUtils';
+import { getDaysLeft, formatDueDate, getStatusColor } from '../utils/assignmentUtils';
 
 interface AssignmentCardProps {
   assignment: Assignment;
@@ -17,7 +17,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
   onViewGrade
 }) => {
   const daysLeft = getDaysLeft(assignment.dueDate);
-  const isOverdue = daysLeft < 0 && assignment.status === 'pending';
+  const isOverdue = daysLeft < 0 && assignment.status === 'draft';
 
   return (
     <div
@@ -32,28 +32,28 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
               <h3 className={`text-xl font-bold ${styles.textPrimary}`}>
                 {assignment.title}
               </h3>
-              <div className="flex items-center gap-2">
-                {[...Array(assignment.priority)].map((_, i) => (
-                  <FiStar key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                ))}
-              </div>
             </div>
-            <p className={`font-medium mb-2 ${styles.accent}`}>{assignment.course}</p>
+            <p className={`font-medium mb-2 ${styles.accent}`}>{assignment.subject}</p>
             <p className={`${styles.textSecondary} text-sm line-clamp-2`}>{assignment.description}</p>
           </div>
         </div>
-        
-        {assignment.completionRate !== undefined && (
-          <div className="mb-4">
-            <div className="flex justify-between items-center mb-2">
-              <span className={`text-sm font-medium ${styles.textSecondary}`}>Progress</span>
-              <span className={`text-sm font-bold ${styles.textPrimary}`}>{assignment.completionRate}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-blue-500 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${assignment.completionRate}%` }}
-              ></div>
+
+        {assignment.files && assignment.files.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className={`text-sm font-medium ${styles.textSecondary}`}>Reference Files:</p>
+            <div className="flex flex-wrap gap-2">
+              {assignment.files.map((file) => (
+                <a
+                  key={file._id}
+                  href={file.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg ${styles.button.secondary} hover:bg-opacity-80 transition-all duration-200`}
+                >
+                  <FiFile className="h-4 w-4" />
+                  <span className="text-sm">{file.fileName}</span>
+                </a>
+              ))}
             </div>
           </div>
         )}
@@ -69,25 +69,17 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
               {daysLeft <= 0 ? 'Overdue' : `${daysLeft} days left`}
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <FiTrendingUp className={`h-4 w-4 ${styles.icon.secondary}`} />
-            <span className={`${styles.textSecondary}`}>{assignment.estimatedTime}</span>
-          </div>
         </div>
         
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
           <div className="flex items-center gap-3">
-            <span className={`px-4 py-2 rounded-xl text-sm font-semibold ${getStatusColor(assignment.status, assignment.isLate, styles)}`}>
+            <span className={`px-4 py-2 rounded-xl text-sm font-semibold ${getStatusColor(assignment.status, styles)}`}>
               {assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1)}
-              {assignment.isLate && ' (Late)'}
-            </span>
-            <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${getUrgencyColor(assignment.urgency, daysLeft, styles)}`}>
-              {assignment.urgency === 'urgent' ? 'Urgent' : 'Normal'}
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            {assignment.status === 'pending' && (
+            {assignment.status === 'draft' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -99,7 +91,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
                 Submit
               </button>
             )}
-            {assignment.status === 'submitted' && assignment.submittedFile && (
+            {assignment.status === 'submitted' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();

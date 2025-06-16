@@ -72,6 +72,7 @@ export const assignmentService = {
     marks: number;
     feedback: string;
     status: 'reviewed' | 'pending' | 'needs_correction';
+    isLate: boolean;
   }) => {
     const response = await httpClient.put(
       `/faculty/assignments/${assignmentId}/submissions/${submissionId}/review`,

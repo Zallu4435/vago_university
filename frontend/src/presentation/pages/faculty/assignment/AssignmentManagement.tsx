@@ -3,14 +3,12 @@ import AssignmentList from './AssignmentList';
 import Submissions from './Submissions';
 import Analytics from './components/Analytics';
 import CreateAssignmentModal from './CreateAssignmentModal';
-import ReviewModal from './ReviewModal';
 import { useAssignmentManagement } from './hooks/useAssignmentManagement';
 import { NewAssignment } from './types';
 
 export default function AssignmentManagement() {
     const [activeTab, setActiveTab] = useState('all-assignments');
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [showReviewModal, setShowReviewModal] = useState(false);
     const [newAssignment, setNewAssignment] = useState<NewAssignment>({
         title: '',
         subject: '',
@@ -25,11 +23,9 @@ export default function AssignmentManagement() {
         submissions,
         analytics,
         selectedAssignment,
-        selectedSubmission,
         isLoading,
         error,
         setSelectedAssignment,
-        setSelectedSubmission,
         setShowAnalytics,
         handleCreateAssignment,
         handleUpdateAssignment,
@@ -42,12 +38,14 @@ export default function AssignmentManagement() {
         isReviewing
     } = useAssignmentManagement();
 
-    const handleReview = async (submissionId: string, reviewData: { marks: number; feedback: string; status: 'reviewed' | 'pending' | 'needs_correction' }) => {
+    const handleReview = async (submissionId: string, reviewData: { 
+        marks: number; 
+        feedback: string; 
+        status: 'reviewed' | 'pending' | 'needs_correction';
+        isLate: boolean;
+    }) => {
         if (!selectedAssignment) return;
-        const success = await handleReviewSubmission(selectedAssignment._id, submissionId, reviewData);
-        if (success) {
-            setSelectedSubmission(reviewData.status === 'reviewed' ? submissions.find(s => s._id === submissionId) || null : null);
-        }
+        await handleReviewSubmission(selectedAssignment._id, submissionId, reviewData);
     };
 
     const handleDownload = async (submissionId: string) => {
@@ -139,7 +137,7 @@ export default function AssignmentManagement() {
                                         submissions={submissions}
                                         onReview={handleReview}
                                         onDownload={handleDownload}
-                                        setShowReviewModal={setShowReviewModal}
+                                        setShowReviewModal={() => {}}
                                         isLoading={isLoading}
                                         isReviewing={isReviewing}
                                     />
@@ -190,40 +188,6 @@ export default function AssignmentManagement() {
                     </div>
                 </div>
             )}
-
-            {/* Review Modal */}
-            {showReviewModal && selectedSubmission && (
-                <div className="fixed inset-0 z-[9999] animate-fadeIn">
-                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-                    <div className="relative z-10 h-full flex items-center justify-center p-4">
-                        <div className="transform animate-scaleIn w-full max-w-2xl">
-                            <ReviewModal
-                                submission={selectedSubmission}
-                                saveReview={handleReview}
-                                isLoading={isReviewing}
-                            />
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Custom Styles */}
-            <style jsx>{`
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes scaleIn {
-                    from { opacity: 0; transform: scale(0.9); }
-                    to { opacity: 1; transform: scale(1); }
-                }
-                .animate-fadeIn {
-                    animation: fadeIn 0.5s ease-out;
-                }
-                .animate-scaleIn {
-                    animation: scaleIn 0.3s ease-out;
-                }
-            `}</style>
         </div>
     );
 }

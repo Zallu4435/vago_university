@@ -32,9 +32,9 @@ export class HttpRequest implements IHttpRequest {
       lastName: string;
       email: string;
     },
-    public file?: Express.Multer.File,    
+    public file?: Express.Multer.File,
     public files?: Express.Multer.File[]
-  ) {}
+  ) { }
 }
 
 export interface IHttpErrors {
@@ -69,7 +69,7 @@ export class HttpSuccess implements IHttpSuccess {
   }
 }
 
-export interface IController {}
+export interface IController { }
 
 export interface IEventController extends IController {
   getEvents(httpRequest: IHttpRequest): Promise<IHttpResponse>;
@@ -177,4 +177,12 @@ export interface IAssignmentController extends IController {
   reviewSubmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   downloadSubmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getAnalytics(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface IUserAssignmentController extends IController {
+  getAssignments(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAssignmentById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  submitAssignment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAssignmentStatus(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAssignmentFeedback(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }

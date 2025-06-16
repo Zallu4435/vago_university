@@ -87,6 +87,41 @@ const assignmentStorage = new CloudinaryStorage({
   }
 });
 
+// Storage engine for assignment submissions
+const assignmentSubmissionStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'assignment-submissions',
+    allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
+    resource_type: 'auto',
+    transformation: [
+      { quality: 'auto' },
+      { fetch_format: 'auto' }
+    ],
+    public_id: (req, file) => {
+      const timestamp = Date.now();
+      const originalName = file.originalname.split('.')[0];
+      return `submission_${timestamp}_${originalName}`;
+    }
+  } as any,
+  fileFilter: (req, file, cb) => {
+    const allowedMimeTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain',
+      'image/jpeg',
+      'image/png'
+    ];
+    
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file format. Allowed formats: PDF, DOC, DOCX, TXT, JPG, JPEG, PNG'));
+    }
+  }
+});
+
 // Multer instances
 const facultyUpload = multer({
   storage: facultyStorage,
@@ -108,5 +143,12 @@ const assignmentUpload = multer({
   storage: assignmentStorage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
 });
+const assignmentSubmissionUpload = multer({
+  storage: assignmentSubmissionStorage,
+  limits: { 
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+    files: 1 // Only allow one file per upload
+  }
+});
 
-export { cloudinary, facultyUpload, profilePictureUpload, messageAttachmentUpload, videoUpload, assignmentUpload };
+export { cloudinary, facultyUpload, profilePictureUpload, messageAttachmentUpload, videoUpload, assignmentUpload, assignmentSubmissionUpload };

@@ -1,14 +1,14 @@
 interface AssignmentFile {
-  originalname: string;
-  path: string;
-  size: number;
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
 }
 
 export interface CreateAssignmentRequestDTO {
   title: string;
   subject: string;
-  dueDate: string;
-  maxMarks: number | string;
+  dueDate: Date;
+  maxMarks: number;
   description: string;
   files: AssignmentFile[];
 }
@@ -55,6 +55,7 @@ export interface ReviewSubmissionRequestDTO {
   marks: number;
   feedback: string;
   status: 'reviewed' | 'pending' | 'needs_correction';
+  isLate: boolean;
 }
 
 export interface DownloadSubmissionRequestDTO {

@@ -126,10 +126,10 @@ export class AssignmentRepository implements IAssignmentRepository {
   }
 
   async reviewSubmission(params: ReviewSubmissionRequestDTO): Promise<ReviewSubmissionResponseDTO> {
-    const { assignmentId, submissionId, marks, feedback, status } = params;
+    const { assignmentId, submissionId, marks, feedback, status, isLate } = params;
     const submission = await SubmissionModel.findOneAndUpdate(
       { _id: submissionId, assignmentId },
-      { $set: { marks, feedback, status } },
+      { $set: { marks, feedback, status, isLate } },
       { new: true }
     );
     if (!submission) {

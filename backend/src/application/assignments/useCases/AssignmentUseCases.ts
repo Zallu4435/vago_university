@@ -136,7 +136,7 @@ export class CreateAssignmentUseCase implements ICreateAssignmentUseCase {
         _id: new mongoose.Types.ObjectId().toString(),
         title: params.title,
         subject: params.subject,
-        dueDate,
+        dueDate: dueDate.toISOString(),
         maxMarks,
         description: params.description,
         files,
@@ -252,7 +252,7 @@ export class ReviewSubmissionUseCase implements IReviewSubmissionUseCase {
       if (params.marks && (isNaN(params.marks) || params.marks < 0)) {
         return { data: { error: AssignmentErrorType.InvalidMarks }, success: false };
       }
-      if (params.status && !['pending', 'graded'].includes(params.status)) {
+      if (params.status && !['reviewed', 'pending', 'needs_correction'].includes(params.status)) {
         return { data: { error: AssignmentErrorType.InvalidStatus }, success: false };
       }
       const result = await this.assignmentRepository.reviewSubmission(params);

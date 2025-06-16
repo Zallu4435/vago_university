@@ -1,7 +1,7 @@
 import React from 'react';
 import { FiArrowLeft, FiCalendar, FiTrendingUp, FiStar, FiUpload, FiFileText, FiDownload, FiAward } from 'react-icons/fi';
 import { Assignment } from '../types/AssignmentTypes';
-import { getDaysLeft, formatDueDate, getStatusColor, getUrgencyColor } from '../utils/assignmentUtils';
+import { getDaysLeft, formatDueDate, getStatusColor } from '../utils/assignmentUtils';
 
 interface AssignmentDetailsProps {
   assignment: Assignment;

@@ -3,7 +3,7 @@ import { FaTimes, FaStar, FaCheck, FaClock, FaExclamationTriangle } from 'react-
 
 interface ReviewModalProps {
   submission: {
-    id: number;
+    id: string;
     studentName: string;
     studentId: string;
     submittedDate: string;
@@ -14,10 +14,12 @@ interface ReviewModalProps {
     fileName: string;
     fileSize: string;
   };
-  saveReview: (submissionId: number, reviewData: { marks: number; feedback: string; status: 'reviewed' | 'pending' | 'needs_correction'; isLate: boolean }) => void;
+  saveReview: (submissionId: string, reviewData: { marks: number; feedback: string; status: 'reviewed' | 'pending' | 'needs_correction'; isLate: boolean }) => void;
+  onClose: () => void;
+  isLoading?: boolean;
 }
 
-export default function ReviewModal({ submission, saveReview }: ReviewModalProps) {
+export default function ReviewModal({ submission, saveReview, onClose, isLoading = false }: ReviewModalProps) {
   const [marks, setMarks] = useState(submission.marks?.toString() || '');
   const [feedback, setFeedback] = useState(submission.feedback);
   const [status, setStatus] = useState(submission.status);
@@ -42,7 +44,7 @@ export default function ReviewModal({ submission, saveReview }: ReviewModalProps
   };
 
   const handleClose = () => {
-    saveReview(submission.id, { marks: submission.marks || 0, feedback: submission.feedback, status: 'pending', isLate: submission.isLate });
+    onClose();
   };
 
   const getStatusConfig = (status: 'reviewed' | 'pending' | 'needs_correction') => {
@@ -244,15 +246,16 @@ export default function ReviewModal({ submission, saveReview }: ReviewModalProps
               <button
                 onClick={handleClose}
                 className="px-6 py-3 bg-gray-200 text-gray-700 rounded-2xl font-medium hover:bg-gray-300 transition-all transform hover:scale-105"
+                disabled={isLoading}
               >
                 Cancel
               </button>
               <button
-                type="submit"
                 onClick={handleSubmit}
-                className="px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg"
+                disabled={isLoading}
+                className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Save Review
+                {isLoading ? 'Saving...' : 'Save Review'}
               </button>
             </div>
           </div>

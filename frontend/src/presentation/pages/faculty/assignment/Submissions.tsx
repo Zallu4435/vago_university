@@ -1,124 +1,81 @@
 import React, { useState } from 'react';
-import { FaSearch, FaDownload, FaEye, FaComment, FaCheck, FaClock, FaExclamationTriangle, FaFilter, FaUsers, FaFileAlt, FaStar } from 'react-icons/fa';
+import { FaSearch, FaDownload, FaEye, FaComment, FaCheck, FaClock, FaExclamationTriangle, FaFilter, FaUsers, FaFileAlt, FaStar, FaCode, FaCalculator, FaFlask, FaLanguage, FaHistory, FaGlobe, FaBook } from 'react-icons/fa';
+import ReviewModal from './ReviewModal';
+import { Assignment, Submission } from './types';
 
-interface Submission {
-  id: number;
-  assignmentId: number;
-  studentId: string;
-  studentName: string;
-  submittedDate: string;
-  status: 'reviewed' | 'pending' | 'needs_correction';
-  marks: number | null;
-  feedback: string;
-  isLate: boolean;
-  files: string[];
-  fileName: string;
-  fileSize: string;
-}
+const getSubjectIcon = (subject: string) => {
+  const subjectIcons: { [key: string]: JSX.Element } = {
+    'Computer Science': <FaCode />,
+    'Mathematics': <FaCalculator />,
+    'Physics': <FaFlask />,
+    'Chemistry': <FaFlask />,
+    'Biology': <FaFlask />,
+    'English': <FaLanguage />,
+    'History': <FaHistory />,
+    'Geography': <FaGlobe />,
+    'default': <FaBook />
+  };
+  return subjectIcons[subject] || subjectIcons.default;
+};
 
 interface SubmissionsProps {
-  assignment: {
-    id: number;
-    title: string;
-    subject: string;
-    totalStudents: number;
-    submitted: number;
-    reviewed: number;
-    late: number;
-    maxMarks: number;
-  };
+  assignment: Assignment;
   submissions: Submission[];
-  onReview: (submissionId: number, reviewData: { marks: number; feedback: string; status: 'reviewed' | 'pending' | 'needs_correction'; isLate: boolean }) => void;
-  onDownload: (submissionId: number) => void;
+  onReview: (submissionId: string, reviewData: { 
+    marks: number; 
+    feedback: string; 
+    status: 'reviewed' | 'pending' | 'needs_correction';
+    isLate: boolean;
+  }) => void;
+  onDownload: (submissionId: string) => void;
   setShowReviewModal: (show: boolean) => void;
+  isLoading?: boolean;
+  isReviewing?: boolean;
 }
 
-// Mock data for demonstration
-const mockSubmissions: Submission[] = [
-  {
-    id: 1,
-    assignmentId: 1,
-    studentId: 'ST001',
-    studentName: 'Alice Johnson',
-    submittedDate: '2024-12-18T10:30:00Z',
-    status: 'reviewed',
-    marks: 85,
-    feedback: 'Excellent work on the database design!',
-    isLate: false,
-    files: ['database_design.pdf'],
-    fileName: 'database_design.pdf',
-    fileSize: '2.3 MB'
-  },
-  {
-    id: 2,
-    assignmentId: 1,
-    studentId: 'ST002',
-    studentName: 'Bob Smith',
-    submittedDate: '2024-12-19T15:45:00Z',
-    status: 'pending',
-    marks: null,
-    feedback: '',
-    isLate: true,
-    files: ['db_project.zip'],
-    fileName: 'db_project.zip',
-    fileSize: '5.1 MB'
-  },
-  {
-    id: 3,
-    assignmentId: 1,
-    studentId: 'ST003',
-    studentName: 'Carol Davis',
-    submittedDate: '2024-12-17T09:15:00Z',
-    status: 'needs_correction',
-    marks: 65,
-    feedback: 'Good effort, but needs improvements in normalization.',
-    isLate: false,
-    files: ['library_db.sql'],
-    fileName: 'library_db.sql',
-    fileSize: '1.8 MB'
-  },
-  {
-    id: 4,
-    assignmentId: 1,
-    studentId: 'ST004',
-    studentName: 'David Wilson',
-    submittedDate: '2024-12-18T14:20:00Z',
-    status: 'reviewed',
-    marks: 92,
-    feedback: 'Outstanding implementation with creative solutions!',
-    isLate: false,
-    files: ['complete_system.zip'],
-    fileName: 'complete_system.zip',
-    fileSize: '8.7 MB'
-  }
-];
-
-export default function Submissions({ assignment, submissions = mockSubmissions, onReview, onDownload, setShowReviewModal }: SubmissionsProps) {
+export default function Submissions({ 
+  assignment, 
+  submissions, 
+  onReview, 
+  onDownload, 
+  setShowReviewModal,
+  isLoading,
+  isReviewing
+}: SubmissionsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [selectedSubmissions, setSelectedSubmissions] = useState<number[]>([]);
+  const [selectedSubmissions, setSelectedSubmissions] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
 
   const handleReview = (submission: Submission) => {
-    onReview(submission.id, {
-      marks: submission.marks || 0,
-      feedback: submission.feedback,
-      status: submission.status,
-      isLate: submission.isLate
-    });
+    setSelectedSubmission(submission);
     setShowReviewModal(true);
   };
 
-  console.log(submissions, "sopkspspokspokskpo")
+  const handleReviewSubmit = async (submissionId: string, reviewData: { 
+    marks: number; 
+    feedback: string; 
+    status: 'reviewed' | 'pending' | 'needs_correction';
+    isLate: boolean;
+  }) => {
+    await onReview(submissionId, reviewData);
+    setSelectedSubmission(null);
+    setShowReviewModal(false);
+  };
 
-  const filteredSubmissions = submissions?.filter(submission => {
-    const matchesSearch = submission.studentName?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
-                        submission.studentId?.toLowerCase().includes(searchTerm?.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || submission.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  });
+  const handleCloseReview = () => {
+    setSelectedSubmission(null);
+    setShowReviewModal(false);
+  };
 
-  const getStatusConfig = (status: 'reviewed' | 'pending' | 'needs_correction') => {
+  const handleBulkDownload = () => {
+    selectedSubmissions.forEach(submissionId => {
+      onDownload(submissionId);
+    });
+  };
+
+  const getStatusConfig = (status: 'pending' | 'reviewed' | 'needs_correction') => {
     switch (status) {
       case 'reviewed':
         return {
@@ -155,25 +112,12 @@ export default function Submissions({ assignment, submissions = mockSubmissions,
     }
   };
 
-  const getSubjectIcon = (subject: string) => {
-    if (subject.toLowerCase().includes('database')) return '🗄️';
-    if (subject.toLowerCase().includes('web')) return '🌐';
-    if (subject.toLowerCase().includes('mobile')) return '📱';
-    if (subject.toLowerCase().includes('ai') || subject.toLowerCase().includes('machine')) return '🤖';
-    return '📘';
-  };
-
-  const getGradeColor = (marks: number, maxMarks: number) => {
-    const percentage = (marks / maxMarks) * 100;
-    if (percentage >= 90) return 'from-green-500 to-emerald-600';
-    if (percentage >= 80) return 'from-blue-500 to-indigo-600';
-    if (percentage >= 70) return 'from-yellow-500 to-orange-600';
-    return 'from-red-500 to-pink-600';
-  };
-
-  const handleBulkDownload = () => {
-    selectedSubmissions.forEach(id => onDownload(id));
-  };
+  const filteredSubmissions = submissions?.filter(submission => {
+    const matchesSearch = submission.studentName?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+                        submission.studentId?.toLowerCase().includes(searchTerm?.toLowerCase());
+    const matchesStatus = filterStatus === 'all' || submission.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <div className="space-y-8 animate-fadeIn">
@@ -308,9 +252,11 @@ export default function Submissions({ assignment, submissions = mockSubmissions,
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {filteredSubmissions.map((submission, index) => {
             const statusConfig = getStatusConfig(submission.status);
+            const fileUrl = submission.files?.[0]; // Get the first file URL
+
             return (
               <div 
-                key={submission.id} 
+                key={submission._id} 
                 className="group relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-8 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 animate-fadeInUp"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
@@ -322,12 +268,12 @@ export default function Submissions({ assignment, submissions = mockSubmissions,
                       <input
                         type="checkbox"
                         className="w-5 h-5 rounded border-2 border-indigo-300 text-indigo-600 focus:ring-indigo-500"
-                        checked={selectedSubmissions.includes(submission.id)}
+                        checked={selectedSubmissions.includes(submission._id)}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedSubmissions([...selectedSubmissions, submission.id]);
+                            setSelectedSubmissions([...selectedSubmissions, submission._id]);
                           } else {
-                            setSelectedSubmissions(selectedSubmissions.filter(id => id !== submission.id));
+                            setSelectedSubmissions(selectedSubmissions.filter(id => id !== submission._id));
                           }
                         }}
                       />
@@ -372,35 +318,27 @@ export default function Submissions({ assignment, submissions = mockSubmissions,
                         <FaFileAlt size={16} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-800 truncate">{submission.fileName}</p>
-                        <p className="text-sm text-gray-500">{submission.fileSize}</p>
+                        {submission.files && submission.files.length > 0 ? (
+                          <a 
+                            href={submission.files[0]} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-indigo-600 hover:text-indigo-800 font-medium truncate block"
+                          >
+                            View Submission
+                          </a>
+                        ) : (
+                          <p className="text-gray-500">No file submitted</p>
+                        )}
                       </div>
+                      <button
+                        onClick={() => onDownload(submission._id)}
+                        className="p-2 text-gray-500 hover:text-indigo-600 transition-colors"
+                      >
+                        <FaDownload size={16} />
+                      </button>
                     </div>
                   </div>
-
-                  {submission.marks !== null && (
-                    <div className="mb-6">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-600">Grade</span>
-                        <div className="flex items-center space-x-2">
-                          <div className={`px-3 py-1 rounded-full text-white font-bold bg-gradient-to-r ${getGradeColor(submission.marks, assignment.maxMarks)}`}>
-                            {submission.marks}/{assignment.maxMarks}
-                          </div>
-                          <div className="flex text-yellow-400">
-                            {[...Array(5)].map((_, i) => (
-                              <FaStar key={i} size={12} className={i < Math.floor((submission.marks / assignment.maxMarks) * 5) ? 'text-yellow-400' : 'text-gray-300'} />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {submission.feedback && (
-                        <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
-                          <p className="text-sm text-blue-800 italic">"{submission.feedback}"</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
 
                   <div className="flex items-center space-x-2">
                     <button
@@ -409,19 +347,6 @@ export default function Submissions({ assignment, submissions = mockSubmissions,
                     >
                       <FaEye size={16} />
                       <span>Review</span>
-                    </button>
-                    <button
-                      onClick={() => onDownload(submission.id)}
-                      className="p-3 bg-green-50 text-green-600 hover:bg-green-100 rounded-2xl transition-all border border-green-200 hover:border-green-300 hover:scale-110 transform"
-                      title="Download"
-                    >
-                      <FaDownload size={16} />
-                    </button>
-                    <button
-                      className="p-3 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-2xl transition-all border border-blue-200 hover:border-blue-300 hover:scale-110 transform"
-                      title="Message"
-                    >
-                      <FaComment size={16} />
                     </button>
                   </div>
                 </div>
@@ -441,7 +366,7 @@ export default function Submissions({ assignment, submissions = mockSubmissions,
                       className="w-5 h-5 rounded border-2 border-indigo-300 text-indigo-600 focus:ring-indigo-500"
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setSelectedSubmissions(filteredSubmissions.map(s => s.id));
+                          setSelectedSubmissions(filteredSubmissions.map(s => s._id));
                         } else {
                           setSelectedSubmissions([]);
                         }
@@ -451,25 +376,26 @@ export default function Submissions({ assignment, submissions = mockSubmissions,
                   <th className="px-8 py-6 text-left text-sm font-bold text-gray-900 uppercase tracking-wider">Student</th>
                   <th className="px-8 py-6 text-left text-sm font-bold text-gray-900 uppercase tracking-wider">Submitted</th>
                   <th className="px-8 py-6 text-left text-sm font-bold text-gray-900 uppercase tracking-wider">Status</th>
-                  <th className="px-8 py-6 text-left text-sm font-bold text-gray-900 uppercase tracking-wider">Marks</th>
                   <th className="px-8 py-6 text-left text-sm font-bold text-gray-900 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filteredSubmissions.map((submission, index) => {
                   const statusConfig = getStatusConfig(submission.status);
+                  const fileUrl = submission.files?.[0]; // Get the first file URL
+
                   return (
-                    <tr key={submission.id} className="hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all animate-fadeInUp" style={{ animationDelay: `${index * 0.05}s` }}>
+                    <tr key={submission._id} className="hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all animate-fadeInUp" style={{ animationDelay: `${index * 0.05}s` }}>
                       <td className="px-8 py-6">
                         <input
                           type="checkbox"
                           className="w-5 h-5 rounded border-2 border-indigo-300 text-indigo-600 focus:ring-indigo-500"
-                          checked={selectedSubmissions.includes(submission.id)}
+                          checked={selectedSubmissions.includes(submission._id)}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              setSelectedSubmissions([...selectedSubmissions, submission.id]);
+                              setSelectedSubmissions([...selectedSubmissions, submission._id]);
                             } else {
-                              setSelectedSubmissions(selectedSubmissions.filter(id => id !== submission.id));
+                              setSelectedSubmissions(selectedSubmissions.filter(id => id !== submission._id));
                             }
                           }}
                         />
@@ -515,22 +441,6 @@ export default function Submissions({ assignment, submissions = mockSubmissions,
                         </span>
                       </td>
                       <td className="px-8 py-6">
-                        {submission.marks !== null ? (
-                          <div className="flex items-center space-x-3">
-                            <span className={`px-3 py-1 rounded-full text-white font-bold bg-gradient-to-r ${getGradeColor(submission.marks, assignment.maxMarks)} shadow-lg`}>
-                              {submission.marks}/{assignment.maxMarks}
-                            </span>
-                            <div className="flex text-yellow-400">
-                              {[...Array(5)].map((_, i) => (
-                                <FaStar key={i} size={12} className={i < Math.floor((submission.marks / assignment.maxMarks) * 5) ? 'text-yellow-400' : 'text-gray-300'} />
-                              ))}
-                            </div>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400 font-medium">Not graded</span>
-                        )}
-                      </td>
-                      <td className="px-8 py-6">
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => handleReview(submission)}
@@ -540,17 +450,11 @@ export default function Submissions({ assignment, submissions = mockSubmissions,
                             <FaEye size={16} />
                           </button>
                           <button
-                            onClick={() => onDownload(submission.id)}
+                            onClick={() => onDownload(submission._id)}
                             className="p-3 bg-green-50 text-green-600 hover:bg-green-100 rounded-xl transition-all border border-green-200 hover:border-green-300 hover:scale-110 transform shadow-lg"
                             title="Download"
                           >
                             <FaDownload size={16} />
-                          </button>
-                          <button
-                            className="p-3 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl transition-all border border-blue-200 hover:border-blue-300 hover:scale-110 transform shadow-lg"
-                            title="Message"
-                          >
-                            <FaComment size={16} />
                           </button>
                         </div>
                       </td>
@@ -576,23 +480,25 @@ export default function Submissions({ assignment, submissions = mockSubmissions,
         </div>
       )}
 
-      {/* Custom Styles */}
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes scaleIn {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.2s ease-out;
-        }
-        .animate-scaleIn {
-          animation: scaleIn 0.2s ease-out;
-        }
-      `}</style>
+      {selectedSubmission && (
+        <ReviewModal
+          submission={{
+            id: selectedSubmission._id,
+            studentName: selectedSubmission.studentName,
+            studentId: selectedSubmission.studentId,
+            submittedDate: selectedSubmission.submittedDate,
+            status: selectedSubmission.status,
+            marks: selectedSubmission.marks ?? 0,
+            feedback: selectedSubmission.feedback ?? '',
+            isLate: selectedSubmission.isLate,
+            fileName: selectedSubmission.files[0]?.split('/').pop() || 'No file',
+            fileSize: 'Unknown',
+          }}
+          saveReview={handleReviewSubmit}
+          onClose={handleCloseReview}
+          isLoading={isReviewing}
+        />
+      )}
     </div>
   );
 }

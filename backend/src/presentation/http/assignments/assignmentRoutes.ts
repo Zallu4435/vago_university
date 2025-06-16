@@ -8,13 +8,17 @@ import { assignmentUpload } from '../../../config/cloudinary.config';
 const assignmentController = AssignmentComposers.composeAssignmentController();
 const router = Router();
 
-// Analytics routes
+
 router.get('/analytics', authMiddleware, (req, res) => {
     expressAdapter(req, res, assignmentController.getAnalytics.bind(assignmentController));
 });
 
+router.put('/:assignmentId/submissions/:submissionId/review', authMiddleware, (req, res) => {
+    expressAdapter(req, res, assignmentController.reviewSubmission.bind(assignmentController));
+});
 
-// Assignment routes
+
+
 router.get('/', authMiddleware, (req, res) => {
     expressAdapter(req, res, assignmentController.getAssignments.bind(assignmentController));
 });
@@ -48,9 +52,6 @@ router.get('/:assignmentId/submissions/:submissionId', authMiddleware, (req, res
     expressAdapter(req, res, assignmentController.getSubmissionById.bind(assignmentController));
 });
 
-router.post('/:assignmentId/submissions/:submissionId/review', authMiddleware, (req, res) => {
-    expressAdapter(req, res, assignmentController.reviewSubmission.bind(assignmentController));
-});
 
 router.get('/:assignmentId/submissions/:submissionId/download', authMiddleware, (req, res) => {
     expressAdapter(req, res, assignmentController.downloadSubmission.bind(assignmentController));

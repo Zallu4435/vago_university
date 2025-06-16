@@ -6,92 +6,12 @@ import { filterAndSortAssignments } from './utils/assignmentUtils';
 import { AssignmentCard } from './components/AssignmentCard';
 import { AssignmentDetails } from './components/AssignmentDetails';
 import { UploadModal } from './components/UploadModal';
+import { useUserAssignments } from './hooks/useUserAssignments';
 
 const AssignmentsSection = () => {
   const { styles } = usePreferences();
-  const [assignments, setAssignments] = useState<Assignment[]>([
-    {
-      id: 1,
-      title: "Machine Learning Final Project",
-      course: "CS 4780 - Machine Learning",
-      dueDate: new Date('2025-06-10T23:59:59'),
-      urgency: "urgent",
-      status: "pending",
-      description: "Implement and compare three ML algorithms on a dataset of your choice. Include comprehensive analysis and visualization of results.",
-      hasFile: true,
-      submittedFile: null,
-      grade: null,
-      priority: 5,
-      estimatedTime: "15-20 hours",
-      completionRate: 65
-    },
-    {
-      id: 2,
-      title: "Database Design Assignment",
-      course: "CS 3320 - Database Systems",
-      dueDate: new Date('2025-06-15T23:59:59'),
-      urgency: "normal",
-      status: "submitted",
-      description: "Design a normalized database schema for an e-commerce platform with full documentation",
-      hasFile: true,
-      submittedFile: "database_schema_john_doe.pdf",
-      submittedAt: new Date('2025-06-03T14:30:00'),
-      grade: null,
-      priority: 3,
-      estimatedTime: "8-10 hours",
-      completionRate: 100
-    },
-    {
-      id: 3,
-      title: "Literature Review Essay",
-      course: "ENG 2010 - Academic Writing",
-      dueDate: new Date('2025-06-08T11:59:59'),
-      urgency: "urgent",
-      status: "graded",
-      description: "Write a 2000-word literature review on climate change impacts with at least 15 scholarly sources",
-      hasFile: false,
-      submittedFile: "climate_review_essay.docx",
-      submittedAt: new Date('2025-06-07T10:15:00'),
-      grade: { score: 88, total: 100, feedback: "Excellent analysis and structure. Minor citation issues noted. Great use of current research." },
-      priority: 4,
-      estimatedTime: "12-15 hours",
-      completionRate: 100
-    },
-    {
-      id: 4,
-      title: "React Component Library",
-      course: "CS 3750 - Web Development",
-      dueDate: new Date('2025-06-20T23:59:59'),
-      urgency: "normal",
-      status: "pending",
-      description: "Create a reusable component library with comprehensive documentation and testing suite",
-      hasFile: true,
-      submittedFile: null,
-      grade: null,
-      priority: 2,
-      estimatedTime: "20-25 hours",
-      completionRate: 30
-    },
-    {
-      id: 5,
-      title: "Statistical Analysis Report",
-      course: "STAT 2050 - Statistics",
-      dueDate: new Date('2025-06-06T17:00:00'),
-      urgency: "urgent",
-      status: "submitted",
-      description: "Analyze survey data using R/Python and present comprehensive findings with visualizations",
-      hasFile: true,
-      submittedFile: "stats_analysis_report.pdf",
-      submittedAt: new Date('2025-06-06T16:45:00'),
-      grade: null,
-      isLate: false,
-      priority: 4,
-      estimatedTime: "6-8 hours",
-      completionRate: 100
-    }
-  ]);
+  const { assignments, selectedFile, error, isLoading, handleFileSelect, handleSubmit, getAssignmentStatus, getAssignmentFeedback } = useUserAssignments();
 
-  const [selectedFile, setSelectedFile] = useState<SelectedFile>({});
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [currentAssignment, setCurrentAssignment] = useState<Assignment | null>(null);
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<number | null>(null);
@@ -101,36 +21,7 @@ const AssignmentsSection = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
 
-  const handleFileSelect = (assignmentId: number, file: File): void => {
-    setSelectedFile((prev) => ({ ...prev, [assignmentId]: file }));
-  };
-
-  const handleSubmit = (assignmentId: number): void => {
-    const file = selectedFile[assignmentId];
-    if (!file) return;
-
-    const now = new Date();
-    setAssignments((prev) =>
-      prev.map((assignment) =>
-        assignment.id === assignmentId 
-          ? {
-              ...assignment,
-              status: 'submitted',
-              submittedFile: file.name,
-              submittedAt: now,
-              isLate: now > assignment.dueDate,
-              completionRate: 100
-            }
-          : assignment
-      )
-    );
-
-    setSelectedFile((prev) => {
-      const updated = { ...prev };
-      delete updated[assignmentId];
-      return updated;
-    });
-  };
+  console.log(assignments, "wwwwwwwwww")
 
   const filteredAndSortedAssignments = filterAndSortAssignments(
     assignments,
@@ -139,10 +30,15 @@ const AssignmentsSection = () => {
     sortBy
   );
 
+  console.log(filteredAndSortedAssignments, "eeeeeeeeeee")
+
   const currentAssignments = filteredAndSortedAssignments.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  console.log(currentAssignments, "rrrrrrrrr")
+
 
   const renderAssignmentList = () => (
     <div className={`min-h-screen ${styles.background}`}>
@@ -199,7 +95,6 @@ const AssignmentsSection = () => {
               >
                 <option value="dueDate">Sort by Due Date</option>
                 <option value="priority">Sort by Priority</option>
-                <option value="status">Sort by Status</option>
                 <option value="course">Sort by Course</option>
               </select>
             </div>
@@ -335,30 +230,29 @@ const AssignmentsSection = () => {
 
   return (
     <>
-      {selectedAssignmentId ? (
-        <AssignmentDetails
-          assignment={assignments.find(a => a.id === selectedAssignmentId)!}
-          styles={styles}
-          onBack={() => setSelectedAssignmentId(null)}
-          onUpload={(assignment) => {
-            setCurrentAssignment(assignment);
-            setShowUploadModal(true);
-          }}
-        />
-      ) : (
-        renderAssignmentList()
-      )}
+      {renderAssignmentList()}
       {showUploadModal && currentAssignment && (
         <UploadModal
           assignment={currentAssignment}
           styles={styles}
-          selectedFile={selectedFile[currentAssignment.id] || null}
-          onClose={() => setShowUploadModal(false)}
+          selectedFile={selectedFile[currentAssignment.id]}
+          onClose={() => {
+            setShowUploadModal(false);
+            setCurrentAssignment(null);
+          }}
           onFileSelect={(file) => handleFileSelect(currentAssignment.id, file)}
           onSubmit={() => {
             handleSubmit(currentAssignment.id);
             setShowUploadModal(false);
+            setCurrentAssignment(null);
           }}
+        />
+      )}
+      {selectedAssignmentId && (
+        <AssignmentDetails
+          assignmentId={selectedAssignmentId}
+          onClose={() => setSelectedAssignmentId(null)}
+          styles={styles}
         />
       )}
     </>

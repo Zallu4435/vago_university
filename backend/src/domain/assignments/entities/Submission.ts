@@ -1,37 +1,43 @@
 export enum SubmissionStatus {
   Pending = 'pending',
   Reviewed = 'reviewed',
-  NeedsCorrection = 'needs_correction'
+  Late = 'late'
+}
+
+export interface SubmissionFile {
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
 }
 
 export class Submission {
   constructor(
-    public readonly _id: string,
+    public readonly id: string,
     public readonly assignmentId: string,
     public readonly studentId: string,
     public readonly studentName: string,
     public readonly submittedDate: Date,
     public readonly status: SubmissionStatus,
     public readonly isLate: boolean,
-    public readonly files: string[],
+    public readonly files: SubmissionFile[],
     public readonly marks?: number,
     public readonly feedback?: string
   ) {}
 
   static create(props: {
-    _id: string;
+    id: string;
     assignmentId: string;
     studentId: string;
     studentName: string;
     submittedDate: Date;
     status: SubmissionStatus;
     isLate: boolean;
-    files: string[];
+    files: SubmissionFile[];
     marks?: number;
     feedback?: string;
   }): Submission {
     return new Submission(
-      props._id,
+      props.id,
       props.assignmentId,
       props.studentId,
       props.studentName,

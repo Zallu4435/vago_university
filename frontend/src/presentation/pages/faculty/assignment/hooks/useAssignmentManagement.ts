@@ -56,7 +56,12 @@ export const useAssignmentManagement = () => {
         mutationFn: ({ assignmentId, submissionId, reviewData }: {
             assignmentId: string;
             submissionId: string;
-            reviewData: { marks: number; feedback: string; status: 'reviewed' | 'pending' | 'needs_correction' };
+            reviewData: { 
+                marks: number; 
+                feedback: string; 
+                status: 'reviewed' | 'pending' | 'needs_correction';
+                isLate: boolean;
+            };
         }) => assignmentService.reviewSubmission(assignmentId, submissionId, reviewData),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['submissions'] });
@@ -94,11 +99,7 @@ export const useAssignmentManagement = () => {
         }
     }, [deleteAssignmentMutation]);
 
-    const handleReviewSubmission = useCallback(async (assignmentId: string, submissionId: string, reviewData: {
-        marks: number;
-        feedback: string;
-        status: 'reviewed' | 'pending' | 'needs_correction';
-    }) => {
+    const handleReviewSubmission = useCallback(async (assignmentId: string, submissionId: string, reviewData: { marks: number; feedback: string; status: 'reviewed' | 'pending' | 'needs_correction'; isLate: boolean }) => {
         try {
             await reviewSubmissionMutation.mutateAsync({ assignmentId, submissionId, reviewData });
             return { success: true };

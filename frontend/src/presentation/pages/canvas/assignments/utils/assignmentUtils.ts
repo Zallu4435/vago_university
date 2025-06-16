@@ -1,13 +1,15 @@
 import { Assignment, SortOption, FilterStatus } from '../types/AssignmentTypes';
 
-export const getDaysLeft = (dueDate: Date): number => {
+export const getDaysLeft = (dueDate: string): number => {
   const now = new Date();
-  const diff = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const due = new Date(dueDate);
+  const diff = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
   return diff;
 };
 
-export const formatDueDate = (dueDate: Date): string => {
-  return dueDate.toLocaleDateString('en-US', {
+export const formatDueDate = (dueDate: string): string => {
+  const date = new Date(dueDate);
+  return date.toLocaleDateString('en-US', {
     weekday: 'short',
     year: 'numeric',
     month: 'short',
@@ -17,19 +19,14 @@ export const formatDueDate = (dueDate: Date): string => {
   });
 };
 
-export const getStatusColor = (status: Assignment['status'], isLate: boolean = false, styles: any) => {
-  if (isLate) return `${styles.status.error} ${styles.button.primary}`;
+export const getStatusColor = (status: Assignment['status'], styles: any) => {
   switch (status) {
-    case 'pending': return `${styles.status.warning} ${styles.button.primary}`;
-    case 'submitted': return `${styles.status.info} ${styles.button.primary}`;
-    case 'graded': return `${styles.status.success} ${styles.button.primary}`;
-    default: return `${styles.button.secondary}`;
+    case 'draft': return `${styles?.status.warning} ${styles?.button.primary}`;
+    case 'published': return `${styles?.status.info} ${styles?.button.primary}`;
+    case 'submitted': return `${styles?.status.success} ${styles?.button.primary}`;
+    case 'graded': return `${styles?.status.success} ${styles?.button.primary}`;
+    default: return `${styles?.button.secondary}`;
   }
-};
-
-export const getUrgencyColor = (urgency: Assignment['urgency'], daysLeft: number, styles: any) => {
-  if (urgency === 'urgent' || daysLeft <= 2) return `${styles.status.error} ${styles.button.primary}`;
-  return `${styles.status.success} ${styles.button.primary}`;
 };
 
 export const filterAndSortAssignments = (
@@ -41,17 +38,24 @@ export const filterAndSortAssignments = (
   return assignments
     .filter(assignment => {
       const matchesSearch = assignment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           assignment.course.toLowerCase().includes(searchTerm.toLowerCase());
+                           assignment.subject.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesFilter = filterStatus === 'all' || assignment.status === filterStatus;
       return matchesSearch && matchesFilter;
     })
     .sort((a, b) => {
       switch (sortBy) {
-        case 'dueDate': return a.dueDate.getTime() - b.dueDate.getTime();
-        case 'priority': return b.priority - a.priority;
-        case 'status': return a.status.localeCompare(b.status);
-        case 'course': return a.course.localeCompare(b.course);
-        default: return 0;
+        case 'dueDate': 
+          const dateA = new Date(a.dueDate).getTime();
+          const dateB = new Date(b.dueDate).getTime();
+          return dateA - dateB;
+        case 'priority': 
+          return (b.totalSubmissions || 0) - (a.totalSubmissions || 0);
+        case 'status': 
+          return (a.status || '').localeCompare(b.status || '');
+        case 'course': 
+          return (a.subject || '').localeCompare(b.subject || '');
+        default: 
+          return 0;
       }
     });
 }; 

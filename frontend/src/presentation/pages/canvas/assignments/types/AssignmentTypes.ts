@@ -1,25 +1,27 @@
 export interface Assignment {
-  id: number;
+  id: string;
   title: string;
-  course: string;
-  dueDate: Date;
-  urgency: 'urgent' | 'normal';
-  status: 'pending' | 'submitted' | 'graded';
+  subject: string;
+  dueDate: string;
+  maxMarks: number;
   description: string;
-  hasFile: boolean;
-  submittedFile: string | null;
-  submittedAt?: Date;
-  grade: { score: number; total: number; feedback: string } | null;
-  isLate?: boolean;
-  priority: number;
-  estimatedTime: string;
-  completionRate?: number;
+  files: Array<{
+    fileName: string;
+    fileUrl: string;
+    fileSize: number;
+    _id: string;
+  }>;
+  createdAt: string;
+  updatedAt: string;
+  status: 'draft' | 'published' | 'submitted' | 'graded';
+  totalSubmissions: number;
+  averageMarks?: number;
 }
 
 export interface SelectedFile {
-  [key: number]: File;
+  [key: string]: File;
 }
 
 export type ViewMode = 'grid' | 'list';
 export type SortOption = 'dueDate' | 'priority' | 'status' | 'course';
-export type FilterStatus = 'all' | 'pending' | 'submitted' | 'graded'; 
+export type FilterStatus = 'all' | 'draft' | 'published' | 'submitted' | 'graded'; 

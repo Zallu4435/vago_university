@@ -158,30 +158,19 @@ export class AssignmentController implements IAssignmentController {
   }
 
   async reviewSubmission(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log('=== Controller: ReviewSubmission Started ===');
-    console.log('Controller: Received request:', httpRequest);
-    console.log('Controller: Request params:', httpRequest.params);
-    console.log('Controller: Request body:', httpRequest.body);
-
     try {
       const { assignmentId, submissionId } = httpRequest.params;
       const { marks, feedback, status, isLate } = httpRequest.body;
 
-      console.log('Controller: Extracted params:', { assignmentId, submissionId });
-      console.log('Controller: Extracted body:', { marks, feedback, status, isLate });
-
       if (!submissionId || submissionId === 'undefined') {
-        console.log('Controller: Invalid submission ID:', submissionId);
         return this.httpErrors.error_400();
       }
 
       if (!assignmentId) {
-        console.log('Controller: Invalid assignment ID:', assignmentId);
         return this.httpErrors.error_400();
       }
 
       if (marks === undefined || feedback === undefined || status === undefined || isLate === undefined) {
-        console.log('Controller: Missing required review data');
         return this.httpErrors.error_400();
       }
 
@@ -195,17 +184,12 @@ export class AssignmentController implements IAssignmentController {
       });
 
       if (!result.success) {
-        console.log('Controller: Review failed:', result.data);
         return this.httpErrors.error_400();
       }
-
-      console.log('Controller: Review successful');
-      console.log('=== Controller: ReviewSubmission Completed ===');
       return this.httpSuccess.success_200(result.data);
     } catch (error) {
       console.error('Controller: Error in reviewSubmission:', error);
       console.error('Controller: Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-      console.log('=== Controller: ReviewSubmission Failed ===');
       return this.httpErrors.error_500();
     }
   }

@@ -22,6 +22,7 @@ app.use(
 );
 
 // Middleware
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Serve uploaded files

@@ -1,0 +1,259 @@
+import { IUserDiplomaRepository } from "../../../application/diploma/repositories/IUserDiplomaRepository";
+import {
+  GetUserDiplomasRequestDTO,
+  GetUserDiplomaByIdRequestDTO,
+  GetUserDiplomaChapterRequestDTO,
+  UpdateVideoProgressRequestDTO,
+  MarkChapterCompleteRequestDTO,
+  ToggleBookmarkRequestDTO
+} from "../../../domain/diploma/dtos/UserDiplomaRequestDTOs";
+import {
+  GetUserDiplomasResponseDTO,
+  GetUserDiplomaByIdResponseDTO,
+  GetUserDiplomaChapterResponseDTO,
+  UpdateVideoProgressResponseDTO,
+  MarkChapterCompleteResponseDTO,
+  ToggleBookmarkResponseDTO
+} from "../../../domain/diploma/dtos/UserDiplomaResponseDTOs";
+import { DiplomaCourse } from "../../../domain/diploma/entities/DiplomaCourse";
+import { Chapter } from "../../../domain/diploma/entities/Chapter";
+import { Diploma as DiplomaModel, IDiploma } from "../../../infrastructure/database/mongoose/models/diploma.model";
+import { UserProgress } from "../../../infrastructure/database/mongoose/models/userProgress.model";
+import mongoose from "mongoose";
+
+export class UserDiplomaRepository implements IUserDiplomaRepository {
+  async getUserDiplomas(params: GetUserDiplomasRequestDTO): Promise<GetUserDiplomasResponseDTO> {
+    console.log('UserDiplomaRepository.getUserDiplomas - Params:', params);
+    try {
+      const { userId, page, limit, category, status, dateRange } = params;
+      const skip = (page - 1) * limit;
+
+      const query: any = { status: true }; // Using true for published status
+      if (category !== 'all') query.category = category;
+      if (status !== 'all') query.status = status === 'published';
+      if (dateRange !== 'all') {
+        const date = new Date();
+        switch (dateRange) {
+          case 'week':
+            date.setDate(date.getDate() - 7);
+            break;
+          case 'month':
+            date.setMonth(date.getMonth() - 1);
+            break;
+          case 'year':
+            date.setFullYear(date.getFullYear() - 1);
+            break;
+        }
+        query.createdAt = { $gte: date };
+      }
+
+      console.log('UserDiplomaRepository.getUserDiplomas - Query:', query);
+
+      const [diplomas, total] = await Promise.all([
+        DiplomaModel.find(query)
+          .skip(skip)
+          .limit(limit)
+          .sort({ createdAt: -1 }),
+        DiplomaModel.countDocuments(query)
+      ]);
+
+      console.log('UserDiplomaRepository.getUserDiplomas - Results:', {
+        diplomasCount: diplomas.length,
+        total
+      });
+
+      // Map mongoose model to domain entity
+      const courses: DiplomaCourse[] = diplomas.map(diploma => ({
+        _id: diploma._id.toString(),
+        title: diploma.title,
+        description: diploma.description,
+        category: diploma.category,
+        status: diploma.status ? 'published' : 'draft',
+        instructor: '', // TODO: Get instructor from user model
+        department: '', // TODO: Get department from user model
+        chapters: [], // TODO: Get chapters from video model
+        createdAt: diploma.createdAt,
+        updatedAt: diploma.updatedAt
+      }));
+
+      return {
+        courses,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      };
+    } catch (error: any) {
+      console.error('UserDiplomaRepository.getUserDiplomas - Error:', error);
+      throw error;
+    }
+  }
+
+  async getUserDiplomaById(params: GetUserDiplomaByIdRequestDTO): Promise<GetUserDiplomaByIdResponseDTO | null> {
+    console.log('UserDiplomaRepository.getUserDiplomaById - Params:', params);
+    try {
+      const diploma = await DiplomaModel.findOne({ 
+        _id: params.id, 
+        status: true 
+      });
+
+      console.log('UserDiplomaRepository.getUserDiplomaById - Result:', diploma ? 'Found' : 'Not found');
+
+      if (!diploma) {
+        return null;
+      }
+
+      return {
+        _id: diploma._id.toString(),
+        title: diploma.title,
+        description: diploma.description,
+        category: diploma.category,
+        status: diploma.status ? 'published' : 'draft',
+        instructor: '', // TODO: Get instructor from user model
+        department: '', // TODO: Get department from user model
+        chapters: [], // TODO: Get chapters from video model
+        createdAt: diploma.createdAt,
+        updatedAt: diploma.updatedAt
+      };
+    } catch (error: any) {
+      console.error('UserDiplomaRepository.getUserDiplomaById - Error:', error);
+      throw error;
+    }
+  }
+
+  async getUserDiplomaChapter(params: GetUserDiplomaChapterRequestDTO): Promise<GetUserDiplomaChapterResponseDTO | null> {
+    console.log('UserDiplomaRepository.getUserDiplomaChapter - Params:', params);
+    try {
+      const diploma = await DiplomaModel.findOne({
+        _id: params.courseId,
+        status: true
+      });
+
+      console.log('UserDiplomaRepository.getUserDiplomaChapter - Course:', diploma ? 'Found' : 'Not found');
+
+      if (!diploma) {
+        return null;
+      }
+
+      // TODO: Get chapter from video model
+      return null;
+    } catch (error: any) {
+      console.error('UserDiplomaRepository.getUserDiplomaChapter - Error:', error);
+      throw error;
+    }
+  }
+
+  async updateVideoProgress(params: UpdateVideoProgressRequestDTO): Promise<UpdateVideoProgressResponseDTO> {
+    console.log('UserDiplomaRepository.updateVideoProgress - Params:', params);
+    try {
+      const { userId, courseId, chapterId, progress } = params;
+
+      const userProgress = await UserProgress.findOneAndUpdate(
+        { userId, courseId, chapterId },
+        { progress },
+        { upsert: true, new: true }
+      );
+
+      console.log('UserDiplomaRepository.updateVideoProgress - Result:', userProgress);
+
+      return {
+        message: 'Progress updated successfully',
+        progress: userProgress.progress
+      };
+    } catch (error: any) {
+      console.error('UserDiplomaRepository.updateVideoProgress - Error:', error);
+      throw error;
+    }
+  }
+
+  async markChapterComplete(params: MarkChapterCompleteRequestDTO): Promise<MarkChapterCompleteResponseDTO> {
+    console.log('UserDiplomaRepository.markChapterComplete - Params:', params);
+    try {
+      const { userId, courseId, chapterId } = params;
+
+      const userProgress = await UserProgress.findOneAndUpdate(
+        { userId, courseId, chapterId },
+        { isCompleted: true },
+        { upsert: true, new: true }
+      );
+
+      console.log('UserDiplomaRepository.markChapterComplete - Result:', userProgress);
+
+      return {
+        message: 'Chapter marked as complete',
+        completed: true
+      };
+    } catch (error: any) {
+      console.error('UserDiplomaRepository.markChapterComplete - Error:', error);
+      throw error;
+    }
+  }
+
+  async toggleBookmark(params: ToggleBookmarkRequestDTO): Promise<ToggleBookmarkResponseDTO> {
+    console.log('UserDiplomaRepository.toggleBookmark - Params:', params);
+    try {
+      const { userId, courseId, chapterId } = params;
+
+      const userProgress = await UserProgress.findOne({ userId, courseId, chapterId });
+      console.log('UserDiplomaRepository.toggleBookmark - Existing progress:', userProgress);
+
+      if (!userProgress) {
+        const newProgress = await UserProgress.create({
+          userId,
+          courseId,
+          chapterId,
+          isBookmarked: true
+        });
+        console.log('UserDiplomaRepository.toggleBookmark - Created new progress:', newProgress);
+        return {
+          message: 'Chapter bookmarked',
+          bookmarked: true
+        };
+      }
+
+      userProgress.isBookmarked = !userProgress.isBookmarked;
+      await userProgress.save();
+      console.log('UserDiplomaRepository.toggleBookmark - Updated progress:', userProgress);
+
+      return {
+        message: userProgress.isBookmarked ? 'Chapter bookmarked' : 'Chapter unbookmarked',
+        bookmarked: userProgress.isBookmarked
+      };
+    } catch (error: any) {
+      console.error('UserDiplomaRepository.toggleBookmark - Error:', error);
+      throw error;
+    }
+  }
+
+  async getCompletedChapters(userId: string, courseId: string): Promise<string[]> {
+    console.log('UserDiplomaRepository.getCompletedChapters - CourseId:', courseId);
+    try {
+      const completedChapters = await UserProgress.find({
+        userId,
+        courseId,
+        isCompleted: true
+      }).select('chapterId');
+
+      return completedChapters.map(chapter => chapter.chapterId.toString());
+    } catch (error: any) {
+      console.error('UserDiplomaRepository.getCompletedChapters - Error:', error);
+      throw error;
+    }
+  }
+
+  async getBookmarkedChapters(userId: string, courseId: string): Promise<string[]> {
+    console.log('UserDiplomaRepository.getBookmarkedChapters - CourseId:', courseId);
+    try {
+      const bookmarkedChapters = await UserProgress.find({
+        userId,
+        courseId,
+        isBookmarked: true
+      }).select('chapterId');
+
+      return bookmarkedChapters.map(chapter => chapter.chapterId.toString());
+    } catch (error: any) {
+      console.error('UserDiplomaRepository.getBookmarkedChapters - Error:', error);
+      throw error;
+    }
+  }
+} 

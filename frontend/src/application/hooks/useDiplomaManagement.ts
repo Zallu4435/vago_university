@@ -2,206 +2,170 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { diplomaService } from '../services/diploma.service';
-import { Diploma, Enrollment } from '../../domain/types/diploma';
+import { DiplomaCourse } from '../../domain/types/diploma';
 
 interface Filters {
   category: string;
   status: string;
+  dateRange: string;
 }
 
 export const useDiplomaManagement = () => {
   const queryClient = useQueryClient();
   const [page, setPage] = useState<number>(1);
-  const [selectedDiplomaId, setSelectedDiplomaId] = useState<string | null>(null);
-  const [selectedEnrollmentId, setSelectedEnrollmentId] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({
-    category: 'All Categories',
-    status: 'All',
+    category: 'all',
+    status: 'all',
+    dateRange: 'all',
   });
-  const [activeTab, setActiveTab] = useState<'diplomas' | 'enrollments'>('diplomas');
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+  const [selectedChapterId, setSelectedChapterId] = useState<string | null>(null);
   const limit = 10;
 
-  const {
-    data: diplomasData,
-    isLoading: isLoadingDiplomas,
-    error: diplomasError,
-  } = useQuery<{ diplomas: Diploma[]; totalPages: number }, Error>({
-    queryKey: ['diplomas', page, filters, limit],
-    queryFn: async () => {
-      const result = await diplomaService.getDiplomas(
+  const getDateRangeFilter = (dateRange: string): string | undefined => {
+    if (!dateRange || dateRange === 'all') return undefined;
+
+    const now = new Date();
+    const startDate = new Date();
+
+    switch (dateRange.toLowerCase()) {
+      case 'last_week':
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case 'last_month':
+        startDate.setMonth(now.getMonth() - 1);
+        break;
+      case 'last_3_months':
+        startDate.setMonth(now.getMonth() - 3);
+        break;
+      case 'last_6_months':
+        startDate.setMonth(now.getMonth() - 6);
+        break;
+      case 'last_year':
+        startDate.setFullYear(now.getFullYear() - 1);
+        break;
+      default:
+        return undefined;
+    }
+
+    const dateRangeString = `${startDate.toISOString()},${now.toISOString()}`;
+    return dateRangeString;
+  };
+
+  const { data: coursesData, isLoading: isLoadingCourses, error: coursesError } = useQuery({
+    queryKey: ['diploma-courses', page, filters, limit],
+    queryFn: () => {
+      const dateRange = getDateRangeFilter(filters.dateRange);
+      return diplomaService.getDiplomaCourses(
         page,
         limit,
-        filters.category !== 'All Categories' ? filters.category : undefined,
-        filters.status !== 'All' ? filters.status.toLowerCase() === 'active' : undefined
+        filters.category !== 'all' ? filters.category : undefined,
+        filters.status !== 'all' ? filters.status : undefined,
+        dateRange
       );
-      // Map diplomas to include videoCount
-      const diplomas = result.diplomas.map((d) => ({
-        ...d,
-        videoCount: d.videoIds.length,
-      }));
-      return { diplomas, totalPages: result.totalPages };
+    }
+  });
+
+  const { data: selectedCourse, isLoading: isLoadingCourse } = useQuery({
+    queryKey: ['diploma-course', selectedCourseId],
+    queryFn: () => {
+      if (!selectedCourseId) throw new Error('No course ID provided');
+      return diplomaService.getDiplomaCourseById(selectedCourseId);
     },
-    enabled: activeTab === 'diplomas',
+    enabled: !!selectedCourseId,
   });
 
-  const {
-    data: enrollmentsData,
-    isLoading: isLoadingEnrollments,
-    error: enrollmentsError,
-  } = useQuery<{ enrollments: Enrollment[]; totalPages: number }, Error>({
-    queryKey: ['diploma-enrollments', page, filters, limit],
-    queryFn: () =>
-      diplomaService.getEnrollments(
-        page,
-        limit,
-        filters.category !== 'All Categories' ? filters.category : undefined,
-        filters.status !== 'All' ? filters.status : undefined
-      ),
-    enabled: activeTab === 'enrollments',
+  const { data: selectedChapter, isLoading: isLoadingChapter } = useQuery({
+    queryKey: ['diploma-chapter', selectedCourseId, selectedChapterId],
+    queryFn: () => {
+      if (!selectedCourseId || !selectedChapterId) throw new Error('No course or chapter ID provided');
+      return diplomaService.getChapterById(selectedCourseId, selectedChapterId);
+    },
+    enabled: !!selectedCourseId && !!selectedChapterId,
   });
 
-  const { data: diplomaDetails, isLoading: isLoadingDiplomaDetails } = useQuery<
-    Diploma & { enrolledStudents: Enrollment[] },
-    Error
-  >({
-    queryKey: ['diploma-details', selectedDiplomaId],
-    queryFn: () => diplomaService.getDiplomaDetails(selectedDiplomaId!),
-    enabled: !!selectedDiplomaId,
+  const { data: completedChapters = [], isLoading: isLoadingCompletedChapters } = useQuery({
+    queryKey: ['completed-chapters', selectedCourseId],
+    queryFn: () => {
+      if (!selectedCourseId) throw new Error('No course ID provided');
+      return diplomaService.getCompletedChapters(selectedCourseId);
+    },
+    enabled: !!selectedCourseId,
   });
 
-  const { data: enrollmentDetails, isLoading: isLoadingEnrollmentDetails } = useQuery<
-    Enrollment,
-    Error
-  >({
-    queryKey: ['enrollment-details', selectedEnrollmentId],
-    queryFn: () => diplomaService.getEnrollmentDetails(selectedEnrollmentId!),
-    enabled: !!selectedEnrollmentId,
+  const { data: bookmarkedChapters = [], isLoading: isLoadingBookmarkedChapters } = useQuery({
+    queryKey: ['bookmarked-chapters', selectedCourseId],
+    queryFn: () => {
+      if (!selectedCourseId) throw new Error('No course ID provided');
+      return diplomaService.getBookmarkedChapters(selectedCourseId);
+    },
+    enabled: !!selectedCourseId,
   });
 
-  const { mutateAsync: createDiploma } = useMutation({
-    mutationFn: (data: Omit<Diploma, '_id' | 'createdAt' | 'updatedAt'>) =>
-      diplomaService.createDiploma(data),
+  const { mutate: updateProgress } = useMutation({
+    mutationFn: ({ courseId, chapterId, progress }: { courseId: string; chapterId: string; progress: number }) =>
+      diplomaService.updateVideoProgress(courseId, chapterId, progress),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['diplomas'] });
-      toast.success('Diploma created successfully');
+      queryClient.invalidateQueries({ queryKey: ['diploma-course', selectedCourseId] });
+      toast.success('Progress updated successfully');
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to create diploma');
+      toast.error(error.message || 'Failed to update progress');
     },
   });
 
-  const { mutateAsync: updateDiploma } = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Diploma> }) =>
-      diplomaService.updateDiploma(id, data),
+  const { mutate: markChapterComplete } = useMutation({
+    mutationFn: ({ courseId, chapterId }: { courseId: string; chapterId: string }) =>
+      diplomaService.markChapterComplete(courseId, chapterId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['diplomas'] });
-      queryClient.invalidateQueries({ queryKey: ['diploma-details'] });
-      toast.success('Diploma updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['completed-chapters', selectedCourseId] });
+      queryClient.invalidateQueries({ queryKey: ['diploma-course', selectedCourseId] });
+      toast.success('Chapter marked as complete');
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to update diploma');
+      toast.error(error.message || 'Failed to mark chapter as complete');
     },
   });
 
-  const { mutateAsync: deleteDiploma } = useMutation({
-    mutationFn: (id: string) => diplomaService.deleteDiploma(id),
+  const { mutate: toggleBookmark } = useMutation({
+    mutationFn: ({ courseId, chapterId }: { courseId: string; chapterId: string }) =>
+      diplomaService.toggleBookmark(courseId, chapterId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['diplomas'] });
-      queryClient.invalidateQueries({ queryKey: ['diploma-enrollments'] });
-      toast.success('Diploma deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['bookmarked-chapters', selectedCourseId] });
+      toast.success('Bookmark toggled successfully');
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to delete diploma');
+      toast.error(error.message || 'Failed to toggle bookmark');
     },
   });
 
-  const { mutateAsync: approveEnrollment } = useMutation({
-    mutationFn: (requestId: string) => diplomaService.approveEnrollment(requestId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['diploma-enrollments'] });
-      queryClient.invalidateQueries({ queryKey: ['enrollment-details'] });
-      toast.success('Enrollment approved successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to approve enrollment');
-    },
-  });
-
-  const { mutateAsync: rejectEnrollment } = useMutation({
-    mutationFn: ({ requestId, reason }: { requestId: string; reason: string }) =>
-      diplomaService.rejectEnrollment(requestId, reason),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['diploma-enrollments'] });
-      queryClient.invalidateQueries({ queryKey: ['enrollment-details'] });
-      toast.success('Enrollment rejected successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to reject enrollment');
-    },
-  });
-
-  const { mutateAsync: resetProgress } = useMutation({
-    mutationFn: (requestId: string) => diplomaService.resetProgress(requestId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['diploma-enrollments'] });
-      queryClient.invalidateQueries({ queryKey: ['enrollment-details'] });
-      toast.success('Progress reset successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to reset progress');
-    },
-  });
-
-  const handleTabChange = (tab: 'diplomas' | 'enrollments') => {
-    setActiveTab(tab);
-    setPage(1);
-    setFilters({
-      category: 'All Categories',
-      status: 'All',
-    });
-    queryClient.invalidateQueries({
-      queryKey: tab === 'diplomas' ? ['diplomas'] : ['diploma-enrollments'],
-    });
+  const handleViewCourse = (courseId: string) => {
+    setSelectedCourseId(courseId);
   };
 
-  const handleViewDiploma = (diplomaId: string) => {
-    setSelectedDiplomaId(diplomaId);
-  };
-
-  const handleEditDiploma = (diplomaId: string) => {
-    setSelectedDiplomaId(diplomaId);
-  };
-
-  const handleViewEnrollment = (enrollmentId: string) => {
-    setSelectedEnrollmentId(enrollmentId);
+  const handleViewChapter = (chapterId: string) => {
+    setSelectedChapterId(chapterId);
   };
 
   return {
-    diplomas: diplomasData?.diplomas || [],
-    totalPages: diplomasData?.totalPages || 0,
+    courses: coursesData?.courses || [],
+    totalPages: coursesData?.totalPages || 0,
     page,
     setPage,
     filters,
     setFilters,
-    isLoading: isLoadingDiplomas,
-    error: diplomasError || enrollmentsError,
-    createDiploma,
-    updateDiploma,
-    deleteDiploma,
-    enrollments: enrollmentsData?.enrollments || [],
-    enrollmentTotalPages: enrollmentsData?.totalPages || 0,
-    isLoadingEnrollments,
-    approveEnrollment,
-    rejectEnrollment,
-    resetProgress,
-    diplomaDetails,
-    isLoadingDiplomaDetails,
-    handleViewDiploma,
-    handleEditDiploma,
-    enrollmentDetails,
-    isLoadingEnrollmentDetails,
-    handleViewEnrollment,
-    activeTab,
-    handleTabChange,
+    isLoading: isLoadingCourses || isLoadingCourse || isLoadingChapter || isLoadingCompletedChapters || isLoadingBookmarkedChapters,
+    error: coursesError,
+    selectedCourse,
+    selectedChapter,
+    completedChapters: new Set(completedChapters),
+    bookmarkedChapters: new Set(bookmarkedChapters),
+    updateProgress,
+    markChapterComplete,
+    toggleBookmark,
+    handleViewCourse,
+    handleViewChapter,
+    setSelectedCourseId,
+    setSelectedChapterId,
   };
 };

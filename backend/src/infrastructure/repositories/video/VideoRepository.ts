@@ -17,6 +17,7 @@ export class VideoRepository implements IVideoRepository {
         if (category && category !== 'all') {
             const diploma = await Diploma.findOne({ category });
             if (!diploma) {
+                console.error('VideoRepository: Diploma not found for category:', category);
                 throw new Error('Diploma not found for this category');
             }
             query.diplomaId = diploma._id;
@@ -54,11 +55,16 @@ export class VideoRepository implements IVideoRepository {
     }
 
     async getVideoById(params: GetVideoByIdRequestDTO): Promise<GetVideoByIdResponseDTO | null> {
+        console.log('VideoRepository: getVideoById called with params:', params);
         const { id } = params;
         const video = await VideoModel.findById(id).lean();
         
-        if (!video) return null;
+        if (!video) {
+            console.error('VideoRepository: Video not found with id:', id);
+            return null;
+        }
 
+        console.log('VideoRepository: Found video:', video);
         return {
             video: new Video(
                 video._id.toString(),
@@ -75,17 +81,25 @@ export class VideoRepository implements IVideoRepository {
     }
 
     async createVideo(params: CreateVideoRequestDTO): Promise<CreateVideoResponseDTO> {
+        console.log('VideoRepository: createVideo called with params:', {
+            ...params,
+            videoFile: params.videoFile ? 'File present' : 'No file'
+        });
+
         const { category, ...videoData } = params;
 
         // First find the diploma by category
+        console.log('VideoRepository: Finding diploma for category:', category);
         const diploma = await Diploma.findOne({ category });
         if (!diploma) {
+            console.error('VideoRepository: Diploma not found for category:', category);
             throw new Error('Diploma not found for this category');
         }
 
         // Upload video to Cloudinary if file is provided
         let videoUrl = '';
         if (params.videoFile) {
+            console.log('VideoRepository: Uploading video to Cloudinary');
             try {
                 const result = await cloudinary.uploader.upload(params.videoFile.path, {
                     resource_type: 'video',
@@ -93,11 +107,16 @@ export class VideoRepository implements IVideoRepository {
                     quality: 'auto'
                 });
                 videoUrl = result.secure_url;
+                console.log('VideoRepository: Video uploaded successfully, URL:', videoUrl);
             } catch (error) {
+                console.error('VideoRepository: Failed to upload video to Cloudinary:', error);
                 throw new Error('Failed to upload video to Cloudinary');
             }
+        } else {
+            console.log('VideoRepository: No video file provided for upload');
         }
 
+        console.log('VideoRepository: Creating video in database');
         const video = await VideoModel.create({
             ...videoData,
             diplomaId: diploma._id,
@@ -106,11 +125,13 @@ export class VideoRepository implements IVideoRepository {
         });
 
         // Update diploma's videoIds array
+        console.log('VideoRepository: Updating diploma with new video ID');
         await Diploma.findByIdAndUpdate(
             diploma._id,
             { $push: { videoIds: video._id } }
         );
 
+        console.log('VideoRepository: Video created successfully:', video);
         return {
             video: new Video(
                 video._id.toString(),
@@ -127,10 +148,16 @@ export class VideoRepository implements IVideoRepository {
     }
 
     async updateVideo(params: UpdateVideoRequestDTO): Promise<UpdateVideoResponseDTO | null> {
+        console.log('VideoRepository: updateVideo called with params:', {
+            ...params,
+            videoFile: params.videoFile ? 'File present' : 'No file'
+        });
+
         const { id, ...updateData } = params;
 
         // If new video file is provided, upload it to Cloudinary
         if (params.videoFile) {
+            console.log('VideoRepository: Uploading new video to Cloudinary');
             try {
                 const result = await cloudinary.uploader.upload(params.videoFile.path, {
                     resource_type: 'video',
@@ -138,19 +165,26 @@ export class VideoRepository implements IVideoRepository {
                     quality: 'auto'
                 });
                 updateData.videoUrl = result.secure_url;
+                console.log('VideoRepository: New video uploaded successfully, URL:', result.secure_url);
             } catch (error) {
+                console.error('VideoRepository: Failed to upload new video to Cloudinary:', error);
                 throw new Error('Failed to upload video to Cloudinary');
             }
         }
 
+        console.log('VideoRepository: Updating video in database');
         const video = await VideoModel.findByIdAndUpdate(
             id,
             { $set: updateData },
             { new: true }
         ).lean();
 
-        if (!video) return null;
+        if (!video) {
+            console.error('VideoRepository: Video not found for update, id:', id);
+            return null;
+        }
 
+        console.log('VideoRepository: Video updated successfully:', video);
         return {
             video: new Video(
                 video._id.toString(),
@@ -167,31 +201,38 @@ export class VideoRepository implements IVideoRepository {
     }
 
     async deleteVideo(params: DeleteVideoRequestDTO): Promise<void> {
+        console.log('VideoRepository: deleteVideo called with params:', params);
         const { id } = params;
         const video = await VideoModel.findById(id);
         
         if (!video) {
+            console.error('VideoRepository: Video not found for deletion, id:', id);
             throw new Error('Video not found');
         }
 
         // Delete video from Cloudinary if it exists
         if (video.videoUrl) {
+            console.log('VideoRepository: Deleting video from Cloudinary');
             try {
                 const publicId = video.videoUrl.split('/').pop()?.split('.')[0];
                 if (publicId) {
                     await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
+                    console.log('VideoRepository: Video deleted from Cloudinary successfully');
                 }
             } catch (error) {
-                console.error('Failed to delete video from Cloudinary:', error);
+                console.error('VideoRepository: Failed to delete video from Cloudinary:', error);
             }
         }
 
         // Remove video from diploma's videoIds array
+        console.log('VideoRepository: Removing video from diploma');
         await Diploma.findByIdAndUpdate(
             video.diplomaId,
             { $pull: { videoIds: video._id } }
         );
 
+        console.log('VideoRepository: Deleting video from database');
         await VideoModel.findByIdAndDelete(id);
+        console.log('VideoRepository: Video deleted successfully');
     }
 } 

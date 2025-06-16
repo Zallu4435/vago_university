@@ -186,3 +186,14 @@ export interface IUserAssignmentController extends IController {
   getAssignmentStatus(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getAssignmentFeedback(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
+
+export interface IUserDiplomaController extends IController {
+  getUserDiplomas(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getUserDiplomaById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getUserDiplomaChapter(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateVideoProgress(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  markChapterComplete(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  toggleBookmark(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getCompletedChapters(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getBookmarkedChapters(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}

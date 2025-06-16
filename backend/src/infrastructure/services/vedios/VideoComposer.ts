@@ -1,3 +1,4 @@
+import { VideoController } from '../../../presentation/http/vedios/videoController';
 import { VideoRepository } from '../../repositories/video/VideoRepository';
 import { GetVideosUseCase, GetVideoByIdUseCase, CreateVideoUseCase, UpdateVideoUseCase, DeleteVideoUseCase } from '../../../application/video/useCases/VideoUseCases';
 
@@ -18,5 +19,9 @@ export class VideoComposer {
             updateVideoUseCase,
             deleteVideoUseCase,
         };
+    }
+
+    static composeVideoController(): VideoController {
+        return new VideoController();
     }
 } 

@@ -1,7 +1,7 @@
 import { IconType } from 'react-icons';
 
 export interface Chapter {
-  id: number;
+  id: string;
   title: string;
   duration: string;
   videoUrl: string;
@@ -10,19 +10,25 @@ export interface Chapter {
 }
 
 export interface DiplomaCourse {
-  id: number;
+  id: string;
   title: string;
   description: string;
   duration: string;
   locked: boolean;
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  difficulty: string;
   rating: number;
   students: number;
-  icon: IconType;
+  icon: string;
   color: string;
   bgColor: string;
   completionRate: number;
   chapters: Chapter[];
+}
+
+export interface VideoProgress {
+  chapterId: string;
+  progress: number;
+  completed: boolean;
 }
 
 export type ViewMode = 'courses' | 'details' | 'chapter';

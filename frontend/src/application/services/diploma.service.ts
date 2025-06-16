@@ -1,4 +1,5 @@
 import httpClient from '../../frameworks/api/httpClient';
+import { DiplomaCourse, Chapter, DiplomaApiResponse } from '../../domain/types/diploma';
 
 interface Video {
     _id: string;
@@ -37,103 +38,91 @@ interface Enrollment {
     progress: number;
 }
 
-export const diplomaService = {
-    async getDiplomas(page: number, limit: number): Promise<{ diplomas: Diploma[]; totalPages: number }> {
-        const response = await httpClient.get('/admin/diploma-courses', { params: { page, limit } });
-        return {
-            diplomas: response.data.diplomas,
-            totalPages: response.data.totalPages,
-        };
-    },
+class DiplomaService {
+    async getDiplomaCourses(
+        page: number,
+        limit: number,
+        category?: string,
+        status?: string,
+        dateRange?: string
+    ): Promise<DiplomaApiResponse> {
+        try {
+            const params: Record<string, string | number> = { page, limit };
+            if (category && category !== 'all') params.category = category;
+            if (status && status !== 'all') params.status = status;
+            if (dateRange && dateRange !== 'all') {
+                const [startDate, endDate] = dateRange.split(',');
+                params.startDate = startDate;
+                params.endDate = endDate;
+            }
 
-    async getVideos(category?: string, page: number = 1, limit: number = 10, status?: string): Promise<{ videos: Video[]; totalPages: number }> {
-        const params: any = { page, limit };
-        if (status && status !== 'all') params.status = status;
-        if (category && category !== 'all') params.category = category;
-
-        const response = await httpClient.get('/admin/vedio/videos', { params });
-        return {
-            videos: response.data.videos,
-            totalPages: response.data.totalPages,
-        };
-    },
-
-    async getVideoById(videoId: string): Promise<Video> {
-        const response = await httpClient.get(`/admin/vedio/videos/${videoId}`);
-        return response.data.video;
-    },
-
-    async createVideo(category: string, videoData: FormData): Promise<Video> {
-        if (!category) {
-            throw new Error('Category is required for video creation');
+            const response = await httpClient.get<DiplomaApiResponse>('/diploma-courses', { params });
+            return response.data;
+        } catch (error: any) {
+            console.error('getDiplomaCourses error:', error);
+            throw new Error(error.response?.data?.error || 'Failed to fetch diploma courses');
         }
-        const response = await httpClient.post(`/admin/vedio/categories/${category}/videos`, videoData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-        return response.data.video;
-    },
+    }
 
-    async updateVideo(videoId: string, videoData: Partial<Video>): Promise<Video> {
-        if (!videoId) {
-            throw new Error('Video ID is required for updates');
+    async getDiplomaCourseById(id: string): Promise<DiplomaCourse> {
+        try {
+            const response = await httpClient.get<{ course: DiplomaCourse }>(`/diploma-courses/${id}`);
+            return response.data.course;
+        } catch (error: any) {
+            throw new Error(error.response?.data?.error || 'Failed to fetch diploma course');
         }
-        const response = await httpClient.put(`/admin/vedio/videos/${videoId}`, videoData);
-        return response.data.video;
-    },
+    }
 
-    async deleteVideo(videoId: string): Promise<void> {
-        if (!videoId) {
-            throw new Error('Video ID is required for deletion');
+    async getChapterById(courseId: string, chapterId: string): Promise<Chapter> {
+        try {
+            const response = await httpClient.get<{ chapter: Chapter }>(`/diploma-courses/${courseId}/chapters/${chapterId}`);
+            return response.data.chapter;
+        } catch (error: any) {
+            throw new Error(error.response?.data?.error || 'Failed to fetch chapter');
         }
-        await httpClient.delete(`/admin/vedio/videos/${videoId}`);
-    },
+    }
 
-    async getEnrollments(page: number, limit: number, category?: string, status?: string): Promise<{ enrollments: Enrollment[]; totalPages: number }> {
-        const params: any = { page, limit };
-        if (category && category !== 'All Categories') params.category = category;
-        if (status && status !== 'All') params.status = status;
-        const response = await httpClient.get('/admin/diploma-enrollments', { params });
-        return {
-            enrollments: response.data.enrollments,
-            totalPages: response.data.totalPages,
-        };
-    },
+    async updateVideoProgress(courseId: string, chapterId: string, progress: number): Promise<void> {
+        try {
+            await httpClient.post(`/diploma-courses/${courseId}/chapters/${chapterId}/progress`, { progress });
+        } catch (error: any) {
+            throw new Error(error.response?.data?.error || 'Failed to update video progress');
+        }
+    }
 
-    async getDiplomaDetails(diplomaId: string): Promise<Diploma & { enrolledStudents: Enrollment[] }> {
-        const response = await httpClient.get(`/admin/diploma-courses/${diplomaId}`);
-        return response.data.diploma;
-    },
+    async markChapterComplete(courseId: string, chapterId: string): Promise<void> {
+        try {
+            await httpClient.post(`/diploma-courses/${courseId}/chapters/${chapterId}/complete`);
+        } catch (error: any) {
+            throw new Error(error.response?.data?.error || 'Failed to mark chapter as complete');
+        }
+    }
 
-    async getEnrollmentDetails(enrollmentId: string): Promise<Enrollment> {
-        const response = await httpClient.get(`/admin/diploma-enrollments/${enrollmentId}`);
-        return response.data.enrollment;
-    },
+    async toggleBookmark(courseId: string, chapterId: string): Promise<void> {
+        try {
+            await httpClient.post(`/diploma-courses/${courseId}/chapters/${chapterId}/bookmark`);
+        } catch (error: any) {
+            throw new Error(error.response?.data?.error || 'Failed to toggle bookmark');
+        }
+    }
 
-    async createDiploma(data: Omit<Diploma, '_id' | 'createdAt' | 'updatedAt'>): Promise<Diploma> {
-        const response = await httpClient.post('/admin/diploma-courses', data);
-        return response.data.diploma;
-    },
+    async getCompletedChapters(courseId: string): Promise<string[]> {
+        try {
+            const response = await httpClient.get<{ completedChapters: string[] }>(`/diploma-courses/${courseId}/completed-chapters`);
+            return response.data.completedChapters;
+        } catch (error: any) {
+            throw new Error(error.response?.data?.error || 'Failed to fetch completed chapters');
+        }
+    }
 
-    async updateDiploma(id: string, data: Partial<Diploma>): Promise<Diploma> {
-        const response = await httpClient.put(`/admin/diploma-courses/${id}`, data);
-        return response.data.diploma;
-    },
+    async getBookmarkedChapters(courseId: string): Promise<string[]> {
+        try {
+            const response = await httpClient.get<{ bookmarkedChapters: string[] }>(`/diploma-courses/${courseId}/bookmarked-chapters`);
+            return response.data.bookmarkedChapters;
+        } catch (error: any) {
+            throw new Error(error.response?.data?.error || 'Failed to fetch bookmarked chapters');
+        }
+    }
+}
 
-    async deleteDiploma(id: string): Promise<void> {
-        await httpClient.delete(`/admin/diploma-courses/${id}`);
-    },
-
-    async approveEnrollment(requestId: string): Promise<void> {
-        await httpClient.post(`/admin/diploma-enrollments/${requestId}/approve`);
-    },
-
-    async rejectEnrollment(requestId: string, reason: string): Promise<void> {
-        await httpClient.post(`/admin/diploma-enrollments/${requestId}/reject`, { reason });
-    },
-
-    async resetProgress(requestId: string): Promise<void> {
-        await httpClient.post(`/admin/diploma-enrollments/${requestId}/reset-progress`);
-    },
-};
+export const diplomaService = new DiplomaService();

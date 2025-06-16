@@ -49,7 +49,7 @@ const videoStorage = new CloudinaryStorage({
   params: {
     folder: 'videos',
     resource_type: 'video',
-    allowed_formats: ['mp4', 'mov', 'avi'],
+    allowed_formats: ['mp4', 'mov', 'avi', 'webm', 'mkv'],
     transformation: [{ quality: 'auto' }],
   } as any,
 });
@@ -137,7 +137,31 @@ const messageAttachmentUpload = multer({
 });
 const videoUpload = multer({
   storage: videoStorage,
-  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit for videos
+  limits: { 
+    fileSize: 500 * 1024 * 1024 // 500MB limit for videos
+  },
+  fileFilter: (req, file, cb) => {
+    console.log('Validating video file:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size
+    });
+    
+    const allowedMimeTypes = [
+      'video/mp4',
+      'video/quicktime',
+      'video/x-msvideo',
+      'video/webm',
+      'video/x-matroska'
+    ];
+    
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      console.error('Invalid video format:', file.mimetype);
+      cb(new Error('Invalid video format. Allowed formats: MP4, MOV, AVI, WEBM, MKV'));
+    }
+  }
 });
 const assignmentUpload = multer({
   storage: assignmentStorage,

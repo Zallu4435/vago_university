@@ -21,8 +21,13 @@ import materialRoutes from '../http/materials/materialRoutes'
 import userMaterialRoutes from '../http/materials/userMaterialRoutes'
 import assignmentRoutes from '../http/assignments/assignmentRoutes'
 import userAssignmentRoutes from '../http/assignments/userAssignmentRoutes'
+import userDiplomaRoutes from '../http/diploma/UserDiplomaRouter'
+
 
 const router = Router();
+
+router.use("/diploma-courses", userDiplomaRoutes);
+
 router.use("/materials", userMaterialRoutes);
 
 router.use("/assignments", userAssignmentRoutes);
@@ -32,8 +37,8 @@ router.use('/fcm', fcmTokenRoute)
 router.use("/admission", admissionRoutes);
 
 router.use("/admin/admissions", adminRoutes);
-router.use("/admin/faculty", facultyRoutes);
 
+router.use("/admin/faculty", facultyRoutes);
 
 router.use("/user", profileRoutes);
 

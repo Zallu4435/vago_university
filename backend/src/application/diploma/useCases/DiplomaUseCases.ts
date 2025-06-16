@@ -29,7 +29,7 @@ export interface IDeleteDiplomaUseCase {
 }
 
 export class GetDiplomasUseCase implements IGetDiplomasUseCase {
-  constructor(private readonly diplomaRepository: IDiplomaRepository) {}
+  constructor(private readonly diplomaRepository: IDiplomaRepository) { }
 
   async execute(params: GetDiplomasRequestDTO): Promise<ResponseDTO<GetDiplomasResponseDTO>> {
     try {
@@ -45,7 +45,7 @@ export class GetDiplomasUseCase implements IGetDiplomasUseCase {
 }
 
 export class GetDiplomaByIdUseCase implements IGetDiplomaByIdUseCase {
-  constructor(private readonly diplomaRepository: IDiplomaRepository) {}
+  constructor(private readonly diplomaRepository: IDiplomaRepository) { }
 
   async execute(params: GetDiplomaByIdRequestDTO): Promise<ResponseDTO<GetDiplomaByIdResponseDTO>> {
     try {
@@ -64,7 +64,7 @@ export class GetDiplomaByIdUseCase implements IGetDiplomaByIdUseCase {
 }
 
 export class CreateDiplomaUseCase implements ICreateDiplomaUseCase {
-  constructor(private readonly diplomaRepository: IDiplomaRepository) {}
+  constructor(private readonly diplomaRepository: IDiplomaRepository) { }
 
   async execute(params: CreateDiplomaRequestDTO): Promise<ResponseDTO<CreateDiplomaResponseDTO>> {
     try {
@@ -77,7 +77,7 @@ export class CreateDiplomaUseCase implements ICreateDiplomaUseCase {
 }
 
 export class UpdateDiplomaUseCase implements IUpdateDiplomaUseCase {
-  constructor(private readonly diplomaRepository: IDiplomaRepository) {}
+  constructor(private readonly diplomaRepository: IDiplomaRepository) { }
 
   async execute(params: UpdateDiplomaRequestDTO): Promise<ResponseDTO<UpdateDiplomaResponseDTO>> {
     try {
@@ -96,7 +96,7 @@ export class UpdateDiplomaUseCase implements IUpdateDiplomaUseCase {
 }
 
 export class DeleteDiplomaUseCase implements IDeleteDiplomaUseCase {
-  constructor(private readonly diplomaRepository: IDiplomaRepository) {}
+  constructor(private readonly diplomaRepository: IDiplomaRepository) { }
 
   async execute(params: DeleteDiplomaRequestDTO): Promise<ResponseDTO<{ message: string }>> {
     try {

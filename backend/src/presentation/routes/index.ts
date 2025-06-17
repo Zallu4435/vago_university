@@ -9,7 +9,7 @@ import clubRoutes from "../http/clubs/clubRoutes";
 import sportRoutes from "../http/sports/SportRoutes";
 import eventRoutes from "../http/events/eventRoutes";
 // import communicationRoutes from './communicationRoutes'
-import campusLifeRoutes from "./campusLifeRoutes";
+import campusLifeRoutes from "../http/campus-life/campusLifeRoutes";
 import academicRoutes from "./academicRoutes";
 import userCommunicationRoutes from "./useCommunicationRoutes";
 import financialRoutes from "./financial.route";

@@ -12,7 +12,7 @@ export default function ClubsSection({ clubs }) {
   const { requestToJoinClub, isJoiningClub, joinClubError } = useCampusLife();
   const { styles, theme } = usePreferences();
 
-  const filteredClubs = clubs.filter((club) =>
+  const filteredClubs = clubs?.clubs?.filter((club) =>
     club.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     club.type.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -20,7 +20,7 @@ export default function ClubsSection({ clubs }) {
   const handleJoinRequest = async (request) => {
     if (!selectedClub) return;
     try {
-      await requestToJoinClub({ clubId: selectedClub.id || selectedClub._id, request });
+      await requestToJoinClub({ clubId: selectedClub.id || selectedClub.id, request });
       setShowJoinForm(false);
     } catch (error) {
       console.error('Failed to submit join request:', error);
@@ -91,9 +91,9 @@ export default function ClubsSection({ clubs }) {
               <div className="max-h-96 overflow-y-auto divide-y divide-amber-100/50">
                 {filteredClubs.map((club) => (
                   <div
-                    key={club.id || club._id}
+                    key={club.id || club.id}
                     className={`p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${
-                      selectedClub?._id === club._id ? 'bg-orange-50/70' : ''
+                      selectedClub?.id === club.id ? 'bg-orange-50/70' : ''
                     }`}
                     onClick={() => setSelectedClub(club)}
                   >
@@ -110,7 +110,7 @@ export default function ClubsSection({ clubs }) {
                           {club.role} • {club.nextMeeting}
                         </div>
                       </div>
-                      {selectedClub?.id === club.id || selectedClub?._id === club._id ? (
+                      {selectedClub?.id === club.id || selectedClub?.id === club.id ? (
                         <div className={`w-2 h-2 rounded-full ${styles.status.warning}`}></div>
                       ) : null}
                     </div>
@@ -226,7 +226,7 @@ ClubsSection.propTypes = {
   clubs: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-      _id: PropTypes.string,
+      id: PropTypes.string,
       name: PropTypes.string.isRequired,
       type: PropTypes.string.isRequired,
       members: PropTypes.string.isRequired,

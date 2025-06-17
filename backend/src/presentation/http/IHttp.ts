@@ -39,6 +39,8 @@ export class HttpRequest implements IHttpRequest {
 
 export interface IHttpErrors {
   error_400(): IHttpResponse;
+  error_401(): IHttpResponse;
+  error_403(): IHttpResponse;
   error_404(): IHttpResponse;
   error_500(): IHttpResponse;
 }
@@ -51,6 +53,12 @@ export interface IHttpSuccess {
 export class HttpErrors implements IHttpErrors {
   error_400(): IHttpResponse {
     return { statusCode: 400, body: { error: "Bad Request" } };
+  }
+  error_401(): IHttpResponse {
+    return { statusCode: 401, body: { error: "Unauthorized" } };
+  }
+  error_403(): IHttpResponse {
+    return { statusCode: 403, body: { error: "Forbidden" } };
   }
   error_404(): IHttpResponse {
     return { statusCode: 404, body: { error: "Not Found" } };
@@ -196,4 +204,17 @@ export interface IUserDiplomaController extends IController {
   toggleBookmark(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getCompletedChapters(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getBookmarkedChapters(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface ICampusLifeController extends IController {
+  getCampusLifeOverview(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getEvents(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getEventById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getSports(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getSportById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getClubs(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getClubById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  joinClub(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  joinSport(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  joinEvent(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }

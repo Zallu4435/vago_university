@@ -13,9 +13,9 @@ export default function AthleticsSection({ sports }) {
   const { styles, theme } = usePreferences();
 
   const normalizedSports = useMemo(() => {
-    return sports
-      .map((sport) => ({
-        _id: sport._id,
+    return sports?.sports
+      ?.map((sport) => ({
+        id: sport.id,
         title: sport.title || 'Unknown Team',
         type: sport.type || 'Unknown',
         icon: sport.icon || '⚽',
@@ -38,7 +38,7 @@ export default function AthleticsSection({ sports }) {
   const handleJoinRequest = async (request) => {
     if (!selectedSport) return;
     try {
-      await requestToJoinSport({ sportId: selectedSport._id, request });
+      await requestToJoinSport({ sportId: selectedSport.id, request });
       setShowJoinForm(false);
     } catch (error) {
       console.error('Failed to submit join request:', error);
@@ -109,9 +109,9 @@ export default function AthleticsSection({ sports }) {
               <div className="max-h-96 overflow-y-auto divide-y divide-amber-100/50">
                 {normalizedSports.map((sport) => (
                   <div
-                    key={sport._id}
+                    key={sport.id}
                     className={`p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${
-                      selectedSport?._id === sport._id ? 'bg-orange-50/70' : ''
+                      selectedSport?.id === sport.id ? 'bg-orange-50/70' : ''
                     }`}
                     onClick={() => setSelectedSport(sport)}
                   >
@@ -126,7 +126,7 @@ export default function AthleticsSection({ sports }) {
                         <h4 className={`font-semibold ${styles.textPrimary} text-sm sm:text-base truncate`}>{sport.title}</h4>
                         <div className={`text-xs sm:text-sm ${styles.textSecondary}`}>{sport.participants} players</div>
                       </div>
-                      {selectedSport?._id === sport._id && (
+                      {selectedSport?.id === sport.id && (
                         <div className={`w-2 h-2 rounded-full ${styles.status.warning}`}></div>
                       )}
                     </div>
@@ -265,7 +265,7 @@ export default function AthleticsSection({ sports }) {
 AthleticsSection.propTypes = {
   sports: PropTypes.arrayOf(
     PropTypes.shape({
-      _id: PropTypes.string.isRequired,
+      id: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
       type: PropTypes.string.isRequired,
       icon: PropTypes.string,

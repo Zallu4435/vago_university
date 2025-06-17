@@ -12,7 +12,7 @@ export default function EventsSection({ events }) {
   const { requestToJoinEvent, isJoiningEvent, joinEventError } = useCampusLife();
   const { styles, theme } = usePreferences();
 
-  const filteredEvents = events.filter((event) =>
+  const filteredEvents = events?.events?.filter((event) =>
     event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     event.location.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -20,7 +20,7 @@ export default function EventsSection({ events }) {
   const handleJoinRequest = async (request) => {
     if (!selectedEvent) return;
     try {
-      await requestToJoinEvent({ eventId: selectedEvent._id, request });
+      await requestToJoinEvent({ eventId: selectedEvent.id, request });
       setShowJoinForm(false);
     } catch (error) {
       console.error('Failed to submit join request:', error);
@@ -88,9 +88,9 @@ export default function EventsSection({ events }) {
               <div className="max-h-96 overflow-y-auto divide-y divide-amber-100/50">
                 {filteredEvents.map((event) => (
                   <div
-                    key={event._id}
+                    key={event.id}
                     className={`p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${
-                      selectedEvent?._id === event._id ? 'bg-orange-50/70' : ''
+                      selectedEvent?.id === event.id ? 'bg-orange-50/70' : ''
                     }`}
                     onClick={() => setSelectedEvent(event)}
                   >
@@ -167,7 +167,7 @@ export default function EventsSection({ events }) {
                           <span className="font-medium text-sm sm:text-base">Location:</span>
                           <span className={`ml-2 text-sm sm:text-base ${styles.textSecondary}`}>
                             {selectedEvent.location}{' '}
-                            {selectedEvent._id === 1 && '(Rain location: Indoor Arena)'}
+                            {selectedEvent.id === 1 && '(Rain location: Indoor Arena)'}
                           </span>
                         </div>
                         <div className="flex items-center mb-2">
@@ -224,7 +224,7 @@ export default function EventsSection({ events }) {
 EventsSection.propTypes = {
   events: PropTypes.arrayOf(
     PropTypes.shape({
-      _id: PropTypes.string.isRequired,
+      id: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
       date: PropTypes.string.isRequired,
       time: PropTypes.string.isRequired,

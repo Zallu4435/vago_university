@@ -8,9 +8,9 @@ import courseRoutes from "../http/courses/coursesRoutes";
 import clubRoutes from "../http/clubs/clubRoutes";
 import sportRoutes from "../http/sports/SportRoutes";
 import eventRoutes from "../http/events/eventRoutes";
-// import communicationRoutes from './communicationRoutes'
+import communicationRoutes from '../http/communication/CommunicationRouter'
 import campusLifeRoutes from "../http/campus-life/campusLifeRoutes";
-import academicRoutes from "./academicRoutes";
+import academicRoutes from "../http/academics/AcademicRouter";
 import userCommunicationRoutes from "./useCommunicationRoutes";
 import financialRoutes from "./financial.route";
 import notificationRoutes from './notificationRouter'
@@ -52,9 +52,9 @@ router.use("/admin/sports", sportRoutes);
 
 router.use("/admin/events", eventRoutes);
 
-// router.use('/admin/communication', communicationRoutes);
+router.use('/communication', communicationRoutes);
 
-router.use("/communication", userCommunicationRoutes);
+// router.use("/communication", userCommunicationRoutes);
 
 router.use("/campus-life", campusLifeRoutes);
 

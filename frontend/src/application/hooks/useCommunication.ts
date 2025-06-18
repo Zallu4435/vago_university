@@ -126,30 +126,33 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
   );
 
   // Map backend messages to frontend format
-  const mapMessage = (msg: any): Message => ({
-    id: msg._id,
-    subject: msg.subject,
-    content: msg.content,
-    sender: {
-      id: msg.sender._id,
-      name: msg.sender.name,
-      email: msg.sender.email,
-      role: msg.sender.role,
-    },
-    recipients: [{
-      id: 'admin',
-      name: msg.to,
-      email: msg.to,
-      role: 'admin',
-      status: msg.status === 'read' ? 'read' : 'unread'
-    }],
-    attachments: msg.attachments || [],
-    isBroadcast: msg.isBroadcast,
-    createdAt: msg.createdAt,
-    updatedAt: msg.updatedAt,
-    status: msg.status,
-    recipientsCount: msg.recipients
-  });
+  const mapMessage = (msg: any): Message => {
+    const mappedMessage = {
+      id: msg._id,
+      subject: msg.subject,
+      content: msg.content,
+      sender: {
+        id: msg.sender._id,
+        name: msg.sender.name,
+        email: msg.sender.email,
+        role: msg.sender.role,
+      },
+      recipients: msg.recipients.map((recipient: any) => ({
+        id: recipient._id,
+        name: recipient.name,
+        email: recipient.email,
+        role: recipient.role,
+        status: recipient.status
+      })),
+      attachments: msg.attachments || [],
+      isBroadcast: msg.isBroadcast,
+      createdAt: msg.createdAt,
+      updatedAt: msg.updatedAt,
+      status: msg.status,
+      recipientsCount: msg.recipientsCount
+    };
+    return mappedMessage;
+  };
 
   const fetchUsers = useCallback(async (type: RecipientType, search?: string): Promise<User[]> => {
     try {

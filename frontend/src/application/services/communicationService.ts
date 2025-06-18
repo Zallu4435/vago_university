@@ -38,7 +38,7 @@ export class CommunicationService {
     try {
       const baseUrl = this.getBaseUrl(!!params.isAdmin);
       const response = await httpClient.get(`${baseUrl}/inbox`, { params });
-      return response.data.data;
+      return response.data;
     } catch (error) {
       throw new Error('Failed to fetch inbox messages');
     }
@@ -55,7 +55,7 @@ export class CommunicationService {
     try {
       const baseUrl = this.getBaseUrl(!!params.isAdmin);
       const response = await httpClient.get(`${baseUrl}/sent`, { params });
-      return response.data.data;
+      return response.data;
     } catch (error) {
       throw new Error('Failed to fetch sent messages');
     }
@@ -110,7 +110,7 @@ export class CommunicationService {
   async getAllAdmins(): Promise<Admin[]> {
     try {
       const response = await httpClient.get(`${this.userBaseUrl}/all-admins`);
-      return response.data.data;
+      return response.data;
     } catch (error) {
       throw new Error('Failed to fetch admins');
     }

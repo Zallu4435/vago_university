@@ -37,7 +37,7 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
         setError(null);
         try {
           const adminList = await communicationService.getAllAdmins();
-          setAdmins(adminList);
+          setAdmins(adminList?.admins);
         } catch (err) {
           setError('Failed to load admins. Please try again.');
           console.error('Error fetching admins:', err);
@@ -88,6 +88,8 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
 
   if (!isOpen) return null;
 
+
+  console.log(admins, "ooooooooooop")
   return (
     <div className="fixed inset-0 z-[9999] overflow-y-auto">
       {/* Backdrop */}
@@ -161,7 +163,7 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
                     disabled={isLoadingAdmins}
                   >
                     <option value="">Select a recipient</option>
-                    {admins.map((admin) => (
+                    {admins?.map((admin) => (
                       <option key={admin._id} value={admin._id}>
                         {admin.name} ({admin.email})
                       </option>

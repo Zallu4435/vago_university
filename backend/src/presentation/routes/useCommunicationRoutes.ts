@@ -17,7 +17,7 @@ router.get('/inbox', authMiddleware, communicationController.getInboxMessages);
 router.get('/sent', authMiddleware, communicationController.getSentMessages);
 router.post('/send', authMiddleware, messageAttachmentUpload.array('attachments'), communicationController.sendMessage);
 router.put('/messages/:messageId/read', authMiddleware, communicationController.markMessageAsRead);
-// router.delete('/messages/:messageId', authMiddleware, communicationController.deleteMessage);
+router.delete('/messages/:messageId', authMiddleware, communicationController.deleteMessage);
 router.get('/messages/:messageId', authMiddleware, communicationController.getMessageDetails);
 router.get('/all-admins', authMiddleware, communicationController.getAllAdmins);
 router.get('/user-groups', authMiddleware, communicationController.getUserGroups);

@@ -1,0 +1,270 @@
+import {
+    IGetStudentInfoUseCase,
+    IGetGradeInfoUseCase,
+    IGetCoursesUseCase,
+    IGetAcademicHistoryUseCase,
+    IGetProgramInfoUseCase,
+    IGetProgressInfoUseCase,
+    IGetRequirementsInfoUseCase,
+    IRegisterCourseUseCase,
+    IDropCourseUseCase,
+    IRequestTranscriptUseCase,
+    IScheduleMeetingUseCase,
+} from "../../../application/academics/useCases/AcademicUseCases";
+import { IHttpRequest, IHttpResponse, HttpSuccess, HttpErrors } from "../IHttp";
+import { IAcademicController } from "../IHttp"
+import mongoose from "mongoose";
+
+export class AcademicController implements IAcademicController {
+    private httpSuccess: HttpSuccess;
+    private httpErrors: HttpErrors;
+
+    constructor(
+        private readonly getStudentInfoUseCase: IGetStudentInfoUseCase,
+        private readonly getGradeInfoUseCase: IGetGradeInfoUseCase,
+        private readonly getCoursesUseCase: IGetCoursesUseCase,
+        private readonly getAcademicHistoryUseCase: IGetAcademicHistoryUseCase,
+        private readonly getProgramInfoUseCase: IGetProgramInfoUseCase,
+        private readonly getProgressInfoUseCase: IGetProgressInfoUseCase,
+        private readonly getRequirementsInfoUseCase: IGetRequirementsInfoUseCase,
+        private readonly registerCourseUseCase: IRegisterCourseUseCase,
+        private readonly dropCourseUseCase: IDropCourseUseCase,
+        private readonly requestTranscriptUseCase: IRequestTranscriptUseCase,
+        private readonly scheduleMeetingUseCase: IScheduleMeetingUseCase
+    ) {
+        this.httpSuccess = new HttpSuccess();
+        this.httpErrors = new HttpErrors();
+    }
+
+    async getStudentInfo(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+        try {
+            if (!httpRequest.user) {
+                return this.httpErrors.error_401();
+            }
+            const result = await this.getStudentInfoUseCase.execute({ userId: httpRequest.user.id });
+            if (!result.success) {
+                return this.httpErrors.error_400();
+            }
+            return this.httpSuccess.success_200(result.data);
+        } catch (err) {
+            console.error(`Error in getStudentInfo:`, err);
+            return this.httpErrors.error_500();
+        }
+    }
+
+    async getGradeInfo(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+        try {
+            if (!httpRequest.user) {
+                return this.httpErrors.error_401();
+            }
+            const result = await this.getGradeInfoUseCase.execute({
+                userId: httpRequest.user.id,
+            });
+            if (!result.success) {
+                return this.httpErrors.error_400();
+            }
+            return this.httpSuccess.success_200(result.data);
+        } catch (err) {
+            console.error('[AcademicController] getGradeInfo - Error:', err);
+            return this.httpErrors.error_500();
+        }
+    }
+
+    async getCourses(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+        try {
+            const result = await this.getCoursesUseCase.execute({});
+            if (!result.success) {
+                return this.httpErrors.error_400();
+            }
+            return this.httpSuccess.success_200(result.data);
+        } catch (err) {
+            console.error(`Error in getCourses:`, err);
+            return this.httpErrors.error_500();
+        }
+    }
+
+    async getAcademicHistory(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+        try {
+            if (!httpRequest.user) {
+                return this.httpErrors.error_401();
+            }
+            const { startTerm, endTerm } = httpRequest.query;
+            const result = await this.getAcademicHistoryUseCase.execute({
+                userId: httpRequest.user.id,
+                startTerm: startTerm ? String(startTerm) : undefined,
+                endTerm: endTerm ? String(endTerm) : undefined,
+            });
+            if (!result.success) {
+                return this.httpErrors.error_400();
+            }
+            return this.httpSuccess.success_200(result.data);
+        } catch (err) {
+            console.error(`Error in getAcademicHistory:`, err);
+            return this.httpErrors.error_500();
+        }
+    }
+
+    async getProgramInfo(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+        try {
+            if (!httpRequest.user) {
+                return this.httpErrors.error_401();
+            }
+            const result = await this.getProgramInfoUseCase.execute({ userId: httpRequest.user.id });
+            if (!result.success) {
+                return this.httpErrors.error_400();
+            }
+            return this.httpSuccess.success_200(result.data);
+        } catch (err) {
+            console.error(`Error in getProgramInfo:`, err);
+            return this.httpErrors.error_500();
+        }
+    }
+
+    async getProgressInfo(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+        try {
+            if (!httpRequest.user) {
+                return this.httpErrors.error_401();
+            }
+            const result = await this.getProgressInfoUseCase.execute({
+                userId: httpRequest.user.id,
+            });
+            if (!result.success) {
+                return this.httpErrors.error_400();
+            }
+            return this.httpSuccess.success_200(result.data);
+        } catch (err) {
+            console.error('[AcademicController] getProgressInfo - Error:', err);
+            return this.httpErrors.error_500();
+        }
+    }
+
+    async getRequirementsInfo(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+        try {
+            if (!httpRequest.user) {
+                return this.httpErrors.error_401();
+            }
+            const result = await this.getRequirementsInfoUseCase.execute({ userId: httpRequest.user.id });
+            if (!result.success) {
+                return this.httpErrors.error_400();
+            }
+            return this.httpSuccess.success_200(result.data);
+        } catch (err) {
+            console.error(`Error in getRequirementsInfo:`, err);
+            return this.httpErrors.error_500();
+        }
+    }
+
+    async registerCourse(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+        try {
+            const { courseId } = httpRequest.params;
+            const { reason } = httpRequest.body;
+            if (!httpRequest.user) {
+                return this.httpErrors.error_401();
+            }
+            if (!mongoose.isValidObjectId(courseId)) {
+                return this.httpErrors.error_400();
+            }
+            if (!reason) {
+                return this.httpErrors.error_400();
+            }
+            const result = await this.registerCourseUseCase.execute({
+                studentId: httpRequest.user.id,
+                courseId,
+                reason,
+            });
+            if (!result.success) {
+                return this.httpErrors.error_400();
+            }
+            return this.httpSuccess.success_200(result.data);
+        } catch (err) {
+            console.error(`Error in registerCourse:`, err);
+            return this.httpErrors.error_500();
+        }
+    }
+
+    async dropCourse(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+        try {
+            const { courseId } = httpRequest.params;
+            if (!httpRequest.user) {
+                return this.httpErrors.error_401();
+            }
+            if (!mongoose.isValidObjectId(courseId)) {
+                return this.httpErrors.error_400();
+            }
+            const result = await this.dropCourseUseCase.execute({
+                studentId: httpRequest.user.id,
+                courseId,
+            });
+            if (!result.success) {
+                return this.httpErrors.error_400();
+            }
+            return this.httpSuccess.success_200(result.data);
+        } catch (err) {
+            console.error(`Error in dropCourse:`, err);
+            return this.httpErrors.error_500();
+        }
+    }
+
+    async requestTranscript(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+        try {
+            const { deliveryMethod, address, email } = httpRequest.body;
+            if (!httpRequest.user) {
+                return this.httpErrors.error_401();
+            }
+            if (!deliveryMethod || !['electronic', 'mail'].includes(deliveryMethod)) {
+                return this.httpErrors.error_400();
+            }
+            if (deliveryMethod === 'mail' && !address) {
+                return this.httpErrors.error_400();
+            }
+            if (deliveryMethod === 'electronic' && !email) {
+                return this.httpErrors.error_400();
+            }
+            const result = await this.requestTranscriptUseCase.execute({
+                studentId: httpRequest.user.id,
+                deliveryMethod,
+                address,
+                email,
+            });
+            if (!result.success) {
+                return this.httpErrors.error_400();
+            }
+            return this.httpSuccess.success_200(result.data);
+        } catch (err) {
+            console.error(`Error in requestTranscript:`, err);
+            return this.httpErrors.error_500();
+        }
+    }
+
+    async scheduleMeeting(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+        try {
+            const { date, reason, preferredTime, notes } = httpRequest.body;
+            if (!httpRequest.user) {
+                return this.httpErrors.error_401();
+            }
+            if (!date || !reason) {
+                return this.httpErrors.error_400();
+            }
+            if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z$/.test(date)) {
+                return this.httpErrors.error_400();
+            }
+            if (preferredTime && !['morning', 'afternoon'].includes(preferredTime)) {
+                return this.httpErrors.error_400();
+            }
+            const result = await this.scheduleMeetingUseCase.execute({
+                studentId: httpRequest.user.id,
+                date,
+                reason,
+                preferredTime,
+                notes,
+            });
+            if (!result.success) {
+                return this.httpErrors.error_400();
+            }
+            return this.httpSuccess.success_200(result.data);
+        } catch (err) {
+            console.error(`Error in scheduleMeeting:`, err);
+            return this.httpErrors.error_500();
+        }
+    }
+}

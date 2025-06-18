@@ -218,3 +218,33 @@ export interface ICampusLifeController extends IController {
   joinSport(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   joinEvent(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
+
+export interface IAcademicController extends IController {
+  getStudentInfo(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getGradeInfo(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getCourses(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAcademicHistory(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getProgramInfo(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getProgressInfo(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getRequirementsInfo(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  registerCourse(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  dropCourse(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  requestTranscript(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  scheduleMeeting(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface ICommunicationController extends IController {
+  getInboxMessages(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getSentMessages(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  sendMessage(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  markMessageAsRead(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  deleteMessage(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getMessageDetails(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAllAdmins(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getUserGroups(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  fetchUsers(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAdminInboxMessages(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAdminSentMessages(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  sendAdminMessage(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  deleteAdminMessage(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}

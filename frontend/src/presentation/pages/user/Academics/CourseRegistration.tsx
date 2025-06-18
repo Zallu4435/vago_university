@@ -20,7 +20,7 @@ export default function CourseRegistration({ studentInfo, courses, enrolledCredi
     if (selectedCourse) {
       try {
         await registerForCourse({
-          courseId: selectedCourse._id,
+          courseId: selectedCourse.id,
           reason: enrollmentData.reason,
         });
         setIsModalOpen(false);

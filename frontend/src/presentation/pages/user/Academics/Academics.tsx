@@ -104,7 +104,7 @@ export default function Academics() {
             ) : (
               <CourseRegistration
                 studentInfo={studentInfo || fallbackStudentInfo}
-                courses={courses?.courses || fallbackCourses}
+                courses={courses || fallbackCourses}
                 enrolledCredits={0}
                 waitlistedCredits={0}
               />

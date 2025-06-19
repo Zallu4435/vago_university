@@ -20,10 +20,11 @@ import { Chapter } from "../../../domain/diploma/entities/Chapter";
 import { Diploma as DiplomaModel, IDiploma } from "../../../infrastructure/database/mongoose/models/diploma.model";
 import { UserProgress } from "../../../infrastructure/database/mongoose/models/userProgress.model";
 import mongoose from "mongoose";
+import { Video } from "../../../infrastructure/database/mongoose/models/video.model";
 
 export class UserDiplomaRepository implements IUserDiplomaRepository {
   async getUserDiplomas(params: GetUserDiplomasRequestDTO): Promise<GetUserDiplomasResponseDTO> {
-    console.log('UserDiplomaRepository.getUserDiplomas - Params:', params);
+    // console.log('UserDiplomaRepository.getUserDiplomas - Params:', params);
     try {
       const { userId, page, limit, category, status, dateRange } = params;
       const skip = (page - 1) * limit;
@@ -47,7 +48,7 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
         query.createdAt = { $gte: date };
       }
 
-      console.log('UserDiplomaRepository.getUserDiplomas - Query:', query);
+      // console.log('UserDiplomaRepository.getUserDiplomas - Query:', query);
 
       const [diplomas, total] = await Promise.all([
         DiplomaModel.find(query)
@@ -57,23 +58,35 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
         DiplomaModel.countDocuments(query)
       ]);
 
-      console.log('UserDiplomaRepository.getUserDiplomas - Results:', {
-        diplomasCount: diplomas.length,
-        total
-      });
+      // console.log('UserDiplomaRepository.getUserDiplomas - Results:', {
+      //   diplomasCount: diplomas.length,
+      //   total
+      // });
 
       // Map mongoose model to domain entity
-      const courses: DiplomaCourse[] = diplomas.map(diploma => ({
-        _id: diploma._id.toString(),
-        title: diploma.title,
-        description: diploma.description,
-        category: diploma.category,
-        status: diploma.status ? 'published' : 'draft',
-        instructor: '', // TODO: Get instructor from user model
-        department: '', // TODO: Get department from user model
-        chapters: [], // TODO: Get chapters from video model
-        createdAt: diploma.createdAt,
-        updatedAt: diploma.updatedAt
+      const courses: DiplomaCourse[] = await Promise.all(diplomas.map(async diploma => {
+        let completedVideoCount = 0;
+        if (diploma.videoIds && diploma.videoIds.length > 0 && userId) {
+          completedVideoCount = await UserProgress.countDocuments({
+            userId,
+            courseId: diploma._id,
+            chapterId: { $in: diploma.videoIds },
+            isCompleted: true
+          });
+        }
+        return {
+          _id: diploma._id.toString(),
+          title: diploma.title,
+          description: diploma.description,
+          category: diploma.category,
+          status: diploma.status ? 'published' : 'draft',
+          instructor: '', // TODO: Get instructor from user model
+          department: '', // TODO: Get department from user model
+          createdAt: diploma.createdAt,
+          updatedAt: diploma.updatedAt,
+          videoCount: Array.isArray(diploma.videoIds) ? diploma.videoIds.length : 0,
+          completedVideoCount
+        };
       }));
 
       return {
@@ -103,6 +116,14 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
         return null;
       }
 
+      // Fetch videos by videoIds if they exist
+      let videos = [];
+      if (diploma.videoIds && diploma.videoIds.length > 0) {
+        console.log('UserDiplomaRepository.getUserDiplomaById - Fetching videos for videoIds:', diploma.videoIds);
+        videos = await Video.find({ _id: { $in: diploma.videoIds } }).lean();
+        console.log('UserDiplomaRepository.getUserDiplomaById - Found videos:', videos.length);
+      }
+
       return {
         _id: diploma._id.toString(),
         title: diploma.title,
@@ -111,7 +132,7 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
         status: diploma.status ? 'published' : 'draft',
         instructor: '', // TODO: Get instructor from user model
         department: '', // TODO: Get department from user model
-        chapters: [], // TODO: Get chapters from video model
+        videos: videos, // Include the fetched videos
         createdAt: diploma.createdAt,
         updatedAt: diploma.updatedAt
       };
@@ -135,8 +156,15 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
         return null;
       }
 
-      // TODO: Get chapter from video model
-      return null;
+      // Fetch the video (chapter) by chapterId
+      const video = await Video.findOne({ _id: params.chapterId }).lean();
+      if (!video) {
+        return null;
+      }
+
+      return {
+        ...video,
+      };
     } catch (error: any) {
       console.error('UserDiplomaRepository.getUserDiplomaChapter - Error:', error);
       throw error;
@@ -144,7 +172,7 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
   }
 
   async updateVideoProgress(params: UpdateVideoProgressRequestDTO): Promise<UpdateVideoProgressResponseDTO> {
-    console.log('UserDiplomaRepository.updateVideoProgress - Params:', params);
+    // console.log('UserDiplomaRepository.updateVideoProgress - Params:', params);
     try {
       const { userId, courseId, chapterId, progress } = params;
 
@@ -154,7 +182,7 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
         { upsert: true, new: true }
       );
 
-      console.log('UserDiplomaRepository.updateVideoProgress - Result:', userProgress);
+      // console.log('UserDiplomaRepository.updateVideoProgress - Result:', userProgress);
 
       return {
         message: 'Progress updated successfully',
@@ -177,7 +205,7 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
         { upsert: true, new: true }
       );
 
-      console.log('UserDiplomaRepository.markChapterComplete - Result:', userProgress);
+      // console.log('UserDiplomaRepository.markChapterComplete - Result:', userProgress);
 
       return {
         message: 'Chapter marked as complete',
@@ -190,12 +218,12 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
   }
 
   async toggleBookmark(params: ToggleBookmarkRequestDTO): Promise<ToggleBookmarkResponseDTO> {
-    console.log('UserDiplomaRepository.toggleBookmark - Params:', params);
+    // console.log('UserDiplomaRepository.toggleBookmark - Params:', params);
     try {
       const { userId, courseId, chapterId } = params;
 
       const userProgress = await UserProgress.findOne({ userId, courseId, chapterId });
-      console.log('UserDiplomaRepository.toggleBookmark - Existing progress:', userProgress);
+      // console.log('UserDiplomaRepository.toggleBookmark - Existing progress:', userProgress);
 
       if (!userProgress) {
         const newProgress = await UserProgress.create({
@@ -204,7 +232,7 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
           chapterId,
           isBookmarked: true
         });
-        console.log('UserDiplomaRepository.toggleBookmark - Created new progress:', newProgress);
+        // console.log('UserDiplomaRepository.toggleBookmark - Created new progress:', newProgress);
         return {
           message: 'Chapter bookmarked',
           bookmarked: true
@@ -213,7 +241,7 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
 
       userProgress.isBookmarked = !userProgress.isBookmarked;
       await userProgress.save();
-      console.log('UserDiplomaRepository.toggleBookmark - Updated progress:', userProgress);
+      // console.log('UserDiplomaRepository.toggleBookmark - Updated progress:', userProgress);
 
       return {
         message: userProgress.isBookmarked ? 'Chapter bookmarked' : 'Chapter unbookmarked',
@@ -242,7 +270,7 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
   }
 
   async getBookmarkedChapters(userId: string, courseId: string): Promise<string[]> {
-    console.log('UserDiplomaRepository.getBookmarkedChapters - CourseId:', courseId);
+    // console.log('UserDiplomaRepository.getBookmarkedChapters - CourseId:', courseId);
     try {
       const bookmarkedChapters = await UserProgress.find({
         userId,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiPlay, FiEdit, FiTrash2, FiUpload, FiEye, FiGrid, FiList, FiCalendar, FiClock, FiBookOpen, FiVideo } from 'react-icons/fi';
+import { FiPlay, FiEdit, FiTrash2, FiUpload, FiEye, FiGrid, FiList, FiCalendar, FiClock, FiBookOpen, FiVideo, FiBriefcase } from 'react-icons/fi';
 import { debounce } from 'lodash';
 import Header from '../User/Header';
 import Pagination from '../User/Pagination';
@@ -8,6 +8,26 @@ import VideoPreviewModal from './VideoPreviewModal';
 import { useVideoManagement } from '../../../hooks/useVideoManagement';
 
 interface Video {
+  id: string;
+  title: string;
+  duration: string;
+  uploadedAt: string;
+  module: number;
+  status: "Published" | "Draft";
+  diplomaId: string;
+  description: string;
+  videoUrl: string;
+  createdAt?: string;
+  updatedAt?: string;
+  diploma?: {
+    id: string;
+    title: string;
+    category: string;
+  };
+}
+
+// Interface for AddVideoModal compatibility
+interface VideoForEdit {
   _id: string;
   title: string;
   duration: string;
@@ -16,17 +36,21 @@ interface Video {
   status: "Published" | "Draft";
   diplomaId: string;
   description: string;
+  videoFile?: File;
+  videoUrl: string;
 }
 
 interface Diploma {
   _id: string;
   title: string;
+  category: string;
   videoIds: string[];
 }
 
 interface Filters {
   status: string;
   category: string;
+  [key: string]: string;
 }
 
 const VideoManagementPage = () => {
@@ -35,7 +59,7 @@ const VideoManagementPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<VideoForEdit | null>(null);
   const [filters, setFilters] = useState<Filters>({ status: 'all', category: '' });
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
@@ -47,11 +71,12 @@ const VideoManagementPage = () => {
     isLoadingVideos,
     handleSaveVideo,
     handleDeleteVideo,
+    fetchVideoById,
   } = useVideoManagement(page, itemsPerPage, filters, activeTab);
 
   const filterOptions = {
     status: ['All Status', 'Published', 'Draft'],
-    categories: diplomasData?.diplomas.map(d => d.title) || [],
+    categories: diplomasData?.diplomas.map(d => d.category) || [],
   };
 
   const debouncedFilterChange = (field: string, value: string) => {
@@ -67,7 +92,7 @@ const VideoManagementPage = () => {
 
   const filteredVideos = (videosData?.videos || [])
     .filter(video => 
-      filters.category ? video.diplomaId === filters.category : true
+      filters.category ? video.diploma?.category === filters.category : true
     )
     .filter(video => 
       video.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -100,14 +125,70 @@ const VideoManagementPage = () => {
     setPage(1);
   };
 
-  const onSaveVideo = (videoData: FormData | Partial<Video>) => {
-    handleSaveVideo(videoData, filters.category || '', selectedVideo);
+  const onSaveVideo = (videoData: FormData | Partial<VideoForEdit>) => {
+    handleSaveVideo(videoData);
     setShowAddModal(false);
     setSelectedVideo(null);
   };
 
   const onDeleteVideo = (video: Video) => {
     handleDeleteVideo(video);
+  };
+
+  // Convert Video to VideoForEdit for the AddVideoModal
+  const convertVideoForEdit = (video: Video): VideoForEdit => {
+    return {
+      _id: video.id,
+      title: video.title,
+      duration: video.duration,
+      uploadedAt: video.uploadedAt,
+      module: video.module,
+      status: video.status,
+      diplomaId: video.diplomaId,
+      description: video.description,
+      videoUrl: video.videoUrl,
+    };
+  };
+
+  // Handle edit button click - fetch video from backend
+  const handleEditVideo = async (video: Video) => {
+    try {
+      console.log('VedioManagement: Edit button clicked for video', video);
+      console.log('VedioManagement: video.videoUrl =', video.videoUrl);
+      
+      // Fetch the complete video data from backend
+      const fetchedVideo = await fetchVideoById(video.id);
+      console.log('VedioManagement: Fetched video from backend', fetchedVideo);
+      console.log('VedioManagement: fetchedVideo.videoUrl =', fetchedVideo.videoUrl);
+      
+      // Convert to VideoForEdit format
+      const videoForEdit: VideoForEdit = {
+        _id: fetchedVideo.id,
+        title: fetchedVideo.title,
+        duration: fetchedVideo.duration,
+        uploadedAt: fetchedVideo.uploadedAt,
+        module: fetchedVideo.module,
+        status: fetchedVideo.status,
+        diplomaId: fetchedVideo.diploma?.category || fetchedVideo.diplomaId,
+        description: fetchedVideo.description,
+        videoUrl: fetchedVideo.videoUrl,
+      };
+      
+      console.log('VedioManagement: Converted to VideoForEdit', videoForEdit);
+      console.log('VedioManagement: videoForEdit.videoUrl =', videoForEdit.videoUrl);
+      console.log('VedioManagement: Available categories', filterOptions.categories);
+      
+      setSelectedVideo(videoForEdit);
+      setShowAddModal(true);
+    } catch (error) {
+      console.error('Error fetching video for edit:', error);
+      // Fallback to using list data if fetch fails
+      const fallbackVideo = convertVideoForEdit(video);
+      console.log('VedioManagement: Using fallback video data', fallbackVideo);
+      console.log('VedioManagement: fallbackVideo.videoUrl =', fallbackVideo.videoUrl);
+      setSelectedVideo(fallbackVideo);
+      setShowAddModal(true);
+    }
   };
 
   if (isLoadingDiplomas || isLoadingVideos) {
@@ -213,6 +294,9 @@ const VideoManagementPage = () => {
                         Module
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase tracking-wider">
+                        Category
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase tracking-wider">
                         Status
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase tracking-wider">
@@ -225,7 +309,7 @@ const VideoManagementPage = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-700">
                     {paginatedVideos.map((video) => (
-                      <tr key={video._id} className="hover:bg-gray-700/50">
+                      <tr key={video.id} className="hover:bg-gray-700/50">
                         <td className="px-6 py-4">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-10 w-10">
@@ -238,7 +322,7 @@ const VideoManagementPage = () => {
                                 {video.title}
                               </div>
                               <div className="text-sm text-purple-300">
-                                ID: {video._id}
+                                ID: {video.id}
                               </div>
                             </div>
                           </div>
@@ -253,6 +337,12 @@ const VideoManagementPage = () => {
                           <div className="flex items-center">
                             <FiBookOpen className="h-4 w-4 mr-1 text-purple-400" />
                             Module {video.module}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                          <div className="flex items-center">
+                            <FiBookOpen className="h-4 w-4 mr-1 text-purple-400" />
+                            {video.diploma?.category}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -277,13 +367,13 @@ const VideoManagementPage = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex items-center space-x-2">
                             <button
-                              onClick={() => {setSelectedVideo(video); setShowPreviewModal(true);}}
+                              onClick={() => {setSelectedVideo(convertVideoForEdit(video)); setShowPreviewModal(true);}}
                               className="text-blue-400 hover:text-blue-300"
                             >
                               <FiEye className="h-4 w-4" />
                             </button>
                             <button
-                              onClick={() => {setSelectedVideo(video); setShowAddModal(true);}}
+                              onClick={() => handleEditVideo(video)}
                               className="text-purple-400 hover:text-purple-300"
                             >
                               <FiEdit className="h-4 w-4" />
@@ -313,7 +403,7 @@ const VideoManagementPage = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {paginatedVideos.map((video) => (
-                  <div key={video._id} className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/30 rounded-xl shadow-lg hover:shadow-2xl transition-shadow">
+                  <div key={video.id} className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/30 rounded-xl shadow-lg hover:shadow-2xl transition-shadow">
                     <div className="aspect-video bg-gradient-to-br from-purple-500 to-blue-600 rounded-t-lg flex items-center justify-center">
                       <FiPlay className="h-8 w-8 text-white opacity-75" />
                     </div>
@@ -344,21 +434,25 @@ const VideoManagementPage = () => {
                           Module {video.module}
                         </div>
                         <div className="flex items-center">
+                          <FiBriefcase className='h-3 w-3 mr-1 text-purple-400'/>
+                          {video.diploma?.category || 'Unknown'}
+                        </div>
+                        <div className="flex items-center">
                           <FiCalendar className="h-3 w-3 mr-1 text-purple-400" />
                           {new Date(video.uploadedAt).toLocaleDateString()}
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
                         <button
-                          onClick={() => {setSelectedVideo(video); setShowPreviewModal(true);}}
+                          onClick={() => {setSelectedVideo(convertVideoForEdit(video)); setShowPreviewModal(true);}}
                           className="text-xs text-blue-400 hover:text-blue-300 font-medium"
                         >
                           Preview
                         </button>
                         <div className="flex items-center space-x-2">
                           <button
-                            onClick={() => {setSelectedVideo(video); setShowAddModal(true);}}
-                            className="p-1 text-purple-300 hover:text-purple-400"
+                            onClick={() => handleEditVideo(video)}
+                            className="text-purple-400 hover:text-purple-300"
                           >
                             <FiEdit className="h-4 w-4" />
                           </button>
@@ -392,8 +486,8 @@ const VideoManagementPage = () => {
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         selectedVideo={selectedVideo}
-        diplomas={diplomasData?.diplomas || []}
         onSave={onSaveVideo}
+        categories={filterOptions.categories}
       />
       <VideoPreviewModal
         isOpen={showPreviewModal}

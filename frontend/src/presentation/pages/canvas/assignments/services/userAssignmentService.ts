@@ -4,9 +4,9 @@ export const userAssignmentService = {
   // Get all assignments for the current user
   getAssignments: async (params?: { status?: string; page?: number; limit?: number; subject?: string }) => {
     try {
-      console.log('Making request to /assignments with params:', params);
+    
       const response = await httpClient.get('/assignments', { params });
-      console.log('Raw response:', response);
+  
       // The backend returns the data directly in response.data
       return response.data;
     } catch (error) {
@@ -23,18 +23,12 @@ export const userAssignmentService = {
 
   // Submit an assignment
   submitAssignment: async (assignmentId: string, file: File) => {
-    console.log('Service: Starting submission for assignment:', assignmentId);
-    console.log('Service: File details:', {
-      name: file.name,
-      type: file.type,
-      size: file.size
-    });
+
 
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      console.log('Service: Sending request to:', `/assignments/${assignmentId}/submit`);
       const response = await httpClient.post(
         `/assignments/${assignmentId}/submit`,
         formData,
@@ -44,7 +38,6 @@ export const userAssignmentService = {
           },
         }
       );
-      console.log('Service: Submission response:', response.data);
       return response.data;
     } catch (error) {
       console.error('Service: Submission error:', error);
@@ -56,6 +49,21 @@ export const userAssignmentService = {
   getAssignmentStatus: async (assignmentId: string) => {
     const response = await httpClient.get(`/assignments/${assignmentId}/status`);
     return response.data;
+  },
+
+  // Get signed download URL for assignment files
+  getFileDownloadUrl: async (fileUrl: string, fileName: string) => {
+    try {
+      console.log('Service: Getting download URL for file:', fileName);
+      const response = await httpClient.get('/assignments/download-file', {
+        params: { fileUrl, fileName }
+      });
+      console.log('Service: Download URL response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Service: Error getting download URL:', error);
+      throw error;
+    }
   },
 
   // Get assignment feedback if graded

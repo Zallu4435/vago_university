@@ -193,6 +193,7 @@ export interface IUserAssignmentController extends IController {
   submitAssignment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getAssignmentStatus(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getAssignmentFeedback(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  downloadAssignmentFile(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface IUserDiplomaController extends IController {

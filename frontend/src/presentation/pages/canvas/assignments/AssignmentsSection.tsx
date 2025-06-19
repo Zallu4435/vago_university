@@ -4,7 +4,6 @@ import { usePreferences } from '../../../context/PreferencesContext';
 import { Assignment, SelectedFile, SortOption, FilterStatus } from './types/AssignmentTypes';
 import { filterAndSortAssignments } from './utils/assignmentUtils';
 import { AssignmentCard } from './components/AssignmentCard';
-import { AssignmentDetails } from './components/AssignmentDetails';
 import { UploadModal } from './components/UploadModal';
 import { useUserAssignments } from './hooks/useUserAssignments';
 
@@ -14,14 +13,12 @@ const AssignmentsSection = () => {
 
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [currentAssignment, setCurrentAssignment] = useState<Assignment | null>(null);
-  const [selectedAssignmentId, setSelectedAssignmentId] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [sortBy, setSortBy] = useState<SortOption>('dueDate');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
 
-  console.log(assignments, "wwwwwwwwww")
 
   const filteredAndSortedAssignments = filterAndSortAssignments(
     assignments,
@@ -30,14 +27,11 @@ const AssignmentsSection = () => {
     sortBy
   );
 
-  console.log(filteredAndSortedAssignments, "eeeeeeeeeee")
 
   const currentAssignments = filteredAndSortedAssignments.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-  console.log(currentAssignments, "rrrrrrrrr")
 
 
   const renderAssignmentList = () => (
@@ -62,40 +56,41 @@ const AssignmentsSection = () => {
               </button>
             </div>
           </div>
-          
-          <div className="flex flex-col lg:flex-row gap-4 mb-6">
-            <div className="flex-1 relative">
-              <FiSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${styles.icon.secondary} h-5 w-5`} />
-              <input
-                type="text"
-                placeholder="Search assignments or courses..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={`w-full pl-10 pr-4 py-3 ${styles.input.border} rounded-xl ${styles.input.background} ${styles.input.focus} transition-all duration-300`}
-                aria-label="Search assignments"
-              />
+
+          {/* Search and Filter Controls */}
+          <div className="flex flex-col lg:flex-row gap-4 mb-8">
+            <div className="flex-1">
+              <div className="relative">
+                <FiSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${styles.icon.secondary}`} />
+                <input
+                  type="text"
+                  placeholder="Search assignments..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className={`w-full pl-10 pr-4 py-3 rounded-xl ${styles.input.background} ${styles.input.border} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+              </div>
             </div>
             <div className="flex gap-3">
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
-                className={`px-4 py-3 ${styles.input.border} rounded-xl ${styles.input.background} ${styles.input.focus}`}
-                aria-label="Filter by status"
+                className={`px-4 py-3 rounded-xl ${styles.input.background} ${styles.input.border} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
               >
                 <option value="all">All Status</option>
-                <option value="pending">Pending</option>
+                <option value="published">Published</option>
                 <option value="submitted">Submitted</option>
                 <option value="graded">Graded</option>
               </select>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className={`px-4 py-3 ${styles.input.border} rounded-xl ${styles.input.background} ${styles.input.focus}`}
-                aria-label="Sort assignments"
+                className={`px-4 py-3 rounded-xl ${styles.input.background} ${styles.input.border} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
               >
-                <option value="dueDate">Sort by Due Date</option>
-                <option value="priority">Sort by Priority</option>
-                <option value="course">Sort by Course</option>
+                <option value="dueDate">Due Date</option>
+                <option value="priority">Priority</option>
+                <option value="status">Status</option>
+                <option value="course">Course</option>
               </select>
             </div>
           </div>
@@ -118,7 +113,9 @@ const AssignmentsSection = () => {
                       setCurrentAssignment(assignment);
                       setShowUploadModal(true);
                     }}
-                    onViewGrade={(assignment) => setSelectedAssignmentId(assignment.id)}
+                    onViewGrade={(assignment) => {
+                      // This is now handled by the GradeModal in AssignmentCard
+                    }}
                   />
                 ))}
               </div>
@@ -132,18 +129,17 @@ const AssignmentsSection = () => {
 
   const renderPagination = (totalItems: number) => {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
+
     if (totalPages <= 1) return null;
 
     return (
-      <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6 mt-6">
+      <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
         <div className="flex flex-1 justify-between sm:hidden">
           <button
             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
-            className={`relative inline-flex items-center rounded-md px-4 py-2 text-sm font-medium ${
-              currentPage === 1
-                ? `${styles.button.secondary} cursor-not-allowed`
-                : `${styles.button.outline} hover:${styles.button.secondary}`
+            className={`relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 ${
+              currentPage === 1 ? 'cursor-not-allowed opacity-50' : ''
             }`}
           >
             Previous
@@ -151,10 +147,8 @@ const AssignmentsSection = () => {
           <button
             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
-            className={`relative inline-flex items-center rounded-md px-4 py-2 text-sm font-medium ${
-              currentPage === totalPages
-                ? `${styles.button.secondary} cursor-not-allowed`
-                : `${styles.button.outline} hover:${styles.button.secondary}`
+            className={`relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 ${
+              currentPage === totalPages ? 'cursor-not-allowed opacity-50' : ''
             }`}
           >
             Next
@@ -162,14 +156,16 @@ const AssignmentsSection = () => {
         </div>
         <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
           <div>
-            <p className={`text-sm ${styles.textSecondary}`}>
-              Showing <span className={`font-semibold ${styles.textPrimary}`}>{(currentPage - 1) * itemsPerPage + 1}</span> to{' '}
-              <span className={`font-semibold ${styles.textPrimary}`}>{Math.min(currentPage * itemsPerPage, totalItems)}</span>{' '}
-              of <span className={`font-semibold ${styles.textPrimary}`}>{totalItems}</span> results
+            <p className="text-sm text-gray-700">
+              Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to{' '}
+              <span className="font-medium">
+                {Math.min(currentPage * itemsPerPage, totalItems)}
+              </span>{' '}
+              of <span className="font-medium">{totalItems}</span> results
             </p>
           </div>
           <div>
-            <nav className="relative isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+            <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
               <button
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
@@ -180,36 +176,20 @@ const AssignmentsSection = () => {
                 <span className="sr-only">Previous</span>
                 <FiArrowLeft className="h-5 w-5" aria-hidden="true" />
               </button>
-              
-              {[...Array(totalPages)].map((_, index) => {
-                const pageNumber = index + 1;
-                const isCurrentPage = pageNumber === currentPage;
-                const isNearCurrentPage = 
-                  Math.abs(pageNumber - currentPage) <= 1 || 
-                  pageNumber === 1 || 
-                  pageNumber === totalPages;
 
-                if (!isNearCurrentPage) {
-                  if (pageNumber === 2 || pageNumber === totalPages - 1) {
-                    return <span key={pageNumber} className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300">...</span>;
-                  }
-                  return null;
-                }
-            
-                return (
-                  <button
-                    key={pageNumber}
-                    onClick={() => setCurrentPage(pageNumber)}
-                    className={`relative inline-flex items-center px-4 py-2 text-sm font-medium ${
-                      isCurrentPage
-                        ? `${styles.button.primary} focus:z-20 focus:outline-offset-0`
-                        : `${styles.button.outline} hover:${styles.button.secondary} ${styles.textPrimary} ring-1 ring-inset ring-gray-300`
-                    }`}
-                  >
-                    {pageNumber}
-                  </button>
-                );
-              })}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
+                    page === currentPage
+                      ? 'z-10 bg-blue-600 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
+                      : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
 
               <button
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
@@ -246,13 +226,6 @@ const AssignmentsSection = () => {
             setShowUploadModal(false);
             setCurrentAssignment(null);
           }}
-        />
-      )}
-      {selectedAssignmentId && (
-        <AssignmentDetails
-          assignmentId={selectedAssignmentId}
-          onClose={() => setSelectedAssignmentId(null)}
-          styles={styles}
         />
       )}
     </>

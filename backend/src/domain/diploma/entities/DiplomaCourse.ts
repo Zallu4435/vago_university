@@ -1,4 +1,5 @@
 import { Chapter } from "./Chapter";
+import { Video } from "../../video/entities/Video";
 
 export interface DiplomaCourse {
   _id: string;
@@ -9,6 +10,7 @@ export interface DiplomaCourse {
   instructor: string;
   department: string;
   chapters: Chapter[];
+  videos?: Video[];
   createdAt: Date;
   updatedAt: Date;
 } 

@@ -7,6 +7,7 @@ interface GetMaterialsFilters {
   course?: string;
   semester?: string;
   type?: string;
+  difficulty?: string;
   page?: number;
   limit?: number;
   search?: string;
@@ -74,6 +75,19 @@ export const useStudyMaterials = (filters: GetMaterialsFilters = {}) => {
     mutationFn: async (materialId: string) => {
       const response = await userMaterialService.downloadMaterial(materialId);
       return response;
+    },
+    onSuccess: (fileUrl: string, materialId: string) => {
+      // Trigger file download in browser
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = ''; // Let browser determine filename
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Invalidate materials query to refresh download count
+      queryClient.invalidateQueries({ queryKey: ['materials'] });
     },
   });
 

@@ -19,12 +19,13 @@ export const formatDueDate = (dueDate: string): string => {
   });
 };
 
-export const getStatusColor = (status: Assignment['status'], styles: any) => {
+export const getStatusColor = (status: Assignment['status'] | 'needs_correction', styles: any) => {
   switch (status) {
     case 'draft': return `${styles?.status.warning} ${styles?.button.primary}`;
     case 'published': return `${styles?.status.info} ${styles?.button.primary}`;
     case 'submitted': return `${styles?.status.success} ${styles?.button.primary}`;
     case 'graded': return `${styles?.status.success} ${styles?.button.primary}`;
+    case 'needs_correction': return `${styles?.status.error} ${styles?.button.primary}`;
     default: return `${styles?.button.secondary}`;
   }
 };
@@ -39,7 +40,25 @@ export const filterAndSortAssignments = (
     .filter(assignment => {
       const matchesSearch = assignment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            assignment.subject.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesFilter = filterStatus === 'all' || assignment.status === filterStatus;
+      
+      // Determine actual status based on submission
+      const getActualStatus = (assignment: Assignment) => {
+        if (assignment.submission) {
+          if (assignment.submission.status === 'reviewed') {
+            return 'graded';
+          } else if (assignment.submission.status === 'pending') {
+            return 'submitted';
+          } else if (assignment.submission.status === 'late') {
+            return 'submitted';
+          } else if (assignment.submission.status === 'needs_correction') {
+            return 'needs_correction';
+          }
+        }
+        return assignment.status;
+      };
+
+      const actualStatus = getActualStatus(assignment);
+      const matchesFilter = filterStatus === 'all' || actualStatus === filterStatus;
       return matchesSearch && matchesFilter;
     })
     .sort((a, b) => {
@@ -51,7 +70,9 @@ export const filterAndSortAssignments = (
         case 'priority': 
           return (b.totalSubmissions || 0) - (a.totalSubmissions || 0);
         case 'status': 
-          return (a.status || '').localeCompare(b.status || '');
+          const statusA = a.submission ? (a.submission.status === 'reviewed' ? 'graded' : 'submitted') : a.status;
+          const statusB = b.submission ? (b.submission.status === 'reviewed' ? 'graded' : 'submitted') : b.status;
+          return statusA.localeCompare(statusB);
         case 'course': 
           return (a.subject || '').localeCompare(b.subject || '');
         default: 

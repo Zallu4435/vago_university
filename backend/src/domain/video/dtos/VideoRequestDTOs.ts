@@ -6,6 +6,7 @@ interface VideoDataDTO {
     module: number;
     status: VideoStatus;
     description: string;
+    videoUrl?: string;
 }
 
 export interface GetVideosRequestDTO {

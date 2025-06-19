@@ -17,12 +17,18 @@ httpClient.interceptors.request.use(
         config.headers['Authorization'] = `Bearer ${token}`;
       }
     }
-    // Remove Content-Type for FormData to let browser set multipart/form-data with boundary
-    if (config.data instanceof FormData) {
+    
+    // Handle video uploads with longer timeout
+    if (config.data instanceof FormData && config.url?.includes('/videos')) {
+      console.log('🎬 Video upload detected, setting extended timeout');
+      config.timeout = 60000; // 1 minute for video uploads
+      delete config.headers['Content-Type']; // Let browser set multipart/form-data with boundary
+    } else if (config.data instanceof FormData) {
       delete config.headers['Content-Type'];
     } else {
       config.headers['Content-Type'] = 'application/json';
     }
+    
     console.log('Request:', config.method, config.url, config.headers, config.data instanceof FormData ? 'FormData' : config.data);
     return config;
   },
@@ -42,8 +48,19 @@ httpClient.interceptors.response.use(
     console.error('Response error:', {
       status: error.response?.status,
       data: error.response?.data,
-      message: error.message
+      message: error.message,
+      code: error.code
     });
+    
+    // Handle timeout errors specifically
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      console.error('⏱️ Request timeout error');
+      import('react-hot-toast').then((toast) => {
+        toast.default.error('Request timed out. For video uploads, this might take a few minutes. Please try again.');
+      });
+      return Promise.reject(error);
+    }
+    
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {

@@ -64,10 +64,10 @@ class DiplomaService {
         }
     }
 
-    async getDiplomaCourseById(id: string): Promise<DiplomaCourse> {
+    async getDiplomaCourseById(id: string): Promise<any> {
         try {
-            const response = await httpClient.get<{ course: DiplomaCourse }>(`/diploma-courses/${id}`);
-            return response.data.course;
+            const response = await httpClient.get<{ course: any }>(`/diploma-courses/${id}`);
+            return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.error || 'Failed to fetch diploma course');
         }
@@ -109,7 +109,7 @@ class DiplomaService {
     async getCompletedChapters(courseId: string): Promise<string[]> {
         try {
             const response = await httpClient.get<{ completedChapters: string[] }>(`/diploma-courses/${courseId}/completed-chapters`);
-            return response.data.completedChapters;
+            return response.data.chapters;
         } catch (error: any) {
             throw new Error(error.response?.data?.error || 'Failed to fetch completed chapters');
         }
@@ -118,7 +118,7 @@ class DiplomaService {
     async getBookmarkedChapters(courseId: string): Promise<string[]> {
         try {
             const response = await httpClient.get<{ bookmarkedChapters: string[] }>(`/diploma-courses/${courseId}/bookmarked-chapters`);
-            return response.data.bookmarkedChapters;
+            return response.data.chapters;
         } catch (error: any) {
             throw new Error(error.response?.data?.error || 'Failed to fetch bookmarked chapters');
         }

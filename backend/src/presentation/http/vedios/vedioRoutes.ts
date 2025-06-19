@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { VideoComposer } from '../../../infrastructure/services/vedios/VideoComposer';
 import { authMiddleware } from '../../../shared/middlewares/authMiddleware';
 import { expressAdapter } from '../../adapters/ExpressAdapter';
-import { videoUpload } from '../../../config/cloudinary.config';
+import { contentVideoUploadWithErrorHandling } from '../../../config/cloudinary.config';
 
 const router = Router();
 const videoController = VideoComposer.composeVideoController();
@@ -11,19 +11,34 @@ const videoController = VideoComposer.composeVideoController();
 router.post(
     '/categories/:category/videos',
     authMiddleware as any,
+    contentVideoUploadWithErrorHandling,
     (req, res) => {
-        console.log('\n=== Video Upload Route ===');
-        console.log('Request received:', {
+        console.log('\n🎬 === VIDEO CREATION ROUTE START ===');
+        console.log('📋 Request details:', {
             method: req.method,
             url: req.url,
-            headers: req.headers,
-            body: req.body,
-            params: req.params
+            params: req.params,
+            headers: {
+                'content-type': req.headers['content-type'],
+                'content-length': req.headers['content-length']
+            }
+        });
+        console.log('📁 File details:', req.file ? {
+            fieldname: req.file.fieldname,
+            originalname: req.file.originalname,
+            mimetype: req.file.mimetype,
+            size: req.file.size
+        } : 'No file uploaded');
+        console.log('📝 Body data:', req.body);
+        console.log('👤 User info:', {
+            userId: req.user?.id
         });
 
         // Add category from params to body
         req.body.category = req.params.category;
+        console.log('✅ Category added to body:', req.body.category);
         
+        console.log('🎬 === CALLING VIDEO CONTROLLER ===');
         expressAdapter(req, res, videoController.createVideo.bind(videoController));
     }
 );
@@ -46,8 +61,32 @@ router.get(
 router.put(
     '/videos/:id',
     authMiddleware as any,
-    videoUpload.single('videoFile'),
-    (req, res) => expressAdapter(req, res, videoController.updateVideo.bind(videoController))
+    contentVideoUploadWithErrorHandling,
+    (req, res) => {
+        console.log('\n🎬 === VIDEO UPDATE ROUTE START ===');
+        console.log('📋 Update request details:', {
+            method: req.method,
+            url: req.url,
+            params: req.params,
+            headers: {
+                'content-type': req.headers['content-type'],
+                'content-length': req.headers['content-length']
+            }
+        });
+        console.log('📁 File details:', req.file ? {
+            fieldname: req.file.fieldname,
+            originalname: req.file.originalname,
+            mimetype: req.file.mimetype,
+            size: req.file.size
+        } : 'No file uploaded');
+        console.log('📝 Body data:', req.body);
+        console.log('👤 User info:', {
+            userId: req.user?.id
+        });
+        
+        console.log('🎬 === CALLING VIDEO CONTROLLER ===');
+        expressAdapter(req, res, videoController.updateVideo.bind(videoController));
+    }
 );
 
 // Delete a video

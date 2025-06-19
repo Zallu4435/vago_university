@@ -1,14 +1,14 @@
 import {
-  IGetInboxMessagesUseCase,
-  IGetSentMessagesUseCase,
-  ISendMessageUseCase,
+    IGetInboxMessagesUseCase,
+    IGetSentMessagesUseCase,
+    ISendMessageUseCase,
   IMarkMessageAsReadUseCase,
-  IDeleteMessageUseCase,
+    IDeleteMessageUseCase,
   IGetMessageDetailsUseCase,
   IGetAllAdminsUseCase,
   IGetUserGroupsUseCase,
   IFetchUsersUseCase,
-} from "../../../application/communication/useCases/CommunicationUseCases";
+  } from "../../../application/communication/useCases/CommunicationUseCases";
 import {
   GetInboxMessagesRequestDTO,
   GetSentMessagesRequestDTO,
@@ -21,12 +21,12 @@ import {
   FetchUsersRequestDTO,
 } from "../../../domain/communication/dtos/CommunicationRequestDTOs";
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, ICommunicationController } from "../IHttp";
-
-export class CommunicationController implements ICommunicationController {
+  
+  export class CommunicationController implements ICommunicationController {
   private httpErrors: HttpErrors;
-  private httpSuccess: HttpSuccess;
-
-  constructor(
+    private httpSuccess: HttpSuccess;
+  
+    constructor(
     private getInboxMessagesUseCase: IGetInboxMessagesUseCase,
     private getSentMessagesUseCase: IGetSentMessagesUseCase,
     private sendMessageUseCase: ISendMessageUseCase,
@@ -38,28 +38,28 @@ export class CommunicationController implements ICommunicationController {
     private fetchUsersUseCase: IFetchUsersUseCase
   ) {
     this.httpErrors = new HttpErrors();
-    this.httpSuccess = new HttpSuccess();
-  }
-
-  async getInboxMessages(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
+      this.httpSuccess = new HttpSuccess();
+    }
+  
+    async getInboxMessages(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+      try {
       const { page = "1", limit = "10", search = "", status = "all" } = httpRequest.query || {};
       const { id: userId } = httpRequest.user || {};
       if (!userId) {
-        return this.httpErrors.error_401();
-      }
+          return this.httpErrors.error_401();
+        }
       const getInboxMessagesRequestDTO: GetInboxMessagesRequestDTO = {
         userId,
-        page: Number(page),
-        limit: Number(limit),
-        search: String(search),
+          page: Number(page),
+          limit: Number(limit),
+          search: String(search),
         status: status as "read" | "unread" | undefined,
       };
 
       const response = await this.getInboxMessagesUseCase.execute(getInboxMessagesRequestDTO);
       if (!response.success) {
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
       if ('error' in response.data) {
         return this.httpErrors.error_400();
       }
@@ -67,29 +67,29 @@ export class CommunicationController implements ICommunicationController {
       return this.httpSuccess.success_200(response.data);
     } catch (error: any) {
       return this.httpErrors.error_500();
+      }
     }
-  }
-
-  async getSentMessages(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
+  
+    async getSentMessages(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+      try {
       const { page = "1", limit = "10", search = "", status = "all" } = httpRequest.query || {};
       const { id: userId } = httpRequest.user || {};
       if (!userId) {
-        return this.httpErrors.error_401();
-      }
+          return this.httpErrors.error_401();
+        }
 
       const getSentMessagesRequestDTO: GetSentMessagesRequestDTO = {
         userId,
-        page: Number(page),
-        limit: Number(limit),
-        search: String(search),
+          page: Number(page),
+          limit: Number(limit),
+          search: String(search),
         status: status as "read" | "unread" | "delivered" | "opened" | undefined,
       };
 
       const response = await this.getSentMessagesUseCase.execute(getSentMessagesRequestDTO);
       if (!response.success) {
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
       if ('error' in response.data) {
         return this.httpErrors.error_400();
       }
@@ -97,16 +97,16 @@ export class CommunicationController implements ICommunicationController {
       return this.httpSuccess.success_200(response.data);
     } catch (error: any) {
       return this.httpErrors.error_500();
+      }
     }
-  }
-
-  async sendMessage(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
+  
+    async sendMessage(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+      try {
       const { subject, message, to, attachments } = httpRequest.body || {};
       const { id: userId, collection: role } = httpRequest.user || {};
       if (!userId || !role) {
-        return this.httpErrors.error_401();
-      }
+          return this.httpErrors.error_401();
+        }
 
       const sendMessageRequestDTO: SendMessageRequestDTO = {
         senderId: userId,
@@ -122,8 +122,8 @@ export class CommunicationController implements ICommunicationController {
         return this.httpErrors.error_400();
       }
       if ('error' in response.data) {
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
 
       return this.httpSuccess.success_201(response.data);
     } catch (error: any) {
@@ -136,8 +136,8 @@ export class CommunicationController implements ICommunicationController {
       const { messageId } = httpRequest.params || {};
       const { id: userId } = httpRequest.user || {};
       if (!messageId || !userId) {
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
 
       const markMessageAsReadRequestDTO: MarkMessageAsReadRequestDTO = {
         messageId,
@@ -146,18 +146,18 @@ export class CommunicationController implements ICommunicationController {
 
       const response = await this.markMessageAsReadUseCase.execute(markMessageAsReadRequestDTO);
       if (!response.success) {
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
       if ('error' in response.data) {
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
 
       return this.httpSuccess.success_200(response.data);
     } catch (error: any) {
-      return this.httpErrors.error_500();
+        return this.httpErrors.error_500();
+      }
     }
-  }
-
+  
   async deleteMessage(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
       const { messageId } = httpRequest.params || {};
@@ -173,11 +173,11 @@ export class CommunicationController implements ICommunicationController {
 
       const response = await this.deleteMessageUseCase.execute(deleteMessageRequestDTO);
       if (!response.success) {
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
       if ('error' in response.data) {
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
 
       return this.httpSuccess.success_200(response.data);
     } catch (error: any) {
@@ -190,8 +190,8 @@ export class CommunicationController implements ICommunicationController {
       const { messageId } = httpRequest.params || {};
       const { id: userId } = httpRequest.user || {};
       if (!messageId || !userId) {
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
 
       const getMessageDetailsRequestDTO: GetMessageDetailsRequestDTO = {
         messageId,
@@ -203,15 +203,15 @@ export class CommunicationController implements ICommunicationController {
         if ('error' in response.data && response.data.error === "Message not found") {
           return this.httpErrors.error_404();
         }
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
 
       return this.httpSuccess.success_200(response.data);
     } catch (error: any) {
-      return this.httpErrors.error_500();
+        return this.httpErrors.error_500();
+      }
     }
-  }
-
+  
   async getAllAdmins(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
       console.log('=== GetAllAdmins Route Start ===');
@@ -233,8 +233,8 @@ export class CommunicationController implements ICommunicationController {
       }
       if ('error' in response.data) {
         console.log('GetAllAdmins - Error in response data:', response.data.error);
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
 
       console.log('GetAllAdmins - Success Response:', JSON.stringify(response.data, null, 2));
       console.log('=== GetAllAdmins Route End ===');
@@ -254,25 +254,25 @@ export class CommunicationController implements ICommunicationController {
 
       const response = await this.getUserGroupsUseCase.execute(getUserGroupsRequestDTO);
       if (!response.success) {
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
       if ('error' in response.data) {
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
 
       return this.httpSuccess.success_200(response.data);
     } catch (error: any) {
-      return this.httpErrors.error_500();
+        return this.httpErrors.error_500();
+      }
     }
-  }
-
+  
   async fetchUsers(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
+      try {
       const { type, search = "" } = httpRequest.query || {};
       const { id: userId } = httpRequest.user || {};
       if (!userId) {
-        return this.httpErrors.error_401();
-      }
+          return this.httpErrors.error_401();
+        }
 
       const fetchUsersRequestDTO: FetchUsersRequestDTO = {
         type: type as "all" | "students" | "faculty" | "staff",
@@ -282,18 +282,18 @@ export class CommunicationController implements ICommunicationController {
 
       const response = await this.fetchUsersUseCase.execute(fetchUsersRequestDTO);
       if (!response.success) {
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
       if ('error' in response.data) {
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
 
       return this.httpSuccess.success_200(response.data);
     } catch (error: any) {
-      return this.httpErrors.error_500();
+        return this.httpErrors.error_500();
+      }
     }
-  }
-
+  
   async getAdminInboxMessages(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
       const { page = "1", limit = "10", search = "", status = "all" } = httpRequest.query || {};
@@ -379,8 +379,8 @@ export class CommunicationController implements ICommunicationController {
         return this.httpErrors.error_400();
       }
       if ('error' in response.data) {
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
 
       return this.httpSuccess.success_201(response.data);
     } catch (error: any) {
@@ -398,14 +398,14 @@ export class CommunicationController implements ICommunicationController {
       }
 
       const deleteMessageRequestDTO: DeleteMessageRequestDTO = {
-        messageId,
+          messageId,
         userId,
       };
 
       const response = await this.deleteMessageUseCase.execute(deleteMessageRequestDTO);
       if (!response.success) {
-        return this.httpErrors.error_400();
-      }
+          return this.httpErrors.error_400();
+        }
       if ('error' in response.data) {
         return this.httpErrors.error_400();
       }
@@ -413,6 +413,6 @@ export class CommunicationController implements ICommunicationController {
       return this.httpSuccess.success_200(response.data);
     } catch (error: any) {
       return this.httpErrors.error_500();
+      }
     }
   }
-}

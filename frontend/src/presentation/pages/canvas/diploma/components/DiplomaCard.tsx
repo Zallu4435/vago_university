@@ -9,6 +9,7 @@ interface DiplomaCardProps {
   userAdmitted: boolean;
   completedChapters: Set<string>;
   onViewDetails: (course: DiplomaCourse) => void;
+  onStartCourse: (courseId: string) => void;
 }
 
 export const DiplomaCard: React.FC<DiplomaCardProps> = ({
@@ -17,13 +18,26 @@ export const DiplomaCard: React.FC<DiplomaCardProps> = ({
   styles,
   userAdmitted,
   completedChapters,
-  onViewDetails
+  onViewDetails,
+  onStartCourse
 }) => {
   const isAccessible = userAdmitted && course.status === 'published';
-  const completedCount = course.chapters.filter(chapter => 
-    completedChapters.has(`${course._id}-${chapter.id}`)
-  ).length;
-  const progressPercentage = course.chapters.length > 0 ? (completedCount / course.chapters.length) * 100 : 0;
+
+  console.log(course, 'course')
+  // Use completedVideoCount and videoCount from backend if available
+  const totalVideos = typeof course.videoCount === 'number' ? course.videoCount : (course.chapters ? course.chapters.length : 0);
+  const completedCount = typeof course.completedVideoCount === 'number'
+    ? course.completedVideoCount
+    : (course.chapters ? course.chapters.filter(chapter => completedChapters.has(String(chapter.id))).length : 0);
+  const progressPercentage = totalVideos > 0 ? (completedCount / totalVideos) * 100 : 0;
+  
+  // Determine progress bar color
+  let progressColor = 'bg-red-500';
+  if (progressPercentage > 66) {
+    progressColor = 'bg-green-500';
+  } else if (progressPercentage > 33) {
+    progressColor = 'bg-yellow-400';
+  }
   
   return (
     <div
@@ -85,13 +99,23 @@ export const DiplomaCard: React.FC<DiplomaCardProps> = ({
             } ${styles.badgeBackground}`}>
               {course.status}
             </span>
-            <span className={`${styles.textSecondary} text-xs`}>{completedCount}/{course.chapters.length} chapters</span>
+            <span className={`${styles.textSecondary} text-xs`}>{completedCount}/{totalVideos} videos</span>
+          </div>
+
+          {/* Progress label */}
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-xs text-gray-500">
+              {completedCount}/{totalVideos} videos completed
+            </span>
+            <span className={`text-xs font-semibold ${progressColor}`}>
+              {Math.round(progressPercentage)}%
+            </span>
           </div>
 
           {/* Progress bar */}
-          <div className={`w-full ${styles.progress.background} rounded-full h-2 mb-4`}>
+          <div className={`w-full bg-gray-200 rounded-full h-2 mb-4`}>
             <div
-              className={`h-2 rounded-full ${styles.accent} transition-all duration-1000`}
+              className={`h-2 rounded-full transition-all duration-1000 ${progressColor}`}
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
@@ -106,6 +130,10 @@ export const DiplomaCard: React.FC<DiplomaCardProps> = ({
               : `${styles.button.secondary} cursor-not-allowed`
           }`}
           aria-label={isAccessible ? progressPercentage > 0 ? 'Continue course' : 'Start course' : 'Access restricted'}
+          onClick={e => {
+            e.stopPropagation();
+            if (isAccessible) onStartCourse(course.id);
+          }}
         >
           {isAccessible ? (
             progressPercentage > 0 ? 'Continue Learning' : 'Start Course'

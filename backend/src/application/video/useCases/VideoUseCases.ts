@@ -62,16 +62,31 @@ export class GetVideoByIdUseCase implements IGetVideoByIdUseCase {
     constructor(private videoRepository: IVideoRepository) {}
 
     async execute(params: GetVideoByIdRequestDTO): Promise<ResponseDTO<GetVideoByIdResponseDTO>> {
+        console.log('\n🎬 === GET VIDEO BY ID USE CASE START ===');
+        console.log('📋 Request params:', params);
+
         try {
+            console.log('🔍 Validating video ID:', params.id);
             if (!mongoose.isValidObjectId(params.id)) {
+                console.error('❌ Invalid video ID format:', params.id);
                 return { data: { error: VideoErrorType.InvalidVideoId }, success: false };
             }
+            console.log('✅ Video ID validation passed');
+
+            console.log('🎬 === CALLING VIDEO REPOSITORY ===');
             const result = await this.videoRepository.getVideoById(params);
+            
             if (!result) {
+                console.error('❌ Video not found in repository');
                 return { data: { error: VideoErrorType.VideoNotFound }, success: false };
             }
+            
+            console.log('✅ Repository result:', result);
+            console.log('🎬 === GET VIDEO BY ID USE CASE SUCCESS ===');
             return { data: result, success: true };
         } catch (error: any) {
+            console.error('❌ GetVideoByIdUseCase error:', error);
+            console.error('❌ Error stack:', error.stack);
             return { data: { error: error.message }, success: false };
         }
     }
@@ -81,14 +96,38 @@ export class CreateVideoUseCase implements ICreateVideoUseCase {
     constructor(private videoRepository: IVideoRepository) {}
 
     async execute(params: CreateVideoRequestDTO): Promise<ResponseDTO<CreateVideoResponseDTO>> {
+        console.log('\n🎬 === CREATE VIDEO USE CASE START ===');
+        console.log('📋 Input params:', {
+            title: params.title,
+            duration: params.duration,
+            module: params.module,
+            status: params.status,
+            description: params.description,
+            category: params.category,
+            videoFile: params.videoFile ? {
+                originalname: params.videoFile.originalname,
+                mimetype: params.videoFile.mimetype,
+                size: params.videoFile.size
+            } : 'No file'
+        });
+
         try {
-            if (!mongoose.isValidObjectId(params.diplomaId)) {
-                return { data: { error: VideoErrorType.InvalidDiplomaId }, success: false };
+            console.log('🔍 Validating category:', params.category);
+            if (!params.category) {
+                console.error('❌ Category is required');
+                return { data: { error: 'Category is required' }, success: false };
             }
-            const video = Video.create(params);
+            console.log('✅ Category validation passed');
+
+            console.log('🎬 === CALLING VIDEO REPOSITORY ===');
             const result = await this.videoRepository.createVideo(params);
+            console.log('✅ Repository result:', result);
+            
+            console.log('🎬 === CREATE VIDEO USE CASE SUCCESS ===');
             return { data: result, success: true };
         } catch (error: any) {
+            console.error('❌ CreateVideoUseCase error:', error);
+            console.error('❌ Error stack:', error.stack);
             return { data: { error: error.message }, success: false };
         }
     }
@@ -98,16 +137,43 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
     constructor(private videoRepository: IVideoRepository) {}
 
     async execute(params: UpdateVideoRequestDTO): Promise<ResponseDTO<UpdateVideoResponseDTO>> {
+        console.log('\n🎬 === UPDATE VIDEO USE CASE START ===');
+        console.log('📋 Update params:', {
+            id: params.id,
+            title: params.title,
+            duration: params.duration,
+            module: params.module,
+            status: params.status,
+            description: params.description,
+            videoFile: params.videoFile ? {
+                originalname: params.videoFile.originalname,
+                mimetype: params.videoFile.mimetype,
+                size: params.videoFile.size
+            } : 'No file'
+        });
+
         try {
+            console.log('🔍 Validating video ID:', params.id);
             if (!mongoose.isValidObjectId(params.id)) {
+                console.error('❌ Invalid video ID:', params.id);
                 return { data: { error: VideoErrorType.InvalidVideoId }, success: false };
             }
+            console.log('✅ Video ID validation passed');
+
+            console.log('🎬 === CALLING VIDEO REPOSITORY ===');
             const result = await this.videoRepository.updateVideo(params);
+            
             if (!result) {
+                console.error('❌ Video not found for update');
                 return { data: { error: VideoErrorType.VideoNotFound }, success: false };
             }
+            
+            console.log('✅ Repository update result:', result);
+            console.log('🎬 === UPDATE VIDEO USE CASE SUCCESS ===');
             return { data: result, success: true };
         } catch (error: any) {
+            console.error('❌ UpdateVideoUseCase error:', error);
+            console.error('❌ Error stack:', error.stack);
             return { data: { error: error.message }, success: false };
         }
     }

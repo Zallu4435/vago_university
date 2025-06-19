@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { ICommunicationRepository } from '../repositories/ICommunicationRepository';
 import {
-  GetInboxMessagesRequestDTO,
+    GetInboxMessagesRequestDTO,
   GetSentMessagesRequestDTO,
   SendMessageRequestDTO,
   MarkMessageAsReadRequestDTO,
@@ -12,11 +12,11 @@ import {
   FetchUsersRequestDTO,
 } from "../../../domain/communication/dtos/CommunicationRequestDTOs";
 import {
-  GetInboxMessagesResponseDTO,
-  GetSentMessagesResponseDTO,
-  SendMessageResponseDTO,
+    GetInboxMessagesResponseDTO,
+    GetSentMessagesResponseDTO,
+    SendMessageResponseDTO,
   MarkMessageAsReadResponseDTO,
-  DeleteMessageResponseDTO,
+    DeleteMessageResponseDTO,
   GetMessageDetailsResponseDTO,
   GetAllAdminsResponseDTO,
   GetUserGroupsResponseDTO,
@@ -28,24 +28,24 @@ export interface ResponseDTO<T> {
   success: boolean;
   data: T | { error: string };
 }
-
-export interface IGetInboxMessagesUseCase {
+  
+  export interface IGetInboxMessagesUseCase {
   execute(params: GetInboxMessagesRequestDTO): Promise<ResponseDTO<GetInboxMessagesResponseDTO>>;
-}
-
-export interface IGetSentMessagesUseCase {
+  }
+  
+  export interface IGetSentMessagesUseCase {
   execute(params: GetSentMessagesRequestDTO): Promise<ResponseDTO<GetSentMessagesResponseDTO>>;
-}
-
-export interface ISendMessageUseCase {
+  }
+  
+  export interface ISendMessageUseCase {
   execute(params: SendMessageRequestDTO): Promise<ResponseDTO<SendMessageResponseDTO>>;
-}
-
+  }
+  
 export interface IMarkMessageAsReadUseCase {
   execute(params: MarkMessageAsReadRequestDTO): Promise<ResponseDTO<MarkMessageAsReadResponseDTO>>;
-}
-
-export interface IDeleteMessageUseCase {
+  }
+  
+  export interface IDeleteMessageUseCase {
   execute(params: DeleteMessageRequestDTO): Promise<ResponseDTO<DeleteMessageResponseDTO>>;
 }
 
@@ -272,4 +272,4 @@ export class FetchUsersUseCase implements IFetchUsersUseCase {
       return { success: false, data: { error: error.message } };
     }
   }
-}
+  }

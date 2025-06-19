@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FiPlus, FiEye, FiEdit, FiTrash2, FiBook, FiBriefcase, FiUser, FiClock, FiUsers, FiPercent, FiCheck, FiX } from 'react-icons/fi';
-import { useDiplomaManagement } from '../../../../application/hooks/useDiplomaManagement';
+import { useAdminDiplomaManagement } from '../../../../application/hooks/useAdminDiplomaManagement';
 import WarningModal from '../../../components/WarningModal';
 import Header from '../User/Header';
 import Pagination from '../User/Pagination';
@@ -66,7 +66,7 @@ const diplomaColumns = [
         key: 'price',
         render: (diploma: Diploma) => (
             <div className="flex items-center text-gray-300">
-                <span className="text-sm">${diploma.price.toFixed(2)}</span>
+                <span className="text-sm">₹{diploma.price.toFixed(2)}</span>
             </div>
         ),
     },
@@ -236,7 +236,7 @@ const DiplomaManagement: React.FC = () => {
         handleViewEnrollment,
         activeTab,
         handleTabChange,
-    } = useDiplomaManagement();
+    } = useAdminDiplomaManagement();
 
     const [searchTerm, setSearchTerm] = useState('');
     const [showDiplomaModal, setShowDiplomaModal] = useState(false);

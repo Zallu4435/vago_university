@@ -21,10 +21,26 @@ export class UserMaterialController {
   ) {}
 
   async getMaterials(req: IHttpRequest): Promise<IHttpResponse> {
-    console.log("reacehed inside the getMeterials", req)
+    console.log("reached inside the getMaterials", req)
     const { query, user } = req;
     if (!user) return { statusCode: 401, body: { message: 'Unauthorized' } };
-    const result = await this.getMaterialsUseCase.execute({ ...query, userId: user.id });
+    
+    // Convert query parameters to the correct types
+    const params = {
+      userId: user.id,
+      subject: query.subject,
+      course: query.course,
+      semester: query.semester ? Number(query.semester) : undefined,
+      type: query.type,
+      difficulty: query.difficulty,
+      search: query.search,
+      sortBy: query.sortBy,
+      sortOrder: query.sortOrder as 'asc' | 'desc',
+      page: Number(query.page) || 1,
+      limit: Number(query.limit) || 10
+    };
+    
+    const result = await this.getMaterialsUseCase.execute(params);
     return { statusCode: 200, body: result };
   }
 

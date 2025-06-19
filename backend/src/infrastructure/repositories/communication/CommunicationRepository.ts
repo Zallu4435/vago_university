@@ -40,19 +40,19 @@ export class CommunicationRepository implements ICommunicationRepository {
       query["recipients.status"] = status;
     }
 
-    if (search) {
-      query.$or = [
+      if (search) {
+        query.$or = [
         { subject: { $regex: search, $options: "i" } },
         { content: { $regex: search, $options: "i" } }
-      ];
-    }
+        ];
+      }
 
-    const skip = (page - 1) * limit;
+      const skip = (page - 1) * limit;
     const messages = await MessageModel.find(query)
       .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
+        .skip(skip)
+        .limit(limit)
+        .lean();
 
     const totalItems = await MessageModel.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
@@ -81,7 +81,7 @@ export class CommunicationRepository implements ICommunicationRepository {
       recipientsCount: message.recipients.length
     }));
 
-    return {
+      return {
       messages: mappedMessages,
       pagination: {
         total: totalItems,
@@ -102,19 +102,19 @@ export class CommunicationRepository implements ICommunicationRepository {
       query["recipients.status"] = status;
     }
 
-    if (search) {
-      query.$or = [
+      if (search) {
+        query.$or = [
         { subject: { $regex: search, $options: "i" } },
         { content: { $regex: search, $options: "i" } }
-      ];
-    }
+        ];
+      }
 
-    const skip = (page - 1) * limit;
+      const skip = (page - 1) * limit;
     const messages = await MessageModel.find(query)
       .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
+        .skip(skip)
+        .limit(limit)
+        .lean();
 
     const totalItems = await MessageModel.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
@@ -143,7 +143,7 @@ export class CommunicationRepository implements ICommunicationRepository {
       recipientsCount: message.recipients.length
     }));
 
-    return {
+      return {
       messages: mappedMessages,
       pagination: {
         total: totalItems,

@@ -12,32 +12,39 @@ interface MaterialTableProps {
     onDownload: (material: Material) => void;
     onBookmark: (materialId: string) => void;
     onLike: (materialId: string) => void;
-    bookmarkedMaterials: Set<string>;
-    likedMaterials: Set<string>;
 }
 
-const MaterialTable: React.FC<MaterialTableProps> = ({
-    materials,
-    onDownload,
-    onBookmark,
-    onLike,
-    bookmarkedMaterials,
-    likedMaterials
-}) => {
+const MaterialTable: React.FC<MaterialTableProps> = ({ materials, onDownload, onBookmark, onLike }) => {
     const { styles } = usePreferences();
+
+    // Function to convert semester number to readable name
+    const getSemesterName = (semester: number) => {
+        const currentYear = new Date().getFullYear();
+        const semesterNames = {
+            1: `Fall ${currentYear}`,
+            2: `Spring ${currentYear + 1}`,
+            3: `Summer ${currentYear + 1}`,
+            4: `Fall ${currentYear + 1}`,
+            5: `Spring ${currentYear + 2}`,
+            6: `Summer ${currentYear + 2}`,
+            7: `Fall ${currentYear + 2}`,
+            8: `Spring ${currentYear + 3}`
+        };
+        return semesterNames[semester as keyof typeof semesterNames] || `Semester ${semester}`;
+    };
 
     return (
         <div className={`${styles.card.background} rounded-2xl shadow-lg overflow-hidden ${styles.card.border}`}>
             <div className="overflow-x-auto">
-                <table className="table-auto w-full">
-                    <thead className={`bg-gradient-to-r ${styles.pattern.secondary} border-b ${styles.borderSecondary}`}>
+                <table className="w-full">
+                    <thead className={`${styles.card.background} border-b ${styles.borderSecondary}`}>
                         <tr>
-                            <th className={`py-4 px-6 text-left text-sm font-semibold ${styles.textPrimary} w-[30%]`}>Material</th>
-                            <th className={`py-4 px-6 text-left text-sm font-semibold ${styles.textPrimary} w-[20%]`}>Course</th>
-                            <th className={`py-4 px-6 text-left text-sm font-semibold ${styles.textPrimary} w-[20%]`}>Instructor</th>
-                            <th className={`py-4 px-6 text-left text-sm font-semibold ${styles.textPrimary} w-[15%]`}>Stats</th>
-                            <th className={`py-4 px-6 text-left text-sm font-semibold ${styles.textPrimary} w-[10%]`}>Rating</th>
-                            <th className={`py-4 px-6 text-center text-sm font-semibold ${styles.textPrimary} w-[15%]`}>Actions</th>
+                            <th className={`px-6 py-4 text-left text-sm font-medium ${styles.textPrimary}`}>Material</th>
+                            <th className={`px-6 py-4 text-left text-sm font-medium ${styles.textPrimary}`}>Course</th>
+                            <th className={`px-6 py-4 text-left text-sm font-medium ${styles.textPrimary}`}>Type</th>
+                            <th className={`px-6 py-4 text-left text-sm font-medium ${styles.textPrimary}`}>Semester</th>
+                            <th className={`px-6 py-4 text-left text-sm font-medium ${styles.textPrimary}`}>Difficulty</th>
+                            <th className={`px-6 py-4 text-left text-sm font-medium ${styles.textPrimary}`}>Actions</th>
                         </tr>
                     </thead>
                     <tbody className={`divide-y ${styles.borderSecondary}`}>
@@ -46,115 +53,76 @@ const MaterialTable: React.FC<MaterialTableProps> = ({
                                 <td colSpan={6} className={`py-8 text-center ${styles.textSecondary}`}>No materials found. Try adjusting your filters.</td>
                             </tr>
                         ) : (
-                            materials.map(material => (
-                                <tr key={material.id} className={`hover:bg-gray-50/50 transition-colors duration-150`}>
-                                    <td className="py-6 px-6 w-[30%]">
-                                        <div className="flex items-center space-x-4">
-                                            <div className="flex-shrink-0">
-                                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${styles.pattern.secondary} flex items-center justify-center`}>
-                                                    {React.createElement(getFileIcon(material.type), { size: 24 })}
+                            materials.map(material => {
+                                // Extract material data from props structure
+                                const materialData = material.props || material;
+                                
+                                return (
+                                    <tr key={materialData._id} className={`hover:bg-gray-50/50 transition-colors duration-150`}>
+                                        <td className="py-6 px-6 w-[30%]">
+                                            <div className="flex items-center space-x-4">
+                                                <div className="flex-shrink-0">
+                                                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${styles.pattern.secondary} flex items-center justify-center`}>
+                                                        {React.createElement(getFileIcon(materialData.type), { size: 24 })}
+                                                    </div>
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className={`text-sm font-medium ${styles.textPrimary} truncate`}>
+                                                        {materialData.title}
+                                                    </h3>
+                                                    <p className={`text-xs ${styles.textSecondary} truncate`}>
+                                                        {materialData.description}
+                                                    </p>
                                                 </div>
                                             </div>
-                                            <div className="min-w-0 flex-1">
-                                                <h3 className={`font-semibold ${styles.textPrimary} truncate max-w-[250px]`}>{material.title}</h3>
-                                                <p className={`text-sm ${styles.textSecondary} truncate max-w-[250px]`}>{material.description}</p>
-                                                <div className="flex items-center space-x-2 mt-2">
-                                                    {material.isNew && (
-                                                        <span className={`bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded-full`}>
-                                                            NEW
-                                                        </span>
-                                                    )}
-                                                    {material.isRestricted && (
-                                                        <FiLock className={styles.icon.secondary} size={14} />
-                                                    )}
-                                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${getDifficultyColor(material.difficulty)}`}>
-                                                        {material.difficulty}
-                                                    </span>
-                                                </div>
+                                        </td>
+                                        <td className="py-6 px-6">
+                                            <div className={`text-sm ${styles.textPrimary}`}>{materialData.course}</div>
+                                            <div className={`text-xs ${styles.textSecondary}`}>{materialData.subject}</div>
+                                        </td>
+                                        <td className="py-6 px-6">
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles.button.secondary}`}>
+                                                {materialData.type.toUpperCase()}
+                                            </span>
+                                        </td>
+                                        <td className="py-6 px-6">
+                                            <span className={`text-sm ${styles.textPrimary}`}>
+                                                {getSemesterName(materialData.semester)}
+                                            </span>
+                                        </td>
+                                        <td className="py-6 px-6">
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getDifficultyColor(materialData.difficulty)}`}>
+                                                {materialData.difficulty}
+                                            </span>
+                                        </td>
+                                        <td className="py-6 px-6">
+                                            <div className="flex items-center space-x-2">
+                                                <button
+                                                    onClick={() => onDownload(material)}
+                                                    className={`p-2 rounded-lg ${styles.button.primary} transition-colors`}
+                                                    aria-label={`Download ${materialData.title}`}
+                                                >
+                                                    <FiDownload size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => onBookmark(materialData._id)}
+                                                    className={`p-2 rounded-lg ${styles.button.secondary} transition-colors`}
+                                                    aria-label={`Bookmark ${materialData.title}`}
+                                                >
+                                                    <FiBookmark size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => onLike(materialData._id)}
+                                                    className={`p-2 rounded-lg ${styles.button.secondary} transition-colors`}
+                                                    aria-label={`Like ${materialData.title}`}
+                                                >
+                                                    <FiHeart size={16} />
+                                                </button>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-6 px-6 w-[20%]">
-                                        <div className="text-sm">
-                                            <div className={`font-medium ${styles.textPrimary} truncate max-w-[150px]`}>{material.course}</div>
-                                            <div className={`${styles.textSecondary} truncate max-w-[150px]`}>{material.subject}</div>
-                                            <div className={`text-xs ${styles.textTertiary} mt-1 flex items-center truncate max-w-[150px]`}>
-                                                <FiBook size={12} className="mr-1" />
-                                                Semester {material.semester}
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-6 px-6 w-[20%]">
-                                        <div className="text-sm">
-                                            <div className={`font-medium ${styles.textPrimary} truncate max-w-[150px]`}>{material.uploadedBy}</div>
-                                            <div className={`text-xs ${styles.textSecondary} mt-1 flex items-center truncate max-w-[150px]`}>
-                                                <FiCalendar size={12} className="mr-1" />
-                                                {formatDate(material.uploadedAt)}
-                                            </div>
-                                            <div className={`text-xs ${styles.textTertiary} flex items-center truncate max-w-[150px]`}>
-                                                <FiClock size={12} className="mr-1" />
-                                                {material.estimatedTime}
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-6 px-6 w-[15%]">
-                                        <div className="flex flex-col space-y-1 text-sm">
-                                            <div className={`flex items-center ${styles.textSecondary}`}>
-                                                <FiDownload size={14} className={`mr-1 ${styles.icon.secondary}`} />
-                                                <span>{formatNumber(material.downloads)}</span>
-                                            </div>
-                                            <div className={`flex items-center ${styles.textSecondary}`}>
-                                                <FiEye size={14} className={`mr-1 ${styles.icon.secondary}`} />
-                                                <span>{formatNumber(material.views)}</span>
-                                            </div>
-                                            <div className={`flex items-center ${styles.textSecondary}`}>
-                                                <FiClock size={14} className={`mr-1 ${styles.icon.secondary}`} />
-                                                <span className="truncate">{material.estimatedTime}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-6 px-6 w-[10%]">
-                                        <div className="flex items-center">
-                                            <FiStar className="text-yellow-400 mr-1" size={16} fill="currentColor" />
-                                            <span className={`text-sm font-medium ${styles.textPrimary}`}>{material.rating}</span>
-                                        </div>
-                                    </td>
-                                    <td className="py-6 px-6 w-[15%]">
-                                        <div className="flex items-center space-x-2 justify-center">
-                                            <button
-                                                onClick={() => onBookmark(material.id)}
-                                                className={`p-2 rounded-lg transition-all duration-200 ${
-                                                    bookmarkedMaterials.has(material.id) || material.isBookmarked
-                                                        ? styles.button.primary
-                                                        : styles.button.secondary
-                                                }`}
-                                                aria-label={`Bookmark ${material.title}`}
-                                            >
-                                                <FiBookmark size={16} fill={bookmarkedMaterials.has(material.id) || material.isBookmarked ? "currentColor" : "none"} />
-                                            </button>
-                                            <button
-                                                onClick={() => onLike(material.id)}
-                                                className={`p-2 rounded-lg transition-all duration-200 ${
-                                                    likedMaterials.has(material.id) || material.isLiked
-                                                        ? `${styles.status.error} ${styles.button.primary}`
-                                                        : styles.button.secondary
-                                                }`}
-                                                aria-label={`Like ${material.title}`}
-                                            >
-                                                <FiHeart size={16} fill={likedMaterials.has(material.id) || material.isLiked ? "currentColor" : "none"} />
-                                            </button>
-                                            <button
-                                                onClick={() => onDownload(material)}
-                                                className={`${styles.button.primary} px-4 py-2 rounded-lg flex items-center transition-all duration-200`}
-                                                aria-label={`Download ${material.title}`}
-                                            >
-                                                <FiDownload size={14} className="mr-1" />
-                                                Download
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
+                                        </td>
+                                    </tr>
+                                );
+                            })
                         )}
                     </tbody>
                 </table>

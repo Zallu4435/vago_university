@@ -6,8 +6,12 @@ export const userMaterialService = {
     course?: string;
     semester?: string;
     type?: string;
+    difficulty?: string;
     page?: number;
     limit?: number;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
   }) => {
     const response = await httpClient.get('/materials', { params: filters });
     return response.data;
@@ -29,10 +33,8 @@ export const userMaterialService = {
   },
 
   downloadMaterial: async (id: string) => {
-    const response = await httpClient.get(`/materials/${id}/download`, {
-      responseType: 'blob'
-    });
-    return response.data;
+    const response = await httpClient.get(`/materials/${id}/download`);
+    return response.data.url;
   },
 
   getBookmarkedMaterials: async () => {

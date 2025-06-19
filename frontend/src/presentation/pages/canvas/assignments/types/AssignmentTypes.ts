@@ -1,3 +1,20 @@
+export interface Submission {
+  id: string;
+  studentId: string;
+  studentName: string;
+  assignmentId: string;
+  files: Array<{
+    fileName: string;
+    fileUrl: string;
+    fileSize: number;
+  }>;
+  submittedDate: string;
+  status: 'pending' | 'reviewed' | 'late' | 'needs_correction';
+  marks?: number;
+  feedback?: string;
+  isLate: boolean;
+}
+
 export interface Assignment {
   id: string;
   title: string;
@@ -16,6 +33,7 @@ export interface Assignment {
   status: 'draft' | 'published' | 'submitted' | 'graded';
   totalSubmissions: number;
   averageMarks?: number;
+  submission?: Submission | null;
 }
 
 export interface SelectedFile {
@@ -24,4 +42,4 @@ export interface SelectedFile {
 
 export type ViewMode = 'grid' | 'list';
 export type SortOption = 'dueDate' | 'priority' | 'status' | 'course';
-export type FilterStatus = 'all' | 'draft' | 'published' | 'submitted' | 'graded'; 
+export type FilterStatus = 'all' | 'draft' | 'published' | 'submitted' | 'graded' | 'needs_correction'; 

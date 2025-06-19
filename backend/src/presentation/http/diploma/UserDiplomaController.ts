@@ -29,13 +29,13 @@ export class UserDiplomaController implements IUserDiplomaController {
   }
 
   async getUserDiplomas(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log('UserDiplomaController.getUserDiplomas - Request:', {
-      query: httpRequest.query,
-      user: httpRequest.user
-    });
+    // console.log('UserDiplomaController.getUserDiplomas - Request:', {
+    //   query: httpRequest.query,
+    //   user: httpRequest.user
+    // });
     try {
       if (!httpRequest.user) {
-        console.log('UserDiplomaController.getUserDiplomas - No user found');
+        // console.log('UserDiplomaController.getUserDiplomas - No user found');
         return this.httpErrors.error_401();
       }
 
@@ -48,7 +48,7 @@ export class UserDiplomaController implements IUserDiplomaController {
         Number(page) < 1 ||
         Number(limit) < 1
       ) {
-        console.log('UserDiplomaController.getUserDiplomas - Invalid pagination params');
+        // console.log('UserDiplomaController.getUserDiplomas - Invalid pagination params');
         return this.httpErrors.error_400();
       }
 
@@ -61,10 +61,10 @@ export class UserDiplomaController implements IUserDiplomaController {
         dateRange: String(dateRange),
       });
 
-      console.log('UserDiplomaController.getUserDiplomas - UseCase Result:', result);
+      // console.log('UserDiplomaController.getUserDiplomas - UseCase Result:', result);
 
       if (!result.success) {
-        console.log('UserDiplomaController.getUserDiplomas - UseCase failed');
+        // console.log('UserDiplomaController.getUserDiplomas - UseCase failed');
         return this.httpErrors.error_400();
       }
 
@@ -76,23 +76,23 @@ export class UserDiplomaController implements IUserDiplomaController {
   }
 
   async getUserDiplomaById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log('UserDiplomaController.getUserDiplomaById - Request:', {
-      params: httpRequest.params,
-      user: httpRequest.user
-    });
+    // console.log('UserDiplomaController.getUserDiplomaById - Request:', {
+    //   params: httpRequest.params,
+    //   user: httpRequest.user
+    // });
     try {
       const { id } = httpRequest.params;
 
       if (!id) {
-        console.log('UserDiplomaController.getUserDiplomaById - Missing id');
+        // console.log('UserDiplomaController.getUserDiplomaById - Missing id');
         return this.httpErrors.error_400();
       }
 
       const result = await this.getUserDiplomaByIdUseCase.execute({ id });
-      console.log('UserDiplomaController.getUserDiplomaById - UseCase Result:', result);
+      // console.log('UserDiplomaController.getUserDiplomaById - UseCase Result:', result);
 
       if (!result.success) {
-        console.log('UserDiplomaController.getUserDiplomaById - UseCase failed');
+        // console.log('UserDiplomaController.getUserDiplomaById - UseCase failed');
         return this.httpErrors.error_404();
       }
 
@@ -104,23 +104,23 @@ export class UserDiplomaController implements IUserDiplomaController {
   }
 
   async getUserDiplomaChapter(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log('UserDiplomaController.getUserDiplomaChapter - Request:', {
-      params: httpRequest.params,
-      user: httpRequest.user
-    });
+    // console.log('UserDiplomaController.getUserDiplomaChapter - Request:', {
+    //   params: httpRequest.params,
+    //   user: httpRequest.user
+    // });
     try {
       const { courseId, chapterId } = httpRequest.params;
 
       if (!courseId || !chapterId) {
-        console.log('UserDiplomaController.getUserDiplomaChapter - Missing courseId or chapterId');
+        // console.log('UserDiplomaController.getUserDiplomaChapter - Missing courseId or chapterId');
         return this.httpErrors.error_400();
       }
 
       const result = await this.getUserDiplomaChapterUseCase.execute({ courseId, chapterId });
-      console.log('UserDiplomaController.getUserDiplomaChapter - UseCase Result:', result);
+      // console.log('UserDiplomaController.getUserDiplomaChapter - UseCase Result:', result);
 
       if (!result.success) {
-        console.log('UserDiplomaController.getUserDiplomaChapter - UseCase failed');
+        // console.log('UserDiplomaController.getUserDiplomaChapter - UseCase failed');
         return this.httpErrors.error_404();
       }
 
@@ -132,14 +132,14 @@ export class UserDiplomaController implements IUserDiplomaController {
   }
 
   async updateVideoProgress(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log('UserDiplomaController.updateVideoProgress - Request:', {
-      params: httpRequest.params,
-      body: httpRequest.body,
-      user: httpRequest.user
-    });
+    // console.log('UserDiplomaController.updateVideoProgress - Request:', {
+    //   params: httpRequest.params,
+    //   body: httpRequest.body,
+    //   user: httpRequest.user
+    // });
     try {
       if (!httpRequest.user) {
-        console.log('UserDiplomaController.updateVideoProgress - No user found');
+        // console.log('UserDiplomaController.updateVideoProgress - No user found');
         return this.httpErrors.error_401();
       }
 
@@ -148,7 +148,7 @@ export class UserDiplomaController implements IUserDiplomaController {
       const { progress } = httpRequest.body;
 
       if (!courseId || !chapterId || typeof progress !== 'number') {
-        console.log('UserDiplomaController.updateVideoProgress - Invalid params:', { courseId, chapterId, progress });
+        // console.log('UserDiplomaController.updateVideoProgress - Invalid params:', { courseId, chapterId, progress });
         return this.httpErrors.error_400();
       }
 
@@ -158,10 +158,10 @@ export class UserDiplomaController implements IUserDiplomaController {
         chapterId, 
         progress 
       });
-      console.log('UserDiplomaController.updateVideoProgress - UseCase Result:', result);
+      // console.log('UserDiplomaController.updateVideoProgress - UseCase Result:', result);
 
       if (!result.success) {
-        console.log('UserDiplomaController.updateVideoProgress - UseCase failed');
+        // console.log('UserDiplomaController.updateVideoProgress - UseCase failed');
         return this.httpErrors.error_400();
       }
 
@@ -173,13 +173,13 @@ export class UserDiplomaController implements IUserDiplomaController {
   }
 
   async markChapterComplete(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log('UserDiplomaController.markChapterComplete - Request:', {
-      params: httpRequest.params,
-      user: httpRequest.user
-    });
+    // console.log('UserDiplomaController.markChapterComplete - Request:', {
+    //   params: httpRequest.params,
+    //   user: httpRequest.user
+    // });
     try {
       if (!httpRequest.user) {
-        console.log('UserDiplomaController.markChapterComplete - No user found');
+        // console.log('UserDiplomaController.markChapterComplete - No user found');
         return this.httpErrors.error_401();
       }
 
@@ -187,7 +187,7 @@ export class UserDiplomaController implements IUserDiplomaController {
       const { courseId, chapterId } = httpRequest.params;
 
       if (!courseId || !chapterId) {
-        console.log('UserDiplomaController.markChapterComplete - Missing courseId or chapterId');
+        // console.log('UserDiplomaController.markChapterComplete - Missing courseId or chapterId');
         return this.httpErrors.error_400();
       }
 
@@ -196,10 +196,10 @@ export class UserDiplomaController implements IUserDiplomaController {
         courseId, 
         chapterId 
       });
-      console.log('UserDiplomaController.markChapterComplete - UseCase Result:', result);
+      // console.log('UserDiplomaController.markChapterComplete - UseCase Result:', result);
 
       if (!result.success) {
-        console.log('UserDiplomaController.markChapterComplete - UseCase failed');
+        // console.log('UserDiplomaController.markChapterComplete - UseCase failed');
         return this.httpErrors.error_400();
       }
 
@@ -211,13 +211,13 @@ export class UserDiplomaController implements IUserDiplomaController {
   }
 
   async toggleBookmark(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log('UserDiplomaController.toggleBookmark - Request:', {
-      params: httpRequest.params,
-      user: httpRequest.user
-    });
+    // console.log('UserDiplomaController.toggleBookmark - Request:', {
+    //   params: httpRequest.params,
+    //   user: httpRequest.user
+    // });
     try {
       if (!httpRequest.user) {
-        console.log('UserDiplomaController.toggleBookmark - No user found');
+        // console.log('UserDiplomaController.toggleBookmark - No user found');
         return this.httpErrors.error_401();
       }
 
@@ -225,7 +225,7 @@ export class UserDiplomaController implements IUserDiplomaController {
       const { courseId, chapterId } = httpRequest.params;
 
       if (!courseId || !chapterId) {
-        console.log('UserDiplomaController.toggleBookmark - Missing courseId or chapterId');
+        // console.log('UserDiplomaController.toggleBookmark - Missing courseId or chapterId');
         return this.httpErrors.error_400();
       }
 
@@ -234,7 +234,7 @@ export class UserDiplomaController implements IUserDiplomaController {
         courseId, 
         chapterId 
       });
-      console.log('UserDiplomaController.toggleBookmark - UseCase Result:', result);
+      // console.log('UserDiplomaController.toggleBookmark - UseCase Result:', result);
 
       if (!result.success) {
         console.log('UserDiplomaController.toggleBookmark - UseCase failed');
@@ -255,7 +255,7 @@ export class UserDiplomaController implements IUserDiplomaController {
     });
     try {
       if (!httpRequest.user) {
-        console.log('UserDiplomaController.getCompletedChapters - No user found');
+        // console.log('UserDiplomaController.getCompletedChapters - No user found');
         return this.httpErrors.error_401();
       }
 
@@ -263,15 +263,15 @@ export class UserDiplomaController implements IUserDiplomaController {
       const { courseId } = httpRequest.params;
 
       if (!courseId) {
-        console.log('UserDiplomaController.getCompletedChapters - Missing courseId');
+        console.error('UserDiplomaController.getCompletedChapters - Missing courseId');
         return this.httpErrors.error_400();
       }
 
       const result = await this.getCompletedChaptersUseCase.execute(id, courseId);
-      console.log('UserDiplomaController.getCompletedChapters - UseCase Result:', result);
+      // console.log('UserDiplomaController.getCompletedChapters - UseCase Result:', result);
 
       if (!result.success) {
-        console.log('UserDiplomaController.getCompletedChapters - UseCase failed');
+        // console.log('UserDiplomaController.getCompletedChapters - UseCase failed');
         return this.httpErrors.error_400();
       }
 
@@ -283,13 +283,13 @@ export class UserDiplomaController implements IUserDiplomaController {
   }
 
   async getBookmarkedChapters(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log('UserDiplomaController.getBookmarkedChapters - Request:', {
-      params: httpRequest.params,
-      user: httpRequest.user
-    });
+    // console.log('UserDiplomaController.getBookmarkedChapters - Request:', {
+    //   params: httpRequest.params,
+    //   user: httpRequest.user
+    // });
     try {
       if (!httpRequest.user) {
-        console.log('UserDiplomaController.getBookmarkedChapters - No user found');
+        // console.log('UserDiplomaController.getBookmarkedChapters - No user found');
         return this.httpErrors.error_401();
       }
 
@@ -297,15 +297,15 @@ export class UserDiplomaController implements IUserDiplomaController {
       const { courseId } = httpRequest.params;
 
       if (!courseId) {
-        console.log('UserDiplomaController.getBookmarkedChapters - Missing courseId');
+        // console.log('UserDiplomaController.getBookmarkedChapters - Missing courseId');
         return this.httpErrors.error_400();
       }
 
       const result = await this.getBookmarkedChaptersUseCase.execute(id, courseId);
-      console.log('UserDiplomaController.getBookmarkedChapters - UseCase Result:', result);
+      // console.log('UserDiplomaController.getBookmarkedChapters - UseCase Result:', result);
 
       if (!result.success) {
-        console.log('UserDiplomaController.getBookmarkedChapters - UseCase failed');
+        // console.log('UserDiplomaController.getBookmarkedChapters - UseCase failed');
         return this.httpErrors.error_400();
       }
 

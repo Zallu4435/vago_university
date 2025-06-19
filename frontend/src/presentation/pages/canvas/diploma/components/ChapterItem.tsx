@@ -5,14 +5,14 @@ import { getChapterTypeIcon, getChapterTypeColor } from '../utils/diplomaUtils';
 
 interface ChapterItemProps {
   chapter: Chapter;
-  courseId: number;
+  courseId: string;
   styles: any;
   isFirst: boolean;
   isPrevCompleted: boolean;
   isCompleted: boolean;
   isBookmarked: boolean;
   onViewChapter: (chapter: Chapter) => void;
-  onBookmark: (courseId: number, chapterId: number) => void;
+  onBookmark: (courseId: string, chapterId: string) => void;
 }
 
 export const ChapterItem: React.FC<ChapterItemProps> = ({
@@ -28,10 +28,10 @@ export const ChapterItem: React.FC<ChapterItemProps> = ({
 }) => {
   const isAccessible = isFirst || isPrevCompleted;
   const TypeIcon = getChapterTypeIcon(chapter.type);
-
+console.log(chapter, "chapter from chapter")
   return (
     <div 
-      className={`group relative ${styles.card.background} rounded-2xl ${styles.cardBorder} transition-all duration-300 ${styles.cardHover} ${
+      className={`group relative ${styles?.card?.background} rounded-2xl ${styles?.cardBorder} transition-all duration-300 ${styles?.cardHover} ${
         isAccessible ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
       }`}
       onClick={() => isAccessible && onViewChapter(chapter)}
@@ -43,12 +43,12 @@ export const ChapterItem: React.FC<ChapterItemProps> = ({
             {/* Chapter status icon */}
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center mr-4 ${
               isCompleted ? styles.status.success :
-              isAccessible ? styles.status.info : styles.button.secondary
+              isAccessible ? styles?.status?.info : styles?.button?.secondary
             }`}>
               {isCompleted ? (
-                <FiCheckCircle className={`w-6 h-6 ${styles.status.success}`} />
+                <FiCheckCircle className={`w-6 h-6 ${styles?.status.success}`} />
               ) : !isAccessible ? (
-                <FiLock className={`w-6 h-6 ${styles.icon.secondary}`} />
+                <FiLock className={`w-6 h-6 ${styles?.icon.secondary}`} />
               ) : (
                 <TypeIcon className={`w-6 h-6 ${getChapterTypeColor(chapter.type, styles)}`} />
               )}
@@ -56,15 +56,15 @@ export const ChapterItem: React.FC<ChapterItemProps> = ({
 
             {/* Chapter info */}
             <div className="flex-1">
-              <h4 className={`font-semibold text-lg mb-1 ${isAccessible ? styles.textPrimary : styles.textSecondary}`}>
+              <h4 className={`font-semibold text-lg mb-1 ${isAccessible ? styles?.textPrimary : styles?.textSecondary}`}>
                 {chapter.title}
               </h4>
               <div className="flex items-center space-x-4 text-sm">
                 <div className="flex items-center">
-                  <FiClock className={`w-4 h-4 mr-1 ${styles.icon.secondary}`} />
-                  <span className={`${styles.textSecondary}`}>{chapter.duration}</span>
+                  <FiClock className={`w-4 h-4 mr-1 ${styles?.icon.secondary}`} />
+                  <span className={`${styles?.textSecondary}`}>{chapter.duration}</span>
                 </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getChapterTypeColor(chapter.type, styles)} ${styles.badgeBackground}`}>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getChapterTypeColor(chapter.type, styles)} ${styles?.badgeBackground}`}>
                   {chapter.type}
                 </span>
               </div>
@@ -75,7 +75,7 @@ export const ChapterItem: React.FC<ChapterItemProps> = ({
           <div className="flex items-center space-x-3">
             {/* Status badge */}
             {isCompleted && (
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${styles.status.success} ${styles.badgeBackground}`}>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${styles?.status.success} ${styles?.badgeBackground}`}>
                 Completed
               </span>
             )}
@@ -89,8 +89,8 @@ export const ChapterItem: React.FC<ChapterItemProps> = ({
                 }}
                 className={`p-2 rounded-lg transition-colors ${
                   isBookmarked 
-                    ? `${styles.status.error} ${styles.badgeBackground}`
-                    : `${styles.button.secondary} hover:${styles.status.error}`
+                    ? `${styles?.status.error} ${styles?.badgeBackground}`
+                    : `${styles?.button.secondary} hover:${styles?.status.error}`
                 }`}
                 aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
               >

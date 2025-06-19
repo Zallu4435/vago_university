@@ -6,6 +6,8 @@ import {
   GetUserAssignmentStatusUseCase,
   GetUserAssignmentFeedbackUseCase
 } from '../../../application/assignments/useCases/UserAssignmentUseCases';
+import { v2 as cloudinary } from 'cloudinary';
+import { config } from '../../../config/config';
 
 export class UserAssignmentController implements IUserAssignmentController {
   private httpSuccess: HttpSuccess;
@@ -64,35 +66,69 @@ export class UserAssignmentController implements IUserAssignmentController {
     }
   }
 
+  async downloadAssignmentFile(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    try {
+      const { fileUrl, fileName } = httpRequest.query;
+      
+      if (!fileUrl || typeof fileUrl !== 'string') {
+        return this.httpErrors.error_400();
+      }
+
+      if (!fileName || typeof fileName !== 'string') {
+        return this.httpErrors.error_400();
+      }
+
+      // Check if it's a Cloudinary URL
+      if (fileUrl.includes('cloudinary.com')) {
+        // Extract public ID from URL
+        const publicId = fileUrl
+          .replace(/^https:\/\/res\.cloudinary\.com\/vago-university\/[^\/]+\/upload\/v[0-9]+\//, '')
+          .replace(/\.[^/.]+$/, ''); // Remove file extension
+
+        // Generate signed URL
+        const signedUrl = cloudinary.url(publicId, {
+          resource_type: 'auto',
+          secure: true,
+          type: 'upload',
+          sign_url: true,
+          api_secret: config.cloudinary.apiSecret,
+        });
+
+        return this.httpSuccess.success_200({
+          downloadUrl: signedUrl,
+          fileName: fileName
+        });
+      } else {
+        // For non-Cloudinary URLs, return as is
+        return this.httpSuccess.success_200({
+          downloadUrl: fileUrl,
+          fileName: fileName
+        });
+      }
+    } catch (error) {
+      console.error('Controller: downloadAssignmentFile error:', error);
+      return this.httpErrors.error_500();
+    }
+  }
+
   async submitAssignment(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
       const { id } = httpRequest.params;
       const file = httpRequest.file;
       
       if (!file) {
-        return this.httpErrors.error_400({ message: 'No file provided' });
+        return this.httpErrors.error_400();
       }
-
 
       const result = await this.submitUserAssignmentUseCase.execute({
         assignmentId: id,
-        file: {
-          fieldname: file.fieldname,
-          originalname: file.originalname,
-          encoding: file.encoding,
-          mimetype: file.mimetype,
-          path: file.path,
-          size: file.size,
-          filename: file.filename
-        },
+        file: file,
         studentId: httpRequest.user?.id
       });
 
-
       if (!result.success) {
-        return this.httpErrors.error_400(result.data);
+        return this.httpErrors.error_400();
       }
-
 
       return this.httpSuccess.success_201(result.data);
     } catch (error) {

@@ -1,4 +1,29 @@
+export interface MaterialData {
+    _id: string;
+    title: string;
+    description: string;
+    subject: string;
+    course: string;
+    semester: number;
+    type: string;
+    fileUrl: string;
+    thumbnailUrl: string;
+    tags: string[];
+    difficulty: string;
+    estimatedTime: string;
+    isNew: boolean;
+    isRestricted: boolean;
+    uploadedBy: string;
+    uploadedAt: string;
+    views: number;
+    downloads: number;
+    rating: number;
+    isBookmarked: boolean;
+    isLiked: boolean;
+}
+
 export interface Material {
+    props?: MaterialData;
     _id: string;
     title: string;
     description: string;

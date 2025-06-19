@@ -14,7 +14,7 @@ import { GetUserMaterialsResponseDTO } from '../../../domain/materials/dtos/User
 
 export class UserMaterialsRepository implements IUserMaterialsRepository {
   async getUserMaterials(params: GetUserMaterialsRequestDTO): Promise<GetUserMaterialsResponseDTO> {
-    const { userId, subject, course, semester, type, page = 1, limit = 10 } = params;
+    const { userId, subject, course, semester, type, difficulty, search, sortBy = 'createdAt', sortOrder = 'desc', page = 1, limit = 10 } = params;
     const skip = (page - 1) * limit;
 
     const query: any = {};
@@ -22,10 +22,44 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
     if (course) query.course = course;
     if (semester) query.semester = semester;
     if (type) query.type = type;
+    if (difficulty) query.difficulty = difficulty;
+    
+    // Handle search across multiple fields
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { subject: { $regex: search, $options: 'i' } },
+        { uploadedBy: { $regex: search, $options: 'i' } },
+        { course: { $regex: search, $options: 'i' } },
+        { tags: { $in: [new RegExp(search, 'i')] } }
+      ];
+    }
+
+    // Handle sorting
+    let sortOptions: any = {};
+    switch (sortBy) {
+      case 'createdAt':
+        sortOptions.uploadedAt = sortOrder === 'desc' ? -1 : 1;
+        break;
+      case 'downloads':
+        sortOptions.downloads = sortOrder === 'desc' ? -1 : 1;
+        break;
+      case 'views':
+        sortOptions.views = sortOrder === 'desc' ? -1 : 1;
+        break;
+      case 'rating':
+        sortOptions.rating = sortOrder === 'desc' ? -1 : 1;
+        break;
+      case 'title':
+        sortOptions.title = sortOrder === 'asc' ? 1 : -1;
+        break;
+      default:
+        sortOptions.uploadedAt = -1; // Default to newest first
+    }
 
     const [materials, total] = await Promise.all([
       MaterialModel.find(query)
-        .sort({ uploadedAt: -1 })
+        .sort(sortOptions)
         .skip(skip)
         .limit(limit)
         .populate('bookmarks')
@@ -102,7 +136,14 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
 
   async downloadMaterial(params: DownloadMaterialRequestDTO): Promise<string> {
     const { materialId } = params;
-    const material = await MaterialModel.findById(materialId).select('fileUrl');
+    
+    // Find and update the material to increment download count
+    const material = await MaterialModel.findByIdAndUpdate(
+      materialId,
+      { $inc: { downloads: 1 } }, // Increment download count
+      { new: true, select: 'fileUrl' }
+    );
+    
     if (!material) throw new Error('Material not found');
     return material.fileUrl;
   }

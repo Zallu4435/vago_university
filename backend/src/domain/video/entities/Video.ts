@@ -1,5 +1,11 @@
 import { VideoStatus } from '../enums/VideoStatus';
 
+interface DiplomaInfo {
+    id: string;
+    title: string;
+    category: string;
+}
+
 export class Video {
     constructor(
         public readonly id: string,
@@ -10,7 +16,8 @@ export class Video {
         public readonly status: VideoStatus,
         public readonly diplomaId: string,
         public readonly description: string,
-        public readonly videoUrl: string
+        public readonly videoUrl: string,
+        public readonly diploma?: DiplomaInfo
     ) {}
 
     static create(params: {

@@ -4,6 +4,10 @@ export interface GetUserMaterialsRequestDTO {
   course?: string;
   semester?: number;
   type?: string;
+  difficulty?: string;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
   page: number;
   limit: number;
 }

@@ -1,15 +1,19 @@
 import { Assignment } from '../entities/Assignment';
 import { Submission } from '../entities/Submission';
 
+export interface AssignmentWithSubmission extends Assignment {
+  submission: Submission | null;
+}
+
 export interface GetUserAssignmentsResponseDTO {
-  assignments: Assignment[];
+  assignments: AssignmentWithSubmission[];
   total: number;
   page: number;
   limit: number;
 }
 
 export interface GetUserAssignmentResponseDTO {
-  assignment: Assignment;
+  assignment: AssignmentWithSubmission;
 }
 
 export interface SubmitUserAssignmentResponseDTO {

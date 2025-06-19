@@ -40,14 +40,33 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
 }) => {
     const { styles } = usePreferences();
 
-    const courses = [...new Set(materials.map(m => m.course))];
-    const types = [...new Set(materials.map(m => m.type))];
-    const semesters = [...new Set(materials.map(m => m.semester))];
-    const difficulties = [...new Set(materials.map(m => m.difficulty))];
+    // Extract materials from props structure and get unique values
+    const extractedMaterials = materials.map(item => item.props || item);
+    
+    const courses = [...new Set(extractedMaterials.map(m => m.course))];
+    const types = [...new Set(extractedMaterials.map(m => m.type))];
+    const semesters = [...new Set(extractedMaterials.map(m => m.semester))];
+    const difficulties = [...new Set(extractedMaterials.map(m => m.difficulty))];
+
+    // Function to convert semester number to readable name
+    const getSemesterName = (semester: number) => {
+        const currentYear = new Date().getFullYear();
+        const semesterNames = {
+            1: `Fall ${currentYear}`,
+            2: `Spring ${currentYear + 1}`,
+            3: `Summer ${currentYear + 1}`,
+            4: `Fall ${currentYear + 1}`,
+            5: `Spring ${currentYear + 2}`,
+            6: `Summer ${currentYear + 2}`,
+            7: `Fall ${currentYear + 2}`,
+            8: `Spring ${currentYear + 3}`
+        };
+        return semesterNames[semester as keyof typeof semesterNames] || `Semester ${semester}`;
+    };
 
     return (
         <div className={`${styles.card.background} rounded-2xl shadow-lg p-6 mb-8 ${styles.card.border}`}>
-            <div className="flex flex-col lg:flex-row gap-4 mb-4">
+            <div className="flex items-center space-x-4">
                 <div className="flex-1 relative">
                     <FiSearch className={`absolute left-4 top-1/2 transform -translate-y-1/2 ${styles.icon.secondary}`} size={20} />
                     <input
@@ -99,7 +118,7 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
                             >
                                 <option value="">All Types</option>
                                 {types.map(type => (
-                                    <option key={type} value={type}>{type}</option>
+                                    <option key={type} value={type}>{type.toUpperCase()}</option>
                                 ))}
                             </select>
                         </div>
@@ -113,8 +132,8 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
                                 aria-label="Filter by semester"
                             >
                                 <option value="">All Semesters</option>
-                                {semesters.map(semester => (
-                                    <option key={semester} value={semester}>{semester}</option>
+                                {semesters.sort((a, b) => a - b).map(semester => (
+                                    <option key={semester} value={semester}>{getSemesterName(semester)}</option>
                                 ))}
                             </select>
                         </div>

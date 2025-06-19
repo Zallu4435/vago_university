@@ -35,7 +35,6 @@ import MaterialCard from './components/MaterialCard';
 import MaterialTable from './components/MaterialTable';
 import MaterialFilters from './components/MaterialFilters';
 import { Material, ViewMode, SortOption } from './types/MaterialTypes';
-import { filterMaterials } from './utils/materialUtils';
 import { useStudyMaterials } from './hooks/useStudyMaterials';
 
 const StudyMaterialsPage: React.FC = () => {
@@ -65,9 +64,10 @@ const StudyMaterialsPage: React.FC = () => {
     subject: selectedCourse,
     type: selectedType,
     semester: selectedSemester,
+    difficulty: selectedDifficulty,
     search: searchTerm,
-    sortBy: sortBy === 'newest' ? 'createdAt' : 'title',
-    sortOrder: sortBy === 'newest' ? 'desc' : 'asc'
+    sortBy: sortBy === 'newest' ? 'createdAt' : sortBy === 'oldest' ? 'createdAt' : sortBy,
+    sortOrder: sortBy === 'newest' ? 'desc' : sortBy === 'oldest' ? 'asc' : 'asc'
   });
 
   useEffect(() => {
@@ -81,9 +81,11 @@ const StudyMaterialsPage: React.FC = () => {
     setShouldFetch(true);
   };
 
-  const handleDownload = async (material: Material) => {
+  const handleDownload = async (material: any): Promise<void> => {
     try {
-      await downloadMaterial(material._id);
+      // Extract material data from props structure
+      const materialData = material.props || material;
+      await downloadMaterial(materialData._id);
     } catch (error) {
       console.error('Failed to download material:', error);
     }
@@ -105,15 +107,7 @@ const StudyMaterialsPage: React.FC = () => {
     }
   };
 
-  const filteredMaterials = filterMaterials(
-    materials,
-    searchTerm,
-    selectedCourse,
-    selectedType,
-    selectedSemester,
-    selectedDifficulty,
-    sortBy
-  );
+  const filteredMaterials = materials;
 
   const bookmarkedSet: Set<string> = new Set(bookmarkedMaterials.map((m: Material) => m._id));
   const likedSet: Set<string> = new Set(likedMaterials.map((m: Material) => m._id));
@@ -199,8 +193,6 @@ const StudyMaterialsPage: React.FC = () => {
           onDownload={handleDownload}
           onBookmark={handleBookmark}
           onLike={handleLike}
-          bookmarkedMaterials={bookmarkedSet}
-          likedMaterials={likedSet}
         />
       )}
 

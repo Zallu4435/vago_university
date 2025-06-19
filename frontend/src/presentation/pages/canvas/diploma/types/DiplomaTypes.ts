@@ -23,6 +23,9 @@ export interface DiplomaCourse {
   bgColor: string;
   completionRate: number;
   chapters: Chapter[];
+  videoCount?: number;
+  completedVideoCount?: number;
+  status?: string;
 }
 
 export interface VideoProgress {

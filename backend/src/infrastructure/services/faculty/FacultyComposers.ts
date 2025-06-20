@@ -1,0 +1,33 @@
+import { IFacultyRepository } from '../../../application/faculty/repositories/IFacultyRepository';
+import {
+  GetFacultyUseCase,
+  GetFacultyByIdUseCase,
+  ApproveFacultyUseCase,
+  RejectFacultyUseCase,
+  DeleteFacultyUseCase,
+  ConfirmFacultyOfferUseCase,
+  DownloadCertificateUseCase,
+} from '../../../application/faculty/useCases/FacultyUseCases';
+import { FacultyRepository } from '../../repositories/faculty/FacultyRepository';
+import { FacultyController } from '../../../presentation/http/faculty/FacultyController';
+import { IFacultyController } from '../../../presentation/http/IHttp';
+
+export function getFacultyComposer(): IFacultyController {
+  const repository: IFacultyRepository = new FacultyRepository();
+  const getFacultyUseCase = new GetFacultyUseCase(repository);
+  const getFacultyByIdUseCase = new GetFacultyByIdUseCase(repository);
+  const approveFacultyUseCase = new ApproveFacultyUseCase(repository);
+  const rejectFacultyUseCase = new RejectFacultyUseCase(repository);
+  const deleteFacultyUseCase = new DeleteFacultyUseCase(repository);
+  const confirmFacultyOfferUseCase = new ConfirmFacultyOfferUseCase(repository);
+  const downloadCertificateUseCase = new DownloadCertificateUseCase(repository);
+  return new FacultyController(
+    getFacultyUseCase,
+    getFacultyByIdUseCase,
+    approveFacultyUseCase,
+    rejectFacultyUseCase,
+    deleteFacultyUseCase,
+    confirmFacultyOfferUseCase,
+    downloadCertificateUseCase
+  );
+}

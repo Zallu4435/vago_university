@@ -1,4 +1,3 @@
-// backend/src/controllers/admissionController.ts
 import { Request, Response, NextFunction } from "express";
 import { getAdmissions } from "../../application/use-cases/user/getAdmission";
 import { getAdmissionById } from "../../application/use-cases/user/getAdmissionById";
@@ -15,7 +14,7 @@ class AdmissionController {
         limit = 5,
         status = "all",
         program = "all",
-        dateRange = "all",
+        dateRange = "all", 
         startDate,
         endDate,
       } = req.query;

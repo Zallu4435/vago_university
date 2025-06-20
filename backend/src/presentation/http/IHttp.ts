@@ -268,3 +268,56 @@ export interface IAuthController extends IController {
   verifyEmailOtp(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   resetPassword(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
+
+export interface IAdminAdmissionController extends IController {
+  getAdmissions(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAdmissionById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  approveAdmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  rejectAdmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  deleteAdmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  confirmAdmissionOffer(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface IFacultyController extends IController {
+  getFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getFacultyById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  approveFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  rejectFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  deleteFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  confirmFacultyOffer(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  downloadCertificate(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface IProfileController extends IController {
+  getProfile(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateProfile(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  changePassword(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateProfilePicture(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface INotificationController extends IController {
+  createNotification(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAllNotifications(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getIndividualNotification(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  deleteNotification(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface IFinancialController extends IController {
+  getStudentFinancialInfo(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAllPayments(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  makePayment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getFinancialAidApplications(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAllFinancialAidApplications(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  applyForFinancialAid(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAvailableScholarships(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getScholarshipApplications(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAllScholarshipApplications(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  applyForScholarship(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  uploadDocument(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getPaymentReceipt(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateFinancialAidApplication(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateScholarshipApplication(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  createCharge(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAllCharges(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getOnePayment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}

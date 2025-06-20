@@ -11,7 +11,7 @@ router.post('/:id/approve', facultyController.approveFaculty);
 
 router.post('/:id/reject', facultyController.rejectFaculty);
 
-// router.delete('/:id', facultyController.deleteAdmission);
+router.delete('/:id', facultyController.deleteAdmission);
 
 router.post('/:id/confirm/:action', facultyController.confirmOffer);
 

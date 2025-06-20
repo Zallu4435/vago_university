@@ -1,7 +1,7 @@
 import { Router } from "express";
-import admissionRoutes from "./admissionRoutes";
+import admissionRoutes from "../http/admission/admissionRouter";
 import adminRoutes from "./adminRoutes";
-import auuthRoutes from "./authRoutes";
+import auuthRoutes from "../http/auth/authRouter";
 import facultyRoutes from "./facultyRoutes";
 import profileRoutes from "./profileRoutes";
 import courseRoutes from "../http/courses/coursesRoutes";
@@ -11,7 +11,6 @@ import eventRoutes from "../http/events/eventRoutes";
 import communicationRoutes from '../http/communication/CommunicationRouter'
 import campusLifeRoutes from "../http/campus-life/campusLifeRoutes";
 import academicRoutes from "../http/academics/AcademicRouter";
-import userCommunicationRoutes from "./useCommunicationRoutes";
 import financialRoutes from "./financial.route";
 import notificationRoutes from './notificationRouter'
 import fcmTokenRoute from './fcmTokenRoute'

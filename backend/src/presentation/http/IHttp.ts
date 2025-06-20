@@ -249,3 +249,22 @@ export interface ICommunicationController extends IController {
   sendAdminMessage(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   deleteAdminMessage(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
+
+export interface IAdmissionController extends IController {
+  createApplication(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getApplication(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  saveSection(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  processPayment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  handleFinalSubmit(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface IAuthController extends IController {
+  register(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  login(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  refreshToken(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  logout(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  registerFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  sendEmailOtp(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  verifyEmailOtp(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  resetPassword(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}

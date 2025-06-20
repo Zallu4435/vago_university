@@ -18,14 +18,13 @@ export class UserMaterialController {
     private downloadMaterialUseCase: DownloadMaterialUseCase,
     private getBookmarkedMaterialsUseCase: GetUserBookmarkedMaterialsUseCase,
     private getLikedMaterialsUseCase: GetUserLikedMaterialsUseCase
-  ) {}
+  ) { }
 
   async getMaterials(req: IHttpRequest): Promise<IHttpResponse> {
     console.log("reached inside the getMaterials", req)
     const { query, user } = req;
     if (!user) return { statusCode: 401, body: { message: 'Unauthorized' } };
-    
-    // Convert query parameters to the correct types
+
     const params = {
       userId: user.id,
       subject: query.subject,
@@ -39,7 +38,7 @@ export class UserMaterialController {
       page: Number(query.page) || 1,
       limit: Number(query.limit) || 10
     };
-    
+
     const result = await this.getMaterialsUseCase.execute(params);
     return { statusCode: 200, body: result };
   }
@@ -79,7 +78,7 @@ export class UserMaterialController {
   async getBookmarkedMaterials(req: IHttpRequest): Promise<IHttpResponse> {
     const { query, user } = req;
     if (!user) return { statusCode: 401, body: { message: 'Unauthorized' } };
-    const result = await this.getBookmarkedMaterialsUseCase.execute({ 
+    const result = await this.getBookmarkedMaterialsUseCase.execute({
       userId: user.id,
       page: Number(query.page) || 1,
       limit: Number(query.limit) || 10
@@ -90,7 +89,7 @@ export class UserMaterialController {
   async getLikedMaterials(req: IHttpRequest): Promise<IHttpResponse> {
     const { query, user } = req;
     if (!user) return { statusCode: 401, body: { message: 'Unauthorized' } };
-    const result = await this.getLikedMaterialsUseCase.execute({ 
+    const result = await this.getLikedMaterialsUseCase.execute({
       userId: user.id,
       page: Number(query.page) || 1,
       limit: Number(query.limit) || 10

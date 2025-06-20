@@ -28,6 +28,8 @@ const router = Router();
 
 router.use("/diploma-courses", userDiplomaRoutes);
 
+router.use("/admin/materials", materialRoutes);
+
 router.use("/materials", userMaterialRoutes);
 
 router.use("/assignments", userAssignmentRoutes);
@@ -68,7 +70,6 @@ router.use("/admin/diploma-courses", diplomaRoutes);
 
 router.use("/admin/vedio", vedioRoutes);
 
-router.use("/admin/materials", materialRoutes);
 
 router.use("/faculty/assignments", assignmentRoutes);
 

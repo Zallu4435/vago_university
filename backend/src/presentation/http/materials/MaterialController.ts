@@ -47,6 +47,7 @@ export class MaterialController implements IMaterialController {
       if (!httpRequest.body || !httpRequest.file) {
         return this.httpErrors.error_400();
       }
+      console.log('[MaterialController] Creating material with fileUrl:', httpRequest.file.path);
       const result = await this.createMaterialUseCase.execute({
         ...httpRequest.body,
         fileUrl: httpRequest.file.path
@@ -63,10 +64,15 @@ export class MaterialController implements IMaterialController {
       if (!id || !httpRequest.body) {
         return this.httpErrors.error_400();
       }
+      if (httpRequest.file?.path) {
+        console.log('[MaterialController] Updating material with new fileUrl:', httpRequest.file.path);
+      }
       const result = await this.updateMaterialUseCase.execute({
         id,
-        ...httpRequest.body,
-        fileUrl: httpRequest.file?.path
+        data: {
+          ...httpRequest.body,
+          ...(httpRequest.file?.path ? { fileUrl: httpRequest.file.path } : {})
+        }
       });
       if (!result) {
         return this.httpErrors.error_404();

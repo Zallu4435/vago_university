@@ -144,10 +144,26 @@ const MaterialManagement: React.FC = () => {
 
   const handleSaveMaterial = async (formData: Partial<Material>) => {
     try {
+      let dataToSend: any = formData;
+      if (formData.file && formData.file instanceof File) {
+        const fd = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+          if (key === 'file' && value instanceof File) {
+            fd.append('file', value);
+          } else if (value !== undefined && value !== null) {
+            if (Array.isArray(value)) {
+              value.forEach((v) => fd.append(key, v));
+            } else {
+              fd.append(key, value as any);
+            }
+          }
+        });
+        dataToSend = fd;
+      }
       if (editingMaterial) {
-        await updateMaterial({ id: editingMaterial._id, data: formData });
+        await updateMaterial({ id: editingMaterial._id, data: dataToSend });
       } else {
-        await createMaterial(formData as Omit<Material, '_id' | 'uploadedAt' | 'views' | 'downloads' | 'rating'>);
+        await createMaterial(dataToSend);
       }
       setShowMaterialModal(false);
       setEditingMaterial(null);

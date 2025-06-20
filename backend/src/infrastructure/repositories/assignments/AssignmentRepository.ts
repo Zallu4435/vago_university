@@ -149,7 +149,6 @@ export class AssignmentRepository implements IAssignmentRepository {
     if (!submission) {
       throw new Error('Submission not found');
     }
-    // TODO: Implement file download logic
     return Buffer.from('');
   }
 
@@ -241,7 +240,7 @@ export class AssignmentRepository implements IAssignmentRepository {
           {
             $project: {
               assignmentTitle: '$title',
-              studentName: { $literal: 'N/A' }, // Since we don't have student info in the assignment
+              studentName: { $literal: 'N/A' },
               submittedAt: '$updatedAt',
               score: '$averageMarks'
             }
@@ -261,7 +260,7 @@ export class AssignmentRepository implements IAssignmentRepository {
           },
           {
             $project: {
-              studentId: { $literal: 'N/A' }, // Since we don't have student info in the assignment
+              studentId: { $literal: 'N/A' },
               studentName: { $literal: 'N/A' },
               averageScore: '$averageMarks',
               submissionsCount: '$totalSubmissions'

@@ -35,6 +35,8 @@ class FinalizeAdmission {
       paymentId: payment._id,
     });
 
+    
+
     await newAdmission.save();
 
     // Delete draft after finalizing

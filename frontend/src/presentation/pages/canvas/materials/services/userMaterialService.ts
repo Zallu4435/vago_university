@@ -33,8 +33,8 @@ export const userMaterialService = {
   },
 
   downloadMaterial: async (id: string) => {
-    const response = await httpClient.get(`/materials/${id}/download`);
-    return response.data.url;
+    const response = await httpClient.get(`/materials/${id}/download-file`, { responseType: 'blob' });
+    return response.data;
   },
 
   getBookmarkedMaterials: async () => {

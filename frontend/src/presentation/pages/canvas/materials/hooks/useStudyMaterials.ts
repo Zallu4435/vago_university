@@ -73,19 +73,28 @@ export const useStudyMaterials = (filters: GetMaterialsFilters = {}) => {
 
   const downloadMutation = useMutation({
     mutationFn: async (materialId: string) => {
-      const response = await userMaterialService.downloadMaterial(materialId);
-      return response;
+      const blob = await userMaterialService.downloadMaterial(materialId);
+      return { blob, materialId };
     },
-    onSuccess: (fileUrl: string, materialId: string) => {
+    onSuccess: async ({ blob, materialId }) => {
+      // Fetch material details to get the filename
+      let fileName = 'material.pdf';
+      try {
+        const material = materialsData?.materials?.find((m: any) => m._id === materialId);
+        if (material) {
+          const ext = material.fileUrl?.split('.').pop().split('?')[0] || 'pdf';
+          fileName = (material.title || 'material').replace(/\s+/g, '_') + '.' + ext;
+        }
+      } catch {}
       // Trigger file download in browser
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = fileUrl;
-      link.download = ''; // Let browser determine filename
-      link.target = '_blank';
+      link.href = url;
+      link.download = fileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+      window.URL.revokeObjectURL(url);
       // Invalidate materials query to refresh download count
       queryClient.invalidateQueries({ queryKey: ['materials'] });
     },

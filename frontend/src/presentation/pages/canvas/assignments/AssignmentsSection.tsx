@@ -46,14 +46,14 @@ const AssignmentsSection = () => {
               <p className={`${styles.textSecondary} text-lg`}>Track your academic progress and stay organized</p>
             </div>
             <div className="flex items-center gap-3">
-              <button className={`${styles.button.primary} px-4 py-2 rounded-xl flex items-center gap-2`}>
+              {/* <button className={`${styles.button.primary} px-4 py-2 rounded-xl flex items-center gap-2`}>
                 <FiRefreshCw className="h-4 w-4" />
                 Sync
               </button>
               <button className={`${styles.button.primary} px-4 py-2 rounded-xl flex items-center gap-2`}>
                 <FiBell className="h-4 w-4" />
                 Reminders
-              </button>
+              </button> */}
             </div>
           </div>
 

@@ -24,7 +24,6 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
     if (type) query.type = type;
     if (difficulty) query.difficulty = difficulty;
     
-    // Handle search across multiple fields
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
@@ -35,7 +34,6 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
       ];
     }
 
-    // Handle sorting
     let sortOptions: any = {};
     switch (sortBy) {
       case 'createdAt':
@@ -54,7 +52,7 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
         sortOptions.title = sortOrder === 'asc' ? 1 : -1;
         break;
       default:
-        sortOptions.uploadedAt = -1; // Default to newest first
+        sortOptions.uploadedAt = -1; 
     }
 
     const [materials, total] = await Promise.all([
@@ -137,10 +135,9 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
   async downloadMaterial(params: DownloadMaterialRequestDTO): Promise<string> {
     const { materialId } = params;
     
-    // Find and update the material to increment download count
     const material = await MaterialModel.findByIdAndUpdate(
       materialId,
-      { $inc: { downloads: 1 } }, // Increment download count
+      { $inc: { downloads: 1 } }, 
       { new: true, select: 'fileUrl' }
     );
     

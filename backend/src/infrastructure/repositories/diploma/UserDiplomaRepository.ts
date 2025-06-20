@@ -16,7 +16,6 @@ import {
   ToggleBookmarkResponseDTO
 } from "../../../domain/diploma/dtos/UserDiplomaResponseDTOs";
 import { DiplomaCourse } from "../../../domain/diploma/entities/DiplomaCourse";
-import { Chapter } from "../../../domain/diploma/entities/Chapter";
 import { Diploma as DiplomaModel, IDiploma } from "../../../infrastructure/database/mongoose/models/diploma.model";
 import { UserProgress } from "../../../infrastructure/database/mongoose/models/userProgress.model";
 import mongoose from "mongoose";
@@ -80,8 +79,8 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
           description: diploma.description,
           category: diploma.category,
           status: diploma.status ? 'published' : 'draft',
-          instructor: '', // TODO: Get instructor from user model
-          department: '', // TODO: Get department from user model
+          instructor: '',
+          department: '',
           createdAt: diploma.createdAt,
           updatedAt: diploma.updatedAt,
           videoCount: Array.isArray(diploma.videoIds) ? diploma.videoIds.length : 0,
@@ -105,9 +104,9 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
   async getUserDiplomaById(params: GetUserDiplomaByIdRequestDTO): Promise<GetUserDiplomaByIdResponseDTO | null> {
     console.log('UserDiplomaRepository.getUserDiplomaById - Params:', params);
     try {
-      const diploma = await DiplomaModel.findOne({ 
-        _id: params.id, 
-        status: true 
+      const diploma = await DiplomaModel.findOne({
+        _id: params.id,
+        status: true
       });
 
       console.log('UserDiplomaRepository.getUserDiplomaById - Result:', diploma ? 'Found' : 'Not found');
@@ -116,7 +115,6 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
         return null;
       }
 
-      // Fetch videos by videoIds if they exist
       let videos = [];
       if (diploma.videoIds && diploma.videoIds.length > 0) {
         console.log('UserDiplomaRepository.getUserDiplomaById - Fetching videos for videoIds:', diploma.videoIds);
@@ -130,9 +128,9 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
         description: diploma.description,
         category: diploma.category,
         status: diploma.status ? 'published' : 'draft',
-        instructor: '', // TODO: Get instructor from user model
-        department: '', // TODO: Get department from user model
-        videos: videos, // Include the fetched videos
+        instructor: '',
+        department: '',
+        videos: videos,
         createdAt: diploma.createdAt,
         updatedAt: diploma.updatedAt
       };
@@ -156,7 +154,6 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
         return null;
       }
 
-      // Fetch the video (chapter) by chapterId
       const video = await Video.findOne({ _id: params.chapterId }).lean();
       if (!video) {
         return null;

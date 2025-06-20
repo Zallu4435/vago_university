@@ -8,7 +8,7 @@ export class SocketService {
   private io: SocketIOServer;
   private chatNamespace: Namespace;
   private chatRepository: ChatRepository;
-  private userSockets: Map<string, string> = new Map(); // userId -> socketId
+  private userSockets: Map<string, string> = new Map(); 
 
   constructor(server: HTTPServer) {
     console.log('\n=== Socket.IO Service Initialization Started ===');
@@ -17,7 +17,6 @@ export class SocketService {
       type: server.constructor.name
     });
     
-    // Initialize Socket.IO with CORS and proper path
     console.log('\nCreating Socket.IO server with config...');
     this.io = new SocketIOServer(server, {
       cors: {
@@ -33,13 +32,11 @@ export class SocketService {
     });
     console.log('Socket.IO server created successfully');
 
-    // Create chat namespace with proper path
     console.log('\nCreating chat namespace...');
     this.chatNamespace = this.io.of('/chat');
     this.chatRepository = new ChatRepository();
     console.log('Chat namespace created at /chat');
 
-    // Add connection logging for main socket
     this.io.on('connection', (socket) => {
       console.log('\n=== Main Socket Connection ===');
       console.log('Socket ID:', socket.id);
@@ -53,7 +50,6 @@ export class SocketService {
       });
     });
 
-    // Add error handling
     this.io.on('error', (error) => {
       console.error('\n=== Socket.IO Server Error ===');
       console.error('Error details:', error);
@@ -72,7 +68,6 @@ export class SocketService {
   private setupSocketHandlers() {
     console.log('\n=== Setting up Socket Handlers ===');
     
-    // Authentication middleware for chat namespace
     this.chatNamespace.use((socket, next) => {
       console.log('\n=== Authentication Attempt ===');
       console.log('Socket ID:', socket.id);
@@ -86,11 +81,8 @@ export class SocketService {
       });
 
       let token = socket.handshake.auth.token;
-      // Ensure token is a string
       if (typeof token !== 'string') {
-        // If token is an object (incorrect), try to get from cookies or stringify
         if (typeof token === 'object' && token !== null) {
-          // Try to get from cookies (if available)
           if (socket.handshake.headers.cookie) {
             const match = socket.handshake.headers.cookie.match(/auth_token=([^;]+)/);
             if (match) {
@@ -157,7 +149,6 @@ export class SocketService {
       
       this.joinUserChats(userId);
 
-      // Join chat room
       socket.on("joinChat", (data: { chatId: string }) => {
         console.log('\n=== Join Chat Event ===');
         console.log('User joining chat:', {
@@ -168,7 +159,6 @@ export class SocketService {
         socket.join(data.chatId);
       });
 
-      // Leave chat room
       socket.on("leaveChat", (data: { chatId: string }) => {
         console.log('\n=== Leave Chat Event ===');
         console.log('User leaving chat:', {
@@ -179,7 +169,6 @@ export class SocketService {
         socket.leave(data.chatId);
       });
 
-      // Handle typing status
       socket.on("typing", (data: { chatId: string; isTyping: boolean }) => {
         console.log('\n=== Typing Event ===');
         console.log('User typing:', {
@@ -194,14 +183,17 @@ export class SocketService {
         });
       });
 
-      // Handle new messages
       socket.on("message", async (message: any) => {
+        if (!message.chatId) {
+          console.error('Received message with undefined chatId:', message);
+          return;
+        }
         console.log('\n=== New Message Event ===');
         console.log('Message received:', {
           chatId: message.chatId,
           senderId: message.senderId,
           type: message.type,
-          content: message.content?.substring(0, 50) + '...' // Log only part of the content
+          content: message.content?.substring(0, 50) + '...'
         });
         try {
           await this.handleNewMessage(message);
@@ -210,7 +202,6 @@ export class SocketService {
         }
       });
 
-      // Handle message status updates
       socket.on("messageStatus", async (data: { messageId: string; status: MessageStatus }) => {
         console.log('\n=== Message Status Update ===');
         console.log('Status update:', {
@@ -225,8 +216,7 @@ export class SocketService {
         }
       });
 
-      // Handle disconnection
-      socket.on("disconnect", () => {
+      socket.on("disconnect", (reason) => {
         console.log('\n=== Socket Disconnection ===');
         const userId = this.getUserIdBySocketId(socket.id);
         if (userId) {
@@ -235,7 +225,13 @@ export class SocketService {
           console.log('User disconnected:', {
             userId,
             socketId: socket.id,
-            remainingConnections: this.userSockets.size
+            remainingConnections: this.userSockets.size,
+            reason
+          });
+        } else {
+          console.log('Socket disconnected (no userId found):', {
+            socketId: socket.id,
+            reason
           });
         }
       });
@@ -287,7 +283,6 @@ export class SocketService {
     const chatId = message.chatId;
     this.chatNamespace.to(chatId).emit("message", message);
 
-    // Update message status to delivered for all participants
     const chat = await this.chatRepository.getChatDetails(chatId);
     if (chat) {
       chat.participants.forEach((participant) => {
@@ -320,7 +315,6 @@ export class SocketService {
       limit: 1,
     });
     if (message.data.length > 0) {
-      // If removing a reaction, send the userId only
       const reactionData = reaction.emoji ? reaction : { userId: reaction.userId };
       this.chatNamespace.to(reaction.chatId).emit("messageReaction", {
         messageId,

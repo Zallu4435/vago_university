@@ -75,6 +75,28 @@ const assignmentSubmissionStorage = new CloudinaryStorage({
   } as any
 });
 
+// Storage engine for material files
+const materialStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'materials',
+    allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
+    resource_type: (req: any, file: any) => {
+      const ext = file.originalname.split('.').pop()?.toLowerCase();
+      if (['pdf', 'doc', 'docx', 'txt'].includes(ext)) return 'raw';
+      return 'image';
+    },
+    // Only apply transformation for images
+    transformation: (req: any, file: any) => {
+      const ext = file.originalname.split('.').pop()?.toLowerCase();
+      if (['jpg', 'jpeg', 'png'].includes(ext)) {
+        return [{ quality: 'auto' }];
+      }
+      return undefined;
+    },
+  } as any,
+});
+
 // Multer instances
 const facultyUpload = multer({
   storage: facultyStorage,
@@ -160,6 +182,40 @@ const assignmentSubmissionUpload = multer({
       });
       cb(new Error(`Invalid file format: ${file.mimetype}. Allowed formats: PDF, DOC, DOCX, TXT, JPG, JPEG, PNG, GIF, BMP, TIFF, WEBP`));
     }
+  }
+});
+
+const materialUpload = multer({
+  storage: materialStorage,
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB limit
+  fileFilter: (req: any, file: any, cb: any) => {
+    const ext = file.originalname.split('.').pop()?.toLowerCase();
+    console.log('[MaterialUpload] Validating file:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      extension: ext
+    });
+    const allowedMimeTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain',
+      'image/jpeg',
+      'image/png'
+    ];
+    const allowedFormats = ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png']; // Cloudinary allowed_formats
+    console.log('[MaterialUpload] allowedMimeTypes:', allowedMimeTypes);
+    console.log('[MaterialUpload] allowedFormats:', allowedFormats);
+    if (!ext || !allowedFormats.includes(ext)) {
+      console.error('[MaterialUpload] Extension not allowed:', ext);
+      return cb(new Error(`File extension .${ext} is not allowed. Allowed: ${allowedFormats.join(', ')}`));
+    }
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      console.error('[MaterialUpload] Invalid file mimetype:', file.mimetype);
+      return cb(new Error(`File mimetype ${file.mimetype} is not allowed. Allowed: ${allowedMimeTypes.join(', ')}`));
+    }
+    console.log('[MaterialUpload] File validation passed');
+    cb(null, true);
   }
 });
 
@@ -311,4 +367,4 @@ const contentVideoUploadWithErrorHandling = (req: any, res: any, next: any) => {
 };
 
 
-export { cloudinary, facultyUpload, profilePictureUpload, messageAttachmentUpload, assignmentUpload, assignmentSubmissionUpload, contentVideoUpload, contentVideoUploadWithErrorHandling };
+export { cloudinary, facultyUpload, profilePictureUpload, messageAttachmentUpload, assignmentUpload, assignmentSubmissionUpload, contentVideoUpload, contentVideoUploadWithErrorHandling, materialUpload };

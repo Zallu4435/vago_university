@@ -112,162 +112,143 @@ export const ChatComponent: React.FC = () => {
     }
   }, [selectedChatId]);
 
-  // Initialize socket connection
+  // Initialize socket connection ONCE on mount
   useEffect(() => {
-    const initializeSocket = () => {
-      try {
-        const socketUrl = 'http://localhost:5000';
-        const socketPath = ''; // Empty string for default path, as namespace is in the URL
-        
-        socketRef.current = io(`${socketUrl}/chat`, {
-          path: socketPath,
-          withCredentials: true,
-          autoConnect: true,
-          reconnection: true,
-          reconnectionAttempts: 5,
-          reconnectionDelay: 1000,
-          transports: ['websocket', 'polling'],
-          auth: {
-            token: token || '' // Ensure token is a string
-          }
-        });
-
-        // Socket event listeners
-        socketRef.current.on('connect', () => {
-          console.log('Connected to chat server');
-          setSocketError(null);
-          // Join all existing chats
-          if (Array.isArray(chats)) {
-            chats.forEach(chat => {
-              socketRef.current?.emit('joinChat', { chatId: chat.id });
-            });
-          }
-        });
-
-        socketRef.current.on('connect_error', (error) => {
-          console.error('Socket connection error:', error);
-          setSocketError('Failed to connect to chat server. Please try again later.');
-        });
-
-        socketRef.current.on('disconnect', (reason) => {
-          console.log('Socket disconnected:', reason);
-          if (reason === 'io server disconnect') {
-            // Server initiated disconnect, try to reconnect
-            socketRef.current?.connect();
-          }
-        });
-
-        socketRef.current.on('error', (error) => {
-          console.error('Socket error:', error);
-          setSocketError('An error occurred with the chat connection. Please try again later.');
-        });
-
-        socketRef.current.on('message', (newMessage: any) => {
-          const formattedMessage = formatMessage(newMessage);
-          
-          // Add message to UI immediately
-          setMessages(prev => [...prev, formattedMessage]);
-          
-          // Update last message in chat list
-          setChats(prev =>
-            prev.map(chat =>
-              chat.id === newMessage.chatId
-                ? {
-                    ...chat,
-                    lastMessage: {
-                      id: newMessage.id,
-                      content: newMessage.content,
-                      senderId: newMessage.senderId,
-                      senderName: newMessage.senderName || '',
-                      type: newMessage.type || 'text',
-                      status: newMessage.status || 'sending',
-                      createdAt: newMessage.createdAt
-                    },
-                    unreadCount: chat.id === selectedChatId ? 0 : chat.unreadCount + 1
-                  }
-                : chat
-            )
-          );
-
-          // If message is from current user, update its status
-          if (newMessage.senderId === currentUserId) {
-            setMessages(prev =>
-              prev.map(msg =>
-                msg.id === newMessage.id
-                  ? { ...msg, status: 'delivered' }
-                  : msg
-              )
-            );
-          }
-        });
-
-        socketRef.current.on('messageStatus', ({ messageId, status }) => {
-          setMessages(prev =>
-            prev.map(msg =>
-              msg.id === messageId
-                ? { ...msg, status }
-                : msg
-            )
-          );
-        });
-
-        socketRef.current.on('typing', ({ chatId, isTyping: typing }) => {
-          setChats(prev =>
-            prev.map(chat =>
-              chat.id === chatId ? { ...chat, typing } : chat
-            )
-          );
-        });
-
-        socketRef.current.on('userStatus', ({ userId, online }) => {
-          setChats(prev =>
-            prev.map(chat =>
-              chat.participants.includes(userId) ? { ...chat, online } : chat
-            )
-          );
-        });
-
-        socketRef.current.on('messageReaction', (data: { messageId: string; reaction: any }) => {
-          setMessages(prevMessages => 
-            prevMessages.map(msg => {
-              if (msg.id === data.messageId) {
-                // If the reaction is being removed (no emoji), filter it out
-                if (!data.reaction.emoji) {
-                  return {
-                    ...msg,
-                    reactions: msg.reactions.filter(r => r.userId !== data.reaction.userId)
-                  };
-                }
-                // Otherwise, add or update the reaction
-                const existingReactionIndex = msg.reactions.findIndex(r => r.userId === data.reaction.userId);
-                if (existingReactionIndex >= 0) {
-                  const newReactions = [...msg.reactions];
-                  newReactions[existingReactionIndex] = data.reaction;
-                  return { ...msg, reactions: newReactions };
-                }
-                return {
-                  ...msg,
-                  reactions: [...msg.reactions, data.reaction]
-                };
-              }
-              return msg;
-            })
-          );
-        });
-      } catch (error) {
-        console.error('Error initializing socket:', error);
-        setSocketError('Failed to initialize chat connection. Please refresh the page.');
+    const socketUrl = 'http://localhost:5000';
+    const socketPath = '';
+    socketRef.current = io(`${socketUrl}/chat`, {
+      path: socketPath,
+      withCredentials: true,
+      autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      transports: ['websocket', 'polling'],
+      auth: {
+        token: token || ''
       }
-    };
+    });
 
-    initializeSocket();
-
+    // Socket event listeners
+    socketRef.current.on('connect', () => {
+      console.log('[Socket] Connected to chat server');
+      setSocketError(null);
+    });
+    socketRef.current.on('connect_error', (error) => {
+      console.error('[Socket] Connection error:', error);
+      setSocketError('Failed to connect to chat server. Please try again later.');
+    });
+    socketRef.current.on('disconnect', (reason) => {
+      console.log('[Socket] Disconnected:', reason);
+      if (reason === 'io server disconnect') {
+        socketRef.current?.connect();
+      }
+    });
+    socketRef.current.on('error', (error) => {
+      console.error('[Socket] General error:', error);
+      setSocketError('An error occurred with the chat connection. Please try again later.');
+    });
+    socketRef.current.on('message', (newMessage: any) => {
+      console.log('[Socket] Received message:', newMessage);
+      const formattedMessage = formatMessage(newMessage);
+      setMessages(prev => [...prev, formattedMessage]);
+      setChats(prev =>
+        prev.map(chat =>
+          chat.id === newMessage.chatId
+            ? {
+                ...chat,
+                lastMessage: {
+                  id: newMessage.id,
+                  content: newMessage.content,
+                  senderId: newMessage.senderId,
+                  senderName: newMessage.senderName || '',
+                  type: newMessage.type || 'text',
+                  status: newMessage.status || 'sending',
+                  createdAt: newMessage.createdAt
+                },
+                unreadCount: chat.id === selectedChatId ? 0 : chat.unreadCount + 1
+              }
+            : chat
+        )
+      );
+      if (newMessage.senderId === currentUserId) {
+        setMessages(prev =>
+          prev.map(msg =>
+            msg.id === newMessage.id
+              ? { ...msg, status: 'delivered' }
+              : msg
+          )
+        );
+      }
+    });
+    socketRef.current.on('messageStatus', ({ messageId, status }) => {
+      console.log(`[Socket] Message status update: messageId=${messageId}, status=${status}`);
+      setMessages(prev =>
+        prev.map(msg =>
+          msg.id === messageId
+            ? { ...msg, status }
+            : msg
+        )
+      );
+    });
+    socketRef.current.on('typing', ({ chatId, isTyping: typing }) => {
+      console.log(`[Socket] Typing event: chatId=${chatId}, isTyping=${typing}`);
+      setChats(prev =>
+        prev.map(chat =>
+          chat.id === chatId ? { ...chat, typing } : chat
+        )
+      );
+    });
+    socketRef.current.on('userStatus', ({ userId, online }) => {
+      console.log(`[Socket] User status update: userId=${userId}, online=${online}`);
+      setChats(prev =>
+        prev.map(chat =>
+          chat.participants.includes(userId) ? { ...chat, online } : chat
+        )
+      );
+    });
+    socketRef.current.on('messageReaction', (data: { messageId: string; reaction: any }) => {
+      console.log('[Socket] Message reaction event:', data);
+      setMessages(prevMessages => 
+        prevMessages.map(msg => {
+          if (msg.id === data.messageId) {
+            if (!data.reaction.emoji) {
+              return {
+                ...msg,
+                reactions: msg.reactions.filter(r => r.userId !== data.reaction.userId)
+              };
+            }
+            const existingReactionIndex = msg.reactions.findIndex(r => r.userId === data.reaction.userId);
+            if (existingReactionIndex >= 0) {
+              const newReactions = [...msg.reactions];
+              newReactions[existingReactionIndex] = data.reaction;
+              return { ...msg, reactions: newReactions };
+            }
+            return {
+              ...msg,
+              reactions: [...msg.reactions, data.reaction]
+            };
+          }
+          return msg;
+        })
+      );
+    });
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
       }
     };
-  }, [selectedChatId, chats, currentUserId]);
+  }, []); // Only run once on mount
+
+  // Join chats when the chats array changes
+  useEffect(() => {
+    if (socketRef.current && Array.isArray(chats)) {
+      chats.forEach(chat => {
+        console.log(`[Socket] Emitting joinChat for chatId: ${chat.id}`);
+        socketRef.current.emit('joinChat', { chatId: chat.id });
+      });
+    }
+  }, [chats]);
 
   useEffect(() => {
     // Apply dark mode class to body
@@ -455,9 +436,9 @@ export const ChatComponent: React.FC = () => {
   const handleSendMessage = async (message: string, file?: File, replyTo?: Message) => {
     if (!message.trim() && !file) return;
 
-    try {
-      if (!selectedChatId && pendingUser) {
-        // Create new chat when sending first message
+    // If no chat is selected but a pending user exists, create the chat first
+    if (!selectedChatId && pendingUser) {
+      try {
         const newChat = await chatService.createChat({
           creatorId: currentUser?.id || '',
           participantId: pendingUser.id,
@@ -465,106 +446,74 @@ export const ChatComponent: React.FC = () => {
           name: `${pendingUser.firstName} ${pendingUser.lastName}`,
           avatar: pendingUser.avatar
         });
-
-        // Update chats list
         setChats(prev => [newChat, ...(Array.isArray(prev) ? prev : [])]);
-        
-        let sentMessage;
-        if (file) {
-          const formData = new FormData();
-          formData.append('file', file);
-          if (message.trim()) {
-            formData.append('content', message.trim());
-          }
-          if (replyTo) {
-            formData.append('replyTo', JSON.stringify({
-              messageId: replyTo.id,
-              content: replyTo.content,
-              senderId: replyTo.senderId,
-              senderName: replyTo.senderName,
-              type: replyTo.type
-            }));
-          }
-          sentMessage = await chatService.sendFile(newChat.id, formData);
-        } else {
-          sentMessage = await chatService.sendMessage(newChat.id, message, replyTo);
-        }
-        
-        // Format the message with WhatsApp-style reply
-        const formattedMessage = formatMessage({
-          ...sentMessage,
-          senderId: currentUserId,
-          senderName: `${currentUser?.firstName} ${currentUser?.lastName}`,
-          content: message.trim(),
-          type: file ? (file.type.startsWith('image/') ? 'image' : 'file') : 'text',
-          status: 'sending',
-          replyTo: replyTo ? {
-            id: replyTo.id,
-            content: replyTo.content,
-            senderId: replyTo.senderId,
-            senderName: replyTo.senderName,
-            type: replyTo.type,
-            createdAt: replyTo.createdAt
-          } : undefined
-        });
-        
-        // Emit message through socket
-        socketRef.current?.emit('message', formattedMessage);
-        
-        // Update messages list
-        setMessages(prev => [...prev, formattedMessage]);
-        
-        // Update selected chat
         setSelectedChatId(newChat.id);
         setPendingUser(null);
         setReplyToMessage(null);
-      } else if (selectedChatId) {
-        let sentMessage;
-        if (file) {
-          const formData = new FormData();
-          formData.append('file', file);
-          if (message.trim()) {
-            formData.append('content', message.trim());
-          }
-          if (replyTo) {
-            formData.append('replyTo', JSON.stringify({
-              messageId: replyTo.id,
-              content: replyTo.content,
-              senderId: replyTo.senderId,
-              senderName: replyTo.senderName,
-              type: replyTo.type
-            }));
-          }
-          sentMessage = await chatService.sendFile(selectedChatId, formData);
-        } else {
-          sentMessage = await chatService.sendMessage(selectedChatId, message, replyTo);
+        // Wait for state to update, then send the message
+        setTimeout(() => {
+          handleSendMessage(message, file, replyTo);
+        }, 0);
+        return;
+      } catch (error) {
+        console.error('Failed to create chat:', error);
+        return;
+      }
+    }
+
+    // If still no selectedChatId, do not send
+    if (!selectedChatId) {
+      console.error('Cannot send message: No chat selected');
+      return;
+    }
+
+    try {
+      let sentMessage;
+      if (file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        if (message.trim()) {
+          formData.append('content', message.trim());
         }
-        
-        // Format the message with WhatsApp-style reply
-        const formattedMessage = formatMessage({
-          ...sentMessage,
-          senderId: currentUserId,
-          senderName: `${currentUser?.firstName} ${currentUser?.lastName}`,
-          content: message.trim(),
-          type: file ? (file.type.startsWith('image/') ? 'image' : 'file') : 'text',
-          status: 'sending',
-          replyTo: replyTo ? {
-            id: replyTo.id,
+        if (replyTo) {
+          formData.append('replyTo', JSON.stringify({
+            messageId: replyTo.id,
             content: replyTo.content,
             senderId: replyTo.senderId,
             senderName: replyTo.senderName,
-            type: replyTo.type,
-            createdAt: replyTo.createdAt
-          } : undefined
-        });
-        
-        // Emit message through socket
-        socketRef.current?.emit('message', formattedMessage);
-        
-        // Update messages list
-        setMessages(prev => [...prev, formattedMessage]);
-        setReplyToMessage(null);
+            type: replyTo.type
+          }));
+        }
+        sentMessage = await chatService.sendFile(selectedChatId, formData);
+      } else {
+        sentMessage = await chatService.sendMessage(selectedChatId, message, replyTo);
       }
+
+      // Format the message with WhatsApp-style reply
+      const formattedMessage = formatMessage({
+        ...sentMessage,
+        senderId: currentUserId,
+        senderName: `${currentUser?.firstName} ${currentUser?.lastName}`,
+        content: message.trim(),
+        type: file ? (file.type.startsWith('image/') ? 'image' : 'file') : 'text',
+        status: 'sending',
+        replyTo: replyTo ? {
+          id: replyTo.id,
+          content: replyTo.content,
+          senderId: replyTo.senderId,
+          senderName: replyTo.senderName,
+          type: replyTo.type,
+          createdAt: replyTo.createdAt
+        } : undefined
+      });
+
+      // Emit message through socket
+      console.log('[Socket] Emitting message:', formattedMessage);
+      socketRef.current?.emit('message', formattedMessage);
+
+      // Update messages list
+      setMessages(prev => [...prev, formattedMessage]);
+      setReplyToMessage(null);
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message');
@@ -573,6 +522,7 @@ export const ChatComponent: React.FC = () => {
 
   const handleTyping = (isTyping: boolean) => {
     if (!selectedChatId || !socketRef.current) return;
+    console.log(`[Socket] Emitting typing: chatId=${selectedChatId}, isTyping=${isTyping}`);
     socketRef.current.emit('typing', {
       chatId: selectedChatId,
       isTyping
@@ -917,20 +867,17 @@ export const ChatComponent: React.FC = () => {
     <div className="flex h-full">
       <div className="w-1/3 border-r border-gray-200 dark:border-gray-700">
         <ChatList
-          chats={Array.isArray(chats) ? chats : []}
+          chats={chats}
           styles={styles}
-          selectedChatId={selectedChatId}
-          onChatSelect={(chatId) => {
-            setSelectedChatId(chatId);
-            const chat = chats.find(c => c.id === chatId);
-            if (chat) setSelectedChat(chat);
-          }}
+          selectedChatId={selectedChatId || ''}
+          onChatSelect={handleChatSelect}
           onSearch={handleSearch}
           onNewChat={() => setShowNewChat(true)}
+          onCreateGroup={() => setShowCreateGroup(true)}
           setMessages={setMessages}
           setChats={setChats}
           onUserSelect={handleUserSelect}
-          onCreateGroup={() => setShowCreateGroup(true)}
+          currentUserId={currentUserId}
         />
       </div>
       <div className="flex-1 flex flex-col">

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { FiSearch, FiUser, FiPlus, FiX, FiUsers } from 'react-icons/fi';
 import { Chat, Message, Styles, User, PaginatedResponse } from '../types/ChatTypes';
 import { formatChatTime, formatMessageTime } from '../utils/chatUtils';
@@ -17,6 +17,7 @@ interface ChatListProps {
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   setChats: React.Dispatch<React.SetStateAction<Chat[]>>;
   onUserSelect: (user: User) => void;
+  currentUserId: string | undefined;
 }
 
 export const ChatList: React.FC<ChatListProps> = ({
@@ -29,180 +30,13 @@ export const ChatList: React.FC<ChatListProps> = ({
   onCreateGroup,
   setMessages,
   setChats,
-  onUserSelect
+  onUserSelect,
+  currentUserId
 }) => {
-  const socketRef = useRef<Socket | null>(null);
-  const [socketError, setSocketError] = useState<string | null>(null);
-  const currentUser = useSelector((state: RootState) => state.auth.user);
-  const token = useSelector((state: RootState) => state.auth.token);
-  const currentUserId = currentUser?.id;
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewChat, setShowNewChat] = useState(false);
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-
-  useEffect(() => {
-    const initializeSocket = () => {
-      try {
-        const socketUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-        console.log('=== Socket Initialization Start ===');
-        console.log('1. Connection URL:', socketUrl);
-        console.log('2. Token available:', !!token);
-        console.log('3. Token format:', token ? token.substring(0, 20) + '...' : 'No token');
-
-        // First establish the main connection
-        socketRef.current = io(socketUrl, {
-          path: '/socket.io',
-          withCredentials: true,
-          autoConnect: true,
-          reconnection: true,
-          reconnectionAttempts: 5,
-          reconnectionDelay: 1000,
-          transports: ['websocket', 'polling'],
-          auth: {
-            token: token
-          }
-        });
-
-        console.log('4. Main socket instance created');
-
-        // Wait for the main connection before connecting to namespace
-        socketRef.current.on('connect', () => {
-          console.log('5. Main socket connected, connecting to chat namespace...');
-          
-          // Now connect to the chat namespace
-          const chatNamespace = io(`${socketUrl}/chat`, {
-            path: '',
-            withCredentials: true,
-            auth: {
-              token: token
-            }
-          });
-
-          console.log('6. Chat namespace connection initiated');
-
-          chatNamespace.on('connect', () => {
-            console.log('7. Connected to chat namespace');
-            setSocketError(null);
-            
-            console.log('8. Joining chats:', chats.map(chat => chat.id));
-            chats.forEach(chat => {
-              console.log('9. Emitting joinChat for:', chat.id);
-              chatNamespace.emit('joinChat', { chatId: chat.id });
-            });
-          });
-
-          chatNamespace.on('connect_error', (error: Error) => {
-            console.error('10. Chat namespace connection error:', {
-              message: error.message,
-              stack: error.stack
-            });
-            setSocketError(`Failed to connect to chat server: ${error.message}`);
-          });
-
-          // Message events
-          chatNamespace.on('message', (newMessage: Message) => {
-            console.log('11. New message received:', {
-              messageId: newMessage.id,
-              chatId: newMessage.chatId,
-              type: newMessage.type
-            });
-            setMessages(prev => [...prev, newMessage]);
-            
-            setChats(prev =>
-              prev.map(chat =>
-                chat.id === newMessage.chatId
-                  ? {
-                      ...chat,
-                      lastMessage: {
-                        id: newMessage.id,
-                        content: newMessage.content,
-                        senderId: newMessage.senderId,
-                        senderName: chat.participants.includes(newMessage.senderId) ? chat.name : 'Unknown',
-                        type: newMessage.type,
-                        status: newMessage.status,
-                        createdAt: newMessage.createdAt
-                      },
-                      unreadCount: chat.id === selectedChatId ? 0 : chat.unreadCount + 1
-                    }
-                  : chat
-              )
-            );
-          });
-
-          chatNamespace.on('messageStatus', ({ messageId, status }: { messageId: string; status: Message['status'] }) => {
-            console.log('12. Message status update:', {
-              messageId,
-              status
-            });
-            setMessages(prev =>
-              prev.map(msg =>
-                msg.id === messageId
-                  ? { ...msg, status }
-                  : msg
-              )
-            );
-          });
-
-          chatNamespace.on('typing', ({ chatId, isTyping: typing }: { chatId: string; isTyping: boolean }) => {
-            console.log('13. Typing status:', {
-              chatId,
-              isTyping: typing
-            });
-            setChats(prev =>
-              prev.map(chat =>
-                chat.id === chatId ? { ...chat, typing } : chat
-              )
-            );
-          });
-
-          chatNamespace.on('userStatus', ({ userId, online }: { userId: string; online: boolean }) => {
-            console.log('14. User status update:', {
-              userId,
-              online
-            });
-            setChats(prev =>
-              prev.map(chat =>
-                chat.participants.includes(userId) ? { ...chat, online } : chat
-              )
-            );
-          });
-
-          console.log('15. All chat namespace event listeners attached');
-        });
-
-        socketRef.current.on('connect_error', (error: Error) => {
-          console.error('16. Main socket connection error:', {
-            message: error.message,
-            stack: error.stack
-          });
-          setSocketError(`Failed to connect to main socket: ${error.message}`);
-        });
-
-        console.log('17. All main socket event listeners attached');
-
-      } catch (error) {
-        console.error('18. Socket initialization error:', {
-          error,
-          message: error instanceof Error ? error.message : 'Unknown error',
-          stack: error instanceof Error ? error.stack : undefined
-        });
-        setSocketError('Failed to initialize chat connection');
-      }
-    };
-
-    console.log('19. Effect triggered with token:', !!token);
-    if (token) {
-      initializeSocket();
-    }
-
-    return () => {
-      console.log('20. Cleanup: Disconnecting socket');
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
-    };
-  }, [selectedChatId, chats, currentUserId, setMessages, setChats, token]);
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);

@@ -16,13 +16,23 @@ export const materialService = {
     return response.data.material;
   },
 
-  async createMaterial(data: Omit<Material, '_id' | 'uploadedAt' | 'views' | 'downloads' | 'rating'>): Promise<Material> {
-    const response = await httpClient.post('/admin/materials', data);
+  async createMaterial(data: Omit<Material, '_id' | 'uploadedAt' | 'views' | 'downloads' | 'rating'> | FormData): Promise<Material> {
+    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
+    const response = await httpClient.post(
+      '/admin/materials',
+      data,
+      isFormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : undefined
+    );
     return response.data.material;
   },
 
-  async updateMaterial(id: string, data: Partial<Material>): Promise<Material> {
-    const response = await httpClient.put(`/admin/materials/${id}`, data);
+  async updateMaterial(id: string, data: Partial<Material> | FormData): Promise<Material> {
+    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
+    const response = await httpClient.put(
+      `/admin/materials/${id}`,
+      data,
+      isFormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : undefined
+    );
     return response.data.material;
   },
 

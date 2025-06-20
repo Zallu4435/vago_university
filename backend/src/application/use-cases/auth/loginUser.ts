@@ -25,8 +25,6 @@ interface LoginResponse {
 
 class LoginUser {
   async execute({ email, password }: LoginParams): Promise<LoginResponse> {
-    console.log(`Executing loginUser use case with params:`, { email });
-
     let user;
     let collection: 'register' | 'admin' | 'user' | 'faculty' = 'register';
 

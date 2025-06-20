@@ -1,6 +1,7 @@
 import { Admission } from '../../../infrastructure/database/mongoose/models/admission.model';
 import { User } from '../../../infrastructure/database/mongoose/models/user.model';
 import { Register } from '../../../infrastructure/database/mongoose/models/register.model'; 
+import { ProgramModel } from '../../../infrastructure/database/mongoose/models/studentProgram.model';
 
 interface ConfirmOfferParams {
   admissionId: string;
@@ -52,6 +53,26 @@ class ConfirmAdmissionOffer {
       });
 
       await user.save();
+
+
+      // let degree = '';
+      // let catalogYear = '';
+      // if (admission.choiceOfStudy && admission.choiceOfStudy.length > 0) {
+      //   // Assuming the first choice is the accepted one
+      //   degree = admission.choiceOfStudy[0]?.degree || '';
+      //   catalogYear = admission.choiceOfStudy[0]?.catalogYear || '';
+      // }
+
+      // console.log(degree, catalogYear)
+
+      // if (degree && catalogYear) {
+      //   await ProgramModel.create({
+      //     studentId: user._id,
+      //     degree,
+      //     catalogYear,
+      //     credits: 20 // default or adjust as needed
+      //   });
+      // }
     } else if (action === 'reject') {
       admission.status = 'rejected';
       admission.rejectedBy = 'user';

@@ -42,14 +42,12 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
 
       const total = await AssignmentModel.countDocuments(query);
 
-      // Get submissions for all assignments for this student
       const assignmentIds = assignments.map(assignment => assignment._id);
       const submissions = await SubmissionModel.find({
         assignmentId: { $in: assignmentIds },
         studentId: studentId
       }).lean();
 
-      // Create a map of assignmentId to submission for quick lookup
       const submissionMap = new Map();
       submissions.forEach(submission => {
         submissionMap.set(submission.assignmentId.toString(), submission);
@@ -59,7 +57,7 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
         assignments: assignments.map(assignment => {
           const assignmentData = this.mapToAssignment(assignment);
           const submission = submissionMap.get(assignment._id.toString());
-          
+
           return {
             ...assignmentData,
             submission: submission ? this.mapToSubmission(submission) : null
@@ -80,19 +78,18 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
     const { id } = params;
     const assignment = await AssignmentModel.findOne({ _id: id, status: 'published' });
     if (!assignment) throw new Error('Assignment not found');
-    
-    // Get submission for this assignment and student
-    const submission = await SubmissionModel.findOne({ 
-      assignmentId: id, 
-      studentId: studentId 
+
+    const submission = await SubmissionModel.findOne({
+      assignmentId: id,
+      studentId: studentId
     }).lean();
-    
+
     const assignmentData = this.mapToAssignment(assignment);
     const assignmentWithSubmission: AssignmentWithSubmission = {
       ...assignmentData,
       submission: submission ? this.mapToSubmission(submission) : null
     };
-    
+
     return { assignment: assignmentWithSubmission };
   }
 
@@ -101,27 +98,24 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
     try {
       const { assignmentId, file } = params;
 
-      // Get student name from user collection
       const student = await mongoose.model('User').findOne({ _id: studentId });
       if (!student) {
         throw new Error('Student not found');
       }
 
-      // Check if there's an existing submission
-      const existingSubmission = await SubmissionModel.findOne({ 
-        assignmentId, 
-        studentId 
+      const existingSubmission = await SubmissionModel.findOne({
+        assignmentId,
+        studentId
       });
 
       let submission;
-      
+
       if (existingSubmission) {
         // Update existing submission (resubmission)
         console.log('📝 Updating existing submission for resubmission');
-        
-        // If the existing submission has status "needs_correction", reset it to "pending"
+
         const newStatus = existingSubmission.status === 'needs_correction' ? 'pending' : existingSubmission.status;
-        
+
         submission = await SubmissionModel.findOneAndUpdate(
           { assignmentId, studentId },
           {
@@ -133,19 +127,18 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
             submittedDate: new Date(),
             status: newStatus,
             isLate: false,
-            // Clear previous marks and feedback for resubmission
             marks: undefined,
             feedback: undefined,
             reviewedAt: undefined
           },
-          { new: true, upsert: false } // Don't create new, just update existing
+          { new: true, upsert: false }
         );
-        
+
         console.log('✅ Existing submission updated successfully');
       } else {
         // Create new submission
         console.log('📝 Creating new submission');
-        
+
         submission = await SubmissionModel.create({
           studentId,
           studentName: `${student.firstName} ${student.lastName}`,
@@ -159,7 +152,7 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
           status: 'pending',
           isLate: false
         });
-        
+
         console.log('✅ New submission created successfully');
       }
 

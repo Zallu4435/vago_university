@@ -291,6 +291,7 @@ export interface IFacultyController extends IController {
   deleteFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   confirmFacultyOffer(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   downloadCertificate(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  serveDocument(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface IProfileController extends IController {

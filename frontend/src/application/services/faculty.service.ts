@@ -41,12 +41,27 @@ class FacultyService {
     }
   }
 
-  async getFacultyDetails(id: string): Promise<Faculty> {
+  async getFacultyDetails(id: string): Promise<any> {
+    const response = await httpClient.get(`/admin/faculty/${id}`);
+    return response.data;
+  }
+
+  async getFacultyDocument(facultyId: string, type: string, documentUrl: string): Promise<any> {
     try {
-      const response = await httpClient.get<Faculty>(`/admin/faculty/${id}`);
+      console.log('Fetching faculty document with ID:', facultyId, 'type:', type);
+      console.log('Using URL:', `/faculty/${facultyId}/documents?type=${type}&documentUrl=${encodeURIComponent(documentUrl)}`);
+      
+      const response = await httpClient.get(`/admin/faculty/${facultyId}/documents?type=${type}&documentUrl=${encodeURIComponent(documentUrl)}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('Faculty document fetch response:', response.data);
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch faculty details');
+      console.error('Error fetching faculty document:', error);
+      throw new Error(error.response?.data?.error || 'Failed to fetch faculty document');
     }
   }
 
@@ -82,7 +97,7 @@ class FacultyService {
 
   async deleteFaculty(id: string): Promise<{ message: string }> {
     try {
-      const response = await httpClient.delete<{ message: string }>(`/faculty/${id}`);
+      const response = await httpClient.delete<{ message: string }>(`/admin/faculty/${id}`);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to delete faculty request');

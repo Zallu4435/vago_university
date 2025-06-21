@@ -1,5 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FiX, FiUser, FiMail, FiPhone, FiBook, FiAward, FiClock, FiFileText, FiDownload, FiEye, FiInfo } from 'react-icons/fi';
+import { facultyService } from '../../../application/services/faculty.service';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../redux/store';
 
 interface FacultyDetailsModalProps {
   isOpen: boolean;
@@ -8,6 +11,8 @@ interface FacultyDetailsModalProps {
 }
 
 const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClose, faculty }) => {
+  const { token } = useSelector((state: RootState) => state.auth);
+  
   // Prevent backend scrolling when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -22,16 +27,105 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
 
   if (!isOpen || !faculty) return null;
 
-  const handleDownloadDocument = (url: string, name: string) => {
+  const handleViewDocument = async (documentUrl: string, type: string, fileName: string) => {
+    if (!documentUrl) {
+      console.error('No document URL provided');
+      return;
+    }
+    
     try {
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = name;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      console.log('Fetching faculty document from backend with URL:', documentUrl);
+      const response = await facultyService.getFacultyDocument(faculty._id, type, documentUrl);
+      console.log('Document response:', response);
+      
+      if (response && response.pdfData) {
+        // Create blob URL from base64 PDF data
+        const byteCharacters = atob(response.pdfData);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank', 'noopener,noreferrer');
+        // Clean up the blob URL after a delay
+        setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+      } else {
+        console.error('No PDF data received from backend');
+        // Fallback to direct URL
+        window.open(documentUrl, '_blank', 'noopener,noreferrer');
+      }
+    } catch (error) {
+      console.error('Error opening document:', error);
+      // Fallback to direct URL if there's an error
+      try {
+        window.open(documentUrl, '_blank', 'noopener,noreferrer');
+      } catch (fallbackError) {
+        console.error('Error with fallback document opening:', fallbackError);
+      }
+    }
+  };
+
+  const handleDownloadDocument = async (documentUrl: string, type: string, fileName: string) => {
+    if (!documentUrl) {
+      console.error('No document URL provided');
+      return;
+    }
+    
+    try {
+      console.log('Fetching faculty document from backend for download with URL:', documentUrl);
+      const response = await facultyService.getFacultyDocument(faculty._id, type, documentUrl);
+      console.log('Document response for download:', response);
+      
+      if (response && response.pdfData) {
+        console.log('PDF data received, length:', response.pdfData.length);
+        console.log('Creating download...');
+        
+        // Convert base64 to blob and download
+        const byteCharacters = atob(response.pdfData);
+        console.log('Converted to byte characters, length:', byteCharacters.length);
+        
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        console.log('Created byte array, length:', byteArray.length);
+        
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        console.log('Created blob, size:', blob.size);
+        
+        const url = window.URL.createObjectURL(blob);
+        console.log('Created blob URL:', url);
+        
+        console.log('Download filename:', fileName);
+        
+        // Create and trigger download
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.style.display = 'none';
+        
+        console.log('Adding link to DOM...');
+        document.body.appendChild(link);
+        
+        console.log('Clicking link...');
+        link.click();
+        
+        console.log('Removing link from DOM...');
+        document.body.removeChild(link);
+        
+        console.log('Cleaning up blob URL...');
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+          console.log('Blob URL cleaned up');
+        }, 1000);
+        
+        console.log('Download process completed');
+      } else {
+        console.error('No PDF data in response');
+      }
     } catch (error) {
       console.error('Error downloading document:', error);
     }
@@ -173,14 +267,14 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
                   </div>
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => window.open(faculty.cvUrl, '_blank', 'noopener,noreferrer')}
+                      onClick={() => handleViewDocument(faculty.cvUrl, 'cv', 'Curriculum_Vitae.pdf')}
                       className="p-1 text-purple-300 hover:bg-purple-500/20 rounded transition-colors"
                       title="View Document"
                     >
                       <FiEye size={16} />
                     </button>
                     <button
-                      onClick={() => handleDownloadDocument(faculty.cvUrl, 'Curriculum_Vitae.pdf')}
+                      onClick={() => handleDownloadDocument(faculty.cvUrl, 'cv', 'Curriculum_Vitae.pdf')}
                       className="p-1 text-purple-300 hover:bg-purple-500/20 rounded transition-colors"
                       title="Download Document"
                     >
@@ -203,14 +297,14 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
                     </div>
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
+                        onClick={() => handleViewDocument(url, 'certificate', `Certificate_${index + 1}.pdf`)}
                         className="p-1 text-purple-300 hover:bg-purple-500/20 rounded transition-colors"
                         title="View Document"
                       >
                         <FiEye size={16} />
                       </button>
                       <button
-                        onClick={() => handleDownloadDocument(url, `Certificate_${index + 1}.pdf`)}
+                        onClick={() => handleDownloadDocument(url, 'certificate', `Certificate_${index + 1}.pdf`)}
                         className="p-1 text-purple-300 hover:bg-purple-500/20 rounded transition-colors"
                         title="Download Document"
                       >

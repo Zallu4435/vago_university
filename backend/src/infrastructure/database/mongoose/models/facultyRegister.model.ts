@@ -28,7 +28,7 @@ const FacultyRegisterSchema: Schema = new Schema(
     aboutMe: { type: String, required: true },
     password: { type: String, required: false },
     cvUrl: { type: String },
-    certificatesUrl: [{ type: String }],
+    certificatesUrl: { type: [String] },
     rejectedBy: {
       type: String,
       enum: ["admin", "user", null],

@@ -178,10 +178,26 @@ export class AuthRepository implements IAuthRepository {
     }
 
     async registerFaculty(params: RegisterFacultyRequestDTO): Promise<RegisterFacultyResponseDTO> {
+        console.log('=== AUTH REPOSITORY: REGISTER FACULTY START ===');
+        console.log('Registration params:', params);
+        
         const existingFaculty = await FacultyRegister.findOne({ email: params.email });
         if (existingFaculty) {
+            console.log('ERROR: Faculty already exists with email:', params.email);
             throw new Error(AuthErrorType.FacultyAlreadyExists);
         }
+
+        console.log('Creating new faculty record with data:', {
+            fullName: params.fullName,
+            email: params.email,
+            phone: params.phone,
+            department: params.department,
+            qualification: params.qualification,
+            experience: params.experience,
+            aboutMe: params.aboutMe,
+            cvUrl: params.cvUrl,
+            certificatesUrl: params.certificatesUrl,
+        });
 
         const faculty = new FacultyRegister({
             fullName: params.fullName,
@@ -196,6 +212,7 @@ export class AuthRepository implements IAuthRepository {
         });
 
         await faculty.save();
+        console.log('Faculty saved successfully with ID:', faculty._id);
 
         const token = jwt.sign(
             { userId: faculty._id, email: faculty.email, collection: "faculty" },
@@ -203,6 +220,7 @@ export class AuthRepository implements IAuthRepository {
             { expiresIn: "1h" }
         );
 
+        console.log('=== AUTH REPOSITORY: REGISTER FACULTY SUCCESS ===');
         return {
             token,
             user: {

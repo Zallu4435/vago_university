@@ -95,19 +95,72 @@ export class AuthController implements IAuthController {
 
   async registerFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
+      console.log('=== FACULTY REGISTRATION START ===');
+      console.log('Request body:', httpRequest.body);
+      console.log('Request files:', httpRequest.files);
+      
       const { fullName, email, phone, department, qualification, experience, aboutMe } = httpRequest.body;
+      
       if (!fullName || !email || !phone || !department || !qualification || !experience || !aboutMe) {
+        console.log('ERROR: Missing required fields');
         return this.httpErrors.error_400();
       }
-      const files = httpRequest.files as (Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] });
+      
+      const files = httpRequest.files as Express.Multer.File[];
       let cvUrl: string | undefined;
       let certificatesUrl: string[] | undefined;
-      if (files && !Array.isArray(files) && files.cv && files.cv.length > 0) {
-        cvUrl = files.cv[0].path;
+      
+      console.log('Files structure:', files);
+      console.log('Files type:', typeof files);
+      console.log('Files is array:', Array.isArray(files));
+      
+      if (files && Array.isArray(files)) {
+        // Handle CV file upload
+        const cvFile = files.find(file => file.fieldname === 'cv');
+        if (cvFile) {
+          console.log('CV file uploaded:', {
+            originalname: cvFile.originalname,
+            mimetype: cvFile.mimetype,
+            size: cvFile.size,
+            path: cvFile.path
+          });
+          cvUrl = cvFile.path; // This is the Cloudinary URL
+        } else {
+          console.log('No CV file found');
+        }
+        
+        // Handle certificates files upload
+        const certificateFiles = files.filter(file => file.fieldname === 'certificates');
+        if (certificateFiles.length > 0) {
+          console.log('Certificates uploaded:', certificateFiles.length, 'files');
+          certificatesUrl = certificateFiles.map((file, index) => {
+            console.log(`Certificate ${index + 1}:`, {
+              originalname: file.originalname,
+              mimetype: file.mimetype,
+              size: file.size,
+              path: file.path
+            });
+            return file.path; // This is the Cloudinary URL
+          });
+        } else {
+          console.log('No certificates found');
+        }
+      } else {
+        console.log('No files uploaded or invalid file structure');
       }
-      if (files && !Array.isArray(files) && files.certificates && files.certificates.length > 0) {
-        certificatesUrl = files.certificates.map((file) => file.path);
-      }
+      
+      console.log('Processed data:', {
+        fullName,
+        email,
+        phone,
+        department,
+        qualification,
+        experience,
+        aboutMe,
+        cvUrl,
+        certificatesUrl
+      });
+      
       const response = await this.registerFacultyUseCase.execute({
         fullName,
         email,
@@ -119,11 +172,19 @@ export class AuthController implements IAuthController {
         cvUrl,
         certificatesUrl,
       });
+      
       if (!response.success) {
+        console.log('ERROR: Use case failed');
         return this.httpErrors.error_400();
       }
+      
+      console.log('=== FACULTY REGISTRATION SUCCESS ===');
       return this.httpSuccess.success_201(response.data);
     } catch (error: any) {
+      console.log('=== FACULTY REGISTRATION ERROR ===');
+      console.error('Controller error:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
       return this.httpErrors.error_500();
     }
   }

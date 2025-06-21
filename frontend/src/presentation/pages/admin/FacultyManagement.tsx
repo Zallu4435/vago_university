@@ -212,7 +212,7 @@ const FacultyManagement: React.FC = () => {
   const handleReject = async (reason: string) => {
     if (!selectedFaculty) return;
     try {
-      await rejectFaculty({
+      rejectFaculty.mutate({
         id: selectedFaculty._id,
         reason,
       });
@@ -225,7 +225,7 @@ const FacultyManagement: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteFaculty(id);
+      deleteFaculty.mutate(id);
       setShowDeleteWarning(false);
       setFacultyToDelete(null);
     } catch (error) {
@@ -470,7 +470,7 @@ const FacultyManagement: React.FC = () => {
           setIsDetailsModalOpen(false);
           setSelectedFaculty(null);
         }}
-        faculty={selectedFaculty?.faculty}
+        faculty={selectedFaculty}
       />
 
       <style jsx>{`

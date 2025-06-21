@@ -15,6 +15,18 @@ export interface SaveSectionRequestDTO {
   data: any;
 }
 
+export interface UploadDocumentRequestDTO {
+  applicationId: string;
+  documentType: string;
+  file: Express.Multer.File;
+}
+
+export interface UploadMultipleDocumentsRequestDTO {
+  applicationId: string;
+  files: Express.Multer.File[];
+  documentTypes: string[];
+}
+
 export interface ProcessPaymentRequestDTO {
   applicationId: string;
   paymentDetails: {

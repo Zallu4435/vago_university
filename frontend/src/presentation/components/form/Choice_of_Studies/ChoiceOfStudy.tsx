@@ -13,6 +13,7 @@ interface ChoiceOfStudyProps {
 
 interface ChoiceOfStudyRef {
   trigger: () => Promise<boolean>;
+  getValues: () => ProgrammeChoice[];
 }
 
 export const ChoiceOfStudy = forwardRef<ChoiceOfStudyRef, ChoiceOfStudyProps>(
@@ -45,6 +46,7 @@ export const ChoiceOfStudy = forwardRef<ChoiceOfStudyRef, ChoiceOfStudyProps>(
         console.log('ChoiceOfStudy: Validation result', { isValid, errors, choices: currentChoices });
         return isValid;
       },
+      getValues: () => currentChoices,
     }));
 
     const handleAddProgramme = (data: ProgrammeChoiceFormData) => {

@@ -9,7 +9,9 @@ export interface GetApplicationResponseDTO {
 }
 
 export interface SaveSectionResponseDTO {
-  draft: AdmissionDraft;
+  success: boolean;
+  message: string;
+  data?: any;
 }
 
 export interface ProcessPaymentResponseDTO {
@@ -29,4 +31,26 @@ export interface ConfirmPaymentResponseDTO {
 
 export interface FinalizeAdmissionResponseDTO {
   admission: Admission;
+}
+
+export interface UploadDocumentResponseDTO {
+  success: boolean;
+  message: string;
+  document: {
+    url: string;
+    publicId: string;
+    fileName: string;
+    fileType: string;
+  };
+}
+
+export interface UploadMultipleDocumentsResponseDTO {
+  success: boolean;
+  message: string;
+  documents: Array<{
+    url: string;
+    publicId: string;
+    fileName: string;
+    fileType: string;
+  }>;
 }

@@ -97,6 +97,26 @@ const materialStorage = new CloudinaryStorage({
   } as any,
 });
 
+// Storage engine for admission documents
+const admissionDocumentStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'admission-documents',
+    allowed_formats: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+    resource_type: (req: any, file: any) => {
+      const ext = file.originalname.split('.').pop()?.toLowerCase();
+      if (['pdf', 'doc', 'docx'].includes(ext)) return 'raw';
+      return 'image';
+    },
+    public_id: (req: any, file: any) => {
+      const timestamp = Date.now();
+      const originalName = file.originalname.split('.')[0];
+      const documentType = req.body.documentType || 'document';
+      return `admission_${documentType}_${timestamp}_${originalName}`;
+    }
+  } as any,
+});
+
 // Multer instances
 const facultyUpload = multer({
   storage: facultyStorage,
@@ -216,6 +236,33 @@ const materialUpload = multer({
     }
     console.log('[MaterialUpload] File validation passed');
     cb(null, true);
+  }
+});
+
+const admissionDocumentUpload = multer({
+  storage: admissionDocumentStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (req: any, file: any, cb: any) => {
+    console.log('[AdmissionDocumentUpload] Validating file:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype
+    });
+    
+    const allowedMimeTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'image/jpeg',
+      'image/png'
+    ];
+
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      console.log('[AdmissionDocumentUpload] File validation passed');
+      cb(null, true);
+    } else {
+      console.error('[AdmissionDocumentUpload] Invalid file format:', file.mimetype);
+      cb(new Error(`Invalid file format: ${file.mimetype}. Allowed formats: PDF, DOC, DOCX, JPG, JPEG, PNG`));
+    }
   }
 });
 
@@ -367,4 +414,4 @@ const contentVideoUploadWithErrorHandling = (req: any, res: any, next: any) => {
 };
 
 
-export { cloudinary, facultyUpload, profilePictureUpload, messageAttachmentUpload, assignmentUpload, assignmentSubmissionUpload, contentVideoUpload, contentVideoUploadWithErrorHandling, materialUpload };
+export { cloudinary, facultyUpload, profilePictureUpload, messageAttachmentUpload, assignmentUpload, assignmentSubmissionUpload, contentVideoUpload, contentVideoUploadWithErrorHandling, materialUpload, admissionDocumentUpload };

@@ -5,6 +5,14 @@ import { DocumentInstructions } from './DocumentInstructions';
 import { DocumentUploadTable } from './DocumentUploadTable';
 import { DocumentUpload, DocumentUploadSectionFormData, DocumentUploadSectionSchema } from '../../../../domain/validation/DocumentSchema';
 import { toast } from 'react-hot-toast';
+import { documentUploadService } from '../../../../application/services/documentUploadService';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../redux/store';
+
+const useAuth = () => {
+  const { token, user, collection } = useSelector((state: RootState) => state.auth);
+  return { token, user, collection };
+};
 
 export interface DocumentUploadSection {
   documents: DocumentUpload[];
@@ -13,16 +21,26 @@ export interface DocumentUploadSection {
 interface DocumentsProps {
   initialData?: DocumentUploadSection;
   onSave: (data: DocumentUploadSection) => void;
+  applicationId: string;
 }
 
 // Define the ref type
 interface DocumentsRef {
   trigger: () => Promise<boolean>;
+  getValues: () => DocumentUploadSection;
 }
 
 // Wrap with forwardRef
 export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
-  ({ initialData, onSave }, ref) => {
+  ({ initialData, onSave, applicationId }, ref) => {
+    const { token } = useAuth();
+    
+    // console.log('Documents component rendered with:', {
+    //   applicationId,
+    //   hasToken: !!token,
+    //   initialData: !!initialData
+    // });
+
     const defaultDocuments: DocumentUpload[] = [
       { id: 'passport', name: 'Passport' },
       { id: 'birthCert', name: 'Birth Certificate (in lieu of Passport)' },
@@ -41,6 +59,7 @@ export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
     });
 
     const { setValue, formState: { errors }, watch, trigger } = methods;
+    const currentDocuments = watch('documents');
 
     // Expose trigger method via ref
     React.useImperativeHandle(ref, () => ({
@@ -54,10 +73,22 @@ export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
         
         return isValid;
       },
+      getValues: () => ({ documents: currentDocuments }),
     }));
 
     const handleFileUpload = async (id: string, file: File) => {
-      if (!file) return;
+      console.log('handleFileUpload called with:', { id, fileName: file.name, applicationId });
+      
+      if (!file || !token) {
+        console.error('Missing file or token:', { hasFile: !!file, hasToken: !!token });
+        return;
+      }
+
+      if (!applicationId || applicationId === '') {
+        console.error('Application ID is missing or empty:', applicationId);
+        toast.error('Application ID is missing. Please refresh the page and try again.');
+        return;
+      }
 
       const validTypes = ['application/pdf'];
       if (!validTypes.includes(file.type)) {
@@ -69,20 +100,36 @@ export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
         return;
       }
 
-      const documents = watch('documents');
-      const updatedDocuments = documents.map(doc =>
-        doc.id === id
-          ? { ...doc, fileName: file.name, fileType: file.type }
-          : doc
-      );
+      try {
+        console.log('Starting document upload with applicationId:', applicationId);
+        // Upload to Cloudinary
+        const uploadResult = await documentUploadService.uploadDocument(applicationId, id, file, token);
 
-      setValue('documents', updatedDocuments, { shouldValidate: true });
+        // Update the document with Cloudinary URL
+        const documents = watch('documents');
+        const updatedDocuments = documents.map(doc =>
+          doc.id === id
+            ? { 
+                ...doc, 
+                fileName: file.name, 
+                fileType: file.type,
+                cloudinaryUrl: uploadResult.url 
+              }
+            : doc
+        );
+
+        setValue('documents', updatedDocuments, { shouldValidate: true });
+        toast.success('Document uploaded successfully!');
+      } catch (error: any) {
+        console.error('Error uploading document:', error);
+        toast.error(error.message || 'Failed to upload document');
+      }
     };
 
     const handleFileRemove = (id: string) => {
       const documents = watch('documents');
       const updatedDocuments = documents.map(doc =>
-        doc.id === id ? { ...doc, fileName: undefined, fileType: undefined } : doc
+        doc.id === id ? { ...doc, fileName: undefined, fileType: undefined, cloudinaryUrl: undefined } : doc
       );
       setValue('documents', updatedDocuments, { shouldValidate: true });
     };

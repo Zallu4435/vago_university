@@ -1,5 +1,5 @@
 import { IAdmissionsRepository } from "../../../application/admission/repositories/IAdmissionsRepository";
-import { CreateApplicationUseCase, GetApplicationUseCase, SaveSectionUseCase, ProcessPaymentUseCase, ConfirmPaymentUseCase, FinalizeAdmissionUseCase } from "../../../application/admission/useCases/AdmissionUseCases";
+import { CreateApplicationUseCase, GetApplicationUseCase, SaveSectionUseCase, ProcessPaymentUseCase, ConfirmPaymentUseCase, FinalizeAdmissionUseCase, UploadDocumentUseCase, UploadMultipleDocumentsUseCase } from "../../../application/admission/useCases/AdmissionUseCases";
 import { AdmissionsRepository } from "../../repositories/admission/AdmissionsRepository";
 import { AdmissionController } from "../../../presentation/http/admission/AdmissionController";
 import { IAdmissionController } from "../../../presentation/http/IHttp";
@@ -12,12 +12,16 @@ export function getAdmissionsComposer(): IAdmissionController {
   const processPaymentUseCase = new ProcessPaymentUseCase(repository);
   const confirmPaymentUseCase = new ConfirmPaymentUseCase(repository);
   const finalizeAdmissionUseCase = new FinalizeAdmissionUseCase(repository);
+  const uploadDocumentUseCase = new UploadDocumentUseCase(repository);
+  const uploadMultipleDocumentsUseCase = new UploadMultipleDocumentsUseCase(repository);
   return new AdmissionController(
     createApplicationUseCase,
     getApplicationUseCase,
     saveSectionUseCase,
     processPaymentUseCase,
     confirmPaymentUseCase,
-    finalizeAdmissionUseCase
+    finalizeAdmissionUseCase,
+    uploadDocumentUseCase,
+    uploadMultipleDocumentsUseCase,
   );
 }

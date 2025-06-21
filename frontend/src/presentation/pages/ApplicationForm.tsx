@@ -62,8 +62,8 @@ export const ApplicationForm: React.FC = () => {
   const personalFormRef = useRef<{ trigger: () => Promise<boolean>, getValues: () => any }>(null);
   const educationFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
   const achievementsFormRef = useRef<{ trigger: () => Promise<boolean>; getValues: () => any }>(null);
-  const documentsFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
-  const choiceOfStudyRef = useRef<{ trigger: () => Promise<boolean> }>(null);
+  const documentsFormRef = useRef<{ trigger: () => Promise<boolean>; getValues: () => DocumentUploadSection }>(null);
+  const choiceOfStudyRef = useRef<{ trigger: () => Promise<boolean>; getValues: () => ProgrammeChoice[] }>(null);
 
   const { token, user, collection } = useAuth();
   const [applicationId, setApplicationId] = useState<string | undefined>(undefined);
@@ -358,7 +358,10 @@ export const ApplicationForm: React.FC = () => {
       console.log('Updated documents:', data);
       await saveDocuments({ applicationId: formData.applicationId, data });
       console.log('Documents saved successfully');
+      // Update the parent form state with current documents data
+      setValue('documents', data, { shouldValidate: false });
       calculateFormProgress({ ...formData, documents: data });
+      handleNextTab();
     } catch (error) {
       console.error('Error saving documents:', error);
       setSaveError('Failed to update documents. Please try again.');
@@ -427,10 +430,11 @@ export const ApplicationForm: React.FC = () => {
       setValidationAttempted(true);
       if (choiceOfStudyRef.current) {
         const isValid = await choiceOfStudyRef.current.trigger();
-        console.log('ChoiceOfStudy validation result:', { isValid, choiceOfStudy: formData.choiceOfStudy });
+        const currentChoices = choiceOfStudyRef.current.getValues();
+        console.log('ChoiceOfStudy validation result:', { isValid, choiceOfStudy: currentChoices });
         if (isValid) {
           try {
-            await handleUpdateChoiceOfStudy(formData.choiceOfStudy || []);
+            await handleUpdateChoiceOfStudy(currentChoices);
             handleNextTab();
           } catch (error) {
             console.error('Error saving choice of study:', error);
@@ -513,10 +517,14 @@ export const ApplicationForm: React.FC = () => {
       if (documentsFormRef.current) {
         console.log('Validating documents form');
         const isValid = await documentsFormRef.current.trigger();
-        console.log('Documents validation result:', { isValid, documents: formData.documents });
-        if (isValid && formData.documents) {
-          await saveDocuments({ applicationId: formData.applicationId, data: formData.documents });
-          console.log('documents saved:', formData.documents);
+        const currentDocuments = documentsFormRef.current.getValues();
+        console.log('Documents validation result:', { isValid, documents: currentDocuments });
+        if (isValid && currentDocuments) {
+          await saveDocuments({ applicationId: formData.applicationId, data: currentDocuments });
+          console.log('documents saved:', currentDocuments);
+          // Update the parent form state with current documents data
+          setValue('documents', currentDocuments, { shouldValidate: false });
+          calculateFormProgress({ ...formData, documents: currentDocuments });
           handleNextTab();
         } else {
           toast.error('Please upload all required documents.');
@@ -550,14 +558,23 @@ export const ApplicationForm: React.FC = () => {
       return;
     }
 
+    // Get the latest documents data from the ref if available
+    let latestFormData = { ...formData };
+    if (documentsFormRef.current) {
+      const currentDocuments = documentsFormRef.current.getValues();
+      latestFormData.documents = currentDocuments;
+      // Update the form state with latest documents data
+      setValue('documents', currentDocuments, { shouldValidate: false });
+    }
+
     const validationResults = await Promise.all([
-      Promise.resolve(!!formData.personalInfo),
-      Promise.resolve(!!(formData.choiceOfStudy && formData.choiceOfStudy.length > 0)),
-      Promise.resolve(!!formData.education),
-      Promise.resolve(!!formData.achievements),
-      Promise.resolve(!!formData.otherInformation),
-      Promise.resolve(!!formData.documents),
-      Promise.resolve(!!formData.declaration?.privacyPolicy),
+      Promise.resolve(!!latestFormData.personalInfo),
+      Promise.resolve(!!(latestFormData.choiceOfStudy && latestFormData.choiceOfStudy.length > 0)),
+      Promise.resolve(!!latestFormData.education),
+      Promise.resolve(!!latestFormData.achievements),
+      Promise.resolve(!!latestFormData.otherInformation),
+      Promise.resolve(!!latestFormData.documents),
+      Promise.resolve(!!latestFormData.declaration?.privacyPolicy),
     ]);
 
     console.log('Full form validation results:', validationResults);
@@ -565,7 +582,7 @@ export const ApplicationForm: React.FC = () => {
     if (validationResults.every(result => result === true)) {
       try {
         setSaveError(null);
-        await handleUpdateDeclaration(formData.declaration!);
+        await handleUpdateDeclaration(latestFormData.declaration!);
         setShowSummary(true);
       } catch (error) {
         console.error('Error saving declaration:', error);
@@ -791,6 +808,7 @@ export const ApplicationForm: React.FC = () => {
             <Documents
               initialData={formData.documents}
               onSave={handleSaveDocuments}
+              applicationId={applicationId || ''}
               ref={documentsFormRef}
             />
           )}

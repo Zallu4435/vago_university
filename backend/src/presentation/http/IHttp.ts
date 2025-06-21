@@ -257,6 +257,9 @@ export interface IAdmissionController extends IController {
   processPayment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   confirmPayment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   handleFinalSubmit(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  uploadDocument(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  uploadMultipleDocuments(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  serveDocument(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface IAuthController extends IController {

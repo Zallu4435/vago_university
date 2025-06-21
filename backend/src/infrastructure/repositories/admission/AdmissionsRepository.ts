@@ -9,6 +9,8 @@ import {
     ProcessPaymentRequestDTO,
     ConfirmPaymentRequestDTO,
     FinalizeAdmissionRequestDTO,
+    UploadDocumentRequestDTO,
+    UploadMultipleDocumentsRequestDTO,
 } from "../../../domain/admission/dtos/AdmissionRequestDTOs";
 import {
     CreateApplicationResponseDTO,
@@ -17,16 +19,25 @@ import {
     ProcessPaymentResponseDTO,
     ConfirmPaymentResponseDTO,
     FinalizeAdmissionResponseDTO,
+    UploadDocumentResponseDTO,
+    UploadMultipleDocumentsResponseDTO,
 } from "../../../domain/admission/dtos/AdmissionResponseDTOs";
 
 import { IAdmissionsRepository } from "../../../application/admission/repositories/IAdmissionsRepository";
 import { AdmissionDraft as AdmissionDraftModel } from "../../database/mongoose/admission/AdmissionDraftModel";
 import { Admission as AdmissionModel } from "../../database/mongoose/models/admission.model";
 import { PaymentModel } from "../../database/mongoose/models/financial.model";
+import { DocumentUploadService } from '../../services/admission/DocumentUploadService';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2023-10-16" });
 
 export class AdmissionsRepository implements IAdmissionsRepository {
+    private documentUploadService: DocumentUploadService;
+
+    constructor() {
+        this.documentUploadService = new DocumentUploadService();
+    }
+
     async createApplication(params: CreateApplicationRequestDTO): Promise<CreateApplicationResponseDTO> {
         let draft = await AdmissionDraftModel.findOne({ registerId: params.userId });
         if (draft) {
@@ -305,6 +316,58 @@ export class AdmissionsRepository implements IAdmissionsRepository {
                 return "Payment is processing";
             default:
                 return "Payment failed";
+        }
+    }
+
+    async uploadDocument(params: UploadDocumentRequestDTO): Promise<UploadDocumentResponseDTO> {
+        try {
+            console.log('[AdmissionsRepository] Uploading document:', {
+                applicationId: params.applicationId,
+                documentType: params.documentType,
+                fileName: params.file.originalname
+            });
+
+            const uploadResult = await this.documentUploadService.uploadDocument(params.file, params.applicationId, params.documentType);
+
+            return {
+                success: true,
+                message: 'Document uploaded successfully',
+                document: {
+                    url: uploadResult.data.document.url,
+                    publicId: uploadResult.data.document.publicId,
+                    fileName: uploadResult.data.document.fileName,
+                    fileType: uploadResult.data.document.fileType,
+                }
+            };
+        } catch (error) {
+            console.error('[AdmissionsRepository] Document upload failed:', error);
+            throw new Error(`Document upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+    async uploadMultipleDocuments(params: UploadMultipleDocumentsRequestDTO): Promise<UploadMultipleDocumentsResponseDTO> {
+        try {
+            console.log('[AdmissionsRepository] Uploading multiple documents:', {
+                applicationId: params.applicationId,
+                fileCount: params.files.length,
+                documentTypes: params.documentTypes
+            });
+
+            const uploadResults = await this.documentUploadService.uploadMultipleDocuments(params.files, params.applicationId, params.documentTypes);
+
+            return {
+                success: true,
+                message: 'Documents uploaded successfully',
+                documents: uploadResults.data.documents.map(result => ({
+                    url: result.url,
+                    publicId: result.publicId,
+                    fileName: result.fileName,
+                    fileType: result.fileType,
+                }))
+            };
+        } catch (error) {
+            console.error('[AdmissionsRepository] Multiple document upload failed:', error);
+            throw new Error(`Multiple document upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 }

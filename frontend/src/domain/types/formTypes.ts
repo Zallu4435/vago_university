@@ -1,4 +1,3 @@
-
 export interface PersonalInfo {
   salutation: string;
   fullName: string;
@@ -143,6 +142,7 @@ export interface DocumentUpload {
   name: string;
   fileName?: string;
   fileType?: string;
+  cloudinaryUrl?: string;
 }
 
 export interface DocumentUploadSection {

@@ -5,6 +5,8 @@ import {
     ProcessPaymentRequestDTO,
     ConfirmPaymentRequestDTO,
     FinalizeAdmissionRequestDTO,
+    UploadDocumentRequestDTO,
+    UploadMultipleDocumentsRequestDTO,
   } from "../../../domain/admission/dtos/AdmissionRequestDTOs";
   import {
     CreateApplicationResponseDTO,
@@ -13,6 +15,8 @@ import {
     ProcessPaymentResponseDTO,
     ConfirmPaymentResponseDTO,
     FinalizeAdmissionResponseDTO,
+    UploadDocumentResponseDTO,
+    UploadMultipleDocumentsResponseDTO,
   } from "../../../domain/admission/dtos/AdmissionResponseDTOs";
   
   export interface IAdmissionsRepository {
@@ -22,4 +26,6 @@ import {
     processPayment(params: ProcessPaymentRequestDTO): Promise<ProcessPaymentResponseDTO>;
     confirmPayment(params: ConfirmPaymentRequestDTO): Promise<ConfirmPaymentResponseDTO>;
     finalizeAdmission(params: FinalizeAdmissionRequestDTO): Promise<FinalizeAdmissionResponseDTO>;
+    uploadDocument(params: UploadDocumentRequestDTO): Promise<UploadDocumentResponseDTO>;
+    uploadMultipleDocuments(params: UploadMultipleDocumentsRequestDTO): Promise<UploadMultipleDocumentsResponseDTO>;
   }

@@ -7,6 +7,8 @@ import {
     ProcessPaymentRequestDTO,
     ConfirmPaymentRequestDTO,
     FinalizeAdmissionRequestDTO,
+    UploadDocumentRequestDTO,
+    UploadMultipleDocumentsRequestDTO,
 } from "../../../domain/admission/dtos/AdmissionRequestDTOs";
 import {
     CreateApplicationResponseDTO,
@@ -15,6 +17,8 @@ import {
     ProcessPaymentResponseDTO,
     ConfirmPaymentResponseDTO,
     FinalizeAdmissionResponseDTO,
+    UploadDocumentResponseDTO,
+    UploadMultipleDocumentsResponseDTO,
 } from "../../../domain/admission/dtos/AdmissionResponseDTOs";
 
 import { IAdmissionsRepository } from "../repositories/IAdmissionsRepository";
@@ -42,6 +46,14 @@ export interface IProcessPaymentUseCase {
 
 export interface IConfirmPaymentUseCase {
     execute(params: ConfirmPaymentRequestDTO): Promise<ResponseDTO<ConfirmPaymentResponseDTO>>;
+}
+
+export interface IUploadDocumentUseCase {
+    execute(params: UploadDocumentRequestDTO): Promise<ResponseDTO<UploadDocumentResponseDTO>>;
+}
+
+export interface IUploadMultipleDocumentsUseCase {
+    execute(params: UploadMultipleDocumentsRequestDTO): Promise<ResponseDTO<UploadMultipleDocumentsResponseDTO>>;
 }
 
 export interface IFinalizeAdmissionUseCase {
@@ -176,6 +188,42 @@ export class FinalizeAdmissionUseCase implements IFinalizeAdmissionUseCase {
         } catch (error: any) {
             console.error("FinalizeAdmissionUseCase: Error:", error);
             return { data: { error: error.message || AdmissionErrorType.ApplicationNotFound }, success: false };
+        }
+    }
+}
+
+export class UploadDocumentUseCase implements IUploadDocumentUseCase {
+    constructor(private admissionsRepository: IAdmissionsRepository) { }
+
+    async execute(params: UploadDocumentRequestDTO): Promise<ResponseDTO<UploadDocumentResponseDTO>> {
+        try {
+            console.log(`Uploading document for applicationId ${params.applicationId}`);
+            if (!params.applicationId || !params.file) {
+                return { data: { error: 'Document upload failed' }, success: false };
+            }
+            const result = await this.admissionsRepository.uploadDocument(params);
+            return { data: result, success: true };
+        } catch (error: any) {
+            console.error("UploadDocumentUseCase: Error:", error);
+            return { data: { error: error.message || 'Document upload failed' }, success: false };
+        }
+    }
+}
+
+export class UploadMultipleDocumentsUseCase implements IUploadMultipleDocumentsUseCase {
+    constructor(private admissionsRepository: IAdmissionsRepository) { }
+
+    async execute(params: UploadMultipleDocumentsRequestDTO): Promise<ResponseDTO<UploadMultipleDocumentsResponseDTO>> {
+        try {
+            console.log(`Uploading multiple documents for applicationId ${params.applicationId}`);
+            if (!params.applicationId || !params.files) {
+                return { data: { error: 'Documents upload failed' }, success: false };
+            }
+            const result = await this.admissionsRepository.uploadMultipleDocuments(params);
+            return { data: result, success: true };
+        } catch (error: any) {
+            console.error("UploadMultipleDocumentsUseCase: Error:", error);
+            return { data: { error: error.message || 'Documents upload failed' }, success: false };
         }
     }
 }

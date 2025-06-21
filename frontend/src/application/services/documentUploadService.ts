@@ -1,0 +1,110 @@
+import httpClient from "../../frameworks/api/httpClient";
+
+export interface DocumentUploadResult {
+  url: string;
+  publicId: string;
+  fileName: string;
+  fileType: string;
+}
+
+export interface MultipleDocumentUploadResult {
+  documents: DocumentUploadResult[];
+}
+
+class DocumentUploadService {
+  private baseUrl = '/admission';
+
+  async uploadDocument(applicationId: string, documentType: string, file: File, token: string): Promise<DocumentUploadResult> {
+    console.log('DocumentUploadService.uploadDocument called with:', {
+      applicationId,
+      documentType,
+      fileName: file.name,
+      fileSize: file.size,
+      hasToken: !!token
+    });
+
+    if (!applicationId || applicationId === '') {
+      throw new Error('Application ID is required for document upload');
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('applicationId', applicationId);
+      formData.append('documentType', documentType);
+
+      console.log('FormData contents:');
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+
+      console.log('Making request to:', `${this.baseUrl}/documents/upload`);
+
+      const response = await httpClient.post(`${this.baseUrl}/documents/upload`, formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('Upload response:', response.data);
+      return response.data.document;
+    } catch (error: any) {
+      console.error('Error uploading document:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      throw new Error(error.response?.data?.error || error.message || 'Failed to upload document');
+    }
+  }
+
+  async uploadMultipleDocuments(applicationId: string, files: File[], documentTypes: string[], token: string): Promise<MultipleDocumentUploadResult> {
+    try {
+      const formData = new FormData();
+      
+      files.forEach((file, index) => {
+        formData.append('files', file);
+      });
+      
+      formData.append('applicationId', applicationId);
+      documentTypes.forEach((documentType, index) => {
+        formData.append('documentTypes', documentType);
+      });
+
+      const response = await httpClient.post(`${this.baseUrl}/documents/upload-multiple`, formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Error uploading multiple documents:', error);
+      throw new Error(error.response?.data?.error || error.message || 'Failed to upload documents');
+    }
+  }
+
+  async getDocument(documentId: string, token: string): Promise<any> {
+    try {
+      console.log('Fetching document with ID:', documentId);
+      console.log('Using URL:', `/admission/documents/${documentId}`);
+      
+      const response = await httpClient.get(`/admission/documents/${documentId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('Document fetch response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching document:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      throw new Error(error.response?.data?.error || error.message || 'Failed to fetch document');
+    }
+  }
+}
+
+export const documentUploadService = new DocumentUploadService(); 

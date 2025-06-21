@@ -2,6 +2,7 @@ import { Router } from "express";
 import { expressAdapter } from "../../adapters/ExpressAdapter";
 import { getAdmissionsComposer } from "../../../infrastructure/services/admission/AdmissionComposers";
 import { authMiddleware } from "../../../shared/middlewares/authMiddleware";
+import { admissionDocumentUpload } from "../../../config/cloudinary.config";
 
 const admissionRouter = Router();
 const admissionController = getAdmissionsComposer();
@@ -28,6 +29,20 @@ admissionRouter.post("/payment/confirm", authMiddleware, (req, res) =>
 
 admissionRouter.post("/finalize", authMiddleware, (req, res) =>
   expressAdapter(req, res, admissionController.handleFinalSubmit.bind(admissionController))
+);
+
+// Document upload routes
+admissionRouter.post("/documents/upload", authMiddleware, admissionDocumentUpload.single('file'), (req, res) =>
+  expressAdapter(req, res, admissionController.uploadDocument.bind(admissionController))
+);
+
+admissionRouter.post("/documents/upload-multiple", authMiddleware, admissionDocumentUpload.array('files', 10), (req, res) =>
+  expressAdapter(req, res, admissionController.uploadMultipleDocuments.bind(admissionController))
+);
+
+// Document serve route
+admissionRouter.get("/documents/:documentId", authMiddleware, (req, res) =>
+  expressAdapter(req, res, admissionController.serveDocument.bind(admissionController))
 );
 
 export default admissionRouter;

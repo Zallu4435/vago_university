@@ -280,6 +280,7 @@ export interface IAdminAdmissionController extends IController {
   rejectAdmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   deleteAdmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   confirmAdmissionOffer(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  serveDocument(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface IFacultyController extends IController {

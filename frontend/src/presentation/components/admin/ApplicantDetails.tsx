@@ -21,7 +21,12 @@ import {
   FiInfo,
 } from 'react-icons/fi';
 import ApprovalModal from './ApprovalModal';
+import RejectModal from './RejectModal';
 import WarningModal from '../WarningModal';
+import { useUserManagement } from '../../../application/hooks/useUserManagement';
+import { documentUploadService } from '../../../application/services/documentUploadService';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../redux/store';
 
 interface ApplicantDetailsProps {
   selectedApplicant: any;
@@ -34,19 +39,27 @@ interface ApplicantDetailsProps {
   onDownloadDocument?: (document: { name: string; url: string }) => void;
 }
 
+const useAuth = () => {
+  const { token } = useSelector((state: RootState) => state.auth);
+  return { token };
+};
+
 const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
   selectedApplicant,
   showDetails,
   setShowDetails,
-  approveAdmission,
-  rejectAdmission,
+  approveAdmission: propApproveAdmission,
+  rejectAdmission: propRejectAdmission,
   deleteAdmission,
   onViewDocument,
   onDownloadDocument,
 }) => {
+  const { approveAdmission, rejectAdmission } = useUserManagement();
+  const { token } = useAuth();
   const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
   const [showWarningModal, setShowWarningModal] = useState(false);
-  const [expandedSections, setExpandedSections] = useState({
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     personal: true,
     programs: false,
     education: false,
@@ -72,6 +85,19 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
 
   if (!selectedApplicant || !showDetails) return null;
 
+  // Handle both data structures: direct admission data or nested admission data
+  const admissionData = selectedApplicant.admission || selectedApplicant;
+  const personalData = admissionData?.personal;
+  const documentsData = admissionData?.documents;
+  const choiceOfStudyData = admissionData?.choiceOfStudy;
+  const educationData = admissionData?.education;
+  const achievementsData = admissionData?.achievements;
+  const otherInformationData = admissionData?.otherInformation;
+  const declarationData = admissionData?.declaration;
+  const status = admissionData?.status || 'pending';
+  const applicationId = admissionData?.applicationId;
+  const createdAt = admissionData?.createdAt;
+
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({
       ...prev,
@@ -87,54 +113,131 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
     });
   };
 
-  const handleViewDocument = (document: any) => {
+  const handleViewDocument = async (document: any) => {
     if (!document) {
       return;
     }
     if (!document.url) {
       return;
     }
-    if (onViewDocument) {
-      onViewDocument(document);
-    } else {
+    
+    try {
+      if (onViewDocument) {
+        onViewDocument(document);
+      } else {
+        // Use backend API like in Application Form
+        if (document.id && token) {
+          console.log('Fetching document from backend with ID:', document.id);
+          const response = await documentUploadService.getAdminDocument(document.id, admissionData._id, token);
+          console.log('Document response:', response);
+          
+          if (response && response.pdfData) {
+            // Create blob URL from base64 PDF data
+            const byteCharacters = atob(response.pdfData);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            window.open(url, '_blank', 'noopener,noreferrer');
+            // Clean up the blob URL after a delay
+            setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+          } else {
+            console.error('No PDF data received from backend');
+            // Fallback to direct URL
+            window.open(document.url, '_blank', 'noopener,noreferrer');
+          }
+        } else {
+          console.log('No document ID or token, using direct URL');
+          // Fallback to direct URL if no ID or token
+          window.open(document.url, '_blank', 'noopener,noreferrer');
+        }
+      }
+    } catch (error) {
+      console.error('Error opening document:', error);
+      // Fallback to direct URL if there's an error
       try {
         window.open(document.url, '_blank', 'noopener,noreferrer');
-      } catch (error) {
-        console.error('Error opening document:', error);
+      } catch (fallbackError) {
+        console.error('Error with fallback document opening:', fallbackError);
       }
     }
   };
 
-  const handleDownloadDocument = (document: any) => {
-    if (!document) {
+  const handleDownloadDocument = async (doc: any) => {
+    if (!doc) {
       console.error('No document provided');
       return;
     }
-    if (!document.url) {
-      console.error('Document URL is missing:', document);
-      return;
-    }
-    if (onDownloadDocument) {
-      console.log('Using custom download handler');
-      onDownloadDocument(document);
-    } else {
-      console.log('Using default download handler, downloading URL:', document.url);
-      try {
-        const link = document.createElement('a');
-        link.href = document.url;
-        link.download = document.name || 'document';
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        console.log('Created download link:', {
-          href: link.href,
-          download: link.download,
-        });
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } catch (error) {
-        console.error('Error downloading document:', error);
+    
+    try {
+      if (onDownloadDocument) {
+        console.log('Using custom download handler');
+        onDownloadDocument(doc);
+      } else {
+        // Use backend API like Application Form
+        if (doc.id && token) {
+          console.log('Fetching document from backend for download with ID:', doc.id);
+          const response = await documentUploadService.getAdminDocument(doc.id, admissionData._id, token);
+          console.log('Document response for download:', response);
+          
+          if (response && response.pdfData) {
+            console.log('PDF data received, length:', response.pdfData.length);
+            console.log('Creating download...');
+            
+            // Convert base64 to blob and download
+            const byteCharacters = atob(response.pdfData);
+            console.log('Converted to byte characters, length:', byteCharacters.length);
+            
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            console.log('Created byte array, length:', byteArray.length);
+            
+            const blob = new Blob([byteArray], { type: 'application/pdf' });
+            console.log('Created blob, size:', blob.size);
+            
+            const url = window.URL.createObjectURL(blob);
+            console.log('Created blob URL:', url);
+            
+            const fileName = doc.fileName || doc.name || 'document.pdf';
+            console.log('Download filename:', fileName);
+            
+            // Create and trigger download
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            link.style.display = 'none';
+            
+            console.log('Adding link to DOM...');
+            document.body.appendChild(link);
+            
+            console.log('Clicking link...');
+            link.click();
+            
+            console.log('Removing link from DOM...');
+            document.body.removeChild(link);
+            
+            console.log('Cleaning up blob URL...');
+            setTimeout(() => {
+              window.URL.revokeObjectURL(url);
+              console.log('Blob URL cleaned up');
+            }, 1000);
+            
+            console.log('Download process completed');
+          } else {
+            console.error('No PDF data in response');
+          }
+        } else {
+          console.error('Missing document ID or token');
+        }
       }
+    } catch (error) {
+      console.error('Error downloading document:', error);
     }
   };
 
@@ -151,7 +254,6 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      {/* Background particles */}
       {ghostParticles.map((particle, i) => (
         <div
           key={i}
@@ -185,25 +287,25 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-purple-100">
-                  {selectedApplicant.admission?.personal?.fullName || 'N/A'}
+                  {personalData?.fullName || 'N/A'}
                 </h2>
                 <p className="text-purple-200 flex items-center mt-1">
                   <FiMail size={16} className="mr-2" />
-                  {selectedApplicant.admission?.personal?.emailAddress || 'N/A'}
+                  {personalData?.emailAddress || 'N/A'}
                 </p>
                 <div className="flex items-center mt-2 space-x-4">
-                  <StatusBadge status={selectedApplicant.admission?.status || 'pending'} />
+                  <StatusBadge status={status} />
                   <span className="text-sm text-purple-300">
-                    ID: {selectedApplicant.admission?.applicationId || 'N/A'}
+                    ID: {applicationId || 'N/A'}
                   </span>
                 </div>
               </div>
             </div>
             <button
               onClick={() => setShowDetails(false)}
-              className="p-2 hover:bg-purple-500/20 rounded-full transition-colors"
+              className="p-2 text-purple-300 hover:bg-purple-500/20 rounded-lg transition-colors"
             >
-              <FiX size={24} className="text-purple-300" />
+              <FiX size={24} />
             </button>
           </div>
         </div>
@@ -215,17 +317,17 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             <QuickInfoCard
               icon={<FiCalendar className="text-purple-300" />}
               title="Applied On"
-              value={formatDate(selectedApplicant.admission?.createdAt)}
+              value={formatDate(createdAt)}
             />
             <QuickInfoCard
               icon={<FiBook className="text-purple-300" />}
               title="Program"
-              value={selectedApplicant.admission?.choiceOfStudy?.[0]?.programme || 'N/A'}
+              value={choiceOfStudyData?.[0]?.programme || 'N/A'}
             />
             <QuickInfoCard
               icon={<FiGlobe className="text-purple-300" />}
               title="Nationality"
-              value={selectedApplicant.admission?.personal?.citizenship || 'N/A'}
+              value={personalData?.citizenship || 'N/A'}
             />
           </div>
 
@@ -238,77 +340,77 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
           >
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               <InfoGroup title="Basic Information">
-                <InfoRow label="Salutation" value={selectedApplicant.admission?.personal?.salutation} />
-                <InfoRow label="Full Name" value={selectedApplicant.admission?.personal?.fullName} />
-                <InfoRow label="Family Name" value={selectedApplicant.admission?.personal?.familyName} />
-                <InfoRow label="Given Name" value={selectedApplicant.admission?.personal?.givenName} />
-                <InfoRow label="Gender" value={selectedApplicant.admission?.personal?.gender} />
-                <InfoRow label="Date of Birth" value={selectedApplicant.admission?.personal?.dateOfBirth} />
-                <InfoRow label="Marital Status" value={selectedApplicant.admission?.personal?.maritalStatus} />
+                <InfoRow label="Salutation" value={personalData?.salutation} />
+                <InfoRow label="Full Name" value={personalData?.fullName} />
+                <InfoRow label="Family Name" value={personalData?.familyName} />
+                <InfoRow label="Given Name" value={personalData?.givenName} />
+                <InfoRow label="Gender" value={personalData?.gender} />
+                <InfoRow label="Date of Birth" value={personalData?.dateOfBirth} />
+                <InfoRow label="Marital Status" value={personalData?.maritalStatus} />
               </InfoGroup>
 
               <InfoGroup title="Contact Information">
                 <InfoRow
                   label="Mobile"
-                  value={`${selectedApplicant.admission?.personal?.mobileCountry || ''} ${
-                    selectedApplicant.admission?.personal?.mobileArea || ''
-                  } ${selectedApplicant.admission?.personal?.mobileNumber || ''}`.trim()}
+                  value={`${personalData?.mobileCountry || ''} ${
+                    personalData?.mobileArea || ''
+                  } ${personalData?.mobileNumber || ''}`.trim()}
                 />
                 <InfoRow
                   label="Phone"
-                  value={`${selectedApplicant.admission?.personal?.phoneCountry || ''} ${
-                    selectedApplicant.admission?.personal?.phoneArea || ''
-                  } ${selectedApplicant.admission?.personal?.phoneNumber || ''}`.trim()}
+                  value={`${personalData?.phoneCountry || ''} ${
+                    personalData?.phoneArea || ''
+                  } ${personalData?.phoneNumber || ''}`.trim()}
                 />
-                <InfoRow label="Alt Email" value={selectedApplicant.admission?.personal?.alternativeEmail} />
+                <InfoRow label="Alt Email" value={personalData?.alternativeEmail} />
                 <InfoRow
                   label="Alternate Contact Name"
-                  value={selectedApplicant.admission?.personal?.alternateContactName}
+                  value={personalData?.alternateContactName}
                 />
                 <InfoRow
                   label="Relationship"
-                  value={selectedApplicant.admission?.personal?.relationshipWithApplicant}
+                  value={personalData?.relationshipWithApplicant}
                 />
-                <InfoRow label="Occupation" value={selectedApplicant.admission?.personal?.occupation} />
+                <InfoRow label="Occupation" value={personalData?.occupation} />
                 <InfoRow
                   label="Alternate Mobile"
-                  value={`${selectedApplicant.admission?.personal?.altMobileCountry || ''} ${
-                    selectedApplicant.admission?.personal?.altMobileArea || ''
-                  } ${selectedApplicant.admission?.personal?.altMobileNumber || ''}`.trim()}
+                  value={`${personalData?.altMobileCountry || ''} ${
+                    personalData?.altMobileArea || ''
+                  } ${personalData?.altMobileNumber || ''}`.trim()}
                 />
                 <InfoRow
                   label="Alternate Phone"
-                  value={`${selectedApplicant.admission?.personal?.altPhoneCountry || ''} ${
-                    selectedApplicant.admission?.personal?.altPhoneArea || ''
-                  } ${selectedApplicant.admission?.personal?.altPhoneNumber || ''}`.trim()}
+                  value={`${personalData?.altPhoneCountry || ''} ${
+                    personalData?.altPhoneArea || ''
+                  } ${personalData?.altPhoneNumber || ''}`.trim()}
                 />
               </InfoGroup>
 
               <InfoGroup title="Address">
                 <InfoRow
                   label="Street"
-                  value={`${selectedApplicant.admission?.personal?.blockNumber || ''} ${
-                    selectedApplicant.admission?.personal?.streetName || ''
+                  value={`${personalData?.blockNumber || ''} ${
+                    personalData?.streetName || ''
                   }`.trim()}
                 />
-                <InfoRow label="Building" value={selectedApplicant.admission?.personal?.buildingName} />
+                <InfoRow label="Building" value={personalData?.buildingName} />
                 <InfoRow
                   label="Unit"
-                  value={`Floor ${selectedApplicant.admission?.personal?.floorNumber || 'N/A'}, Unit ${
-                    selectedApplicant.admission?.personal?.unitNumber || 'N/A'
+                  value={`Floor ${personalData?.floorNumber || 'N/A'}, Unit ${
+                    personalData?.unitNumber || 'N/A'
                   }`}
                 />
-                <InfoRow label="City/State" value={selectedApplicant.admission?.personal?.stateCity} />
-                <InfoRow label="Country" value={selectedApplicant.admission?.personal?.country} />
-                <InfoRow label="Postal Code" value={selectedApplicant.admission?.personal?.postalCode} />
-                <InfoRow label="Citizenship" value={selectedApplicant.admission?.personal?.citizenship} />
+                <InfoRow label="City/State" value={personalData?.stateCity} />
+                <InfoRow label="Country" value={personalData?.country} />
+                <InfoRow label="Postal Code" value={personalData?.postalCode} />
+                <InfoRow label="Citizenship" value={personalData?.citizenship} />
                 <InfoRow
                   label="Residential Status"
-                  value={selectedApplicant.admission?.personal?.residentialStatus}
+                  value={personalData?.residentialStatus}
                 />
-                <InfoRow label="Race" value={selectedApplicant.admission?.personal?.race} />
-                <InfoRow label="Religion" value={selectedApplicant.admission?.personal?.religion} />
-                <InfoRow label="Passport Number" value={selectedApplicant.admission?.personal?.passportNumber} />
+                <InfoRow label="Race" value={personalData?.race} />
+                <InfoRow label="Religion" value={personalData?.religion} />
+                <InfoRow label="Passport Number" value={personalData?.passportNumber} />
               </InfoGroup>
             </div>
           </SectionCard>
@@ -321,8 +423,8 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             toggle={() => toggleSection('programs')}
           >
             <div className="space-y-4">
-              {selectedApplicant.admission?.choiceOfStudy?.length ? (
-                selectedApplicant.admission.choiceOfStudy.map((choice: any, idx: number) => (
+              {choiceOfStudyData?.length ? (
+                choiceOfStudyData.map((choice: any, idx: number) => (
                   <div
                     key={idx}
                     className="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30"
@@ -354,40 +456,74 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             <div className="space-y-4">
               <InfoRow
                 label="Student Type"
-                value={selectedApplicant.admission?.education?.studentType || 'N/A'}
+                value={educationData?.studentType || 'N/A'}
               />
-              {selectedApplicant.admission?.education?.transfer && (
+              {educationData?.transfer && (
                 <div className="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30">
                   <h4 className="font-semibold text-purple-100 mb-3">Previous Education</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <InfoRow
                       label="School"
-                      value={selectedApplicant.admission.education.transfer.schoolName}
+                      value={educationData.transfer.schoolName}
                     />
                     <InfoRow
                       label="Duration"
-                      value={`${selectedApplicant.admission.education.transfer.from} - ${selectedApplicant.admission.education.transfer.to}`}
+                      value={`${educationData.transfer.from} - ${educationData.transfer.to}`}
                     />
-                    <InfoRow label="GPA" value={selectedApplicant.admission.education.transfer.gpa} />
+                    <InfoRow label="GPA" value={educationData.transfer.gpa} />
                     <InfoRow
                       label="Program"
-                      value={selectedApplicant.admission.education.transfer.programStudied}
+                      value={educationData.transfer.programStudied}
                     />
                     <InfoRow
                       label="Country"
-                      value={selectedApplicant.admission.education.transfer.country}
+                      value={educationData.transfer.country}
+                    />
+                  </div>
+                </div>
+              )}
+              {educationData?.local && (
+                <div className="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30">
+                  <h4 className="font-semibold text-purple-100 mb-3">Local Education</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InfoRow
+                      label="School"
+                      value={educationData.local.schoolName}
                     />
                     <InfoRow
-                      label="Previous University"
-                      value={selectedApplicant.admission.education.transfer.previousUniversity}
+                      label="Duration"
+                      value={`${educationData.local.from} - ${educationData.local.to}`}
                     />
                     <InfoRow
-                      label="Credits Earned"
-                      value={selectedApplicant.admission.education.transfer.creditsEarned}
+                      label="National ID"
+                      value={educationData.local.nationalID}
                     />
                     <InfoRow
-                      label="Reason for Transfer"
-                      value={selectedApplicant.admission.education.transfer.reasonForTransfer}
+                      label="Country"
+                      value={educationData.local.country}
+                    />
+                  </div>
+                </div>
+              )}
+              {educationData?.international && (
+                <div className="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30">
+                  <h4 className="font-semibold text-purple-100 mb-3">International Education</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InfoRow
+                      label="School"
+                      value={educationData.international.schoolName}
+                    />
+                    <InfoRow
+                      label="Duration"
+                      value={`${educationData.international.from} - ${educationData.international.to}`}
+                    />
+                    <InfoRow
+                      label="Examination"
+                      value={educationData.international.examination}
+                    />
+                    <InfoRow
+                      label="Country"
+                      value={educationData.international.country}
                     />
                   </div>
                 </div>
@@ -402,55 +538,58 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             isOpen={expandedSections.achievements}
             toggle={() => toggleSection('achievements')}
           >
-            <div className="space-y-6">
-              <InfoRow
-                label="Has Achievements"
-                value={selectedApplicant.admission?.achievements?.hasNoAchievements ? 'No' : 'Yes'}
-              />
-              {selectedApplicant.admission?.achievements?.questions && (
-                <div>
-                  <h4 className="font-semibold text-purple-100 mb-3">Personal Statements</h4>
-                  <div className="space-y-3">
-                    {Object.entries(selectedApplicant.admission.achievements.questions).map(
-                      ([key, value]) => (
-                        <div
-                          key={key}
-                          className="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30"
-                        >
-                          <p className="text-purple-200">{value || 'N/A'}</p>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              )}
-              {selectedApplicant.admission?.achievements?.achievements?.length ? (
-                <div>
-                  <h4 className="font-semibold text-purple-100 mb-3">Activities & Leadership</h4>
-                  <div className="space-y-4">
-                    {selectedApplicant.admission.achievements.achievements.map((ach: any, idx: number) => (
-                      <div
-                        key={idx}
-                        className="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h5 className="font-semibold text-purple-100">{ach.activity}</h5>
-                            <p className="text-purple-200 mt-1">
-                              {ach.organizationName} • {ach.positionHeld}
-                            </p>
-                            <p className="text-purple-300 text-sm mt-1">
-                              {ach.fromDate} - {ach.toDate}
-                            </p>
-                            <p className="text-purple-200 mt-2">{ach.description}</p>
-                          </div>
-                          <span className="bg-purple-600/30 text-purple-100 px-2 py-1 rounded text-sm">
-                            {ach.level}
-                          </span>
-                        </div>
+            <div className="space-y-4">
+              {achievementsData?.questions && Object.keys(achievementsData.questions).length > 0 && (
+                <div className="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30">
+                  <h4 className="font-semibold text-purple-100 mb-3">Questions</h4>
+                  <div className="space-y-2">
+                    {Object.entries(achievementsData.questions).map(([key, value]) => (
+                      <div key={key} className="flex justify-between">
+                        <span className="text-purple-200">Q{key}:</span>
+                        <span className="text-purple-100">{value as string}</span>
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+              {achievementsData?.achievements && achievementsData.achievements.length > 0 ? (
+                <div className="space-y-3">
+                  {achievementsData.achievements.map((achievement: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-semibold text-purple-100">{achievement.activity}</h4>
+                        <span className="bg-purple-600/30 text-purple-100 px-2 py-1 rounded text-xs">
+                          {achievement.level}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span className="text-purple-300">Level of Achievement:</span>
+                          <span className="text-purple-100 ml-2">{achievement.levelOfAchievement}</span>
+                        </div>
+                        <div>
+                          <span className="text-purple-300">Position:</span>
+                          <span className="text-purple-100 ml-2">{achievement.positionHeld}</span>
+                        </div>
+                        <div>
+                          <span className="text-purple-300">Organization:</span>
+                          <span className="text-purple-100 ml-2">{achievement.organizationName}</span>
+                        </div>
+                        <div>
+                          <span className="text-purple-300">Duration:</span>
+                          <span className="text-purple-100 ml-2">
+                            {achievement.fromDate} - {achievement.toDate}
+                          </span>
+                        </div>
+                      </div>
+                      {achievement.description && (
+                        <p className="text-purple-200 mt-2 text-sm">{achievement.description}</p>
+                      )}
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <p className="text-sm text-purple-300">No achievements listed</p>
@@ -466,36 +605,51 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             toggle={() => toggleSection('documents')}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {selectedApplicant.admission?.documents?.documents?.length ? (
-                selectedApplicant.admission.documents.documents.map((doc: any, idx: number) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between p-3 bg-gray-800/80 rounded-lg border border-purple-500/30"
-                  >
-                    <div className="flex items-center">
-                      <div className="p-2 bg-purple-600/30 rounded-lg mr-3">
-                        <FiFileText size={18} className="text-purple-300" />
+              {documentsData?.documents?.filter((doc: any) => doc.cloudinaryUrl)?.length ? (
+                documentsData.documents
+                  .filter((doc: any) => doc.cloudinaryUrl)
+                  .map((doc: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-3 bg-gray-800/80 rounded-lg border border-purple-500/30"
+                    >
+                      <div className="flex items-center">
+                        <div className="p-2 bg-purple-600/30 rounded-lg mr-3">
+                          <FiFileText size={18} className="text-purple-300" />
+                        </div>
+                        <div>
+                          <span className="text-purple-100 font-medium">{doc.name}</span>
+                          <p className="text-xs text-purple-300">{doc.fileName}</p>
+                        </div>
                       </div>
-                      <span className="text-purple-100 font-medium">{doc.name}</span>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleViewDocument({ 
+                            id: doc.id, 
+                            name: doc.name, 
+                            url: doc.cloudinaryUrl,
+                            fileName: doc.fileName 
+                          })}
+                          className="p-1 text-purple-300 hover:bg-purple-500/20 rounded transition-colors"
+                          title="View Document"
+                        >
+                          <FiEye size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDownloadDocument({ 
+                            id: doc.id, 
+                            name: doc.name, 
+                            url: doc.cloudinaryUrl,
+                            fileName: doc.fileName 
+                          })}
+                          className="p-1 text-purple-300 hover:bg-purple-500/20 rounded transition-colors"
+                          title="Download Document"
+                        >
+                          <FiDownload size={16} />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleViewDocument(doc)}
-                        className="p-1 text-purple-300 hover:bg-purple-500/20 rounded transition-colors"
-                        title="View Document"
-                      >
-                        <FiEye size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDownloadDocument(doc)}
-                        className="p-1 text-purple-300 hover:bg-purple-500/20 rounded transition-colors"
-                        title="Download Document"
-                      >
-                        <FiDownload size={16} />
-                      </button>
-                    </div>
-                  </div>
-                ))
+                  ))
               ) : (
                 <p className="text-sm text-purple-300">No documents uploaded</p>
               )}
@@ -513,34 +667,34 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
               <InfoGroup title="Health Information">
                 <InfoRow
                   label="Health Support Required"
-                  value={selectedApplicant.admission?.otherInformation?.health?.hasHealthSupport}
+                  value={otherInformationData?.health?.hasHealthSupport}
                 />
                 <InfoRow
                   label="Medical Conditions"
-                  value={selectedApplicant.admission?.otherInformation?.health?.medicalConditions}
+                  value={otherInformationData?.health?.medicalConditions}
                 />
                 <InfoRow
                   label="Disabilities"
-                  value={selectedApplicant.admission?.otherInformation?.health?.disabilities}
+                  value={otherInformationData?.health?.disabilities}
                 />
                 <InfoRow
                   label="Special Needs"
-                  value={selectedApplicant.admission?.otherInformation?.health?.specialNeeds}
+                  value={otherInformationData?.health?.specialNeeds}
                 />
               </InfoGroup>
 
               <InfoGroup title="Legal Information">
                 <InfoRow
                   label="Criminal Record"
-                  value={selectedApplicant.admission?.otherInformation?.legal?.hasCriminalRecord}
+                  value={otherInformationData?.legal?.hasCriminalRecord}
                 />
                 <InfoRow
                   label="Criminal Details"
-                  value={selectedApplicant.admission?.otherInformation?.legal?.criminalRecord}
+                  value={otherInformationData?.legal?.criminalRecord}
                 />
                 <InfoRow
                   label="Legal Proceedings"
-                  value={selectedApplicant.admission?.otherInformation?.legal?.legalProceedings}
+                  value={otherInformationData?.legal?.legalProceedings}
                 />
               </InfoGroup>
             </div>
@@ -556,15 +710,15 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             <div className="space-y-3">
               <ConsentRow
                 label="Privacy Policy Agreement"
-                value={selectedApplicant.admission?.declaration?.privacyPolicy}
+                value={declarationData?.privacyPolicy}
               />
               <ConsentRow
                 label="Marketing Email Consent"
-                value={selectedApplicant.admission?.declaration?.marketingEmail}
+                value={declarationData?.marketingEmail}
               />
               <ConsentRow
                 label="Marketing Call Consent"
-                value={selectedApplicant.admission?.declaration?.marketingCall}
+                value={declarationData?.marketingCall}
               />
             </div>
           </SectionCard>
@@ -579,24 +733,24 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             <InfoRow
               icon={<FiCalendar className="text-purple-300" />}
               label="Applied On"
-              value={formatDate(selectedApplicant.admission?.createdAt)}
+              value={formatDate(createdAt)}
             />
             <InfoRow
               icon={<FiBook className="text-purple-300" />}
               label="Program"
-              value={selectedApplicant.admission?.choiceOfStudy?.[0]?.programme || 'N/A'}
+              value={choiceOfStudyData?.[0]?.programme || 'N/A'}
             />
             <InfoRow
               icon={<FiGlobe className="text-purple-300" />}
               label="Nationality"
-              value={selectedApplicant.admission?.personal?.citizenship || 'N/A'}
+              value={personalData?.citizenship || 'N/A'}
             />
           </SectionCard>
         </div>
 
         {/* Actions Footer */}
-        {(selectedApplicant.admission?.status || 'pending') === 'pending' && (
-          <div className="border-t border-purple-500/30 bg-gray-900/80 p-6">
+        {status === 'pending' && (
+          <div className="border-t border-purple-500/30 bg-gray-900/80 ">
             <div className="flex space-x-4">
               <button
                 onClick={() => setShowApprovalModal(true)}
@@ -606,13 +760,7 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
                 Approve Application
               </button>
               <button
-                onClick={() => {
-                  rejectAdmission({
-                    id: selectedApplicant.admission._id,
-                    reason: 'Application rejected',
-                  });
-                  setShowDetails(false);
-                }}
+                onClick={() => setShowRejectModal(true)}
                 className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center border border-red-500/50"
               >
                 <FiAlertCircle size={20} className="mr-2" />
@@ -626,28 +774,69 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
         {showApprovalModal && (
           <ApprovalModal
             isOpen={showApprovalModal}
-            onClose={() => setShowApprovalModal(false)}
-            onApprove={(data) => {
-              approveAdmission({
-                admission: selectedApplicant.admission,
-                ...data,
-              });
+            onClose={() => {
               setShowApprovalModal(false);
-              setShowDetails(false);
             }}
-            onReject={(reason) => {
-              rejectAdmission({
-                id: selectedApplicant.admission._id,
-                reason,
-              });
-              setShowApprovalModal(false);
-              setShowDetails(false);
+            onApprove={async (data: any) => {
+              console.log('ApplicantDetails onApprove called with data:', data);
+              console.log('admissionData._id:', admissionData._id);
+              
+              try {
+                const admissionId = admissionData._id;
+                if (!admissionId) {
+                  throw new Error('No admission ID found');
+                }
+                
+                // Call the mutation function directly from the hook
+                await approveAdmission({
+                  id: admissionId,
+                  approvalData: {
+                    programDetails: data.programDetails || '',
+                    startDate: data.startDate || '',
+                    scholarshipInfo: data.scholarshipInfo || '',
+                    additionalNotes: data.additionalNotes || '',
+                  },
+                });
+                console.log('approveAdmission completed successfully');
+                
+                setShowApprovalModal(false);
+                setShowDetails(false);
+              } catch (error) {
+                console.error('Error approving admission:', error);
+              }
             }}
-            onDelete={() => {
-              setShowApprovalModal(false);
-              setShowWarningModal(true);
+            applicantName={personalData?.fullName}
+          />
+        )}
+
+        {showRejectModal && (
+          <RejectModal
+            isOpen={showRejectModal}
+            onClose={() => setShowRejectModal(false)}
+            onReject={(reason: string) => {
+              console.log('ApplicantDetails onReject called with reason:', reason);
+              console.log('admissionData._id:', admissionData._id);
+              
+              try {
+                const admissionId = admissionData._id;
+                if (!admissionId) {
+                  throw new Error('No admission ID found');
+                }
+                
+                // Call the mutation function directly from the hook
+                rejectAdmission({
+                  id: admissionId,
+                  reason: reason || 'Application rejected',
+                });
+                console.log('rejectAdmission completed successfully');
+                
+                setShowRejectModal(false);
+                setShowDetails(false);
+              } catch (error) {
+                console.error('Error rejecting admission:', error);
+              }
             }}
-            applicantName={selectedApplicant.admission?.personal?.fullName}
+            applicantName={personalData?.fullName}
           />
         )}
 
@@ -656,12 +845,12 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             isOpen={showWarningModal}
             onClose={() => setShowWarningModal(false)}
             onConfirm={() => {
-              deleteAdmission(selectedApplicant.admission._id);
+              deleteAdmission(admissionData._id);
               setShowWarningModal(false);
               setShowDetails(false);
             }}
             title="Delete Application"
-            message={`Are you sure you want to delete ${selectedApplicant.admission?.personal?.fullName}'s application? This action cannot be undone.`}
+            message={`Are you sure you want to delete ${personalData?.fullName}'s application? This action cannot be undone.`}
             confirmText="Delete"
             cancelText="Cancel"
             type="danger"

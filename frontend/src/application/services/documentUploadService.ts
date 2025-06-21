@@ -105,6 +105,28 @@ class DocumentUploadService {
       throw new Error(error.response?.data?.error || error.message || 'Failed to fetch document');
     }
   }
+
+  async getAdminDocument(documentId: string, admissionId: string, token: string): Promise<any> {
+    try {
+      console.log('Fetching admin document with ID:', documentId, 'from admission:', admissionId);
+      console.log('Using URL:', `/admin/admissions/documents/${documentId}?admissionId=${admissionId}`);
+      
+      const response = await httpClient.get(`/admin/admissions/documents/${documentId}?admissionId=${admissionId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('Admin document fetch response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching admin document:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      throw new Error(error.response?.data?.error || error.message || 'Failed to fetch admin document');
+    }
+  }
 }
 
 export const documentUploadService = new DocumentUploadService(); 

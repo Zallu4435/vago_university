@@ -21,6 +21,8 @@ import userMaterialRoutes from '../http/materials/userMaterialRoutes'
 import assignmentRoutes from '../http/assignments/assignmentRoutes'
 import userAssignmentRoutes from '../http/assignments/userAssignmentRoutes'
 import userDiplomaRoutes from '../http/diploma/UserDiplomaRouter'
+import siteSectionRoutes from '../http/site-management/siteSectionRoutes'
+import userSiteSectionRoutes from '../http/site-management/userSiteSectionRoutes'
 
 
 const router = Router();
@@ -69,7 +71,9 @@ router.use("/admin/vedio", vedioRoutes);
 
 router.use("/faculty/assignments", assignmentRoutes);
 
+router.use("/admin/site-sections", siteSectionRoutes);
 
+router.use("/site-sections", userSiteSectionRoutes);
 
 
 export default router;

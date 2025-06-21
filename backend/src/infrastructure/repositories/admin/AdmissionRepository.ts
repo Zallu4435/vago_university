@@ -209,9 +209,7 @@ export class AdmissionRepository implements IAdmissionRepository {
             });
 
             await user.save();
-
-            // Uncomment if ProgramModel creation is needed
-            /*
+            
             let degree = "";
             let catalogYear = "";
             if (admission.choiceOfStudy && admission.choiceOfStudy.length > 0) {
@@ -226,7 +224,7 @@ export class AdmissionRepository implements IAdmissionRepository {
                 credits: 20,
               });
             }
-            */
+            
         } else {
             admission.status = "rejected";
             admission.rejectedBy = "user";

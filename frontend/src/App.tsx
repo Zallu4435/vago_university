@@ -13,6 +13,7 @@ import AdminLayout from './presentation/Layout/AdminLayout';
 import UserLayout from './presentation/Layout/UserLayout';
 import FacultyLayout from './presentation/Layout/FacultyLayout';
 import DepartmentLayout from './presentation/Layout/DepartmentLayout';
+import ApplicationFormLayout from './presentation/Layout/ApplicationFormLayout';
 
 // Pages
 import { Home } from './presentation/pages/main/Home';
@@ -62,6 +63,7 @@ import DiplomaManagement from './presentation/pages/admin/diploma/DiplomaManagem
 import MaterialManagement from './presentation/pages/admin/material/MaterialManagement';
 import AssignmentManagement from './presentation/pages/faculty/assignment/AssignmentManagement';
 import SessionManagement from './presentation/pages/faculty/sessions/SessionManagement';
+import SiteManagement from './presentation/pages/admin/sites/SiteManagement';
 
 const App: React.FC = () => {
   const { isError, error } = useRefreshToken();
@@ -152,7 +154,9 @@ const App: React.FC = () => {
 
         {/* Admission Route (register only) */}
         <Route element={<ProtectedRoute allowedCollections={['register']} />}>
-          <Route path="admission" element={<ApplicationForm />} />
+          <Route path="admission" element={<ApplicationFormLayout>
+            <ApplicationForm />
+          </ApplicationFormLayout>} />
         </Route>
 
         {/* Admin Routes (admin only) */}
@@ -171,7 +175,7 @@ const App: React.FC = () => {
             <Route path="admin/notifications" element={<NotificationManagement />} />
             <Route path="admin/diploma-courses" element={<DiplomaManagement />} />
             <Route path="admin/material" element={<MaterialManagement />} />
-    
+            <Route path="admin/site-management" element={<SiteManagement />} />
           </Route>
         </Route>
 

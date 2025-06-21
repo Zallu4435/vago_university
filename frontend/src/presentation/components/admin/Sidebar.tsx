@@ -18,7 +18,8 @@ import {
   MdArticle,
   MdHelpCenter,
   MdLogout,
-  MdPayment
+  MdPayment,
+  MdSettings
 } from 'react-icons/md';
 import { IoSearchOutline as Search } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
@@ -41,6 +42,7 @@ const sidebarItems = [
   { name: 'Notification System', path: '/admin/notifications', icon: <MdNotifications size={20} /> },
   { name: 'Material', path: '/admin/material', icon: <MdFolder size={20} /> },
   { name: 'Content', path: '/admin/content', icon: <MdArticle size={20} /> },
+  { name: 'Site Management', path: '/admin/site-management', icon: <MdSettings size={20} /> },
   { name: 'Enquiry', path: '/admin/enquiry', icon: <MdHelpCenter size={20} /> },
   { name: 'Payment', path: '/admin/payment', icon: <MdPayment size={20} /> },
 ];
@@ -49,11 +51,11 @@ const sidebarItems = [
 const groupedItems = [
   { category: 'Main', items: [sidebarItems[0]] },
   { category: 'People', items: [sidebarItems[1], sidebarItems[2]] },
-  { category: 'Content', items: [sidebarItems[3], sidebarItems[14], sidebarItems[13]] },
+  { category: 'Content', items: [sidebarItems[3], sidebarItems[14], sidebarItems[13], sidebarItems[15]] },
   { category: 'Education', items: [sidebarItems[4], sidebarItems[6], sidebarItems[11]] },
   { category: 'Activities', items: [sidebarItems[5], sidebarItems[7], sidebarItems[8]] },
-  { category: 'Communication', items: [sidebarItems[9], sidebarItems[10], sidebarItems[12], sidebarItems[15]] },
-  { category: 'Payment', items: [sidebarItems[16]] },
+  { category: 'Communication', items: [sidebarItems[9], sidebarItems[10], sidebarItems[12], sidebarItems[16]] },
+  { category: 'Payment', items: [sidebarItems[17]] },
 ];
 
 interface SidebarProps {

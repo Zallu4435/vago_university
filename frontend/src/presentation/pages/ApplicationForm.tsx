@@ -157,7 +157,7 @@ export const ApplicationForm: React.FC = () => {
         setValue('applicationId', fetchedData.applicationId, { shouldValidate: false });
       } else {
         try {
-          const response = await createApplication(user.id);
+          const response = await createApplication(user?.id);
           setApplicationId(response.applicationId);
           setValue('applicationId', response.applicationId, { shouldValidate: false });
         } catch (error) {
@@ -168,7 +168,7 @@ export const ApplicationForm: React.FC = () => {
       setIsInitializing(false);
     };
     initializeApplication();
-  }, [fetchedData, isFetching, fetchError, user.id, createApplication, setValue]);
+  }, [fetchedData, isFetching, fetchError, user?.id, createApplication, setValue]);
 
   useEffect(() => {
     if (fetchedData) {

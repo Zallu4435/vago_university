@@ -1,27 +1,49 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa";
-
-const articles = [
-  {
-    id: 1,
-    title: "How financial influencers can make or break investment platforms like Chocolate Finance",
-    description: "Influencers contributed to the rapid growth of Singapore financial services firm Chocolate Finance, but also to its upheaval.",
-    image: "https://via.placeholder.com/600x400?text=Finance+Influencers",
-    category: "Finance",
-    link: "/insights/finance-influencers"
-  },
-  {
-    id: 2,
-    title: "Cold Storage, Giant acquisition signals room for growth in Singapore's supermarket landscape",
-    description: "The supermarket of the future may not look like a supermarket at all.",
-    image: "https://via.placeholder.com/600x400?text=Supermarket+Growth",
-    category: "Business",
-    link: "/insights/supermarket-landscape"
-  },
-];
+import { useLeadership } from "../../../application/hooks/useSiteSections";
 
 export const ThoughtLeadership: React.FC = () => {
+  const { data: leadershipItems, isLoading, error } = useLeadership();
+
+  if (isLoading) {
+    return (
+      <section className="bg-transparent_65 rounded-xl border border-cyan-100 shadow-sm p-8">
+        <div className="max-w-6xl mx-auto text-center mb-12">
+          <h2 className="text-3xl font-bold mb-3 text-cyan-800">Thought Leadership</h2>
+          <p className="text-cyan-600 text-lg mb-6 max-w-2xl mx-auto">
+            Distinguished thought leaders, movers and shakers in Singapore and across the globe gather regularly on
+            campus to share their insights and engage in intellectual discourse.
+          </p>
+          <div className="w-20 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          {[1, 2].map((idx) => (
+            <div key={idx} className="rounded-xl overflow-hidden shadow-lg border border-cyan-50 animate-pulse">
+              <div className="h-60 bg-gray-200"></div>
+              <div className="bg-gradient-to-r from-cyan-700 via-blue-600 to-cyan-600 text-white p-6 min-h-[240px]">
+                <div className="h-6 bg-white/20 rounded mb-3"></div>
+                <div className="h-4 bg-white/20 rounded mb-2"></div>
+                <div className="h-4 bg-white/20 rounded w-3/4"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="bg-transparent_65 rounded-xl border border-cyan-100 shadow-sm p-8">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-3 text-cyan-800">Thought Leadership</h2>
+          <p className="text-red-600">Failed to load thought leadership content. Please try again later.</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="bg-transparent_65 rounded-xl border border-cyan-100 shadow-sm p-8">
       <div className="max-w-6xl mx-auto text-center mb-12">
@@ -34,34 +56,34 @@ export const ThoughtLeadership: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-        {articles.map((article) => (
+        {(leadershipItems as any[])?.map((item) => (
           <div 
-            key={article.id} 
+            key={item.id} 
             className="group rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-cyan-50"
           >
             <div className="relative overflow-hidden h-60">
               <img 
-                src={article.image} 
-                alt={article.title} 
+                src={item.image} 
+                alt={item.title} 
                 className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" 
               />
               <div className="absolute top-4 right-4">
                 <span className="bg-gradient-to-r from-cyan-600 to-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
-                  {article.category}
+                  {item.category || 'Leadership'}
                 </span>
               </div>
             </div>
-            <div className="bg-gradient-to-r from-cyan-700 via-blue-600 to-cyan-600 text-white p-6 flex flex-col justify-between min-h-[240px]">
+            <div className="bg-gradient-to-r from-cyan-700 via-blue-600 to-cyan-600 text-white p-6 flex flex-col justify-between">
               <div>
                 <h3 className="text-xl font-semibold mb-3 leading-tight">
-                  {article.title}
+                  {item.title}
                 </h3>
-                <p className="text-cyan-50 text-sm leading-relaxed">
-                  {article.description}
+                <p className="text-cyan-50 text-sm leading-relaxed line-clamp-2">
+                  {item.description}
                 </p>
               </div>
               <Link 
-                to={article.link}
+                to={item.link || '#'}
                 className="inline-flex items-center mt-4 bg-white/20 text-white font-semibold py-2 px-4 rounded-lg hover:bg-white/30 transition group/btn self-start"
               >
                 Read More

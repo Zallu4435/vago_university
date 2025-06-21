@@ -11,14 +11,16 @@ interface HeaderProps {
   userName?: string;
   onLogout?: () => void;
   isAuthenticated?: boolean;
-  layoutType?: 'public' | 'ug' | 'department'; // Add layoutType prop
+  layoutType?: 'public' | 'ug' | 'department';
+  hideNavLinks?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   userName = '',
   onLogout,
   isAuthenticated = false,
-  layoutType = 'public', // Default to 'public'
+  layoutType = 'public',
+  hideNavLinks = false,
 }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -48,28 +50,31 @@ export const Header: React.FC<HeaderProps> = ({
         <span className="text-white text-3xl font-extrabold tracking-widest drop-shadow-lg">ACADEMIA</span>
       </Link>
       <div className="flex gap-4 items-center">
-        <Link
-          to="/dashboard"
-          className="flex items-center bg-white/20 px-4 py-2 rounded-lg text-white font-semibold hover:bg-white/30 transition shadow"
-        >
-          <MdDashboard className="w-5 h-5 mr-2" />
-          Dashboard
-        </Link>
-        <Link
-          to="/canvas"
-          className="flex items-center bg-white/20 px-4 py-2 rounded-lg text-white font-semibold hover:bg-white/30 transition shadow"
-        >
-          <IoSchool className="w-5 h-5 mr-2" />
-          Canvas
-        </Link>
-        <Link
-          to="/faculty"
-          className="flex items-center bg-white/20 px-4 py-2 rounded-lg text-white font-semibold hover:bg-white/30 transition shadow"
-        >
-          <FaUserGraduate className="w-5 h-5 mr-2" />
-          Faculty
-        </Link>
-
+        {!hideNavLinks && (
+          <>
+            <Link
+              to="/dashboard"
+              className="flex items-center bg-white/20 px-4 py-2 rounded-lg text-white font-semibold hover:bg-white/30 transition shadow"
+            >
+              <MdDashboard className="w-5 h-5 mr-2" />
+              Dashboard
+            </Link>
+            <Link
+              to="/canvas"
+              className="flex items-center bg-white/20 px-4 py-2 rounded-lg text-white font-semibold hover:bg-white/30 transition shadow"
+            >
+              <IoSchool className="w-5 h-5 mr-2" />
+              Canvas
+            </Link>
+            <Link
+              to="/faculty"
+              className="flex items-center bg-white/20 px-4 py-2 rounded-lg text-white font-semibold hover:bg-white/30 transition shadow"
+            >
+              <FaUserGraduate className="w-5 h-5 mr-2" />
+              Faculty
+            </Link>
+          </>
+        )}
         {isAuthenticated ? (
           <div className="relative ml-4" ref={dropdownRef}>
             <button

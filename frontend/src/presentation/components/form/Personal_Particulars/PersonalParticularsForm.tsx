@@ -74,6 +74,7 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
       console.log('Trigger validation result:', { isValid, errors });
       return isValid;
     },
+    getValues: () => methods.getValues(),
   }));
 
   // Reset form with initialData or defaultValues

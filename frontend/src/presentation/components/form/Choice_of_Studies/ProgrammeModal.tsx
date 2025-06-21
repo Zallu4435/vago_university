@@ -3,7 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../../Button';
 import { Select } from '../../Select';
-import { programmeOptions, majorOptions } from './options';
+import { programmeOptions } from './options';
 import { createProgrammeChoiceSchema, ProgrammeChoiceFormData } from '../../../../domain/validation/ChoiceOfStudySchema';
 
 interface ProgrammeModalProps {
@@ -44,6 +44,8 @@ export const ProgrammeModal: React.FC<ProgrammeModalProps> = ({
     onSubmit(data);
   };
 
+  const majors = programmeOptions.find(p => p.value === selectedProgramme)?.children || [];
+
   return (
     <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md relative border border-blue-100">
@@ -65,34 +67,35 @@ export const ProgrammeModal: React.FC<ProgrammeModalProps> = ({
                 name="programme"
                 label="Programme"
                 options={programmeOptions}
-                value={field.value}
+                value={field.value || ''}
                 onChange={field.onChange}
+                placeholder="Select a programme"
                 required
                 className="border-blue-200 focus:border-blue-400 focus:ring-blue-200 bg-white mb-4"
                 labelClassName="text-blue-700"
-                error={errors.programme?.message}
               />
             )}
           />
-          <Controller
-            name="preferredMajor"
-            control={control}
-            render={({ field }) => (
-              <Select
-                id="preferredMajor"
-                name="preferredMajor"
-                label="Preferred Major"
-                options={majorOptions}
-                value={field.value || ''}
-                onChange={field.onChange}
-                disabled={!selectedProgramme}
-                required={!!selectedProgramme && ['Engineering', 'Science'].includes(selectedProgramme)}
-                className="border-blue-200 focus:border-blue-400 focus:ring-blue-200 bg-white"
-                labelClassName="text-blue-700"
-                error={errors.preferredMajor?.message}
-              />
-            )}
-          />
+          {selectedProgramme && (
+            <Controller
+              name="preferredMajor"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  id="preferredMajor"
+                  name="preferredMajor"
+                  label="Preferred Major"
+                  options={majors}
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  placeholder="Select a major"
+                  required
+                  className="border-blue-200 focus:border-blue-400 focus:ring-blue-200 bg-white"
+                  labelClassName="text-blue-700"
+                />
+              )}
+            />
+          )}
           <div className="flex justify-end mt-6">
             <Button
               label="Add"

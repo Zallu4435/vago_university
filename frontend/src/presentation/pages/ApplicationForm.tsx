@@ -34,6 +34,21 @@ interface FormData {
   registerId?: string;
 }
 
+// Utility to map backend data to frontend FormData
+function mapBackendToFormData(data: any): FormData {
+  if (!data) return {};
+  return {
+    applicationId: data._applicationId,
+    personalInfo: Object.keys(data._personal || {}).length ? data._personal : undefined,
+    choiceOfStudy: Array.isArray(data._choiceOfStudy) && data._choiceOfStudy.length > 0 ? data._choiceOfStudy : undefined,
+    education: Object.keys(data._education || {}).length ? data._education : undefined,
+    achievements: Object.keys(data._achievements || {}).length ? data._achievements : undefined,
+    otherInformation: Object.keys(data._otherInformation || {}).length ? data._otherInformation : undefined,
+    documents: Object.keys(data._documents || {}).length ? data._documents : undefined,
+    declaration: Object.keys(data._declaration || {}).length ? data._declaration : undefined,
+  };
+}
+
 export const ApplicationForm: React.FC = () => {
   const [activeTab, setActiveTab] = useState('personalDetails');
   const [formProgress, setFormProgress] = useState(0);
@@ -44,9 +59,9 @@ export const ApplicationForm: React.FC = () => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [validationAttempted, setValidationAttempted] = useState(false);
 
-  const personalFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
+  const personalFormRef = useRef<{ trigger: () => Promise<boolean>, getValues: () => any }>(null);
   const educationFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
-  const achievementsFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
+  const achievementsFormRef = useRef<{ trigger: () => Promise<boolean>; getValues: () => any }>(null);
   const documentsFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
   const choiceOfStudyRef = useRef<{ trigger: () => Promise<boolean> }>(null);
 
@@ -55,15 +70,15 @@ export const ApplicationForm: React.FC = () => {
 
   const methods = useForm<FormData>({
     defaultValues: {
-    applicationId: '',
-    personalInfo: undefined,
+      applicationId: '',
+      personalInfo: undefined,
       choiceOfStudy: [],
       education: undefined,
-    achievements: {
-      questions: { 1: '', 2: '', 3: '', 4: '', 5: '' },
-      achievements: [],
-      hasNoAchievements: false,
-      showModal: false,
+      achievements: {
+        questions: { 1: '', 2: '', 3: '', 4: '', 5: '' },
+        achievements: [],
+        hasNoAchievements: false,
+        showModal: false,
         newAchievement: [],
         referenceContact: {
           firstName: '',
@@ -73,16 +88,16 @@ export const ApplicationForm: React.FC = () => {
           phone: { country: '', area: '', number: '' },
         },
         editingIndex: null,
-    },
-    otherInformation: undefined,
-    documents: undefined,
-    declaration: { privacyPolicy: false, marketingEmail: false, marketingCall: false },
+      },
+      otherInformation: undefined,
+      documents: undefined,
+      declaration: { privacyPolicy: false, marketingEmail: false, marketingCall: false },
       registerId: user?.id,
     },
     mode: 'onSubmit',
   });
 
-  const { setValue, watch, trigger } = methods;
+  const { setValue, watch, trigger, getValues } = methods;
   const formData = watch();
 
   const {
@@ -105,8 +120,8 @@ export const ApplicationForm: React.FC = () => {
     if (!token || !user) {
       console.log('No auth token or user found, redirecting to login');
       navigate('/login');
-        return;
-      }
+      return;
+    }
 
     if (collection !== 'register') {
       console.log('User is not in register collection, redirecting to appropriate dashboard');
@@ -128,7 +143,7 @@ export const ApplicationForm: React.FC = () => {
 
   useEffect(() => {
     const initializeApplication = async () => {
-      if (isFetching) return; 
+      if (isFetching) return;
 
       if (fetchError) {
         setSaveError('Failed to load application data. Please try again.');
@@ -142,7 +157,7 @@ export const ApplicationForm: React.FC = () => {
         setValue('applicationId', fetchedData.applicationId, { shouldValidate: false });
       } else {
         try {
-          const response = await createApplication(user.id); 
+          const response = await createApplication(user.id);
           setApplicationId(response.applicationId);
           setValue('applicationId', response.applicationId, { shouldValidate: false });
         } catch (error) {
@@ -157,20 +172,16 @@ export const ApplicationForm: React.FC = () => {
 
   useEffect(() => {
     if (fetchedData) {
-      console.log('Fetched data:', fetchedData);
-      setValue('applicationId', fetchedData.applicationId ?? '', { shouldValidate: false });
-      if (fetchedData.personal) {
-        setValue('personalInfo', fetchedData.personal, { shouldValidate: false });
-      } else {
-        setValue('personalInfo', undefined, { shouldValidate: false });
-      }
-      if (fetchedData.choiceOfStudy) setValue('choiceOfStudy', fetchedData.choiceOfStudy, { shouldValidate: false });
-      if (fetchedData.education) setValue('education', fetchedData.education, { shouldValidate: false });
-      if (fetchedData.achievements) setValue('achievements', fetchedData.achievements, { shouldValidate: false });
-      if (fetchedData.otherInformation) setValue('otherInformation', fetchedData.otherInformation, { shouldValidate: false });
-      if (fetchedData.documents) setValue('documents', fetchedData.documents, { shouldValidate: false });
-      if (fetchedData.declaration) setValue('declaration', fetchedData.declaration, { shouldValidate: false });
-      calculateFormProgress(fetchedData);
+      const mapped = mapBackendToFormData(fetchedData);
+      setValue('applicationId', mapped.applicationId ?? '', { shouldValidate: false });
+      setValue('personalInfo', mapped.personalInfo, { shouldValidate: false });
+      setValue('choiceOfStudy', mapped.choiceOfStudy, { shouldValidate: false });
+      setValue('education', mapped.education, { shouldValidate: false });
+      setValue('achievements', mapped.achievements, { shouldValidate: false });
+      setValue('otherInformation', mapped.otherInformation, { shouldValidate: false });
+      setValue('documents', mapped.documents, { shouldValidate: false });
+      setValue('declaration', mapped.declaration, { shouldValidate: false });
+      calculateFormProgress(mapped);
     }
   }, [fetchedData, setValue]);
 
@@ -213,20 +224,21 @@ export const ApplicationForm: React.FC = () => {
       console.log('Waiting for application initialization');
       return;
     }
-    if (!formData.applicationId || !formData.personalInfo) {
-      setSaveError('No application ID or personal info found.');
-      console.error('Missing applicationId or personalInfo:', {
-        applicationId: formData.applicationId,
-        personalInfo: formData.personalInfo
-      });
+    if (!formData.applicationId) {
+      setSaveError('No application ID found.');
       return;
     }
+    if (!personalFormRef.current) {
+      setSaveError('Personal form reference is missing.');
+      return;
+    }
+    // Always get the latest values from the child form
+    const latestPersonalInfo = personalFormRef.current.getValues() as PersonalInfo;
     try {
       setSaveError(null);
-      console.log('Saving personalInfo to backend:', formData.personalInfo);
-      await savePersonalInfo({ applicationId: formData.applicationId, data: formData.personalInfo });
-      console.log('Personal info saved successfully');
-      calculateFormProgress(formData);
+      console.log('Saving personalInfo to backend:', latestPersonalInfo);
+      await savePersonalInfo({ applicationId: formData.applicationId, data: latestPersonalInfo });
+      calculateFormProgress({ ...formData, personalInfo: latestPersonalInfo });
     } catch (error) {
       console.error('Error saving personalInfo:', error);
       setSaveError('Failed to save personal information. Please try again.');
@@ -253,7 +265,7 @@ export const ApplicationForm: React.FC = () => {
     } catch (error) {
       console.error('Error saving choiceOfStudy:', error);
       setSaveError('Failed to update choice of study. Please try again.');
-      throw error; // Re-throw to prevent form progression
+      throw error;
     }
   };
 
@@ -291,19 +303,21 @@ export const ApplicationForm: React.FC = () => {
 
     try {
       setSaveError(null);
-      console.log('Saving achievements to backend:', data);
-      
-      // Save to backend first
-      await saveAchievements({ applicationId: formData.applicationId, data });
+      // Only send the correct fields to thebackend
+      const payload = {
+        questions: data.questions,
+        achievements: data.achievements,
+        hasNoAchievements: data.hasNoAchievements,
+      };
+      console.log('Saving achievements to backend (clean payload):', payload);
+      await saveAchievements({ applicationId: formData.applicationId, data: payload });
       console.log('Achievements saved successfully');
-      
-      // Then update form data
-      setValue('achievements', data, { shouldValidate: false });
-      calculateFormProgress({ ...formData, achievements: data });
+      setValue('achievements', payload, { shouldValidate: false });
+      calculateFormProgress({ ...formData, achievements: payload });
     } catch (error) {
       console.error('Error saving achievements:', error);
       setSaveError('Failed to update achievements. Please try again.');
-      throw error; // Re-throw to prevent form progression
+      throw error;
     }
   };
 
@@ -373,7 +387,12 @@ export const ApplicationForm: React.FC = () => {
     }
   };
 
- const handleSaveCurrentTab = async () => {
+  const handleDeclarationChange = (data: DeclarationSection) => {
+    console.log('Declaration changed (local only):', data);
+    setValue('declaration', data, { shouldValidate: false });
+  };
+
+  const handleSaveCurrentTab = async () => {
     if (isInitializing) {
       console.log('Waiting for application initialization');
       return;
@@ -409,31 +428,37 @@ export const ApplicationForm: React.FC = () => {
       if (choiceOfStudyRef.current) {
         const isValid = await choiceOfStudyRef.current.trigger();
         console.log('ChoiceOfStudy validation result:', { isValid, choiceOfStudy: formData.choiceOfStudy });
-      if (isValid) {
+        if (isValid) {
           try {
             await handleUpdateChoiceOfStudy(formData.choiceOfStudy || []);
-        handleNextTab();
+            handleNextTab();
           } catch (error) {
             console.error('Error saving choice of study:', error);
             setSaveError('Failed to save choice of study. Please try again.');
           }
-      } else {
-        toast.error('Please add at least one programme choice.');
+        } else {
+          toast.error('Please add at least one programme choice.');
         }
-      }   
+      }
     } else if (activeTab === 'education') {
       setValidationAttempted(true);
       if (educationFormRef.current) {
         const isValid = await educationFormRef.current.trigger();
-        console.log(formData, "formData.education")
-        console.log('Education validation result:', { isValid, education: formData.education });
-        if (isValid && formData.education?.studentType) {
-          await saveEducation({ applicationId: formData.applicationId, data: formData.education });
-          console.log('education saved:', formData.education);
+        // Get the current form values to access the education data
+        const currentValues = getValues();
+        const educationData = currentValues.education;
+        
+        console.log('Current form values:', currentValues);
+        console.log('Education data:', educationData);
+        console.log('Education validation result:', { isValid, education: educationData });
+        
+        if (isValid && educationData?.studentType) {
+          await saveEducation({ applicationId: formData.applicationId, data: educationData });
+          console.log('education saved:', educationData);
           handleNextTab();
         } else {
           toast.error(
-            formData.education?.studentType === 'international' && !isValid
+            educationData?.studentType === 'international' && !isValid
               ? 'Please complete all required education details, including at least one English proficiency test.'
               : 'Please complete all required education details, including student type.'
           );
@@ -446,15 +471,15 @@ export const ApplicationForm: React.FC = () => {
       setValidationAttempted(true);
       if (achievementsFormRef.current) {
         const isValid = await achievementsFormRef.current.trigger();
-        console.log('Achievements validation result:', { isValid, achievements: formData.achievements });
-        if (isValid && formData.achievements) {
+        const latestAchievements = achievementsFormRef.current.getValues();
+        console.log('Achievements validation result:', { isValid, achievements: latestAchievements });
+        if (isValid && latestAchievements) {
           try {
             // Save to backend
-            await handleUpdateAchievements(formData.achievements, true);
+            await handleUpdateAchievements(latestAchievements, true);
             console.log('achievements saved successfully');
-            
-          if (!saveError) {
-            handleNextTab();
+            if (!saveError) {
+              handleNextTab();
             }
           } catch (error) {
             console.error('Error saving achievements:', error);
@@ -462,7 +487,7 @@ export const ApplicationForm: React.FC = () => {
           }
         } else {
           toast.error(
-            formData.achievements?.hasNoAchievements
+            latestAchievements?.hasNoAchievements
               ? 'Please complete all required questions.'
               : 'Please add at least one achievement or select "No Achievements to Report".'
           );
@@ -552,7 +577,7 @@ export const ApplicationForm: React.FC = () => {
       if (invalidSectionIndex !== -1) {
         setActiveTab(tabs[invalidSectionIndex].id);
         console.log('Navigating to invalid section:', tabs[invalidSectionIndex].id);
-      } 
+      }
     }
   };
 
@@ -619,22 +644,21 @@ export const ApplicationForm: React.FC = () => {
         }}
         onBackToForm={() => setShowSummary(false)}
         token={token}
-        isPayment={false}
       />
     );
   }
 
   if (showPayment) {
-      return (
+    return (
       <FormSubmissionFlow
         formData={{
           ...formData,
           registerId: user?.id
         }}
-          onPaymentComplete={() => {
-            setShowPayment(false);
-            setActiveTab('personalDetails');
-            setApplicationId(undefined);
+        onPaymentComplete={() => {
+          setShowPayment(false);
+          setActiveTab('personalDetails');
+          setApplicationId(undefined);
           setValue('applicationId', '', { shouldValidate: false });
           setValue('personalInfo', undefined, { shouldValidate: false });
           setValue('choiceOfStudy', [], { shouldValidate: false });
@@ -645,7 +669,6 @@ export const ApplicationForm: React.FC = () => {
           setValue('declaration', { privacyPolicy: false, marketingEmail: false, marketingCall: false }, { shouldValidate: false });
         }}
         token={token}
-        isPayment={true}
       />
     );
   }
@@ -695,16 +718,11 @@ export const ApplicationForm: React.FC = () => {
           </div>
         </div>
 
-        {formData.applicationId && (
-          <div className="mb-4 text-center">
-            <p className="text-sm text-cyan-700 bg-cyan-50 inline-block px-4 py-2 rounded-full">
-              Application ID: <span className="font-medium">{formData.applicationId}</span>
-              <span className="ml-2 text-xs text-cyan-500">(Save this ID to continue your application later)</span>
-            </p>
-          </div>
-        )}
-
-        <FormTabs tabs={tabs} />
+        <FormTabs tabs={tabs} onTabClick={(tabId) => {
+          setActiveTab(tabId);
+          const currentIndex = tabs.findIndex((tab) => tab.id === tabId);
+          setFormProgress(Math.floor((currentIndex / (tabs.length - 1)) * 100));
+        }} />
         <div className="bg-white shadow-sm p-6 rounded-xl border border-cyan-100 relative overflow-hidden">
           <div
             className="absolute inset-0 bg-cyan-50/10 -z-10"
@@ -749,7 +767,7 @@ export const ApplicationForm: React.FC = () => {
               ref={choiceOfStudyRef}
             />
           )}
-              {activeTab === 'education' && (
+          {activeTab === 'education' && (
             <Education
               initialData={formData.education}
               onSave={handleUpdateEducation}
@@ -779,7 +797,7 @@ export const ApplicationForm: React.FC = () => {
           {activeTab === 'declaration' && (
             <Declaration
               value={formData.declaration || { privacyPolicy: false, marketingEmail: false, marketingCall: false }}
-              onChange={handleUpdateDeclaration}
+              onChange={handleDeclarationChange}
             />
           )}
           <div className="flex justify-between mt-8 border-t border-cyan-50 pt-6">

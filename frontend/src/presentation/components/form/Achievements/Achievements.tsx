@@ -1,4 +1,4 @@
-import React, { useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { useEffect, forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AchievementQuestions } from './AchievementQuestions';
@@ -13,30 +13,11 @@ interface Props {
   onSave: (data: AchievementSection) => void;
 }
 
-export const Achievements = forwardRef<{ trigger: () => Promise<boolean> }, Props>(({ initialData, onSave }, ref) => {
+export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getValues: () => any }, Props>(({ initialData, onSave }, ref) => {
   const defaultValues: AchievementSection = {
     questions: questions.reduce((acc, q) => ({ ...acc, [q.id]: '' }), {}),
     achievements: [],
     hasNoAchievements: false,
-    showModal: false,
-    newAchievement: {
-      activity: '',
-      level: '',
-      levelOfAchievement: '',
-      positionHeld: '',
-      organizationName: '',
-      fromDate: '',
-      toDate: '',
-      description: '',
-      reference: {
-        firstName: '',
-        lastName: '',
-        position: '',
-        email: '',
-        phone: { country: '', area: '', number: '' },
-      },
-    },
-    editingIndex: null,
   };
 
   const methods = useForm<AchievementSection>({
@@ -49,6 +30,27 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean> }, Prop
   const achievementData = watch();
   const previousDataRef = useRef<AchievementSection | null>(null);
 
+  // Local UI state
+  const [showModal, setShowModal] = useState(false);
+  const [newAchievement, setNewAchievement] = useState({
+    activity: '',
+    level: '',
+    levelOfAchievement: '',
+    positionHeld: '',
+    organizationName: '',
+    fromDate: '',
+    toDate: '',
+    description: '',
+    reference: {
+      firstName: '',
+      lastName: '',
+      position: '',
+      email: '',
+      phone: { country: '', area: '', number: '' },
+    },
+  });
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
   useEffect(() => {
     // Only update the form data without saving to backend
     if (initialData) {
@@ -60,25 +62,13 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean> }, Prop
   useImperativeHandle(ref, () => ({
     trigger: async () => {
       const isValid = await trigger(['questions', 'achievements', 'hasNoAchievements'], { shouldFocus: true });
-      console.log('Achievements: Validation result', { isValid, errors, achievementData });
-      
-      // If validation passes, call onSave with the current data
+      console.log('Achievements: trigger called. isValid:', isValid, 'Current achievements:', achievementData.achievements);
       if (isValid) {
-        // Get the current form data directly from the form
-        const currentData = {
-          questions: achievementData.questions,
-          achievements: achievementData.achievements,
-          hasNoAchievements: achievementData.hasNoAchievements,
-          showModal: achievementData.showModal,
-          newAchievement: achievementData.newAchievement,
-          editingIndex: achievementData.editingIndex
-        };
-        console.log('Calling onSave with current data:', currentData);
-        onSave(currentData);
+        methods.clearErrors();
       }
-      
       return isValid;
     },
+    getValues: () => methods.getValues(),
   }));
 
   const handleAnswerChange = (questionId: number, value: string) => {
@@ -99,11 +89,12 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean> }, Prop
 
   const handleRemoveAchievement = (index: number) => {
     const newAchievements = achievementData.achievements.filter((_, i) => i !== index);
+    console.log('Removing achievement at index', index, 'New achievements:', newAchievements);
     setValue('achievements', newAchievements, { shouldValidate: false });
   };
 
   const resetModalFields = () => {
-    setValue('newAchievement', {
+    setNewAchievement({
       activity: '',
       level: '',
       levelOfAchievement: '',
@@ -119,13 +110,13 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean> }, Prop
         email: '',
         phone: { country: '', area: '', number: '' },
       },
-    }, { shouldValidate: false });
-    setValue('editingIndex', null, { shouldValidate: false });
+    });
+    setEditingIndex(null);
   };
 
   const handleAddAchievement = () => {
     resetModalFields();
-    setValue('showModal', true, { shouldValidate: false });
+    setShowModal(true);
   };
 
   return (
@@ -202,9 +193,9 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean> }, Prop
                 achievements={achievementData.achievements}
                 onAdd={handleAddAchievement}
                 onEdit={(achievement, index) => {
-                  setValue('newAchievement', achievement, { shouldValidate: false });
-                  setValue('editingIndex', index, { shouldValidate: false });
-                  setValue('showModal', true, { shouldValidate: false });
+                  setNewAchievement(achievement);
+                  setEditingIndex(index);
+                  setShowModal(true);
                 }}
                 onRemove={handleRemoveAchievement}
                 max={4}
@@ -216,34 +207,32 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean> }, Prop
         </div>
 
         <AchievementModal
-          show={achievementData.showModal || false}
+          show={showModal}
           onClose={() => {
-            setValue('showModal', false, { shouldValidate: false });
+            setShowModal(false);
             resetModalFields();
           }}
           onSubmit={async () => {
             const isValid = await trigger(['newAchievement'], { shouldFocus: true });
-            console.log('AchievementModal: Validation result', { isValid, errors, newAchievement: achievementData.newAchievement });
+            console.log('AchievementModal: Validation result', { isValid, errors, newAchievement });
             if (!isValid) {
               return;
             }
 
-            const editingIndex = achievementData.editingIndex;
-            const newAchievements = [...(achievementData.achievements || [])];
-            const newAchievement = achievementData.newAchievement;
-
+            const currentAchievements = [...(achievementData.achievements || [])];
+            console.log('Adding/editing achievement:', newAchievement, 'at index', editingIndex);
             if (editingIndex !== null && editingIndex !== undefined) {
-              newAchievements[editingIndex] = newAchievement;
-            } else if (newAchievements.length < 4) {
-              newAchievements.push(newAchievement);
+              currentAchievements[editingIndex] = newAchievement;
+            } else if (currentAchievements.length < 4) {
+              currentAchievements.push(newAchievement);
             }
-
-            setValue('achievements', newAchievements, { shouldValidate: false });
-            setValue('showModal', false, { shouldValidate: false });
+            console.log('Updated achievements array:', currentAchievements);
+            setValue('achievements', currentAchievements, { shouldValidate: false });
+            setShowModal(false);
             resetModalFields();
           }}
-          newAchievement={achievementData.newAchievement}
-          setNewAchievement={(a) => setValue('newAchievement', a, { shouldValidate: false })}
+          newAchievement={newAchievement}
+          setNewAchievement={setNewAchievement}
         />
       </div>
     </FormProvider>

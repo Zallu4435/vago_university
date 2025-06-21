@@ -27,7 +27,7 @@ export interface DocumentDTO {
     studentId: string;
     date: string;
     description: string;
-    method: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay";
+    method: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay" | "stripe";
     amount: number;
     status: "Completed" | "Pending" | "Failed";
     receiptUrl?: string;
@@ -106,7 +106,7 @@ export interface DocumentDTO {
     status: "Completed" | "Pending" | "Failed";
     date?: string;
     description?: string;
-    method?: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay";
+    method?: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay" | "stripe";
     metadata?: Record<string, any>;
   }
   

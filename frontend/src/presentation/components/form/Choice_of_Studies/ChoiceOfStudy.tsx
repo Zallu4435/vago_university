@@ -43,11 +43,6 @@ export const ChoiceOfStudy = forwardRef<ChoiceOfStudyRef, ChoiceOfStudyProps>(
       trigger: async () => {
         const isValid = await trigger();
         console.log('ChoiceOfStudy: Validation result', { isValid, errors, choices: currentChoices });
-        
-        if (isValid) {
-          onSave(currentChoices);
-        }
-        
         return isValid;
       },
     }));
@@ -55,15 +50,21 @@ export const ChoiceOfStudy = forwardRef<ChoiceOfStudyRef, ChoiceOfStudyProps>(
     const handleAddProgramme = (data: ProgrammeChoiceFormData) => {
       const newChoice: ProgrammeChoice = { 
         programme: data.programme, 
-        preferredMajor: data.preferredMajor || '' 
+        preferredMajor: data.preferredMajor ?? ''
       };
-      const updatedChoices = [...currentChoices, newChoice];
+      const updatedChoices = [...currentChoices, newChoice].map(choice => ({
+        programme: choice.programme,
+        preferredMajor: choice.preferredMajor ?? ''
+      }));
       setValue('choices', updatedChoices, { shouldValidate: false });
       setShowModal(false);
     };
 
     const handleRemove = (idx: number) => {
-      const updatedChoices = currentChoices.filter((_, i) => i !== idx);
+      const updatedChoices = currentChoices.filter((_, i) => i !== idx).map(choice => ({
+        programme: choice.programme,
+        preferredMajor: choice.preferredMajor ?? ''
+      }));
       setValue('choices', updatedChoices, { shouldValidate: false });
     };
 
@@ -119,7 +120,11 @@ export const ChoiceOfStudy = forwardRef<ChoiceOfStudyRef, ChoiceOfStudyProps>(
                         <td className="py-4 px-4 text-cyan-600" colSpan={4}>No record(s)</td>
                       </tr>
                     ) : (
-                      currentChoices?.map((choice: ProgrammeChoice, idx: number) => (
+                      currentChoices?.map((choice, idx: number) => (
+                        ((choice: any) => ({
+                          ...choice,
+                          preferredMajor: choice.preferredMajor ?? ''
+                        }))(choice),
                         <tr key={idx} className="border-b border-cyan-100 hover:bg-cyan-50">
                           <td className="py-3 px-4 text-cyan-800">{idx + 1}</td>
                           <td className="py-3 px-4 text-cyan-800">{choice.programme}</td>
@@ -154,7 +159,10 @@ export const ChoiceOfStudy = forwardRef<ChoiceOfStudyRef, ChoiceOfStudyProps>(
           showModal={showModal}
           onClose={() => setShowModal(false)}
           onSubmit={handleAddProgramme}
-          choices={currentChoices}
+          choices={currentChoices.map(choice => ({
+            programme: choice.programme,
+            preferredMajor: choice.preferredMajor ?? ''
+          }))}
         />
       </FormProvider>
     );

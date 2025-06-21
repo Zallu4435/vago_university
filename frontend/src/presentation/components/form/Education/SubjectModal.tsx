@@ -11,8 +11,7 @@ interface SubjectModalProps {
   onSubmit: (subject: {
     subject: string;
     otherSubject: string;
-    marksObtained: string;
-    maxMarks: string;
+    grade: string;
   }) => void;
 }
 
@@ -24,15 +23,13 @@ export const SubjectModal: React.FC<SubjectModalProps> = ({
   const { control, handleSubmit, formState: { errors }, reset, watch } = useForm<{
     subject: string;
     otherSubject: string;
-    marksObtained: string;
-    maxMarks: string;
+    grade: string;
   }>({
     resolver: zodResolver(subjectSchema),
     defaultValues: {
       subject: '',
       otherSubject: '',
-      marksObtained: '',
-      maxMarks: '',
+      grade: '',
     },
     mode: 'onChange',
   });
@@ -48,8 +45,7 @@ export const SubjectModal: React.FC<SubjectModalProps> = ({
   const onFormSubmit = (data: {
     subject: string;
     otherSubject: string;
-    marksObtained: string;
-    maxMarks: string;
+    grade: string;
   }) => {
     onSubmit(data);
     onClose();
@@ -106,36 +102,19 @@ export const SubjectModal: React.FC<SubjectModalProps> = ({
             />
           )}
           <Controller
-            name="marksObtained"
+            name="grade"
             control={control}
             render={({ field }) => (
               <Input
-                id="marksObtained"
-                label="Marks Obtained"
+                id="grade"
+                label="Grade"
                 value={field.value}
                 onChange={field.onChange}
                 required
-                placeholder="Enter marks obtained"
+                placeholder="Enter grade"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
                 labelClassName="text-cyan-700"
-                error={errors.marksObtained?.message}
-              />
-            )}
-          />
-          <Controller
-            name="maxMarks"
-            control={control}
-            render={({ field }) => (
-              <Input
-                id="maxMarks"
-                label="Maximum Marks"
-                value={field.value}
-                onChange={field.onChange}
-                required
-                placeholder="Enter maximum marks"
-                className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
-                labelClassName="text-cyan-700"
-                error={errors.maxMarks?.message}
+                error={errors.grade?.message}
               />
             )}
           />

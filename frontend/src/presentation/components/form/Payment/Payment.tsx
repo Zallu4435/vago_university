@@ -29,7 +29,7 @@ export const Payment: React.FC<PaymentProps> = ({
   const [selectedMethod, setSelectedMethod] = useState<string>('stripe');
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
-  const { processPayment, submitApplication } = useApplicationForm(token);
+  const { processPayment, confirmPayment, submitApplication } = useApplicationForm(token);
   const [submissionStatus, setSubmissionStatus] = useState<{
     success: boolean | null;
     message: string | null;
@@ -68,24 +68,46 @@ export const Payment: React.FC<PaymentProps> = ({
       };
 
       console.log('Payment Payload:', paymentPayload);
+      
+      // Step 1: Process payment (create payment record and Stripe PaymentIntent)
       const paymentResult = await processPayment(paymentPayload);
       console.log('Payment Result:', paymentResult);
+      console.log('Payment Result stripePaymentIntentId:', paymentResult.stripePaymentIntentId);
 
-      if (paymentResult.status !== 'completed') {
-        let errorMessage = paymentResult.message || 'Payment processing failed';
-        if (paymentResult.status === 'pending') {
+      if (paymentResult.status !== 'pending') {
+        throw new Error(paymentResult.message || 'Payment processing failed');
+      }
+
+      // Step 2: Confirm payment (check Stripe status and update payment record)
+      console.log('Confirming payment with:', {
+        paymentId: paymentResult.paymentId,
+        stripePaymentIntentId: paymentResult.stripePaymentIntentId
+      });
+      
+      if (!paymentResult.stripePaymentIntentId) {
+        throw new Error('Missing stripePaymentIntentId from payment result');
+      }
+      
+      const confirmResult = await confirmPayment({
+        paymentId: paymentResult.paymentId,
+        stripePaymentIntentId: paymentResult.stripePaymentIntentId,
+      });
+      console.log('Confirm Result:', confirmResult);
+
+      if (confirmResult.status !== 'completed') {
+        let errorMessage = confirmResult.message || 'Payment confirmation failed';
+        if (confirmResult.status === 'pending') {
           errorMessage = 'Payment is still processing. Please wait and try again.';
-        } else if (paymentResult.status === 'requires_action') {
-          errorMessage = 'Additional payment verification required. Please follow the instructions.';
-        } else if (paymentResult.status === 'failed') {
+        } else if (confirmResult.status === 'failed') {
           errorMessage = 'Payment failed. Please try a different payment method.';
         }
         throw new Error(errorMessage);
       }
 
+      // Step 3: Submit application
       const submissionResult = await submitApplication({
         applicationId: formData.applicationId,
-        paymentId: paymentResult.paymentId,
+        paymentId: confirmResult.paymentId,
       });
       console.log('Submission Result:', submissionResult);
 
@@ -182,7 +204,6 @@ export const Payment: React.FC<PaymentProps> = ({
             amount={1000.00}
             currency="INR"
             onSubmit={handlePayment}
-            isProcessing={isProcessing}
           />
         )}
       </div>

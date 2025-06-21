@@ -70,9 +70,6 @@ export const AchievementSectionSchema = z.object({
   questions: QuestionsSchema,
   achievements: z.array(AchievementSchema).max(4, { message: 'Cannot add more than 4 achievements' }).optional(),
   hasNoAchievements: z.boolean(),
-  showModal: z.boolean().optional(),
-  newAchievement: AchievementSchema.optional(),  // ✅ This already includes reference
-  editingIndex: z.number().nullable().optional(),
 }).refine(
   (data) => data.hasNoAchievements || (data.achievements && data.achievements.length > 0),
   {

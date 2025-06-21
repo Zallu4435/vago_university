@@ -83,7 +83,7 @@ export const applicationController = {
     applicationId: string,
     paymentDetails: any,
     token: string
-  ): Promise<{ paymentId: string; status: string; message: string }> {
+  ): Promise<{ paymentId: string; status: string; message: string; clientSecret?: string; stripePaymentIntentId?: string }> {
     try {
       const response = await httpClient.post('/admission/payment/process', { applicationId, paymentDetails }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -108,6 +108,28 @@ export const applicationController = {
       return response.data.status;
     } catch (error: any) {
       console.error(`Error fetching status for application ${applicationId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Confirms payment after Stripe processing
+   * @param paymentId The payment ID
+   * @param stripePaymentIntentId The Stripe payment intent ID
+   * @param token JWT token for authentication
+   */
+  async confirmPayment(
+    paymentId: string,
+    stripePaymentIntentId: string,
+    token: string
+  ): Promise<{ paymentId: string; status: string; message: string; stripePaymentIntentId: string }> {
+    try {
+      const response = await httpClient.post('/admission/payment/confirm', { paymentId, stripePaymentIntentId }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error(`Error confirming payment ${paymentId}:`, error);
       throw error;
     }
   },

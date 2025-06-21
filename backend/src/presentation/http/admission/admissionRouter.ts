@@ -22,6 +22,10 @@ admissionRouter.post("/payment/process", authMiddleware, (req, res) =>
   expressAdapter(req, res, admissionController.processPayment.bind(admissionController))
 );
 
+admissionRouter.post("/payment/confirm", authMiddleware, (req, res) =>
+  expressAdapter(req, res, admissionController.confirmPayment.bind(admissionController))
+);
+
 admissionRouter.post("/finalize", authMiddleware, (req, res) =>
   expressAdapter(req, res, admissionController.handleFinalSubmit.bind(admissionController))
 );

@@ -25,7 +25,7 @@ interface Payment extends mongoose.Document {
   studentId: mongoose.Types.ObjectId;
   date: Date;
   description: string;
-  method: "Credit Card" | "Bank Transfer" | "Financial Aid";
+  method: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay" | "stripe";
   amount: number;
   status: "Completed" | "Pending" | "Failed";
   receiptUrl?: string;
@@ -121,7 +121,7 @@ const PaymentSchema = new mongoose.Schema<Payment>(
     description: { type: String, required: true },
     method: {
       type: String,
-      enum: ['Credit Card', 'Bank Transfer', 'Financial Aid', 'Razorpay'],
+      enum: ['Credit Card', 'Bank Transfer', 'Financial Aid', 'Razorpay', 'stripe'],
       required: true,
     },
     amount: { type: Number, required: true },

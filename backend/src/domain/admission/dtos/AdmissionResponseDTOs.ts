@@ -17,6 +17,14 @@ export interface ProcessPaymentResponseDTO {
   status: string;
   message: string;
   clientSecret: string | null;
+  stripePaymentIntentId?: string;
+}
+
+export interface ConfirmPaymentResponseDTO {
+  paymentId: string;
+  status: string;
+  message: string;
+  stripePaymentIntentId: string;
 }
 
 export interface FinalizeAdmissionResponseDTO {

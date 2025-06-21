@@ -6,7 +6,7 @@ export interface PaymentProps {
   studentId: string;
   date: Date;
   description: string;
-  method: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay";
+  method: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay" | "stripe";
   amount: number;
   status: "Completed" | "Pending" | "Failed";
   receiptUrl?: string;
@@ -20,7 +20,7 @@ export class Payment {
   private _studentId: string;
   private _date: Date;
   private _description: string;
-  private _method: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay";
+  private _method: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay" | "stripe";
   private _amount: number;
   private _status: "Completed" | "Pending" | "Failed";
   private _receiptUrl?: string;
@@ -62,7 +62,7 @@ export class Payment {
   get studentId(): string { return this._studentId; }
   get date(): Date { return this._date; }
   get description(): string { return this._description; }
-  get method(): "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay" { return this._method; }
+  get method(): "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay" | "stripe" { return this._method; }
   get amount(): number { return this._amount; }
   get status(): "Completed" | "Pending" | "Failed" { return this._status; }
   get receiptUrl(): string | undefined { return this._receiptUrl; }

@@ -11,12 +11,10 @@ interface DeclarationProps {
 
 export const Declaration: React.FC<DeclarationProps> = ({ value, onChange }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { register, formState: { errors }, watch, getValues, setValue } = useFormContext();
-
-  const agreements = watch('declaration') || value;
+  const { register, formState: { errors }, getValues, setValue } = useFormContext();
 
   const handleCheckboxChange = (field: keyof DeclarationSection, checked: boolean) => {
-    const updatedAgreements = { ...agreements, [field]: checked };
+    const updatedAgreements = { ...value, [field]: checked };
     setValue('declaration', updatedAgreements, { shouldValidate: true });
     onChange(updatedAgreements);
   };
@@ -43,7 +41,7 @@ export const Declaration: React.FC<DeclarationProps> = ({ value, onChange }) => 
                   type="checkbox"
                   id="privacyPolicy"
                   {...register('declaration.privacyPolicy')}
-                  checked={agreements.privacyPolicy}
+                  checked={value.privacyPolicy}
                   onChange={(e) => handleCheckboxChange('privacyPolicy', e.target.checked)}
                   className="mt-1 h-4 w-4 text-cyan-600 border-cyan-300 focus:ring-cyan-200"
                 />
@@ -51,14 +49,14 @@ export const Declaration: React.FC<DeclarationProps> = ({ value, onChange }) => 
                   I agree to the <a href="/privacy-notice" className="text-cyan-600 underline">Privacy Notice</a>.
                 </label>
               </div>
-              {errors.declaration?.privacyPolicy && (
-                <p className="text-sm text-red-700 ml-6">{errors.declaration.privacyPolicy.message}</p>
+              {!value.privacyPolicy && (
+                <p className="text-sm text-red-700 ml-6">You must agree to the Privacy Notice to proceed.</p>
               )}
               <div className="flex items-start">
                 <input
                   type="checkbox"
                   id="marketingEmail"
-                  checked={agreements.marketingEmail}
+                  checked={value.marketingEmail}
                   onChange={(e) => handleCheckboxChange('marketingEmail', e.target.checked)}
                   className="mt-1 h-4 w-4 text-cyan-600 border-cyan-300 focus:ring-cyan-200"
                 />
@@ -70,7 +68,7 @@ export const Declaration: React.FC<DeclarationProps> = ({ value, onChange }) => 
                 <input
                   type="checkbox"
                   id="marketingCall"
-                  checked={agreements.marketingCall}
+                  checked={value.marketingCall}
                   onChange={(e) => handleCheckboxChange('marketingCall', e.target.checked)}
                   className="mt-1 h-4 w-4 text-cyan-600 border-cyan-300 focus:ring-cyan-200"
                 />
@@ -84,11 +82,11 @@ export const Declaration: React.FC<DeclarationProps> = ({ value, onChange }) => 
             <Button
               label="Previous"
               className="text-cyan-600 border-cyan-200 hover:bg-cyan-50 px-4 py-2 rounded-lg"
-              onClick={() => onChange(agreements)} // Trigger onChange to save current state
+              onClick={() => {}}
             />
             <Button
               label="Submit Application"
-              disabled={!agreements.privacyPolicy || isSubmitting}
+              disabled={!value.privacyPolicy || isSubmitting}
               onClick={() => setIsSubmitting(true)}
               className="bg-gradient-to-r from-cyan-400 to-blue-400 text-white px-6 py-2 rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all duration-300 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             />
@@ -99,7 +97,7 @@ export const Declaration: React.FC<DeclarationProps> = ({ value, onChange }) => 
           formData={getValues()}
           onConfirm={() => {
             setIsSubmitting(false);
-            onChange(agreements); // Ensure state is saved before moving to summary
+            onChange(value); // Ensure state is saved before moving to summary
           }}
           onBackToForm={() => setIsSubmitting(false)}
           onPaymentComplete={() => {

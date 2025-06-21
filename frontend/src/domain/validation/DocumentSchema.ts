@@ -36,13 +36,13 @@ export const DocumentUploadSectionSchema = z.object({
       data => {
         return data.every(doc => {
           if (doc.fileType) {
-            return ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'].includes(doc.fileType);
+            return ['application/pdf'].includes(doc.fileType);
           }
           return true;
         });
       },
       {
-        message: 'Invalid file type. Allowed types are PDF, JPEG, JPG, PNG',
+        message: 'Invalid file type. Only PDF files are allowed',
         path: ['documents'],
       }
     ),

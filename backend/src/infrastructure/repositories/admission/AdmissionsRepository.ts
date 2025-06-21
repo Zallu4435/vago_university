@@ -7,6 +7,7 @@ import {
     GetApplicationRequestDTO,
     SaveSectionRequestDTO,
     ProcessPaymentRequestDTO,
+    ConfirmPaymentRequestDTO,
     FinalizeAdmissionRequestDTO,
 } from "../../../domain/admission/dtos/AdmissionRequestDTOs";
 import {
@@ -14,6 +15,7 @@ import {
     GetApplicationResponseDTO,
     SaveSectionResponseDTO,
     ProcessPaymentResponseDTO,
+    ConfirmPaymentResponseDTO,
     FinalizeAdmissionResponseDTO,
 } from "../../../domain/admission/dtos/AdmissionResponseDTOs";
 
@@ -122,17 +124,7 @@ export class AdmissionsRepository implements IAdmissionsRepository {
         const draft = await AdmissionDraftModel.findOne({ applicationId });
         if (!draft) throw new Error(AdmissionErrorType.ApplicationNotFound);
 
-        // 1. Create Stripe PaymentIntent
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(paymentDetails.amount * 100),
-            currency: paymentDetails.currency.toLowerCase(),
-            automatic_payment_methods: { enabled: true, allow_redirects: "always" },
-            return_url: paymentDetails.returnUrl,
-            confirm: false, // let frontend confirm
-            payment_method: paymentDetails.paymentMethodId,
-        });
-
-        // 2. Create PaymentModel record
+        // 1. Create PaymentModel record first
         const payment = new PaymentModel({
             studentId: draft.registerId,
             date: new Date(),
@@ -143,19 +135,109 @@ export class AdmissionsRepository implements IAdmissionsRepository {
             metadata: {
                 currency: paymentDetails.currency,
                 paymentMethodId: paymentDetails.paymentMethodId,
-                stripePaymentIntentId: paymentIntent.id,
-                returnUrl: paymentDetails.returnUrl,
+                applicationId: applicationId,
             }
         });
         await payment.save();
 
-        // 3. Return clientSecret for frontend
-        return {
-            paymentId: payment._id.toString(),
-            status: payment.status,
-            message: "Payment initiated",
-            clientSecret: paymentIntent.client_secret,
-        };
+        try {
+            // 2. Create Stripe PaymentIntent
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: Math.round(paymentDetails.amount * 100),
+                currency: paymentDetails.currency.toLowerCase(),
+                automatic_payment_methods: { enabled: true, allow_redirects: "never" },
+                confirm: false, // let frontend confirm
+                payment_method: paymentDetails.paymentMethodId,
+                metadata: {
+                    paymentId: payment._id.toString(),
+                    applicationId: applicationId,
+                    studentId: draft.registerId.toString(),
+                }
+            });
+
+            // 3. Update payment record with Stripe details
+            payment.metadata = {
+                ...payment.metadata,
+                stripePaymentIntentId: paymentIntent.id,
+                returnUrl: paymentDetails.returnUrl,
+                clientSecret: paymentIntent.client_secret,
+            };
+            await payment.save();
+
+            // 4. Return payment details for frontend
+            return {
+                paymentId: payment._id.toString(),
+                status: "pending",
+                message: "Payment created successfully. Please complete the payment.",
+                clientSecret: paymentIntent.client_secret,
+                stripePaymentIntentId: paymentIntent.id,
+            };
+        } catch (error) {
+            // If Stripe fails, update payment status to failed
+            payment.status = "Failed";
+            payment.metadata = {
+                ...payment.metadata,
+                error: error instanceof Error ? error.message : 'Unknown error',
+            };
+            await payment.save();
+            
+            throw new Error(`Payment creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+    async confirmPayment(params: ConfirmPaymentRequestDTO): Promise<ConfirmPaymentResponseDTO> {
+        console.log('=== CONFIRM PAYMENT REPOSITORY START ===');
+        console.log('Repository params:', params);
+        
+        const { paymentId, stripePaymentIntentId } = params;
+        const payment = await PaymentModel.findById(paymentId);
+        if (!payment) throw new Error(AdmissionErrorType.PaymentNotFound);
+
+        try {
+            // First, confirm the PaymentIntent with Stripe using the stored payment method
+            const paymentIntent = await stripe.paymentIntents.confirm(stripePaymentIntentId, {
+                payment_method: payment.metadata?.paymentMethodId,
+            });
+            console.log('Stripe PaymentIntent confirmed:', paymentIntent.id, 'Status:', paymentIntent.status);
+            
+            // Update payment status based on Stripe status
+            const stripeStatus = paymentIntent.status;
+            const paymentStatus = this.mapStripeStatusToPaymentStatus(stripeStatus);
+            
+            console.log('Mapping Stripe status:', stripeStatus, 'to payment status:', paymentStatus);
+            
+            payment.status = paymentStatus === "completed" ? "Completed" : 
+                           paymentStatus === "pending" ? "Pending" : "Failed";
+            
+            payment.metadata = {
+                ...payment.metadata,
+                stripeStatus: stripeStatus,
+                confirmedAt: new Date(),
+                lastChecked: new Date(),
+            };
+            
+            await payment.save();
+            console.log('Payment updated in database:', payment._id, 'Status:', payment.status);
+
+            return {
+                paymentId: payment._id.toString(),
+                status: paymentStatus,
+                message: this.getPaymentMessage(stripeStatus),
+                stripePaymentIntentId: stripePaymentIntentId,
+            };
+        } catch (error) {
+            console.error('Error confirming payment:', error);
+            // If confirmation fails, update payment status to failed
+            payment.status = "Failed";
+            payment.metadata = {
+                ...payment.metadata,
+                confirmationError: error instanceof Error ? error.message : 'Unknown error',
+                lastError: new Date(),
+            };
+            await payment.save();
+            
+            throw new Error(`Payment confirmation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
     }
 
     async finalizeAdmission(params: FinalizeAdmissionRequestDTO): Promise<FinalizeAdmissionResponseDTO> {

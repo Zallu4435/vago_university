@@ -48,13 +48,8 @@ export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
         const isValid = await trigger();
         console.log('Documents trigger validation result:', { isValid, errors });
         
-        // If validation passes, call onSave with the current data
         if (isValid) {
-          const currentData = {
-            documents: watch('documents')
-          };
-          console.log('Calling onSave with current data:', currentData);
-          onSave(currentData);
+          methods.clearErrors();
         }
         
         return isValid;
@@ -64,9 +59,9 @@ export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
     const handleFileUpload = async (id: string, file: File) => {
       if (!file) return;
 
-      const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+      const validTypes = ['application/pdf'];
       if (!validTypes.includes(file.type)) {
-        toast.error('Invalid file type. Allowed types are PDF, JPEG, JPG, PNG.');
+        toast.error('Invalid file type. Only PDF files are allowed.');
         return;
       }
       if (file.size > 10 * 1024 * 1024) {

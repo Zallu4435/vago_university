@@ -15,6 +15,8 @@ interface PaymentResult {
   paymentId: string;
   status: string;
   message?: string;
+  clientSecret?: string;
+  stripePaymentIntentId?: string;
 }
 
 // Define submission result interface
@@ -35,7 +37,8 @@ class ApplicationService {
 
   async getApplicationById(userId: string, token: string): Promise<FormData | null> {
     try {
-      return await applicationController.getApplicationById(userId, token);
+      const response = await applicationController.getApplicationById(userId, token);
+      return response?.draft
     } catch (error: any) {
       console.error('Error fetching application data:', error);
       throw new Error(error.response?.data?.error || error.message || 'Failed to fetch application data');
@@ -114,11 +117,30 @@ class ApplicationService {
       return {
         paymentId: result.paymentId,
         status: result.status,
-        message: result.message
+        message: result.message,
+        clientSecret: result.clientSecret,
+        stripePaymentIntentId: result.stripePaymentIntentId,
       };
     } catch (error: any) {
       console.error('Error processing payment:', error);
       throw new Error(error.response?.data?.error || error.message || 'Failed to process payment');
+    }
+  }
+
+  async confirmPayment(paymentId: string, stripePaymentIntentId: string, token: string): Promise<PaymentResult> {
+    try {
+      const result = await applicationController.confirmPayment(paymentId, stripePaymentIntentId, token);
+      if (!result.paymentId || !result.status) {
+        throw new Error(result.message || 'Invalid payment confirmation response');
+      }
+      return {
+        paymentId: result.paymentId,
+        status: result.status,
+        message: result.message
+      };
+    } catch (error: any) {
+      console.error('Error confirming payment:', error);
+      throw new Error(error.response?.data?.error || error.message || 'Failed to confirm payment');
     }
   }
 

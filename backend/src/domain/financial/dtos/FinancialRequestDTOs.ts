@@ -24,7 +24,7 @@ export interface DocumentDTO {
   export interface MakePaymentRequestDTO {
     studentId: string;
     amount: number;
-    method: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay";
+    method: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay" | "stripe";
     term: string;
     razorpayPaymentId?: string;
     razorpayOrderId?: string;

@@ -191,6 +191,21 @@ export const useApplicationForm = (token: string | null) => {
     }
   });
 
+  // Confirm payment
+  const { mutateAsync: confirmPayment, isLoading: isConfirmingPayment } = useMutation({
+    mutationFn: async ({ paymentId, stripePaymentIntentId }: { paymentId: string, stripePaymentIntentId: string }) => {
+      if (!token) throw new Error('Authentication token is missing');
+      return await applicationService.confirmPayment(paymentId, stripePaymentIntentId, token);
+    },
+    onSuccess: (data) => {
+      console.log('Payment confirmed successfully:', data);
+    },
+    onError: (error: any) => {
+      console.error('useApplicationForm: Error confirming payment:', error);
+      toast.error(error.message || 'Failed to confirm payment');
+    }
+  });
+
   return {
     createApplication,
     savePersonalInfo,
@@ -201,6 +216,7 @@ export const useApplicationForm = (token: string | null) => {
     saveDocuments,
     saveDeclaration,
     processPayment,
+    confirmPayment,
     submitApplication,
     isLoading: 
       isCreating ||
@@ -212,7 +228,8 @@ export const useApplicationForm = (token: string | null) => {
       isSavingDocuments || 
       isSavingDeclaration || 
       isSubmitting || 
-      isProcessingPayment
+      isProcessingPayment ||
+      isConfirmingPayment
   };
 };
 

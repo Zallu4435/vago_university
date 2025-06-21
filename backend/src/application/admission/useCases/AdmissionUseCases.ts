@@ -5,6 +5,7 @@ import {
     GetApplicationRequestDTO,
     SaveSectionRequestDTO,
     ProcessPaymentRequestDTO,
+    ConfirmPaymentRequestDTO,
     FinalizeAdmissionRequestDTO,
 } from "../../../domain/admission/dtos/AdmissionRequestDTOs";
 import {
@@ -12,6 +13,7 @@ import {
     GetApplicationResponseDTO,
     SaveSectionResponseDTO,
     ProcessPaymentResponseDTO,
+    ConfirmPaymentResponseDTO,
     FinalizeAdmissionResponseDTO,
 } from "../../../domain/admission/dtos/AdmissionResponseDTOs";
 
@@ -36,6 +38,10 @@ export interface ISaveSectionUseCase {
 
 export interface IProcessPaymentUseCase {
     execute(params: ProcessPaymentRequestDTO): Promise<ResponseDTO<ProcessPaymentResponseDTO>>;
+}
+
+export interface IConfirmPaymentUseCase {
+    execute(params: ConfirmPaymentRequestDTO): Promise<ResponseDTO<ConfirmPaymentResponseDTO>>;
 }
 
 export interface IFinalizeAdmissionUseCase {
@@ -118,6 +124,39 @@ export class ProcessPaymentUseCase implements IProcessPaymentUseCase {
             return { data: result, success: true };
         } catch (error: any) {
             console.error("ProcessPaymentUseCase: Error:", error);
+            return { data: { error: error.message || AdmissionErrorType.PaymentProcessingFailed }, success: false };
+        }
+    }
+}
+
+export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
+    constructor(private admissionsRepository: IAdmissionsRepository) { }
+
+    async execute(params: ConfirmPaymentRequestDTO): Promise<ResponseDTO<ConfirmPaymentResponseDTO>> {
+        try {
+            console.log('=== CONFIRM PAYMENT USE CASE START ===');
+            console.log('Params received:', params);
+            console.log('PaymentId:', params.paymentId);
+            console.log('StripePaymentIntentId:', params.stripePaymentIntentId);
+            
+            if (!params.paymentId || !params.stripePaymentIntentId) {
+                console.log('ERROR: Missing required parameters');
+                console.log('paymentId exists:', !!params.paymentId);
+                console.log('stripePaymentIntentId exists:', !!params.stripePaymentIntentId);
+                return { data: { error: AdmissionErrorType.PaymentProcessingFailed }, success: false };
+            }
+            
+            console.log('Calling repository confirmPayment...');
+            const result = await this.admissionsRepository.confirmPayment(params);
+            console.log('Repository result:', result);
+            
+            console.log('=== CONFIRM PAYMENT USE CASE SUCCESS ===');
+            return { data: result, success: true };
+        } catch (error: any) {
+            console.log('=== CONFIRM PAYMENT USE CASE ERROR ===');
+            console.error('Use case error:', error);
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
             return { data: { error: error.message || AdmissionErrorType.PaymentProcessingFailed }, success: false };
         }
     }

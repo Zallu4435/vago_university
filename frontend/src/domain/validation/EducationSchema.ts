@@ -60,8 +60,7 @@ export const subjectSchema = z
   .object({
     subject: z.string().min(1, 'Subject is required'),
     otherSubject: z.string().optional(),
-    marksObtained: z.string().regex(/^\d+$/, 'Enter a valid number for marks obtained'),
-    maxMarks: z.string().regex(/^\d+$/, 'Enter a valid number for maximum marks'),
+    grade: z.string().min(1, 'Grade is required'),
   })
   .refine(
     (data) => {
@@ -73,18 +72,6 @@ export const subjectSchema = z
     {
       path: ['otherSubject'],
       message: 'Other subject name is required when "Other" is selected',
-    }
-  )
-  .refine(
-    (data) => {
-      if (data.marksObtained && data.maxMarks) {
-        return parseInt(data.marksObtained) <= parseInt(data.maxMarks);
-      }
-      return true;
-    },
-    {
-      path: ['marksObtained'],
-      message: 'Marks obtained cannot exceed maximum marks',
     }
   );
 

@@ -67,20 +67,26 @@ export const Education = forwardRef<EducationRef, EducationProps>(({ initialData
     trigger: async () => {
       try {
         const currentValues = getValues();
-        
         // First check if studentType is selected
         if (!currentValues.studentType) {
           return false;
         }
-        
         // Validate the form
         const isValid = await trigger();
         
+        // If valid, structure the data properly under education field
         if (isValid) {
-          // Call onSave with the current form values
-          onSave(currentValues);
+          const educationData = {
+            studentType: currentValues.studentType,
+            local: currentValues.local,
+            transfer: currentValues.transfer,
+            international: currentValues.international,
+          };
+          // Update the education field in the form
+          setValue('education', educationData, { shouldValidate: false });
         }
         
+        // Do not call onSave here; let parent handle backend update
         return isValid;
       } catch (error) {
         console.error('Education: Validation error:', error);

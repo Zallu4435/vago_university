@@ -26,6 +26,11 @@ export interface ProcessPaymentRequestDTO {
   };
 }
 
+export interface ConfirmPaymentRequestDTO {
+  paymentId: string;
+  stripePaymentIntentId: string;
+}
+
 export interface FinalizeAdmissionRequestDTO {
   applicationId: string;
   paymentId: string;

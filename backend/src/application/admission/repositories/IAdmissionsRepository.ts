@@ -3,6 +3,7 @@ import {
     GetApplicationRequestDTO,
     SaveSectionRequestDTO,
     ProcessPaymentRequestDTO,
+    ConfirmPaymentRequestDTO,
     FinalizeAdmissionRequestDTO,
   } from "../../../domain/admission/dtos/AdmissionRequestDTOs";
   import {
@@ -10,6 +11,7 @@ import {
     GetApplicationResponseDTO,
     SaveSectionResponseDTO,
     ProcessPaymentResponseDTO,
+    ConfirmPaymentResponseDTO,
     FinalizeAdmissionResponseDTO,
   } from "../../../domain/admission/dtos/AdmissionResponseDTOs";
   
@@ -18,5 +20,6 @@ import {
     getApplication(params: GetApplicationRequestDTO): Promise<GetApplicationResponseDTO>;
     saveSection(params: SaveSectionRequestDTO): Promise<SaveSectionResponseDTO>;
     processPayment(params: ProcessPaymentRequestDTO): Promise<ProcessPaymentResponseDTO>;
+    confirmPayment(params: ConfirmPaymentRequestDTO): Promise<ConfirmPaymentResponseDTO>;
     finalizeAdmission(params: FinalizeAdmissionRequestDTO): Promise<FinalizeAdmissionResponseDTO>;
   }

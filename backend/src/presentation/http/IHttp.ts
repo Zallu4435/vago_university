@@ -255,6 +255,7 @@ export interface IAdmissionController extends IController {
   getApplication(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   saveSection(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   processPayment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  confirmPayment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   handleFinalSubmit(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 

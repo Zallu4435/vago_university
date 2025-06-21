@@ -13,7 +13,9 @@ import {
   FaBalanceScale,
   FaAward,
   FaCheckCircle,
-  FaHome
+  FaHome,
+  FaEye,
+  FaTimes
 } from 'react-icons/fa';
 
 interface FormSubmissionFlowProps {
@@ -33,18 +35,20 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
 }) => {
   const [showPayment, setShowPayment] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [submissionStatus, setSubmissionStatus] = useState<{
-    success: boolean | null;
-    message: string | null;
-  }>({ success: null, message: null });
-
+  const [submissionStatus, setSubmissionStatus] = useState<{ success: boolean; message: string }>({ success: false, message: '' });
+  const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
 
   // Utility function to format different types of data
   const formatValue = (value: any): string => {
     if (value === null || value === undefined) return '—';
     if (typeof value === 'boolean') return value ? 'Yes' : 'No';
     if (typeof value === 'object') {
+      if (Array.isArray(value)) {
+        return value.length > 0 ? `${value.length} item(s)` : 'None';
+      }
       return Object.entries(value)
+        .filter(([, v]) => v !== null && v !== undefined && v !== '')
         .map(([k, v]) => `${k}: ${formatValue(v)}`)
         .join(', ');
     }
@@ -53,9 +57,8 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
 
   // Function to handle new application
   const handleStartNewApplication = () => {
-    // Call the onPaymentComplete callback that resets the application state
     console.log("Starting new application...");
-        localStorage.removeItem('applicationId')
+    localStorage.removeItem('applicationId');
     if (onPaymentComplete) {
       onPaymentComplete();
     }
@@ -64,9 +67,18 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
   // Function to handle home redirect
   const handleRedirectToHome = () => {
     console.log("Redirecting to home...");
-    localStorage.removeItem('applicationId')
-    // This would typically use router.push('/') or window.location
+    localStorage.removeItem('applicationId');
     window.location.href = '/';
+  };
+
+  const handleViewDocument = (document: any) => {
+    setSelectedDocument(document);
+    setShowDocumentModal(true);
+  };
+
+  const closeDocumentModal = () => {
+    setShowDocumentModal(false);
+    setSelectedDocument(null);
   };
 
   // Render a section with a list of key-value pairs
@@ -90,18 +102,18 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
     if (filteredEntries.length === 0) return null;
 
     return (
-      <div className="mb-4 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-        <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center gap-3">
+      <div className="mb-6 bg-white rounded-xl border border-cyan-100 shadow-sm overflow-hidden">
+        <div className="bg-gradient-to-r from-cyan-50 to-blue-50 px-6 py-4 border-b border-cyan-100 flex items-center gap-3">
           {icon}
-          <h3 className="text-md font-semibold text-gray-800">{title}</h3>
+          <h3 className="text-lg font-semibold text-cyan-900">{title}</h3>
         </div>
-        <div className="p-4">
+        <div className="p-6">
           {filteredEntries.map(([key, value]) => {
             if (Array.isArray(value)) {
               return (
-                <div key={key} className="mb-3">
-                  <strong className="text-gray-700 block mb-1 capitalize">{key}:</strong>
-                  <ul className="list-disc pl-5 text-sm text-gray-600 space-y-1">
+                <div key={key} className="mb-4">
+                  <strong className="text-cyan-800 block mb-2 capitalize">{key.replace(/([A-Z])/g, ' $1')}:</strong>
+                  <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
                     {value.map((item, idx) => (
                       <li key={idx}>{formatValue(item)}</li>
                     ))}
@@ -112,9 +124,9 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
             return (
               <div 
                 key={key} 
-                className="flex justify-between py-2 text-sm border-b border-gray-200 last:border-0"
+                className="flex justify-between py-3 text-sm border-b border-cyan-50 last:border-0"
               >
-                <strong className="text-gray-700 capitalize">{key.replace(/([A-Z])/g, ' $1')}</strong>
+                <strong className="text-cyan-800 capitalize">{key.replace(/([A-Z])/g, ' $1')}</strong>
                 <span className="text-gray-900 font-medium max-w-[60%] text-right">
                   {formatValue(value)}
                 </span>
@@ -126,186 +138,483 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
     );
   };
 
-  if (showConfirmation) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white shadow-md rounded-xl border border-gray-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-green-600 to-green-800 text-white px-6 py-4">
-            <h2 className="text-xl font-semibold">Application Submitted</h2>
-            <p className="text-green-100 text-sm mt-1">Thank you for your submission!</p>
-          </div>
-          <div className="p-6 text-center">
-            <FaCheckCircle className="text-green-500 mx-auto mb-4" size={48} />
-            <p className="text-gray-700 mb-4">
-              Your application has been successfully submitted. You will receive a confirmation email soon.
-            </p>
-            <p className="text-gray-500 text-sm mb-6">
-              Application ID: <span className="font-medium">{formData.applicationId}</span>
-            </p>
-            <div className="flex justify-center space-x-4">
-              <Button
-                label="Start New Application"
-                onClick={handleStartNewApplication}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md font-medium transition-colors shadow-sm flex items-center"
-                icon={<FaFileAlt className="mr-2" size={16} />}
-              />
-              <Button
-                label="Return to Home"
-                onClick={handleRedirectToHome}
-                className="bg-cyan-600 hover:bg-cyan-700 text-white px-5 py-2 rounded-md font-medium transition-colors shadow-sm flex items-center"
-                icon={<FaHome className="mr-2" size={16} />}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!showPayment) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        {submissionStatus.success === true && (
-          <div className="mb-4 bg-green-50 border-l-4 border-green-400 p-4 flex items-start gap-3">
-            <FaExclamationCircle className="text-green-500 mt-0.5 flex-shrink-0" size={20} />
-            <div>
-              <p className="text-sm text-green-800">{submissionStatus.message}</p>
-            </div>
-          </div>
-        )}
-        {submissionStatus.success === false && (
-          <div className="mb-4 bg-red-50 border-l-4 border-red-400 p-4 flex items-start gap-3">
-            <FaExclamationCircle className="text-red-500 mt-0.5 flex-shrink-0" size={20} />
-            <div>
-              <p className="text-sm text-red-800">{submissionStatus.message}</p>
-            </div>
-          </div>
-        )}
-        <div className="bg-white shadow-md rounded-xl border border-gray-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-6 py-4">
-            <h2 className="text-xl font-semibold">Application Summary</h2>
-            <p className="text-blue-100 text-sm mt-1">Please review your information before proceeding</p>
-          </div>
-          <div className="bg-amber-50 border-l-4 border-amber-400 p-4 flex items-start gap-3">
-            <FaExclamationCircle className="text-amber-500 mt-0.5 flex-shrink-0" size={20} />
-            <div>
-              <p className="text-sm text-amber-800">
-                Please carefully review your application details before final submission.
-                Once submitted, changes cannot be made.
-              </p>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4 max-h-[60vh] overflow-auto pr-2">
-              {renderKeyValueSection(
-                'Personal Information', 
-                formData.personalInfo, 
-                <FaUserCircle className="text-blue-600" />,
-                ['applicationId']
-              )}
-              {formData.choiceOfStudy && (
-                <div className="mb-4 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                  <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center gap-3">
-                    <FaGraduationCap className="text-blue-600" />
-                    <h3 className="text-md font-semibold text-gray-800">Choices of Study</h3>
-                  </div>
-                  <div className="p-4">
-                    {formData.choiceOfStudy.map((choice: any, index: number) => (
-                      <div 
-                        key={index} 
-                        className="mb-2 pb-2 border-b border-gray-200 last:border-0"
-                      >
-                        <div className="flex justify-between">
-                          <strong className="text-gray-700">Programme {index + 1}:</strong>
-                          <span className="text-gray-900 font-medium">{choice.programme}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <strong className="text-gray-700">Preferred Major:</strong>
-                          <span className="text-gray-900 font-medium">{choice.preferredMajor}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {renderKeyValueSection(
-                'Education', 
-                formData.education, 
-                <FaClipboardList className="text-blue-600" />
-              )}
-              {renderKeyValueSection(
-                'Achievements', 
-                formData.achievements, 
-                <FaAward className="text-blue-600" />,
-                ['achievements', 'editingIndex', 'showModal', 'newAchievement', 'hasNoAchievements']
-              )}
-              {renderKeyValueSection(
-                'Other Information - Health', 
-                formData.otherInformation?.health || {}, 
-                <FaHeartbeat className="text-blue-600" />
-              )}
-              {renderKeyValueSection(
-                'Other Information - Legal', 
-                formData.otherInformation?.legal || {}, 
-                <FaBalanceScale className="text-blue-600" />
-              )}
-              {renderKeyValueSection(
-                'Declaration', 
-                formData.declaration || {}, 
-                <FaClipboardList className="text-blue-600" />
-              )}
-              {formData.documents && (
-                <div className="mb-4 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                  <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center gap-3">
-                    <FaFileAlt className="text-blue-600" />
-                    <h3 className="text-md font-semibold text-gray-800">Uploaded Documents</h3>
-                  </div>
-                  <div className="p-4">
-                    <ul className="list-disc pl-5 text-sm text-gray-600 space-y-1">
-                      {formData.documents.documents.map((doc: any, index: number) => (
-                        <li key={index}>
-                          {Object.entries(doc).map(([key, value]) => 
-                            `${key}: ${formatValue(value)}`
-                          ).join(', ')}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="flex items-center justify-between mt-8 pt-4 border-t border-gray-200">
-              <Button
-                label="Back to Edit"
-                onClick={onBackToForm}
-                className="flex items-center gap-2 text-gray-600 bg-white border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-md font-medium transition-colors"
-                icon={<FaChevronLeft size={16} />}
-              />
-              <Button
-                label="Proceed to Payment"
-                onClick={() => setShowPayment(true)}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md font-medium transition-colors shadow-sm"
-                icon={<FaCreditCard size={16} />}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="text-center mt-4">
-          <p className="text-xs text-gray-500 flex items-center justify-center gap-1">
-            <FaFileAlt size={14} />
-            Your information is secure and will only be used for application purposes
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <Payment
-      formData={formData}
-      onComplete={() => setShowConfirmation(true)}
-      onPrevious={() => setShowPayment(false)}
-      token={token}
-    />
+    <>
+      {showConfirmation ? (
+        <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4">
+          <div className="max-w-2xl w-full">
+            <div className="bg-white rounded-2xl shadow-xl border border-cyan-100 overflow-hidden">
+              <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-6 text-center">
+                <FaCheckCircle className="text-6xl mx-auto mb-4" />
+                <h1 className="text-3xl font-bold mb-2">Application Submitted!</h1>
+                <p className="text-green-100 text-lg">
+                  Your application has been successfully submitted. You will receive a confirmation email soon.
+                </p>
+                <p className="text-gray-600 text-base mb-8">
+                  Application ID: <span className="font-semibold text-cyan-700">{formData.applicationId}</span>
+                </p>
+                <div className="flex justify-center space-x-6">
+                  <Button
+                    label="Start New Application"
+                    onClick={handleStartNewApplication}
+                    className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-sm"
+                  />
+                  <Button
+                    label="Return to Home"
+                    onClick={handleRedirectToHome}
+                    className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-sm"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : !showPayment ? (
+        <div className="max-w-6xl mx-auto">
+          {submissionStatus.success === true && (
+            <div className="mb-6 bg-green-50 border-l-4 border-green-400 p-4 rounded-lg flex items-start gap-3">
+              <FaExclamationCircle className="text-green-500 mt-0.5 flex-shrink-0" size={20} />
+              <div>
+                <p className="text-sm text-green-800">{submissionStatus.message}</p>
+              </div>
+            </div>
+          )}
+          {submissionStatus.success === false && (
+            <div className="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-lg flex items-start gap-3">
+              <FaExclamationCircle className="text-red-500 mt-0.5 flex-shrink-0" size={20} />
+              <div>
+                <p className="text-sm text-red-800">{submissionStatus.message}</p>
+              </div>
+            </div>
+          )}
+          
+          <div className="bg-white shadow-lg rounded-xl border border-cyan-100 overflow-hidden">
+            <div className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-8 py-6">
+              <h2 className="text-2xl font-semibold">Application Summary</h2>
+              <p className="text-cyan-100 text-lg mt-2">Please review your information before proceeding</p>
+            </div>
+            
+            <div className="bg-amber-50 border-l-4 border-amber-400 p-6 flex items-start gap-3">
+              <FaExclamationCircle className="text-amber-500 mt-0.5 flex-shrink-0" size={20} />
+              <div>
+                <p className="text-amber-800 font-medium">
+                  Please carefully review your application details before final submission.
+                  Once submitted, changes cannot be made.
+                </p>
+              </div>
+            </div>
+            
+            <div className="p-8">
+              <div className="space-y-6 max-h-[70vh] overflow-auto pr-2">
+                {renderKeyValueSection(
+                  'Personal Information', 
+                  formData.personalInfo, 
+                  <FaUserCircle className="text-cyan-600" size={20} />,
+                  ['applicationId']
+                )}
+                
+                {formData.choiceOfStudy && formData.choiceOfStudy.length > 0 && (
+                  <div className="mb-6 bg-white rounded-xl border border-cyan-100 shadow-sm overflow-hidden">
+                    <div className="bg-gradient-to-r from-cyan-50 to-blue-50 px-6 py-4 border-b border-cyan-100 flex items-center gap-3">
+                      <FaGraduationCap className="text-cyan-600" size={20} />
+                      <h3 className="text-lg font-semibold text-cyan-900">Choices of Study</h3>
+                    </div>
+                    <div className="p-6">
+                      {formData.choiceOfStudy.map((choice: any, index: number) => (
+                        <div 
+                          key={index} 
+                          className="mb-4 pb-4 border-b border-cyan-50 last:border-0"
+                        >
+                          <div className="flex justify-between mb-2">
+                            <strong className="text-cyan-800">Programme {index + 1}:</strong>
+                            <span className="text-gray-900 font-medium">{choice.programme}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <strong className="text-cyan-800">Preferred Major:</strong>
+                            <span className="text-gray-900 font-medium">{choice.preferredMajor}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {formData.education && (
+                  <div className="mb-6 bg-white rounded-xl border border-cyan-100 shadow-sm overflow-hidden">
+                    <div className="bg-gradient-to-r from-cyan-50 to-blue-50 px-6 py-4 border-b border-cyan-100 flex items-center gap-3">
+                      <FaClipboardList className="text-cyan-600" size={20} />
+                      <h3 className="text-lg font-semibold text-cyan-900">
+                        {formData.education.studentType === 'local' && 'Local Student Education'}
+                        {formData.education.studentType === 'transfer' && 'Transfer Student Education'}
+                        {formData.education.studentType === 'international' && 'International Student Education'}
+                      </h3>
+                    </div>
+                    <div className="p-6">
+                      {formData.education.studentType === 'local' && formData.education.local && (
+                        <div className="space-y-3">
+                          <div className="flex justify-between">
+                            <strong className="text-cyan-800">School Name:</strong>
+                            <span className="text-gray-900 font-medium">{formData.education.local.schoolName}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <strong className="text-cyan-800">Country:</strong>
+                            <span className="text-gray-900 font-medium">{formData.education.local.country}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <strong className="text-cyan-800">Duration:</strong>
+                            <span className="text-gray-900 font-medium">{formData.education.local.from} - {formData.education.local.to}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <strong className="text-cyan-800">National ID:</strong>
+                            <span className="text-gray-900 font-medium">{formData.education.local.nationalID}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <strong className="text-cyan-800">School Category:</strong>
+                            <span className="text-gray-900 font-medium">{formData.education.local.localSchoolCategory}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <strong className="text-cyan-800">State/Province:</strong>
+                            <span className="text-gray-900 font-medium">{formData.education.local.stateOrProvince}</span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {formData.education.studentType === 'transfer' && formData.education.transfer && (
+                        <div className="space-y-3">
+                          <div className="flex justify-between">
+                            <strong className="text-cyan-800">School Name:</strong>
+                            <span className="text-gray-900 font-medium">{formData.education.transfer.schoolName}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <strong className="text-cyan-800">Country:</strong>
+                            <span className="text-gray-900 font-medium">{formData.education.transfer.country}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <strong className="text-cyan-800">Duration:</strong>
+                            <span className="text-gray-900 font-medium">{formData.education.transfer.from} - {formData.education.transfer.to}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <strong className="text-cyan-800">Previous University:</strong>
+                            <span className="text-gray-900 font-medium">
+                              {formData.education.transfer.previousUniversity === 'other' 
+                                ? formData.education.transfer.otherUniversity 
+                                : formData.education.transfer.previousUniversity}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <strong className="text-cyan-800">Credits Earned:</strong>
+                            <span className="text-gray-900 font-medium">{formData.education.transfer.creditsEarned}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <strong className="text-cyan-800">GPA:</strong>
+                            <span className="text-gray-900 font-medium">{formData.education.transfer.gpa}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <strong className="text-cyan-800">Program Studied:</strong>
+                            <span className="text-gray-900 font-medium">{formData.education.transfer.programStudied}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <strong className="text-cyan-800">Reason for Transfer:</strong>
+                            <span className="text-gray-900 font-medium max-w-[60%] text-right">{formData.education.transfer.reasonForTransfer}</span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {formData.education.studentType === 'international' && formData.education.international && (
+                        <div className="space-y-4">
+                          <div className="space-y-3">
+                            <div className="flex justify-between">
+                              <strong className="text-cyan-800">School Name:</strong>
+                              <span className="text-gray-900 font-medium">{formData.education.international.schoolName}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <strong className="text-cyan-800">Country:</strong>
+                              <span className="text-gray-900 font-medium">{formData.education.international.country}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <strong className="text-cyan-800">Duration:</strong>
+                              <span className="text-gray-900 font-medium">{formData.education.international.from} - {formData.education.international.to}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <strong className="text-cyan-800">Examination:</strong>
+                              <span className="text-gray-900 font-medium">{formData.education.international.examination}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <strong className="text-cyan-800">Exam Month/Year:</strong>
+                              <span className="text-gray-900 font-medium">{formData.education.international.examMonthYear}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <strong className="text-cyan-800">Result Type:</strong>
+                              <span className="text-gray-900 font-medium capitalize">{formData.education.international.resultType}</span>
+                            </div>
+                          </div>
+                          
+                          {formData.education.international.subjects && formData.education.international.subjects.length > 0 && (
+                            <div>
+                              <strong className="text-cyan-800 block mb-2">Subjects:</strong>
+                              <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                                {formData.education.international.subjects.map((subject: any, index: number) => (
+                                  <li key={index}>
+                                    {subject.subject === 'other' ? subject.otherSubject : subject.subject}: {subject.marksObtained}/{subject.maxMarks}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          
+                          {/* English Proficiency Tests */}
+                          {formData.education.international.ielts && Object.values(formData.education.international.ielts).some(val => val) && (
+                            <div>
+                              <strong className="text-cyan-800 block mb-2">IELTS:</strong>
+                              <div className="text-sm text-gray-700">
+                                {formData.education.international.ielts.date && <div>Date: {formData.education.international.ielts.date}</div>}
+                                {formData.education.international.ielts.overall && <div>Overall: {formData.education.international.ielts.overall}</div>}
+                                {formData.education.international.ielts.reading && <div>Reading: {formData.education.international.ielts.reading}</div>}
+                                {formData.education.international.ielts.writing && <div>Writing: {formData.education.international.ielts.writing}</div>}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {formData.education.international.toefl && Object.values(formData.education.international.toefl).some(val => val) && (
+                            <div>
+                              <strong className="text-cyan-800 block mb-2">TOEFL:</strong>
+                              <div className="text-sm text-gray-700">
+                                {formData.education.international.toefl.date && <div>Date: {formData.education.international.toefl.date}</div>}
+                                {formData.education.international.toefl.grade && <div>Score: {formData.education.international.toefl.grade}</div>}
+                                {formData.education.international.toefl.type && <div>Type: {formData.education.international.toefl.type}</div>}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {formData.education.international.sat && Object.values(formData.education.international.sat).some(val => val) && (
+                            <div>
+                              <strong className="text-cyan-800 block mb-2">SAT:</strong>
+                              <div className="text-sm text-gray-700">
+                                {formData.education.international.sat.date && <div>Date: {formData.education.international.sat.date}</div>}
+                                {formData.education.international.sat.math && <div>Math: {formData.education.international.sat.math}</div>}
+                                {formData.education.international.sat.reading && <div>Reading: {formData.education.international.sat.reading}</div>}
+                                {formData.education.international.sat.essay && <div>Essay: {formData.education.international.sat.essay}</div>}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {formData.education.international.act && Object.values(formData.education.international.act).some(val => val) && (
+                            <div>
+                              <strong className="text-cyan-800 block mb-2">ACT:</strong>
+                              <div className="text-sm text-gray-700">
+                                {formData.education.international.act.date && <div>Date: {formData.education.international.act.date}</div>}
+                                {formData.education.international.act.composite && <div>Composite: {formData.education.international.act.composite}</div>}
+                                {formData.education.international.act.english && <div>English: {formData.education.international.act.english}</div>}
+                                {formData.education.international.act.math && <div>Math: {formData.education.international.act.math}</div>}
+                                {formData.education.international.act.reading && <div>Reading: {formData.education.international.act.reading}</div>}
+                                {formData.education.international.act.science && <div>Science: {formData.education.international.act.science}</div>}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {formData.education.international.ap && formData.education.international.ap.subjects && formData.education.international.ap.subjects.length > 0 && (
+                            <div>
+                              <strong className="text-cyan-800 block mb-2">AP Subjects:</strong>
+                              <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                                {formData.education.international.ap.subjects.map((subject: any, index: number) => (
+                                  <li key={index}>
+                                    {subject.subject}: {subject.score}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {formData.achievements && (
+                  <div className="mb-6 bg-white rounded-xl border border-cyan-100 shadow-sm overflow-hidden">
+                    <div className="bg-gradient-to-r from-cyan-50 to-blue-50 px-6 py-4 border-b border-cyan-100 flex items-center gap-3">
+                      <FaAward className="text-cyan-600" size={20} />
+                      <h3 className="text-lg font-semibold text-cyan-900">Achievements</h3>
+                    </div>
+                    <div className="p-6">
+                      {formData.achievements.questions && (
+                        <div className="mb-4">
+                          <strong className="text-cyan-800 block mb-2">Questions:</strong>
+                          {Object.entries(formData.achievements.questions).map(([key, value]) => (
+                            <div key={key} className="mb-2">
+                              <span className="text-gray-700">Q{key}: </span>
+                              <span className="text-gray-900">{formatValue(value)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {formData.achievements.achievements && formData.achievements.achievements.length > 0 && (
+                        <div>
+                          <strong className="text-cyan-800 block mb-2">Achievements:</strong>
+                          <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                            {formData.achievements.achievements.map((achievement: any, index: number) => (
+                              <li key={index}>
+                                {achievement.activity} - {achievement.level} ({achievement.levelOfAchievement})
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {formData.otherInformation && (
+                  <>
+                    {formData.otherInformation.health && (
+                      renderKeyValueSection(
+                        'Health Information', 
+                        formData.otherInformation.health, 
+                        <FaHeartbeat className="text-cyan-600" size={20} />
+                      )
+                    )}
+                    {formData.otherInformation.legal && (
+                      renderKeyValueSection(
+                        'Legal Information', 
+                        formData.otherInformation.legal, 
+                        <FaBalanceScale className="text-cyan-600" size={20} />
+                      )
+                    )}
+                  </>
+                )}
+                
+                {formData.documents && formData.documents.documents && (
+                  <div className="mb-6 bg-white rounded-xl border border-cyan-100 shadow-sm overflow-hidden">
+                    <div className="bg-gradient-to-r from-cyan-50 to-blue-50 px-6 py-4 border-b border-cyan-100 flex items-center gap-3">
+                      <FaFileAlt className="text-cyan-600" size={20} />
+                      <h3 className="text-lg font-semibold text-cyan-900">Uploaded Documents</h3>
+                    </div>
+                    <div className="p-6">
+                      <ul className="space-y-3">
+                        {formData.documents.documents.map((doc: any, index: number) => (
+                          <li key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            <div className="flex-1">
+                              <strong className="text-cyan-800">{doc.documentType}:</strong>
+                              <span className="ml-2 text-gray-700">
+                                {doc.fileName ? doc.fileName : <span className="text-red-500 italic">Not uploaded</span>}
+                              </span>
+                            </div>
+                            {doc.fileName && (
+                              <button
+                                onClick={() => handleViewDocument(doc)}
+                                className="ml-4 px-3 py-1.5 bg-cyan-100 text-cyan-700 rounded-md hover:bg-cyan-200 transition-colors duration-200 flex items-center gap-2 text-sm"
+                              >
+                                <FaEye size={14} />
+                                View
+                              </button>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+                
+                {renderKeyValueSection(
+                  'Declaration', 
+                  formData.declaration || {}, 
+                  <FaClipboardList className="text-cyan-600" size={20} />
+                )}
+              </div>
+              
+              <div className="flex items-center justify-between mt-8 pt-6 border-t border-cyan-100">
+                <Button
+                  label="Back to Edit"
+                  onClick={onBackToForm}
+                  className="flex items-center gap-2 text-cyan-700 bg-white border border-cyan-300 hover:bg-cyan-50 px-6 py-3 rounded-lg font-medium transition-all duration-300"
+                />
+                <Button
+                  label="Proceed to Payment"
+                  onClick={() => setShowPayment(true)}
+                  className="flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-sm"
+                />
+              </div>
+            </div>
+          </div>
+          
+          <div className="text-center mt-6">
+            <p className="text-sm text-gray-500 flex items-center justify-center gap-2">
+              <FaFileAlt size={16} />
+              Your information is secure and will only be used for application purposes
+            </p>
+          </div>
+        </div>
+      ) : (
+        <Payment
+          formData={formData}
+          onComplete={() => setShowConfirmation(true)}
+          onPrevious={() => setShowPayment(false)}
+          token={token}
+        />
+      )}
+      
+      {/* Document View Modal */}
+      {showDocumentModal && selectedDocument && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-6 py-4 flex items-center justify-between">
+              <h3 className="text-xl font-semibold flex items-center gap-3">
+                <FaFileAlt size={20} />
+                {selectedDocument.documentType}
+              </h3>
+              <button
+                onClick={closeDocumentModal}
+                className="text-white hover:text-cyan-100 transition-colors duration-200"
+              >
+                <FaTimes size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <strong className="text-cyan-800">Document Name:</strong>
+                  <span className="text-gray-900 font-medium">{selectedDocument.fileName}</span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <strong className="text-cyan-800">File Type:</strong>
+                  <span className="text-gray-900 font-medium">{selectedDocument.fileType || 'PDF'}</span>
+                </div>
+                {selectedDocument.fileSize && (
+                  <div className="flex justify-between items-center mb-2">
+                    <strong className="text-cyan-800">File Size:</strong>
+                    <span className="text-gray-900 font-medium">{selectedDocument.fileSize}</span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="border-t border-cyan-100 pt-4">
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-center justify-center h-64 bg-white rounded border-2 border-dashed border-gray-300">
+                    <div className="text-center">
+                      <FaFileAlt className="text-gray-400 mx-auto mb-2" size={48} />
+                      <p className="text-gray-500 text-sm">
+                        Document preview not available
+                      </p>
+                      <p className="text-gray-400 text-xs mt-1">
+                        {selectedDocument.fileName}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-end mt-6 pt-4 border-t border-cyan-100">
+                <Button
+                  label="Close"
+                  onClick={closeDocumentModal}
+                  className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

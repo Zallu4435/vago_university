@@ -22,8 +22,7 @@ export const InternationalSchoolInfo: React.FC<InternationalSchoolInfoProps> = (
   const handleAddSubject = async (newSubject: {
     subject: string;
     otherSubject: string;
-    marksObtained: string;
-    maxMarks: string;
+    grade: string;
   }) => {
     append(newSubject);
     setShowSubjectModal(false);
@@ -180,7 +179,6 @@ export const InternationalSchoolInfo: React.FC<InternationalSchoolInfoProps> = (
                 onChange={field.onChange}
                 required
                 className="md:col-span-2 mt-2 text-cyan-700"
-                error={errors.international?.resultType?.message}
               />
             )}
           />
@@ -202,15 +200,14 @@ export const InternationalSchoolInfo: React.FC<InternationalSchoolInfoProps> = (
               <tr className="bg-cyan-50 border-b border-cyan-200">
                 <th className="py-3 px-4 text-left font-medium text-cyan-800">Subject</th>
                 <th className="py-3 px-4 text-left font-medium text-cyan-800">Other Subject</th>
-                <th className="py-3 px-4 text-left font-medium text-cyan-800">Marks Obtained</th>
-                <th className="py-3 px-4 text-left font-medium text-cyan-800">Maximum Marks</th>
+                <th className="py-3 px-4 text-left font-medium text-cyan-800">Grade</th>
                 <th className="py-3 px-4 text-left font-medium text-cyan-800">Actions</th>
               </tr>
             </thead>
             <tbody>
               {subjects.length === 0 ? (
                 <tr>
-                  <td className="py-2 px-3 text-gray-500" colSpan={5}>
+                  <td className="py-2 px-3 text-gray-500" colSpan={4}>
                     No record(s)
                   </td>
                 </tr>
@@ -219,8 +216,7 @@ export const InternationalSchoolInfo: React.FC<InternationalSchoolInfoProps> = (
                   <tr key={subj.id} className="border-b border-cyan-100">
                     <td className="py-2 px-3">{subj.subject}</td>
                     <td className="py-2 px-3">{subj.otherSubject || '-'}</td>
-                    <td className="py-2 px-3">{subj.marksObtained}</td>
-                    <td className="py-2 px-3">{subj.maxMarks}</td>
+                    <td className="py-2 px-3">{subj.grade}</td>
                     <td className="py-2 px-3">
                       <Button
                         label="Remove"

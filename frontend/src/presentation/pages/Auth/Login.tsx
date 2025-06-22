@@ -60,7 +60,7 @@ const onSubmit = (data: FormData) => {
           navigate('/dashboard');
           break;
         case 'faculty':
-          navigate('/faculty/courses');
+          navigate('/faculty');
           break;
       }
     },

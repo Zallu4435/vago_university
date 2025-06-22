@@ -1,13 +1,24 @@
 export interface ProfileData {
-    firstName: string;
-    lastName: string;
+    // Common fields for both user and faculty
+    firstName?: string;
+    lastName?: string;
+    fullName?: string; // For faculty
     phone: string;
     email: string;
     profilePicture?: string;
-  }
+    passwordChangedAt?: string;
+    
+    // Faculty-specific fields
+    department?: string;
+    qualification?: string;
+    experience?: string;
+    aboutMe?: string;
+    cvUrl?: string;
+    certificatesUrl?: string[];
+}
   
-  export interface PasswordChangeData {
+export interface PasswordChangeData {
     currentPassword: string;
     newPassword: string;
     confirmPassword?: string; // Optional, depending on backend requirements
-  }
+}

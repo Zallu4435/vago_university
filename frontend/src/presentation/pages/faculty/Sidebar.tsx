@@ -32,7 +32,7 @@ export default function Sidebar({ activeTab, setActiveTab, facultyName, departme
       icon: <LuList size={20} />, 
       gradient: 'from-blue-500 to-cyan-500',
       description: 'Overview & Analytics',
-      path: '/faculty/'
+      path: '/faculty'
     },
     { 
       title: 'My Sessions', 

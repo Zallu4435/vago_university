@@ -35,7 +35,8 @@ export class ProfileController implements IProfileController {
       const dto: GetProfileRequestDTO = { userId };
       const response = await this.getProfileUseCase.execute(dto);
       if (!response.success) {
-        return this.httpErrors.error_404();
+        const errorMessage = (response.data as any)?.error || 'Profile not found';
+        return this.httpErrors.error_400(errorMessage);
       }
       return this.httpSuccess.success_200(response.data);
     } catch {
@@ -53,7 +54,8 @@ export class ProfileController implements IProfileController {
       const dto: UpdateProfileRequestDTO = { userId, firstName, lastName, phone, email };
       const response = await this.updateProfileUseCase.execute(dto);
       if (!response.success) {
-        return this.httpErrors.error_400();
+        const errorMessage = (response.data as any)?.error || 'Failed to update profile';
+        return this.httpErrors.error_400(errorMessage);
       }
       return this.httpSuccess.success_200(response.data);
     } catch {
@@ -71,7 +73,8 @@ export class ProfileController implements IProfileController {
       const dto: ChangePasswordRequestDTO = { userId, currentPassword, newPassword, confirmPassword };
       const response = await this.changePasswordUseCase.execute(dto);
       if (!response.success) {
-        return this.httpErrors.error_400();
+        const errorMessage = (response.data as any)?.error || 'Failed to change password';
+        return this.httpErrors.error_400(errorMessage);
       }
       return this.httpSuccess.success_200(response.data);
     } catch {
@@ -87,12 +90,13 @@ export class ProfileController implements IProfileController {
         return this.httpErrors.error_401();
       }
       if (!file) {
-        return this.httpErrors.error_400();
+        return this.httpErrors.error_400('Profile picture file is required');
       }
       const dto: UpdateProfilePictureRequestDTO = { userId, filePath: file.path };
       const response = await this.updateProfilePictureUseCase.execute(dto);
       if (!response.success || !('profilePicture' in response.data)) {
-        return this.httpErrors.error_400();
+        const errorMessage = (response.data as any)?.error || 'Failed to update profile picture';
+        return this.httpErrors.error_400(errorMessage);
       }
       return this.httpSuccess.success_200({ url: (response.data as any).profilePicture });
     } catch {

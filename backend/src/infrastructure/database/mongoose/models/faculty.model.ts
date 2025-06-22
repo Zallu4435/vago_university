@@ -7,6 +7,9 @@ export interface IFaculty extends Document {
   email: string;
   password: string;
   createdAt: Date;
+  phone?: string;
+  profilePicture?: string;
+  passwordChangedAt?: Date;
   fcmTokens: string[];
 }
 
@@ -23,6 +26,16 @@ const facultySchema = new Schema<IFaculty>({
   },
   password: { type: String, required: true, minlength: 8 },
   createdAt: { type: Date, default: Date.now },
+  phone: {
+    type: String,
+    trim: true,
+    match: [/^\+?[0-9\- ]{7,15}$/, "Please use a valid phone number"],
+  },
+  profilePicture: {
+    type: String,
+    trim: true,
+  },
+  passwordChangedAt: { type: Date },
   fcmTokens: [{ type: String }],
 });
 
@@ -36,6 +49,8 @@ facultySchema.pre("save", async function (next) {
   try {
     const salt = await bcrypt.genSalt(10);
     faculty.password = await bcrypt.hash(faculty.password, salt);
+    // Set passwordChangedAt when password is modified
+    faculty.passwordChangedAt = new Date();
     next();
   } catch (err) {
     next(err as Error);

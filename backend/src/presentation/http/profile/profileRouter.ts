@@ -8,13 +8,13 @@ const profileRouter = Router();
 const profileController = getProfileComposer();
 
 profileRouter.get(
-  "/profile",
+  "/",
   authMiddleware,
   (req, res, next) => expressAdapter(req, res, profileController.getProfile.bind(profileController))
 );
 
 profileRouter.put(
-  "/profile",
+  "/",
   authMiddleware,
   (req, res, next) => expressAdapter(req, res, profileController.updateProfile.bind(profileController))
 );

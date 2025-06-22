@@ -1,13 +1,21 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 import { LuBell, LuLogOut, LuSearch, LuMoon, LuSun, LuSettings, LuUser } from 'react-icons/lu';
 
-export default function Header({ currentDate, facultyName, onLogout }) {
+interface HeaderProps {
+  currentDate: string;
+  facultyName: string;
+  onLogout: () => void;
+}
+
+export default function Header({ currentDate, facultyName, onLogout }: HeaderProps) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [time, setTime] = useState(new Date());
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -20,8 +28,8 @@ export default function Header({ currentDate, facultyName, onLogout }) {
     { id: 3, title: 'Grade submission deadline', time: '1 hour ago', type: 'urgent' }
   ];
 
-  const getInitials = (name) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  const getInitials = (name: string) => {
+    return name.split(' ').map((n: string) => n[0]).join('').toUpperCase();
   };
 
   return (
@@ -165,11 +173,12 @@ export default function Header({ currentDate, facultyName, onLogout }) {
               
               <div className="p-2">
                 {[
-                  { icon: <LuUser size={16} />, label: 'My Profile', color: 'text-indigo-600' },
-                  { icon: <LuSettings size={16} />, label: 'Account Settings', color: 'text-purple-600' },
+                  { icon: <LuUser size={16} />, label: 'My Profile', color: 'text-indigo-600', action: () => navigate('/faculty/settings') },
+                  // { icon: <LuSettings size={16} />, label: 'Account Settings', color: 'text-purple-600', action: () => navigate('/faculty/settings') },
                 ].map((item, index) => (
                   <button
                     key={index}
+                    onClick={item.action}
                     className="flex items-center space-x-3 w-full px-3 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 rounded-xl transition-all duration-200"
                   >
                     <span className={`${item.color}`}>{item.icon}</span>

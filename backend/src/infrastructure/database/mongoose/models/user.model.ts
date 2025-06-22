@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
+import bcrypt from "bcryptjs";
 
 export interface IUser extends Document {
   firstName: string;
@@ -8,6 +9,7 @@ export interface IUser extends Document {
   createdAt: Date;
   phone?: string;
   profilePicture?: string;
+  passwordChangedAt?: Date;
   fcmTokens: string[];
 }
 
@@ -33,7 +35,26 @@ const userSchema = new Schema<IUser>({
     type: String,
     trim: true,
   },
+  passwordChangedAt: { type: Date },
   fcmTokens: [{ type: String }],
+});
+
+// Pre-save middleware to hash password
+userSchema.pre("save", async function (next) {
+  const user = this as IUser;
+
+  // Only hash the password if it has been modified (or is new)
+  if (!user.isModified("password")) return next();
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(user.password, salt);
+    // Set passwordChangedAt when password is modified
+    user.passwordChangedAt = new Date();
+    next();
+  } catch (err) {
+    next(err as Error);
+  }
 });
 
 export const User = mongoose.model<IUser>("User", userSchema);

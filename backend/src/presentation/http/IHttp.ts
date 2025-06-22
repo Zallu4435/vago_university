@@ -38,7 +38,7 @@ export class HttpRequest implements IHttpRequest {
 }
 
 export interface IHttpErrors {
-  error_400(): IHttpResponse;
+  error_400(message?: string): IHttpResponse;
   error_401(): IHttpResponse;
   error_403(): IHttpResponse;
   error_404(): IHttpResponse;
@@ -51,8 +51,8 @@ export interface IHttpSuccess {
 }
 
 export class HttpErrors implements IHttpErrors {
-  error_400(): IHttpResponse {
-    return { statusCode: 400, body: { error: "Bad Request" } };
+  error_400(message?: string): IHttpResponse {
+    return { statusCode: 400, body: { error: message || "Bad Request" } };
   }
   error_401(): IHttpResponse {
     return { statusCode: 401, body: { error: "Unauthorized" } };

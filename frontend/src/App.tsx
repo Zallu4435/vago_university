@@ -38,6 +38,7 @@ import ConfirmAdmission from './presentation/pages/ConfirmAdmission';
 import FacultyManagement from './presentation/pages/admin/FacultyManagement';
 import ConfirmFaculty from './presentation/pages/ConfirmFaculty';
 import Setting from './presentation/pages/user/Settings/Setting';
+import FacultySettings from './presentation/pages/faculty/settings/FacultySettings';
 import { useNavigate } from 'react-router-dom';
 import VideoManagementPage from './presentation/pages/admin/vedio/VedioManagement';
 import AdminCourseManagement from './presentation/pages/admin/course/CourseManagement';
@@ -196,10 +197,15 @@ const App: React.FC = () => {
         {/* Faculty Routes (faculty only) */}
         <Route element={<ProtectedRoute allowedCollections={['faculty']} />}>
           <Route element={<FacultyLayout />}>
-            <Route path="faculty/" element={<FacultyDashboard />} />
+            <Route path="faculty" element={<FacultyDashboard />} />
             <Route path="faculty/assignments" element={<AssignmentManagement />} />
             <Route path="faculty/sessions" element={<SessionManagement />} />
           </Route>
+        </Route>
+
+        {/* Faculty Settings Route (faculty only, independent layout) */}
+        <Route element={<ProtectedRoute allowedCollections={['faculty']} />}>
+          <Route path="faculty/settings" element={<FacultySettings />} />
         </Route>
 
         {/* Confirm Faculty Route */}

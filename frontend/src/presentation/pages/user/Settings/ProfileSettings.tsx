@@ -6,6 +6,33 @@ import { ProfilePictureModal } from './ProfilePictureModal';
 import { PasswordChangeModal } from './PasswordChangeModal';
 import { ProfileData, PasswordChangeData } from '../../../../domain/types/profile';
 
+// Helper function to format password changed date
+const formatPasswordChangedDate = (passwordChangedAt?: string): string => {
+  if (!passwordChangedAt) {
+    return 'Never changed';
+  }
+  
+  const changedDate = new Date(passwordChangedAt);
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - changedDate.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 1) {
+    return '1 day ago';
+  } else if (diffDays < 7) {
+    return `${diffDays} days ago`;
+  } else if (diffDays < 30) {
+    const weeks = Math.floor(diffDays / 7);
+    return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+  } else if (diffDays < 365) {
+    const months = Math.floor(diffDays / 30);
+    return `${months} month${months > 1 ? 's' : ''} ago`;
+  } else {
+    const years = Math.floor(diffDays / 365);
+    return `${years} year${years > 1 ? 's' : ''} ago`;
+  }
+};
+
 export default function ProfileSettings() {
   const {
     profile,
@@ -291,7 +318,12 @@ export default function ProfileSettings() {
                   <h2 className="text-xl font-bold text-slate-800 mb-1">
                     {formData.firstName} {formData.lastName}
                   </h2>
-                  <p className="text-sky-600 mb-1 font-medium text-sm">Student ID: UNI-2024-001</p>
+                  {profile?.studentId && (
+                    <p className="text-sky-600 mb-1 font-medium text-sm">ID: {profile.studentId}</p>
+                  )}
+                  {profile?.facultyId && (
+                    <p className="text-purple-600 mb-1 font-medium text-sm">ID: {profile.facultyId}</p>
+                  )}
                   <p className="text-slate-600 text-sm">{formData.email}</p>
                 </div>
               </div>
@@ -394,7 +426,7 @@ export default function ProfileSettings() {
                   </div>
                   <div>
                     <h4 className="text-slate-800 font-medium">Password Security</h4>
-                    <p className="text-slate-500 text-sm">Last changed: 30 days ago</p>
+                    <p className="text-slate-500 text-sm">Last changed: {formatPasswordChangedDate(profile?.passwordChangedAt)}</p>
                   </div>
                 </div>
                 <button

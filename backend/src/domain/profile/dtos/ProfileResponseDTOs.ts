@@ -4,6 +4,9 @@ export interface ProfileResponseDTO {
     phone?: string;
     email: string;
     profilePicture?: string;
+    studentId?: string;
+    facultyId?: string;
+    passwordChangedAt?: string;
   }
   
   export interface UpdateProfileResponseDTO {

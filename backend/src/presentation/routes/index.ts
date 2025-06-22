@@ -43,7 +43,7 @@ router.use("/admin/admissions", adminRoutes);
 
 router.use("/admin/faculty", facultyRoutes);
 
-router.use("/user", profileRoutes);
+router.use("/profile", profileRoutes);
 
 router.use("/auth", auuthRoutes);
 

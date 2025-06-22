@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { User } from "../../database/mongoose/models/user.model";
+import { Faculty } from "../../database/mongoose/models/faculty.model";
 import { ProfileErrorType } from "../../../domain/profile/enums/ProfileErrorType";
 import {
     GetProfileRequestDTO,
@@ -17,29 +18,53 @@ import { IProfileRepository } from "../../../application/profile/repositories/IP
 
 export class ProfileRepository implements IProfileRepository {
     async getProfile(params: GetProfileRequestDTO): Promise<ProfileResponseDTO> {
-        const user = await User.findById(params.userId).select("firstName lastName email phone profilePicture");
+        // Try to find user first
+        let user = await User.findById(params.userId).select("firstName lastName email phone profilePicture passwordChangedAt");
+        let isFaculty = false;
+
         if (!user) {
-            throw new Error(ProfileErrorType.UserNotFound);
+            // If not found in User collection, try Faculty collection
+            const faculty = await Faculty.findById(params.userId).select("firstName lastName email phone profilePicture passwordChangedAt");
+            if (!faculty) {
+                throw new Error(ProfileErrorType.UserNotFound);
+            }
+            user = faculty as any; // Type assertion for compatibility
+            isFaculty = true;
         }
 
         return {
             firstName: user.firstName,
-            lastName: user.lastName,
+            lastName: user.lastName || undefined,
             email: user.email,
             phone: user.phone,
             profilePicture: user.profilePicture,
+            facultyId: isFaculty ? user._id.toString() : undefined,
+            studentId: !isFaculty ? user._id.toString() : undefined,
+            passwordChangedAt: user.passwordChangedAt ? user.passwordChangedAt.toISOString() : undefined,
         };
     }
 
     async updateProfile(params: UpdateProfileRequestDTO): Promise<UpdateProfileResponseDTO> {
-        const user = await User.findById(params.userId);
+        // Try to find user first
+        let user = await User.findById(params.userId);
+        let isFaculty = false;
+
         if (!user) {
-            throw new Error(ProfileErrorType.UserNotFound);
+            // If not found in User collection, try Faculty collection
+            const faculty = await Faculty.findById(params.userId);
+            if (!faculty) {
+                throw new Error(ProfileErrorType.UserNotFound);
+            }
+            user = faculty as any; // Type assertion for compatibility
+            isFaculty = true;
         }
 
         if (params.email && params.email !== user.email) {
+            // Check for email uniqueness in both collections
             const existingUser = await User.findOne({ email: params.email });
-            if (existingUser) {
+            const existingFaculty = await Faculty.findOne({ email: params.email });
+            
+            if (existingUser || existingFaculty) {
                 throw new Error(ProfileErrorType.EmailAlreadyInUse);
             }
         }
@@ -60,9 +85,16 @@ export class ProfileRepository implements IProfileRepository {
     }
 
     async changePassword(params: ChangePasswordRequestDTO): Promise<ChangePasswordResponseDTO> {
-        const user = await User.findById(params.userId);
+        // Try to find user first
+        let user = await User.findById(params.userId);
+
         if (!user) {
-            throw new Error(ProfileErrorType.UserNotFound);
+            // If not found in User collection, try Faculty collection
+            const faculty = await Faculty.findById(params.userId);
+            if (!faculty) {
+                throw new Error(ProfileErrorType.UserNotFound);
+            }
+            user = faculty as any; // Type assertion for compatibility
         }
 
         const isPasswordValid = await bcrypt.compare(params.currentPassword, user.password);
@@ -70,8 +102,8 @@ export class ProfileRepository implements IProfileRepository {
             throw new Error(ProfileErrorType.IncorrectCurrentPassword);
         }
 
-        const hashedPassword = await bcrypt.hash(params.newPassword, 10);
-        user.password = hashedPassword;
+        // Set the new password (pre-save middleware will hash it and set passwordChangedAt)
+        user.password = params.newPassword;
 
         await user.save();
 
@@ -79,9 +111,16 @@ export class ProfileRepository implements IProfileRepository {
     }
 
     async updateProfilePicture(params: UpdateProfilePictureRequestDTO): Promise<UpdateProfilePictureResponseDTO> {
-        const user = await User.findById(params.userId);
+        // Try to find user first
+        let user = await User.findById(params.userId);
+
         if (!user) {
-            throw new Error(ProfileErrorType.UserNotFound);
+            // If not found in User collection, try Faculty collection
+            const faculty = await Faculty.findById(params.userId);
+            if (!faculty) {
+                throw new Error(ProfileErrorType.UserNotFound);
+            }
+            user = faculty as any; // Type assertion for compatibility
         }
 
         user.profilePicture = params.filePath;

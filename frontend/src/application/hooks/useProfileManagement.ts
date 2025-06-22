@@ -14,9 +14,6 @@ export const useProfileManagement = () => {
     queryFn: () => profileService.getProfile(),
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     refetchOnWindowFocus: false, // Prevent refetch on window focus
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to fetch profile data');
-    },
   });
 
   // Update profile mutation

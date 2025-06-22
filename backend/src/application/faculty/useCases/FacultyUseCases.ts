@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import {
     GetFacultyRequestDTO,
     GetFacultyByIdRequestDTO,
+    GetFacultyByTokenRequestDTO,
     ApproveFacultyRequestDTO,
     RejectFacultyRequestDTO,
     DeleteFacultyRequestDTO,
@@ -11,6 +12,7 @@ import {
 import {
     GetFacultyResponseDTO,
     GetFacultyByIdResponseDTO,
+    GetFacultyByTokenResponseDTO,
     ApproveFacultyResponseDTO,
     RejectFacultyResponseDTO,
     DeleteFacultyResponseDTO,
@@ -31,6 +33,10 @@ export interface IGetFacultyUseCase {
 
 export interface IGetFacultyByIdUseCase {
     execute(params: GetFacultyByIdRequestDTO): Promise<ResponseDTO<GetFacultyByIdResponseDTO>>;
+}
+
+export interface IGetFacultyByTokenUseCase {
+    execute(params: GetFacultyByTokenRequestDTO): Promise<ResponseDTO<GetFacultyByTokenResponseDTO>>;
 }
 
 export interface IApproveFacultyUseCase {
@@ -75,6 +81,19 @@ export class GetFacultyByIdUseCase implements IGetFacultyByIdUseCase {
                 return { data: { error: FacultyErrorType.InvalidFacultyId }, success: false };
             }
             const result = await this.facultyRepository.getFacultyById(params);
+            return { data: result, success: true };
+        } catch (error: any) {
+            return { data: { error: error.message || FacultyErrorType.FacultyNotFound }, success: false };
+        }
+    }
+}
+
+export class GetFacultyByTokenUseCase implements IGetFacultyByTokenUseCase {
+    constructor(private facultyRepository: IFacultyRepository) { }
+
+    async execute(params: GetFacultyByTokenRequestDTO): Promise<ResponseDTO<GetFacultyByTokenResponseDTO>> {
+        try {
+            const result = await this.facultyRepository.getFacultyByToken(params);
             return { data: result, success: true };
         } catch (error: any) {
             return { data: { error: error.message || FacultyErrorType.FacultyNotFound }, success: false };

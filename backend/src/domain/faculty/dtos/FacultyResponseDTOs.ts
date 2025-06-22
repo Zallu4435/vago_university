@@ -24,6 +24,10 @@ export interface FacultyResponseDTO {
     faculty: FacultyResponseDTO;
   }
   
+  export interface GetFacultyByTokenResponseDTO {
+    faculty: FacultyResponseDTO;
+  }
+  
   export interface ApproveFacultyResponseDTO {
     message: string;
   }

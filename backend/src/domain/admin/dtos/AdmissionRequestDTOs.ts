@@ -12,6 +12,11 @@ export interface GetAdmissionsRequestDTO {
     id: string;
   }
   
+  export interface GetAdmissionByTokenRequestDTO {
+    admissionId: string;
+    token: string;
+  }
+  
   export interface ApproveAdmissionRequestDTO {
     id: string;
     additionalInfo?: {

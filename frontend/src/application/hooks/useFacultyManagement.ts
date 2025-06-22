@@ -51,7 +51,7 @@ export const useFacultyManagement = () => {
   const getFacultyDetails = async (id: string) => {
     try {
       const response = await facultyService.getFacultyDetails(id);
-      return response;
+      return response?.faculty;
     } catch (error) {
       toast.error('Error fetching faculty details');
       throw error;

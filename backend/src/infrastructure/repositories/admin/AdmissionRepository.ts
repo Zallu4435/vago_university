@@ -4,6 +4,7 @@ import { AdmissionErrorType } from "../../../domain/admin/enums/AdmissionErrorTy
 import {
     GetAdmissionsRequestDTO,
     GetAdmissionByIdRequestDTO,
+    GetAdmissionByTokenRequestDTO,
     ApproveAdmissionRequestDTO,
     RejectAdmissionRequestDTO,
     DeleteAdmissionRequestDTO,
@@ -12,6 +13,7 @@ import {
 import {
     GetAdmissionsResponseDTO,
     GetAdmissionByIdResponseDTO,
+    GetAdmissionByTokenResponseDTO,
     ApproveAdmissionResponseDTO,
     RejectAdmissionResponseDTO,
     DeleteAdmissionResponseDTO,
@@ -103,6 +105,56 @@ export class AdmissionRepository implements IAdmissionRepository {
         if (!admission) {
             throw new Error(AdmissionErrorType.AdmissionNotFound);
         }
+        return { admission };
+    }
+
+    async getAdmissionByToken(params: GetAdmissionByTokenRequestDTO): Promise<GetAdmissionByTokenResponseDTO> {
+        console.log(`=== ADMISSION REPOSITORY: getAdmissionByToken START ===`);
+        console.log(`Looking for admission with ID: ${params.admissionId}`);
+        console.log(`Token provided: ${params.token}`);
+        
+        const admission = await AdmissionModel.findById(params.admissionId)
+            .select("personal choiceOfStudy status confirmationToken tokenExpiry")
+            .lean();
+
+        console.log(`Admission found: ${admission ? 'Yes' : 'No'}`);
+        
+        if (!admission) {
+            console.log(`ERROR: Admission not found with ID: ${params.admissionId}`);
+            throw new Error(AdmissionErrorType.AdmissionNotFound);
+        }
+
+        console.log(`Admission status: ${admission.status}`);
+        console.log(`Admission confirmationToken: ${admission.confirmationToken}`);
+        console.log(`Admission tokenExpiry: ${admission.tokenExpiry}`);
+        console.log(`Current time: ${new Date()}`);
+
+        // Validate token
+        if (!admission.confirmationToken || admission.confirmationToken !== params.token) {
+            console.log(`ERROR: Token validation failed`);
+            console.log(`Expected token: ${admission.confirmationToken}`);
+            console.log(`Received token: ${params.token}`);
+            console.log(`Tokens match: ${admission.confirmationToken === params.token}`);
+            throw new Error(AdmissionErrorType.InvalidToken);
+        }
+
+        // Check if token is expired
+        if (!admission.tokenExpiry || new Date() > admission.tokenExpiry) {
+            console.log(`ERROR: Token is expired`);
+            console.log(`Token expiry: ${admission.tokenExpiry}`);
+            console.log(`Current time: ${new Date()}`);
+            console.log(`Is expired: ${new Date() > admission.tokenExpiry}`);
+            throw new Error(AdmissionErrorType.TokenExpired);
+        }
+
+        // Check if admission status is "offered" (waiting for confirmation)
+        if (admission.status !== "offered") {
+            console.log(`ERROR: Admission status is not 'offered'`);
+            console.log(`Current status: ${admission.status}`);
+            throw new Error(AdmissionErrorType.AdmissionAlreadyProcessed);
+        }
+
+        console.log(`=== ADMISSION REPOSITORY: getAdmissionByToken SUCCESS ===`);
         return { admission };
     }
 

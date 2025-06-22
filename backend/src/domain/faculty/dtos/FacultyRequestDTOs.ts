@@ -10,6 +10,11 @@ export interface GetFacultyRequestDTO {
     id: string;
   }
   
+  export interface GetFacultyByTokenRequestDTO {
+    facultyId: string;
+    token: string;
+  }
+  
   export interface ApproveFacultyRequestDTO {
     id: string;
     additionalInfo: {

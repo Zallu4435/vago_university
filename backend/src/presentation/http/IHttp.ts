@@ -276,6 +276,7 @@ export interface IAuthController extends IController {
 export interface IAdminAdmissionController extends IController {
   getAdmissions(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getAdmissionById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAdmissionByToken(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   approveAdmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   rejectAdmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   deleteAdmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
@@ -286,6 +287,7 @@ export interface IAdminAdmissionController extends IController {
 export interface IFacultyController extends IController {
   getFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getFacultyById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getFacultyByToken(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   approveFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   rejectFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   deleteFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse>;

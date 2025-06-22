@@ -2,6 +2,7 @@ import { IAdmissionRepository } from '../../../application/admin/repositories/IA
 import {
     GetAdmissionsUseCase,
     GetAdmissionByIdUseCase,
+    GetAdmissionByTokenUseCase,
     ApproveAdmissionUseCase,
     RejectAdmissionUseCase,
     DeleteAdmissionUseCase,
@@ -15,6 +16,7 @@ export function getAdminAdmissionsComposer(): IAdminAdmissionController {
     const repository: IAdmissionRepository = new AdmissionRepository();
     const getAdmissionsUseCase = new GetAdmissionsUseCase(repository);
     const getAdmissionByIdUseCase = new GetAdmissionByIdUseCase(repository);
+    const getAdmissionByTokenUseCase = new GetAdmissionByTokenUseCase(repository);
     const approveAdmissionUseCase = new ApproveAdmissionUseCase(repository);
     const rejectAdmissionUseCase = new RejectAdmissionUseCase(repository);
     const deleteAdmissionUseCase = new DeleteAdmissionUseCase(repository);
@@ -22,6 +24,7 @@ export function getAdminAdmissionsComposer(): IAdminAdmissionController {
     return new AdminAdmissionController(
         getAdmissionsUseCase,
         getAdmissionByIdUseCase,
+        getAdmissionByTokenUseCase,
         approveAdmissionUseCase,
         rejectAdmissionUseCase,
         deleteAdmissionUseCase,

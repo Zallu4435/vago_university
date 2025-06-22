@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaSpinner, FaCheckCircle } from 'react-icons/fa';
+import { FaSpinner, FaCheckCircle, FaEnvelope } from 'react-icons/fa';
 
 const ConfirmAdmission = () => {
   const { id, action } = useParams();
@@ -12,7 +12,12 @@ const ConfirmAdmission = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [admissionDetails, setAdmissionDetails] = useState(null);
+  const [admissionDetails, setAdmissionDetails] = useState<{
+    fullName: string;
+    email: string;
+    program: string;
+    status: string;
+  } | null>(null);
 
   useEffect(() => {
     // Validate parameters
@@ -25,10 +30,12 @@ const ConfirmAdmission = () => {
     // Fetch admission details to show the user what they're confirming
     const fetchAdmissionDetails = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/admin/admissions/${id}`, {
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/admin/admissions/${id}/token`, {
           params: { token }
         });
 
+        console.log(response.data, "response.data")
+        
         // Access the nested admission data
         const admissionData = response.data.admission;
         setAdmissionDetails({
@@ -124,9 +131,25 @@ const ConfirmAdmission = () => {
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Success</h2>
           <p className="text-gray-600 mb-6">{success}</p>
           {action === 'accept' ? (
-            <button onClick={() => navigate('/login')}>Proceed to Login</button>
+            <div className="space-y-4">
+              <div className="flex items-center justify-center text-blue-600">
+                <FaEnvelope className="mr-2" />
+                <p>Check your email for login credentials</p>
+              </div>
+              <button 
+                onClick={() => navigate('/login')}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Proceed to Login
+              </button>
+            </div>
           ) : (
-            <button onClick={() => navigate('/')}>Return to Homepage</button>
+            <button 
+              onClick={() => navigate('/')}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Return to Homepage
+            </button>
           )}
         </div>
       </div>

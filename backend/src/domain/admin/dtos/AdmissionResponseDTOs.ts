@@ -18,6 +18,10 @@ export interface AdmissionResponseDTO {
     admission: any;
   }
   
+  export interface GetAdmissionByTokenResponseDTO {
+    admission: any;
+  }
+  
   export interface ApproveAdmissionResponseDTO {
     message: string;
   }

@@ -454,13 +454,13 @@ const StatusBadge = ({ status }: { status: string }) => {
     offered: { bg: 'bg-blue-600/30', text: 'text-blue-100', border: 'border-blue-500/50' },
   };
 
-  const config = statusConfig[status.toLowerCase()] || statusConfig.pending;
+  const config = statusConfig[status?.toLowerCase()] || statusConfig.pending;
 
   return (
     <span
       className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.bg} ${config.text} ${config.border}`}
     >
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {status?.charAt(0).toUpperCase() + status?.slice(1)}
     </span>
   );
 };

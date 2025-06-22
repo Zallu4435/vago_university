@@ -1,6 +1,7 @@
 import {
     GetFacultyRequestDTO,
     GetFacultyByIdRequestDTO,
+    GetFacultyByTokenRequestDTO,
     ApproveFacultyRequestDTO,
     RejectFacultyRequestDTO,
     DeleteFacultyRequestDTO,
@@ -10,6 +11,7 @@ import {
 import {
     GetFacultyResponseDTO,
     GetFacultyByIdResponseDTO,
+    GetFacultyByTokenResponseDTO,
     ApproveFacultyResponseDTO,
     RejectFacultyResponseDTO,
     DeleteFacultyResponseDTO,
@@ -20,6 +22,7 @@ import {
 export interface IFacultyRepository {
     getFaculty(params: GetFacultyRequestDTO): Promise<GetFacultyResponseDTO>;
     getFacultyById(params: GetFacultyByIdRequestDTO): Promise<GetFacultyByIdResponseDTO>;
+    getFacultyByToken(params: GetFacultyByTokenRequestDTO): Promise<GetFacultyByTokenResponseDTO>;
     approveFaculty(params: ApproveFacultyRequestDTO): Promise<ApproveFacultyResponseDTO>;
     rejectFaculty(params: RejectFacultyRequestDTO): Promise<RejectFacultyResponseDTO>;
     deleteFaculty(params: DeleteFacultyRequestDTO): Promise<DeleteFacultyResponseDTO>;

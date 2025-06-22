@@ -2,6 +2,7 @@ import { IFacultyRepository } from '../../../application/faculty/repositories/IF
 import {
   GetFacultyUseCase,
   GetFacultyByIdUseCase,
+  GetFacultyByTokenUseCase,
   ApproveFacultyUseCase,
   RejectFacultyUseCase,
   DeleteFacultyUseCase,
@@ -16,6 +17,7 @@ export function getFacultyComposer(): IFacultyController {
   const repository: IFacultyRepository = new FacultyRepository();
   const getFacultyUseCase = new GetFacultyUseCase(repository);
   const getFacultyByIdUseCase = new GetFacultyByIdUseCase(repository);
+  const getFacultyByTokenUseCase = new GetFacultyByTokenUseCase(repository);
   const approveFacultyUseCase = new ApproveFacultyUseCase(repository);
   const rejectFacultyUseCase = new RejectFacultyUseCase(repository);
   const deleteFacultyUseCase = new DeleteFacultyUseCase(repository);
@@ -24,6 +26,7 @@ export function getFacultyComposer(): IFacultyController {
   return new FacultyController(
     getFacultyUseCase,
     getFacultyByIdUseCase,
+    getFacultyByTokenUseCase,
     approveFacultyUseCase,
     rejectFacultyUseCase,
     deleteFacultyUseCase,

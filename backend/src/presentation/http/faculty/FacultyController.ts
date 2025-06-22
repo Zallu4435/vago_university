@@ -3,6 +3,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import {
   GetFacultyUseCase,
   GetFacultyByIdUseCase,
+  GetFacultyByTokenUseCase,
   ApproveFacultyUseCase,
   RejectFacultyUseCase,
   DeleteFacultyUseCase,
@@ -17,6 +18,7 @@ export class FacultyController implements IFacultyController {
   constructor(
     private getFacultyUseCase: GetFacultyUseCase,
     private getFacultyByIdUseCase: GetFacultyByIdUseCase,
+    private getFacultyByTokenUseCase: GetFacultyByTokenUseCase,
     private approveFacultyUseCase: ApproveFacultyUseCase,
     private rejectFacultyUseCase: RejectFacultyUseCase,
     private deleteFacultyUseCase: DeleteFacultyUseCase,
@@ -58,6 +60,26 @@ export class FacultyController implements IFacultyController {
       const response = await this.getFacultyByIdUseCase.execute({ id });
       if (!response.success) {
         return this.httpErrors.error_404();
+      }
+      return this.httpSuccess.success_200(response.data);
+    } catch (error: any) {
+      return this.httpErrors.error_500();
+    }
+  }
+
+  async getFacultyByToken(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    try {
+      const { id } = httpRequest.params || {};
+      const { token } = httpRequest.query || {};
+      if (!id || !token || typeof token !== "string") {
+        return this.httpErrors.error_400();
+      }
+      const response = await this.getFacultyByTokenUseCase.execute({
+        facultyId: id,
+        token,
+      });
+      if (!response.success) {
+        return this.httpErrors.error_400();
       }
       return this.httpSuccess.success_200(response.data);
     } catch (error: any) {

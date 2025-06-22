@@ -139,7 +139,6 @@ const App: React.FC = () => {
             <Route path="contact" element={<ContactUs />} />
             <Route path="education" element={<Education />} />
             <Route path="about" element={<About />} />
-            <Route path="confirm-admission/:id/:action" element={<ConfirmAdmission />} />
             <Route path='program-prerequisites' element={<ProgramPrerequisites />} />
             <Route path='undergraduate-scholarships' element={<ScholarshipComponent />} />
           </Route>
@@ -152,6 +151,9 @@ const App: React.FC = () => {
             <Route path="ug/contact" element={<ContactUs />} />
           </Route>
         </Route>
+
+        {/* Confirm Admission Route (no authentication required) */}
+        <Route path="/confirm-admission/:id/:action" element={<ConfirmAdmission />} />
 
         {/* Admission Route (register only) */}
         <Route element={<ProtectedRoute allowedCollections={['register']} />}>

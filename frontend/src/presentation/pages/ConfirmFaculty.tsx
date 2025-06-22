@@ -26,7 +26,7 @@ const ConfirmFaculty = () => {
     // Fetch faculty details
     const fetchFacultyDetails = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/admin/faculty/${id}`, {
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/admin/faculty/${id}/token`, {
           params: { token }
         });
 

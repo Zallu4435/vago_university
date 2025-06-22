@@ -2,6 +2,7 @@ import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IAdminAdmissionCo
 import {
   GetAdmissionsUseCase,
   GetAdmissionByIdUseCase,
+  GetAdmissionByTokenUseCase,
   ApproveAdmissionUseCase,
   RejectAdmissionUseCase,
   DeleteAdmissionUseCase,
@@ -17,6 +18,7 @@ export class AdminAdmissionController implements IAdminAdmissionController {
   constructor(
     private getAdmissionsUseCase: GetAdmissionsUseCase,
     private getAdmissionByIdUseCase: GetAdmissionByIdUseCase,
+    private getAdmissionByTokenUseCase: GetAdmissionByTokenUseCase,
     private approveAdmissionUseCase: ApproveAdmissionUseCase,
     private rejectAdmissionUseCase: RejectAdmissionUseCase,
     private deleteAdmissionUseCase: DeleteAdmissionUseCase,
@@ -56,6 +58,26 @@ export class AdminAdmissionController implements IAdminAdmissionController {
       const response = await this.getAdmissionByIdUseCase.execute({ id });
       if (!response.success) {
         return this.httpErrors.error_404();
+      }
+      return this.httpSuccess.success_200(response.data);
+    } catch (error: any) {
+      return this.httpErrors.error_500();
+    }
+  }
+
+  async getAdmissionByToken(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    try {
+      const { id } = httpRequest.params || {};
+      const { token } = httpRequest.query || {};
+      if (!id || !token || typeof token !== "string") {
+        return this.httpErrors.error_400();
+      }
+      const response = await this.getAdmissionByTokenUseCase.execute({
+        admissionId: id,
+        token,
+      });
+      if (!response.success) {
+        return this.httpErrors.error_400();
       }
       return this.httpSuccess.success_200(response.data);
     } catch (error: any) {

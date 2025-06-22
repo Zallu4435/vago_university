@@ -1,6 +1,7 @@
 import {
     GetAdmissionsRequestDTO,
     GetAdmissionByIdRequestDTO,
+    GetAdmissionByTokenRequestDTO,
     ApproveAdmissionRequestDTO,
     RejectAdmissionRequestDTO,
     DeleteAdmissionRequestDTO,
@@ -9,6 +10,7 @@ import {
   import {
     GetAdmissionsResponseDTO,
     GetAdmissionByIdResponseDTO,
+    GetAdmissionByTokenResponseDTO,
     ApproveAdmissionResponseDTO,
     RejectAdmissionResponseDTO,
     DeleteAdmissionResponseDTO,
@@ -18,6 +20,7 @@ import {
   export interface IAdmissionRepository {
     getAdmissions(params: GetAdmissionsRequestDTO): Promise<GetAdmissionsResponseDTO>;
     getAdmissionById(params: GetAdmissionByIdRequestDTO): Promise<GetAdmissionByIdResponseDTO>;
+    getAdmissionByToken(params: GetAdmissionByTokenRequestDTO): Promise<GetAdmissionByTokenResponseDTO>;
     approveAdmission(params: ApproveAdmissionRequestDTO): Promise<ApproveAdmissionResponseDTO>;
     rejectAdmission(params: RejectAdmissionRequestDTO): Promise<RejectAdmissionResponseDTO>;
     deleteAdmission(params: DeleteAdmissionRequestDTO): Promise<DeleteAdmissionResponseDTO>;

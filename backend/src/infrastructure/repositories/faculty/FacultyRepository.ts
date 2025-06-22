@@ -8,6 +8,7 @@ import { FacultyErrorType } from "../../../domain/faculty/enums/FacultyErrorType
 import {
     GetFacultyRequestDTO,
     GetFacultyByIdRequestDTO,
+    GetFacultyByTokenRequestDTO,
     ApproveFacultyRequestDTO,
     RejectFacultyRequestDTO,
     DeleteFacultyRequestDTO,
@@ -17,6 +18,7 @@ import {
 import {
     GetFacultyResponseDTO,
     GetFacultyByIdResponseDTO,
+    GetFacultyByTokenResponseDTO,
     ApproveFacultyResponseDTO,
     RejectFacultyResponseDTO,
     DeleteFacultyResponseDTO,
@@ -104,6 +106,52 @@ export class FacultyRepository implements IFacultyRepository {
 
         if (!faculty) {
             throw new Error(FacultyErrorType.FacultyNotFound);
+        }
+
+        return {
+            faculty: {
+                _id: faculty._id.toString(),
+                fullName: faculty.fullName,
+                email: faculty.email,
+                phone: faculty.phone,
+                department: faculty.department,
+                qualification: faculty.qualification,
+                experience: faculty.experience,
+                aboutMe: faculty.aboutMe,
+                cvUrl: faculty.cvUrl,
+                certificatesUrl: faculty.certificatesUrl,
+                createdAt: faculty.createdAt.toISOString(),
+                status: faculty.status,
+            },
+        };
+    }
+
+    async getFacultyByToken(params: GetFacultyByTokenRequestDTO): Promise<GetFacultyByTokenResponseDTO> {
+        if (!mongoose.isValidObjectId(params.facultyId)) {
+            throw new Error(FacultyErrorType.InvalidFacultyId);
+        }
+
+        const faculty = await FacultyRegister.findById(params.facultyId)
+            .select("fullName email phone department qualification experience aboutMe cvUrl certificatesUrl createdAt status confirmationToken tokenExpiry")
+            .lean();
+
+        if (!faculty) {
+            throw new Error(FacultyErrorType.FacultyNotFound);
+        }
+
+        // Validate token
+        if (!faculty.confirmationToken || faculty.confirmationToken !== params.token) {
+            throw new Error(FacultyErrorType.InvalidToken);
+        }
+
+        // Check if token is expired
+        if (!faculty.tokenExpiry || new Date() > faculty.tokenExpiry) {
+            throw new Error(FacultyErrorType.TokenExpired);
+        }
+
+        // Check if faculty status is "offered" (waiting for confirmation)
+        if (faculty.status !== "offered") {
+            throw new Error(FacultyErrorType.FacultyAlreadyProcessed);
         }
 
         return {

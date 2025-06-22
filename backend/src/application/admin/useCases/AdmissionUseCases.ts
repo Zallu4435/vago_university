@@ -1,6 +1,7 @@
 import {
     GetAdmissionsRequestDTO,
     GetAdmissionByIdRequestDTO,
+    GetAdmissionByTokenRequestDTO,
     ApproveAdmissionRequestDTO,
     RejectAdmissionRequestDTO,
     DeleteAdmissionRequestDTO,
@@ -9,6 +10,7 @@ import {
 import {
     GetAdmissionsResponseDTO,
     GetAdmissionByIdResponseDTO,
+    GetAdmissionByTokenResponseDTO,
     ApproveAdmissionResponseDTO,
     RejectAdmissionResponseDTO,
     DeleteAdmissionResponseDTO,
@@ -28,6 +30,10 @@ export interface IGetAdmissionsUseCase {
 
 export interface IGetAdmissionByIdUseCase {
     execute(params: GetAdmissionByIdRequestDTO): Promise<ResponseDTO<GetAdmissionByIdResponseDTO>>;
+}
+
+export interface IGetAdmissionByTokenUseCase {
+    execute(params: GetAdmissionByTokenRequestDTO): Promise<ResponseDTO<GetAdmissionByTokenResponseDTO>>;
 }
 
 export interface IApproveAdmissionUseCase {
@@ -71,6 +77,21 @@ export class GetAdmissionByIdUseCase implements IGetAdmissionByIdUseCase {
             return { data: result, success: true };
         } catch (error: any) {
             console.error("GetAdmissionByIdUseCase: Error:", error);
+            return { data: { error: error.message || AdmissionErrorType.AdmissionNotFound }, success: false };
+        }
+    }
+}
+
+export class GetAdmissionByTokenUseCase implements IGetAdmissionByTokenUseCase {
+    constructor(private admissionRepository: IAdmissionRepository) { }
+
+    async execute(params: GetAdmissionByTokenRequestDTO): Promise<ResponseDTO<GetAdmissionByTokenResponseDTO>> {
+        try {
+            console.log(`Executing getAdmissionByToken use case with token: ${params.token}`);
+            const result = await this.admissionRepository.getAdmissionByToken(params);
+            return { data: result, success: true };
+        } catch (error: any) {
+            console.error("GetAdmissionByTokenUseCase: Error:", error);
             return { data: { error: error.message || AdmissionErrorType.AdmissionNotFound }, success: false };
         }
     }

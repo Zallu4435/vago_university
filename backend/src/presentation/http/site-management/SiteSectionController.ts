@@ -26,10 +26,29 @@ export class SiteSectionController {
   async getSections(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
       const { sectionKey, page = 1, limit = 10, search } = httpRequest.query;
+      
+      // Validate pagination parameters
+      const pageNum = Number(page);
+      const limitNum = Number(limit);
+      
+      if (isNaN(pageNum) || pageNum < 1) {
+        return { 
+          statusCode: 400, 
+          body: { message: "Page must be a positive number" } 
+        };
+      }
+      
+      if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
+        return { 
+          statusCode: 400, 
+          body: { message: "Limit must be between 1 and 100" } 
+        };
+      }
+      
       const params: GetSiteSectionsRequestDTO = {
         sectionKey: sectionKey as any,
-        page: Number(page),
-        limit: Number(limit),
+        page: pageNum,
+        limit: limitNum,
         search: search as string,
       };
 
@@ -66,37 +85,50 @@ export class SiteSectionController {
 
   async createSection(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const params: CreateSiteSectionRequestDTO = httpRequest.body;
+      console.log('[SiteSectionController] createSection - httpRequest.file:', httpRequest.file);
+      console.log('[SiteSectionController] createSection - httpRequest.body:', httpRequest.body);
+      let params: CreateSiteSectionRequestDTO = httpRequest.body;
+      if (httpRequest.file) {
+        params = { ...params, image: httpRequest.file.path };
+      }
+      console.log('[SiteSectionController] createSection - params:', params);
       const result = await this.createSiteSectionUseCase.execute(params);
       if (!result.success) {
+        console.log('[SiteSectionController] createSection - use case failed:', result);
         return { statusCode: 400, body: { message: "Failed to create site section" } };
       }
-
       return { statusCode: 201, body: result.data };
     } catch (error) {
+      console.error('[SiteSectionController] createSection - error:', error);
       return { statusCode: 500, body: { message: "Internal server error" } };
     }
   }
 
   async updateSection(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
+      console.log('[SiteSectionController] updateSection - httpRequest.file:', httpRequest.file);
+      console.log('[SiteSectionController] updateSection - httpRequest.body:', httpRequest.body);
       const { id } = httpRequest.params;
-      const params: UpdateSiteSectionRequestDTO = {
+      let params: UpdateSiteSectionRequestDTO = {
         id,
         ...httpRequest.body,
       };
-
+      if (httpRequest.file) {
+        params = { ...params, image: httpRequest.file.path };
+      }
+      console.log('[SiteSectionController] updateSection - params:', params);
       const result = await this.updateSiteSectionUseCase.execute(params);
       if (!result.success) {
+        console.log('[SiteSectionController] updateSection - use case failed:', result);
         return { statusCode: 400, body: { message: "Failed to update site section" } };
       }
-
       if (!result.data) {
+        console.log('[SiteSectionController] updateSection - not found');
         return { statusCode: 404, body: { message: "Site section not found" } };
       }
-
       return { statusCode: 200, body: result.data };
     } catch (error) {
+      console.error('[SiteSectionController] updateSection - error:', error);
       return { statusCode: 500, body: { message: "Internal server error" } };
     }
   }

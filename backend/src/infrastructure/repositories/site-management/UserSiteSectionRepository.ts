@@ -18,13 +18,9 @@ function toUserDTO(doc: any): UserSiteSectionDTO {
 
 export class UserSiteSectionRepository implements IUserSiteSectionRepository {
   async getUserSections(params: GetUserSiteSectionsRequestDTO): Promise<GetUserSiteSectionsResponseDTO> {
-    const { sectionKey } = params;
+    const { sectionKey, page = 1, limit = 10 } = params;
     
     const query: any = { sectionKey };
-    
-    // Default pagination for user view
-    const page = 1;
-    const limit = 10;
     const skip = (page - 1) * limit;
 
     const [docs, total] = await Promise.all([

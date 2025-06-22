@@ -3,6 +3,8 @@ import { SiteSectionKey } from '../entities/SiteSection';
 // Request DTOs for user-side
 export interface GetUserSiteSectionsRequestDTO {
   sectionKey: SiteSectionKey;
+  page?: number;
+  limit?: number;
 }
 
 // Response DTOs for user-side

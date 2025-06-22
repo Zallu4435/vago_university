@@ -3,6 +3,7 @@ import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaFacebook, FaTwitter, FaInstagram
 import { Input } from './Input';
 import { Button } from './Button';
 import { Textarea } from './Textarea';
+import { useSectionAnimation } from '../../application/hooks/useSectionAnimation';
 
 const ContactUs = () => {
   const [form, setForm] = useState({
@@ -11,6 +12,8 @@ const ContactUs = () => {
     subject: '',
     message: ''
   });
+
+  const isVisible = useSectionAnimation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -22,7 +25,13 @@ const ContactUs = () => {
   };
 
   return (
-    <section className="w-full bg-gradient-to-b from-cyan-50 via-white to-cyan-50 pt-20 pb-30">
+    <section
+      id="contact-us"
+      data-animate
+      className={`w-full bg-gradient-to-b from-cyan-50 via-white to-cyan-50 pt-20 pb-30 transition-all duration-800 ${
+        isVisible["contact-us"] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+      }`}
+    >
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-cyan-800 mb-4">Contact Us</h2>

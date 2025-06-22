@@ -24,7 +24,10 @@ const createSchema = (fields: SectionField[]) => {
   const schemaObject: Record<string, any> = {};
   
   fields.forEach(field => {
-    if (field.required) {
+    if (field.type === 'image') {
+      // Accept string (for existing image URL) or File (for new upload)
+      schemaObject[field.name] = z.union([z.string(), z.instanceof(File)]).optional();
+    } else if (field.required) {
       schemaObject[field.name] = z.string().min(1, `${field.label} is required`);
     } else {
       schemaObject[field.name] = z.string().optional();
@@ -44,10 +47,17 @@ const SiteSectionForm: React.FC<SiteSectionFormProps> = ({ fields, initialData, 
     formState: { errors, isSubmitting },
     setValue,
     watch,
+    reset,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: initialData || Object.fromEntries(fields.map(f => [f.name, ''])),
   });
+
+  useEffect(() => {
+    if (initialData) {
+      reset(initialData);
+    }
+  }, [initialData, reset]);
 
   // Prevent background scrolling when modal is open
   useEffect(() => {
@@ -147,26 +157,42 @@ const SiteSectionForm: React.FC<SiteSectionFormProps> = ({ fields, initialData, 
                     />
                     {errors[field.name as keyof FormData] && (
                       <p className="text-red-400 text-sm mt-1">
-                        {errors[field.name as keyof FormData]?.message}
+                        {(errors[field.name as keyof FormData]?.message as string) || ''}
                       </p>
                     )}
                   </div>
                 ) : field.type === 'image' ? (
                   <div>
+                    {/* Show preview if initialData.image is a string (URL) and no new file is selected */}
+                    {typeof watch(field.name) === 'string' && watch(field.name) && (
+                      <img
+                        src={watch(field.name)}
+                        alt="Current"
+                        className="mb-2 max-h-32 rounded border border-purple-600/30"
+                      />
+                    )}
+                    {/* Show preview for newly selected file */}
+                    {typeof watch(field.name) !== 'string' && watch(field.name) && (
+                      <img
+                        src={URL.createObjectURL(watch(field.name))}
+                        alt="Preview"
+                        className="mb-2 max-h-32 rounded border border-purple-600/30"
+                      />
+                    )}
                     <input
                       type="file"
                       accept="image/*"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          setValue(field.name as keyof FormData, file.name);
+                          setValue(field.name as keyof FormData, file);
                         }
                       }}
                       className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                     />
                     {errors[field.name as keyof FormData] && (
                       <p className="text-red-400 text-sm mt-1">
-                        {errors[field.name as keyof FormData]?.message}
+                        {(errors[field.name as keyof FormData]?.message as string) || ''}
                       </p>
                     )}
                   </div>
@@ -180,7 +206,7 @@ const SiteSectionForm: React.FC<SiteSectionFormProps> = ({ fields, initialData, 
                     />
                     {errors[field.name as keyof FormData] && (
                       <p className="text-red-400 text-sm mt-1">
-                        {errors[field.name as keyof FormData]?.message}
+                        {(errors[field.name as keyof FormData]?.message as string) || ''}
                       </p>
                     )}
                   </div>

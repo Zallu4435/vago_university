@@ -17,8 +17,8 @@ export const useSiteManagement = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['site-sections', activeTab],
-    queryFn: () => siteManagementService.getSections(activeTab),
+    queryKey: ['site-sections', activeTab, page],
+    queryFn: () => siteManagementService.getSections(activeTab, 10, page),
   });
 
   // Fetch individual section by ID
@@ -46,8 +46,13 @@ export const useSiteManagement = () => {
     mutationFn: ({ id, data }: { id: string; data: UpdateSiteSectionData }) => 
       siteManagementService.updateSection(id, data),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['site-sections', data.sectionKey] });
-      queryClient.invalidateQueries({ queryKey: ['site-section', selectedId] });
+      // Update the section list cache
+      queryClient.setQueryData(['site-sections', data.sectionKey, page], (oldSections: SiteSection[] | undefined) => {
+        if (!oldSections) return oldSections;
+        return oldSections.map(section => section.id === data.id ? data : section);
+      });
+      // Update the individual section cache
+      queryClient.setQueryData(['site-section', data.id], data);
       toast.success(`${data.sectionKey === 'highlights' ? 'Highlight' : data.sectionKey === 'vagoNow' ? 'VAGO Now' : 'Leadership'} updated successfully`);
     },
     onError: () => toast.error('Failed to update section'),

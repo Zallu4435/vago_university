@@ -37,10 +37,19 @@ export interface SiteSectionsResponse {
   totalPages: number;
 }
 
+function isFile(value: any): value is File {
+  return typeof File !== 'undefined' && value instanceof File;
+}
+
 class SiteManagementService {
   // Get all sections by type
-  async getSections(sectionKey: 'highlights' | 'vagoNow' | 'leadership'): Promise<SiteSection[]> {
-    const response = await httpClient.get<SiteSectionsResponse>(`/admin/site-sections?sectionKey=${sectionKey}`);
+  async getSections(sectionKey: 'highlights' | 'vagoNow' | 'leadership', limit?: number, page?: number): Promise<SiteSection[]> {
+    const params = new URLSearchParams();
+    params.append('sectionKey', sectionKey);
+    if (limit) params.append('limit', limit.toString());
+    if (page) params.append('page', page.toString());
+    
+    const response = await httpClient.get<SiteSectionsResponse>(`/admin/site-sections?${params.toString()}`);
     return response.data.sections;
   }
 
@@ -52,13 +61,43 @@ class SiteManagementService {
 
   // Create new section
   async createSection(data: CreateSiteSectionData): Promise<SiteSection> {
-    const response = await httpClient.post<{ section: SiteSection }>('/admin/site-sections', data);
+    let payload: any = data;
+    let headers: any = {};
+    if (data.image && isFile(data.image)) {
+      payload = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (isFile(value)) {
+            payload.append(key, value);
+          } else {
+            payload.append(key, value as string);
+          }
+        }
+      });
+      headers['Content-Type'] = 'multipart/form-data';
+    }
+    const response = await httpClient.post<{ section: SiteSection }>('/admin/site-sections', payload, { headers });
     return response.data.section;
   }
 
   // Update section
   async updateSection(id: string, data: UpdateSiteSectionData): Promise<SiteSection> {
-    const response = await httpClient.put<{ section: SiteSection }>(`/admin/site-sections/${id}`, data);
+    let payload: any = data;
+    let headers: any = {};
+    if (data.image && isFile(data.image)) {
+      payload = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (isFile(value)) {
+            payload.append(key, value);
+          } else {
+            payload.append(key, value as string);
+          }
+        }
+      });
+      headers['Content-Type'] = 'multipart/form-data';
+    }
+    const response = await httpClient.put<{ section: SiteSection }>(`/admin/site-sections/${id}`, payload, { headers });
     return response.data.section;
   }
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaGraduationCap, FaArrowRight, FaClock } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { useSectionAnimation } from '../../../application/hooks/useSectionAnimation';
 
 interface ProgramCardProps {
     title: string;
@@ -80,6 +81,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ title, description, image, co
 };
 
 const UGProgrammes: React.FC = () => {
+    const isVisible = useSectionAnimation();
     const programs = [
         {
             title: "School of Computing",
@@ -104,7 +106,13 @@ const UGProgrammes: React.FC = () => {
     ];
 
     return (
-        <section className="w-full bg-gradient-to-b from-cyan-50 via-white to-cyan-50 pt-20 py-30">
+        <section
+            id="ug-programmes"
+            data-animate
+            className={`w-full bg-gradient-to-b from-cyan-50 via-white to-cyan-50 pt-20 py-30 transition-all duration-800 ${
+                isVisible["ug-programmes"] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+            }`}
+        >
             <div className="max-w-6xl mx-auto px-4">
                 <div className="text-center mb-16">
                     <span className="inline-block px-4 py-1 bg-cyan-100 text-cyan-800 rounded-full text-sm font-medium mb-4">Academic Excellence</span>
@@ -134,6 +142,21 @@ const UGProgrammes: React.FC = () => {
                     </p>
                 </div>
             </div>
+            <style>{`
+                @keyframes fade-in {
+                  from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                  }
+                  to {
+                    opacity: 1;
+                    transform: translateY(0);
+                  }
+                }
+                .animate-fade-in {
+                  animation: fade-in 0.8s ease-out forwards;
+                }
+            `}</style>
         </section>
     );
 };

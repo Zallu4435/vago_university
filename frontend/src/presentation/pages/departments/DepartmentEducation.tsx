@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { FaArrowRight, FaCalendarAlt } from 'react-icons/fa';
+import { useSectionAnimation } from '../../../application/hooks/useSectionAnimation';
 
 interface Programme {
   title: string;
@@ -22,35 +23,9 @@ interface DepartmentDataMap {
   [key: string]: DepartmentData;
 }
 
-interface VisibilityState {
-  [key: string]: boolean;
-}
-
 const DepartmentProgrammes: React.FC = () => {
   const [currentDepartment, setCurrentDepartment] = useState<string>('computer-science');
-  const [isVisible, setIsVisible] = useState<VisibilityState>({});
-  const observerRef = useRef<IntersectionObserver | null>(null);
-
-  // Intersection Observer for animations
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsVisible(prev => ({ ...prev, [entry.target.id]: true }));
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    observerRef.current = observer;
-
-    const elements = document.querySelectorAll('[data-animate]');
-    elements.forEach(el => observer.observe(el));
-
-    return () => observer.disconnect();
-  }, []);
+  const isVisible = useSectionAnimation();
 
   const departmentData: DepartmentDataMap = {
     'computer-science': {

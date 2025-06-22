@@ -22,26 +22,46 @@ export interface SiteSectionsResponse {
 
 class SiteSectionsService {
   // Get highlights for home page
-  async getHighlights(): Promise<SiteSection[]> {
-    const response = await httpClient.get<SiteSectionsResponse>('/site-sections?sectionKey=highlights');
+  async getHighlights(limit?: number, page?: number): Promise<SiteSection[]> {
+    const params = new URLSearchParams();
+    params.append('sectionKey', 'highlights');
+    if (limit) params.append('limit', limit.toString());
+    if (page) params.append('page', page.toString());
+    
+    const response = await httpClient.get<SiteSectionsResponse>(`/site-sections?${params.toString()}`);
     return response.data.sections;
   }
 
   // Get VAGO Now for home page
-  async getVagoNow(): Promise<SiteSection[]> {
-    const response = await httpClient.get<SiteSectionsResponse>('/site-sections?sectionKey=vagoNow');
+  async getVagoNow(limit?: number, page?: number): Promise<SiteSection[]> {
+    const params = new URLSearchParams();
+    params.append('sectionKey', 'vagoNow');
+    if (limit) params.append('limit', limit.toString());
+    if (page) params.append('page', page.toString());
+    
+    const response = await httpClient.get<SiteSectionsResponse>(`/site-sections?${params.toString()}`);
     return response.data.sections;
   }
 
   // Get leadership for home page
-  async getLeadership(): Promise<SiteSection[]> {
-    const response = await httpClient.get<SiteSectionsResponse>('/site-sections?sectionKey=leadership');
+  async getLeadership(limit?: number, page?: number): Promise<SiteSection[]> {
+    const params = new URLSearchParams();
+    params.append('sectionKey', 'leadership');
+    if (limit) params.append('limit', limit.toString());
+    if (page) params.append('page', page.toString());
+    
+    const response = await httpClient.get<SiteSectionsResponse>(`/site-sections?${params.toString()}`);
     return response.data.sections;
   }
 
   // Get all sections by type (generic method)
-  async getSectionsByType(sectionKey: 'highlights' | 'vagoNow' | 'leadership'): Promise<SiteSection[]> {
-    const response = await httpClient.get<SiteSectionsResponse>(`/site-sections?sectionKey=${sectionKey}`);
+  async getSectionsByType(sectionKey: 'highlights' | 'vagoNow' | 'leadership', limit?: number, page?: number): Promise<SiteSection[]> {
+    const params = new URLSearchParams();
+    params.append('sectionKey', sectionKey);
+    if (limit) params.append('limit', limit.toString());
+    if (page) params.append('page', page.toString());
+    
+    const response = await httpClient.get<SiteSectionsResponse>(`/site-sections?${params.toString()}`);
     return response.data.sections;
   }
 }

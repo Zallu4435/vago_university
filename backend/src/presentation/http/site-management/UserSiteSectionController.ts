@@ -10,12 +10,30 @@ export class UserSiteSectionController {
 
   async getSections(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { sectionKey } = httpRequest.query;
+      const { sectionKey, page = 1, limit = 10 } = httpRequest.query;
       
       if (!sectionKey || typeof sectionKey !== 'string') {
         return { 
           statusCode: 400, 
           body: { message: "Section key is required" } 
+        };
+      }
+
+      // Validate pagination parameters
+      const pageNum = Number(page);
+      const limitNum = Number(limit);
+      
+      if (isNaN(pageNum) || pageNum < 1) {
+        return { 
+          statusCode: 400, 
+          body: { message: "Page must be a positive number" } 
+        };
+      }
+      
+      if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
+        return { 
+          statusCode: 400, 
+          body: { message: "Limit must be between 1 and 100" } 
         };
       }
 
@@ -40,6 +58,8 @@ export class UserSiteSectionController {
 
       const params: GetUserSiteSectionsRequestDTO = {
         sectionKey: mappedSectionKey,
+        page: pageNum,
+        limit: limitNum,
       };
 
       const result = await this.getUserSiteSectionsUseCase.execute(params);

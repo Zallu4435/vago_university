@@ -17,6 +17,9 @@ import ApplicationFormLayout from './presentation/Layout/ApplicationFormLayout';
 
 // Pages
 import { Home } from './presentation/pages/main/Home';
+import { HighlightsPage } from './presentation/pages/main/HighlightsPage';
+import { VagoNowPage } from './presentation/pages/main/VagoNowPage';
+import { LeadershipPage } from './presentation/pages/main/LeadershipPage';
 import { Admissions } from './presentation/pages/main/Admissions';
 import ContactUs from './presentation/components/ContactUs';
 import { Education } from './presentation/pages/main/Education';
@@ -135,6 +138,9 @@ const App: React.FC = () => {
         <Route element={<ProtectedRoute allowedCollections={['register', 'user', 'faculty']} isPublic={true} />}>
           <Route element={<PublicLayout />}>
             <Route index element={<Home />} />
+            <Route path="highlights" element={<HighlightsPage />} />
+            <Route path="vago-now" element={<VagoNowPage />} />
+            <Route path="leadership" element={<LeadershipPage />} />
             <Route path="admissions" element={<Admissions />} />
             <Route path="contact" element={<ContactUs />} />
             <Route path="education" element={<Education />} />

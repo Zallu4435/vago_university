@@ -127,6 +127,42 @@ const admissionDocumentStorage = new CloudinaryStorage({
   } as any,
 });
 
+// Storage engine for site section images
+const siteSectionImageStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: (req: any, file: any) => {
+    const params = {
+      folder: 'site-section-images',
+      allowed_formats: ['jpg', 'jpeg', 'png'],
+      transformation: [
+        { width: 800, height: 600, crop: 'limit', quality: 'auto' },
+      ],
+    };
+    console.log('[siteSectionImageStorage] Cloudinary params:', params, 'File:', file?.originalname, file?.mimetype);
+    return params;
+  },
+});
+
+const siteSectionImageUpload = multer({
+  storage: siteSectionImageStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req: any, file: any, cb: any) => {
+    console.log('[siteSectionImageUpload] fileFilter - file:', file?.originalname, file?.mimetype);
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/jpg',
+    ];
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      console.log('[siteSectionImageUpload] fileFilter - allowed');
+      cb(null, true);
+    } else {
+      console.error('[siteSectionImageUpload] fileFilter - invalid file format:', file.mimetype);
+      cb(new Error('Invalid file format. Only JPG, JPEG, and PNG are allowed.'));
+    }
+  },
+});
+
 // Multer instances
 const facultyUpload = multer({
   storage: facultyStorage,
@@ -424,4 +460,4 @@ const contentVideoUploadWithErrorHandling = (req: any, res: any, next: any) => {
 };
 
 
-export { cloudinary, facultyUpload, profilePictureUpload, messageAttachmentUpload, assignmentUpload, assignmentSubmissionUpload, contentVideoUpload, contentVideoUploadWithErrorHandling, materialUpload, admissionDocumentUpload };
+export { cloudinary, facultyUpload, profilePictureUpload, messageAttachmentUpload, assignmentUpload, assignmentSubmissionUpload, contentVideoUpload, contentVideoUploadWithErrorHandling, materialUpload, admissionDocumentUpload, siteSectionImageUpload };

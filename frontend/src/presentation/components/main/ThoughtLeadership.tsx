@@ -1,10 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa";
 import { useLeadership } from "../../../application/hooks/useSiteSections";
+import SiteSectionModal from '../SiteSectionModal';
+import { SiteSection } from "../../../application/services/siteSections.service";
 
 export const ThoughtLeadership: React.FC = () => {
-  const { data: leadershipItems, isLoading, error } = useLeadership();
+  const { data: leadershipItems, isLoading, error } = useLeadership(2);
+  const [selectedItem, setSelectedItem] = useState<SiteSection | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleReadMore = (item: SiteSection) => {
+    setSelectedItem(item);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedItem(null);
+  };
 
   if (isLoading) {
     return (
@@ -82,13 +96,13 @@ export const ThoughtLeadership: React.FC = () => {
                   {item.description}
                 </p>
               </div>
-              <Link 
-                to={item.link || '#'}
+              <button
+                onClick={() => handleReadMore(item)}
                 className="inline-flex items-center mt-4 bg-white/20 text-white font-semibold py-2 px-4 rounded-lg hover:bg-white/30 transition group/btn self-start"
               >
                 Read More
                 <FaArrowRight className="ml-2 group-hover/btn:translate-x-1 transition-transform" />
-              </Link>
+              </button>
             </div>
           </div>
         ))}
@@ -96,13 +110,21 @@ export const ThoughtLeadership: React.FC = () => {
 
       <div className="text-center mt-12">
         <Link
-          to="/thought-leadership"
+          to="/leadership"
           className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
         >
           View All Insights
           <FaArrowRight className="ml-2" />
         </Link>
       </div>
+
+      {/* Modal for previewing Thought Leadership item */}
+      <SiteSectionModal
+        item={selectedItem}
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        type="leadership"
+      />
     </section>
   );
 };

@@ -1,10 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa";
 import { useVagoNow } from "../../../application/hooks/useSiteSections";
+import SiteSectionModal from '../SiteSectionModal';
+import { SiteSection } from "../../../application/services/siteSections.service";
 
 export const VagoNow: React.FC = () => {
     const { data: vagoNowItems, isLoading, error } = useVagoNow();
+    const [selectedItem, setSelectedItem] = useState<SiteSection | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleLearnMore = (item: SiteSection) => {
+        setSelectedItem(item);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedItem(null);
+    };
 
     if (isLoading) {
         return (
@@ -76,12 +90,12 @@ export const VagoNow: React.FC = () => {
                                         {item.category || 'General'}
                                     </span>
                                     <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                                    <Link
-                                        to={item.link || '#'}
-                                        className="inline-flex items-center text-sm font-semibold hover:text-cyan-300 transition-colors"
+                                    <button
+                                        onClick={() => handleLearnMore(item)}
+                                        className="inline-flex items-center text-sm font-semibold hover:text-cyan-300 transition-colors focus:outline-none"
                                     >
                                         Learn More <FaArrowRight className="ml-2 text-xs" />
-                                    </Link>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -106,12 +120,12 @@ export const VagoNow: React.FC = () => {
                                         {item.category || 'General'}
                                     </span>
                                     <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                                    <Link
-                                        to={item.link || '#'}
-                                        className="inline-flex items-center text-sm font-semibold hover:text-cyan-300 transition-colors"
+                                    <button
+                                        onClick={() => handleLearnMore(item)}
+                                        className="inline-flex items-center text-sm font-semibold hover:text-cyan-300 transition-colors focus:outline-none"
                                     >
                                         Learn More <FaArrowRight className="ml-2 text-xs" />
-                                    </Link>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -121,13 +135,21 @@ export const VagoNow: React.FC = () => {
 
             <div className="text-center mt-10">
                 <Link
-                    to="/campus-life"
+                    to="/vago-now"
                     className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
                 >
                     Explore More
                     <FaArrowRight className="ml-2" />
                 </Link>
             </div>
+
+            {/* Modal for previewing VAGO Now item */}
+            <SiteSectionModal
+                item={selectedItem}
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                type="vagoNow"
+            />
         </section>
     );
 };

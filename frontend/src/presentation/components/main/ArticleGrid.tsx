@@ -1,10 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa";
 import { useHighlights } from "../../../application/hooks/useSiteSections";
+import SiteSectionModal from '../SiteSectionModal';
+import { SiteSection } from "../../../application/services/siteSections.service";
 
 export const ArticleGrid: React.FC = () => {
   const { data: highlights, isLoading, error } = useHighlights();
+  const [selectedHighlight, setSelectedHighlight] = useState<SiteSection | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleLearnMore = (highlight: SiteSection) => {
+    setSelectedHighlight(highlight);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedHighlight(null);
+  };
 
   if (isLoading) {
     return (
@@ -58,7 +72,7 @@ export const ArticleGrid: React.FC = () => {
 
       {/* Enhanced grid layout */}
       <div className="grid md:grid-cols-2 gap-8">
-        {highlights?.map((highlight) => (
+        {highlights?.slice(0, 4).map((highlight) => (
           <div
             key={highlight.id}
             className="group bg-white rounded-xl overflow-hidden border border-cyan-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
@@ -75,37 +89,48 @@ export const ArticleGrid: React.FC = () => {
                 </span>
               </div>
             </div>
+            
             <div className="p-6">
-              <h3 className="text-xl font-semibold mb-3 text-cyan-900 group-hover:text-cyan-600 transition-colors">
+              <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-cyan-600 transition-colors">
                 {highlight.title}
               </h3>
-              <p className="text-cyan-700 text-sm mb-4 line-clamp-2">
+              <p className="text-gray-600 text-sm mb-4 line-clamp-3">
                 {highlight.description}
               </p>
-              <div className="flex justify-end">
-                <Link
-                  to={highlight.link || '#'}
-                  className="inline-flex items-center text-cyan-600 hover:text-cyan-700 font-semibold text-sm group/link"
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500">
+                  {new Date(highlight.createdAt).toLocaleDateString()}
+                </span>
+                <button
+                  onClick={() => handleLearnMore(highlight)}
+                  className="inline-flex items-center text-sm font-semibold text-cyan-600 hover:text-cyan-700 transition-colors focus:outline-none"
                 >
-                  Read More 
-                  <FaArrowRight className="ml-2 transform group-hover/link:translate-x-1 transition-transform" />
-                </Link>
+                  Learn More <FaArrowRight className="ml-2 text-xs" />
+                </button>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Optional: Add "View All" button */}
+      {/* Explore More Button */}
       <div className="text-center mt-12">
         <Link
-          to="/news"
-          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-500 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-600 transition-all duration-300 shadow-md hover:shadow-lg"
+          to="/highlights"
+          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
         >
-          View All Articles
+          Explore All Highlights
           <FaArrowRight className="ml-2" />
         </Link>
       </div>
+
+      {/* Modal for previewing highlight */}
+      <SiteSectionModal
+        item={selectedHighlight}
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        type="highlights"
+      />
     </section>
   );
 };

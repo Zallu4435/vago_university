@@ -40,7 +40,7 @@ const messageSchema = new Schema<IMessage>(
   {
     chatId: { type: String, required: true, index: true },
     senderId: { type: String, required: true, index: true },
-    content: { type: String, required: true },
+    content: { type: String },
     type: { 
       type: String, 
       required: true,

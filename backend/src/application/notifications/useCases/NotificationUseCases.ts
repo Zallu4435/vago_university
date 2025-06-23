@@ -40,7 +40,7 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
 
     async execute(params: CreateNotificationRequestDTO): Promise<ResponseDTO<CreateNotificationResponseDTO>> {
         try {
-            console.log(`Executing createNotification use case with params:`, params);
+            // console.log(`Executing createNotification use case with params:`, params);
             const result = await this.notificationRepository.createNotification(params);
             return { data: result, success: true };
         } catch (error: any) {
@@ -55,7 +55,7 @@ export class GetAllNotificationsUseCase implements IGetAllNotificationsUseCase {
 
     async execute(params: GetAllNotificationsRequestDTO): Promise<ResponseDTO<GetAllNotificationsResponseDTO>> {
         try {
-            console.log(`Executing getAllNotifications use case with params:`, params);
+            // console.log(`Executing getAllNotifications use case with params:`, params);
             if (params.userId && !mongoose.Types.ObjectId.isValid(params.userId)) {
                 return { data: { error: NotificationErrorType.InvalidRecipientId }, success: false };
             }
@@ -73,7 +73,7 @@ export class GetIndividualNotificationUseCase implements IGetIndividualNotificat
 
     async execute(params: GetIndividualNotificationRequestDTO): Promise<ResponseDTO<GetIndividualNotificationResponseDTO>> {
         try {
-            console.log(`Executing getIndividualNotification use case with params:`, params);
+            // console.log(`Executing getIndividualNotification use case with params:`, params);
             if (!mongoose.Types.ObjectId.isValid(params.notificationId)) {
                 return { data: { error: NotificationErrorType.InvalidNotificationId }, success: false };
             }
@@ -91,7 +91,7 @@ export class DeleteNotificationUseCase implements IDeleteNotificationUseCase {
 
     async execute(params: DeleteNotificationRequestDTO): Promise<ResponseDTO<DeleteNotificationResponseDTO>> {
         try {
-            console.log(`Executing deleteNotification use case with params:`, params);
+            // console.log(`Executing deleteNotification use case with params:`, params);
             if (!mongoose.Types.ObjectId.isValid(params.notificationId)) {
                 return { data: { error: NotificationErrorType.InvalidNotificationId }, success: false };
             }

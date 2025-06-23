@@ -3,6 +3,8 @@ import { FiSend, FiSmile, FiPaperclip, FiX, FiCornerUpLeft } from 'react-icons/f
 import { EmojiPicker } from './EmojiPicker';
 import { AttachmentMenu } from './AttachmentMenu';
 import { Styles, Message } from '../types/ChatTypes';
+import { MediaPreview } from './MediaPreview';
+import { chatService } from '../services/chatService';
 
 interface ChatInputProps {
   onSendMessage: (message: string, file?: File, replyTo?: Message) => void;
@@ -10,6 +12,7 @@ interface ChatInputProps {
   styles: Styles;
   replyToMessage?: Message | null;
   onCancelReply?: () => void;
+  selectedChatId: string | null;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -17,37 +20,38 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onTyping,
   styles,
   replyToMessage,
-  onCancelReply
+  onCancelReply,
+  selectedChatId
 }) => {
   const [message, setMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [showMediaPreview, setShowMediaPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const attachmentRef = useRef<HTMLButtonElement>(null);
+  const emojiRef = useRef<HTMLButtonElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim() || selectedFile) {
-      onSendMessage(message.trim(), selectedFile || undefined, replyToMessage || undefined);
+    if (message.trim() || selectedFiles.length > 0) {
+      onSendMessage(message.trim(), selectedFiles.length > 0 ? selectedFiles[0] : undefined, replyToMessage || undefined);
       setMessage('');
-      setSelectedFile(null);
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-        setPreviewUrl(null);
-      }
+      setSelectedFiles([]);
+      setPreviewUrls([]);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value);
     onTyping(true);
-    
+
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
-    
+
     typingTimeoutRef.current = setTimeout(() => {
       onTyping(false);
     }, 2000);
@@ -55,7 +59,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const handleEmojiSelect = (emoji: string) => {
     setMessage(prev => prev + emoji);
-    setShowEmojiPicker(false);
+    onTyping(false);
   };
 
   const handleFileSelect = () => {
@@ -63,10 +67,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const newPreviewUrls = files.map(file => URL.createObjectURL(file));
+      setSelectedFiles(prev => [...prev, ...files]);
+      setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
+      if (files.some(file => file.type.startsWith('image/') || file.type.startsWith('video/'))) {
+        setShowMediaPreview(true);
+      }
     }
   };
 
@@ -78,12 +86,58 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     setShowAttachmentMenu(!showAttachmentMenu);
   };
 
-  const clearSelectedFile = () => {
-    setSelectedFile(null);
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-      setPreviewUrl(null);
+  const clearSelectedFiles = () => {
+    selectedFiles.forEach((_, idx) => {
+      if (previewUrls[idx]) URL.revokeObjectURL(previewUrls[idx]);
+    });
+    setSelectedFiles([]);
+    setPreviewUrls([]);
+  };
+
+  const handleSendMedia = (caption: string) => {
+    if (selectedFiles.length > 0) {
+      selectedFiles.forEach((file) => {
+        onSendMessage(caption, file, replyToMessage || undefined);
+      });
+      setMessage('');
+      clearSelectedFiles();
+      setShowMediaPreview(false);
     }
+  };
+
+  const handleCloseMediaPreview = () => {
+    setShowMediaPreview(false);
+    clearSelectedFiles();
+  };
+
+  const handleAddMoreFiles = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleRemoveMedia = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setPreviewUrls(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSendAllMedia = async (media: { url: string; name: string; type: string; caption: string }[]) => {
+    if (!selectedChatId || selectedFiles.length === 0) return;
+    const formData = new FormData();
+    selectedFiles.forEach(file => {
+      formData.append('files', file);
+    });
+    // If all captions are the same, use the first; otherwise, join them (or just use the first for now)
+    if (media.length > 0 && media[0].caption) {
+      formData.append('content', media[0].caption);
+    }
+    try {
+      console.log(formData, "shoooooooi")
+      await chatService.sendFile(selectedChatId, formData);
+    } catch (e) {
+      // Optionally handle error
+    }
+    setMessage('');
+    clearSelectedFiles();
+    setShowMediaPreview(false);
   };
 
   useEffect(() => {
@@ -91,24 +145,22 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
+      previewUrls.forEach(url => URL.revokeObjectURL(url));
     };
-  }, [previewUrl]);
+  }, []);
 
   return (
-    <div className="relative">
+    <div className="relative bg-white dark:bg-[#202c33] p-2">
       {replyToMessage && (
-        <div className={`absolute bottom-full left-0 right-0 p-4 ${styles.card.background} border ${styles.border} rounded-t-lg`}>
-          <div className="flex items-center justify-between mb-2">
+        <div className="absolute bottom-full left-0 right-0 p-3 bg-white dark:bg-[#2a3942] border border-gray-200 dark:border-[#2a3942] rounded-t-xl max-w-xs mx-auto">
+          <div className="flex items-center justify-between mb-1">
             <div className="flex items-center space-x-2">
-              <FiCornerUpLeft className="text-gray-500" />
-              <span className="text-sm font-medium">Replying to {replyToMessage.senderName}</span>
+              <FiCornerUpLeft className="text-gray-500 dark:text-gray-400" />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Replying to {replyToMessage.senderName}</span>
             </div>
             <button
               onClick={onCancelReply}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             >
               <FiX className="w-5 h-5" />
             </button>
@@ -119,50 +171,57 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         </div>
       )}
 
-      {selectedFile && (
-        <div className={`absolute bottom-full left-0 right-0 p-4 ${styles.card.background} border ${styles.border} rounded-t-lg`}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">{selectedFile.name}</span>
+      {showMediaPreview && selectedFiles.length > 0 && (
+        <MediaPreview
+          message={{ attachments: selectedFiles.map((file, idx) => ({ url: previewUrls[idx], name: file.name, type: file.type.startsWith('image/') ? 'image' : 'video' })) }}
+          onClose={handleCloseMediaPreview}
+          styles={styles}
+          onAddMore={handleAddMoreFiles}
+          onRemoveMedia={handleRemoveMedia}
+          onSendMedia={handleSendAllMedia}
+        />
+      )}
+
+      {selectedFiles.length > 0 && selectedFiles.every(file => !(file.type.startsWith('image/') || file.type.startsWith('video/'))) && (
+        <div className="absolute bottom-full left-0 right-0 p-3 bg-white dark:bg-[#2a3942] border border-gray-200 dark:border-[#2a3942] rounded-t-xl max-w-xs mx-auto">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{selectedFiles.map(f => f.name).join(', ')}</span>
             <button
-              onClick={clearSelectedFile}
-              className="text-gray-500 hover:text-gray-700"
+              onClick={clearSelectedFiles}
+              className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             >
               <FiX className="w-5 h-5" />
             </button>
           </div>
-          {previewUrl && selectedFile.type.startsWith('image/') && (
-            <img
-              src={previewUrl}
-              alt="Preview"
-              className="max-h-40 rounded-lg object-contain"
-            />
-          )}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex items-center space-x-2 p-4">
+      <form onSubmit={handleSubmit} className="flex items-center space-x-2 p-2 bg-white dark:bg-[#2a3942] rounded-xl shadow-sm">
         <input
           type="file"
           ref={fileInputRef}
           onChange={handleFileChange}
           className="hidden"
           accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
+          multiple
         />
-        
+
         <button
+          ref={attachmentRef}
           type="button"
           onClick={handleAttachmentClick}
-          className={`p-2 rounded-full ${styles.button.secondary}`}
+          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2c3e50]"
         >
-          <FiPaperclip className="w-5 h-5" />
+          <FiPaperclip className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </button>
 
         <button
+          ref={emojiRef}
           type="button"
           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          className={`p-2 rounded-full ${styles.button.secondary}`}
+          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2c3e50]"
         >
-          <FiSmile className="w-5 h-5" />
+          <FiSmile className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </button>
 
         <input
@@ -170,20 +229,22 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           value={message}
           onChange={handleChange}
           placeholder="Type a message..."
-          className={`flex-1 p-2 rounded-lg ${styles.input.background} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          className="flex-1 p-2 rounded-lg bg-gray-100 dark:bg-[#2c3e50] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
         <button
           type="submit"
-          disabled={!message.trim() && !selectedFile}
-          className={`p-2 rounded-full ${styles.button.primary} disabled:opacity-50`}
+          disabled={!message.trim() && selectedFiles.length === 0}
+          className="p-2 rounded-full bg-green-500 text-white hover:bg-green-600 disabled:bg-green-300"
         >
           <FiSend className="w-5 h-5" />
         </button>
       </form>
 
       {showEmojiPicker && (
-        <div className="absolute bottom-full right-0 mb-2">
+        <div
+          className="absolute left-0 bottom-full mb-102 z-30 w-full rounded-xl shadow-xl bg-white dark:bg-[#202c33]"
+        >
           <EmojiPicker
             show={showEmojiPicker}
             onEmojiSelect={handleEmojiSelect}
@@ -194,13 +255,20 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         </div>
       )}
 
-      <AttachmentMenu
-        styles={styles}
-        showAttachmentMenu={showAttachmentMenu}
-        onFileSelect={handleFileSelect}
-        onCameraSelect={handleCameraSelect}
-        onClose={() => setShowAttachmentMenu(false)}
-      />
+      {showAttachmentMenu && (
+        <div
+          className="absolute bottom-full left-0 transform translate-x-0"
+          style={{ transform: 'translateX(-50%)' }}
+        >
+          <AttachmentMenu
+            styles={styles}
+            showAttachmentMenu={showAttachmentMenu}
+            onFileSelect={handleFileSelect}
+            onCameraSelect={handleCameraSelect}
+            onClose={() => setShowAttachmentMenu(false)}
+          />
+        </div>
+      )}
     </div>
   );
-}; 
+};

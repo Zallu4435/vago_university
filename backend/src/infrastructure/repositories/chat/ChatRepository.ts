@@ -38,31 +38,31 @@ import { MessageType } from "../../../domain/chat/entities/MessageType";
 export class ChatRepository implements IChatRepository {
   async getChats(params: GetChatsRequestDTO): Promise<GetChatsResponseDTO> {
     try {
-      console.log('ChatRepository - getChats - Params:', params);
+      // console.log('ChatRepository - getChats - Params:', params);
       const { userId, page, limit } = params;
       const skip = (page - 1) * limit;
 
       // Verify user exists
-      console.log('ChatRepository - getChats - Finding user:', userId);
+      // console.log('ChatRepository - getChats - Finding user:', userId);
       const user = await UserModel.findById(userId);
       if (!user) {
-        console.log('ChatRepository - getChats - User not found');
+        // console.log('ChatRepository - getChats - User not found');
         throw new Error("User not found");
       }
-      console.log('ChatRepository - getChats - User found');
+      // console.log('ChatRepository - getChats - User found');
 
-      console.log('ChatRepository - getChats - Finding chats');
+      // console.log('ChatRepository - getChats - Finding chats');
       const chats = await ChatModel.find({ participants: userId })
         .sort({ updatedAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean();
-      console.log('ChatRepository - getChats - Chats found:', chats.length);
+      // console.log('ChatRepository - getChats - Chats found:', chats.length);
 
       const totalItems = await ChatModel.countDocuments({ participants: userId });
       const totalPages = Math.ceil(totalItems / limit);
 
-      console.log('ChatRepository - getChats - Mapping chats');
+      // console.log('ChatRepository - getChats - Mapping chats');
       const mappedChats: ChatSummaryDTO[] = await Promise.all(
         chats.map(async (chat) => {
           const unreadCount = await MessageModel.countDocuments({
@@ -96,7 +96,7 @@ export class ChatRepository implements IChatRepository {
           };
         })
       );
-      console.log('ChatRepository - getChats - Chats mapped');
+      // console.log('ChatRepository - getChats - Chats mapped');
 
       const result = {
         data: mappedChats,
@@ -104,7 +104,7 @@ export class ChatRepository implements IChatRepository {
         totalPages,
         currentPage: page,
       };
-      console.log('ChatRepository - getChats - Returning result');
+      // console.log('ChatRepository - getChats - Returning result');
       return result;
     } catch (error) {
       console.error("Error in getChats repository:", error);
@@ -258,14 +258,13 @@ export class ChatRepository implements IChatRepository {
 
   async getChatMessages(params: GetChatMessagesRequestDTO): Promise<GetChatMessagesResponseDTO> {
     try {
-      console.log('ChatRepository - getChatMessages - Params:', params);
+      // console.log('ChatRepository - getChatMessages - Params:', params);
       const { chatId, page = 1, limit = 20, before } = params;
       const skip = (page - 1) * limit;
 
-      // Build query for pagination and exclude deleted messages
+      // Build query for pagination and exclude only messages deleted for this user
       const query: any = { 
         chatId,
-        deletedForEveryone: false,
         $or: [
           { deletedFor: { $ne: params.userId } },
           { deletedFor: { $exists: false } }
@@ -303,6 +302,9 @@ export class ChatRepository implements IChatRepository {
           forwardedFrom: message.forwardedFrom,
           createdAt: message.createdAt,
           updatedAt: message.updatedAt,
+          isDeleted: message.isDeleted || false,
+          deletedForEveryone: message.deletedForEveryone || false,
+          deletedFor: message.deletedFor || [],
         }));
 
       // Get the oldest message timestamp for cursor-based pagination
@@ -658,8 +660,7 @@ export class ChatRepository implements IChatRepository {
         // Delete for everyone
         message.isDeleted = true;
         message.deletedForEveryone = true;
-        message.content = 'This message was deleted';
-        message.attachments = [];
+        // Do NOT change content or attachments
       } else {
         // Delete for me
         if (!message.deletedFor) {

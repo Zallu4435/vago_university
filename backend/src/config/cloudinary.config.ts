@@ -459,5 +459,38 @@ const contentVideoUploadWithErrorHandling = (req: any, res: any, next: any) => {
   });
 };
 
+// Storage engine for chat attachments
+const chatAttachmentStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'chat-attachments',
+    allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
+    resource_type: 'auto',
+    transformation: [{ quality: 'auto' }],
+  } as any,
+});
 
-export { cloudinary, facultyUpload, profilePictureUpload, messageAttachmentUpload, assignmentUpload, assignmentSubmissionUpload, contentVideoUpload, contentVideoUploadWithErrorHandling, materialUpload, admissionDocumentUpload, siteSectionImageUpload };
+const chatAttachmentUpload = multer({
+  storage: chatAttachmentStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (req: any, file: any, cb: any) => {
+    console.log('[chatAttachmentUpload] Incoming file:', file?.originalname, file?.fieldname, file?.mimetype);
+    const allowedMimeTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain',
+      'image/jpeg',
+      'image/png',
+      'image/jpg',
+    ];
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      console.error('[chatAttachmentUpload] Invalid file format:', file.mimetype);
+      cb(new Error('Invalid file format'));
+    }
+  }
+});
+
+export { cloudinary, facultyUpload, profilePictureUpload, messageAttachmentUpload, assignmentUpload, assignmentSubmissionUpload, contentVideoUpload, contentVideoUploadWithErrorHandling, materialUpload, admissionDocumentUpload, siteSectionImageUpload, chatAttachmentUpload };

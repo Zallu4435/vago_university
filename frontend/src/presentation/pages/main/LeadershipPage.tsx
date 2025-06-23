@@ -107,7 +107,7 @@ export const LeadershipPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cyan-50 via-white to-cyan-50 pt-20">
+    <div className="min-h-screen bg-gradient-to-b from-cyan-50 via-white to-cyan-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-cyan-100">
         <div className="max-w-7xl mx-auto px-6 py-8">

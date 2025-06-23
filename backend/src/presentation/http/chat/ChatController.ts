@@ -25,6 +25,7 @@ import {
 import { GetChatsRequestDTO, SearchChatsRequestDTO, GetChatMessagesRequestDTO, SendMessageRequestDTO, MarkMessagesAsReadRequestDTO, AddReactionRequestDTO, RemoveReactionRequestDTO, SearchUsersRequestDTO, CreateChatRequestDTO, CreateGroupChatRequestDTO, AddGroupMemberRequestDTO, RemoveGroupMemberRequestDTO, UpdateGroupAdminRequestDTO, UpdateGroupSettingsRequestDTO, UpdateGroupInfoRequestDTO, LeaveGroupRequestDTO, EditMessageRequestDTO, DeleteMessageRequestDTO, ReplyToMessageRequestDTO } from "../../../domain/chat/dtos/ChatRequestDTOs";
 import { FileUploadService } from "../../../infrastructure/services/upload/FileUploadService";
 import { MessageType } from "../../../domain/chat/entities/Message";
+import { cloudinary } from '../../../config/cloudinary.config';
 
 export class ChatController {
   constructor(
@@ -53,7 +54,7 @@ export class ChatController {
 
   async getChats(req: IHttpRequest): Promise<IHttpResponse> {
     try {
-      console.log('ChatController - getChats - User:', req.user);
+      // console.log('ChatController - getChats - User:', req.user);
       
       if (!req.user?.id) {
         return {
@@ -68,7 +69,7 @@ export class ChatController {
         limit: parseInt(req.query?.limit as string) || 10,
       };
 
-      console.log('ChatController - getChats - Params:', params);
+      // console.log('ChatController - getChats - Params:', params);
       const result = await this.getChatsUseCase.execute(params);
       return {
         statusCode: 200,
@@ -139,7 +140,7 @@ export class ChatController {
 
   async getChatMessages(req: IHttpRequest): Promise<IHttpResponse> {
     try {
-      console.log('ChatController - getChatMessages - Params:', req.params);
+      // console.log('ChatController - getChatMessages - Params:', req.params);
       const { chatId } = req.params;
       if (!chatId) {
         return {
@@ -155,7 +156,7 @@ export class ChatController {
         before: req.query?.before as string
       };
 
-      console.log('ChatController - getChatMessages - Request params:', params);
+      // console.log('ChatController - getChatMessages - Request params:', params);
       const result = await this.getChatMessagesUseCase.execute(params);
       
       return {
@@ -203,24 +204,48 @@ export class ChatController {
         };
       }
 
-      // Handle both text and content fields
-      const messageContent = req.body.text || req.body.content;
-      if (!messageContent) {
-        return {
-          statusCode: 400,
-          body: { error: "Message content is required" }
-        };
+      // Handle file attachments if present
+      let attachments: any[] = [];
+      if (req.files && Array.isArray(req.files)) {
+        for (const file of req.files) {
+          try {
+            if (file.mimetype && file.mimetype.startsWith('image/')) {
+              console.log('[ChatController] Uploading image to Cloudinary:', file.originalname);
+              const result = await cloudinary.uploader.upload(file.path, {
+                folder: 'message-attachments',
+                resource_type: 'image',
+                use_filename: true,
+                unique_filename: false,
+                overwrite: false
+              });
+              console.log('[ChatController] Cloudinary upload result:', result);
+              attachments.push({
+                type: MessageType.Image,
+                url: result.secure_url,
+                name: file.originalname,
+                size: file.size,
+              });
+            } else {
+              // Non-image files: use existing logic (local or other storage)
+              attachments.push({
+                type: MessageType.File,
+                url: FileUploadService.getFileUrl(file.filename),
+                name: file.originalname,
+                size: file.size,
+              });
+            }
+          } catch (uploadErr: any) {
+            console.error('[ChatController] Error uploading file to Cloudinary:', file.originalname, uploadErr);
+          }
+        }
       }
 
-      // Handle file attachments if present
-      let attachments = [];
-      if (req.body.files) {
-        attachments = req.body.files.map((file: any) => ({
-          type: file.mimetype?.startsWith("image/") ? MessageType.Image : MessageType.File,
-          url: FileUploadService.getFileUrl(file.filename),
-          name: file.originalname,
-          size: file.size,
-        }));
+      const messageContent = req.body.text || req.body.content || '';
+      if (!messageContent && attachments.length === 0) {
+        return {
+          statusCode: 400,
+          body: { error: "Message content or file is required" }
+        };
       }
 
       const params: SendMessageRequestDTO = {
@@ -239,7 +264,7 @@ export class ChatController {
         body: { message: "Message sent successfully" }
       };
     } catch (error) {
-      console.error("Error in sendMessage:", error);
+      console.error('[ChatController] sendMessage error:', error);
       return {
         statusCode: 500,
         body: { 
@@ -252,7 +277,7 @@ export class ChatController {
 
   async markMessagesAsRead(req: IHttpRequest): Promise<IHttpResponse> {
     try {
-      console.log('ChatController - markMessagesAsRead - User:', req.user);
+      // console.log('ChatController - markMessagesAsRead - User:', req.user);
       if (!req.user?.id) {
         return {
           statusCode: 401,
@@ -273,7 +298,7 @@ export class ChatController {
         userId: req.user.id
       };
 
-      console.log('ChatController - markMessagesAsRead - Params:', params);
+      // console.log('ChatController - markMessagesAsRead - Params:', params);
       await this.markMessagesAsReadUseCase.execute(params);
 
       return {

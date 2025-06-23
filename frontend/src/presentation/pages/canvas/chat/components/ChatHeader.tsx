@@ -22,23 +22,23 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   const isOnline = chat.participants.some(p => p.isOnline);
 
   return (
-    <div className={`flex items-center justify-between p-4 border-b ${styles?.border} ${styles?.background}`}>
+    <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#202c33]">
       <div className="flex items-center space-x-3">
         <div className="relative">
           <img
             src={chat.avatar}
             alt={chat.name || 'Chat'}
-            className="w-10 h-10 rounded-full object-cover"
+            className="w-12 h-12 rounded-full object-cover"
           />
           {isOnline && (
-            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800" />
+            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-[#202c33]" />
           )}
         </div>
         <div>
-          <h2 className={`text-base font-medium ${styles?.text?.primary}`}>
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white">
             {chat.name}
           </h2>
-          <p className={`text-sm ${styles?.text?.muted}`}>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             {chat.type === 'group' 
               ? `${chat.participants.length} members`
               : isOnline ? 'Online' : 'Offline'
@@ -49,50 +49,50 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
       <div className="flex items-center space-x-2">
         <button
           onClick={onToggleTheme}
-          className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles?.button?.secondary}`}
+          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942] transition-colors duration-200"
           title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
-          {isDarkMode ? <FiSun className="w-5 h-5" /> : <FiMoon className="w-5 h-5" />}
+          {isDarkMode ? <FiSun className="w-5 h-5 text-gray-600 dark:text-gray-300" /> : <FiMoon className="w-5 h-5 text-gray-600 dark:text-gray-300" />}
         </button>
         {chat.type === 'direct' && (
           <>
             <button
-              className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles?.button?.secondary}`}
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942] transition-colors duration-200"
               title="Voice call"
             >
-              <FiPhone className="w-5 h-5" />
+              <FiPhone className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </button>
             <button
-              className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles?.button?.secondary}`}
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942] transition-colors duration-200"
               title="Video call"
             >
-              <FiVideo className="w-5 h-5" />
+              <FiVideo className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </button>
           </>
         )}
         {chat.type === 'group' && (
           <button
             onClick={onSettingsClick}
-            className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles?.button?.secondary}`}
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942] transition-colors duration-200"
             title="Group settings"
           >
-            <FiSettings className="w-5 h-5" />
+            <FiSettings className="w-5 h-5 text-gray-600 dark:text-gray-300" />
           </button>
         )}
         <button
-          className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles?.button?.secondary}`}
+          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942] transition-colors duration-200"
           title="Chat info"
           onClick={onInfoClick}
         >
-          <FiInfo className="w-5 h-5" />
+          <FiInfo className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </button>
         <button
-          className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles?.button?.secondary}`}
+          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942] transition-colors duration-200"
           title="More options"
         >
-          <FiMoreVertical className="w-5 h-5" />
+          <FiMoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </button>
       </div>
     </div>
   );
-}; 
+};

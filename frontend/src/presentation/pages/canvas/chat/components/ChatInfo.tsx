@@ -60,29 +60,26 @@ export const ChatInfo: React.FC<ChatInfoProps> = ({
   };
 
   return (
-    <div className={`w-80 h-full border-l ${styles.border} ${styles.background} flex flex-col`}>
-      {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-        <h2 className={`text-lg font-medium ${styles.text.primary}`}>Chat Info</h2>
+    <div className="w-80 h-full border-l border-gray-200 dark:border-[#2a3942] bg-white dark:bg-[#202c33] flex flex-col">
+      <div className="p-4 border-b border-gray-200 dark:border-[#2a3942] flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Chat Info</h2>
         <button
           onClick={onClose}
-          className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles.button.secondary}`}
+          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942] transition-colors duration-200"
         >
-          <FiX className="w-5 h-5" />
+          <FiX className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </button>
       </div>
 
-      {/* Chat Info */}
       <div className="flex-1 overflow-y-auto p-4">
-        {/* Chat Name */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            <h3 className={`text-sm font-medium ${styles.text.secondary}`}>Chat Name</h3>
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Chat Name</h3>
             <button
               onClick={() => setIsEditing(true)}
-              className={`p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles.button.secondary}`}
+              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942] transition-colors duration-200"
             >
-              <FiEdit2 className="w-4 h-4" />
+              <FiEdit2 className="w-4 h-4 text-gray-600 dark:text-gray-300" />
             </button>
           </div>
           {isEditing ? (
@@ -91,39 +88,37 @@ export const ChatInfo: React.FC<ChatInfoProps> = ({
                 type="text"
                 value={editedName}
                 onChange={(e) => setEditedName(e.target.value)}
-                className={`flex-1 px-3 py-2 rounded-lg ${styles.input.background} ${styles.input.border} focus:outline-none focus:ring-2 ${styles.input.focus}`}
+                className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-[#2a3942] bg-white dark:bg-[#2c3e50] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 autoFocus
               />
               <button
                 onClick={handleSaveEdit}
-                className={`px-3 py-2 rounded-lg ${styles.button.primary}`}
+                className="px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
               >
                 Save
               </button>
             </div>
           ) : (
-            <p className={`text-base ${styles.text.primary}`}>{chat.name}</p>
+            <p className="text-base text-gray-900 dark:text-white">{chat.name}</p>
           )}
         </div>
 
-        {/* Chat Type */}
         <div className="mb-6">
-          <h3 className={`text-sm font-medium ${styles.text.secondary} mb-2`}>Chat Type</h3>
-          <p className={`text-base ${styles.text.primary}`}>
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Chat Type</h3>
+          <p className="text-base text-gray-900 dark:text-white">
             {chat.type === 'direct' ? 'Direct Message' : 'Group Chat'}
           </p>
         </div>
 
-        {/* Participants */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            <h3 className={`text-sm font-medium ${styles.text.secondary}`}>Participants</h3>
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Participants</h3>
             {chat.type === 'group' && (
               <button
                 onClick={() => onAddMembers(chat.id)}
-                className={`p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${styles.button.secondary}`}
+                className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942] transition-colors duration-200"
               >
-                <FiUsers className="w-4 h-4" />
+                <FiUsers className="w-4 h-4 text-gray-600 dark:text-gray-300" />
               </button>
             )}
           </div>
@@ -131,23 +126,23 @@ export const ChatInfo: React.FC<ChatInfoProps> = ({
             {chat.participants.map(participant => (
               <div
                 key={participant.id}
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2a3942]"
               >
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
                     {participant.avatar ? (
                       <img src={participant.avatar} alt="Avatar" className="w-full h-full rounded-full" />
                     ) : (
-                      <span className="text-sm font-medium">
+                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                         {participant.firstName.charAt(0).toUpperCase()}
                       </span>
                     )}
                   </div>
                   <div>
-                    <span className={`text-sm font-medium ${styles.text.primary}`}>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {participant.firstName} {participant.lastName}
                     </span>
-                    <span className={`text-xs ${styles.text.secondary}`}>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       {participant.email} ({participant.type})
                     </span>
                   </div>
@@ -165,30 +160,29 @@ export const ChatInfo: React.FC<ChatInfoProps> = ({
           </div>
         </div>
 
-        {/* Settings */}
         {chat.type === 'group' && (
           <div className="mb-6">
-            <h3 className={`text-sm font-medium ${styles.text.secondary} mb-2`}>Group Settings</h3>
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Group Settings</h3>
             <div className="space-y-2">
-              <label className="flex items-center space-x-2">
+              <label className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2a3942]">
                 <input
                   type="checkbox"
                   checked={chat.settings?.onlyAdminsCanPost}
                   onChange={(e) => onUpdateSettings(chat.id, { ...chat.settings, onlyAdminsCanPost: e.target.checked })}
-                  className="rounded text-blue-500 focus:ring-blue-500"
+                  className="rounded text-blue-600 focus:ring-blue-500"
                 />
-                <span className={`text-sm ${styles.text.primary}`}>
+                <span className="text-sm text-gray-700 dark:text-gray-300">
                   Only admins can post
                 </span>
               </label>
-              <label className="flex items-center space-x-2">
+              <label className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2a3942]">
                 <input
                   type="checkbox"
                   checked={chat.settings?.onlyAdminsCanAddMembers}
                   onChange={(e) => onUpdateSettings(chat.id, { ...chat.settings, onlyAdminsCanAddMembers: e.target.checked || false })}
-                  className="rounded text-blue-500 focus:ring-blue-500"
+                  className="rounded text-blue-600 focus:ring-blue-500"
                 />
-                <span className={`text-sm ${styles.text.primary}`}>
+                <span className="text-sm text-gray-700 dark:text-gray-300">
                   Only admins can add members
                 </span>
               </label>
@@ -196,30 +190,28 @@ export const ChatInfo: React.FC<ChatInfoProps> = ({
           </div>
         )}
 
-        {/* Notifications */}
         <div className="mb-6">
-          <h3 className={`text-sm font-medium ${styles.text.secondary} mb-2`}>Notifications</h3>
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notifications</h3>
           <button
             onClick={handleToggleMute}
-            className={`flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 w-full ${styles.button.secondary}`}
+            className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2a3942] w-full"
           >
             {isMuted ? (
               <>
-                <FiBellOff className="w-4 h-4" />
-                <span className={`text-sm ${styles.text.primary}`}>Unmute Notifications</span>
+                <FiBellOff className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">Unmute Notifications</span>
               </>
             ) : (
               <>
-                <FiBell className="w-4 h-4" />
-                <span className={`text-sm ${styles.text.primary}`}>Mute Notifications</span>
+                <FiBell className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">Mute Notifications</span>
               </>
             )}
           </button>
         </div>
 
-        {/* Danger Zone */}
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-          <h3 className={`text-sm font-medium text-red-500 mb-2`}>Danger Zone</h3>
+        <div className="border-t border-gray-200 dark:border-[#2a3942] pt-4">
+          <h3 className="text-sm font-medium text-red-500 mb-2">Danger Zone</h3>
           <button
             onClick={() => onDeleteChat(chat.id)}
             className="flex items-center space-x-2 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-red-500"
@@ -231,4 +223,4 @@ export const ChatInfo: React.FC<ChatInfoProps> = ({
       </div>
     </div>
   );
-}; 
+};

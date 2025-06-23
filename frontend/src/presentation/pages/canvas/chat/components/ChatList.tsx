@@ -61,8 +61,8 @@ export const ChatList: React.FC<ChatListProps> = ({
   console.log('chats', chats);
 
   return (
-    <div className="w-80 border-r border-gray-200 dark:border-gray-700 flex flex-col h-full">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+    <div className="w-full border-r border-gray-200 dark:border-[#2a3942] bg-white dark:bg-[#202c33] flex flex-col h-full">
+      <div className="p-4 border-b border-gray-200 dark:border-[#2a3942]">
         <div className="relative">
           <div className="flex items-center space-x-2">
             <div className="relative flex-1">
@@ -79,7 +79,7 @@ export const ChatList: React.FC<ChatListProps> = ({
                     }
                   }, 200);
                 }}
-                className="w-full px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 rounded-lg bg-gray-100 dark:bg-[#2c3e50] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {searchQuery && (
                 <button
@@ -88,7 +88,7 @@ export const ChatList: React.FC<ChatListProps> = ({
                     setSearchResults([]);
                     setShowNewChat(false);
                   }}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                 >
                   <FiX size={18} />
                 </button>
@@ -96,13 +96,13 @@ export const ChatList: React.FC<ChatListProps> = ({
             </div>
             <button
               onClick={onNewChat}
-              className="p-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="p-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <FiPlus size={20} />
             </button>
             <button
               onClick={onCreateGroup}
-              className="p-2 rounded-lg bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              className="p-2 rounded-lg bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
             >
               <FiUsers size={20} />
             </button>
@@ -112,10 +112,10 @@ export const ChatList: React.FC<ChatListProps> = ({
 
       <div className="flex-1 overflow-y-auto">
         {showNewChat && searchQuery && (
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="p-4 border-b border-gray-200 dark:border-[#2a3942]">
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Search Results</h3>
             {isSearching ? (
-              <div className="text-center py-2">Searching...</div>
+              <div className="text-center py-2 text-gray-500 dark:text-gray-400">Searching...</div>
             ) : searchResults.length > 0 ? (
               <div className="space-y-2">
                 {searchResults.map((user) => (
@@ -127,7 +127,7 @@ export const ChatList: React.FC<ChatListProps> = ({
                       setSearchQuery('');
                       setSearchResults([]);
                     }}
-                    className="w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                    className="w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2a3942]"
                   >
                     <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                       {user.avatar ? (
@@ -136,9 +136,9 @@ export const ChatList: React.FC<ChatListProps> = ({
                         <FiUser size={20} className="text-gray-500 dark:text-gray-400" />
                       )}
                     </div>
-                    <div className="flex-1 text-left">
-                      <div className="font-medium text-gray-900 dark:text-white">{user.name}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
+                    <div className="flex-1 min-w-0 text-left items-start">
+                      <div className="font-medium text-gray-900 dark:text-white w-full whitespace-normal break-words text-left">{user.name}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400 w-full whitespace-normal break-words text-left">{user.email}</div>
                     </div>
                   </button>
                 ))}
@@ -149,13 +149,13 @@ export const ChatList: React.FC<ChatListProps> = ({
           </div>
         )}
 
-        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+        <div className="divide-y divide-gray-200 dark:divide-[#2a3942]">
           {chats.map((chat) => (
             <button
               key={chat.id}
               onClick={() => onChatSelect(chat.id)}
-              className={`w-full p-4 flex items-center space-x-3 hover:bg-gray-50 dark:hover:bg-gray-800 ${
-                selectedChatId === chat.id ? 'bg-gray-100 dark:bg-gray-800' : ''
+              className={`w-full p-4 flex items-center space-x-3 hover:bg-gray-100 dark:hover:bg-[#2a3942] ${
+                selectedChatId === chat.id ? 'bg-gray-200 dark:bg-[#2c3e50]' : ''
               }`}
             >
               <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
@@ -165,9 +165,9 @@ export const ChatList: React.FC<ChatListProps> = ({
                   <FiUsers size={24} className="text-gray-500 dark:text-gray-400" />
                 )}
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 w-full">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-white w-full whitespace-normal break-words text-left">
                     {chat.type === 'group' ? (
                       <>
                         {chat.name}
@@ -184,7 +184,7 @@ export const ChatList: React.FC<ChatListProps> = ({
                   )}
                 </div>
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 w-full whitespace-normal break-words text-left">
                     {chat.lastMessage ? (
                       <>
                         {chat.type === 'group' && (
@@ -204,7 +204,7 @@ export const ChatList: React.FC<ChatListProps> = ({
                     )}
                   </p>
                   {chat.unreadCount > 0 && (
-                    <span className="ml-2 inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-blue-500 rounded-full">
+                    <span className="ml-2 inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-green-500 rounded-full">
                       {chat.unreadCount}
                     </span>
                   )}
@@ -216,4 +216,4 @@ export const ChatList: React.FC<ChatListProps> = ({
       </div>
     </div>
   );
-}; 
+};

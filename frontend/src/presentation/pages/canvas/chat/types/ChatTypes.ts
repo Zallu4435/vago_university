@@ -11,7 +11,7 @@ export interface User {
 
 export interface Attachment {
   id: string;
-  type: 'image' | 'file' | 'audio' | 'video';
+  type: 'image' | 'document' | 'audio' | 'video';
   url: string;
   name: string;
   size: number;
@@ -31,7 +31,7 @@ export interface ReplyTo {
   content: string;
   senderId: string;
   senderName: string;
-  type: 'text' | 'file' | 'image' | 'audio' | 'video';
+  type: 'text' | 'document' | 'image' | 'audio' | 'video';
   createdAt: string;
 }
 
@@ -47,7 +47,7 @@ export interface Message {
   senderId: string;
   senderName: string;
   content: string;
-  type: 'text' | 'image' | 'file' | 'audio' | 'video';
+  type: 'text' | 'image' | 'document' | 'audio' | 'video';
   fileUrl?: string;
   fileName?: string;
   fileSize?: number;
@@ -55,7 +55,7 @@ export interface Message {
   replyToId?: string;
   replyTo?: ReplyTo;
   forwardedFrom?: ForwardedFrom;
-  reactions: { [emoji: string]: string[] };
+  reactions: Reaction[];
   status: 'sending' | 'delivered' | 'read' | 'failed';
   createdAt: Date;
   updatedAt: Date;
@@ -65,7 +65,7 @@ export interface Message {
   deletedForEveryone?: boolean;
   attachments?: {
     id: string;
-    type: 'image' | 'file' | 'audio' | 'video';
+    type: 'image' | 'document' | 'audio' | 'video';
     url: string;
     name: string;
     size: number;
@@ -78,7 +78,7 @@ export interface LastMessage {
   content: string;
   senderId: string;
   senderName: string;
-  type: 'text' | 'file' | 'image' | 'audio' | 'video';
+  type: 'text' | 'document' | 'image' | 'audio' | 'video';
   status: 'sending' | 'delivered' | 'read' | 'failed';
   createdAt: string;
 }

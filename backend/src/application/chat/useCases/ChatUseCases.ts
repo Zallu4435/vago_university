@@ -32,10 +32,10 @@ export class GetChatsUseCase {
   constructor(private chatRepository: IChatRepository) {}
 
   async execute(params: GetChatsRequestDTO): Promise<GetChatsResponseDTO> {
-    console.log('GetChatsUseCase - Executing with params:', params);
+    // console.log('GetChatsUseCase - Executing with params:', params);
     try {
       const result = await this.chatRepository.getChats(params);
-      console.log('GetChatsUseCase - Result:', result);
+      // console.log('GetChatsUseCase - Result:', result);
       return result;
     } catch (error) {
       console.error('GetChatsUseCase - Error:', error);
@@ -104,12 +104,12 @@ export class SearchUsersUseCase {
   constructor(private chatRepository: IChatRepository) {}
 
   async execute(params: SearchUsersRequestDTO): Promise<SearchUsersResponseDTO> {
-    console.log('=== Search Users UseCase Started ===');
-    console.log('SearchUsersUseCase - Executing with params:', params);
+    // console.log('=== Search Users UseCase Started ===');
+    // console.log('SearchUsersUseCase - Executing with params:', params);
     try {
       const result = await this.chatRepository.searchUsers(params);
-      console.log('SearchUsersUseCase - Result:', result);
-      console.log('=== Search Users UseCase Ended ===');
+      // console.log('SearchUsersUseCase - Result:', result);
+      // console.log('=== Search Users UseCase Ended ===');
       return result;
     } catch (error) {
       console.error('SearchUsersUseCase - Error:', error);
@@ -122,7 +122,7 @@ export class CreateChatUseCase {
   constructor(private chatRepository: IChatRepository) {}
 
   async execute(params: CreateChatRequestDTO): Promise<ChatSummaryDTO> {
-    console.log('CreateChatUseCase - Executing with params:', params);
+    // console.log('CreateChatUseCase - Executing with params:', params);
     try {
       const result = await this.chatRepository.createChat(params);
       console.log('CreateChatUseCase - Result:', result);

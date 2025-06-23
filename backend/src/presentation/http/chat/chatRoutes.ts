@@ -2,6 +2,7 @@ import { Router } from "express";
 import { expressAdapter } from "../../adapters/ExpressAdapter";
 import { getChatComposer } from "../../../infrastructure/services/chat/ChatComposers";
 import { authMiddleware } from "../../../shared/middlewares/authMiddleware";
+import { chatAttachmentUpload } from '../../../config/cloudinary.config';
 
 const chatRouter = Router();
 const chatController = getChatComposer();
@@ -33,8 +34,11 @@ chatRouter.get("/:chatId/messages", authMiddleware, (req, res) =>
   expressAdapter(req, res, chatController.getChatMessages.bind(chatController))
 );
 
-chatRouter.post("/:chatId/messages", authMiddleware, (req, res) =>
-  expressAdapter(req, res, chatController.sendMessage.bind(chatController))
+chatRouter.post(
+  "/:chatId/messages",
+  authMiddleware,
+  chatAttachmentUpload.array('files'),
+  (req, res) => expressAdapter(req, res, chatController.sendMessage.bind(chatController))
 );
 
 // Message editing and deletion routes

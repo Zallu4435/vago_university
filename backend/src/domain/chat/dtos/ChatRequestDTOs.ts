@@ -148,4 +148,5 @@ export interface CreateGroupChatRequestDTO {
     onlyAdminsCanAddMembers?: boolean;
     onlyAdminsCanChangeInfo?: boolean;
   };
+  avatar?: string;
 } 

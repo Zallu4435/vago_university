@@ -3,6 +3,7 @@ import { expressAdapter } from "../../adapters/ExpressAdapter";
 import { getChatComposer } from "../../../infrastructure/services/chat/ChatComposers";
 import { authMiddleware } from "../../../shared/middlewares/authMiddleware";
 import { chatAttachmentUpload } from '../../../config/cloudinary.config';
+import { profilePictureUpload } from '../../../config/cloudinary.config';
 
 const chatRouter = Router();
 const chatController = getChatComposer();
@@ -63,7 +64,7 @@ chatRouter.delete("/messages/:messageId/reactions", authMiddleware, (req, res) =
 );
 
 // Group chat routes
-chatRouter.post("/group", authMiddleware, (req, res) =>
+chatRouter.post("/group", authMiddleware, profilePictureUpload.single('avatar'), (req, res) =>
   expressAdapter(req, res, chatController.createGroupChat.bind(chatController))
 );
 

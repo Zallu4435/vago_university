@@ -438,6 +438,7 @@ export class ChatRepository implements IChatRepository {
         avatar: chat.avatar,
         description: chat.description,
         admins: chat.admins,
+        settings: chat.settings,
       },
       messages: messages.map((message) => ({
         id: message._id.toString(),
@@ -762,11 +763,9 @@ export class ChatRepository implements IChatRepository {
   }
 
   async updateGroupSettings(params: UpdateGroupSettingsRequestDTO): Promise<void> {
-    const { chatId, settings, updatedBy } = params;
     try {
-      console.log('ChatRepository - updateGroupSettings - chatId:', chatId);
-      console.log('ChatRepository - updateGroupSettings - settings:', settings);
-      console.log('ChatRepository - updateGroupSettings - updatedBy:', updatedBy);
+      console.log('ChatRepository - updateGroupSettings - Params:', params);
+      const { chatId, settings, updatedBy } = params;
       const chat = await ChatModel.findById(chatId);
       if (!chat) throw new Error('Chat not found');
 
@@ -778,10 +777,15 @@ export class ChatRepository implements IChatRepository {
         throw new Error('Only admins can update group settings');
       }
 
-      console.log('ChatRepository - updateGroupSettings - Updating settings in DB...');
-      await ChatModel.findByIdAndUpdate(chatId, {
-        $set: { settings }
-      });
+      const updateQuery: { [key: string]: any } = {};
+      for (const key in settings) {
+        if (Object.prototype.hasOwnProperty.call(settings, key)) {
+          updateQuery[`settings.${key}`] = settings[key as keyof typeof settings];
+        }
+      }
+
+      console.log('ChatRepository - updateGroupSettings - Update query:', updateQuery);
+      await ChatModel.findByIdAndUpdate(chatId, { $set: updateQuery });
       console.log('ChatRepository - updateGroupSettings - Update finished');
     } catch (error) {
       console.error('Error in updateGroupSettings repository:', error);
@@ -903,6 +907,7 @@ export class ChatRepository implements IChatRepository {
         participants: finalParticipants,
         createdBy: creatorId,
         admins: [creatorId], // Creator is the first admin
+        avatar: params.avatar, // Save the avatar URL
         settings: {
           onlyAdminsCanPost: settings?.onlyAdminsCanPost || false,
           onlyAdminsCanAddMembers: settings?.onlyAdminsCanAddMembers || false,
@@ -964,6 +969,22 @@ export class ChatRepository implements IChatRepository {
       await ChatModel.findByIdAndUpdate(chatId, { $set: update });
     } catch (error) {
       console.error('Error in updateGroupInfo repository:', error, 'Params:', params);
+      throw error;
+    }
+  }
+
+  async leaveGroup(params: { chatId: string; userId: string }): Promise<void> {
+    try {
+      const { chatId, userId } = params;
+      // Remove the user from participants and admins
+      await ChatModel.findByIdAndUpdate(chatId, {
+        $pull: {
+          participants: userId,
+          admins: userId
+        }
+      });
+    } catch (error) {
+      console.error('Error in leaveGroup repository:', error);
       throw error;
     }
   }

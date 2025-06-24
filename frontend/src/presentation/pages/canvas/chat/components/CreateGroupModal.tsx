@@ -23,6 +23,7 @@ interface CreateGroupModalProps {
       onlyAdminsCanSendMedia?: boolean;
       onlyAdminsCanSendLinks?: boolean;
     };
+    avatar?: File;
   }) => void;
   onSearch: (query: string) => Promise<{ data: User[] }>;
 }
@@ -56,6 +57,8 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     onlyAdminsCanSendLinks: false
   });
   const [showSettings, setShowSettings] = useState(false);
+  const [groupAvatar, setGroupAvatar] = useState<File | null>(null);
+  const [groupAvatarPreview, setGroupAvatarPreview] = useState<string | null>(null);
 
   // Remove mockUsers and use onSearch for searching users
   const handleSearch = async (query: string) => {
@@ -109,14 +112,31 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     setStep('participants');
   };
 
-  const handleSubmit = () => {
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setGroupAvatar(file);
+    if (file) {
+      setGroupAvatarPreview(URL.createObjectURL(file));
+    } else {
+      setGroupAvatarPreview(null);
+    }
+  };
+
+  const handleSubmit = async () => {
     if (groupName.trim() && selectedUsers.length > 0) {
-      onCreateGroup({
+      const params = {
         name: groupName.trim(),
         description: description.trim(),
         participants: selectedUsers.map(user => user.id),
-        settings
-      });
+        settings,
+        avatar: groupAvatar ? groupAvatar : undefined,
+      };
+      console.log('Submitting group creation:', params);
+      try {
+        await onCreateGroup(params);
+      } catch (err) {
+        console.error('Error in CreateGroupModal handleSubmit:', err);
+      }
     }
   };
 
@@ -239,15 +259,27 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
           <div className="px-6 py-8 border-b border-gray-200 dark:border-[#2a3942]">
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center overflow-hidden">
+                  {groupAvatarPreview ? (
+                    <img src={groupAvatarPreview} alt="Group avatar preview" className="w-full h-full object-cover rounded-full" />
+                  ) : (
                   <FiCamera size={24} className="text-gray-500 dark:text-gray-400" />
+                  )}
                 </div>
-                <button
-                  type="button"
-                  className="absolute bottom-0 right-0 w-6 h-6 bg-[#00a884] rounded-full flex items-center justify-center"
+                <label
+                  htmlFor="group-avatar-upload"
+                  className="absolute bottom-0 right-0 w-6 h-6 bg-[#00a884] rounded-full flex items-center justify-center cursor-pointer"
+                  title="Upload group avatar"
                 >
                   <FiCamera size={12} className="text-white" />
-                </button>
+                  <input
+                    id="group-avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                  />
+                </label>
               </div>
               <div className="flex-1">
                 <input

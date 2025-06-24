@@ -142,21 +142,20 @@ class ChatService {
     }
   }
 
-  async createGroupChat(params: {
-    name: string;
-    description?: string;
-    participants: string[];
-    creatorId: string;
-    settings?: {
-      onlyAdminsCanPost?: boolean;
-      onlyAdminsCanAddMembers?: boolean;
-      onlyAdminsCanChangeInfo?: boolean;
-    };
-  }): Promise<Chat> {
+  async createGroupChat(params: any): Promise<Chat> {
+    console.log('chatService.createGroupChat called with:', params);
     try {
-      const response = await httpClient.post('/chats/group', params);
-      return response.data;
+      if (params instanceof FormData) {
+        console.log('chatService: sending FormData to /chats/group');
+        const response = await httpClient.post('/chats/group', params);
+        return response.data;
+      } else {
+        console.log('chatService: sending JSON to /chats/group');
+        const response = await httpClient.post('/chats/group', params);
+        return response.data;
+      }
     } catch (error: any) {
+      console.error('chatService.createGroupChat error:', error);
       throw new Error(error.response?.data?.error || 'Failed to create group chat');
     }
   }
@@ -245,6 +244,30 @@ class ChatService {
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch chat by ID');
+    }
+  }
+
+  async deleteChat(chatId: string): Promise<void> {
+    try {
+      await httpClient.delete(`/chats/${chatId}`);
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to delete chat');
+    }
+  }
+
+  async blockChat(chatId: string): Promise<void> {
+    try {
+      await httpClient.post(`/chats/${chatId}/block`);
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to block chat');
+    }
+  }
+
+  async clearChat(chatId: string): Promise<void> {
+    try {
+      await httpClient.delete(`/chats/${chatId}/messages`);
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to clear chat');
     }
   }
 }

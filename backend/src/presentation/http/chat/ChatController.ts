@@ -552,21 +552,25 @@ export class ChatController {
         };
       }
 
-      const { name, description, participants, settings } = req.body;
-      if (!name || !participants || !Array.isArray(participants)) {
-        return {
-          statusCode: 400,
-          body: { error: "Name and participants array are required" }
-        };
+      let { name, description, participants, settings } = req.body;
+      // If sent as FormData, participants/settings may be JSON strings
+      if (typeof participants === 'string') {
+        try { participants = JSON.parse(participants); } catch {}
       }
-
-      const params: CreateGroupChatRequestDTO = {
+      if (typeof settings === 'string') {
+        try { settings = JSON.parse(settings); } catch {}
+      }
+      const params: any = {
         name,
         description,
         participants,
         creatorId: req.user.id,
         settings
       };
+      // Handle avatar upload
+      if (req.file && (req.file.path || req.file.url)) {
+        params.avatar = req.file.path || req.file.url;
+      }
 
       console.log('ChatController - createGroupChat - Params:', params);
       const result = await this.createGroupChatUseCase.execute(params);
@@ -969,4 +973,12 @@ export class ChatController {
       };
     }
   }
+
+  // async deleteGroup(req: IHttpRequest): Promise<IHttpResponse> {
+  //   try {
+  //     // Your delete group logic here
+  //   } catch (error) {
+  //     // Error handling
+  //   }
+  // }
 }  

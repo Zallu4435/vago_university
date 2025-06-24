@@ -294,6 +294,31 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
     }
   });
 
+  // Chat management mutations
+  const deleteChat = useMutation({
+    mutationFn: async (chatId: string) => chatService.deleteChat(chatId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chats'] });
+      queryClient.invalidateQueries({ queryKey: ['chat'] });
+    },
+  });
+
+  const blockChat = useMutation({
+    mutationFn: async (chatId: string) => chatService.blockChat(chatId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chats'] });
+      queryClient.invalidateQueries({ queryKey: ['chat'] });
+    },
+  });
+
+  const clearChat = useMutation({
+    mutationFn: async (chatId: string) => chatService.clearChat(chatId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chats'] });
+      queryClient.invalidateQueries({ queryKey: ['chat'] });
+    },
+  });
+
   return {
     // Group
     addGroupMember,
@@ -316,5 +341,9 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
     addReaction,
     removeReaction,
     editMessage,
+    // Chat management
+    deleteChat,
+    blockChat,
+    clearChat,
   };
 }; 

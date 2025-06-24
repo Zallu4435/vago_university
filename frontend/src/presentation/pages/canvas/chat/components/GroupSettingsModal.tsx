@@ -62,9 +62,8 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
 
   const group = chatDetails ? chatDetails.chat : chat;
 
-  console.log('DEBUG chatDetails:', chatDetails);
-  console.log('DEBUG chat prop:', chat);
-  console.log('DEBUG group:', group);
+  console.log(group, "groi[")
+
 
   if (isLoadingChatDetails || !group || !group.participants) return <div>Loading...</div>;
 
@@ -129,18 +128,6 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
       description: 'Control who can invite new members'
     },
     {
-      key: 'onlyAdminsCanSendMedia',
-      icon: FiImage,
-      label: 'Only admins can send media',
-      description: 'Restrict media sharing to administrators'
-    },
-    {
-      key: 'onlyAdminsCanSendLinks',
-      icon: FiLink,
-      label: 'Only admins can send links',
-      description: 'Control link sharing permissions'
-    },
-    {
       key: 'onlyAdminsCanChangeInfo',
       icon: FiLock,
       label: 'Only admins can change info',
@@ -148,7 +135,6 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
     }
   ];
 
-  console.log('Rendering description:', group.description);
 
   const handleSaveName = () => {
     if (newName.trim() && newName !== group.name) {
@@ -163,6 +149,11 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
     }
     setIsEditingDescription(false);
   };
+
+  // Log group.settings on render
+  useEffect(() => {
+    console.log('GroupSettingsModal: group.settings on render:', group.settings);
+  }, [group.settings]);
 
   return (
     <div className="relative h-full w-full flex flex-col bg-white dark:bg-[#1f2937] border-l border-gray-200 dark:border-gray-700 overflow-x-visible">
@@ -453,10 +444,47 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
             <div className="space-y-3">
               {settingsConfig.map((setting) => {
                 const IconComponent = setting.icon;
+                const checked = !!group.settings?.[setting.key as keyof typeof group.settings];
                 return (
-                  <label
+                  <div
                     key={setting.key}
-                    className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 cursor-pointer group"
+                    className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 group cursor-pointer"
+                    style={{ userSelect: 'none', opacity: !firstAdmin ? 0.5 : 1 }}
+                    onClick={() => {
+                      if (!firstAdmin) return;
+                      console.log('Toggling setting:', setting.key, 'from', checked, 'to', !checked);
+                      updateGroupSettings.mutate(
+                        { [setting.key]: !checked },
+                        {
+                          onSuccess: (data) => {
+                            console.log('updateGroupSettings success:', data);
+                          },
+                          onError: (error) => {
+                            console.error('updateGroupSettings error:', error);
+                          }
+                        }
+                      );
+                    }}
+                    tabIndex={0}
+                    onKeyDown={e => {
+                      if (!firstAdmin) return;
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        console.log('Toggling setting (keyboard):', setting.key, 'from', checked, 'to', !checked);
+                        updateGroupSettings.mutate(
+                          { [setting.key]: !checked },
+                          {
+                            onSuccess: (data) => {
+                              console.log('updateGroupSettings success:', data);
+                            },
+                            onError: (error) => {
+                              console.error('updateGroupSettings error:', error);
+                            }
+                          }
+                        );
+                      }
+                    }}
+                    role="button"
+                    aria-pressed={checked}
                   >
                     <div className="flex items-start space-x-3 flex-1">
                       <IconComponent className="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -465,25 +493,20 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
                         <div className="text-sm text-gray-500 dark:text-gray-400">{setting.description}</div>
                       </div>
                     </div>
-                    <div className="relative">
+                    <div className="relative select-none">
                       <input
                         type="checkbox"
-                        checked={group.settings?.[setting.key as keyof typeof group.settings] || false}
-                        onChange={(e) => updateGroupSettings.mutate({ [setting.key]: e.target.checked })}
+                        checked={checked}
+                        readOnly
                         className="sr-only"
-                        disabled={!firstAdmin}
+                        tabIndex={-1}
                       />
-                      <div className={`w-12 h-6 rounded-full transition-all duration-200 ${
-                        group.settings?.[setting.key as keyof typeof group.settings]
-                          ? 'bg-blue-500'
-                          : 'bg-gray-200 dark:bg-gray-600'
-                      } ${!firstAdmin ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
-                        <div className={`w-5 h-5 bg-white rounded-full shadow-lg transform transition-transform duration-200 ${
-                          group.settings?.[setting.key as keyof typeof group.settings] ? 'translate-x-6' : 'translate-x-0.5'
-                        } mt-0.5`} />
+                      <div className={`w-12 h-6 rounded-full transition-all duration-200 ${checked ? 'bg-blue-500' : 'bg-gray-200 dark:bg-gray-600'} ${!firstAdmin ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                      >
+                        <div className={`w-5 h-5 bg-white rounded-full shadow-lg transform transition-transform duration-200 ${checked ? 'translate-x-6' : 'translate-x-0.5'} mt-0.5`} />
                       </div>
                     </div>
-                  </label>
+                  </div>
                 );
               })}
             </div>
@@ -529,7 +552,7 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
             <FiLogOut className="w-4 h-4" />
             <span>Leave Group</span>
           </button>
-          {isCreator && (
+          {/* {isCreator && (
             <button
               onClick={onDeleteGroup}
               className="w-full flex items-center justify-center space-x-2 p-3 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-all duration-200 font-medium"
@@ -537,7 +560,7 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
               <FiTrash2 className="w-4 h-4" />
               <span>Delete Group</span>
             </button>
-          )}
+          )} */}
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FiMoreVertical, FiPhone, FiVideo, FiSettings, FiUser, FiUsers } from 'react-icons/fi';
 import { Chat, Styles } from '../types/ChatTypes';
 
@@ -9,6 +9,9 @@ interface ChatHeaderProps {
   onSettingsClick: () => void;
   isDarkMode: boolean;
   onToggleTheme: () => void;
+  onDeleteChat: () => void;
+  onBlock: () => void;
+  onClearChat: () => void;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -17,10 +20,32 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onInfoClick,
   onSettingsClick,
   isDarkMode,
-  onToggleTheme
+  onToggleTheme,
+  onDeleteChat,
+  onBlock,
+  onClearChat
 }) => {
-  console.log('ChatHeader chat:', chat);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const isOnline = chat.participants.some(p => p.isOnline);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuOpen]);
+
+  console.log('ChatHeader chat:', chat);
 
   return (
     <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#202c33]">
@@ -83,12 +108,37 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             <FiSettings className="w-5 h-5 text-gray-600 dark:text-gray-300" />
           </button>
         )}
-        <button
-          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942] transition-colors duration-200"
-          title="More options"
-        >
-          <FiMoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-        </button>
+        <div className="relative" ref={menuRef}>
+          <button
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942] transition-colors duration-200"
+            title="More options"
+            onClick={() => setMenuOpen((prev) => !prev)}
+          >
+            <FiMoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-[#202c33] border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+              <button
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-[#2a3942] text-red-600 dark:text-red-400"
+                onClick={() => { setMenuOpen(false); onDeleteChat(); }}
+              >
+                Delete Chat
+              </button>
+              <button
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-[#2a3942]"
+                onClick={() => { setMenuOpen(false); onBlock(); }}
+              >
+                Block {chat.type === 'group' ? 'Group' : 'User'}
+              </button>
+              <button
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-[#2a3942]"
+                onClick={() => { setMenuOpen(false); onClearChat(); }}
+              >
+                Clear Chat
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

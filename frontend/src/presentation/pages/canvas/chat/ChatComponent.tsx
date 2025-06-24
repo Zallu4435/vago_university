@@ -7,7 +7,7 @@ import { ChatInput } from './components/ChatInput';
 import { TypingIndicator } from './components/TypingIndicator';
 import { Chat, Message, User, Participant } from './types/ChatTypes';
 import { getStyles } from './utils/chatUtils';
-import { FiPlus, FiSearch, FiX, FiUser, FiMenu, FiArrowLeft, FiUsers } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiX, FiUser, FiMenu, FiArrowLeft, FiUsers, FiMessageSquare } from 'react-icons/fi';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../presentation/redux/store';
 import { toast } from 'react-hot-toast';
@@ -470,6 +470,20 @@ export const ChatComponent: React.FC = () => {
     scrollState.shouldScrollToBottom = true;
   }, [selectedChatId]); // Reset on chat change
 
+  // Menu action handlers for ChatHeader
+  const handleDeleteChat = () => {
+    toast('Delete Chat clicked (not implemented)');
+    // TODO: Implement delete chat logic
+  };
+  const handleBlock = () => {
+    toast('Block clicked (not implemented)');
+    // TODO: Implement block logic
+  };
+  const handleClearChat = () => {
+    toast('Clear Chat clicked (not implemented)');
+    // TODO: Implement clear chat logic
+  };
+
   if (loading) return <div className={`flex h-screen items-center justify-center ${styles.background}`}><div className="animate-spin h-12 w-12 border-t-2 border-b-2 border-blue-500 rounded-full" /></div>;
   if (socketError) return (
     <div className={`flex h-screen items-center justify-center ${styles.background}`}>
@@ -602,7 +616,22 @@ export const ChatComponent: React.FC = () => {
             onClose={() => setShowCreateGroup(false)}
             onCreateGroup={async (params) => {
               try {
-                const newGroup = await chatMutations.createGroupChat.mutateAsync({ ...params, creatorId: currentUser?.id || '' });
+                console.log('ChatComponent: onCreateGroup called with:', params);
+                let newGroup;
+                if (params.avatar) {
+                  const formData = new FormData();
+                  formData.append('name', params.name);
+                  if (params.description) formData.append('description', params.description);
+                  formData.append('creatorId', currentUser?.id || '');
+                  formData.append('participants', JSON.stringify(params.participants));
+                  if (params.settings) formData.append('settings', JSON.stringify(params.settings));
+                  formData.append('avatar', params.avatar);
+                  console.log('ChatComponent: Submitting FormData to createGroupChat');
+                  newGroup = await chatMutations.createGroupChat.mutateAsync(formData);
+                } else {
+                  console.log('ChatComponent: Submitting JSON to createGroupChat');
+                  newGroup = await chatMutations.createGroupChat.mutateAsync({ ...params, creatorId: currentUser?.id || '' });
+                }
                 setSelectedChatId(newGroup.id);
                 setAllMessages([]);
                 setMessagesPage(1);
@@ -610,6 +639,7 @@ export const ChatComponent: React.FC = () => {
                 setReplyToMessage(null);
                 setShowCreateGroup(false);
               } catch (error) {
+                console.error('ChatComponent: Error in onCreateGroup', error);
                 toast.error('Failed to create group');
               }
             }}
@@ -641,27 +671,42 @@ export const ChatComponent: React.FC = () => {
                 onSettingsClick={() => setShowGroupSettings(true)}
                 isDarkMode={isDarkMode}
                 onToggleTheme={() => setIsDarkMode((prev) => !prev)}
+                onDeleteChat={handleDeleteChat}
+                onBlock={handleBlock}
+                onClearChat={handleClearChat}
               />
               <div className="flex-1 overflow-y-auto p-4" onScroll={handleScroll} ref={scrollRef}>
-                {allMessages.map((message: Message, index: number) => {
-                  const isLast = index === allMessages.length - 1;
-                  return (
-                    <ChatMessage
-                      key={message.id}
-                      ref={isLast ? messagesEndRef : undefined}
-                      message={message}
-                      previousMessage={index > 0 ? allMessages[index - 1] : undefined}
-                      styles={styles}
-                      onReaction={handleReaction}
-                      onRemoveReaction={handleRemoveReaction}
-                      onDelete={handleDeleteMessage}
-                      onEdit={handleEditMessage}
-                      onReply={handleReplyToMessage}
-                      onForward={handleForwardMessage}
-                      currentUserId={currentUserId || ''}
-                    />
-                  );
-                })}
+                {isLoadingMessages && messagesPage === 1 ? (
+                  <div className="flex h-full items-center justify-center">
+                    <div className="animate-spin h-8 w-8 border-t-2 border-b-2 border-blue-500 rounded-full" />
+                  </div>
+                ) : allMessages.length > 0 ? (
+                  allMessages.map((message: Message, index: number) => {
+                    const isLast = index === allMessages.length - 1;
+                    return (
+                      <ChatMessage
+                        key={message.id}
+                        ref={isLast ? messagesEndRef : undefined}
+                        message={message}
+                        previousMessage={index > 0 ? allMessages[index - 1] : undefined}
+                        styles={styles}
+                        onReaction={handleReaction}
+                        onRemoveReaction={handleRemoveReaction}
+                        onDelete={handleDeleteMessage}
+                        onEdit={handleEditMessage}
+                        onReply={handleReplyToMessage}
+                        onForward={handleForwardMessage}
+                        currentUserId={currentUserId || ''}
+                      />
+                    );
+                  })
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-center p-8 text-gray-500 dark:text-gray-400">
+                    <FiMessageSquare size={60} className="mb-4" />
+                    <h2 className="text-xl font-semibold">No Messages Yet</h2>
+                    <p>Start the conversation by sending a message.</p>
+                  </div>
+                )}
                 {isTyping && <TypingIndicator styles={styles} />}
               </div>
               <ChatInput
@@ -675,32 +720,44 @@ export const ChatComponent: React.FC = () => {
               />
             </>
           ) : pendingUser ? (
-            <div className="flex flex-col h-full">
+            <>
               <div className="p-4 border-b border-gray-200 dark:border-[#2a3942] flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {pendingUser.name || `${pendingUser.firstName || ''} ${pendingUser.lastName || ''}`.trim()}
                 </h2>
               </div>
-              <div className="flex-1 p-4 text-center">
-                <p className="text-gray-500 dark:text-gray-400">Start a conversation by sending a message.</p>
+              <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-gray-50 dark:bg-gray-800/50">
+                <div className="w-24 h-24 flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-full mb-6">
+                  <FiMessageSquare size={60} className="text-gray-400 dark:text-gray-500" />
+                </div>
+                <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                  No Messages Yet
+                </h2>
+                <p className="text-md text-gray-500 dark:text-gray-400 mb-6 max-w-sm">
+                  Start a conversation by sending a message.
+                </p>
               </div>
-              <div className="p-4 border-t border-gray-200 dark:border-[#2a3942]">
-                <input
-                  type="text"
-                  placeholder="Type a message..."
-                  className="w-full p-2 rounded-lg bg-gray-100 dark:bg-[#2c3e50] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                      handleSendMessage(e.currentTarget.value);
-                      e.currentTarget.value = '';
-                    }
-                  }}
+              <div className="border-t border-gray-200 dark:border-[#2a3942] p-4">
+                <ChatInput
+                  onSendMessage={handleSendMessage}
+                  onTyping={handleTyping}
+                  styles={styles}
+                  replyToMessage={replyToMessage}
+                  onCancelReply={() => setReplyToMessage(null)}
+                  selectedChatId={''}
+                  currentUserId={currentUserId || ''}
                 />
               </div>
-            </div>
+            </>
           ) : (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500 dark:text-gray-400">Select a chat or start a new conversation.</p>
+            <div className="flex flex-col items-center justify-center h-full text-center p-8 bg-gray-50 dark:bg-gray-800/50">
+              <div className="w-24 h-24 flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-full mb-6">
+                <FiMessageSquare size={60} className="text-gray-400 dark:text-gray-500" />
+              </div>
+              <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">Welcome to Chat</h2>
+              <p className="text-md text-gray-500 dark:text-gray-400 mt-2 max-w-sm">
+                Select a conversation from the list on the left, or start a new one to begin messaging.
+              </p>
             </div>
           )}
         </div>

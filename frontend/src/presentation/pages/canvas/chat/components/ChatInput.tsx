@@ -17,14 +17,15 @@ interface ChatInputProps {
   currentUserId: string;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({
+export const ChatInput: React.FC<ChatInputProps & { disabled?: boolean }> = ({
   onSendMessage,
   onTyping,
   styles,
   replyToMessage,
   onCancelReply,
   selectedChatId,
-  currentUserId
+  currentUserId,
+  disabled = false
 }) => {
   const [message, setMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -41,6 +42,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (disabled) return;
     if (message.trim() || selectedFiles.length > 0) {
       onSendMessage(message.trim(), selectedFiles.length > 0 ? selectedFiles[0] : undefined, replyToMessage || undefined);
       setMessage('');
@@ -188,7 +190,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex items-center space-x-2 p-2 bg-white dark:bg-[#2a3942] rounded-xl shadow-sm">
+      <form onSubmit={handleSubmit} className="flex items-center space-x-2 p-2 border-t border-gray-200 dark:border-[#2a3942] bg-white dark:bg-[#202c33]">
         <input
           type="file"
           ref={fileInputRef}
@@ -220,16 +222,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           type="text"
           value={message}
           onChange={handleChange}
-          placeholder="Type a message..."
-          className="flex-1 p-2 rounded-lg bg-gray-100 dark:bg-[#2c3e50] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-4 py-2 rounded-lg bg-gray-100 dark:bg-[#2c3e50] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder={disabled ? 'You blocked this user.' : 'Type a message...'}
+          disabled={disabled}
         />
 
         <button
           type="submit"
-          disabled={!message.trim() && selectedFiles.length === 0}
-          className="p-2 rounded-full bg-green-500 text-white hover:bg-green-600 disabled:bg-green-300"
+          className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50"
+          disabled={disabled}
         >
-          <FiSend className="w-5 h-5" />
+          Send
         </button>
       </form>
 

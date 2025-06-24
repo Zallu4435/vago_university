@@ -14,8 +14,8 @@ export interface SearchChatsRequestDTO {
 export interface GetChatMessagesRequestDTO {
   chatId: string;
   userId: string;
-  page: number;
-  limit: number;
+  page?: number;
+  limit?: number;
   before?: string;
 }
 
@@ -149,4 +149,19 @@ export interface CreateGroupChatRequestDTO {
     onlyAdminsCanChangeInfo?: boolean;
   };
   avatar?: string;
+}
+
+export interface DeleteChatRequestDTO {
+  chatId: string;
+  userId: string;
+}
+
+export interface BlockChatRequestDTO {
+  chatId: string;
+  userId: string;
+}
+
+export interface ClearChatRequestDTO {
+  chatId: string;
+  userId: string;
 } 

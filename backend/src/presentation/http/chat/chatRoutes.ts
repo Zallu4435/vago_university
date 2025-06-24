@@ -95,4 +95,19 @@ chatRouter.post("/group/:chatId/leave", authMiddleware, (req, res) =>
   expressAdapter(req, res, chatController.leaveGroup.bind(chatController))
 );
 
+chatRouter.delete('/:chatId', authMiddleware, (req, res) => {
+  console.log('[Route] DELETE /:chatId', req.params);
+  expressAdapter(req, res, chatController.deleteChat.bind(chatController));
+});
+
+chatRouter.post('/:chatId/block', authMiddleware, (req, res) => {
+  console.log('[Route] POST /:chatId/block', req.params);
+  expressAdapter(req, res, chatController.blockChat.bind(chatController));
+});
+
+chatRouter.delete('/:chatId/messages', authMiddleware, (req, res) => {
+  console.log('[Route] DELETE /:chatId/messages', req.params);
+  expressAdapter(req, res, chatController.clearChat.bind(chatController));
+});
+
 export default chatRouter;

@@ -18,7 +18,10 @@ import {
   LeaveGroupRequestDTO,
   EditMessageRequestDTO,
   DeleteMessageRequestDTO,
-  ReplyToMessageRequestDTO
+  ReplyToMessageRequestDTO,
+  DeleteChatRequestDTO,
+  BlockChatRequestDTO,
+  ClearChatRequestDTO
 } from "../../../domain/chat/dtos/ChatRequestDTOs";
 import {
   GetChatsResponseDTO,
@@ -29,7 +32,7 @@ import {
 } from "../../../domain/chat/dtos/ChatResponseDTOs";
 
 export class GetChatsUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: GetChatsRequestDTO): Promise<GetChatsResponseDTO> {
     // console.log('GetChatsUseCase - Executing with params:', params);
@@ -45,7 +48,7 @@ export class GetChatsUseCase {
 }
 
 export class SearchChatsUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: SearchChatsRequestDTO): Promise<GetChatsResponseDTO> {
     return this.chatRepository.searchChats(params);
@@ -53,7 +56,7 @@ export class SearchChatsUseCase {
 }
 
 export class GetChatMessagesUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: GetChatMessagesRequestDTO): Promise<GetChatMessagesResponseDTO> {
     return this.chatRepository.getChatMessages(params);
@@ -61,7 +64,7 @@ export class GetChatMessagesUseCase {
 }
 
 export class SendMessageUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: SendMessageRequestDTO): Promise<void> {
     return this.chatRepository.sendMessage(params);
@@ -69,7 +72,7 @@ export class SendMessageUseCase {
 }
 
 export class MarkMessagesAsReadUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: MarkMessagesAsReadRequestDTO): Promise<void> {
     return this.chatRepository.markMessagesAsRead(params);
@@ -77,7 +80,7 @@ export class MarkMessagesAsReadUseCase {
 }
 
 export class AddReactionUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: AddReactionRequestDTO): Promise<void> {
     return this.chatRepository.addReaction(params);
@@ -85,7 +88,7 @@ export class AddReactionUseCase {
 }
 
 export class RemoveReactionUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: RemoveReactionRequestDTO): Promise<void> {
     return this.chatRepository.removeReaction(params);
@@ -93,15 +96,15 @@ export class RemoveReactionUseCase {
 }
 
 export class GetChatDetailsUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
-  async execute(chatId: string): Promise<ChatDetailsResponseDTO | null> {
-    return this.chatRepository.getChatDetails(chatId);
+  async execute(chatId: string, userId: string): Promise<ChatDetailsResponseDTO | null> {
+    return this.chatRepository.getChatDetails(chatId, userId);
   }
 }
 
 export class SearchUsersUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: SearchUsersRequestDTO): Promise<SearchUsersResponseDTO> {
     // console.log('=== Search Users UseCase Started ===');
@@ -119,7 +122,7 @@ export class SearchUsersUseCase {
 }
 
 export class CreateChatUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: CreateChatRequestDTO): Promise<ChatSummaryDTO> {
     // console.log('CreateChatUseCase - Executing with params:', params);
@@ -135,7 +138,7 @@ export class CreateChatUseCase {
 }
 
 export class CreateGroupChatUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: CreateGroupChatRequestDTO): Promise<ChatSummaryDTO> {
     console.log('CreateGroupChatUseCase - Executing with params:', params);
@@ -151,7 +154,7 @@ export class CreateGroupChatUseCase {
 }
 
 export class AddGroupMemberUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: AddGroupMemberRequestDTO): Promise<void> {
     console.log('AddGroupMemberUseCase - Executing with params:', params);
@@ -166,7 +169,7 @@ export class AddGroupMemberUseCase {
 }
 
 export class RemoveGroupMemberUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: RemoveGroupMemberRequestDTO): Promise<void> {
     console.log('RemoveGroupMemberUseCase - Executing with params:', params);
@@ -181,7 +184,7 @@ export class RemoveGroupMemberUseCase {
 }
 
 export class UpdateGroupAdminUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: UpdateGroupAdminRequestDTO): Promise<void> {
     console.log('UpdateGroupAdminUseCase - Executing with params:', params);
@@ -196,7 +199,7 @@ export class UpdateGroupAdminUseCase {
 }
 
 export class UpdateGroupSettingsUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: UpdateGroupSettingsRequestDTO): Promise<void> {
     console.log('UpdateGroupSettingsUseCase - Executing with params:', params);
@@ -212,7 +215,7 @@ export class UpdateGroupSettingsUseCase {
 }
 
 export class UpdateGroupInfoUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: UpdateGroupInfoRequestDTO): Promise<void> {
     console.log('UpdateGroupInfoUseCase - Executing with params:', params);
@@ -227,7 +230,7 @@ export class UpdateGroupInfoUseCase {
 }
 
 export class LeaveGroupUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: LeaveGroupRequestDTO): Promise<void> {
     console.log('LeaveGroupUseCase - Executing with params:', params);
@@ -242,7 +245,7 @@ export class LeaveGroupUseCase {
 }
 
 export class EditMessageUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: EditMessageRequestDTO): Promise<void> {
     console.log('EditMessageUseCase - Executing with params:', params);
@@ -257,7 +260,7 @@ export class EditMessageUseCase {
 }
 
 export class DeleteMessageUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: DeleteMessageRequestDTO): Promise<void> {
     console.log('DeleteMessageUseCase - Executing with params:', params);
@@ -272,7 +275,7 @@ export class DeleteMessageUseCase {
 }
 
 export class ReplyToMessageUseCase {
-  constructor(private chatRepository: IChatRepository) {}
+  constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: ReplyToMessageRequestDTO): Promise<void> {
     console.log('ReplyToMessageUseCase - Executing with params:', params);
@@ -281,6 +284,45 @@ export class ReplyToMessageUseCase {
       console.log('ReplyToMessageUseCase - Reply sent successfully');
     } catch (error) {
       console.error('ReplyToMessageUseCase - Error:', error);
+      throw error;
+    }
+  }
+}
+
+export class DeleteChatUseCase {
+  constructor(private chatRepository: IChatRepository) { }
+  async execute(params: DeleteChatRequestDTO): Promise<void> {
+    try {
+      console.log('[DeleteChatUseCase] params:', params);
+      await this.chatRepository.deleteChat(params);
+    } catch (error) {
+      console.error('[DeleteChatUseCase] Error:', error);
+      throw error;
+    }
+  }
+}
+
+export class BlockChatUseCase {
+  constructor(private chatRepository: IChatRepository) { }
+  async execute(params: BlockChatRequestDTO): Promise<void> {
+    try {
+      console.log('[BlockChatUseCase] params:', params);
+      await this.chatRepository.blockChat(params);
+    } catch (error) {
+      console.error('[BlockChatUseCase] Error:', error);
+      throw error;
+    }
+  }
+}
+
+export class ClearChatUseCase {
+  constructor(private chatRepository: IChatRepository) { }
+  async execute(params: ClearChatRequestDTO): Promise<void> {
+    try {
+      console.log('[ClearChatUseCase] params:', params);
+      await this.chatRepository.clearChat(params);
+    } catch (error) {
+      console.error('[ClearChatUseCase] Error:', error);
       throw error;
     }
   }

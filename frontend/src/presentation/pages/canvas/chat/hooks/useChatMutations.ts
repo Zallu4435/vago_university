@@ -316,6 +316,7 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chats'] });
       queryClient.invalidateQueries({ queryKey: ['chat'] });
+      if (chatId) queryClient.invalidateQueries({ queryKey: ['messages', chatId] });
     },
   });
 

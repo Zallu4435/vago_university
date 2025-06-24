@@ -82,6 +82,10 @@ export const ChatComponent: React.FC = () => {
 
   const flatChat = chatDetails?.chat ?? chatDetails;
 
+  console.log(flatChat, "flatchat")
+
+  const isBlocked = flatChat?.blockedUsers?.includes(currentUserId);
+
   useEffect(() => {
     setLoading(isLoadingChats);
   }, [isLoadingChats]);
@@ -471,17 +475,45 @@ export const ChatComponent: React.FC = () => {
   }, [selectedChatId]); // Reset on chat change
 
   // Menu action handlers for ChatHeader
-  const handleDeleteChat = () => {
-    toast('Delete Chat clicked (not implemented)');
-    // TODO: Implement delete chat logic
+  const handleDeleteChat = async () => {
+    if (!flatChat) return;
+    if (window.confirm('Are you sure you want to delete this chat? This action cannot be undone.')) {
+      try {
+        await chatMutations.deleteChat.mutateAsync(flatChat.id);
+        setSelectedChatId(null);
+        toast.success('Chat deleted');
+      } catch (error) {
+        toast.error('Failed to delete chat');
+      }
+    }
   };
-  const handleBlock = () => {
-    toast('Block clicked (not implemented)');
-    // TODO: Implement block logic
+  const handleBlock = async () => {
+    if (!flatChat) return;
+    if (window.confirm(`Are you sure you want to block this ${flatChat.type === 'group' ? 'group' : 'user'}?`)) {
+      try {
+        await chatMutations.blockChat.mutateAsync(flatChat.id);
+        setSelectedChatId(null);
+        toast.success(`${flatChat.type === 'group' ? 'Group' : 'User'} blocked`);
+      } catch (error) {
+        toast.error('Failed to block');
+      }
+    }
   };
-  const handleClearChat = () => {
-    toast('Clear Chat clicked (not implemented)');
-    // TODO: Implement clear chat logic
+  const handleClearChat = async () => {
+    if (!flatChat) return;
+    if (window.confirm('Are you sure you want to clear all messages in this chat?')) {
+      try {
+        await chatMutations.clearChat.mutateAsync(flatChat.id);
+        setAllMessages([]); // Instantly clear messages in UI
+        // Optionally update chat list to show no last message for this chat
+        setAllChats(prevChats => prevChats.map(chat =>
+          chat.id === flatChat.id ? { ...chat, lastMessage: undefined } : chat
+        ));
+        toast.success('Chat cleared');
+      } catch (error) {
+        toast.error('Failed to clear chat');
+      }
+    }
   };
 
   if (loading) return <div className={`flex h-screen items-center justify-center ${styles.background}`}><div className="animate-spin h-12 w-12 border-t-2 border-b-2 border-blue-500 rounded-full" /></div>;
@@ -674,7 +706,11 @@ export const ChatComponent: React.FC = () => {
                 onDeleteChat={handleDeleteChat}
                 onBlock={handleBlock}
                 onClearChat={handleClearChat}
+                currentUserId={currentUserId || ''}
               />
+              {isBlocked && (
+                <div className="text-red-500 text-center p-2">You blocked this user. Unblock to send messages.</div>
+              )}
               <div className="flex-1 overflow-y-auto p-4" onScroll={handleScroll} ref={scrollRef}>
                 {isLoadingMessages && messagesPage === 1 ? (
                   <div className="flex h-full items-center justify-center">
@@ -717,6 +753,7 @@ export const ChatComponent: React.FC = () => {
                 onCancelReply={() => setReplyToMessage(null)}
                 selectedChatId={selectedChatId || ''}
                 currentUserId={currentUserId || ''}
+                disabled={isBlocked}
               />
             </>
           ) : pendingUser ? (

@@ -22,6 +22,12 @@ export interface IChat extends Document {
     onlyAdminsCanAddMembers: boolean;
     onlyAdminsCanChangeInfo: boolean;
   };
+  blockedUsers: string[];
+  userChatMeta: {
+    userId: string;
+    clearedAt?: Date; // timestamp for when the user cleared chat
+    isDeleted?: boolean; // if user is removed or deleted
+  }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -51,16 +57,24 @@ const chatSchema = new Schema<IChat>(
       onlyAdminsCanPost: { type: Boolean, default: false },
       onlyAdminsCanAddMembers: { type: Boolean, default: false },
       onlyAdminsCanChangeInfo: { type: Boolean, default: false }
-    }
+    },
+    blockedUsers: [{ type: String }],
+    userChatMeta: [
+      {
+        userId: { type: String, required: true },
+        clearedAt: { type: Date, default: null },
+        isDeleted: { type: Boolean, default: false }
+      }
+    ]
   },
   {
-    timestamps: true,
-    indexes: [
-      { participants: 1 }, // For finding user's chats
-      { type: 1, participants: 1 }, // For finding direct chats
-      { updatedAt: -1 } // For sorting chats by latest activity
-    ]
+    timestamps: true
   }
 );
 
-export const ChatModel = mongoose.model<IChat>("Chat", chatSchema); 
+// Indexes (define separately if using `createIndexes`)
+chatSchema.index({ participants: 1 });
+chatSchema.index({ type: 1, participants: 1 });
+chatSchema.index({ updatedAt: -1 });
+
+export const ChatModel = mongoose.model<IChat>("Chat", chatSchema);

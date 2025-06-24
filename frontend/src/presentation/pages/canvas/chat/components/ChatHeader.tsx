@@ -12,6 +12,7 @@ interface ChatHeaderProps {
   onDeleteChat: () => void;
   onBlock: () => void;
   onClearChat: () => void;
+  currentUserId: string;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -23,11 +24,13 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onToggleTheme,
   onDeleteChat,
   onBlock,
-  onClearChat
+  onClearChat,
+  currentUserId
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const isOnline = chat.participants.some(p => p.isOnline);
+  const isBlocked = chat.blockedUsers?.includes(currentUserId);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -80,6 +83,9 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
               : isOnline ? 'Online' : 'Offline'
             }
           </p>
+          {isBlocked && (
+            <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-red-100 text-red-600 rounded">Blocked</span>
+          )}
         </div>
       </div>
       <div className="flex items-center space-x-2">
@@ -109,33 +115,37 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           </button>
         )}
         <div className="relative" ref={menuRef}>
-          <button
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942] transition-colors duration-200"
-            title="More options"
-            onClick={() => setMenuOpen((prev) => !prev)}
-          >
-            <FiMoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-          </button>
-          {menuOpen && (
+          {chat.type === 'direct' && (
+            <button
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942] transition-colors duration-200"
+              title="More options"
+              onClick={() => setMenuOpen((prev) => !prev)}
+            >
+              <FiMoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            </button>
+          )}
+          {menuOpen && chat.type === 'direct' && (
             <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-[#202c33] border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
-              <button
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-[#2a3942] text-red-600 dark:text-red-400"
-                onClick={() => { setMenuOpen(false); onDeleteChat(); }}
-              >
-                Delete Chat
-              </button>
-              <button
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-[#2a3942]"
-                onClick={() => { setMenuOpen(false); onBlock(); }}
-              >
-                Block {chat.type === 'group' ? 'Group' : 'User'}
-              </button>
-              <button
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-[#2a3942]"
-                onClick={() => { setMenuOpen(false); onClearChat(); }}
-              >
-                Clear Chat
-              </button>
+              <>
+                <button
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-[#2a3942] text-red-600 dark:text-red-400"
+                  onClick={() => { setMenuOpen(false); onDeleteChat(); }}
+                >
+                  Delete Chat
+                </button>
+                <button
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-[#2a3942]"
+                  onClick={() => { setMenuOpen(false); onBlock(); }}
+                >
+                  {isBlocked ? `Unblock User` : `Block User`}
+                </button>
+                <button
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-[#2a3942]"
+                  onClick={() => { setMenuOpen(false); onClearChat(); }}
+                >
+                  Clear Chat
+                </button>
+              </>
             </div>
           )}
         </div>

@@ -17,7 +17,10 @@ import {
   LeaveGroupRequestDTO,
   EditMessageRequestDTO,
   DeleteMessageRequestDTO,
-  ReplyToMessageRequestDTO
+  ReplyToMessageRequestDTO,
+  DeleteChatRequestDTO,
+  BlockChatRequestDTO,
+  ClearChatRequestDTO
 } from "../../../domain/chat/dtos/ChatRequestDTOs";
 import {
   GetChatsResponseDTO,
@@ -35,7 +38,7 @@ export interface IChatRepository {
   markMessagesAsRead(params: MarkMessagesAsReadRequestDTO): Promise<void>;
   addReaction(params: AddReactionRequestDTO): Promise<void>;
   removeReaction(params: RemoveReactionRequestDTO): Promise<void>;
-  getChatDetails(chatId: string): Promise<ChatDetailsResponseDTO | null>;
+  getChatDetails(chatId: string, userId: string): Promise<ChatDetailsResponseDTO | null>;
   searchUsers(params: SearchUsersRequestDTO): Promise<SearchUsersResponseDTO>;
   createChat(params: CreateChatRequestDTO): Promise<ChatSummaryDTO>;
   createGroupChat(params: CreateGroupChatRequestDTO): Promise<ChatSummaryDTO>;
@@ -48,4 +51,7 @@ export interface IChatRepository {
   editMessage(params: EditMessageRequestDTO): Promise<void>;
   deleteMessage(params: DeleteMessageRequestDTO): Promise<void>;
   replyToMessage(params: ReplyToMessageRequestDTO): Promise<void>;
+  deleteChat(params: DeleteChatRequestDTO): Promise<void>;
+  blockChat(params: BlockChatRequestDTO): Promise<void>;
+  clearChat(params: ClearChatRequestDTO): Promise<void>;
 } 

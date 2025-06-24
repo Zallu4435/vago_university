@@ -20,8 +20,12 @@ import {
   LeaveGroupUseCase,
   EditMessageUseCase,
   DeleteMessageUseCase,
-  ReplyToMessageUseCase
+  ReplyToMessageUseCase,
+  DeleteChatUseCase,
+  BlockChatUseCase,
+  ClearChatUseCase
 } from "../../../application/chat/useCases/ChatUseCases";
+import { FileUploadService } from '../../services/upload/FileUploadService';
 
 export const getChatComposer = () => {
   const chatRepository = new ChatRepository();
@@ -46,6 +50,10 @@ export const getChatComposer = () => {
   const editMessageUseCase = new EditMessageUseCase(chatRepository);
   const deleteMessageUseCase = new DeleteMessageUseCase(chatRepository);
   const replyToMessageUseCase = new ReplyToMessageUseCase(chatRepository);
+  const deleteChatUseCase = new DeleteChatUseCase(chatRepository);
+  const blockChatUseCase = new BlockChatUseCase(chatRepository);
+  const clearChatUseCase = new ClearChatUseCase(chatRepository);
+  const fileUploadService = new FileUploadService();
 
   return new ChatController(
     getChatsUseCase,
@@ -67,6 +75,10 @@ export const getChatComposer = () => {
     leaveGroupUseCase,
     editMessageUseCase,
     deleteMessageUseCase,
-    replyToMessageUseCase
+    fileUploadService,
+    replyToMessageUseCase,
+    deleteChatUseCase,
+    blockChatUseCase,
+    clearChatUseCase
   );
 }; 

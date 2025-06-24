@@ -134,6 +134,7 @@ export interface Chat {
   };
   unreadCount: number;
   updatedAt: Date;
+  blockedUsers?: string[];
 }
 
 export interface PaginatedResponse<T> {

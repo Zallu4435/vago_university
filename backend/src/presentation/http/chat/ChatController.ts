@@ -20,7 +20,10 @@ import {
   LeaveGroupUseCase,
     EditMessageUseCase,
   DeleteMessageUseCase,
-  ReplyToMessageUseCase
+  ReplyToMessageUseCase,
+  DeleteChatUseCase,
+  BlockChatUseCase,
+  ClearChatUseCase
 } from "../../../application/chat/useCases/ChatUseCases";
 import { GetChatsRequestDTO, SearchChatsRequestDTO, GetChatMessagesRequestDTO, SendMessageRequestDTO, MarkMessagesAsReadRequestDTO, AddReactionRequestDTO, RemoveReactionRequestDTO, SearchUsersRequestDTO, CreateChatRequestDTO, CreateGroupChatRequestDTO, AddGroupMemberRequestDTO, RemoveGroupMemberRequestDTO, UpdateGroupAdminRequestDTO, UpdateGroupSettingsRequestDTO, UpdateGroupInfoRequestDTO, LeaveGroupRequestDTO, EditMessageRequestDTO, DeleteMessageRequestDTO, ReplyToMessageRequestDTO } from "../../../domain/chat/dtos/ChatRequestDTOs";
 import { FileUploadService } from "../../../infrastructure/services/upload/FileUploadService";
@@ -49,7 +52,10 @@ export class ChatController {
     private editMessageUseCase: EditMessageUseCase,
     private deleteMessageUseCase: DeleteMessageUseCase,
     private fileUploadService: FileUploadService,
-    private replyToMessageUseCase: ReplyToMessageUseCase
+    private replyToMessageUseCase: ReplyToMessageUseCase,
+    private deleteChatUseCase: DeleteChatUseCase,
+    private blockChatUseCase: BlockChatUseCase,
+    private clearChatUseCase: ClearChatUseCase
   ) {}
 
   async getChats(req: IHttpRequest): Promise<IHttpResponse> {
@@ -140,25 +146,22 @@ export class ChatController {
 
   async getChatMessages(req: IHttpRequest): Promise<IHttpResponse> {
     try {
-      // console.log('ChatController - getChatMessages - Params:', req.params);
       const { chatId } = req.params;
-      if (!chatId) {
+      const userId = req.user?.id;
+      if (!chatId || !userId) {
         return {
           statusCode: 400,
-          body: { error: "Chat ID is required" }
+          body: { error: "Chat ID and user ID are required" }
         };
       }
-
       const params: GetChatMessagesRequestDTO = {
         chatId,
+        userId,
         page: parseInt(req.query?.page as string) || 1,
         limit: parseInt(req.query?.limit as string) || 20,
         before: req.query?.before as string
       };
-
-      // console.log('ChatController - getChatMessages - Request params:', params);
       const result = await this.getChatMessagesUseCase.execute(params);
-      
       return {
         statusCode: 200,
         body: {
@@ -414,14 +417,15 @@ export class ChatController {
       console.log('ChatController - getChatDetails - Params:', req.params);
       
       const { chatId } = req.params;
-      if (!chatId) {
+      const userId = req.user?.id;
+      if (!chatId || !userId) {
         return {
           statusCode: 400,
-          body: { error: "Chat ID is required" }
+          body: { error: "Chat ID and user ID are required" }
         };
       }
 
-      const result = await this.getChatDetailsUseCase.execute(chatId);
+      const result = await this.getChatDetailsUseCase.execute(chatId, userId);
       if (!result) {
         return {
           statusCode: 404,
@@ -971,6 +975,57 @@ export class ChatController {
           details: error instanceof Error ? error.message : 'Internal server error'
         }
       };
+    }
+  }
+
+  async deleteChat(req: IHttpRequest): Promise<IHttpResponse> {
+    try {
+      const { chatId } = req.params;
+      const userId = req.user?.id;
+      console.log('[ChatController] deleteChat called with chatId:', chatId, 'userId:', userId);
+      if (!chatId || !userId) {
+        return { statusCode: 400, body: { error: 'Chat ID and user ID are required' } };
+      }
+      await this.deleteChatUseCase.execute({ chatId, userId });
+      return { statusCode: 204, body: {} };
+    } catch (error: any) {
+      if (error.message === 'Chat not found') {
+        return { statusCode: 404, body: { error: 'Chat not found' } };
+      }
+      if (error.message === 'Not authorized') {
+        return { statusCode: 403, body: { error: 'Not authorized' } };
+      }
+      return { statusCode: 500, body: { error: 'Failed to delete chat', details: error.message } };
+    }
+  }
+
+  async blockChat(req: IHttpRequest): Promise<IHttpResponse> {
+    try {
+      const { chatId } = req.params;
+      const userId = req.user?.id;
+      console.log('[ChatController] blockChat called with chatId:', chatId, 'userId:', userId);
+      if (!chatId || !userId) {
+        return { statusCode: 400, body: { error: 'Chat ID and user ID are required' } };
+      }
+      await this.blockChatUseCase.execute({ chatId, userId });
+      return { statusCode: 204, body: {} };
+    } catch (error: any) {
+      return { statusCode: 500, body: { error: 'Failed to block chat', details: error.message } };
+    }
+  }
+
+  async clearChat(req: IHttpRequest): Promise<IHttpResponse> {
+    try {
+      const { chatId } = req.params;
+      const userId = req.user?.id;
+      console.log('[ChatController] clearChat called with chatId:', chatId, 'userId:', userId);
+      if (!chatId || !userId) {
+        return { statusCode: 400, body: { error: 'Chat ID and user ID are required' } };
+      }
+      await this.clearChatUseCase.execute({ chatId, userId });
+      return { statusCode: 204, body: {} };
+    } catch (error: any) {
+      return { statusCode: 500, body: { error: 'Failed to clear chat', details: error.message } };
     }
   }
 

@@ -94,7 +94,7 @@ export const ChatList: React.FC<ChatListProps> = ({
                           {chat.lastMessage.content}
                         </>
                       ) : (
-                        'No messages yet'
+                        <span className="italic text-gray-400">No messages yet</span>
                       )}
                     </p>
                     {chat.unreadCount > 0 && (

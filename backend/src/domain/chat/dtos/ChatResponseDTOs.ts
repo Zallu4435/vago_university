@@ -39,6 +39,7 @@ export interface ChatSummaryDTO {
   };
   unreadCount: number;
   updatedAt: Date;
+  blockedUsers?: string[];
 }
 
 export interface MessageSummaryDTO {

@@ -17,7 +17,10 @@ import {
   LeaveGroupRequestDTO,
   EditMessageRequestDTO,
   DeleteMessageRequestDTO,
-  ReplyToMessageRequestDTO
+  ReplyToMessageRequestDTO,
+  DeleteChatRequestDTO,
+  BlockChatRequestDTO,
+  ClearChatRequestDTO
 } from "../../../domain/chat/dtos/ChatRequestDTOs";
 import {
   GetChatsResponseDTO,
@@ -72,6 +75,14 @@ export class ChatRepository implements IChatRepository {
             status: MessageStatus.Sent,
           });
 
+          // Find the last message not deleted for this user
+          const lastMessage = await MessageModel.findOne({
+            chatId: chat._id.toString(),
+            deletedFor: { $ne: userId }
+          })
+            .sort({ createdAt: -1 })
+            .lean();
+
           // Populate participants with full user objects
           const participantUsers = await UserModel.find({ _id: { $in: chat.participants } })
             .select("firstName lastName email avatar")
@@ -82,7 +93,16 @@ export class ChatRepository implements IChatRepository {
             type: chat.type,
             name: chat.name,
             avatar: chat.avatar,
-            lastMessage: chat.lastMessage,
+            lastMessage: lastMessage
+              ? {
+                  id: lastMessage._id.toString(),
+                  content: lastMessage.content,
+                  type: lastMessage.type,
+                  senderId: lastMessage.senderId,
+                  status: lastMessage.status,
+                  createdAt: lastMessage.createdAt,
+                }
+              : undefined,
             participants: participantUsers.map(user => ({
               id: user._id.toString(),
               firstName: user.firstName,
@@ -117,7 +137,7 @@ export class ChatRepository implements IChatRepository {
     try {
       console.log('=== Search Chats Repository Started ===');
       console.log('Search params:', params);
-      
+
       const { userId, query, page, limit } = params;
       const skip = (page - 1) * limit;
 
@@ -151,8 +171,8 @@ export class ChatRepository implements IChatRepository {
       console.log('Matching user IDs:', matchingUserIds);
 
       // Create base query with user's chats
-      let searchQuery: any = { 
-        participants: { 
+      let searchQuery: any = {
+        participants: {
           $in: [userId, ...matchingUserIds]
         }
       };
@@ -213,6 +233,14 @@ export class ChatRepository implements IChatRepository {
             status: MessageStatus.Sent,
           });
 
+          // Find the last message not deleted for this user
+          const lastMessage = await MessageModel.findOne({
+            chatId: chat._id.toString(),
+            deletedFor: { $ne: userId }
+          })
+            .sort({ createdAt: -1 })
+            .lean();
+
           // Populate participants with full user objects
           const participantUsers = await UserModel.find({ _id: { $in: chat.participants } })
             .select("firstName lastName email avatar")
@@ -223,7 +251,16 @@ export class ChatRepository implements IChatRepository {
             type: chat.type,
             name: chat.name,
             avatar: chat.avatar,
-            lastMessage: chat.lastMessage,
+            lastMessage: lastMessage
+              ? {
+                  id: lastMessage._id.toString(),
+                  content: lastMessage.content,
+                  type: lastMessage.type,
+                  senderId: lastMessage.senderId,
+                  status: lastMessage.status,
+                  createdAt: lastMessage.createdAt,
+                }
+              : undefined,
             participants: participantUsers.map(user => ({
               id: user._id.toString(),
               firstName: user.firstName,
@@ -260,18 +297,15 @@ export class ChatRepository implements IChatRepository {
   async getChatMessages(params: GetChatMessagesRequestDTO): Promise<GetChatMessagesResponseDTO> {
     try {
       // console.log('ChatRepository - getChatMessages - Params:', params);
-      const { chatId, page = 1, limit = 20, before } = params;
+      const { chatId, userId, page = 1, limit = 20, before } = params;
       const skip = (page - 1) * limit;
 
       // Build query for pagination and exclude only messages deleted for this user
-      const query: any = { 
+      const query: any = {
         chatId,
-        $or: [
-          { deletedFor: { $ne: params.userId } },
-          { deletedFor: { $exists: false } }
-        ]
+        deletedFor: { $ne: userId }
       };
-      
+
       if (before) {
         query.createdAt = { $lt: new Date(before) };
       }
@@ -309,8 +343,8 @@ export class ChatRepository implements IChatRepository {
         }));
 
       // Get the oldest message timestamp for cursor-based pagination
-      const oldestMessageTimestamp = messages.length > 0 
-        ? messages[messages.length - 1].createdAt 
+      const oldestMessageTimestamp = messages.length > 0
+        ? messages[messages.length - 1].createdAt
         : null;
 
       return {
@@ -329,7 +363,10 @@ export class ChatRepository implements IChatRepository {
 
   async sendMessage(params: SendMessageRequestDTO): Promise<void> {
     const { chatId, senderId, content, type, attachments } = params;
-
+    const chat = await ChatModel.findById(chatId);
+    if (chat && chat.blockedUsers && chat.blockedUsers.includes(senderId)) {
+      throw new Error('You are blocked and cannot send messages in this chat.');
+    }
     const message = await MessageModel.create({
       chatId,
       senderId,
@@ -338,7 +375,6 @@ export class ChatRepository implements IChatRepository {
       status: MessageStatus.Sent,
       attachments,
     });
-
     await ChatModel.findByIdAndUpdate(chatId, {
       lastMessage: {
         id: message._id.toString(),
@@ -402,13 +438,14 @@ export class ChatRepository implements IChatRepository {
     );
   }
 
-  async getChatDetails(chatId: string): Promise<ChatDetailsResponseDTO | null> {
+  async getChatDetails(chatId: string, userId: string): Promise<ChatDetailsResponseDTO | null> {
     const chat = await ChatModel.findById(chatId).lean();
     if (!chat) {
       return null;
     }
 
-    const messages = await MessageModel.find({ chatId })
+    // Only fetch messages not deleted for this user
+    const messages = await MessageModel.find({ chatId, deletedFor: { $ne: userId } })
       .sort({ createdAt: -1 })
       .limit(50)
       .lean();
@@ -439,6 +476,7 @@ export class ChatRepository implements IChatRepository {
         description: chat.description,
         admins: chat.admins,
         settings: chat.settings,
+        blockedUsers: chat.blockedUsers,
       },
       messages: messages.map((message) => ({
         id: message._id.toString(),
@@ -457,7 +495,7 @@ export class ChatRepository implements IChatRepository {
 
   async searchUsers(params: SearchUsersRequestDTO): Promise<SearchUsersResponseDTO> {
     const { query, page = 1, limit = 20, userId } = params;
-      const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
     // Ensure query is a string and escape special characters
     const searchQuery = String(query).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -473,9 +511,9 @@ export class ChatRepository implements IChatRepository {
         ]
       })
         .select('firstName lastName email avatar')
-          .skip(skip)
-          .limit(limit)
-          .lean(),
+        .skip(skip)
+        .limit(limit)
+        .lean(),
 
       FacultyModel.find({
         _id: { $ne: userId },
@@ -486,10 +524,10 @@ export class ChatRepository implements IChatRepository {
         ]
       })
         .select('firstName lastName email avatar')
-          .skip(skip)
-          .limit(limit)
-          .lean()
-      ]);
+        .skip(skip)
+        .limit(limit)
+        .lean()
+    ]);
 
     // Get total count for pagination
     const [totalUsers, totalFaculty] = await Promise.all([
@@ -513,23 +551,23 @@ export class ChatRepository implements IChatRepository {
 
     // Combine and format results
     const results = [
-        ...users.map(user => ({
-          id: user._id.toString(),
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
+      ...users.map(user => ({
+        id: user._id.toString(),
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
         avatar: user.avatar,
-          type: 'user'
-        })),
-        ...faculty.map(faculty => ({
-          id: faculty._id.toString(),
-          firstName: faculty.firstName,
-          lastName: faculty.lastName,
-          email: faculty.email,
+        type: 'user'
+      })),
+      ...faculty.map(faculty => ({
+        id: faculty._id.toString(),
+        firstName: faculty.firstName,
+        lastName: faculty.lastName,
+        email: faculty.email,
         avatar: faculty.avatar,
-          type: 'faculty'
-        }))
-      ];
+        type: 'faculty'
+      }))
+    ];
 
     return {
       items: results,
@@ -751,7 +789,7 @@ export class ChatRepository implements IChatRepository {
       }
 
       await ChatModel.findByIdAndUpdate(chatId, {
-        $pull: { 
+        $pull: {
           participants: userId,
           admins: userId
         }
@@ -987,5 +1025,42 @@ export class ChatRepository implements IChatRepository {
       console.error('Error in leaveGroup repository:', error);
       throw error;
     }
+  }
+
+  async deleteChat(params: DeleteChatRequestDTO): Promise<void> {
+    const { chatId, userId } = params;
+    console.log('[deleteChat] chatId:', chatId, 'userId:', userId);
+    const chat = await ChatModel.findById(chatId);
+    if (!chat) throw new Error('Chat not found');
+    if (!chat.participants.map(String).includes(String(userId))) throw new Error('Not authorized');
+    await ChatModel.findByIdAndDelete(chatId);
+    await MessageModel.deleteMany({ chatId });
+    console.log('[deleteChat] Chat and messages deleted for chatId:', chatId);
+  }
+
+  async blockChat(params: BlockChatRequestDTO): Promise<void> {
+    const { chatId, userId } = params;
+    console.log('[blockChat] chatId:', chatId, 'userId:', userId);
+    const chat = await ChatModel.findById(chatId);
+    if (!chat) throw new Error('Chat not found');
+    if (chat.blockedUsers.includes(userId)) {
+      // Unblock
+      await ChatModel.findByIdAndUpdate(chatId, { $pull: { blockedUsers: userId } });
+      console.log('[blockChat] User unblocked in chatId:', chatId);
+    } else {
+      // Block
+      await ChatModel.findByIdAndUpdate(chatId, { $addToSet: { blockedUsers: userId } });
+      console.log('[blockChat] User blocked in chatId:', chatId);
+    }
+  }
+
+  async clearChat(params: ClearChatRequestDTO): Promise<void> {
+    const { chatId, userId } = params;
+    console.log('[clearChat] chatId:', chatId, 'userId:', userId);
+    await MessageModel.updateMany(
+      { chatId },
+      { $addToSet: { deletedFor: userId } }
+    );
+    console.log('[clearChat] Messages cleared for userId:', userId, 'in chatId:', chatId);
   }
 } 

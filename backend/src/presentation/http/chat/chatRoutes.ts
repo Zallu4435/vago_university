@@ -75,7 +75,10 @@ chatRouter.delete("/group/:chatId/members/:userId", authMiddleware, (req, res) =
   expressAdapter(req, res, chatController.removeGroupMember.bind(chatController))
 );
 
-chatRouter.patch("/group/:chatId/admins/:userId", authMiddleware, (req, res) =>
+chatRouter.patch("/group/:chatId/admins/:userId", authMiddleware, (req, res, next) => {
+  console.log('PATCH /group/:chatId/admins/:userId route hit');
+  next();
+}, (req, res) =>
   expressAdapter(req, res, chatController.updateGroupAdmin.bind(chatController))
 );
 

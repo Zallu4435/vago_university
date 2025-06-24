@@ -34,6 +34,7 @@ import { User as UserModel } from "../../../infrastructure/database/mongoose/mod
 import { Faculty as FacultyModel } from "../../../infrastructure/database/mongoose/models/faculty.model";
 import { MessageStatus } from "../../../domain/chat/entities/Message";
 import { MessageType } from "../../../domain/chat/entities/MessageType";
+import { ChatType } from "../../../domain/chat/entities/Chat";
 
 export class ChatRepository implements IChatRepository {
   async getChats(params: GetChatsRequestDTO): Promise<GetChatsResponseDTO> {
@@ -421,13 +422,22 @@ export class ChatRepository implements IChatRepository {
     return {
       chat: {
         id: chat._id.toString(),
-        participants: chat.participants,
+        participants: participants.map((user) => ({
+          id: user._id.toString(),
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          avatar: user.avatar,
+          isOnline: false // Default to false, update via socket if needed
+        })),
         lastMessage: chat.lastMessage,
         createdAt: chat.createdAt,
         updatedAt: chat.updatedAt,
         type: chat.type,
         name: chat.name,
         avatar: chat.avatar,
+        description: chat.description,
+        admins: chat.admins,
       },
       messages: messages.map((message) => ({
         id: message._id.toString(),
@@ -440,12 +450,6 @@ export class ChatRepository implements IChatRepository {
         attachments: message.attachments,
         createdAt: message.createdAt,
         updatedAt: message.updatedAt,
-      })),
-      participants: participants.map((user) => ({
-        id: user._id.toString(),
-        name: `${user.firstName} ${user.lastName || ""}`.trim(),
-        avatar: user.avatar,
-        status: "offline", // This should be managed by a separate service
       })),
     };
   }
@@ -702,7 +706,8 @@ export class ChatRepository implements IChatRepository {
     }
   }
 
-  async addGroupMember(chatId: string, userId: string, addedBy: string): Promise<void> {
+  async addGroupMember(params: AddGroupMemberRequestDTO): Promise<void> {
+    const { chatId, userId, addedBy } = params;
     try {
       const chat = await ChatModel.findById(chatId);
       if (!chat) throw new Error('Chat not found');
@@ -728,9 +733,12 @@ export class ChatRepository implements IChatRepository {
     }
   }
 
-  async removeGroupMember(chatId: string, userId: string, removedBy: string): Promise<void> {
+  async removeGroupMember(params: RemoveGroupMemberRequestDTO): Promise<void> {
+    const { chatId, userId, removedBy } = params;
     try {
+      console.log('removeGroupMember - Looking for chat with id:', chatId, 'type:', typeof chatId, 'length:', chatId);
       const chat = await ChatModel.findById(chatId);
+      console.log('removeGroupMember - Chat found:', chat);
       if (!chat) throw new Error('Chat not found');
 
       if (chat.type !== ChatType.Group) {
@@ -753,12 +761,12 @@ export class ChatRepository implements IChatRepository {
     }
   }
 
-  async updateGroupSettings(chatId: string, settings: {
-    onlyAdminsCanPost?: boolean;
-    onlyAdminsCanAddMembers?: boolean;
-    onlyAdminsCanChangeInfo?: boolean;
-  }, updatedBy: string): Promise<void> {
+  async updateGroupSettings(params: UpdateGroupSettingsRequestDTO): Promise<void> {
+    const { chatId, settings, updatedBy } = params;
     try {
+      console.log('ChatRepository - updateGroupSettings - chatId:', chatId);
+      console.log('ChatRepository - updateGroupSettings - settings:', settings);
+      console.log('ChatRepository - updateGroupSettings - updatedBy:', updatedBy);
       const chat = await ChatModel.findById(chatId);
       if (!chat) throw new Error('Chat not found');
 
@@ -770,9 +778,11 @@ export class ChatRepository implements IChatRepository {
         throw new Error('Only admins can update group settings');
       }
 
+      console.log('ChatRepository - updateGroupSettings - Updating settings in DB...');
       await ChatModel.findByIdAndUpdate(chatId, {
         $set: { settings }
       });
+      console.log('ChatRepository - updateGroupSettings - Update finished');
     } catch (error) {
       console.error('Error in updateGroupSettings repository:', error);
       throw error;
@@ -913,6 +923,47 @@ export class ChatRepository implements IChatRepository {
       };
     } catch (error) {
       console.error('Error in createGroupChat repository:', error);
+      throw error;
+    }
+  }
+
+  async updateGroupAdmin(params: UpdateGroupAdminRequestDTO): Promise<void> {
+    try {
+      console.log('updateGroupAdmin - Params:', params);
+      const { chatId, userId, isAdmin, updatedBy } = params;
+      const chat = await ChatModel.findById(chatId);
+      if (!chat) throw new Error('Chat not found');
+      if (chat.type !== ChatType.Group) throw new Error('Can only update admins for group chats');
+      if (!chat.admins.includes(updatedBy)) throw new Error('Only admins can update admin status');
+      if (isAdmin) {
+        // Add user to admins
+        await ChatModel.findByIdAndUpdate(chatId, { $addToSet: { admins: userId } });
+      } else {
+        // Remove user from admins
+        await ChatModel.findByIdAndUpdate(chatId, { $pull: { admins: userId } });
+      }
+    } catch (error) {
+      console.error('Error in updateGroupAdmin repository:', error, 'Params:', params);
+      throw error;
+    }
+  }
+
+  async updateGroupInfo(params: UpdateGroupInfoRequestDTO): Promise<void> {
+    try {
+      console.log('updateGroupInfo - Params:', params);
+      const { chatId, name, description, avatar, updatedBy } = params;
+      const chat = await ChatModel.findById(chatId);
+      if (!chat) throw new Error('Chat not found');
+      if (chat.type !== ChatType.Group) throw new Error('Can only update info for group chats');
+      if (!chat.admins.includes(updatedBy)) throw new Error('Only admins can update group info');
+      const update: any = {};
+      if (name !== undefined) update.name = name;
+      if (description !== undefined) update.description = description;
+      if (avatar !== undefined) update.avatar = avatar;
+      console.log('updateGroupInfo - Update object:', update);
+      await ChatModel.findByIdAndUpdate(chatId, { $set: update });
+    } catch (error) {
+      console.error('Error in updateGroupInfo repository:', error, 'Params:', params);
       throw error;
     }
   }

@@ -5,21 +5,21 @@ import { ChatHeader } from './components/ChatHeader';
 import { ChatMessage } from './components/ChatMessage';
 import { ChatInput } from './components/ChatInput';
 import { TypingIndicator } from './components/TypingIndicator';
-import { Chat, Message, User, PaginatedResponse } from './types/ChatTypes';
+import { Chat, Message, User, Participant } from './types/ChatTypes';
 import { getStyles } from './utils/chatUtils';
-import { chatService } from './services/chatService';
-import { FiPlus, FiSearch, FiX, FiUser, FiMenu } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiX, FiUser, FiMenu, FiArrowLeft, FiUsers } from 'react-icons/fi';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../presentation/redux/store';
 import { toast } from 'react-hot-toast';
 import CreateGroupModal from './components/CreateGroupModal';
 import GroupSettingsModal from './components/GroupSettingsModal';
+import ChatSearchAndGroupBar from './components/ChatSearchAndGroupBar';
+import { useChatQueries } from './hooks/useChatQueries';
+import { useChatMutations } from './hooks/useChatMutations';
+import { chatService } from './services/chatService';
 
 export const ChatComponent: React.FC = () => {
-  const [chats, setChats] = useState<Chat[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
-  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showInfo, setShowInfo] = useState(false);
@@ -29,180 +29,137 @@ export const ChatComponent: React.FC = () => {
   const [showNewChat, setShowNewChat] = useState(false);
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [oldestMessageTimestamp, setOldestMessageTimestamp] = useState<string | null>(null);
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
   const [socketError, setSocketError] = useState<string | null>(null);
   const [showGroupSettings, setShowGroupSettings] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const styles = getStyles(isDarkMode);
   const [replyToMessage, setReplyToMessage] = useState<Message | null>(null);
   const [pendingUser, setPendingUser] = useState<User | null>(null);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [showSearchBar, setShowSearchBar] = useState(false);
+  const [showAttachmentPanel, setShowAttachmentPanel] = useState(false);
+  const [messagesPage, setMessagesPage] = useState(1);
+  const [allMessages, setAllMessages] = useState<Message[]>([]);
+  const [chatsPage, setChatsPage] = useState(1);
+  const [allChats, setAllChats] = useState<Chat[]>([]);
+  const [hasMoreChats, setHasMoreChats] = useState(true);
+  const [loadingMoreChats, setLoadingMoreChats] = useState(false);
+  const scrollState = useRef({
+    shouldScrollToBottom: true,
+    oldScrollHeight: 0,
+  }).current;
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const token = useSelector((state: RootState) => state.auth.token);
   const currentUserId = currentUser?.id;
 
-  // Fetch chats with pagination
-  const fetchChats = async (page = 1) => {
-    try {
-      const response = await chatService.getChats(page);
-      const formattedChats = response.data.map(chat => ({
-        ...chat,
-        participants: chat.participants.map(participant => ({
-          id: participant.id,
-          name: `${participant.firstName} ${participant.lastName}`,
-          email: participant.email,
-          avatar: participant.avatar,
-          isOnline: false
-        }))
-      }));
-      setChats(prev => page === 1 ? formattedChats : [...prev, ...formattedChats]);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching chats:', error);
-      setLoading(false);
-    }
-  };
+  const {
+    chatsResponse,
+    isLoadingChats,
+    chatDetails,
+    messagesResponse,
+    isLoadingMessages,
+    searchUsers: searchUsersQuery
+  } = useChatQueries({
+    chatId: selectedChatId || undefined,
+    messagesPage,
+    messagesLimit: 20,
+    chatsPage,
+    chatsLimit: 20,
+    query: searchQuery
+  });
 
-  // Fetch messages with pagination
-  const fetchMessages = async (page = 1) => {
-    if (!selectedChatId) return;
+  const messages = messagesResponse?.messages || [];
+  const hasMore = messagesResponse?.hasMore || false;
+  const chats = chatsResponse?.data || [];
 
-    try {
-      setLoadingMoreMessages(true);
-      const response = await chatService.getMessages(selectedChatId, page, 20);
-      setMessages(prev => page === 1 ? response.messages : [...response.messages, ...prev]);
-      setHasMoreMessages(response.pagination.hasMore || false);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    } finally {
-      setLoadingMoreMessages(false);
-    }
-  };
+  const chatMutations = useChatMutations(selectedChatId || undefined, currentUserId);
 
-  // Load more messages when scrolling up
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const { scrollTop } = e.currentTarget;
-    if (scrollTop === 0 && hasMoreMessages && !loadingMoreMessages) {
-      fetchMessages();
-    }
-  }, [hasMoreMessages, loadingMoreMessages]);
-
-  // Scroll to bottom when new messages arrive
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const flatChat = chatDetails?.chat ?? chatDetails;
 
   useEffect(() => {
-    fetchChats();
-  }, []);
-
-  useEffect(() => {
-    if (selectedChatId) {
-      fetchMessages(1);
-      scrollToBottom();
-    }
-  }, [selectedChatId]);
-
-  // Initialize socket connection
-  useEffect(() => {
-    const socketUrl = 'http://localhost:5000';
-    socketRef.current = io(`${socketUrl}/chat`, {
-      withCredentials: true,
-      auth: { token: token || '' },
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      transports: ['websocket', 'polling']
-    });
-
-    socketRef.current.on('connect', () => setSocketError(null));
-    socketRef.current.on('connect_error', (error) => {
-      console.error('[Socket] Connection error:', error);
-      setSocketError('Failed to connect to chat server. Please try again later.');
-    });
-    socketRef.current.on('disconnect', (reason) => {
-      console.log('[Socket] Disconnected:', reason);
-      if (reason === 'io server disconnect') socketRef.current?.connect();
-    });
-    socketRef.current.on('error', (error) => {
-      console.error('[Socket] General error:', error);
-      setSocketError('An error occurred with the chat connection.');
-    });
-    socketRef.current.on('message', (newMessage: any) => {
-      const formattedMessage = formatMessage(newMessage);
-      setMessages(prev => [...prev, formattedMessage]);
-      setChats(prev =>
-        prev.map(chat =>
-          chat.id === newMessage.chatId
-            ? { ...chat, lastMessage: formattedMessage, unreadCount: chat.id === selectedChatId ? 0 : chat.unreadCount + 1 }
-            : chat
-        )
-      );
-      if (newMessage.senderId === currentUserId) setMessages(prev => prev.map(msg => msg.id === newMessage.id ? { ...msg, status: 'delivered' } : msg));
-    });
-    socketRef.current.on('messageStatus', ({ messageId, status }) => {
-      setMessages(prev => prev.map(msg => msg.id === messageId ? { ...msg, status } : msg));
-    });
-    socketRef.current.on('typing', ({ chatId, isTyping: typing }) => {
-      setChats(prev => prev.map(chat => chat.id === chatId ? { ...chat, typing } : chat));
-    });
-    socketRef.current.on('userStatus', ({ userId, online }) => {
-      setChats(prev => prev.map(chat => chat.participants.some(p => p.id === userId) ? { ...chat, online } : chat));
-    });
-    socketRef.current.on('messageReaction', (data: { messageId: string; reaction: any }) => {
-      setMessages(prev =>
-        prev.map(msg =>
-          msg.id === data.messageId
-            ? {
-                ...msg,
-                reactions: data.reaction.emoji
-                  ? [...(msg.reactions || []), data.reaction]
-                  : msg.reactions.filter(r => r.userId !== data.reaction.userId)
-              }
-            : msg
-        )
-      );
-    });
-    socketRef.current.on('messageDeleted', ({ messageId, deleteForEveryone }) => {
-      if (deleteForEveryone) setMessages(prev => prev.filter(msg => msg.id !== messageId));
-    });
-
-    return () => {
-      socketRef.current?.disconnect();
-    };
-  }, [token]);
-
-  useEffect(() => {
-    if (socketRef.current && Array.isArray(chats)) {
-      chats.forEach(chat => socketRef.current?.emit('joinChat', { chatId: chat.id }));
-    }
-  }, [chats]);
+    setLoading(isLoadingChats);
+  }, [isLoadingChats]);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDarkMode);
   }, [isDarkMode]);
 
-  const handleChatSelect = async (chatId: string) => {
-    if (!chatId || !chats) return;
-    try {
-      setSelectedChatId(chatId);
-      const chat = chats.find(c => c.id === chatId);
-      if (chat) {
-        setSelectedChat(chat);
-        setMessages([]);
-        setHasMoreMessages(true);
-        setOldestMessageTimestamp(null);
-        const response = await chatService.getMessages(chatId, 1);
-        setMessages(response.messages);
-        setHasMoreMessages(response.pagination.hasMore);
-        await chatService.markMessagesAsRead(chatId);
-        setChats(prev => prev.map(c => c.id === chatId ? { ...c, unreadCount: 0 } : c));
-        scrollToBottom();
+  useEffect(() => {
+    if (messagesPage === 1 && messages.length > 0) {
+      setAllMessages(messages);
+      setHasMoreMessages(true);
+    } else if (messagesPage > 1) {
+      if (messages.length > 0) {
+        setAllMessages(prev => [...messages, ...prev]);
+      } else {
+        setHasMoreMessages(false);
       }
+    }
+  }, [messages, messagesPage]);
+
+  useEffect(() => {
+    const hasMoreChatsResponse = chatsResponse?.hasMore || false;
+    if (chatsPage === 1 && chats.length > 0) {
+      setAllChats(chats);
+      setHasMoreChats(hasMoreChatsResponse);
+    } else if (chatsPage > 1) {
+      if (chats.length > 0) {
+        setAllChats(prev => [...prev, ...chats]);
+        setHasMoreChats(hasMoreChatsResponse);
+      } else {
+        setHasMoreChats(false);
+      }
+    }
+  }, [chats, chatsPage, chatsResponse?.hasMore]);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight } = e.currentTarget;
+    if (scrollTop === 0 && !isLoadingMessages && !loadingMoreMessages && hasMoreMessages) {
+      scrollState.shouldScrollToBottom = false;
+      scrollState.oldScrollHeight = scrollHeight;
+      setLoadingMoreMessages(true);
+      setMessagesPage((prev) => prev + 1);
+    }
+  };
+
+  const handleChatListScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop < clientHeight + 1 && !isLoadingChats && !loadingMoreChats && hasMoreChats) {
+      setLoadingMoreChats(true);
+      setChatsPage(prev => prev + 1);
+    }
+  };
+
+  useEffect(() => {
+    if (!isLoadingMessages) {
+      setLoadingMoreMessages(false);
+    }
+  }, [isLoadingMessages]);
+
+  useEffect(() => {
+    if (!isLoadingChats) {
+      setLoadingMoreChats(false);
+    }
+  }, [isLoadingChats]);
+
+  const handleChatSelect = async (chatId: string) => {
+    setSelectedChatId(chatId);
+    setAllMessages([]);
+    setMessagesPage(1);
+    setHasMoreMessages(true);
+    setReplyToMessage(null);
+    const chatArray: Chat[] = Array.isArray(chats) ? chats as Chat[] : (chats?.data as Chat[] || []);
+    if (!chatId || !chatArray) return;
+    try {
+      setOldestMessageTimestamp(null);
+      await chatMutations.markMessagesAsRead.mutateAsync(chatId);
+      scrollToBottom();
     } catch (error) {
       console.error('Error in handleChatSelect:', error);
     }
@@ -213,38 +170,45 @@ export const ChatComponent: React.FC = () => {
     if (query.trim()) {
       setIsSearching(true);
       try {
-        const response = await chatService.searchUsers(query);
+        let response: any = { items: [] };
+        if (searchUsersQuery && 'items' in searchUsersQuery) {
+          response = searchUsersQuery;
+        }
         setSearchResults(response.items);
-        return response;
-    } catch (error) {
-        console.error('Search error:', error);
+      } catch {
         setSearchResults([]);
-        throw error;
       } finally {
         setIsSearching(false);
       }
     } else {
       setSearchResults([]);
-      return { items: [], total: 0, page: 1, limit: 20, hasMore: false };
     }
   };
 
   const handleUserSelect = async (user: User) => {
     try {
-      if (!Array.isArray(chats)) {
-        setPendingUser(user);
+      const chatArray: Chat[] = Array.isArray(chats) ? (chats as Chat[]) : [];
+      if (!chatArray.length) {
+        const userWithName = {
+          ...user,
+          name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim()
+        };
+        setPendingUser(userWithName);
         setSelectedChatId(null);
         setSearchQuery('');
         setSearchResults([]);
         setShowNewChat(false);
         return;
       }
-      const existingChat = chats.find(chat => chat.type === 'direct' && chat.participants.some(p => p.id === user.id));
+      const existingChat = chatArray.find((chat) => chat.type === 'direct' && chat.participants.some((p) => p.id === user.id));
       if (existingChat) {
         setSelectedChatId(existingChat.id);
-        setSelectedChat(existingChat);
       } else {
-        setPendingUser(user);
+        const userWithName = {
+          ...user,
+          name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim()
+        };
+        setPendingUser(userWithName);
         setSelectedChatId(null);
       }
       setSearchQuery('');
@@ -252,7 +216,11 @@ export const ChatComponent: React.FC = () => {
       setShowNewChat(false);
     } catch (error) {
       console.error('Error in handleUserSelect:', error);
-      setPendingUser(user);
+      const userWithName = {
+        ...user,
+        name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim()
+      };
+      setPendingUser(userWithName);
       setSelectedChatId(null);
       setSearchQuery('');
       setSearchResults([]);
@@ -261,61 +229,63 @@ export const ChatComponent: React.FC = () => {
   };
 
   const formatMessage = (message: any): Message => ({
-      id: message.id,
-      chatId: message.chatId,
-      senderId: message.senderId,
-      content: message.content || '',
-      type: message.type || 'text',
-      status: message.status || 'sending',
-      createdAt: message.createdAt || new Date().toISOString(),
-      updatedAt: message.updatedAt || new Date().toISOString(),
-      reactions: message.reactions || [],
-      attachments: message.attachments || [],
-      isDeleted: message.isDeleted || false,
-      deleteForEveryone: message.deletedForEveryone || false
+    id: message.id,
+    chatId: message.chatId,
+    senderId: message.senderId,
+    senderName: message.senderName || '',
+    content: message.content || '',
+    type: message.type || 'text',
+    status: message.status || 'sending',
+    createdAt: message.createdAt || new Date().toISOString(),
+    updatedAt: message.updatedAt || new Date().toISOString(),
+    reactions: message.reactions || [],
+    attachments: message.attachments || [],
+    isDeleted: message.isDeleted || false,
+    deletedForEveryone: message.deletedForEveryone || false,
   });
 
   const handleEditMessage = async (messageId: string, newContent: string) => {
     try {
-      const response = await chatService.editMessage(selectedChatId!, messageId, newContent);
-      setMessages(prev => prev.map(msg => msg.id === messageId ? { ...msg, content: newContent, isEdited: true } : msg));
+      await chatMutations.editMessage.mutateAsync({ chatId: selectedChatId!, messageId, newContent });
     } catch (error) {
-      console.error('Error editing message:', error);
+      toast.error('Failed to edit message');
     }
   };
 
   const handleDeleteMessage = async (messageId: string, deleteForEveryone: boolean) => {
     try {
-      await chatService.deleteMessage(selectedChatId!, messageId, deleteForEveryone);
-      setMessages(prev => prev.map(msg => msg.id === messageId ? { ...msg, isDeleted: true, deleteForEveryone } : msg));
+      await chatMutations.deleteMessage.mutateAsync({ 
+        chatId: selectedChatId!, 
+        messageId, 
+        deleteForEveryone 
+      });
     } catch (error) {
-      console.error('Error deleting message:', error);
+      toast.error('Failed to delete message');
     }
   };
 
   const handleReplyToMessage = (message: Message) => setReplyToMessage(message);
 
   const handleForwardMessage = async (messageId: string) => {
-    const message = messages.find(m => m.id === messageId);
+    const message = messages.find((m: Message) => m.id === messageId);
     if (message) console.log('Forwarding message:', message); // TODO: Implement forward logic
   };
 
-  const handleSendMessage = async (message: string, file?: File, replyTo?: Message) => {
-    if (!message.trim() && !file) return;
+  const handleSendMessage = async (message: string, fileOrFiles?: File | File[], replyTo?: Message) => {
+    if (!message.trim() && !fileOrFiles) return;
 
     if (!selectedChatId && pendingUser) {
       try {
-        const newChat = await chatService.createChat({
+        const newChat = await chatMutations.createChat.mutateAsync({
           creatorId: currentUser?.id || '',
           participantId: pendingUser.id,
           type: 'direct',
           name: `${pendingUser.firstName} ${pendingUser.lastName}`,
           avatar: pendingUser.avatar
         });
-        setChats(prev => [newChat, ...(Array.isArray(prev) ? prev : [])]);
         setSelectedChatId(newChat.id);
         setPendingUser(null);
-        setTimeout(() => handleSendMessage(message, file, replyTo), 0);
+        setTimeout(() => handleSendMessage(message, fileOrFiles, replyTo), 0);
         return;
       } catch (error) {
         console.error('Failed to create chat:', error);
@@ -326,30 +296,20 @@ export const ChatComponent: React.FC = () => {
     if (!selectedChatId) return;
 
     try {
-      let sentMessage;
-      if (file) {
+      if (fileOrFiles) {
+        const files = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
         const formData = new FormData();
-        formData.append('files', file);
+        files.forEach(file => formData.append('files', file));
         if (message.trim()) formData.append('content', message.trim());
         if (replyTo) formData.append('replyTo', JSON.stringify(replyTo));
-        sentMessage = await chatService.sendFile(selectedChatId, formData);
+        // Only pass the first file for optimistic preview, but all files are sent
+        await chatMutations.sendFile.mutateAsync({ chatId: selectedChatId, formData, file: files[0] });
       } else {
-        sentMessage = await chatService.sendMessage(selectedChatId, message, replyTo);
+        await chatMutations.sendMessage.mutateAsync({ chatId: selectedChatId, content: message, type: 'text' });
       }
-      const formattedMessage = formatMessage({
-        ...sentMessage,
-        senderId: currentUserId,
-        senderName: `${currentUser?.firstName} ${currentUser?.lastName}`,
-        content: message.trim(),
-        type: file ? (file.type.startsWith('image/') ? 'image' : 'file') : 'text',
-        status: 'sending',
-        replyTo
-      });
-      socketRef.current?.emit('message', formattedMessage);
-      setMessages(prev => [...prev, formattedMessage]);
       setReplyToMessage(null);
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Failed to send message:', error);
       toast.error('Failed to send message');
     }
   };
@@ -361,25 +321,12 @@ export const ChatComponent: React.FC = () => {
 
   const handleFileUpload = async (file: File) => {
     if (!selectedChatId) return;
-    const tempMessage = {
-      id: `temp-${Date.now()}`,
-      chatId: selectedChatId,
-      senderId: currentUserId!,
-      content: file.name,
-      type: file.type.startsWith('image/') ? 'image' : 'file',
-      status: 'sending',
-      createdAt: new Date().toISOString(),
-      attachments: [{ id: `temp-${Date.now()}`, type: file.type.startsWith('image/') ? 'image' : 'file', url: URL.createObjectURL(file), name: file.name, size: file.size }],
-      reactions: []
-    };
-    setMessages(prev => [...prev, tempMessage]);
     try {
       const formData = new FormData();
       formData.append('files', file);
-      const sentMessage = await chatService.sendFile(selectedChatId, formData);
-      setMessages(prev => prev.map(msg => msg.id === tempMessage.id ? sentMessage : msg));
+      await chatMutations.sendFile.mutateAsync({ chatId: selectedChatId, formData, file });
     } catch (error) {
-      setMessages(prev => prev.map(msg => msg.id === tempMessage.id ? { ...msg, status: 'failed' } : msg));
+      // handle error
     }
   };
 
@@ -391,8 +338,7 @@ export const ChatComponent: React.FC = () => {
 
   const handleReaction = async (messageId: string, emoji: string) => {
     try {
-      await chatService.addReaction(messageId, emoji);
-      setMessages(prev => prev.map(msg => msg.id === messageId ? { ...msg, reactions: [...(msg.reactions || []), { id: Date.now().toString(), emoji, userId: currentUserId || '', createdAt: new Date().toISOString(), count: 1 }] } : msg));
+      await chatMutations.addReaction.mutateAsync({ messageId, emoji, userId: currentUserId! });
     } catch (error) {
       console.error('Error adding reaction:', error);
     }
@@ -400,16 +346,7 @@ export const ChatComponent: React.FC = () => {
 
   const handleRemoveReaction = async (messageId: string, emoji: string) => {
     try {
-      await chatService.removeReaction(messageId, emoji);
-      setMessages(prev => prev.map(msg => {
-        if (msg.id === messageId) {
-          return {
-            ...msg,
-            reactions: msg.reactions.filter(r => !(r.emoji === emoji && r.userId === currentUserId))
-          };
-        }
-        return msg;
-      }));
+      await chatMutations.removeReaction.mutateAsync({ messageId, userId: currentUserId! });
     } catch (error) {
       console.error('Error removing reaction:', error);
     }
@@ -431,12 +368,9 @@ export const ChatComponent: React.FC = () => {
       onlyAdminsCanSendLinks?: boolean;
     };
   }) => {
-    if (!selectedChat || !currentUser) return;
+    if (!flatChat || !currentUser) return;
     try {
-      await chatService.updateGroupSettings(selectedChat.id, updates);
-      const updatedChat = await chatService.getChatById(selectedChat.id);
-      setSelectedChat(updatedChat);
-      setChats(chats.map(chat => chat.id === selectedChat.id ? updatedChat : chat));
+      await chatMutations.updateGroupSettings.mutateAsync({ chatId: selectedChatId!, updates });
       toast.success('Group settings updated');
     } catch (error) {
       console.error('Error updating group:', error);
@@ -445,40 +379,33 @@ export const ChatComponent: React.FC = () => {
   };
 
   const handleAddMembers = async (selectedUsers: User[]) => {
-    if (!selectedChat || !currentUser) return;
+    if (!flatChat || !currentUser) return;
     try {
-      for (const user of selectedUsers) await chatService.addGroupMember(selectedChat.id, user.id, currentUser.id);
-      const updatedChat = await chatService.getChatById(selectedChat.id);
-      setSelectedChat(updatedChat);
-      setChats(chats.map(chat => chat.id === selectedChat.id ? updatedChat : chat));
-      setShowNewChat(false);
+      for (const user of selectedUsers) {
+        await chatMutations.addGroupMember.mutateAsync(user.id);
+      }
       toast.success('Members added');
     } catch (error) {
-      console.error('Error adding members:', error);
       toast.error('Failed to add members');
     }
   };
 
   const handleRemoveMember = async (userId: string) => {
-    if (!selectedChat || !currentUser) return;
+    if (!flatChat || !currentUser) return;
     try {
-      await chatService.removeGroupMember(selectedChat.id, userId, currentUser.id);
-      const updatedChat = await chatService.getChatById(selectedChat.id);
-      setSelectedChat(updatedChat);
-      setChats(chats.map(chat => chat.id === selectedChat.id ? updatedChat : chat));
+      const updatedChat = await chatMutations.removeGroupMember.mutateAsync(userId);
+      setSelectedChatId(updatedChat.id);
       toast.success('Member removed');
     } catch (error) {
-      console.error('Error removing member:', error);
       toast.error('Failed to remove member');
     }
   };
 
   const handleMakeAdmin = async (userId: string) => {
-    if (!selectedChat) return;
+    if (!flatChat || !currentUser) return;
     try {
-      await chatService.makeAdmin(selectedChat.id, userId);
-      setChats(prev => prev.map(chat => chat.id === selectedChat.id ? { ...chat, admins: [...chat.admins, userId] } : chat));
-      setSelectedChat(prev => prev ? { ...prev, admins: [...prev.admins, userId] } : null);
+      await chatMutations.updateGroupAdmin.mutateAsync({ userId, isAdmin: true });
+      setSelectedChatId(prev => prev ? { ...prev, admins: [...prev.admins, userId] } : null);
       toast.success('Admin added');
     } catch (error) {
       console.error('Error making admin:', error);
@@ -487,11 +414,10 @@ export const ChatComponent: React.FC = () => {
   };
 
   const handleRemoveAdmin = async (userId: string) => {
-    if (!selectedChat) return;
+    if (!flatChat || !currentUser) return;
     try {
-      await chatService.removeAdmin(selectedChat.id, userId);
-      setChats(prev => prev.map(chat => chat.id === selectedChat.id ? { ...chat, admins: chat.admins.filter(id => id !== userId) } : chat));
-      setSelectedChat(prev => prev ? { ...prev, admins: prev.admins.filter(id => id !== userId) } : null);
+      await chatMutations.updateGroupAdmin.mutateAsync({ userId, isAdmin: false });
+      setSelectedChatId(prev => prev ? { ...prev, admins: prev.admins.filter(id => id !== userId) } : null);
       toast.success('Admin removed');
     } catch (error) {
       console.error('Error removing admin:', error);
@@ -500,11 +426,10 @@ export const ChatComponent: React.FC = () => {
   };
 
   const handleLeaveGroup = async () => {
-    if (!selectedChat) return;
+    if (!flatChat) return;
     try {
-      await chatService.leaveGroup(selectedChat.id);
-      setChats(prev => prev.filter(chat => chat.id !== selectedChat.id));
-      setSelectedChat(null);
+      await chatMutations.leaveGroup.mutateAsync();
+      setSelectedChatId(null);
       setShowGroupSettings(false);
       toast.success('Left group');
     } catch (error) {
@@ -514,11 +439,9 @@ export const ChatComponent: React.FC = () => {
   };
 
   const handleDeleteGroup = async () => {
-    if (!selectedChat || !currentUser) return;
+    if (!flatChat || !currentUser) return;
     try {
-      await chatService.deleteGroup(selectedChat.id, currentUser.id);
-      setChats(chats.filter(chat => chat.id !== selectedChat.id));
-      setSelectedChat(null);
+      setSelectedChatId(null);
       setShowGroupSettings(false);
       toast.success('Group deleted');
     } catch (error) {
@@ -527,123 +450,207 @@ export const ChatComponent: React.FC = () => {
     }
   };
 
-  const renderSearchResults = () => {
-    if (!showNewChat || !searchQuery) return null;
-    return (
-      <div className="absolute top-14 left-0 right-0 bg-white dark:bg-[#202c33] shadow-lg rounded-lg mt-1 max-h-96 overflow-y-auto z-50 border border-gray-200 dark:border-gray-700">
-        {isSearching ? (
-          <div className="p-4 text-center"><div className="animate-spin h-5 w-5 border-t-2 border-b-2 border-blue-500 rounded-full mx-auto" /></div>
-        ) : searchResults.length > 0 ? (
-          searchResults.map(user => (
-              <div
-                key={user.id}
-              className="p-3 hover:bg-gray-100 dark:hover:bg-[#2a3942] cursor-pointer flex items-center space-x-3"
-                onClick={() => handleUserSelect(user)}
-              >
-              <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400">
-                {user.avatar ? <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full" /> : `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`}
-                </div>
-              <div>
-                <h4 className="text-sm font-medium text-gray-900 dark:text-white">{user.firstName} {user.lastName}</h4>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
-                  </div>
-                </div>
-          ))
-        ) : (
-          <div className="p-4 text-center text-gray-500 dark:text-gray-400">No users found</div>
-        )}
-      </div>
-    );
+  const scrollToBottom = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
   };
+
+  useEffect(() => {
+    if (scrollState.shouldScrollToBottom) {
+      scrollToBottom();
+    } else if (scrollRef.current && scrollState.oldScrollHeight) {
+      const newScrollHeight = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollTop = newScrollHeight - scrollState.oldScrollHeight;
+      scrollState.oldScrollHeight = 0; // Reset
+    }
+  }, [allMessages]); // Trigger on allMessages change
+
+  useEffect(() => {
+    scrollState.shouldScrollToBottom = true;
+  }, [selectedChatId]); // Reset on chat change
 
   if (loading) return <div className={`flex h-screen items-center justify-center ${styles.background}`}><div className="animate-spin h-12 w-12 border-t-2 border-b-2 border-blue-500 rounded-full" /></div>;
   if (socketError) return (
-      <div className={`flex h-screen items-center justify-center ${styles.background}`}>
+    <div className={`flex h-screen items-center justify-center ${styles.background}`}>
       <div className="text-center">
         <p className="text-red-500 mb-4">{socketError}</p>
         <button onClick={() => window.location.reload()} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Retry</button>
       </div>
-      </div>
-    );
+    </div>
+  );
 
-    return (
+  return (
     <div className={`flex h-screen ${styles.background} font-sans`}>
-      {/* Sidebar (Chat List) */}
-      <div className="w-100 border-r border-gray-200 dark:border-[#2a3942] flex flex-col">
-        <div className="p-4 border-b border-gray-200 dark:border-[#2a3942] flex items-center justify-between">
+      <div className={`transition-all duration-300 ${showGroupSettings ? 'w-80' : 'w-100'} border-r border-gray-200 dark:border-[#2a3942] flex flex-col relative overflow-hidden`}>
+        <div className="p-4 border-b border-gray-200 dark:border-[#2a3942] flex items-center justify-between relative z-10 bg-white dark:bg-[#202c33]">
+          <span className="text-lg font-semibold">WhatsApp</span>
           <div className="flex items-center space-x-2">
-            <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942]">
-              <FiMenu className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-            </button>
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">WhatsApp</h1>
-          </div>
-          <div className="flex space-x-2">
-            <button onClick={() => setShowCreateGroup(true)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942]">
+            <button onClick={() => setShowSearchBar(true)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942]">
               <FiPlus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </button>
-            <button onClick={() => setShowNewChat(true)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942]">
-              <FiUser className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <button onClick={() => setShowCreateGroup(true)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942]">
+              <FiUsers className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </button>
           </div>
         </div>
-        <div className="relative p-2">
-          <div className="relative">
-            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search or start new chat"
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              onFocus={() => setShowNewChat(true)}
-              onBlur={() => !searchQuery && setShowNewChat(false)}
-              className="w-full pl-10 pr-10 py-2 rounded-lg bg-gray-100 dark:bg-[#2c3e50] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-            {searchQuery && (
-          <button
-                onClick={() => { setSearchQuery(''); setSearchResults([]); setShowNewChat(false); }}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+        <div className="relative flex-1">
+          <div
+            className={`absolute inset-0 top-0 transition-transform duration-300 ${showSearchBar ? '-translate-x-full opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'}`}
           >
-                <FiX size={18} />
-          </button>
-            )}
+            <ChatList
+              chats={allChats}
+              styles={styles}
+              selectedChatId={selectedChatId || ''}
+              onChatSelect={handleChatSelect}
+              onScroll={handleChatListScroll}
+              onSearch={async (query: string) => {
+                setIsSearching(true);
+                try {
+                  const response = await chatService.searchUsers(query);
+                  setSearchResults(response.data ?? response.items ?? []);
+                  return response;
+                } catch {
+                  setSearchResults([]);
+                  return { data: [], total: 0, page: 1, limit: 20, hasMore: false };
+                } finally {
+                  setIsSearching(false);
+                }
+              }}
+              onNewChat={() => setShowNewChat(true)}
+              onCreateGroup={() => setShowCreateGroup(true)}
+              onUserSelect={handleUserSelect}
+              currentUserId={currentUserId}
+              setMessages={() => {}}
+              setChats={() => {}}
+            />
+          </div>
+          <div
+            className={`absolute inset-0 top-0 bg-white dark:bg-[#202c33] z-10 transition-transform duration-300 ${showSearchBar ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none'}`}
+          >
+            <div className="flex items-center space-x-2 p-4 border-b border-gray-200 dark:border-[#2a3942] bg-white dark:bg-[#202c33]">
+              <button
+                onClick={() => {
+                  setShowSearchBar(false);
+                  setSearchQuery('');
+                  setSearchResults([]);
+                }}
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942]"
+                title="Back"
+              >
+                <FiArrowLeft size={20} />
+              </button>
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={searchQuery}
+                onChange={async (e) => {
+                  const query = e.target.value;
+                  setSearchQuery(query);
+                  if (query.trim()) {
+                    setIsSearching(true);
+                    try {
+                      const response = await chatService.searchUsers(query);
+                      setSearchResults(response.data ?? response.items ?? []);
+                    } catch {
+                      setSearchResults([]);
+                    } finally {
+                      setIsSearching(false);
+                    }
+                  } else {
+                    setSearchResults([]);
+                  }
+                }}
+                className="flex-1 px-4 py-2 rounded-lg bg-gray-100 dark:bg-[#2c3e50] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="p-2">
+              {searchQuery ? (
+                isSearching ? (
+                  <div className="text-center py-2 text-gray-500 dark:text-gray-400">Searching...</div>
+                ) : searchResults.length > 0 ? (
+                  <div className="space-y-2">
+                    {searchResults.map(user => (
+                      <button
+                        key={user.id}
+                        onClick={() => handleUserSelect(user)}
+                        className="w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2a3942]"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                          {user.avatar ? (
+                            <img src={user.avatar} alt={user.name || (user.firstName + ' ' + user.lastName)} className="w-full h-full rounded-full" />
+                          ) : (
+                            <FiUser size={20} className="text-gray-500 dark:text-gray-400" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0 text-left items-start">
+                          <div className="font-medium text-gray-900 dark:text-white w-full whitespace-normal break-words text-left">{user.name || (user.firstName + ' ' + user.lastName)}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400 w-full whitespace-normal break-words text-left">{user.email}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-2 text-gray-500 dark:text-gray-400">No users found</div>
+                )
+              ) : null}
+            </div>
+          </div>
         </div>
-          {renderSearchResults()}
-      </div>
-        <ChatList
-          chats={chats}
-          styles={styles}
-          selectedChatId={selectedChatId || ''}
-          onChatSelect={handleChatSelect}
-          onSearch={handleSearch}
-          onNewChat={() => setShowNewChat(true)}
-          onCreateGroup={() => setShowCreateGroup(true)}
-          setMessages={setMessages}
-          setChats={setChats}
-          onUserSelect={handleUserSelect}
-          currentUserId={currentUserId}
-        />
+        {showCreateGroup && (
+          <CreateGroupModal
+            onClose={() => setShowCreateGroup(false)}
+            onCreateGroup={async (params) => {
+              try {
+                const newGroup = await chatMutations.createGroupChat.mutateAsync({ ...params, creatorId: currentUser?.id || '' });
+                setSelectedChatId(newGroup.id);
+                setAllMessages([]);
+                setMessagesPage(1);
+                setHasMoreMessages(true);
+                setReplyToMessage(null);
+                setShowCreateGroup(false);
+              } catch (error) {
+                toast.error('Failed to create group');
+              }
+            }}
+            onSearch={async (query: string) => {
+              setIsSearching(true);
+              try {
+                const response = await chatService.searchUsers(query);
+                setSearchResults(response.data ?? response.items ?? []);
+                return response;
+              } catch {
+                setSearchResults([]);
+                return { data: [], total: 0, page: 1, limit: 20, hasMore: false };
+              } finally {
+                setIsSearching(false);
+              }
+            }}
+          />
+        )}
       </div>
 
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        {selectedChatId && selectedChat ? (
-          <>
-            <ChatHeader
-              chat={selectedChat}
-              onInfoClick={() => setShowInfo(true)}
-              onSettingsClick={handleSettingsClick}
-              styles={styles}
-              isDarkMode={isDarkMode}
-              onToggleTheme={handleToggleTheme}
-            />
-            <div className="flex-1 overflow-y-auto p-4" onScroll={handleScroll}>
-                {messages
-                  .filter(msg => !msg.deletedFor?.includes(currentUserId))
-                  .map((message, index) => (
+      <div className="flex-1 flex flex-row h-full">
+        <div className={`flex flex-col transition-all duration-300 ${showGroupSettings ? 'w-2/3' : 'w-full'}`}>
+          {selectedChatId && flatChat ? (
+            <>
+              <ChatHeader
+                chat={flatChat}
+                styles={styles}
+                onInfoClick={() => setShowInfo(true)}
+                onSettingsClick={() => setShowGroupSettings(true)}
+                isDarkMode={isDarkMode}
+                onToggleTheme={() => setIsDarkMode((prev) => !prev)}
+              />
+              <div className="flex-1 overflow-y-auto p-4" onScroll={handleScroll} ref={scrollRef}>
+                {allMessages.map((message: Message, index: number) => {
+                  const isLast = index === allMessages.length - 1;
+                  return (
                     <ChatMessage
                       key={message.id}
+                      ref={isLast ? messagesEndRef : undefined}
                       message={message}
-                      previousMessage={index > 0 ? messages[index - 1] : undefined}
+                      previousMessage={index > 0 ? allMessages[index - 1] : undefined}
                       styles={styles}
                       onReaction={handleReaction}
                       onRemoveReaction={handleRemoveReaction}
@@ -653,87 +660,67 @@ export const ChatComponent: React.FC = () => {
                       onForward={handleForwardMessage}
                       currentUserId={currentUserId || ''}
                     />
-                  ))}
-                <div ref={messagesEndRef} />
+                  );
+                })}
                 {isTyping && <TypingIndicator styles={styles} />}
               </div>
               <ChatInput
                 onSendMessage={handleSendMessage}
-                onFileSelect={handleFileUpload}
-                onCameraSelect={handleCameraSelect}
                 onTyping={handleTyping}
                 styles={styles}
                 replyToMessage={replyToMessage}
                 onCancelReply={() => setReplyToMessage(null)}
-                selectedChatId={selectedChatId}
+                selectedChatId={selectedChatId || ''}
+                currentUserId={currentUserId || ''}
               />
-          </>
-        ) : pendingUser ? (
-          <div className="flex flex-col h-full">
-            <div className="p-4 border-b border-gray-200 dark:border-[#2a3942] flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{pendingUser.firstName} {pendingUser.lastName}</h2>
+            </>
+          ) : pendingUser ? (
+            <div className="flex flex-col h-full">
+              <div className="p-4 border-b border-gray-200 dark:border-[#2a3942] flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {pendingUser.name || `${pendingUser.firstName || ''} ${pendingUser.lastName || ''}`.trim()}
+                </h2>
+              </div>
+              <div className="flex-1 p-4 text-center">
+                <p className="text-gray-500 dark:text-gray-400">Start a conversation by sending a message.</p>
+              </div>
+              <div className="p-4 border-t border-gray-200 dark:border-[#2a3942]">
+                <input
+                  type="text"
+                  placeholder="Type a message..."
+                  className="w-full p-2 rounded-lg bg-gray-100 dark:bg-[#2c3e50] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                      handleSendMessage(e.currentTarget.value);
+                      e.currentTarget.value = '';
+                    }
+                  }}
+                />
+              </div>
             </div>
-            <div className="flex-1 p-4 text-center">
-              <p className="text-gray-500 dark:text-gray-400">Start a conversation by sending a message.</p>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-gray-500 dark:text-gray-400">Select a chat or start a new conversation.</p>
             </div>
-            <div className="p-4 border-t border-gray-200 dark:border-[#2a3942]">
-              <input
-                type="text"
-                placeholder="Type a message..."
-                className="w-full p-2 rounded-lg bg-gray-100 dark:bg-[#2c3e50] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                    handleSendMessage(e.currentTarget.value);
-                    e.currentTarget.value = '';
-                  }
-                }}
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-gray-500 dark:text-gray-400">Select a chat or start a new conversation.</p>
+          )}
+        </div>
+        {showGroupSettings && flatChat && currentUser && (
+          <div className="w-1/3 h-full border-l border-gray-200 dark:border-[#2a3942] bg-white dark:bg-[#1f2937] shadow-lg transition-all duration-300">
+            <GroupSettingsModal
+              onClose={() => setShowGroupSettings(false)}
+              chat={flatChat}
+              currentUser={currentUser}
+              onUpdateGroup={handleUpdateGroup}
+              onAddMembers={handleAddMembers}
+              onRemoveMember={handleRemoveMember}
+              onMakeAdmin={handleMakeAdmin}
+              onRemoveAdmin={handleRemoveAdmin}
+              onLeaveGroup={handleLeaveGroup}
+              onDeleteGroup={handleDeleteGroup}
+            />
           </div>
         )}
       </div>
-
-      {/* Info/Settings Area (Placeholder) */}
-      {showInfo && selectedChat && (
-        <div className="w-80 border-l border-gray-200 dark:border-[#2a3942] bg-white dark:bg-[#202c33] p-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Chat Info</h2>
-          {/* Add chat info content here */}
-          <button onClick={() => setShowInfo(false)} className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Close</button>
-        </div>
-      )}
-      {showCreateGroup && (
-        <CreateGroupModal
-          onClose={() => setShowCreateGroup(false)}
-          onCreateGroup={async (params) => {
-            try {
-              const newGroup = await chatService.createGroupChat({ ...params, creatorId: currentUser?.id || '' });
-              setChats(prev => [newGroup, ...prev]);
-              setShowCreateGroup(false);
-            } catch (error) {
-              toast.error('Failed to create group');
-            }
-          }}
-          onSearch={handleSearch}
-        />
-      )}
-      {showGroupSettings && selectedChat && (
-        <GroupSettingsModal
-          chat={selectedChat}
-          currentUser={currentUser}
-          onClose={() => setShowGroupSettings(false)}
-          onUpdateGroup={handleUpdateGroup}
-          onAddMembers={handleAddMembers}
-          onRemoveMember={handleRemoveMember}
-          onMakeAdmin={handleMakeAdmin}
-          onRemoveAdmin={handleRemoveAdmin}
-          onLeaveGroup={handleLeaveGroup}
-          onDeleteGroup={handleDeleteGroup}
-        />
-      )}
     </div>
   );
 };

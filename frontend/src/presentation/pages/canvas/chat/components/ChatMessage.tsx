@@ -1,14 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, ForwardedRef } from 'react';
 import { Message, Styles } from '../types/ChatTypes';
 import { formatMessageTime, shouldShowDateHeader } from '../utils/chatUtils';
 import { FiCheck, FiMoreVertical, FiShare2, FiCornerUpLeft, FiSmile, FiFile, FiChevronDown } from 'react-icons/fi';
-import { MessageStatus } from './MessageStatus';
 import { EmojiPicker } from './EmojiPicker';
-import { MediaPreview } from './MediaPreview';
 import { MessageDropdown } from './MessageDropdown';
 import { DeleteMessageModal } from './DeleteMessageModal';
 import { MessageReactionsModal } from './MessageReactionsModal';
 import { ImagePreviewModal } from './ImagePreviewModal';
+import { useChatMutations } from '../hooks/useChatMutations';
 
 
 // Simple time-only formatter for message bubbles
@@ -30,7 +29,7 @@ interface ChatMessageProps {
   styles: Styles;
 }
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({
+const ChatMessageComponent = ({
   message,
   previousMessage,
   styles,
@@ -41,7 +40,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   onReply,
   onForward,
   currentUserId
-}) => {
+}: ChatMessageProps, ref: ForwardedRef<HTMLDivElement>) => {
+
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteOptions, setShowDeleteOptions] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -53,6 +53,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const reactionIconRef = useRef<HTMLDivElement | null>(null);
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState('');
+
+  const { editMessage, deleteMessage, forwardMessage, addReaction, removeReaction } = useChatMutations(message.chatId, currentUserId);
 
   const handleOpenReactionsModal = (event: React.MouseEvent) => {
     // Use the bounding rect of the reaction icon for precise positioning
@@ -70,18 +72,18 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
   const handleEdit = () => {
     if (editedContent.trim() && editedContent !== message.content) {
-      onEdit(message.id, editedContent);
+      editMessage.mutate({ chatId: message.chatId, messageId: message.id, newContent: editedContent });
     }
     setIsEditing(false);
   };
 
   const handleAddReaction = (emoji: string) => {
-    onReaction(message.id, emoji);
+    addReaction.mutate({ messageId: message.id, emoji, userId: currentUserId });
     setShowEmojiPicker(false);
   };
 
   const handleRemoveReaction = (emoji: string) => {
-    onRemoveReaction(message.id, emoji);
+    removeReaction.mutate({ messageId: message.id, userId: currentUserId });
     setShowReactionsModal(false);
   };
 
@@ -398,7 +400,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const isSentMessage = message.senderId === currentUserId;
 
   return (
-    <>
+    <div ref={ref}>
       {shouldShowDateHeader(message, previousMessage) && (
         <div className="flex justify-center my-4">
           <div className="px-4 py-1 rounded-full bg-gray-200 dark:bg-[#2a3942] text-sm text-gray-600 dark:text-gray-400">
@@ -412,7 +414,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         {isSentMessage && !message.isDeleted && (
           <div className="flex items-center space-x-1 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button
-              onClick={() => onForward(message.id)}
+              onClick={() => forwardMessage.mutate({ messageId: message.id, targetChatId: '' })}
               className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-[#2a3942] text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
               title="Forward"
             >
@@ -439,6 +441,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 : 'bg-white dark:bg-[#2a3942] text-gray-900 dark:text-white rounded-bl-none shadow-sm border border-gray-200 dark:border-gray-600'
             }`}
           >
+            {/* Spinner overlay while sending */}
+            {message.status === 'sending' && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-60 rounded-lg z-10">
+                <div className="animate-spin h-6 w-6 border-4 border-blue-400 border-t-transparent rounded-full" />
+              </div>
+            )}
+
             {/* Tail for message bubble */}
             <div
               className={`absolute w-0 h-0 bottom-0 ${
@@ -474,7 +483,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 onClose={() => setShowMenu(false)}
                 onReact={() => setShowEmojiPicker(true)}
                 onReply={() => onReply(message)}
-                onForward={() => onForward(message.id)}
+                onForward={() => forwardMessage.mutate({ messageId: message.id, targetChatId: '' })}
                 onEdit={() => setIsEditing(true)}
                 onDelete={handleDeleteForMe}
                 onShowDeleteOptions={() => setShowDeleteOptions(true)}
@@ -510,7 +519,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               <FiSmile className="w-4 h-4" />
             </button>
             <button
-              onClick={() => onForward(message.id)}
+              onClick={() => forwardMessage.mutate({ messageId: message.id, targetChatId: '' })}
               className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-[#2a3942] text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
               title="Forward"
             >
@@ -550,6 +559,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         onRemoveReaction={handleRemoveReaction}
         position={modalPosition}
       />
-    </>
+    </div>
   );
 };
+
+export const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(ChatMessageComponent);

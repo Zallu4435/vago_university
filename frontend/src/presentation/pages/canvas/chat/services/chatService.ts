@@ -1,90 +1,148 @@
 import httpClient from '../../../../../frameworks/api/httpClient';
 import { Chat, Message, User, PaginatedResponse } from '../types/ChatTypes';
 
-export const chatService = {
-  // Chat operations
-  getChats: async (page = 1, limit = 20): Promise<PaginatedResponse<Chat>> => {
-    const response = await httpClient.get(`/chats?page=${page}&limit=${limit}`);
-    const chats = response.data.data.map((chat: any) => ({
-      ...chat,
-      participants: chat.participants.map((participant: any) => ({
-        id: participant.id,
-        firstName: participant.firstName,
-        lastName: participant.lastName,
-        email: participant.email,
-        avatar: participant.avatar,
-        isOnline: false
-      }))
-    }));
-    return {
-      ...response.data,
-      data: chats
-    };
-  },
+class ChatService {
+  async getChats(page = 1, limit = 20): Promise<PaginatedResponse<Chat>> {
+    try {
+      const response = await httpClient.get(`/chats?page=${page}&limit=${limit}`);
+      const chats = response.data.data.map((chat: any) => ({
+        ...chat,
+        participants: chat.participants.map((participant: any) => ({
+          id: participant.id,
+          firstName: participant.firstName,
+          lastName: participant.lastName,
+          email: participant.email,
+          avatar: participant.avatar,
+          isOnline: false
+        }))
+      }));
+      return {
+        ...response.data,
+        data: chats
+      };
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to fetch chats');
+    }
+  }
 
-  searchChats: async (query: string, page = 1, limit = 20): Promise<PaginatedResponse<Chat>> => {
-    const response = await httpClient.get(`/chats/search?query=${query}&page=${page}&limit=${limit}`);
-    return response.data;
-  },
+  async searchChats(query: string, page = 1, limit = 20): Promise<PaginatedResponse<Chat>> {
+    try {
+      const response = await httpClient.get(`/chats/search?query=${query}&page=${page}&limit=${limit}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to search chats');
+    }
+  }
 
-  getChatDetails: async (chatId: string): Promise<Chat> => {
-    const response = await httpClient.get(`/chats/${chatId}`);
-    return response.data;
-  },
+  async getChatDetails(chatId: string): Promise<Chat> {
+    try {
+      const response = await httpClient.get(`/chats/${chatId}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to fetch chat details');
+    }
+  }
 
-  createChat: async (params: { creatorId: string; participantId: string; type: 'direct' | 'group'; name?: string; avatar?: string }): Promise<Chat> => {
-    const response = await httpClient.post('/chats', params);
-    return response.data;
-  },
+  async createChat(params: { creatorId: string; participantId: string; type: 'direct' | 'group'; name?: string; avatar?: string }): Promise<Chat> {
+    try {
+      const response = await httpClient.post('/chats', params);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to create chat');
+    }
+  }
 
-  // Message operations
-  getMessages: async (chatId: string, page = 1, limit = 20, before?: string): Promise<PaginatedResponse<Message>> => {
-    const response = await httpClient.get(`/chats/${chatId}/messages?page=${page}&limit=${limit}${before ? `&before=${before}` : ''}`);
-    return response.data;
-  },
+  async getMessages(chatId: string, page = 1, limit = 20, before?: string): Promise<PaginatedResponse<Message>> {
+    try {
+      const response = await httpClient.get(`/chats/${chatId}/messages?page=${page}&limit=${limit}${before ? `&before=${before}` : ''}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to fetch messages');
+    }
+  }
 
-  sendMessage: async (chatId: string, content: string, type: 'text' | 'image' | 'file' | 'audio' | 'video' = 'text'): Promise<Message> => {
-    const response = await httpClient.post(`/chats/${chatId}/messages`, { content, type });
-    return response.data;
-  },
+  async sendMessage(chatId: string, content: string, type: 'text' | 'image' | 'file' | 'audio' | 'video' = 'text'): Promise<Message> {
+    try {
+      const response = await httpClient.post(`/chats/${chatId}/messages`, { content, type });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to send message');
+    }
+  }
 
-  sendFile: async (chatId: string, formData: FormData): Promise<Message> => {
-    const response = await httpClient.post(`/chats/${chatId}/messages`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    return response.data;
-  },
+  async sendFile(chatId: string, formData: FormData): Promise<Message> {
+    try {
+      const response = await httpClient.post(`/chats/${chatId}/messages`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to send file');
+    }
+  }
 
-  deleteMessage: async (messageId: string, deleteForMeOnly = false): Promise<void> => {
-    const endpoint = deleteForMeOnly ? `/messages/${messageId}/me` : `/messages/${messageId}`;
-    await httpClient.delete(endpoint);
-  },
+  async deleteMessage(messageId: string, deleteForMeOnly = false): Promise<void> {
+    try {
+      const endpoint = deleteForMeOnly ? `/communication/messages/${messageId}` : `/communication/messages/${messageId}`;
+      await httpClient.delete(endpoint);
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to delete message');
+    }
+  }
 
-  forwardMessage: async (messageId: string, targetChatId: string): Promise<Message> => {
-    const response = await httpClient.post(`/messages/${messageId}/forward`, { targetChatId });
-    return response.data;
-  },
+  async deleteMessageInChat(chatId: string, messageId: string, deleteForEveryone: boolean): Promise<void> {
+    try {
+      await httpClient.delete(`/chats/${chatId}/messages/${messageId}`, {
+        data: { deleteForEveryone }
+      });
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to delete message');
+    }
+  }
 
-  replyToMessage: async (chatId: string, replyToId: string, content: string): Promise<Message> => {
-    const response = await httpClient.post(`/chats/${chatId}/messages`, { content, replyToId });
-    return response.data;
-  },
+  async forwardMessage(messageId: string, targetChatId: string): Promise<Message> {
+    try {
+      const response = await httpClient.post(`/messages/${messageId}/forward`, { targetChatId });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to forward message');
+    }
+  }
 
-  markMessagesAsRead: async (chatId: string): Promise<void> => {
-    await httpClient.put(`/chats/${chatId}/read`);
-  },
+  async replyToMessage(chatId: string, replyToId: string, content: string): Promise<Message> {
+    try {
+      const response = await httpClient.post(`/chats/${chatId}/messages`, { content, replyToId });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to reply to message');
+    }
+  }
 
-  // Reaction operations
-  addReaction: async (messageId: string, emoji: string, userId: string): Promise<void> => {
-    await httpClient.post(`/chats/messages/${messageId}/reactions`, { userId, emoji });
-  },
+  async markMessagesAsRead(chatId: string): Promise<void> {
+    try {
+      await httpClient.put(`/chats/${chatId}/read`);
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to mark messages as read');
+    }
+  }
 
-  removeReaction: async (messageId: string, userId: string): Promise<void> => {
-    await httpClient.delete(`/chats/messages/${messageId}/reactions`, { data: { userId } });
-  },
+  async addReaction(messageId: string, emoji: string, userId: string): Promise<void> {
+    try {
+      await httpClient.post(`/chats/messages/${messageId}/reactions`, { userId, emoji });
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to add reaction');
+    }
+  }
 
-  // Group operations
-  createGroupChat: async (params: {
+  async removeReaction(messageId: string, userId: string): Promise<void> {
+    try {
+      await httpClient.delete(`/chats/messages/${messageId}/reactions`, { data: { userId } });
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to remove reaction');
+    }
+  }
+
+  async createGroupChat(params: {
     name: string;
     description?: string;
     participants: string[];
@@ -94,59 +152,101 @@ export const chatService = {
       onlyAdminsCanAddMembers?: boolean;
       onlyAdminsCanChangeInfo?: boolean;
     };
-  }): Promise<Chat> => {
-    const response = await httpClient.post('/chats/group', params);
-    return response.data;
-  },
+  }): Promise<Chat> {
+    try {
+      const response = await httpClient.post('/chats/group', params);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to create group chat');
+    }
+  }
 
-  addGroupMember: async (chatId: string, userId: string, addedBy: string): Promise<void> => {
-    await httpClient.post(`/chats/group/${chatId}/members`, { userId, addedBy });
-  },
+  async addGroupMember(chatId: string, userId: string, addedBy: string): Promise<Chat> {
+    try {
+      const response = await httpClient.post(`/chats/group/${chatId}/members`, { userId, addedBy });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to add group member');
+    }
+  }
 
-  removeGroupMember: async (chatId: string, userId: string, removedBy: string): Promise<void> => {
-    await httpClient.delete(`/chats/group/${chatId}/members/${userId}`, { data: { removedBy } });
-  },
+  async removeGroupMember(chatId: string, userId: string, removedBy: string): Promise<Chat> {
+    try {
+      const response = await httpClient.delete(`/chats/group/${chatId}/members/${userId}`, { data: { removedBy } });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to remove group member');
+    }
+  }
 
-  updateGroupAdmin: async (chatId: string, userId: string, isAdmin: boolean, updatedBy: string): Promise<void> => {
-    await httpClient.patch(`/chats/group/${chatId}/admins/${userId}`, { isAdmin, updatedBy });
-  },
+  async updateGroupAdmin(chatId: string, userId: string, isAdmin: boolean, updatedBy: string): Promise<void> {
+    try {
+      await httpClient.patch(`/chats/group/${chatId}/admins/${userId}`, { isAdmin, updatedBy });
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to update group admin');
+    }
+  }
 
-  updateGroupSettings: async (chatId: string, settings: {
+  async updateGroupSettings(chatId: string, settings: {
     onlyAdminsCanPost?: boolean;
     onlyAdminsCanAddMembers?: boolean;
     onlyAdminsCanChangeInfo?: boolean;
-  }, updatedBy: string): Promise<void> => {
-    await httpClient.patch(`/chats/group/${chatId}/settings`, { settings, updatedBy });
-  },
+  }, updatedBy: string): Promise<void> {
+    try {
+      await httpClient.patch(`/chats/group/${chatId}/settings`, { settings, updatedBy });
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to update group settings');
+    }
+  }
 
-  updateGroupInfo: async (chatId: string, info: {
+  async updateGroupInfo(chatId: string, info: {
     name?: string;
     description?: string;
     avatar?: string;
-  }, updatedBy: string): Promise<void> => {
-    await httpClient.patch(`/chats/group/${chatId}`, { ...info, updatedBy });
-  },
-
-  leaveGroup: async (chatId: string, userId: string): Promise<void> => {
-    await httpClient.post(`/chats/group/${chatId}/leave`, { userId });
-  },
-
-  // User operations
-  searchUsers: async (query: string, page = 1, limit = 20): Promise<PaginatedResponse<User>> => {
-    const response = await httpClient.get(`/chats/users/search?query=${query}&page=${page}&limit=${limit}`);
-    return response.data;
-  },
-
-  editMessage: async (chatId: string, messageId: string, newContent: string): Promise<Message> => {
-    const response = await httpClient.put(`/chats/${chatId}/messages/${messageId}`, {
-      content: newContent
-    });
-    return response.data;
-  },
-
-  deleteMessage: async (chatId: string, messageId: string, deleteForEveryone: boolean): Promise<void> => {
-    await httpClient.delete(`/chats/${chatId}/messages/${messageId}`, {
-      data: { deleteForEveryone }
-    });
+  }, updatedBy: string): Promise<void> {
+    try {
+      await httpClient.patch(`/chats/group/${chatId}`, { ...info, updatedBy });
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to update group info');
+    }
   }
-}; 
+
+  async leaveGroup(chatId: string, userId: string): Promise<void> {
+    try {
+      await httpClient.post(`/chats/group/${chatId}/leave`, { userId });
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to leave group');
+    }
+  }
+
+  async searchUsers(query: string, page = 1, limit = 20): Promise<PaginatedResponse<User>> {
+    try {
+      const response = await httpClient.get(`/chats/users/search?query=${query}&page=${page}&limit=${limit}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to search users');
+    }
+  }
+
+  async editMessage(chatId: string, messageId: string, newContent: string): Promise<Message> {
+    try {
+      const response = await httpClient.put(`/chats/${chatId}/messages/${messageId}`, {
+        content: newContent
+      });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to edit message');
+    }
+  }
+
+  async getChatById(chatId: string): Promise<Chat> {
+    try {
+      const response = await httpClient.get(`/chats/${chatId}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to fetch chat by ID');
+    }
+  }
+}
+
+export const chatService = new ChatService(); 

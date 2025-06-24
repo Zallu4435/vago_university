@@ -201,8 +201,9 @@ export class UpdateGroupSettingsUseCase {
   async execute(params: UpdateGroupSettingsRequestDTO): Promise<void> {
     console.log('UpdateGroupSettingsUseCase - Executing with params:', params);
     try {
+      console.log('UpdateGroupSettingsUseCase - Calling repository...');
       await this.chatRepository.updateGroupSettings(params);
-      console.log('UpdateGroupSettingsUseCase - Success');
+      console.log('UpdateGroupSettingsUseCase - Repository call finished');
     } catch (error) {
       console.error('UpdateGroupSettingsUseCase - Error:', error);
       throw error;

@@ -4,7 +4,8 @@ import { EmojiPicker } from './EmojiPicker';
 import { AttachmentMenu } from './AttachmentMenu';
 import { Styles, Message } from '../types/ChatTypes';
 import { MediaPreview } from './MediaPreview';
-import { chatService } from '../services/chatService';
+import { useChatMutations } from '../hooks/useChatMutations';
+import { toast } from 'react-hot-toast';
 
 interface ChatInputProps {
   onSendMessage: (message: string, file?: File, replyTo?: Message) => void;
@@ -13,6 +14,7 @@ interface ChatInputProps {
   replyToMessage?: Message | null;
   onCancelReply?: () => void;
   selectedChatId: string | null;
+  currentUserId: string;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -21,7 +23,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   styles,
   replyToMessage,
   onCancelReply,
-  selectedChatId
+  selectedChatId,
+  currentUserId
 }) => {
   const [message, setMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -33,6 +36,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const attachmentRef = useRef<HTMLButtonElement>(null);
   const emojiRef = useRef<HTMLButtonElement>(null);
+
+  const { sendFile, sendMessage } = useChatMutations(selectedChatId || undefined, currentUserId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,20 +126,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const handleSendAllMedia = async (media: { url: string; name: string; type: string; caption: string }[]) => {
     if (!selectedChatId || selectedFiles.length === 0) return;
-    const formData = new FormData();
-    selectedFiles.forEach(file => {
-      formData.append('files', file);
-    });
-    // If all captions are the same, use the first; otherwise, join them (or just use the first for now)
-    if (media.length > 0 && media[0].caption) {
-      formData.append('content', media[0].caption);
-    }
-    try {
-      console.log(formData, "shoooooooi")
-      await chatService.sendFile(selectedChatId, formData);
-    } catch (e) {
-      // Optionally handle error
-    }
+    onSendMessage(media[0]?.caption || '', selectedFiles, replyToMessage || undefined);
     setMessage('');
     clearSelectedFiles();
     setShowMediaPreview(false);

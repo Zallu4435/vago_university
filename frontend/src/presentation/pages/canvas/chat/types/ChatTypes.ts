@@ -2,11 +2,14 @@ import { IconType } from 'react-icons';
 
 export interface User {
   id: string;
-  name: string;
+  name?: string;
   email: string;
   avatar?: string;
   status?: 'online' | 'offline' | 'away';
   lastSeen?: Date;
+  firstName?: string;
+  lastName?: string;
+  isOnline?: boolean;
 }
 
 export interface Attachment {

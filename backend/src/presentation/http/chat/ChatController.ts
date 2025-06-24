@@ -600,7 +600,7 @@ export class ChatController {
       }
 
       const { chatId } = req.params;
-      const { userId } = req.body;
+      const { userId, addedBy } = req.body;
       if (!chatId || !userId) {
         return {
           statusCode: 400,
@@ -617,9 +617,10 @@ export class ChatController {
       console.log('ChatController - addGroupMember - Params:', params);
       await this.addGroupMemberUseCase.execute(params);
       
+      const updatedChat = await this.getChatDetailsUseCase.execute(chatId);
       return {
         statusCode: 200,
-        body: { message: "Member added successfully" }
+        body: updatedChat
       };
     } catch (error) {
       console.error("Error in addGroupMember:", error);
@@ -662,9 +663,10 @@ export class ChatController {
       console.log('ChatController - removeGroupMember - Params:', params);
       await this.removeGroupMemberUseCase.execute(params);
       
+      const updatedChat = await this.getChatDetailsUseCase.execute(chatId);
       return {
         statusCode: 200,
-        body: { message: "Member removed successfully" }
+        body: updatedChat
       };
     } catch (error) {
       console.error("Error in removeGroupMember:", error);
@@ -679,6 +681,7 @@ export class ChatController {
   }
 
   async updateGroupAdmin(req: IHttpRequest): Promise<IHttpResponse> {
+    console.log('ChatController - updateGroupAdmin called');
     try {
       console.log('ChatController - updateGroupAdmin - User:', req.user);
       console.log('ChatController - updateGroupAdmin - Body:', req.body);
@@ -753,14 +756,16 @@ export class ChatController {
       };
 
       console.log('ChatController - updateGroupSettings - Params:', params);
+      console.log('ChatController - updateGroupSettings - Calling use case...');
       await this.updateGroupSettingsUseCase.execute(params);
+      console.log('ChatController - updateGroupSettings - Use case finished');
       
       return {
         statusCode: 200,
         body: { message: "Group settings updated successfully" }
       };
     } catch (error) {
-      console.error("Error in updateGroupSettings:", error);
+      console.error("Error in updateGroupSettings (Controller):", error);
       return {
         statusCode: 500,
         body: { 

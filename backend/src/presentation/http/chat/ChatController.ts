@@ -1,4 +1,3 @@
-import { Request, Response } from "express";
 import { IHttpRequest, IHttpResponse } from "../../http/IHttp";
 import {
   GetChatsUseCase,
@@ -668,7 +667,6 @@ export class ChatController {
     const { chatId, messageId } = req.params;
     const { deleteForEveryone } = req.body;
     const userId = req.user.id;
-    console.log('[ChatController] deleteMessage called with:', { chatId, messageId, userId, deleteForEveryone });
     try {
       await this.deleteMessageUseCase.execute({
         messageId,

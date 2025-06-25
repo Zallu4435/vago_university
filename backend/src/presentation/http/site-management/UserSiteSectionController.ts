@@ -6,38 +6,36 @@ import { SiteSectionKey } from "../../../domain/site-management/entities/SiteSec
 export class UserSiteSectionController {
   constructor(
     private readonly getUserSiteSectionsUseCase: IGetUserSiteSectionsUseCase
-  ) {}
+  ) { }
 
   async getSections(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
       const { sectionKey, page = 1, limit = 10 } = httpRequest.query;
-      
+
       if (!sectionKey || typeof sectionKey !== 'string') {
-        return { 
-          statusCode: 400, 
-          body: { message: "Section key is required" } 
+        return {
+          statusCode: 400,
+          body: { message: "Section key is required" }
         };
       }
 
-      // Validate pagination parameters
       const pageNum = Number(page);
       const limitNum = Number(limit);
-      
+
       if (isNaN(pageNum) || pageNum < 1) {
-        return { 
-          statusCode: 400, 
-          body: { message: "Page must be a positive number" } 
-        };
-      }
-      
-      if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
-        return { 
-          statusCode: 400, 
-          body: { message: "Limit must be between 1 and 100" } 
+        return {
+          statusCode: 400,
+          body: { message: "Page must be a positive number" }
         };
       }
 
-      // Map frontend sectionKey to enum
+      if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
+        return {
+          statusCode: 400,
+          body: { message: "Limit must be between 1 and 100" }
+        };
+      }
+
       let mappedSectionKey: SiteSectionKey;
       switch (sectionKey) {
         case 'highlights':
@@ -50,9 +48,9 @@ export class UserSiteSectionController {
           mappedSectionKey = SiteSectionKey.Leadership;
           break;
         default:
-          return { 
-            statusCode: 400, 
-            body: { message: "Invalid section key. Must be one of: highlights, vagoNow, leadership" } 
+          return {
+            statusCode: 400,
+            body: { message: "Invalid section key. Must be one of: highlights, vagoNow, leadership" }
           };
       }
 
@@ -64,9 +62,9 @@ export class UserSiteSectionController {
 
       const result = await this.getUserSiteSectionsUseCase.execute(params);
       if (!result.success) {
-        return { 
-          statusCode: 400, 
-          body: { message: "Failed to get site sections" } 
+        return {
+          statusCode: 400,
+          body: { message: "Failed to get site sections" }
         };
       }
 

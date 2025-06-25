@@ -25,8 +25,6 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory }) {
     return studentInfo.reduce((sum, charge) => sum + (charge.amount || 0), 0);
   };
 
-  console.log(studentInfo, 'studentInfo');
-
   const handlePayment = async (e) => {
     e.preventDefault();
     if (paymentAmount <= 0) {
@@ -36,7 +34,6 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory }) {
     setAmountError(null);
 
     try {
-      // Call backend to create Razorpay order
       const payment = {
         amount: paymentAmount,
         method: paymentMethod,

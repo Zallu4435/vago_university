@@ -39,9 +39,7 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
     setError(null);
     
     try {
-      console.log('Fetching document:', doc.id);
       const response = await documentUploadService.getDocument(doc.id, token);
-      console.log('Document response:', response);
       
       if (response && response.pdfData) {
         setPdfData(response.pdfData);

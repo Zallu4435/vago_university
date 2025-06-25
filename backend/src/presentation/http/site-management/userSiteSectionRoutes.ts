@@ -5,7 +5,6 @@ import { getUserSiteSectionsComposer } from '../../../infrastructure/services/si
 const userSiteSectionRouter = Router();
 const userSiteSectionController = getUserSiteSectionsComposer();
 
-// Single route with query parameter to match frontend
 userSiteSectionRouter.get('/', (req, res) =>
   expressAdapter(req, res, userSiteSectionController.getSections.bind(userSiteSectionController))
 );

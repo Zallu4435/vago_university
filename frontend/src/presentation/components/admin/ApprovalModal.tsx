@@ -32,16 +32,12 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      // Trigger animation after modal is displayed
       setTimeout(() => setAnimateIn(true), 50);
-      // Prevent body scrolling when modal is open
       document.body.style.overflow = 'hidden';
     } else {
       setAnimateIn(false);
-      // Restore body scrolling when modal is closed
       document.body.style.overflow = 'auto';
     }
-    // Cleanup on unmount
     return () => {
       document.body.style.overflow = 'auto';
     };
@@ -49,11 +45,6 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('ApprovalModal handleSubmit called!');
-    console.log('Form data:', formData);
-    console.log('Program details:', formData.programDetails);
-    console.log('Start date:', formData.startDate);
-    console.log('Calling onApprove with data:', formData);
     onApprove(formData);
   };
 

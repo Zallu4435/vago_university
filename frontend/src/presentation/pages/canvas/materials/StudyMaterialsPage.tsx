@@ -1,40 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
-  FiSearch,
-  FiDownload,
-  FiInfo,
-  FiFilter,
-  FiCalendar,
-  FiUser,
-  FiBook,
-  FiFileText,
-  FiFile,
-  FiLock,
   FiGrid,
   FiList,
-  FiChevronDown,
-  FiStar,
-  FiEye,
-  FiHeart,
-  FiShare2,
-  FiBookmark,
-  FiTrendingUp,
-  FiClock,
-  FiUsers,
-  FiAward,
-  FiPlay,
-  FiImage,
-  FiVideo,
-  FiBookOpen,
-  FiX,
-  FiPlus,
   FiRefreshCw
 } from 'react-icons/fi';
 import { usePreferences } from '../../../context/PreferencesContext';
 import MaterialCard from './components/MaterialCard';
 import MaterialTable from './components/MaterialTable';
 import MaterialFilters from './components/MaterialFilters';
-import { Material, ViewMode, SortOption } from './types/MaterialTypes';
+import { ViewMode, SortOption } from './types/MaterialTypes';
 import { useStudyMaterials } from './hooks/useStudyMaterials';
 
 const StudyMaterialsPage: React.FC = () => {
@@ -57,9 +31,8 @@ const StudyMaterialsPage: React.FC = () => {
     downloadMaterial,
     toggleBookmark,
     toggleLike,
-    isDownloading
   } = useStudyMaterials({
-    subject: selectedCourse,
+    course: selectedCourse,
     type: selectedType,
     semester: selectedSemester,
     difficulty: selectedDifficulty,
@@ -81,7 +54,6 @@ const StudyMaterialsPage: React.FC = () => {
 
   const handleDownload = async (material: any): Promise<void> => {
     try {
-      // Extract material data from props structure
       const materialData = material.props || material;
       await downloadMaterial(materialData._id);
     } catch (error) {
@@ -106,9 +78,6 @@ const StudyMaterialsPage: React.FC = () => {
   };
 
   const filteredMaterials = materials;
-
-  console.log(materials, "materials")
-  console.log(filteredMaterials, "filtered matrial")
 
   return (
     <div className="container mx-auto px-4 py-8">

@@ -2,37 +2,38 @@ import React, { useState } from 'react';
 import { FiSearch, FiRefreshCw, FiBell, FiArrowLeft } from 'react-icons/fi';
 import { usePreferences } from '../../../context/PreferencesContext';
 import { Assignment, SelectedFile, SortOption, FilterStatus } from './types/AssignmentTypes';
-import { filterAndSortAssignments } from './utils/assignmentUtils';
+// import { filterAndSortAssignments } from './utils/assignmentUtils';
 import { AssignmentCard } from './components/AssignmentCard';
 import { UploadModal } from './components/UploadModal';
 import { useUserAssignments } from './hooks/useUserAssignments';
 
 const AssignmentsSection = () => {
   const { styles } = usePreferences();
-  const { assignments, selectedFile, error, isLoading, handleFileSelect, handleSubmit, getAssignmentStatus, getAssignmentFeedback } = useUserAssignments();
+  const {
+    assignments,
+    selectedFile,
+    error,
+    isLoading,
+    handleFileSelect,
+    handleSubmit,
+    getAssignmentStatus,
+    getAssignmentFeedback,
+    searchTerm,
+    setSearchTerm,
+    filterStatus,
+    setFilterStatus,
+    sortBy,
+    setSortBy,
+    currentPage,
+    setCurrentPage,
+    itemsPerPage
+  } = useUserAssignments();
 
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [currentAssignment, setCurrentAssignment] = useState<Assignment | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
-  const [sortBy, setSortBy] = useState<SortOption>('dueDate');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
 
-
-  const filteredAndSortedAssignments = filterAndSortAssignments(
-    assignments,
-    searchTerm,
-    filterStatus,
-    sortBy
-  );
-
-
-  const currentAssignments = filteredAndSortedAssignments.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
+  // No local filtering/sorting, use backend-driven assignments
+  const currentAssignments = assignments;
 
   const renderAssignmentList = () => (
     <div className={`min-h-screen ${styles.background}`}>
@@ -66,7 +67,10 @@ const AssignmentsSection = () => {
                   type="text"
                   placeholder="Search assignments..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className={`w-full pl-10 pr-4 py-3 rounded-xl ${styles.input.background} ${styles.input.border} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 />
               </div>
@@ -74,7 +78,10 @@ const AssignmentsSection = () => {
             <div className="flex gap-3">
               <select
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
+                onChange={(e) => {
+                  setFilterStatus(e.target.value as FilterStatus);
+                  setCurrentPage(1);
+                }}
                 className={`px-4 py-3 rounded-xl ${styles.input.background} ${styles.input.border} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
               >
                 <option value="all">All Status</option>
@@ -84,7 +91,10 @@ const AssignmentsSection = () => {
               </select>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                onChange={(e) => {
+                  setSortBy(e.target.value as SortOption);
+                  setCurrentPage(1);
+                }}
                 className={`px-4 py-3 rounded-xl ${styles.input.background} ${styles.input.border} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
               >
                 <option value="dueDate">Due Date</option>
@@ -104,7 +114,7 @@ const AssignmentsSection = () => {
           ) : (
             <>
               <div className="space-y-6">
-                {currentAssignments.map((assignment) => (
+                {currentAssignments.map((assignment: Assignment) => (
                   <AssignmentCard
                     key={assignment.id}
                     assignment={assignment}
@@ -119,7 +129,7 @@ const AssignmentsSection = () => {
                   />
                 ))}
               </div>
-              {renderPagination(filteredAndSortedAssignments.length)}
+              {renderPagination()}
             </>
           )}
         </div>
@@ -127,11 +137,10 @@ const AssignmentsSection = () => {
     </div>
   );
 
-  const renderPagination = (totalItems: number) => {
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-    if (totalPages <= 1) return null;
-
+  const renderPagination = () => {
+    // Assume backend returns total count in future, for now just use currentPage and itemsPerPage
+    // You may want to update this to use total pages from backend if available
+    // For now, just show next/prev buttons
     return (
       <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
         <div className="flex flex-1 justify-between sm:hidden">
@@ -145,11 +154,8 @@ const AssignmentsSection = () => {
             Previous
           </button>
           <button
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className={`relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 ${
-              currentPage === totalPages ? 'cursor-not-allowed opacity-50' : ''
-            }`}
+            onClick={() => setCurrentPage(prev => prev + 1)}
+            className={`relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50`}
           >
             Next
           </button>
@@ -157,11 +163,7 @@ const AssignmentsSection = () => {
         <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
           <div>
             <p className="text-sm text-gray-700">
-              Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to{' '}
-              <span className="font-medium">
-                {Math.min(currentPage * itemsPerPage, totalItems)}
-              </span>{' '}
-              of <span className="font-medium">{totalItems}</span> results
+              Page <span className="font-medium">{currentPage}</span>
             </p>
           </div>
           <div>
@@ -176,30 +178,11 @@ const AssignmentsSection = () => {
                 <span className="sr-only">Previous</span>
                 <FiArrowLeft className="h-5 w-5" aria-hidden="true" />
               </button>
-
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
-                    page === currentPage
-                      ? 'z-10 bg-blue-600 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
-                      : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
-
               <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className={`relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${
-                  currentPage === totalPages ? 'cursor-not-allowed opacity-50' : ''
-                }`}
+                onClick={() => setCurrentPage(prev => prev + 1)}
+                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0`}
               >
-                <span className="sr-only">Next</span>
-                <FiArrowLeft className="h-5 w-5 rotate-180" aria-hidden="true" />
+                Next
               </button>
             </nav>
           </div>

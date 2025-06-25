@@ -85,13 +85,13 @@ export class ChatRepository implements IChatRepository {
             avatar: chat.avatar,
             lastMessage: lastMessage
               ? {
-                  id: lastMessage._id.toString(),
-                  content: lastMessage.content,
-                  type: lastMessage.type,
-                  senderId: lastMessage.senderId,
-                  status: lastMessage.status,
-                  createdAt: lastMessage.createdAt,
-                }
+                id: lastMessage._id.toString(),
+                content: lastMessage.content,
+                type: lastMessage.type,
+                senderId: lastMessage.senderId,
+                status: lastMessage.status,
+                createdAt: lastMessage.createdAt,
+              }
               : undefined,
             participants: participantUsers.map(user => ({
               id: user._id.toString(),
@@ -99,7 +99,7 @@ export class ChatRepository implements IChatRepository {
               lastName: user.lastName,
               email: user.email,
               avatar: user.avatar,
-              isOnline: false // Default to false, update via socket if needed
+              isOnline: false
             })),
             admins: chat.admins,
             unreadCount,
@@ -123,9 +123,6 @@ export class ChatRepository implements IChatRepository {
 
   async searchChats(params: SearchChatsRequestDTO): Promise<GetChatsResponseDTO> {
     try {
-      console.log('=== Search Chats Repository Started ===');
-      console.log('Search params:', params);
-
       const { userId, query, page, limit } = params;
       const skip = (page - 1) * limit;
 
@@ -138,15 +135,8 @@ export class ChatRepository implements IChatRepository {
         ]
       };
 
-      console.log('User search query:', JSON.stringify(userSearchQuery, null, 2));
-
       const users = await UserModel.find(userSearchQuery).select('_id firstName lastName email profilePicture').lean();
-
-      console.log('Found users:', users.length);
-
       const matchingUserIds = users.map(user => user._id.toString());
-
-      console.log('Matching user IDs:', matchingUserIds);
 
       let searchQuery: any = {
         participants: {
@@ -164,21 +154,17 @@ export class ChatRepository implements IChatRepository {
         };
       }
 
-      console.log('Final chat search query:', JSON.stringify(searchQuery, null, 2));
-
       const chats = await ChatModel.find(searchQuery)
         .sort({ updatedAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean();
 
-      console.log('Found chats:', chats.length);
-
       if (chats.length === 0 && matchingUserIds.length > 0) {
         const newChats = matchingUserIds.map(userId => ({
           id: `new_${userId}`,
           type: 'direct',
-          name: '', // Will be set when chat is created
+          name: '',
           avatar: '',
           lastMessage: null,
           participants: [params.userId, userId],
@@ -196,9 +182,6 @@ export class ChatRepository implements IChatRepository {
 
       const totalItems = await ChatModel.countDocuments(searchQuery);
       const totalPages = Math.ceil(totalItems / limit);
-
-      console.log('Total items:', totalItems);
-      console.log('Total pages:', totalPages);
 
       const mappedChats: ChatSummaryDTO[] = await Promise.all(
         chats.map(async (chat) => {
@@ -226,13 +209,13 @@ export class ChatRepository implements IChatRepository {
             avatar: chat.avatar,
             lastMessage: lastMessage
               ? {
-                  id: lastMessage._id.toString(),
-                  content: lastMessage.content,
-                  type: lastMessage.type,
-                  senderId: lastMessage.senderId,
-                  status: lastMessage.status,
-                  createdAt: lastMessage.createdAt,
-                }
+                id: lastMessage._id.toString(),
+                content: lastMessage.content,
+                type: lastMessage.type,
+                senderId: lastMessage.senderId,
+                status: lastMessage.status,
+                createdAt: lastMessage.createdAt,
+              }
               : undefined,
             participants: participantUsers.map(user => ({
               id: user._id.toString(),
@@ -240,16 +223,13 @@ export class ChatRepository implements IChatRepository {
               lastName: user.lastName,
               email: user.email,
               avatar: user.avatar,
-              isOnline: false // Default to false, update via socket if needed
+              isOnline: false
             })),
             unreadCount,
             updatedAt: chat.updatedAt,
           };
         })
       );
-
-      console.log('Mapped chats:', mappedChats.length);
-      console.log('=== Search Chats Repository Ended ===');
 
       return {
         data: mappedChats,
@@ -444,7 +424,7 @@ export class ChatRepository implements IChatRepository {
           lastName: user.lastName,
           email: user.email,
           avatar: user.avatar,
-          isOnline: false // Default to false, update via socket if needed
+          isOnline: false
         })),
         lastMessage: chat.lastMessage,
         createdAt: chat.createdAt,
@@ -520,7 +500,6 @@ export class ChatRepository implements IChatRepository {
 
   async createChat(params: CreateChatRequestDTO): Promise<ChatSummaryDTO> {
     try {
-      console.log('ChatRepository - createChat - Params:', params);
       const { creatorId, participantId, type, name, avatar } = params;
 
       if (type === 'direct') {
@@ -621,7 +600,6 @@ export class ChatRepository implements IChatRepository {
   async deleteMessage(params: DeleteMessageRequestDTO): Promise<void> {
     try {
       const { messageId, userId, deleteForEveryone } = params;
-      console.log('[deleteMessage] params:', params);
       const message = await MessageModel.findOne({ _id: messageId });
       if (!message) {
         console.error('[deleteMessage] Message not found:', messageId);
@@ -727,7 +705,6 @@ export class ChatRepository implements IChatRepository {
 
   async updateGroupSettings(params: UpdateGroupSettingsRequestDTO): Promise<void> {
     try {
-      console.log('ChatRepository - updateGroupSettings - Params:', params);
       const { chatId, settings, updatedBy } = params;
       const chat = await ChatModel.findById(chatId);
       if (!chat) throw new Error('Chat not found');
@@ -747,9 +724,7 @@ export class ChatRepository implements IChatRepository {
         }
       }
 
-      console.log('ChatRepository - updateGroupSettings - Update query:', updateQuery);
       await ChatModel.findByIdAndUpdate(chatId, { $set: updateQuery });
-      console.log('ChatRepository - updateGroupSettings - Update finished');
     } catch (error) {
       console.error('Error in updateGroupSettings repository:', error);
       throw error;
@@ -834,7 +809,6 @@ export class ChatRepository implements IChatRepository {
 
   async createGroupChat(params: CreateGroupChatRequestDTO): Promise<ChatSummaryDTO> {
     try {
-      console.log('ChatRepository - createGroupChat - Params:', params);
       const { creatorId, name, participants, description, settings } = params;
 
       const [userCreator, facultyCreator] = await Promise.all([
@@ -865,8 +839,8 @@ export class ChatRepository implements IChatRepository {
         description,
         participants: finalParticipants,
         createdBy: creatorId,
-        admins: [creatorId], // Creator is the first admin
-        avatar: params.avatar, // Save the avatar URL
+        admins: [creatorId],
+        avatar: params.avatar,
         settings: {
           onlyAdminsCanPost: settings?.onlyAdminsCanPost || false,
           onlyAdminsCanAddMembers: settings?.onlyAdminsCanAddMembers || false,
@@ -893,7 +867,6 @@ export class ChatRepository implements IChatRepository {
 
   async updateGroupAdmin(params: UpdateGroupAdminRequestDTO): Promise<void> {
     try {
-      console.log('updateGroupAdmin - Params:', params);
       const { chatId, userId, isAdmin, updatedBy } = params;
       const chat = await ChatModel.findById(chatId);
       if (!chat) throw new Error('Chat not found');
@@ -912,7 +885,6 @@ export class ChatRepository implements IChatRepository {
 
   async updateGroupInfo(params: UpdateGroupInfoRequestDTO): Promise<void> {
     try {
-      console.log('updateGroupInfo - Params:', params);
       const { chatId, name, description, avatar, updatedBy } = params;
       const chat = await ChatModel.findById(chatId);
       if (!chat) throw new Error('Chat not found');
@@ -922,7 +894,6 @@ export class ChatRepository implements IChatRepository {
       if (name !== undefined) update.name = name;
       if (description !== undefined) update.description = description;
       if (avatar !== undefined) update.avatar = avatar;
-      console.log('updateGroupInfo - Update object:', update);
       await ChatModel.findByIdAndUpdate(chatId, { $set: update });
     } catch (error) {
       console.error('Error in updateGroupInfo repository:', error, 'Params:', params);
@@ -961,15 +932,12 @@ export class ChatRepository implements IChatRepository {
     if (chat.type === 'direct') {
       const otherUserId = chat.participants.find((id: string) => id !== userId);
       if (otherUserId) {
-        // Check if already blocked
         const isBlocked = chat.blockedUsers?.some((entry: any) => entry.blocker === userId && entry.blocked === otherUserId);
         if (isBlocked) {
-          // Unblock: remove the block entry
           await ChatModel.findByIdAndUpdate(chatId, {
             $pull: { blockedUsers: { blocker: userId, blocked: otherUserId } }
           });
         } else {
-          // Block: add the block entry
           await ChatModel.findByIdAndUpdate(chatId, {
             $addToSet: { blockedUsers: { blocker: userId, blocked: otherUserId } }
           });

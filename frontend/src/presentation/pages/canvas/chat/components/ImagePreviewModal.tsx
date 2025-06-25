@@ -35,11 +35,10 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({ imageUrl, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
-      <div 
-        ref={modalRef} 
+      <div
+        ref={modalRef}
         className="relative bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl overflow-hidden max-w-2xl w-full max-h-[90vh]"
       >
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900">
           <h3 className="text-lg font-medium text-white">Image Preview</h3>
           <button
@@ -50,7 +49,6 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({ imageUrl, 
             <FiX className="w-6 h-6" />
           </button>
         </div>
-        {/* Image container */}
         <div className="p-6 bg-gray-900 flex items-center justify-center">
           <div className="bg-gray-800 rounded-xl border border-gray-700 p-2 w-full flex items-center justify-center">
             <img

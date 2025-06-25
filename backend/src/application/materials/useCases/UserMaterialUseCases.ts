@@ -5,8 +5,6 @@ import {
   ToggleBookmarkRequestDTO, 
   ToggleLikeRequestDTO, 
   DownloadMaterialRequestDTO,
-  GetUserBookmarkedMaterialsRequestDTO,
-  GetUserLikedMaterialsRequestDTO
 } from '../../../domain/materials/dtos/UserMaterialRequestDTOs';
 import { GetUserMaterialsResponseDTO } from '../../../domain/materials/dtos/UserMaterialResponseDTOs';
 

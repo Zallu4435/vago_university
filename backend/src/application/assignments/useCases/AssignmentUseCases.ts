@@ -24,7 +24,6 @@ import {
 import { AssignmentErrorType } from "../../../domain/assignments/enums/AssignmentErrorType";
 import mongoose from "mongoose";
 import { Assignment } from "../../../domain/assignments/entities/Assignment";
-import { Submission } from "../../../domain/assignments/entities/Submission";
 
 interface ResponseDTO<T> {
   data: T | { error: string };

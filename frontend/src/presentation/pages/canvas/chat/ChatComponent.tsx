@@ -1,26 +1,24 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { ChatList } from './components/ChatList';
 import { ChatHeader } from './components/ChatHeader';
 import { ChatMessage } from './components/ChatMessage';
 import { ChatInput } from './components/ChatInput';
 import { TypingIndicator } from './components/TypingIndicator';
-import { Chat, Message, User, Participant } from './types/ChatTypes';
+import { Chat, Message, User } from './types/ChatTypes';
 import { getStyles } from './utils/chatUtils';
-import { FiPlus, FiSearch, FiX, FiUser, FiMenu, FiArrowLeft, FiUsers, FiMessageSquare } from 'react-icons/fi';
+import { FiPlus, FiUser, FiArrowLeft, FiUsers, FiMessageSquare } from 'react-icons/fi';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../presentation/redux/store';
 import { toast } from 'react-hot-toast';
 import CreateGroupModal from './components/CreateGroupModal';
 import GroupSettingsModal from './components/GroupSettingsModal';
-import ChatSearchAndGroupBar from './components/ChatSearchAndGroupBar';
 import { useChatQueries } from './hooks/useChatQueries';
 import { useChatMutations } from './hooks/useChatMutations';
 import { chatService } from './services/chatService';
 
 export const ChatComponent: React.FC = () => {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showInfo, setShowInfo] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -42,7 +40,6 @@ export const ChatComponent: React.FC = () => {
   const [pendingUser, setPendingUser] = useState<User | null>(null);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [showSearchBar, setShowSearchBar] = useState(false);
-  const [showAttachmentPanel, setShowAttachmentPanel] = useState(false);
   const [messagesPage, setMessagesPage] = useState(1);
   const [allMessages, setAllMessages] = useState<Message[]>([]);
   const [chatsPage, setChatsPage] = useState(1);
@@ -54,7 +51,6 @@ export const ChatComponent: React.FC = () => {
   }).current;
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
-  const token = useSelector((state: RootState) => state.auth.token);
   const currentUserId = currentUser?.id;
 
   const {
@@ -74,7 +70,6 @@ export const ChatComponent: React.FC = () => {
   });
 
   const messages = messagesResponse?.messages || [];
-  const hasMore = messagesResponse?.hasMore || false;
   const chats = chatsResponse?.data || [];
 
   const chatMutations = useChatMutations(selectedChatId || undefined, currentUserId);
@@ -156,26 +151,6 @@ export const ChatComponent: React.FC = () => {
     }
   };
 
-  const handleSearch = async (query: string) => {
-    setSearchQuery(query);
-    if (query.trim()) {
-      setIsSearching(true);
-      try {
-        let response: any = { items: [] };
-        if (searchUsersQuery && 'items' in searchUsersQuery) {
-          response = searchUsersQuery;
-        }
-        setSearchResults(response.items);
-      } catch {
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
-    } else {
-      setSearchResults([]);
-    }
-  };
-
   const handleUserSelect = async (user: User) => {
     try {
       const chatArray: Chat[] = Array.isArray(chats) ? (chats as Chat[]) : [];
@@ -219,21 +194,6 @@ export const ChatComponent: React.FC = () => {
     }
   };
 
-  const formatMessage = (message: any): Message => ({
-    id: message.id,
-    chatId: message.chatId,
-    senderId: message.senderId,
-    senderName: message.senderName || '',
-    content: message.content || '',
-    type: message.type || 'text',
-    status: message.status || 'sending',
-    createdAt: message.createdAt || new Date().toISOString(),
-    updatedAt: message.updatedAt || new Date().toISOString(),
-    reactions: message.reactions || [],
-    attachments: message.attachments || [],
-    isDeleted: message.isDeleted || false,
-    deletedForEveryone: message.deletedForEveryone || false,
-  });
 
   const handleEditMessage = async (messageId: string, newContent: string) => {
     try {
@@ -245,10 +205,10 @@ export const ChatComponent: React.FC = () => {
 
   const handleDeleteMessage = async (messageId: string, deleteForEveryone: boolean) => {
     try {
-      await chatMutations.deleteMessage.mutateAsync({ 
-        chatId: selectedChatId!, 
-        messageId, 
-        deleteForEveryone 
+      await chatMutations.deleteMessage.mutateAsync({
+        chatId: selectedChatId!,
+        messageId,
+        deleteForEveryone
       });
     } catch (error) {
       toast.error('Failed to delete message');
@@ -309,16 +269,6 @@ export const ChatComponent: React.FC = () => {
     socketRef.current.emit('typing', { chatId: selectedChatId, isTyping });
   };
 
-  const handleFileUpload = async (file: File) => {
-    if (!selectedChatId) return;
-    try {
-      const formData = new FormData();
-      formData.append('files', file);
-      await chatMutations.sendFile.mutateAsync({ chatId: selectedChatId, formData, file });
-    } catch (error) {
-      // handle error
-    }
-  };
 
   const handleCameraSelect = () => {
     navigator.mediaDevices.getUserMedia({ video: true })
@@ -342,9 +292,6 @@ export const ChatComponent: React.FC = () => {
     }
   };
 
-  const handleToggleTheme = () => setIsDarkMode(prev => !prev);
-
-  const handleSettingsClick = () => setShowGroupSettings(true);
 
   const handleUpdateGroup = async (updates: {
     name?: string;
@@ -452,15 +399,14 @@ export const ChatComponent: React.FC = () => {
     } else if (scrollRef.current && scrollState.oldScrollHeight) {
       const newScrollHeight = scrollRef.current.scrollHeight;
       scrollRef.current.scrollTop = newScrollHeight - scrollState.oldScrollHeight;
-      scrollState.oldScrollHeight = 0; // Reset
+      scrollState.oldScrollHeight = 0;
     }
-  }, [allMessages]); // Trigger on allMessages change
+  }, [allMessages]);
 
   useEffect(() => {
     scrollState.shouldScrollToBottom = true;
-  }, [selectedChatId]); // Reset on chat change
+  }, [selectedChatId]);
 
-  // Menu action handlers for ChatHeader
   const handleDeleteChat = async () => {
     if (!flatChat) return;
     if (window.confirm('Are you sure you want to delete this chat? This action cannot be undone.')) {
@@ -490,8 +436,7 @@ export const ChatComponent: React.FC = () => {
     if (window.confirm('Are you sure you want to clear all messages in this chat?')) {
       try {
         await chatMutations.clearChat.mutateAsync(flatChat.id);
-        setAllMessages([]); // Instantly clear messages in UI
-        // Optionally update chat list to show no last message for this chat
+        setAllMessages([]);
         toast.success('Chat cleared');
       } catch (error) {
         toast.error('Failed to clear chat');
@@ -504,7 +449,6 @@ export const ChatComponent: React.FC = () => {
 
     const handleNewMessage = (message: any) => {
       if (message.chatId === selectedChatId && message.senderId !== currentUser.id) {
-        console.log('Calling markMessagesAsRead for chatId:', selectedChatId);
         chatMutations.markMessagesAsRead.mutateAsync(selectedChatId);
       }
     };
@@ -567,8 +511,8 @@ export const ChatComponent: React.FC = () => {
               onCreateGroup={() => setShowCreateGroup(true)}
               onUserSelect={handleUserSelect}
               currentUserId={currentUserId}
-              setMessages={() => {}}
-              setChats={() => {}}
+              setMessages={() => { }}
+              setChats={() => { }}
             />
           </div>
           <div

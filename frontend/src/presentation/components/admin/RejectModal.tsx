@@ -34,7 +34,6 @@ const RejectModal: React.FC<RejectModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const finalReason = rejectReason.trim() || 'Application rejected';
-    console.log('Rejecting with reason:', finalReason);
     onReject(finalReason);
   };
 

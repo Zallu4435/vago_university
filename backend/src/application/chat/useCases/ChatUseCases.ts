@@ -227,7 +227,6 @@ export class DeleteMessageUseCase {
   constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: DeleteMessageRequestDTO): Promise<void> {
-    console.log('[DeleteMessageUseCase] execute called with:', params);
     try {
       await this.chatRepository.deleteMessage(params);
     } catch (error) {

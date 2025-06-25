@@ -87,7 +87,6 @@ export const ImageCropper = ({
         (blob) => {
           if (blob) {
             const file = new File([blob], 'profile-picture.jpg', { type: 'image/jpeg' });
-            console.log('Cropped file created:', { name: file.name, size: file.size, type: file.type });
             onCropApply(file);
           }
         },

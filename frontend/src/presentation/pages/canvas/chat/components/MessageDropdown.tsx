@@ -87,7 +87,6 @@ export const MessageDropdown: React.FC<MessageDropdownProps> = ({
         Forward
       </button>
 
-      {/* Edit option - only for sent messages */}
       {isSentMessage && (
         <button
           onClick={() => {
@@ -101,9 +100,7 @@ export const MessageDropdown: React.FC<MessageDropdownProps> = ({
         </button>
       )}
 
-      {/* Delete options */}
       {isSentMessage ? (
-        // For sent messages, show delete with options
         <button
           onClick={onShowDeleteOptions}
           className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-[#2a3942] w-full text-left"
@@ -112,7 +109,6 @@ export const MessageDropdown: React.FC<MessageDropdownProps> = ({
           Delete
         </button>
       ) : (
-        // For received messages, show only "Delete for me"
         <button
           onClick={() => {
             onDelete();

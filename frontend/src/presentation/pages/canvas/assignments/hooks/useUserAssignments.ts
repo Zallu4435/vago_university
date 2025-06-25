@@ -1,22 +1,30 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userAssignmentService } from '../services/userAssignmentService';
-import { Assignment, SelectedFile } from '../types/AssignmentTypes';
+import { Assignment, SelectedFile, SortOption, FilterStatus } from '../types/AssignmentTypes';
 
 export const useUserAssignments = () => {
   const queryClient = useQueryClient();
   const [selectedFile, setSelectedFile] = useState<SelectedFile>({});
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch all assignments with initial query parameters
+  // UI state for filters/search/sort/pagination
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
+  const [sortBy, setSortBy] = useState<SortOption>('dueDate');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
+
+  // Fetch assignments from backend with current filters
   const { data: assignments, isLoading: isLoadingAssignments } = useQuery({
-    queryKey: ['userAssignments', { status: 'all', page: 1, limit: 10, subject: 'all' }],
+    queryKey: ['userAssignments', { search: searchTerm, status: filterStatus, sortBy, page: currentPage, limit: itemsPerPage }],
     queryFn: async () => {
       const result = await userAssignmentService.getAssignments({
-        status: 'all',
-        page: 1,
-        limit: 10,
-        subject: 'all'
+        search: searchTerm,
+        status: filterStatus,
+        sortBy,
+        page: currentPage,
+        limit: itemsPerPage,
       });
       return result.assignments;
     }
@@ -90,11 +98,22 @@ export const useUserAssignments = () => {
     error,
     isLoading: isLoadingAssignments || submitAssignmentMutation.isPending,
 
-    // Handlers
+    // Handlers for UI
     handleFileSelect,
     handleSubmit,
     getAssignmentStatus,
     getAssignmentFeedback,
+
+    // Filter/search/sort/page state and setters
+    searchTerm,
+    setSearchTerm,
+    filterStatus,
+    setFilterStatus,
+    sortBy,
+    setSortBy,
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
 
     // Mutations
     isSubmitting: submitAssignmentMutation.isPending

@@ -34,21 +34,6 @@ interface FormData {
   registerId?: string;
 }
 
-// Utility to map backend data to frontend FormData
-function mapBackendToFormData(data: any): FormData {
-  if (!data) return {};
-  return {
-    applicationId: data._applicationId,
-    personalInfo: Object.keys(data._personal || {}).length ? data._personal : undefined,
-    choiceOfStudy: Array.isArray(data._choiceOfStudy) && data._choiceOfStudy.length > 0 ? data._choiceOfStudy : undefined,
-    education: Object.keys(data._education || {}).length ? data._education : undefined,
-    achievements: Object.keys(data._achievements || {}).length ? data._achievements : undefined,
-    otherInformation: Object.keys(data._otherInformation || {}).length ? data._otherInformation : undefined,
-    documents: Object.keys(data._documents || {}).length ? data._documents : undefined,
-    declaration: Object.keys(data._declaration || {}).length ? data._declaration : undefined,
-  };
-}
-
 export const ApplicationForm: React.FC = () => {
   const [activeTab, setActiveTab] = useState('personalDetails');
   const [formProgress, setFormProgress] = useState(0);
@@ -118,13 +103,11 @@ export const ApplicationForm: React.FC = () => {
 
   useEffect(() => {
     if (!token || !user) {
-      console.log('No auth token or user found, redirecting to login');
       navigate('/login');
       return;
     }
 
     if (collection !== 'register') {
-      console.log('User is not in register collection, redirecting to appropriate dashboard');
       switch (collection) {
         case 'admin':
           navigate('/admin');
@@ -158,7 +141,6 @@ export const ApplicationForm: React.FC = () => {
       } else {
         try {
           const response = await createApplication(user?.id);
-          console.log(response, "response from the backend ")
           setApplicationId(response.applicationId);
           setValue('applicationId', response.applicationId, { shouldValidate: false });
         } catch (error) {
@@ -221,7 +203,6 @@ export const ApplicationForm: React.FC = () => {
 
   const handleSavePersonalInfo = async () => {
     if (isInitializing) {
-      console.log('Waiting for application initialization');
       return;
     }
     if (!formData.applicationId) {
@@ -232,11 +213,9 @@ export const ApplicationForm: React.FC = () => {
       setSaveError('Personal form reference is missing.');
       return;
     }
-    // Always get the latest values from the child form
     const latestPersonalInfo = personalFormRef.current.getValues() as PersonalInfo;
     try {
       setSaveError(null);
-      console.log('Saving personalInfo to backend:', latestPersonalInfo);
       await savePersonalInfo({ applicationId: formData.applicationId, data: latestPersonalInfo });
       calculateFormProgress({ ...formData, personalInfo: latestPersonalInfo });
     } catch (error) {
@@ -247,7 +226,6 @@ export const ApplicationForm: React.FC = () => {
 
   const handleUpdateChoiceOfStudy = async (choices: ProgrammeChoice[]) => {
     if (isInitializing) {
-      console.log('Waiting for application initialization');
       return;
     }
     if (!formData.applicationId) {
@@ -256,10 +234,7 @@ export const ApplicationForm: React.FC = () => {
     }
     try {
       setSaveError(null);
-      // Save to backend first
       await saveChoiceOfStudy({ applicationId: formData.applicationId, data: choices });
-      console.log('Choice of study saved to backend:', choices);
-      // Then update form data
       setValue('choiceOfStudy', choices, { shouldValidate: false });
       calculateFormProgress({ ...formData, choiceOfStudy: choices });
     } catch (error) {
@@ -271,7 +246,6 @@ export const ApplicationForm: React.FC = () => {
 
   const handleUpdateEducation = async (data: EducationData) => {
     if (isInitializing) {
-      console.log('Waiting for application initialization');
       return;
     }
     if (!formData.applicationId) {
@@ -280,10 +254,8 @@ export const ApplicationForm: React.FC = () => {
     }
     try {
       setSaveError(null);
-      console.log('handleUpdateEducation called with data:', data);
       setValue('education', data, { shouldValidate: false });
       await saveEducation({ applicationId: formData.applicationId, data });
-      console.log('Education saved to backend:', data);
       calculateFormProgress({ ...formData, education: data });
     } catch (error) {
       console.error('Error saving education:', error);
@@ -293,7 +265,6 @@ export const ApplicationForm: React.FC = () => {
 
   const handleUpdateAchievements = async (data: AchievementSection, validate: boolean = false) => {
     if (isInitializing) {
-      console.log('Waiting for application initialization');
       return;
     }
     if (!formData.applicationId) {
@@ -303,15 +274,12 @@ export const ApplicationForm: React.FC = () => {
 
     try {
       setSaveError(null);
-      // Only send the correct fields to thebackend
       const payload = {
         questions: data.questions,
         achievements: data.achievements,
         hasNoAchievements: data.hasNoAchievements,
       };
-      console.log('Saving achievements to backend (clean payload):', payload);
       await saveAchievements({ applicationId: formData.applicationId, data: payload });
-      console.log('Achievements saved successfully');
       setValue('achievements', payload, { shouldValidate: false });
       calculateFormProgress({ ...formData, achievements: payload });
     } catch (error) {
@@ -323,7 +291,6 @@ export const ApplicationForm: React.FC = () => {
 
   const handleUpdateOtherInformation = async (data: OtherInformationSection) => {
     if (isInitializing) {
-      console.log('Waiting for application initialization');
       return;
     }
     if (!formData.applicationId) {
@@ -333,9 +300,7 @@ export const ApplicationForm: React.FC = () => {
     try {
       setSaveError(null);
       setValue('otherInformation', data, { shouldValidate: false });
-      console.log('Updated otherInformation:', data);
       await saveOtherInfo({ applicationId: formData.applicationId, data });
-      console.log('Other information saved successfully');
       calculateFormProgress({ ...formData, otherInformation: data });
     } catch (error) {
       console.error('Error saving otherInformation:', error);
@@ -345,7 +310,6 @@ export const ApplicationForm: React.FC = () => {
 
   const handleSaveDocuments = async (data: DocumentUploadSection) => {
     if (isInitializing) {
-      console.log('Waiting for application initialization');
       return;
     }
     if (!formData.applicationId) {
@@ -355,10 +319,7 @@ export const ApplicationForm: React.FC = () => {
     try {
       setSaveError(null);
       setValue('documents', data, { shouldValidate: false });
-      console.log('Updated documents:', data);
       await saveDocuments({ applicationId: formData.applicationId, data });
-      console.log('Documents saved successfully');
-      // Update the parent form state with current documents data
       setValue('documents', data, { shouldValidate: false });
       calculateFormProgress({ ...formData, documents: data });
       handleNextTab();
@@ -370,7 +331,6 @@ export const ApplicationForm: React.FC = () => {
 
   const handleUpdateDeclaration = async (data: DeclarationSection) => {
     if (isInitializing) {
-      console.log('Waiting for application initialization');
       return;
     }
     if (!formData.applicationId) {
@@ -380,9 +340,7 @@ export const ApplicationForm: React.FC = () => {
     try {
       setSaveError(null);
       setValue('declaration', data, { shouldValidate: false });
-      console.log('Updated declaration:', data);
       await saveDeclaration({ applicationId: formData.applicationId, data });
-      console.log('Declaration saved successfully');
       calculateFormProgress({ ...formData, declaration: data });
     } catch (error) {
       console.error('Error saving declaration:', error);
@@ -391,14 +349,11 @@ export const ApplicationForm: React.FC = () => {
   };
 
   const handleDeclarationChange = (data: DeclarationSection) => {
-    console.log('Declaration changed (local only):', data);
     setValue('declaration', data, { shouldValidate: false });
   };
 
   const handleSaveCurrentTab = async () => {
-    console.log(formData, "foooooooorm")
     if (isInitializing) {
-      console.log('Waiting for application initialization');
       return;
     }
     if (!formData.applicationId) {
@@ -407,20 +362,14 @@ export const ApplicationForm: React.FC = () => {
       return;
     }
 
-    console.log('handleSaveCurrentTab: Saving tab:', activeTab, 'formData:', formData);
-
     if (activeTab === 'personalDetails') {
       setValidationAttempted(true);
       if (personalFormRef.current) {
         const isValid = await personalFormRef.current.trigger();
-        console.log('PersonalDetails validation result:', { isValid, personalInfo: formData.personalInfo });
         if (isValid && formData.personalInfo && Object.values(formData.personalInfo).some(val => val !== '' && val !== undefined && val !== null)) {
-          console.log('Proceeding to save personal info');
           await handleSavePersonalInfo();
-          console.log('personalInfo saved:', formData.personalInfo);
           handleNextTab();
         } else {
-          console.log('Form validation failed or personalInfo is empty, staying on personalDetails tab');
           toast.error('Please fill in the required personal information fields.');
         }
       } else {
@@ -432,7 +381,6 @@ export const ApplicationForm: React.FC = () => {
       if (choiceOfStudyRef.current) {
         const isValid = await choiceOfStudyRef.current.trigger();
         const currentChoices = choiceOfStudyRef.current.getValues();
-        console.log('ChoiceOfStudy validation result:', { isValid, choiceOfStudy: currentChoices });
         if (isValid) {
           try {
             await handleUpdateChoiceOfStudy(currentChoices);
@@ -449,17 +397,11 @@ export const ApplicationForm: React.FC = () => {
       setValidationAttempted(true);
       if (educationFormRef.current) {
         const isValid = await educationFormRef.current.trigger();
-        // Get the current form values to access the education data
         const currentValues = getValues();
         const educationData = currentValues.education;
-        
-        console.log('Current form values:', currentValues);
-        console.log('Education data:', educationData);
-        console.log('Education validation result:', { isValid, education: educationData });
-        
+
         if (isValid && educationData?.studentType) {
           await saveEducation({ applicationId: formData.applicationId, data: educationData });
-          console.log('education saved:', educationData);
           handleNextTab();
         } else {
           toast.error(
@@ -477,12 +419,9 @@ export const ApplicationForm: React.FC = () => {
       if (achievementsFormRef.current) {
         const isValid = await achievementsFormRef.current.trigger();
         const latestAchievements = achievementsFormRef.current.getValues();
-        console.log('Achievements validation result:', { isValid, achievements: latestAchievements });
         if (isValid && latestAchievements) {
           try {
-            // Save to backend
             await handleUpdateAchievements(latestAchievements, true);
-            console.log('achievements saved successfully');
             if (!saveError) {
               handleNextTab();
             }
@@ -504,26 +443,19 @@ export const ApplicationForm: React.FC = () => {
     } else if (activeTab === 'otherInformation') {
       setValidationAttempted(true);
       const isValid = !!formData.otherInformation;
-      console.log('OtherInformation validation result:', { isValid, otherInformation: formData.otherInformation });
       if (isValid && formData.otherInformation) {
         await saveOtherInfo({ applicationId: formData.applicationId, data: formData.otherInformation });
-        console.log('otherInformation saved:', formData.otherInformation);
         handleNextTab();
       } else {
         toast.error('Please complete the Other Information section.');
       }
     } else if (activeTab === 'documents') {
       setValidationAttempted(true);
-      console.log('documentsFormRef:', documentsFormRef);
       if (documentsFormRef.current) {
-        console.log('Validating documents form');
         const isValid = await documentsFormRef.current.trigger();
         const currentDocuments = documentsFormRef.current.getValues();
-        console.log('Documents validation result:', { isValid, documents: currentDocuments });
         if (isValid && currentDocuments) {
           await saveDocuments({ applicationId: formData.applicationId, data: currentDocuments });
-          console.log('documents saved:', currentDocuments);
-          // Update the parent form state with current documents data
           setValue('documents', currentDocuments, { shouldValidate: false });
           calculateFormProgress({ ...formData, documents: currentDocuments });
           handleNextTab();
@@ -537,10 +469,8 @@ export const ApplicationForm: React.FC = () => {
     } else if (activeTab === 'declaration') {
       setValidationAttempted(true);
       const isValid = formData.declaration?.privacyPolicy === true;
-      console.log('Declaration validation result:', { isValid, declaration: formData.declaration });
       if (isValid && formData.declaration) {
         await saveDeclaration({ applicationId: formData.applicationId, data: formData.declaration });
-        console.log('declaration saved:', formData.declaration);
         handleNextTab();
       } else {
         toast.error('Please agree to the Privacy Notice to proceed.');
@@ -550,7 +480,6 @@ export const ApplicationForm: React.FC = () => {
 
   const handleSubmitApplication = async () => {
     if (isInitializing) {
-      console.log('Waiting for application initialization');
       return;
     }
 
@@ -558,13 +487,10 @@ export const ApplicationForm: React.FC = () => {
       toast.error('No application ID found.');
       return;
     }
-
-    // Get the latest documents data from the ref if available
     let latestFormData = { ...formData };
     if (documentsFormRef.current) {
       const currentDocuments = documentsFormRef.current.getValues();
       latestFormData.documents = currentDocuments;
-      // Update the form state with latest documents data
       setValue('documents', currentDocuments, { shouldValidate: false });
     }
 
@@ -578,7 +504,6 @@ export const ApplicationForm: React.FC = () => {
       Promise.resolve(!!latestFormData.declaration?.privacyPolicy),
     ]);
 
-    console.log('Full form validation results:', validationResults);
 
     if (validationResults.every(result => result === true)) {
       try {
@@ -594,7 +519,6 @@ export const ApplicationForm: React.FC = () => {
       const invalidSectionIndex = validationResults.findIndex(result => result === false);
       if (invalidSectionIndex !== -1) {
         setActiveTab(tabs[invalidSectionIndex].id);
-        console.log('Navigating to invalid section:', tabs[invalidSectionIndex].id);
       }
     }
   };
@@ -771,7 +695,6 @@ export const ApplicationForm: React.FC = () => {
             <PersonalParticularsForm
               initialData={formData.personalInfo}
               onChange={(data) => {
-                console.log('PersonalParticularsForm onChange:', data);
                 setValue('personalInfo', data, { shouldValidate: false });
                 calculateFormProgress({ ...formData, personalInfo: data });
               }}

@@ -17,14 +17,12 @@ interface MessageReactionsModalProps {
   position?: { x: number; y: number };
 }
 
-const QUICK_REACTIONS = ['❤️', '😂', '😮', '😢', '😠', '👍', '👎', '🙏'];
 
 export const MessageReactionsModal: React.FC<MessageReactionsModalProps> = ({
   isVisible,
   onClose,
   reactions,
   currentUserId,
-  onAddReaction,
   onRemoveReaction,
   position = { x: 0, y: 0 }
 }) => {
@@ -57,7 +55,6 @@ export const MessageReactionsModal: React.FC<MessageReactionsModalProps> = ({
 
   if (!isVisible) return null;
 
-  // Group reactions by emoji
   const groupedReactions = reactions.reduce((acc, reaction) => {
     if (!acc[reaction.emoji]) {
       acc[reaction.emoji] = [];
@@ -68,15 +65,6 @@ export const MessageReactionsModal: React.FC<MessageReactionsModalProps> = ({
 
   const totalReactions = reactions.length;
   const reactionTypes = Object.keys(groupedReactions);
-
-  const handleReactionClick = (emoji: string) => {
-    const userReaction = reactions.find(r => r.emoji === emoji && r.userId === currentUserId);
-    if (userReaction) {
-      onRemoveReaction(emoji);
-    } else {
-      onAddReaction(emoji);
-    }
-  };
 
   const getFilteredReactions = () => {
     if (activeTab === 'all') {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FiX, FiUser, FiCheck, FiMessageSquare, FiUsers, FiImage, FiLink, FiLock, FiCamera, FiArrowLeft } from 'react-icons/fi';
+import { FiX, FiUser, FiCheck, FiMessageSquare, FiUsers, FiImage, FiLock, FiCamera, FiArrowLeft } from 'react-icons/fi';
 
-// User type for demonstration
 interface User {
   id: string;
   name: string;
@@ -33,7 +32,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   onCreateGroup,
   onSearch
 }) => {
-  // Prevent background scroll when modal is open
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -60,13 +58,11 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   const [groupAvatar, setGroupAvatar] = useState<File | null>(null);
   const [groupAvatarPreview, setGroupAvatarPreview] = useState<string | null>(null);
 
-  // Remove mockUsers and use onSearch for searching users
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
     if (query.trim()) {
       try {
         const result = await onSearch(query);
-        console.log(result, "popopopo")
         let usersArray: any[] = [];
         if (result && typeof result === 'object') {
           if ('items' in result && Array.isArray(result.items)) {
@@ -79,9 +75,8 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
           id: user.id,
           name: `${user.firstName} ${user.lastName}`,
           email: user.email,
-          avatar: user.avatar // or undefined if not present
+          avatar: user.avatar
         }));
-        // Filter out already selected users
         const filteredUsers = mappedUsers.filter((user: any) => !selectedUsers.some(selected => selected.id === user.id));
         setSearchResults(filteredUsers);
       } catch (error) {
@@ -131,7 +126,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
         settings,
         avatar: groupAvatar ? groupAvatar : undefined,
       };
-      console.log('Submitting group creation:', params);
       try {
         await onCreateGroup(params);
       } catch (err) {
@@ -143,7 +137,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   const renderParticipantsStep = () => {
     return (
       <>
-        {/* Header */}
         <div className="flex items-center px-6 py-4 bg-[#00a884] text-white">
           <button onClick={onClose} className="mr-6">
             <FiX size={20} />
@@ -154,7 +147,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
           </div>
         </div>
 
-        {/* Search */}
         <div className="px-6 py-4 border-b border-gray-200 dark:border-[#2a3942]">
           <div className="relative">
             <input
@@ -167,7 +159,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
           </div>
         </div>
 
-        {/* Selected Users */}
         {selectedUsers.length > 0 && (
           <div className="px-6 py-4 border-b border-gray-200 dark:border-[#2a3942]">
             <div className="flex flex-wrap gap-2">
@@ -197,7 +188,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
           </div>
         )}
 
-        {/* Contact List */}
         <div className="flex-1 overflow-y-auto">
           {searchResults.length > 0 ? (
             searchResults.map((user) => (
@@ -234,7 +224,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               className="w-12 h-12 bg-[#00a884] text-white rounded-full flex items-center justify-center ml-auto hover:bg-[#008a72] transition-colors"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M9.4 18L8 16.6l4.6-4.6L8 7.4L9.4 6l6 6z"/>
+                <path d="M9.4 18L8 16.6l4.6-4.6L8 7.4L9.4 6l6 6z" />
               </svg>
             </button>
           </div>
@@ -246,7 +236,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   const renderInfoStep = () => {
     return (
       <>
-        {/* Header */}
         <div className="flex items-center px-6 py-4 bg-[#00a884] text-white">
           <button onClick={handleBack} className="mr-6">
             <FiArrowLeft size={20} />
@@ -255,7 +244,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
         </div>
 
         <div className="flex-1 flex flex-col">
-          {/* Group Photo & Info */}
           <div className="px-6 py-8 border-b border-gray-200 dark:border-[#2a3942]">
             <div className="flex items-center space-x-4">
               <div className="relative">
@@ -263,7 +251,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
                   {groupAvatarPreview ? (
                     <img src={groupAvatarPreview} alt="Group avatar preview" className="w-full h-full object-cover rounded-full" />
                   ) : (
-                  <FiCamera size={24} className="text-gray-500 dark:text-gray-400" />
+                    <FiCamera size={24} className="text-gray-500 dark:text-gray-400" />
                   )}
                 </div>
                 <label
@@ -298,7 +286,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
             </div>
           </div>
 
-          {/* Description */}
           <div className="px-6 py-4 border-b border-gray-200 dark:border-[#2a3942]">
             <div className="relative">
               <textarea
@@ -315,7 +302,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
             </div>
           </div>
 
-          {/* Participants */}
           <div className="px-6 py-4 border-b border-gray-200 dark:border-[#2a3942]">
             <div className="text-[#00a884] text-sm font-medium mb-3">
               Participants: {selectedUsers.length}
@@ -345,7 +331,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
             </div>
           </div>
 
-          {/* Group Settings */}
           <div className="px-6 py-4">
             <button
               type="button"
@@ -353,15 +338,15 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               className="flex items-center justify-between w-full text-left"
             >
               <span className="text-[#00a884] text-sm font-medium">Group settings</span>
-              <svg 
+              <svg
                 className={`w-4 h-4 text-[#00a884] transition-transform ${showSettings ? 'rotate-180' : ''}`}
-                fill="currentColor" 
+                fill="currentColor"
                 viewBox="0 0 20 20"
               >
                 <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
             </button>
-            
+
             {showSettings && (
               <div className="mt-4 space-y-3">
                 <label className="flex items-center justify-between py-2">
@@ -376,7 +361,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
                     className="w-4 h-4 text-[#00a884] border-gray-300 rounded focus:ring-[#00a884]"
                   />
                 </label>
-                
+
                 <label className="flex items-center justify-between py-2">
                   <div className="flex items-center space-x-3">
                     <FiUsers size={16} className="text-gray-500 dark:text-gray-400" />
@@ -389,7 +374,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
                     className="w-4 h-4 text-[#00a884] border-gray-300 rounded focus:ring-[#00a884]"
                   />
                 </label>
-                
+
                 <label className="flex items-center justify-between py-2">
                   <div className="flex items-center space-x-3">
                     <FiImage size={16} className="text-gray-500 dark:text-gray-400" />
@@ -402,7 +387,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
                     className="w-4 h-4 text-[#00a884] border-gray-300 rounded focus:ring-[#00a884]"
                   />
                 </label>
-                
+
                 <label className="flex items-center justify-between py-2">
                   <div className="flex items-center space-x-3">
                     <FiLock size={16} className="text-gray-500 dark:text-gray-400" />
@@ -419,7 +404,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
             )}
           </div>
 
-          {/* Create Button */}
           <div className="p-4 mt-auto">
             <button
               type="button"

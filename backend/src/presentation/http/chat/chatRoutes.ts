@@ -8,17 +8,14 @@ import { profilePictureUpload } from '../../../config/cloudinary.config';
 const chatRouter = Router();
 const chatController = getChatComposer();
 
-// User search route
 chatRouter.get("/users/search", authMiddleware, (req, res) =>
   expressAdapter(req, res, chatController.searchUsers.bind(chatController))
 );
 
-// Create chat route
 chatRouter.post("/", authMiddleware, (req, res) =>
   expressAdapter(req, res, chatController.createChat.bind(chatController))
 );
 
-// Chat routes
 chatRouter.get("/", authMiddleware, (req, res) =>
   expressAdapter(req, res, chatController.getChats.bind(chatController))
 );
@@ -42,7 +39,6 @@ chatRouter.post(
   (req, res) => expressAdapter(req, res, chatController.sendMessage.bind(chatController))
 );
 
-// Message editing and deletion routes
 chatRouter.put("/:chatId/messages/:messageId", authMiddleware, (req, res) =>
   expressAdapter(req, res, chatController.editMessage.bind(chatController))
 );
@@ -63,7 +59,6 @@ chatRouter.delete("/messages/:messageId/reactions", authMiddleware, (req, res) =
   expressAdapter(req, res, chatController.removeReaction.bind(chatController))
 );
 
-// Group chat routes
 chatRouter.post("/group", authMiddleware, profilePictureUpload.single('avatar'), (req, res) =>
   expressAdapter(req, res, chatController.createGroupChat.bind(chatController))
 );
@@ -77,8 +72,6 @@ chatRouter.delete("/group/:chatId/members/:userId", authMiddleware, (req, res) =
 );
 
 chatRouter.patch("/group/:chatId/admins/:userId", authMiddleware, (req, res, next) => {
-  console.log('PATCH /group/:chatId/admins/:userId route hit');
-  next();
 }, (req, res) =>
   expressAdapter(req, res, chatController.updateGroupAdmin.bind(chatController))
 );
@@ -96,17 +89,14 @@ chatRouter.post("/group/:chatId/leave", authMiddleware, (req, res) =>
 );
 
 chatRouter.delete('/:chatId', authMiddleware, (req, res) => {
-  console.log('[Route] DELETE /:chatId', req.params);
   expressAdapter(req, res, chatController.deleteChat.bind(chatController));
 });
 
 chatRouter.post('/:chatId/block', authMiddleware, (req, res) => {
-  console.log('[Route] POST /:chatId/block', req.params);
   expressAdapter(req, res, chatController.blockChat.bind(chatController));
 });
 
 chatRouter.delete('/:chatId/messages', authMiddleware, (req, res) => {
-  console.log('[Route] DELETE /:chatId/messages', req.params);
   expressAdapter(req, res, chatController.clearChat.bind(chatController));
 });
 

@@ -68,9 +68,6 @@ export const diplomaBackendService = {
 
     async getVideoById(videoId: string): Promise<Video> {
         const response = await httpClient.get(`/admin/vedio/videos/${videoId}`);
-        console.log('diplomaBackendService: getVideoById response:', response.data);
-        console.log('diplomaBackendService: video object:', response.data.video);
-        console.log('diplomaBackendService: video.videoUrl =', response.data.video?.videoUrl);
         return response.data.data.video;
     },
 
@@ -91,12 +88,8 @@ export const diplomaBackendService = {
         if (!videoId) {
             throw new Error('Video ID is required for updates');
         }
-        
-        console.log('diplomaBackendService: updateVideo called with:', { videoId, videoData });
-        
-        // Determine if it's FormData (with file) or plain object (without file)
+                
         const isFormData = videoData instanceof FormData;
-        console.log('diplomaBackendService: isFormData =', isFormData);
         
         if (!isFormData) {
             console.log('diplomaBackendService: videoData.videoUrl =', (videoData as Partial<Video>).videoUrl);
@@ -106,7 +99,7 @@ export const diplomaBackendService = {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
-            timeout: 60000, // 1 minute timeout for video uploads
+            timeout: 60000,
         } : {};
         
         const response = await httpClient.put(`/admin/vedio/videos/${videoId}`, videoData, config);

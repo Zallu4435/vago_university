@@ -53,7 +53,6 @@ class EmailService {
   private transporter: any;
 
   constructor() {
-    // Validate email configuration
     if (!config.email.host) {
       console.error("EMAIL_HOST is not configured");
       throw new Error("Email host is not configured");
@@ -67,14 +66,6 @@ class EmailService {
       throw new Error("Email password is not configured");
     }
 
-    console.log("Initializing email service with config:", {
-      host: config.email.host,
-      port: config.email.port,
-      secure: config.email.secure,
-      user: config.email.user,
-      from: config.email.from
-    });
-
     this.transporter = nodemailer.createTransport({
       host: config.email.host,
       port: config.email.port,
@@ -85,7 +76,6 @@ class EmailService {
       },
     });
 
-    // Verify transporter configuration
     this.transporter.verify((error: any, success: any) => {
       if (error) {
         console.error("Email transporter verification failed:", error);
@@ -111,22 +101,19 @@ class EmailService {
         <h2 style="color: #2a5885;">Congratulations, ${name}!</h2>
         <p>We are pleased to inform you that your application to the <strong>${programDetails}</strong> has been reviewed and accepted.</p>
         
-        ${
-          programDetails
-            ? `<p><strong>Program Details:</strong> ${programDetails}</p>`
-            : ""
-        }
+        ${programDetails
+        ? `<p><strong>Program Details:</strong> ${programDetails}</p>`
+        : ""
+      }
         ${startDate ? `<p><strong>Start Date:</strong> ${startDate}</p>` : ""}
-        ${
-          scholarshipInfo
-            ? `<p><strong>Scholarship Information:</strong> ${scholarshipInfo}</p>`
-            : ""
-        }
-        ${
-          additionalNotes
-            ? `<p><strong>Additional Information:</strong> ${additionalNotes}</p>`
-            : ""
-        }
+        ${scholarshipInfo
+        ? `<p><strong>Scholarship Information:</strong> ${scholarshipInfo}</p>`
+        : ""
+      }
+        ${additionalNotes
+        ? `<p><strong>Additional Information:</strong> ${additionalNotes}</p>`
+        : ""
+      }
         
         <p>Please confirm your admission by clicking one of the following options:</p>
         
@@ -155,7 +142,6 @@ class EmailService {
       html: htmlContent,
     });
 
-    console.log(`Admission offer email sent to ${to}`);
   }
 
   async sendFacultyOfferEmail({
@@ -186,11 +172,10 @@ class EmailService {
           ${benefits ? `<p><strong>Benefits:</strong> ${benefits}</p>` : ""}
         </div>
         
-        ${
-          additionalNotes
-            ? `<p><strong>Additional Information:</strong> ${additionalNotes}</p>`
-            : ""
-        }
+        ${additionalNotes
+        ? `<p><strong>Additional Information:</strong> ${additionalNotes}</p>`
+        : ""
+      }
         
         <p>We are excited about the possibility of you joining our academic community and believe your expertise will be a valuable addition to our institution.</p>
         
@@ -223,7 +208,6 @@ class EmailService {
       html: htmlContent,
     });
 
-    console.log(`Faculty offer email sent to ${to}`);
   }
 
   async sendFacultyCredentialsEmail({
@@ -253,11 +237,10 @@ class EmailService {
         
         <p><strong>Important:</strong> For security reasons, please change your password after your first login.</p>
         
-        ${
-          additionalInstructions
-            ? `<p><strong>Additional Instructions:</strong> ${additionalInstructions}</p>`
-            : ""
-        }
+        ${additionalInstructions
+        ? `<p><strong>Additional Instructions:</strong> ${additionalInstructions}</p>`
+        : ""
+      }
         
         <p>The faculty dashboard will provide you with access to important resources, class schedules, student information, and other administrative tools.</p>
         
@@ -277,7 +260,6 @@ class EmailService {
       html: htmlContent,
     });
 
-    console.log(`Faculty credentials email sent to ${to}`);
   }
 
   async sendPasswordResetOtpEmail({
@@ -311,7 +293,6 @@ class EmailService {
           </div>
         `;
 
-        console.log(`Attempting to send password reset OTP email to ${to} (attempt ${attempt}/${maxRetries})`);
 
         await this.transporter.sendMail({
           from: `"Support Team" <${config.email.from}>`,
@@ -320,22 +301,19 @@ class EmailService {
           html: htmlContent,
         });
 
-        console.log(`Password reset OTP email sent successfully to ${to}`);
-        return; // Success, exit the retry loop
+        return;
       } catch (error: any) {
         lastError = error;
         console.error(`Failed to send password reset OTP email to ${to} (attempt ${attempt}/${maxRetries}):`, error.message);
-        
+
         if (attempt < maxRetries) {
-          // Wait before retrying (exponential backoff)
-          const delay = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
-          console.log(`Retrying in ${delay}ms...`);
+          const delay = Math.pow(2, attempt) * 1000;
           await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
     }
-    
-    // All retries failed
+
+
     console.error(`All ${maxRetries} attempts to send password reset OTP email to ${to} failed`);
     throw new Error(`Failed to send OTP email after ${maxRetries} attempts: ${lastError.message}`);
   }
@@ -368,46 +346,30 @@ class EmailService {
             <p style="color: #999; font-size: 12px;">Best regards,<br>The University Support Team</p>
           </div>
         `;
-        
-        console.log(`Attempting to send registration confirmation email to ${to} (attempt ${attempt}/${maxRetries})`);
-        console.log(`Email configuration:`, {
-          from: `"Support Team" <${config.email.from}>`,
-          to,
-          subject: `Confirm your email address`,
-          host: config.email.host,
-          port: config.email.port,
-          secure: config.email.secure
-        });
-        
+
         const mailOptions = {
           from: `"Support Team" <${config.email.from}>`,
           to,
           subject: `Confirm your email address`,
           html: htmlContent,
         };
-        
-        console.log(`Mail options:`, mailOptions);
-        
-        const result = await this.transporter.sendMail(mailOptions);
-        console.log(`Email send result:`, result);
-        
-        console.log(`Registration confirmation email sent successfully to ${to}`);
-        return; // Success, exit the retry loop
+
+
+        await this.transporter.sendMail(mailOptions);
+
+        return;
       } catch (error: any) {
         lastError = error;
         console.error(`Failed to send registration confirmation email to ${to} (attempt ${attempt}/${maxRetries}):`, error.message);
         console.error(`Full error:`, error);
-        
+
         if (attempt < maxRetries) {
-          // Wait before retrying (exponential backoff)
           const delay = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
-          console.log(`Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
     }
-    
-    // All retries failed
+
     console.error(`All ${maxRetries} attempts to send registration confirmation email to ${to} failed`);
     throw new Error(`Failed to send confirmation email after ${maxRetries} attempts: ${lastError.message}`);
   }

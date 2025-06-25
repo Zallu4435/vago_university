@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect, ForwardedRef } from 'react';
+import React, { useState, useRef, ForwardedRef } from 'react';
 import { Message, Styles } from '../types/ChatTypes';
 import { formatMessageTime, shouldShowDateHeader } from '../utils/chatUtils';
-import { FiCheck, FiMoreVertical, FiShare2, FiCornerUpLeft, FiSmile, FiFile, FiChevronDown } from 'react-icons/fi';
+import { FiCheck, FiShare2, FiCornerUpLeft, FiSmile, FiFile, FiChevronDown } from 'react-icons/fi';
 import { EmojiPicker } from './EmojiPicker';
 import { MessageDropdown } from './MessageDropdown';
 import { DeleteMessageModal } from './DeleteMessageModal';
@@ -10,7 +10,6 @@ import { ImagePreviewModal } from './ImagePreviewModal';
 import { useChatMutations } from '../hooks/useChatMutations';
 
 
-// Simple time-only formatter for message bubbles
 const formatMessageTimeOnly = (date: string | Date): string => {
   const messageDate = new Date(date);
   return messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -33,12 +32,8 @@ const ChatMessageComponent = ({
   message,
   previousMessage,
   styles,
-  onReaction,
-  onRemoveReaction,
   onDelete,
-  onEdit,
   onReply,
-  onForward,
   currentUserId
 }: ChatMessageProps, ref: ForwardedRef<HTMLDivElement>) => {
 
@@ -47,7 +42,6 @@ const ChatMessageComponent = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(message.content);
-  const [showMediaPreview, setShowMediaPreview] = useState(false);
   const [showReactionsModal, setShowReactionsModal] = useState(false);
   const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
   const reactionIconRef = useRef<HTMLDivElement | null>(null);
@@ -57,12 +51,11 @@ const ChatMessageComponent = ({
   const { editMessage, deleteMessage, forwardMessage, addReaction, removeReaction } = useChatMutations(message.chatId, currentUserId);
 
   const handleOpenReactionsModal = (event: React.MouseEvent) => {
-    // Use the bounding rect of the reaction icon for precise positioning
     const rect = reactionIconRef.current?.getBoundingClientRect();
     if (rect) {
       setModalPosition({
         x: rect.left + rect.width / 2,
-        y: rect.bottom + window.scrollY + 8 // 8px below the icon
+        y: rect.bottom + window.scrollY + 8
       });
     } else {
       setModalPosition({ x: event.clientX, y: event.clientY });
@@ -138,7 +131,6 @@ const ChatMessageComponent = ({
 
     const isSentMessage = message.senderId === currentUserId;
 
-    // Group reactions by emoji for display
     const groupedReactions = message.reactions.reduce((acc, reaction) => {
       if (!acc[reaction.emoji]) {
         acc[reaction.emoji] = { userIds: [], users: [] };
@@ -158,11 +150,10 @@ const ChatMessageComponent = ({
           {Object.entries(groupedReactions).map(([emoji, data]) => (
             <div key={emoji} className="group relative inline-block">
               <div
-                className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs cursor-pointer shadow-sm border ${
-                  data.userIds.includes(currentUserId)
+                className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs cursor-pointer shadow-sm border ${data.userIds.includes(currentUserId)
                     ? 'bg-blue-100 text-blue-600 border-blue-200'
                     : 'bg-white text-gray-600 border-gray-200 dark:bg-[#2a3942] dark:text-gray-300 dark:border-gray-600'
-                }`}
+                  }`}
               >
                 <span>{emoji}</span>
                 {data.userIds.length > 1 && (
@@ -179,7 +170,7 @@ const ChatMessageComponent = ({
   const renderReplyTo = () => {
     if (!message.replyTo) return null;
 
-    const replyTo = typeof message.replyTo === 'string' 
+    const replyTo = typeof message.replyTo === 'string'
       ? { id: message.replyTo, content: '', senderId: '', senderName: 'Unknown', type: 'text' as const, createdAt: '' }
       : message.replyTo;
 
@@ -213,7 +204,7 @@ const ChatMessageComponent = ({
     const gridClasses = {
       1: 'grid-cols-1',
       2: 'grid-cols-2',
-      3: 'grid-cols-2', // First image takes full width
+      3: 'grid-cols-2',
       4: 'grid-cols-2',
     };
 
@@ -228,22 +219,20 @@ const ChatMessageComponent = ({
       <div className="mt-2">
         <div className={`grid ${gridClasses[Math.min(imageAttachments.length, 4) as keyof typeof gridClasses]} gap-1`}>
           {imageAttachments.map((attachment, idx) => {
-            // For 3 images, make the first one full width
             const isFullWidth = imageAttachments.length === 3 && idx === 0;
             const gridColumnClass = isFullWidth ? 'col-span-2' : '';
 
             return (
-              <div 
-                key={attachment.id || attachment.url} 
+              <div
+                key={attachment.id || attachment.url}
                 className={`relative group ${gridColumnClass} ${idx >= 4 ? 'hidden' : ''}`}
               >
                 <div onClick={(e) => handleImageClick(e, attachment.url)} className="cursor-pointer">
                   <img
                     src={attachment.url}
                     alt={attachment.name}
-                    className={`rounded-lg cursor-pointer hover:opacity-90 transition-opacity ${
-                      imageClasses[Math.min(imageAttachments.length, 4) as keyof typeof imageClasses]
-                    }`}
+                    className={`rounded-lg cursor-pointer hover:opacity-90 transition-opacity ${imageClasses[Math.min(imageAttachments.length, 4) as keyof typeof imageClasses]
+                      }`}
                   />
                   {idx === 3 && imageAttachments.length > 4 && (
                     <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
@@ -255,7 +244,6 @@ const ChatMessageComponent = ({
             );
           })}
         </div>
-        {/* Show caption/content below the image grid if present */}
         {message.content && message.content.trim() && (
           <div className="mt-2 text-sm text-gray-800 dark:text-gray-200 break-words px-1">
             {message.content}
@@ -270,7 +258,6 @@ const ChatMessageComponent = ({
       return (
         <div className="pr-12 pb-1">
           <p className="text-sm text-gray-500 italic">This message was deleted</p>
-          {/* Time and status */}
           <div className="flex items-center justify-end space-x-1 mt-1">
             <span className="text-xs text-gray-400">
               {formatMessageTimeOnly(message.createdAt)}
@@ -319,7 +306,6 @@ const ChatMessageComponent = ({
 
     return (
       <div>
-        {/* Only show content in the main bubble if there are no image attachments */}
         {!(message.attachments && message.attachments.some(att => att.type === 'image')) && (
           <div className="pr-12 pb-1">
             <p className="text-sm break-words leading-relaxed">{message.content}</p>
@@ -328,11 +314,9 @@ const ChatMessageComponent = ({
 
         {message.attachments && message.attachments.length > 0 && (
           <div className="mt-2 space-y-2">
-            {/* Render image grid if there are image attachments */}
             {message.attachments.some(att => att.type === 'image') ? (
               renderMediaGrid()
             ) : (
-              /* Render other attachment types */
               message.attachments.map((attachment, idx) => {
                 switch (attachment.type) {
                   case 'video':
@@ -386,13 +370,11 @@ const ChatMessageComponent = ({
           </div>
         )}
 
-        {/* Time and status at bottom right - positioned within the content flow */}
         <div className="flex items-center justify-end space-x-1">
-          <span className={`text-xs ${
-            isSentMessage 
-              ? 'text-white text-opacity-70' 
+          <span className={`text-xs ${isSentMessage
+              ? 'text-white text-opacity-70'
               : 'text-gray-500 dark:text-gray-400'
-          }`}>
+            }`}>
             {formatMessageTimeOnly(message.createdAt)}
           </span>
           {message.senderId === currentUserId && (
@@ -407,7 +389,6 @@ const ChatMessageComponent = ({
 
   const isSentMessage = message.senderId === currentUserId;
 
-  // Hide deleted-for-everyone messages for the sender
   if (message.isDeleted && message.deletedForEveryone && isSentMessage) {
     return null;
   }
@@ -421,9 +402,8 @@ const ChatMessageComponent = ({
           </div>
         </div>
       )}
-      
+
       <div className={`group relative flex mb-4 ${isSentMessage ? 'justify-end' : 'justify-start'}`}>
-        {/* Hover actions positioned on the left for sent messages */}
         {isSentMessage && !message.isDeleted && (
           <div className="flex items-center space-x-1 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button
@@ -446,13 +426,12 @@ const ChatMessageComponent = ({
           </div>
         )}
 
-          <div className="relative">
+        <div className="relative">
           <div
-            className={`relative max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg rounded-lg px-3 py-2 ${
-              isSentMessage
+            className={`relative max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg rounded-lg px-3 py-2 ${isSentMessage
                 ? 'bg-[#005c4b] text-white rounded-br-none'
                 : 'bg-white dark:bg-[#2a3942] text-gray-900 dark:text-white rounded-bl-none shadow-sm border border-gray-200 dark:border-gray-600'
-            }`}
+              }`}
           >
             {/* Spinner overlay while sending */}
             {message.status === 'sending' && (
@@ -463,18 +442,16 @@ const ChatMessageComponent = ({
 
             {/* Tail for message bubble */}
             <div
-              className={`absolute w-0 h-0 bottom-0 ${
-                isSentMessage
+              className={`absolute w-0 h-0 bottom-0 ${isSentMessage
                   ? 'right-0 border-l-[8px] border-l-[#005c4b] border-b-[8px] border-b-transparent'
                   : 'left-0 border-r-[8px] border-r-white dark:border-r-[#2a3942] border-b-[8px] border-b-transparent'
-              }`}
+                }`}
             />
 
             {renderForwardedFrom()}
             {renderReplyTo()}
             {renderMessageContent()}
 
-            {/* WhatsApp-style dropdown arrow button */}
             {!message.isDeleted && (
               <button
                 onClick={(e) => {
@@ -514,11 +491,9 @@ const ChatMessageComponent = ({
             )}
           </div>
 
-          {/* Reactions positioned below/over the message bubble */}
           {renderReactions()}
         </div>
 
-        {/* Hover actions positioned on the right for received messages */}
         {!isSentMessage && !message.isDeleted && (
           <div className="flex items-center space-x-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button

@@ -1,17 +1,17 @@
 import { IHttpRequest, IHttpResponse } from "../IHttp";
-import { 
-  IGetSiteSectionsUseCase, 
-  IGetSiteSectionByIdUseCase, 
-  ICreateSiteSectionUseCase, 
-  IUpdateSiteSectionUseCase, 
-  IDeleteSiteSectionUseCase 
+import {
+  IGetSiteSectionsUseCase,
+  IGetSiteSectionByIdUseCase,
+  ICreateSiteSectionUseCase,
+  IUpdateSiteSectionUseCase,
+  IDeleteSiteSectionUseCase
 } from "../../../application/site-management/useCases/SiteSectionUseCases";
-import { 
-  GetSiteSectionsRequestDTO, 
-  GetSiteSectionByIdRequestDTO, 
-  CreateSiteSectionRequestDTO, 
-  UpdateSiteSectionRequestDTO, 
-  DeleteSiteSectionRequestDTO 
+import {
+  GetSiteSectionsRequestDTO,
+  GetSiteSectionByIdRequestDTO,
+  CreateSiteSectionRequestDTO,
+  UpdateSiteSectionRequestDTO,
+  DeleteSiteSectionRequestDTO
 } from "../../../domain/site-management/dtos/SiteSectionDTOs";
 
 export class SiteSectionController {
@@ -21,30 +21,29 @@ export class SiteSectionController {
     private readonly createSiteSectionUseCase: ICreateSiteSectionUseCase,
     private readonly updateSiteSectionUseCase: IUpdateSiteSectionUseCase,
     private readonly deleteSiteSectionUseCase: IDeleteSiteSectionUseCase
-  ) {}
+  ) { }
 
   async getSections(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
       const { sectionKey, page = 1, limit = 10, search } = httpRequest.query;
-      
-      // Validate pagination parameters
+
       const pageNum = Number(page);
       const limitNum = Number(limit);
-      
+
       if (isNaN(pageNum) || pageNum < 1) {
-        return { 
-          statusCode: 400, 
-          body: { message: "Page must be a positive number" } 
+        return {
+          statusCode: 400,
+          body: { message: "Page must be a positive number" }
         };
       }
-      
+
       if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
-        return { 
-          statusCode: 400, 
-          body: { message: "Limit must be between 1 and 100" } 
+        return {
+          statusCode: 400,
+          body: { message: "Limit must be between 1 and 100" }
         };
       }
-      
+
       const params: GetSiteSectionsRequestDTO = {
         sectionKey: sectionKey as any,
         page: pageNum,
@@ -67,7 +66,7 @@ export class SiteSectionController {
     try {
       const { id } = httpRequest.params;
       const params: GetSiteSectionByIdRequestDTO = { id };
-      
+
       const result = await this.getSiteSectionByIdUseCase.execute(params);
       if (!result.success) {
         return { statusCode: 400, body: { message: "Failed to get site section" } };
@@ -85,16 +84,12 @@ export class SiteSectionController {
 
   async createSection(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      console.log('[SiteSectionController] createSection - httpRequest.file:', httpRequest.file);
-      console.log('[SiteSectionController] createSection - httpRequest.body:', httpRequest.body);
       let params: CreateSiteSectionRequestDTO = httpRequest.body;
       if (httpRequest.file) {
         params = { ...params, image: httpRequest.file.path };
       }
-      console.log('[SiteSectionController] createSection - params:', params);
       const result = await this.createSiteSectionUseCase.execute(params);
       if (!result.success) {
-        console.log('[SiteSectionController] createSection - use case failed:', result);
         return { statusCode: 400, body: { message: "Failed to create site section" } };
       }
       return { statusCode: 201, body: result.data };
@@ -106,8 +101,6 @@ export class SiteSectionController {
 
   async updateSection(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      console.log('[SiteSectionController] updateSection - httpRequest.file:', httpRequest.file);
-      console.log('[SiteSectionController] updateSection - httpRequest.body:', httpRequest.body);
       const { id } = httpRequest.params;
       let params: UpdateSiteSectionRequestDTO = {
         id,
@@ -116,14 +109,11 @@ export class SiteSectionController {
       if (httpRequest.file) {
         params = { ...params, image: httpRequest.file.path };
       }
-      console.log('[SiteSectionController] updateSection - params:', params);
       const result = await this.updateSiteSectionUseCase.execute(params);
       if (!result.success) {
-        console.log('[SiteSectionController] updateSection - use case failed:', result);
         return { statusCode: 400, body: { message: "Failed to update site section" } };
       }
       if (!result.data) {
-        console.log('[SiteSectionController] updateSection - not found');
         return { statusCode: 404, body: { message: "Site section not found" } };
       }
       return { statusCode: 200, body: result.data };

@@ -10,12 +10,9 @@ import {
   FiCheckCircle,
   FiAlertCircle,
   FiMail,
-  FiPhone,
-  FiMapPin,
   FiAward,
   FiUsers,
   FiShield,
-  FiBuilding,
   FiEye,
   FiDownload,
   FiInfo,
@@ -71,8 +68,6 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
   });
 
 
-  console.log(selectedApplicant, "selectedApplicant")
-  // Prevent backend scrolling when modal is open
   useEffect(() => {
     if (showDetails) {
       document.body.classList.add('no-scroll');
@@ -86,7 +81,6 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
 
   if (!selectedApplicant || !showDetails) return null;
 
-  // Handle both data structures: direct admission data or nested admission data
   const admissionData = selectedApplicant.admission || selectedApplicant;
   const personalData = admissionData?.personal;
   const documentsData = admissionData?.documents;
@@ -121,19 +115,14 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
     if (!document.url) {
       return;
     }
-    
+
     try {
       if (onViewDocument) {
         onViewDocument(document);
       } else {
-        // Use backend API like in Application Form
         if (document.id && token) {
-          console.log('Fetching document from backend with ID:', document.id);
           const response = await documentUploadService.getAdminDocument(document.id, admissionData._id, token);
-          console.log('Document response:', response);
-          
           if (response && response.pdfData) {
-            // Create blob URL from base64 PDF data
             const byteCharacters = atob(response.pdfData);
             const byteNumbers = new Array(byteCharacters.length);
             for (let i = 0; i < byteCharacters.length; i++) {
@@ -143,22 +132,17 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             const blob = new Blob([byteArray], { type: 'application/pdf' });
             const url = window.URL.createObjectURL(blob);
             window.open(url, '_blank', 'noopener,noreferrer');
-            // Clean up the blob URL after a delay
             setTimeout(() => window.URL.revokeObjectURL(url), 1000);
           } else {
             console.error('No PDF data received from backend');
-            // Fallback to direct URL
             window.open(document.url, '_blank', 'noopener,noreferrer');
           }
         } else {
-          console.log('No document ID or token, using direct URL');
-          // Fallback to direct URL if no ID or token
           window.open(document.url, '_blank', 'noopener,noreferrer');
         }
       }
     } catch (error) {
       console.error('Error opening document:', error);
-      // Fallback to direct URL if there's an error
       try {
         window.open(document.url, '_blank', 'noopener,noreferrer');
       } catch (fallbackError) {
@@ -172,64 +156,43 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
       console.error('No document provided');
       return;
     }
-    
+
     try {
       if (onDownloadDocument) {
-        console.log('Using custom download handler');
         onDownloadDocument(doc);
       } else {
-        // Use backend API like Application Form
         if (doc.id && token) {
-          console.log('Fetching document from backend for download with ID:', doc.id);
           const response = await documentUploadService.getAdminDocument(doc.id, admissionData._id, token);
-          console.log('Document response for download:', response);
-          
+
           if (response && response.pdfData) {
-            console.log('PDF data received, length:', response.pdfData.length);
-            console.log('Creating download...');
-            
-            // Convert base64 to blob and download
             const byteCharacters = atob(response.pdfData);
-            console.log('Converted to byte characters, length:', byteCharacters.length);
-            
+
             const byteNumbers = new Array(byteCharacters.length);
             for (let i = 0; i < byteCharacters.length; i++) {
               byteNumbers[i] = byteCharacters.charCodeAt(i);
             }
             const byteArray = new Uint8Array(byteNumbers);
-            console.log('Created byte array, length:', byteArray.length);
-            
+
             const blob = new Blob([byteArray], { type: 'application/pdf' });
-            console.log('Created blob, size:', blob.size);
-            
+
             const url = window.URL.createObjectURL(blob);
-            console.log('Created blob URL:', url);
-            
+
             const fileName = doc.fileName || doc.name || 'document.pdf';
-            console.log('Download filename:', fileName);
-            
-            // Create and trigger download
+
             const link = document.createElement('a');
             link.href = url;
             link.download = fileName;
             link.style.display = 'none';
-            
-            console.log('Adding link to DOM...');
+
             document.body.appendChild(link);
-            
-            console.log('Clicking link...');
+
             link.click();
-            
-            console.log('Removing link from DOM...');
             document.body.removeChild(link);
-            
-            console.log('Cleaning up blob URL...');
+
             setTimeout(() => {
               window.URL.revokeObjectURL(url);
-              console.log('Blob URL cleaned up');
             }, 1000);
-            
-            console.log('Download process completed');
+
           } else {
             console.error('No PDF data in response');
           }
@@ -242,7 +205,6 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
     }
   };
 
-  // Particle effect
   const ghostParticles = Array(30)
     .fill(0)
     .map((_, i) => ({
@@ -353,15 +315,13 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
               <InfoGroup title="Contact Information">
                 <InfoRow
                   label="Mobile"
-                  value={`${personalData?.mobileCountry || ''} ${
-                    personalData?.mobileArea || ''
-                  } ${personalData?.mobileNumber || ''}`.trim()}
+                  value={`${personalData?.mobileCountry || ''} ${personalData?.mobileArea || ''
+                    } ${personalData?.mobileNumber || ''}`.trim()}
                 />
                 <InfoRow
                   label="Phone"
-                  value={`${personalData?.phoneCountry || ''} ${
-                    personalData?.phoneArea || ''
-                  } ${personalData?.phoneNumber || ''}`.trim()}
+                  value={`${personalData?.phoneCountry || ''} ${personalData?.phoneArea || ''
+                    } ${personalData?.phoneNumber || ''}`.trim()}
                 />
                 <InfoRow label="Alt Email" value={personalData?.alternativeEmail} />
                 <InfoRow
@@ -375,31 +335,27 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
                 <InfoRow label="Occupation" value={personalData?.occupation} />
                 <InfoRow
                   label="Alternate Mobile"
-                  value={`${personalData?.altMobileCountry || ''} ${
-                    personalData?.altMobileArea || ''
-                  } ${personalData?.altMobileNumber || ''}`.trim()}
+                  value={`${personalData?.altMobileCountry || ''} ${personalData?.altMobileArea || ''
+                    } ${personalData?.altMobileNumber || ''}`.trim()}
                 />
                 <InfoRow
                   label="Alternate Phone"
-                  value={`${personalData?.altPhoneCountry || ''} ${
-                    personalData?.altPhoneArea || ''
-                  } ${personalData?.altPhoneNumber || ''}`.trim()}
+                  value={`${personalData?.altPhoneCountry || ''} ${personalData?.altPhoneArea || ''
+                    } ${personalData?.altPhoneNumber || ''}`.trim()}
                 />
               </InfoGroup>
 
               <InfoGroup title="Address">
                 <InfoRow
                   label="Street"
-                  value={`${personalData?.blockNumber || ''} ${
-                    personalData?.streetName || ''
-                  }`.trim()}
+                  value={`${personalData?.blockNumber || ''} ${personalData?.streetName || ''
+                    }`.trim()}
                 />
                 <InfoRow label="Building" value={personalData?.buildingName} />
                 <InfoRow
                   label="Unit"
-                  value={`Floor ${personalData?.floorNumber || 'N/A'}, Unit ${
-                    personalData?.unitNumber || 'N/A'
-                  }`}
+                  value={`Floor ${personalData?.floorNumber || 'N/A'}, Unit ${personalData?.unitNumber || 'N/A'
+                    }`}
                 />
                 <InfoRow label="City/State" value={personalData?.stateCity} />
                 <InfoRow label="Country" value={personalData?.country} />
@@ -625,11 +581,11 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
                       </div>
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => handleViewDocument({ 
-                            id: doc.id, 
-                            name: doc.name, 
+                          onClick={() => handleViewDocument({
+                            id: doc.id,
+                            name: doc.name,
                             url: doc.cloudinaryUrl,
-                            fileName: doc.fileName 
+                            fileName: doc.fileName
                           })}
                           className="p-1 text-purple-300 hover:bg-purple-500/20 rounded transition-colors"
                           title="View Document"
@@ -637,11 +593,11 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
                           <FiEye size={16} />
                         </button>
                         <button
-                          onClick={() => handleDownloadDocument({ 
-                            id: doc.id, 
-                            name: doc.name, 
+                          onClick={() => handleDownloadDocument({
+                            id: doc.id,
+                            name: doc.name,
                             url: doc.cloudinaryUrl,
-                            fileName: doc.fileName 
+                            fileName: doc.fileName
                           })}
                           className="p-1 text-purple-300 hover:bg-purple-500/20 rounded transition-colors"
                           title="Download Document"
@@ -779,16 +735,12 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
               setShowApprovalModal(false);
             }}
             onApprove={async (data: any) => {
-              console.log('ApplicantDetails onApprove called with data:', data);
-              console.log('admissionData._id:', admissionData._id);
-              
               try {
                 const admissionId = admissionData._id;
                 if (!admissionId) {
                   throw new Error('No admission ID found');
                 }
-                
-                // Call the mutation function directly from the hook
+
                 await approveAdmission({
                   id: admissionId,
                   approvalData: {
@@ -798,8 +750,7 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
                     additionalNotes: data.additionalNotes || '',
                   },
                 });
-                console.log('approveAdmission completed successfully');
-                
+
                 setShowApprovalModal(false);
                 setShowDetails(false);
               } catch (error) {
@@ -815,22 +766,17 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             isOpen={showRejectModal}
             onClose={() => setShowRejectModal(false)}
             onReject={(reason: string) => {
-              console.log('ApplicantDetails onReject called with reason:', reason);
-              console.log('admissionData._id:', admissionData._id);
-              
               try {
                 const admissionId = admissionData._id;
                 if (!admissionId) {
                   throw new Error('No admission ID found');
                 }
-                
-                // Call the mutation function directly from the hook
+
                 rejectAdmission({
                   id: admissionId,
                   reason: reason || 'Application rejected',
                 });
-                console.log('rejectAdmission completed successfully');
-                
+
                 setShowRejectModal(false);
                 setShowDetails(false);
               } catch (error) {

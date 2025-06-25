@@ -135,7 +135,6 @@ export class AdmissionsRepository implements IAdmissionsRepository {
         const draft = await AdmissionDraftModel.findOne({ applicationId });
         if (!draft) throw new Error(AdmissionErrorType.ApplicationNotFound);
 
-        // 1. Create PaymentModel record first
         const payment = new PaymentModel({
             studentId: draft.registerId,
             date: new Date(),
@@ -152,7 +151,6 @@ export class AdmissionsRepository implements IAdmissionsRepository {
         await payment.save();
 
         try {
-            // 2. Create Stripe PaymentIntent
             const paymentIntent = await stripe.paymentIntents.create({
                 amount: Math.round(paymentDetails.amount * 100),
                 currency: paymentDetails.currency.toLowerCase(),
@@ -166,7 +164,6 @@ export class AdmissionsRepository implements IAdmissionsRepository {
                 }
             });
 
-            // 3. Update payment record with Stripe details
             payment.metadata = {
                 ...payment.metadata,
                 stripePaymentIntentId: paymentIntent.id,
@@ -175,7 +172,6 @@ export class AdmissionsRepository implements IAdmissionsRepository {
             };
             await payment.save();
 
-            // 4. Return payment details for frontend
             return {
                 paymentId: payment._id.toString(),
                 status: "pending",
@@ -184,51 +180,42 @@ export class AdmissionsRepository implements IAdmissionsRepository {
                 stripePaymentIntentId: paymentIntent.id,
             };
         } catch (error) {
-            // If Stripe fails, update payment status to failed
             payment.status = "Failed";
             payment.metadata = {
                 ...payment.metadata,
                 error: error instanceof Error ? error.message : 'Unknown error',
             };
             await payment.save();
-            
+
             throw new Error(`Payment creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async confirmPayment(params: ConfirmPaymentRequestDTO): Promise<ConfirmPaymentResponseDTO> {
-        console.log('=== CONFIRM PAYMENT REPOSITORY START ===');
-        console.log('Repository params:', params);
-        
         const { paymentId, stripePaymentIntentId } = params;
         const payment = await PaymentModel.findById(paymentId);
         if (!payment) throw new Error(AdmissionErrorType.PaymentNotFound);
 
         try {
-            // First, confirm the PaymentIntent with Stripe using the stored payment method
             const paymentIntent = await stripe.paymentIntents.confirm(stripePaymentIntentId, {
                 payment_method: payment.metadata?.paymentMethodId,
             });
-            console.log('Stripe PaymentIntent confirmed:', paymentIntent.id, 'Status:', paymentIntent.status);
-            
-            // Update payment status based on Stripe status
+
             const stripeStatus = paymentIntent.status;
             const paymentStatus = this.mapStripeStatusToPaymentStatus(stripeStatus);
-            
-            console.log('Mapping Stripe status:', stripeStatus, 'to payment status:', paymentStatus);
-            
-            payment.status = paymentStatus === "completed" ? "Completed" : 
-                           paymentStatus === "pending" ? "Pending" : "Failed";
-            
+
+
+            payment.status = paymentStatus === "completed" ? "Completed" :
+                paymentStatus === "pending" ? "Pending" : "Failed";
+
             payment.metadata = {
                 ...payment.metadata,
                 stripeStatus: stripeStatus,
                 confirmedAt: new Date(),
                 lastChecked: new Date(),
             };
-            
+
             await payment.save();
-            console.log('Payment updated in database:', payment._id, 'Status:', payment.status);
 
             return {
                 paymentId: payment._id.toString(),
@@ -238,7 +225,6 @@ export class AdmissionsRepository implements IAdmissionsRepository {
             };
         } catch (error) {
             console.error('Error confirming payment:', error);
-            // If confirmation fails, update payment status to failed
             payment.status = "Failed";
             payment.metadata = {
                 ...payment.metadata,
@@ -246,7 +232,7 @@ export class AdmissionsRepository implements IAdmissionsRepository {
                 lastError: new Date(),
             };
             await payment.save();
-            
+
             throw new Error(`Payment confirmation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -321,12 +307,6 @@ export class AdmissionsRepository implements IAdmissionsRepository {
 
     async uploadDocument(params: UploadDocumentRequestDTO): Promise<UploadDocumentResponseDTO> {
         try {
-            console.log('[AdmissionsRepository] Uploading document:', {
-                applicationId: params.applicationId,
-                documentType: params.documentType,
-                fileName: params.file.originalname
-            });
-
             const uploadResult = await this.documentUploadService.uploadDocument(params.file, params.applicationId, params.documentType);
 
             return {
@@ -347,12 +327,6 @@ export class AdmissionsRepository implements IAdmissionsRepository {
 
     async uploadMultipleDocuments(params: UploadMultipleDocumentsRequestDTO): Promise<UploadMultipleDocumentsResponseDTO> {
         try {
-            console.log('[AdmissionsRepository] Uploading multiple documents:', {
-                applicationId: params.applicationId,
-                fileCount: params.files.length,
-                documentTypes: params.documentTypes
-            });
-
             const uploadResults = await this.documentUploadService.uploadMultipleDocuments(params.files, params.applicationId, params.documentTypes);
 
             return {

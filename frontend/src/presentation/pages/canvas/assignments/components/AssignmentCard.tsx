@@ -3,7 +3,6 @@ import { FiCalendar, FiClock, FiUpload, FiDownload, FiEye, FiFile, FiCheckCircle
 import { Assignment } from '../types/AssignmentTypes';
 import { getDaysLeft, formatDueDate, getStatusColor } from '../utils/assignmentUtils';
 import { GradeModal } from './GradeModal';
-import { userAssignmentService } from '../services/userAssignmentService';
 import httpClient from '../../../../../frameworks/api/httpClient';
 
 interface AssignmentCardProps {
@@ -17,16 +16,11 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
   assignment,
   styles,
   onUpload,
-  onViewGrade
 }) => {
   const [showGradeModal, setShowGradeModal] = useState(false);
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const daysLeft = getDaysLeft(assignment.dueDate);
   const isOverdue = daysLeft < 0 && !assignment.submission;
   
-  // Determine the actual status based on submission
   const getActualStatus = () => {
     if (assignment.submission) {
       if (assignment.submission.status === 'reviewed') {
@@ -44,61 +38,37 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
 
   const actualStatus = getActualStatus();
 
-  // Handle file download
   const handleFileDownload = async (fileUrl: string, fileName: string) => {
-    console.log('=== FRONTEND DOWNLOAD STARTED ===');
-    console.log('📁 File name:', fileName);
-    console.log('🔗 Original URL:', fileUrl);
-    
     try {
-      console.log('🔍 Checking if URL is Cloudinary...');
       
-      // Detect actual file extension from URL
       let actualFileName = fileName;
       if (fileUrl.includes('.png') || fileUrl.includes('.jpg') || fileUrl.includes('.jpeg')) {
         const urlParts = fileUrl.split('.');
-        const actualExtension = urlParts[urlParts.length - 1].split('?')[0]; // Remove query params
+        const actualExtension = urlParts[urlParts.length - 1].split('?')[0]; 
         if (fileName.toLowerCase().endsWith('.pdf')) {
           actualFileName = fileName.replace('.pdf', `.${actualExtension}`);
-          console.log('🔄 Correcting filename from', fileName, 'to', actualFileName);
         }
       }
       
-      // For Cloudinary URLs, use the proxy endpoint for direct download
       if (fileUrl.includes('cloudinary.com')) {
-        console.log('✅ Detected Cloudinary URL, using proxy');
         
         const proxyUrl = `/assignments/download-file?fileUrl=${encodeURIComponent(fileUrl)}&fileName=${encodeURIComponent(actualFileName)}`;
         
-        console.log('🌐 Proxy URL created:', proxyUrl);
-        console.log('🔧 Making authenticated request...');
-        
         try {
-          // Use the HTTP client to make an authenticated request
           const response = await httpClient.get(proxyUrl);
-          
-          console.log('✅ Response received from backend:', response.data);
-          
+                    
           if (response.data.success && response.data.fileUrl) {
-            console.log('📤 Backend returned Cloudinary URL, opening in new tab...');
             // Open the Cloudinary URL directly in a new tab
             window.open(response.data.fileUrl, '_blank');
-            console.log('✅ File opened in new tab successfully');
           } else {
-            console.log('❌ Backend response indicates failure, using fallback...');
-            // Fallback to direct window.open
             window.open(fileUrl, '_blank');
           }
         } catch (error) {
           console.error('❌ Error downloading file:', error);
-          console.log('🔄 Falling back to window.open...');
-          // Fallback: try to open in new tab if download fails
           window.open(fileUrl, '_blank');
         }
       } else {
-        console.log('✅ Regular URL detected, using direct download');
         
-        // For regular URLs, create download link
         const link = document.createElement('a');
         link.href = fileUrl;
         link.download = actualFileName;

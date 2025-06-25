@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { FiX, FiRotateCcw, FiEdit3, FiType, FiSquare, FiSmile, FiDownload, FiPlus } from 'react-icons/fi';
 
-// Mock Message type for the preview
 interface Attachment {
   url: string;
   name: string;
@@ -75,7 +74,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
   const [rotation, setRotation] = useState<number[]>(() => (message.attachments || []).map(() => 0));
   const [currentTool, setCurrentTool] = useState<Tool>('none');
   const [isDrawing, setIsDrawing] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
   const [drawPaths, setDrawPaths] = useState<{[key: number]: Array<any>}>({});
   const [textElements, setTextElements] = useState<{[key: number]: TextElement[]}>({});
   const [rectElements, setRectElements] = useState<{[key: number]: RectElement[]}>({});
@@ -90,22 +88,18 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
   const drawingPath = useRef<{x: number, y: number}[]>([]);
   const currentElement = useRef<any>(null);
 
-  // Tool states
   const penColors = ['#ff0000', '#00bcd4', '#4caf50', '#ffeb3b', '#ffffff', '#000000'];
   const penThicknesses = [2, 4, 8, 12];
   const [penColor, setPenColor] = useState<string>('#ff0000');
   const [penThickness, setPenThickness] = useState<number>(2);
   const [isEraser, setIsEraser] = useState(false);
   
-  // Text tool states
   const [textColor, setTextColor] = useState('#ffffff');
   const [textBackground, setTextBackground] = useState('transparent');
   const [fontSize, setFontSize] = useState(24);
   
-  // Rectangle tool states
   const [rectFill, setRectFill] = useState(false);
   
-  // Common emojis for quick access
   const commonEmojis = ['😀', '😂', '😍', '🤔', '😢', '😡', '👍', '👎', '❤️', '🔥', '💯', '🎉'];
 
   useEffect(() => {
@@ -141,14 +135,11 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
   if (!attachments.length || currentMediaIndex < 0 || currentMediaIndex >= attachments.length) return null;
   const attachment = attachments[currentMediaIndex];
   const isImage = attachment.type === 'image';
-  const hasMultipleMedia = attachments.length > 1;
 
-  // Update captions array when currentMediaIndex or input changes
   useEffect(() => {
     setCaption(captions[currentMediaIndex] || '');
   }, [currentMediaIndex]);
 
-  // Ensure currentMediaIndex is always valid after attachments change
   useEffect(() => {
     if (currentMediaIndex >= attachments.length) {
       setCurrentMediaIndex(Math.max(attachments.length - 1, 0));
@@ -191,7 +182,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
     };
   };
 
-  // Drawing handlers
   const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const coords = getCanvasCoordinates(e);
     
@@ -356,7 +346,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
       ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
       ctx.fillRect(area.x, area.y, area.width, area.height);
       
-      // Add mosaic pattern
       const mosaicSize = 8;
       for (let x = area.x; x < area.x + area.width; x += mosaicSize) {
         for (let y = area.y; y < area.y + area.height; y += mosaicSize) {
@@ -367,7 +356,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
       ctx.restore();
     });
     
-    // Draw current blur area
     if (currentElement.current && currentTool === 'blur') {
       ctx.save();
       ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
@@ -375,21 +363,19 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
       ctx.restore();
     }
     
-    // Draw rectangles
     (rectElements[currentMediaIndex] || []).forEach(rect => {
       if (!rect) return;
       ctx.save();
       ctx.strokeStyle = rect.color;
       ctx.lineWidth = rect.thickness;
       if (rect.fill) {
-        ctx.fillStyle = rect.color + '40'; // Add transparency
+        ctx.fillStyle = rect.color + '40'; 
         ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
       }
       ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
       ctx.restore();
     });
     
-    // Draw current rectangle
     if (currentElement.current && currentTool === 'rect') {
       ctx.save();
       ctx.strokeStyle = currentElement.current.color;
@@ -402,7 +388,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
       ctx.restore();
     }
     
-    // Draw all saved paths
     (drawPaths[currentMediaIndex] || []).forEach((pathObj: any) => {
       const { points, color, thickness } = pathObj;
       ctx.save();
@@ -425,7 +410,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
       ctx.restore();
     });
     
-    // Draw current path
     if (drawingPath.current.length > 0) {
       ctx.save();
       if (isEraser) {
@@ -483,7 +467,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
 
   const applyCrop = () => {
     if (cropArea && imageRef.current) {
-      // In a real implementation, you would crop the image here
       console.log('Cropping image with area:', cropArea);
     }
     setCropArea(null);

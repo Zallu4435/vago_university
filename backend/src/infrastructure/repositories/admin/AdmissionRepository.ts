@@ -109,52 +109,30 @@ export class AdmissionRepository implements IAdmissionRepository {
     }
 
     async getAdmissionByToken(params: GetAdmissionByTokenRequestDTO): Promise<GetAdmissionByTokenResponseDTO> {
-        console.log(`=== ADMISSION REPOSITORY: getAdmissionByToken START ===`);
-        console.log(`Looking for admission with ID: ${params.admissionId}`);
-        console.log(`Token provided: ${params.token}`);
 
         const admission = await AdmissionModel.findById(params.admissionId)
             .select("personal choiceOfStudy status confirmationToken tokenExpiry")
             .lean();
 
-        console.log(`Admission found: ${admission ? 'Yes' : 'No'}`);
 
         if (!admission) {
-            console.log(`ERROR: Admission not found with ID: ${params.admissionId}`);
             throw new Error(AdmissionErrorType.AdmissionNotFound);
         }
 
-        console.log(`Admission status: ${admission.status}`);
-        console.log(`Admission confirmationToken: ${admission.confirmationToken}`);
-        console.log(`Admission tokenExpiry: ${admission.tokenExpiry}`);
-        console.log(`Current time: ${new Date()}`);
 
-        // Validate token
         if (!admission.confirmationToken || admission.confirmationToken !== params.token) {
-            console.log(`ERROR: Token validation failed`);
-            console.log(`Expected token: ${admission.confirmationToken}`);
-            console.log(`Received token: ${params.token}`);
-            console.log(`Tokens match: ${admission.confirmationToken === params.token}`);
             throw new Error(AdmissionErrorType.InvalidToken);
         }
 
         // Check if token is expired
         if (!admission.tokenExpiry || new Date() > admission.tokenExpiry) {
-            console.log(`ERROR: Token is expired`);
-            console.log(`Token expiry: ${admission.tokenExpiry}`);
-            console.log(`Current time: ${new Date()}`);
-            console.log(`Is expired: ${new Date() > admission.tokenExpiry}`);
             throw new Error(AdmissionErrorType.TokenExpired);
         }
 
-        // Check if admission status is "offered" (waiting for confirmation)
         if (admission.status !== "offered") {
-            console.log(`ERROR: Admission status is not 'offered'`);
-            console.log(`Current status: ${admission.status}`);
             throw new Error(AdmissionErrorType.AdmissionAlreadyProcessed);
         }
 
-        console.log(`=== ADMISSION REPOSITORY: getAdmissionByToken SUCCESS ===`);
         return { admission };
     }
 
@@ -248,7 +226,6 @@ export class AdmissionRepository implements IAdmissionRepository {
                 throw new Error(AdmissionErrorType.RegisterUserNotFound);
             }
 
-            console.log(registerUser.password, "password")
             const fullNameParts = admission.personal.fullName.split(" ");
             const firstName = fullNameParts[0];
             const lastName = fullNameParts.slice(1).join(" ") || "";
@@ -268,13 +245,12 @@ export class AdmissionRepository implements IAdmissionRepository {
 
             const currentYear = new Date().getFullYear();
             const yearRange = `${currentYear}-${currentYear + 4}`;
-            
+
             if (admission.choiceOfStudy && admission.choiceOfStudy.length > 0) {
                 degree = admission.choiceOfStudy[0]?.programme || "";
                 catalogYear = admission.choiceOfStudy[0]?.catalogYear || yearRange;
             }
 
-            console.log(degree, catalogYear, "pooooooooooooooooop")
             if (degree && catalogYear) {
                 await ProgramModel.create({
                     studentId: user._id,

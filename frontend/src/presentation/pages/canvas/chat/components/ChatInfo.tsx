@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { FiX, FiEdit2, FiTrash2, FiUsers, FiLock, FiBell, FiBellOff } from 'react-icons/fi';
+import { FiX, FiEdit2, FiTrash2, FiUsers, FiBell, FiBellOff } from 'react-icons/fi';
 import { Chat, Styles } from '../types/ChatTypes';
-import { useChatQueries } from '../hooks/useChatQueries';
 import { useChatMutations } from '../hooks/useChatMutations';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';

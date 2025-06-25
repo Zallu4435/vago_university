@@ -86,7 +86,6 @@ import {
   
     async getCourseById(params: GetCourseByIdRequestDTO): Promise<GetCourseByIdResponseDTO | null> {
 
-      console.log("hihihihhhihiiiihhhih")
       const course = await CourseModel.findById(params.id).lean();
       if (!course) {
         return null;

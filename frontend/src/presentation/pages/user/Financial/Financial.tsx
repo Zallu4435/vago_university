@@ -35,7 +35,6 @@ export default function Financial() {
     const fetchData = async () => {
       try {
         const info = await getStudentFinancialInfo();
-        console.log('API Response:', info);
         setStudentInfo(info || {});
       } catch (err) {
         console.error('Error fetching financial data:', err);

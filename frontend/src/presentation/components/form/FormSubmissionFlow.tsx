@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { Payment } from './Payment/Payment';
 import { Button } from '../Button';
 import { 
-  FaChevronLeft,
-  FaCreditCard,
   FaExclamationCircle, 
   FaFileAlt,
   FaUserCircle,
@@ -13,9 +11,7 @@ import {
   FaBalanceScale,
   FaAward,
   FaCheckCircle,
-  FaHome,
   FaEye,
-  FaTimes
 } from 'react-icons/fa';
 import DocumentViewModal from './Documents/DocumentViewModal';
 import { DocumentUpload } from '../../../domain/types/formTypes';
@@ -57,18 +53,14 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
     return String(value);
   };
 
-  // Function to handle new application
   const handleStartNewApplication = () => {
-    console.log("Starting new application...");
     localStorage.removeItem('applicationId');
     if (onPaymentComplete) {
       onPaymentComplete();
     }
   };
 
-  // Function to handle home redirect
   const handleRedirectToHome = () => {
-    console.log("Redirecting to home...");
     localStorage.removeItem('applicationId');
     window.location.href = '/';
   };
@@ -83,7 +75,6 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
     setSelectedDocument(null);
   };
 
-  // Render a section with a list of key-value pairs
   const renderKeyValueSection = (
     title: string, 
     data: Record<string, any>, 

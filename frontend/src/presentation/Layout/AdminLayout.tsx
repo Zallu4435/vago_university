@@ -15,7 +15,6 @@ const AdminLayout = () => {
   const fullName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim();
 
   const handleLogout = () => {
-    console.log('Logging out...');
     dispatch(logout());
     navigate('/login');
   };

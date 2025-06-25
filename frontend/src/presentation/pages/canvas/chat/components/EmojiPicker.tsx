@@ -10,12 +10,11 @@ interface EmojiPickerProps {
   position?: 'top' | 'bottom';
 }
 
-// Extended emoji collections for WhatsApp-like experience
 const EMOJI_CATEGORIES = {
   recent: {
     icon: FiClock,
     label: 'Recent',
-    emojis: ['😊', '😂', '😍', '😘', '😎'] // This would be dynamically populated
+    emojis: ['😊', '😂', '😍', '😘', '😎'] 
   },
   people: {
     icon: FiSmile,
@@ -116,11 +115,9 @@ const EMOJI_CATEGORIES = {
 };
 
 export const EmojiPicker: React.FC<EmojiPickerProps> = ({
-  styles,
   show,
   onEmojiSelect,
   onClose,
-  position = 'top'
 }) => {
   const pickerRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -147,7 +144,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
     // Add to recent emojis
     setRecentEmojis(prev => {
       const filtered = prev.filter(e => e !== emoji);
-      return [emoji, ...filtered].slice(0, 20); // Keep only 20 recent emojis
+      return [emoji, ...filtered].slice(0, 20); 
     });
     
     onEmojiSelect(emoji);
@@ -155,7 +152,6 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
 
   if (!show) return null;
 
-  // Filter emojis based on search query
   const getFilteredEmojis = () => {
     if (!searchQuery) {
       if (selectedCategory === 'recent') {
@@ -168,7 +164,6 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
     return Object.values(EMOJI_CATEGORIES)
       .flatMap(category => category.emojis)
       .filter(emoji => {
-        // Simple search - you could enhance this with emoji names/descriptions
         return emoji.includes(searchQuery.toLowerCase());
       });
   };
@@ -184,7 +179,6 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         height: '400px',
       }}
     >
-      {/* Header with Search */}
       <div className="p-3 border-b border-[#2a3942] flex items-center justify-between">
         <div className="relative flex-1">
           <input
@@ -212,7 +206,6 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         </button>
       </div>
 
-      {/* Category Navigation */}
       <div className="flex border-b border-[#2a3942] bg-[#202c33]">
         {Object.entries(EMOJI_CATEGORIES).map(([key, category]) => {
           const IconComponent = category.icon;
@@ -233,14 +226,12 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         })}
       </div>
 
-      {/* Category Label */}
       {!searchQuery && (
         <div className="px-3 py-2 text-[#8696a0] text-sm font-medium border-b border-[#2a3942]">
           {selectedCategory === 'recent' ? 'Recent' : EMOJI_CATEGORIES[selectedCategory].label}
         </div>
       )}
 
-      {/* Emoji Grid */}
       <div className="flex-1 overflow-y-auto p-2 h-[250px]">
         {filteredEmojis.length === 0 ? (
           <div className="flex items-center justify-center h-full text-[#8696a0]">

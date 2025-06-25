@@ -25,22 +25,55 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
     const startTime = Date.now();
 
     try {
-      const { subject, status, page = 1, limit = 10 } = params;
+      const { subject, status, page = 1, limit = 10, search, sortBy } = params;
       const query: any = {};
 
-      if (status && status !== 'all') {
-        query.status = status;
-      }
+      // Subject filter
       if (subject && subject !== 'all') {
         query.subject = subject;
       }
+      // Search filter (title or subject, case-insensitive)
+      if (search && search.trim() !== '') {
+        query.$or = [
+          { title: { $regex: search, $options: 'i' } },
+          { subject: { $regex: search, $options: 'i' } }
+        ];
+      }
 
-      const assignments = await AssignmentModel.find(query)
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .sort({ dueDate: 1 });
+      // Sorting
+      let sortField: string;
+      let sortOrder: 1 | -1 = 1;
+      switch (sortBy) {
+        case 'dueDate':
+        default:
+          sortField = 'dueDate';
+          break;
+        case 'priority':
+          sortField = 'priority';
+          break;
+        case 'status':
+          sortField = 'status';
+          break;
+        case 'course':
+        case 'subject':
+          sortField = 'subject';
+          break;
+      }
 
-      const total = await AssignmentModel.countDocuments(query);
+      let filterByGraded = false;
+      let filterBySubmitted = false;
+      if (status && status !== 'all') {
+        if (status === 'graded') {
+          filterByGraded = true;
+        } else if (status === 'submitted') {
+          filterBySubmitted = true;
+        } else {
+          query.status = status;
+        }
+      }
+
+      let assignments = await AssignmentModel.find(query)
+        .sort({ [sortField]: sortOrder });
 
       const assignmentIds = assignments.map(assignment => assignment._id);
       const submissions = await SubmissionModel.find({
@@ -52,6 +85,25 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
       submissions.forEach(submission => {
         submissionMap.set(submission.assignmentId.toString(), submission);
       });
+
+      // If filtering by graded, filter assignments to those with a reviewed submission
+      if (filterByGraded) {
+        assignments = assignments.filter(assignment => {
+          const submission = submissionMap.get(assignment._id.toString());
+          return submission && submission.status === 'reviewed';
+        });
+      }
+      // If filtering by submitted, filter assignments to those with a pending submission
+      if (filterBySubmitted) {
+        assignments = assignments.filter(assignment => {
+          const submission = submissionMap.get(assignment._id.toString());
+          return !!submission; // any submission, any status
+        });
+      }
+
+      // Pagination after filtering
+      const total = assignments.length;
+      assignments = assignments.slice((page - 1) * limit, page * limit);
 
       const result = {
         assignments: assignments.map(assignment => {
@@ -111,8 +163,6 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
       let submission;
 
       if (existingSubmission) {
-        // Update existing submission (resubmission)
-        console.log('📝 Updating existing submission for resubmission');
 
         const newStatus = existingSubmission.status === 'needs_correction' ? 'pending' : existingSubmission.status;
 
@@ -134,10 +184,7 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
           { new: true, upsert: false }
         );
 
-        console.log('✅ Existing submission updated successfully');
       } else {
-        // Create new submission
-        console.log('📝 Creating new submission');
 
         submission = await SubmissionModel.create({
           studentId,
@@ -153,7 +200,6 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
           isLate: false
         });
 
-        console.log('✅ New submission created successfully');
       }
 
       const result = { submission: this.mapToSubmission(submission) };

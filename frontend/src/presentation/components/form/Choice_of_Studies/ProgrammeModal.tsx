@@ -40,7 +40,6 @@ export const ProgrammeModal: React.FC<ProgrammeModalProps> = ({
   if (!showModal) return null;
 
   const onFormSubmit = (data: ProgrammeChoiceFormData) => {
-    console.log('ProgrammeModal submitting:', data);
     onSubmit(data);
   };
 

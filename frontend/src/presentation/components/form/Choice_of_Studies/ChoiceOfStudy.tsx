@@ -34,7 +34,6 @@ export const ChoiceOfStudy = forwardRef<ChoiceOfStudyRef, ChoiceOfStudyProps>(
 
     useEffect(() => {
       if (initialData) {
-        console.log('ChoiceOfStudy: Initializing with data:', initialData);
         setValue('choices', initialData, { shouldValidate: false });
       }
     }, [initialData, setValue]);
@@ -43,7 +42,6 @@ export const ChoiceOfStudy = forwardRef<ChoiceOfStudyRef, ChoiceOfStudyProps>(
     useImperativeHandle(ref, () => ({
       trigger: async () => {
         const isValid = await trigger();
-        console.log('ChoiceOfStudy: Validation result', { isValid, errors, choices: currentChoices });
         return isValid;
       },
       getValues: () => currentChoices,

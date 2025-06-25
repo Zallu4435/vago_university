@@ -29,7 +29,7 @@ export interface IGetEventRequestDetailsUseCase {
 }
 
 export class GetEventRequestsUseCase implements IGetEventRequestsUseCase {
-  constructor(private eventsRepository: IEventsRepository) {}
+  constructor(private eventsRepository: IEventsRepository) { }
 
   async execute(params: GetEventRequestsRequestDTO): Promise<{
     success: boolean;
@@ -38,7 +38,6 @@ export class GetEventRequestsUseCase implements IGetEventRequestsUseCase {
     try {
       const { page, limit, startDate, endDate } = params;
 
-      // Validate pagination parameters
       if (page < 1 || limit < 1) {
         return {
           success: false,
@@ -46,7 +45,6 @@ export class GetEventRequestsUseCase implements IGetEventRequestsUseCase {
         };
       }
 
-      // Validate and format dates
       let formattedStartDate: Date | undefined;
       let formattedEndDate: Date | undefined;
 
@@ -72,7 +70,6 @@ export class GetEventRequestsUseCase implements IGetEventRequestsUseCase {
         formattedEndDate = end;
       }
 
-      // Validate date range
       if (formattedStartDate && formattedEndDate && formattedStartDate > formattedEndDate) {
         return {
           success: false,
@@ -101,7 +98,7 @@ export class GetEventRequestsUseCase implements IGetEventRequestsUseCase {
 }
 
 export class ApproveEventRequestUseCase implements IApproveEventRequestUseCase {
-  constructor(private eventsRepository: IEventsRepository) {}
+  constructor(private eventsRepository: IEventsRepository) { }
 
   async execute(params: ApproveEventRequestRequestDTO): Promise<ResponseDTO<{ message: string }>> {
     try {
@@ -117,7 +114,7 @@ export class ApproveEventRequestUseCase implements IApproveEventRequestUseCase {
 }
 
 export class RejectEventRequestUseCase implements IRejectEventRequestUseCase {
-  constructor(private eventsRepository: IEventsRepository) {}
+  constructor(private eventsRepository: IEventsRepository) { }
 
   async execute(params: RejectEventRequestRequestDTO): Promise<ResponseDTO<{ message: string }>> {
     try {
@@ -133,7 +130,7 @@ export class RejectEventRequestUseCase implements IRejectEventRequestUseCase {
 }
 
 export class GetEventRequestDetailsUseCase implements IGetEventRequestDetailsUseCase {
-  constructor(private eventsRepository: IEventsRepository) {}
+  constructor(private eventsRepository: IEventsRepository) { }
 
   async execute(params: GetEventRequestDetailsRequestDTO): Promise<ResponseDTO<GetEventRequestDetailsResponseDTO>> {
     try {

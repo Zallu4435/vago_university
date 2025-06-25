@@ -5,7 +5,7 @@ import { GetVideosUseCase, GetVideoByIdUseCase, CreateVideoUseCase, UpdateVideoU
 export class VideoComposer {
     static compose() {
         const videoRepository = new VideoRepository();
-        
+
         const getVideosUseCase = new GetVideosUseCase(videoRepository);
         const getVideoByIdUseCase = new GetVideoByIdUseCase(videoRepository);
         const createVideoUseCase = new CreateVideoUseCase(videoRepository);

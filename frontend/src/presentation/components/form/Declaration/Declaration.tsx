@@ -101,7 +101,6 @@ export const Declaration: React.FC<DeclarationProps> = ({ value, onChange }) => 
           }}
           onBackToForm={() => setIsSubmitting(false)}
           onPaymentComplete={() => {
-            console.log('Declaration: Payment completed');
             onChange({ privacyPolicy: false, marketingEmail: false, marketingCall: false }); // Reset declaration
           }}
         />

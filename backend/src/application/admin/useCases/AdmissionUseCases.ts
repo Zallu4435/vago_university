@@ -57,7 +57,6 @@ export class GetAdmissionsUseCase implements IGetAdmissionsUseCase {
 
     async execute(params: GetAdmissionsRequestDTO): Promise<ResponseDTO<GetAdmissionsResponseDTO>> {
         try {
-            console.log(`Executing getAdmissions use case with params:`, params);
             const result = await this.admissionRepository.getAdmissions(params);
             return { data: result, success: true };
         } catch (error: any) {
@@ -72,7 +71,6 @@ export class GetAdmissionByIdUseCase implements IGetAdmissionByIdUseCase {
 
     async execute(params: GetAdmissionByIdRequestDTO): Promise<ResponseDTO<GetAdmissionByIdResponseDTO>> {
         try {
-            console.log(`Executing getAdmissionById use case with id: ${params.id}`);
             const result = await this.admissionRepository.getAdmissionById(params);
             return { data: result, success: true };
         } catch (error: any) {
@@ -87,7 +85,6 @@ export class GetAdmissionByTokenUseCase implements IGetAdmissionByTokenUseCase {
 
     async execute(params: GetAdmissionByTokenRequestDTO): Promise<ResponseDTO<GetAdmissionByTokenResponseDTO>> {
         try {
-            console.log(`Executing getAdmissionByToken use case with token: ${params.token}`);
             const result = await this.admissionRepository.getAdmissionByToken(params);
             return { data: result, success: true };
         } catch (error: any) {
@@ -102,7 +99,6 @@ export class ApproveAdmissionUseCase implements IApproveAdmissionUseCase {
 
     async execute(params: ApproveAdmissionRequestDTO): Promise<ResponseDTO<ApproveAdmissionResponseDTO>> {
         try {
-            console.log(`Executing approveAdmission use case with id: ${params.id}`);
             const result = await this.admissionRepository.approveAdmission(params);
             return { data: result, success: true };
         } catch (error: any) {
@@ -117,7 +113,6 @@ export class RejectAdmissionUseCase implements IRejectAdmissionUseCase {
 
     async execute(params: RejectAdmissionRequestDTO): Promise<ResponseDTO<RejectAdmissionResponseDTO>> {
         try {
-            console.log(`Executing rejectAdmission use case with id: ${params.id}`);
             const result = await this.admissionRepository.rejectAdmission(params);
             return { data: result, success: true };
         } catch (error: any) {
@@ -132,7 +127,6 @@ export class DeleteAdmissionUseCase implements IDeleteAdmissionUseCase {
 
     async execute(params: DeleteAdmissionRequestDTO): Promise<ResponseDTO<DeleteAdmissionResponseDTO>> {
         try {
-            console.log(`Executing deleteAdmission use case with id: ${params.id}`);
             const result = await this.admissionRepository.deleteAdmission(params);
             return { data: result, success: true };
         } catch (error: any) {
@@ -147,7 +141,6 @@ export class ConfirmAdmissionOfferUseCase implements IConfirmAdmissionOfferUseCa
 
     async execute(params: ConfirmAdmissionOfferRequestDTO): Promise<ResponseDTO<ConfirmAdmissionOfferResponseDTO>> {
         try {
-            console.log(`Executing confirmAdmissionOffer use case with id: ${params.admissionId}, action: ${params.action}`);
             const result = await this.admissionRepository.confirmAdmissionOffer(params);
             return { data: result, success: true };
         } catch (error: any) {

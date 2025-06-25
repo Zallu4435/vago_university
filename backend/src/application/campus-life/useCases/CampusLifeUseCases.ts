@@ -69,7 +69,7 @@ export interface IJoinEventUseCase {
 }
 
 export class GetCampusLifeOverviewUseCase implements IGetCampusLifeOverviewUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) {}
+  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetCampusLifeOverviewRequestDTO): Promise<ResponseDTO<CampusLifeOverviewResponseDTO>> {
     try {
@@ -82,7 +82,7 @@ export class GetCampusLifeOverviewUseCase implements IGetCampusLifeOverviewUseCa
 }
 
 export class GetEventsUseCase implements IGetEventsUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) {}
+  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetEventsRequestDTO): Promise<ResponseDTO<GetEventsResponseDTO>> {
     try {
@@ -101,7 +101,7 @@ export class GetEventsUseCase implements IGetEventsUseCase {
 }
 
 export class GetEventByIdUseCase implements IGetEventByIdUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) {}
+  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetEventByIdRequestDTO): Promise<ResponseDTO<GetEventByIdResponseDTO>> {
     try {
@@ -120,7 +120,7 @@ export class GetEventByIdUseCase implements IGetEventByIdUseCase {
 }
 
 export class GetSportsUseCase implements IGetSportsUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) {}
+  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetSportsRequestDTO): Promise<ResponseDTO<GetSportsResponseDTO>> {
     try {
@@ -136,7 +136,7 @@ export class GetSportsUseCase implements IGetSportsUseCase {
 }
 
 export class GetSportByIdUseCase implements IGetSportByIdUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) {}
+  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetSportByIdRequestDTO): Promise<ResponseDTO<GetSportByIdResponseDTO>> {
     try {
@@ -155,7 +155,7 @@ export class GetSportByIdUseCase implements IGetSportByIdUseCase {
 }
 
 export class GetClubsUseCase implements IGetClubsUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) {}
+  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetClubsRequestDTO): Promise<ResponseDTO<GetClubsResponseDTO>> {
     try {
@@ -171,7 +171,7 @@ export class GetClubsUseCase implements IGetClubsUseCase {
 }
 
 export class GetClubByIdUseCase implements IGetClubByIdUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) {}
+  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetClubByIdRequestDTO): Promise<ResponseDTO<GetClubByIdResponseDTO>> {
     try {
@@ -190,7 +190,7 @@ export class GetClubByIdUseCase implements IGetClubByIdUseCase {
 }
 
 export class JoinClubUseCase implements IJoinClubUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) {}
+  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: JoinClubRequestDTO): Promise<ResponseDTO<JoinClubResponseDTO>> {
     try {
@@ -209,7 +209,7 @@ export class JoinClubUseCase implements IJoinClubUseCase {
 }
 
 export class JoinSportUseCase implements IJoinSportUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) {}
+  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: JoinSportRequestDTO): Promise<ResponseDTO<JoinSportResponseDTO>> {
     try {
@@ -228,7 +228,7 @@ export class JoinSportUseCase implements IJoinSportUseCase {
 }
 
 export class JoinEventUseCase implements IJoinEventUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) {}
+  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: JoinEventRequestDTO): Promise<ResponseDTO<JoinEventResponseDTO>> {
     try {

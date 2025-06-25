@@ -3,14 +3,12 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import multer from 'multer';
 import { config as appConfig } from '../config/config';
 
-// Configure Cloudinary
 cloudinary.config({
   cloud_name: appConfig.cloudinary.cloudName,
   api_key: appConfig.cloudinary.apiKey,
   api_secret: appConfig.cloudinary.apiSecret,
 });
 
-// Storage engine for faculty documents
 const facultyStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -30,7 +28,6 @@ const facultyStorage = new CloudinaryStorage({
   } as any,
 });
 
-// Storage engine for profile pictures
 const profilePictureStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -42,18 +39,16 @@ const profilePictureStorage = new CloudinaryStorage({
   } as any,
 });
 
-// Storage engine for message attachments
 const messageAttachmentStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'message-attachments',
     allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
-    resource_type: 'auto', // Supports both images and raw files (e.g., txt)
+    resource_type: 'auto', 
     transformation: [{ quality: 'auto' }],
   } as any,
 });
 
-// Storage engine for assignment files
 const assignmentStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -64,7 +59,6 @@ const assignmentStorage = new CloudinaryStorage({
   } as any
 });
 
-// Storage engine for assignment submissions
 const assignmentSubmissionStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -85,7 +79,6 @@ const assignmentSubmissionStorage = new CloudinaryStorage({
   } as any
 });
 
-// Storage engine for material files
 const materialStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -96,7 +89,6 @@ const materialStorage = new CloudinaryStorage({
       if (['pdf', 'doc', 'docx', 'txt'].includes(ext)) return 'raw';
       return 'image';
     },
-    // Only apply transformation for images
     transformation: (req: any, file: any) => {
       const ext = file.originalname.split('.').pop()?.toLowerCase();
       if (['jpg', 'jpeg', 'png'].includes(ext)) {
@@ -107,7 +99,6 @@ const materialStorage = new CloudinaryStorage({
   } as any,
 });
 
-// Storage engine for admission documents
 const admissionDocumentStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -127,7 +118,6 @@ const admissionDocumentStorage = new CloudinaryStorage({
   } as any,
 });
 
-// Storage engine for site section images
 const siteSectionImageStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: (req: any, file: any) => {
@@ -138,7 +128,6 @@ const siteSectionImageStorage = new CloudinaryStorage({
         { width: 800, height: 600, crop: 'limit', quality: 'auto' },
       ],
     };
-    console.log('[siteSectionImageStorage] Cloudinary params:', params, 'File:', file?.originalname, file?.mimetype);
     return params;
   },
 });
@@ -147,14 +136,12 @@ const siteSectionImageUpload = multer({
   storage: siteSectionImageStorage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req: any, file: any, cb: any) => {
-    console.log('[siteSectionImageUpload] fileFilter - file:', file?.originalname, file?.mimetype);
     const allowedMimeTypes = [
       'image/jpeg',
       'image/png',
       'image/jpg',
     ];
     if (allowedMimeTypes.includes(file.mimetype)) {
-      console.log('[siteSectionImageUpload] fileFilter - allowed');
       cb(null, true);
     } else {
       console.error('[siteSectionImageUpload] fileFilter - invalid file format:', file.mimetype);
@@ -166,19 +153,19 @@ const siteSectionImageUpload = multer({
 // Multer instances
 const facultyUpload = multer({
   storage: facultyStorage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
 const profilePictureUpload = multer({
   storage: profilePictureStorage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
 const messageAttachmentUpload = multer({
   storage: messageAttachmentStorage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
 const assignmentUpload = multer({
   storage: assignmentStorage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req: any, file: any, cb: any) => {
     console.log('Validating assignment file:', {
       originalname: file.originalname,
@@ -205,16 +192,10 @@ const assignmentUpload = multer({
 const assignmentSubmissionUpload = multer({
   storage: assignmentSubmissionStorage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
-    files: 1 // Only allow one file per upload
+    fileSize: 10 * 1024 * 1024,
+    files: 1 
   },
   fileFilter: (req: any, file: any, cb: any) => {
-    console.log('🔍 File validation for assignment submission:', {
-      originalname: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size,
-      fieldname: file.fieldname
-    });
 
     const allowedMimeTypes = [
       'application/pdf',
@@ -227,21 +208,16 @@ const assignmentSubmissionUpload = multer({
       'image/bmp',
       'image/tiff',
       'image/webp',
-      // Add more common MIME types
       'application/octet-stream',
       'application/zip',
       'application/x-zip-compressed'
     ];
 
-    console.log('📋 Checking if mimetype is allowed:', file.mimetype);
-    console.log('📋 Allowed MIME types:', allowedMimeTypes);
-
     if (allowedMimeTypes.includes(file.mimetype)) {
-      console.log('✅ File validation passed');
       cb(null, true);
     } else {
-      console.error('❌ Invalid file format:', file.mimetype);
-      console.error('❌ File details:', {
+      console.error('Invalid file format:', file.mimetype);
+      console.error('File details:', {
         originalname: file.originalname,
         mimetype: file.mimetype,
         size: file.size
@@ -253,14 +229,9 @@ const assignmentSubmissionUpload = multer({
 
 const materialUpload = multer({
   storage: materialStorage,
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB limit
+  limits: { fileSize: 20 * 1024 * 1024 }, 
   fileFilter: (req: any, file: any, cb: any) => {
     const ext = file.originalname.split('.').pop()?.toLowerCase();
-    console.log('[MaterialUpload] Validating file:', {
-      originalname: file.originalname,
-      mimetype: file.mimetype,
-      extension: ext
-    });
     const allowedMimeTypes = [
       'application/pdf',
       'application/msword',
@@ -269,9 +240,7 @@ const materialUpload = multer({
       'image/jpeg',
       'image/png'
     ];
-    const allowedFormats = ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png']; // Cloudinary allowed_formats
-    console.log('[MaterialUpload] allowedMimeTypes:', allowedMimeTypes);
-    console.log('[MaterialUpload] allowedFormats:', allowedFormats);
+    const allowedFormats = ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png']; 
     if (!ext || !allowedFormats.includes(ext)) {
       console.error('[MaterialUpload] Extension not allowed:', ext);
       return cb(new Error(`File extension .${ext} is not allowed. Allowed: ${allowedFormats.join(', ')}`));
@@ -280,14 +249,13 @@ const materialUpload = multer({
       console.error('[MaterialUpload] Invalid file mimetype:', file.mimetype);
       return cb(new Error(`File mimetype ${file.mimetype} is not allowed. Allowed: ${allowedMimeTypes.join(', ')}`));
     }
-    console.log('[MaterialUpload] File validation passed');
     cb(null, true);
   }
 });
 
 const admissionDocumentUpload = multer({
   storage: admissionDocumentStorage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req: any, file: any, cb: any) => {
     console.log('[AdmissionDocumentUpload] Validating file:', {
       originalname: file.originalname,
@@ -303,7 +271,6 @@ const admissionDocumentUpload = multer({
     ];
 
     if (allowedMimeTypes.includes(file.mimetype)) {
-      console.log('[AdmissionDocumentUpload] File validation passed');
       cb(null, true);
     } else {
       console.error('[AdmissionDocumentUpload] Invalid file format:', file.mimetype);
@@ -315,100 +282,53 @@ const admissionDocumentUpload = multer({
 const contentVideoStorage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: 'content',            // ← new folder name
+    folder: 'content',          
     resource_type: 'video',
     allowed_formats: ['mp4', 'mov', 'avi', 'webm', 'mkv'],
     transformation: [{ quality: 'auto' }],
-    timeout: 60000, // 1 minute timeout
+    timeout: 60000, 
   } as any,
 });
 
 const contentVideoUpload = multer({
   storage: contentVideoStorage,
-  limits: { fileSize: 500 * 1024 * 1024 }, // 500  MB limit
+  limits: { fileSize: 500 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    console.log('\n🎬 === CONTENT VIDEO UPLOAD MIDDLEWARE ===');
-    console.log(file, "file checking")
-    console.log('📁 File details:', {
-      fieldname: file.fieldname,
-      originalname: file.originalname,
-      encoding: file.encoding,
-      mimetype: file.mimetype,
-      size: file.size,
-      destination: file.destination,
-      filename: file.filename,
-      path: file.path
-    });
-    console.log('📋 Request details:', {
-      method: req.method,
-      url: req.url,
-      headers: {
-        'content-type': req.headers['content-type'],
-        'content-length': req.headers['content-length']
-      }
-    });
 
     const allowedMimeTypes = [
       'video/mp4',
-      'video/quicktime',    // .mov
-      'video/x-msvideo',    // .avi
+      'video/quicktime',    
+      'video/x-msvideo',    
       'video/webm',
-      'video/x-matroska',   // .mkv
+      'video/x-matroska',   
     ];
 
-    console.log('🔍 Validating video file format...');
-    console.log('📋 File mimetype:', file.mimetype);
-    console.log('📋 Allowed MIME types:', allowedMimeTypes);
-
     if (allowedMimeTypes.includes(file.mimetype)) {
-      console.log('✅ Video format validation passed');
-      console.log('🎬 === CALLING CLOUDINARY STORAGE ===');
       cb(null, true);
     } else {
-      console.error('❌ Invalid video format:', file.mimetype);
-      console.error('❌ Allowed formats: MP4, MOV, AVI, WEBM, MKV');
+      console.error('Invalid video format:', file.mimetype);
+      console.error('Allowed formats: MP4, MOV, AVI, WEBM, MKV');
       cb(new Error('Invalid video format. Allowed: MP4, MOV, AVI, WEBM, MKV'));
     }
   },
 });
 
-// Error handling wrapper for video upload
 const contentVideoUploadWithErrorHandling = (req: any, res: any, next: any) => {
-  console.log('\n🎬 === VIDEO UPLOAD ERROR HANDLING WRAPPER ===');
 
-  // Set timeout
   req.setTimeout(60000);
   res.setTimeout(60000);
 
-  console.log('⏱️ Setting upload timeout to 1 minute');
-  console.log('☁️ Cloudinary config:', {
-    cloud_name: cloudinary.config().cloud_name,
-    api_key: cloudinary.config().api_key ? 'Set' : 'Not set',
-    api_secret: cloudinary.config().api_secret ? 'Set' : 'Not set'
-  });
-
-  // Check if this is a PUT request (update) without file
   const isUpdateRequest = req.method === 'PUT';
   const hasFile = req.headers['content-type']?.includes('multipart/form-data');
   
-  console.log('🔍 Request analysis:', {
-    method: req.method,
-    isUpdateRequest,
-    hasFile,
-    contentType: req.headers['content-type']
-  });
 
-  // For update requests without file, skip file validation
   if (isUpdateRequest && !hasFile) {
-    console.log('📝 Update request without file detected - skipping file validation');
-    console.log('📋 Request body for metadata update:', req.body);
-    console.log('✅ Proceeding to controller for metadata-only update');
     return next();
   }
 
   contentVideoUpload.single('videoFile')(req, res, (err: any) => {
     if (err) {
-      console.error('❌ Video upload error:', err);
+      console.error('Video upload error:', err);
 
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({
@@ -437,9 +357,8 @@ const contentVideoUploadWithErrorHandling = (req: any, res: any, next: any) => {
       });
     }
 
-    // 🔒 Manually check for missing or invalid file
     if (!req.file) {
-      console.error('❌ No file uploaded or file object is invalid.');
+      console.error('No file uploaded or file object is invalid.');
       return res.status(400).json({
         error: 'No video file uploaded',
         message: 'Please provide a valid video file.'
@@ -447,19 +366,16 @@ const contentVideoUploadWithErrorHandling = (req: any, res: any, next: any) => {
     }
 
     if (!req.file.size || req.file.size > 500 * 1024 * 1024) {
-      console.error('❌ File size invalid or exceeds limit:', req.file.size);
+      console.error('File size invalid or exceeds limit:', req.file.size);
       return res.status(400).json({
         error: 'Invalid file size',
         message: 'File is either missing size information or too large.'
       });
     }
-
-    console.log('✅ File passed all checks. Proceeding...');
     next();
   });
 };
 
-// Storage engine for chat attachments
 const chatAttachmentStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -472,9 +388,8 @@ const chatAttachmentStorage = new CloudinaryStorage({
 
 const chatAttachmentUpload = multer({
   storage: chatAttachmentStorage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req: any, file: any, cb: any) => {
-    console.log('[chatAttachmentUpload] Incoming file:', file?.originalname, file?.fieldname, file?.mimetype);
     const allowedMimeTypes = [
       'application/pdf',
       'application/msword',

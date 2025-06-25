@@ -33,7 +33,6 @@ const authSlice = createSlice({
         profilePicture?: string;
       }>
     ) => {
-      console.log('setAuth payload:', action.payload);
       state.token = action.payload.token;
       state.user = action.payload.user;
       state.collection = action.payload.collection;

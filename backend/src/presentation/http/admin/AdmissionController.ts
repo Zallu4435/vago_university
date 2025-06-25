@@ -9,7 +9,6 @@ import {
   ConfirmAdmissionOfferUseCase,
 } from "../../../application/admin/useCases/AdmissionUseCases";
 import { Admission } from "../../../infrastructure/database/mongoose/models/admission.model";
-import { v2 as cloudinary } from 'cloudinary';
 
 export class AdminAdmissionController implements IAdminAdmissionController {
   private httpErrors: HttpErrors;
@@ -163,88 +162,56 @@ export class AdminAdmissionController implements IAdminAdmissionController {
 
   async serveDocument(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      console.log('=== ADMIN SERVE DOCUMENT CONTROLLER START ===');
-      console.log('Request params:', httpRequest.params);
-      console.log('Request user:', httpRequest.user);
-      
       if (!httpRequest.user) {
-        console.log('ERROR: No user found in request');
         return this.httpErrors.error_401();
       }
-      
-      // Check if user is admin
+
       if (httpRequest.user.collection !== 'admin') {
-        console.log('ERROR: User is not admin');
         return this.httpErrors.error_403();
       }
-      
+
       const { documentId } = httpRequest.params || {};
       const { admissionId } = httpRequest.query || {};
-      
-      console.log('Extracted data:', { documentId, admissionId });
-      
+
+
       if (!documentId) {
-        console.log('ERROR: Missing documentId');
         return this.httpErrors.error_400();
       }
-      
+
       if (!admissionId) {
-        console.log('ERROR: Missing admissionId');
         return this.httpErrors.error_400();
       }
-      
-      // Find the specific admission and document within it
-      console.log('Looking for document with ID:', documentId, 'in admission:', admissionId);
-      
-      const admission = await Admission.findOne({ 
+
+      const admission = await Admission.findOne({
         _id: admissionId,
         "documents.documents": { $elemMatch: { id: documentId } }
       });
-      
-      console.log('Found admission:', admission?.documents?.documents);
-      
+
+
       if (!admission) {
-        console.log('ERROR: Document not found');
         return this.httpErrors.error_404();
       }
-      
-      // Find the specific document
+
       const document = admission.documents?.documents?.find((doc: any) => doc.id === documentId);
-      console.log('Found document:', document ? 'Yes' : 'No');
-      console.log('Document structure:', document);
-      console.log('Document cloudinaryUrl:', document?.cloudinaryUrl);
-      console.log('Document url:', document?.url);
-      console.log('Document path:', document?.path);
-      console.log('All document fields:', document ? Object.keys(document) : 'No document found');
-      
+
       if (!document) {
-        console.log('ERROR: Document not found');
         return this.httpErrors.error_404();
       }
-      
-      // Try to get the URL from different possible field names
+
       const documentUrl = document.cloudinaryUrl || document.url || document.path;
-      console.log('Using document URL:', documentUrl);
-      
+
       if (!documentUrl) {
-        console.log('ERROR: No URL found in document');
         return this.httpErrors.error_404();
       }
-      
-      // Fetch the PDF from Cloudinary
-      console.log('Fetching PDF from Cloudinary URL:', documentUrl);
-      
+
       const response = await fetch(documentUrl);
-      
+
       if (!response.ok) {
-        console.log('ERROR: Failed to fetch from Cloudinary, status:', response.status);
         return this.httpErrors.error_404();
       }
-      
+
       const pdfBuffer = await response.arrayBuffer();
-      console.log('PDF buffer size:', pdfBuffer.byteLength);
-      
-      // Return the PDF with proper headers
+
       const result_response = {
         statusCode: 200,
         body: {
@@ -253,11 +220,9 @@ export class AdminAdmissionController implements IAdminAdmissionController {
           contentType: 'application/pdf'
         }
       };
-      
-      console.log('=== ADMIN SERVE DOCUMENT CONTROLLER SUCCESS ===');
+
       return result_response;
     } catch (error: any) {
-      console.log('=== ADMIN SERVE DOCUMENT CONTROLLER ERROR ===');
       console.error('Controller error:', error);
       console.error('Error message:', error.message);
       console.error('Error stack:', error.stack);

@@ -1,10 +1,7 @@
-import React, { useState } from 'react';
-import { FiSearch, FiUser, FiPlus, FiX, FiUsers } from 'react-icons/fi';
+import React from 'react';
+import { FiUsers } from 'react-icons/fi';
 import { Chat, Message, Styles, User, PaginatedResponse } from '../types/ChatTypes';
-import { formatChatTime, formatMessageTime } from '../utils/chatUtils';
-import io, { Socket } from 'socket.io-client';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../../redux/store';
+import { formatChatTime } from '../utils/chatUtils';
 
 interface ChatListProps {
   chats: Chat[];
@@ -23,24 +20,14 @@ interface ChatListProps {
 
 export const ChatList: React.FC<ChatListProps> = ({
   chats,
-  styles,
   selectedChatId,
   onChatSelect,
   onScroll,
-  onSearch,
-  onNewChat,
-  onCreateGroup,
-  setMessages,
-  setChats,
-  onUserSelect,
   currentUserId
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <div className="flex h-full flex-col bg-white dark:bg-[#111b21]">
-      {/* Search and filter bar */}
-      {/* Contact list */}
       <div className="flex-1 overflow-y-auto" onScroll={onScroll}>
         {chats.length > 0 ? (
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -48,9 +35,8 @@ export const ChatList: React.FC<ChatListProps> = ({
               <button
                 key={chat.id}
                 onClick={() => onChatSelect(chat.id)}
-                className={`w-full p-4 flex items-center space-x-3 hover:bg-gray-100 dark:hover:bg-[#2a3942] ${
-                  selectedChatId === chat.id ? 'bg-gray-200 dark:bg-[#2c3e50]' : ''
-                }`}
+                className={`w-full p-4 flex items-center space-x-3 hover:bg-gray-100 dark:hover:bg-[#2a3942] ${selectedChatId === chat.id ? 'bg-gray-200 dark:bg-[#2c3e50]' : ''
+                  }`}
               >
                 <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                   {chat.avatar ? (

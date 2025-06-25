@@ -30,7 +30,6 @@ const UniversityDashboard = () => {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const handleLogout = () => {
-    console.log("Logging out...");
     dispatch(logout());
     navigate('/login');
   };

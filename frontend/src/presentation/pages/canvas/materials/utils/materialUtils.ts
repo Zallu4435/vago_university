@@ -1,4 +1,3 @@
-import { Material } from '../types/MaterialTypes';
 import { FiFileText, FiBookOpen, FiFile, FiImage, FiVideo } from 'react-icons/fi';
 
 export type FileIconType = typeof FiFileText | typeof FiBookOpen | typeof FiFile | typeof FiImage | typeof FiVideo;
@@ -38,5 +37,3 @@ export const formatNumber = (num: number) => {
     }
     return num?.toString();
 };
-
-// filterMaterials function removed - all filtering and sorting now handled by backend 

@@ -16,8 +16,12 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
     const skip = (page - 1) * limit;
 
     const query: any = {};
-    if (subject) query.subject = subject;
-    if (course) query.course = course;
+    if (subject) query.subject = { $regex: `^${subject.replace(/\+/g, ' ')}`, $options: 'i' };
+    if (course) {
+      query.course = course;
+    } else if (subject) {
+      query.course = { $regex: `^${subject.replace(/\+/g, ' ')}`, $options: 'i' };
+    }
     if (semester) query.semester = semester;
     if (type) query.type = type;
     if (difficulty) query.difficulty = difficulty;

@@ -28,13 +28,15 @@ export class UserAssignmentController implements IUserAssignmentController {
     const startTime = Date.now();
     
     try {
-      const { subject, status, page, limit } = httpRequest.query;
+      const { subject, status, page, limit, search, sortBy } = httpRequest.query;
       
       const result = await this.getUserAssignmentsUseCase.execute({
         subject: subject as string,
-        status: status as 'pending' | 'submitted' | 'reviewed',
+        status: status as any,
         page: page ? parseInt(page as string) : undefined,
         limit: limit ? parseInt(limit as string) : undefined,
+        search: search as string,
+        sortBy: sortBy as string,
         studentId: httpRequest.user?.id
       });
 

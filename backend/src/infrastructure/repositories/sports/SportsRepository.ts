@@ -29,7 +29,6 @@ import mongoose from "mongoose";
 
 export class SportsRepository implements ISportsRepository {
   async getSports(params: GetSportsRequestDTO): Promise<GetSportsResponseDTO> {
-    console.log("reached inside the sport repo")
     
     const { page, limit, sportType, status, coach } = params;
     const query: any = {};
@@ -70,8 +69,6 @@ export class SportsRepository implements ISportsRepository {
       .limit(limit)
       .lean();
     
-    console.log("Raw sports data:", sports);
-    
     const mappedSports: SportSummaryDTO[] = sports.map((sport) => ({
       id: sport._id.toString(),
       title: sport.title,
@@ -88,8 +85,6 @@ export class SportsRepository implements ISportsRepository {
       createdAt: new Date(sport.createdAt).toISOString()
     }));
 
-    console.log("Mapped sports:", mappedSports);
-
     const response = {
       sports: mappedSports,
       totalItems,
@@ -97,7 +92,6 @@ export class SportsRepository implements ISportsRepository {
       currentPage: page
     };
 
-    console.log("Final response:", response);
     return response;
   }
 

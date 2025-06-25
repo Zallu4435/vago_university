@@ -1,9 +1,11 @@
 export interface GetUserAssignmentsRequestDTO {
   subject?: string;
-  status?: 'pending' | 'submitted' | 'reviewed';
+  status?: 'pending' | 'submitted' | 'reviewed' | 'published' | 'graded' | 'all';
   page?: number;
   limit?: number;
   studentId?: string;
+  search?: string;
+  sortBy?: string;
 }
 
 export interface GetUserAssignmentByIdRequestDTO {

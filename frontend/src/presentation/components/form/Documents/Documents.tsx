@@ -24,22 +24,14 @@ interface DocumentsProps {
   applicationId: string;
 }
 
-// Define the ref type
 interface DocumentsRef {
   trigger: () => Promise<boolean>;
   getValues: () => DocumentUploadSection;
 }
 
-// Wrap with forwardRef
 export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
   ({ initialData, onSave, applicationId }, ref) => {
     const { token } = useAuth();
-    
-    // console.log('Documents component rendered with:', {
-    //   applicationId,
-    //   hasToken: !!token,
-    //   initialData: !!initialData
-    // });
 
     const defaultDocuments: DocumentUpload[] = [
       { id: 'passport', name: 'Passport' },
@@ -65,20 +57,18 @@ export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
     React.useImperativeHandle(ref, () => ({
       trigger: async () => {
         const isValid = await trigger();
-        console.log('Documents trigger validation result:', { isValid, errors });
-        
+
         if (isValid) {
           methods.clearErrors();
         }
-        
+
         return isValid;
       },
       getValues: () => ({ documents: currentDocuments }),
     }));
 
     const handleFileUpload = async (id: string, file: File) => {
-      console.log('handleFileUpload called with:', { id, fileName: file.name, applicationId });
-      
+
       if (!file || !token) {
         console.error('Missing file or token:', { hasFile: !!file, hasToken: !!token });
         return;
@@ -101,20 +91,16 @@ export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
       }
 
       try {
-        console.log('Starting document upload with applicationId:', applicationId);
-        // Upload to Cloudinary
         const uploadResult = await documentUploadService.uploadDocument(applicationId, id, file, token);
-        console.log(uploadResult, "popopopo")
-        // Update the document with Cloudinary URL
         const documents = watch('documents');
         const updatedDocuments = documents.map(doc =>
           doc.id === id
-            ? { 
-                ...doc, 
-                fileName: file.name, 
-                fileType: file.type,
-                cloudinaryUrl: uploadResult.url 
-              }
+            ? {
+              ...doc,
+              fileName: file.name,
+              fileType: file.type,
+              cloudinaryUrl: uploadResult.url
+            }
             : doc
         );
 
@@ -160,5 +146,4 @@ export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
   }
 );
 
-// Optional: Set display name for better debugging
 Documents.displayName = 'Documents';

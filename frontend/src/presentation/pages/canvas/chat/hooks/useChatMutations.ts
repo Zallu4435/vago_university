@@ -188,9 +188,35 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
 
   const deleteMessage = useMutation({
     mutationFn: async (params: { chatId: string; messageId: string; deleteForEveryone: boolean }) =>
-      chatService.deleteMessage(params.messageId, params.deleteForEveryone),
-    onSuccess: () => {
-      if (chatId) queryClient.invalidateQueries({ queryKey: ['chat', chatId] });
+      chatService.deleteMessage(params.chatId, params.messageId, params.deleteForEveryone),
+    onMutate: async (params) => {
+      await queryClient.cancelQueries({ queryKey: ['messages', params.chatId] });
+      const previousMessages = queryClient.getQueryData(['messages', params.chatId]);
+      queryClient.setQueryData(['messages', params.chatId], (old: any) => {
+        if (!old) return old;
+        if (Array.isArray(old)) {
+          return old.filter((msg: any) => msg.id !== params.messageId);
+        }
+        if (old.pages) {
+          return {
+            ...old,
+            pages: old.pages.map((page: any) => ({
+              ...page,
+              messages: page.messages.filter((msg: any) => msg.id !== params.messageId),
+            })),
+          };
+        }
+        return old;
+      });
+      return { previousMessages };
+    },
+    onError: (_err, params, context) => {
+      queryClient.setQueryData(['messages', params.chatId], context?.previousMessages);
+      toast.error('Failed to delete message.');
+    },
+    onSettled: (_data, _error, params) => {
+      queryClient.invalidateQueries({ queryKey: ['messages', params.chatId] });
+      if (params.chatId) queryClient.invalidateQueries({ queryKey: ['chat', params.chatId] });
     }
   });
 
@@ -212,7 +238,61 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
 
   const markMessagesAsRead = useMutation({
     mutationFn: async (chatId: string) => chatService.markMessagesAsRead(chatId),
-    onSuccess: (_data, chatId) => {
+    onMutate: async (chatId: string) => {
+      // Cancel outgoing fetches for chat lists and chat details
+      await queryClient.cancelQueries({ queryKey: ['chats'] });
+      await queryClient.cancelQueries({ queryKey: ['chat', chatId] });
+
+      // Save previous state for rollback
+      const previousChatsQueries = queryClient.getQueriesData({ queryKey: ['chats'] });
+      const previousChatDetails = queryClient.getQueryData(['chat', chatId]);
+
+      // Optimistically update all paginated chat list caches
+      previousChatsQueries.forEach(([key, oldData]: any) => {
+        if (!oldData) return;
+        if (Array.isArray(oldData)) {
+          queryClient.setQueryData(key, oldData.map((chat: any) =>
+            chat.id === chatId ? { ...chat, unreadCount: 0 } : chat
+          ));
+        } else if (oldData.data && Array.isArray(oldData.data)) {
+          queryClient.setQueryData(key, {
+            ...oldData,
+            data: oldData.data.map((chat: any) =>
+              chat.id === chatId ? { ...chat, unreadCount: 0 } : chat
+            ),
+          });
+        }
+      });
+
+      // Optimistically update chat details cache
+      if (previousChatDetails) {
+        queryClient.setQueryData(['chat', chatId], {
+          ...previousChatDetails,
+          chat: {
+            ...previousChatDetails.chat,
+            unreadCount: 0,
+          },
+        });
+      }
+
+      // Return rollback context
+      return { previousChatsQueries, previousChatDetails };
+    },
+    onError: (_err, chatId, context) => {
+      // Rollback chat lists
+      if (context?.previousChatsQueries) {
+        context.previousChatsQueries.forEach(([key, oldData]: any) => {
+          queryClient.setQueryData(key, oldData);
+        });
+      }
+      // Rollback chat details
+      if (context?.previousChatDetails) {
+        queryClient.setQueryData(['chat', chatId], context.previousChatDetails);
+      }
+    },
+    onSettled: (_data, _error, chatId) => {
+      // Optionally refetch to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ['chats'] });
       queryClient.invalidateQueries({ queryKey: ['chat', chatId] });
     }
   });

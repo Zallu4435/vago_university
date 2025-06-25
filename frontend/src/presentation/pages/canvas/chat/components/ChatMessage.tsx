@@ -95,10 +95,18 @@ const ChatMessageComponent = ({
   };
 
   const handleDeleteForMe = () => {
+    if (!message.id || message.id === 'false' || typeof message.id !== 'string') {
+      console.error('[ChatMessage] Invalid message.id for delete:', message.id);
+      return;
+    }
     onDelete(message.id, false);
   };
 
   const handleDeleteForEveryone = () => {
+    if (!message.id || message.id === 'false' || typeof message.id !== 'string') {
+      console.error('[ChatMessage] Invalid message.id for delete (everyone):', message.id);
+      return;
+    }
     onDelete(message.id, true);
   };
 
@@ -398,6 +406,11 @@ const ChatMessageComponent = ({
   };
 
   const isSentMessage = message.senderId === currentUserId;
+
+  // Hide deleted-for-everyone messages for the sender
+  if (message.isDeleted && message.deletedForEveryone && isSentMessage) {
+    return null;
+  }
 
   return (
     <div ref={ref}>

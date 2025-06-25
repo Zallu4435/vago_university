@@ -42,31 +42,23 @@ import { ChatType } from "../../../domain/chat/entities/Chat";
 export class ChatRepository implements IChatRepository {
   async getChats(params: GetChatsRequestDTO): Promise<GetChatsResponseDTO> {
     try {
-      // console.log('ChatRepository - getChats - Params:', params);
       const { userId, page, limit } = params;
       const skip = (page - 1) * limit;
 
-      // Verify user exists
-      // console.log('ChatRepository - getChats - Finding user:', userId);
       const user = await UserModel.findById(userId);
       if (!user) {
-        // console.log('ChatRepository - getChats - User not found');
         throw new Error("User not found");
       }
-      // console.log('ChatRepository - getChats - User found');
 
-      // console.log('ChatRepository - getChats - Finding chats');
       const chats = await ChatModel.find({ participants: userId })
         .sort({ updatedAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean();
-      // console.log('ChatRepository - getChats - Chats found:', chats.length);
 
       const totalItems = await ChatModel.countDocuments({ participants: userId });
       const totalPages = Math.ceil(totalItems / limit);
 
-      // console.log('ChatRepository - getChats - Mapping chats');
       const mappedChats: ChatSummaryDTO[] = await Promise.all(
         chats.map(async (chat) => {
           const unreadCount = await MessageModel.countDocuments({
@@ -75,7 +67,6 @@ export class ChatRepository implements IChatRepository {
             status: MessageStatus.Sent,
           });
 
-          // Find the last message not deleted for this user
           const lastMessage = await MessageModel.findOne({
             chatId: chat._id.toString(),
             deletedFor: { $ne: userId }
@@ -83,7 +74,6 @@ export class ChatRepository implements IChatRepository {
             .sort({ createdAt: -1 })
             .lean();
 
-          // Populate participants with full user objects
           const participantUsers = await UserModel.find({ _id: { $in: chat.participants } })
             .select("firstName lastName email avatar")
             .lean();
@@ -117,7 +107,6 @@ export class ChatRepository implements IChatRepository {
           };
         })
       );
-      // console.log('ChatRepository - getChats - Chats mapped');
 
       const result = {
         data: mappedChats,
@@ -125,7 +114,6 @@ export class ChatRepository implements IChatRepository {
         totalPages,
         currentPage: page,
       };
-      // console.log('ChatRepository - getChats - Returning result');
       return result;
     } catch (error) {
       console.error("Error in getChats repository:", error);
@@ -141,7 +129,6 @@ export class ChatRepository implements IChatRepository {
       const { userId, query, page, limit } = params;
       const skip = (page - 1) * limit;
 
-      // First, find matching users/faculty
       const userSearchQuery = {
         _id: { $ne: userId },
         $or: [
@@ -153,7 +140,6 @@ export class ChatRepository implements IChatRepository {
 
       console.log('User search query:', JSON.stringify(userSearchQuery, null, 2));
 
-      // Search in both collections
       const [users, faculty] = await Promise.all([
         UserModel.find(userSearchQuery).select('_id firstName lastName email profilePicture').lean(),
         FacultyModel.find(userSearchQuery).select('_id firstName lastName email profilePicture').lean()
@@ -162,7 +148,6 @@ export class ChatRepository implements IChatRepository {
       console.log('Found users:', users.length);
       console.log('Found faculty:', faculty.length);
 
-      // Get all matching user IDs
       const matchingUserIds = [
         ...users.map(user => user._id.toString()),
         ...faculty.map(faculty => faculty._id.toString())
@@ -170,14 +155,12 @@ export class ChatRepository implements IChatRepository {
 
       console.log('Matching user IDs:', matchingUserIds);
 
-      // Create base query with user's chats
       let searchQuery: any = {
         participants: {
           $in: [userId, ...matchingUserIds]
         }
       };
 
-      // Add message content search if query exists
       if (query && typeof query === 'string' && query.trim().length > 0) {
         searchQuery = {
           ...searchQuery,
@@ -198,7 +181,6 @@ export class ChatRepository implements IChatRepository {
 
       console.log('Found chats:', chats.length);
 
-      // If no chats found, create new chat summaries for the matching users
       if (chats.length === 0 && matchingUserIds.length > 0) {
         const newChats = matchingUserIds.map(userId => ({
           id: `new_${userId}`,
@@ -233,7 +215,6 @@ export class ChatRepository implements IChatRepository {
             status: MessageStatus.Sent,
           });
 
-          // Find the last message not deleted for this user
           const lastMessage = await MessageModel.findOne({
             chatId: chat._id.toString(),
             deletedFor: { $ne: userId }
@@ -241,7 +222,6 @@ export class ChatRepository implements IChatRepository {
             .sort({ createdAt: -1 })
             .lean();
 
-          // Populate participants with full user objects
           const participantUsers = await UserModel.find({ _id: { $in: chat.participants } })
             .select("firstName lastName email avatar")
             .lean();
@@ -296,32 +276,30 @@ export class ChatRepository implements IChatRepository {
 
   async getChatMessages(params: GetChatMessagesRequestDTO): Promise<GetChatMessagesResponseDTO> {
     try {
-      // console.log('ChatRepository - getChatMessages - Params:', params);
       const { chatId, userId, page = 1, limit = 20, before } = params;
       const skip = (page - 1) * limit;
 
-      // Build query for pagination and exclude only messages deleted for this user
       const query: any = {
         chatId,
-        deletedFor: { $ne: userId }
+        $or: [
+          { deletedFor: { $exists: false } },
+          { deletedFor: { $ne: userId } }
+        ]
       };
 
       if (before) {
         query.createdAt = { $lt: new Date(before) };
       }
 
-      // Get messages in ascending order (oldest first)
       const messages = await MessageModel.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean();
 
-      // Get total count for pagination
       const totalItems = await MessageModel.countDocuments(query);
       const totalPages = Math.ceil(totalItems / limit);
 
-      // Map messages and reverse the order to show oldest first
       const mappedMessages: MessageDTO[] = messages
         .reverse()
         .map((message) => ({
@@ -342,7 +320,6 @@ export class ChatRepository implements IChatRepository {
           deletedFor: message.deletedFor || [],
         }));
 
-      // Get the oldest message timestamp for cursor-based pagination
       const oldestMessageTimestamp = messages.length > 0
         ? messages[messages.length - 1].createdAt
         : null;
@@ -364,8 +341,12 @@ export class ChatRepository implements IChatRepository {
   async sendMessage(params: SendMessageRequestDTO): Promise<void> {
     const { chatId, senderId, content, type, attachments } = params;
     const chat = await ChatModel.findById(chatId);
-    if (chat && chat.blockedUsers && chat.blockedUsers.includes(senderId)) {
-      throw new Error('You are blocked and cannot send messages in this chat.');
+    if (!chat) throw new Error('Chat not found');
+    if (chat.type === 'direct') {
+      const receiverId = chat.participants.find((id: string) => id !== senderId);
+      if (receiverId && chat.blockedUsers.some((entry: any) => entry.blocker === receiverId && entry.blocked === senderId)) {
+        throw new Error('You are blocked and cannot send messages to this user.');
+      }
     }
     const message = await MessageModel.create({
       chatId,
@@ -444,8 +425,13 @@ export class ChatRepository implements IChatRepository {
       return null;
     }
 
-    // Only fetch messages not deleted for this user
-    const messages = await MessageModel.find({ chatId, deletedFor: { $ne: userId } })
+    const messages = await MessageModel.find({
+      chatId,
+      $or: [
+        { deletedFor: { $exists: false } },
+        { deletedFor: { $ne: userId } }
+      ]
+    })
       .sort({ createdAt: -1 })
       .limit(50)
       .lean();
@@ -497,10 +483,8 @@ export class ChatRepository implements IChatRepository {
     const { query, page = 1, limit = 20, userId } = params;
     const skip = (page - 1) * limit;
 
-    // Ensure query is a string and escape special characters
     const searchQuery = String(query).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-    // Search in both User and Faculty collections
     const [users, faculty] = await Promise.all([
       UserModel.find({
         _id: { $ne: userId },
@@ -529,7 +513,6 @@ export class ChatRepository implements IChatRepository {
         .lean()
     ]);
 
-    // Get total count for pagination
     const [totalUsers, totalFaculty] = await Promise.all([
       UserModel.countDocuments({
         _id: { $ne: userId },
@@ -549,7 +532,6 @@ export class ChatRepository implements IChatRepository {
       })
     ]);
 
-    // Combine and format results
     const results = [
       ...users.map(user => ({
         id: user._id.toString(),
@@ -583,7 +565,6 @@ export class ChatRepository implements IChatRepository {
       console.log('ChatRepository - createChat - Params:', params);
       const { creatorId, participantId, type, name, avatar } = params;
 
-      // Check if a direct chat already exists between these users
       if (type === 'direct') {
         const existingChat = await ChatModel.findOne({
           type: 'direct',
@@ -595,7 +576,6 @@ export class ChatRepository implements IChatRepository {
         }
       }
 
-      // Try to find creator in both User and Faculty models
       const [userCreator, facultyCreator] = await Promise.all([
         UserModel.findById(creatorId),
         FacultyModel.findById(creatorId)
@@ -606,7 +586,6 @@ export class ChatRepository implements IChatRepository {
         throw new Error('Creator not found');
       }
 
-      // Try to find participant in both User and Faculty models
       const [userParticipant, facultyParticipant] = await Promise.all([
         UserModel.findById(participantId),
         FacultyModel.findById(participantId)
@@ -617,7 +596,6 @@ export class ChatRepository implements IChatRepository {
         throw new Error('Participant not found');
       }
 
-      // Create the chat
       const chat = await ChatModel.create({
         type,
         name: type === 'direct' ? `${participant.firstName} ${participant.lastName}` : name,
@@ -658,17 +636,14 @@ export class ChatRepository implements IChatRepository {
         throw new Error('Message not found');
       }
 
-      // Check if user is the sender
       if (message.senderId.toString() !== userId) {
         throw new Error('Not authorized to edit this message');
       }
 
-      // Update message
       message.content = content;
       message.isEdited = true;
       await message.save();
 
-      // Update chat's last message if this was the last message
       const chat = await ChatModel.findById(chatId);
       if (chat?.lastMessage?.id === messageId) {
         await ChatModel.findByIdAndUpdate(chatId, {
@@ -688,34 +663,28 @@ export class ChatRepository implements IChatRepository {
   async deleteMessage(params: DeleteMessageRequestDTO): Promise<void> {
     try {
       const { messageId, userId, deleteForEveryone } = params;
-
+      console.log('[deleteMessage] params:', params);
       const message = await MessageModel.findOne({ _id: messageId });
       if (!message) {
+        console.error('[deleteMessage] Message not found:', messageId);
         throw new Error('Message not found');
       }
-
-      // Check if user is the sender for deleteForEveryone
       if (deleteForEveryone && message.senderId.toString() !== userId) {
+        console.error('[deleteMessage] Not authorized to delete for everyone:', { messageId, userId, senderId: message.senderId });
         throw new Error('Not authorized to delete for everyone');
       }
-
       if (deleteForEveryone) {
-        // Delete for everyone
         message.isDeleted = true;
         message.deletedForEveryone = true;
-        // Do NOT change content or attachments
       } else {
-        // Delete for me
         if (!message.deletedFor) {
           message.deletedFor = [];
         }
-        message.deletedFor.push(userId);
-        message.isDeleted = true;
+        if (!message.deletedFor.includes(userId)) {
+          message.deletedFor.push(userId);
+        }
       }
-
       await message.save();
-
-      // Update chat's last message if this was the last message
       const chat = await ChatModel.findById(message.chatId);
       if (chat?.lastMessage?.id === messageId) {
         await ChatModel.findByIdAndUpdate(message.chatId, {
@@ -728,7 +697,7 @@ export class ChatRepository implements IChatRepository {
         });
       }
     } catch (error) {
-      console.error('Error in deleteMessage repository:', error);
+      console.error('Error in deleteMessage repository:', error, '\nParams:', params);
       throw error;
     }
   }
@@ -775,9 +744,7 @@ export class ChatRepository implements IChatRepository {
   async removeGroupMember(params: RemoveGroupMemberRequestDTO): Promise<void> {
     const { chatId, userId, removedBy } = params;
     try {
-      console.log('removeGroupMember - Looking for chat with id:', chatId, 'type:', typeof chatId, 'length:', chatId);
       const chat = await ChatModel.findById(chatId);
-      console.log('removeGroupMember - Chat found:', chat);
       if (!chat) throw new Error('Chat not found');
 
       if (chat.type !== ChatType.Group) {
@@ -912,7 +879,6 @@ export class ChatRepository implements IChatRepository {
       console.log('ChatRepository - createGroupChat - Params:', params);
       const { creatorId, name, participants, description, settings } = params;
 
-      // Verify creator exists
       const [userCreator, facultyCreator] = await Promise.all([
         UserModel.findById(creatorId),
         FacultyModel.findById(creatorId)
@@ -923,7 +889,6 @@ export class ChatRepository implements IChatRepository {
         throw new Error('Creator not found');
       }
 
-      // Verify all participants exist
       const [userParticipants, facultyParticipants] = await Promise.all([
         UserModel.find({ _id: { $in: participants } }),
         FacultyModel.find({ _id: { $in: participants } })
@@ -934,10 +899,8 @@ export class ChatRepository implements IChatRepository {
         throw new Error('One or more participants not found');
       }
 
-      // Ensure creator is included in participants
       const finalParticipants = [...new Set([...participants, creatorId])];
 
-      // Create the group chat
       const chat = await ChatModel.create({
         type: 'group',
         name,
@@ -979,10 +942,8 @@ export class ChatRepository implements IChatRepository {
       if (chat.type !== ChatType.Group) throw new Error('Can only update admins for group chats');
       if (!chat.admins.includes(updatedBy)) throw new Error('Only admins can update admin status');
       if (isAdmin) {
-        // Add user to admins
         await ChatModel.findByIdAndUpdate(chatId, { $addToSet: { admins: userId } });
       } else {
-        // Remove user from admins
         await ChatModel.findByIdAndUpdate(chatId, { $pull: { admins: userId } });
       }
     } catch (error) {
@@ -1014,7 +975,6 @@ export class ChatRepository implements IChatRepository {
   async leaveGroup(params: { chatId: string; userId: string }): Promise<void> {
     try {
       const { chatId, userId } = params;
-      // Remove the user from participants and admins
       await ChatModel.findByIdAndUpdate(chatId, {
         $pull: {
           participants: userId,
@@ -1029,38 +989,44 @@ export class ChatRepository implements IChatRepository {
 
   async deleteChat(params: DeleteChatRequestDTO): Promise<void> {
     const { chatId, userId } = params;
-    console.log('[deleteChat] chatId:', chatId, 'userId:', userId);
     const chat = await ChatModel.findById(chatId);
     if (!chat) throw new Error('Chat not found');
     if (!chat.participants.map(String).includes(String(userId))) throw new Error('Not authorized');
     await ChatModel.findByIdAndDelete(chatId);
     await MessageModel.deleteMany({ chatId });
-    console.log('[deleteChat] Chat and messages deleted for chatId:', chatId);
   }
 
   async blockChat(params: BlockChatRequestDTO): Promise<void> {
     const { chatId, userId } = params;
-    console.log('[blockChat] chatId:', chatId, 'userId:', userId);
     const chat = await ChatModel.findById(chatId);
     if (!chat) throw new Error('Chat not found');
-    if (chat.blockedUsers.includes(userId)) {
-      // Unblock
-      await ChatModel.findByIdAndUpdate(chatId, { $pull: { blockedUsers: userId } });
-      console.log('[blockChat] User unblocked in chatId:', chatId);
+    if (chat.type === 'direct') {
+      const otherUserId = chat.participants.find((id: string) => id !== userId);
+      if (otherUserId) {
+        // Check if already blocked
+        const isBlocked = chat.blockedUsers?.some((entry: any) => entry.blocker === userId && entry.blocked === otherUserId);
+        if (isBlocked) {
+          // Unblock: remove the block entry
+          await ChatModel.findByIdAndUpdate(chatId, {
+            $pull: { blockedUsers: { blocker: userId, blocked: otherUserId } }
+          });
+        } else {
+          // Block: add the block entry
+          await ChatModel.findByIdAndUpdate(chatId, {
+            $addToSet: { blockedUsers: { blocker: userId, blocked: otherUserId } }
+          });
+        }
+      }
     } else {
-      // Block
-      await ChatModel.findByIdAndUpdate(chatId, { $addToSet: { blockedUsers: userId } });
-      console.log('[blockChat] User blocked in chatId:', chatId);
+      // For group, keep previous logic (if needed)
     }
   }
 
   async clearChat(params: ClearChatRequestDTO): Promise<void> {
     const { chatId, userId } = params;
-    console.log('[clearChat] chatId:', chatId, 'userId:', userId);
     await MessageModel.updateMany(
       { chatId },
       { $addToSet: { deletedFor: userId } }
     );
-    console.log('[clearChat] Messages cleared for userId:', userId, 'in chatId:', chatId);
   }
 } 

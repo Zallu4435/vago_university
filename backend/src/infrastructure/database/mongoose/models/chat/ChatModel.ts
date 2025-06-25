@@ -22,7 +22,7 @@ export interface IChat extends Document {
     onlyAdminsCanAddMembers: boolean;
     onlyAdminsCanChangeInfo: boolean;
   };
-  blockedUsers: string[];
+  blockedUsers: { blocker: string; blocked: string }[];
   userChatMeta: {
     userId: string;
     clearedAt?: Date; // timestamp for when the user cleared chat
@@ -58,7 +58,12 @@ const chatSchema = new Schema<IChat>(
       onlyAdminsCanAddMembers: { type: Boolean, default: false },
       onlyAdminsCanChangeInfo: { type: Boolean, default: false }
     },
-    blockedUsers: [{ type: String }],
+    blockedUsers: [
+      {
+        blocker: { type: String, required: true },
+        blocked: { type: String, required: true }
+      }
+    ],
     userChatMeta: [
       {
         userId: { type: String, required: true },

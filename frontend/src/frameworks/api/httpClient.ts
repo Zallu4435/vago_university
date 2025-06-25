@@ -20,7 +20,7 @@ httpClient.interceptors.request.use(
     
     // Handle video uploads with longer timeout
     if (config.data instanceof FormData && config.url?.includes('/videos')) {
-      console.log('🎬 Video upload detected, setting extended timeout');
+      // console.log('🎬 Video upload detected, setting extended timeout');
       config.timeout = 60000; // 1 minute for video uploads
       delete config.headers['Content-Type']; // Let browser set multipart/form-data with boundary
     } else if (config.data instanceof FormData) {
@@ -29,7 +29,7 @@ httpClient.interceptors.request.use(
       config.headers['Content-Type'] = 'application/json';
     }
     
-    console.log('Request:', config.method, config.url, config.headers, config.data instanceof FormData ? 'FormData' : config.data);
+    // console.log('Request:', config.method, config.url, config.headers, config.data instanceof FormData ? 'FormData' : config.data);
     return config;
   },
   (error) => Promise.reject(error)
@@ -37,11 +37,11 @@ httpClient.interceptors.request.use(
 
 httpClient.interceptors.response.use(
   (response) => {
-    console.log('Response received:', {
-      status: response.status,
-      data: response.data,
-      headers: response.headers
-    });
+    // console.log('Response received:', {
+    //   status: response.status,
+    //   data: response.data,
+    //   headers: response.headers
+    // });
     return response;
   },
   async (error) => {

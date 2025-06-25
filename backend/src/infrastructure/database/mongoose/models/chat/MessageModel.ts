@@ -7,6 +7,7 @@ export interface IMessage extends Document {
   content: string;
   type: MessageType;
   status: MessageStatus;
+  isDeleted: boolean;
   deletedFor: string[]; // Array of user IDs for whom the message is deleted
   deletedForEveryone: boolean;
   reactions: {
@@ -52,6 +53,7 @@ const messageSchema = new Schema<IMessage>(
       enum: Object.values(MessageStatus),
       default: MessageStatus.Sent
     },
+    isDeleted: { type: Boolean, default: false },
     deletedFor: [{ type: String }],
     deletedForEveryone: { type: Boolean, default: false },
     reactions: [{

@@ -13,6 +13,8 @@ interface ChatHeaderProps {
   onBlock: () => void;
   onClearChat: () => void;
   currentUserId: string;
+  isBlockedByMe: boolean;
+  isBlockedMe: boolean;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -25,12 +27,13 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onDeleteChat,
   onBlock,
   onClearChat,
-  currentUserId
+  currentUserId,
+  isBlockedByMe,
+  isBlockedMe
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const isOnline = chat.participants.some(p => p.isOnline);
-  const isBlocked = chat.blockedUsers?.includes(currentUserId);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -47,8 +50,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [menuOpen]);
-
-  console.log('ChatHeader chat:', chat);
 
   return (
     <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#202c33]">
@@ -83,7 +84,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
               : isOnline ? 'Online' : 'Offline'
             }
           </p>
-          {isBlocked && (
+          {isBlockedByMe && (
             <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-red-100 text-red-600 rounded">Blocked</span>
           )}
         </div>
@@ -115,7 +116,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           </button>
         )}
         <div className="relative" ref={menuRef}>
-          {chat.type === 'direct' && (
+          {chat.type === 'direct' && !isBlockedMe && (
             <button
               className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942] transition-colors duration-200"
               title="More options"
@@ -124,7 +125,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
               <FiMoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </button>
           )}
-          {menuOpen && chat.type === 'direct' && (
+          {menuOpen && chat.type === 'direct' && !isBlockedMe && (
             <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-[#202c33] border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
               <>
                 <button
@@ -137,7 +138,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                   className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-[#2a3942]"
                   onClick={() => { setMenuOpen(false); onBlock(); }}
                 >
-                  {isBlocked ? `Unblock User` : `Block User`}
+                  {isBlockedByMe ? 'Unblock User' : 'Block User'}
                 </button>
                 <button
                   className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-[#2a3942]"

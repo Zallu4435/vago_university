@@ -38,8 +38,8 @@ export class SocketService {
     // console.log('Chat namespace created at /chat');
 
     this.io.on('connection', (socket) => {
-      // console.log('\n=== Main Socket Connection ===');
-      // console.log('Socket ID:', socket.id);
+      console.log('\n=== Main Socket Connection ===');
+      console.log('Socket ID:', socket.id);
       // console.log('Connection details:', {
       //   handshake: {
       //     address: socket.handshake.address,
@@ -125,9 +125,9 @@ export class SocketService {
     });
 
     this.chatNamespace.on("connection", (socket) => {
-      // console.log('\n=== New Chat Namespace Connection ===');
-      // console.log('Socket ID:', socket.id);
-      // console.log('User Data:', socket.data.user);
+      console.log('\n=== New Chat Namespace Connection ===');
+      console.log('Socket ID:', socket.id);
+      console.log('User Data:', socket.data.user);
       // console.log('Connection state:', {
       //   connected: socket.connected,
       //   disconnected: socket.disconnected,
@@ -217,7 +217,8 @@ export class SocketService {
       });
 
       socket.on("disconnect", (reason) => {
-        // console.log('\n=== Socket Disconnection ===');
+        console.log('\n=== Socket Disconnection ===');
+        console.log('Socket ID:', socket.id, 'Reason:', reason);
         const userId = this.getUserIdBySocketId(socket.id);
         if (userId) {
           this.userSockets.delete(userId);

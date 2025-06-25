@@ -28,6 +28,7 @@ export interface ChatProps {
   settings?: GroupSettings;
   rules?: string;
   joinLink?: string;
+  blockedUsers?: { blocker: string; blocked: string }[];
 }
 
 export enum ChatType {
@@ -112,6 +113,10 @@ export class Chat {
       };
     }
     return undefined;
+  }
+
+  get blockedUsers(): { blocker: string; blocked: string }[] | undefined {
+    return this.props.blockedUsers;
   }
 
   updateLastMessage(message: Message): void {

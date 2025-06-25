@@ -46,7 +46,6 @@ export const ChatComponent: React.FC = () => {
   const [messagesPage, setMessagesPage] = useState(1);
   const [allMessages, setAllMessages] = useState<Message[]>([]);
   const [chatsPage, setChatsPage] = useState(1);
-  const [allChats, setAllChats] = useState<Chat[]>([]);
   const [hasMoreChats, setHasMoreChats] = useState(true);
   const [loadingMoreChats, setLoadingMoreChats] = useState(false);
   const scrollState = useRef({
@@ -82,9 +81,12 @@ export const ChatComponent: React.FC = () => {
 
   const flatChat = chatDetails?.chat ?? chatDetails;
 
-  console.log(flatChat, "flatchat")
-
-  const isBlocked = flatChat?.blockedUsers?.includes(currentUserId);
+  const isBlockedByMe = Array.isArray(flatChat?.blockedUsers) && flatChat.blockedUsers.some(
+    (entry: { blocker: string; blocked: string }) => entry.blocker === currentUserId
+  );
+  const isBlockedMe = Array.isArray(flatChat?.blockedUsers) && flatChat.blockedUsers.some(
+    (entry: { blocker: string; blocked: string }) => entry.blocked === currentUserId
+  );
 
   useEffect(() => {
     setLoading(isLoadingChats);
@@ -106,21 +108,6 @@ export const ChatComponent: React.FC = () => {
       }
     }
   }, [messages, messagesPage]);
-
-  useEffect(() => {
-    const hasMoreChatsResponse = chatsResponse?.hasMore || false;
-    if (chatsPage === 1 && chats.length > 0) {
-      setAllChats(chats);
-      setHasMoreChats(hasMoreChatsResponse);
-    } else if (chatsPage > 1) {
-      if (chats.length > 0) {
-        setAllChats(prev => [...prev, ...chats]);
-        setHasMoreChats(hasMoreChatsResponse);
-      } else {
-        setHasMoreChats(false);
-      }
-    }
-  }, [chats, chatsPage, chatsResponse?.hasMore]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight } = e.currentTarget;
@@ -272,7 +259,6 @@ export const ChatComponent: React.FC = () => {
 
   const handleForwardMessage = async (messageId: string) => {
     const message = messages.find((m: Message) => m.id === messageId);
-    if (message) console.log('Forwarding message:', message); // TODO: Implement forward logic
   };
 
   const handleSendMessage = async (message: string, fileOrFiles?: File | File[], replyTo?: Message) => {
@@ -506,15 +492,29 @@ export const ChatComponent: React.FC = () => {
         await chatMutations.clearChat.mutateAsync(flatChat.id);
         setAllMessages([]); // Instantly clear messages in UI
         // Optionally update chat list to show no last message for this chat
-        setAllChats(prevChats => prevChats.map(chat =>
-          chat.id === flatChat.id ? { ...chat, lastMessage: undefined } : chat
-        ));
         toast.success('Chat cleared');
       } catch (error) {
         toast.error('Failed to clear chat');
       }
     }
   };
+
+  useEffect(() => {
+    if (!selectedChatId || !socketRef.current || !currentUser?.id) return;
+
+    const handleNewMessage = (message: any) => {
+      if (message.chatId === selectedChatId && message.senderId !== currentUser.id) {
+        console.log('Calling markMessagesAsRead for chatId:', selectedChatId);
+        chatMutations.markMessagesAsRead.mutateAsync(selectedChatId);
+      }
+    };
+
+    socketRef.current.on('message', handleNewMessage);
+
+    return () => {
+      socketRef.current.off('message', handleNewMessage);
+    };
+  }, [selectedChatId, currentUser?.id]);
 
   if (loading) return <div className={`flex h-screen items-center justify-center ${styles.background}`}><div className="animate-spin h-12 w-12 border-t-2 border-b-2 border-blue-500 rounded-full" /></div>;
   if (socketError) return (
@@ -545,7 +545,7 @@ export const ChatComponent: React.FC = () => {
             className={`absolute inset-0 top-0 transition-transform duration-300 ${showSearchBar ? '-translate-x-full opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'}`}
           >
             <ChatList
-              chats={allChats}
+              chats={chats}
               styles={styles}
               selectedChatId={selectedChatId || ''}
               onChatSelect={handleChatSelect}
@@ -648,7 +648,6 @@ export const ChatComponent: React.FC = () => {
             onClose={() => setShowCreateGroup(false)}
             onCreateGroup={async (params) => {
               try {
-                console.log('ChatComponent: onCreateGroup called with:', params);
                 let newGroup;
                 if (params.avatar) {
                   const formData = new FormData();
@@ -658,10 +657,8 @@ export const ChatComponent: React.FC = () => {
                   formData.append('participants', JSON.stringify(params.participants));
                   if (params.settings) formData.append('settings', JSON.stringify(params.settings));
                   formData.append('avatar', params.avatar);
-                  console.log('ChatComponent: Submitting FormData to createGroupChat');
                   newGroup = await chatMutations.createGroupChat.mutateAsync(formData);
                 } else {
-                  console.log('ChatComponent: Submitting JSON to createGroupChat');
                   newGroup = await chatMutations.createGroupChat.mutateAsync({ ...params, creatorId: currentUser?.id || '' });
                 }
                 setSelectedChatId(newGroup.id);
@@ -707,9 +704,14 @@ export const ChatComponent: React.FC = () => {
                 onBlock={handleBlock}
                 onClearChat={handleClearChat}
                 currentUserId={currentUserId || ''}
+                isBlockedByMe={isBlockedByMe}
+                isBlockedMe={isBlockedMe}
               />
-              {isBlocked && (
+              {isBlockedByMe && (
                 <div className="text-red-500 text-center p-2">You blocked this user. Unblock to send messages.</div>
+              )}
+              {!isBlockedByMe && isBlockedMe && (
+                <div className="text-red-500 text-center p-2">You are blocked and cannot send messages.</div>
               )}
               <div className="flex-1 overflow-y-auto p-4" onScroll={handleScroll} ref={scrollRef}>
                 {isLoadingMessages && messagesPage === 1 ? (
@@ -717,25 +719,35 @@ export const ChatComponent: React.FC = () => {
                     <div className="animate-spin h-8 w-8 border-t-2 border-b-2 border-blue-500 rounded-full" />
                   </div>
                 ) : allMessages.length > 0 ? (
-                  allMessages.map((message: Message, index: number) => {
-                    const isLast = index === allMessages.length - 1;
-                    return (
-                      <ChatMessage
-                        key={message.id}
-                        ref={isLast ? messagesEndRef : undefined}
-                        message={message}
-                        previousMessage={index > 0 ? allMessages[index - 1] : undefined}
-                        styles={styles}
-                        onReaction={handleReaction}
-                        onRemoveReaction={handleRemoveReaction}
-                        onDelete={handleDeleteMessage}
-                        onEdit={handleEditMessage}
-                        onReply={handleReplyToMessage}
-                        onForward={handleForwardMessage}
-                        currentUserId={currentUserId || ''}
-                      />
-                    );
-                  })
+                  allMessages
+                    .filter(message => {
+                      if (message.isDeleted && message.deletedForEveryone && message.senderId === currentUserId) {
+                        return false;
+                      }
+                      if (Array.isArray(message.deletedFor) && currentUserId && message.deletedFor.includes(currentUserId)) {
+                        return false;
+                      }
+                      return message.id && message.id !== 'false' && typeof message.id === 'string';
+                    })
+                    .map((message: Message, index: number) => {
+                      const isLast = index === allMessages.length - 1;
+                      return (
+                        <ChatMessage
+                          key={message.id}
+                          ref={isLast ? messagesEndRef : undefined}
+                          message={message}
+                          previousMessage={index > 0 ? allMessages[index - 1] : undefined}
+                          styles={styles}
+                          onReaction={handleReaction}
+                          onRemoveReaction={handleRemoveReaction}
+                          onDelete={handleDeleteMessage}
+                          onEdit={handleEditMessage}
+                          onReply={handleReplyToMessage}
+                          onForward={handleForwardMessage}
+                          currentUserId={currentUserId || ''}
+                        />
+                      );
+                    })
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-center p-8 text-gray-500 dark:text-gray-400">
                     <FiMessageSquare size={60} className="mb-4" />
@@ -753,7 +765,7 @@ export const ChatComponent: React.FC = () => {
                 onCancelReply={() => setReplyToMessage(null)}
                 selectedChatId={selectedChatId || ''}
                 currentUserId={currentUserId || ''}
-                disabled={isBlocked}
+                disabled={isBlockedByMe || isBlockedMe}
               />
             </>
           ) : pendingUser ? (

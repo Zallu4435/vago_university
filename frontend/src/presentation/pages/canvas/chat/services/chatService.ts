@@ -81,10 +81,15 @@ class ChatService {
     }
   }
 
-  async deleteMessage(messageId: string, deleteForMeOnly = false): Promise<void> {
+  async deleteMessage(chatId: string, messageId: string, deleteForEveryone: boolean): Promise<void> {
+    if (!messageId || messageId === 'false' || typeof messageId !== 'string') {
+      console.error('[chatService.deleteMessage] Invalid messageId:', messageId);
+      throw new Error('Invalid message selected for deletion.');
+    }
     try {
-      const endpoint = deleteForMeOnly ? `/communication/messages/${messageId}` : `/communication/messages/${messageId}`;
-      await httpClient.delete(endpoint);
+      await httpClient.delete(`/chats/${chatId}/messages/${messageId}`, {
+        data: { deleteForEveryone }
+      });
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to delete message');
     }

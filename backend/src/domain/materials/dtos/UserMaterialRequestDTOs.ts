@@ -30,16 +30,4 @@ export interface ToggleLikeRequestDTO {
 export interface DownloadMaterialRequestDTO {
   userId: string;
   materialId: string;
-}
-
-export interface GetUserBookmarkedMaterialsRequestDTO {
-  userId: string;
-  page: number;
-  limit: number;
-}
-
-export interface GetUserLikedMaterialsRequestDTO {
-  userId: string;
-  page: number;
-  limit: number;
 } 

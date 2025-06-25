@@ -5,12 +5,12 @@ export const assignmentService = {
   // Assignment CRUD operations
   getAssignments: async () => {
     const response = await httpClient.get('/faculty/assignments');
-    return response.data;
+    return response.data.data;
   },
 
   getAssignmentById: async (id: string) => {
     const response = await httpClient.get(`/faculty/assignments/${id}`);
-    return response.data;
+    return response.data.data;
   },
 
   createAssignment: async (assignment: NewAssignment) => {
@@ -47,9 +47,29 @@ export const assignmentService = {
     }
   },
 
-  updateAssignment: async (id: string, assignment: Partial<Assignment>) => {
-    const response = await httpClient.put(`/faculty/assignments/${id}`, assignment);
-    return response.data;
+  updateAssignment: async (id: string, assignment: Partial<Assignment> & { files?: File[] }) => {
+    // If files are present, use FormData
+    if (assignment.files && assignment.files.length > 0) {
+      const formData = new FormData();
+      if (assignment.title) formData.append('title', assignment.title);
+      if (assignment.subject) formData.append('subject', assignment.subject);
+      if (assignment.dueDate) formData.append('dueDate', assignment.dueDate);
+      if (assignment.maxMarks) formData.append('maxMarks', assignment.maxMarks.toString());
+      if (assignment.description) formData.append('description', assignment.description);
+      assignment.files.forEach((file, index) => {
+        formData.append('files', file);
+      });
+      const response = await httpClient.put(`/faculty/assignments/${id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } else {
+      // No new files, send as JSON
+      const response = await httpClient.put(`/faculty/assignments/${id}`, assignment);
+      return response.data;
+    }
   },
 
   deleteAssignment: async (id: string) => {
@@ -60,7 +80,7 @@ export const assignmentService = {
   // Submission operations
   getSubmissions: async (assignmentId: string) => {
     const response = await httpClient.get(`/faculty/assignments/${assignmentId}/submissions`);
-    return response.data;
+    return response.data.data;
   },
 
   getSubmissionById: async (assignmentId: string, submissionId: string) => {

@@ -49,8 +49,8 @@ export const diplomaBackendService = {
     async getDiplomas(page: number, limit: number): Promise<{ diplomas: Diploma[]; totalPages: number }> {
         const response = await httpClient.get('/admin/diploma-courses', { params: { page, limit } });
         return {
-            diplomas: response.data.diplomas,
-            totalPages: response.data.totalPages,
+            diplomas: response.data.data.diplomas,
+            totalPages: response.data.data.totalPages,
         };
     },
 
@@ -61,8 +61,8 @@ export const diplomaBackendService = {
 
         const response = await httpClient.get('/admin/vedio/videos', { params });
         return {
-            videos: response.data.data,
-            totalPages: response.data.totalPages,
+            videos: response.data.data.data,
+            totalPages: response.data.data.totalPages,
         };
     },
 
@@ -71,7 +71,7 @@ export const diplomaBackendService = {
         console.log('diplomaBackendService: getVideoById response:', response.data);
         console.log('diplomaBackendService: video object:', response.data.video);
         console.log('diplomaBackendService: video.videoUrl =', response.data.video?.videoUrl);
-        return response.data.video;
+        return response.data.data.video;
     },
 
     async createVideo(category: string, videoData: FormData): Promise<Video> {
@@ -133,7 +133,7 @@ export const diplomaBackendService = {
 
     async getDiplomaDetails(diplomaId: string): Promise<Diploma & { enrolledStudents: Enrollment[] }> {
         const response = await httpClient.get(`/admin/diploma-courses/${diplomaId}`);
-        return response.data.diploma;
+        return response.data.data.diploma;
     },
 
     async getEnrollmentDetails(enrollmentId: string): Promise<Enrollment> {

@@ -16,7 +16,7 @@ class UserService {
       const response = await httpClient.get<AdmissionApiResponse>('/admin/admissions', {
         params: { page, limit, status, program, dateRange, startDate, endDate },
       });
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch admissions');
     }
@@ -25,7 +25,7 @@ class UserService {
   async getAdmissionDetails(id: string): Promise<AdmissionDetails> {
     try {
       const response = await httpClient.get<AdmissionDetails>(`/admin/admissions/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch admission details');
     }

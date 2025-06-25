@@ -11,14 +11,6 @@ userMaterialRoutes.get('/', authMiddleware, (req: Request, res: Response) =>
   expressAdapter(req, res, userMaterialController.getMaterials.bind(userMaterialController))
 );
 
-userMaterialRoutes.get('/bookmarks', authMiddleware, (req: Request, res: Response) =>
-  expressAdapter(req, res, userMaterialController.getBookmarkedMaterials.bind(userMaterialController))
-);
-
-userMaterialRoutes.get('/likes', authMiddleware, (req: Request, res: Response) =>
-  expressAdapter(req, res, userMaterialController.getLikedMaterials.bind(userMaterialController))
-);
-
 userMaterialRoutes.get('/:id', authMiddleware, (req: Request, res: Response) =>
   expressAdapter(req, res, userMaterialController.getMaterialById.bind(userMaterialController))
 );

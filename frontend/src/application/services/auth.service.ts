@@ -29,7 +29,7 @@ class AuthService {
   async loginUser(data: { email: string; password: string }): Promise<LoginResponse> {
     try {
       const response = await httpClient.post<LoginResponse>('/auth/login', data);
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to login');
     }

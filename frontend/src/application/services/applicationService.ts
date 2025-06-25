@@ -38,7 +38,8 @@ class ApplicationService {
   async getApplicationById(userId: string, token: string): Promise<FormData | null> {
     try {
       const response = await applicationController.getApplicationById(userId, token);
-      return response?.draft
+      console.log(response, "popopopo")
+      return response?.data?.draft
     } catch (error: any) {
       console.error('Error fetching application data:', error);
       throw new Error(error.response?.data?.error || error.message || 'Failed to fetch application data');
@@ -111,15 +112,15 @@ class ApplicationService {
   async processPayment(applicationId: string, paymentDetails: any, token: string): Promise<PaymentResult> {
     try {
       const result = await applicationController.processPayment(applicationId, paymentDetails, token);
-      if (!result.paymentId || !result.status) {
+      if (!result.data?.paymentId || !result.data?.status) {
         throw new Error(result.message || 'Invalid payment response');
       }
       return {
-        paymentId: result.paymentId,
-        status: result.status,
-        message: result.message,
-        clientSecret: result.clientSecret,
-        stripePaymentIntentId: result.stripePaymentIntentId,
+        paymentId: result.data?.paymentId,
+        status: result.data?.status,
+        message: result.data?.message,
+        clientSecret: result.data?.clientSecret,
+        stripePaymentIntentId: result.data?.stripePaymentIntentId,
       };
     } catch (error: any) {
       console.error('Error processing payment:', error);
@@ -130,13 +131,13 @@ class ApplicationService {
   async confirmPayment(paymentId: string, stripePaymentIntentId: string, token: string): Promise<PaymentResult> {
     try {
       const result = await applicationController.confirmPayment(paymentId, stripePaymentIntentId, token);
-      if (!result.paymentId || !result.status) {
+      if (!result.data?.paymentId || !result.data?.status) {
         throw new Error(result.message || 'Invalid payment confirmation response');
       }
       return {
-        paymentId: result.paymentId,
-        status: result.status,
-        message: result.message
+        paymentId: result.data?.paymentId,
+        status: result.data?.status,
+        message: result.data?.message
       };
     } catch (error: any) {
       console.error('Error confirming payment:', error);

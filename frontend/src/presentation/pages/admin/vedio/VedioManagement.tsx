@@ -91,15 +91,15 @@ const VideoManagementPage = () => {
   };
 
   const filteredVideos = (videosData?.videos || [])
-    .filter(video => 
+    ?.filter(video => 
       filters.category ? video.diploma?.category === filters.category : true
     )
-    .filter(video => 
+    ?.filter(video => 
       video.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
   const totalPages = videosData?.totalPages || Math.ceil(filteredVideos.length / itemsPerPage);
-  const paginatedVideos = filteredVideos.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+  const paginatedVideos = filteredVideos?.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   const tabs = [
     { 

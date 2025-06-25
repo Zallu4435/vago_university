@@ -16,7 +16,11 @@ export interface IHttpRequest {
 
 export interface IHttpResponse {
   statusCode: number;
-  body: any;
+  body: {
+    error?: string;
+    data?: any;
+    details?: any;
+  };
 }
 
 export class HttpRequest implements IHttpRequest {
@@ -38,11 +42,11 @@ export class HttpRequest implements IHttpRequest {
 }
 
 export interface IHttpErrors {
-  error_400(message?: string): IHttpResponse;
-  error_401(): IHttpResponse;
-  error_403(): IHttpResponse;
-  error_404(): IHttpResponse;
-  error_500(): IHttpResponse;
+  error_400(message?: string, details?: any): IHttpResponse;
+  error_401(message?: string, details?: any): IHttpResponse;
+  error_403(message?: string, details?: any): IHttpResponse;
+  error_404(message?: string, details?: any): IHttpResponse;
+  error_500(message?: string, details?: any): IHttpResponse;
 }
 
 export interface IHttpSuccess {
@@ -51,29 +55,29 @@ export interface IHttpSuccess {
 }
 
 export class HttpErrors implements IHttpErrors {
-  error_400(message?: string): IHttpResponse {
-    return { statusCode: 400, body: { error: message || "Bad Request" } };
+  error_400(message = "Bad Request", details?: any): IHttpResponse {
+    return { statusCode: 400, body: { error: message, details } };
   }
-  error_401(): IHttpResponse {
-    return { statusCode: 401, body: { error: "Unauthorized" } };
+  error_401(message = "Unauthorized", details?: any): IHttpResponse {
+    return { statusCode: 401, body: { error: message, details } };
   }
-  error_403(): IHttpResponse {
-    return { statusCode: 403, body: { error: "Forbidden" } };
+  error_403(message = "Forbidden", details?: any): IHttpResponse {
+    return { statusCode: 403, body: { error: message, details } };
   }
-  error_404(): IHttpResponse {
-    return { statusCode: 404, body: { error: "Not Found" } };
+  error_404(message = "Not Found", details?: any): IHttpResponse {
+    return { statusCode: 404, body: { error: message, details } };
   }
-  error_500(): IHttpResponse {
-    return { statusCode: 500, body: { error: "Internal Server Error" } };
+  error_500(message = "Internal Server Error", details?: any): IHttpResponse {
+    return { statusCode: 500, body: { error: message, details } };
   }
 }
 
 export class HttpSuccess implements IHttpSuccess {
   success_200(data: any): IHttpResponse {
-    return { statusCode: 200, body: data };
+    return { statusCode: 200, body: { data } };
   }
   success_201(data: any): IHttpResponse {
-    return { statusCode: 201, body: data };
+    return { statusCode: 201, body: { data } };
   }
 }
 

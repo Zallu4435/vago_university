@@ -236,8 +236,8 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
   return {
     inboxMessages: (inboxQuery.data?.messages || []).map(mapMessage),
     sentMessages: (sentQuery.data?.messages || []).map(mapMessage),
-    totalInboxPages: inboxQuery.data?.pagination.totalPages || 1,
-    totalSentPages: sentQuery.data?.pagination.totalPages || 1,
+    totalInboxPages: inboxQuery.data?.totalPages || 1,
+    totalSentPages: sentQuery.data?.totalPages || 1,
     isLoadingInbox: inboxQuery.isLoading,
     isLoadingSent: sentQuery.isLoading,
     page,

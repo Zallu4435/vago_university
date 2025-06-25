@@ -33,29 +33,12 @@ export const useStudyMaterials = (filters: GetMaterialsFilters = {}) => {
     },
   });
 
-  const { data: bookmarkedMaterials, isLoading: isLoadingBookmarks } = useQuery({
-    queryKey: ['bookmarkedMaterials'],
-    queryFn: async () => {
-      const response = await userMaterialService.getBookmarkedMaterials();
-      return response;
-    },
-  });
-
-  const { data: likedMaterials, isLoading: isLoadingLikes } = useQuery({
-    queryKey: ['likedMaterials'],
-    queryFn: async () => {
-      const response = await userMaterialService.getLikedMaterials();
-      return response;
-    },
-  });
-
   const bookmarkMutation = useMutation({
     mutationFn: async (materialId: string) => {
       const response = await userMaterialService.toggleBookmark(materialId);
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bookmarkedMaterials'] });
       queryClient.invalidateQueries({ queryKey: ['materials'] });
     },
   });
@@ -66,7 +49,6 @@ export const useStudyMaterials = (filters: GetMaterialsFilters = {}) => {
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['likedMaterials'] });
       queryClient.invalidateQueries({ queryKey: ['materials'] });
     },
   });
@@ -103,10 +85,8 @@ export const useStudyMaterials = (filters: GetMaterialsFilters = {}) => {
   return {
     materials: materialsData?.materials || [],
     totalPages: materialsData?.totalPages || 0,
-    isLoading: isLoadingMaterials || isLoadingBookmarks || isLoadingLikes,
+    isLoading: isLoadingMaterials,
     error: materialsError,
-    bookmarkedMaterials: bookmarkedMaterials?.materials || [],
-    likedMaterials: likedMaterials?.materials || [],
     getMaterials: () => queryClient.invalidateQueries({ queryKey: ['materials'] }),
     downloadMaterial: (materialId: string) => downloadMutation.mutate(materialId),
     toggleBookmark: (materialId: string) => bookmarkMutation.mutate(materialId),

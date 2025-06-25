@@ -21,8 +21,7 @@ export enum AdmissionStatus {
 
 export enum RejectedBy {
   ADMIN = "admin",
-  USER = "user",
-  NULL = null,
+  USER = "user"
 }
 
 interface AdmissionDraftProps {
@@ -49,32 +48,32 @@ interface AdmissionProps extends AdmissionDraftProps {
 }
 
 export class AdmissionDraft {
-  private _applicationId: string;
-  private _registerId: mongoose.Types.ObjectId;
-  private _personal: any;
-  private _choiceOfStudy: any[];
-  private _education: any;
-  private _achievements: any;
-  private _otherInformation: any;
-  private _documents: any;
-  private _declaration: any;
-  private _completedSteps: string[];
-  private _createdAt?: Date;
-  private _updatedAt?: Date;
+  private applicationId: string;
+  private registerId: mongoose.Types.ObjectId;
+  private personal: any;
+  private choiceOfStudy: any[];
+  private education: any;
+  private achievements: any;
+  private otherInformation: any;
+  private documents: any;
+  private declaration: any;
+  private completedSteps: string[];
+  private createdAt?: Date;
+  private updatedAt?: Date;
 
   constructor(props: AdmissionDraftProps) {
-    this._applicationId = props.applicationId;
-    this._registerId = props.registerId;
-    this._personal = props.personal || {};
-    this._choiceOfStudy = props.choiceOfStudy || [];
-    this._education = props.education || {};
-    this._achievements = props.achievements || {};
-    this._otherInformation = props.otherInformation || {};
-    this._documents = props.documents || {};
-    this._declaration = props.declaration || {};
-    this._completedSteps = props.completedSteps || [];
-    this._createdAt = props.createdAt;
-    this._updatedAt = props.updatedAt;
+    this.applicationId = props.applicationId;
+    this.registerId = props.registerId;
+    this.personal = props.personal || {};
+    this.choiceOfStudy = props.choiceOfStudy || [];
+    this.education = props.education || {};
+    this.achievements = props.achievements || {};
+    this.otherInformation = props.otherInformation || {};
+    this.documents = props.documents || {};
+    this.declaration = props.declaration || {};
+    this.completedSteps = props.completedSteps || [];
+    this.createdAt = props.createdAt;
+    this.updatedAt = props.updatedAt;
   }
 
   static create(props: AdmissionDraftProps): AdmissionDraft {
@@ -87,34 +86,34 @@ export class AdmissionDraft {
     return new AdmissionDraft(props);
   }
 
-  get applicationId(): string { return this._applicationId; }
-  get registerId(): mongoose.Types.ObjectId { return this._registerId; }
-  get personal(): any { return this._personal; }
-  get choiceOfStudy(): any[] { return this._choiceOfStudy; }
-  get education(): any { return this._education; }
-  get achievements(): any { return this._achievements; }
-  get otherInformation(): any { return this._otherInformation; }
-  get documents(): any { return this._documents; }
-  get declaration(): any { return this._declaration; }
-  get completedSteps(): string[] { return this._completedSteps; }
-  get createdAt(): Date | undefined { return this._createdAt; }
-  get updatedAt(): Date | undefined { return this._updatedAt; }
+  getApplicationId(): string { return this.applicationId; }
+  getRegisterId(): mongoose.Types.ObjectId { return this.registerId; }
+  getPersonal(): any { return this.personal; }
+  getChoiceOfStudy(): any[] { return this.choiceOfStudy; }
+  getEducation(): any { return this.education; }
+  getAchievements(): any { return this.achievements; }
+  getOtherInformation(): any { return this.otherInformation; }
+  getDocuments(): any { return this.documents; }
+  getDeclaration(): any { return this.declaration; }
+  getCompletedSteps(): string[] { return this.completedSteps; }
+  getCreatedAt(): Date | undefined { return this.createdAt; }
+  getUpdatedAt(): Date | undefined { return this.updatedAt; }
 }
 
 export class Admission extends AdmissionDraft {
-  private _paymentId: string;
-  private _status: AdmissionStatus;
-  private _rejectedBy: RejectedBy | null;
-  private _confirmationToken: string | null;
-  private _tokenExpiry: Date | null;
+  private paymentId: string;
+  private status: AdmissionStatus;
+  private rejectedBy: RejectedBy | null;
+  private confirmationToken: string | null;
+  private tokenExpiry: Date | null;
 
   constructor(props: AdmissionProps) {
     super(props);
-    this._paymentId = props.paymentId;
-    this._status = props.status || AdmissionStatus.PENDING;
-    this._rejectedBy = props.rejectedBy || null;
-    this._confirmationToken = props.confirmationToken || null;
-    this._tokenExpiry = props.tokenExpiry || null;
+    this.paymentId = props.paymentId;
+    this.status = props.status || AdmissionStatus.PENDING;
+    this.rejectedBy = props.rejectedBy || null;
+    this.confirmationToken = props.confirmationToken || null;
+    this.tokenExpiry = props.tokenExpiry || null;
   }
 
   static create(props: AdmissionProps): Admission {
@@ -124,9 +123,9 @@ export class Admission extends AdmissionDraft {
     return new Admission(props);
   }
 
-  get paymentId(): string { return this._paymentId; }
-  get status(): AdmissionStatus { return this._status; }
-  get rejectedBy(): RejectedBy | null { return this._rejectedBy; }
-  get confirmationToken(): string | null { return this._confirmationToken; }
-  get tokenExpiry(): Date | null { return this._tokenExpiry; }
+  getPaymentId(): string { return this.paymentId; }
+  getStatus(): AdmissionStatus { return this.status; }
+  getRejectedBy(): RejectedBy | null { return this.rejectedBy; }
+  getConfirmationToken(): string | null { return this.confirmationToken; }
+  getTokenExpiry(): Date | null { return this.tokenExpiry; }
 }

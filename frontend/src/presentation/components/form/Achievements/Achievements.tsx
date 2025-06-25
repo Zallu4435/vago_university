@@ -52,9 +52,13 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getVal
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    // Only update the form data without saving to backend
     if (initialData) {
-      reset(initialData, { keepDirty: false });
+      reset({
+        ...initialData,
+        achievements: Array.isArray(initialData.achievements) ? initialData.achievements : [],
+        hasNoAchievements: !!initialData.hasNoAchievements,
+        questions: initialData.questions || { 1: '', 2: '', 3: '', 4: '', 5: '' }
+      }, { keepDirty: false });
       console.log('Achievements: Initialized with data:', initialData);
     }
   }, [initialData, reset]);

@@ -43,8 +43,21 @@ export class AssignmentRepository implements IAssignmentRepository {
       AssignmentModel.countDocuments(query)
     ]);
 
+    // For each assignment, fetch submissions and calculate count and average mark
+    const assignmentsWithStats = await Promise.all(assignments.map(async (assignment) => {
+      const submissions = await SubmissionModel.find({ assignmentId: assignment._id });
+      const submissionCount = submissions.length;
+      const averageMark = submissionCount > 0 ? (submissions.reduce((sum, s) => sum + (s.marks ?? 0), 0) / submissionCount) : 0;
+      const assignmentObj = this.mapToAssignment(assignment);
+      return {
+        ...assignmentObj,
+        submissionCount,
+        averageMark: Number(averageMark.toFixed(2))
+      };
+    }));
+
     return {
-      assignments: assignments.map(this.mapToAssignment),
+      assignments: assignmentsWithStats,
       total,
       page,
       limit

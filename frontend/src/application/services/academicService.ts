@@ -66,43 +66,43 @@ export const academicService = {
   // Get student information
   getStudentInfo: async (): Promise<StudentInfo> => {
     const response = await httpClient.get('/academic/student-info');
-    return response.data;
+    return response.data?.data;
   },
 
   // Get grade information
   getGradeInfo: async (): Promise<GradeInfo> => {
     const response = await httpClient.get('/academic/grade-info');
-    return response.data;
+    return response.data?.data;
   },
 
   // Get available courses
   getCourses: async (): Promise<Course[]> => {
     const response = await httpClient.get('/academic/courses');
-    return response.data;
+    return response.data?.data;
   },
 
   // Get academic history
   getAcademicHistory: async (): Promise<AcademicHistory[]> => {
     const response = await httpClient.get('/academic/history');
-    return response.data;
+    return response.data?.data;
   },
 
   // Get program information
   getProgramInfo: async (): Promise<ProgramInfo> => {
     const response = await httpClient.get('/academic/program-info');
-    return response.data;
+    return response.data?.data;
   },
 
   // Get progress information
   getProgressInfo: async (): Promise<ProgressInfo> => {
     const response = await httpClient.get('/academic/progress-info');
-    return response.data;
+    return response.data?.data;
   },
 
   // Get requirements information
   getRequirementsInfo: async (): Promise<RequirementsInfo> => {
     const response = await httpClient.get('/academic/requirements-info');
-    return response.data;
+    return response.data?.data;
   },
 
   // Register for a course

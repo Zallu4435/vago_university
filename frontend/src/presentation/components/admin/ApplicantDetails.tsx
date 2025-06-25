@@ -71,6 +71,7 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
   });
 
 
+  console.log(selectedApplicant, "selectedApplicant")
   // Prevent backend scrolling when modal is open
   useEffect(() => {
     if (showDetails) {

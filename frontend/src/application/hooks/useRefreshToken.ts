@@ -19,7 +19,7 @@ interface RefreshTokenResponse {
 const refreshToken = async (token: string): Promise<RefreshTokenResponse> => {
   console.log('Attempting to refresh token:', token); // Debug
   const response = await httpClient.post('/auth/refresh-token', { token });
-  return response.data;
+  return response.data.data;
 };
 
 export const useRefreshToken = () => {

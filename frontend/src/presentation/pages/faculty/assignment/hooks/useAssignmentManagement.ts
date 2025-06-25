@@ -56,9 +56,9 @@ export const useAssignmentManagement = () => {
         mutationFn: ({ assignmentId, submissionId, reviewData }: {
             assignmentId: string;
             submissionId: string;
-            reviewData: { 
-                marks: number; 
-                feedback: string; 
+            reviewData: {
+                marks: number;
+                feedback: string;
                 status: 'reviewed' | 'pending' | 'needs_correction';
                 isLate: boolean;
             };
@@ -109,22 +109,10 @@ export const useAssignmentManagement = () => {
         }
     }, [reviewSubmissionMutation]);
 
-    const handleDownloadSubmission = useCallback(async (assignmentId: string, submissionId: string) => {
-        try {
-            const blob = await assignmentService.downloadSubmission(assignmentId, submissionId);
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `submission-${submissionId}.zip`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-            return { success: true };
-        } catch (error) {
-            console.error('Error downloading submission:', error);
-            return { success: false, error: 'Failed to download submission' };
-        }
+    const handleDownloadSubmission = useCallback((assignmentId: string, submissionId: string) => {
+        // Open the backend download route directly in a new tab/window
+        window.open(`/api/assignments/${assignmentId}/submissions/${submissionId}/download`, '_blank');
+        return { success: true };
     }, []);
 
     return {

@@ -158,6 +158,7 @@ export const ApplicationForm: React.FC = () => {
       } else {
         try {
           const response = await createApplication(user?.id);
+          console.log(response, "response from the backend ")
           setApplicationId(response.applicationId);
           setValue('applicationId', response.applicationId, { shouldValidate: false });
         } catch (error) {
@@ -172,16 +173,15 @@ export const ApplicationForm: React.FC = () => {
 
   useEffect(() => {
     if (fetchedData) {
-      const mapped = mapBackendToFormData(fetchedData);
-      setValue('applicationId', mapped.applicationId ?? '', { shouldValidate: false });
-      setValue('personalInfo', mapped.personalInfo, { shouldValidate: false });
-      setValue('choiceOfStudy', mapped.choiceOfStudy, { shouldValidate: false });
-      setValue('education', mapped.education, { shouldValidate: false });
-      setValue('achievements', mapped.achievements, { shouldValidate: false });
-      setValue('otherInformation', mapped.otherInformation, { shouldValidate: false });
-      setValue('documents', mapped.documents, { shouldValidate: false });
-      setValue('declaration', mapped.declaration, { shouldValidate: false });
-      calculateFormProgress(mapped);
+      setValue('applicationId', (fetchedData as any)?.applicationId ?? '', { shouldValidate: false });
+      setValue('personalInfo', (fetchedData as any)?.personal ?? undefined, { shouldValidate: false });
+      setValue('choiceOfStudy', (fetchedData as any)?.choiceOfStudy ?? [], { shouldValidate: false });
+      setValue('education', (fetchedData as any)?.education ?? undefined, { shouldValidate: false });
+      setValue('achievements', (fetchedData as any)?.achievements ?? undefined, { shouldValidate: false });
+      setValue('otherInformation', (fetchedData as any)?.otherInformation ?? undefined, { shouldValidate: false });
+      setValue('documents', (fetchedData as any)?.documents ?? undefined, { shouldValidate: false });
+      setValue('declaration', (fetchedData as any)?.declaration ?? undefined, { shouldValidate: false });
+      calculateFormProgress(fetchedData as any);
     }
   }, [fetchedData, setValue]);
 
@@ -396,6 +396,7 @@ export const ApplicationForm: React.FC = () => {
   };
 
   const handleSaveCurrentTab = async () => {
+    console.log(formData, "foooooooorm")
     if (isInitializing) {
       console.log('Waiting for application initialization');
       return;

@@ -92,11 +92,17 @@ export default function Financial() {
               <div className="flex items-center gap-1">
                 <span className="font-medium">Account Balance:</span>
                 <MdCurrencyRupee />
-                <span>{studentInfo?.info[0]?.amount?.toLocaleString() || '0.00'}</span>
+                <span>
+                  {studentInfo?.info && studentInfo.info.length > 0 && studentInfo.info[0]?.amount
+                    ? studentInfo.info[0].amount.toLocaleString()
+                    : '0.00'}
+                </span>
               </div>
               <div>
                 <span className="font-medium">Payment Due:</span>{' '}
-                {formatDate(studentInfo?.info[0]?.paymentDueDate) || 'N/A'}
+                {studentInfo?.info?.[0]?.paymentDueDate
+                  ? formatDate(studentInfo.info[0].paymentDueDate)
+                  : 'N/A'}
               </div>
               <div>
                 <span className="font-medium">Financial Aid Status:</span>{' '}

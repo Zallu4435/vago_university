@@ -135,12 +135,6 @@ export default function FacultyRequestForm() {
           >
             <option value="">Select Department</option>
             <option value="computer-science">Computer Science</option>
-            <option value="mathematics">Mathematics</option>
-            <option value="physics">Physics</option>
-            <option value="chemistry">Chemistry</option>
-            <option value="biology">Biology</option>
-            <option value="engineering">Engineering</option>
-            <option value="humanities">Humanities</option>
             <option value="business">Business</option>
           </select>
           {errors.department && (

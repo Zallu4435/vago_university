@@ -48,7 +48,7 @@ class DocumentUploadService {
       });
 
       console.log('Upload response:', response.data);
-      return response.data.document;
+      return response.data.data?.document;
     } catch (error: any) {
       console.error('Error uploading document:', error);
       console.error('Error response:', error.response?.data);

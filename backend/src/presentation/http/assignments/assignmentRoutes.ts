@@ -35,7 +35,7 @@ router.post('/',
     }
 );
 
-router.put('/:id', authMiddleware, (req, res) => {
+router.put('/:id', authMiddleware, assignmentUpload.array('files', 5), (req, res) => {
     expressAdapter(req, res, assignmentController.updateAssignment.bind(assignmentController));
 });
 
@@ -55,6 +55,10 @@ router.get('/:assignmentId/submissions/:submissionId', authMiddleware, (req, res
 
 router.get('/:assignmentId/submissions/:submissionId/download', authMiddleware, (req, res) => {
     expressAdapter(req, res, assignmentController.downloadSubmission.bind(assignmentController));
+});
+
+router.get('/:id/files/view', authMiddleware, (req, res) => {
+    expressAdapter(req, res, assignmentController.viewAssignmentFile.bind(assignmentController));
 });
 
 export default router; 

@@ -11,6 +11,7 @@ interface AuthState {
     id?: string;
   } | null;
   collection: 'register' | 'admin' | 'user' | 'faculty' | null;
+  profilePicture?: string;
 }
 
 const initialState: AuthState = {
@@ -29,8 +30,10 @@ const authSlice = createSlice({
         token: string;
         user: { firstName: string; lastName: string; email: string; id?: string };
         collection: 'register' | 'admin' | 'user' | 'faculty';
+        profilePicture?: string;
       }>
     ) => {
+      console.log('setAuth payload:', action.payload);
       state.token = action.payload.token;
       state.user = action.payload.user;
       state.collection = action.payload.collection;

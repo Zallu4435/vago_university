@@ -35,15 +35,5 @@ export const userMaterialService = {
   downloadMaterial: async (id: string) => {
     const response = await httpClient.get(`/materials/${id}/download-file`, { responseType: 'blob' });
     return response.data;
-  },
-
-  getBookmarkedMaterials: async () => {
-    const response = await httpClient.get('/materials/bookmarks');
-    return response.data;
-  },
-
-  getLikedMaterials: async () => {
-    const response = await httpClient.get('/materials/likes');
-    return response.data;
   }
 };

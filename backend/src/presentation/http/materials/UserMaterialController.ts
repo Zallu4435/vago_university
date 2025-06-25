@@ -74,26 +74,4 @@ export class UserMaterialController {
     const url = await this.downloadMaterialUseCase.execute({ materialId: id, userId: user.id });
     return { statusCode: 200, body: { url } };
   }
-
-  async getBookmarkedMaterials(req: IHttpRequest): Promise<IHttpResponse> {
-    const { query, user } = req;
-    if (!user) return { statusCode: 401, body: { message: 'Unauthorized' } };
-    const result = await this.getBookmarkedMaterialsUseCase.execute({
-      userId: user.id,
-      page: Number(query.page) || 1,
-      limit: Number(query.limit) || 10
-    });
-    return { statusCode: 200, body: result };
-  }
-
-  async getLikedMaterials(req: IHttpRequest): Promise<IHttpResponse> {
-    const { query, user } = req;
-    if (!user) return { statusCode: 401, body: { message: 'Unauthorized' } };
-    const result = await this.getLikedMaterialsUseCase.execute({
-      userId: user.id,
-      page: Number(query.page) || 1,
-      limit: Number(query.limit) || 10
-    });
-    return { statusCode: 200, body: result };
-  }
 } 

@@ -39,15 +39,15 @@ export class AuthController implements IAuthController {
     try {
       const { firstName, lastName, email, password } = httpRequest.body;
       if (!firstName || !lastName || !email || !password) {
-        return this.httpErrors.error_400();
+        return this.httpErrors.error_400("All required fields must be provided!");
       }
       const response = await this.registerUseCase.execute({ firstName, lastName, email, password });
       if (!response.success) {
-        return this.httpErrors.error_400();
+        return this.httpErrors.error_400((response.data as any)?.error || "Registration failed");
       }
       return this.httpSuccess.success_201(response.data);
     } catch (error: any) {
-      return this.httpErrors.error_500();
+      return this.httpErrors.error_500(error.message, error.stack);
     }
   }
 
@@ -55,15 +55,15 @@ export class AuthController implements IAuthController {
     try {
       const { email, password } = httpRequest.body;
       if (!email || !password) {
-        return this.httpErrors.error_400();
+        return this.httpErrors.error_400("Email and password are required");
       }
       const response = await this.loginUseCase.execute({ email, password });
       if (!response.success) {
-        return this.httpErrors.error_400();
+        return this.httpErrors.error_400((response.data as any)?.error || "Login failed");
       }
       return this.httpSuccess.success_200(response.data);
     } catch (error: any) {
-      return this.httpErrors.error_500();
+      return this.httpErrors.error_500(error.message, error.stack);
     }
   }
 
@@ -71,15 +71,15 @@ export class AuthController implements IAuthController {
     try {
       const { token } = httpRequest.body;
       if (!token) {
-        return this.httpErrors.error_400();
+        return this.httpErrors.error_400("Token is required");
       }
       const response = await this.refreshTokenUseCase.execute({ token });
       if (!response.success) {
-        return this.httpErrors.error_400();
+        return this.httpErrors.error_400((response.data as any)?.error || "Invalid token");
       }
       return this.httpSuccess.success_200(response.data);
     } catch (error: any) {
-      return this.httpErrors.error_500();
+      return this.httpErrors.error_500(error.message, error.stack);
     }
   }
 
@@ -87,11 +87,11 @@ export class AuthController implements IAuthController {
     try {
       const response = await this.logoutUseCase.execute({});
       if (!response.success) {
-        return this.httpErrors.error_400();
+        return this.httpErrors.error_400((response.data as any)?.error || "Logout failed");
       }
       return this.httpSuccess.success_200(response.data);
     } catch (error: any) {
-      return this.httpErrors.error_500();
+      return this.httpErrors.error_500(error.message, error.stack);
     }
   }
 
@@ -105,7 +105,7 @@ export class AuthController implements IAuthController {
       
       if (!fullName || !email || !phone || !department || !qualification || !experience || !aboutMe) {
         console.log('ERROR: Missing required fields');
-        return this.httpErrors.error_400();
+        return this.httpErrors.error_400("All required fields must be provided!");
       }
       
       const files = httpRequest.files as Express.Multer.File[];
@@ -177,7 +177,7 @@ export class AuthController implements IAuthController {
       
       if (!response.success) {
         console.log('ERROR: Use case failed');
-        return this.httpErrors.error_400();
+        return this.httpErrors.error_400((response.data as any)?.error || "Faculty registration failed");
       }
       
       console.log('=== FACULTY REGISTRATION SUCCESS ===');
@@ -187,7 +187,7 @@ export class AuthController implements IAuthController {
       console.error('Controller error:', error);
       console.error('Error message:', error.message);
       console.error('Error stack:', error.stack);
-      return this.httpErrors.error_500();
+      return this.httpErrors.error_500(error.message, error.stack);
     }
   }
 

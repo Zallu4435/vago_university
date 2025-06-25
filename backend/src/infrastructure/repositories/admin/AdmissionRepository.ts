@@ -112,13 +112,13 @@ export class AdmissionRepository implements IAdmissionRepository {
         console.log(`=== ADMISSION REPOSITORY: getAdmissionByToken START ===`);
         console.log(`Looking for admission with ID: ${params.admissionId}`);
         console.log(`Token provided: ${params.token}`);
-        
+
         const admission = await AdmissionModel.findById(params.admissionId)
             .select("personal choiceOfStudy status confirmationToken tokenExpiry")
             .lean();
 
         console.log(`Admission found: ${admission ? 'Yes' : 'No'}`);
-        
+
         if (!admission) {
             console.log(`ERROR: Admission not found with ID: ${params.admissionId}`);
             throw new Error(AdmissionErrorType.AdmissionNotFound);
@@ -248,6 +248,7 @@ export class AdmissionRepository implements IAdmissionRepository {
                 throw new Error(AdmissionErrorType.RegisterUserNotFound);
             }
 
+            console.log(registerUser.password, "password")
             const fullNameParts = admission.personal.fullName.split(" ");
             const firstName = fullNameParts[0];
             const lastName = fullNameParts.slice(1).join(" ") || "";
@@ -261,22 +262,28 @@ export class AdmissionRepository implements IAdmissionRepository {
             });
 
             await user.save();
-            
+
             let degree = "";
             let catalogYear = "";
-            if (admission.choiceOfStudy && admission.choiceOfStudy.length > 0) {
-              degree = admission.choiceOfStudy[0]?.degree || "";
-              catalogYear = admission.choiceOfStudy[0]?.catalogYear || "";
-            }
-            if (degree && catalogYear) {
-              await ProgramModel.create({
-                studentId: user._id,
-                degree,
-                catalogYear,
-                credits: 20,
-              });
-            }
+
+            const currentYear = new Date().getFullYear();
+            const yearRange = `${currentYear}-${currentYear + 4}`;
             
+            if (admission.choiceOfStudy && admission.choiceOfStudy.length > 0) {
+                degree = admission.choiceOfStudy[0]?.programme || "";
+                catalogYear = admission.choiceOfStudy[0]?.catalogYear || yearRange;
+            }
+
+            console.log(degree, catalogYear, "pooooooooooooooooop")
+            if (degree && catalogYear) {
+                await ProgramModel.create({
+                    studentId: user._id,
+                    degree,
+                    catalogYear,
+                    credits: 20,
+                });
+            }
+
         } else {
             admission.status = "rejected";
             admission.rejectedBy = "user";

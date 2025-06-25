@@ -8,7 +8,7 @@ const ConfirmAdmission = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const navigate = useNavigate();
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -34,10 +34,7 @@ const ConfirmAdmission = () => {
           params: { token }
         });
 
-        console.log(response.data, "response.data")
-        
-        // Access the nested admission data
-        const admissionData = response.data.admission;
+        const admissionData = response.data.data?.admission;
         setAdmissionDetails({
           fullName: admissionData.personal.fullName,
           email: admissionData.personal.emailAddress,
@@ -61,7 +58,7 @@ const ConfirmAdmission = () => {
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/admin/admissions/${id}/confirm/${action}`, null, {
         params: { token }
       });
-      
+
       if (action === 'accept') {
         setSuccess('Admission accepted and user account created. You can now login with your credentials.');
       } else {
@@ -111,8 +108,8 @@ const ConfirmAdmission = () => {
           <h2 className="text-2xl font-bold text-center text-gray-800 mb-4">Error</h2>
           <p className="text-gray-600 text-center">{error}</p>
           <div className="mt-6 text-center">
-            <button 
-              onClick={() => navigate('/')} 
+            <button
+              onClick={() => navigate('/')}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Return to Homepage
@@ -134,9 +131,9 @@ const ConfirmAdmission = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-center text-blue-600">
                 <FaEnvelope className="mr-2" />
-                <p>Check your email for login credentials</p>
+                <p>Your request has been accepted. You can now log in.</p>
               </div>
-              <button 
+              <button
                 onClick={() => navigate('/login')}
                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
@@ -144,7 +141,7 @@ const ConfirmAdmission = () => {
               </button>
             </div>
           ) : (
-            <button 
+            <button
               onClick={() => navigate('/')}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
@@ -162,7 +159,7 @@ const ConfirmAdmission = () => {
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
           {action === 'accept' ? 'Accept Admission Offer' : 'Decline Admission Offer'}
         </h2>
-        
+
         {admissionDetails && (
           <div className="mb-6 p-4 bg-gray-50 rounded-lg">
             <h3 className="font-semibold text-lg mb-2">Admission Details:</h3>
@@ -172,24 +169,23 @@ const ConfirmAdmission = () => {
             <p><span className="font-medium">Status:</span> <span className="capitalize">{admissionDetails.status}</span></p>
           </div>
         )}
-        
+
         <div className="mb-6">
           <p className="text-gray-600 text-center">
-            {action === 'accept' 
+            {action === 'accept'
               ? 'By accepting this offer, you confirm your enrollment in the program. A user account will be created for you.'
               : 'Are you sure you want to decline this admission offer? This action cannot be undone.'
             }
           </p>
         </div>
-        
+
         <div className="flex justify-center space-x-4">
           <button
             onClick={handleConfirmation}
-            className={`px-4 py-2 rounded ${
-              action === 'accept' 
-                ? 'bg-green-500 hover:bg-green-600' 
+            className={`px-4 py-2 rounded ${action === 'accept'
+                ? 'bg-green-500 hover:bg-green-600'
                 : 'bg-red-500 hover:bg-red-600'
-            } text-white`}
+              } text-white`}
           >
             {action === 'accept' ? 'Accept Offer' : 'Decline Offer'}
           </button>

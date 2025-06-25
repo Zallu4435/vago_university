@@ -57,7 +57,7 @@ class DiplomaService {
             }
 
             const response = await httpClient.get<DiplomaApiResponse>('/diploma-courses', { params });
-            return response.data;
+            return response.data.data;
         } catch (error: any) {
             console.error('getDiplomaCourses error:', error);
             throw new Error(error.response?.data?.error || 'Failed to fetch diploma courses');
@@ -67,7 +67,7 @@ class DiplomaService {
     async getDiplomaCourseById(id: string): Promise<any> {
         try {
             const response = await httpClient.get<{ course: any }>(`/diploma-courses/${id}`);
-            return response.data;
+            return response.data.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.error || 'Failed to fetch diploma course');
         }
@@ -76,7 +76,7 @@ class DiplomaService {
     async getChapterById(courseId: string, chapterId: string): Promise<Chapter> {
         try {
             const response = await httpClient.get<{ chapter: Chapter }>(`/diploma-courses/${courseId}/chapters/${chapterId}`);
-            return response.data.chapter;
+            return response.data.data.chapter;
         } catch (error: any) {
             throw new Error(error.response?.data?.error || 'Failed to fetch chapter');
         }
@@ -109,7 +109,7 @@ class DiplomaService {
     async getCompletedChapters(courseId: string): Promise<string[]> {
         try {
             const response = await httpClient.get<{ completedChapters: string[] }>(`/diploma-courses/${courseId}/completed-chapters`);
-            return response.data.chapters;
+            return response.data.data.chapters;
         } catch (error: any) {
             throw new Error(error.response?.data?.error || 'Failed to fetch completed chapters');
         }
@@ -118,7 +118,7 @@ class DiplomaService {
     async getBookmarkedChapters(courseId: string): Promise<string[]> {
         try {
             const response = await httpClient.get<{ bookmarkedChapters: string[] }>(`/diploma-courses/${courseId}/bookmarked-chapters`);
-            return response.data.chapters;
+            return response.data.data.chapters;
         } catch (error: any) {
             throw new Error(error.response?.data?.error || 'Failed to fetch bookmarked chapters');
         }

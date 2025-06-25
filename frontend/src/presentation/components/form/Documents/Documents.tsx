@@ -104,7 +104,7 @@ export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
         console.log('Starting document upload with applicationId:', applicationId);
         // Upload to Cloudinary
         const uploadResult = await documentUploadService.uploadDocument(applicationId, id, file, token);
-
+        console.log(uploadResult, "popopopo")
         // Update the document with Cloudinary URL
         const documents = watch('documents');
         const updatedDocuments = documents.map(doc =>

@@ -43,18 +43,4 @@ export class DownloadMaterialUseCase {
   async execute(params: DownloadMaterialRequestDTO): Promise<string> {
     return this.repo.downloadMaterial(params);
   }
-}
-
-export class GetUserBookmarkedMaterialsUseCase {
-  constructor(private repo: IUserMaterialsRepository) {}
-  async execute(params: GetUserBookmarkedMaterialsRequestDTO): Promise<GetUserMaterialsResponseDTO> {
-    return this.repo.getUserBookmarkedMaterials(params);
-  }
-}
-
-export class GetUserLikedMaterialsUseCase {
-  constructor(private repo: IUserMaterialsRepository) {}
-  async execute(params: GetUserLikedMaterialsRequestDTO): Promise<GetUserMaterialsResponseDTO> {
-    return this.repo.getUserLikedMaterials(params);
-  }
 } 

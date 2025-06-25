@@ -26,6 +26,7 @@ const LoginPage = () => {
   const backgroundAnimation = useAnimation(0);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [pendingError, setPendingError] = useState('');
+  const [loginError, setLoginError] = useState('');
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(loginSchema),
@@ -38,43 +39,43 @@ const LoginPage = () => {
   const mutation = useLoginUser();
 
 
-const onSubmit = (data: FormData) => {
-  setPendingError('');
-  mutation.mutate(data, {
-    onSuccess: (response) => {
-      Cookies.set('auth_token', response.token, { secure: true, sameSite: 'strict' });
-      console.log(response, "response from the checking side....")
-      dispatch(setAuth({
-        token: response.token,
-        user: response.user,
-        collection: response.collection,
-        profilePicture: response.profilePicture,
-      }));
-      toast.success('Login successful!');
-      switch (response.collection) {
-        case 'register':
-          navigate('/admission');
-          break;
-        case 'admin':
-          navigate('/admin');
-          break;
-        case 'user':
-          navigate('/dashboard');
-          break;
-        case 'faculty':
-          navigate('/faculty');
-          break;
-      }
-    },
-    onError: (error: Error) => {
-      if (error.message.toLowerCase().includes('confirm your email')) {
-        setPendingError('You must confirm your email before logging in. Please check your inbox.');
-      } else {
-        toast.error(`Login failed: ${error.message}`);
-      }
-    },
-  });
-};
+  const onSubmit = (data: FormData) => {
+    setPendingError('');
+    setLoginError('');
+    mutation.mutate(data, {
+      onSuccess: (response) => {
+        Cookies.set('auth_token', response.token, { secure: true, sameSite: 'strict' });
+        dispatch(setAuth({
+          token: response.token,
+          user: response.user,
+          collection: response.collection,
+          profilePicture: response.profilePicture,
+        }));
+        toast.success('Login successful!');
+        switch (response.collection) {
+          case 'register':
+            navigate('/admission');
+            break;
+          case 'admin':
+            navigate('/admin');
+            break;
+          case 'user':
+            navigate('/dashboard');
+            break;
+          case 'faculty':
+            navigate('/faculty');
+            break;
+        }
+      },
+      onError: (error: Error) => {
+        if (error.message.toLowerCase().includes('confirm your email')) {
+          setPendingError('You must confirm your email before logging in. Please check your inbox.');
+        } else {
+          setLoginError(error.message || 'Login failed. Please try again.');
+        }
+      },
+    });
+  };
 
   return (
     <div
@@ -93,6 +94,12 @@ const onSubmit = (data: FormData) => {
             {pendingError && (
               <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative mb-6" role="alert">
                 <span className="block sm:inline">{pendingError}</span>
+              </div>
+            )}
+
+            {loginError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+                <span className="block sm:inline">{loginError}</span>
               </div>
             )}
 

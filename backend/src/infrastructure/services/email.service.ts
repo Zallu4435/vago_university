@@ -180,7 +180,6 @@ class EmailService {
         <p>We are pleased to offer you a faculty position in the <strong>${department}</strong> department at our institution.</p>
         
         <div style="background-color: #f9f9f9; border-left: 4px solid #2a5885; padding: 15px; margin: 20px 0;">
-          // <p><strong>Position:</strong> ${position}</p>
           <p><strong>Department:</strong> ${department}</p>
           <p><strong>Start Date:</strong> ${startDate}</p>
           ${salary ? `<p><strong>Salary:</strong> ${salary}</p>` : ""}
@@ -220,7 +219,7 @@ class EmailService {
     await this.transporter.sendMail({
       from: `"Faculty Affairs Office" <${config.email.from}>`,
       to,
-      subject: `Faculty Position Offer: ${position} in ${department}`,
+      subject: `Faculty Position Offer: ${department}`,
       html: htmlContent,
     });
 

@@ -30,9 +30,10 @@ const ConfirmFaculty = () => {
           params: { token }
         });
 
-        console.log(response.data, "response.data")
+        // window.alert('Success: ' + JSON.stringify(response.data.data, null, 2));
+        //         console.log(response.data, "response.data")
         
-        const facultyData = response.data.faculty;
+        const facultyData = response.data.data.faculty;
         setFacultyDetails({
           fullName: facultyData.fullName,
           email: facultyData.email,

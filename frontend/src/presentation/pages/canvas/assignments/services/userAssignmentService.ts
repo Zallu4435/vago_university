@@ -8,7 +8,7 @@ export const userAssignmentService = {
       const response = await httpClient.get('/assignments', { params });
   
       // The backend returns the data directly in response.data
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error('Error in getAssignments:', error);
       throw error;

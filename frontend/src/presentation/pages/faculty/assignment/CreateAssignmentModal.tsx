@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FaUpload, FaTimes, FaFile } from 'react-icons/fa';
+import { FiEye } from 'react-icons/fi';
 import { NewAssignment, Assignment } from './types';
+import httpClient from '../../../../frameworks/api/httpClient';
 
 interface CreateAssignmentModalProps {
   newAssignment: NewAssignment;
@@ -10,6 +12,8 @@ interface CreateAssignmentModalProps {
   isLoading: boolean;
   selectedAssignment: Assignment | null;
   onUpdate?: (id: string, data: Partial<Assignment>) => Promise<{ success: boolean; error?: string }>;
+  setActiveTab: (tab: string) => void;
+  setSelectedAssignment: (assignment: Assignment | null) => void;
 }
 
 export default function CreateAssignmentModal({ 
@@ -19,7 +23,9 @@ export default function CreateAssignmentModal({
   onSubmit,
   isLoading,
   selectedAssignment,
-  onUpdate
+  onUpdate,
+  setActiveTab,
+  setSelectedAssignment
 }: CreateAssignmentModalProps) {
 
   console.log(selectedAssignment, "selectedassoignment")
@@ -42,12 +48,23 @@ export default function CreateAssignmentModal({
       });
       // Set existing files
       if (selectedAssignment.files && Array.isArray(selectedAssignment.files)) {
-        setExistingFiles(selectedAssignment.files.map(file => ({
-          fileName: file.fileName,
-          fileUrl: file.fileUrl,
-          fileSize: file.fileSize,
-          _id: file._id
-        })));
+        setExistingFiles(selectedAssignment.files.map(file => {
+          if (typeof file === 'object' && file !== null && 'fileName' in file && 'fileUrl' in file && 'fileSize' in file && '_id' in file) {
+            return {
+              fileName: (file as any).fileName,
+              fileUrl: (file as any).fileUrl,
+              fileSize: (file as any).fileSize,
+              _id: (file as any)._id
+            };
+          } else {
+            return {
+              fileName: typeof file === 'string' ? file : '',
+              fileUrl: typeof file === 'string' ? file : '',
+              fileSize: 0,
+              _id: ''
+            };
+          }
+        }));
       }
     }
   }, [selectedAssignment, setNewAssignment]);
@@ -97,17 +114,23 @@ export default function CreateAssignmentModal({
 
     if (selectedAssignment && onUpdate) {
       // Update existing assignment
-      const result = await onUpdate(selectedAssignment._id, {
+      const updatePayload: any = {
         title: newAssignment.title,
         subject: newAssignment.subject,
         dueDate: newAssignment.dueDate,
         maxMarks: maxMarksNum,
         description: newAssignment.description
-      });
+      };
+      if (newAssignment.files && newAssignment.files.length > 0) {
+        updatePayload.files = newAssignment.files;
+      }
+      const result = await onUpdate(selectedAssignment._id, updatePayload);
       if (result.success) {
         setShowCreateModal(false);
         setNewAssignment({ title: '', subject: '', dueDate: '', maxMarks: '', description: '', files: [] });
         setError('');
+        setActiveTab('all-assignments');
+        setSelectedAssignment(null);
       } else {
         setError(result.error || 'Failed to update assignment');
       }
@@ -118,6 +141,8 @@ export default function CreateAssignmentModal({
         setShowCreateModal(false);
         setNewAssignment({ title: '', subject: '', dueDate: '', maxMarks: '', description: '', files: [] });
         setError('');
+        setActiveTab('all-assignments');
+        setSelectedAssignment(null);
       } else {
         setError(result.error || 'Failed to create assignment');
       }
@@ -128,6 +153,37 @@ export default function CreateAssignmentModal({
     setShowCreateModal(false);
     setNewAssignment({ title: '', subject: '', dueDate: '', maxMarks: '', description: '', files: [] });
     setError('');
+  };
+
+  // Handler to view assignment file as PDF in a new tab
+  const handleViewAssignmentFile = async (fileUrl: string, fileName: string) => {
+    if (!fileName || !selectedAssignment?._id) return;
+    try {
+      // Call the backend to get the base64 PDF data
+      const response = await httpClient.get(`/faculty/assignments/${selectedAssignment._id}/files/view`, {
+        params: { fileName },
+      });
+      const pdfData = response.data.data.pdfData;
+      if (pdfData) {
+        // Decode base64 and open as PDF
+        const byteCharacters = atob(pdfData);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank', 'noopener,noreferrer');
+        setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+      } else {
+        // Fallback: open the direct URL
+        window.open(fileUrl, '_blank', 'noopener,noreferrer');
+      }
+    } catch (error) {
+      // Fallback: open the direct URL
+      window.open(fileUrl, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
@@ -244,14 +300,14 @@ export default function CreateAssignmentModal({
                           <p className="text-xs text-gray-500">{Math.round(file.fileSize / 1024)} KB</p>
                         </div>
                       </div>
-                      <a
-                        href={file.fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+                      <button
+                        type="button"
+                        onClick={() => handleViewAssignmentFile(file.fileUrl, file.fileName)}
+                        className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1"
+                        title="View PDF"
                       >
-                        View
-                      </a>
+                        <FiEye className="inline-block" /> View
+                      </button>
                     </div>
                   ))}
                 </div>

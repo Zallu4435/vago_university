@@ -11,7 +11,13 @@ export const useProfileManagement = () => {
   // Fetch profile data with controlled refetching
   const { data: profile, isLoading, error } = useQuery<ProfileData, Error>({
     queryKey: ['profile'],
-    queryFn: () => profileService.getProfile(),
+    queryFn: () => {
+      console.log('Fetching profile from backend...');
+      return profileService.getProfile().then((data) => {
+        console.log('Profile fetch result:', data);
+        return data;
+      });
+    },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     refetchOnWindowFocus: false, // Prevent refetch on window focus
   });
@@ -55,7 +61,7 @@ export const useProfileManagement = () => {
   });
 
   return {
-    profile,
+    profile: profile?.data,
     isLoading,
     error,
     isEditing,

@@ -35,7 +35,7 @@ class FacultyService {
       const response = await httpClient.get<FacultyApiResponse>('/admin/faculty', {
         params
       });
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch faculty');
     }
@@ -43,7 +43,7 @@ class FacultyService {
 
   async getFacultyDetails(id: string): Promise<any> {
     const response = await httpClient.get(`/admin/faculty/${id}`);
-    return response.data;
+    return response.data.data;
   }
 
   async getFacultyDocument(facultyId: string, type: string, documentUrl: string): Promise<any> {

@@ -8,7 +8,7 @@ interface AssignmentListProps {
   assignments: Assignment[];
   isLoading: boolean;
   error: any;
-  setSelectedAssignment: (assignment: Assignment) => void;
+  setSelectedAssignment: (assignment: Assignment | null) => void;
   setActiveTab: (tab: string) => void;
   setShowCreateModal: (show: boolean) => void;
   onDelete: (id: string) => Promise<{ success: boolean; error?: string }>;
@@ -201,21 +201,21 @@ export default function AssignmentList({
                 {assignment.description}
               </p>
 
-              {/* Statistics */}
+              {/* Stats Row */}
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl p-4 text-center border border-indigo-200">
                   <div className="flex items-center justify-center space-x-2 mb-1">
                     <FaUsers className="text-indigo-600" size={16} />
-                    <p className="text-2xl font-bold text-indigo-600">{assignment.totalSubmissions}</p>
+                    <p className="text-2xl font-bold text-indigo-600">{assignment.submissionCount ?? 0}</p>
                   </div>
-                  <p className="text-xs text-indigo-600 font-medium">Submitted</p>
+                  <p className="text-xs text-indigo-600 font-medium">Submissions</p>
                 </div>
                 <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-4 text-center border border-green-200">
                   <div className="flex items-center justify-center space-x-2 mb-1">
                     <FaCheckCircle className="text-green-600" size={16} />
-                    <p className="text-2xl font-bold text-green-600">{assignment.averageMarks || 0}</p>
+                    <p className="text-2xl font-bold text-green-600">{assignment.averageMark ?? 0}</p>
                   </div>
-                  <p className="text-xs text-green-600 font-medium">Average Marks</p>
+                  <p className="text-xs text-green-600 font-medium">Average Mark</p>
                 </div>
               </div>
 

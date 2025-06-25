@@ -110,7 +110,7 @@ export class CommunicationService {
   async getAllAdmins(): Promise<Admin[]> {
     try {
       const response = await httpClient.get(`${this.userBaseUrl}/all-admins`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       throw new Error('Failed to fetch admins');
     }

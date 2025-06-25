@@ -6,9 +6,7 @@ import {
   GetUserMaterialByIdRequestDTO,
   ToggleBookmarkRequestDTO, 
   ToggleLikeRequestDTO, 
-  DownloadMaterialRequestDTO,
-  GetUserBookmarkedMaterialsRequestDTO,
-  GetUserLikedMaterialsRequestDTO
+  DownloadMaterialRequestDTO
 } from '../../../domain/materials/dtos/UserMaterialRequestDTOs';
 import { GetUserMaterialsResponseDTO } from '../../../domain/materials/dtos/UserMaterialResponseDTOs';
 
@@ -66,11 +64,34 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
     ]);
 
     return {
-      materials: materials.map(material => new Material({
-        ...material.toObject(),
-        isBookmarked: material.bookmarks.some(b => b.userId === userId),
-        isLiked: material.likes.some(l => l.userId === userId)
-      })),
+      materials: materials.map(material => {
+        const obj = material.toObject();
+        return {
+          _id: obj._id,
+          title: obj.title,
+          description: obj.description,
+          subject: obj.subject,
+          course: obj.course,
+          semester: obj.semester,
+          type: obj.type,
+          fileUrl: obj.fileUrl,
+          thumbnailUrl: obj.thumbnailUrl,
+          tags: obj.tags,
+          difficulty: obj.difficulty,
+          estimatedTime: obj.estimatedTime,
+          isNew: obj.isNew,
+          isRestricted: obj.isRestricted,
+          uploadedBy: obj.uploadedBy,
+          uploadedAt: obj.uploadedAt,
+          views: obj.views,
+          downloads: obj.downloads,
+          rating: obj.rating,
+          isBookmarked: Array.isArray(obj.bookmarks) ? obj.bookmarks.some(b => b.userId === userId) : false,
+          isLiked: Array.isArray(obj.likes) ? obj.likes.some(l => l.userId === userId) : false,
+          bookmarks: Array.isArray(obj.bookmarks) ? obj.bookmarks.map(b => ({ userId: b.userId, materialId: obj._id })) : [],
+          likes: Array.isArray(obj.likes) ? obj.likes.map(l => ({ userId: l.userId, materialId: obj._id })) : []
+        };
+      }),
       total,
       page,
       limit
@@ -92,12 +113,33 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
       };
     }
 
+    const obj = material.toObject();
     return {
-      materials: [new Material({
-        ...material.toObject(),
-        isBookmarked: material.bookmarks.some(b => b.userId === userId),
-        isLiked: material.likes.some(l => l.userId === userId)
-      })],
+      materials: [{
+        _id: obj._id,
+        title: obj.title,
+        description: obj.description,
+        subject: obj.subject,
+        course: obj.course,
+        semester: obj.semester,
+        type: obj.type,
+        fileUrl: obj.fileUrl,
+        thumbnailUrl: obj.thumbnailUrl,
+        tags: obj.tags,
+        difficulty: obj.difficulty,
+        estimatedTime: obj.estimatedTime,
+        isNew: obj.isNew,
+        isRestricted: obj.isRestricted,
+        uploadedBy: obj.uploadedBy,
+        uploadedAt: obj.uploadedAt,
+        views: obj.views,
+        downloads: obj.downloads,
+        rating: obj.rating,
+        isBookmarked: Array.isArray(obj.bookmarks) ? obj.bookmarks.some(b => b.userId === userId) : false,
+        isLiked: Array.isArray(obj.likes) ? obj.likes.some(l => l.userId === userId) : false,
+        bookmarks: Array.isArray(obj.bookmarks) ? obj.bookmarks.map(b => ({ userId: b.userId, materialId: obj._id })) : [],
+        likes: Array.isArray(obj.likes) ? obj.likes.map(l => ({ userId: l.userId, materialId: obj._id })) : []
+      }],
       total: 1,
       page: 1,
       limit: 1
@@ -143,65 +185,5 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
     
     if (!material) throw new Error('Material not found');
     return material.fileUrl;
-  }
-
-  async getUserBookmarkedMaterials(params: GetUserBookmarkedMaterialsRequestDTO): Promise<GetUserMaterialsResponseDTO> {
-    const { userId, page = 1, limit = 10 } = params;
-    const skip = (page - 1) * limit;
-
-    const [materials, total] = await Promise.all([
-      MaterialModel.find({
-        'bookmarks.userId': userId
-      })
-      .sort({ uploadedAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate('bookmarks')
-      .populate('likes'),
-      MaterialModel.countDocuments({
-        'bookmarks.userId': userId
-      })
-    ]);
-
-    return {
-      materials: materials.map(material => new Material({
-        ...material.toObject(),
-        isBookmarked: true,
-        isLiked: material.likes.some(l => l.userId === userId)
-      })),
-      total,
-      page,
-      limit
-    };
-  }
-
-  async getUserLikedMaterials(params: GetUserLikedMaterialsRequestDTO): Promise<GetUserMaterialsResponseDTO> {
-    const { userId, page = 1, limit = 10 } = params;
-    const skip = (page - 1) * limit;
-
-    const [materials, total] = await Promise.all([
-      MaterialModel.find({
-        'likes.userId': userId
-      })
-      .sort({ uploadedAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate('bookmarks')
-      .populate('likes'),
-      MaterialModel.countDocuments({
-        'likes.userId': userId
-      })
-    ]);
-
-    return {
-      materials: materials.map(material => new Material({
-        ...material.toObject(),
-        isBookmarked: material.bookmarks.some(b => b.userId === userId),
-        isLiked: true
-      })),
-      total,
-      page,
-      limit
-    };
   }
 } 

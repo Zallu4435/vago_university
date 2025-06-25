@@ -89,14 +89,14 @@ export const AchievementList: React.FC<Props> = ({
                       <p className="text-sm mt-1">You have indicated that you have no achievements to list</p>
                     </td>
                   </tr>
-                ) : achievements.length === 0 ? (
+                ) : achievements?.length === 0 ? (
                   <tr>
                     <td colSpan={columns.length + 1} className="px-6 py-4 text-center text-cyan-600">
                       No record(s)
                     </td>
                   </tr>
                 ) : (
-                  achievements.map((achievement, index) => (
+                  achievements?.map((achievement, index) => (
                     <tr key={index} className="border-b border-cyan-100 hover:bg-cyan-50">
                       {columns.map((col, idx) => (
                         <td key={idx} className="px-6 py-4 text-cyan-800" style={{ minWidth: col.width }}>

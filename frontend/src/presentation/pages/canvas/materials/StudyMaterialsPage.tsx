@@ -53,8 +53,6 @@ const StudyMaterialsPage: React.FC = () => {
     materials,
     isLoading,
     error,
-    bookmarkedMaterials,
-    likedMaterials,
     getMaterials,
     downloadMaterial,
     toggleBookmark,
@@ -108,9 +106,6 @@ const StudyMaterialsPage: React.FC = () => {
   };
 
   const filteredMaterials = materials;
-
-  const bookmarkedSet: Set<string> = new Set(bookmarkedMaterials.map((m: Material) => m._id));
-  const likedSet: Set<string> = new Set(likedMaterials.map((m: Material) => m._id));
 
   console.log(materials, "materials")
   console.log(filteredMaterials, "filtered matrial")
@@ -182,8 +177,8 @@ const StudyMaterialsPage: React.FC = () => {
               onDownload={handleDownload}
               onBookmark={handleBookmark}
               onLike={handleLike}
-              isBookmarked={bookmarkedSet.has(material._id)}
-              isLiked={likedSet.has(material._id)}
+              isBookmarked={material.isBookmarked}
+              isLiked={material.isLiked}
             />
           ))}
         </div>

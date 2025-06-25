@@ -15,6 +15,8 @@ export interface Assignment {
   status: 'active' | 'draft' | 'archived';
   totalSubmissions: number;
   averageMarks?: number;
+  submissionCount?: number;
+  averageMark?: number;
 }
 
 export interface Submission {

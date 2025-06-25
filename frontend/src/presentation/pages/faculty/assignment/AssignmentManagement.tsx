@@ -117,10 +117,7 @@ export default function AssignmentManagement() {
                                         assignments={assignments}
                                         isLoading={isLoading}
                                         error={error}
-                                        setSelectedAssignment={(assignment) => {
-                                            setSelectedAssignment(assignment);
-                                            setActiveTab('submissions');
-                                        }}
+                                        setSelectedAssignment={setSelectedAssignment}
                                         setActiveTab={setActiveTab}
                                         setShowCreateModal={setShowCreateModal}
                                         onDelete={handleDeleteAssignment}
@@ -183,6 +180,8 @@ export default function AssignmentManagement() {
                                 isLoading={isCreating}
                                 selectedAssignment={selectedAssignment}
                                 onUpdate={handleUpdateAssignment}
+                                setActiveTab={setActiveTab}
+                                setSelectedAssignment={setSelectedAssignment}
                             />
                         </div>
                     </div>

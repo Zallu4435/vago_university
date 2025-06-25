@@ -83,6 +83,7 @@ export const useUserManagement = () => {
     },
   });
 
+
   return {
     users: data?.admissions || [],
     totalPages: data?.totalPages || 0,

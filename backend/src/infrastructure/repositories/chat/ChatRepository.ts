@@ -140,18 +140,11 @@ export class ChatRepository implements IChatRepository {
 
       console.log('User search query:', JSON.stringify(userSearchQuery, null, 2));
 
-      const [users, faculty] = await Promise.all([
-        UserModel.find(userSearchQuery).select('_id firstName lastName email profilePicture').lean(),
-        FacultyModel.find(userSearchQuery).select('_id firstName lastName email profilePicture').lean()
-      ]);
+      const users = await UserModel.find(userSearchQuery).select('_id firstName lastName email profilePicture').lean();
 
       console.log('Found users:', users.length);
-      console.log('Found faculty:', faculty.length);
 
-      const matchingUserIds = [
-        ...users.map(user => user._id.toString()),
-        ...faculty.map(faculty => faculty._id.toString())
-      ];
+      const matchingUserIds = users.map(user => user._id.toString());
 
       console.log('Matching user IDs:', matchingUserIds);
 
@@ -485,78 +478,43 @@ export class ChatRepository implements IChatRepository {
 
     const searchQuery = String(query).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-    const [users, faculty] = await Promise.all([
-      UserModel.find({
-        _id: { $ne: userId },
-        $or: [
-          { firstName: { $regex: searchQuery, $options: 'i' } },
-          { lastName: { $regex: searchQuery, $options: 'i' } },
-          { email: { $regex: searchQuery, $options: 'i' } }
-        ]
-      })
-        .select('firstName lastName email avatar')
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+    const users = await UserModel.find({
+      _id: { $ne: userId },
+      $or: [
+        { firstName: { $regex: searchQuery, $options: 'i' } },
+        { lastName: { $regex: searchQuery, $options: 'i' } },
+        { email: { $regex: searchQuery, $options: 'i' } }
+      ]
+    })
+      .select('firstName lastName email avatar')
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
-      FacultyModel.find({
-        _id: { $ne: userId },
-        $or: [
-          { firstName: { $regex: searchQuery, $options: 'i' } },
-          { lastName: { $regex: searchQuery, $options: 'i' } },
-          { email: { $regex: searchQuery, $options: 'i' } }
-        ]
-      })
-        .select('firstName lastName email avatar')
-        .skip(skip)
-        .limit(limit)
-        .lean()
-    ]);
+    const totalUsers = await UserModel.countDocuments({
+      _id: { $ne: userId },
+      $or: [
+        { firstName: { $regex: searchQuery, $options: 'i' } },
+        { lastName: { $regex: searchQuery, $options: 'i' } },
+        { email: { $regex: searchQuery, $options: 'i' } }
+      ]
+    });
 
-    const [totalUsers, totalFaculty] = await Promise.all([
-      UserModel.countDocuments({
-        _id: { $ne: userId },
-        $or: [
-          { firstName: { $regex: searchQuery, $options: 'i' } },
-          { lastName: { $regex: searchQuery, $options: 'i' } },
-          { email: { $regex: searchQuery, $options: 'i' } }
-        ]
-      }),
-      FacultyModel.countDocuments({
-        _id: { $ne: userId },
-        $or: [
-          { firstName: { $regex: searchQuery, $options: 'i' } },
-          { lastName: { $regex: searchQuery, $options: 'i' } },
-          { email: { $regex: searchQuery, $options: 'i' } }
-        ]
-      })
-    ]);
-
-    const results = [
-      ...users.map(user => ({
-        id: user._id.toString(),
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        avatar: user.avatar,
-        type: 'user'
-      })),
-      ...faculty.map(faculty => ({
-        id: faculty._id.toString(),
-        firstName: faculty.firstName,
-        lastName: faculty.lastName,
-        email: faculty.email,
-        avatar: faculty.avatar,
-        type: 'faculty'
-      }))
-    ];
+    const results = users.map(user => ({
+      id: user._id.toString(),
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      avatar: user.avatar,
+      type: 'user'
+    }));
 
     return {
       items: results,
-      total: totalUsers + totalFaculty,
+      total: totalUsers,
       page,
       limit,
-      hasMore: skip + results.length < totalUsers + totalFaculty
+      hasMore: skip + results.length < totalUsers
     };
   }
 

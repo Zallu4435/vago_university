@@ -46,6 +46,11 @@ userSchema.pre("save", async function (next) {
   // Only hash the password if it has been modified (or is new)
   if (!user.isModified("password")) return next();
 
+  // If password is already a bcrypt hash, skip re-hashing
+  if (/^\$2[aby]\$[\d]+\$/.test(user.password) && user.password.length === 60) {
+    return next();
+  }
+
   try {
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(user.password, salt);

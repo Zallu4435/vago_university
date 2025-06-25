@@ -14,6 +14,8 @@ export default function InboxSection() {
     useCommunicationManagement();
   const { styles, theme } = usePreferences();
 
+  console.log(messages, "messages ")
+
   const handleMessageClick = (message: Message) => {
     setSelectedMessage(message);
     if (message.recipients.find((r) => r.status === 'unread')) {

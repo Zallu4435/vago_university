@@ -27,6 +27,8 @@ const RegisterPage = () => {
   const backgroundAnimation = useAnimation(0);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+  const [confirmationMessage, setConfirmationMessage] = useState('');
+  const [formError, setFormError] = useState('');
 
   const { register, handleSubmit, watch, formState: { errors }, reset } = useForm<FormData>({
     resolver: zodResolver(registerSchema),
@@ -46,6 +48,7 @@ const RegisterPage = () => {
   const mutation = useRegisterUser();
 
   const onSubmit = (data: FormData) => {
+    setFormError('');
     mutation.mutate(
       {
         firstName: data.firstName,
@@ -54,13 +57,12 @@ const RegisterPage = () => {
         password: data.password,
       },
       {
-        onSuccess: () => {
-          toast.success('Registration successful! Welcome to Horizon University.');
+        onSuccess: (response) => {
+          setConfirmationMessage(response.message || 'Registration successful! Please check your email to confirm your account before logging in.');
           reset();
-          navigate('/login');
         },
         onError: (error: Error) => {
-          toast.error(`Registration failed: ${error.message}`);
+          setFormError(error.message || 'Registration failed');
         },
       }
     );
@@ -80,146 +82,158 @@ const RegisterPage = () => {
               <div className="w-20 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto mt-4" />
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Input
-                    id="firstName"
-                    type="text"
-                    label="First Name"
-                    {...register('firstName')}
-                    placeholder="John"
-                    className="border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500"
-                  />
-                  {errors.firstName && <p className="text-red-600 text-xs mt-1">{errors.firstName.message}</p>}
-                </div>
-                <div>
-                  <Input
-                    id="lastName"
-                    type="text"
-                    label="Last Name"
-                    {...register('lastName')}
-                    placeholder="Doe"
-                    className="border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500"
-                  />
-                  {errors.lastName && <p className="text-red-600 text-xs mt-1">{errors.lastName.message}</p>}
-                </div>
+            {confirmationMessage ? (
+              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6 text-center" role="alert">
+                <span className="block sm:inline text-lg font-semibold">{confirmationMessage}</span>
+                <p className="mt-2 text-sm text-green-600">You may close this page and log in after confirming your email.</p>
               </div>
-
-              <div>
-                <Input
-                  id="email"
-                  type="email"
-                  label="Email Address"
-                  {...register('email')}
-                  placeholder="you@example.com"
-                  className="border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500"
-                />
-                {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>}
-              </div>
-
-              <div>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={isPasswordVisible ? "text" : "password"}
-                    label="Password"
-                    {...register('password')}
-                    placeholder="••••••••"
-                    className="border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500 pr-10"
-                  />
-                  <button
-                    type="button"
-                    onMouseDown={() => setIsPasswordVisible(true)}
-                    onMouseUp={() => setIsPasswordVisible(false)}
-                    onMouseLeave={() => setIsPasswordVisible(false)}
-                    onTouchStart={() => setIsPasswordVisible(true)}
-                    onTouchEnd={() => setIsPasswordVisible(false)}
-                    className="absolute right-3 top-[38px] text-gray-500 hover:text-gray-700 focus:outline-none"
-                  >
-                    {isPasswordVisible ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
-                  </button>
-                </div>
-                {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password.message}</p>}
-                {password && (
-                  <div className="mt-2">
-                    <div className="flex gap-1 mb-1">
-                      {[...Array(4)].map((_, i) => (
-                        <div
-                          key={i}
-                          className={`h-1 flex-1 rounded-full ${i < passwordStrength ? getPasswordStrengthColor() : 'bg-gray-200'}`}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-xs text-gray-500">{getPasswordStrengthText()}</p>
+            ) : (
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                {formError && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 text-center" role="alert">
+                    <span className="block sm:inline">{formError}</span>
                   </div>
                 )}
-              </div>
-
-              <div>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={isConfirmPasswordVisible ? "text" : "password"}
-                    label="Confirm Password"
-                    {...register('confirmPassword')}
-                    placeholder="••••••••"
-                    className="border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500 pr-10"
-                  />
-                  <button
-                    type="button"
-                    onMouseDown={() => setIsConfirmPasswordVisible(true)}
-                    onMouseUp={() => setIsConfirmPasswordVisible(false)}
-                    onMouseLeave={() => setIsConfirmPasswordVisible(false)}
-                    onTouchStart={() => setIsConfirmPasswordVisible(true)}
-                    onTouchEnd={() => setIsConfirmPasswordVisible(false)}
-                    className="absolute right-3 top-[38px] text-gray-500 hover:text-gray-700 focus:outline-none"
-                  >
-                    {isConfirmPasswordVisible ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
-                  </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      label="First Name"
+                      {...register('firstName')}
+                      placeholder="John"
+                      className="border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500"
+                    />
+                    {errors.firstName && <p className="text-red-600 text-xs mt-1">{errors.firstName.message}</p>}
+                  </div>
+                  <div>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      label="Last Name"
+                      {...register('lastName')}
+                      placeholder="Doe"
+                      className="border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500"
+                    />
+                    {errors.lastName && <p className="text-red-600 text-xs mt-1">{errors.lastName.message}</p>}
+                  </div>
                 </div>
-                {errors.confirmPassword && <p className="text-red-600 text-xs mt-1">{errors.confirmPassword.message}</p>}
-              </div>
 
-              <div className="flex items-center">
-                <input
-                  id="terms"
-                  type="checkbox"
-                  {...register('acceptTerms')}
-                  className="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-cyan-300 rounded"
+                <div>
+                  <Input
+                    id="email"
+                    type="email"
+                    label="Email Address"
+                    {...register('email')}
+                    placeholder="you@example.com"
+                    className="border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500"
+                  />
+                  {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>}
+                </div>
+
+                <div>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={isPasswordVisible ? "text" : "password"}
+                      label="Password"
+                      {...register('password')}
+                      placeholder="••••••••"
+                      className="border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onMouseDown={() => setIsPasswordVisible(true)}
+                      onMouseUp={() => setIsPasswordVisible(false)}
+                      onMouseLeave={() => setIsPasswordVisible(false)}
+                      onTouchStart={() => setIsPasswordVisible(true)}
+                      onTouchEnd={() => setIsPasswordVisible(false)}
+                      className="absolute right-3 top-[38px] text-gray-500 hover:text-gray-700 focus:outline-none"
+                    >
+                      {isPasswordVisible ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                  {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password.message}</p>}
+                  {password && (
+                    <div className="mt-2">
+                      <div className="flex gap-1 mb-1">
+                        {[...Array(4)].map((_, i) => (
+                          <div
+                            key={i}
+                            className={`h-1 flex-1 rounded-full ${i < passwordStrength ? getPasswordStrengthColor() : 'bg-gray-200'}`}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-500">{getPasswordStrengthText()}</p>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={isConfirmPasswordVisible ? "text" : "password"}
+                      label="Confirm Password"
+                      {...register('confirmPassword')}
+                      placeholder="••••••••"
+                      className="border-cyan-200 focus:border-cyan-500 focus:ring-cyan-500 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onMouseDown={() => setIsConfirmPasswordVisible(true)}
+                      onMouseUp={() => setIsConfirmPasswordVisible(false)}
+                      onMouseLeave={() => setIsConfirmPasswordVisible(false)}
+                      onTouchStart={() => setIsConfirmPasswordVisible(true)}
+                      onTouchEnd={() => setIsConfirmPasswordVisible(false)}
+                      className="absolute right-3 top-[38px] text-gray-500 hover:text-gray-700 focus:outline-none"
+                    >
+                      {isConfirmPasswordVisible ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && <p className="text-red-600 text-xs mt-1">{errors.confirmPassword.message}</p>}
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    id="terms"
+                    type="checkbox"
+                    {...register('acceptTerms')}
+                    className="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-cyan-300 rounded"
+                  />
+                  <label htmlFor="terms" className="ml-2 block text-sm text-cyan-700">
+                    I agree to the <Link to="/terms" className="text-cyan-600 hover:underline">Terms of Service</Link> and{' '}
+                    <Link to="/privacy" className="text-cyan-600 hover:underline">Privacy Policy</Link>
+                  </label>
+                </div>
+                {errors.acceptTerms && <p className="text-red-600 text-xs mt-1">{errors.acceptTerms.message}</p>}
+
+                <Button
+                  type="submit"
+                  label={
+                    mutation.isPending ? (
+                      <span className="flex items-center justify-center">
+                        <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        </svg>
+                        Registering...
+                      </span>
+                    ) : (
+                      'Register'
+                    )
+                  }
+                  disabled={mutation.isPending}
+                  variant="primary"
+                  className="w-full"
                 />
-                <label htmlFor="terms" className="ml-2 block text-sm text-cyan-700">
-                  I agree to the <Link to="/terms" className="text-cyan-600 hover:underline">Terms of Service</Link> and{' '}
-                  <Link to="/privacy" className="text-cyan-600 hover:underline">Privacy Policy</Link>
-                </label>
-              </div>
-              {errors.acceptTerms && <p className="text-red-600 text-xs mt-1">{errors.acceptTerms.message}</p>}
 
-              <Button
-                type="submit"
-                label={
-                  mutation.isPending ? (
-                    <span className="flex items-center justify-center">
-                      <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      </svg>
-                      Registering...
-                    </span>
-                  ) : (
-                    'Register'
-                  )
-                }
-                disabled={mutation.isPending}
-                variant="primary"
-                className="w-full"
-              />
-
-              <div className="text-center text-sm text-cyan-700 mt-4">
-                Already enrolled? <Link to="/login" className="text-cyan-600 hover:underline font-medium">Sign in</Link>
-                <span className="mx-2">|</span>
-                <Link to="/faculty/request" className="text-cyan-600 hover:underline font-medium">Apply as Faculty</Link>
-              </div>
-            </form>
+                <div className="text-center text-sm text-cyan-700 mt-4">
+                  Already enrolled? <Link to="/login" className="text-cyan-600 hover:underline font-medium">Sign in</Link>
+                  <span className="mx-2">|</span>
+                  <Link to="/faculty/request" className="text-cyan-600 hover:underline font-medium">Apply as Faculty</Link>
+                </div>
+              </form>
+            )}
           </div>
         </div>
 

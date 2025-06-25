@@ -43,10 +43,38 @@ interface PasswordResetOtpEmailParams {
   otp: string;
 }
 
+interface RegistrationConfirmationEmailParams {
+  to: string;
+  name: string;
+  confirmationUrl: string;
+}
+
 class EmailService {
   private transporter: any;
 
   constructor() {
+    // Validate email configuration
+    if (!config.email.host) {
+      console.error("EMAIL_HOST is not configured");
+      throw new Error("Email host is not configured");
+    }
+    if (!config.email.user) {
+      console.error("EMAIL_USER is not configured");
+      throw new Error("Email user is not configured");
+    }
+    if (!config.email.password) {
+      console.error("EMAIL_PASSWORD is not configured");
+      throw new Error("Email password is not configured");
+    }
+
+    console.log("Initializing email service with config:", {
+      host: config.email.host,
+      port: config.email.port,
+      secure: config.email.secure,
+      user: config.email.user,
+      from: config.email.from
+    });
+
     this.transporter = nodemailer.createTransport({
       host: config.email.host,
       port: config.email.port,
@@ -55,6 +83,15 @@ class EmailService {
         user: config.email.user,
         pass: config.email.password,
       },
+    });
+
+    // Verify transporter configuration
+    this.transporter.verify((error: any, success: any) => {
+      if (error) {
+        console.error("Email transporter verification failed:", error);
+      } else {
+        console.log("Email transporter is ready to send messages");
+      }
     });
   }
 
@@ -249,35 +286,131 @@ class EmailService {
     name,
     otp,
   }: PasswordResetOtpEmailParams): Promise<void> {
-    const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #2a5885;">Password Reset Request</h2>
-        
-        <p>Dear ${name},</p>
-        
-        <p>We received a request to reset the password for your account. Please use the following One-Time Password (OTP) to proceed:</p>
-        
-        <div style="background-color: #f9f9f9; border-left: 4px solid #2a5885; padding: 15px; margin: 20px 0; text-align: center;">
-          <p style="font-size: 1.5rem; font-weight: bold; letter-spacing: 0.1rem; color: #1f2937;">${otp}</p>
-        </div>
-        
-        <p><strong>Important:</strong> This OTP is valid for 10 minutes. Do not share it with anyone.</p>
-        
-        <p>If you did not request a password reset, please ignore this email or contact our support team.</p>
-        
-        <p>Best regards,<br>
-        The Support Team</p>
-      </div>
-    `;
+    const maxRetries = 3;
+    let lastError: any;
 
-    await this.transporter.sendMail({
-      from: `"Support Team" <${config.email.from}>`,
-      to,
-      subject: `Your Password Reset OTP`,
-      html: htmlContent,
-    });
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const htmlContent = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #2a5885;">Password Reset Request</h2>
+            
+            <p>Dear ${name},</p>
+            
+            <p>We received a request to reset the password for your account. Please use the following One-Time Password (OTP) to proceed:</p>
+            
+            <div style="background-color: #f9f9f9; border-left: 4px solid #2a5885; padding: 15px; margin: 20px 0; text-align: center;">
+              <p style="font-size: 1.5rem; font-weight: bold; letter-spacing: 0.1rem; color: #1f2937;">${otp}</p>
+            </div>
+            
+            <p><strong>Important:</strong> This OTP is valid for 10 minutes. Do not share it with anyone.</p>
+            
+            <p>If you did not request a password reset, please ignore this email or contact our support team.</p>
+            
+            <p>Best regards,<br>
+            The Support Team</p>
+          </div>
+        `;
 
-    console.log(`Password reset OTP email sent to ${to}`);
+        console.log(`Attempting to send password reset OTP email to ${to} (attempt ${attempt}/${maxRetries})`);
+
+        await this.transporter.sendMail({
+          from: `"Support Team" <${config.email.from}>`,
+          to,
+          subject: `Your Password Reset OTP`,
+          html: htmlContent,
+        });
+
+        console.log(`Password reset OTP email sent successfully to ${to}`);
+        return; // Success, exit the retry loop
+      } catch (error: any) {
+        lastError = error;
+        console.error(`Failed to send password reset OTP email to ${to} (attempt ${attempt}/${maxRetries}):`, error.message);
+        
+        if (attempt < maxRetries) {
+          // Wait before retrying (exponential backoff)
+          const delay = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+          console.log(`Retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+    }
+    
+    // All retries failed
+    console.error(`All ${maxRetries} attempts to send password reset OTP email to ${to} failed`);
+    throw new Error(`Failed to send OTP email after ${maxRetries} attempts: ${lastError.message}`);
+  }
+
+  async sendRegistrationConfirmationEmail({
+    to,
+    name,
+    confirmationUrl,
+  }: RegistrationConfirmationEmailParams): Promise<void> {
+    const maxRetries = 3;
+    let lastError: any;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const htmlContent = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #2a5885;">Confirm Your Email Address</h2>
+            <p>Dear ${name},</p>
+            <p>Thank you for registering with our university platform. Please confirm your email address by clicking the button below:</p>
+            <div style="margin: 30px 0; text-align: center;">
+              <a href="${confirmationUrl}" style="background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+                Confirm Email Address
+              </a>
+            </div>
+            <p style="color: #666; font-size: 14px;">If the button doesn't work, you can copy and paste this link into your browser:</p>
+            <p style="color: #666; font-size: 14px; word-break: break-all;">${confirmationUrl}</p>
+            <p style="color: #666; font-size: 14px;">If you did not register for an account, please ignore this email.</p>
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+            <p style="color: #999; font-size: 12px;">This is an automated message from our university registration system.</p>
+            <p style="color: #999; font-size: 12px;">Best regards,<br>The University Support Team</p>
+          </div>
+        `;
+        
+        console.log(`Attempting to send registration confirmation email to ${to} (attempt ${attempt}/${maxRetries})`);
+        console.log(`Email configuration:`, {
+          from: `"Support Team" <${config.email.from}>`,
+          to,
+          subject: `Confirm your email address`,
+          host: config.email.host,
+          port: config.email.port,
+          secure: config.email.secure
+        });
+        
+        const mailOptions = {
+          from: `"Support Team" <${config.email.from}>`,
+          to,
+          subject: `Confirm your email address`,
+          html: htmlContent,
+        };
+        
+        console.log(`Mail options:`, mailOptions);
+        
+        const result = await this.transporter.sendMail(mailOptions);
+        console.log(`Email send result:`, result);
+        
+        console.log(`Registration confirmation email sent successfully to ${to}`);
+        return; // Success, exit the retry loop
+      } catch (error: any) {
+        lastError = error;
+        console.error(`Failed to send registration confirmation email to ${to} (attempt ${attempt}/${maxRetries}):`, error.message);
+        console.error(`Full error:`, error);
+        
+        if (attempt < maxRetries) {
+          // Wait before retrying (exponential backoff)
+          const delay = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+          console.log(`Retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+    }
+    
+    // All retries failed
+    console.error(`All ${maxRetries} attempts to send registration confirmation email to ${to} failed`);
+    throw new Error(`Failed to send confirmation email after ${maxRetries} attempts: ${lastError.message}`);
   }
 }
 

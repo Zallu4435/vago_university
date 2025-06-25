@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { FaPhone, FaEnvelope, FaShieldAlt, FaArrowLeft, FaMobileAlt, FaAt, FaLock, FaCheckCircle, FaExclamationCircle, FaTimes } from 'react-icons/fa';
+import { authService } from '../../application/services/auth.service';
 
 // Mobile OTP Component
-const MobileOTPComponent = ({ onBack, onClose }) => {
+interface MobileOTPComponentProps {
+  onBack: () => void;
+  onClose: () => void;
+}
+const MobileOTPComponent = ({ onBack, onClose }: MobileOTPComponentProps) => {
   const [step, setStep] = useState('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
@@ -188,7 +193,12 @@ const MobileOTPComponent = ({ onBack, onClose }) => {
 };
 
 // Email OTP Component
-const EmailOTPComponent = ({ onBack, onClose, onVerified }) => {
+interface EmailOTPComponentProps {
+  onBack: () => void;
+  onClose: () => void;
+  onVerified: (email: string) => void;
+}
+const EmailOTPComponent = ({ onBack, onClose, onVerified }: EmailOTPComponentProps) => {
   const [step, setStep] = useState('email');
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
@@ -207,11 +217,14 @@ const EmailOTPComponent = ({ onBack, onClose, onVerified }) => {
     setLoading(true);
     setError('');
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await authService.sendEmailOtp(email);
       setStep('otp');
+    } catch (err: any) {
+      setError(err.message || 'Failed to send OTP');
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
   const handleVerifyOTP = async () => {
@@ -223,16 +236,16 @@ const EmailOTPComponent = ({ onBack, onClose, onVerified }) => {
     setLoading(true);
     setError('');
 
-    setTimeout(() => {
-      if (otp === '123456') {
-        setResetToken('demo-token');
-        setStep('change-password');
-        onVerified(email);
-      } else {
-        setError('Invalid OTP. Please try again. (Use: 123456)');
-      }
+    try {
+      const result = await authService.verifyEmailOtp(email, otp);
+      setResetToken(result.resetToken);
+      setStep('change-password');
+      onVerified(email);
+    } catch (err: any) {
+      setError(err.message || 'Failed to verify OTP');
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   const handleChangePassword = async () => {
@@ -248,10 +261,15 @@ const EmailOTPComponent = ({ onBack, onClose, onVerified }) => {
     setLoading(true);
     setError('');
 
-    setTimeout(() => {
+    try {
+      await authService.resetPassword(resetToken, newPassword);
       alert('Password changed successfully! You are now logged in.');
       onClose();
-    }, 2000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to reset password');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -475,7 +493,7 @@ export default function ForgotPasswordModal() {
     setVerifiedEmail('');
   };
 
-  const handleVerified = (email) => {
+  const handleVerified = (email: string) => {
     setVerifiedEmail(email);
   };
 
@@ -601,11 +619,11 @@ export default function ForgotPasswordModal() {
           )}
 
           {/* Mobile OTP Screen */}
-          {currentMethod === 'mobile' && <MobileOTPComponent onBack={handleBack} onClose={handleClose} />}
+          {currentMethod === 'mobile' && <MobileOTPComponent onBack={handleBack as () => void} onClose={handleClose as () => void} />}
 
           {/* Email OTP Screen */}
           {currentMethod === 'email' && (
-            <EmailOTPComponent onBack={handleBack} onClose={handleClose} onVerified={handleVerified} />
+            <EmailOTPComponent onBack={handleBack as () => void} onClose={handleClose as () => void} onVerified={handleVerified as (email: string) => void} />
           )}
         </div>
       </div>

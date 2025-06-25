@@ -271,6 +271,7 @@ export interface IAuthController extends IController {
   sendEmailOtp(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   verifyEmailOtp(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   resetPassword(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  confirmRegistration(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface IAdminAdmissionController extends IController {

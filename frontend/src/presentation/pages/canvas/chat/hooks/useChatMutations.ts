@@ -111,14 +111,14 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
         isDeleted: false,
         deletedForEveryone: false,
       };
-      queryClient.setQueryData(['messages', params.chatId], (old: any[] = []) => [...old, optimisticMessage]);
+      queryClient.setQueryData(['messages', params?.chatId], (old: any[] = []) => [...old, optimisticMessage]);
       return { previousMessages };
     },
     onError: (err, params, context) => {
-      queryClient.setQueryData(['messages', params.chatId], context?.previousMessages);
+      queryClient.setQueryData(['messages', params?.chatId], context?.previousMessages);
     },
     onSettled: (_data, _error, params) => {
-      queryClient.invalidateQueries({ queryKey: ['messages', params.chatId] });
+      queryClient.invalidateQueries({ queryKey: ['messages', params?.chatId] });
     }
   });
 

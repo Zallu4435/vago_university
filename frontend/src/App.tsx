@@ -38,6 +38,7 @@ import DashboardPage from './presentation/pages/user/Dashboard/StudentDashboard'
 import FacultyDashboard from './presentation/pages/faculty/FacultyDashboard';
 import FacultyRequestForm from './presentation/pages/Auth/FacultyRequest';
 import ConfirmAdmission from './presentation/pages/ConfirmAdmission';
+import ConfirmRegistration from './presentation/pages/Auth/ConfirmRegistration';
 import FacultyManagement from './presentation/pages/admin/FacultyManagement';
 import ConfirmFaculty from './presentation/pages/ConfirmFaculty';
 import Setting from './presentation/pages/user/Settings/Setting';
@@ -236,6 +237,9 @@ const App: React.FC = () => {
           {/* Redirect if department is not found */}
           <Route path="*" element={<Navigate to="/departments/computer-science" replace />} />
         </Route>
+
+        {/* Confirm Registration Route (no authentication required) */}
+        <Route path="/confirm-registration" element={<ConfirmRegistration />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/register" replace />} />

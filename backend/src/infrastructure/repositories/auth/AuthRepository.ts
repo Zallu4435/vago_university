@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { emailService } from "../../services/email.service";
 import { otpStorage } from "../../services/otpStorage";
 import { AuthErrorType } from "../../../domain/auth/enums/AuthErrorType";
+import { config } from "../../../config/config";
 import {
     RegisterRequestDTO,
     LoginRequestDTO,
@@ -41,17 +42,33 @@ export class AuthRepository implements IAuthRepository {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(params.password, salt);
 
+        const confirmationToken = jwt.sign(
+            { email: params.email },
+            process.env.JWT_SECRET || "your-secret-key",
+            { expiresIn: "1d" }
+        );
+
         const user = new Register({
             firstName: params.firstName,
             lastName: params.lastName,
             email: params.email,
             password: hashedPassword,
+            pending: true,
         });
 
         await user.save();
 
+        const confirmationUrl = `${config.frontendUrl}/confirm-registration?token=${confirmationToken}`;
+        console.log("Generated confirmation URL:", confirmationUrl);
+        
+        await emailService.sendRegistrationConfirmationEmail({
+            to: params.email,
+            name: params.firstName,
+            confirmationUrl,
+        });
+
         return {
-            message: "User registered successfully",
+            message: "Registration successful. Please check your email to confirm your account.",
             user: {
                 firstName: user.firstName,
                 lastName: user.lastName,
@@ -86,6 +103,9 @@ export class AuthRepository implements IAuthRepository {
                 if (admission) {
                     throw new Error(AuthErrorType.AdmissionExists);
                 }
+                if (user.pending) {
+                    throw new Error("Please confirm your email before logging in.");
+                }
                 collection = "register";
             }
         }
@@ -111,8 +131,8 @@ export class AuthRepository implements IAuthRepository {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
-                id: user._id.toString(),
-                profilePicture: user.profilePicture,
+                id: user._id?.toString(),
+                profilePicture: (user as any).profilePicture || "",
             },
             collection,
         };
@@ -163,8 +183,8 @@ export class AuthRepository implements IAuthRepository {
                     firstName: user.firstName,
                     lastName: user.lastName,
                     email: user.email,
-                    id: user._id.toString(),
-                    profilePicture: user.profilePicture,
+                    id: user._id?.toString(),
+                    profilePicture: (user as any).profilePicture || "",
                 },
                 collection: decoded.collection,
             };
@@ -350,10 +370,29 @@ export class AuthRepository implements IAuthRepository {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
-                id: user._id.toString(),
-                profilePicture: user.profilePicture || "",
+                id: user._id?.toString(),
+                profilePicture: (user as any).profilePicture || "",
             },
             collection,
         };
+    }
+
+    async confirmRegistration(token: string): Promise<{ message: string }> {
+        let payload: { email: string };
+        try {
+            payload = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key") as { email: string };
+        } catch (err) {
+            throw new Error("Invalid or expired confirmation token");
+        }
+        const user = await Register.findOne({ email: payload.email });
+        if (!user) {
+            throw new Error("User not found");
+        }
+        if (!user.pending) {
+            throw new Error("User already confirmed");
+        }
+        user.pending = false;
+        await user.save();
+        return { message: "Email confirmed successfully. You can now log in." };
     }
 }

@@ -8,6 +8,7 @@ import {
   SendEmailOtpUseCase,
   VerifyEmailOtpUseCase,
   ResetPasswordUseCase,
+  ConfirmRegistrationUseCase,
 } from "../../../application/auth/useCases/AuthUseCases";
 import { facultyUpload } from "../../../config/cloudinary.config";
 
@@ -27,7 +28,8 @@ export class AuthController implements IAuthController {
     private registerFacultyUseCase: RegisterFacultyUseCase,
     private sendEmailOtpUseCase: SendEmailOtpUseCase,
     private verifyEmailOtpUseCase: VerifyEmailOtpUseCase,
-    private resetPasswordUseCase: ResetPasswordUseCase
+    private resetPasswordUseCase: ResetPasswordUseCase,
+    private confirmRegistrationUseCase: ConfirmRegistrationUseCase
   ) {
     this.httpErrors = new HttpErrors();
     this.httpSuccess = new HttpSuccess();
@@ -234,6 +236,19 @@ export class AuthController implements IAuthController {
       return this.httpSuccess.success_200(response.data);
     } catch (error: any) {
       return this.httpErrors.error_500();
+    }
+  }
+
+  async confirmRegistration(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    try {
+      const token = httpRequest.body.token || httpRequest.query.token;
+      if (!token) {
+        return this.httpErrors.error_400();
+      }
+      const result = await this.confirmRegistrationUseCase.execute(token);
+      return this.httpSuccess.success_200(result);
+    } catch (error: any) {
+      return this.httpErrors.error_400();
     }
   }
 }

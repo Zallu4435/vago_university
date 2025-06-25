@@ -28,4 +28,5 @@ import {
     sendEmailOtp(params: SendEmailOtpRequestDTO): Promise<SendEmailOtpResponseDTO>;
     verifyEmailOtp(params: VerifyEmailOtpRequestDTO): Promise<VerifyEmailOtpResponseDTO>;
     resetPassword(params: ResetPasswordRequestDTO): Promise<ResetPasswordResponseDTO>;
+    confirmRegistration(token: string): Promise<{ message: string }>;
   }

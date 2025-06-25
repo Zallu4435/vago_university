@@ -6,6 +6,7 @@ export interface IRegister extends Document {
   email: string;
   password: string;
   createdAt: Date;
+  pending: boolean;
 }
 
 const registerSchema = new Schema<IRegister>({
@@ -21,6 +22,7 @@ const registerSchema = new Schema<IRegister>({
   },
   password: { type: String, required: true, minlength: 8 },
   createdAt: { type: Date, default: Date.now },
+  pending: { type: Boolean, default: true },
 });
 
 export const Register = mongoose.model<IRegister>('Register', registerSchema);

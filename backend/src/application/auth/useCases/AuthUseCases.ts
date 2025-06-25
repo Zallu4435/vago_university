@@ -58,6 +58,10 @@ import {
     execute(params: ResetPasswordRequestDTO): Promise<ResponseDTO<ResetPasswordResponseDTO>>;
   }
   
+  export interface IConfirmRegistrationUseCase {
+    execute(token: string): Promise<{ message: string }>;
+  }
+  
   export class RegisterUseCase implements IRegisterUseCase {
     constructor(private authRepository: IAuthRepository) {}
   
@@ -175,5 +179,12 @@ import {
         console.error("ResetPasswordUseCase: Error:", error);
         return { data: { error: error.message || AuthErrorType.InvalidToken }, success: false };
       }
+    }
+  }
+  
+  export class ConfirmRegistrationUseCase implements IConfirmRegistrationUseCase {
+    constructor(private authRepository: IAuthRepository) {}
+    async execute(token: string): Promise<{ message: string }> {
+      return this.authRepository.confirmRegistration(token);
     }
   }

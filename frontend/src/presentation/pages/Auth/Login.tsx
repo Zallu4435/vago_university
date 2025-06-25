@@ -25,6 +25,7 @@ const LoginPage = () => {
   const formAnimation = useAnimation(300);
   const backgroundAnimation = useAnimation(0);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [pendingError, setPendingError] = useState('');
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(loginSchema),
@@ -38,6 +39,7 @@ const LoginPage = () => {
 
 
 const onSubmit = (data: FormData) => {
+  setPendingError('');
   mutation.mutate(data, {
     onSuccess: (response) => {
       Cookies.set('auth_token', response.token, { secure: true, sameSite: 'strict' });
@@ -65,7 +67,11 @@ const onSubmit = (data: FormData) => {
       }
     },
     onError: (error: Error) => {
-      toast.error(`Login failed: ${error.message}`);
+      if (error.message.toLowerCase().includes('confirm your email')) {
+        setPendingError('You must confirm your email before logging in. Please check your inbox.');
+      } else {
+        toast.error(`Login failed: ${error.message}`);
+      }
     },
   });
 };
@@ -83,6 +89,12 @@ const onSubmit = (data: FormData) => {
               <p className="text-cyan-600">Sign in to your Horizon University account</p>
               <div className="w-20 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto mt-4" />
             </div>
+
+            {pendingError && (
+              <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative mb-6" role="alert">
+                <span className="block sm:inline">{pendingError}</span>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <div>

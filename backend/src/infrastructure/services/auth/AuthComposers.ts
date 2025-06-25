@@ -8,6 +8,7 @@ import {
   SendEmailOtpUseCase,
   VerifyEmailOtpUseCase,
   ResetPasswordUseCase,
+  ConfirmRegistrationUseCase,
 } from '../../../application/auth/useCases/AuthUseCases';
 import { AuthRepository } from '../../../infrastructure/repositories/auth/AuthRepository';
 import { AuthController } from '../../../presentation/http/auth/AuthController';
@@ -23,6 +24,7 @@ export function getAuthComposer(): IAuthController {
   const sendEmailOtpUseCase = new SendEmailOtpUseCase(repository);
   const verifyEmailOtpUseCase = new VerifyEmailOtpUseCase(repository);
   const resetPasswordUseCase = new ResetPasswordUseCase(repository);
+  const confirmRegistrationUseCase = new ConfirmRegistrationUseCase(repository);
   return new AuthController(
     registerUseCase,
     loginUseCase,
@@ -31,6 +33,7 @@ export function getAuthComposer(): IAuthController {
     registerFacultyUseCase,
     sendEmailOtpUseCase,
     verifyEmailOtpUseCase,
-    resetPasswordUseCase
+    resetPasswordUseCase,
+    confirmRegistrationUseCase
   );
 }

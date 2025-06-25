@@ -29,4 +29,6 @@ authRouter.post("/verify-email-otp", (req, res, next) => expressAdapter(req, res
 
 authRouter.post("/reset-password", (req, res, next) => expressAdapter(req, res, authController.resetPassword.bind(authController)));
 
+authRouter.post("/confirm-registration", (req, res, next) => expressAdapter(req, res, authController.confirmRegistration.bind(authController)));
+
 export default authRouter;

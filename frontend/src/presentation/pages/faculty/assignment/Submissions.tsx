@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaSearch, FaDownload, FaEye, FaComment, FaCheck, FaClock, FaExclamationTriangle, FaFilter, FaUsers, FaFileAlt, FaStar, FaCode, FaCalculator, FaFlask, FaLanguage, FaHistory, FaGlobe, FaBook } from 'react-icons/fa';
 import ReviewModal from './ReviewModal';
 import { Assignment, Submission } from './types';
+import { assignmentService } from './services/assignmentService';
 
 const getSubjectIcon = (subject: string) => {
   const subjectIcons: { [key: string]: JSX.Element } = {
@@ -75,9 +76,9 @@ export default function Submissions({
     });
   };
 
-  const getStatusConfig = (status: 'pending' | 'reviewed' | 'needs_correction') => {
+  const getStatusConfig = (status: 'submitted' | 'graded' | 'late') => {
     switch (status) {
-      case 'reviewed':
+      case 'graded':
         return {
           color: 'from-green-500 to-emerald-600',
           bg: 'bg-green-50',
@@ -85,7 +86,7 @@ export default function Submissions({
           border: 'border-green-200',
           icon: <FaCheck size={14} />
         };
-      case 'pending':
+      case 'submitted':
         return {
           color: 'from-yellow-500 to-orange-600',
           bg: 'bg-yellow-50',
@@ -93,7 +94,7 @@ export default function Submissions({
           border: 'border-yellow-200',
           icon: <FaClock size={14} />
         };
-      case 'needs_correction':
+      case 'late':
         return {
           color: 'from-red-500 to-pink-600',
           bg: 'bg-red-50',
@@ -118,6 +119,46 @@ export default function Submissions({
     const matchesStatus = filterStatus === 'all' || submission.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
+
+  const handleDownloadSubmission = async (fileUrl: string, fileName: string) => {
+    try {
+      console.log('=== FACULTY SUBMISSION DOWNLOAD STARTED ===');
+      console.log('📁 File details:', { fileUrl, fileName });
+      
+      let actualFileName = fileName;
+      if (fileUrl.includes('.png') || fileUrl.includes('.jpg') || fileUrl.includes('.jpeg')) {
+        const urlParts = fileUrl.split('.');
+        const actualExtension = urlParts[urlParts.length - 1].split('?')[0]; 
+        if (fileName.toLowerCase().endsWith('.pdf')) {
+          actualFileName = fileName.replace('.pdf', `.${actualExtension}`);
+        }
+      }
+
+      // Use the same pattern as canvas assignment download - get file blob first
+      const blob = await assignmentService.downloadSubmissionFile(fileUrl, actualFileName);
+      
+      console.log('✅ Faculty submission download triggered successfully');
+      console.log('=== FACULTY SUBMISSION DOWNLOAD COMPLETED ===');
+    } catch (error) {
+      console.error('❌ Error downloading faculty submission:', error);
+      console.log('🔄 Falling back to direct download...');
+      // Fallback: try direct download (same as canvas)
+      try {
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = fileName;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (fallbackError) {
+        console.error('❌ Fallback download also failed:', fallbackError);
+        // Last resort: open in new tab
+        window.open(fileUrl, '_blank');
+      }
+      console.log('=== FACULTY SUBMISSION DOWNLOAD FAILED ===');
+    }
+  };
 
   return (
     <div className="space-y-8 animate-fadeIn">
@@ -155,10 +196,10 @@ export default function Submissions({
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[
-                { label: 'Total Students', value: assignment.totalStudents, icon: FaUsers, color: 'from-blue-500 to-indigo-600' },
-                { label: 'Submitted', value: assignment.submitted, icon: FaFileAlt, color: 'from-green-500 to-emerald-600' },
-                { label: 'Reviewed', value: assignment.reviewed, icon: FaCheck, color: 'from-purple-500 to-indigo-600' },
-                { label: 'Late', value: assignment.late, icon: FaClock, color: 'from-red-500 to-pink-600' }
+                { label: 'Total Submissions', value: assignment.totalSubmissions, icon: FaUsers, color: 'from-blue-500 to-indigo-600' },
+                { label: 'Submitted', value: assignment.totalSubmissions, icon: FaFileAlt, color: 'from-green-500 to-emerald-600' },
+                { label: 'Reviewed', value: assignment.totalSubmissions, icon: FaCheck, color: 'from-purple-500 to-indigo-600' },
+                { label: 'Late', value: assignment.totalSubmissions, icon: FaClock, color: 'from-red-500 to-pink-600' }
               ].map((stat, index) => (
                 <div key={stat.label} className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/50 shadow-lg hover:shadow-xl transition-all transform hover:scale-105 group animate-fadeInUp" style={{ animationDelay: `${index * 0.1}s` }}>
                   <div className="flex items-center justify-between mb-3">
@@ -173,7 +214,7 @@ export default function Submissions({
                   <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className={`h-full bg-gradient-to-r ${stat.color} rounded-full transition-all duration-1000`}
-                      style={{ width: `${Math.min((stat.value / assignment.totalStudents) * 100, 100)}%` }}
+                      style={{ width: `${Math.min((stat.value / assignment.totalSubmissions) * 100, 100)}%` }}
                     ></div>
                   </div>
                 </div>
@@ -332,7 +373,33 @@ export default function Submissions({
                         )}
                       </div>
                       <button
-                        onClick={() => onDownload(submission._id)}
+                        onClick={() => {
+                          console.log('🔍 Download button clicked for submission:', submission._id);
+                          console.log('📁 Submission files:', submission.files);
+                          console.log('📄 Submission fileName:', submission.fileName);
+                          
+                          if (!submission.files || submission.files.length === 0) {
+                            console.error('❌ No files found in submission');
+                            alert('No files found in this submission');
+                            return;
+                          }
+                          
+                          // Extract filename from URL if fileName is not available
+                          let fileName = submission.fileName;
+                          if (!fileName && submission.files[0]) {
+                            const urlParts = submission.files[0].split('/');
+                            fileName = urlParts[urlParts.length - 1].split('?')[0]; // Remove query parameters
+                            console.log('📄 Extracted fileName from URL:', fileName);
+                          }
+                          
+                          if (!fileName) {
+                            console.error('❌ No fileName found in submission');
+                            alert('No filename found in this submission');
+                            return;
+                          }
+                          
+                          handleDownloadSubmission(submission.files[0], fileName);
+                        }}
                         className="p-2 text-gray-500 hover:text-indigo-600 transition-colors"
                       >
                         <FaDownload size={16} />
@@ -450,7 +517,33 @@ export default function Submissions({
                             <FaEye size={16} />
                           </button>
                           <button
-                            onClick={() => onDownload(submission._id)}
+                            onClick={() => {
+                              console.log('🔍 Download button clicked for submission:', submission._id);
+                              console.log('📁 Submission files:', submission.files);
+                              console.log('📄 Submission fileName:', submission.fileName);
+                              
+                              if (!submission.files || submission.files.length === 0) {
+                                console.error('❌ No files found in submission');
+                                alert('No files found in this submission');
+                                return;
+                              }
+                              
+                              // Extract filename from URL if fileName is not available
+                              let fileName = submission.fileName;
+                              if (!fileName && submission.files[0]) {
+                                const urlParts = submission.files[0].split('/');
+                                fileName = urlParts[urlParts.length - 1].split('?')[0]; // Remove query parameters
+                                console.log('📄 Extracted fileName from URL:', fileName);
+                              }
+                              
+                              if (!fileName) {
+                                console.error('❌ No fileName found in submission');
+                                alert('No filename found in this submission');
+                                return;
+                              }
+                              
+                              handleDownloadSubmission(submission.files[0], fileName);
+                            }}
                             className="p-3 bg-green-50 text-green-600 hover:bg-green-100 rounded-xl transition-all border border-green-200 hover:border-green-300 hover:scale-110 transform shadow-lg"
                             title="Download"
                           >
@@ -487,7 +580,8 @@ export default function Submissions({
             studentName: selectedSubmission.studentName,
             studentId: selectedSubmission.studentId,
             submittedDate: selectedSubmission.submittedDate,
-            status: selectedSubmission.status,
+            status: selectedSubmission.status === 'graded' ? 'reviewed' : 
+                   selectedSubmission.status === 'submitted' ? 'pending' : 'needs_correction',
             marks: selectedSubmission.marks ?? 0,
             feedback: selectedSubmission.feedback ?? '',
             isLate: selectedSubmission.isLate,

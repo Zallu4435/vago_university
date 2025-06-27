@@ -36,7 +36,6 @@ import {
       const { page, limit, category, status, startDate, endDate } = params;
       const query: any = {};
   
-      console.log("reached inside the databse query ")
       if (category && category.toLowerCase() !== "all") {
         query.type = { $regex: `^${category}$`, $options: "i" };
       }
@@ -80,9 +79,7 @@ import {
     }
   
     async getClubById(params: GetClubByIdRequestDTO): Promise<GetClubByIdResponseDTO | null> {
-      console.log("reached inside the getclubby id ");
       const club = await ClubModel.findById(params.id).lean();
-      console.log(club, "huhuhuhuuh");
       if (!club) {
         return null;
       }

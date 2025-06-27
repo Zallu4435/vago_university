@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiSend, FiSmile, FiPaperclip, FiX, FiCornerUpLeft } from 'react-icons/fi';
+import { FiSmile, FiPaperclip, FiX, FiCornerUpLeft } from 'react-icons/fi';
 import { EmojiPicker } from './EmojiPicker';
 import { AttachmentMenu } from './AttachmentMenu';
 import { Styles, Message } from '../types/ChatTypes';
 import { MediaPreview } from './MediaPreview';
 import { useChatMutations } from '../hooks/useChatMutations';
-import { toast } from 'react-hot-toast';
 
 interface ChatInputProps {
   onSendMessage: (message: string, file?: File, replyTo?: Message) => void;

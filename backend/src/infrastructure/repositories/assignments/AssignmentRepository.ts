@@ -43,7 +43,6 @@ export class AssignmentRepository implements IAssignmentRepository {
       AssignmentModel.countDocuments(query)
     ]);
 
-    // For each assignment, fetch submissions and calculate count and average mark
     const assignmentsWithStats = await Promise.all(assignments.map(async (assignment) => {
       const submissions = await SubmissionModel.find({ assignmentId: assignment._id });
       const submissionCount = submissions.length;
@@ -178,15 +177,16 @@ export class AssignmentRepository implements IAssignmentRepository {
         topPerformers
       ] = await Promise.all([
         AssignmentModel.countDocuments(),
+        SubmissionModel.countDocuments(),
         AssignmentModel.aggregate([
           {
-            $group: {
-              _id: null,
-              total: { $sum: '$totalSubmissions' }
+            $lookup: {
+              from: 'submissions',
+              localField: '_id',
+              foreignField: 'assignmentId',
+              as: 'submissions'
             }
-          }
-        ]),
-        AssignmentModel.aggregate([
+          },
           {
             $group: {
               _id: null,
@@ -194,7 +194,7 @@ export class AssignmentRepository implements IAssignmentRepository {
               withSubmissions: {
                 $sum: {
                   $cond: [
-                    { $gt: ['$totalSubmissions', 0] },
+                    { $gt: [{ $size: '$submissions' }, 0] },
                     1,
                     0
                   ]
@@ -205,8 +205,16 @@ export class AssignmentRepository implements IAssignmentRepository {
         ]),
         AssignmentModel.aggregate([
           {
+            $lookup: {
+              from: 'submissions',
+              localField: '_id',
+              foreignField: 'assignmentId',
+              as: 'submissions'
+            }
+          },
+          {
             $match: {
-              totalSubmissions: { $gt: 0 }
+              'submissions.0': { $exists: true }
             }
           },
           {
@@ -222,26 +230,50 @@ export class AssignmentRepository implements IAssignmentRepository {
         ]),
         AssignmentModel.aggregate([
           {
+            $lookup: {
+              from: 'submissions',
+              localField: '_id',
+              foreignField: 'assignmentId',
+              as: 'submissions'
+            }
+          },
+          {
             $group: {
               _id: '$subject',
               count: { $sum: 1 },
-              submissions: { $sum: '$totalSubmissions' }
+              submissions: { $sum: { $size: '$submissions' } }
             }
           }
         ]),
         AssignmentModel.aggregate([
+          {
+            $lookup: {
+              from: 'submissions',
+              localField: '_id',
+              foreignField: 'assignmentId',
+              as: 'submissions'
+            }
+          },
           {
             $group: {
               _id: '$status',
               count: { $sum: 1 },
-              submissions: { $sum: '$totalSubmissions' }
+              submissions: { $sum: { $size: '$submissions' } }
             }
           }
         ]),
         AssignmentModel.aggregate([
           {
+            $lookup: {
+              from: 'submissions',
+              localField: '_id',
+              foreignField: 'assignmentId',
+              as: 'submissions'
+            }
+          },
+          {
             $match: {
-              totalSubmissions: { $gt: 0 }
+              'submissions.0': { $exists: true }
             }
           },
           {
@@ -261,8 +293,16 @@ export class AssignmentRepository implements IAssignmentRepository {
         ]),
         AssignmentModel.aggregate([
           {
+            $lookup: {
+              from: 'submissions',
+              localField: '_id',
+              foreignField: 'assignmentId',
+              as: 'submissions'
+            }
+          },
+          {
             $match: {
-              totalSubmissions: { $gt: 0 }
+              'submissions.0': { $exists: true }
             }
           },
           {
@@ -276,15 +316,16 @@ export class AssignmentRepository implements IAssignmentRepository {
               studentId: { $literal: 'N/A' },
               studentName: { $literal: 'N/A' },
               averageScore: '$averageMarks',
-              submissionsCount: '$totalSubmissions'
+              submissionsCount: { $size: '$submissions' }
             }
           }
         ])
       ]);
 
+
       const analytics = {
         totalAssignments,
-        totalSubmissions: totalSubmissions[0]?.total || 0,
+        totalSubmissions,
         submissionRate: submissionRate[0] ? (submissionRate[0].withSubmissions / submissionRate[0].total) * 100 : 0,
         averageSubmissionTimeHours: averageSubmissionTime[0]?.avgTime ? averageSubmissionTime[0].avgTime / (1000 * 60 * 60) : 0,
         subjectDistribution: subjectDistribution.reduce((acc, curr) => ({

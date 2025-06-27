@@ -21,7 +21,6 @@ export class UserMaterialController {
   ) { }
 
   async getMaterials(req: IHttpRequest): Promise<IHttpResponse> {
-    console.log("reached inside the getMaterials", req)
     const { query, user } = req;
     if (!user) return { statusCode: 401, body: { message: 'Unauthorized' } };
 

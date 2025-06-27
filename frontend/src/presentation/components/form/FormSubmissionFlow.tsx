@@ -147,11 +147,11 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                   Application ID: <span className="font-semibold text-cyan-700">{formData.applicationId}</span>
             </p>
                 <div className="flex justify-center space-x-6">
-              <Button
+              {/* <Button
                 label="Start New Application"
                 onClick={handleStartNewApplication}
                     className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-sm"
-              />
+              /> */}
               <Button
                 label="Return to Home"
                 onClick={handleRedirectToHome}

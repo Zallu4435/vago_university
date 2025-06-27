@@ -1,13 +1,11 @@
 import httpClient from '../../../../../frameworks/api/httpClient';
 
 export const userAssignmentService = {
-  // Get all assignments for the current user
   getAssignments: async (params?: { status?: string; page?: number; limit?: number; subject?: string }) => {
     try {
-    
+
       const response = await httpClient.get('/assignments', { params });
-  
-      // The backend returns the data directly in response.data
+
       return response.data.data;
     } catch (error) {
       console.error('Error in getAssignments:', error);
@@ -15,18 +13,33 @@ export const userAssignmentService = {
     }
   },
 
-  // Get a specific assignment by ID
   getAssignmentById: async (id: string) => {
     const response = await httpClient.get(`/assignments/${id}`);
     return response.data;
   },
 
-  // Submit an assignment
   submitAssignment: async (assignmentId: string, file: File) => {
+    console.log('=== FRONTEND SERVICE: SUBMIT ASSIGNMENT STARTED ===');
+    console.log('Service: Assignment ID:', assignmentId);
+    console.log('Service: File object:', file);
+    console.log('Service: File info:', {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      lastModified: file.lastModified
+    });
 
+    if (!file || file.size === 0) {
+      console.error('Service: Invalid file - file is null or has zero size');
+      throw new Error('Invalid file');
+    }
 
     const formData = new FormData();
     formData.append('file', file);
+
+    for (let [key, value] of formData.entries()) {
+      console.log(`  ${key}:`, value);
+    }
 
     try {
       const response = await httpClient.post(
@@ -38,27 +51,26 @@ export const userAssignmentService = {
           },
         }
       );
+
       return response.data;
     } catch (error) {
       console.error('Service: Submission error:', error);
+      console.error('Service: Error response:', error.response?.data);
+      console.error('Service: Error status:', error.response?.status);
       throw error;
     }
   },
 
-  // Get assignment status and details
   getAssignmentStatus: async (assignmentId: string) => {
     const response = await httpClient.get(`/assignments/${assignmentId}/status`);
     return response.data;
   },
 
-  // Get signed download URL for assignment files
   getFileDownloadUrl: async (fileUrl: string, fileName: string) => {
     try {
-      console.log('Service: Getting download URL for file:', fileName);
       const response = await httpClient.get('/assignments/download-file', {
         params: { fileUrl, fileName }
       });
-      console.log('Service: Download URL response:', response.data);
       return response.data;
     } catch (error) {
       console.error('Service: Error getting download URL:', error);
@@ -66,7 +78,19 @@ export const userAssignmentService = {
     }
   },
 
-  // Get assignment feedback if graded
+  downloadReferenceFile: async (fileUrl: string, fileName: string) => {
+    try {
+      const response = await httpClient.get('/assignments/download-reference-file', {
+        params: { fileUrl, fileName },
+        responseType: 'blob'
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Service: Error downloading reference file:', error);
+      throw error;
+    }
+  },
+
   getAssignmentFeedback: async (assignmentId: string) => {
     const response = await httpClient.get(`/assignments/${assignmentId}/feedback`);
     return response.data;

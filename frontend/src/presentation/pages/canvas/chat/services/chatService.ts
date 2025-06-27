@@ -148,14 +148,11 @@ class ChatService {
   }
 
   async createGroupChat(params: any): Promise<Chat> {
-    console.log('chatService.createGroupChat called with:', params);
     try {
       if (params instanceof FormData) {
-        console.log('chatService: sending FormData to /chats/group');
         const response = await httpClient.post('/chats/group', params);
         return response.data;
       } else {
-        console.log('chatService: sending JSON to /chats/group');
         const response = await httpClient.post('/chats/group', params);
         return response.data;
       }

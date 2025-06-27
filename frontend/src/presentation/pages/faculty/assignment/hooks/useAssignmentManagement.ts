@@ -22,10 +22,8 @@ export const useAssignmentManagement = () => {
     });
 
     const { data: analytics, isLoading: isLoadingAnalytics } = useQuery({
-        queryKey: ['analytics', selectedAssignment?._id],
-        queryFn: () => selectedAssignment
-            ? assignmentService.getAssignmentAnalytics(selectedAssignment._id)
-            : assignmentService.getAllAnalytics(),
+        queryKey: ['analytics'],
+        queryFn: assignmentService.getAllAnalytics,
         enabled: showAnalytics
     });
 
@@ -109,11 +107,6 @@ export const useAssignmentManagement = () => {
         }
     }, [reviewSubmissionMutation]);
 
-    const handleDownloadSubmission = useCallback((assignmentId: string, submissionId: string) => {
-        // Open the backend download route directly in a new tab/window
-        window.open(`/api/assignments/${assignmentId}/submissions/${submissionId}/download`, '_blank');
-        return { success: true };
-    }, []);
 
     return {
         // State
@@ -136,7 +129,6 @@ export const useAssignmentManagement = () => {
         handleUpdateAssignment,
         handleDeleteAssignment,
         handleReviewSubmission,
-        handleDownloadSubmission,
 
         // Mutations state
         isCreating: createAssignmentMutation.isPending,

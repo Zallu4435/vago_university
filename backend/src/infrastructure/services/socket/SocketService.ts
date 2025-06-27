@@ -11,13 +11,7 @@ export class SocketService {
   private userSockets: Map<string, string> = new Map(); 
 
   constructor(server: HTTPServer) {
-    // console.log('\n=== Socket.IO Service Initialization Started ===');
-    // console.log('Server details:', {
-    //   port: server.address(),
-    //   type: server.constructor.name
-    // });
-    
-    // console.log('\nCreating Socket.IO server with config...');
+  
     this.io = new SocketIOServer(server, {
       cors: {
         origin: ["http://localhost:5173", "http://localhost:3000"],
@@ -30,24 +24,11 @@ export class SocketService {
       pingTimeout: 60000,
       pingInterval: 25000,
     });
-    // console.log('Socket.IO server created successfully');
 
-    // console.log('\nCreating chat namespace...');
     this.chatNamespace = this.io.of('/chat');
     this.chatRepository = new ChatRepository();
-    // console.log('Chat namespace created at /chat');
 
     this.io.on('connection', (socket) => {
-      console.log('\n=== Main Socket Connection ===');
-      console.log('Socket ID:', socket.id);
-      // console.log('Connection details:', {
-      //   handshake: {
-      //     address: socket.handshake.address,
-      //     time: socket.handshake.time,
-      //     url: socket.handshake.url,
-      //     query: socket.handshake.query
-      //   }
-      // });
     });
 
     this.io.on('error', (error) => {
@@ -60,25 +41,11 @@ export class SocketService {
       console.error('Error details:', error);
     });
 
-    // console.log('\nSetting up socket handlers...');
     this.setupSocketHandlers();
-    // console.log('=== Socket.IO Service Initialization Complete ===\n');
   }
 
-  private setupSocketHandlers() {
-    // console.log('\n=== Setting up Socket Handlers ===');
-    
+  private setupSocketHandlers() {    
     this.chatNamespace.use((socket, next) => {
-      // console.log('\n=== Authentication Attempt ===');
-      // console.log('Socket ID:', socket.id);
-      // console.log('Connection details:', {
-      //   auth: socket.handshake.auth, 
-      //   headers: socket.handshake.headers,
-      //   query: socket.handshake.query,
-      //   address: socket.handshake.address,
-      //   time: socket.handshake.time,
-      //   url: socket.handshake.url
-      // });
 
       let token = socket.handshake.auth.token;
       if (typeof token !== 'string') {
@@ -103,17 +70,12 @@ export class SocketService {
       }
 
       try {
-        // console.log('Verifying JWT token...');
         const decoded = jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret") as any;
         socket.data.user = {
           id: decoded.userId,
           collection: decoded.collection,
         };
-        // console.log('Authentication successful:', {
-        //   userId: decoded.userId,
-        //   collection: decoded.collection,
-        //   token: token.substring(0, 20) + '...'
-        // });
+   
         next();
       } catch (err) {
         console.error('Authentication failed:', {
@@ -125,57 +87,19 @@ export class SocketService {
     });
 
     this.chatNamespace.on("connection", (socket) => {
-      console.log('\n=== New Chat Namespace Connection ===');
-      console.log('Socket ID:', socket.id);
-      console.log('User Data:', socket.data.user);
-      // console.log('Connection state:', {
-      //   connected: socket.connected,
-      //   disconnected: socket.disconnected,
-      //   handshake: {
-      //     address: socket.handshake.address,
-      //     time: socket.handshake.time,
-      //     url: socket.handshake.url
-      //   }
-      // });
-      
       const userId = socket.data.user.id;
       this.userSockets.set(userId, socket.id);
-      
-      // console.log('User connected:', {
-      //   userId,
-      //   socketId: socket.id,
-      //   totalConnections: this.userSockets.size
-      // });
-      
       this.joinUserChats(userId);
 
       socket.on("joinChat", (data: { chatId: string }) => {
-        // console.log('\n=== Join Chat Event ===');
-        // console.log('User joining chat:', {
-        //   userId,
-        //   chatId: data.chatId,
-        //   socketId: socket.id
-        // });
         socket.join(data.chatId);
       });
 
       socket.on("leaveChat", (data: { chatId: string }) => {
-        // console.log('\n=== Leave Chat Event ===');
-        // console.log('User leaving chat:', {
-        //   userId,
-        //   chatId: data.chatId,
-        //   socketId: socket.id
-        // });
         socket.leave(data.chatId);
       });
 
       socket.on("typing", (data: { chatId: string; isTyping: boolean }) => {
-        // console.log('\n=== Typing Event ===');
-        // console.log('User typing:', {
-        //   userId,
-        //   chatId: data.chatId,
-        //   isTyping: data.isTyping
-        // });
         socket.to(data.chatId).emit("typing", {
           userId,
           chatId: data.chatId,
@@ -188,13 +112,6 @@ export class SocketService {
           console.error('Received message with undefined chatId:', message);
           return;
         }
-        // console.log('\n=== New Message Event ===');
-        // console.log('Message received:', {
-        //   chatId: message.chatId,
-        //   senderId: message.senderId,
-        //   type: message.type,
-        //   content: message.content?.substring(0, 50) + '...'
-        // });
         try {
           await this.handleNewMessage(message);
         } catch (error) {
@@ -203,11 +120,6 @@ export class SocketService {
       });
 
       socket.on("messageStatus", async (data: { messageId: string; status: MessageStatus }) => {
-        // console.log('\n=== Message Status Update ===');
-        // console.log('Status update:', {
-        //   messageId: data.messageId,
-        //   status: data.status
-        // });
         try {
           await this.chatRepository.updateMessageStatus(data.messageId, data.status);
           socket.to(data.messageId).emit("messageStatus", data);
@@ -217,51 +129,25 @@ export class SocketService {
       });
 
       socket.on("disconnect", (reason) => {
-        console.log('\n=== Socket Disconnection ===');
-        console.log('Socket ID:', socket.id, 'Reason:', reason);
         const userId = this.getUserIdBySocketId(socket.id);
         if (userId) {
           this.userSockets.delete(userId);
           this.chatNamespace.emit("userStatus", { userId, status: "offline" });
-          // console.log('User disconnected:', {
-          //   userId,
-          //   socketId: socket.id,
-          //   remainingConnections: this.userSockets.size,
-          //   reason
-          // });
         } else {
-          // console.log('Socket disconnected (no userId found):', {
-          //   socketId: socket.id,
-          //   reason
-          // });
         }
       });
     });
 
-    // console.log('=== Socket Handlers Setup Complete ===\n');
   }
 
   private joinUserChats(userId: string) {
-    // console.log('\n=== Joining User Chats ===');
-    // console.log('User ID:', userId);
-    
     this.chatRepository
       .getChats({ userId, page: 1, limit: 100 })
       .then((response) => {
-        // console.log('Found chats for user:', {
-        //   userId,
-        //   chatCount: response.data.length
-        // });
-        
         response.data.forEach((chat) => {
           const socketId = this.userSockets.get(userId);
           if (socketId) {
             this.chatNamespace.sockets.get(socketId)?.join(chat.id);
-            // console.log('User joined chat:', {
-            //   userId,
-            //   chatId: chat.id,
-            //   socketId
-            // });
           }
         });
       })

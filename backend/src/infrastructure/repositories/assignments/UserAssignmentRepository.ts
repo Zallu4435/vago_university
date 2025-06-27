@@ -28,11 +28,10 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
       const { subject, status, page = 1, limit = 10, search, sortBy } = params;
       const query: any = {};
 
-      // Subject filter
       if (subject && subject !== 'all') {
         query.subject = subject;
       }
-      // Search filter (title or subject, case-insensitive)
+
       if (search && search.trim() !== '') {
         query.$or = [
           { title: { $regex: search, $options: 'i' } },
@@ -86,22 +85,20 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
         submissionMap.set(submission.assignmentId.toString(), submission);
       });
 
-      // If filtering by graded, filter assignments to those with a reviewed submission
       if (filterByGraded) {
         assignments = assignments.filter(assignment => {
           const submission = submissionMap.get(assignment._id.toString());
           return submission && submission.status === 'reviewed';
         });
       }
-      // If filtering by submitted, filter assignments to those with a pending submission
+
       if (filterBySubmitted) {
         assignments = assignments.filter(assignment => {
           const submission = submissionMap.get(assignment._id.toString());
-          return !!submission; // any submission, any status
+          return !!submission;
         });
       }
 
-      // Pagination after filtering
       const total = assignments.length;
       assignments = assignments.slice((page - 1) * limit, page * limit);
 
@@ -152,6 +149,7 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
 
       const student = await mongoose.model('User').findOne({ _id: studentId });
       if (!student) {
+        console.error('Repository: Student not found with ID:', studentId);
         throw new Error('Student not found');
       }
 
@@ -163,7 +161,6 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
       let submission;
 
       if (existingSubmission) {
-
         const newStatus = existingSubmission.status === 'needs_correction' ? 'pending' : existingSubmission.status;
 
         submission = await SubmissionModel.findOneAndUpdate(
@@ -185,7 +182,6 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
         );
 
       } else {
-
         submission = await SubmissionModel.create({
           studentId,
           studentName: `${student.firstName} ${student.lastName}`,

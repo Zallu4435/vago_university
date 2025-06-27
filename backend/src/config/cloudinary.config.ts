@@ -54,30 +54,53 @@ const assignmentStorage = new CloudinaryStorage({
   params: {
     folder: 'assignments',
     allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
-    resource_type: 'auto',
-    transformation: [{ quality: 'auto' }],
-  } as any
+    resource_type: (req: any, file: any) => {
+      const ext = file.originalname.split('.').pop()?.toLowerCase();
+      if (['pdf', 'doc', 'docx', 'txt'].includes(ext)) return 'raw';
+      return 'image';
+    },
+    transformation: (req: any, file: any) => {
+      const ext = file.originalname.split('.').pop()?.toLowerCase();
+      if (['jpg', 'jpeg', 'png'].includes(ext)) {
+        return [{ quality: 'auto' }];
+      }
+      return undefined;
+    },
+  } as any,
 });
 
 const assignmentSubmissionStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: 'assignment-submissions',
-    allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'],
-    resource_type: 'auto',
-    public_id: (req: any, file: any) => {
-      const timestamp = Date.now();
-      const originalName = file.originalname.split('.')[0];
-      console.log('🔧 Generating public_id for file:', {
-        originalname: file.originalname,
-        originalName: originalName,
-        timestamp: timestamp,
-        public_id: `submission_${timestamp}_${originalName}`
-      });
-      return `submission_${timestamp}_${originalName}`;
-    }
-  } as any
-});
+  params: (req: any, file: any) => {
+    const ext = file.originalname.split('.').pop()?.toLowerCase();
+    
+    console.log('=== CLOUDINARY STORAGE PARAMS ===');
+    console.log('File extension:', ext);
+    console.log('File details:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size
+    });
+    
+    const params = {
+      folder: 'assignment-submissions',
+      allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'],
+      resource_type: 'auto',
+      transformation: (req: any, file: any) => {
+        const ext = file.originalname.split('.').pop()?.toLowerCase();
+        if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'].includes(ext)) {
+          return [{ quality: 'auto' }];
+        }
+        return undefined;
+      },
+    };
+    
+    console.log('Cloudinary params:', params);
+    console.log('=== CLOUDINARY STORAGE PARAMS END ===');
+    
+    return params;
+  }
+} as any);
 
 const materialStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -196,6 +219,25 @@ const assignmentSubmissionUpload = multer({
     files: 1 
   },
   fileFilter: (req: any, file: any, cb: any) => {
+    console.log('=== ASSIGNMENT SUBMISSION UPLOAD VALIDATION ===');
+    console.log('Complete file object:', JSON.stringify(file, null, 2));
+    console.log('File details:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+      fieldname: file.fieldname,
+      buffer: file.buffer ? `Buffer present (${file.buffer.length} bytes)` : 'No buffer',
+      stream: file.stream ? 'Stream present' : 'No stream',
+      encoding: file.encoding,
+      destination: file.destination,
+      filename: file.filename,
+      path: file.path
+    });
+
+    // Log all properties of the file object
+    console.log('All file properties:', Object.keys(file));
+    console.log('File size type:', typeof file.size);
+    console.log('File size value:', file.size);
 
     const allowedMimeTypes = [
       'application/pdf',
@@ -213,10 +255,14 @@ const assignmentSubmissionUpload = multer({
       'application/x-zip-compressed'
     ];
 
+    console.log('Checking if mimetype is allowed:', file.mimetype);
+    console.log('Allowed MIME types:', allowedMimeTypes);
+
     if (allowedMimeTypes.includes(file.mimetype)) {
+      console.log('✅ MIME type validation passed');
       cb(null, true);
     } else {
-      console.error('Invalid file format:', file.mimetype);
+      console.error('❌ Invalid file format:', file.mimetype);
       console.error('File details:', {
         originalname: file.originalname,
         mimetype: file.mimetype,
@@ -380,7 +426,7 @@ const chatAttachmentStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'chat-attachments',
-    allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
+    allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'mp4', 'mov', 'avi', 'webm', 'mkv'],
     resource_type: 'auto',
     transformation: [{ quality: 'auto' }],
   } as any,
@@ -398,6 +444,11 @@ const chatAttachmentUpload = multer({
       'image/jpeg',
       'image/png',
       'image/jpg',
+      'video/mp4',
+      'video/quicktime',
+      'video/x-msvideo',
+      'video/webm',
+      'video/x-matroska',
     ];
     if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true);

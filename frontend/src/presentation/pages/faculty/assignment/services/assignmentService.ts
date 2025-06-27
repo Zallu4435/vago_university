@@ -101,22 +101,86 @@ export const assignmentService = {
     return response.data;
   },
 
-  downloadSubmission: async (assignmentId: string, submissionId: string) => {
-    const response = await httpClient.get(
-      `/faculty/assignments/${assignmentId}/submissions/${submissionId}/download`,
-      { responseType: 'blob' }
-    );
-    return response.data;
-  },
+  // downloadSubmission: async (assignmentId: string, submissionId: string) => {
+  //   const response = await httpClient.get(
+  //     `/faculty/assignments/${assignmentId}/submissions/${submissionId}/download`,
+  //     { responseType: 'blob' }
+  //   );
+  //   return response.data;
+  // },
 
   // Analytics
-  getAssignmentAnalytics: async (assignmentId: string) => {
-    const response = await httpClient.get(`/faculty/assignments/${assignmentId}/analytics`);
-    return response.data;
-  },
-
   getAllAnalytics: async () => {
     const response = await httpClient.get('/faculty/assignments/analytics');
-    return response.data;
-  }
+    return response.data.data;
+  },
+
+  // Get file download URL (similar to canvas assignment)
+  getFileDownloadUrl: async (fileUrl: string, fileName: string) => {
+    try {
+      console.log('Service: Getting download URL for file:', fileName);
+      const response = await httpClient.get('/faculty/assignments/download-file', {
+        params: { fileUrl, fileName },
+        responseType: 'blob'
+      });
+      console.log('Service: Download response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        dataType: typeof response.data,
+        dataSize: response.data instanceof Blob ? response.data.size : 'N/A'
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Service: Error getting download URL:', error);
+      throw error;
+    }
+  },
+
+  // New method for downloading submission files (similar to student side)
+  downloadSubmissionFile: async (fileUrl: string, fileName: string) => {
+    try {
+      console.log('=== SERVICE: DOWNLOAD SUBMISSION FILE STARTED ===');
+      console.log('Service: File URL:', fileUrl);
+      console.log('Service: File Name:', fileName);
+      
+      // Use the same pattern as canvas assignment - get file blob first
+      const blob = await assignmentService.getFileDownloadUrl(fileUrl, fileName);
+      console.log('Service: File blob received:', {
+        size: blob instanceof Blob ? blob.size : 'N/A',
+        type: blob instanceof Blob ? blob.type : 'N/A'
+      });
+      
+      // Create blob URL and trigger download (same as canvas)
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      link.style.display = 'none';
+      
+      console.log('📎 Download link properties:', {
+        href: link.href,
+        download: link.download
+      });
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up blob URL
+      setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+      
+      console.log('Service: File download triggered successfully');
+      console.log('=== SERVICE: DOWNLOAD SUBMISSION FILE COMPLETED ===');
+      return blob;
+    } catch (error: any) {
+      console.error('=== SERVICE: DOWNLOAD SUBMISSION FILE ERROR ===');
+      console.error('Service: Error downloading submission file:', error);
+      console.error('Service: Error response:', error.response?.data);
+      console.error('Service: Error status:', error.response?.status);
+      console.error('Service: Error message:', error.message);
+      console.error('=== SERVICE: DOWNLOAD SUBMISSION FILE ERROR END ===');
+      throw error;
+    }
+  },
 }; 

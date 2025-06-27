@@ -2,6 +2,7 @@ import React from 'react';
 import { FiX, FiAward, FiFileText, FiDownload, FiCheckCircle, FiAlertCircle, FiCalendar, FiClock } from 'react-icons/fi';
 import { Assignment } from '../types/AssignmentTypes';
 import { formatDueDate } from '../utils/assignmentUtils';
+import { userAssignmentService } from '../services/userAssignmentService';
 
 interface GradeModalProps {
   assignment: Assignment;
@@ -17,6 +18,9 @@ export const GradeModal: React.FC<GradeModalProps> = ({ assignment, onClose }) =
 
   const handleFileDownload = async (fileUrl: string, fileName: string) => {
     try {
+      console.log('=== GRADE MODAL FILE DOWNLOAD STARTED ===');
+      console.log('📁 File details:', { fileUrl, fileName });
+      
       let actualFileName = fileName;
       if (fileUrl.includes('.png') || fileUrl.includes('.jpg') || fileUrl.includes('.jpeg')) {
         const urlParts = fileUrl.split('.');
@@ -26,18 +30,50 @@ export const GradeModal: React.FC<GradeModalProps> = ({ assignment, onClose }) =
         }
       }
 
+      // Use the new download service method (similar to materials)
+      const blob = await userAssignmentService.downloadReferenceFile(fileUrl, actualFileName);
+      
+      // Create blob URL and trigger download
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = fileUrl.includes('cloudinary.com')
-        ? `/api/assignments/download-file?fileUrl=${encodeURIComponent(fileUrl)}&fileName=${encodeURIComponent(actualFileName)}`
-        : fileUrl;
+      link.href = url;
       link.download = actualFileName;
+      link.style.display = 'none';
+      
+      console.log('📎 Download link properties:', {
+        href: link.href,
+        download: link.download
+      });
+      
+      // Trigger download
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
+      // Clean up blob URL
+      setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+      
+      console.log('✅ Grade modal file download triggered successfully');
     } catch (error) {
-      console.error('Download error:', error);
-      window.open(fileUrl, '_blank');
+      console.error('❌ Error downloading grade modal file:', error);
+      console.log('🔄 Falling back to direct download...');
+      // Fallback: try direct download
+      try {
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = fileName;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (fallbackError) {
+        console.error('❌ Fallback download also failed:', fallbackError);
+        // Last resort: open in new tab
+        window.open(fileUrl, '_blank');
+      }
     }
+    
+    console.log('=== GRADE MODAL FILE DOWNLOAD ENDED ===');
   };
 
   return (

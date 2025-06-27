@@ -85,21 +85,38 @@ export class SubmitUserAssignmentUseCase implements ISubmitUserAssignmentUseCase
   constructor(private userAssignmentRepository: IUserAssignmentRepository) {}
 
   async execute(params: SubmitUserAssignmentRequestDTO): Promise<ResponseDTO<SubmitUserAssignmentResponseDTO>> {
+    console.log('=== USECASE: SUBMIT ASSIGNMENT STARTED ===');
+    console.log('UseCase: Input params:', {
+      assignmentId: params.assignmentId,
+      file: params.file ? {
+        originalname: params.file.originalname,
+        size: params.file.size,
+        mimetype: params.file.mimetype
+      } : 'No file',
+      studentId: params.studentId
+    });
 
     try {
       if (!mongoose.isValidObjectId(params.assignmentId)) {
+        console.error('UseCase: Invalid assignment ID:', params.assignmentId);
         return { data: { error: AssignmentErrorType.InvalidAssignmentId }, success: false };
       }
+      
       if (!params.file) {
+        console.error('UseCase: No file provided');
         return { data: { error: AssignmentErrorType.FileRequired }, success: false };
       }
 
+      console.log('UseCase: Validation passed, calling repository...');
       const result = await this.userAssignmentRepository.submitAssignment(params, params.studentId);
+      console.log('UseCase: Repository call successful, result:', result);
 
+      console.log('=== USECASE: SUBMIT ASSIGNMENT COMPLETED ===');
       return { data: result, success: true };
     } catch (error: any) {
       console.error('UseCase: Error in submitAssignment:', error);
       console.error('UseCase: Error stack:', error.stack);
+      console.log('=== USECASE: SUBMIT ASSIGNMENT FAILED ===');
       return { data: { error: error.message }, success: false };
     }
   }

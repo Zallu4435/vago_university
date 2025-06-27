@@ -211,7 +211,7 @@ export default function Analytics({ analytics, isLoading, onShow, onHide }: Anal
                 </div>
                 <div className="p-4 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl">
                     <p className="text-sm text-gray-600">Average Marks</p>
-                    <p className="text-2xl font-bold text-yellow-600">{analytics.averageMarks.toFixed(1)}</p>
+                    <p className="text-2xl font-bold text-yellow-600">{analytics.averageMarks?.toFixed(1)}</p>
                 </div>
             </div>
 

@@ -130,7 +130,7 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
                 </svg>
                 <div>
                   <h2 className="text-xl md:text-2xl font-bold text-cyan-800">
-                    Emergency / Next of Kin Contact Details
+                    Emergency Contact Details
                   </h2>
                   <p className="text-sm font-normal text-cyan-500">For urgent communication</p>
                 </div>

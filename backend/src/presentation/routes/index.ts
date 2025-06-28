@@ -23,7 +23,7 @@ import userAssignmentRoutes from '../http/assignments/userAssignmentRoutes'
 import userDiplomaRoutes from '../http/diploma/UserDiplomaRouter'
 import siteSectionRoutes from '../http/site-management/siteSectionRoutes'
 import userSiteSectionRoutes from '../http/site-management/userSiteSectionRoutes'
-
+import enquiryRoutes from '../http/enquiry/enquiryRouter'
 
 const router = Router();
 
@@ -75,5 +75,6 @@ router.use("/admin/site-sections", siteSectionRoutes);
 
 router.use("/site-sections", userSiteSectionRoutes);
 
+router.use("/enquiries", enquiryRoutes);
 
 export default router;

@@ -31,7 +31,7 @@ class EventService {
       const response = await httpClient.get<EventApiResponse>('/admin/events', {
         params
       });
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       console.error('getEvents error:', error);
       throw new Error(error.response?.data?.error || 'Failed to fetch events');

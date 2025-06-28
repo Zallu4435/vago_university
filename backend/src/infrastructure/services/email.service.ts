@@ -49,6 +49,16 @@ interface RegistrationConfirmationEmailParams {
   confirmationUrl: string;
 }
 
+interface EnquiryReplyEmailParams {
+  to: string;
+  name: string;
+  originalSubject: string;
+  originalMessage: string;
+  replyMessage: string;
+  adminName?: string;
+}
+
+
 class EmailService {
   private transporter: any;
 
@@ -369,9 +379,59 @@ class EmailService {
         }
       }
     }
+  }
 
-    console.error(`All ${maxRetries} attempts to send registration confirmation email to ${to} failed`);
-    throw new Error(`Failed to send confirmation email after ${maxRetries} attempts: ${lastError.message}`);
+  async sendEnquiryReplyEmail({
+    to,
+    name,
+    originalSubject,
+    originalMessage,
+    replyMessage,
+    adminName = "Support Team",
+  }: EnquiryReplyEmailParams): Promise<void> {
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #2a5885;">Response to Your Enquiry</h2>
+        
+        <p>Dear ${name},</p>
+        
+        <p>Thank you for contacting us. We have received your enquiry and are pleased to provide you with a response.</p>
+        
+        <div style="background-color: #f9f9f9; border-left: 4px solid #2a5885; padding: 15px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #2a5885;">Your Original Enquiry</h3>
+          <p><strong>Subject:</strong> ${originalSubject}</p>
+          <p><strong>Message:</strong></p>
+          <div style="background-color: white; padding: 10px; border-radius: 4px; margin: 10px 0;">
+            ${originalMessage.replace(/\n/g, '<br>')}
+          </div>
+        </div>
+        
+        <div style="background-color: #e8f5e8; border-left: 4px solid #4CAF50; padding: 15px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #2a5885;">Our Response</h3>
+          <div style="background-color: white; padding: 10px; border-radius: 4px; margin: 10px 0;">
+            ${replyMessage.replace(/\n/g, '<br>')}
+          </div>
+        </div>
+        
+        <p>If you have any further questions or need additional assistance, please don't hesitate to contact us again.</p>
+        
+        <p>Best regards,<br>
+        ${adminName}<br>
+        Support Team</p>
+        
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+        <p style="font-size: 12px; color: #666;">
+          This is an automated response to your enquiry. Please do not reply to this email directly.
+        </p>
+      </div>
+    `;
+
+    await this.transporter.sendMail({
+      from: `"Support Team" <${config.email.from}>`,
+      to,
+      subject: `Re: ${originalSubject}`,
+      html: htmlContent,
+    });
   }
 }
 

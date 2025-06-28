@@ -246,6 +246,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar }) => {
                       <NavLink
                         key={item.name}
                         to={item.path}
+                        end={item.path === '/admin'}
                         className={({ isActive }) =>
                           `flex items-center ${collapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-xl transition-all duration-300 relative
                           ${isActive
@@ -256,36 +257,32 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar }) => {
                         onMouseLeave={() => setHoveredItem(null)}
                         onClick={() => window.innerWidth < 1024 && setMobileOpen(false)}
                       >
-                        <div className={`flex items-center ${!collapsed ? 'w-full' : ''}`}>
-                          <div
-                            className={`relative flex-shrink-0 p-1.5 rounded-lg transition-all duration-300
-                              ${hoveredItem === item.name ? 'text-purple-300 transform scale-110' : 'text-purple-400'}`}
-                          >
-                            {hoveredItem === item.name && (
-                              <span className="absolute inset-0 bg-purple-600/20 rounded-lg blur-md shadow-[0_0_8px_rgba(139,92,246,0.4)]" />
+                        {({ isActive }) => (
+                          <>
+                            <div className={`flex items-center ${!collapsed ? 'w-full' : ''}`}>
+                              <div
+                                className={`relative flex-shrink-0 p-1.5 rounded-lg transition-all duration-300
+                                  ${hoveredItem === item.name ? 'text-purple-300 transform scale-110' : 'text-purple-400'}`}
+                              >
+                                {hoveredItem === item.name && (
+                                  <span className="absolute inset-0 bg-purple-600/20 rounded-lg blur-md shadow-[0_0_8px_rgba(139,92,246,0.4)]" />
+                                )}
+                                <span className="relative z-10">{item.icon}</span>
+                              </div>
+                              {!collapsed && (
+                                <span className={`ml-3 text-sm transition-all duration-200 ${hoveredItem === item.name ? 'font-medium' : ''}`}>
+                                  {item.name}
+                                </span>
+                              )}
+                            </div>
+                            {!collapsed && isActive && (
+                              <div className="inline-flex h-2 w-2 rounded-full bg-purple-400" />
                             )}
-                            <span className="relative z-10">{item.icon}</span>
-                          </div>
-                          {!collapsed && (
-                            <span className={`ml-3 text-sm transition-all duration-200 ${hoveredItem === item.name ? 'font-medium' : ''}`}>
-                              {item.name}
-                            </span>
-                          )}
-                        </div>
-                        {!collapsed && (
-                          <NavLink
-                            to={item.path}
-                            className={({ isActive }) =>
-                              isActive ? 'inline-flex h-2 w-2 rounded-full bg-purple-400' : 'hidden'
-                            }
-                          />
+                            {isActive && (
+                              <div className="absolute left-0 top-1/2 w-1 h-8 bg-gradient-to-b from-purple-400 to-blue-400 rounded-r-md transform -translate-y-1/2 shadow-[0_0_8px_rgba(139,92,246,0.6)]" />
+                            )}
+                          </>
                         )}
-                        <NavLink
-                          to={item.path}
-                          className={({ isActive }) =>
-                            isActive ? 'absolute left-0 top-1/2 w-1 h-8 bg-gradient-to-b from-purple-400 to-blue-400 rounded-r-md transform -translate-y-1/2 shadow-[0_0_8px_rgba(139,92,246,0.6)]' : 'hidden'
-                          }
-                        />
                       </NavLink>
                     ))}
                   </div>
@@ -303,7 +300,9 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar }) => {
               <div className={`flex items-center ${collapsed ? 'flex-col' : ''}`}>
                 <div className="relative">
                   <div className="h-10 w-10 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.3)] ring-2 ring-purple-600/30">
-                    <span className="text-sm font-bold text-white">{user?.firstName?.charAt(0) + user?.lastName?.charAt(0)}</span>
+                    <span className="text-sm font-bold text-white">
+                      {(user?.firstName?.charAt(0) || '') + (user?.lastName?.charAt(0) || '')}
+                    </span>
                   </div>
                   <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-400 border-2 border-gray-900" />
                 </div>

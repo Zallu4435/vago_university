@@ -35,7 +35,7 @@ import {
     async getAllPayments(): Promise<Payment[]> {
       try {
         const response = await httpClient.get(`${this.adminBaseUrl}/payments`);
-        return response.data.data;
+        return response.data.data.data;
       } catch (error) {
         throw new Error('Failed to fetch all payments');
       }
@@ -182,7 +182,7 @@ import {
     async getPaymentDetails(paymentId: string): Promise<Payment> {
       try {
         const response = await httpClient.get(`${this.adminBaseUrl}/payments/${paymentId}`);
-        return response.data.payment;
+        return response.data.data.payment;
       } catch (error) {
         throw new Error('Failed to fetch payment details');
       }

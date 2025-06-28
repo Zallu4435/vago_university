@@ -1,6 +1,6 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import store from './presentation/redux/store';
 import './index.css';
 import { useRefreshToken } from './application/hooks/useRefreshToken';
@@ -69,6 +69,9 @@ import MaterialManagement from './presentation/pages/admin/material/MaterialMana
 import AssignmentManagement from './presentation/pages/faculty/assignment/AssignmentManagement';
 import SessionManagement from './presentation/pages/faculty/sessions/SessionManagement';
 import SiteManagement from './presentation/pages/admin/sites/SiteManagement';
+import { VideoConferencePage } from './presentation/VideoConference/VideoConferencePage';
+import { AttendanceManagement } from './presentation/VideoConference/AttendanceManagement';
+import EnquiryManagement from './presentation/pages/admin/EnquiryManagement';
 
 const App: React.FC = () => {
   const { isError, error } = useRefreshToken();
@@ -186,6 +189,7 @@ const App: React.FC = () => {
             <Route path="admin/diploma-courses" element={<DiplomaManagement />} />
             <Route path="admin/material" element={<MaterialManagement />} />
             <Route path="admin/site-management" element={<SiteManagement />} />
+            <Route path="admin/enquiry" element={<EnquiryManagement />} />
           </Route>
         </Route>
 
@@ -209,6 +213,7 @@ const App: React.FC = () => {
             <Route path="faculty" element={<FacultyDashboard />} />
             <Route path="faculty/assignments" element={<AssignmentManagement />} />
             <Route path="faculty/sessions" element={<SessionManagement />} />
+            <Route path="faculty/attendance" element={<AttendanceManagement />} />
           </Route>
         </Route>
 
@@ -240,6 +245,9 @@ const App: React.FC = () => {
 
         {/* Confirm Registration Route (no authentication required) */}
         <Route path="/confirm-registration" element={<ConfirmRegistration />} />
+
+        
+        <Route path="/video" element={<VideoConferencePage />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/register" replace />} />

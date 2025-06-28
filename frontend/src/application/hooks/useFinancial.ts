@@ -1,13 +1,13 @@
 import { useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { 
-  StudentFinancialInfo, 
-  Charge, 
-  Payment, 
-  FinancialAidApplication, 
-  Scholarship, 
+import {
+  StudentFinancialInfo,
+  Charge,
+  Payment,
+  FinancialAidApplication,
+  Scholarship,
   ScholarshipApplication,
-  PaymentForm 
+  PaymentForm
 } from '../../domain/types/financial';
 import { financialService } from '../services/financialService';
 
@@ -66,7 +66,7 @@ export const useFinancial = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = isAdmin 
+      const data = isAdmin
         ? await financialService.getAllFinancialAidApplications()
         : await financialService.getFinancialAidApplications();
       return data;
@@ -143,7 +143,7 @@ export const useFinancial = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = isAdmin 
+      const data = isAdmin
         ? await financialService.getAllScholarshipApplications()
         : await financialService.getScholarshipApplications();
       return data;
@@ -203,7 +203,7 @@ export const useFinancial = () => {
   }, []);
 
   const uploadDocument = useCallback(async (
-    file: File, 
+    file: File,
     type: 'financial-aid' | 'scholarship'
   ): Promise<{ url: string } | null> => {
     try {

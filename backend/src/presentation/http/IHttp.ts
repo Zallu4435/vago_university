@@ -334,3 +334,12 @@ export interface IFinancialController extends IController {
   getAllCharges(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getOnePayment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
+
+export interface IEnquiryController extends IController {
+  createEnquiry(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getEnquiries(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getEnquiryById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateEnquiryStatus(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  deleteEnquiry(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  sendReply(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}

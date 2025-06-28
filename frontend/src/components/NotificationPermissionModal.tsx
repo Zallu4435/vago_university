@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { getToken } from 'firebase/messaging';
+// Firebase messaging temporarily disabled for mobile access
+// import { getToken } from 'firebase/messaging';
 import axios from 'axios';
 import { RootState } from '../presentation/redux/store';
 import { IoNotificationsOutline as NotificationIcon } from 'react-icons/io5';
-import { messaging, VAPID_KEY } from '../firebase/setup';
+// import { messaging, VAPID_KEY } from '../firebase/setup';
 import httpClient from '../frameworks/api/httpClient';
 
 // Constants
@@ -45,15 +46,16 @@ const NotificationPermissionModal: React.FC = () => {
       const permission = await Notification.requestPermission();
       
       if (permission === 'granted') {
+        // Firebase messaging temporarily disabled
         // Get FCM token
-        const token = await getToken(messaging, {
-          vapidKey: VAPID_KEY,
-        });
+        // const token = await getToken(messaging, {
+        //   vapidKey: VAPID_KEY,
+        // });
 
         // Send token to backend
-        await httpClient.post(`/fcm/${collection}/${user?.id}/fcm-token`, {
-          token,
-        });
+        // await httpClient.post(`/fcm/${collection}/${user?.id}/fcm-token`, {
+        //   token,
+        // });
 
         // Store permission in localStorage
         localStorage.setItem(NOTIFICATION_PERMISSION_KEY, 'granted');

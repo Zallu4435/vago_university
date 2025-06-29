@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import { expressAdapter } from "../../adapters/ExpressAdapter";
 import { getSportsComposer } from "../../../infrastructure/services/sports/SportComposers";
 import { getSportRequestsComposer } from "../../../infrastructure/services/sports/SportRequestComposers";
@@ -9,7 +9,7 @@ const sportController = getSportsComposer();
 const sportRequestController = getSportRequestsComposer();
 
 // Sport request routes
-sportRouter.get("/player-requests", authMiddleware, (req, res) =>
+sportRouter.get("/player-requests", authMiddleware, (req: Request, res: Response) =>
   expressAdapter(
     req,
     res,
@@ -17,7 +17,7 @@ sportRouter.get("/player-requests", authMiddleware, (req, res) =>
   )
 );
 
-sportRouter.get("/player-requests/:id", authMiddleware, (req, res) =>
+sportRouter.get("/player-requests/:id", authMiddleware, (req: Request, res: Response) =>
   expressAdapter(
     req,
     res,
@@ -25,7 +25,7 @@ sportRouter.get("/player-requests/:id", authMiddleware, (req, res) =>
   )
 );
 
-sportRouter.post("/player-requests/:id/approve", authMiddleware, (req, res) =>
+sportRouter.post("/player-requests/:id/approve", authMiddleware, (req: Request, res: Response) =>
   expressAdapter(
     req,
     res,
@@ -33,7 +33,7 @@ sportRouter.post("/player-requests/:id/approve", authMiddleware, (req, res) =>
   )
 );
 
-sportRouter.post("/player-requests/:id/reject", authMiddleware, (req, res) =>
+sportRouter.post("/player-requests/:id/reject", authMiddleware, (req: Request, res: Response) =>
   expressAdapter(
     req,
     res,
@@ -41,7 +41,7 @@ sportRouter.post("/player-requests/:id/reject", authMiddleware, (req, res) =>
   )
 );
 
-sportRouter.post("/:player-requests/join", authMiddleware, (req, res) =>
+sportRouter.post("/:player-requests/join", authMiddleware, (req: Request, res: Response) =>
   expressAdapter(
     req,
     res,
@@ -50,23 +50,23 @@ sportRouter.post("/:player-requests/join", authMiddleware, (req, res) =>
 );
 
 // Sport routes
-sportRouter.get("/", authMiddleware, (req, res) =>
+sportRouter.get("/", authMiddleware, (req: Request, res: Response) =>
   expressAdapter(req, res, sportController.getSports.bind(sportController))
 );
 
-sportRouter.get("/:id", authMiddleware, (req, res) =>
+sportRouter.get("/:id", authMiddleware, (req: Request, res: Response) =>
   expressAdapter(req, res, sportController.getSportById.bind(sportController))
 );
 
-sportRouter.post("/", authMiddleware, (req, res) =>
+sportRouter.post("/", authMiddleware, (req: Request, res: Response) =>
   expressAdapter(req, res, sportController.createSport.bind(sportController))
 );
 
-sportRouter.put("/:id", authMiddleware, (req, res) =>
+sportRouter.put("/:id", authMiddleware, (req: Request, res: Response) =>
   expressAdapter(req, res, sportController.updateSport.bind(sportController))
 );
 
-sportRouter.delete("/:id", authMiddleware, (req, res) =>
+sportRouter.delete("/:id", authMiddleware, (req: Request, res: Response) =>
   expressAdapter(req, res, sportController.deleteSport.bind(sportController))
 );
 

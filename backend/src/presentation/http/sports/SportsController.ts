@@ -56,7 +56,7 @@ export class SportsController implements ISportsController {
 
   async getSportById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { id } = httpRequest.path;
+      const { id } = httpRequest.params;
 
       if (!id) {
         return this.httpErrors.error_400();
@@ -87,7 +87,7 @@ export class SportsController implements ISportsController {
 
   async updateSport(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { id } = httpRequest.path;
+      const { id } = httpRequest.params;
       const sportData = httpRequest.body;
 
       if (!id) {
@@ -108,7 +108,7 @@ export class SportsController implements ISportsController {
 
   async deleteSport(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { id } = httpRequest.path;
+      const { id } = httpRequest.params;
 
       if (!id) {
         return this.httpErrors.error_400();

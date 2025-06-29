@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { config } from "./config/config";
-import { admissionDraft } from "./infrastructure/database/mongoose/models/admissionDraft.model";
+import { AdmissionDraft } from "./infrastructure/database/mongoose/models/admissionDraft.model";
 
 async function cleanupOldDrafts() {
   try {
@@ -8,7 +8,7 @@ async function cleanupOldDrafts() {
     console.log("MongoDB connected for cleanup");
 
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const result = await admissionDraft.model.deleteMany({
+    const result = await AdmissionDraft.deleteMany({
       createdAt: { $lt: oneDayAgo },
     });
 

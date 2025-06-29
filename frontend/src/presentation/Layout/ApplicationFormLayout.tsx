@@ -30,7 +30,7 @@ const ApplicationFormLayout: React.FC<{ children: React.ReactNode }> = ({ childr
         hideNavLinks
         onLogout={handleLogout}
       />
-      <main className="mt-28">
+      <main className="mt-24 sm:mt-26 md:mt-28 lg:mt-30">
         {children}
       </main>
     </div>

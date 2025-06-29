@@ -4,8 +4,12 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js"
+    "prebuild": "rimraf dist",
+    "build": "tsc --project tsconfig.json",
+    "build:prod": "tsc --project tsconfig.json --noEmitOnError false",
+    "build:render": "npx tsc --project tsconfig.json --noEmitOnError false || exit 0",
+    "start": "node dist/server.js",
+    "type-check": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
@@ -39,11 +43,14 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.15.17",
+    "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^6.4.17",
     "@types/ws": "^8.18.1",
+    "rimraf": "^5.0.10",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.3"
   }

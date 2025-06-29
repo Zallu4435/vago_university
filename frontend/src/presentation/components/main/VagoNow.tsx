@@ -22,23 +22,23 @@ export const VagoNow: React.FC = () => {
 
     if (isLoading) {
         return (
-            <section className="bg-transparent_65 rounded-xl border border-cyan-100 shadow-sm p-8">
-                <div className="max-w-6xl mx-auto text-center mb-10">
-                    <h2 className="text-3xl font-bold mb-3 text-cyan-800">VAGO Now</h2>
-                    <p className="text-cyan-600 text-lg mb-6 max-w-2xl mx-auto">
+            <section className="bg-transparent_65 rounded-xl border border-cyan-100 shadow-sm p-4 sm:p-6 md:p-8">
+                <div className="max-w-6xl mx-auto text-center mb-6 sm:mb-8 md:mb-10">
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-cyan-800">VAGO Now</h2>
+                    <p className="text-cyan-600 text-base sm:text-lg mb-4 sm:mb-6 max-w-2xl mx-auto px-4">
                         Come discover our exciting and vibrant campus and find out why #VagoLife is invigorating and fulfilling.
                     </p>
-                    <div className="w-20 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto mb-10" />
+                    <div className="w-16 sm:w-20 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto mb-6 sm:mb-8 md:mb-10" />
                 </div>
                 <div className="max-w-6xl mx-auto">
-                    <div className="grid grid-cols-3 gap-6 mb-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
                         {[1, 2, 3].map((idx) => (
-                            <div key={idx} className="h-[280px] bg-gray-200 rounded-xl animate-pulse"></div>
+                            <div key={idx} className="h-[200px] sm:h-[250px] md:h-[280px] bg-gray-200 rounded-xl animate-pulse"></div>
                         ))}
                     </div>
-                    <div className="grid grid-cols-2 gap-6 max-w-4xl mx-auto">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
                         {[1, 2].map((idx) => (
-                            <div key={idx} className="h-[280px] bg-gray-200 rounded-xl animate-pulse"></div>
+                            <div key={idx} className="h-[200px] sm:h-[250px] md:h-[280px] bg-gray-200 rounded-xl animate-pulse"></div>
                         ))}
                     </div>
                 </div>
@@ -48,9 +48,9 @@ export const VagoNow: React.FC = () => {
 
     if (error) {
         return (
-            <section className="bg-transparent_65 rounded-xl border border-cyan-100 shadow-sm p-8">
+            <section className="bg-transparent_65 rounded-xl border border-cyan-100 shadow-sm p-4 sm:p-6 md:p-8">
                 <div className="max-w-6xl mx-auto text-center">
-                    <h2 className="text-3xl font-bold mb-3 text-cyan-800">VAGO Now</h2>
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-cyan-800">VAGO Now</h2>
                     <p className="text-red-600">Failed to load VAGO Now content. Please try again later.</p>
                 </div>
             </section>
@@ -62,18 +62,18 @@ export const VagoNow: React.FC = () => {
     const secondRow = vagoNowItems?.slice(3, 5) || [];
 
     return (
-        <section className="bg-transparent_65 rounded-xl border border-cyan-100 shadow-sm p-8">
-            <div className="max-w-6xl mx-auto text-center mb-10">
-                <h2 className="text-3xl font-bold mb-3 text-cyan-800">VAGO Now</h2>
-                <p className="text-cyan-600 text-lg mb-6 max-w-2xl mx-auto">
+        <section className="bg-transparent_65 rounded-xl border border-cyan-100 shadow-sm p-4 sm:p-6 md:p-8">
+            <div className="max-w-6xl mx-auto text-center mb-6 sm:mb-8 md:mb-10">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-cyan-800">VAGO Now</h2>
+                <p className="text-cyan-600 text-base sm:text-lg mb-4 sm:mb-6 max-w-2xl mx-auto px-4">
                     Come discover our exciting and vibrant campus and find out why #VagoLife is invigorating and fulfilling.
                 </p>
-                <div className="w-20 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto mb-10" />
+                <div className="w-16 sm:w-20 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto mb-6 sm:mb-8 md:mb-10" />
             </div>
 
             <div className="max-w-6xl mx-auto">
                 {/* First row - 3 items */}
-                <div className="grid grid-cols-3 gap-6 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
                     {firstRow.map((item) => (
                         <div
                             key={item.id}
@@ -82,19 +82,19 @@ export const VagoNow: React.FC = () => {
                             <img
                                 src={item.image}
                                 alt={item.title}
-                                className="w-full h-[280px] object-cover transform group-hover:scale-105 transition-transform duration-500"
+                                className="w-full h-[200px] sm:h-[250px] md:h-[280px] object-cover transform group-hover:scale-105 transition-transform duration-500"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/90 via-cyan-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                                    <span className="text-xs font-semibold px-3 py-1 bg-cyan-500/80 rounded-full mb-2 inline-block">
+                                <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-6 text-white">
+                                    <span className="text-xs font-semibold px-2 sm:px-3 py-1 bg-cyan-500/80 rounded-full mb-2 inline-block">
                                         {item.category || 'General'}
                                     </span>
-                                    <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                                    <h3 className="text-lg sm:text-xl font-bold mb-2">{item.title}</h3>
                                     <button
                                         onClick={() => handleLearnMore(item)}
-                                        className="inline-flex items-center text-sm font-semibold hover:text-cyan-300 transition-colors focus:outline-none"
+                                        className="inline-flex items-center text-xs sm:text-sm font-semibold hover:text-cyan-300 transition-colors focus:outline-none"
                                     >
-                                        Learn More <FaArrowRight className="ml-2 text-xs" />
+                                        Learn More <FaArrowRight className="ml-1 sm:ml-2 text-xs" />
                                     </button>
                                 </div>
                             </div>
@@ -103,7 +103,7 @@ export const VagoNow: React.FC = () => {
                 </div>
 
                 {/* Second row - 2 items centered */}
-                <div className="grid grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
                     {secondRow.map((item) => (
                         <div
                             key={item.id}
@@ -112,19 +112,19 @@ export const VagoNow: React.FC = () => {
                             <img
                                 src={item.image}
                                 alt={item.title}
-                                className="w-full h-[280px] object-cover transform group-hover:scale-105 transition-transform duration-500"
+                                className="w-full h-[200px] sm:h-[250px] md:h-[280px] object-cover transform group-hover:scale-105 transition-transform duration-500"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/90 via-cyan-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                                    <span className="text-xs font-semibold px-3 py-1 bg-cyan-500/80 rounded-full mb-2 inline-block">
+                                <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-6 text-white">
+                                    <span className="text-xs font-semibold px-2 sm:px-3 py-1 bg-cyan-500/80 rounded-full mb-2 inline-block">
                                         {item.category || 'General'}
                                     </span>
-                                    <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                                    <h3 className="text-lg sm:text-xl font-bold mb-2">{item.title}</h3>
                                     <button
                                         onClick={() => handleLearnMore(item)}
-                                        className="inline-flex items-center text-sm font-semibold hover:text-cyan-300 transition-colors focus:outline-none"
+                                        className="inline-flex items-center text-xs sm:text-sm font-semibold hover:text-cyan-300 transition-colors focus:outline-none"
                                     >
-                                        Learn More <FaArrowRight className="ml-2 text-xs" />
+                                        Learn More <FaArrowRight className="ml-1 sm:ml-2 text-xs" />
                                     </button>
                                 </div>
                             </div>
@@ -133,10 +133,10 @@ export const VagoNow: React.FC = () => {
                 </div>
             </div>
 
-            <div className="text-center mt-10">
+            <div className="text-center mt-6 sm:mt-8 md:mt-10">
                 <Link
                     to="/vago-now"
-                    className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
+                    className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg text-sm sm:text-base"
                 >
                     Explore More
                     <FaArrowRight className="ml-2" />

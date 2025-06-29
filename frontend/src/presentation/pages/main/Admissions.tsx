@@ -9,23 +9,23 @@ export const Admissions: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-cyan-50 mt-16 via-white to-cyan-50">
       {/* Main content container */}
-      <main className="flex-1 relative pb-16">
+      <main className="flex-1 relative pb-8 sm:pb-12 md:pb-16">
         {/* Subtle background pattern */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-b from-cyan-50/30 via-white to-cyan-50/30" />
         </div>
 
         {/* Content sections */}
-        <div className="relative space-y-8">
+        <div className="relative space-y-6 sm:space-y-8">
           {/* Programmes Section */}
           <section
             id="programmes"
             data-animate
-            className={`py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto transition-all duration-800 ${
+            className={`py-6 sm:py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto transition-all duration-800 ${
               isVisible["programmes"] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            <div className="bg-white/80 shadow-md backdrop-blur-sm rounded-xl p-6 border border-cyan-100">
+            <div className="bg-white/80 shadow-md backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-cyan-100">
               <Programmes />
             </div>
           </section>
@@ -34,11 +34,11 @@ export const Admissions: React.FC = () => {
           <section
             id="scholarships"
             data-animate
-            className={`py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto transition-all duration-800 ${
+            className={`py-6 sm:py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto transition-all duration-800 ${
               isVisible["scholarships"] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            <div className="bg-white/80 shadow-md backdrop-blur-sm rounded-xl p-6 border border-cyan-100">
+            <div className="bg-white/80 shadow-md backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-cyan-100">
               <Scholarships />
             </div>
           </section>
@@ -47,11 +47,11 @@ export const Admissions: React.FC = () => {
           <section
             id="apply"
             data-animate
-            className={`py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto transition-all duration-800 ${
+            className={`py-6 sm:py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto transition-all duration-800 ${
               isVisible["apply"] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            <div className="bg-white/80 shadow-md backdrop-blur-sm rounded-xl p-6 border border-cyan-100">
+            <div className="bg-white/80 shadow-md backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-cyan-100">
               <Apply />
             </div>
           </section>

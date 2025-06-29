@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { VideoComposer } from '../../../infrastructure/services/vedios/VideoComposer';
 import { authMiddleware } from '../../../shared/middlewares/authMiddleware';
 import { expressAdapter } from '../../adapters/ExpressAdapter';
@@ -11,7 +11,7 @@ router.post(
     '/categories/:category/videos',
     authMiddleware as any,
     contentVideoUploadWithErrorHandling,
-    (req, res) => {
+    (req: Request, res: Response) => {
         req.body.category = req.params.category;
         expressAdapter(req, res, videoController.createVideo.bind(videoController));
     }
@@ -20,20 +20,20 @@ router.post(
 router.get(
     '/videos',
     authMiddleware as any,
-    (req, res) => expressAdapter(req, res, videoController.getVideos.bind(videoController))
+    (req: Request, res: Response) => expressAdapter(req, res, videoController.getVideos.bind(videoController))
 );
 
 router.get(
     '/videos/:id',
     authMiddleware as any,
-    (req, res) => expressAdapter(req, res, videoController.getVideoById.bind(videoController))
+    (req: Request, res: Response) => expressAdapter(req, res, videoController.getVideoById.bind(videoController))
 );
 
 router.put(
     '/videos/:id',
     authMiddleware as any,
     contentVideoUploadWithErrorHandling,
-    (req, res) => {
+    (req: Request, res: Response) => {
         expressAdapter(req, res, videoController.updateVideo.bind(videoController));
     }
 );
@@ -41,7 +41,7 @@ router.put(
 router.delete(
     '/videos/:id',
     authMiddleware as any,
-    (req, res) => expressAdapter(req, res, videoController.deleteVideo.bind(videoController))
+    (req: Request, res: Response) => expressAdapter(req, res, videoController.deleteVideo.bind(videoController))
 );
 
 export default router; 

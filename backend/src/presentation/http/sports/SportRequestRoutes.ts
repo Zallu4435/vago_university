@@ -1,44 +1,44 @@
 import { Router } from "express";
-import { ISportRequestController } from "../../IHttp";
-import { authMiddleware } from "../../middlewares/authMiddleware";
+import { expressAdapter } from "../../adapters/ExpressAdapter";
+import { getSportRequestsComposer } from "../../../infrastructure/services/sports/SportRequestComposers";
+import { authMiddleware } from "../../../shared/middlewares/authMiddleware";
 
-export const createSportRequestRoutes = (controller: ISportRequestController) => {
-  const router = Router();
+const sportRequestRouter = Router();
+const sportRequestController = getSportRequestsComposer();
 
-  // Get all sport requests (with pagination and filters)
-  router.get(
-    "/",
-    authMiddleware,
-    controller.getSportRequests.bind(controller)
-  );
+// Get all sport requests (with pagination and filters)
+sportRequestRouter.get(
+  "/",
+  authMiddleware,
+  (req, res) => expressAdapter(req, res, sportRequestController.getSportRequests.bind(sportRequestController))
+);
 
-  // Get sport request details
-  router.get(
-    "/:id",
-    authMiddleware,
-    controller.getSportRequestDetails.bind(controller)
-  );
+// Get sport request details
+sportRequestRouter.get(
+  "/:id",
+  authMiddleware,
+  (req, res) => expressAdapter(req, res, sportRequestController.getSportRequestDetails.bind(sportRequestController))
+);
 
-  // Approve sport request
-  router.post(
-    "/:id/approve",
-    authMiddleware,
-    controller.approveSportRequest.bind(controller)
-  );
+// Approve sport request
+sportRequestRouter.post(
+  "/:id/approve",
+  authMiddleware,
+  (req, res) => expressAdapter(req, res, sportRequestController.approveSportRequest.bind(sportRequestController))
+);
 
-  // Reject sport request
-  router.post(
-    "/:id/reject",
-    authMiddleware,
-    controller.rejectSportRequest.bind(controller)
-  );
+// Reject sport request
+sportRequestRouter.post(
+  "/:id/reject",
+  authMiddleware,
+  (req, res) => expressAdapter(req, res, sportRequestController.rejectSportRequest.bind(sportRequestController))
+);
 
-  // Join a sport
-  router.post(
-    "/join/:sportId",
-    authMiddleware,
-    controller.joinSport.bind(controller)
-  );
+// Join a sport
+sportRequestRouter.post(
+  "/join/:sportId",
+  authMiddleware,
+  (req, res) => expressAdapter(req, res, sportRequestController.joinSport.bind(sportRequestController))
+);
 
-  return router;
-}; 
+export default sportRequestRouter; 

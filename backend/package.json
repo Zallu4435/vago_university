@@ -8,6 +8,7 @@
     "build": "tsc --project tsconfig.json",
     "build:prod": "tsc --project tsconfig.json --noEmitOnError false",
     "build:render": "rm -rf dist && npx tsc --project tsconfig.json --noEmitOnError false && ls -la dist/",
+    "build:simple": "npm install && rm -rf dist && npx tsc --project tsconfig.json --noEmitOnError false",
     "start": "node dist/server.js",
     "type-check": "tsc --noEmit"
   },
@@ -38,6 +39,7 @@
     "razorpay": "^2.9.6",
     "socket.io": "^4.8.1",
     "stripe": "^18.1.0",
+    "typescript": "^5.8.3",
     "uuid": "^11.1.0",
     "ws": "^8.18.2"
   },
@@ -51,7 +53,6 @@
     "@types/nodemailer": "^6.4.17",
     "@types/ws": "^8.18.1",
     "rimraf": "^5.0.10",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.8.3"
+    "ts-node-dev": "^2.0.0"
   }
 }

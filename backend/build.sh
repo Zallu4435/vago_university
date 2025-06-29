@@ -8,11 +8,15 @@ echo "🚀 Starting build process..."
 echo "🧹 Cleaning previous build..."
 rm -rf dist 2>/dev/null || rmdir /s /q dist 2>/dev/null || true
 
+# Install dependencies if needed
+echo "📦 Installing dependencies..."
+npm install
+
 # Check if TypeScript is available
-echo "📦 Checking TypeScript installation..."
-if ! command -v npx &> /dev/null; then
-    echo "❌ npx not found, installing dependencies..."
-    npm install
+echo "🔍 Checking TypeScript installation..."
+if ! npx tsc --version &> /dev/null; then
+    echo "❌ TypeScript not found, installing..."
+    npm install typescript@^5.8.3
 fi
 
 # Show current directory and files

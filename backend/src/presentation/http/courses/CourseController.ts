@@ -13,23 +13,24 @@ export class CourseController implements ICourseController {
 
   async getCourses(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { page = 1, limit = 10, search, department, status } = httpRequest.query;
+      const { page = 1, limit = 10, search, specialization, faculty, term } = httpRequest.query;
       const params: GetCoursesRequestDTO = {
         page: Number(page),
         limit: Number(limit),
         search: search as string,
-        department: department as string,
-        status: status as string,
+        specialization: specialization as string,
+        faculty: faculty as string,
+        term: term as string,
       };
 
       const result = await this.getCoursesUseCase.execute(params);
       if (!result.success) {
-        return { statusCode: 400, body: { message: "Failed to get courses" } };
+        return { statusCode: 400, body: { error: "Failed to get courses" } };
       }
 
-      return { statusCode: 200, body: result.data };
+      return { statusCode: 200, body: { data: result.data } };
     } catch (error) {
-      return { statusCode: 500, body: { message: "Internal server error" } };
+      return { statusCode: 500, body: { error: "Internal server error" } };
     }
   }
 
@@ -46,17 +47,17 @@ export class CourseController implements ICourseController {
       console.log("[CourseController] Use case result:", result);
       
       if (!result.success) {
-        return { statusCode: 400, body: { message: "Failed to get course" } };
+        return { statusCode: 400, body: { error: "Failed to get course" } };
       }
 
       if (!result.data) {
-        return { statusCode: 404, body: { message: "Course not found" } };
+        return { statusCode: 404, body: { error: "Course not found" } };
       }
 
-      return { statusCode: 200, body: result.data };
+      return { statusCode: 200, body: { data: result.data } };
     } catch (error) {
       console.error("[CourseController] Error in getCourseById:", error);
-      return { statusCode: 500, body: { message: "Internal server error" } };
+      return { statusCode: 500, body: { error: "Internal server error" } };
     }
   }
 
@@ -65,12 +66,12 @@ export class CourseController implements ICourseController {
       const params: CreateCourseRequestDTO = httpRequest.body;
       const result = await this.createCourseUseCase.execute(params);
       if (!result.success) {
-        return { statusCode: 400, body: { message: "Failed to create course" } };
+        return { statusCode: 400, body: { error: "Failed to create course" } };
       }
 
-      return { statusCode: 201, body: result.data };
+      return { statusCode: 201, body: { data: result.data } };
     } catch (error) {
-      return { statusCode: 500, body: { message: "Internal server error" } };
+      return { statusCode: 500, body: { error: "Internal server error" } };
     }
   }
 
@@ -84,16 +85,16 @@ export class CourseController implements ICourseController {
 
       const result = await this.updateCourseUseCase.execute(params);
       if (!result.success) {
-        return { statusCode: 400, body: { message: "Failed to update course" } };
+        return { statusCode: 400, body: { error: "Failed to update course" } };
       }
 
       if (!result.data) {
-        return { statusCode: 404, body: { message: "Course not found" } };
+        return { statusCode: 404, body: { error: "Course not found" } };
       }
 
-      return { statusCode: 200, body: result.data };
+      return { statusCode: 200, body: { data: result.data } };
     } catch (error) {
-      return { statusCode: 500, body: { message: "Internal server error" } };
+      return { statusCode: 500, body: { error: "Internal server error" } };
     }
   }
 
@@ -104,12 +105,12 @@ export class CourseController implements ICourseController {
 
       const result = await this.deleteCourseUseCase.execute(params);
       if (!result.success) {
-        return { statusCode: 400, body: { message: "Failed to delete course" } };
+        return { statusCode: 400, body: { error: "Failed to delete course" } };
       }
 
-      return { statusCode: 204, body: null };
+      return { statusCode: 204, body: { data: null } };
     } catch (error) {
-      return { statusCode: 500, body: { message: "Internal server error" } };
+      return { statusCode: 500, body: { error: "Internal server error" } };
     }
   }
 } 

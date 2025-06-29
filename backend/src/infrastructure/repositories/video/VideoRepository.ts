@@ -55,7 +55,7 @@ export class VideoRepository implements IVideoRepository {
     async getVideoById(params: GetVideoByIdRequestDTO): Promise<GetVideoByIdResponseDTO | null> {
         const { id } = params;
 
-        const video = await VideoModel.findById(id)
+        const video = await (VideoModel as any).findById(id)
             .populate('diplomaId', 'title category')
             .lean();
 
@@ -76,9 +76,9 @@ export class VideoRepository implements IVideoRepository {
                 video.description,
                 video.videoUrl,
                 {
-                    id: video.diplomaId._id.toString(),
-                    title: video.diplomaId.title,
-                    category: video.diplomaId.category
+                    id: (video.diplomaId as any)._id.toString(),
+                    title: (video.diplomaId as any).title,
+                    category: (video.diplomaId as any).category
                 }
             ),
         };

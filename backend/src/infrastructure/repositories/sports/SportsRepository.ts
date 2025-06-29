@@ -96,7 +96,7 @@ export class SportsRepository implements ISportsRepository {
   }
 
   async getSportById(params: GetSportByIdRequestDTO): Promise<GetSportByIdResponseDTO | null> {
-    const sport = await TeamModel.findById(params.id).lean();
+    const sport = await (TeamModel as any).findById(params.id).lean();
     if (!sport) {
       return null;
     }
@@ -107,11 +107,11 @@ export class SportsRepository implements ISportsRepository {
         title: sport.title,
         type: sport.type,
         headCoach: sport.headCoach,
-        playerCount: sport.playerCount,
+        playerCount: sport.participants || 0,
         status: sport.status === "active" ? SportStatus.Active : SportStatus.Inactive,
-        formedOn: sport.formedOn,
-        logo: sport.logo,
-        division: sport.division,
+        formedOn: sport.createdAt.toISOString(),
+        logo: sport.logo || "",
+        division: sport.division || "",
         participants: sport.participants || 0,
         icon: sport.icon,
         color: sport.color,
@@ -122,7 +122,7 @@ export class SportsRepository implements ISportsRepository {
   }
 
   async createSport(params: CreateSportRequestDTO): Promise<CreateSportResponseDTO> {
-    const newSport = await TeamModel.create({
+    const newSport = await (TeamModel as any).create({
       ...params,
       status: params.status?.toLowerCase() || "active",
     });
@@ -133,11 +133,11 @@ export class SportsRepository implements ISportsRepository {
         title: newSport.title,
         type: newSport.type,
         headCoach: newSport.headCoach,
-        playerCount: newSport.playerCount,
-        status: newSport.status,
-        formedOn: newSport.formedOn,
-        logo: newSport.logo,
-        division: newSport.division,
+        playerCount: newSport.participants || 0,
+        status: newSport.status === "active" ? SportStatus.Active : SportStatus.Inactive,
+        formedOn: newSport.createdAt.toISOString(),
+        logo: newSport.logo || "",
+        division: newSport.division || "",
         participants: newSport.participants || 0,
         icon: newSport.icon,
         color: newSport.color,
@@ -148,7 +148,7 @@ export class SportsRepository implements ISportsRepository {
   }
 
   async updateSport(params: UpdateSportRequestDTO): Promise<UpdateSportResponseDTO | null> {
-    const updatedSport = await TeamModel.findByIdAndUpdate(
+    const updatedSport = await (TeamModel as any).findByIdAndUpdate(
       params.id,
       { $set: { ...params, updatedAt: new Date() } },
       { new: true }
@@ -164,11 +164,11 @@ export class SportsRepository implements ISportsRepository {
         title: updatedSport.title,
         type: updatedSport.type,
         headCoach: updatedSport.headCoach,
-        playerCount: updatedSport.playerCount,
-        status: updatedSport.status,
-        formedOn: updatedSport.formedOn,
-        logo: updatedSport.logo,
-        division: updatedSport.division,
+        playerCount: updatedSport.participants || 0,
+        status: updatedSport.status === "active" ? SportStatus.Active : SportStatus.Inactive,
+        formedOn: updatedSport.createdAt.toISOString(),
+        logo: updatedSport.logo || "",
+        division: updatedSport.division || "",
         participants: updatedSport.participants || 0,
         icon: updatedSport.icon,
         color: updatedSport.color,

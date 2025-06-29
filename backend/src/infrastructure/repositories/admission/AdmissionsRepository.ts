@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import Stripe from "stripe";
-import { AdmissionDraft } from "../../../domain/admission/entities/Admission";
+import { AdmissionDraft, Admission } from "../../../domain/admission/entities/Admission";
 import { AdmissionErrorType } from "../../../domain/admission/enums/AdmissionErrorType";
 import {
     CreateApplicationRequestDTO,
@@ -29,7 +29,7 @@ import { Admission as AdmissionModel } from "../../database/mongoose/models/admi
 import { PaymentModel } from "../../database/mongoose/models/financial.model";
 import { DocumentUploadService } from '../../services/admission/DocumentUploadService';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2023-10-16" });
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2025-04-30.basil" });
 
 export class AdmissionsRepository implements IAdmissionsRepository {
     private documentUploadService: DocumentUploadService;
@@ -113,7 +113,9 @@ export class AdmissionsRepository implements IAdmissionsRepository {
         await draft.save();
 
         return {
-            draft: new AdmissionDraft({
+            success: true,
+            message: "Section saved successfully",
+            data: new AdmissionDraft({
                 applicationId: draft.applicationId,
                 registerId: draft.registerId,
                 personal: draft.personal,
@@ -274,7 +276,24 @@ export class AdmissionsRepository implements IAdmissionsRepository {
         await AdmissionDraftModel.deleteOne({ applicationId: params.applicationId });
 
         return {
-            admission: newAdmission,
+            admission: new Admission({
+                applicationId: newAdmission.applicationId,
+                registerId: newAdmission.registerId,
+                personal: newAdmission.personal,
+                choiceOfStudy: newAdmission.choiceOfStudy,
+                education: newAdmission.education,
+                achievements: newAdmission.achievements,
+                otherInformation: newAdmission.otherInformation,
+                documents: newAdmission.documents,
+                declaration: newAdmission.declaration,
+                createdAt: newAdmission.createdAt,
+                updatedAt: newAdmission.updatedAt,
+                paymentId: newAdmission.paymentId.toString(),
+                status: newAdmission.status as any,
+                rejectedBy: newAdmission.rejectedBy as any,
+                confirmationToken: newAdmission.confirmationToken,
+                tokenExpiry: newAdmission.tokenExpiry,
+            }),
         };
     }
 

@@ -364,7 +364,7 @@ export class AssignmentRepository implements IAssignmentRepository {
       files: doc.files,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
-      status: doc.status,
+      status: doc.status as any,
       totalSubmissions: doc.totalSubmissions,
       averageMarks: doc.averageMarks
     };
@@ -372,16 +372,20 @@ export class AssignmentRepository implements IAssignmentRepository {
 
   private mapToSubmission(doc: ISubmissionDocument): Submission {
     return {
-      _id: doc._id.toString(),
+      id: doc._id.toString(),
       assignmentId: doc.assignmentId.toString(),
       studentId: doc.studentId,
       studentName: doc.studentName,
       submittedDate: doc.submittedDate,
-      status: doc.status,
+      status: doc.status as any,
       marks: doc.marks,
       feedback: doc.feedback,
       isLate: doc.isLate,
-      files: doc.files.map(f => f.fileUrl)
+      files: doc.files.map(f => ({
+        fileName: f.fileName,
+        fileUrl: f.fileUrl,
+        fileSize: f.fileSize
+      }))
     };
   }
 } 

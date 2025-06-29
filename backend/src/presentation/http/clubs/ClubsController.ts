@@ -56,7 +56,7 @@ export class ClubsController implements IClubsController {
         endDate,
       };
       const response = await this.getClubsUseCase.execute(getClubsRequestDTO);
-      if (!response.success || !response.data) {
+      if (!response.success || !response.data || 'error' in response.data) {
         return this.httpErrors.error_400();
       }
       return this.httpSuccess.success_200({
@@ -72,7 +72,7 @@ export class ClubsController implements IClubsController {
 
   async getClubById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { id } = httpRequest.path || {};
+      const { id } = httpRequest.params || {};
       if (!id || !mongoose.isValidObjectId(id)) {
         return this.httpErrors.error_400();
       }
@@ -103,7 +103,7 @@ export class ClubsController implements IClubsController {
 
   async updateClub(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { id } = httpRequest.path || {};
+      const { id } = httpRequest.params || {};
       const clubData = httpRequest.body || {};
       if (!id || !mongoose.isValidObjectId(id)) {
         return this.httpErrors.error_400();
@@ -121,7 +121,7 @@ export class ClubsController implements IClubsController {
 
   async deleteClub(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { id } = httpRequest.path || {};
+      const { id } = httpRequest.params || {};
       if (!id || !mongoose.isValidObjectId(id)) {
         return this.httpErrors.error_400();
       }

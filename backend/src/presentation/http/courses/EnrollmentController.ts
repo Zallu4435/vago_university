@@ -1,4 +1,4 @@
-import { IHttpRequest, IHttpResponse, ICourseEnrollmentController } from "../../IHttp";
+import { IHttpRequest, IHttpResponse, ICourseEnrollmentController } from "../IHttp";
 import { IGetEnrollmentsUseCase, IApproveEnrollmentUseCase, IRejectEnrollmentUseCase, IGetCourseRequestDetailsUseCase } from "../../../application/courses/useCases/EnrollmentUseCases";
 import { GetEnrollmentsRequestDTO, ApproveEnrollmentRequestDTO, RejectEnrollmentRequestDTO, GetCourseRequestDetailsRequestDTO } from "../../../domain/courses/dtos/EnrollmentRequestDTOs";
 
@@ -21,12 +21,12 @@ export class EnrollmentController implements ICourseEnrollmentController {
 
       const result = await this.getEnrollmentsUseCase.execute(params);
       if (!result.success) {
-        return { statusCode: 400, body: { message: "Failed to get enrollments" } };
+        return { statusCode: 400, body: { error: "Failed to get enrollments" } };
       }
 
-      return { statusCode: 200, body: result.data };
+      return { statusCode: 200, body: { data: result.data } };
     } catch (error) {
-      return { statusCode: 500, body: { message: "Internal server error" } };
+      return { statusCode: 500, body: { error: "Internal server error" } };
     }
   }
 
@@ -37,48 +37,48 @@ export class EnrollmentController implements ICourseEnrollmentController {
 
       const result = await this.getCourseRequestDetailsUseCase.execute(params);
       if (!result.success) {
-        return { statusCode: 400, body: { message: "Failed to get enrollment details" } };
+        return { statusCode: 400, body: { error: "Failed to get enrollment details" } };
       }
 
       if (!result.data) {
-        return { statusCode: 404, body: { message: "Enrollment not found" } };
+        return { statusCode: 404, body: { error: "Enrollment not found" } };
       }
 
-      return { statusCode: 200, body: result.data };
+      return { statusCode: 200, body: { data: result.data } };
     } catch (error) {
-      return { statusCode: 500, body: { message: "Internal server error" } };
+      return { statusCode: 500, body: { error: "Internal server error" } };
     }
   }
 
   async approveEnrollment(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
       const { id } = httpRequest.params;
-      const params: ApproveEnrollmentRequestDTO = { id };
+      const params: ApproveEnrollmentRequestDTO = { enrollmentId: id };
 
       const result = await this.approveEnrollmentUseCase.execute(params);
       if (!result.success) {
-        return { statusCode: 400, body: { message: "Failed to approve enrollment" } };
+        return { statusCode: 400, body: { error: "Failed to approve enrollment" } };
       }
 
-      return { statusCode: 200, body: { message: "Enrollment approved successfully" } };
+      return { statusCode: 200, body: { data: { message: "Enrollment approved successfully" } } };
     } catch (error) {
-      return { statusCode: 500, body: { message: "Internal server error" } };
+      return { statusCode: 500, body: { error: "Internal server error" } };
     }
   }
 
   async rejectEnrollment(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
       const { id } = httpRequest.params;
-      const params: RejectEnrollmentRequestDTO = { id };
+      const params: RejectEnrollmentRequestDTO = { enrollmentId: id };
 
       const result = await this.rejectEnrollmentUseCase.execute(params);
       if (!result.success) {
-        return { statusCode: 400, body: { message: "Failed to reject enrollment" } };
+        return { statusCode: 400, body: { error: "Failed to reject enrollment" } };
       }
 
-      return { statusCode: 200, body: { message: "Enrollment rejected successfully" } };
+      return { statusCode: 200, body: { data: { message: "Enrollment rejected successfully" } } };
     } catch (error) {
-      return { statusCode: 500, body: { message: "Internal server error" } };
+      return { statusCode: 500, body: { error: "Internal server error" } };
     }
   }
 } 

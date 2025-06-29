@@ -22,29 +22,29 @@ import {
   JoinSportResponseDTO,
   JoinEventResponseDTO,
 } from "../../../domain/campus-life/dtos/CampusLifeDTOs";
-import { CampusEvent, Sport, Club, JoinRequest } from "../../../domain/campus-life/entities/CampusLife";
+import { CampusEvent, Sport, Club, JoinRequest, SportType } from "../../../domain/campus-life/entities/CampusLife";
 import { CampusEventModel, EventRequestModel } from "../../../infrastructure/database/mongoose/models/events/CampusEventModel";
 import { TeamModel, SportRequestModel } from "../../../infrastructure/database/mongoose/models/sports.model";
 import { ClubModel, ClubRequestModel } from "../../../infrastructure/database/mongoose/models/clubs/ClubModel";
 
 export class CampusLifeRepository implements ICampusLifeRepository {
   async getCampusLifeOverview(params: GetCampusLifeOverviewRequestDTO): Promise<CampusLifeOverviewResponseDTO> {
-    const events = await CampusEventModel.find()
+    const events = await (CampusEventModel as any).find()
       .select("title date time location organizer timeframe icon color description fullTime additionalInfo requirements createdAt updatedAt")
       .limit(10)
       .lean();
-    const sports = await TeamModel.find()
+    const sports = await (TeamModel as any).find()
       .select("title type teams icon color division headCoach homeGames record upcomingGames createdAt updatedAt")
       .limit(10)
       .lean();
-    const clubs = await ClubModel.find()
+    const clubs = await (ClubModel as any).find()
       .select("name type members icon color status role nextMeeting about upcomingEvents createdAt updatedAt")
       .limit(10)
       .lean();
 
     return {
       events: events.map(
-        (e) =>
+        (e: any) =>
           new CampusEvent(
             e._id.toString(),
             e.title,
@@ -64,37 +64,37 @@ export class CampusLifeRepository implements ICampusLifeRepository {
           )
       ),
       sports: sports.map(
-        (s) =>
+        (s: any) =>
           new Sport(
             s._id.toString(),
             s.title,
-            s.type,
-            s.teams,
+            s.type as SportType,
+            [], // teams property doesn't exist in model
             s.icon,
             s.color,
             s.division,
             s.headCoach,
-            s.homeGames,
+            [s.homeGames?.toString() || ""], // convert number to string array
             s.record,
-            s.upcomingGames,
+            s.upcomingGames?.map((g: any) => g.description) || [],
             s.createdAt.toISOString(),
             s.updatedAt.toISOString()
           )
       ),
       clubs: clubs.map(
-        (c) =>
+        (c: any) =>
           new Club(
             c._id.toString(),
             c.name,
             c.type,
-            c.members,
+            parseInt(c.members) || 0, // convert string to number
             c.icon,
             c.color,
-            c.status,
+            c.status as any,
             c.role,
             c.nextMeeting,
             c.about,
-            c.upcomingEvents,
+            c.upcomingEvents?.map((e: any) => e.description) || [],
             c.createdAt.toISOString(),
             c.updatedAt.toISOString()
           )
@@ -112,11 +112,11 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       query.date = params.status === "upcoming" ? { $gte: today } : { $lt: today };
     }
 
-    const totalItems = await CampusEventModel.countDocuments(query);
+    const totalItems = await (CampusEventModel as any).countDocuments(query);
     const totalPages = Math.ceil(totalItems / params.limit);
     const skip = (params.page - 1) * params.limit;
 
-    const events = await CampusEventModel.find(query)
+    const events = await (CampusEventModel as any).find(query)
       .select("title date time location organizer timeframe icon color description fullTime additionalInfo requirements createdAt updatedAt")
       .skip(skip)
       .limit(params.limit)
@@ -124,7 +124,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
 
     return {
       events: events.map(
-        (e) =>
+        (e: any) =>
           new CampusEvent(
             e._id.toString(),
             e.title,
@@ -150,7 +150,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
   }
 
   async getEventById(params: GetEventByIdRequestDTO): Promise<GetEventByIdResponseDTO | null> {
-    const event = await CampusEventModel.findById(params.eventId)
+    const event = await (CampusEventModel as any).findById(params.eventId)
       .select("title date time location organizer timeframe icon color description fullTime additionalInfo requirements createdAt updatedAt")
       .lean();
     if (!event) return null;
@@ -185,26 +185,26 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       query.title = { $regex: params.search, $options: "i" };
     }
 
-    const totalItems = await TeamModel.countDocuments(query);
-    const sports = await TeamModel.find(query)
+    const totalItems = await (TeamModel as any).countDocuments(query);
+    const sports = await (TeamModel as any).find(query)
       .select("title type teams icon color division headCoach homeGames record upcomingGames createdAt updatedAt")
       .lean();
 
     return {
       sports: sports.map(
-        (s) =>
+        (s: any) =>
           new Sport(
             s._id.toString(),
             s.title,
-            s.type,
-            s.teams,
+            s.type as SportType,
+            [], // teams property doesn't exist in model
             s.icon,
             s.color,
             s.division,
             s.headCoach,
-            s.homeGames,
+            [s.homeGames?.toString() || ""], // convert number to string array
             s.record,
-            s.upcomingGames,
+            s.upcomingGames?.map((g: any) => g.description) || [],
             s.createdAt.toISOString(),
             s.updatedAt.toISOString()
           )
@@ -214,7 +214,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
   }
 
   async getSportById(params: GetSportByIdRequestDTO): Promise<GetSportByIdResponseDTO | null> {
-    const sport = await TeamModel.findById(params.sportId)
+    const sport = await (TeamModel as any).findById(params.sportId)
       .select("title type teams icon color division headCoach homeGames record upcomingGames createdAt updatedAt")
       .lean();
     if (!sport) return null;
@@ -223,15 +223,15 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       sport: new Sport(
         sport._id.toString(),
         sport.title,
-        sport.type,
-        sport.teams,
+        sport.type as SportType,
+        [], // teams property doesn't exist in model
         sport.icon,
         sport.color,
         sport.division,
         sport.headCoach,
-        sport.homeGames,
+        [sport.homeGames?.toString() || ""], // convert number to string array
         sport.record,
-        sport.upcomingGames,
+        sport.upcomingGames?.map((g: any) => g.description) || [],
         sport.createdAt.toISOString(),
         sport.updatedAt.toISOString()
       ),
@@ -250,26 +250,26 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       query.status = params.status;
     }
 
-    const totalItems = await ClubModel.countDocuments(query);
-    const clubs = await ClubModel.find(query)
+    const totalItems = await (ClubModel as any).countDocuments(query);
+    const clubs = await (ClubModel as any).find(query)
       .select("name type members icon color status role nextMeeting about upcomingEvents createdAt updatedAt")
       .lean();
 
     return {
       clubs: clubs.map(
-        (c) =>
+        (c: any) =>
           new Club(
             c._id.toString(),
             c.name,
             c.type,
-            c.members,
+            parseInt(c.members) || 0, // convert string to number
             c.icon,
             c.color,
-            c.status,
+            c.status as any,
             c.role,
             c.nextMeeting,
             c.about,
-            c.upcomingEvents,
+            c.upcomingEvents?.map((e: any) => e.description) || [],
             c.createdAt.toISOString(),
             c.updatedAt.toISOString()
           )
@@ -279,7 +279,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
   }
 
   async getClubById(params: GetClubByIdRequestDTO): Promise<GetClubByIdResponseDTO | null> {
-    const club = await ClubModel.findById(params.clubId)
+    const club = await (ClubModel as any).findById(params.clubId)
       .select("name type members icon color status role nextMeeting about upcomingEvents createdAt updatedAt")
       .lean();
     if (!club) return null;
@@ -289,14 +289,14 @@ export class CampusLifeRepository implements ICampusLifeRepository {
         club._id.toString(),
         club.name,
         club.type,
-        club.members,
+        parseInt(club.members) || 0, // convert string to number
         club.icon,
         club.color,
-        club.status,
+        club.status as any,
         club.role,
         club.nextMeeting,
         club.about,
-        club.upcomingEvents,
+        club.upcomingEvents?.map((e: any) => e.description) || [],
         club.createdAt.toISOString(),
         club.updatedAt.toISOString()
       ),
@@ -304,7 +304,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
   }
 
   async joinClub(params: JoinClubRequestDTO): Promise<JoinClubResponseDTO> {
-    const club = await ClubModel.findById(params.clubId).lean();
+    const club = await (ClubModel as any).findById(params.clubId).lean();
     if (!club) {
       throw new Error("Club not found");
     }
@@ -314,7 +314,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       throw new Error("Student not found");
     }
 
-    const existingRequest = await ClubRequestModel.findOne({
+    const existingRequest = await (ClubRequestModel as any).findOne({
       clubId: params.clubId,
       userId: params.studentId,
     }).lean();
@@ -322,7 +322,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       throw new Error("Join request already submitted for this club");
     }
 
-    const newRequest = new ClubRequestModel({
+    const newRequest = new (ClubRequestModel as any)({
       clubId: params.clubId,
       userId: params.studentId,
       status: "pending",
@@ -341,7 +341,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
   }
 
   async joinSport(params: JoinSportRequestDTO): Promise<JoinSportResponseDTO> {
-    const sport = await TeamModel.findById(params.sportId).lean();
+    const sport = await (TeamModel as any).findById(params.sportId).lean();
     if (!sport) {
       throw new Error("Sport not found");
     }
@@ -351,7 +351,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       throw new Error("Student not found");
     }
 
-    const existingRequest = await SportRequestModel.findOne({
+    const existingRequest = await (SportRequestModel as any).findOne({
       sportId: params.sportId,
       userId: params.studentId,
     }).lean();
@@ -360,7 +360,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       throw new Error("Join request already submitted for this sport");
     }
 
-    const newRequest = new SportRequestModel({
+    const newRequest = new (SportRequestModel as any)({
       sportId: params.sportId,
       userId: params.studentId,
       status: "pending",
@@ -379,7 +379,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
   }
 
   async joinEvent(params: JoinEventRequestDTO): Promise<JoinEventResponseDTO> {
-    const event = await CampusEventModel.findById(params.eventId).lean();
+    const event = await (CampusEventModel as any).findById(params.eventId).lean();
     if (!event) {
       throw new Error("Event not found");
     }
@@ -389,7 +389,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       throw new Error("Student not found");
     }
 
-    const existingRequest = await EventRequestModel.findOne({
+    const existingRequest = await (EventRequestModel as any).findOne({
       eventId: params.eventId,
       userId: params.studentId,
     }).lean();
@@ -397,7 +397,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       throw new Error("Join request already submitted for this event");
     }
 
-    const newRequest = new EventRequestModel({
+    const newRequest = new (EventRequestModel as any)({
       eventId: params.eventId,
       userId: params.studentId,
       status: "pending",

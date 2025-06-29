@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { AdmissionErrorType } from "../../admission/enums/AdmissionErrorType";
+import { AdmissionErrorType } from "../enums/AdmissionErrorType";
 
 export interface AdmissionProps {
   _id?: mongoose.Types.ObjectId;

@@ -9,35 +9,35 @@ export class MaterialsRepository implements IMaterialsRepository {
     const query: any = {};
     if (subject && subject !== 'All Subjects') query.subject = subject;
     if (course && course !== 'All Courses') query.course = course;
-    if (semester && semester !== 'All Semesters') query.semester = semester;
+    if (semester && semester !== 0) query.semester = semester;
     if (type && type !== 'All Types') query.type = type;
     if (uploadedBy && uploadedBy !== 'All Uploaders') query.uploadedBy = uploadedBy;
 
     const skip = (page - 1) * limit;
-    const materials = await MaterialModel.find(query).sort({ uploadedAt: -1 }).skip(skip).limit(limit);
-    const total = await MaterialModel.countDocuments(query);
+    const materials = await (MaterialModel as any).find(query).sort({ uploadedAt: -1 }).skip(skip).limit(limit);
+    const total = await (MaterialModel as any).countDocuments(query);
     const totalPages = Math.ceil(total / limit);
 
-    return { materials: materials.map(m => m.toObject()), totalPages };
+    return { materials: materials.map((m: any) => m.toObject()), totalPages };
   }
 
   async getMaterialById(params: GetMaterialByIdRequestDTO): Promise<GetMaterialByIdResponseDTO | null> {
-    const material = await MaterialModel.findById(params.id);
+    const material = await (MaterialModel as any).findById(params.id);
     return material ? { material: material.toObject() } : null;
   }
 
   async createMaterial(params: CreateMaterialRequestDTO): Promise<CreateMaterialResponseDTO> {
-    const material = new MaterialModel({ ...params, uploadedBy: params.uploadedBy || 'defaultUser' });
+    const material = new (MaterialModel as any)({ ...params, uploadedBy: params.uploadedBy || 'defaultUser' });
     await material.save();
     return { material: material.toObject() };
   }
 
   async updateMaterial(params: UpdateMaterialRequestDTO): Promise<UpdateMaterialResponseDTO | null> {
-    const material = await MaterialModel.findByIdAndUpdate(params.id, params.data, { new: true });
+    const material = await (MaterialModel as any).findByIdAndUpdate(params.id, params.data, { new: true });
     return material ? { material: material.toObject() } : null;
   }
 
   async deleteMaterial(params: DeleteMaterialRequestDTO): Promise<void> {
-    await MaterialModel.findByIdAndDelete(params.id);
+    await (MaterialModel as any).findByIdAndDelete(params.id);
   }
 } 

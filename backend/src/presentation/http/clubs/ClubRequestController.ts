@@ -49,7 +49,7 @@ import {
   
     async approveClubRequest(httpRequest: IHttpRequest): Promise<IHttpResponse> {
       try {
-        const { id } = httpRequest.path || {};
+        const { id } = httpRequest.params || {};
         if (!id) {
           return this.httpErrors.error_400();
         }
@@ -66,7 +66,7 @@ import {
   
     async rejectClubRequest(httpRequest: IHttpRequest): Promise<IHttpResponse> {
       try {
-        const { id } = httpRequest.path || {};
+        const { id } = httpRequest.params || {};
         if (!id) {
           return this.httpErrors.error_400();
         }
@@ -83,7 +83,7 @@ import {
   
     async getClubRequestDetails(httpRequest: IHttpRequest): Promise<IHttpResponse> {
       try {
-        const { id } = httpRequest.path || {};
+        const { id } = httpRequest.params || {};
         if (!id) {
           return this.httpErrors.error_400();
         }

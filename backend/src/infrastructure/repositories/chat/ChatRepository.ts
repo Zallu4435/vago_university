@@ -75,7 +75,7 @@ export class ChatRepository implements IChatRepository {
             .lean();
 
           const participantUsers = await UserModel.find({ _id: { $in: chat.participants } })
-            .select("firstName lastName email avatar")
+            .select("firstName lastName email profilePicture")
             .lean();
 
           return {
@@ -98,7 +98,7 @@ export class ChatRepository implements IChatRepository {
               firstName: user.firstName,
               lastName: user.lastName,
               email: user.email,
-              avatar: user.avatar,
+              avatar: user.profilePicture,
               isOnline: false
             })),
             admins: chat.admins,
@@ -167,7 +167,21 @@ export class ChatRepository implements IChatRepository {
           name: '',
           avatar: '',
           lastMessage: null,
-          participants: [params.userId, userId],
+          participants: [{
+            id: params.userId,
+            firstName: '',
+            lastName: '',
+            email: '',
+            avatar: '',
+            isOnline: false
+          }, {
+            id: userId,
+            firstName: '',
+            lastName: '',
+            email: '',
+            avatar: '',
+            isOnline: false
+          }],
           unreadCount: 0,
           updatedAt: new Date()
         }));
@@ -199,7 +213,7 @@ export class ChatRepository implements IChatRepository {
             .lean();
 
           const participantUsers = await UserModel.find({ _id: { $in: chat.participants } })
-            .select("firstName lastName email avatar")
+            .select("firstName lastName email profilePicture")
             .lean();
 
           return {
@@ -222,7 +236,7 @@ export class ChatRepository implements IChatRepository {
               firstName: user.firstName,
               lastName: user.lastName,
               email: user.email,
-              avatar: user.avatar,
+              avatar: user.profilePicture,
               isOnline: false
             })),
             unreadCount,
@@ -412,8 +426,14 @@ export class ChatRepository implements IChatRepository {
     const participants = await UserModel.find({
       _id: { $in: chat.participants },
     })
-      .select("firstName lastName email avatar")
+      .select("firstName lastName email profilePicture")
       .lean();
+
+    const unreadCount = await MessageModel.countDocuments({
+      chatId: chat._id.toString(),
+      senderId: { $ne: userId },
+      status: MessageStatus.Sent,
+    });
 
     return {
       chat: {
@@ -423,11 +443,10 @@ export class ChatRepository implements IChatRepository {
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-          avatar: user.avatar,
+          avatar: user.profilePicture,
           isOnline: false
         })),
         lastMessage: chat.lastMessage,
-        createdAt: chat.createdAt,
         updatedAt: chat.updatedAt,
         type: chat.type,
         name: chat.name,
@@ -436,6 +455,7 @@ export class ChatRepository implements IChatRepository {
         admins: chat.admins,
         settings: chat.settings,
         blockedUsers: chat.blockedUsers,
+        unreadCount,
       },
       messages: messages.map((message) => ({
         id: message._id.toString(),
@@ -449,6 +469,14 @@ export class ChatRepository implements IChatRepository {
         createdAt: message.createdAt,
         updatedAt: message.updatedAt,
       })),
+      participants: participants.map((user) => ({
+        id: user._id.toString(),
+        name: `${user.firstName} ${user.lastName}`,
+        avatar: user.profilePicture,
+        status: 'online',
+        isAdmin: chat.admins?.includes(user._id.toString()) || false,
+      })),
+      settings: chat.settings,
     };
   }
 
@@ -466,7 +494,7 @@ export class ChatRepository implements IChatRepository {
         { email: { $regex: searchQuery, $options: 'i' } }
       ]
     })
-      .select('firstName lastName email avatar')
+      .select('firstName lastName email profilePicture')
       .skip(skip)
       .limit(limit)
       .lean();
@@ -485,16 +513,15 @@ export class ChatRepository implements IChatRepository {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      avatar: user.avatar,
+      avatar: user.profilePicture,
       type: 'user'
     }));
 
     return {
-      items: results,
-      total: totalUsers,
-      page,
-      limit,
-      hasMore: skip + results.length < totalUsers
+      data: results,
+      totalItems: totalUsers,
+      totalPages: Math.ceil(totalUsers / limit),
+      currentPage: page,
     };
   }
 
@@ -554,7 +581,21 @@ export class ChatRepository implements IChatRepository {
         type: chat.type,
         name: chat.name || '',
         avatar: chat.avatar || '',
-        participants: chat.participants,
+        participants: [{
+          id: creatorId,
+          firstName: creator.firstName,
+          lastName: creator.lastName,
+          email: creator.email,
+          avatar: creator.profilePicture,
+          isOnline: false
+        }, {
+          id: participantId,
+          firstName: participant.firstName,
+          lastName: participant.lastName,
+          email: participant.email,
+          avatar: participant.profilePicture,
+          isOnline: false
+        }],
         unreadCount: 0,
         updatedAt: chat.updatedAt
       };
@@ -578,7 +619,6 @@ export class ChatRepository implements IChatRepository {
       }
 
       message.content = content;
-      message.isEdited = true;
       await message.save();
 
       const chat = await ChatModel.findById(chatId);
@@ -586,8 +626,7 @@ export class ChatRepository implements IChatRepository {
         await ChatModel.findByIdAndUpdate(chatId, {
           lastMessage: {
             ...chat.lastMessage,
-            content: content,
-            isEdited: true
+            content: content
           }
         });
       }
@@ -855,7 +894,14 @@ export class ChatRepository implements IChatRepository {
         type: chat.type,
         name: chat.name,
         avatar: chat.avatar || '',
-        participants: chat.participants,
+        participants: allParticipants.map(participant => ({
+          id: participant._id.toString(),
+          firstName: participant.firstName,
+          lastName: participant.lastName,
+          email: participant.email,
+          avatar: participant.profilePicture,
+          isOnline: false
+        })),
         unreadCount: 0,
         updatedAt: chat.updatedAt
       };

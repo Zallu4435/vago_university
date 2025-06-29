@@ -145,8 +145,18 @@ export class CreateAssignmentUseCase implements ICreateAssignmentUseCase {
         totalSubmissions: 0
       };
 
-      const assignment = Assignment.create(assignmentData);
-      const result = await this.assignmentRepository.createAssignment(assignmentData);
+      const assignment = Assignment.create({
+        ...assignmentData,
+        dueDate: dueDate
+      });
+      const result = await this.assignmentRepository.createAssignment({
+        title: params.title,
+        subject: params.subject,
+        dueDate: params.dueDate,
+        maxMarks: params.maxMarks,
+        description: params.description,
+        files: params.files
+      });
       return { data: result, success: true };
     } catch (error: any) {
       console.error('Error in CreateAssignmentUseCase:', error);

@@ -1,19 +1,20 @@
 interface AssignmentFile {
-  fileName: string;
-  fileUrl: string;
-  fileSize: number;
+  originalname: string;
+  path: string;
+  size: number;
 }
 
 export interface CreateAssignmentRequestDTO {
   title: string;
   subject: string;
-  dueDate: Date;
-  maxMarks: number;
+  dueDate: string;
+  maxMarks: number | string;
   description: string;
   files: AssignmentFile[];
 }
 
 export interface UpdateAssignmentRequestDTO {
+  id: string;
   title?: string;
   subject?: string;
   dueDate?: string;

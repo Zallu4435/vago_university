@@ -135,10 +135,10 @@ export enum EnrollmentStatus {
       public userId: string,
       public date: string,
       public reason: string,
-      public preferredTime?: string,
-      public notes?: string,
       public meetingTime: string,
       public location: string,
-      public createdAt: string
+      public createdAt: string,
+      public preferredTime?: string,
+      public notes?: string
     ) {}
   }

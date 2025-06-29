@@ -46,7 +46,7 @@ export class EventRequestController implements IEventRequestController {
   }
   async approveEventRequest(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { id } = httpRequest.path || {};
+      const { id } = httpRequest.params || {};
       if (!id) {
         return this.httpErrors.error_400();
       }
@@ -63,7 +63,7 @@ export class EventRequestController implements IEventRequestController {
 
   async rejectEventRequest(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { id } = httpRequest.path || {};
+      const { id } = httpRequest.params || {};
       if (!id) {
         return this.httpErrors.error_400();
       }
@@ -80,7 +80,7 @@ export class EventRequestController implements IEventRequestController {
 
   async getEventRequestDetails(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { id } = httpRequest.path || {};
+      const { id } = httpRequest.params || {};
       if (!id) {
         return this.httpErrors.error_400();
       }

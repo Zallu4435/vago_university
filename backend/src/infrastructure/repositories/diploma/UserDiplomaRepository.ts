@@ -65,6 +65,24 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
             isCompleted: true
           });
         }
+
+        // Fetch videos to create chapters
+        let chapters = [];
+        if (diploma.videoIds && diploma.videoIds.length > 0) {
+          const videos = await Video.find({ _id: { $in: diploma.videoIds } }).lean();
+          chapters = videos.map(video => ({
+            _id: video._id.toString(),
+            title: video.title,
+            description: video.description || '',
+            videoUrl: video.videoUrl,
+            duration: Number(video.duration) || 0,
+            order: video.module || 0,
+            isPublished: video.status === 'Published',
+            createdAt: video.createdAt,
+            updatedAt: video.updatedAt
+          }));
+        }
+
         return {
           _id: diploma._id.toString(),
           title: diploma.title,
@@ -73,6 +91,7 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
           status: diploma.status ? 'published' : 'draft',
           instructor: '',
           department: '',
+          chapters,
           createdAt: diploma.createdAt,
           updatedAt: diploma.updatedAt,
           videoCount: Array.isArray(diploma.videoIds) ? diploma.videoIds.length : 0,
@@ -118,6 +137,17 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
         status: diploma.status ? 'published' : 'draft',
         instructor: '',
         department: '',
+        chapters: videos.map(video => ({
+          _id: video._id.toString(),
+          title: video.title,
+          description: video.description || '',
+          videoUrl: video.videoUrl,
+          duration: Number(video.duration) || 0,
+          order: video.module || 0,
+          isPublished: video.status === 'Published',
+          createdAt: video.createdAt,
+          updatedAt: video.updatedAt
+        })),
         videos: videos,
         createdAt: diploma.createdAt,
         updatedAt: diploma.updatedAt
@@ -146,7 +176,15 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
       }
 
       return {
-        ...video,
+        _id: video._id.toString(),
+        title: video.title,
+        description: video.description || '',
+        videoUrl: video.videoUrl,
+        duration: Number(video.duration) || 0,
+        order: video.module || 0,
+        isPublished: video.status === 'Published',
+        createdAt: video.createdAt,
+        updatedAt: video.updatedAt
       };
     } catch (error: any) {
       console.error('UserDiplomaRepository.getUserDiplomaChapter - Error:', error);
@@ -156,10 +194,10 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
 
   async updateVideoProgress(params: UpdateVideoProgressRequestDTO): Promise<UpdateVideoProgressResponseDTO> {
     try {
-      const { userId, courseId, chapterId, progress } = params;
+      const { courseId, chapterId, progress } = params;
 
       const userProgress = await UserProgress.findOneAndUpdate(
-        { userId, courseId, chapterId },
+        { courseId, chapterId },
         { progress },
         { upsert: true, new: true }
       );
@@ -176,10 +214,10 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
 
   async markChapterComplete(params: MarkChapterCompleteRequestDTO): Promise<MarkChapterCompleteResponseDTO> {
     try {
-      const { userId, courseId, chapterId } = params;
+      const { courseId, chapterId } = params;
 
       const userProgress = await UserProgress.findOneAndUpdate(
-        { userId, courseId, chapterId },
+        { courseId, chapterId },
         { isCompleted: true },
         { upsert: true, new: true }
       );
@@ -196,13 +234,12 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
 
   async toggleBookmark(params: ToggleBookmarkRequestDTO): Promise<ToggleBookmarkResponseDTO> {
     try {
-      const { userId, courseId, chapterId } = params;
+      const { courseId, chapterId } = params;
 
-      const userProgress = await UserProgress.findOne({ userId, courseId, chapterId });
+      const userProgress = await UserProgress.findOne({ courseId, chapterId });
 
       if (!userProgress) {
         const newProgress = await UserProgress.create({
-          userId,
           courseId,
           chapterId,
           isBookmarked: true

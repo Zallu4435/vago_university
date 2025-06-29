@@ -207,10 +207,9 @@ export class FinancialController implements IFinancialController {
 
   async getAllScholarshipApplications(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { status, term, page = "1", limit = "10" } = httpRequest.query || {};
+      const { status, page = "1", limit = "10" } = httpRequest.query || {};
       const response = await this.getAllScholarshipApplicationsUseCase.execute({
         status,
-        term,
         page: parseInt(page as string),
         limit: parseInt(limit as string),
       });
@@ -261,7 +260,13 @@ export class FinancialController implements IFinancialController {
   async getPaymentReceipt(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
       const { paymentId } = httpRequest.params || {};
-      const response = await this.getPaymentReceiptUseCase.execute({ paymentId });
+      if (!httpRequest.user?.id) {
+        return this.httpErrors.error_401();
+      }
+      const response = await this.getPaymentReceiptUseCase.execute({ 
+        paymentId,
+        studentId: httpRequest.user.id 
+      });
       if (!response.success) {
         return this.httpErrors.error_400();
       }
@@ -316,12 +321,18 @@ export class FinancialController implements IFinancialController {
 
   async createCharge(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { amount, description, dueDate, studentId } = httpRequest.body || {};
+      const { title, description, amount, term, dueDate, applicableFor } = httpRequest.body || {};
+      if (!httpRequest.user?.id) {
+        return this.httpErrors.error_401();
+      }
       const response = await this.createChargeUseCase.execute({
-        amount,
+        title,
         description,
-        dueDate,
-        studentId,
+        amount,
+        term,
+        dueDate: new Date(dueDate),
+        applicableFor,
+        createdBy: httpRequest.user.id,
       });
       if (!response.success) {
         return this.httpErrors.error_400();
@@ -334,10 +345,11 @@ export class FinancialController implements IFinancialController {
 
   async getAllCharges(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { studentId, status, page = "1", limit = "10" } = httpRequest.query || {};
+      const { term, status, search, page = "1", limit = "10" } = httpRequest.query || {};
       const response = await this.getAllChargesUseCase.execute({
-        studentId,
+        term,
         status,
+        search,
         page: parseInt(page as string),
         limit: parseInt(limit as string),
       });

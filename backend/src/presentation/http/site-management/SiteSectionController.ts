@@ -33,14 +33,14 @@ export class SiteSectionController {
       if (isNaN(pageNum) || pageNum < 1) {
         return {
           statusCode: 400,
-          body: { message: "Page must be a positive number" }
+          body: { error: "Page must be a positive number" }
         };
       }
 
       if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
         return {
           statusCode: 400,
-          body: { message: "Limit must be between 1 and 100" }
+          body: { error: "Limit must be between 1 and 100" }
         };
       }
 
@@ -53,12 +53,12 @@ export class SiteSectionController {
 
       const result = await this.getSiteSectionsUseCase.execute(params);
       if (!result.success) {
-        return { statusCode: 400, body: { message: "Failed to get site sections" } };
+        return { statusCode: 400, body: { error: "Failed to get site sections" } };
       }
 
-      return { statusCode: 200, body: result.data };
+      return { statusCode: 200, body: { data: result.data } };
     } catch (error) {
-      return { statusCode: 500, body: { message: "Internal server error" } };
+      return { statusCode: 500, body: { error: "Internal server error" } };
     }
   }
 
@@ -69,16 +69,16 @@ export class SiteSectionController {
 
       const result = await this.getSiteSectionByIdUseCase.execute(params);
       if (!result.success) {
-        return { statusCode: 400, body: { message: "Failed to get site section" } };
+        return { statusCode: 400, body: { error: "Failed to get site section" } };
       }
 
       if (!result.data) {
-        return { statusCode: 404, body: { message: "Site section not found" } };
+        return { statusCode: 404, body: { error: "Site section not found" } };
       }
 
-      return { statusCode: 200, body: result.data };
+      return { statusCode: 200, body: { data: result.data } };
     } catch (error) {
-      return { statusCode: 500, body: { message: "Internal server error" } };
+      return { statusCode: 500, body: { error: "Internal server error" } };
     }
   }
 
@@ -90,12 +90,12 @@ export class SiteSectionController {
       }
       const result = await this.createSiteSectionUseCase.execute(params);
       if (!result.success) {
-        return { statusCode: 400, body: { message: "Failed to create site section" } };
+        return { statusCode: 400, body: { error: "Failed to create site section" } };
       }
-      return { statusCode: 201, body: result.data };
+      return { statusCode: 201, body: { data: result.data } };
     } catch (error) {
       console.error('[SiteSectionController] createSection - error:', error);
-      return { statusCode: 500, body: { message: "Internal server error" } };
+      return { statusCode: 500, body: { error: "Internal server error" } };
     }
   }
 
@@ -111,15 +111,15 @@ export class SiteSectionController {
       }
       const result = await this.updateSiteSectionUseCase.execute(params);
       if (!result.success) {
-        return { statusCode: 400, body: { message: "Failed to update site section" } };
+        return { statusCode: 400, body: { error: "Failed to update site section" } };
       }
       if (!result.data) {
-        return { statusCode: 404, body: { message: "Site section not found" } };
+        return { statusCode: 404, body: { error: "Site section not found" } };
       }
-      return { statusCode: 200, body: result.data };
+      return { statusCode: 200, body: { data: result.data } };
     } catch (error) {
       console.error('[SiteSectionController] updateSection - error:', error);
-      return { statusCode: 500, body: { message: "Internal server error" } };
+      return { statusCode: 500, body: { error: "Internal server error" } };
     }
   }
 
@@ -130,12 +130,12 @@ export class SiteSectionController {
 
       const result = await this.deleteSiteSectionUseCase.execute(params);
       if (!result.success) {
-        return { statusCode: 400, body: { message: "Failed to delete site section" } };
+        return { statusCode: 400, body: { error: "Failed to delete site section" } };
       }
 
-      return { statusCode: 204, body: null };
+      return { statusCode: 204, body: { data: null } };
     } catch (error) {
-      return { statusCode: 500, body: { message: "Internal server error" } };
+      return { statusCode: 500, body: { error: "Internal server error" } };
     }
   }
 }

@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
      export interface IProgress extends Document {
-       studentId: string;
+       studentId: mongoose.Types.ObjectId;
        overallProgress: number;
        totalCredits: number;
        completedCredits: number;

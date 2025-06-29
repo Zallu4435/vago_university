@@ -7,7 +7,7 @@ export interface IRequirementSub {
 }
 
 export interface IRequirements extends Document {
-  studentId: string;
+  studentId: mongoose.Types.ObjectId;
   core: IRequirementSub;
   elective: IRequirementSub;
   general: IRequirementSub;

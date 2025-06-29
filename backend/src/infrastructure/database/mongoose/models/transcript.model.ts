@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ITranscriptRequest extends Document {
-  studentId: string;
+  studentId: mongoose.Types.ObjectId;
   deliveryMethod: string;
   address?: string;
   email?: string;

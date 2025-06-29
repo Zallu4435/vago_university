@@ -232,7 +232,7 @@ import {
     }
   
     async approveEnrollment(params: ApproveEnrollmentRequestDTO): Promise<void> {
-      const enrollment = await EnrollmentModel.findById(params.id).lean();
+      const enrollment = await EnrollmentModel.findById(params.enrollmentId).lean();
       if (!enrollment) {
         throw new Error(CourseErrorType.EnrollmentNotFound);
       }
@@ -250,7 +250,7 @@ import {
       }
   
       await EnrollmentModel.findByIdAndUpdate(
-        params.id,
+        params.enrollmentId,
         { status: EnrollmentStatus.Approved, updatedAt: new Date() },
         { runValidators: true }
       );
@@ -263,7 +263,7 @@ import {
     }
   
     async rejectEnrollment(params: RejectEnrollmentRequestDTO): Promise<void> {
-      const enrollment = await EnrollmentModel.findById(params.id).lean();
+      const enrollment = await EnrollmentModel.findById(params.enrollmentId).lean();
       if (!enrollment) {
         throw new Error(CourseErrorType.EnrollmentNotFound);
       }
@@ -273,7 +273,7 @@ import {
       }
   
       await EnrollmentModel.findByIdAndUpdate(
-        params.id,
+        params.enrollmentId,
         { status: EnrollmentStatus.Rejected, updatedAt: new Date() },
         { runValidators: true }
       );

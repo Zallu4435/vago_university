@@ -37,8 +37,8 @@ const CourseSchema = new Schema(
 CourseSchema.index({ title: "text" });
 
 export interface IEnrollmentDocument extends Document {
-  studentId: string;
-  courseId: string;
+  studentId: mongoose.Types.ObjectId;
+  courseId: mongoose.Types.ObjectId;
   status: "Pending" | "Approved" | "Rejected";
   requestedAt: Date;
   reason?: string;

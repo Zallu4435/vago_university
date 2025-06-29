@@ -53,7 +53,6 @@ export class EnquiryController implements IEnquiryController {
         page: page ? Number(page) : undefined,
         limit: limit ? Number(limit) : undefined,
         status: status ? status as any : undefined,
-        dateRange: dateRange ? String(dateRange) : undefined,
         startDate: startDate ? String(startDate) : undefined,
         endDate: endDate ? String(endDate) : undefined,
         search: search ? String(search) : undefined,

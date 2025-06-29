@@ -57,12 +57,12 @@ export class EventsRepository implements IEventsRepository {
     }
 
     const skip = (page - 1) * limit;
-    const events = await CampusEventModel.find(query)
+    const events = await (CampusEventModel as any).find(query)
       .skip(skip)
       .limit(limit)
       .lean();
 
-    const totalItems = await CampusEventModel.countDocuments(query);
+    const totalItems = await (CampusEventModel as any).countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
 
     const mappedEvents: EventSummaryDTO[] = events.map((event: any) => ({
@@ -87,7 +87,7 @@ export class EventsRepository implements IEventsRepository {
   async getEventById(
     params: GetEventByIdRequestDTO
   ): Promise<GetEventByIdResponseDTO | null> {
-    const event = await CampusEventModel.findById(params.id).lean();
+    const event = await (CampusEventModel as any).findById(params.id).lean();
     if (!event) {
       return null;
     }
@@ -120,7 +120,7 @@ export class EventsRepository implements IEventsRepository {
   async createEvent(
     params: CreateEventRequestDTO
   ): Promise<CreateEventResponseDTO> {
-    const newEvent = await CampusEventModel.create(params);
+    const newEvent = await (CampusEventModel as any).create(params);
     return {
       event: new Event({
         id: newEvent._id.toString(),
@@ -149,7 +149,7 @@ export class EventsRepository implements IEventsRepository {
   async updateEvent(
     params: UpdateEventRequestDTO
   ): Promise<UpdateEventResponseDTO | null> {
-    const updatedEvent = await CampusEventModel.findByIdAndUpdate(
+    const updatedEvent = await (CampusEventModel as any).findByIdAndUpdate(
       params.id,
       { $set: params },
       { new: true }
@@ -185,7 +185,7 @@ export class EventsRepository implements IEventsRepository {
   }
 
   async deleteEvent(params: DeleteEventRequestDTO): Promise<void> {
-    await CampusEventModel.findByIdAndDelete(params.id);
+    await (CampusEventModel as any).findByIdAndDelete(params.id);
   }
 
   async getEventRequests(
@@ -218,7 +218,7 @@ export class EventsRepository implements IEventsRepository {
       }
     }
 
-    const matchingEvents = await CampusEventModel.find(eventQuery)
+    const matchingEvents = await (CampusEventModel as any).find(eventQuery)
       .select("_id")
       .lean();
 
@@ -228,11 +228,11 @@ export class EventsRepository implements IEventsRepository {
       query.eventId = { $in: eventIds };
     }
 
-    const totalItems = await EventRequestModel.countDocuments(query);
+    const totalItems = await (EventRequestModel as any).countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
     const skip = (page - 1) * limit;
 
-    const rawRequests = await EventRequestModel.find(query)
+    const rawRequests = await (EventRequestModel as any).find(query)
       .populate({
         path: "eventId",
         select: "title eventType date",
@@ -267,7 +267,7 @@ export class EventsRepository implements IEventsRepository {
   async approveEventRequest(
     params: ApproveEventRequestRequestDTO
   ): Promise<void> {
-    const eventRequest = await EventRequestModel.findById(params.id);
+    const eventRequest = await (EventRequestModel as any).findById(params.id);
     if (!eventRequest) {
       throw new Error("Event request not found");
     }
@@ -276,13 +276,13 @@ export class EventsRepository implements IEventsRepository {
       throw new Error("Event request is not in pending status");
     }
 
-    await EventRequestModel.findByIdAndUpdate(
+    await (EventRequestModel as any).findByIdAndUpdate(
       params.id,
       { status: EventRequestStatus.Approved, updatedAt: new Date() },
       { runValidators: true }
     );
 
-    const updatedEvent = await CampusEventModel.findByIdAndUpdate(
+    const updatedEvent = await (CampusEventModel as any).findByIdAndUpdate(
       eventRequest.eventId,
       { $inc: { participantsCount: 1 } },
       { new: true }
@@ -298,7 +298,7 @@ export class EventsRepository implements IEventsRepository {
   async rejectEventRequest(
     params: RejectEventRequestRequestDTO
   ): Promise<void> {
-    const eventRequest = await EventRequestModel.findById(params.id);
+    const eventRequest = await (EventRequestModel as any).findById(params.id);
     if (!eventRequest) {
       throw new Error("Event request not found");
     }
@@ -307,7 +307,7 @@ export class EventsRepository implements IEventsRepository {
       throw new Error("Event request is not in pending status");
     }
 
-    await EventRequestModel.findByIdAndUpdate(
+    await (EventRequestModel as any).findByIdAndUpdate(
       params.id,
       { status: EventRequestStatus.Rejected, updatedAt: new Date() },
       { runValidators: true }
@@ -321,7 +321,7 @@ export class EventsRepository implements IEventsRepository {
       throw new Error("Invalid event request ID");
     }
 
-    const eventRequest = await EventRequestModel.findById(params.id)
+    const eventRequest = await (EventRequestModel as any).findById(params.id)
       .populate({
         path: "eventId",
         select: "title description date location participantsCount",

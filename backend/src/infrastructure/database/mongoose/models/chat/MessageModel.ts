@@ -84,14 +84,14 @@ const messageSchema = new Schema<IMessage>(
     }
   },
   {
-    timestamps: true,
-    indexes: [
-      { chatId: 1, createdAt: -1 }, // For efficient chat message retrieval
-      { senderId: 1, createdAt: -1 }, // For user's message history
-      { "reactions.userId": 1 }, // For reaction queries
-      { deletedFor: 1 } // For deleted message queries
-    ]
+    timestamps: true
   }
 );
+
+// Define indexes separately
+messageSchema.index({ chatId: 1, createdAt: -1 }); // For efficient chat message retrieval
+messageSchema.index({ senderId: 1, createdAt: -1 }); // For user's message history
+messageSchema.index({ "reactions.userId": 1 }); // For reaction queries
+messageSchema.index({ deletedFor: 1 }); // For deleted message queries
 
 export const MessageModel = mongoose.model<IMessage>("ChatMessage", messageSchema); 

@@ -15,7 +15,7 @@ export class UserSiteSectionController {
       if (!sectionKey || typeof sectionKey !== 'string') {
         return {
           statusCode: 400,
-          body: { message: "Section key is required" }
+          body: { error: "Section key is required" }
         };
       }
 
@@ -25,14 +25,14 @@ export class UserSiteSectionController {
       if (isNaN(pageNum) || pageNum < 1) {
         return {
           statusCode: 400,
-          body: { message: "Page must be a positive number" }
+          body: { error: "Page must be a positive number" }
         };
       }
 
       if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
         return {
           statusCode: 400,
-          body: { message: "Limit must be between 1 and 100" }
+          body: { error: "Limit must be between 1 and 100" }
         };
       }
 
@@ -50,7 +50,7 @@ export class UserSiteSectionController {
         default:
           return {
             statusCode: 400,
-            body: { message: "Invalid section key. Must be one of: highlights, vagoNow, leadership" }
+            body: { error: "Invalid section key. Must be one of: highlights, vagoNow, leadership" }
           };
       }
 
@@ -64,13 +64,13 @@ export class UserSiteSectionController {
       if (!result.success) {
         return {
           statusCode: 400,
-          body: { message: "Failed to get site sections" }
+          body: { error: "Failed to get site sections" }
         };
       }
 
-      return { statusCode: 200, body: result.data };
+      return { statusCode: 200, body: { data: result.data } };
     } catch (error) {
-      return { statusCode: 500, body: { message: "Internal server error" } };
+      return { statusCode: 500, body: { error: "Internal server error" } };
     }
   }
 } 

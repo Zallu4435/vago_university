@@ -56,9 +56,9 @@ export class AcademicRepository implements IAcademicRepository {
         .reduce((sum, enrollment) => sum + ((enrollment.courseId as any).credits || 0), 0);
 
       // Get academic standing from user's academic status
-      const academicStanding = user.academicStanding || 'Good';
+      const academicStanding = 'Good';
       // Get advisor from user's advisor field
-      const advisor = user.advisor || 'Unknown';
+      const advisor = 'Unknown';
 
       return new Student(
         userId,
@@ -95,11 +95,11 @@ export class AcademicRepository implements IAcademicRepository {
         userId,
         '',
         grade.cumulativeGPA || 'N/A',
-        grade.termGPA || 0,
+        grade.termGPA || 'N/A',
         '',
         grade.termName || 'Unknown Term',
         '',
-        parseInt(grade.creditsEarned || '0'),
+        grade.creditsEarned || '0',
         grade.creditsInProgress || '0',
         new Date().toISOString()
       );
@@ -141,7 +141,6 @@ export class AcademicRepository implements IAcademicRepository {
         .lean();
       return history.map((record) => new AcademicHistory(
         record.id,
-        0,
         userId,
         record.term,
         record.credits,
@@ -269,8 +268,8 @@ export class AcademicRepository implements IAcademicRepository {
         enrollment.studentId.toString(),
         enrollment.courseId.toString(),
         enrollment.status as EnrollmentStatus,
-        enrollment.reason,
-        enrollment.requestedAt.toISOString()
+        enrollment.requestedAt.toISOString(),
+        enrollment.reason
       );
     } catch (err) {
       console.error(`Error in findEnrollment:`, err);

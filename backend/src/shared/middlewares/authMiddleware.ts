@@ -36,7 +36,8 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.error('authMiddleware: Missing or invalid Authorization header');
-      return res.status(401).json({ error: 'Authorization header missing or invalid' });
+      res.status(401).json({ error: 'Authorization header missing or invalid' });
+      return;
     }
 
     const token = authHeader.split(' ')[1];
@@ -62,18 +63,21 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
           const admission = await Admission.findOne({ registerId: user._id });
           if (admission) {
             console.error('authMiddleware: User has an admission and cannot access:', decoded.userId);
-            return res.status(403).json({ error: 'User has already made an admission' });
+            res.status(403).json({ error: 'User has already made an admission' });
+            return;
           }
         }
         break;
       default:
         console.error('authMiddleware: Invalid collection:', decoded.collection);
-        return res.status(403).json({ error: 'Invalid user collection' });
+        res.status(403).json({ error: 'Invalid user collection' });
+        return;
     }
 
     if (!user) {
       console.error('authMiddleware: User not found for userId:', decoded.userId, 'in collection:', decoded.collection);
-      return res.status(401).json({ error: 'User not found in specified collection' });
+      res.status(401).json({ error: 'User not found in specified collection' });
+      return;
     }
 
     // Attach user to request
@@ -85,10 +89,10 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
       email: user.email,
     };
 
-
     next();
   } catch (error: any) {
     console.error('authMiddleware: Error:', error.message);
-    return res.status(401).json({ error: 'Invalid or expired token' });
+    res.status(401).json({ error: 'Invalid or expired token' });
+    return;
   }
 };

@@ -48,41 +48,15 @@ export class EnquiryRepository implements IEnquiryRepository {
   }
 
   async getEnquiries(params: GetEnquiriesRequestDTO): Promise<GetEnquiriesResponseDTO> {
-    const { page = 1, limit = 10, status, dateRange, startDate, endDate, search } = params;
+    const { page = 1, limit = 10, status, startDate, endDate, search } = params;
     const skip = (page - 1) * limit;
 
     // Build query
     const query: any = {};
 
     // Status filter
-    if (status && status !== "all") {
+    if (status && (status as any) !== "all") {
       query.status = status;
-    }
-
-    // Date range filter
-    if (dateRange && dateRange !== "all") {
-      const now = new Date();
-      let start: Date;
-      let end: Date = now;
-
-      switch (dateRange) {
-        case "today":
-          start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          break;
-        case "week":
-          start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          break;
-        case "month":
-          start = new Date(now.getFullYear(), now.getMonth(), 1);
-          break;
-        case "year":
-          start = new Date(now.getFullYear(), 0, 1);
-          break;
-        default:
-          start = new Date(0);
-      }
-
-      query.createdAt = { $gte: start, $lte: end };
     }
 
     // Custom date range

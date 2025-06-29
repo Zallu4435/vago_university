@@ -51,11 +51,15 @@ export class SportRequestController implements ISportRequestController {
         endDate: endDate ? String(endDate) : undefined,
       });
 
+      if (!result.success || 'error' in result.data) {
+        return this.httpErrors.error_400();
+      }
+
       return this.httpSuccess.success_200({
-        data: result.data,
-        totalPages: result.totalPages,
-        totalItems: result.totalItems,
-        currentPage: result.currentPage,
+        data: result.data.requests,
+        totalPages: result.data.totalPages,
+        totalItems: result.data.totalItems,
+        currentPage: result.data.currentPage,
       });
     } catch (err) {
       console.error(`Error in getSportRequests:`, err);
@@ -65,7 +69,7 @@ export class SportRequestController implements ISportRequestController {
 
   async approveSportRequest(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { id } = httpRequest.path;
+      const { id } = httpRequest.params;
 
       if (!id) {
         return this.httpErrors.error_400();
@@ -81,7 +85,7 @@ export class SportRequestController implements ISportRequestController {
 
   async rejectSportRequest(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { id } = httpRequest.path;
+      const { id } = httpRequest.params;
 
       if (!id) {
         return this.httpErrors.error_400();
@@ -97,7 +101,7 @@ export class SportRequestController implements ISportRequestController {
 
   async getSportRequestDetails(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { id } = httpRequest.path;
+      const { id } = httpRequest.params;
 
       if (!id) {
         return this.httpErrors.error_400();
@@ -117,7 +121,7 @@ export class SportRequestController implements ISportRequestController {
 
   async joinSport(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { sportId } = httpRequest.path;
+      const { sportId } = httpRequest.params;
       const { reason, additionalInfo } = httpRequest.body;
       const studentId = httpRequest.headers?.user?.id;
 
@@ -140,11 +144,15 @@ export class SportRequestController implements ISportRequestController {
         additionalInfo,
       });
 
+      if (!result.success || 'error' in result.data) {
+        return this.httpErrors.error_400();
+      }
+
       return this.httpSuccess.success_200({
         success: true,
         message: "Join request submitted successfully.",
-        requestId: result.requestId,
-        status: result.status,
+        requestId: result.data.requestId,
+        status: result.data.status,
         timestamp: new Date().toISOString(),
       });
     } catch (error: any) {

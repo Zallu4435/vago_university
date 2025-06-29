@@ -238,7 +238,8 @@ export class AdmissionController implements IAdmissionController {
       
       const response = await this.uploadMultipleDocumentsUseCase.execute({ 
         applicationId, 
-        files: files as Express.Multer.File[] 
+        files: files as Express.Multer.File[],
+        documentTypes: Array(files.length).fill('general') // Default document type for all files
       });
       
       if (!response.success) {
@@ -289,9 +290,11 @@ export class AdmissionController implements IAdmissionController {
       const result = {
         statusCode: 200,
         body: {
-          pdfData: Buffer.from(pdfBuffer).toString('base64'),
-          fileName: document.fileName,
-          contentType: 'application/pdf'
+          data: {
+            pdfData: Buffer.from(pdfBuffer).toString('base64'),
+            fileName: document.fileName,
+            contentType: 'application/pdf'
+          }
         }
       };
       

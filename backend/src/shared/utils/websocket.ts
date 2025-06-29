@@ -31,7 +31,7 @@ export function initializeWebSocket(server: HttpServer) {
     }
 
     try {
-      const user = verifyToken(token) as DecodedToken;
+      const user = verifyToken(token) as unknown as DecodedToken;
       (ws as any).userId = user._id;
 
       ws.on('message', (message: any) => {

@@ -16,20 +16,20 @@ interface ClubRequestProps {
 }
 
 export class ClubRequest {
-  private id?: string;
-  private clubId: string;
-  private userId: string;
-  private status: ClubRequestStatus;
-  private whyJoin: string;
-  private additionalInfo: string;
+  private idValue?: string;
+  private clubIdValue: string;
+  private userIdValue: string;
+  private statusValue: ClubRequestStatus;
+  private whyJoinValue: string;
+  private additionalInfoValue: string;
 
   constructor(props: ClubRequestProps) {
-    this.id = props.id;
-    this.clubId = props.clubId;
-    this.userId = props.userId;
-    this.status = props.status;
-    this.whyJoin = props.whyJoin;
-    this.additionalInfo = props.additionalInfo || "";
+    this.idValue = props.id;
+    this.clubIdValue = props.clubId;
+    this.userIdValue = props.userId;
+    this.statusValue = props.status;
+    this.whyJoinValue = props.whyJoin;
+    this.additionalInfoValue = props.additionalInfo || "";
   }
 
   static create(props: ClubRequestProps): ClubRequest {
@@ -45,10 +45,10 @@ export class ClubRequest {
     return new ClubRequest(props);
   }
 
-  get id(): string | undefined { return this.id; }
-  get clubId(): string { return this.clubId; }
-  get userId(): string { return this.userId; }
-  get status(): ClubRequestStatus { return this.status; }
-  get whyJoin(): string { return this.whyJoin; }
-  get additionalInfo(): string { return this.additionalInfo; }
+  get id(): string | undefined { return this.idValue; }
+  get clubId(): string { return this.clubIdValue; }
+  get userId(): string { return this.userIdValue; }
+  get status(): ClubRequestStatus { return this.statusValue; }
+  get whyJoin(): string { return this.whyJoinValue; }
+  get additionalInfo(): string { return this.additionalInfoValue; }
 }

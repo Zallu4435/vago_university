@@ -170,7 +170,7 @@ export class SocketService {
     const chatId = message.chatId;
     this.chatNamespace.to(chatId).emit("message", message);
 
-    const chat = await this.chatRepository.getChatDetails(chatId);
+    const chat = await this.chatRepository.getChatDetails(chatId, message.senderId);
     if (chat) {
       chat.participants.forEach((participant) => {
         if (participant.id !== message.senderId) {

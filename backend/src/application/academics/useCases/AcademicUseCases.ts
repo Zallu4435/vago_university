@@ -80,11 +80,26 @@ export class GetStudentInfoUseCase implements IGetStudentInfoUseCase {
 
   async execute(input: GetStudentInfoRequestDTO): Promise<ResponseDTO<GetStudentInfoResponseDTO>> {
     try {
-      const result = await this.academicRepository.findStudentById(input.userId);
-      if (!result) {
+      const student = await this.academicRepository.findStudentById(input.userId);
+      if (!student) {
         return { data: { error: "Student not found" }, success: false };
       }
-      return { data: result, success: true };
+      
+      const response: GetStudentInfoResponseDTO = {
+        name: `${student.firstName} ${student.lastName}`,
+        id: student.id,
+        email: student.email,
+        phone: student.phone,
+        profilePicture: student.profilePicture,
+        major: student.major,
+        catalogYear: student.catalogYear,
+        academicStanding: student.academicStanding,
+        advisor: student.advisor,
+        pendingCredits: student.pendingCredits,
+        credits: student.credits
+      };
+      
+      return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };
     }
@@ -96,11 +111,20 @@ export class GetGradeInfoUseCase implements IGetGradeInfoUseCase {
 
   async execute(input: GetGradeInfoRequestDTO): Promise<ResponseDTO<GetGradeInfoResponseDTO>> {
     try {
-      const result = await this.academicRepository.findGradeByUserId(input.userId);
-      if (!result) {
+      const grade = await this.academicRepository.findGradeByUserId(input.userId);
+      if (!grade) {
         return { data: { error: "Grade information not found" }, success: false };
       }
-      return { data: result, success: true };
+      
+      const response: GetGradeInfoResponseDTO = {
+        cumulativeGPA: grade.cumulativeGPA,
+        termGPA: grade.termGPA,
+        termName: grade.termName,
+        creditsEarned: grade.creditsEarned,
+        creditsInProgress: grade.creditsInProgress
+      };
+      
+      return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };
     }
@@ -112,8 +136,16 @@ export class GetCoursesUseCase implements IGetCoursesUseCase {
 
   async execute(input: GetCoursesRequestDTO): Promise<ResponseDTO<GetCoursesResponseDTO>> {
     try {
-      const result = await this.academicRepository.findAllCourses();
-      return { data: result, success: true };
+      const courses = await this.academicRepository.findAllCourses();
+      
+      const response: GetCoursesResponseDTO = {
+        courses: courses,
+        totalCourses: courses.length,
+        totalPages: 1, // Assuming single page for now
+        currentPage: 1
+      };
+      
+      return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };
     }
@@ -125,8 +157,18 @@ export class GetAcademicHistoryUseCase implements IGetAcademicHistoryUseCase {
 
   async execute(input: GetAcademicHistoryRequestDTO): Promise<ResponseDTO<GetAcademicHistoryResponseDTO>> {
     try {
-      const result = await this.academicRepository.findAcademicHistory(input.userId, input.startTerm, input.endTerm);
-      return { data: result, success: true };
+      const history = await this.academicRepository.findAcademicHistory(input.userId, input.startTerm, input.endTerm);
+      
+      const response: GetAcademicHistoryResponseDTO = {
+        history: history.map(item => ({
+          term: item.term,
+          credits: item.credits,
+          gpa: item.gpa,
+          id: item.id
+        }))
+      };
+      
+      return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };
     }
@@ -138,11 +180,17 @@ export class GetProgramInfoUseCase implements IGetProgramInfoUseCase {
 
   async execute(input: GetProgramInfoRequestDTO): Promise<ResponseDTO<GetProgramInfoResponseDTO>> {
     try {
-      const result = await this.academicRepository.findProgramByUserId(input.userId);
-      if (!result) {
+      const program = await this.academicRepository.findProgramByUserId(input.userId);
+      if (!program) {
         return { data: { error: "Program information not found" }, success: false };
       }
-      return { data: result, success: true };
+      
+      const response: GetProgramInfoResponseDTO = {
+        degree: program.degree,
+        catalogYear: program.catalogYear
+      };
+      
+      return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };
     }
@@ -154,11 +202,20 @@ export class GetProgressInfoUseCase implements IGetProgressInfoUseCase {
 
   async execute(input: GetProgressInfoRequestDTO): Promise<ResponseDTO<GetProgressInfoResponseDTO>> {
     try {
-      const result = await this.academicRepository.findProgressByUserId(input.userId);
-      if (!result) {
+      const progress = await this.academicRepository.findProgressByUserId(input.userId);
+      if (!progress) {
         return { data: { error: "Progress information not found" }, success: false };
       }
-      return { data: result, success: true };
+      
+      const response: GetProgressInfoResponseDTO = {
+        overallProgress: progress.overallProgress,
+        totalCredits: progress.totalCredits,
+        completedCredits: progress.completedCredits,
+        remainingCredits: progress.remainingCredits,
+        estimatedGraduation: progress.estimatedGraduation
+      };
+      
+      return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };
     }
@@ -170,11 +227,18 @@ export class GetRequirementsInfoUseCase implements IGetRequirementsInfoUseCase {
 
   async execute(input: GetRequirementsInfoRequestDTO): Promise<ResponseDTO<GetRequirementsInfoResponseDTO>> {
     try {
-      const result = await this.academicRepository.findRequirementsByUserId(input.userId);
-      if (!result) {
+      const requirements = await this.academicRepository.findRequirementsByUserId(input.userId);
+      if (!requirements) {
         return { data: { error: "Requirements information not found" }, success: false };
       }
-      return { data: result, success: true };
+      
+      const response: GetRequirementsInfoResponseDTO = {
+        core: requirements.core,
+        elective: requirements.elective,
+        general: requirements.general
+      };
+      
+      return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };
     }
@@ -206,14 +270,14 @@ export class RegisterCourseUseCase implements IRegisterCourseUseCase {
       });
 
       await this.academicRepository.updateCourseEnrollment(input.courseId, 1);
-      return { 
-        data: {
-          success: true,
-          message: "Course registered successfully",
-          enrollmentId: enrollment.id
-        }, 
-        success: true 
+      
+      const response: RegisterCourseResponseDTO = {
+        success: true,
+        message: "Course registered successfully",
+        enrollmentId: enrollment.id
       };
+      
+      return { data: response, success: true };
     } catch (error: any) {
       console.error('RegisterCourseUseCase - Error:', error);
       return { data: { error: error.message }, success: false };
@@ -226,18 +290,24 @@ export class DropCourseUseCase implements IDropCourseUseCase {
 
   async execute(input: DropCourseRequestDTO): Promise<ResponseDTO<DropCourseResponseDTO>> {
     try {
-      const enrollment = await this.academicRepository.findEnrollment(input.userId, input.courseId);
+      const enrollment = await this.academicRepository.findEnrollment(input.studentId, input.courseId);
       if (!enrollment) {
         return { data: { error: "Not enrolled in this course" }, success: false };
       }
 
-      const success = await this.academicRepository.deleteEnrollment(input.userId, input.courseId);
+      const success = await this.academicRepository.deleteEnrollment(input.studentId, input.courseId);
       if (!success) {
         return { data: { error: "Failed to drop course" }, success: false };
       }
 
       await this.academicRepository.updateCourseEnrollment(input.courseId, -1);
-      return { data: { message: "Course dropped successfully" }, success: true };
+      
+      const response: DropCourseResponseDTO = {
+        success: true,
+        message: "Course dropped successfully"
+      };
+      
+      return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };
     }
@@ -250,13 +320,23 @@ export class RequestTranscriptUseCase implements IRequestTranscriptUseCase {
   async execute(input: RequestTranscriptRequestDTO): Promise<ResponseDTO<RequestTranscriptResponseDTO>> {
     try {
       const request = await this.academicRepository.createTranscriptRequest({
-        studentId: input.userId,
-        requestDate: new Date(),
-        status: "pending",
-        purpose: input.purpose,
+        id: new mongoose.Types.ObjectId().toString(),
+        userId: input.studentId,
         deliveryMethod: input.deliveryMethod,
+        requestedAt: new Date().toISOString(),
+        estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+        address: input.address,
+        email: input.email
       });
-      return { data: request, success: true };
+      
+      const response: RequestTranscriptResponseDTO = {
+        success: true,
+        message: "Transcript request submitted successfully",
+        requestId: request.id,
+        estimatedDelivery: request.estimatedDelivery
+      };
+      
+      return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };
     }
@@ -269,16 +349,28 @@ export class ScheduleMeetingUseCase implements IScheduleMeetingUseCase {
   async execute(input: ScheduleMeetingRequestDTO): Promise<ResponseDTO<ScheduleMeetingResponseDTO>> {
     try {
       const meeting = await this.academicRepository.createMeeting({
-        studentId: input.userId,
-        advisorId: input.advisorId,
+        id: new mongoose.Types.ObjectId().toString(),
+        userId: input.studentId,
         date: input.date,
-        purpose: input.purpose,
-        status: "scheduled",
+        reason: input.reason,
+        preferredTime: input.preferredTime,
         notes: input.notes,
+        meetingTime: input.date, // Using date as meeting time for now
+        location: "Academic Advisor Office", // Default location
+        createdAt: new Date().toISOString()
       });
-      return { data: meeting, success: true };
+      
+      const response: ScheduleMeetingResponseDTO = {
+        success: true,
+        message: "Meeting scheduled successfully",
+        meetingId: meeting.id,
+        meetingTime: meeting.meetingTime,
+        location: meeting.location
+      };
+      
+      return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };
     }
   }
-  }
+}

@@ -238,9 +238,11 @@ export class FacultyController implements IFacultyController {
       const result_response = {
         statusCode: 200,
         body: {
-          pdfData: Buffer.from(pdfBuffer).toString('base64'),
-          fileName: `${type}_${facultyId}.pdf`,
-          contentType: 'application/pdf'
+          data: {
+            pdfData: Buffer.from(pdfBuffer).toString('base64'),
+            fileName: `${type}_${facultyId}.pdf`,
+            contentType: 'application/pdf'
+          }
         }
       };
       

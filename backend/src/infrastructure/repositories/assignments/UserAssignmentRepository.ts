@@ -161,7 +161,7 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
       let submission;
 
       if (existingSubmission) {
-        const newStatus = existingSubmission.status === 'needs_correction' ? 'pending' : existingSubmission.status;
+        const newStatus = existingSubmission.status;
 
         submission = await SubmissionModel.findOneAndUpdate(
           { assignmentId, studentId },
@@ -214,7 +214,7 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
     if (!submission) return { status: 'pending' };
 
     return {
-      status: submission.status,
+      status: submission.status as any,
       submittedAt: submission.submittedDate,
       score: submission.marks
     };
@@ -228,13 +228,13 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
     return {
       feedback: submission.feedback || '',
       score: submission.marks || 0,
-      reviewedAt: submission.reviewedAt || new Date()
+      reviewedAt: new Date()
     };
   }
 
   private mapToAssignment(doc: any): Assignment {
     return {
-      id: doc._id.toString(),
+      _id: doc._id.toString(),
       title: doc.title,
       subject: doc.subject,
       dueDate: doc.dueDate,

@@ -16,6 +16,7 @@ import {
     GetAllNotificationsResponseDTO,
     GetIndividualNotificationResponseDTO,
     DeleteNotificationResponseDTO,
+    NotificationResponseDTO,
 } from "../../../domain/notifications/dtos/NotificationResponseDTOs";
 import { INotificationRepository } from "../../../application/notifications/repositories/INotificationRepository";
 

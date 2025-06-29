@@ -24,6 +24,7 @@ import {
     DeleteFacultyResponseDTO,
     ConfirmFacultyOfferResponseDTO,
     DownloadCertificateResponseDTO,
+    FacultyResponseDTO,
 } from "../../../domain/faculty/dtos/FacultyResponseDTOs";
 import { IFacultyRepository } from "../../../application/faculty/repositories/IFacultyRepository";
 import { Faculty as FacultyModel } from "../../database/mongoose/models/faculty.model";
@@ -62,11 +63,11 @@ export class FacultyRepository implements IFacultyRepository {
             query.createdAt = { $gte: startDate };
         }
 
-        const totalFaculty = await FacultyRegister.countDocuments(query);
+        const totalFaculty = await (FacultyRegister as any).countDocuments(query);
         const totalPages = Math.ceil(totalFaculty / limit);
         const skip = (page - 1) * limit;
 
-        const faculty = await FacultyRegister.find(query)
+        const faculty = await (FacultyRegister as any).find(query)
             .select("fullName email phone department qualification experience aboutMe cvUrl certificatesUrl createdAt status")
             .skip(skip)
             .limit(limit)
@@ -100,7 +101,7 @@ export class FacultyRepository implements IFacultyRepository {
             throw new Error(FacultyErrorType.InvalidFacultyId);
         }
 
-        const faculty = await FacultyRegister.findById(params.id)
+        const faculty = await (FacultyRegister as any).findById(params.id)
             .select("fullName email phone department qualification experience aboutMe cvUrl certificatesUrl createdAt status")
             .lean();
 
@@ -131,7 +132,7 @@ export class FacultyRepository implements IFacultyRepository {
             throw new Error(FacultyErrorType.InvalidFacultyId);
         }
 
-        const faculty = await FacultyRegister.findById(params.facultyId)
+        const faculty = await (FacultyRegister as any).findById(params.facultyId)
             .select("fullName email phone department qualification experience aboutMe cvUrl certificatesUrl createdAt status confirmationToken tokenExpiry")
             .lean();
 
@@ -177,7 +178,7 @@ export class FacultyRepository implements IFacultyRepository {
             throw new Error(FacultyErrorType.InvalidFacultyId);
         }
 
-        const faculty = await FacultyRegister.findById(params.id);
+        const faculty = await (FacultyRegister as any).findById(params.id);
         if (!faculty) {
             throw new Error(FacultyErrorType.FacultyNotFound);
         }
@@ -222,7 +223,7 @@ export class FacultyRepository implements IFacultyRepository {
             throw new Error(FacultyErrorType.InvalidFacultyId);
         }
 
-        const faculty = await FacultyRegister.findById(params.id);
+        const faculty = await (FacultyRegister as any).findById(params.id);
         if (!faculty) {
             throw new Error(FacultyErrorType.FacultyNotFound);
         }
@@ -242,7 +243,7 @@ export class FacultyRepository implements IFacultyRepository {
             throw new Error(FacultyErrorType.InvalidFacultyId);
         }
 
-        const faculty = await FacultyRegister.findById(params.id);
+        const faculty = await (FacultyRegister as any).findById(params.id);
         if (!faculty) {
             throw new Error(FacultyErrorType.FacultyNotFound);
         }
@@ -250,7 +251,7 @@ export class FacultyRepository implements IFacultyRepository {
             throw new Error(FacultyErrorType.FacultyAlreadyProcessed);
         }
 
-        await FacultyRegister.deleteOne({ _id: params.id });
+        await (FacultyRegister as any).deleteOne({ _id: params.id });
 
         return { message: "Faculty registration deleted" };
     }
@@ -260,7 +261,7 @@ export class FacultyRepository implements IFacultyRepository {
             throw new Error(FacultyErrorType.InvalidFacultyId);
         }
 
-        const facultyRegister = await FacultyRegister.findById(params.facultyId);
+        const facultyRegister = await (FacultyRegister as any).findById(params.facultyId);
         if (!facultyRegister) {
             throw new Error(FacultyErrorType.FacultyNotFound);
         }
@@ -327,7 +328,7 @@ export class FacultyRepository implements IFacultyRepository {
             throw new Error(FacultyErrorType.InvalidFacultyId);
         }
 
-        const faculty = await FacultyRegister.findById(params.facultyId);
+        const faculty = await (FacultyRegister as any).findById(params.facultyId);
         if (!faculty) {
             throw new Error(FacultyErrorType.FacultyNotFound);
         }

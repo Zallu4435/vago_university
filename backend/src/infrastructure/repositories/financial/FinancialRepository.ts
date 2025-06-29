@@ -57,11 +57,11 @@ cloudinary.config({
 
 export class FinancialRepository implements IFinancialRepository {
     async getStudentFinancialInfo(params: GetStudentFinancialInfoRequestDTO): Promise<GetStudentFinancialInfoResponseDTO> {
-        const infos = await StudentFinancialInfoModel.find({ studentId: params.studentId })
+        const infos = await (StudentFinancialInfoModel as any).find({ studentId: params.studentId })
             .populate("chargeId", "title description")
             .lean();
 
-        const formattedInfos = infos.map((info) => ({
+        const formattedInfos = infos.map((info: any) => ({
             id: info._id.toString(),
             studentId: info.studentId.toString(),
             chargeId: info.chargeId?._id?.toString() || "",
@@ -72,10 +72,10 @@ export class FinancialRepository implements IFinancialRepository {
             issuedAt: info.issuedAt.toISOString(),
             paidAt: info.paidAt ? info.paidAt.toISOString() : undefined,
             method: info.method,
-            createdAt: info.createdAt.toISOString(),
-            updatedAt: info.updatedAt.toISOString(),
-            chargeTitle: info.chargeId?.title || "",
-            chargeDescription: info.chargeId?.description || "",
+            createdAt: info.createdAt?.toISOString() || new Date().toISOString(),
+            updatedAt: info.updatedAt?.toISOString() || new Date().toISOString(),
+            chargeTitle: (info.chargeId as any)?.title || "",
+            chargeDescription: (info.chargeId as any)?.description || "",
         }));
 
         return {
@@ -97,8 +97,8 @@ export class FinancialRepository implements IFinancialRepository {
         if (params.endDate) query.date = { ...query.date, $lte: new Date(params.endDate) };
         if (params.status) query.status = params.status;
 
-        const total = await PaymentModel.countDocuments(query);
-        const payments = await PaymentModel.find(query)
+        const total = await (PaymentModel as any).countDocuments(query);
+        const payments = await (PaymentModel as any).find(query)
             .skip((params.page - 1) * params.limit)
             .limit(params.limit)
             .lean();
@@ -120,7 +120,7 @@ export class FinancialRepository implements IFinancialRepository {
     }
 
     async getOnePayment(params: GetOnePaymentRequestDTO): Promise<GetOnePaymentResponseDTO> {
-        const payment = await PaymentModel.findById(params.paymentId).lean();
+        const payment = await (PaymentModel as any).findById(params.paymentId).lean();
         if (!payment) {
             throw new Error(FinancialErrorType.PaymentNotFound);
         }
@@ -152,7 +152,7 @@ export class FinancialRepository implements IFinancialRepository {
                     throw new Error(FinancialErrorType.InvalidPaymentSignature);
                 }
 
-                const payment = await PaymentModel.findOneAndUpdate(
+                const payment = await (PaymentModel as any).findOneAndUpdate(
                     { "metadata.razorpayOrderId": params.razorpayOrderId, studentId: params.studentId },
                     {
                         $set: {
@@ -168,7 +168,7 @@ export class FinancialRepository implements IFinancialRepository {
 
                 if (!payment) throw new Error(FinancialErrorType.PaymentNotFound);
 
-                await StudentFinancialInfoModel.updateMany(
+                await (StudentFinancialInfoModel as any).updateMany(
                     { studentId: params.studentId, term: params.term, status: "Pending" },
                     { $set: { status: "Paid", method: params.method } }
                 );
@@ -224,7 +224,7 @@ export class FinancialRepository implements IFinancialRepository {
 
             await payment.save();
 
-            await StudentFinancialInfoModel.updateMany(
+            await (StudentFinancialInfoModel as any).updateMany(
                 { studentId: params.studentId, term: params.term, status: "Pending" },
                 { $set: { status: "Paid", method: params.method } }
             );
@@ -244,7 +244,7 @@ export class FinancialRepository implements IFinancialRepository {
         const query: any = { studentId: params.studentId };
         if (params.status) query.status = params.status;
 
-        const applications = await FinancialAidApplicationModel.find(query).lean();
+        const applications = await (FinancialAidApplicationModel as any).find(query).lean();
 
         return {
             data: applications.map((app) => ({
@@ -270,8 +270,8 @@ export class FinancialRepository implements IFinancialRepository {
         if (params.status) query.status = params.status;
         if (params.term) query.term = params.term;
 
-        const total = await FinancialAidApplicationModel.countDocuments(query);
-        const applications = await FinancialAidApplicationModel.find(query)
+        const total = await (FinancialAidApplicationModel as any).countDocuments(query);
+        const applications = await (FinancialAidApplicationModel as any).find(query)
             .skip((params.page - 1) * params.limit)
             .limit(params.limit)
             .lean();
@@ -297,7 +297,7 @@ export class FinancialRepository implements IFinancialRepository {
     }
 
     async applyForFinancialAid(params: ApplyForFinancialAidRequestDTO): Promise<ApplyForFinancialAidResponseDTO> {
-        const application = new FinancialAidApplicationModel({
+        const application = new (FinancialAidApplicationModel as any)({
             studentId: params.studentId,
             term: params.term,
             status: "Pending",
@@ -338,7 +338,7 @@ export class FinancialRepository implements IFinancialRepository {
         if (params.status) query.status = params.status;
         if (params.term) query.term = params.term;
 
-        const scholarships = await ScholarshipModel.find(query).lean();
+        const scholarships = await (ScholarshipModel as any).find(query).lean();
 
         return {
             data: scholarships.map((s) => ({
@@ -358,7 +358,7 @@ export class FinancialRepository implements IFinancialRepository {
         const query: any = { studentId: params.studentId };
         if (params.status) query.status = params.status;
 
-        const applications = await ScholarshipApplicationModel.find(query).lean();
+        const applications = await (ScholarshipApplicationModel as any).find(query).lean();
 
         return {
             data: applications.map((app) => ({
@@ -381,8 +381,8 @@ export class FinancialRepository implements IFinancialRepository {
         const query: any = {};
         if (params.status) query.status = params.status;
 
-        const total = await ScholarshipApplicationModel.countDocuments(query);
-        const applications = await ScholarshipApplicationModel.find(query)
+        const total = await (ScholarshipApplicationModel as any).countDocuments(query);
+        const applications = await (ScholarshipApplicationModel as any).find(query)
             .skip((params.page - 1) * params.limit)
             .limit(params.limit)
             .lean();
@@ -406,7 +406,7 @@ export class FinancialRepository implements IFinancialRepository {
     }
 
     async applyForScholarship(params: ApplyForScholarshipRequestDTO): Promise<ApplyForScholarshipResponseDTO> {
-        const scholarship = await ScholarshipModel.findById(params.scholarshipId);
+        const scholarship = await (ScholarshipModel as any).findById(params.scholarshipId);
         if (!scholarship) {
             throw new Error(FinancialErrorType.ScholarshipNotFound);
         }
@@ -414,7 +414,7 @@ export class FinancialRepository implements IFinancialRepository {
             throw new Error(FinancialErrorType.ScholarshipClosed);
         }
 
-        const application = new ScholarshipApplicationModel({
+        const application = new (ScholarshipApplicationModel as any)({
             studentId: params.studentId,
             scholarshipId: params.scholarshipId,
             status: "Pending",
@@ -452,84 +452,121 @@ export class FinancialRepository implements IFinancialRepository {
         });
         return {
             url: result.secure_url,
-            publicId: result.public_id,
         };
     }
 
     async getPaymentReceipt(params: GetPaymentReceiptRequestDTO): Promise<GetPaymentReceiptResponseDTO> {
-        const payment = await PaymentModel.findById(params.paymentId).lean();
+        const payment = await (PaymentModel as any).findById(params.paymentId).lean();
         if (!payment) throw new Error(FinancialErrorType.PaymentNotFound);
         return {
-            receiptUrl: payment.receiptUrl,
-            paymentId: payment._id.toString(),
+            url: payment.receiptUrl || "",
         };
     }
 
     async updateFinancialAidApplication(params: UpdateFinancialAidApplicationRequestDTO): Promise<UpdateFinancialAidApplicationResponseDTO> {
-        const application = await FinancialAidApplicationModel.findByIdAndUpdate(
+        const application = await (FinancialAidApplicationModel as any).findByIdAndUpdate(
             params.applicationId,
             { status: params.status, amount: params.amount },
             { new: true }
         ).lean();
         if (!application) throw new Error(FinancialErrorType.ApplicationNotFound);
         return {
-            id: application._id.toString(),
-            status: application.status,
-            amount: application.amount,
+            data: {
+                id: application._id.toString(),
+                studentId: application.studentId.toString(),
+                term: application.term,
+                status: application.status,
+                amount: application.amount,
+                type: application.type,
+                applicationDate: application.applicationDate.toISOString(),
+                documents: application.documents.map((doc: any) => ({
+                    id: doc.id,
+                    name: doc.name,
+                    url: doc.url,
+                    status: doc.status,
+                })),
+            },
         };
     }
 
     async updateScholarshipApplication(params: UpdateScholarshipApplicationRequestDTO): Promise<UpdateScholarshipApplicationResponseDTO> {
-        const application = await ScholarshipApplicationModel.findByIdAndUpdate(
+        const application = await (ScholarshipApplicationModel as any).findByIdAndUpdate(
             params.applicationId,
             { status: params.status },
             { new: true }
         ).lean();
         if (!application) throw new Error(FinancialErrorType.ApplicationNotFound);
         return {
-            id: application._id.toString(),
-            status: application.status,
+            data: {
+                id: application._id.toString(),
+                studentId: application.studentId.toString(),
+                scholarshipId: application.scholarshipId.toString(),
+                status: application.status,
+                applicationDate: application.applicationDate.toISOString(),
+                documents: application.documents.map((doc: any) => ({
+                    id: doc.id,
+                    name: doc.name,
+                    url: doc.url,
+                    status: doc.status,
+                })),
+            },
         };
     }
 
     async createCharge(params: CreateChargeRequestDTO): Promise<CreateChargeResponseDTO> {
-        const charge = new ChargeModel({
-            studentId: params.studentId,
-            amount: params.amount,
-            dueDate: params.dueDate,
+        const charge = new (ChargeModel as any)({
+            title: params.title,
             description: params.description,
-            status: "Pending",
+            amount: params.amount,
+            term: params.term,
+            dueDate: params.dueDate,
+            applicableFor: params.applicableFor,
+            createdBy: params.createdBy,
+            status: "Active",
             createdAt: new Date(),
         });
         await charge.save();
         return {
-            id: charge._id.toString(),
-            studentId: charge.studentId.toString(),
-            amount: charge.amount,
-            dueDate: charge.dueDate.toISOString(),
-            description: charge.description,
-            status: charge.status,
+            charge: {
+                id: charge._id.toString(),
+                title: charge.title,
+                description: charge.description,
+                amount: charge.amount,
+                term: charge.term,
+                dueDate: charge.dueDate.toISOString(),
+                applicableFor: charge.applicableFor,
+                createdBy: charge.createdBy,
+                createdAt: charge.createdAt.toISOString(),
+                updatedAt: charge.updatedAt.toISOString(),
+                status: charge.status,
+            },
+            studentFinancialInfos: [],
         };
     }
 
     async getAllCharges(params: GetAllChargesRequestDTO): Promise<GetAllChargesResponseDTO> {
         const query: any = {};
-        if (params.studentId) query.studentId = params.studentId;
+        if (params.term) query.term = params.term;
         if (params.status) query.status = params.status;
 
-        const total = await ChargeModel.countDocuments(query);
-        const charges = await ChargeModel.find(query)
+        const total = await (ChargeModel as any).countDocuments(query);
+        const charges = await (ChargeModel as any).find(query)
             .skip((params.page - 1) * params.limit)
             .limit(params.limit)
             .lean();
 
         return {
-            data: charges.map((charge) => ({
+            data: charges.map((charge: any) => ({
                 id: charge._id.toString(),
-                studentId: charge.studentId.toString(),
-                amount: charge.amount,
-                dueDate: charge.dueDate.toISOString(),
+                title: charge.title,
                 description: charge.description,
+                amount: charge.amount,
+                term: charge.term,
+                dueDate: charge.dueDate.toISOString(),
+                applicableFor: charge.applicableFor,
+                createdBy: charge.createdBy,
+                createdAt: charge.createdAt.toISOString(),
+                updatedAt: charge.updatedAt.toISOString(),
                 status: charge.status,
             })),
             total,

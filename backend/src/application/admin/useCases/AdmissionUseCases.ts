@@ -16,7 +16,7 @@ import {
     DeleteAdmissionResponseDTO,
     ConfirmAdmissionOfferResponseDTO,
 } from "../../../domain/admin/dtos/AdmissionResponseDTOs";
-import { AdmissionErrorType } from "../../../domain/admission/enums/AdmissionErrorType";
+import { AdmissionErrorType } from "../../../domain/admin/enums/AdmissionErrorType";
 import { IAdmissionRepository } from "../repositories/IAdmissionRepository";
 
 interface ResponseDTO<T> {

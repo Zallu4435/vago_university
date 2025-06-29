@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IAcademicHistory extends Document {
-  studentId: string;
+  studentId: mongoose.Types.ObjectId;
   term: string;
   credits: string;
   gpa: string;

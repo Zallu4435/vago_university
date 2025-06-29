@@ -215,9 +215,11 @@ export class AdminAdmissionController implements IAdminAdmissionController {
       const result_response = {
         statusCode: 200,
         body: {
-          pdfData: Buffer.from(pdfBuffer).toString('base64'),
-          fileName: document.fileName,
-          contentType: 'application/pdf'
+          data: {
+            pdfData: Buffer.from(pdfBuffer).toString('base64'),
+            fileName: document.fileName,
+            contentType: 'application/pdf'
+          }
         }
       };
 

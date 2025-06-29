@@ -75,7 +75,9 @@ export class ChatController {
       const result = await this.getChatsUseCase.execute(params);
       return {
         statusCode: 200,
-        body: result
+        body: {
+          data: result
+        }
       };
     } catch (error: any) {
       if (error.message === "User not found") {
@@ -121,7 +123,9 @@ export class ChatController {
       const result = await this.searchChatsUseCase.execute(params);
       return {
         statusCode: 200,
-        body: result
+        body: {
+          data: result
+        }
       };
     } catch (error: any) {
       return {
@@ -155,13 +159,15 @@ export class ChatController {
       return {
         statusCode: 200,
         body: {
-          messages: result.data,
-          pagination: {
-            totalItems: result.totalItems,
-            totalPages: result.totalPages,
-            currentPage: result.currentPage,
-            hasMore: result.hasMore,
-            oldestMessageTimestamp: result.oldestMessageTimestamp
+          data: {
+            messages: result.data,
+            pagination: {
+              totalItems: result.totalItems,
+              totalPages: result.totalPages,
+              currentPage: result.currentPage,
+              hasMore: result.hasMore,
+              oldestMessageTimestamp: result.oldestMessageTimestamp
+            }
           }
         }
       };
@@ -244,7 +250,7 @@ export class ChatController {
       
       return {
         statusCode: 201,
-        body: { message: "Message sent successfully" }
+        body: { data: { message: "Message sent successfully" } }
       };
     } catch (error) {
       return {
@@ -261,7 +267,7 @@ export class ChatController {
     if (!req.user?.id) {
       return {
         statusCode: 401,
-        body: { message: 'Unauthorized' }
+        body: { error: 'Unauthorized' }
       };
     }
 
@@ -269,7 +275,7 @@ export class ChatController {
     if (!chatId) {
       return {
         statusCode: 400,
-        body: { message: 'Chat ID is required' }
+        body: { error: 'Chat ID is required' }
       };
     }
 
@@ -282,7 +288,7 @@ export class ChatController {
 
     return {
       statusCode: 200,
-      body: { message: 'Messages marked as read' }
+      body: { data: { message: 'Messages marked as read' } }
     };
   }
 
@@ -320,7 +326,7 @@ export class ChatController {
     
     return {
       statusCode: 200,
-      body: { message: "Reaction added successfully" }
+      body: { data: { message: "Reaction added successfully" } }
     };
   }
 
@@ -349,7 +355,7 @@ export class ChatController {
     
     return {
       statusCode: 200,
-      body: { message: "Reaction removed successfully" }
+      body: { data: { message: "Reaction removed successfully" } }
     };
   }
 
@@ -373,7 +379,7 @@ export class ChatController {
 
     return {
       statusCode: 200,
-      body: result
+      body: { data: result }
     };
   }
 
@@ -396,7 +402,9 @@ export class ChatController {
       
     return {
       statusCode: 200,
-      body: result
+      body: {
+        data: result
+      }
     };
   }
 
@@ -419,7 +427,7 @@ export class ChatController {
     const result = await this.createChatUseCase.execute(params);
     return {
       statusCode: 201,
-      body: result
+      body: { data: result }
     };
   }
 
@@ -445,15 +453,15 @@ export class ChatController {
       creatorId: req.user.id,
       settings
     };
-    if (req.file && (req.file.path || req.file.url)) {
-      params.avatar = req.file.path || req.file.url;
+    if (req.file && (req.file.path || (req.file as any).url)) {
+      params.avatar = req.file.path || (req.file as any).url;
     }
 
     const result = await this.createGroupChatUseCase.execute(params);
     
     return {
       statusCode: 201,
-      body: result
+      body: { data: result }
     };
   }
 
@@ -482,10 +490,10 @@ export class ChatController {
 
     await this.addGroupMemberUseCase.execute(params);
     
-    const updatedChat = await this.getChatDetailsUseCase.execute(chatId);
+    const updatedChat = await this.getChatDetailsUseCase.execute(chatId, req.user.id);
     return {
       statusCode: 200,
-      body: updatedChat
+      body: { data: updatedChat }
     };
   }
 
@@ -513,10 +521,10 @@ export class ChatController {
 
     await this.removeGroupMemberUseCase.execute(params);
     
-    const updatedChat = await this.getChatDetailsUseCase.execute(chatId);
+    const updatedChat = await this.getChatDetailsUseCase.execute(chatId, req.user.id);
     return {
       statusCode: 200,
-      body: updatedChat
+      body: { data: updatedChat }
     };
   }
 
@@ -548,7 +556,7 @@ export class ChatController {
     
     return {
       statusCode: 200,
-      body: { message: "Admin status updated successfully" }
+      body: { data: { message: "Admin status updated successfully" } }
     };
   }
 
@@ -579,7 +587,7 @@ export class ChatController {
     
     return {
       statusCode: 200,
-      body: { message: "Group settings updated successfully" }
+      body: { data: { message: "Group settings updated successfully" } }
     };
   }
 
@@ -612,7 +620,7 @@ export class ChatController {
     
     return {
       statusCode: 200,
-      body: { message: "Group info updated successfully" }
+      body: { data: { message: "Group info updated successfully" } }
     };
   }
 
@@ -641,7 +649,7 @@ export class ChatController {
     
     return {
       statusCode: 200,
-      body: { message: "Successfully left the group" }
+      body: { data: { message: "Successfully left the group" } }
     };
   }
 
@@ -659,7 +667,7 @@ export class ChatController {
 
     return {
       statusCode: 200,
-      body: { message: 'Message edited successfully' }
+      body: { data: { message: 'Message edited successfully' } }
     };
   }
 
@@ -675,7 +683,7 @@ export class ChatController {
       });
       return {
         statusCode: 200,
-        body: { message: 'Message deleted successfully' }
+        body: { data: { message: 'Message deleted successfully' } }
       };
     } catch (error) {
       console.error('[ChatController] Error in deleteMessage:', error, '\nParams:', { chatId, messageId, userId, deleteForEveryone });
@@ -721,7 +729,7 @@ export class ChatController {
     
     return {
       statusCode: 200,
-      body: { message: "Reply sent successfully" }
+      body: { data: { message: "Reply sent successfully" } }
     };
   }
 

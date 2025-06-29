@@ -4,9 +4,9 @@ import { ICreateEventUseCase } from "../../../application/events/useCases/EventU
 import { IUpdateEventUseCase } from "../../../application/events/useCases/EventUseCases";
 import { IDeleteEventUseCase } from "../../../application/events/useCases/EventUseCases";
 import { GetEventsRequestDTO, GetEventByIdRequestDTO, CreateEventRequestDTO, UpdateEventRequestDTO, DeleteEventRequestDTO } from "../../../domain/events/dtos/EventRequestDTOs";
-import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IController } from "../IHttp";
+import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IEventController } from "../IHttp";
 
-export class EventController implements IController {
+export class EventController implements IEventController {
   private httpErrors: HttpErrors;
   private httpSuccess: HttpSuccess;
 
@@ -44,7 +44,7 @@ export class EventController implements IController {
 
   async getEventById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { id } = httpRequest.path || {};
+      const { id } = httpRequest.params || {};
       if (!id) {
         return this.httpErrors.error_400();
       }
@@ -80,7 +80,7 @@ export class EventController implements IController {
 
   async updateEvent(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { id } = httpRequest.path || {};
+      const { id } = httpRequest.params || {};
       if (!id || !httpRequest.body || Object.keys(httpRequest.body).length === 0) {
         return this.httpErrors.error_400();
       }
@@ -100,7 +100,7 @@ export class EventController implements IController {
 
   async deleteEvent(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { id } = httpRequest.path || {};
+      const { id } = httpRequest.params || {};
       if (!id) {
         return this.httpErrors.error_400();
       }

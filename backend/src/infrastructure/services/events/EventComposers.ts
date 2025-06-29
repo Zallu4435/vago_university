@@ -2,9 +2,9 @@ import { IEventsRepository } from "../../../application/events/repositories/IEve
 import { GetEventsUseCase, GetEventByIdUseCase, CreateEventUseCase, UpdateEventUseCase, DeleteEventUseCase } from "../../../application/events/useCases/EventUseCases";
 import { EventController } from "../../../presentation/http/events/EventController";
 import { EventsRepository } from "../../repositories/events/EventsRepository";
-import { IController } from "../../../presentation/http/IHttp";
+import { IEventController } from "../../../presentation/http/IHttp";
 
-export function getEventsComposer(): IController {
+export function getEventsComposer(): IEventController {
   const repository: IEventsRepository = new EventsRepository();
   const getEventsUseCase: GetEventsUseCase = new GetEventsUseCase(repository);
   const getEventByIdUseCase: GetEventByIdUseCase = new GetEventByIdUseCase(repository);

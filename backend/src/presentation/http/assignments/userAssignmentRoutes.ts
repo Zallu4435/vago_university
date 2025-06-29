@@ -47,7 +47,7 @@ router.get('/download-file', authMiddleware, async (req: Request, res: Response)
 });
 
 // New endpoint for downloading assignment reference files
-router.get('/download-reference-file', authMiddleware, async (req: Request, res: Response) => {
+router.get('/download-reference-file', authMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
     console.log('=== ASSIGNMENT REFERENCE FILE DOWNLOAD STARTED ===');
     console.log('📥 Request received:', {
@@ -64,12 +64,14 @@ router.get('/download-reference-file', authMiddleware, async (req: Request, res:
 
     if (!fileUrl || typeof fileUrl !== 'string') {
       console.error('❌ Error: File URL is missing or invalid');
-      return res.status(400).send('File URL is required');
+      res.status(400).send('File URL is required');
+      return;
     }
 
     if (!fileName || typeof fileName !== 'string') {
       console.error('❌ Error: File name is missing or invalid');
-      return res.status(400).send('File name is required');
+      res.status(400).send('File name is required');
+      return;
     }
 
     console.log('✅ Parameters validation passed');
@@ -100,7 +102,8 @@ router.get('/download-reference-file', authMiddleware, async (req: Request, res:
       console.error('❌ Error: Failed to fetch file from URL');
       console.error('Response status:', response.status);
       console.error('Response status text:', response.statusText);
-      return res.status(500).send('Failed to fetch file');
+      res.status(500).send('Failed to fetch file');
+      return;
     }
 
     console.log('✅ File fetched successfully');

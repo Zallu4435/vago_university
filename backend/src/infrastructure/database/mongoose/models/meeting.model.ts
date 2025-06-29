@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IMeeting extends Document {
-  studentId: string;
+  studentId: mongoose.Types.ObjectId;
   date: string;
   reason: string;
   preferredTime?: string;

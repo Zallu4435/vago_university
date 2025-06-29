@@ -85,7 +85,7 @@ export class AdmissionRepository implements IAdmissionRepository {
             fullName: admission.personal?.fullName || "N/A",
             email: admission.personal?.emailAddress || "N/A",
             createdAt: admission.createdAt.toISOString(),
-            status: admission.status || "pending",
+            status: (admission.status || "pending") as "pending" | "approved" | "rejected" | "offered",
             program: admission.choiceOfStudy?.[0]?.programme || "N/A",
         }));
 
@@ -148,7 +148,7 @@ export class AdmissionRepository implements IAdmissionRepository {
         const confirmationToken = this.generateConfirmationToken();
         admission.confirmationToken = confirmationToken;
         admission.tokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-        admission.status = "offered";
+        admission.status = "offered" as any;
         await admission.save();
 
         const acceptUrl = `${config.frontendUrl}/confirm-admission/${params.id}/accept?token=${confirmationToken}`;
@@ -178,8 +178,8 @@ export class AdmissionRepository implements IAdmissionRepository {
             throw new Error(AdmissionErrorType.AdmissionAlreadyProcessed);
         }
 
-        admission.status = "rejected";
-        admission.rejectedBy = "admin";
+        admission.status = "rejected" as any;
+        admission.rejectedBy = "admin" as any;
         await admission.save();
 
         return { message: "Admission rejected" };
@@ -218,7 +218,7 @@ export class AdmissionRepository implements IAdmissionRepository {
         }
 
         if (params.action === "accept") {
-            admission.status = "approved";
+            admission.status = "approved" as any;
             admission.rejectedBy = undefined;
 
             const registerUser = await Register.findById(admission.registerId);
@@ -261,8 +261,8 @@ export class AdmissionRepository implements IAdmissionRepository {
             }
 
         } else {
-            admission.status = "rejected";
-            admission.rejectedBy = "user";
+            admission.status = "rejected" as any;
+            admission.rejectedBy = "user" as any;
         }
 
         admission.confirmationToken = undefined;

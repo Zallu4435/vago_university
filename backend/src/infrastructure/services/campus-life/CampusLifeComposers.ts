@@ -12,7 +12,8 @@ import {
   JoinEventUseCase,
 } from "../../../application/campus-life/useCases/CampusLifeUseCases";
 import { CampusLifeRepository} from "../../../infrastructure/repositories/campus-life/CampusLifeRepository"; 
-import { CampusLifeController, ICampusLifeController } from "../../../presentation/http/campus-life/CampusLifeController";
+import { CampusLifeController } from "../../../presentation/http/campus-life/CampusLifeController";
+import { ICampusLifeController } from "../../../presentation/http/IHttp";
 
 export function getCampusLifeComposer(): ICampusLifeController {
   const campusLifeRepository: ICampusLifeRepository = new CampusLifeRepository();

@@ -36,7 +36,7 @@ export class CommunicationRepository implements ICommunicationRepository {
       "recipients._id": userId
     };
 
-    if (status && status !== "all") {
+    if (status && (status as any) !== "all") {
       query["recipients.status"] = status;
     }
 
@@ -48,13 +48,13 @@ export class CommunicationRepository implements ICommunicationRepository {
       }
 
       const skip = (page - 1) * limit;
-    const messages = await MessageModel.find(query)
+    const messages = await (MessageModel as any).find(query)
       .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean();
 
-    const totalItems = await MessageModel.countDocuments(query);
+    const totalItems = await (MessageModel as any).countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
 
     const mappedMessages: MessageSummaryDTO[] = messages.map((message: any) => ({
@@ -98,7 +98,7 @@ export class CommunicationRepository implements ICommunicationRepository {
       "sender._id": userId
     };
 
-    if (status && status !== "all") {
+    if (status && (status as any) !== "all") {
       query["recipients.status"] = status;
     }
 
@@ -110,13 +110,13 @@ export class CommunicationRepository implements ICommunicationRepository {
       }
 
       const skip = (page - 1) * limit;
-    const messages = await MessageModel.find(query)
+    const messages = await (MessageModel as any).find(query)
       .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean();
 
-    const totalItems = await MessageModel.countDocuments(query);
+    const totalItems = await (MessageModel as any).countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
 
     const mappedMessages: MessageSummaryDTO[] = messages.map((message: any) => ({
@@ -243,7 +243,7 @@ export class CommunicationRepository implements ICommunicationRepository {
     }
 
     // Create message using MessageModel directly
-    const message = await MessageModel.create({
+    const message = await (MessageModel as any).create({
       subject,
       content,
       sender,
@@ -272,7 +272,7 @@ export class CommunicationRepository implements ICommunicationRepository {
       throw new Error("Message not found or user does not have access");
     }
 
-    await MessageModel.findByIdAndDelete(messageId);
+    await (MessageModel as any).findByIdAndDelete(messageId);
     return { success: true, message: "Message deleted successfully" };
   }
 
@@ -314,7 +314,12 @@ export class CommunicationRepository implements ICommunicationRepository {
     console.log('Repository getAllAdmins - Mapped admins:', mappedAdmins);
 
     return {
-      admins: mappedAdmins
+      admins: mappedAdmins.map(admin => ({
+        _id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role as UserRole
+      }))
     };
   }
 
@@ -396,7 +401,7 @@ export class CommunicationRepository implements ICommunicationRepository {
       _id: user._id.toString(),
       name: `${user.firstName} ${user.lastName}`,
       email: user.email,
-      role: role
+      role: role as UserRole
     };
     console.log('Returning user info:', userInfo);
     return userInfo;
@@ -430,27 +435,28 @@ export class CommunicationRepository implements ICommunicationRepository {
   }
 
   async findMessageById(messageId: string): Promise<Message | null> {
-    const message = await MessageModel.findById(messageId).lean();
+    const message = await (MessageModel as any).findById(messageId).lean();
     if (!message) return null;
 
-    return new Message({
-      id: message._id.toString(),
-      subject: message.subject,
-      content: message.content,
-      sender: message.sender,
-      recipients: message.recipients,
-      createdAt: message.createdAt,
-      isBroadcast: message.isBroadcast,
-      attachments: message.attachments
-    });
+    return new Message(
+      message._id.toString(),
+      message.subject,
+      message.content,
+      message.sender,
+      message.recipients,
+      message.isBroadcast,
+      message.attachments || [],
+      message.createdAt.toISOString(),
+      message.updatedAt.toISOString()
+    );
   }
 
   async createMessage(message: Message): Promise<void> {
-    await MessageModel.create(message);
+    await (MessageModel as any).create(message);
   }
 
   async updateMessageRecipientStatus(messageId: string, userId: string, status: string): Promise<void> {
-    await MessageModel.updateOne(
+    await (MessageModel as any).updateOne(
       { _id: messageId, "recipients._id": userId },
       { $set: { "recipients.$.status": status } }
     );

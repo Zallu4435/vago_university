@@ -1,6 +1,3 @@
-import { Entity } from './Entity';
-import { Enrollment } from './Enrollment';
-
 export interface CourseProps {
   title: string;
   code: string;
@@ -15,9 +12,13 @@ export interface CourseProps {
   updatedAt: Date;
 }
 
-export class Course extends Entity<CourseProps> {
+export class Course {
+  private props: CourseProps;
+  private id?: string;
+
   private constructor(props: CourseProps, id?: string) {
-    super(props, id);
+    this.props = props;
+    this.id = id;
   }
 
   public static create(props: CourseProps, id?: string): Course {

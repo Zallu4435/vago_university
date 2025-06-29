@@ -4,10 +4,10 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "prebuild": "rimraf dist",
+    "prebuild": "rm -rf dist || rmdir /s /q dist || true",
     "build": "tsc --project tsconfig.json",
     "build:prod": "tsc --project tsconfig.json --noEmitOnError false",
-    "build:render": "npx tsc --project tsconfig.json --noEmitOnError false || exit 0",
+    "build:render": "rm -rf dist && npx tsc --project tsconfig.json --noEmitOnError false && ls -la dist/",
     "start": "node dist/server.js",
     "type-check": "tsc --noEmit"
   },

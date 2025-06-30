@@ -78,7 +78,7 @@ export const academicService = {
   // Get available courses
   getCourses: async (): Promise<Course[]> => {
     const response = await httpClient.get('/academic/courses');
-    return response.data?.data;
+    return response.data?.data.courses;
   },
 
   // Get academic history

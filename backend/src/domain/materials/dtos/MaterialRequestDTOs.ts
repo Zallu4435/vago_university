@@ -20,7 +20,7 @@ export interface CreateMaterialRequestDTO {
   tags: string[];
   difficulty: string;
   estimatedTime: string;
-  isNew: boolean;
+  isNewMaterial: boolean;
   isRestricted: boolean;
   uploadedBy: string;
 }

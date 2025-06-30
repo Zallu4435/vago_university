@@ -77,25 +77,35 @@ export const VagoNow: React.FC = () => {
                     {firstRow.map((item) => (
                         <div
                             key={item.id}
-                            className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                            className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
+                            onClick={() => handleLearnMore(item)}
                         >
                             <img
                                 src={item.image}
                                 alt={item.title}
                                 className="w-full h-[200px] sm:h-[250px] md:h-[280px] object-cover transform group-hover:scale-105 transition-transform duration-500"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/90 via-cyan-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/90 via-cyan-900/40 to-transparent opacity-0 group-hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
                                 <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-6 text-white">
                                     <span className="text-xs font-semibold px-2 sm:px-3 py-1 bg-cyan-500/80 rounded-full mb-2 inline-block">
                                         {item.category || 'General'}
                                     </span>
                                     <h3 className="text-lg sm:text-xl font-bold mb-2">{item.title}</h3>
-                                    <button
-                                        onClick={() => handleLearnMore(item)}
-                                        className="inline-flex items-center text-xs sm:text-sm font-semibold hover:text-cyan-300 transition-colors focus:outline-none"
-                                    >
+                                    <div className="inline-flex items-center text-xs sm:text-sm font-semibold text-cyan-300">
                                         Learn More <FaArrowRight className="ml-1 sm:ml-2 text-xs" />
-                                    </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Mobile overlay - always visible on mobile */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/90 via-cyan-900/40 to-transparent sm:hidden">
+                                <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                                    <span className="text-xs font-semibold px-2 py-1 bg-cyan-500/80 rounded-full mb-2 inline-block">
+                                        {item.category || 'General'}
+                                    </span>
+                                    <h3 className="text-lg font-bold mb-2">{item.title}</h3>
+                                    <div className="inline-flex items-center text-xs font-semibold text-cyan-300">
+                                        Tap to Learn More <FaArrowRight className="ml-1 text-xs" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -107,25 +117,35 @@ export const VagoNow: React.FC = () => {
                     {secondRow.map((item) => (
                         <div
                             key={item.id}
-                            className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                            className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
+                            onClick={() => handleLearnMore(item)}
                         >
                             <img
                                 src={item.image}
                                 alt={item.title}
                                 className="w-full h-[200px] sm:h-[250px] md:h-[280px] object-cover transform group-hover:scale-105 transition-transform duration-500"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/90 via-cyan-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/90 via-cyan-900/40 to-transparent opacity-0 group-hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
                                 <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-6 text-white">
                                     <span className="text-xs font-semibold px-2 sm:px-3 py-1 bg-cyan-500/80 rounded-full mb-2 inline-block">
                                         {item.category || 'General'}
                                     </span>
                                     <h3 className="text-lg sm:text-xl font-bold mb-2">{item.title}</h3>
-                                    <button
-                                        onClick={() => handleLearnMore(item)}
-                                        className="inline-flex items-center text-xs sm:text-sm font-semibold hover:text-cyan-300 transition-colors focus:outline-none"
-                                    >
+                                    <div className="inline-flex items-center text-xs sm:text-sm font-semibold text-cyan-300">
                                         Learn More <FaArrowRight className="ml-1 sm:ml-2 text-xs" />
-                                    </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Mobile overlay - always visible on mobile */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/90 via-cyan-900/40 to-transparent sm:hidden">
+                                <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                                    <span className="text-xs font-semibold px-2 py-1 bg-cyan-500/80 rounded-full mb-2 inline-block">
+                                        {item.category || 'General'}
+                                    </span>
+                                    <h3 className="text-lg font-bold mb-2">{item.title}</h3>
+                                    <div className="inline-flex items-center text-xs font-semibold text-cyan-300">
+                                        Tap to Learn More <FaArrowRight className="ml-1 text-xs" />
+                                    </div>
                                 </div>
                             </div>
                         </div>

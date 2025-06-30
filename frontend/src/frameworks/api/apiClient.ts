@@ -5,7 +5,7 @@ import axios from 'axios';
  * Base API client configured with interceptors for authentication and error handling
  */
 export const apiClient = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL || '/api',
+  baseURL: process.env.REACT_APP_API_BASE_URL || import.meta.env.VITE_API_BASE_URL || 'https://vago-university.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },

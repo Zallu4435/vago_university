@@ -63,7 +63,7 @@ const Entrepreneurship: React.FC = () => {
           },
           {
             title: 'Funding and Recognition',
-            description: 'Providing awards and grants to recognize and support our students’ innovative ideas and projects.',
+            description: "Providing awards and grants to recognize and support our students' innovative ideas and projects.",
             icon: FaMoneyBillWave,
           },
           {
@@ -100,7 +100,7 @@ const Entrepreneurship: React.FC = () => {
             title: 'CTO & Co-Founder',
             company: 'Mobbin',
             testimonial:
-              'The no-frills office space provided was invaluable in the early days of building Mobbin. It gave us a space to work on our ideas whilst we were still pursuing our bachelor’s degree. Today, Mobbin',
+              "The no-frills office space provided was invaluable in the early days of building Mobbin. It gave us a space to work on our ideas whilst we were still pursuing our bachelor's degree. Today, Mobbin",
           },
         ],
       },
@@ -177,14 +177,14 @@ const Entrepreneurship: React.FC = () => {
       <section
         id="poster"
         data-animate
-        className={`relative h-96 bg-gradient-to-b from-cyan-600 to-blue-600 flex items-center justify-center transition-all duration-800 ${
+        className={`relative h-64 sm:h-80 lg:h-96 bg-gradient-to-b from-cyan-600 to-blue-600 flex items-center justify-center transition-all duration-800 ${
           isVisible.poster ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/60 to-transparent" />
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4">{data.poster.title}</h1>
-          <p className="text-lg sm:text-2xl text-cyan-100">{data.poster.subtitle}</p>
+        <div className="relative z-10 w-full max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 text-center text-white">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold mb-3 sm:mb-4 px-2">{data.poster.title}</h1>
+          <p className="text-sm sm:text-base lg:text-lg xl:text-2xl text-cyan-100 px-2">{data.poster.subtitle}</p>
         </div>
       </section>
 
@@ -192,16 +192,16 @@ const Entrepreneurship: React.FC = () => {
       <section
         id="what-we-do"
         data-animate
-        className={`max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 transition-all duration-800 ${
+        className={`w-full max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-12 sm:py-16 lg:py-20 transition-all duration-800 ${
           isVisible['what-we-do'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}
       >
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-cyan-800 mb-4">{data.whatWeDo.title}</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto" />
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-cyan-800 mb-3 sm:mb-4">{data.whatWeDo.title}</h2>
+          <div className="w-16 sm:w-20 lg:w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto" />
         </div>
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-8">
-          <p className="text-lg text-cyan-600 leading-relaxed">{data.whatWeDo.description}</p>
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-4 sm:p-6 lg:p-8">
+          <p className="text-sm sm:text-base lg:text-lg text-cyan-600 leading-relaxed">{data.whatWeDo.description}</p>
         </div>
       </section>
 
@@ -209,27 +209,27 @@ const Entrepreneurship: React.FC = () => {
       <section
         id="how-we-do-it"
         data-animate
-        className={`max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 transition-all duration-800 ${
+        className={`w-full max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-12 sm:py-16 lg:py-20 transition-all duration-800 ${
           isVisible['how-we-do-it'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}
       >
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-cyan-800 mb-4">{data.howWeDoIt.title}</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto" />
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-cyan-800 mb-3 sm:mb-4">{data.howWeDoIt.title}</h2>
+          <div className="w-16 sm:w-20 lg:w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {data.howWeDoIt.aspects.map((aspect, index) => (
             <div
               key={index}
-              className="group bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-6 transition-all duration-300 hover:scale-105"
+              className="group bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-4 sm:p-6 transition-all duration-300 hover:scale-105"
             >
-              <div className="p-3 rounded-full bg-cyan-100 mb-4 w-fit">
-                <aspect.icon className="text-cyan-600 text-xl" />
+              <div className="p-2 sm:p-3 rounded-full bg-cyan-100 mb-3 sm:mb-4 w-fit">
+                <aspect.icon className="text-cyan-600 text-lg sm:text-xl" />
               </div>
-              <h4 className="text-lg font-bold text-cyan-800 mb-2 group-hover:text-cyan-600 transition-colors">
+              <h4 className="text-base sm:text-lg font-bold text-cyan-800 mb-1 sm:mb-2 group-hover:text-cyan-600 transition-colors">
                 {aspect.title}
               </h4>
-              <p className="text-cyan-600">{aspect.description}</p>
+              <p className="text-cyan-600 text-sm sm:text-base">{aspect.description}</p>
             </div>
           ))}
         </div>
@@ -239,33 +239,33 @@ const Entrepreneurship: React.FC = () => {
       <section
         id="alumni"
         data-animate
-        className={`max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 transition-all duration-800 ${
+        className={`w-full max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-12 sm:py-16 lg:py-20 transition-all duration-800 ${
           isVisible.alumni ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}
       >
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-cyan-800 mb-4">{data.alumni.title}</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto" />
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-cyan-800 mb-3 sm:mb-4">{data.alumni.title}</h2>
+          <div className="w-16 sm:w-20 lg:w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {data.alumni.testimonials.map((testimonial, index) => (
             <div
               key={index}
-              className="group bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-6 transition-all duration-300 hover:scale-105"
+              className="group bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-4 sm:p-6 transition-all duration-300 hover:scale-105"
             >
-              <div className="flex items-center justify-center mb-4">
-                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
-                  <span className="text-cyan-600 text-2xl font-bold">{testimonial.name.charAt(0)}</span>
+              <div className="flex items-center justify-center mb-3 sm:mb-4">
+                <div className="w-16 sm:w-20 lg:w-24 h-16 sm:h-20 lg:h-24 bg-gray-200 rounded-full flex items-center justify-center">
+                  <span className="text-cyan-600 text-lg sm:text-xl lg:text-2xl font-bold">{testimonial.name.charAt(0)}</span>
                 </div>
               </div>
-              <h4 className="text-lg font-bold text-cyan-800 mb-1 text-center">{testimonial.name}</h4>
-              <p className="text-sm text-cyan-600 mb-2 text-center">{testimonial.title}, {testimonial.company}</p>
-              <p className="text-cyan-600 text-center">{testimonial.testimonial}</p>
+              <h4 className="text-base sm:text-lg font-bold text-cyan-800 mb-1 text-center">{testimonial.name}</h4>
+              <p className="text-xs sm:text-sm text-cyan-600 mb-2 text-center">{testimonial.title}, {testimonial.company}</p>
+              <p className="text-cyan-600 text-sm sm:text-base text-center">{testimonial.testimonial}</p>
             </div>
           ))}
         </div>
-        <div className="text-center mt-8">
-          <button className="group inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg">
+        <div className="text-center mt-6 sm:mt-8">
+          <button className="group inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg text-sm sm:text-base">
             Read More Stories
             <FaArrowRight className="ml-2 group-hover:translate-x-2 transition-transform" />
           </button>

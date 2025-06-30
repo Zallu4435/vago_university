@@ -22,7 +22,7 @@ export interface MaterialProps {
   tags: string[];
   difficulty: MaterialDifficulty;
   estimatedTime: string;
-  isNew: boolean;
+  isNewMaterial: boolean;
   isRestricted: boolean;
   uploadedBy: string;
   uploadedAt: string;

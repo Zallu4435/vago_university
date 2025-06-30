@@ -13,17 +13,17 @@ export const UGWhy_VAGO: React.FC = () => {
       </div>
 
       {/* Main content container */}
-      <main className="flex-1 relative z-10 pb-20">
-        <div className="relative space-y-8">
+      <main className="flex-1 relative z-10 pb-20 w-full">
+        <div className="relative space-y-8 w-full sm:max-w-6xl mx-auto">
           {/* Section 1 */}
           <section
             id="nus-education-framework"
             data-animate
-            className={`py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto transition-all duration-800 ${
+            className={`py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-6 xl:px-8 w-full transition-all duration-800 ${
               isVisible["nus-education-framework"] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-cyan-100">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl p-4 sm:p-6 border border-cyan-100 shadow-sm w-full">
               <NUSEducationFramework />
             </div>
           </section>
@@ -32,11 +32,11 @@ export const UGWhy_VAGO: React.FC = () => {
           <section
             id="graduation-support"
             data-animate
-            className={`py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto transition-all duration-800 ${
+            className={`py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-6 xl:px-8 w-full transition-all duration-800 ${
               isVisible["graduation-support"] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-cyan-100">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl p-4 sm:p-6 border border-cyan-100 shadow-sm w-full">
               <GraduationSupport />
             </div>
           </section>
@@ -45,11 +45,11 @@ export const UGWhy_VAGO: React.FC = () => {
           <section
             id="student-testimonials"
             data-animate
-            className={`py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto transition-all duration-800 ${
+            className={`py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-6 xl:px-8 w-full transition-all duration-800 ${
               isVisible["student-testimonials"] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-cyan-100">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl p-4 sm:p-6 border border-cyan-100 shadow-sm w-full">
               <StudentTestimonials />
             </div>
           </section>

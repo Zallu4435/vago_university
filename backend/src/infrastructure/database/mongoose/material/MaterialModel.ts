@@ -12,7 +12,7 @@ const materialSchema = new mongoose.Schema({
   tags: [{ type: String }],
   difficulty: { type: String, required: true },
   estimatedTime: { type: String, required: true },
-  isNew: { type: Boolean, default: true },
+  isNewMaterial: { type: Boolean, default: true },
   isRestricted: { type: Boolean, default: false },
   uploadedBy: { type: String, required: true },
   uploadedAt: { type: Date, default: Date.now },

@@ -9,7 +9,7 @@ const EssentialSteps = () => {
     {
       id: 'dates',
       title: 'Note Down Important Dates',
-      icon: <FaCalendar className="w-5 h-5 text-white" />,
+      icon: <FaCalendar className="w-4 h-4 sm:w-5 sm:h-5 text-white" />,
       content: `
         <p>Pay close attention to these key dates in the admissions calendar:</p>
         <ul>
@@ -26,7 +26,7 @@ const EssentialSteps = () => {
     {
       id: 'options',
       title: 'Consider Your Application Options',
-      icon: <FaCheckSquare className="w-5 h-5 text-white" />,
+      icon: <FaCheckSquare className="w-4 h-4 sm:w-5 sm:h-5 text-white" />,
       content: `
         <p>Before applying, carefully review:</p>
         <ul>
@@ -42,7 +42,7 @@ const EssentialSteps = () => {
     {
       id: 'apply',
       title: 'Apply when Admissions Applications Open',
-      icon: <FaRegClock className="w-5 h-5 text-white" />,
+      icon: <FaRegClock className="w-4 h-4 sm:w-5 sm:h-5 text-white" />,
       content: `
         <p>Submit your application as soon as possible after the portal opens:</p>
         <ul>
@@ -58,7 +58,7 @@ const EssentialSteps = () => {
     {
       id: 'rank',
       title: 'Rank Your Selection in order of Preference',
-      icon: <FaListOl className="w-5 h-5 text-white" />,
+      icon: <FaListOl className="w-4 h-4 sm:w-5 sm:h-5 text-white" />,
       content: `
         <p>You can apply for up to five programs, ranked in order of preference:</p>
         <ul>
@@ -74,7 +74,7 @@ const EssentialSteps = () => {
     {
       id: 'showcase',
       title: 'Showcase Your Aptitude, Passions and Interests',
-      icon: <FaStar className="w-5 h-5 text-white" />,
+      icon: <FaStar className="w-4 h-4 sm:w-5 sm:h-5 text-white" />,
       content: `
         <p>The university values well-rounded applicants. Highlight:</p>
         <ul>
@@ -90,7 +90,7 @@ const EssentialSteps = () => {
     {
       id: 'accuracy',
       title: 'Ensure Accuracy of Information',
-      icon: <FaRegFileAlt className="w-5 h-5 text-white" />,
+      icon: <FaRegFileAlt className="w-4 h-4 sm:w-5 sm:h-5 text-white" />,
       content: `
         <p>Verify all information before submission:</p>
         <ul>
@@ -121,55 +121,56 @@ const EssentialSteps = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden mb-12">
-      <div className="border-b border-blue-500">
-        <h1 className="text-3xl font-bold text-center py-6 text-blue-800">ESSENTIAL STEPS</h1>
-        <p className="text-center text-gray-600 pb-4">
+    <div className="w-full max-w-6xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden mb-8 sm:mb-10 lg:mb-12 border border-cyan-100">
+      <div className="border-b border-cyan-200">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center py-4 sm:py-6 text-cyan-800">ESSENTIAL STEPS</h1>
+        <div className="w-16 sm:w-20 lg:w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto mb-4 sm:mb-6" />
+        <p className="text-center text-cyan-600 pb-3 sm:pb-4 text-sm sm:text-base px-2">
           Essential steps to complete your undergraduate admissions application.
         </p>
       </div>
 
-      <div className="p-6">
-        <div className="flex justify-end mb-4">
+      <div className="p-4 sm:p-6">
+        <div className="flex justify-end mb-3 sm:mb-4">
           <button 
             onClick={toggleAll} 
-            className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+            className="text-cyan-600 hover:text-cyan-800 text-xs sm:text-sm font-medium flex items-center transition-colors duration-300"
           >
             {expandAll ? 'Collapse All' : 'Expand All'}
             {expandAll ? 
-              <FaChevronUp className="ml-1 w-4 h-4" /> : 
-              <FaChevronDown className="ml-1 w-4 h-4" />
+              <FaChevronUp className="ml-1 w-3 h-3 sm:w-4 sm:h-4" /> : 
+              <FaChevronDown className="ml-1 w-3 h-3 sm:w-4 sm:h-4" />
             }
           </button>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {steps.map((step) => (
             <div 
               key={step.id} 
-              className="border border-gray-200 rounded-lg overflow-hidden shadow-sm transition-shadow duration-300 hover:shadow-md"
+              className="border border-cyan-200 rounded-lg overflow-hidden shadow-sm transition-all duration-300 hover:shadow-md hover:border-cyan-300"
             >
               <button 
                 onClick={() => toggleItem(step.id)}
-                className="w-full flex items-center justify-between p-4 bg-gray-600 text-white focus:outline-none hover:bg-gray-700 transition-colors duration-200"
+                className="w-full flex items-center justify-between p-3 sm:p-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white focus:outline-none hover:from-cyan-700 hover:to-blue-700 transition-all duration-300"
               >
                 <div className="flex items-center">
-                  <div className="mr-3 bg-blue-600 p-2 rounded-full">
+                  <div className="mr-2 sm:mr-3 bg-white/20 p-1.5 sm:p-2 rounded-full">
                     {step.icon}
                   </div>
-                  <h2 className="text-lg font-medium">{step.title}</h2>
+                  <h2 className="text-sm sm:text-lg font-medium">{step.title}</h2>
                 </div>
                 {expandedItems.includes(step.id) ? 
-                  <FaChevronUp className="w-5 h-5" /> : 
-                  <FaChevronDown className="w-5 h-5" />
+                  <FaChevronUp className="w-4 h-4 sm:w-5 sm:h-5" /> : 
+                  <FaChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
                 }
               </button>
               
               {expandedItems.includes(step.id) && (
-                <div className="p-5 bg-white border-t border-gray-200">
+                <div className="p-3 sm:p-5 bg-gradient-to-br from-cyan-50 to-blue-50 border-t border-cyan-200">
                   <div 
                     dangerouslySetInnerHTML={{ __html: step.content }}
-                    className="prose max-w-none text-gray-700"
+                    className="prose max-w-none text-cyan-700 text-xs sm:text-sm"
                   />
                 </div>
               )}

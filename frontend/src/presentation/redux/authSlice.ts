@@ -9,9 +9,9 @@ interface AuthState {
     lastName: string;
     email: string;
     id?: string;
+    profilePicture?: string;
   } | null;
   collection: 'register' | 'admin' | 'user' | 'faculty' | null;
-  profilePicture?: string;
 }
 
 const initialState: AuthState = {
@@ -28,15 +28,13 @@ const authSlice = createSlice({
       state,
       action: PayloadAction<{
         token: string;
-        user: { firstName: string; lastName: string; email: string; id?: string };
+        user: { firstName: string; lastName: string; email: string; id?: string; profilePicture?: string };
         collection: 'register' | 'admin' | 'user' | 'faculty';
-        profilePicture?: string;
       }>
     ) => {
       state.token = action.payload.token;
       state.user = action.payload.user;
       state.collection = action.payload.collection;
-      state.profilePicture = action.payload.profilePicture;
     },
     logout: (state) => {
       // Call logout API to clear cookie

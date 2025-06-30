@@ -46,7 +46,7 @@ const ContactUs = () => {
     setSubmitError(null);
     
     try {
-      const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+      const backendUrl = import.meta.env.VITE_API_BASE_URL || 'https://vago-university.onrender.com/api';
       const response = await axios.post(`${backendUrl}/enquiries`, {
         name: data.name.trim(),
         email: data.email.trim(),

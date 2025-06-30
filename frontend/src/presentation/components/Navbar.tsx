@@ -156,10 +156,20 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
                     <Link
                       to={link.href}
                       onClick={handleMobileLinkClick}
-                      className={`block text-cyan-800 font-semibold text-base px-3 py-2 rounded-md transition-colors duration-200 
-                        ${isActive ? 'bg-cyan-50 text-cyan-600 border-l-4 border-cyan-500' : 'hover:bg-cyan-50 hover:text-cyan-600'}`}
+                      className={`block font-semibold text-base px-4 py-3 rounded-lg transition-all duration-300 relative overflow-hidden
+                        ${isActive 
+                          ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg transform scale-105 border-l-4 border-white/30' 
+                          : 'text-cyan-800 hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 hover:text-cyan-600 hover:shadow-md hover:transform hover:scale-102'
+                        }
+                        ${isActive ? 'before:absolute before:inset-0 before:bg-white/10 before:animate-pulse' : ''}
+                      `}
                     >
-                      {link.label}
+                      <span className="relative z-10 flex items-center">
+                        {link.label}
+                        {isActive && (
+                          <div className="ml-2 w-2 h-2 bg-white rounded-full animate-bounce"></div>
+                        )}
+                      </span>
                     </Link>
                   </li>
                 );

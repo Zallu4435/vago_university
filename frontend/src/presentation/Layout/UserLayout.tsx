@@ -10,7 +10,7 @@ import { usePreferences } from '../context/PreferencesContext';
 const UserLayout = () => {
   const location = useLocation();
   const isCanvas = location.pathname.includes('/canvas');
-  const defaultTab = isCanvas ? 'Canvas Dashboard' : 'Dashboard';
+  const defaultTab = isCanvas ? 'Dashboard' : '';
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { styles } = usePreferences();
@@ -19,6 +19,7 @@ const UserLayout = () => {
 
   const user = useSelector((state: RootState) => state.auth.user);
   const fullName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim();
+  const profilePicture = user?.profilePicture;
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -31,7 +32,7 @@ const UserLayout = () => {
   useEffect(() => {
     const path = location.pathname;
     if (path.includes('/canvas')) {
-      setActiveTab('Canvas Dashboard');
+      setActiveTab('Dashboard');
     } else if (path.includes('/dashboard')) {
       setActiveTab('Dashboard');
     }
@@ -48,6 +49,7 @@ const UserLayout = () => {
             setMobileMenuOpen={setMobileMenuOpen}
             onLogout={handleLogout}
             userName={fullName}
+            profilePicture={profilePicture}
           />
         )}
         <main className={`flex-grow px-4 ${isSettingsPage || isHelpPage ? 'py-12' : 'py-8'} ${styles.textPrimary}`}>

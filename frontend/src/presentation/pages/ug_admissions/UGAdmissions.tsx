@@ -14,17 +14,17 @@ export const UGAdmissions: React.FC = () => {
       </div>
 
       {/* Main content container */}
-      <main className="flex-1 relative z-10 pb-20">
-        <div className="relative space-y-8">
+      <main className="flex-1 relative z-10 pb-8 sm:pb-12 lg:pb-20">
+        <div className="relative space-y-4 sm:space-y-6 lg:space-y-8">
           {/* Section 1 */}
           <section
             id="admissions-assessment"
             data-animate
-            className={`py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto transition-all duration-800 ${
+            className={`py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-6 xl:px-8 max-w-6xl mx-auto transition-all duration-800 ${
               isVisible["admissions-assessment"] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-cyan-100 shadow-sm">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl p-4 sm:p-6 border border-cyan-100 shadow-sm">
               <AdmissionsAssessment />
             </div>
           </section>
@@ -33,11 +33,11 @@ export const UGAdmissions: React.FC = () => {
           <section
             id="admission-categories"
             data-animate
-            className={`py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto transition-all duration-800 ${
+            className={`py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-6 xl:px-8 max-w-6xl mx-auto transition-all duration-800 ${
               isVisible["admission-categories"] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-cyan-100 shadow-sm">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl p-4 sm:p-6 border border-cyan-100 shadow-sm">
               <AdmissionCategories />
             </div>
           </section>
@@ -46,11 +46,11 @@ export const UGAdmissions: React.FC = () => {
           <section
             id="application-process"
             data-animate
-            className={`py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto transition-all duration-800 ${
+            className={`py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-6 xl:px-8 max-w-6xl mx-auto transition-all duration-800 ${
               isVisible["application-process"] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-cyan-100 shadow-sm">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl p-4 sm:p-6 border border-cyan-100 shadow-sm">
               <ApplicationProcess />
             </div>
           </section>
@@ -58,11 +58,11 @@ export const UGAdmissions: React.FC = () => {
           <section
             id="essential-steps"
             data-animate
-            className={`py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto transition-all duration-800 ${
+            className={`py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-6 xl:px-8 max-w-6xl mx-auto transition-all duration-800 ${
               isVisible["essential-steps"] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-cyan-100 shadow-sm">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl p-4 sm:p-6 border border-cyan-100 shadow-sm">
               <EssentialSteps />
             </div>
           </section>

@@ -70,31 +70,31 @@ const RegisterPage = () => {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-gradient-to-b from-cyan-50 via-white to-cyan-50 py-20"
+      className="min-h-screen flex items-center justify-center bg-gradient-to-b from-cyan-50 via-white to-cyan-50 px-3 sm:px-4 lg:px-6 py-2 sm:py-6 lg:py-8"
       style={backgroundAnimation}
     >
-      <div className="w-full max-w-6xl flex shadow-xl rounded-xl overflow-hidden">
-        <div className="w-full md:w-1/2 bg-white p-8 md:p-12" style={formAnimation}>
+      <div className="w-full max-w-6xl flex flex-col lg:flex-row shadow-xl rounded-lg sm:rounded-xl overflow-hidden">
+        <div className="w-full lg:w-1/2 bg-white p-4 sm:p-6 lg:p-8 xl:p-12" style={formAnimation}>
           <div className="max-w-md mx-auto">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-cyan-800 mb-4">University Registration</h2>
-              <p className="text-cyan-600">Begin your journey at Horizon University</p>
-              <div className="w-20 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto mt-4" />
+            <div className="text-center mb-4 sm:mb-6 lg:mb-8">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-cyan-800 mb-2 sm:mb-4">University Registration</h2>
+              <p className="text-sm sm:text-base text-cyan-600">Begin your journey at Horizon University</p>
+              <div className="w-16 sm:w-20 lg:w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto mt-3 sm:mt-4" />
             </div>
 
             {confirmationMessage ? (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6 text-center" role="alert">
-                <span className="block sm:inline text-lg font-semibold">{confirmationMessage}</span>
-                <p className="mt-2 text-sm text-green-600">You may close this page and log in after confirming your email.</p>
+              <div className="bg-green-100 border border-green-400 text-green-700 px-3 sm:px-4 py-2 sm:py-3 rounded relative mb-4 sm:mb-6 text-center text-sm sm:text-base" role="alert">
+                <span className="block sm:inline text-base sm:text-lg font-semibold">{confirmationMessage}</span>
+                <p className="mt-2 text-xs sm:text-sm text-green-600">You may close this page and log in after confirming your email.</p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4 lg:space-y-5">
                 {formError && (
-                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 text-center" role="alert">
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded relative mb-4 text-center text-sm sm:text-base" role="alert">
                     <span className="block sm:inline">{formError}</span>
                   </div>
                 )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <Input
                       id="firstName"
@@ -150,7 +150,7 @@ const RegisterPage = () => {
                       onTouchEnd={() => setIsPasswordVisible(false)}
                       className="absolute right-3 top-[38px] text-gray-500 hover:text-gray-700 focus:outline-none"
                     >
-                      {isPasswordVisible ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                      {isPasswordVisible ? <FiEyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <FiEye className="h-4 w-4 sm:h-5 sm:w-5" />}
                     </button>
                   </div>
                   {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password.message}</p>}
@@ -188,20 +188,20 @@ const RegisterPage = () => {
                       onTouchEnd={() => setIsConfirmPasswordVisible(false)}
                       className="absolute right-3 top-[38px] text-gray-500 hover:text-gray-700 focus:outline-none"
                     >
-                      {isConfirmPasswordVisible ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                      {isConfirmPasswordVisible ? <FiEyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <FiEye className="h-4 w-4 sm:h-5 sm:w-5" />}
                     </button>
                   </div>
                   {errors.confirmPassword && <p className="text-red-600 text-xs mt-1">{errors.confirmPassword.message}</p>}
                 </div>
 
-                <div className="flex items-center">
+                <div className="flex items-start">
                   <input
                     id="terms"
                     type="checkbox"
                     {...register('acceptTerms')}
-                    className="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-cyan-300 rounded"
+                    className="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-cyan-300 rounded mt-1"
                   />
-                  <label htmlFor="terms" className="ml-2 block text-sm text-cyan-700">
+                  <label htmlFor="terms" className="ml-2 block text-xs sm:text-sm text-cyan-700">
                     I agree to the <Link to="/terms" className="text-cyan-600 hover:underline">Terms of Service</Link> and{' '}
                     <Link to="/privacy" className="text-cyan-600 hover:underline">Privacy Policy</Link>
                   </label>
@@ -213,7 +213,7 @@ const RegisterPage = () => {
                   label={
                     mutation.isPending ? (
                       <span className="flex items-center justify-center">
-                        <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                        <svg className="animate-spin h-4 w-4 sm:h-5 sm:w-5 mr-2" viewBox="0 0 24 24">
                           <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         </svg>
                         Registering...
@@ -227,10 +227,12 @@ const RegisterPage = () => {
                   className="w-full"
                 />
 
-                <div className="text-center text-sm text-cyan-700 mt-4">
-                  Already enrolled? <Link to="/login" className="text-cyan-600 hover:underline font-medium">Sign in</Link>
-                  <span className="mx-2">|</span>
-                  <Link to="/faculty/request" className="text-cyan-600 hover:underline font-medium">Apply as Faculty</Link>
+                <div className="text-center text-xs sm:text-sm text-cyan-700 mt-2 sm:mt-3 lg:mt-4 space-y-1 sm:space-y-2">
+                  <div>
+                    Already enrolled? <Link to="/login" className="text-cyan-600 hover:underline font-medium">Sign in</Link>
+                    <span className="mx-1 sm:mx-2">|</span>
+                    <Link to="/faculty/request" className="text-cyan-600 hover:underline font-medium">Apply as Faculty</Link>
+                  </div>
                 </div>
               </form>
             )}
@@ -238,7 +240,7 @@ const RegisterPage = () => {
         </div>
 
         <div
-          className="hidden md:block w-1/2 p-12 text-white bg-cover bg-center relative"
+          className="hidden lg:block lg:w-1/2 p-6 sm:p-8 lg:p-12 text-white bg-cover bg-center relative"
           style={{
             ...formAnimation,
             backgroundImage: `url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80')`,
@@ -247,50 +249,50 @@ const RegisterPage = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-cyan-900/30 to-blue-900/30"></div>
           <div className="absolute inset-0 flex items-center justify-center">
             <span
-              className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400 opacity-20 transform -rotate-45"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400 opacity-20 transform -rotate-45"
               style={{ textShadow: '0 0 20px rgba(0, 255, 255, 0.3)' }}
             >
               HORIZON
             </span>
           </div>
-          <div className="relative h-full flex flex-col justify-between p-6 rounded-lg">
+          <div className="relative h-full flex flex-col justify-between p-4 sm:p-6 rounded-lg">
             <div>
-              <h1 className="text-3xl font-bold mb-6">Welcome to Horizon University</h1>
-              <p className="text-white mb-8">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6">Welcome to Horizon University</h1>
+              <p className="text-sm sm:text-base text-white mb-6 sm:mb-8">
                 Register now to embark on your academic journey with Horizon University and discover our
                 diverse programs and vibrant campus life.
               </p>
-              <div className="space-y-6 mt-12">
+              <div className="space-y-4 sm:space-y-6 mt-8 sm:mt-12">
                 <div className="flex items-center">
                   <div className="bg-cyan-500 bg-opacity-30 p-2 rounded-full">
-                    <FaRegCheckCircle className="w-5 h-5" />
+                    <FaRegCheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <div className="ml-4">
-                    <h3 className="font-medium">Streamlined Enrollment</h3>
-                    <p className="text-sm text-white">Complete your registration in just a few minutes</p>
+                  <div className="ml-3 sm:ml-4">
+                    <h3 className="font-medium text-sm sm:text-base">Streamlined Enrollment</h3>
+                    <p className="text-xs sm:text-sm text-white">Complete your registration in just a few minutes</p>
                   </div>
                 </div>
                 <div className="flex items-center">
                   <div className="bg-cyan-500 bg-opacity-30 p-2 rounded-full">
-                    <FaRegIdCard className="w-5 h-5" />
+                    <FaRegIdCard className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <div className="ml-4">
-                    <h3 className="font-medium">Academic Excellence</h3>
-                    <p className="text-sm text-white">Access world-class education and resources</p>
+                  <div className="ml-3 sm:ml-4">
+                    <h3 className="font-medium text-sm sm:text-base">Academic Excellence</h3>
+                    <p className="text-xs sm:text-sm text-white">Access world-class education and resources</p>
                   </div>
                 </div>
                 <div className="flex items-center">
                   <div className="bg-cyan-500 bg-opacity-30 p-2 rounded-full">
-                    <FaShieldAlt className="w-5 h-5" />
+                    <FaShieldAlt className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <div className="ml-4">
-                    <h3 className="font-medium">Secure Registration</h3>
-                    <p className="text-sm text-white">Your personal information is protected</p>
+                  <div className="ml-3 sm:ml-4">
+                    <h3 className="font-medium text-sm sm:text-base">Secure Registration</h3>
+                    <p className="text-xs sm:text-sm text-white">Your personal information is protected</p>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="text-sm text-white">© 2025 Horizon University. All rights reserved.</div>
+            <div className="text-xs sm:text-sm text-white">© 2025 Horizon University. All rights reserved.</div>
           </div>
         </div>
       </div>

@@ -18,6 +18,4 @@ const AcademicHistorySchema = new Schema<IAcademicHistory>({
   id: { type: Number, required: true, unique: true },
 }, { timestamps: true });
 
-AcademicHistorySchema.index({ id: 1 });
-
 export const AcademicHistoryModel = mongoose.model<IAcademicHistory>('AcademicHistory', AcademicHistorySchema);

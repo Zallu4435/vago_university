@@ -18,11 +18,11 @@ export const UGScholarships: React.FC = () => {
           <section
             id="nus-scholarships"
             data-animate
-            className={`py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto transition-all duration-800 ${
+            className={`py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-6 xl:px-8 w-full sm:max-w-6xl mx-auto transition-all duration-800 ${
               isVisible["nus-scholarships"] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-cyan-100">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl p-4 sm:p-6 border border-cyan-100 shadow-sm">
               <NUSScholarships />
             </div>
           </section>
@@ -30,11 +30,11 @@ export const UGScholarships: React.FC = () => {
           <section
             id="student-testimonials"
             data-animate
-            className={`py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto transition-all duration-800 ${
+            className={`py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-6 xl:px-8 w-full sm:max-w-6xl mx-auto transition-all duration-800 ${
               isVisible["student-testimonials"] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-cyan-100">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl p-4 sm:p-6 border border-cyan-100 shadow-sm">
               <StudentTestimonials />
             </div>
           </section>

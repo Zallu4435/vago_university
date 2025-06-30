@@ -29,7 +29,7 @@ class SiteSectionsService {
     if (page) params.append('page', page.toString());
     
     const response = await httpClient.get<SiteSectionsResponse>(`/site-sections?${params.toString()}`);
-    return response.data.sections;
+    return response.data.data.sections;
   }
 
   // Get VAGO Now for home page
@@ -40,7 +40,7 @@ class SiteSectionsService {
     if (page) params.append('page', page.toString());
     
     const response = await httpClient.get<SiteSectionsResponse>(`/site-sections?${params.toString()}`);
-    return response.data.sections;
+    return response.data.data.sections;
   }
 
   // Get leadership for home page
@@ -51,7 +51,7 @@ class SiteSectionsService {
     if (page) params.append('page', page.toString());
     
     const response = await httpClient.get<SiteSectionsResponse>(`/site-sections?${params.toString()}`);
-    return response.data.sections;
+    return response.data.data.sections;
   }
 
   // Get all sections by type (generic method)

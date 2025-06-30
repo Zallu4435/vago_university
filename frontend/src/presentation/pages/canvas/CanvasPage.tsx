@@ -13,7 +13,7 @@ export default function StudentCanvas() {
   const { styles } = usePreferences();
 
   const navItems = [
-    'Canvas Dashboard',
+    'Dashboard',
     'Diploma Course',
     'Chat',
     'Video Class',
@@ -25,7 +25,6 @@ export default function StudentCanvas() {
   const renderContent = () => {
     switch (activeTab) {  
       case 'Dashboard':
-      case 'Canvas Dashboard':
         return <UniversityDashboard />;
       case 'Diploma Course':
         return <DiplomaCoursesSection />;

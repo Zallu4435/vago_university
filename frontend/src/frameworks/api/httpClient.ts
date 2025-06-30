@@ -3,7 +3,7 @@ import { logout } from '../../presentation/redux/authSlice';
 import store from '../../presentation/redux/store';
 
 const httpClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://vago-university.onrender.com/api',
   timeout: 15000,
   withCredentials: true,
 });

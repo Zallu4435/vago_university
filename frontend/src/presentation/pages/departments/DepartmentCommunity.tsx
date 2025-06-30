@@ -79,7 +79,7 @@ const DepartmentCommunity: React.FC = () => {
         title: 'Community',
         studentLife: {
           description:
-            'At the School of Computing, our vibrant community fosters collaboration, innovation, and lifelong connections. From coding clubs to hackathons, there’s something for everyone to engage, learn, and grow.',
+            "At the School of Computing, our vibrant community fosters collaboration, innovation, and lifelong connections. From coding clubs to hackathons, there's something for everyone to engage, learn, and grow.",
           aspects: [
             { title: 'Tech Clubs', description: 'Join AI, robotics, and coding clubs to explore your passions.', icon: FaLaptopCode },
             { title: 'Hackathons', description: 'Compete and collaborate in exciting coding challenges.', icon: FaUsers },
@@ -211,14 +211,14 @@ const DepartmentCommunity: React.FC = () => {
       <section
         id="poster"
         data-animate
-        className={`relative h-96 bg-gradient-to-b from-cyan-600 to-blue-600 flex items-center justify-center transition-all duration-800 ${
+        className={`relative h-64 sm:h-80 lg:h-96 bg-gradient-to-b from-cyan-600 to-blue-600 flex items-center justify-center transition-all duration-800 ${
           isVisible.poster ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/60 to-transparent" />
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4">{data.poster.title}</h1>
-          <p className="text-lg sm:text-2xl text-cyan-100">{data.poster.subtitle}</p>
+        <div className="relative z-10 w-full max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 text-center text-white">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold mb-3 sm:mb-4 px-2">{data.poster.title}</h1>
+          <p className="text-sm sm:text-base lg:text-lg xl:text-2xl text-cyan-100 px-2">{data.poster.subtitle}</p>
         </div>
       </section>
 
@@ -226,16 +226,16 @@ const DepartmentCommunity: React.FC = () => {
       <section
         id="about"
         data-animate
-        className={`max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 transition-all duration-800 ${
+        className={`w-full max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-12 sm:py-16 lg:py-20 transition-all duration-800 ${
           isVisible.about ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}
       >
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-cyan-800 mb-4">{data.about.title}</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto" />
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-cyan-800 mb-3 sm:mb-4">{data.about.title}</h2>
+          <div className="w-16 sm:w-20 lg:w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto" />
         </div>
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-8">
-          <p className="text-lg text-cyan-600 leading-relaxed">{data.about.description}</p>
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-4 sm:p-6 lg:p-8">
+          <p className="text-sm sm:text-base lg:text-lg text-cyan-600 leading-relaxed">{data.about.description}</p>
         </div>
       </section>
 
@@ -243,40 +243,40 @@ const DepartmentCommunity: React.FC = () => {
       <section
         id="community"
         data-animate
-        className={`max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 transition-all duration-800 ${
+        className={`w-full max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-12 sm:py-16 lg:py-20 transition-all duration-800 ${
           isVisible.community ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}
       >
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-cyan-800 mb-4">{data.community.title}</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto" />
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-cyan-800 mb-3 sm:mb-4">{data.community.title}</h2>
+          <div className="w-16 sm:w-20 lg:w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto" />
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
           {/* Student Life */}
           <div className="lg:w-2/3">
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-8 mb-8">
-              <h3 className="text-2xl font-bold text-cyan-800 mb-4">Student Life</h3>
-              <p className="text-lg text-cyan-600 leading-relaxed mb-6">{data.community.studentLife.description}</p>
-              <button className="group inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
+              <h3 className="text-xl sm:text-2xl font-bold text-cyan-800 mb-3 sm:mb-4">Student Life</h3>
+              <p className="text-sm sm:text-base lg:text-lg text-cyan-600 leading-relaxed mb-4 sm:mb-6">{data.community.studentLife.description}</p>
+              <button className="group inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg text-sm sm:text-base">
                 Join Now
                 <FaArrowRight className="ml-2 group-hover:translate-x-2 transition-transform" />
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {data.community.studentLife.aspects.map((aspect, index) => (
                 <div
                   key={index}
-                  className="group bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-6 transition-all duration-300 hover:scale-105"
+                  className="group bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-4 sm:p-6 transition-all duration-300 hover:scale-105"
                 >
-                  <div className="p-3 rounded-full bg-cyan-100 mb-4 w-fit">
-                    <aspect.icon className="text-cyan-600 text-xl" />
+                  <div className="p-2 sm:p-3 rounded-full bg-cyan-100 mb-3 sm:mb-4 w-fit">
+                    <aspect.icon className="text-cyan-600 text-lg sm:text-xl" />
                   </div>
-                  <h4 className="text-lg font-bold text-cyan-800 mb-2 group-hover:text-cyan-600 transition-colors">
+                  <h4 className="text-base sm:text-lg font-bold text-cyan-800 mb-1 sm:mb-2 group-hover:text-cyan-600 transition-colors">
                     {aspect.title}
                   </h4>
-                  <p className="text-cyan-600">{aspect.description}</p>
+                  <p className="text-cyan-600 text-sm sm:text-base">{aspect.description}</p>
                 </div>
               ))}
             </div>
@@ -284,18 +284,18 @@ const DepartmentCommunity: React.FC = () => {
 
           {/* Upcoming Events */}
           <div className="lg:w-1/3">
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-8">
-              <h3 className="text-2xl font-bold text-cyan-800 mb-6">{data.community.events.title}</h3>
-              <div className="space-y-6">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-4 sm:p-6 lg:p-8">
+              <h3 className="text-xl sm:text-2xl font-bold text-cyan-800 mb-4 sm:mb-6">{data.community.events.title}</h3>
+              <div className="space-y-4 sm:space-y-6">
                 {data.community.events.list.map((event, index) => (
-                  <div key={index} className="border-l-4 border-cyan-600 pl-4">
-                    <p className="text-sm text-cyan-700">{event.date}</p>
-                    <h4 className="text-lg font-bold text-cyan-800 mb-2">{event.title}</h4>
-                    <p className="text-cyan-600">{event.description}</p>
+                  <div key={index} className="border-l-4 border-cyan-600 pl-3 sm:pl-4">
+                    <p className="text-xs sm:text-sm text-cyan-700">{event.date}</p>
+                    <h4 className="text-base sm:text-lg font-bold text-cyan-800 mb-1 sm:mb-2">{event.title}</h4>
+                    <p className="text-cyan-600 text-sm sm:text-base">{event.description}</p>
                   </div>
                 ))}
               </div>
-              <button className="group inline-flex items-center mt-6 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg">
+              <button className="group inline-flex items-center mt-4 sm:mt-6 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg text-sm sm:text-base">
                 View All Events
                 <FaCalendarAlt className="ml-2 group-hover:translate-x-2 transition-transform" />
               </button>
@@ -308,32 +308,32 @@ const DepartmentCommunity: React.FC = () => {
       <section
         id="support-wellness"
         data-animate
-        className={`max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 transition-all duration-800 ${
+        className={`w-full max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-12 sm:py-16 lg:py-20 transition-all duration-800 ${
           isVisible['support-wellness'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}
       >
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-cyan-800 mb-4">{data.supportWellness.title}</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto" />
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-cyan-800 mb-3 sm:mb-4">{data.supportWellness.title}</h2>
+          <div className="w-16 sm:w-20 lg:w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
           {data.supportWellness.resources.map((resource, index) => (
             <div
               key={index}
-              className="group bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-6 transition-all duration-300 hover:scale-105"
+              className="group bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-4 sm:p-6 transition-all duration-300 hover:scale-105"
             >
-              <div className="p-3 rounded-full bg-cyan-100 mb-4 w-fit">
-                <resource.icon className="text-cyan-600 text-xl" />
+              <div className="p-2 sm:p-3 rounded-full bg-cyan-100 mb-3 sm:mb-4 w-fit">
+                <resource.icon className="text-cyan-600 text-lg sm:text-xl" />
               </div>
-              <h4 className="text-lg font-bold text-cyan-800 mb-2 group-hover:text-cyan-600 transition-colors">
+              <h4 className="text-base sm:text-lg font-bold text-cyan-800 mb-1 sm:mb-2 group-hover:text-cyan-600 transition-colors">
                 {resource.title}
               </h4>
-              <p className="text-cyan-600">{resource.description}</p>
+              <p className="text-cyan-600 text-sm sm:text-base">{resource.description}</p>
             </div>
           ))}
         </div>
         <div className="text-center">
-          <button className="group inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg">
+          <button className="group inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg text-sm sm:text-base">
             Get Support
             <FaArrowRight className="ml-2 group-hover:translate-x-2 transition-transform" />
           </button>
@@ -344,25 +344,25 @@ const DepartmentCommunity: React.FC = () => {
       <section
         id="emergency-contact"
         data-animate
-        className={`max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 transition-all duration-800 ${
+        className={`w-full max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-12 sm:py-16 lg:py-20 transition-all duration-800 ${
           isVisible['emergency-contact'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}
       >
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-cyan-800 mb-4">{data.emergencyContact.title}</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto" />
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-cyan-800 mb-3 sm:mb-4">{data.emergencyContact.title}</h2>
+          <div className="w-16 sm:w-20 lg:w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto" />
         </div>
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-8">
-          <div className="space-y-6">
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl shadow-md hover:shadow-xl border border-cyan-100 p-4 sm:p-6 lg:p-8">
+          <div className="space-y-4 sm:space-y-6">
             {data.emergencyContact.contacts.map((contact, index) => (
-              <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-cyan-100 pb-4 last:border-b-0">
+              <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-cyan-100 pb-3 sm:pb-4 last:border-b-0">
                 <div>
-                  <h4 className="text-lg font-bold text-cyan-800 mb-2">{contact.title}</h4>
-                  <div className="flex items-center space-x-2 text-cyan-600">
+                  <h4 className="text-base sm:text-lg font-bold text-cyan-800 mb-1 sm:mb-2">{contact.title}</h4>
+                  <div className="flex items-center space-x-2 text-cyan-600 text-sm sm:text-base">
                     <FaPhone />
                     <p>{contact.phone}</p>
                   </div>
-                  <div className="flex items-center space-x-2 text-cyan-600">
+                  <div className="flex items-center space-x-2 text-cyan-600 text-sm sm:text-base">
                     <FaEnvelope />
                     <p>{contact.email}</p>
                   </div>

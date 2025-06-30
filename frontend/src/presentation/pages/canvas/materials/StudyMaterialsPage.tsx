@@ -8,7 +8,7 @@ import { usePreferences } from '../../../context/PreferencesContext';
 import MaterialCard from './components/MaterialCard';
 import MaterialTable from './components/MaterialTable';
 import MaterialFilters from './components/MaterialFilters';
-import { ViewMode, SortOption } from './types/MaterialTypes';
+import { ViewMode, SortOption, Material } from './types/MaterialTypes';
 import { useStudyMaterials } from './hooks/useStudyMaterials';
 
 const StudyMaterialsPage: React.FC = () => {
@@ -80,66 +80,96 @@ const StudyMaterialsPage: React.FC = () => {
   const filteredMaterials = materials;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className={`text-2xl font-bold ${styles.textPrimary}`}>Study Materials</h1>
-        <button
-          onClick={handleSync}
-          className={`${styles.button.primary} px-4 py-2 rounded-lg flex items-center transition-all duration-200`}
-        >
-          <FiRefreshCw size={16} className="mr-2" />
-          Sync
-        </button>
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      {/* Header Section */}
+      <div className={`hidden sm:block relative overflow-hidden rounded-xl sm:rounded-2xl shadow-xl bg-gradient-to-r ${styles.accent} group mb-4 sm:mb-6`}>
+        <div className={`absolute inset-0 bg-gradient-to-r ${styles.orb.primary}`}></div>
+        <div className={`absolute -top-4 sm:-top-8 -left-4 sm:-left-8 w-24 h-24 sm:w-48 sm:h-48 rounded-full bg-gradient-to-br ${styles.orb.primary} blur-2xl sm:blur-3xl animate-pulse`}></div>
+        <div className={`absolute -bottom-4 sm:-bottom-8 -right-4 sm:-right-8 w-16 h-16 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br ${styles.orb.secondary} blur-xl sm:blur-2xl animate-pulse delay-700`}></div>
+        <div className="relative z-10 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="relative">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br ${styles.accent} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
+                  <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/20 to-transparent"></div>
+                  <FiGrid size={16} className="sm:w-5 sm:h-5 text-white relative z-10" />
+                </div>
+                <div className={`absolute -inset-1 bg-gradient-to-br ${styles.orb.primary} rounded-xl sm:rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300`}></div>
+              </div>
+              <div>
+                <h1 className={`text-lg sm:text-2xl font-bold text-white bg-clip-text`}>
+                  Study Materials
+                </h1>
+                <div className={`h-0.5 sm:h-1 w-12 sm:w-16 bg-gradient-to-r ${styles.accent} rounded-full mt-1 group-hover:w-16 sm:group-hover:w-24 transition-all duration-300`}></div>
+              </div>
+            </div>
+            <button
+              onClick={handleSync}
+              className={`group/btn bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded-full transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 text-xs sm:text-sm`}
+            >
+              <span className="flex items-center justify-center space-x-1 sm:space-x-2">
+                <FiRefreshCw size={14} className="group-hover/btn:rotate-180 transition-transform duration-500" />
+                <span>Sync</span>
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      <MaterialFilters
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        selectedCourse={selectedCourse}
-        setSelectedCourse={setSelectedCourse}
-        selectedType={selectedType}
-        setSelectedType={setSelectedType}
-        selectedSemester={selectedSemester}
-        setSelectedSemester={setSelectedSemester}
-        selectedDifficulty={selectedDifficulty}
-        setSelectedDifficulty={setSelectedDifficulty}
-        sortBy={sortBy}
-        setSortBy={(sort: string) => setSortBy(sort as SortOption)}
-        showFilters={showFilters}
-        setShowFilters={setShowFilters}
-        materials={materials}
-      />
+      {/* Filters Section */}
+      <div className="mb-4 sm:mb-6">
+        <MaterialFilters
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          selectedCourse={selectedCourse}
+          setSelectedCourse={setSelectedCourse}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          selectedSemester={selectedSemester}
+          setSelectedSemester={setSelectedSemester}
+          selectedDifficulty={selectedDifficulty}
+          setSelectedDifficulty={setSelectedDifficulty}
+          sortBy={sortBy}
+          setSortBy={(sort: string) => setSortBy(sort as SortOption)}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+          materials={materials}
+        />
+      </div>
 
-      <div className="flex justify-end mb-6">
-        <div className={`${styles.card.background} rounded-lg p-1 flex space-x-1 ${styles.card.border}`}>
+      {/* View Toggle */}
+      <div className="hidden sm:flex justify-end mb-4 sm:mb-6">
+        <div className={`${styles.card.background} rounded-lg p-1 flex space-x-1 ${styles.card.border} shadow-sm hover:shadow-md transition-shadow duration-300`}>
           <button
             onClick={() => setViewMode('grid')}
-            className={`p-2 rounded-lg transition-all duration-200 ${viewMode === 'grid' ? styles.button.primary : styles.button.secondary}`}
+            className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 ${viewMode === 'grid' ? styles.button.primary : styles.button.secondary}`}
             aria-label="Grid view"
           >
-            <FiGrid size={20} />
+            <FiGrid size={16} className="sm:w-5 sm:h-5" />
           </button>
           <button
             onClick={() => setViewMode('table')}
-            className={`p-2 rounded-lg transition-all duration-200 ${viewMode === 'table' ? styles.button.primary : styles.button.secondary}`}
+            className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 ${viewMode === 'table' ? styles.button.primary : styles.button.secondary}`}
             aria-label="Table view"
           >
-            <FiList size={20} />
+            <FiList size={16} className="sm:w-5 sm:h-5" />
           </button>
         </div>
       </div>
 
+      {/* Content Section */}
       {isLoading ? (
-        <div className="text-center py-12">
-          <p className={`${styles.textSecondary} text-lg`}>Loading materials...</p>
+        <div className="text-center py-8 sm:py-12">
+          <div className="inline-block w-8 h-8 border-2 border-current border-t-transparent rounded-full animate-spin mb-2"></div>
+          <p className={`${styles.textSecondary} text-sm sm:text-lg`}>Loading materials...</p>
         </div>
       ) : error ? (
-        <div className="text-center py-12">
-          <p className={`${styles.textSecondary} text-lg`}>{error.message || 'Failed to load materials'}</p>
+        <div className="text-center py-8 sm:py-12">
+          <p className={`${styles.textSecondary} text-sm sm:text-lg`}>{error.message || 'Failed to load materials'}</p>
         </div>
       ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredMaterials.map(material => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-6">
+          {filteredMaterials.map((material: Material) => (
             <MaterialCard
               key={material._id}
               material={material}
@@ -161,9 +191,9 @@ const StudyMaterialsPage: React.FC = () => {
       )}
 
       {!isLoading && !error && filteredMaterials.length === 0 && (
-        <div className={`text-center py-12 ${styles.textSecondary}`}>
-          <p className="text-lg">No materials found matching your criteria.</p>
-          <p className="mt-2">Try adjusting your filters or search terms.</p>
+        <div className={`text-center py-8 sm:py-12 ${styles.textSecondary}`}>
+          <p className="text-sm sm:text-lg">No materials found matching your criteria.</p>
+          <p className="mt-2 text-xs sm:text-sm">Try adjusting your filters or search terms.</p>
         </div>
       )}
     </div>

@@ -13,7 +13,7 @@ import Communication from '../Communication/Communication';
 import Financial from '../Financial/Financial';
 
 export default function StudentDashboard() {
-  const [activeTab, setActiveTab] = useOutletContext();
+  const [activeTab, setActiveTab] = useOutletContext() as [string, (tab: string) => void];
   const { styles } = usePreferences();
 
   const announcements = [
@@ -40,13 +40,13 @@ export default function StudentDashboard() {
   ];
 
   const calendarDays = Array.from({ length: 31 }, (_, i) => i + 1);
-  const specialDates = {
+  const specialDates: Record<number, { type: 'exam' | 'deadline' | 'event' }> = {
     10: { type: 'exam' },
     15: { type: 'deadline' },
     3: { type: 'event' }
   };
 
-  const handleVote = (index) => {
+  const handleVote = (index: number) => {
     console.log(`Voted for ${onlineTopics[index].title}`);
   };
 
@@ -55,13 +55,13 @@ export default function StudentDashboard() {
       {activeTab === 'Dashboard' && (
         <>
           <WelcomeBanner />
-          <div className="px-4 py-12">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
+          <div className="px-2 sm:px-4 md:px-4 py-4 sm:py-6 md:py-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-4 md:gap-6 h-full">
               <Announcements announcements={announcements} />
               <Deadlines deadlines={deadlines} />
               <QuickLinks />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 h-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-4 md:gap-6 mt-8 sm:mt-4 md:mt-6 h-full">
               <ScheduledClasses classes={classes} />
               <OnlineSessionTopics onlineTopics={onlineTopics} handleVote={handleVote} />
               <Calendar calendarDays={calendarDays} specialDates={specialDates} />

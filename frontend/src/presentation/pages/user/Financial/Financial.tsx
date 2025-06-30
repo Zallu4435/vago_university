@@ -8,6 +8,15 @@ import { useFinancial } from '../../../../application/hooks/useFinancial';
 import { usePreferences } from '../../../context/PreferencesContext';
 import { MdCurrencyRupee } from 'react-icons/md';
 
+interface StudentFinancialInfo {
+  info: Array<{
+    amount?: number;
+    paymentDueDate?: string;
+  }>;
+  history: any[];
+  financialAidStatus?: string;
+}
+
 const formatDate = (dateString: string): string => {
   if (!dateString) return 'N/A';
   const date = new Date(dateString);
@@ -29,13 +38,21 @@ export default function Financial() {
   const { styles, theme } = usePreferences();
 
   const [activeTab, setActiveTab] = useState('Fees and Payments');
-  const [studentInfo, setStudentInfo] = useState(null);
+  const [studentInfo, setStudentInfo] = useState<StudentFinancialInfo>({
+    info: [],
+    history: [],
+    financialAidStatus: '',
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const info = await getStudentFinancialInfo();
-        setStudentInfo(info || {});
+        const info: any = await getStudentFinancialInfo();
+        setStudentInfo({
+          info: Array.isArray(info?.info) ? info.info : [],
+          history: Array.isArray(info?.history) ? info.history : [],
+          financialAidStatus: typeof info?.financialAidStatus === 'string' ? info.financialAidStatus : '',
+        });
       } catch (err) {
         console.error('Error fetching financial data:', err);
       }
@@ -67,27 +84,26 @@ export default function Financial() {
 
   return (
     <div className={`min-h-screen flex flex-col relative overflow-hidden ${styles.background}`}>
-
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className={`group relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} hover:${styles.card.hover} transition-all duration-300`}>
-          <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
+      <div className="relative z-10 w-full sm:px-4 md:px-6 py-6 sm:py-8">
+        <div className={`group relative overflow-hidden rounded-xl sm:rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} hover:${styles.card.hover} transition-all duration-300`}>
+          <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-xl sm:rounded-2xl blur transition-all duration-300`}></div>
           <div className="relative z-10 p-4 sm:p-6">
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
               <div className="relative">
-                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${styles.accent} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent"></div>
-                  <FaMoneyBillWave size={20} className="text-white relative z-10" />
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br ${styles.accent} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
+                  <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/20 to-transparent"></div>
+                  <FaMoneyBillWave size={16} className="sm:w-5 sm:h-5 text-white relative z-10" />
                 </div>
-                <div className={`absolute -inset-1 bg-gradient-to-br ${styles.orb.primary} rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300`}></div>
+                <div className={`absolute -inset-1 bg-gradient-to-br ${styles.orb.primary} rounded-xl sm:rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300`}></div>
               </div>
               <div>
-                <h2 className={`text-xl sm:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} bg-clip-text`}>
+                <h2 className={`text-lg sm:text-xl md:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} bg-clip-text`}>
                   Financial Services
                 </h2>
-                <div className={`h-1 w-16 bg-gradient-to-r ${styles.accent} rounded-full mt-1 group-hover:w-24 transition-all duration-300`}></div>
+                <div className={`h-0.5 sm:h-1 w-12 sm:w-16 bg-gradient-to-r ${styles.accent} rounded-full mt-1 group-hover:w-16 sm:group-hover:w-24 transition-all duration-300`}></div>
               </div>
             </div>
-            <div className={`mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm ${styles.textSecondary}`}>
+            <div className={`mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm ${styles.textSecondary}`}> 
               <div className="flex items-center gap-1">
                 <span className="font-medium">Account Balance:</span>
                 <MdCurrencyRupee />

@@ -44,11 +44,52 @@ export default function Academics() {
     major: 'Computer Science',
     academicStanding: 'Good',
     advisor: 'Dr. Emma Wilson',
+    credits: 15,
+    pendingCredits: 3,
   };
   const fallbackCourses = [
-    { code: 'CS401', title: 'Advanced Algorithms', credits: 3, instructor: 'Dr. P. Garcia', schedule: 'MWF 10:00-11:45', id: 1 },
-    { code: 'MATH302', title: 'Differential Equations', credits: 4, instructor: 'Dr. L. Chen', schedule: 'TTh 1:00-3:00', id: 2 },
-    { code: 'PHYS201', title: 'Modern Physics', credits: 4, instructor: 'Dr. R. Smith', schedule: 'MWF 2:00-3:30', id: 3 },
+    {
+      id: '1',
+      code: 'CS401',
+      specialization: 'Algorithms',
+      title: 'Advanced Algorithms',
+      credits: 3,
+      instructor: 'Dr. P. Garcia',
+      faculty: 'Engineering',
+      schedule: 'MWF 10:00-11:45',
+      maxEnrollment: 30,
+      currentEnrollment: 25,
+      description: 'Study of advanced algorithmic techniques.',
+      prerequisites: ['CS201'],
+    },
+    {
+      id: '2',
+      code: 'MATH302',
+      specialization: 'Mathematics',
+      title: 'Differential Equations',
+      credits: 4,
+      instructor: 'Dr. L. Chen',
+      faculty: 'Science',
+      schedule: 'TTh 1:00-3:00',
+      maxEnrollment: 40,
+      currentEnrollment: 38,
+      description: 'Introduction to differential equations.',
+      prerequisites: ['MATH201'],
+    },
+    {
+      id: '3',
+      code: 'PHYS201',
+      specialization: 'Physics',
+      title: 'Modern Physics',
+      credits: 4,
+      instructor: 'Dr. R. Smith',
+      faculty: 'Science',
+      schedule: 'MWF 2:00-3:30',
+      maxEnrollment: 35,
+      currentEnrollment: 30,
+      description: 'Concepts in modern physics.',
+      prerequisites: ['PHYS101'],
+    },
   ];
   const fallbackGradeInfo = {
     cumulativeGPA: '3.75',
@@ -81,8 +122,8 @@ export default function Academics() {
 
   // Loading component
   const LoadingSpinner = () => (
-    <div className="flex items-center justify-center min-h-[400px]">
-      <div className={`animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 ${styles.button.primary.split(' ')[0]}`}></div>
+    <div className="flex items-center justify-center min-h-[300px] sm:min-h-[400px]">
+      <div className={`animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-t-2 border-b-2 ${styles.button.primary.split(' ')[0]}`}></div>
     </div>
   );
 
@@ -97,14 +138,17 @@ export default function Academics() {
           advisor={studentInfo?.advisor || fallbackStudentInfo.advisor}
         />
         <AcademicsTabs activeSubTab={activeSubTab} setActiveSubTab={setActiveSubTab} />
-        <main className="flex-grow container mx-auto px-4 py-8">
+        <main className="flex-grow w-full sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
           {activeSubTab === 'Course Registration' && (
             isLoadingCourseRegistration ? (
               <LoadingSpinner />
             ) : (
               <CourseRegistration
-                studentInfo={studentInfo || fallbackStudentInfo}
-                courses={courses || fallbackCourses}
+                studentInfo={{ ...fallbackStudentInfo, ...studentInfo }}
+                courses={(courses && courses.length > 0
+                  ? courses.map((c, i) => ({ ...fallbackCourses[i % fallbackCourses.length], ...c, id: String(c.id ?? fallbackCourses[i % fallbackCourses.length].id) }))
+                  : fallbackCourses)
+                }
                 enrolledCredits={0}
                 waitlistedCredits={0}
               />
@@ -117,7 +161,7 @@ export default function Academics() {
               <AcademicRecords
                 studentInfo={studentInfo || fallbackStudentInfo}
                 gradeInfo={gradeInfo || fallbackGradeInfo}
-                academicHistory={academicHistory?.history || fallbackAcademicHistory}
+                academicHistory={academicHistory || fallbackAcademicHistory}
               />
             )
           )}

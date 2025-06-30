@@ -23,15 +23,12 @@ export const DiplomaCard: React.FC<DiplomaCardProps> = ({
 }) => {
   const isAccessible = userAdmitted && course.status === 'published';
 
-  console.log(course, 'course')
-  // Use completedVideoCount and videoCount from backend if available
   const totalVideos = typeof course.videoCount === 'number' ? course.videoCount : (course.chapters ? course.chapters.length : 0);
   const completedCount = typeof course.completedVideoCount === 'number'
     ? course.completedVideoCount
     : (course.chapters ? course.chapters.filter(chapter => completedChapters.has(String(chapter.id))).length : 0);
   const progressPercentage = totalVideos > 0 ? (completedCount / totalVideos) * 100 : 0;
   
-  // Determine progress bar color
   let progressColor = 'bg-red-500';
   if (progressPercentage > 66) {
     progressColor = 'bg-green-500';

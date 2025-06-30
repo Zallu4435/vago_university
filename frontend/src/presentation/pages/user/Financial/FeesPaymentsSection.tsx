@@ -3,12 +3,38 @@ import { FaMoneyCheckAlt, FaTimes } from 'react-icons/fa';
 import { useFinancial } from '../../../../application/hooks/useFinancial';
 import { usePreferences } from '../../../context/PreferencesContext';
 
-export default function FeesPaymentsSection({ studentInfo, paymentHistory }) {
+interface Charge {
+  id: string;
+  amount?: number;
+  chargeTitle?: string;
+  chargeDescription?: string;
+  term?: string;
+  paymentDueDate?: string;
+  name?: string;
+  email?: string;
+  contact?: string;
+}
+
+interface Payment {
+  id?: string;
+  paidAt?: string;
+  chargeTitle?: string;
+  description?: string;
+  method?: 'Financial Aid' | 'Credit Card' | 'Bank Transfer' | 'Razorpay';
+  amount?: number;
+}
+
+interface FeesPaymentsSectionProps {
+  studentInfo: Charge[];
+  paymentHistory: Payment[];
+}
+
+export default function FeesPaymentsSection({ studentInfo, paymentHistory }: FeesPaymentsSectionProps) {
   const { makePayment, loading, error } = useFinancial();
   const { styles, theme } = usePreferences();
-  const [paymentAmount, setPaymentAmount] = useState(studentInfo[0]?.amount || 0);
-  const [paymentMethod, setPaymentMethod] = useState('Razorpay');
-  const [amountError, setAmountError] = useState(null);
+  const [paymentAmount, setPaymentAmount] = useState<number>(studentInfo[0]?.amount || 0);
+  const [paymentMethod, setPaymentMethod] = useState<'Razorpay'>('Razorpay');
+  const [amountError, setAmountError] = useState<string | null>(null);
 
   // Load Razorpay SDK dynamically
   useEffect(() => {
@@ -21,11 +47,11 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory }) {
     };
   }, []);
 
-  const totalDue = () => {
-    return studentInfo.reduce((sum, charge) => sum + (charge.amount || 0), 0);
+  const totalDue = (): number => {
+    return studentInfo.reduce((sum: number, charge: Charge) => sum + (charge.amount || 0), 0);
   };
 
-  const handlePayment = async (e) => {
+  const handlePayment = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (paymentAmount <= 0) {
       setAmountError('Payment amount must be greater than zero.');
@@ -40,6 +66,10 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory }) {
         term: studentInfo[0]?.term || 'Spring 2025',
       };
       const response = await makePayment(payment);
+      if (!response || !('orderId' in response)) {
+        setAmountError('Failed to initiate payment.');
+        return;
+      }
 
       // Initialize Razorpay checkout
       const options = {
@@ -49,14 +79,14 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory }) {
         name: 'Your Institution Name',
         description: `Payment for ${studentInfo[0]?.term || 'Spring 2025'} Fees`,
         order_id: response.orderId, // Order ID from backend
-        handler: async (response) => {
+        handler: async (rzpResponse: any) => {
           // Handle successful payment
           try {
             await makePayment({
               ...payment,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpayOrderId: response.razorpay_order_id,
-              razorpaySignature: response.razorpay_signature,
+              razorpayPaymentId: rzpResponse.razorpay_payment_id,
+              razorpayOrderId: rzpResponse.razorpay_order_id,
+              razorpaySignature: rzpResponse.razorpay_signature,
             });
             setPaymentAmount(0);
             alert('Payment successful!');
@@ -74,9 +104,9 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory }) {
         },
       };
 
-      const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', (response) => {
-        setAmountError(`Payment failed: ${response.error.description}`);
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on('payment.failed', (rzpResponse: any) => {
+        setAmountError(`Payment failed: ${rzpResponse.error.description}`);
       });
       rzp.open();
     } catch (err) {
@@ -85,37 +115,37 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory }) {
   };
 
   return (
-    <div className="relative">
-      <div className={`relative overflow-hidden rounded-t-2xl shadow-xl bg-gradient-to-r ${styles.accent} group mb-6`}>
+    <div className="relative w-full sm:px-4 md:px-6">
+      <div className={`relative overflow-hidden rounded-xl sm:rounded-2xl shadow-xl bg-gradient-to-r ${styles.accent} group mb-6`}>
         <div className={`absolute inset-0 bg-gradient-to-r ${styles.orb.primary}`}></div>
-        <div className={`absolute -top-8 -left-8 w-48 h-48 rounded-full bg-gradient-to-br ${styles.orb.primary} blur-3xl animate-pulse`}></div>
-        <div className={`absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-gradient-to-br ${styles.orb.secondary} blur-2xl animate-pulse delay-700`}></div>
-        <div className="relative z-10 p-4 sm:p-6 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+        <div className={`absolute -top-4 sm:-top-8 -left-4 sm:-left-8 w-24 h-24 sm:w-48 sm:h-48 rounded-full bg-gradient-to-br ${styles.orb.primary} blur-2xl sm:blur-3xl animate-pulse`}></div>
+        <div className={`absolute -bottom-4 sm:-bottom-8 -right-4 sm:-right-8 w-16 h-16 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br ${styles.orb.secondary} blur-xl sm:blur-2xl animate-pulse delay-700`}></div>
+        <div className="relative z-10 p-3 sm:p-5 md:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+          <div className="flex items-center space-x-3 sm:space-x-4">
             <div className="relative">
-              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${styles.accent} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent"></div>
-                <FaMoneyCheckAlt size={20} className="text-white relative z-10" />
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br ${styles.accent} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
+                <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/20 to-transparent"></div>
+                <FaMoneyCheckAlt size={16} className="sm:w-5 sm:h-5 text-white relative z-10" />
               </div>
-              <div className={`absolute -inset-1 bg-gradient-to-br ${styles.orb.primary} rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300`}></div>
+              <div className={`absolute -inset-1 bg-gradient-to-br ${styles.orb.primary} rounded-xl sm:rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300`}></div>
             </div>
             <div>
-              <h3 className={`text-xl sm:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} bg-clip-text`}>
+              <h3 className={`text-lg sm:text-xl md:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} bg-clip-text`}>
                 Fee Payment Portal
               </h3>
-              <div className={`h-1 w-16 bg-gradient-to-r ${styles.accent} rounded-full mt-1 group-hover:w-24 transition-all duration-300`}></div>
+              <div className={`h-0.5 sm:h-1 w-12 sm:w-16 bg-gradient-to-r ${styles.accent} rounded-full mt-1 group-hover:w-16 sm:group-hover:w-24 transition-all duration-300`}></div>
             </div>
           </div>
-          <span className={`bg-amber-200 text-orange-800 px-3 py-1 rounded-full text-xs sm:text-sm font-medium`}>
+          <span className={`bg-amber-200 text-orange-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium`}>
             Spring 2025
           </span>
         </div>
       </div>
 
-      <div className={`relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
-        <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
-        <div className="relative z-10 p-4 sm:p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+      <div className={`relative overflow-hidden rounded-xl sm:rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
+        <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-xl sm:rounded-2xl blur transition-all duration-300`}></div>
+        <div className="relative z-10 p-3 sm:p-5 md:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 items-stretch">
             <div className="flex flex-col">
               <h4 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} mb-4 border-b ${styles.border} pb-2`}>
                 Current Charges
@@ -261,9 +291,9 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory }) {
             <h4 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} mb-4 border-b ${styles.border} pb-2`}>
               Payment History
             </h4>
-            <div className={`relative overflow-hidden rounded-lg ${styles.card.background} p-4 border ${styles.border} group/item hover:${styles.card.hover} transition-all duration-300`}>
+            <div className={`relative overflow-x-auto rounded-lg ${styles.card.background} p-3 sm:p-4 border ${styles.border} group/item hover:${styles.card.hover} transition-all duration-300`}>
               <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-lg blur transition-all duration-300`}></div>
-              <div className="relative z-10 overflow-x-auto">
+              <div className="relative z-10 min-w-[500px] sm:min-w-0">
                 {paymentHistory.length === 0 ? (
                   <p className={`text-sm ${styles.textSecondary} text-center py-4`}>No payment history available.</p>
                 ) : (

@@ -12,21 +12,21 @@ export const SessionFilters: React.FC<SessionFiltersProps> = ({
   styles
 }) => {
   return (
-    <div className={`${styles.card.background} rounded-2xl ${styles.cardShadow} ${styles.cardBorder} p-6 mb-8`}>
-      <div className="flex items-center gap-3 mb-6">
-        <div className={`w-10 h-10 ${styles.accent} rounded-xl flex items-center justify-center`}>
-          <FaFilter className={`w-5 h-5 ${styles.textPrimary}`} />
+    <div className={`${styles.card.background} rounded-xl sm:rounded-2xl ${styles.cardShadow} ${styles.cardBorder} p-3 sm:p-6 mb-6 sm:mb-8`}>
+      <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+        <div className={`w-8 h-8 sm:w-10 sm:h-10 ${styles.accent} rounded-lg sm:rounded-xl flex items-center justify-center`}>
+          <FaFilter className={`w-4 h-4 sm:w-5 sm:h-5 ${styles.textPrimary}`} />
         </div>
-        <h2 className={`text-xl font-semibold ${styles.textPrimary}`}>Filter Sessions</h2>
+        <h2 className={`text-base sm:text-xl font-semibold ${styles.textPrimary}`}>Filter Sessions</h2>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <div>
-          <label className={`block text-sm font-medium ${styles.textPrimary} mb-2`}>Status</label>
+          <label className={`block text-xs sm:text-sm font-medium ${styles.textPrimary} mb-1 sm:mb-2`}>Status</label>
           <select
             value={filters.status}
             onChange={(e) => onFilterChange({ ...filters, status: e.target.value as 'all' | 'live' | 'upcoming' | 'completed' })}
-            className={`w-full px-4 py-3 ${styles.input.border} rounded-xl ${styles.input.background} ${styles.input.focus}`}
+            className={`w-full px-2 sm:px-4 py-2 sm:py-3 ${styles.input.border} rounded-lg sm:rounded-xl ${styles.input.background} ${styles.input.focus} text-xs sm:text-base`}
             aria-label="Filter by status"
           >
             <option value="all">All Sessions</option>
@@ -37,11 +37,11 @@ export const SessionFilters: React.FC<SessionFiltersProps> = ({
         </div>
         
         <div>
-          <label className={`block text-sm font-medium ${styles.textPrimary} mb-2`}>Instructor</label>
+          <label className={`block text-xs sm:text-sm font-medium ${styles.textPrimary} mb-1 sm:mb-2`}>Instructor</label>
           <select
             value={filters.instructor}
             onChange={(e) => onFilterChange({ ...filters, instructor: e.target.value })}
-            className={`w-full px-4 py-3 ${styles.input.border} rounded-xl ${styles.input.background} ${styles.input.focus}`}
+            className={`w-full px-2 sm:px-4 py-2 sm:py-3 ${styles.input.border} rounded-lg sm:rounded-xl ${styles.input.background} ${styles.input.focus} text-xs sm:text-base`}
             aria-label="Filter by instructor"
           >
             <option value="all">All Instructors</option>
@@ -54,7 +54,7 @@ export const SessionFilters: React.FC<SessionFiltersProps> = ({
         <div className="flex items-end">
           <button
             onClick={onClearFilters}
-            className={`w-full px-4 py-3 text-sm font-medium ${styles.button.secondary} ${styles.border} rounded-xl ${styles.cardHover}`}
+            className={`w-full px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium ${styles.button.secondary} ${styles.border} rounded-lg sm:rounded-xl ${styles.cardHover}`}
             aria-label="Clear all filters"
           >
             Clear All Filters
@@ -62,7 +62,7 @@ export const SessionFilters: React.FC<SessionFiltersProps> = ({
         </div>
         
         <div className="flex items-end">
-          <label className={`flex items-center gap-2 text-sm font-medium ${styles.textPrimary}`}>
+          <label className={`flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium ${styles.textPrimary}`}>
             <input
               type="checkbox"
               checked={userAccess.isEnrolled}

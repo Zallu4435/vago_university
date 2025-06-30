@@ -37,21 +37,21 @@ const AssignmentsSection = () => {
 
   const renderAssignmentList = () => (
     <div className={`min-h-screen ${styles.background}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-12">
+        <div className="mb-6 sm:mb-8">
+          <div className="hidden sm:flex flex-row items-center justify-between gap-4 mb-6">
             <div>
-              <h1 className={`text-4xl font-bold ${styles.textPrimary} mb-2`}>
+              <h1 className={`text-2xl sm:text-4xl font-bold ${styles.textPrimary} mb-1 sm:mb-2`}>
                 Assignment Dashboard
               </h1>
-              <p className={`${styles.textSecondary} text-lg`}>Track your academic progress and stay organized</p>
+              <p className={`${styles.textSecondary} text-base sm:text-lg`}>Track your academic progress and stay organized</p>
             </div>
             <div className="flex items-center gap-3">
-              {/* <button className={`${styles.button.primary} px-4 py-2 rounded-xl flex items-center gap-2`}>
+              {/* <button className={`${styles.button.primary} px-3 sm:px-4 py-2 rounded-xl flex items-center gap-2`}>
                 <FiRefreshCw className="h-4 w-4" />
                 Sync
               </button>
-              <button className={`${styles.button.primary} px-4 py-2 rounded-xl flex items-center gap-2`}>
+              <button className={`${styles.button.primary} px-3 sm:px-4 py-2 rounded-xl flex items-center gap-2`}>
                 <FiBell className="h-4 w-4" />
                 Reminders
               </button> */}
@@ -59,10 +59,10 @@ const AssignmentsSection = () => {
           </div>
 
           {/* Search and Filter Controls */}
-          <div className="flex flex-col lg:flex-row gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-6 sm:mb-8">
             <div className="flex-1">
               <div className="relative">
-                <FiSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${styles.icon.secondary}`} />
+                <FiSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 ${styles.icon.secondary}`} />
                 <input
                   type="text"
                   placeholder="Search assignments..."
@@ -71,18 +71,18 @@ const AssignmentsSection = () => {
                     setSearchTerm(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className={`w-full pl-10 pr-4 py-3 rounded-xl ${styles.input.background} ${styles.input.border} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className={`w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 rounded-lg sm:rounded-xl ${styles.input.background} ${styles.input.border} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base`}
                 />
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               <select
                 value={filterStatus}
                 onChange={(e) => {
                   setFilterStatus(e.target.value as FilterStatus);
                   setCurrentPage(1);
                 }}
-                className={`px-4 py-3 rounded-xl ${styles.input.background} ${styles.input.border} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                className={`px-2 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl ${styles.input.background} ${styles.input.border} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-base`}
               >
                 <option value="all">All Status</option>
                 <option value="published">Published</option>
@@ -95,7 +95,7 @@ const AssignmentsSection = () => {
                   setSortBy(e.target.value as SortOption);
                   setCurrentPage(1);
                 }}
-                className={`px-4 py-3 rounded-xl ${styles.input.background} ${styles.input.border} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                className={`px-2 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl ${styles.input.background} ${styles.input.border} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-base`}
               >
                 <option value="dueDate">Due Date</option>
                 <option value="priority">Priority</option>
@@ -106,14 +106,14 @@ const AssignmentsSection = () => {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {currentAssignments.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-8 sm:py-12">
               <p className={`${styles.textSecondary}`}>No assignments found. Try adjusting your search or filter criteria.</p>
             </div>
           ) : (
             <>
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {currentAssignments.map((assignment: Assignment) => (
                   <AssignmentCard
                     key={assignment.id}

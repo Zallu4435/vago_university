@@ -14,7 +14,7 @@ export const userMaterialService = {
     sortOrder?: 'asc' | 'desc';
   }) => {
     const response = await httpClient.get('/materials', { params: filters });
-    return response.data;
+    return response.data.data;
   },
 
   getMaterialById: async (id: string) => {

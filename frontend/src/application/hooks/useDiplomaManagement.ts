@@ -147,7 +147,6 @@ export const useDiplomaManagement = () => {
   const handleViewChapter = (chapterId: string) => {
     setSelectedChapterId(chapterId);
   };
-  console.log(completedChapters, "markChapterComplete")
 
   return {
     courses: coursesData?.courses || [],

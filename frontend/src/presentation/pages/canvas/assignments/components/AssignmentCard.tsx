@@ -84,35 +84,35 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
   return (
     <>
       <div
-        className={`${styles.card.background} p-6 rounded-2xl shadow-lg ${styles.border} ${isOverdue ? `border-l-4 ${styles.status.error}` : ''
+        className={`${styles.card.background} p-4 sm:p-6 rounded-lg sm:rounded-2xl shadow-lg ${styles.border} ${isOverdue ? `border-l-4 ${styles.status.error}` : ''
           } hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer`}
       >
-        <div className="flex flex-col gap-4">
-          <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-3 sm:gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h3 className={`text-xl font-bold ${styles.textPrimary}`}>
+              <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                <h3 className={`text-base sm:text-xl font-bold ${styles.textPrimary}`}> 
                   {assignment.title}
                 </h3>
                 {assignment.submission && (
                   <div className="flex items-center gap-1">
                     {assignment.submission.status === 'reviewed' ? (
-                      <FiCheckCircle className={`h-5 w-5 ${styles.status.success}`} />
+                      <FiCheckCircle className={`h-4 w-4 sm:h-5 sm:w-5 ${styles.status.success}`} />
                     ) : (
-                      <FiAlertCircle className={`h-5 w-5 ${styles.status.warning}`} />
+                      <FiAlertCircle className={`h-4 w-4 sm:h-5 sm:w-5 ${styles.status.warning}`} />
                     )}
                   </div>
                 )}
               </div>
-              <p className={`font-medium mb-2 ${styles.accent}`}>{assignment.subject}</p>
-              <p className={`${styles.textSecondary} text-sm line-clamp-2`}>{assignment.description}</p>
+              <p className={`font-medium mb-1 sm:mb-2 ${styles.accent} text-sm sm:text-base`}>{assignment.subject}</p>
+              <p className={`${styles.textSecondary} text-xs sm:text-sm line-clamp-2`}>{assignment.description}</p>
             </div>
           </div>
 
           {assignment.files && assignment.files.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <p className={`text-sm font-medium ${styles.textSecondary}`}>Reference Files:</p>
-              <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col gap-1.5 sm:gap-2">
+              <p className={`text-xs sm:text-sm font-medium ${styles.textSecondary}`}>Reference Files:</p>
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {assignment.files.map((file) => (
                   <button
                     key={file._id}
@@ -120,10 +120,10 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
                       e.stopPropagation();
                       handleFileDownload(file.fileUrl, file.fileName);
                     }}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg ${styles.button.secondary} hover:bg-opacity-80 transition-all duration-200`}
+                    className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md sm:rounded-lg ${styles.button.secondary} hover:bg-opacity-80 transition-all duration-200 text-xs sm:text-sm`}
                   >
                     <FiDownload className="h-4 w-4" />
-                    <span className="text-sm">{file.fileName}</span>
+                    <span>{file.fileName}</span>
                   </button>
                 ))}
               </div>
@@ -131,28 +131,28 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
           )}
 
           {assignment.submission && assignment.submission.files && assignment.submission.files.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <p className={`text-sm font-medium ${styles.status.success}`}>Submitted Files:</p>
-              <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col gap-1.5 sm:gap-2">
+              <p className={`text-xs sm:text-sm font-medium ${styles.status.success}`}>Submitted Files:</p>
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {assignment.submission.files.map((file, index) => (
                   <div
                     key={index}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg ${styles.status.success} bg-opacity-20`}
+                    className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md sm:rounded-lg ${styles.status.success} bg-opacity-20 text-xs sm:text-sm`}
                   >
                     <FiFile className="h-4 w-4" />
-                    <span className="text-sm">{file.fileName}</span>
+                    <span>{file.fileName}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <FiCalendar className={`h-4 w-4 ${styles.icon.secondary}`} />
               <span className={`${styles.textSecondary}`}>Due: {formatDueDate(assignment.dueDate)}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <FiClock className={`h-4 w-4 ${styles.icon.secondary}`} />
               <span className={`${styles.textSecondary}`}>
                 {daysLeft <= 0 ? 'Overdue' : `${daysLeft} days left`}
@@ -160,9 +160,9 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-            <div className="flex items-center gap-3">
-              <span className={`px-4 py-2 rounded-xl text-sm font-semibold ${getStatusColor(actualStatus, styles)}`}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-3 sm:pt-4 border-t border-gray-100 gap-2 sm:gap-0">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              <span className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold ${getStatusColor(actualStatus, styles)}`}>
                 {actualStatus.charAt(0).toUpperCase() + actualStatus.slice(1)}
               </span>
               {assignment.submission && (
@@ -172,14 +172,14 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {!assignment.submission && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onUpload(assignment);
                   }}
-                  className={`px-6 py-3 ${styles.button.primary} rounded-xl flex items-center gap-2`}
+                  className={`px-4 sm:px-6 py-2 sm:py-3 ${styles.button.primary} rounded-lg sm:rounded-xl flex items-center gap-1.5 sm:gap-2 text-xs sm:text-base`}
                 >
                   <FiUpload className="h-4 w-4" />
                   Submit
@@ -190,7 +190,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
-                  className={`p-3 ${styles.button.secondary} rounded-xl transition-all duration-200`}
+                  className={`p-2.5 sm:p-3 ${styles.button.secondary} rounded-lg sm:rounded-xl transition-all duration-200`}
                   disabled
                 >
                   <FiClock className={`h-4 w-4 ${styles.icon.secondary}`} />
@@ -202,7 +202,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
                     e.stopPropagation();
                     onUpload(assignment);
                   }}
-                  className={`px-6 py-3 ${styles.button.primary} rounded-xl flex items-center gap-2`}
+                  className={`px-4 sm:px-6 py-2 sm:py-3 ${styles.button.primary} rounded-lg sm:rounded-xl flex items-center gap-1.5 sm:gap-2 text-xs sm:text-base`}
                 >
                   <FiUpload className="h-4 w-4" />
                   Resubmit
@@ -214,7 +214,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
                     e.stopPropagation();
                     setShowGradeModal(true);
                   }}
-                  className={`px-6 py-2 ${styles.button.primary} rounded-xl flex items-center gap-2`}
+                  className={`px-4 sm:px-6 py-2 sm:py-2 ${styles.button.primary} rounded-lg sm:rounded-xl flex items-center gap-1.5 sm:gap-2 text-xs sm:text-base`}
                 >
                   <FiEye className="h-4 w-4" />
                   View Grade

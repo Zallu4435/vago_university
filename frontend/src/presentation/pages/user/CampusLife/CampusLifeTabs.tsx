@@ -1,19 +1,24 @@
 import PropTypes from 'prop-types';
 import { usePreferences } from '../../../context/PreferencesContext';
 
-export default function CampusLifeTabs({ activeTab, setActiveTab }) {
+interface CampusLifeTabsProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}
+
+export default function CampusLifeTabs({ activeTab, setActiveTab }: CampusLifeTabsProps) {
   const tabs = ['Events', 'Clubs', 'Athletics'];
   const { styles } = usePreferences();
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
+    <div className={`relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500 w-full`}>
       <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
-      <div className="relative z-10 flex flex-col sm:flex-row">
+      <div className="relative z-10 flex flex-col xs:flex-row xs:space-x-0 sm:flex-row w-full">
         {tabs.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`relative flex-1 py-3 px-4 sm:px-6 font-medium text-center transition-all duration-300 group/tab ${
+            className={`relative flex-1 w-full py-2 sm:py-3 px-3 sm:px-6 font-medium text-center transition-all duration-300 group/tab text-sm sm:text-base md:text-lg ${
               activeTab === tab
                 ? `bg-gradient-to-r ${styles.accent} text-white rounded-t-2xl sm:rounded-2xl`
                 : `${styles.textSecondary} hover:${styles.textPrimary} hover:bg-amber-100/50`

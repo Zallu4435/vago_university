@@ -67,6 +67,7 @@ class DiplomaService {
     async getDiplomaCourseById(id: string): Promise<any> {
         try {
             const response = await httpClient.get<{ course: any }>(`/diploma-courses/${id}`);
+            console.log('[DiplomaService] getDiplomaCourseById response:', response.data);
             return response.data.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.error || 'Failed to fetch diploma course');
@@ -76,6 +77,7 @@ class DiplomaService {
     async getChapterById(courseId: string, chapterId: string): Promise<Chapter> {
         try {
             const response = await httpClient.get<{ chapter: Chapter }>(`/diploma-courses/${courseId}/chapters/${chapterId}`);
+            console.log(response.data, "oooooooooooooooooooooooooooooooooomb")
             return response.data.data.chapter;
         } catch (error: any) {
             throw new Error(error.response?.data?.error || 'Failed to fetch chapter');

@@ -65,14 +65,14 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
     };
 
     return (
-        <div className={`${styles.card.background} rounded-2xl shadow-lg p-6 mb-8 ${styles.card.border}`}>
-            <div className="flex items-center space-x-4">
-                <div className="flex-1 relative">
-                    <FiSearch className={`absolute left-4 top-1/2 transform -translate-y-1/2 ${styles.icon.secondary}`} size={20} />
+        <div className={`${styles.card.background} rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-6 mb-6 sm:mb-8 ${styles.card.border}`}>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <div className="flex-1 relative w-full">
+                    <FiSearch className={`absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 ${styles.icon.secondary}`} size={16} />
                     <input
                         type="text"
                         placeholder="Search materials, courses, instructors, or tags..."
-                        className={`w-full pl-12 pr-4 py-3 ${styles.input.border} rounded-xl ${styles.input.focus} ${styles.input.background} transition-all duration-200 text-lg`}
+                        className={`w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 ${styles.input.border} rounded-lg sm:rounded-xl ${styles.input.focus} ${styles.input.background} transition-all duration-200 text-sm sm:text-lg`}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         aria-label="Search materials"
@@ -81,22 +81,22 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
 
                 <button
                     onClick={() => setShowFilters(!showFilters)}
-                    className={`flex items-center px-6 py-3 ${styles.button.outline} rounded-xl transition-all duration-200 font-medium`}
+                    className={`flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 ${styles.button.outline} rounded-lg sm:rounded-xl transition-all duration-200 font-medium text-sm sm:text-base w-full sm:w-auto`}
                     aria-label="Toggle filters"
                 >
-                    <FiFilter size={18} className="mr-2" />
+                    <FiFilter size={16} className="mr-2" />
                     Filters
-                    <FiChevronDown size={18} className={`ml-2 transition-transform duration-200 ${showFilters ? 'rotate-180' : ''}`} />
+                    <FiChevronDown size={16} className={`ml-2 transition-transform duration-200 ${showFilters ? 'rotate-180' : ''}`} />
                 </button>
             </div>
 
             {showFilters && (
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
                         <div>
-                            <label className={`block text-sm font-medium ${styles.textPrimary} mb-2`}>Course</label>
+                            <label className={`block text-xs sm:text-sm font-medium ${styles.textPrimary} mb-1 sm:mb-2`}>Course</label>
                             <select
-                                className={`w-full ${styles.input.border} rounded-lg px-3 py-2 ${styles.input.focus} ${styles.input.background}`}
+                                className={`w-full ${styles.input.border} rounded-md sm:rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 ${styles.input.focus} ${styles.input.background} text-xs sm:text-sm`}
                                 value={selectedCourse}
                                 onChange={(e) => setSelectedCourse(e.target.value)}
                                 aria-label="Filter by course"
@@ -109,9 +109,9 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
                         </div>
 
                         <div>
-                            <label className={`block text-sm font-medium ${styles.textPrimary} mb-2`}>Type</label>
+                            <label className={`block text-xs sm:text-sm font-medium ${styles.textPrimary} mb-1 sm:mb-2`}>Type</label>
                             <select
-                                className={`w-full ${styles.input.border} rounded-lg px-3 py-2 ${styles.input.focus} ${styles.input.background}`}
+                                className={`w-full ${styles.input.border} rounded-md sm:rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 ${styles.input.focus} ${styles.input.background} text-xs sm:text-sm`}
                                 value={selectedType}
                                 onChange={(e) => setSelectedType(e.target.value)}
                                 aria-label="Filter by type"
@@ -124,9 +124,9 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
                         </div>
 
                         <div>
-                            <label className={`block text-sm font-medium ${styles.textPrimary} mb-2`}>Semester</label>
+                            <label className={`block text-xs sm:text-sm font-medium ${styles.textPrimary} mb-1 sm:mb-2`}>Semester</label>
                             <select
-                                className={`w-full ${styles.input.border} rounded-lg px-3 py-2 ${styles.input.focus} ${styles.input.background}`}
+                                className={`w-full ${styles.input.border} rounded-md sm:rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 ${styles.input.focus} ${styles.input.background} text-xs sm:text-sm`}
                                 value={selectedSemester}
                                 onChange={(e) => setSelectedSemester(e.target.value)}
                                 aria-label="Filter by semester"
@@ -139,9 +139,9 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
                         </div>
 
                         <div>
-                            <label className={`block text-sm font-medium ${styles.textPrimary} mb-2`}>Difficulty</label>
+                            <label className={`block text-xs sm:text-sm font-medium ${styles.textPrimary} mb-1 sm:mb-2`}>Difficulty</label>
                             <select
-                                className={`w-full ${styles.input.border} rounded-lg px-3 py-2 ${styles.input.focus} ${styles.input.background}`}
+                                className={`w-full ${styles.input.border} rounded-md sm:rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 ${styles.input.focus} ${styles.input.background} text-xs sm:text-sm`}
                                 value={selectedDifficulty}
                                 onChange={(e) => setSelectedDifficulty(e.target.value)}
                                 aria-label="Filter by difficulty"
@@ -154,9 +154,9 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
                         </div>
 
                         <div>
-                            <label className={`block text-sm font-medium ${styles.textPrimary} mb-2`}>Sort By</label>
+                            <label className={`block text-xs sm:text-sm font-medium ${styles.textPrimary} mb-1 sm:mb-2`}>Sort By</label>
                             <select
-                                className={`w-full ${styles.input.border} rounded-lg px-3 py-2 ${styles.input.focus} ${styles.input.background}`}
+                                className={`w-full ${styles.input.border} rounded-md sm:rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 ${styles.input.focus} ${styles.input.background} text-xs sm:text-sm`}
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
                                 aria-label="Sort materials"
@@ -172,7 +172,7 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
                     </div>
 
                     {(selectedCourse || selectedType || selectedSemester || selectedDifficulty) && (
-                        <div className="mt-4 flex justify-end">
+                        <div className="mt-3 flex flex-col sm:flex-row sm:justify-end gap-2">
                             <button
                                 onClick={() => {
                                     setSelectedCourse('');
@@ -180,10 +180,10 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
                                     setSelectedSemester('');
                                     setSelectedDifficulty('');
                                 }}
-                                className={`flex items-center px-4 py-2 text-sm ${styles.button.outline} transition-colors`}
+                                className={`flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm ${styles.button.outline} rounded-md sm:rounded-lg transition-colors`}
                                 aria-label="Clear all filters"
                             >
-                                <FiX size={16} className="mr-1" />
+                                <FiX size={14} className="mr-1" />
                                 Clear all filters
                             </button>
                         </div>

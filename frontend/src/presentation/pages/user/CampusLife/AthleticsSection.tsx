@@ -1,14 +1,16 @@
-import { useState, useMemo } from 'react';
-import { FaSearch, FaTrophy, FaUsers } from 'react-icons/fa';
+import React, { useState, useMemo } from 'react';
+import { FaSearch, FaTrophy, FaUsers, FaArrowRight } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import { useCampusLife } from '../../../../application/hooks/useCampusLife';
 import JoinRequestForm from './JoinRequestForm';
 import { usePreferences } from '../../../context/PreferencesContext';
+import ReactDOM from 'react-dom';
 
 export default function AthleticsSection({ sports }) {
   const [selectedSport, setSelectedSport] = useState(sports[0] || null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showJoinForm, setShowJoinForm] = useState(false);
+  const [showMobileDetails, setShowMobileDetails] = useState(false);
   const { requestToJoinSport, isJoiningSport, joinSportError } = useCampusLife();
   const { styles, theme } = usePreferences();
 
@@ -44,6 +46,24 @@ export default function AthleticsSection({ sports }) {
       console.error('Failed to submit join request:', error);
     }
   };
+
+  const handleSportClick = (sport) => {
+    setSelectedSport(sport);
+    if (window.innerWidth < 640) {
+      setShowMobileDetails(true);
+    }
+  };
+
+  React.useEffect(() => {
+    if (showMobileDetails) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [showMobileDetails]);
 
   return (
     <div className="relative">
@@ -110,10 +130,8 @@ export default function AthleticsSection({ sports }) {
                 {normalizedSports.map((sport) => (
                   <div
                     key={sport.id}
-                    className={`p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${
-                      selectedSport?.id === sport.id ? 'bg-orange-50/70' : ''
-                    }`}
-                    onClick={() => setSelectedSport(sport)}
+                    className={`p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${selectedSport?.id === sport.id ? 'bg-orange-50/70' : ''}`}
+                    onClick={() => handleSportClick(sport)}
                   >
                     <div className="flex items-center space-x-3">
                       <div
@@ -139,7 +157,7 @@ export default function AthleticsSection({ sports }) {
             </div>
           </div>
 
-          <div className={`lg:col-span-2 relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
+          <div className={`hidden sm:block lg:col-span-2 relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
             <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
             <div className="relative z-10">
               {!selectedSport ? (
@@ -257,6 +275,125 @@ export default function AthleticsSection({ sports }) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Mobile Overlay for Sport Details */}
+      {ReactDOM.createPortal(
+        <div
+          className={`fixed inset-0 z-[9999] ${styles.card.background} transition-transform duration-700 transform sm:hidden flex flex-col
+            ${showMobileDetails && selectedSport ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'}`}
+          style={{ willChange: 'transform' }}
+        >
+          <div className="flex items-center p-4 border-b border-gray-200 dark:border-gray-700 justify-between">
+            <span className="font-bold text-lg text-gray-800 dark:text-white">Sport Details</span>
+            <button
+              aria-label="Close"
+              className={`ml-3 text-2xl focus:outline-none ${styles.textPrimary}`}
+              onClick={() => setShowMobileDetails(false)}
+            >
+              <FaArrowRight className={styles.accent} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-4">
+              {selectedSport ? (
+                <>
+                  <div className="flex items-center mb-4">
+                    <div
+                      className={`w-10 h-10 rounded-full text-white flex items-center justify-center font-bold mr-4`}
+                      style={{ backgroundColor: selectedSport.color }}
+                    >
+                      {selectedSport.icon}
+                    </div>
+                    <div>
+                      <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>{selectedSport.title}</h3>
+                      <p className={`text-xs ${styles.textSecondary}`}>{selectedSport.division}</p>
+                    </div>
+                  </div>
+                  <h4 className={`text-base font-bold ${styles.status.warning} mb-4`}>Team Information</h4>
+                  <div className={`relative overflow-hidden rounded-lg p-4 mb-4 border ${styles.border} group/item hover:${styles.card.hover} transition-all duration-300`}>
+                    <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-lg blur transition-all duration-300`}></div>
+                    <div className="relative z-10">
+                      <div className={`mb-2 text-sm ${styles.textPrimary}`}>
+                        <span className="font-medium">Head Coach:</span>
+                        <span className="ml-2">{selectedSport.headCoach}</span>
+                      </div>
+                      <div className={`mb-2 text-sm ${styles.textPrimary}`}>
+                        <span className="font-medium">Home Games:</span>
+                        <span className="ml-2">{selectedSport.homeGames}</span>
+                      </div>
+                      <div className={`mb-2 text-sm ${styles.textPrimary}`}>
+                        <span className="font-medium">Current Record:</span>
+                        <span className="ml-2">{selectedSport.record}</span>
+                      </div>
+                    </div>
+                  </div>
+                  {selectedSport.upcomingGames?.length > 0 ? (
+                    <>
+                      <h4 className={`text-base font-bold ${styles.status.warning} mb-2`}>Upcoming Games</h4>
+                      <ul className={`relative overflow-hidden rounded-lg p-4 mb-4 border ${styles.border} group/item hover:${styles.card.hover} transition-all duration-300`}>
+                        <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-lg blur transition-all duration-300`}></div>
+                        <div className="relative z-10">
+                          {selectedSport.upcomingGames.map((game, index) => (
+                            <li key={index} className={`mb-2 flex text-sm ${styles.textPrimary}`}>
+                              <span className={`${styles.status.warning} mr-2`}>•</span>
+                              <span>
+                                {new Date(game.date).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })}
+                                : {game.description}
+                              </span>
+                            </li>
+                          ))}
+                        </div>
+                      </ul>
+                      <div className="flex flex-col gap-3 mt-4">
+                        <button className={`group/btn bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-2 px-4 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 flex items-center justify-center space-x-2 text-sm`}>
+                          <span>Get Tickets</span>
+                          <FaTrophy size={12} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
+                        </button>
+                        <button className={`group/btn border ${styles.border} ${styles.status.warning} hover:bg-amber-50 py-2 px-4 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 flex items-center justify-center space-x-2 text-sm`}>
+                          <span>Team Roster</span>
+                          <FaUsers size={12} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <p className={`text-sm ${styles.textSecondary}`}>No upcoming games scheduled.</p>
+                  )}
+                  {!showJoinForm ? (
+                    <button
+                      onClick={() => setShowJoinForm(true)}
+                      className={`group/btn mt-4 w-full bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-2 px-4 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 flex items-center justify-center space-x-2 text-sm`}
+                    >
+                      <span>Try Out for Team</span>
+                      <FaTrophy size={12} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
+                    </button>
+                  ) : (
+                    <div className="mt-4">
+                      <JoinRequestForm
+                        onSubmit={handleJoinRequest}
+                        onCancel={() => setShowJoinForm(false)}
+                        isLoading={isJoiningSport}
+                        title={selectedSport.title}
+                      />
+                      {joinSportError && (
+                        <div className={`mt-2 ${styles.status.error} text-sm`}>
+                          Failed to submit tryout request. Please try again.
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center text-sm text-gray-400">Select a sport to view details.</div>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -15,7 +15,7 @@ class CampusLifeService {
   async getEvents(): Promise<Event[]> {
     try {
       const response = await httpClient.get('/campus-life/events');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       throw error;
     }
@@ -24,7 +24,7 @@ class CampusLifeService {
   async getSports(): Promise<Sport[]> {
     try {
       const response = await httpClient.get('/campus-life/sports');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       throw error;
     }

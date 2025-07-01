@@ -95,15 +95,15 @@ export class VideoRepository implements IVideoRepository {
         }
         let videoUrl = '';
         if (params.videoFile) {
-
             try {
+                console.log('🚀 Starting video upload to Cloudinary...');
                 const result = await cloudinary.uploader.upload(params.videoFile.path, {
                     resource_type: 'video',
                     folder: 'videos',
                     quality: 'auto'
                 });
                 videoUrl = result.secure_url;
-
+                console.log('✅ Video upload to Cloudinary complete! URL:', videoUrl);
             } catch (error) {
                 console.error('❌ Failed to upload video to Cloudinary:', error);
                 console.error('❌ Error details:', {
@@ -174,7 +174,7 @@ export class VideoRepository implements IVideoRepository {
                         console.warn('⚠️ Failed to delete old video from Cloudinary:', deleteError.message);
                     }
                 }
-
+                console.log('🚀 Starting new video upload to Cloudinary...');
                 // Upload new video
                 const result = await cloudinary.uploader.upload(params.videoFile.path, {
                     resource_type: 'video',
@@ -182,8 +182,8 @@ export class VideoRepository implements IVideoRepository {
                     quality: 'auto',
                     timeout: 60000 // 1 minute timeout
                 });
-
                 updateData.videoUrl = result.secure_url;
+                console.log('✅ New video upload to Cloudinary complete! URL:', updateData.videoUrl);
 
             } catch (error) {
                 console.error('❌ Failed to upload new video to Cloudinary:', error);

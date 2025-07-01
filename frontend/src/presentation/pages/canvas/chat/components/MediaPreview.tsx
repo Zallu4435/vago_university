@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { FiX, FiRotateCcw, FiEdit3, FiType, FiSquare, FiSmile, FiDownload, FiPlus } from 'react-icons/fi';
 
 interface Attachment {
@@ -109,10 +110,18 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    document.body.classList.add('overflow-hidden');
+    
+    // Prevent background scrolling
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      document.body.classList.remove('overflow-hidden');
+      document.body.style.overflow = originalStyle;
+      document.body.style.position = '';
+      document.body.style.width = '';
     };
   }, [onClose]);
 
@@ -603,78 +612,78 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-white/10 backdrop-blur-sm flex items-center justify-center z-50">
-      <div ref={modalRef} className="w-full max-w-4xl h-[80vh] mx-auto bg-black rounded-lg shadow-lg flex flex-col overflow-hidden relative">
+  const modalContent = (
+    <div className="fixed inset-0 bg-white/10 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4">
+      <div ref={modalRef} className="w-full max-w-4xl h-[80vh] md:h-[80vh] mx-auto bg-black rounded-lg shadow-lg flex flex-col overflow-hidden relative">
         {/* Main close button at top-left */}
         <button
           onClick={onClose}
-          className="absolute top-4 left-4 z-50 bg-white/90 hover:bg-white text-black rounded-full p-2 shadow-lg transition-colors flex items-center justify-center"
+          className="absolute top-2 md:top-4 left-2 md:left-4 z-50 bg-white/90 hover:bg-white text-black rounded-full p-1.5 md:p-2 shadow-lg transition-colors flex items-center justify-center"
           style={{ fontSize: 28, lineHeight: 1 }}
           title="Close"
         >
-          <FiX className="w-6 h-6" />
+          <FiX className="w-4 h-4 md:w-6 md:h-6" />
         </button>
 
         {/* Top toolbar */}
-        <div className="flex items-center justify-between px-3 py-2 bg-gray-900">
+        <div className="flex items-center justify-between px-2 md:px-3 py-1 md:py-2 bg-gray-900">
           <div />
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-0.5 md:space-x-1">
             {/* Rotate */}
             <button
-              className={`text-white p-2 rounded ${isImage ? (currentTool === 'rotate' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
+              className={`text-white p-1.5 md:p-2 rounded ${isImage ? (currentTool === 'rotate' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
               onClick={handleRotate}
               title="Rotate"
             >
-              <FiRotateCcw className="w-6 h-6" />
+              <FiRotateCcw className="w-4 h-4 md:w-6 md:h-6" />
             </button>
             
             {/* Draw/Pen */}
             <button
-              className={`text-white p-2 rounded ${isImage ? (currentTool === 'draw' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
+              className={`text-white p-1.5 md:p-2 rounded ${isImage ? (currentTool === 'draw' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
               onClick={() => {
                 if (!isImage) return;
                 setCurrentTool(currentTool === 'draw' ? 'none' : 'draw');
               }}
               title="Draw/Pen"
             >
-              <FiEdit3 className="w-6 h-6" />
+              <FiEdit3 className="w-4 h-4 md:w-6 md:h-6" />
             </button>
             
             {/* Text */}
             <button
-              className={`text-white p-2 rounded ${isImage ? (currentTool === 'text' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
+              className={`text-white p-1.5 md:p-2 rounded ${isImage ? (currentTool === 'text' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
               onClick={() => {
                 if (!isImage) return;
                 setCurrentTool(currentTool === 'text' ? 'none' : 'text');
               }}
               title="Add Text"
             >
-              <FiType className="w-6 h-6" />
+              <FiType className="w-4 h-4 md:w-6 md:h-6" />
             </button>
             
             {/* Rectangle */}
             <button
-              className={`text-white p-2 rounded ${isImage ? (currentTool === 'rect' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
+              className={`text-white p-1.5 md:p-2 rounded ${isImage ? (currentTool === 'rect' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
               onClick={() => {
                 if (!isImage) return;
                 setCurrentTool(currentTool === 'rect' ? 'none' : 'rect');
               }}
               title="Rectangle"
             >
-              <FiSquare className="w-6 h-6" />
+              <FiSquare className="w-4 h-4 md:w-6 md:h-6" />
             </button>
             
             {/* Mosaic/Blur */}
             <button
-              className={`text-white p-2 rounded ${isImage ? (currentTool === 'blur' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
+              className={`text-white p-1.5 md:p-2 rounded ${isImage ? (currentTool === 'blur' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
               onClick={() => {
                 if (!isImage) return;
                 setCurrentTool(currentTool === 'blur' ? 'none' : 'blur');
               }}
               title="Blur/Mosaic"
             >
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <svg className="w-4 h-4 md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <rect x="3" y="3" width="6" height="6" rx="1"/>
                 <rect x="9" y="3" width="6" height="6" rx="1"/>
                 <rect x="15" y="3" width="6" height="6" rx="1"/>
@@ -689,41 +698,41 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
             
             {/* Emoji */}
             <button
-              className={`text-white p-2 rounded ${isImage ? (currentTool === 'emoji' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
+              className={`text-white p-1.5 md:p-2 rounded ${isImage ? (currentTool === 'emoji' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
               onClick={() => {
                 if (!isImage) return;
                 setCurrentTool(currentTool === 'emoji' ? 'none' : 'emoji');
               }}
               title="Add Emoji"
             >
-              <FiSmile className="w-6 h-6" />
+              <FiSmile className="w-4 h-4 md:w-6 md:h-6" />
             </button>
             
             {/* Crop */}
             <button
-              className={`text-white p-2 rounded ${isImage ? (currentTool === 'crop' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
+              className={`text-white p-1.5 md:p-2 rounded ${isImage ? (currentTool === 'crop' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
               onClick={() => {
                 if (!isImage) return;
                 setCurrentTool(currentTool === 'crop' ? 'none' : 'crop');
               }}
               title="Crop"
             >
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <svg className="w-4 h-4 md:w-6 md:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M6 2v14a2 2 0 0 0 2 2h14"/>
                 <path d="M18 6H8a2 2 0 0 0-2 2v10"/>
               </svg>
             </button>
             
             {/* Quality/HD */}
-            <button className="text-white p-2" title="HD Quality">
+            <button className="text-white p-1.5 md:p-2" title="HD Quality">
               <div className="border border-white rounded px-1 text-xs font-bold">
                 HD
               </div>
             </button>
             
             {/* Download */}
-            <button className="text-white p-2" title="Download">
-              <FiDownload className="w-6 h-6" />
+            <button className="text-white p-1.5 md:p-2" title="Download">
+              <FiDownload className="w-4 h-4 md:w-6 md:h-6" />
             </button>
           </div>
         </div>
@@ -732,12 +741,12 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
         <div className="flex-1 flex flex-col items-center justify-center bg-black relative">
           {/* Tool palette just above image */}
           {isImage && currentTool !== 'none' && (
-            <div className="mb-4">{renderToolPalette()}</div>
+            <div className="mb-2 md:mb-4">{renderToolPalette()}</div>
           )}
-          <div className="w-full flex items-center justify-center relative" style={{ minHeight: '300px' }}>
+          <div className="w-full flex items-center justify-center relative" style={{ minHeight: '200px' }}>
             {attachments.length > 1 && (
-              <button onClick={handlePrev} className="absolute left-2 top-1/2 -translate-y-1/2 bg-gray-800 bg-opacity-60 hover:bg-opacity-90 text-white rounded-full p-2 z-10">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
+              <button onClick={handlePrev} className="absolute left-1 md:left-2 top-1/2 -translate-y-1/2 bg-gray-800 bg-opacity-60 hover:bg-opacity-90 text-white rounded-full p-1.5 md:p-2 z-10">
+                <svg className="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
               </button>
             )}
             
@@ -747,10 +756,10 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
                   ref={imageRef}
                   src={attachment.url}
                   alt={attachment.name}
-                  className="w-auto h-auto max-w-[95vw] max-h-[72vh] object-contain rounded-xl shadow-lg"
+                  className="w-auto h-auto max-w-[90vw] md:max-w-[95vw] max-h-[60vh] md:max-h-[72vh] object-contain rounded-xl shadow-lg"
                   style={{ 
-                    maxHeight: '72vh', 
-                    maxWidth: '95vw', 
+                    maxHeight: '60vh', 
+                    maxWidth: '90vw', 
                     transform: `rotate(${rotation[currentMediaIndex] || 0}deg)` 
                   }}
                 />
@@ -860,12 +869,12 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
                 
                 {/* Emoji picker */}
                 {showEmojiPicker && (
-                  <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 bg-black/90 p-4 rounded-lg shadow-lg">
-                    <div className="grid grid-cols-6 gap-2 mb-2">
+                  <div className="absolute top-12 md:top-16 left-1/2 -translate-x-1/2 z-40 bg-black/90 p-2 md:p-4 rounded-lg shadow-lg">
+                    <div className="grid grid-cols-4 md:grid-cols-6 gap-1 md:gap-2 mb-2">
                       {commonEmojis.map(emoji => (
                         <button
                           key={emoji}
-                          className="text-2xl hover:bg-gray-700 p-2 rounded"
+                          className="text-lg md:text-2xl hover:bg-gray-700 p-1 md:p-2 rounded"
                           onClick={() => handleEmojiSelect(emoji)}
                         >
                           {emoji}
@@ -873,7 +882,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
                       ))}
                     </div>
                     <button
-                      className="w-full bg-gray-700 text-white py-1 px-2 rounded text-sm"
+                      className="w-full bg-gray-700 text-white py-1 px-2 rounded text-xs md:text-sm"
                       onClick={() => setShowEmojiPicker(false)}
                     >
                       Cancel
@@ -885,11 +894,11 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
               <video
                 src={attachment.url}
                 controls
-                className="max-w-2xl w-full max-h-[60vh] rounded-xl shadow-lg bg-black object-contain"
-                style={{ maxHeight: '60vh' }}
+                className="max-w-[90vw] md:max-w-2xl w-full max-h-[50vh] md:max-h-[60vh] rounded-xl shadow-lg bg-black object-contain"
+                style={{ maxHeight: '50vh' }}
               />
             ) : attachment.type === 'audio' ? (
-              <div className="bg-gray-800 p-8 rounded-lg">
+              <div className="bg-gray-800 p-4 md:p-8 rounded-lg">
                 <audio
                   src={attachment.url}
                   controls
@@ -897,21 +906,21 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
                 />
               </div>
             ) : (
-              <div className="bg-gray-800 p-8 rounded-lg">
+              <div className="bg-gray-800 p-4 md:p-8 rounded-lg">
                 <a
                   href={attachment.url}
                   download={attachment.name}
                   className="text-blue-400 hover:text-blue-300 flex items-center space-x-2"
                 >
-                  <FiDownload className="w-5 h-5" />
-                  <span>Download {attachment.name}</span>
+                  <FiDownload className="w-4 h-4 md:w-5 md:h-5" />
+                  <span className="text-sm md:text-base">Download {attachment.name}</span>
                 </a>
               </div>
             )}
             
             {attachments.length > 1 && (
-              <button onClick={handleNext} className="absolute right-2 top-1/2 -translate-y-1/2 bg-gray-800 bg-opacity-60 hover:bg-opacity-90 text-white rounded-full p-2 z-10">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
+              <button onClick={handleNext} className="absolute right-1 md:right-2 top-1/2 -translate-y-1/2 bg-gray-800 bg-opacity-60 hover:bg-opacity-90 text-white rounded-full p-1.5 md:p-2 z-10">
+                <svg className="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
               </button>
             )}
           </div>
@@ -920,12 +929,12 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
         {/* Bottom section */}
         <div className="bg-gray-900">
           {/* Media thumbnails at bottom */}
-          <div className="flex items-center justify-center py-2 space-x-2">
+          <div className="flex items-center justify-center py-1 md:py-2 space-x-1 md:space-x-2">
             {/* Thumbnails for all attachments */}
             {attachments.map((att, idx) => (
               <div
                 key={idx}
-                className={`relative w-12 h-12 rounded-lg overflow-hidden border-2 ${idx === currentMediaIndex ? 'border-green-500' : 'border-gray-700'} bg-gray-800 cursor-pointer flex flex-col items-center justify-center`}
+                className={`relative w-8 h-8 md:w-12 md:h-12 rounded-lg overflow-hidden border-2 ${idx === currentMediaIndex ? 'border-green-500' : 'border-gray-700'} bg-gray-800 cursor-pointer flex flex-col items-center justify-center`}
                 onClick={() => {
                   setCurrentMediaIndex(idx);
                   setCurrentTool('none');
@@ -945,14 +954,14 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
                 {/* Remove icon at top-right of thumbnail */}
                 {attachments.length > 1 && (
                   <button
-                    className="absolute top-1 right-1 bg-white text-black rounded-full p-0.5 shadow hover:bg-red-500 hover:text-white z-20 border border-gray-300"
+                    className="absolute top-0.5 md:top-1 right-0.5 md:right-1 bg-white text-black rounded-full p-0.5 shadow hover:bg-red-500 hover:text-white z-20 border border-gray-300"
                     onClick={e => { 
                       e.stopPropagation(); 
                       if (onRemoveMedia) onRemoveMedia(idx); 
                     }}
                     title="Remove"
                   >
-                    <FiX className="w-3 h-3" />
+                    <FiX className="w-2 h-2 md:w-3 md:h-3" />
                   </button>
                 )}
               </div>
@@ -961,42 +970,42 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
             {/* Add more button */}
             {onAddMore && (
               <div
-                className="w-12 h-12 bg-gray-700 rounded-lg flex items-center justify-center border border-gray-600 cursor-pointer hover:bg-gray-600 transition-colors"
+                className="w-8 h-8 md:w-12 md:h-12 bg-gray-700 rounded-lg flex items-center justify-center border border-gray-600 cursor-pointer hover:bg-gray-600 transition-colors"
                 onClick={onAddMore}
                 title="Add more media"
               >
-                <FiPlus className="w-6 h-6 text-gray-300" />
+                <FiPlus className="w-4 h-4 md:w-6 md:h-6 text-gray-300" />
               </div>
             )}
           </div>
 
           {/* Caption input and send */}
-          <div className="px-4 pb-4 flex items-end space-x-3">
-            <div className="flex-1 bg-gray-800 rounded-full px-4 py-2 flex items-center">
+          <div className="px-2 md:px-4 pb-2 md:pb-4 flex items-end space-x-2 md:space-x-3">
+            <div className="flex-1 bg-gray-800 rounded-full px-3 md:px-4 py-1.5 md:py-2 flex items-center">
               <input
                 type="text"
                 placeholder="Add a caption..."
                 value={caption}
                 onChange={handleCaptionChange}
-                className="flex-1 bg-transparent text-white placeholder-gray-400 text-base outline-none"
+                className="flex-1 bg-transparent text-white placeholder-gray-400 text-sm md:text-base outline-none"
                 maxLength={1024}
               />
               <button 
-                className="text-gray-400 hover:text-white ml-2 transition-colors"
+                className="text-gray-400 hover:text-white ml-1 md:ml-2 transition-colors"
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                 title="Add emoji to caption"
               >
-                <FiSmile className="w-5 h-5" />
+                <FiSmile className="w-4 h-4 md:w-5 md:h-5" />
               </button>
             </div>
             
             {/* Send button - Green circle with arrow */}
             <button
               onClick={handleSend}
-              className="bg-green-500 hover:bg-green-600 rounded-full p-3 transition-colors shadow-lg"
+              className="bg-green-500 hover:bg-green-600 rounded-full p-2 md:p-3 transition-colors shadow-lg"
               title="Send"
             >
-              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+              <svg className="w-4 h-4 md:w-6 md:h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3.478 2.404a.75.75 0 00-.926.941l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.404z"/>
               </svg>
             </button>
@@ -1005,7 +1014,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
         
         {/* Current tool indicator */}
         {currentTool !== 'none' && (
-          <div className="absolute bottom-20 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm z-30">
+          <div className="absolute bottom-16 md:bottom-20 left-2 md:left-4 bg-black/70 text-white px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs md:text-sm z-30">
             {currentTool === 'draw' && (isEraser ? 'Eraser' : 'Draw')}
             {currentTool === 'text' && 'Add Text'}
             {currentTool === 'rect' && 'Rectangle'}
@@ -1017,4 +1026,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, st
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };

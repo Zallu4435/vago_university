@@ -183,7 +183,9 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
       console.log('📤 videoUrl being sent:', updateData.videoUrl);
       
       try {
+        console.log('🚀 Uploading video (no new file)...');
         await onSave(updateData);
+        console.log('✅ Video upload (no new file) complete!');
         onClose();
       } catch (error) {
         console.error('Error updating video:', error);
@@ -198,7 +200,9 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
     }
 
     try {
+      console.log('🚀 Uploading video...');
       await onSave(formData);
+      console.log('✅ Video upload complete!');
       onClose();
     } catch (error) {
       console.error('Error saving video:', error);

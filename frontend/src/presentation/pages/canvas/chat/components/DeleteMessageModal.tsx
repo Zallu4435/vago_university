@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface DeleteMessageModalProps {
   isVisible: boolean;
@@ -25,29 +26,38 @@ export const DeleteMessageModal: React.FC<DeleteMessageModalProps> = ({
     };
 
     if (isVisible) {
+      // Prevent body scrolling when modal is open
+      const originalStyle = window.getComputedStyle(document.body).overflow;
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      
       document.addEventListener('mousedown', handleClickOutside);
-      document.body.classList.add('overflow-hidden');
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      document.body.classList.remove('overflow-hidden');
+      // Restore body scrolling when modal is closed
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     };
   }, [isVisible, onClose]);
 
   if (!isVisible) return null;
 
-  return (
-    <div className="fixed inset-0 bg-white/10 backdrop-blur-sm flex items-center justify-center z-50">
-      <div ref={modalRef} className="bg-white dark:bg-[#202c33] rounded-lg p-4 max-w-sm w-full mx-4">
-        <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">Delete Message</h3>
-        <div className="space-y-2">
+  // Create portal to render modal at the top of DOM
+  const modalContent = (
+    <div className="fixed inset-0 bg-white/10 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
+      <div ref={modalRef} className="bg-white dark:bg-[#202c33] rounded-lg p-4 md:p-6 max-w-sm w-full mx-2 md:mx-4 shadow-xl">
+        <h3 className="text-lg md:text-xl font-medium mb-4 md:mb-6 text-gray-900 dark:text-white">Delete Message</h3>
+        <div className="space-y-2 md:space-y-3">
           <button
             onClick={() => {
               onDeleteForMe();
               onClose();
             }}
-            className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-[#2a3942] rounded text-gray-900 dark:text-white"
+            className="w-full px-4 py-3 md:py-4 text-left hover:bg-gray-100 dark:hover:bg-[#2a3942] rounded-lg text-gray-900 dark:text-white text-sm md:text-base transition-colors"
           >
             Delete for me
           </button>
@@ -57,14 +67,14 @@ export const DeleteMessageModal: React.FC<DeleteMessageModalProps> = ({
                 onDeleteForEveryone();
                 onClose();
               }}
-              className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-[#2a3942] rounded text-red-600"
+              className="w-full px-4 py-3 md:py-4 text-left hover:bg-gray-100 dark:hover:bg-[#2a3942] rounded-lg text-red-600 text-sm md:text-base transition-colors"
             >
               Delete for everyone
             </button>
           )}
           <button
             onClick={onClose}
-            className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-[#2a3942] rounded text-gray-500 dark:text-gray-400 mt-4 border-t border-gray-200 dark:border-gray-600"
+            className="w-full px-4 py-3 md:py-4 text-left hover:bg-gray-100 dark:hover:bg-[#2a3942] rounded-lg text-gray-500 dark:text-gray-400 mt-4 md:mt-6 border-t border-gray-200 dark:border-gray-600 text-sm md:text-base transition-colors"
           >
             Cancel
           </button>
@@ -72,4 +82,7 @@ export const DeleteMessageModal: React.FC<DeleteMessageModalProps> = ({
       </div>
     </div>
   );
+
+  // Use portal to render at the top of DOM tree
+  return createPortal(modalContent, document.body);
 };

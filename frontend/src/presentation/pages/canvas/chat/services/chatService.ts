@@ -5,7 +5,8 @@ class ChatService {
   async getChats(page = 1, limit = 20): Promise<PaginatedResponse<Chat>> {
     try {
       const response = await httpClient.get(`/chats?page=${page}&limit=${limit}`);
-      const chats = response.data.data.map((chat: any) => ({
+      console.log(response, "popopopooppo")
+      const chats = response.data.data.data.map((chat: any) => ({
         ...chat,
         participants: chat.participants.map((participant: any) => ({
           id: participant.id,
@@ -16,6 +17,7 @@ class ChatService {
           isOnline: false
         }))
       }));
+      console.log(chats, response.data)
       return {
         ...response.data,
         data: chats
@@ -37,7 +39,7 @@ class ChatService {
   async getChatDetails(chatId: string): Promise<Chat> {
     try {
       const response = await httpClient.get(`/chats/${chatId}`);
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch chat details');
     }
@@ -55,7 +57,7 @@ class ChatService {
   async getMessages(chatId: string, page = 1, limit = 20, before?: string): Promise<PaginatedResponse<Message>> {
     try {
       const response = await httpClient.get(`/chats/${chatId}/messages?page=${page}&limit=${limit}${before ? `&before=${before}` : ''}`);
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch messages');
     }
@@ -223,7 +225,7 @@ class ChatService {
   async searchUsers(query: string, page = 1, limit = 20): Promise<PaginatedResponse<User>> {
     try {
       const response = await httpClient.get(`/chats/users/search?query=${query}&page=${page}&limit=${limit}`);
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to search users');
     }

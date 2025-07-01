@@ -12,6 +12,7 @@ router.post(
     authMiddleware as any,
     contentVideoUploadWithErrorHandling,
     (req: Request, res: Response) => {
+        console.log('🎬 [ROUTE] POST /categories/:category/videos - Video upload route hit');
         req.body.category = req.params.category;
         expressAdapter(req, res, videoController.createVideo.bind(videoController));
     }
@@ -34,6 +35,7 @@ router.put(
     authMiddleware as any,
     contentVideoUploadWithErrorHandling,
     (req: Request, res: Response) => {
+        console.log('🎬 [ROUTE] PUT /videos/:id - Video update route hit');
         expressAdapter(req, res, videoController.updateVideo.bind(videoController));
     }
 );

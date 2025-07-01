@@ -173,11 +173,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
   return (
     <div
       ref={pickerRef}
-      className="absolute bg-[#111b21] rounded-lg shadow-2xl border border-[#2a3942] z-50"
-      style={{
-        width: '500px',
-        height: '400px',
-      }}
+      className="absolute bg-[#111b21] rounded-lg shadow-2xl border border-[#2a3942] z-50 w-[90vw] max-w-sm md:w-[500px] h-[300px] md:h-[400px]"
     >
       <div className="p-3 border-b border-[#2a3942] flex items-center justify-between">
         <div className="relative flex-1">
@@ -232,7 +228,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto p-2 h-[250px]">
+      <div className="flex-1 overflow-y-auto p-2 h-[160px] md:h-[250px]">
         {filteredEmojis.length === 0 ? (
           <div className="flex items-center justify-center h-full text-[#8696a0]">
             No emojis found

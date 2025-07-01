@@ -127,7 +127,7 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
       {/* Main gradient overlay */}
       <div className={`absolute inset-0 bg-gradient-to-r ${styles.accent} opacity-20 backdrop-blur-md`}></div>
 
-      <div className="container mx-auto px-6 py-4 relative z-10">
+      <div className="container mx-auto py-4 relative z-10">
         <div className="flex items-center justify-between">
           {/* Logo - Hidden on Mobile */}
           <div className="hidden md:flex items-center space-x-3 group">

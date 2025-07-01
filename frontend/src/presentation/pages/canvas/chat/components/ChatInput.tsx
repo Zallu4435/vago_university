@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiSmile, FiPaperclip, FiX, FiCornerUpLeft } from 'react-icons/fi';
+import { FiSmile, FiPaperclip, FiX, FiCornerUpLeft, FiSend } from 'react-icons/fi';
 import { EmojiPicker } from './EmojiPicker';
 import { AttachmentMenu } from './AttachmentMenu';
 import { Styles, Message } from '../types/ChatTypes';
 import { MediaPreview } from './MediaPreview';
-import { useChatMutations } from '../hooks/useChatMutations';
+
 
 interface ChatInputProps {
   onSendMessage: (message: string, file?: File, replyTo?: Message) => void;
@@ -37,7 +37,7 @@ export const ChatInput: React.FC<ChatInputProps & { disabled?: boolean }> = ({
   const attachmentRef = useRef<HTMLButtonElement>(null);
   const emojiRef = useRef<HTMLButtonElement>(null);
 
-  const { sendFile, sendMessage } = useChatMutations(selectedChatId || undefined, currentUserId);
+  // Removed unused useChatMutations since we're using onSendMessage prop instead
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +57,7 @@ export const ChatInput: React.FC<ChatInputProps & { disabled?: boolean }> = ({
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
+    
 
     typingTimeoutRef.current = setTimeout(() => {
       onTyping(false);
@@ -127,7 +128,7 @@ export const ChatInput: React.FC<ChatInputProps & { disabled?: boolean }> = ({
 
   const handleSendAllMedia = async (media: { url: string; name: string; type: string; caption: string }[]) => {
     if (!selectedChatId || selectedFiles.length === 0) return;
-    onSendMessage(media[0]?.caption || '', selectedFiles, replyToMessage || undefined);
+    onSendMessage(media[0]?.caption || '', selectedFiles[0], replyToMessage || undefined);
     setMessage('');
     clearSelectedFiles();
     setShowMediaPreview(false);
@@ -145,20 +146,20 @@ export const ChatInput: React.FC<ChatInputProps & { disabled?: boolean }> = ({
   return (
     <div className="relative bg-white dark:bg-[#202c33] p-2">
       {replyToMessage && (
-        <div className="absolute bottom-full left-0 right-0 p-3 bg-white dark:bg-[#2a3942] border border-gray-200 dark:border-[#2a3942] rounded-t-xl max-w-xs mx-auto">
+        <div className="absolute bottom-full left-0 right-0 p-2 md:p-3 bg-white dark:bg-[#2a3942] border border-gray-200 dark:border-[#2a3942] rounded-t-xl max-w-xs mx-auto">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center space-x-2">
-              <FiCornerUpLeft className="text-gray-500 dark:text-gray-400" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Replying to {replyToMessage.senderName}</span>
+              <FiCornerUpLeft className="text-gray-500 dark:text-gray-400 w-4 h-4 md:w-5 md:h-5" />
+              <span className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">Replying to {replyToMessage.senderName}</span>
             </div>
             <button
               onClick={onCancelReply}
               className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             >
-              <FiX className="w-5 h-5" />
+              <FiX className="w-4 h-4 md:w-5 md:h-5" />
             </button>
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
+          <div className="text-xs md:text-sm text-gray-600 dark:text-gray-400 truncate">
             {replyToMessage.content}
           </div>
         </div>
@@ -176,20 +177,20 @@ export const ChatInput: React.FC<ChatInputProps & { disabled?: boolean }> = ({
       )}
 
       {selectedFiles.length > 0 && selectedFiles.every(file => !(file.type.startsWith('image/') || file.type.startsWith('video/'))) && (
-        <div className="absolute bottom-full left-0 right-0 p-3 bg-white dark:bg-[#2a3942] border border-gray-200 dark:border-[#2a3942] rounded-t-xl max-w-xs mx-auto">
+        <div className="absolute bottom-full left-0 right-0 p-2 md:p-3 bg-white dark:bg-[#2a3942] border border-gray-200 dark:border-[#2a3942] rounded-t-xl max-w-xs mx-auto">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{selectedFiles.map(f => f.name).join(', ')}</span>
+            <span className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">{selectedFiles.map(f => f.name).join(', ')}</span>
             <button
               onClick={clearSelectedFiles}
               className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             >
-              <FiX className="w-5 h-5" />
+              <FiX className="w-4 h-4 md:w-5 md:h-5" />
             </button>
           </div>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex items-center space-x-2 p-2 border-t border-gray-200 dark:border-[#2a3942] bg-white dark:bg-[#202c33]">
+      <form onSubmit={handleSubmit} className="flex items-center space-x-1 md:space-x-2 p-2 border-t border-gray-200 dark:border-[#2a3942] bg-white dark:bg-[#202c33]">
         <input
           type="file"
           ref={fileInputRef}
@@ -203,41 +204,41 @@ export const ChatInput: React.FC<ChatInputProps & { disabled?: boolean }> = ({
           ref={attachmentRef}
           type="button"
           onClick={handleAttachmentClick}
-          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2c3e50]"
+          className="p-1.5 md:p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2c3e50] flex-shrink-0"
         >
-          <FiPaperclip className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          <FiPaperclip className="w-4 h-4 md:w-5 md:h-5 text-gray-600 dark:text-gray-300" />
         </button>
 
         <button
           ref={emojiRef}
           type="button"
           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2c3e50]"
+          className="p-1.5 md:p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2c3e50] flex-shrink-0"
         >
-          <FiSmile className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          <FiSmile className="w-4 h-4 md:w-5 md:h-5 text-gray-600 dark:text-gray-300" />
         </button>
 
         <input
           type="text"
           value={message}
           onChange={handleChange}
-          className="flex-1 px-4 py-2 rounded-lg bg-gray-100 dark:bg-[#2c3e50] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="flex-1 px-3 md:px-4 py-2 md:py-2.5 rounded-lg bg-gray-100 dark:bg-[#2c3e50] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 text-sm md:text-base"
           placeholder={disabled ? 'You blocked this user.' : 'Type a message...'}
           disabled={disabled}
         />
 
         <button
           type="submit"
-          className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50"
-          disabled={disabled}
+          className="p-2 md:p-2.5 bg-green-500 text-white rounded-full hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 transition-colors"
+          disabled={disabled || (!message.trim() && selectedFiles.length === 0)}
         >
-          Send
+          <FiSend className="w-4 h-4 md:w-5 md:h-5" />
         </button>
       </form>
 
       {showEmojiPicker && (
         <div
-          className="absolute left-0 bottom-full mb-102 z-30 w-full rounded-xl shadow-xl bg-white dark:bg-[#202c33]"
+          className="absolute left-0 bottom-full mb-75 md:mb-100 z-30 w-full rounded-xl shadow-xl bg-white dark:bg-[#202c33]"
         >
           <EmojiPicker
             show={showEmojiPicker}

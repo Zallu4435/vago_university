@@ -209,10 +209,10 @@ const ChatMessageComponent = ({
     };
 
     const imageClasses = {
-      1: 'max-w-sm w-full',
-      2: 'w-full max-h-48 object-cover',
-      3: 'w-full max-h-48 object-cover',
-      4: 'w-full max-h-40 object-cover',
+      1: 'max-w-xs md:max-w-sm w-full',
+      2: 'w-full max-h-32 md:max-h-48 object-cover',
+      3: 'w-full max-h-32 md:max-h-48 object-cover',
+      4: 'w-full max-h-28 md:max-h-40 object-cover',
     };
 
     return (

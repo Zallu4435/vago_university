@@ -79,6 +79,7 @@ export class VideoController implements IVideoController {
 
     async createVideo(httpRequest: IHttpRequest): Promise<IHttpResponse> {
         try {
+            console.log('🎬 [CONTROLLER] Handling video upload (createVideo)');
             const { title, category, module, status, description, duration } = httpRequest.body;
             const videoFile = httpRequest.file;
             const categoryParam = httpRequest.params.category;
@@ -113,8 +114,8 @@ export class VideoController implements IVideoController {
     }
 
     async updateVideo(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-
         try {
+            console.log('🎬 [CONTROLLER] Handling video update (updateVideo)');
             const { id } = httpRequest.params;
             const { title, duration, module, status, description, videoUrl } = httpRequest.body;
             const videoFile = httpRequest.file;

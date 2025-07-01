@@ -460,6 +460,26 @@ export const ChatComponent: React.FC = () => {
     };
   }, [selectedChatId, currentUser?.id]);
 
+  // New state to control mobile view
+  const [showMobileChat, setShowMobileChat] = useState(false);
+
+  // When a chat is selected, show chat view on mobile
+  useEffect(() => {
+    if (selectedChatId) {
+      setShowMobileChat(true);
+    }
+  }, [selectedChatId]);
+
+  // When going back to chat list on mobile
+  const handleMobileBack = () => {
+    setShowMobileChat(false);
+    setSelectedChatId(null);
+    setReplyToMessage(null);
+    setAllMessages([]);
+    setMessagesPage(1);
+    setHasMoreMessages(true);
+  };
+
   if (loading) return <div className={`flex h-screen items-center justify-center ${styles.background}`}><div className="animate-spin h-12 w-12 border-t-2 border-b-2 border-blue-500 rounded-full" /></div>;
   if (socketError) return (
     <div className={`flex h-screen items-center justify-center ${styles.background}`}>
@@ -471,8 +491,16 @@ export const ChatComponent: React.FC = () => {
   );
 
   return (
-    <div className={`flex h-screen ${styles.background} font-sans`}>
-      <div className={`transition-all duration-300 ${showGroupSettings ? 'w-80' : 'w-100'} border-r border-gray-200 dark:border-[#2a3942] flex flex-col relative overflow-hidden`}>
+    <div className={`flex h-screen ${styles.background} font-sans overflow-hidden`}>
+      {/* Chat List (Sidebar) */}
+      <div
+        className={`
+          transition-all duration-300 border-r border-gray-200 dark:border-[#2a3942] flex flex-col relative overflow-hidden
+          w-full max-w-full md:w-[420px]
+          ${showMobileChat ? 'hidden' : 'flex'}  // hide on mobile if chat is open
+          md:flex  // always show on desktop
+        `}
+      >
         <div className="p-4 border-b border-gray-200 dark:border-[#2a3942] flex items-center justify-between relative z-10 bg-white dark:bg-[#202c33]">
           <span className="text-lg font-semibold">WhatsApp</span>
           <div className="flex items-center space-x-2">
@@ -633,8 +661,16 @@ export const ChatComponent: React.FC = () => {
         )}
       </div>
 
-      <div className="flex-1 flex flex-row h-full">
-        <div className={`flex flex-col transition-all duration-300 ${showGroupSettings ? 'w-2/3' : 'w-full'}`}>
+      {/* Chat Messages/Main View */}
+      <div
+        className={`
+          flex-1 flex flex-row h-full min-w-0
+          ${showMobileChat ? 'flex' : 'hidden'}  // show on mobile if chat is open
+          md:flex  // always show on desktop
+        `}
+      >
+        <div className={`flex flex-col transition-all duration-300 min-w-0 w-full ${showGroupSettings ? 'md:w-2/3' : 'w-full'}`}>
+      
           {selectedChatId && flatChat ? (
             <>
               <ChatHeader
@@ -650,6 +686,7 @@ export const ChatComponent: React.FC = () => {
                 currentUserId={currentUserId || ''}
                 isBlockedByMe={isBlockedByMe}
                 isBlockedMe={isBlockedMe}
+                onBack={handleMobileBack}
               />
               {isBlockedByMe && (
                 <div className="text-red-500 text-center p-2">You blocked this user. Unblock to send messages.</div>
@@ -657,7 +694,7 @@ export const ChatComponent: React.FC = () => {
               {!isBlockedByMe && isBlockedMe && (
                 <div className="text-red-500 text-center p-2">You are blocked and cannot send messages.</div>
               )}
-              <div className="flex-1 overflow-y-auto p-4" onScroll={handleScroll} ref={scrollRef}>
+              <div className="flex-1 overflow-y-auto overflow-x-hidden p-4" onScroll={handleScroll} ref={scrollRef}>
                 {isLoadingMessages && messagesPage === 1 ? (
                   <div className="flex h-full items-center justify-center">
                     <div className="animate-spin h-8 w-8 border-t-2 border-b-2 border-blue-500 rounded-full" />
@@ -714,19 +751,19 @@ export const ChatComponent: React.FC = () => {
             </>
           ) : pendingUser ? (
             <>
-              <div className="p-4 border-b border-gray-200 dark:border-[#2a3942] flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <div className="p-4 border-b border-gray-200 dark:border-[#2a3942] flex items-center justify-between min-w-0">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
                   {pendingUser.name || `${pendingUser.firstName || ''} ${pendingUser.lastName || ''}`.trim()}
                 </h2>
               </div>
-              <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-gray-50 dark:bg-gray-800/50">
-                <div className="w-24 h-24 flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-full mb-6">
-                  <FiMessageSquare size={60} className="text-gray-400 dark:text-gray-500" />
+              <div className="flex-1 flex flex-col items-center justify-center text-center p-4 md:p-8 bg-gray-50 dark:bg-gray-800/50">
+                <div className="w-20 h-20 md:w-24 md:h-24 flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-full mb-4 md:mb-6">
+                  <FiMessageSquare size={48} className="md:w-[60px] md:h-[60px] text-gray-400 dark:text-gray-500" />
                 </div>
-                <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                <h2 className="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
                   No Messages Yet
                 </h2>
-                <p className="text-md text-gray-500 dark:text-gray-400 mb-6 max-w-sm">
+                <p className="text-sm md:text-md text-gray-500 dark:text-gray-400 mb-4 md:mb-6 max-w-sm px-2">
                   Start a conversation by sending a message.
                 </p>
               </div>
@@ -743,19 +780,19 @@ export const ChatComponent: React.FC = () => {
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-center p-8 bg-gray-50 dark:bg-gray-800/50">
-              <div className="w-24 h-24 flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-full mb-6">
-                <FiMessageSquare size={60} className="text-gray-400 dark:text-gray-500" />
+            <div className="flex flex-col items-center justify-center h-full text-center p-4 md:p-8 bg-gray-50 dark:bg-gray-800/50">
+              <div className="w-20 h-20 md:w-24 md:h-24 flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-full mb-4 md:mb-6">
+                <FiMessageSquare size={48} className="md:w-[60px] md:h-[60px] text-gray-400 dark:text-gray-500" />
               </div>
-              <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">Welcome to Chat</h2>
-              <p className="text-md text-gray-500 dark:text-gray-400 mt-2 max-w-sm">
+              <h2 className="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-200">Welcome to Chat</h2>
+              <p className="text-sm md:text-md text-gray-500 dark:text-gray-400 mt-2 max-w-sm px-2">
                 Select a conversation from the list on the left, or start a new one to begin messaging.
               </p>
             </div>
           )}
         </div>
         {showGroupSettings && flatChat && currentUser && (
-          <div className="w-1/3 h-full border-l border-gray-200 dark:border-[#2a3942] bg-white dark:bg-[#1f2937] shadow-lg transition-all duration-300">
+          <div className="hidden md:block w-1/3 h-full border-l border-gray-200 dark:border-[#2a3942] bg-white dark:bg-[#1f2937] shadow-lg transition-all duration-300">
             <GroupSettingsModal
               onClose={() => setShowGroupSettings(false)}
               chat={flatChat}

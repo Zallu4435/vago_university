@@ -7,6 +7,7 @@ import UniversitySessionsDashboard from './sessions/UniversitySessionsDashboard'
 import VideoClassPage from './sessions/UniversitySessionsDashboard';
 import UniversityDashboard from './UniversityDashboard';
 import { ChatComponent } from './chat/ChatComponent';
+import StudentDashboard from '../user/Dashboard/StudentDashboard';
 
 export default function StudentCanvas() {
   const [activeTab, setActiveTab] = useOutletContext<[string, (tab: string) => void]>();
@@ -25,7 +26,7 @@ export default function StudentCanvas() {
   const renderContent = () => {
     switch (activeTab) {  
       case 'Dashboard':
-        return <UniversityDashboard />;
+        return <StudentDashboard />;
       case 'Diploma Course':
         return <DiplomaCoursesSection />;
       case 'Chat':

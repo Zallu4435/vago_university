@@ -360,21 +360,21 @@ const contentVideoUpload = multer({
 });
 
 const contentVideoUploadWithErrorHandling = (req: any, res: any, next: any) => {
-
+  console.log('☁️ [CLOUDINARY] contentVideoUploadWithErrorHandling middleware triggered');
   req.setTimeout(60000);
   res.setTimeout(60000);
 
   const isUpdateRequest = req.method === 'PUT';
   const hasFile = req.headers['content-type']?.includes('multipart/form-data');
   
-
   if (isUpdateRequest && !hasFile) {
+    console.log('☁️ [CLOUDINARY] Update request with no file, skipping upload middleware');
     return next();
   }
 
   contentVideoUpload.single('videoFile')(req, res, (err: any) => {
     if (err) {
-      console.error('Video upload error:', err);
+      console.error('☁️ [CLOUDINARY] Video upload error:', err);
 
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({
@@ -404,7 +404,7 @@ const contentVideoUploadWithErrorHandling = (req: any, res: any, next: any) => {
     }
 
     if (!req.file) {
-      console.error('No file uploaded or file object is invalid.');
+      console.error('☁️ [CLOUDINARY] No file uploaded or file object is invalid.');
       return res.status(400).json({
         error: 'No video file uploaded',
         message: 'Please provide a valid video file.'
@@ -412,12 +412,13 @@ const contentVideoUploadWithErrorHandling = (req: any, res: any, next: any) => {
     }
 
     if (!req.file.size || req.file.size > 500 * 1024 * 1024) {
-      console.error('File size invalid or exceeds limit:', req.file.size);
+      console.error('☁️ [CLOUDINARY] File size invalid or exceeds limit:', req.file.size);
       return res.status(400).json({
         error: 'Invalid file size',
         message: 'File is either missing size information or too large.'
       });
     }
+    console.log('☁️ [CLOUDINARY] Video file passed upload middleware validation');
     next();
   });
 };

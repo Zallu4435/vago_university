@@ -109,19 +109,19 @@ const DiplomaCoursesSection = () => {
 
   const renderCoursesList = () => (
     <div className={`min-h-screen ${styles.background}`}>
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className={`inline-flex items-center justify-center w-16 h-16 ${styles.accent} rounded-2xl mb-6`}>
-            <FiAward className={`w-8 h-8 ${styles.textPrimary}`} />
+        <div className="text-center mb-8 sm:mb-12">
+          <div className={`inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 ${styles.accent} rounded-2xl mb-4 sm:mb-6`}>
+            <FiAward className={`w-6 h-6 sm:w-8 sm:h-8 ${styles.textPrimary}`} />
           </div>
-          <h1 className={`text-5xl font-bold ${styles.textPrimary} mb-4`}>Diploma Courses</h1>
-          <p className={`text-xl ${styles.textSecondary} max-w-2xl mx-auto`}>
+          <h1 className={`text-3xl sm:text-5xl font-bold ${styles.textPrimary} mb-2 sm:mb-4`}>Diploma Courses</h1>
+          <p className={`text-base sm:text-xl ${styles.textSecondary} max-w-2xl mx-auto`}>
             Advance your career with our comprehensive diploma programs designed by industry experts
           </p>
         </div>
         {/* Courses grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {courses.map((course, index) => (
             <DiplomaCard
               key={course._id}
@@ -145,11 +145,11 @@ const DiplomaCoursesSection = () => {
     console.log('[renderCourseDetails] selectedCourse:', selectedCourse);
     return (
       <div className={`min-h-screen ${styles.background}`}>
-        <div className="max-w-6xl mx-auto px-6 py-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           {/* Back button */}
           <button
             onClick={() => setCurrentView('courses')}
-            className={`flex items-center ${styles.textPrimary} hover:${styles.accent} mb-8 transition-colors group`}
+            className={`flex items-center ${styles.textPrimary} hover:${styles.accent} mb-6 sm:mb-8 transition-colors group`}
             aria-label="Back to courses"
           >
             <FiArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
@@ -157,54 +157,49 @@ const DiplomaCoursesSection = () => {
           </button>
 
           {/* Course header */}
-          <div className={`${styles.card.background} rounded-3xl p-8 ${styles.cardBorder} mb-8`}>
-            <div className="flex items-start justify-between mb-6">
-              <div className="flex items-center space-x-6">
-                <div className={`w-20 h-20 rounded-2xl ${styles.accent} flex items-center justify-center ${styles.textPrimary} ${styles.cardShadow}`}>
-                  {/* Optionally display an icon if you add one to the backend type */}
-                </div>
+          <div className={`${styles.card.background} rounded-2xl sm:rounded-3xl p-4 sm:p-8 ${styles.cardBorder} mb-6 sm:mb-8`}>
+            <div className="flex flex-col sm:flex-row items-start justify-between mb-4 sm:mb-6 gap-4 sm:gap-0">
+              <div className="flex items-center space-x-4 sm:space-x-6">
+                <div className={`w-14 h-14 sm:w-20 sm:h-20 rounded-2xl ${styles.accent} flex items-center justify-center ${styles.textPrimary} ${styles.cardShadow}`}></div>
                 <div>
-                  <h1 className={`text-4xl font-bold ${styles.textPrimary} mb-2`}>{selectedCourse?.title}</h1>
-                  <p className={`${styles.textSecondary} text-lg mb-4`}>{selectedCourse?.description}</p>
-                  <div className="flex items-center space-x-6 text-sm">
+                  <h1 className={`text-2xl sm:text-4xl font-bold ${styles.textPrimary} mb-1 sm:mb-2`}>{selectedCourse?.title}</h1>
+                  <p className={`${styles.textSecondary} text-base sm:text-lg mb-2 sm:mb-4`}>{selectedCourse?.description}</p>
+                  <div className="flex items-center space-x-4 sm:space-x-6 text-xs sm:text-sm">
                     <div className="flex items-center">
                       <FiClock className={`w-4 h-4 mr-1 ${styles.icon.secondary}`} />
-                      {/* Optionally display duration if you add it to the backend type */}
                     </div>
                     <div className="flex items-center">
                       <FiUsers className={`w-4 h-4 mr-1 ${styles.icon.secondary}`} />
-                      {/* Optionally display students if you add it to the backend type */}
                     </div>
                     <div className="flex items-center">
                       <FiStar className="w-4 h-4 mr-1 text-yellow-500" />
-                      {/* Optionally display rating if you add it to the backend type */}
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center space-x-3">
-                <button className={`${styles.button.secondary} p-3 rounded-xl transition-colors`} aria-label="Like course">
-                  <FiHeart className={`w-5 h-5 ${styles.icon.secondary}`} />
+              <div className="flex items-center space-x-2 sm:space-x-3 mt-4 sm:mt-0">
+                <button className={`${styles.button.secondary} p-2 sm:p-3 rounded-xl transition-colors`} aria-label="Like course">
+                  <FiHeart className={`w-5 h-5 sm:w-6 sm:h-6 ${styles.icon.secondary}`} />
                 </button>
-                <button className={`${styles.button.secondary} p-3 rounded-xl transition-colors`} aria-label="Share course">
-                  <FiShare2 className={`w-5 h-5 ${styles.icon.secondary}`} />
+                <button className={`${styles.button.secondary} p-2 sm:p-3 rounded-xl transition-colors`} aria-label="Share course">
+                  <FiShare2 className={`w-5 h-5 sm:w-6 sm:h-6 ${styles.icon.secondary}`} />
                 </button>
               </div>
             </div>
           </div>
 
           {/* Chapters section */}
-          <div className={`${styles.card.background} rounded-3xl p-8 ${styles.cardBorder}`}>
-            <div className="flex items-center justify-between mb-8">
-              <h2 className={`text-2xl font-bold ${styles.textPrimary} flex items-center`}>
-                <FiBookOpen className={`w-6 h-6 mr-3 ${styles.accent}`} />
+          <div className={`${styles.card.background} rounded-2xl sm:rounded-3xl p-4 sm:p-8 ${styles.cardBorder}`}>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-2 sm:gap-0">
+              <h2 className={`text-xl sm:text-2xl font-bold ${styles.textPrimary} flex items-center`}>
+                <FiBookOpen className={`w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 ${styles.accent}`} />
                 Course Chapters
               </h2>
-              <div className={`${styles.textSecondary} text-sm`}>
+              <div className={`${styles.textSecondary} text-xs sm:text-sm mt-2 sm:mt-0`}>
                 {completedChapters.size} of {chapters.length} completed
               </div>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {selectedCourse && chapters.map((chapter: any, idx: number) => {
                 const isFirst = idx === 0;
                 const prevId = chapters[idx - 1]?.id;
@@ -238,36 +233,36 @@ const DiplomaCoursesSection = () => {
 
           {/* Video Modal */}
           {videoModalOpen && modalVideo && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-              <div className="bg-white rounded-xl shadow-lg max-w-2xl w-full p-6 relative">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md px-2 sm:px-0">
+              <div className="bg-white rounded-xl shadow-lg w-full max-w-md sm:max-w-2xl p-4 sm:p-6 relative">
                 <button
-                  className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                  className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-2xl"
                   onClick={() => setVideoModalOpen(false)}
                 >
                   ×
                 </button>
-                <h2 className="text-2xl font-bold mb-2">{modalVideo.title}</h2>
+                <h2 className="text-xl sm:text-2xl font-bold mb-2">{modalVideo.title}</h2>
                 <video
                   src={modalVideo.videoUrl}
                   controls
-                  className="w-full rounded mb-4"
-                  style={{ minHeight: 300 }}
+                  className="w-full rounded mb-3 sm:mb-4"
+                  style={{ minHeight: 180, maxHeight: 400 }}
                 />
                 <div className="text-gray-600">{modalVideo.notes || modalVideo.description}</div>
-                <div className="mt-4 flex justify-between items-center">
+                <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
                   {/* Bookmark button */}
                   <button
-                    className={`px-4 py-2 rounded-lg font-semibold transition-colors mr-2 ${bookmarkedChapters.has(String(modalVideo.id)) ? 'bg-yellow-200 text-yellow-800' : 'bg-gray-200 text-gray-700'}`}
+                    className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition-colors mr-0 sm:mr-2 ${bookmarkedChapters.has(String(modalVideo.id)) ? 'bg-yellow-200 text-yellow-800' : 'bg-gray-200 text-gray-700'}`}
                     onClick={() => handleBookmark(selectedCourse._id, modalVideo.id)}
                   >
                     {bookmarkedChapters.has(String(modalVideo.id)) ? 'Bookmarked' : 'Bookmark'}
                   </button>
                   {/* Completed/Mark as Completed button */}
                   {completedChapters.has(String(modalVideo.id)) ? (
-                    <span className="px-4 py-2 rounded-lg bg-green-100 text-green-700 font-semibold">Completed</span>
+                    <span className="px-3 sm:px-4 py-2 rounded-lg bg-green-100 text-green-700 font-semibold">Completed</span>
                   ) : (
                     <button
-                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold transition-colors"
                       onClick={() => {
                         if (selectedCourse && modalVideo) {
                           markChapterComplete({ courseId: selectedCourse._id, chapterId: modalVideo.id });

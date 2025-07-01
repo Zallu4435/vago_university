@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { FiX, FiUser, FiCheck, FiMessageSquare, FiUsers, FiImage, FiLock, FiCamera, FiArrowLeft } from 'react-icons/fi';
 
 interface User {
@@ -33,10 +34,17 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   onSearch
 }) => {
   useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
+    // Prevent body scrolling when modal is open
+    const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    
     return () => {
-      document.body.style.overflow = originalOverflow;
+      // Restore body scrolling when modal is closed
+      document.body.style.overflow = originalStyle;
+      document.body.style.position = '';
+      document.body.style.width = '';
     };
   }, []);
 
@@ -419,13 +427,17 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     );
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-[#111b21] w-full max-w-md h-[600px] flex flex-col shadow-xl">
+  // Create portal to render modal at the top of DOM
+  const modalContent = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-white dark:bg-[#111b21] w-full max-w-md h-[600px] sm:h-[600px] h-[90vh] max-h-[600px] flex flex-col shadow-xl rounded-lg overflow-hidden">
         {step === 'participants' ? renderParticipantsStep() : renderInfoStep()}
       </div>
     </div>
   );
+
+  // Use portal to render at the top of DOM tree
+  return createPortal(modalContent, document.body);
 };
 
 export default CreateGroupModal;

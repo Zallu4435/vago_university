@@ -6,6 +6,7 @@ import { logout } from '../redux/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { usePreferences } from '../context/PreferencesContext';
+import { socketRef } from '../pages/canvas/chat/ChatComponent';
 
 const UserLayout = () => {
   const location = useLocation();
@@ -24,6 +25,11 @@ const UserLayout = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    if (socketRef.current) {
+      console.log('oooododododododo')
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
     dispatch(logout());
     navigate('/login');
   };

@@ -8,10 +8,10 @@ export class SocketService {
   private io: SocketIOServer;
   private chatNamespace: Namespace;
   private chatRepository: ChatRepository;
-  private userSockets: Map<string, string> = new Map(); 
+  private userSockets: Map<string, string> = new Map();
 
   constructor(server: HTTPServer) {
-  
+
     this.io = new SocketIOServer(server, {
       cors: {
         origin: ["http://localhost:5173", "http://localhost:3000"],
@@ -44,7 +44,7 @@ export class SocketService {
     this.setupSocketHandlers();
   }
 
-  private setupSocketHandlers() {    
+  private setupSocketHandlers() {
     this.chatNamespace.use((socket, next) => {
 
       let token = socket.handshake.auth.token;
@@ -75,7 +75,7 @@ export class SocketService {
           id: decoded.userId,
           collection: decoded.collection,
         };
-   
+
         next();
       } catch (err) {
         console.error('Authentication failed:', {
@@ -89,9 +89,20 @@ export class SocketService {
     this.chatNamespace.on("connection", (socket) => {
       const userId = socket.data.user.id;
       this.userSockets.set(userId, socket.id);
+      // Send the list of currently online users to the newly connected socket
+      socket.emit("onlineUsers", Array.from(this.userSockets.keys()));
       this.joinUserChats(userId);
 
       console.log(`[Socket.IO] User connected: ${userId}, socket id: ${socket.id}`);
+
+      // Emit online status to all
+      this.chatNamespace.emit("userStatus", { userId, status: "online" });
+      // Emit online status for all other users to the newly connected user
+      Array.from(this.userSockets.keys()).forEach(id => {
+        if (id !== userId) {
+          socket.emit("userStatus", { userId: id, status: "online" });
+        }
+      });
 
       socket.on("joinChat", (data: { chatId: string }) => {
         socket.join(data.chatId);
@@ -130,11 +141,21 @@ export class SocketService {
         }
       });
 
+      socket.on("removeReaction", (data: { messageId: string; userId: string; chatId: string }) => {
+        this.handleRemoveReaction(data.messageId, data.userId, data.chatId);
+      });
+
+      socket.on("deleteMessage", (data: { messageId: string; chatId: string }) => {
+        this.handleDeleteMessage(data.messageId, data.chatId);
+      });
+
       socket.on("disconnect", (reason) => {
         const userId = this.getUserIdBySocketId(socket.id);
         if (userId) {
           this.userSockets.delete(userId);
+          console.log(`[Socket.IO] User disconnected: ${userId}, socket id: ${socket.id}, reason: ${reason}`);
           this.chatNamespace.emit("userStatus", { userId, status: "offline" });
+          console.log(`[Socket.IO] Emitted userStatus: offline for user ${userId}`);
         } else {
         }
       });
@@ -190,8 +211,8 @@ export class SocketService {
   }
 
   public async handleMessageRead(chatId: string, userId: string) {
-    this.chatNamespace.to(chatId).emit("messageStatus", { 
-      chatId, 
+    this.chatNamespace.to(chatId).emit("messageStatus", {
+      chatId,
       userId,
       status: "read"
     });
@@ -215,5 +236,24 @@ export class SocketService {
 
   public async handleUserStatus(userId: string, status: "online" | "offline") {
     this.chatNamespace.emit("userStatus", { userId, status });
+  }
+
+  public async handleRemoveReaction(messageId: string, userId: string, chatId: string) {
+    this.chatNamespace.to(chatId).emit("messageReactionRemoved", {
+      messageId,
+      userId,
+    });
+  }
+
+  public async handleDeleteMessage(messageId: string, chatId: string) {
+    this.chatNamespace.to(chatId).emit("messageDeleted", {
+      messageId,
+      chatId,
+    });
+  }
+
+  public async handleUpdatedChat(chat: any) {
+    if (!chat || !chat.id) return;
+    this.chatNamespace.to(chat.id).emit('chat', chat);
   }
 } 

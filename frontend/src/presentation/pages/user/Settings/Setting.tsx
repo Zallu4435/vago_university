@@ -20,6 +20,7 @@ import { RootState } from '../../../redux/store';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../../redux/authSlice';
 import PreferenceSettings from './PreferenceSettings';
+import { socketRef } from '../../canvas/chat/ChatComponent';
 
 const UniversityDashboard = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -30,6 +31,10 @@ const UniversityDashboard = () => {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const handleLogout = () => {
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
     dispatch(logout());
     navigate('/login');
   };

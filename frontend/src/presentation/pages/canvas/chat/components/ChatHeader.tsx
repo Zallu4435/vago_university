@@ -16,6 +16,7 @@ interface ChatHeaderProps {
   isBlockedByMe: boolean;
   isBlockedMe: boolean;
   onBack?: () => void;
+  onlineUsers: Set<string>;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -31,11 +32,17 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   currentUserId,
   isBlockedByMe,
   isBlockedMe,
-  onBack
+  onBack,
+  onlineUsers
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const isOnline = chat.participants.some(p => p.isOnline);
+  const otherParticipant = chat.type === 'direct'
+    ? chat.participants.find(p => p.id !== currentUserId)
+    : null;
+  const isOnline = chat.type === 'direct'
+    ? (otherParticipant ? onlineUsers.has(otherParticipant.id) : false)
+    : chat.participants.some(p => onlineUsers.has(p.id));
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

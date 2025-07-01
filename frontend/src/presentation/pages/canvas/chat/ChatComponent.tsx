@@ -17,6 +17,8 @@ import { useChatQueries } from './hooks/useChatQueries';
 import { useChatMutations } from './hooks/useChatMutations';
 import { chatService } from './services/chatService';
 
+export const socketRef = React.createRef<Socket | null>();
+
 export const ChatComponent: React.FC = () => {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,7 +35,6 @@ export const ChatComponent: React.FC = () => {
   const [socketError, setSocketError] = useState<string | null>(null);
   const [showGroupSettings, setShowGroupSettings] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const socketRef = useRef<Socket | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const styles = getStyles(isDarkMode);
   const [replyToMessage, setReplyToMessage] = useState<Message | null>(null);
@@ -49,6 +50,7 @@ export const ChatComponent: React.FC = () => {
     shouldScrollToBottom: true,
     oldScrollHeight: 0,
   }).current;
+  const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const currentUserId = currentUser?.id;
@@ -539,6 +541,48 @@ export const ChatComponent: React.FC = () => {
     };
   }, [token]);
 
+  console.log('ChatComponent mounted for user', currentUserId);
+
+  useEffect(() => {
+    if (!socketRef.current) return;
+    console.log('Attaching userStatus listener for user', currentUserId);
+    const handleUserStatus = (data: { userId: string; status: 'online' | 'offline' }) => {
+      setOnlineUsers(prev => {
+        const newSet = new Set(prev);
+        if (data.status === 'online') {
+          newSet.add(data.userId);
+        } else {
+          newSet.delete(data.userId);
+        }
+        console.log(`[Socket.IO] Received userStatus: ${data.status} for user ${data.userId}. Online users:`, Array.from(newSet));
+        return newSet;
+      });
+    };
+    socketRef.current.on('userStatus', handleUserStatus);
+    return () => {
+      socketRef.current?.off('userStatus', handleUserStatus);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!socketRef.current || !selectedChatId) return;
+    socketRef.current.emit('joinChat', { chatId: selectedChatId });
+    return () => {
+      socketRef.current?.emit('leaveChat', { chatId: selectedChatId });
+    };
+  }, [selectedChatId]);
+
+  useEffect(() => {
+    if (!socketRef.current) return;
+    const handleOnlineUsers = (userIds: string[]) => {
+      setOnlineUsers(new Set(userIds));
+    };
+    socketRef.current.on('onlineUsers', handleOnlineUsers);
+    return () => {
+      socketRef.current?.off('onlineUsers', handleOnlineUsers);
+    };
+  }, []);
+
   if (loading) return <div className={`flex h-screen items-center justify-center ${styles.background}`}><div className="animate-spin h-12 w-12 border-t-2 border-b-2 border-blue-500 rounded-full" /></div>;
   if (socketError) return (
     <div className={`flex h-screen items-center justify-center ${styles.background}`}>
@@ -729,7 +773,7 @@ export const ChatComponent: React.FC = () => {
         `}
       >
         <div className={`flex flex-col transition-all duration-300 min-w-0 w-full ${showGroupSettings ? 'md:w-2/3' : 'w-full'}`}>
-      
+
           {selectedChatId && flatChat ? (
             <>
               <ChatHeader
@@ -745,7 +789,8 @@ export const ChatComponent: React.FC = () => {
                 currentUserId={currentUserId || ''}
                 isBlockedByMe={isBlockedByMe}
                 isBlockedMe={isBlockedMe}
-                onBack={handleMobileBack}
+                onBack={showMobileChat ? handleMobileBack : undefined}
+                onlineUsers={onlineUsers}
               />
               {isBlockedByMe && (
                 <div className="text-red-500 text-center p-2">You blocked this user. Unblock to send messages.</div>
@@ -755,7 +800,7 @@ export const ChatComponent: React.FC = () => {
               )}
               <div className="flex-1 overflow-y-auto overflow-x-hidden p-4" onScroll={handleScroll} ref={scrollRef}>
                 {/* Debug button to force re-render */}
-                <button onClick={() => setAllMessages([...allMessages])} style={{marginBottom: 8, background: '#eee', padding: 4, borderRadius: 4}}>
+                <button onClick={() => setAllMessages([...allMessages])} style={{ marginBottom: 8, background: '#eee', padding: 4, borderRadius: 4 }}>
                   Force Re-render (Debug)
                 </button>
                 {isLoadingMessages && messagesPage === 1 ? (
@@ -854,21 +899,53 @@ export const ChatComponent: React.FC = () => {
             </div>
           )}
         </div>
+        {/* Group Settings Modal: Desktop sidebar and Mobile full-screen overlay */}
         {showGroupSettings && flatChat && currentUser && (
-          <div className="hidden md:block w-1/3 h-full border-l border-gray-200 dark:border-[#2a3942] bg-white dark:bg-[#1f2937] shadow-lg transition-all duration-300">
-            <GroupSettingsModal
-              onClose={() => setShowGroupSettings(false)}
-              chat={flatChat}
-              currentUser={currentUser}
-              onUpdateGroup={handleUpdateGroup}
-              onAddMembers={handleAddMembers}
-              onRemoveMember={handleRemoveMember}
-              onMakeAdmin={handleMakeAdmin}
-              onRemoveAdmin={handleRemoveAdmin}
-              onLeaveGroup={handleLeaveGroup}
-              onDeleteGroup={handleDeleteGroup}
-            />
-          </div>
+          <React.Fragment>
+            {/* Desktop: Sidebar */}
+            <div className="hidden md:block w-1/3 h-full border-l border-gray-200 dark:border-[#2a3942] bg-white dark:bg-[#1f2937] shadow-lg transition-all duration-300">
+              <GroupSettingsModal
+                onClose={() => setShowGroupSettings(false)}
+                chat={flatChat}
+                currentUser={currentUser}
+                onUpdateGroup={handleUpdateGroup}
+                onAddMembers={handleAddMembers}
+                onRemoveMember={handleRemoveMember}
+                onMakeAdmin={handleMakeAdmin}
+                onRemoveAdmin={handleRemoveAdmin}
+                onLeaveGroup={handleLeaveGroup}
+                onDeleteGroup={handleDeleteGroup}
+              />
+            </div>
+            {/* Mobile: Full-width overlay */}
+            {showMobileChat && (
+              <div className="fixed inset-0 z-50 bg-white dark:bg-[#1f2937] w-full h-full md:hidden overflow-y-auto transition-all duration-300">
+                {/* Mobile-only back button header */}
+                <div className="flex items-center p-4 border-b border-gray-200 dark:border-[#2a3942] bg-white dark:bg-[#202c33] md:hidden">
+                  <button
+                    onClick={() => setShowGroupSettings(false)}
+                    className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3942]"
+                    title="Back"
+                  >
+                    <FiArrowLeft size={24} />
+                  </button>
+                  <span className="ml-4 text-lg font-semibold">Group Settings</span>
+                </div>
+                <GroupSettingsModal
+                  onClose={() => setShowGroupSettings(false)}
+                  chat={flatChat}
+                  currentUser={currentUser}
+                  onUpdateGroup={handleUpdateGroup}
+                  onAddMembers={handleAddMembers}
+                  onRemoveMember={handleRemoveMember}
+                  onMakeAdmin={handleMakeAdmin}
+                  onRemoveAdmin={handleRemoveAdmin}
+                  onLeaveGroup={handleLeaveGroup}
+                  onDeleteGroup={handleDeleteGroup}
+                />
+              </div>
+            )}
+          </React.Fragment>
         )}
       </div>
     </div>

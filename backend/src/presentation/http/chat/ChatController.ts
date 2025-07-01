@@ -334,7 +334,11 @@ export class ChatController {
     };
 
     await this.addReactionUseCase.execute(params);
-    
+    // Fetch the updated message and emit to the chat room
+    const updatedMessage = await require('../../../infrastructure/database/mongoose/models/chat/MessageModel').MessageModel.findById(messageId).lean();
+    if (updatedMessage) {
+      socketService.handleNewMessage(updatedMessage);
+    }
     return {
       statusCode: 200,
       body: { data: { message: "Reaction added successfully" } }
@@ -363,7 +367,11 @@ export class ChatController {
     };
 
     await this.removeReactionUseCase.execute(params);
-    
+    // Fetch the updated message and emit to the chat room
+    const updatedMessage = await require('../../../infrastructure/database/mongoose/models/chat/MessageModel').MessageModel.findById(messageId).lean();
+    if (updatedMessage) {
+      socketService.handleNewMessage(updatedMessage);
+    }
     return {
       statusCode: 200,
       body: { data: { message: "Reaction removed successfully" } }
@@ -692,6 +700,11 @@ export class ChatController {
         userId,
         deleteForEveryone
       });
+      // Fetch the updated (deleted) message and emit to the chat room
+      const updatedMessage = await require('../../../infrastructure/database/mongoose/models/chat/MessageModel').MessageModel.findById(messageId).lean();
+      if (updatedMessage) {
+        socketService.handleNewMessage(updatedMessage);
+      }
       return {
         statusCode: 200,
         body: { data: { message: 'Message deleted successfully' } }
@@ -751,6 +764,11 @@ export class ChatController {
       return { statusCode: 400, body: { error: 'Chat ID and user ID are required' } };
     }
     await this.deleteChatUseCase.execute({ chatId, userId });
+    // Fetch the updated chat and emit to the chat room
+    const updatedChat = await this.getChatDetailsUseCase.execute(chatId, userId);
+    if (updatedChat) {
+      socketService.handleUpdatedChat(updatedChat);
+    }
     return { statusCode: 204, body: {} };
   }
 
@@ -761,6 +779,11 @@ export class ChatController {
       return { statusCode: 400, body: { error: 'Chat ID and user ID are required' } };
     }
     await this.blockChatUseCase.execute({ chatId, userId });
+    // Fetch the updated chat and emit to the chat room
+    const updatedChat = await this.getChatDetailsUseCase.execute(chatId, userId);
+    if (updatedChat) {
+      socketService.handleUpdatedChat(updatedChat);
+    }
     return { statusCode: 204, body: {} };
   }
 

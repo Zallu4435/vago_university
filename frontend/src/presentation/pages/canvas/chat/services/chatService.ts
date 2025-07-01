@@ -5,7 +5,6 @@ class ChatService {
   async getChats(page = 1, limit = 20): Promise<PaginatedResponse<Chat>> {
     try {
       const response = await httpClient.get(`/chats?page=${page}&limit=${limit}`);
-      console.log(response, "popopopooppo")
       const chats = response.data.data.data.map((chat: any) => ({
         ...chat,
         participants: chat.participants.map((participant: any) => ({
@@ -17,7 +16,6 @@ class ChatService {
           isOnline: false
         }))
       }));
-      console.log(chats, response.data)
       return {
         ...response.data,
         data: chats

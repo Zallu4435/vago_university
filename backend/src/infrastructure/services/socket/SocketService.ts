@@ -91,6 +91,8 @@ export class SocketService {
       this.userSockets.set(userId, socket.id);
       this.joinUserChats(userId);
 
+      console.log(`[Socket.IO] User connected: ${userId}, socket id: ${socket.id}`);
+
       socket.on("joinChat", (data: { chatId: string }) => {
         socket.join(data.chatId);
       });
@@ -168,8 +170,9 @@ export class SocketService {
 
   public async handleNewMessage(message: any) {
     const chatId = message.chatId;
+    // No longer save the message here. Only emit the message to the chat room.
     this.chatNamespace.to(chatId).emit("message", message);
-
+    // ...rest of your code ...
     const chat = await this.chatRepository.getChatDetails(chatId, message.senderId);
     if (chat) {
       chat.participants.forEach((participant) => {

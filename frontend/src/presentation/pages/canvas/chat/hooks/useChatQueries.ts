@@ -77,10 +77,7 @@ export const useChatQueries = (params: {
     enabled: !!params.query,
   });
 
-  // Helper to refetch all chats
   const refetchChats = () => queryClient.invalidateQueries({ queryKey: ['chats'] });
-
-  console.log(messagesResponse, "messagesResponsemessagesResponse")
 
   return {
     // Data

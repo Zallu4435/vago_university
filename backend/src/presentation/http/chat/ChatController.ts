@@ -28,6 +28,7 @@ import { GetChatsRequestDTO, SearchChatsRequestDTO, GetChatMessagesRequestDTO, S
 import { FileUploadService } from "../../../infrastructure/services/upload/FileUploadService";
 import { MessageType } from "../../../domain/chat/entities/Message";
 import { cloudinary } from '../../../config/cloudinary.config';
+import { socketService } from '../../../app';
 
 export class ChatController {
   constructor(
@@ -247,7 +248,17 @@ export class ChatController {
       };
 
       await this.sendMessageUseCase.execute(params);
-      
+      // Fetch the most recent message (should be the one just saved)
+      const messagesResult = await this.getChatMessagesUseCase.execute({
+        chatId,
+        userId: req.user.id,
+        page: 1,
+        limit: 1,
+      });
+      const savedMessage = messagesResult.data && messagesResult.data.length > 0 ? messagesResult.data[0] : null;
+      if (savedMessage) {
+        socketService.handleNewMessage(savedMessage);
+      }
       return {
         statusCode: 201,
         body: { data: { message: "Message sent successfully" } }

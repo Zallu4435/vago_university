@@ -52,6 +52,7 @@ export const ChatComponent: React.FC = () => {
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const currentUserId = currentUser?.id;
+  const token = useSelector((state: RootState) => state.auth.token);
 
   const {
     chatsResponse,
@@ -256,6 +257,7 @@ export const ChatComponent: React.FC = () => {
         await chatMutations.sendFile.mutateAsync({ chatId: selectedChatId, formData, file: files[0] });
       } else {
         await chatMutations.sendMessage.mutateAsync({ chatId: selectedChatId, content: message, type: 'text' });
+        // Do NOT emit the message via socket.io from the frontend.
       }
       setReplyToMessage(null);
     } catch (error) {
@@ -445,20 +447,39 @@ export const ChatComponent: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!selectedChatId || !socketRef.current || !currentUser?.id) return;
+    if (!socketRef.current || !currentUser?.id) return;
 
     const handleNewMessage = (message: any) => {
-      if (message.chatId === selectedChatId && message.senderId !== currentUser.id) {
-        chatMutations.markMessagesAsRead.mutateAsync(selectedChatId);
+      // Normalize id for MongoDB (_id -> id)
+      const normalizedMessage = { ...message, id: message.id || message._id };
+      console.log('[Socket.IO] Received real-time message:', normalizedMessage);
+      if (normalizedMessage.chatId === selectedChatId) {
+        setAllMessages(prev => {
+          const idx = prev.findIndex(m => m.id === normalizedMessage.id);
+          if (idx !== -1) {
+            // Replace the existing message
+            const updated = [...prev];
+            updated[idx] = normalizedMessage;
+            console.log('[Socket.IO] Updated allMessages (replaced):', updated);
+            return updated;
+          }
+          // Otherwise, append as new
+          const updated = [...prev, normalizedMessage];
+          console.log('[Socket.IO] Updated allMessages (appended):', updated);
+          return updated;
+        });
+        if (normalizedMessage.senderId !== currentUser.id) {
+          chatMutations.markMessagesAsRead.mutateAsync(selectedChatId!);
+        }
       }
     };
 
     socketRef.current.on('message', handleNewMessage);
 
     return () => {
-      socketRef.current.off('message', handleNewMessage);
+      socketRef.current?.off('message', handleNewMessage);
     };
-  }, [selectedChatId, currentUser?.id]);
+  }, [selectedChatId, currentUser?.id, socketRef.current]);
 
   // New state to control mobile view
   const [showMobileChat, setShowMobileChat] = useState(false);
@@ -479,6 +500,44 @@ export const ChatComponent: React.FC = () => {
     setMessagesPage(1);
     setHasMoreMessages(true);
   };
+
+  // Add this useEffect for socket.io connection
+  useEffect(() => {
+    if (!token) return;
+    // Connect to the /chat namespace with the correct backend URL and port
+    const socket = io('http://localhost:5000/chat', {
+      path: '/socket.io',
+      transports: ['websocket'],
+      auth: { token },
+      withCredentials: true,
+    });
+    socketRef.current = socket;
+
+    socket.on('connect_error', (err) => {
+      setSocketError('Socket connection error: ' + (err.message || err));
+      console.error('[Socket.IO] Connection error:', err);
+    });
+    socket.on('connect', () => {
+      setSocketError(null);
+      console.log('[Socket.IO] Connected:', socket.id);
+      if (socket.connected) {
+        console.log('Socket is connected (checked in code)!');
+      }
+    });
+    socket.on('disconnect', (reason) => {
+      console.warn('[Socket.IO] Disconnected:', reason);
+      if (!socket.connected) {
+        console.log('Socket is NOT connected (checked in code)!');
+      }
+    });
+    // Optionally, add more event listeners here (e.g., for user status, typing, etc.)
+
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
+      console.log('[Socket.IO] Disconnected and cleaned up');
+    };
+  }, [token]);
 
   if (loading) return <div className={`flex h-screen items-center justify-center ${styles.background}`}><div className="animate-spin h-12 w-12 border-t-2 border-b-2 border-blue-500 rounded-full" /></div>;
   if (socketError) return (
@@ -695,6 +754,10 @@ export const ChatComponent: React.FC = () => {
                 <div className="text-red-500 text-center p-2">You are blocked and cannot send messages.</div>
               )}
               <div className="flex-1 overflow-y-auto overflow-x-hidden p-4" onScroll={handleScroll} ref={scrollRef}>
+                {/* Debug button to force re-render */}
+                <button onClick={() => setAllMessages([...allMessages])} style={{marginBottom: 8, background: '#eee', padding: 4, borderRadius: 4}}>
+                  Force Re-render (Debug)
+                </button>
                 {isLoadingMessages && messagesPage === 1 ? (
                   <div className="flex h-full items-center justify-center">
                     <div className="animate-spin h-8 w-8 border-t-2 border-b-2 border-blue-500 rounded-full" />

@@ -35,7 +35,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  console.log(chat, "chatchatchatchatchat")
   const isOnline = chat.participants.some(p => p.isOnline);
 
   useEffect(() => {

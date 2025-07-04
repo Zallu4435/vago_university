@@ -204,7 +204,12 @@ export class ChatController {
       if (req.files && Array.isArray(req.files)) {
         for (const file of req.files) {
           try {
-            if (file.mimetype && file.mimetype.startsWith('image/')) {
+            let attachmentType = 'file';
+            let url = file.url || FileUploadService.getFileUrl(file.filename);
+
+            if (file.mimetype.startsWith('image/')) {
+              attachmentType = 'image';
+              // Upload image to Cloudinary
               const result = await cloudinary.uploader.upload(file.path, {
                 folder: 'message-attachments',
                 resource_type: 'image',
@@ -212,21 +217,47 @@ export class ChatController {
                 unique_filename: false,
                 overwrite: false
               });
-              attachments.push({
-                type: MessageType.Image,
-                url: result.secure_url,
-                name: file.originalname,
-                size: file.size,
+              url = result.secure_url;
+            } else if (file.mimetype.startsWith('audio/')) {
+              attachmentType = 'audio';
+              // Upload audio to Cloudinary (resource_type: 'video' for audio)
+              const result = await cloudinary.uploader.upload(file.path, {
+                folder: 'message-attachments',
+                resource_type: 'video',
+                use_filename: true,
+                unique_filename: false,
+                overwrite: false
               });
-            } else {
-              attachments.push({
-                type: MessageType.File,
-                url: FileUploadService.getFileUrl(file.filename),
-                name: file.originalname,
-                size: file.size,
+              url = result.secure_url;
+            } else if (file.mimetype.startsWith('video/')) {
+              attachmentType = 'video';
+              // Upload video to Cloudinary
+              const result = await cloudinary.uploader.upload(file.path, {
+                folder: 'message-attachments',
+                resource_type: 'video',
+                use_filename: true,
+                unique_filename: false,
+                overwrite: false
               });
+              url = result.secure_url;
+            } else if ([
+              'application/pdf',
+              'application/msword',
+              'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+              'text/plain'
+            ].includes(file.mimetype)) {
+              attachmentType = 'document';
             }
+
+            attachments.push({
+              type: attachmentType,
+              url,
+              name: file.originalname,
+              size: file.size,
+              mimetype: file.mimetype,
+            });
           } catch (uploadErr: any) {
+            // handle error
           }
         }
       }

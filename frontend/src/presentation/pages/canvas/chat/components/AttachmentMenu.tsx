@@ -69,16 +69,7 @@ export const AttachmentMenu: React.FC<AttachmentMenuProps> = ({
           </div>
           <span className={`text-base font-medium`}>Camera</span>
         </button>
-
-        <button
-          className={`flex items-center p-2 ${styles.card.hover} text-white rounded-lg transition-colors`}
-        >
-          <div className={`p-2 bg-purple-100 dark:bg-purple-900 rounded-full mr-3`}>
-            <FiMic className="w-6 h-6 text-purple-600" />
-          </div>
-          <span className={`text-base font-medium`}>Voice Message</span>
-        </button>
-
+        
         <button
           className={`flex items-center p-2 ${styles.card.hover} text-white rounded-lg transition-colors`}
         >

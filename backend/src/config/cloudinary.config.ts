@@ -427,7 +427,7 @@ const chatAttachmentStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'chat-attachments',
-    allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'mp4', 'mov', 'avi', 'webm', 'mkv'],
+    allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'mp4', 'mov', 'avi', 'webm', 'mkv', 'mp3', 'wav', 'ogg', 'm4a'],
     resource_type: 'auto',
     transformation: [{ quality: 'auto' }],
   } as any,
@@ -450,6 +450,12 @@ const chatAttachmentUpload = multer({
       'video/x-msvideo',
       'video/webm',
       'video/x-matroska',
+      'audio/webm',
+      'audio/mpeg',
+      'audio/mp3',
+      'audio/wav',
+      'audio/ogg',
+      'audio/m4a',
     ];
     if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true);

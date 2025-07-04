@@ -343,3 +343,12 @@ export interface IEnquiryController extends IController {
   deleteEnquiry(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   sendReply(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
+
+export interface IVideoSessionController extends IController {
+  createSession(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  joinSession(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getSession(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateSession(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  deleteSession(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getAllSessions(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}

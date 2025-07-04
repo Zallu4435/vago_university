@@ -19,6 +19,9 @@ export enum MessageType {
   Text = "text",
   Image = "image",
   File = "file",
+  Audio = "audio",
+  Video = "video",
+  Document = "document",
   System = "system"
 }
 

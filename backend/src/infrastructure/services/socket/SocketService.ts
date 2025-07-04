@@ -1,5 +1,4 @@
 import { Server as SocketIOServer, Namespace } from "socket.io";
-import { Server as HTTPServer } from "http";
 import { ChatRepository } from "../../repositories/chat/ChatRepository";
 import { MessageStatus } from "../../../domain/chat/entities/Message";
 import jwt from "jsonwebtoken";
@@ -10,26 +9,10 @@ export class SocketService {
   private chatRepository: ChatRepository;
   private userSockets: Map<string, string> = new Map();
 
-  constructor(server: HTTPServer) {
-
-    this.io = new SocketIOServer(server, {
-      cors: {
-        origin: ["http://localhost:5173", "http://localhost:3000"],
-        methods: ["GET", "POST"],
-        credentials: true,
-        allowedHeaders: ["Content-Type", "Authorization"],
-      },
-      transports: ["websocket", "polling"],
-      path: '/socket.io',
-      pingTimeout: 60000,
-      pingInterval: 25000,
-    });
-
+  constructor(io: SocketIOServer) {
+    this.io = io;
     this.chatNamespace = this.io.of('/chat');
     this.chatRepository = new ChatRepository();
-
-    this.io.on('connection', (socket) => {
-    });
 
     this.io.on('error', (error) => {
       console.error('\n=== Socket.IO Server Error ===');
@@ -153,7 +136,6 @@ export class SocketService {
         const userId = this.getUserIdBySocketId(socket.id);
         if (userId) {
           this.userSockets.delete(userId);
-          console.log(`[Socket.IO] User disconnected: ${userId}, socket id: ${socket.id}, reason: ${reason}`);
           this.chatNamespace.emit("userStatus", { userId, status: "offline" });
           console.log(`[Socket.IO] Emitted userStatus: offline for user ${userId}`);
         } else {
@@ -191,9 +173,7 @@ export class SocketService {
 
   public async handleNewMessage(message: any) {
     const chatId = message.chatId;
-    // No longer save the message here. Only emit the message to the chat room.
     this.chatNamespace.to(chatId).emit("message", message);
-    // ...rest of your code ...
     const chat = await this.chatRepository.getChatDetails(chatId, message.senderId);
     if (chat) {
       chat.participants.forEach((participant) => {

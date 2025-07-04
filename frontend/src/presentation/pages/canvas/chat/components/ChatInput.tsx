@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiSmile, FiPaperclip, FiX, FiCornerUpLeft, FiSend } from 'react-icons/fi';
+import { FiSmile, FiPaperclip, FiX, FiCornerUpLeft, FiSend, FiMic } from 'react-icons/fi';
 import { EmojiPicker } from './EmojiPicker';
 import { AttachmentMenu } from './AttachmentMenu';
 import { Styles, Message } from '../types/ChatTypes';
 import { MediaPreview } from './MediaPreview';
+import LiveWaveform from './LiveWaveform';
+import AudioPlayer from './AudioPlayer';
 
 
 interface ChatInputProps {
@@ -36,6 +38,13 @@ export const ChatInput: React.FC<ChatInputProps & { disabled?: boolean }> = ({
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const attachmentRef = useRef<HTMLButtonElement>(null);
   const emojiRef = useRef<HTMLButtonElement>(null);
+  const [recording, setRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const recordingInterval = useRef<NodeJS.Timeout | null>(null);
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
 
   // Removed unused useChatMutations since we're using onSendMessage prop instead
 
@@ -134,6 +143,65 @@ export const ChatInput: React.FC<ChatInputProps & { disabled?: boolean }> = ({
     setShowMediaPreview(false);
   };
 
+  const startRecording = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    setMediaStream(stream);
+    const recorder = new MediaRecorder(stream);
+    const chunks: BlobPart[] = [];
+    recorder.ondataavailable = (e) => chunks.push(e.data);
+    recorder.onstop = () => {
+      setAudioBlob(new Blob(chunks, { type: 'audio/webm' }));
+      stream.getTracks().forEach(track => track.stop());
+      if (recordingInterval.current) clearInterval(recordingInterval.current);
+      setMediaStream(null);
+    };
+    recorder.start();
+    setMediaRecorder(recorder);
+    setRecording(true);
+    setRecordingTime(0);
+    recordingInterval.current = setInterval(() => setRecordingTime(t => t + 1), 1000);
+  };
+
+  const stopRecording = () => {
+    mediaRecorder?.stop();
+    setRecording(false);
+    setMediaStream(null);
+  };
+
+  const cancelRecording = () => {
+    setAudioBlob(null);
+    setRecording(false);
+    setRecordingTime(0);
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+    }
+    setMediaStream(null);
+    setAudioUrl(null);
+  };
+
+  const sendAudio = () => {
+    if (audioBlob) {
+      // Convert Blob to File for compatibility
+      const audioFile = new File([audioBlob], `audio-message-${Date.now()}.webm`, { type: 'audio/webm' });
+      onSendMessage('', audioFile, replyToMessage || undefined);
+      setAudioBlob(null);
+      setRecordingTime(0);
+      setAudioUrl(null);
+    }
+  };
+
+  useEffect(() => {
+    if (audioBlob) {
+      const url = URL.createObjectURL(audioBlob);
+      setAudioUrl(url);
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    } else {
+      setAudioUrl(null);
+    }
+  }, [audioBlob]);
+
   useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {
@@ -217,6 +285,27 @@ export const ChatInput: React.FC<ChatInputProps & { disabled?: boolean }> = ({
         >
           <FiSmile className="w-4 h-4 md:w-5 md:h-5 text-gray-600 dark:text-gray-300" />
         </button>
+
+        {!recording && !audioBlob && (
+          <button type="button" onClick={startRecording} className="p-1.5 md:p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2c3e50] flex-shrink-0" title="Record Audio">
+            <FiMic className="w-4 h-4 md:w-5 md:h-5 text-gray-600 dark:text-gray-300" />
+          </button>
+        )}
+        {recording && (
+          <div className="flex items-center space-x-2 mb-2 w-full">
+            <LiveWaveform stream={mediaStream} isRecording={recording} />
+            <span className="text-xs text-red-500">Recording: {recordingTime}s</span>
+            <button type="button" onClick={stopRecording} className="p-1.5 md:p-2 rounded-full bg-red-500 text-white hover:bg-red-600">Stop</button>
+            <button type="button" onClick={cancelRecording} className="p-1.5 md:p-2 rounded-full bg-gray-300 text-gray-700 hover:bg-gray-400">Cancel</button>
+          </div>
+        )}
+        {audioBlob && !recording && (
+          <div className="flex items-center space-x-2">
+            <audio controls src={URL.createObjectURL(audioBlob)} className="h-8" />
+            <button type="button" onClick={sendAudio} className="p-1.5 md:p-2 rounded-full bg-green-500 text-white hover:bg-green-600">Send</button>
+            <button type="button" onClick={cancelRecording} className="p-1.5 md:p-2 rounded-full bg-gray-300 text-gray-700 hover:bg-gray-400">Cancel</button>
+          </div>
+        )}
 
         <input
           type="text"

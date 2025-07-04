@@ -246,8 +246,8 @@ const App: React.FC = () => {
         {/* Confirm Registration Route (no authentication required) */}
         <Route path="/confirm-registration" element={<ConfirmRegistration />} />
 
-        
-        <Route path="/video" element={<VideoConferencePage />} />
+        {/* Video Conference Route (accessible to all authenticated users) */}
+        <Route path="/faculty/video-conference/:sessionId" element={<VideoConferencePage />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/register" replace />} />

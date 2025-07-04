@@ -8,6 +8,7 @@ import { DeleteMessageModal } from './DeleteMessageModal';
 import { MessageReactionsModal } from './MessageReactionsModal';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import { useChatMutations } from '../hooks/useChatMutations';
+import AudioPlayer from './AudioPlayer';
 
 
 const formatMessageTimeOnly = (date: string | Date): string => {
@@ -151,8 +152,8 @@ const ChatMessageComponent = ({
             <div key={emoji} className="group relative inline-block">
               <div
                 className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs cursor-pointer shadow-sm border ${data.userIds.includes(currentUserId)
-                    ? 'bg-blue-100 text-blue-600 border-blue-200'
-                    : 'bg-white text-gray-600 border-gray-200 dark:bg-[#2a3942] dark:text-gray-300 dark:border-gray-600'
+                  ? 'bg-blue-100 text-blue-600 border-blue-200'
+                  : 'bg-white text-gray-600 border-gray-200 dark:bg-[#2a3942] dark:text-gray-300 dark:border-gray-600'
                   }`}
               >
                 <span>{emoji}</span>
@@ -321,7 +322,7 @@ const ChatMessageComponent = ({
                 switch (attachment.type) {
                   case 'video':
                     return (
-                      <div key={attachment.id} className="relative">
+                      <div key={attachment.id || idx} className="relative">
                         <video
                           src={attachment.url}
                           controls
@@ -333,19 +334,32 @@ const ChatMessageComponent = ({
                     );
                   case 'audio':
                     return (
-                      <div key={attachment.id} className="relative">
-                        <audio
-                          src={attachment.url}
-                          controls
-                          className="w-full"
-                        >
-                          Your browser does not support the audio tag.
-                        </audio>
+                      <div key={attachment.id || idx} className="relative">
+                        <AudioPlayer src={attachment.url} />
                       </div>
                     );
                   case 'document':
                     return (
-                      <div key={attachment.id} className="flex items-center space-x-2 p-2 bg-black bg-opacity-10 rounded-lg">
+                      <div key={attachment.id || idx} className="flex items-center space-x-2 p-2 bg-black bg-opacity-10 rounded-lg">
+                        <FiFile className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{attachment.name}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{(attachment.size / 1024).toFixed(1)} KB</p>
+                        </div>
+                        <a
+                          href={attachment.url}
+                          download={attachment.name}
+                          className="flex-shrink-0 p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                        </a>
+                      </div>
+                    );
+                  case 'file':
+                    return (
+                      <div key={attachment.id || idx} className="flex items-center space-x-2 p-2 bg-black bg-opacity-10 rounded-lg">
                         <FiFile className="w-6 h-6 text-gray-500 dark:text-gray-400" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{attachment.name}</p>
@@ -363,7 +377,13 @@ const ChatMessageComponent = ({
                       </div>
                     );
                   default:
-                    return null;
+                    return (
+                      <div key={attachment.id || idx} className="relative">
+                        <a href={attachment.url} target="_blank" rel="noopener noreferrer">
+                          Download {attachment.name || 'file'}
+                        </a>
+                      </div>
+                    );
                 }
               })
             )}
@@ -372,8 +392,8 @@ const ChatMessageComponent = ({
 
         <div className="flex items-center justify-end space-x-1">
           <span className={`text-xs ${isSentMessage
-              ? 'text-white text-opacity-70'
-              : 'text-gray-500 dark:text-gray-400'
+            ? 'text-white text-opacity-70'
+            : 'text-gray-500 dark:text-gray-400'
             }`}>
             {formatMessageTimeOnly(message.createdAt)}
           </span>
@@ -429,8 +449,8 @@ const ChatMessageComponent = ({
         <div className="relative">
           <div
             className={`relative max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg rounded-lg px-3 py-2 ${isSentMessage
-                ? 'bg-[#005c4b] text-white rounded-br-none'
-                : 'bg-white dark:bg-[#2a3942] text-gray-900 dark:text-white rounded-bl-none shadow-sm border border-gray-200 dark:border-gray-600'
+              ? 'bg-[#005c4b] text-white rounded-br-none'
+              : 'bg-white dark:bg-[#2a3942] text-gray-900 dark:text-white rounded-bl-none shadow-sm border border-gray-200 dark:border-gray-600'
               }`}
           >
             {/* Spinner overlay while sending */}
@@ -443,8 +463,8 @@ const ChatMessageComponent = ({
             {/* Tail for message bubble */}
             <div
               className={`absolute w-0 h-0 bottom-0 ${isSentMessage
-                  ? 'right-0 border-l-[8px] border-l-[#005c4b] border-b-[8px] border-b-transparent'
-                  : 'left-0 border-r-[8px] border-r-white dark:border-r-[#2a3942] border-b-[8px] border-b-transparent'
+                ? 'right-0 border-l-[8px] border-l-[#005c4b] border-b-[8px] border-b-transparent'
+                : 'left-0 border-r-[8px] border-r-white dark:border-r-[#2a3942] border-b-[8px] border-b-transparent'
                 }`}
             />
 

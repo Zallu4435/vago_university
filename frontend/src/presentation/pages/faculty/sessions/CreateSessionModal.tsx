@@ -55,12 +55,15 @@ export default function CreateSessionModal({ setShowCreateModal, createSession }
       return;
     }
 
+    // Transform payload for backend
+    const { date, time, duration, tags, ...rest } = newSession;
+    const startTime = new Date(`${date}T${time}:00.000Z`).toISOString();
     createSession({
-      ...newSession,
-      id: 0, // Will be set by parent
+      ...rest,
+      startTime,
+      duration: Number(duration),
       maxAttendees: maxAttendeesNum,
-      tags: newSession.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-      status: 'upcoming',
+      tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
       isLive: false,
       hasRecording: false,
       attendees: 0,

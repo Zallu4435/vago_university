@@ -1,62 +1,20 @@
 import React, { useState } from 'react';
-import { FaSearch, FaPlus, FaEdit, FaTrash, FaPlay, FaStop, FaVideo, FaDownload, FaClock, FaCheck } from 'react-icons/fa';
+import { FaSearch, FaPlus, FaEdit, FaTrash, FaClock, FaCheck } from 'react-icons/fa';
 import CreateSessionModal from './CreateSessionModal';
 import EditSessionModal from './EditSessionModal';
-import RecordingModal from './RecordingModal';
 import { Session } from './types';
-
-const mockSessions: Session[] = [
-  {
-    id: 1,
-    title: 'Introduction to Databases',
-    instructor: 'Dr. Alice Smith',
-    course: 'Database Systems',
-    date: '2025-06-15',
-    time: '10:00',
-    duration: '2',
-    maxAttendees: 50,
-    description: 'Learn the basics of relational databases.',
-    tags: ['SQL', 'RDBMS'],
-    difficulty: 'beginner',
-    status: 'upcoming',
-    isLive: false,
-    hasRecording: false,
-    attendees: 0,
-    attendeeList: []
-  },
-  {
-    id: 2,
-    title: 'Advanced Web Development',
-    instructor: 'Prof. Bob Johnson',
-    course: 'Web Development',
-    date: '2025-06-10',
-    time: '14:00',
-    duration: '3',
-    maxAttendees: 30,
-    description: 'Explore modern frameworks like React.',
-    tags: ['React', 'JavaScript'],
-    difficulty: 'advanced',
-    status: 'completed',
-    isLive: false,
-    hasRecording: true,
-    recordingUrl: 'https://youtube.com/example',
-    attendees: 25,
-    attendeeList: [
-      { id: 'ST001', name: 'Carol Davis' },
-      { id: 'ST002', name: 'David Wilson' }
-    ]
-  }
-];
-
-const mockStudents = [
-  { id: 'ST001', name: 'Carol Davis' },
-  { id: 'ST002', name: 'David Wilson' },
-  { id: 'ST003', name: 'Emma Brown' },
-  { id: 'ST004', name: 'Frank Lee' }
-];
+import { useSessionManagement } from '../../../../application/hooks/useSessionManagement';
+import SessionDetailsModal from './SessionDetailsModal';
+import WarningModal from '../../../components/WarningModal';
 
 export default function SessionManagement() {
-  const [sessions, setSessions] = useState<Session[]>(mockSessions);
+  const {
+    sessions,
+    isLoading,
+    handleCreateSession,
+    handleUpdateSession,
+    handleDeleteSession,
+  } = useSessionManagement();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterCourse, setFilterCourse] = useState('all');
@@ -64,8 +22,11 @@ export default function SessionManagement() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showRecordingModal, setShowRecordingModal] = useState(false);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [sessionToDelete, setSessionToDelete] = useState<any>(null);
 
-  const filteredSessions = sessions.filter(session => {
+  const filteredSessions = sessions.filter((session: Session) => {
     const matchesSearch = session.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          session.instructor.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || session.status === filterStatus;
@@ -73,63 +34,21 @@ export default function SessionManagement() {
     return matchesSearch && matchesStatus && matchesCourse;
   });
 
-  const handleCreateSession = (newSession: Session) => {
-    setSessions([...sessions, { ...newSession, id: sessions.length + 1 }]);
+  const onCreateSession = async (newSession: any) => {
+    await handleCreateSession(newSession);
     setShowCreateModal(false);
   };
 
-  const handleEditSession = (updatedSession: Session) => {
-    setSessions(sessions.map(s => s.id === updatedSession.id ? updatedSession : s));
+  const onEditSession = async (updatedSession: any) => {
+    await handleUpdateSession(updatedSession._id || updatedSession.id, updatedSession);
     setShowEditModal(false);
     setSelectedSession(null);
   };
 
-  const handleDeleteSession = (id: number) => {
-    setSessions(sessions.filter(s => s.id !== id));
-  };
-
-  const handleToggleLive = (id: number) => {
-    setSessions(sessions.map(s => {
-      if (s.id === id) {
-        const isLive = !s.isLive;
-        let attendees = s.attendees;
-        let attendeeList = s.attendeeList || [];
-        if (isLive && !s.attendees) {
-          // Simulate automatic attendance when going live
-          attendees = Math.floor(Math.random() * s.maxAttendees) + 1;
-          const shuffledStudents = mockStudents.sort(() => Math.random() - 0.5);
-          attendeeList = shuffledStudents.slice(0, attendees);
-        }
-        return {
-          ...s,
-          isLive,
-          status: isLive ? 'live' : (new Date(s.date) < new Date() ? 'completed' : 'upcoming'),
-          attendees,
-          attendeeList
-        };
-      }
-      return s;
-    }));
-  };
-
-  const handleUploadRecording = (id: number, recordingUrl: string) => {
-    setSessions(sessions.map(s => s.id === id ? { ...s, hasRecording: true, recordingUrl } : s));
-    setShowRecordingModal(false);
-    setSelectedSession(null);
-  };
-
-  const handleExportAttendance = (session: Session) => {
-    const csvContent = [
-      ['Student ID', 'Name'],
-      ...(session.attendeeList || []).map(student => [student.id, student.name])
-    ].map(row => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${session.title}_attendance.csv`);
-    link.click();
-    URL.revokeObjectURL(url);
+  const onDeleteSession = async (id: string) => {
+    await handleDeleteSession(id);
+    setShowDeleteModal(false);
+    setSessionToDelete(null);
   };
 
   const getStatusConfig = (status: 'upcoming' | 'live' | 'completed') => {
@@ -229,43 +148,37 @@ export default function SessionManagement() {
                       <th className="px-6 py-4 text-left text-gray-900 font-bold uppercase">Title</th>
                       <th className="px-6 py-4 text-left text-gray-900 font-bold uppercase">Instructor</th>
                       <th className="px-6 py-4 text-left text-gray-900 font-bold uppercase">Course</th>
-                      <th className="px-6 py-4 text-left text-gray-900 font-bold uppercase">Date</th>
-                      <th className="px-6 py-4 text-left text-gray-900 font-bold uppercase">Time</th>
                       <th className="px-6 py-4 text-left text-gray-900 font-bold uppercase">Status</th>
-                      <th className="px-6 py-4 text-left text-gray-900 font-bold uppercase">Live</th>
                       <th className="px-6 py-4 text-left text-gray-900 font-bold uppercase">Attendees</th>
                       <th className="px-6 py-4 text-left text-gray-900 font-bold uppercase">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {filteredSessions.map((session, index) => {
+                    {filteredSessions.map((session: any, index: number) => {
                       const statusConfig = getStatusConfig(session.status);
                       return (
-                        <tr key={session.id} className="hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all animate-fadeInUp" style={{ animationDelay: `${index * 0.05}s` }}>
+                        <tr key={session._id || session.id} className="hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all animate-fadeInUp" style={{ animationDelay: `${index * 0.05}s` }}>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <p className="font-bold text-gray-900">{session.title}</p>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-gray-700">{session.instructor}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-gray-700">{session.course}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-gray-700">{new Date(session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-gray-700">{session.time}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold text-white bg-gradient-to-r ${statusConfig.color} shadow-lg`}>
                               {statusConfig.icon}
                               <span className="ml-2 capitalize">{session.status}</span>
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <button
-                              onClick={() => handleToggleLive(session.id)}
-                              className={`px-3 py-1 rounded-full text-white font-medium ${session.isLive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} transition-all`}
-                            >
-                              {session.isLive ? 'End' : 'Start'}
-                            </button>
-                          </td>
                           <td className="px-6 py-4 whitespace-nowrap text-gray-700">{session.attendees}/{session.maxAttendees}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => { setSelectedSession(session); setShowDetailsModal(true); }}
+                                className="p-3 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-xl transition-all border border-gray-200 hover:border-gray-300 hover:scale-110 transform"
+                                title="View"
+                              >
+                                View
+                              </button>
                               <button
                                 onClick={() => { setSelectedSession(session); setShowEditModal(true); }}
                                 className="p-3 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl transition-all border border-indigo-200 hover:border-indigo-300 hover:scale-110 transform"
@@ -274,25 +187,11 @@ export default function SessionManagement() {
                                 <FaEdit size={16} />
                               </button>
                               <button
-                                onClick={() => handleDeleteSession(session.id)}
+                                onClick={() => { setSessionToDelete(session); setShowDeleteModal(true); }}
                                 className="p-3 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl transition-all border border-red-200 hover:border-red-300 hover:scale-50 transform"
                                 title="Delete"
                               >
                                 <FaTrash size={16} />
-                              </button>
-                              <button
-                                onClick={() => { setSelectedSession(session); setShowRecordingModal(true); }}
-                                className="p-3 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl transition-all border border-blue-200 hover:border-blue-300 hover:scale-50 transform"
-                                title="Upload Recording"
-                              >
-                                <FaVideo size={16} />
-                              </button>
-                              <button
-                                onClick={() => handleExportAttendance(session)}
-                                className="p-3 bg-green-50 text-green-600 hover:bg-green-100 rounded-xl transition-all border border-green-200 hover:border-green-300 hover:scale-50 transform"
-                                title="Export Attendance"
-                              >
-                                <FaDownload size={16} />
                               </button>
                             </div>
                           </td>
@@ -324,23 +223,29 @@ export default function SessionManagement() {
       {showCreateModal && (
         <CreateSessionModal
           setShowCreateModal={setShowCreateModal}
-          createSession={handleCreateSession}
+          createSession={onCreateSession}
         />
       )}
       {showEditModal && selectedSession && (
         <EditSessionModal
           session={selectedSession}
           setShowEditModal={setShowEditModal}
-          editSession={handleEditSession}
+          editSession={onEditSession}
         />
       )}
-      {showRecordingModal && selectedSession && (
-        <RecordingModal
-          sessionId={selectedSession.id}
-          setShowRecordingModal={setShowRecordingModal}
-          uploadRecording={handleUploadRecording}
-        />
+      {showDetailsModal && selectedSession && (
+        <SessionDetailsModal session={selectedSession} onClose={() => setShowDetailsModal(false)} />
       )}
+      <WarningModal
+        isOpen={showDeleteModal}
+        onClose={() => { setShowDeleteModal(false); setSessionToDelete(null); }}
+        onConfirm={() => sessionToDelete && onDeleteSession(sessionToDelete._id || sessionToDelete.id)}
+        title="Delete Session"
+        message={`Are you sure you want to delete the session "${sessionToDelete?.title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 }

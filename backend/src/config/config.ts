@@ -28,4 +28,5 @@ export const config = {
     apiKey: process.env.CLOUDINARY_API_KEY!,
     apiSecret: process.env.CLOUDINARY_API_SECRET!,
   },
+  backendUrl: process.env.BACKEND_BASE_URL || 'http://localhost:5000',
 };

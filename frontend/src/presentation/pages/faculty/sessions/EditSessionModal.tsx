@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { Session } from './types';
 
@@ -9,11 +9,25 @@ interface EditSessionModalProps {
 }
 
 export default function EditSessionModal({ session, setShowEditModal, editSession }: EditSessionModalProps) {
-  const [editedSession, setEditedSession] = useState({
-    ...session,
-    maxAttendees: session.maxAttendees.toString(),
-    duration: session.duration.toString(),
-    tags: session.tags.join(', ')
+  // Extract date and time from startTime if present
+  function extractDateTime(startTime?: string) {
+    if (!startTime) return { date: '', time: '' };
+    const d = new Date(startTime);
+    const date = d.toISOString().slice(0, 10);
+    const time = d.toTimeString().slice(0, 5);
+    return { date, time };
+  }
+
+  const [editedSession, setEditedSession] = useState(() => {
+    const { date, time } = extractDateTime((session as any).startTime);
+    return {
+      ...session,
+      date: (session as any).date || date,
+      time: (session as any).time || time,
+      maxAttendees: session.maxAttendees.toString(),
+      duration: session.duration.toString(),
+      tags: session.tags.join(', ')
+    };
   });
   const [error, setError] = useState('');
 

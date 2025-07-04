@@ -8,11 +8,19 @@ import { io, Socket } from 'socket.io-client';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 
-const initialMessages = [
-  { id: 'm1', user: 'Alice Johnson', text: 'Welcome everyone to our meeting!', timestamp: '10:00' },
-  { id: 'm2', user: 'Bob Smith', text: 'Thanks for having us!', timestamp: '10:01' },
-  { id: 'm3', user: 'Charlie Brown', text: 'Can everyone see my screen?', timestamp: '10:02' },
-];
+interface Message {
+  id: string;
+  user: string;
+  text: string;
+  timestamp: string;
+}
+
+interface Reaction {
+  id: string;
+  emoji: string;
+  sender: string;
+  timestamp: number;
+}
 
 export const VideoConferencePage: React.FC = () => {
   const location = useLocation();
@@ -23,17 +31,23 @@ export const VideoConferencePage: React.FC = () => {
   };
 
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const [messages, setMessages] = useState(initialMessages);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [micOn, setMicOn] = useState(true);
   const [cameraOn, setCameraOn] = useState(true);
+  const [handRaised, setHandRaised] = useState(false);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
-  const [mediaReady, setMediaReady] = useState(false); // Add this state
+  const [mediaReady, setMediaReady] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [reactions, setReactions] = useState<Reaction[]>([]);
+  const [meetingSeconds, setMeetingSeconds] = useState(0);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [othersOpen, setOthersOpen] = useState(false);
+
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const peerConnections = useRef<{ [userId: string]: RTCPeerConnection }>({});
   const localStreamRef = useRef<MediaStream | null>(null);
   const myIdRef = useRef(faculty?.id || faculty?._id);
-  const [isConnected, setIsConnected] = useState(false);
 
   // Get user from Redux
   const user = useSelector((state: RootState) => state.auth.user);
@@ -63,7 +77,7 @@ export const VideoConferencePage: React.FC = () => {
         });
         localStreamRef.current = stream;
         setLocalStream(stream);
-        setMediaReady(true); // Set media ready state
+        setMediaReady(true);
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = stream;
         }
@@ -77,7 +91,7 @@ export const VideoConferencePage: React.FC = () => {
     initializeMedia();
   }, []);
 
-  // Socket connection effect - now depends on mediaReady
+  // Socket connection effect
   useEffect(() => {
     console.log('[Debug] useEffect running. userId:', userId, 'mediaReady:', mediaReady, 'isConnected:', isConnected);
     if (!userId || !mediaReady || isConnected) {
@@ -131,9 +145,10 @@ export const VideoConferencePage: React.FC = () => {
         id: p.userId,
         name: p.name,
         isHost: p.isHost,
-        videoOn: true,
-        audioOn: true,
-        handRaised: false
+        videoOn: p.cameraOn,
+        audioOn: p.micOn,
+        handRaised: p.handRaised,
+        isPresenting: p.isPresenting || false
       })));
     });
 
@@ -146,9 +161,10 @@ export const VideoConferencePage: React.FC = () => {
           id: user.id,
           name: user.name,
           isHost: user.isHost,
-          videoOn: true,
-          audioOn: true,
-          handRaised: false
+          videoOn: user.cameraOn,
+          audioOn: user.micOn,
+          handRaised: user.handRaised,
+          isPresenting: false
         }];
       });
       
@@ -166,6 +182,66 @@ export const VideoConferencePage: React.FC = () => {
         peerConnections.current[userId].close();
         delete peerConnections.current[userId];
       }
+    });
+
+    // Media state changes
+    socket.on('media-state-changed', (data) => {
+      console.log('[Socket] Media state changed:', data);
+      upsertParticipant({
+        id: data.userId,
+        audioOn: data.micOn,
+        videoOn: data.cameraOn,
+      });
+    });
+
+    // Hand raise changes
+    socket.on('hand-raise-changed', (data) => {
+      console.log('[Socket] Hand raise changed:', data);
+      upsertParticipant({
+        id: data.userId,
+        handRaised: data.handRaised,
+      });
+    });
+
+    // Emoji reactions
+    socket.on('reaction-received', (data) => {
+      console.log('[Socket] Reaction received:', data);
+      const newReaction: Reaction = {
+        id: data.id,
+        emoji: data.emoji,
+        sender: data.userName,
+        timestamp: data.timestamp
+      };
+      setReactions(prev => [...prev, newReaction]);
+    });
+
+    // Chat messages
+    socket.on('message-received', (data) => {
+      console.log('[Socket] Message received:', data);
+      const newMessage: Message = {
+        id: data.id,
+        user: data.userName,
+        text: data.text,
+        timestamp: new Date(data.timestamp).toLocaleTimeString().slice(0, 5)
+      };
+      setMessages(prev => [...prev, newMessage]);
+    });
+
+    // Screen sharing events
+    socket.on('screen-share-started', (data) => {
+      console.log('[Socket] Screen share started:', data);
+      upsertParticipant({
+        id: data.userId,
+        isPresenting: true,
+      });
+    });
+
+    socket.on('screen-share-stopped', (data) => {
+      console.log('[Socket] Screen share stopped:', data);
+      upsertParticipant({
+        id: data.userId,
+        isPresenting: false,
+      });
     });
 
     // WebRTC Signaling handlers
@@ -211,12 +287,9 @@ export const VideoConferencePage: React.FC = () => {
       }
     });
 
-    socket.on('media-state-changed', (data) => {
-      upsertParticipant({
-        id: data.userId,
-        audioOn: data.micOn,
-        videoOn: data.cameraOn,
-      });
+    // Handle socket errors
+    socket.on('error', (error) => {
+      console.error('[Socket] Error:', error);
     });
 
     // Cleanup
@@ -227,7 +300,7 @@ export const VideoConferencePage: React.FC = () => {
       peerConnections.current = {};
       setIsConnected(false);
     };
-  }, [userId, mediaReady, session, faculty, isHost]); // Add mediaReady to dependencies
+  }, [userId, mediaReady, session, faculty, isHost]);
 
   // Helper to create peer connection
   const createPeerConnection = (remoteUserId: string): RTCPeerConnection => {
@@ -296,19 +369,13 @@ export const VideoConferencePage: React.FC = () => {
     }
   };
 
-  // Rest of your UI state
-  const [handRaised, setHandRaised] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [othersOpen, setOthersOpen] = useState(false);
-  const [participantsOpen, setParticipantsOpen] = useState(false);
-  const [meetingSeconds, setMeetingSeconds] = useState(0);
-  const [reactions, setReactions] = useState<Array<{id: string, emoji: string, sender: string, timestamp: number}>>([]);
-
+  // Timer effect
   useEffect(() => {
     const interval = setInterval(() => setMeetingSeconds((s) => s + 1), 1000);
     return () => clearInterval(interval);
   }, []);
 
+  // Reactions cleanup effect
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
@@ -366,16 +433,30 @@ export const VideoConferencePage: React.FC = () => {
     });
   };
 
-  const handleToggleHand = () => setHandRaised((v) => !v);
+  const handleToggleHand = () => {
+    setHandRaised((prev) => {
+      const newState = !prev;
+      if (socketRef.current) {
+        socketRef.current.emit('hand-raise-changed', {
+          sessionId: session?.id || session?._id,
+          userId: myIdRef.current,
+          userName: faculty?.firstName + (faculty?.lastName ? ' ' + faculty.lastName : ''),
+          handRaised: newState,
+        });
+      }
+      return newState;
+    });
+  };
   
   const handleSendReaction = (emoji: string) => {
-    const newReaction = {
-      id: Date.now().toString(),
-      emoji,
-      sender: 'You',
-      timestamp: Date.now()
-    };
-    setReactions(prev => [...prev, newReaction]);
+    if (socketRef.current) {
+      socketRef.current.emit('send-reaction', {
+        sessionId: session?.id || session?._id,
+        userId: myIdRef.current,
+        userName: faculty?.firstName + (faculty?.lastName ? ' ' + faculty.lastName : ''),
+        emoji,
+      });
+    }
   };
 
   const handleLeave = () => {
@@ -392,18 +473,64 @@ export const VideoConferencePage: React.FC = () => {
     window.location.href = '/';
   };
 
-  const handleShareScreen = () => alert('Screen sharing started');
+  const handleShareScreen = async () => {
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true
+      });
+      
+      if (socketRef.current) {
+        socketRef.current.emit('screen-share-started', {
+          sessionId: session?.id || session?._id,
+          userId: myIdRef.current,
+          userName: faculty?.firstName + (faculty?.lastName ? ' ' + faculty.lastName : ''),
+        });
+      }
+      
+      // Replace video track in peer connections
+      Object.values(peerConnections.current).forEach(pc => {
+        const sender = pc.getSenders().find(s => s.track?.kind === 'video');
+        if (sender) {
+          sender.replaceTrack(screenStream.getVideoTracks()[0]);
+        }
+      });
+      
+      screenStream.getVideoTracks()[0].onended = () => {
+        // Screen sharing stopped
+        if (socketRef.current) {
+          socketRef.current.emit('screen-share-stopped', {
+            sessionId: session?.id || session?._id,
+            userId: myIdRef.current,
+            userName: faculty?.firstName + (faculty?.lastName ? ' ' + faculty.lastName : ''),
+          });
+        }
+        
+        // Restore camera
+        if (localStream) {
+          Object.values(peerConnections.current).forEach(pc => {
+            const sender = pc.getSenders().find(s => s.track?.kind === 'video');
+            if (sender) {
+              sender.replaceTrack(localStream.getVideoTracks()[0]);
+            }
+          });
+        }
+      };
+      
+    } catch (err) {
+      console.error('Error sharing screen:', err);
+    }
+  };
   
   const handleSendMessage = (message: string) => {
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `m${prev.length + 1}`,
-        user: 'You',
-        text: message,
-        timestamp: new Date().toLocaleTimeString().slice(0, 5),
-      },
-    ]);
+    if (socketRef.current) {
+      socketRef.current.emit('send-message', {
+        sessionId: session?.id || session?._id,
+        userId: myIdRef.current,
+        userName: faculty?.firstName + (faculty?.lastName ? ' ' + faculty.lastName : ''),
+        message,
+      });
+    }
   };
 
   // Keep own participant state in sync
@@ -421,7 +548,7 @@ export const VideoConferencePage: React.FC = () => {
 
   return (
     <div className="w-screen h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col overflow-hidden">
-      <TopBar sessionName="Product Strategy Meeting" meetingTimer={meetingTimer} />
+      <TopBar sessionName={session?.name || "Video Conference"} meetingTimer={meetingTimer} />
       
       {/* Connection Status */}
       {!mediaReady && (
@@ -434,6 +561,11 @@ export const VideoConferencePage: React.FC = () => {
           Connecting...
         </div>
       )}
+      {isConnected && (
+        <div className="absolute top-20 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm z-50">
+          Connected
+        </div>
+      )}
       
       {/* Reactions Overlay */}
       <div className="fixed inset-0 pointer-events-none z-40">
@@ -443,7 +575,8 @@ export const VideoConferencePage: React.FC = () => {
             className="absolute bottom-32 left-8 animate-reaction-flow"
             style={{
               animationDelay: `${index * 0.1}s`,
-              animationDuration: '3s'
+              animationDuration: '3s',
+              left: `${8 + (index % 3) * 60}px`
             }}
           >
             <div className="flex flex-col items-start">
@@ -467,12 +600,12 @@ export const VideoConferencePage: React.FC = () => {
         />
         
         {/* Others Button */}
-        {participants.length > 0 && (
+        {participants.length > 1 && (
           <button
             onClick={() => setOthersOpen(true)}
             className="absolute bottom-28 right-4 px-4 py-2 bg-gray-800/90 backdrop-blur-sm text-white rounded-full shadow-lg z-30 hover:bg-gray-700 transition-all duration-200 border border-gray-600/50 font-medium"
           >
-            +{participants.length} others
+            +{participants.length - 1} others
           </button>
         )}
         
@@ -482,7 +615,7 @@ export const VideoConferencePage: React.FC = () => {
             <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden">
               <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-800">
-                  Other Participants ({participants.length})
+                  Participants ({participants.length})
                 </h2>
                 <button
                   onClick={() => setOthersOpen(false)}
@@ -501,7 +634,7 @@ export const VideoConferencePage: React.FC = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-gray-800 truncate">
-                          {participant.name}
+                          {participant.name} {participant.id === myIdRef.current && '(You)'}
                         </div>
                         <div className="flex items-center gap-2 mt-1">
                           {participant.isHost && (
@@ -552,6 +685,28 @@ export const VideoConferencePage: React.FC = () => {
         cameraOn={cameraOn}
         handRaised={handRaised}
       />
+      
+      {/* CSS for reaction animation */}
+      <style jsx>{`
+        @keyframes reaction-flow {
+          0% {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+          }
+          50% {
+            transform: translateY(-50px) scale(1.2);
+            opacity: 0.8;
+          }
+          100% {
+            transform: translateY(-100px) scale(0.8);
+            opacity: 0;
+          }
+        }
+        
+        .animate-reaction-flow {
+          animation: reaction-flow 3s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 };

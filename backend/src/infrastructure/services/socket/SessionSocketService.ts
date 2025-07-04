@@ -48,7 +48,10 @@ export const setupSessionSocketHandlers = (io: Server) => {
             userId: user.userId,
             name: user.username,
             isHost: !!user.isHost,
-            socketId: socket.id // Store socket ID for direct targeting
+            socketId: socket.id,
+            micOn: true,
+            cameraOn: true,
+            handRaised: false
           });
         } else {
           // Update socket ID if user reconnects
@@ -65,7 +68,10 @@ export const setupSessionSocketHandlers = (io: Server) => {
         socket.to(sessionId).emit('user-joined', {
           id: user.userId,
           name: user.username,
-          isHost: !!user.isHost
+          isHost: !!user.isHost,
+          micOn: true,
+          cameraOn: true,
+          handRaised: false
         });
 
         // Update database
@@ -92,6 +98,7 @@ export const setupSessionSocketHandlers = (io: Server) => {
       }
     });
 
+    // WebRTC signaling handlers
     socket.on('video-offer', (data) => {
       console.log(`[SessionSocketService] Received video-offer from ${data.from} to ${data.to}`);
       
@@ -105,7 +112,6 @@ export const setupSessionSocketHandlers = (io: Server) => {
           logRoomState(data.sessionId);
         }
       } else {
-        // Broadcast to all in room except sender
         socket.to(data.sessionId).emit('video-offer', data);
       }
     });
@@ -144,9 +150,111 @@ export const setupSessionSocketHandlers = (io: Server) => {
       }
     });
 
+    // Media state changes (mic, camera)
     socket.on('media-state-changed', (data) => {
       console.log(`[SessionSocketService] media-state-changed event:`, data);
+      
+      // Update participant in memory
+      if (sessionParticipants[data.sessionId]) {
+        const participant = sessionParticipants[data.sessionId].find(p => p.userId === data.userId);
+        if (participant) {
+          participant.micOn = data.micOn;
+          participant.cameraOn = data.cameraOn;
+        }
+      }
+      
+      // Broadcast to all other participants
       socket.to(data.sessionId).emit('media-state-changed', data);
+    });
+
+    // Hand raise/lower
+    socket.on('hand-raise-changed', (data) => {
+      console.log(`[SessionSocketService] hand-raise-changed event:`, data);
+      
+      // Update participant in memory
+      if (sessionParticipants[data.sessionId]) {
+        const participant = sessionParticipants[data.sessionId].find(p => p.userId === data.userId);
+        if (participant) {
+          participant.handRaised = data.handRaised;
+        }
+      }
+      
+      // Broadcast to all other participants
+      socket.to(data.sessionId).emit('hand-raise-changed', {
+        userId: data.userId,
+        userName: data.userName,
+        handRaised: data.handRaised,
+        sessionId: data.sessionId
+      });
+    });
+
+    // Emoji reactions
+    socket.on('send-reaction', (data) => {
+      console.log(`[SessionSocketService] send-reaction event:`, data);
+      
+      // Broadcast reaction to all participants including sender
+      io.to(data.sessionId).emit('reaction-received', {
+        id: Date.now().toString() + Math.random(),
+        emoji: data.emoji,
+        userId: data.userId,
+        userName: data.userName,
+        timestamp: Date.now(),
+        sessionId: data.sessionId
+      });
+    });
+
+    // Chat messages
+    socket.on('send-message', (data) => {
+      console.log(`[SessionSocketService] send-message event:`, data);
+      
+      // Broadcast message to all participants
+      io.to(data.sessionId).emit('message-received', {
+        id: Date.now().toString() + Math.random(),
+        userId: data.userId,
+        userName: data.userName,
+        text: data.message,
+        timestamp: new Date().toISOString(),
+        sessionId: data.sessionId
+      });
+    });
+
+    // Screen sharing
+    socket.on('screen-share-started', (data) => {
+      console.log(`[SessionSocketService] screen-share-started event:`, data);
+      
+      // Update participant in memory
+      if (sessionParticipants[data.sessionId]) {
+        const participant = sessionParticipants[data.sessionId].find(p => p.userId === data.userId);
+        if (participant) {
+          participant.isPresenting = true;
+        }
+      }
+      
+      // Broadcast to all other participants
+      socket.to(data.sessionId).emit('screen-share-started', {
+        userId: data.userId,
+        userName: data.userName,
+        sessionId: data.sessionId
+      });
+    });
+
+    socket.on('screen-share-stopped', (data) => {
+      console.log(`[SessionSocketService] screen-share-stopped event:`, data);
+      
+      // Update participant in memory
+      if (sessionParticipants[data.sessionId]) {
+        const participant = sessionParticipants[data.sessionId].find(p => p.userId === data.userId);
+        if (participant) {
+          participant.isPresenting = false;
+        }
+      }
+      
+      // Broadcast to all other participants
+      socket.to(data.sessionId).emit('screen-share-stopped', {
+        userId: data.userId,
+        userName: data.userName,
+        sessionId: data.sessionId
+      });
     });
 
     socket.on('disconnect', (reason) => {
@@ -160,7 +268,10 @@ export const setupSessionSocketHandlers = (io: Server) => {
         }
         
         // Broadcast user-left to remaining participants
-        socket.to(currentSessionId).emit('user-left', { userId: currentUserId });
+        socket.to(currentSessionId).emit('user-left', { 
+          userId: currentUserId,
+          userName: currentUserName 
+        });
       }
     });
 

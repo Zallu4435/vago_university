@@ -6,7 +6,7 @@ import SiteSectionModal from '../SiteSectionModal';
 import { SiteSection } from "../../../application/services/siteSections.service";
 
 export const ArticleGrid: React.FC = () => {
-  const { data: highlights, isLoading, error } = useHighlights();
+  const { data: highlights, isLoading, error } = useHighlights({ limit: 4 });
   const [selectedHighlight, setSelectedHighlight] = useState<SiteSection | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 

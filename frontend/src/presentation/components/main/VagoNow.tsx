@@ -6,7 +6,7 @@ import SiteSectionModal from '../SiteSectionModal';
 import { SiteSection } from "../../../application/services/siteSections.service";
 
 export const VagoNow: React.FC = () => {
-    const { data: vagoNowItems, isLoading, error } = useVagoNow();
+    const { data: vagoNowItems, isLoading, error } = useVagoNow({ limit: 5 });
     const [selectedItem, setSelectedItem] = useState<SiteSection | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 

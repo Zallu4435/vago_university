@@ -5,6 +5,8 @@ export interface GetUserSiteSectionsRequestDTO {
   sectionKey: SiteSectionKey;
   page?: number;
   limit?: number;
+  search?: string;
+  category?: string;
 }
 
 // Response DTOs for user-side

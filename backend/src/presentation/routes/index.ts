@@ -25,10 +25,13 @@ import siteSectionRoutes from '../http/site-management/siteSectionRoutes'
 import userSiteSectionRoutes from '../http/site-management/userSiteSectionRoutes'
 import enquiryRoutes from '../http/enquiry/enquiryRouter'
 import sessionRoutes from '../http/session/sessionRoutes'
+import facultyDashboardRoutes from './facultyDashboard.routes'
+import dashboardRoutes from '../http/admin/dashboardRouter'
 
 const router = Router();
 
 router.use('/faculty/sessions', sessionRoutes);
+router.use('/faculty/dashboard', facultyDashboardRoutes);
 
 router.use("/diploma-courses", userDiplomaRoutes);
 
@@ -43,6 +46,8 @@ router.use('/fcm', fcmTokenRoute)
 router.use("/admission", admissionRoutes);
 
 router.use("/admin/admissions", adminRoutes);
+
+router.use("/admin/dashboard", dashboardRoutes);
 
 router.use("/admin/faculty", facultyRoutes);
 

@@ -10,7 +10,7 @@ export class UserSiteSectionController {
 
   async getSections(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      const { sectionKey, page = 1, limit = 10 } = httpRequest.query;
+      const { sectionKey, page = 1, limit = 10, search, category } = httpRequest.query;
 
       if (!sectionKey || typeof sectionKey !== 'string') {
         return {
@@ -58,9 +58,12 @@ export class UserSiteSectionController {
         sectionKey: mappedSectionKey,
         page: pageNum,
         limit: limitNum,
+        search: search as string,
+        category: category as string,
       };
 
       const result = await this.getUserSiteSectionsUseCase.execute(params);
+      
       if (!result.success) {
         return {
           statusCode: 400,

@@ -355,3 +355,26 @@ export interface IVideoSessionController extends IController {
   getSessionAttendance(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   updateAttendanceStatus(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
+
+export interface IFacultyDashboardController extends IController {
+  getDashboardStats(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getDashboardData(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getWeeklyAttendance(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getCoursePerformance(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getSessionDistribution(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getRecentActivities(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getSystemStatus(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}
+
+export interface IAdminDashboardController extends IController {
+  getDashboardData(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getDashboardMetrics(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getUserGrowthData(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getRevenueData(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getPerformanceData(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getRecentActivities(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getSystemAlerts(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  refreshDashboard(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  dismissAlert(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  markActivityAsRead(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+}

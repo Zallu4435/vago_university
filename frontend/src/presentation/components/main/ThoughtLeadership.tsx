@@ -6,7 +6,7 @@ import SiteSectionModal from '../SiteSectionModal';
 import { SiteSection } from "../../../application/services/siteSections.service";
 
 export const ThoughtLeadership: React.FC = () => {
-  const { data: leadershipItems, isLoading, error } = useLeadership(2);
+  const { data: leadershipItems, isLoading, error } = useLeadership({ limit: 2 });
   const [selectedItem, setSelectedItem] = useState<SiteSection | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 

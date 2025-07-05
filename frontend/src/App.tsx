@@ -27,7 +27,7 @@ import { About } from './presentation/pages/main/About';
 import LoginPage from './presentation/pages/Auth/Login';
 import RegisterPage from './presentation/pages/Auth/Register';
 import { ApplicationForm } from './presentation/pages/ApplicationForm';
-import UniversityAdminDashboard from './presentation/pages/admin/Dasboard';
+import AdminDashboard from './presentation/pages/admin/Dasboard';
 import UserManagement from './presentation/pages/admin/User/UserManagement';
 import { UGHome } from './presentation/pages/ug_admissions/UGHome';
 import { UGAdmissions } from './presentation/pages/ug_admissions/UGAdmissions';
@@ -177,7 +177,7 @@ const App: React.FC = () => {
         {/* Admin Routes (admin only) */}
         <Route element={<ProtectedRoute allowedCollections={['admin']} />}>
           <Route element={<AdminLayout />}>
-            <Route path="admin" element={<UniversityAdminDashboard />} />
+            <Route path="admin" element={<AdminDashboard />} />
             <Route path="admin/user" element={<UserManagement />} />
             <Route path="admin/faculty" element={<FacultyManagement />} />
             <Route path="admin/course-management" element={<AdminCourseManagement />} />

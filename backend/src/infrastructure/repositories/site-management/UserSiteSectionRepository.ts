@@ -18,9 +18,24 @@ function toUserDTO(doc: any): UserSiteSectionDTO {
 
 export class UserSiteSectionRepository implements IUserSiteSectionRepository {
   async getUserSections(params: GetUserSiteSectionsRequestDTO): Promise<GetUserSiteSectionsResponseDTO> {
-    const { sectionKey, page = 1, limit = 10 } = params;
+    const { sectionKey, page = 1, limit = 10, search, category } = params;
     
     const query: any = { sectionKey };
+    
+    // Add search functionality only if search is provided and not empty
+    if (search && search.trim() !== '') {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { category: { $regex: search, $options: 'i' } },
+      ];
+    }
+    
+    // Add category filter only if category is provided and not empty
+    if (category && category.trim() !== '') {
+      query.category = category;
+    }
+    
     const skip = (page - 1) * limit;
 
     const [docs, total] = await Promise.all([

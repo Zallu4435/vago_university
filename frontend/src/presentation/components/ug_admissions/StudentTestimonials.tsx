@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import testmonials1 from '../../../assets/images/ug-programs/testmonials/testmonials1.png'
+import testmonials2 from '../../../assets/images/ug-programs/testmonials/testmonials2.jpg';
+import testmonials3 from '../../../assets/images/ug-programs/testmonials/testmonials3.jpg'
 
 const StudentTestimonials = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -10,21 +13,21 @@ const StudentTestimonials = () => {
       name: 'Victoria Lim',
       faculty: 'College of Humanities and Sciences (Psychology)',
       quote: '"The interdisciplinary curriculum exposed me to so many different perspectives – philosophy, history, science, statistics and more – encouraging me to venture beyond my interests and expand my comfort zone."',
-      image: '/api/placeholder/300/400'
+      image: testmonials1
     },
     {
       id: 2,
       name: 'Ahmad Khan',
       faculty: 'School of Computing',
       quote: '"The vibrant tech community and innovative research opportunities at NUS have empowered me to develop solutions that can make a real impact on society."',
-      image: '/api/placeholder/300/400'
+      image: testmonials2
     },
     {
       id: 3,
       name: 'Sarah Chen',
       faculty: 'Faculty of Engineering',
       quote: '"Working alongside brilliant professors and industry partners has given me practical experience and connections that have been invaluable for my career development."',
-      image: '/api/placeholder/300/400'
+      image: testmonials3
     }
   ];
 
@@ -59,7 +62,7 @@ const StudentTestimonials = () => {
           {/* Left navigation button */}
           <button 
             onClick={prevSlide}
-            className="absolute left-2 z-10 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-full p-2 transition-all duration-300 focus:outline-none shadow-sm hover:shadow-md"
+            className="absolute left-2 z-20 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-full p-2 transition-all duration-300 focus:outline-none shadow-sm hover:shadow-md"
             aria-label="Previous testimonial"
           >
             <FaChevronLeft size={20} className="sm:w-6 sm:h-6" />
@@ -75,14 +78,14 @@ const StudentTestimonials = () => {
                 }`}
               >
                 <div className="lg:w-1/3 relative mb-4 lg:mb-0">
-                  <div className="relative">
-                    <div className="w-full h-full absolute bg-cyan-100 rounded-lg -top-2 -left-2 z-0"></div>
-                    <div className="w-full h-full absolute bg-blue-100 rounded-lg -bottom-2 -right-2 z-0"></div>
-                    <div className="relative z-10 rounded-lg overflow-hidden shadow-sm">
+                  <div className="relative w-full h-48 lg:h-56">
+                    <div className="absolute inset-0 bg-cyan-100 rounded-lg -top-2 -left-2 z-0"></div>
+                    <div className="absolute inset-0 bg-blue-100 rounded-lg -bottom-2 -right-2 z-0"></div>
+                    <div className="absolute inset-0 z-10 rounded-lg overflow-hidden shadow-sm">
                       <img 
                         src={testimonial.image} 
                         alt={testimonial.name} 
-                        className="w-full h-48 lg:h-auto object-cover"
+                        className="w-full h-full object-cover"
                       />
                     </div>
                   </div>
@@ -104,7 +107,7 @@ const StudentTestimonials = () => {
           {/* Right navigation button */}
           <button 
             onClick={nextSlide}
-            className="absolute right-2 z-10 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-full p-2 transition-all duration-300 focus:outline-none shadow-sm hover:shadow-md"
+            className="absolute right-2 z-20 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-full p-2 transition-all duration-300 focus:outline-none shadow-sm hover:shadow-md"
             aria-label="Next testimonial"
           >
             <FaChevronRight size={20} className="sm:w-6 sm:h-6" />

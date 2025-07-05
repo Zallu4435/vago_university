@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FaGraduationCap,
   FaGlobe,
@@ -15,11 +15,27 @@ import {
   FaPaperPlane,
   FaListAlt,
   FaUmbrellaBeach,
+  FaBars,
+  FaTimes,
 } from 'react-icons/fa';
+import { useSearchParams } from 'react-router-dom';
 
 export default function ScholarshipComponent() {
+  const [searchParams] = useSearchParams();
   const [activeNavItem, setActiveNavItem] = useState('Sports Scholarships');
-  const [expandedSections, setExpandedSections] = useState({});
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Set active navigation item from URL parameter on component mount
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl) {
+      const decodedTab = decodeURIComponent(tabFromUrl);
+      if (['Scholarships for Freshman (Our Citizen)', 'Undergraduate Scholarships', 'Global Merit Scholarships', 'Sports Scholarships', 'Entrepreneur Scholarships', 'Beach Scholarships'].includes(decodedTab)) {
+        setActiveNavItem(decodedTab);
+      }
+    }
+  }, [searchParams]);
 
   const navItems = [
     { name: 'Scholarships for Freshman (Our Citizen)', icon: FaUser },
@@ -30,11 +46,16 @@ export default function ScholarshipComponent() {
     { name: 'Beach Scholarships', icon: FaUmbrellaBeach },
   ];
 
-  const toggleSection = (sectionId) => {
+  const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) => ({
       ...prev,
       [sectionId]: !prev[sectionId],
     }));
+  };
+
+  const handleNavItemClick = (itemName: string) => {
+    setActiveNavItem(itemName);
+    setIsMobileMenuOpen(false);
   };
 
   const getContentForNavItem = () => {
@@ -189,7 +210,7 @@ export default function ScholarshipComponent() {
                 'Demonstrated leadership through co-curricular activities or community initiatives.',
                 'Strong English proficiency (IELTS 7.0, TOEFL iBT 100, or equivalent).',
                 'Applying for a full-time undergraduate program at NUS.',
-                'Commitment to contribute to NUS’s diverse and global community.',
+                'Commitment to contribute to NUS\'s diverse and global community.',
                 'Must not hold other full scholarships or sponsorships.',
               ],
             },
@@ -350,7 +371,7 @@ export default function ScholarshipComponent() {
                 'Strong academic record: Minimum 3 H2 distinctions or equivalent (e.g., IB 38+, GPA 3.7+)',
                 'Demonstrated entrepreneurial achievements (e.g., startups, business competitions, or innovative projects)',
                 'Leadership in entrepreneurial or innovation-related co-curricular activities',
-                'Commitment to contribute to NUS’s entrepreneurial ecosystem',
+                'Commitment to contribute to NUS\'s entrepreneurial ecosystem',
                 'Must not hold other full scholarships or sponsorships',
               ],
             },
@@ -426,7 +447,7 @@ export default function ScholarshipComponent() {
                 'Strong academic record: Minimum 3 H2 distinctions or equivalent (e.g., IB 38+, GPA 3.7+)',
                 'Demonstrated excellence in beach-related sports or activities (e.g., beach volleyball, surfing, or coastal conservation)',
                 'Leadership in environmental or community initiatives related to coastal areas',
-                'Commitment to contribute to NUS’s sustainability and coastal community efforts',
+                'Commitment to contribute to NUS\'s sustainability and coastal community efforts',
                 'Must not hold other full scholarships or sponsorships',
               ],
             },
@@ -579,32 +600,49 @@ export default function ScholarshipComponent() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-cyan-50 via-white to-cyan-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-16 px-8">
+      <div className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-8 sm:py-12 md:py-16 px-4 sm:px-6 md:px-8">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl font-bold text-white mb-2">UNDERGRADUATE SCHOLARSHIPS</h1>
-          <p className="text-cyan-200 text-lg">Scholarships for Freshmen and International Students</p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 text-center sm:text-left">
+            UNDERGRADUATE SCHOLARSHIPS
+          </h1>
+          <p className="text-cyan-200 text-base sm:text-lg text-center sm:text-left">
+            Scholarships for Freshmen and International Students
+          </p>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto flex gap-8 p-8">
+      <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8 p-4 sm:p-6 lg:p-8">
+        {/* Mobile Menu Toggle */}
+        <div className="lg:hidden">
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-4 py-3 rounded-lg font-medium flex items-center justify-between"
+          >
+            <span>Scholarship Types</span>
+            {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
+          </button>
+        </div>
+
         {/* Sidebar Navigation */}
-        <div className="lg:w-80 bg-gradient-to-b from-cyan-50 to-white border border-cyan-100 rounded-xl shadow-md backdrop-blur-sm h-fit">
-          <nav className="p-6">
+        <div className={`lg:w-80 bg-gradient-to-b from-cyan-50 to-white border border-cyan-100 rounded-xl shadow-md backdrop-blur-sm h-fit ${
+          isMobileMenuOpen ? 'block' : 'hidden lg:block'
+        }`}>
+          <nav className="p-4 sm:p-6">
             {navItems.map((item, index) => {
               const Icon = item.icon;
               const isActive = item.name === activeNavItem;
               return (
                 <button
                   key={index}
-                  onClick={() => setActiveNavItem(item.name)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 mb-2 rounded-lg text-left transition-all duration-300 ${
+                  onClick={() => handleNavItemClick(item.name)}
+                  className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2 sm:py-3 mb-2 rounded-lg text-left transition-all duration-300 text-sm sm:text-base ${
                     isActive
                       ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg transform scale-[1.02]'
                       : 'text-cyan-700 hover:bg-cyan-50 hover:text-cyan-800 hover:shadow-md'
                   }`}
                 >
                   <Icon
-                    className={`text-lg ${isActive ? 'text-cyan-200' : 'text-cyan-400 group-hover:text-cyan-600'}`}
+                    className={`text-base sm:text-lg ${isActive ? 'text-cyan-200' : 'text-cyan-400 group-hover:text-cyan-600'}`}
                   />
                   <span className="font-medium">{item.name}</span>
                 </button>
@@ -615,44 +653,44 @@ export default function ScholarshipComponent() {
 
         {/* Main Content */}
         <div className="flex-1">
-          <div className="bg-white/80 rounded-xl shadow-lg border border-cyan-100 backdrop-blur-sm p-8">
-            <h2 className="text-3xl font-bold text-cyan-800 mb-8 flex items-center gap-3">
-              {navItems.find((item) => item.name === activeNavItem)?.icon({ className: 'text-yellow-400' })}
-              {currentContent.title}
+          <div className="bg-white/80 rounded-xl shadow-lg border border-cyan-100 backdrop-blur-sm p-4 sm:p-6 lg:p-8">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-cyan-800 mb-4 sm:mb-6 lg:mb-8 flex items-center gap-2 sm:gap-3">
+              {navItems.find((item) => item.name === activeNavItem)?.icon({ className: 'text-yellow-400 text-lg sm:text-xl lg:text-2xl' })}
+              <span className="break-words">{currentContent.title}</span>
             </h2>
 
             {/* Info Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white/80 rounded-xl p-6 border border-cyan-100 shadow-md transform hover:-translate-y-1 transition-all duration-300">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+              <div className="bg-white/80 rounded-xl p-4 sm:p-6 border border-cyan-100 shadow-md transform hover:-translate-y-1 transition-all duration-300">
                 <div className="flex items-center gap-2 text-cyan-800 font-semibold mb-2">
-                  <FaGraduationCap className="text-cyan-600" />
-                  Scholarship Type:
+                  <FaGraduationCap className="text-cyan-600 text-sm sm:text-base" />
+                  <span className="text-sm sm:text-base">Scholarship Type:</span>
                 </div>
-                <p className="text-cyan-700">University Level</p>
+                <p className="text-cyan-700 text-sm sm:text-base">University Level</p>
               </div>
-              <div className="bg-white/80 rounded-xl p-6 border border-cyan-100 shadow-md transform hover:-translate-y-1 transition-all duration-300">
+              <div className="bg-white/80 rounded-xl p-4 sm:p-6 border border-cyan-100 shadow-md transform hover:-translate-y-1 transition-all duration-300">
                 <div className="flex items-center gap-2 text-cyan-800 font-semibold mb-2">
-                  <FaFlag className="text-cyan-600" />
-                  Nationality:
+                  <FaFlag className="text-cyan-600 text-sm sm:text-base" />
+                  <span className="text-sm sm:text-base">Nationality:</span>
                 </div>
-                <p className="text-cyan-700">
+                <p className="text-cyan-700 text-sm sm:text-base">
                   {activeNavItem === 'Global Merit Scholarships' || activeNavItem === 'Entrepreneur Scholarships' || activeNavItem === 'Beach Scholarships'
                     ? 'Open to All'
                     : 'Singapore Citizens'}
                 </p>
               </div>
-              <div className="bg-white/80 rounded-xl p-6 border border-cyan-100 shadow-md transform hover:-translate-y-1 transition-all duration-300">
+              <div className="bg-white/80 rounded-xl p-4 sm:p-6 border border-cyan-100 shadow-md transform hover:-translate-y-1 transition-all duration-300 sm:col-span-2 lg:col-span-1">
                 <div className="flex items-center gap-2 text-cyan-800 font-semibold mb-2">
-                  <FaUserGraduate className="text-cyan-600" />
-                  Student Type:
+                  <FaUserGraduate className="text-cyan-600 text-sm sm:text-base" />
+                  <span className="text-sm sm:text-base">Student Type:</span>
                 </div>
-                <p className="text-cyan-700">Freshmen</p>
+                <p className="text-cyan-700 text-sm sm:text-base">Freshmen</p>
               </div>
             </div>
 
             {/* Description */}
-            <div className="mb-8 p-6 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-100 shadow-md backdrop-blur-sm">
-              <p className="text-cyan-700 leading-relaxed mb-4">
+            <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-100 shadow-md backdrop-blur-sm">
+              <p className="text-cyan-700 leading-relaxed mb-3 sm:mb-4 text-sm sm:text-base">
                 {activeNavItem === 'Scholarships for Freshman (Our Citizen)'
                   ? 'The Scholarships for Freshman (Singapore Citizens) support outstanding Singaporean students with strong academic and leadership records, fostering their contributions to NUS and the community.'
                   : activeNavItem === 'Undergraduate Scholarships'
@@ -662,26 +700,26 @@ export default function ScholarshipComponent() {
                   : activeNavItem === 'Sports Scholarships'
                   ? 'The NUS Sports Scholarship is awarded to highly-talented individuals who possess outstanding academic and sports participation records, committed to elevating NUS sports.'
                   : activeNavItem === 'Entrepreneur Scholarships'
-                  ? 'The NUS Entrepreneur Scholarship supports students with entrepreneurial talent, fostering innovation and leadership within NUS’s startup ecosystem.'
-                  : 'The NUS Beach Scholarship supports students excelling in beach-related sports or coastal conservation, contributing to NUS’s sustainability and community efforts.'}
+                  ? 'The NUS Entrepreneur Scholarship supports students with entrepreneurial talent, fostering innovation and leadership within NUS\'s startup ecosystem.'
+                  : 'The NUS Beach Scholarship supports students excelling in beach-related sports or coastal conservation, contributing to NUS\'s sustainability and community efforts.'}
               </p>
-              <p className="text-cyan-700 leading-relaxed">
-                Interested students should submit <span className="font-semibold text-cyan-800">one scholarship application</span> during the admission process to be considered for eligible scholarships.[](https://www.shiksha.com/studyabroad/scholarships/nus-international-undergraduate-scholarship)
+              <p className="text-cyan-700 leading-relaxed text-sm sm:text-base">
+                Interested students should submit <span className="font-semibold text-cyan-800">one scholarship application</span> during the admission process to be considered for eligible scholarships.
               </p>
             </div>
 
             {/* Expand All Button */}
-            <div className="flex justify-end mb-6">
+            <div className="flex justify-end mb-4 sm:mb-6">
               <button
                 onClick={() => {
                   const allExpanded = currentContent.sections.every((section) => expandedSections[section.id]);
-                  const newState = {};
+                  const newState: Record<string, boolean> = {};
                   currentContent.sections.forEach((section) => {
                     newState[section.id] = !allExpanded;
                   });
                   setExpandedSections(newState);
                 }}
-                className="text-cyan-600 hover:text-cyan-800 font-medium flex items-center gap-2 transition-colors"
+                className="text-cyan-600 hover:text-cyan-800 font-medium flex items-center gap-2 transition-colors text-sm sm:text-base"
               >
                 Expand All
                 <FaChevronDown className="text-sm" />
@@ -689,7 +727,7 @@ export default function ScholarshipComponent() {
             </div>
 
             {/* Expandable Sections */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {currentContent.sections.map((section) => {
                 const Icon = section.icon;
                 const isExpanded = expandedSections[section.id];
@@ -697,27 +735,27 @@ export default function ScholarshipComponent() {
                   <div key={section.id} className="border border-cyan-100 rounded-xl overflow-hidden shadow-md">
                     <button
                       onClick={() => toggleSection(section.id)}
-                      className="w-full bg-cyan-50 hover:bg-cyan-100 px-6 py-4 flex items-center justify-between transition-colors group"
+                      className="w-full bg-cyan-50 hover:bg-cyan-100 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between transition-colors group"
                     >
-                      <div className="flex items-center gap-3">
-                        <Icon className="text-cyan-600 group-hover:text-cyan-800 transition-colors" />
-                        <span className="font-semibold text-cyan-800 group-hover:text-cyan-900 transition-colors">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <Icon className="text-cyan-600 group-hover:text-cyan-800 transition-colors text-sm sm:text-base" />
+                        <span className="font-semibold text-cyan-800 group-hover:text-cyan-900 transition-colors text-sm sm:text-base">
                           {section.title}
                         </span>
                       </div>
                       {isExpanded ? (
-                        <FaChevronUp className="text-cyan-600 group-hover:text-cyan-800 transition-colors" />
+                        <FaChevronUp className="text-cyan-600 group-hover:text-cyan-800 transition-colors text-sm" />
                       ) : (
-                        <FaChevronDown className="text-cyan-600 group-hover:text-cyan-800 transition-colors" />
+                        <FaChevronDown className="text-cyan-600 group-hover:text-cyan-800 transition-colors text-sm" />
                       )}
                     </button>
                     {isExpanded && (
-                      <div className="p-6 bg-white/80 backdrop-blur-sm animate-in slide-in-from-top-2 duration-200">
-                        <ul className="space-y-3">
+                      <div className="p-4 sm:p-6 bg-white/80 backdrop-blur-sm animate-in slide-in-from-top-2 duration-200">
+                        <ul className="space-y-2 sm:space-y-3">
                           {section.content.map((item, idx) => (
-                            <li key={idx} className="flex items-start gap-3">
-                              <FaCheck className="text-cyan-600 mt-1 flex-shrink-0" />
-                              <span className="text-cyan-700 leading-relaxed">{item}</span>
+                            <li key={idx} className="flex items-start gap-2 sm:gap-3">
+                              <FaCheck className="text-cyan-600 mt-1 flex-shrink-0 text-xs sm:text-sm" />
+                              <span className="text-cyan-700 leading-relaxed text-sm sm:text-base">{item}</span>
                             </li>
                           ))}
                         </ul>
@@ -729,10 +767,10 @@ export default function ScholarshipComponent() {
             </div>
 
             {/* Apply Button */}
-            <div className="mt-8 text-center">
-              <button className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-3 mx-auto">
-                <FaPaperPlane />
-                Apply for Scholarship
+            <div className="mt-6 sm:mt-8 text-center">
+              <button className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2 sm:gap-3 mx-auto">
+                <FaPaperPlane className="text-sm sm:text-base" />
+                <span>Apply for Scholarship</span>
               </button>
             </div>
           </div>

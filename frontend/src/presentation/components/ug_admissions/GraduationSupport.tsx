@@ -1,23 +1,28 @@
+// Import images from assets
+import entrepreneurshipImage from '../../../assets/images/ug-programs/graduation-support/entrepreneurship.jpg';
+import furtherEducationImage from '../../../assets/images/ug-programs/graduation-support/further-education.jpg';
+import lifelongLearningImage from '../../../assets/images/ug-programs/graduation-support/lifelong-learning.jpg';
+
 const GraduationSupport = () => {
   const supportItems = [
     {
       id: 'entrepreneurship',
       title: 'Entrepreneurship',
-      image: '/api/placeholder/400/250',
+      image: entrepreneurshipImage,
       description: 'Whether it is to turn ground breaking research into a deep tech start-up, deep dive into the academic and experiential part of entrepreneurship, or incubate your early or growth stage start-up, we can give you a hand.',
       buttonText: 'Learn more'
     },
     {
       id: 'further-education',
       title: 'Further Education',
-      image: '/api/placeholder/400/250',
+      image: furtherEducationImage,
       description: "If your inclination is to continue from where you left off, NUS Graduate School offers Graduate Diplomas or Doctoral and Master's Degrees. What's more – you'll get to do them in an environment and at a pace you are familiar with.",
       buttonText: 'Learn more'
     },
     {
       id: 'lifelong-learning',
       title: 'Lifelong Learning',
-      image: '/api/placeholder/400/250',
+      image: lifelongLearningImage,
       description: "With over 1,000 courses on emerging topics, NUS Lifelong Learning (L³) for Alumni keeps you on top of your professional game. You can even stack them towards micro-certifications like Graduate Certificates, or a Master's Degree or another Bachelor's Degree.",
       buttonText: 'Learn more'
     }

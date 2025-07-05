@@ -1,24 +1,32 @@
 import { FaBookOpen, FaAward, FaDollarSign } from 'react-icons/fa';
 
+// Import images from assets
+import viewbookImage from '../../../assets/images/ug-programs/publications/undergraduate-viewbook.jpg';
+import prospectusImage from '../../../assets/images/ug-programs/publications/international-prospectus.jpg';
+import brochureImage from '../../../assets/images/ug-programs/publications/scholarship-financial-aid.jpg';
+
 const UndergraduatePublications: React.FC = () => {
   const publications = [
     {
       title: "AY2025/2026 Undergraduate Viewbook",
       icon: <FaBookOpen size={24} />,
       color: "bg-gradient-to-r from-cyan-600 to-blue-600",
-      description: "Comprehensive overview of our undergraduate programs, campus life, and admission requirements."
+      description: "Comprehensive overview of our undergraduate programs, campus life, and admission requirements.",
+      image: viewbookImage
     },
     {
       title: "AY2025/2026 Undergraduate Prospectus for International Students",
       icon: <FaAward size={24} />,
       color: "bg-gradient-to-r from-cyan-500 to-blue-500",
-      description: "Detailed information for international applicants, including visa requirements and global opportunities."
+      description: "Detailed information for international applicants, including visa requirements and global opportunities.",
+      image: prospectusImage
     },
     {
       title: "AY2025/2026 Scholarship & Financial Aid Brochure",
       icon: <FaDollarSign size={24} />,
       color: "bg-gradient-to-r from-cyan-700 to-blue-700",
-      description: "Complete guide to available scholarships, grants, and financial assistance programs."
+      description: "Complete guide to available scholarships, grants, and financial assistance programs.",
+      image: brochureImage
     }
   ];
 
@@ -42,11 +50,11 @@ const UndergraduatePublications: React.FC = () => {
               className="flex flex-col bg-white rounded-lg sm:rounded-xl shadow-md overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-xl border border-cyan-100"
             >
               <div className={`${pub.color} p-4 sm:p-6 flex justify-center`}>
-                <div className="w-24 sm:w-28 lg:w-32 h-32 sm:h-36 lg:h-40 bg-white rounded-lg shadow-md flex items-center justify-center">
+                <div className="w-24 sm:w-28 lg:w-32 h-32 sm:h-36 lg:h-40 bg-white rounded-lg shadow-md flex items-center justify-center overflow-hidden">
                   <img 
-                    src="/api/placeholder/240/320" 
+                    src={pub.image} 
                     alt={pub.title} 
-                    className="w-20 sm:w-24 object-cover" 
+                    className="w-full h-full object-cover" 
                   />
                 </div>
               </div>

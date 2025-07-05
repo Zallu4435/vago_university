@@ -1,10 +1,16 @@
 import React from 'react';
 
+// Import images from assets
+import flexiblePathwaysImage from '../../../assets/images/ug-programs/education-framework/flexible-pathways.jpg';
+import commonCurriculumImage from '../../../assets/images/ug-programs/education-framework/common-curriculum.jpg';
+import interdisciplinaryLearningImage from '../../../assets/images/ug-programs/education-framework/interdisciplinary-learning.jpg';
+import lifelongLearningImage from '../../../assets/images/ug-programs/education-framework/lifelong-learning-education-pillar.jpg';
+
 const NUSEducationFramework = () => {
   const educationPillars = [
     {
       title: "Flexible Pathways",
-      image: "/api/placeholder/500/400",
+      image: flexiblePathwaysImage,
       points: [
         "Opportunity to explore a diverse range of majors, second majors, minors, specialisations and cross-disciplinary programmes",
         "Each major combines its specialised area of knowledge with broader cross-disciplinary elements",
@@ -13,7 +19,7 @@ const NUSEducationFramework = () => {
     },
     {
       title: "Common Curriculum",
-      image: "/api/placeholder/500/400",
+      image: commonCurriculumImage,
       points: [
         "Develops strong foundational understanding in established and emerging fields",
         "Learn fundamental concepts and strengthen your analytical thinking",
@@ -23,7 +29,7 @@ const NUSEducationFramework = () => {
     },
     {
       title: "Interdisciplinary Learning",
-      image: "/api/placeholder/500/400",
+      image: interdisciplinaryLearningImage,
       points: [
         "Connect knowledge across disciplines to pursue knowledge with perspective",
         "Enhance your ability to transfer and integrate knowledge from different disciplines to solve complex and evolving situations",
@@ -32,7 +38,7 @@ const NUSEducationFramework = () => {
     },
     {
       title: "Lifelong Learning",
-      image: "/api/placeholder/500/400",
+      image: lifelongLearningImage,
       points: [
         "Encourage continuous learning of new skills and knowledge through upskilling/reskilling",
         "Gain access to over 1,900 courses on emerging topics via NUS' Lifelong Learning programmes",

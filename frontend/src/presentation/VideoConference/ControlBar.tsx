@@ -152,15 +152,13 @@ export const ControlBar: React.FC<ControlBarProps> = ({
         {/* Reactions popover for mobile - shown above control bar */}
         {isMobile && showReactions && (
           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 bg-white rounded-xl shadow-2xl p-4 min-w-[300px] z-50 reactions-modal">
-            <div className="text-center text-sm text-gray-600 mb-3 font-medium">
-              Send a reaction
-            </div>
-            <div className="grid grid-cols-6 gap-2">
+        
+            <div className="flex gap-2">
               {reactions.map((emoji) => (
                 <button
                   key={emoji}
                   onClick={() => handleReactionClick(emoji)}
-                  className="text-2xl p-3 rounded-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-110 active:scale-95"
+                  className="text-2xl p-3 rounded-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-110 active:scale-95 flex items-center justify-center"
                 >
                   {emoji}
                 </button>
@@ -258,12 +256,12 @@ export const ControlBar: React.FC<ControlBarProps> = ({
                     <div className="text-center text-sm text-gray-600 mb-3 font-medium">
                       Send a reaction
                     </div>
-                    <div className="grid grid-cols-6 gap-2">
+                    <div className="flex gap-2">
                       {reactions.map((emoji) => (
                         <button
                           key={emoji}
                           onClick={() => handleReactionClick(emoji)}
-                          className="text-2xl p-3 rounded-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-110 active:scale-95"
+                          className="text-2xl p-3 rounded-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-110 active:scale-95 flex items-center justify-center"
                         >
                           {emoji}
                         </button>

@@ -70,7 +70,6 @@ import AssignmentManagement from './presentation/pages/faculty/assignment/Assign
 import SessionManagement from './presentation/pages/faculty/sessions/SessionManagement';
 import SiteManagement from './presentation/pages/admin/sites/SiteManagement';
 import { VideoConferencePage } from './presentation/VideoConference/VideoConferencePage';
-import { AttendanceManagement } from './presentation/VideoConference/AttendanceManagement';
 import EnquiryManagement from './presentation/pages/admin/EnquiryManagement';
 import SessionAttendancePage from './presentation/pages/faculty/attendance/SessionAttendancePage';
 import AttendanceSummaryPage from './presentation/pages/faculty/attendance/AttendanceSummaryPage';

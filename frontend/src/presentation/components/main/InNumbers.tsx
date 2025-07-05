@@ -30,18 +30,22 @@ const InNumbers: React.FC = () => {
   return (
     <section className="w-full bg-gradient-to-b from-cyan-50 via-white to-cyan-50">
       {/* Hero Image Section */}
-      <div className="relative h-[200px] sm:h-[300px] lg:h-[400px] w-full overflow-hidden">
+      <div className="relative h-[200px] sm:h-[300px] lg:h-[400px] w-full overflow-hidden group">
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center transition-all duration-500"
           style={{
-            backgroundImage: 'url("https://via.placeholder.com/1920x400?text=University+Town")',
+            backgroundImage: 'url("/images/university-town.jpg")',
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-900/90 to-blue-900/80" />
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-900/80 to-blue-900/70 sm:from-cyan-900/90 sm:to-blue-900/80 group-hover:from-cyan-900/70 group-hover:to-blue-900/60 transition-all duration-500" />
         </div>
         <div className="relative h-full max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 flex flex-col justify-center text-white">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-4">University Town</h1>
-          <p className="text-sm sm:text-base lg:text-xl text-cyan-100">Study. Play. Live.</p>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-4 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-500">
+            University Town
+          </h1>
+          <p className="text-sm sm:text-base lg:text-xl text-cyan-100 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-500 delay-100">
+            Study. Play. Live.
+          </p>
         </div>
       </div>
 

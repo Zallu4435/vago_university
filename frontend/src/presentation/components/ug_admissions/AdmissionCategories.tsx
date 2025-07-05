@@ -1,6 +1,9 @@
 import { FaArrowRight, FaUsers, FaGlobe, FaUser } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const AdmissionCategories = () => {
+  const navigate = useNavigate();
+
   const categories = [
     {
       id: 'transfer',
@@ -8,7 +11,8 @@ const AdmissionCategories = () => {
       icon: <FaUsers className="w-8 h-8 sm:w-10 sm:h-10 text-white" />,
       description: 'For students transferring from other universities or institutions.',
       note: 'Refer to the Important Dates page for details on relevant application windows',
-      gradient: 'from-cyan-600 to-blue-600'
+      gradient: 'from-cyan-600 to-blue-600',
+      tab: 'transfer'
     },
     {
       id: 'international',
@@ -16,7 +20,8 @@ const AdmissionCategories = () => {
       icon: <FaGlobe className="w-8 h-8 sm:w-10 sm:h-10 text-white" />,
       description: 'For international students applying with non-Singapore qualifications.',
       note: 'Refer to the Important Dates page for details on relevant application windows',
-      gradient: 'from-cyan-500 to-blue-500'
+      gradient: 'from-cyan-500 to-blue-500',
+      tab: 'international'
     },
     {
       id: 'citizens',
@@ -24,9 +29,14 @@ const AdmissionCategories = () => {
       icon: <FaUser className="w-8 h-8 sm:w-10 sm:h-10 text-white" />,
       description: 'For Singapore citizens and permanent residents.',
       note: 'Refer to the Important Dates page for details on relevant application windows',
-      gradient: 'from-cyan-700 to-blue-700'
+      gradient: 'from-cyan-700 to-blue-700',
+      tab: 'admission'
     }
   ];
+
+  const handleLearnMore = (category: any) => {
+    navigate(`/program-prerequisites?tab=${category.tab}`);
+  };
 
   return (
     <div className="w-full max-w-6xl mx-auto bg-white shadow-md rounded-lg sm:rounded-xl overflow-hidden mb-8 sm:mb-10 lg:mb-12 border border-cyan-100">
@@ -63,13 +73,13 @@ const AdmissionCategories = () => {
                 <p className="text-xs sm:text-sm text-cyan-700 mb-3 sm:mb-4 flex-grow">
                   {category.note}
                 </p>
-                <a 
-                  href="#" 
+                <button 
+                  onClick={() => handleLearnMore(category)}
                   className="flex items-center justify-center py-2 px-3 sm:px-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-md transition-all duration-300 text-xs sm:text-sm font-medium shadow-md hover:shadow-lg"
                 >
                   <span>Learn more</span>
                   <FaArrowRight className="ml-2 w-3 h-3 sm:w-4 sm:h-4" />
-                </a>
+                </button>
               </div>
             </div>
           ))}

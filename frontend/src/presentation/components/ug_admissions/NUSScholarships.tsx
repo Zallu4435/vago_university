@@ -1,35 +1,55 @@
 import { useState } from 'react';
 import { FaChevronRight } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+
+// Import scholarship category images from assets
+import citizensScholarshipImage from '../../../assets/images/ug-programs/scholarshipCategories/scholarships-singapore-citizens.jpg';
+import prScholarshipImage from '../../../assets/images/ug-programs/scholarshipCategories/scholarships-singapore-pr.jpg';
+import internationalScholarshipImage from '../../../assets/images/ug-programs/scholarshipCategories/scholarships-international-students.jpg';
+import currentStudentsScholarshipImage from '../../../assets/images/ug-programs/scholarshipCategories/current-nus-undergraduates.jpg';
 
 export default function NUSScholarships() {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const scholarshipCategories = [
     {
       id: 'citizens',
       title: 'Singapore Citizens',
-      image: '/api/placeholder/400/300',
-      description: 'Scholarships available for Singapore citizens entering NUS as freshmen.'
+      image: citizensScholarshipImage,
+      description: 'Scholarships available for Singapore citizens entering NUS as freshmen.',
+      tab: 'Scholarships for Freshman (Our Citizen)'
     },
     {
       id: 'pr',
       title: 'Singapore Permanent Residents',
-      image: '/api/placeholder/400/300',
-      description: 'Scholarship options for Singapore PRs starting their undergraduate journey.'
+      image: prScholarshipImage,
+      description: 'Scholarship options for Singapore PRs starting their undergraduate journey.',
+      tab: 'Undergraduate Scholarships'
     },
     {
       id: 'international',
       title: 'International Students',
-      image: '/api/placeholder/400/300',
-      description: 'Financial aid opportunities for international students joining NUS.'
+      image: internationalScholarshipImage,
+      description: 'Financial aid opportunities for international students joining NUS.',
+      tab: 'Undergraduate Scholarships'
     },
     {
       id: 'current',
       title: 'Current NUS Undergraduates',
-      image: '/api/placeholder/400/300',
-      description: 'Merit-based scholarships for existing NUS students with outstanding performance.'
+      image: currentStudentsScholarshipImage,
+      description: 'Merit-based scholarships for existing NUS students with outstanding performance.',
+      tab: 'Undergraduate Scholarships'
     }
   ];
+
+  const handleLearnMore = (category: any) => {
+    navigate(`/undergraduate-scholarships?tab=${encodeURIComponent(category.tab)}`);
+  };
+
+  const handleApplyNow = () => {
+    navigate('/undergraduate-scholarships?tab=Undergraduate%20Scholarships');
+  };
 
   return (
     <div className="w-full py-6 sm:py-8 lg:py-12 px-0 sm:px-0 lg:px-0 bg-transparent">
@@ -70,7 +90,10 @@ export default function NUSScholarships() {
               </div>
               <div className="p-3 sm:p-4 bg-transparent">
                 <p className="text-cyan-600 mb-3 sm:mb-4 text-xs sm:text-sm">{category.description}</p>
-                <button className="flex items-center text-cyan-600 font-medium hover:text-cyan-800 transition-colors text-xs sm:text-sm">
+                <button 
+                  onClick={() => handleLearnMore(category)}
+                  className="flex items-center text-cyan-600 font-medium hover:text-cyan-800 transition-colors text-xs sm:text-sm"
+                >
                   Learn more <FaChevronRight size={14} className="ml-1" />
                 </button>
               </div>
@@ -96,7 +119,10 @@ export default function NUSScholarships() {
           </div>
           <div className="p-4 sm:p-6 bg-transparent">
             <p className="text-cyan-600 mb-3 sm:mb-4 text-xs sm:text-sm">{scholarshipCategories[3].description}</p>
-            <button className="flex items-center text-cyan-600 font-medium hover:text-cyan-800 transition-colors text-xs sm:text-sm">
+            <button 
+              onClick={() => handleLearnMore(scholarshipCategories[3])}
+              className="flex items-center text-cyan-600 font-medium hover:text-cyan-800 transition-colors text-xs sm:text-sm"
+            >
               Explore opportunities <FaChevronRight size={14} className="ml-1" />
             </button>
           </div>
@@ -107,7 +133,10 @@ export default function NUSScholarships() {
       <div className="mt-6 sm:mt-8 lg:mt-12 lg:mt-16 text-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg border border-cyan-100 mx-3 sm:mx-4 lg:mx-6 shadow-sm">
         <h3 className="text-lg sm:text-xl font-semibold text-cyan-800 mb-2 sm:mb-3">Ready to pursue excellence?</h3>
         <p className="text-cyan-600 mb-4 sm:mb-6 text-sm sm:text-base">Apply for NUS scholarships and unlock your potential.</p>
-        <button className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-medium py-2 sm:py-3 px-4 sm:px-6 rounded-md transition-all duration-300 shadow-sm hover:shadow-md text-sm sm:text-base">
+        <button 
+          onClick={handleApplyNow}
+          className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-medium py-2 sm:py-3 px-4 sm:px-6 rounded-md transition-all duration-300 shadow-sm hover:shadow-md text-sm sm:text-base"
+        >
           Apply Now
         </button>
       </div>

@@ -1,6 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaArrowRight, FaGraduationCap, FaGlobeAmericas, FaDollarSign, FaUsers, FaCalendarAlt, FaStar } from 'react-icons/fa';
 import { useSectionAnimation } from '../../../application/hooks/useSectionAnimation';
+import { useLocation } from 'react-router-dom';
+
+// Import images from assets
+import computerImage from '../../../assets/images/departments/computer-science/ai-research-security.jpg';
+import awardImage from '../../../assets/images/departments/computer-science/acm-paper-award.jpg';
+import studentImage from '../../../assets/images/departments/computer-science/phd-student-award.jpg';
+import educationImage from '../../../assets/images/departments/computer-science/cs-education-undergraduate.jpg';
+
+import businessImage from '../../../assets/images/departments/business/future-global-markets.jpg';
+import businessAwardImage from '../../../assets/images/departments/business/mba-ranking-award.jpg';
+import businessStudentImage from '../../../assets/images/departments/business/mba-case-competition.jpg';
+import businessEducationImage from '../../../assets/images/departments/business/business-education-undergrad.jpg';
 
 interface DepartmentData {
   poster: {
@@ -60,8 +72,28 @@ interface DepartmentDataMap {
 }
 
 const DepartmentHome: React.FC = () => {
+  const location = useLocation();
   const [currentDepartment, setCurrentDepartment] = useState<string>('computer-science');
   const isVisible = useSectionAnimation();
+
+  // Set current department based on URL path
+  useEffect(() => {
+    const pathSegments = location.pathname.split('/');
+    const departmentFromPath = pathSegments[2]; // /departments/business -> business
+    
+    console.log('URL Path:', location.pathname);
+    console.log('Path Segments:', pathSegments);
+    console.log('Department from path:', departmentFromPath);
+    console.log('Available departments:', Object.keys(departmentData));
+    
+    if (departmentFromPath && departmentData[departmentFromPath]) {
+      console.log('Setting department to:', departmentFromPath);
+      setCurrentDepartment(departmentFromPath);
+    } else {
+      console.log('Department not found, defaulting to computer-science');
+      setCurrentDepartment('computer-science'); // default fallback
+    }
+  }, [location.pathname]);
 
   const departmentData: DepartmentDataMap = {
     'computer-science': {
@@ -78,7 +110,7 @@ const DepartmentHome: React.FC = () => {
       },
       spotlight: [
         {
-          image: 'computer-image.jpg',
+          image: computerImage,
           title: 'The Hidden Dangers of AI',
           date: '06-20-2025',
           description: 'Can we determine what makes AI systems trustworthy and secure?',
@@ -86,7 +118,7 @@ const DepartmentHome: React.FC = () => {
           readTime: '5 min read'
         },
         {
-          image: 'award-image.jpg',
+          image: awardImage,
           title: 'Best Paper Award at ACM 2025',
           date: '04-15-2025',
           description: 'Faculty, student, and alumni team wins prestigious award.',
@@ -94,7 +126,7 @@ const DepartmentHome: React.FC = () => {
           readTime: '3 min read'
         },
         {
-          image: 'student-image.jpg',
+          image: studentImage,
           title: 'PhD Student Xu Poison Receives Honorable Mention',
           date: '03-10-2025',
           description: 'Awarded for outstanding research contributions.',
@@ -108,7 +140,7 @@ const DepartmentHome: React.FC = () => {
           title: 'Undergraduate Programs',
           content: 'Nurturing the next generation of leaders in tech through a diverse range of multidisciplinary programs.',
           features: ['Hands-on Learning', 'Industry Partnerships', 'Research Opportunities'],
-          image: 'education-image.jpg',
+          image: educationImage,
         },
         graduate: {
           title: 'Graduate Programs',
@@ -167,7 +199,7 @@ const DepartmentHome: React.FC = () => {
       },
       spotlight: [
         {
-          image: 'business-image.jpg',
+          image: businessImage,
           title: 'The Future of Global Markets',
           date: '06-18-2025',
           description: 'How will emerging economies shape the next decade?',
@@ -175,7 +207,7 @@ const DepartmentHome: React.FC = () => {
           readTime: '7 min read'
         },
         {
-          image: 'award-image.jpg',
+          image: businessAwardImage,
           title: 'Best MBA Program 2025',
           date: '04-12-2025',
           description: 'Recognized by Global Business Review.',
@@ -183,7 +215,7 @@ const DepartmentHome: React.FC = () => {
           readTime: '2 min read'
         },
         {
-          image: 'student-image.jpg',
+          image: businessStudentImage,
           title: 'MBA Student Wins National Case Competition',
           date: '03-05-2025',
           description: 'Team excels in strategic analysis and innovation.',
@@ -197,7 +229,7 @@ const DepartmentHome: React.FC = () => {
           title: 'Undergraduate Programs',
           content: 'Preparing future business leaders through innovative programs in finance, marketing, and entrepreneurship.',
           features: ['Real-world Projects', 'Mentorship Program', 'Global Exposure'],
-          image: 'business-education-image.jpg',
+          image: businessEducationImage,
         },
         graduate: {
           title: 'Graduate Programs',

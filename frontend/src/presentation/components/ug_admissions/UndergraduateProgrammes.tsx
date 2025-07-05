@@ -1,5 +1,7 @@
 import React from 'react';
 import { FaGraduationCap, FaArrowRight, FaClock } from 'react-icons/fa';
+import computingImage from '../../../assets/images/ug-programs/programs/school-of-computing.jpg'
+import businessImage from '../../../assets/images/ug-programs/programs/school-of-business.jpg';
 
 interface ProgramCardProps {
   title: string;
@@ -77,13 +79,13 @@ const UndergraduateProgrammes: React.FC = () => {
     {
       title: "School of Computing",
       description: "Shape the digital future through innovation and technology in our cutting-edge computing programs.",
-      image: "/images/computing.jpg",
+      image: computingImage,
       courses: ["Computer Science", "Information Systems", "Business Analytics"]
     },
     {
       title: "Faculty of Business",
       description: "Develop business acumen and leadership skills for the global marketplace with our renowned faculty.",
-      image: "/images/business.jpg",
+      image: businessImage,
       courses: ["BBA", "BBA (Accountancy)", "Business Analytics"]
     },
     {

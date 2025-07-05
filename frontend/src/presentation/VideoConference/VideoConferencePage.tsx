@@ -72,9 +72,9 @@ export const VideoConferencePage: React.FC = () => {
   useEffect(() => {
     const initializeMedia = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: true, 
-          audio: true 
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true
         });
         localStreamRef.current = stream;
         setLocalStream(stream);
@@ -105,18 +105,18 @@ export const VideoConferencePage: React.FC = () => {
       transports: ['websocket'],
       auth: { userId }
     });
-    
+
     socketRef.current = socket;
 
     socket.on('connect', () => {
       console.log('[Socket] Connected:', socket.id);
       setIsConnected(true);
-      
+
       // Join the room after connection
       const myId = faculty?.id || faculty?._id;
       myIdRef.current = myId;
       const myName = faculty?.firstName + (faculty?.lastName ? ' ' + faculty.lastName : '');
-      
+
       socket.emit('join-room', session?.id || session?._id, {
         userId: myId,
         username: myName,
@@ -168,7 +168,7 @@ export const VideoConferencePage: React.FC = () => {
           isPresenting: false
         }];
       });
-      
+
       // Create peer connection and send offer
       if (user.id !== myIdRef.current) {
         createPeerConnectionAndOffer(user.id);
@@ -249,13 +249,13 @@ export const VideoConferencePage: React.FC = () => {
     socket.on('video-offer', async (data) => {
       console.log('[WebRTC] Received offer from:', data.from);
       if (data.to !== myIdRef.current) return;
-      
+
       const pc = createPeerConnection(data.from);
       await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-      
+
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
-      
+
       socket.emit('video-answer', {
         sessionId: session?.id || session?._id,
         from: myIdRef.current,
@@ -267,7 +267,7 @@ export const VideoConferencePage: React.FC = () => {
     socket.on('video-answer', async (data) => {
       console.log('[WebRTC] Received answer from:', data.from);
       if (data.to !== myIdRef.current) return;
-      
+
       const pc = peerConnections.current[data.from];
       if (pc) {
         await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
@@ -277,7 +277,7 @@ export const VideoConferencePage: React.FC = () => {
     socket.on('ice-candidate', async (data) => {
       console.log('[WebRTC] Received ICE candidate from:', data.from);
       if (data.to !== myIdRef.current) return;
-      
+
       const pc = peerConnections.current[data.from];
       if (pc && data.candidate) {
         try {
@@ -306,11 +306,11 @@ export const VideoConferencePage: React.FC = () => {
   // Helper to create peer connection
   const createPeerConnection = (remoteUserId: string): RTCPeerConnection => {
     console.log('[WebRTC] Creating peer connection for:', remoteUserId);
-    
-    const pc = new RTCPeerConnection({ 
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] 
+
+    const pc = new RTCPeerConnection({
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
     });
-    
+
     peerConnections.current[remoteUserId] = pc;
 
     // Add local stream tracks
@@ -353,11 +353,11 @@ export const VideoConferencePage: React.FC = () => {
   // Helper to create peer connection and send offer
   const createPeerConnectionAndOffer = async (remoteUserId: string) => {
     const pc = createPeerConnection(remoteUserId);
-    
+
     try {
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
-      
+
       console.log('[WebRTC] Sending offer to:', remoteUserId);
       socketRef.current?.emit('video-offer', {
         sessionId: session?.id || session?._id,
@@ -400,7 +400,7 @@ export const VideoConferencePage: React.FC = () => {
           track.enabled = newState;
         });
       }
-      
+
       if (socketRef.current) {
         socketRef.current.emit('media-state-changed', {
           sessionId: session?.id || session?._id,
@@ -421,7 +421,7 @@ export const VideoConferencePage: React.FC = () => {
           track.enabled = newState;
         });
       }
-      
+
       if (socketRef.current) {
         socketRef.current.emit('media-state-changed', {
           sessionId: session?.id || session?._id,
@@ -448,7 +448,7 @@ export const VideoConferencePage: React.FC = () => {
       return newState;
     });
   };
-  
+
   const handleSendReaction = (emoji: string) => {
     if (socketRef.current) {
       socketRef.current.emit('send-reaction', {
@@ -486,7 +486,7 @@ export const VideoConferencePage: React.FC = () => {
         video: true,
         audio: true
       });
-      
+
       if (socketRef.current) {
         socketRef.current.emit('screen-share-started', {
           sessionId: session?.id || session?._id,
@@ -494,7 +494,7 @@ export const VideoConferencePage: React.FC = () => {
           userName: faculty?.firstName + (faculty?.lastName ? ' ' + faculty.lastName : ''),
         });
       }
-      
+
       // Replace video track in peer connections
       Object.values(peerConnections.current).forEach(pc => {
         const sender = pc.getSenders().find(s => s.track?.kind === 'video');
@@ -502,7 +502,7 @@ export const VideoConferencePage: React.FC = () => {
           sender.replaceTrack(screenStream.getVideoTracks()[0]);
         }
       });
-      
+
       screenStream.getVideoTracks()[0].onended = () => {
         // Screen sharing stopped
         if (socketRef.current) {
@@ -512,7 +512,7 @@ export const VideoConferencePage: React.FC = () => {
             userName: faculty?.firstName + (faculty?.lastName ? ' ' + faculty.lastName : ''),
           });
         }
-        
+
         // Restore camera
         if (localStream) {
           Object.values(peerConnections.current).forEach(pc => {
@@ -523,12 +523,12 @@ export const VideoConferencePage: React.FC = () => {
           });
         }
       };
-      
+
     } catch (err) {
       console.error('Error sharing screen:', err);
     }
   };
-  
+
   const handleSendMessage = (message: string) => {
     if (socketRef.current) {
       socketRef.current.emit('send-message', {
@@ -567,7 +567,7 @@ export const VideoConferencePage: React.FC = () => {
   return (
     <div className="w-screen h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col overflow-hidden">
       <TopBar sessionName={session?.name || "Video Conference"} meetingTimer={meetingTimer} />
-      
+
       {/* Connection Status */}
       {!mediaReady && (
         <div className="absolute top-20 left-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm z-50">
@@ -584,9 +584,9 @@ export const VideoConferencePage: React.FC = () => {
           Connected
         </div>
       )}
-      
+
       {/* Reactions Overlay */}
-      <div className="fixed inset-0 pointer-events-none z-40">
+      {/* <div className="fixed inset-0 pointer-events-none z-40">
         {reactions.map((reaction, index) => (
           <div
             key={reaction.id}
@@ -607,16 +607,38 @@ export const VideoConferencePage: React.FC = () => {
             </div>
           </div>
         ))}
+      </div> */}
+
+      <div className="fixed inset-0 pointer-events-none z-40 flex flex-col gap-2 items-start px-8 pb-32 justify-end">
+        {reactions.map((reaction, index) => (
+          <div
+            key={reaction.id}
+            className="animate-reaction-flow"
+            style={{
+              animationDelay: `${index * 0.1}s`,
+              animationDuration: '3s',
+            }}
+          >
+            <div className="flex items-center space-x-2">
+              <div className="text-4xl animate-bounce">{reaction.emoji}</div>
+              <div className="text-white text-sm font-medium bg-black/50 px-2 py-1 rounded-full backdrop-blur-sm">
+                {reaction.sender}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
-      
+
+
+
       {/* Main Video Area */}
       <div className="flex-1 flex flex-col min-h-0 relative pt-20 pb-24">
-        <VideoGrid 
-          participants={participants} 
-          localParticipantId={myIdRef.current} 
-          localStream={localStream} 
+        <VideoGrid
+          participants={participants}
+          localParticipantId={myIdRef.current}
+          localStream={localStream}
         />
-        
+
         {/* Others Button */}
         {participants.length > 1 && (
           <button
@@ -626,7 +648,7 @@ export const VideoConferencePage: React.FC = () => {
             +{participants.length - 1} others
           </button>
         )}
-        
+
         {/* Others Modal */}
         {othersOpen && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-40 p-4">
@@ -642,7 +664,7 @@ export const VideoConferencePage: React.FC = () => {
                   ×
                 </button>
               </div>
-              
+
               <div className="overflow-y-auto max-h-96 p-4">
                 <ul className="space-y-3">
                   {participants.map((participant) => (
@@ -682,14 +704,14 @@ export const VideoConferencePage: React.FC = () => {
           </div>
         )}
       </div>
-      
+
       <ChatPanel
         isOpen={chatOpen}
         onClose={() => setChatOpen(false)}
         messages={messages}
         onSend={handleSendMessage}
       />
-      
+
       <ControlBar
         onToggleMic={handleToggleMic}
         onToggleCamera={handleToggleCamera}
@@ -703,7 +725,7 @@ export const VideoConferencePage: React.FC = () => {
         cameraOn={cameraOn}
         handRaised={handRaised}
       />
-      
+
       {/* CSS for reaction animation */}
       <style jsx>{`
         @keyframes reaction-flow {

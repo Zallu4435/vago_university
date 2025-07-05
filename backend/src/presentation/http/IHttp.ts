@@ -351,4 +351,7 @@ export interface IVideoSessionController extends IController {
   updateSession(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   deleteSession(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getAllSessions(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateSessionStatus(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getSessionAttendance(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateAttendanceStatus(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }

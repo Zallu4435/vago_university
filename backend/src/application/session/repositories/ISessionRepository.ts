@@ -7,4 +7,6 @@ export interface ISessionRepository {
   update(sessionId: string, data: Partial<VideoSession>): Promise<VideoSession | null>;
   delete(sessionId: string): Promise<void>;
   getAll(): Promise<VideoSession[]>;
+  getSessionAttendance(sessionId: string): Promise<any[]>;
+  updateAttendanceStatus(sessionId: string, userId: string, status: string, name: string): Promise<void>;
 }

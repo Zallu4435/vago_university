@@ -47,6 +47,22 @@ export interface UpdateVideoSessionRequestDTO {
     }>;
 }
 
+export interface UpdateVideoSessionStatusRequestDTO {
+    sessionId: string;
+    status: string;
+}
+
 export interface DeleteVideoSessionRequestDTO {
+    sessionId: string;
+}
+
+export interface UpdateAttendanceStatusRequestDTO {
+    sessionId: string;
+    userId: string;
+    status: string;
+    name: string;
+}
+
+export interface GetSessionAttendanceRequestDTO {
     sessionId: string;
 } 

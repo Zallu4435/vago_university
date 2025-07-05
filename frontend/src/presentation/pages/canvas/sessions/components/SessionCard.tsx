@@ -41,6 +41,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   const backendSession = session as unknown as BackendSession;
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
+  const status = (session.status || '').toLowerCase();
   // Parse startTime for date and time
   const start = backendSession.startTime ? new Date(backendSession.startTime) : null;
   const dateStr = start ? start.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '';
@@ -73,7 +74,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
                 </div>
               </div>
               <div className="flex items-center gap-2 sm:gap-3 mt-2 sm:mt-0">
-                {getStatusBadge(session.status, session.isLive, styles)}
+                {getStatusBadge(status, session.isLive, styles)}
               </div>
             </div>
             <p className={`${styles.textSecondary} mb-3 sm:mb-4 text-sm sm:text-lg`}>{session.description}</p>
@@ -165,7 +166,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
             </div>
           </div>
         )}
-        {backendSession.joinUrl && (
+        {backendSession.joinUrl && !['ended', 'completed'].includes(status) && (
           <div className="mt-4 flex justify-center">
             <button
               onClick={() => {

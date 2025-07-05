@@ -72,6 +72,8 @@ import SiteManagement from './presentation/pages/admin/sites/SiteManagement';
 import { VideoConferencePage } from './presentation/VideoConference/VideoConferencePage';
 import { AttendanceManagement } from './presentation/VideoConference/AttendanceManagement';
 import EnquiryManagement from './presentation/pages/admin/EnquiryManagement';
+import SessionAttendancePage from './presentation/pages/faculty/attendance/SessionAttendancePage';
+import AttendanceSummaryPage from './presentation/pages/faculty/attendance/AttendanceSummaryPage';
 
 const App: React.FC = () => {
   const { isError, error } = useRefreshToken();
@@ -213,7 +215,8 @@ const App: React.FC = () => {
             <Route path="faculty" element={<FacultyDashboard />} />
             <Route path="faculty/assignments" element={<AssignmentManagement />} />
             <Route path="faculty/sessions" element={<SessionManagement />} />
-            <Route path="faculty/attendance" element={<AttendanceManagement />} />
+            <Route path="faculty/attendance" element={<SessionAttendancePage />} />
+            <Route path="faculty/attendance-summary" element={<AttendanceSummaryPage />} />
           </Route>
         </Route>
 

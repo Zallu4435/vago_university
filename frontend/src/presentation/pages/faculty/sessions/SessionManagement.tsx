@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaSearch, FaPlus, FaEdit, FaTrash, FaClock, FaCheck } from 'react-icons/fa';
+import { FaSearch, FaPlus, FaEdit, FaTrash, FaClock, FaCheck, FaPlay } from 'react-icons/fa';
 import CreateSessionModal from './CreateSessionModal';
 import EditSessionModal from './EditSessionModal';
 import { Session } from './types';
@@ -14,6 +14,8 @@ export default function SessionManagement() {
     handleCreateSession,
     handleUpdateSession,
     handleDeleteSession,
+    markSessionAsOver,
+    isMarkingAsOver,
   } = useSessionManagement();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -193,6 +195,16 @@ export default function SessionManagement() {
                               >
                                 <FaTrash size={16} />
                               </button>
+                              {session.status !== 'Ended' && (
+                                <button
+                                  onClick={() => markSessionAsOver(session._id || session.id)}
+                                  className="p-3 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 rounded-xl transition-all border border-yellow-200 hover:border-yellow-300 hover:scale-110 transform"
+                                  title="Mark as Over"
+                                  disabled={isMarkingAsOver}
+                                >
+                                  {isMarkingAsOver ? 'Marking...' : 'Mark as Over'}
+                                </button>
+                              )}
                             </div>
                           </td>
                         </tr>

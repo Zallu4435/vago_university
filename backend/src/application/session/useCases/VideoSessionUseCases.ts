@@ -124,4 +124,26 @@ export class GetAllVideoSessionsUseCase {
         const sessions = await this.sessionRepository.getAll();
         return sessions as VideoSessionResponseDTO[];
     }
+}
+
+export class UpdateVideoSessionStatusUseCase {
+    constructor(private sessionRepository: ISessionRepository) {}
+    async execute(sessionId: string, status: VideoSessionStatus): Promise<UpdateVideoSessionResponseDTO | null> {
+        const session = await this.sessionRepository.update(sessionId, { status });
+        return session ? { session: session as VideoSessionResponseDTO } : null;
+    }
+}
+
+export class GetSessionAttendanceUseCase {
+    constructor(private sessionRepository: ISessionRepository) {}
+    async execute(sessionId: string): Promise<any[]> {
+        return this.sessionRepository.getSessionAttendance(sessionId);
+    }
+}
+
+export class UpdateAttendanceStatusUseCase {
+    constructor(private sessionRepository: ISessionRepository) {}
+    async execute(sessionId: string, userId: string, status: string, name: string): Promise<void> {
+        await this.sessionRepository.updateAttendanceStatus(sessionId, userId, status, name);
+    }
 } 

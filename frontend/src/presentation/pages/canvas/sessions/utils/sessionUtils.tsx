@@ -13,11 +13,12 @@ import {
 } from 'react-icons/fa';
 import { Session, SessionStats } from '../types/SessionTypes';
 
-export const getStatusBadge = (status: Session['status'], isLive: boolean, styles: any): JSX.Element => {
+export const getStatusBadge = (status: string, isLive: boolean, styles: any): JSX.Element => {
   const baseClasses = "px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1";
-  
-  switch (status) {
+  const normalized = (status || '').toLowerCase();
+  switch (normalized) {
     case 'upcoming':
+    case 'scheduled':
       return (
         <span className={`${baseClasses} ${styles.status.warning} ${styles.badgeBackground}`}>
           <FaClock className="w-3 h-3" />
@@ -36,6 +37,13 @@ export const getStatusBadge = (status: Session['status'], isLive: boolean, style
         <span className={`${baseClasses} ${styles.status.info} ${styles.badgeBackground}`}>
           <FaCheckCircle className="w-3 h-3" />
           Completed
+        </span>
+      );
+    case 'ended':
+      return (
+        <span className={`${baseClasses} ${styles.status.error} ${styles.badgeBackground}`}>
+          <FaCheckCircle className="w-3 h-3" />
+          Ended
         </span>
       );
     default:

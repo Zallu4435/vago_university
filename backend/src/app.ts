@@ -12,7 +12,6 @@ import { setupSessionSocketHandlers } from './infrastructure/services/socket/Ses
 const app = express();
 const httpServer = createServer(app);
 
-// CORS middleware - must be before any other middleware or routes
 app.use(
   cors({
     origin: [

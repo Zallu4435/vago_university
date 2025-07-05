@@ -60,6 +60,14 @@ export const useSessionManagement = () => {
     }
   });
 
+  // Mark session as over mutation
+  const markSessionAsOverMutation = useMutation({
+    mutationFn: (id: string) => sessionService.updateSessionStatus(id, 'Ended'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sessions'] });
+    }
+  });
+
   // Handlers
   const handleCreateSession = useCallback(async (data: CreateVideoSessionPayload) => {
     try {
@@ -91,6 +99,66 @@ export const useSessionManagement = () => {
     }
   }, [deleteSessionMutation]);
 
+  const markSessionAsOver = useCallback(async (id: string) => {
+    try {
+      await markSessionAsOverMutation.mutateAsync(id);
+      return { success: true };
+    } catch (error) {
+      console.error('Error marking session as over:', error);
+      return { success: false, error: 'Failed to mark session as over' };
+    }
+  }, [markSessionAsOverMutation]);
+
+  const attendanceJoin = useCallback(async (sessionId: string) => {
+    try {
+      await sessionService.attendanceJoin(sessionId);
+      return { success: true };
+    } catch (error) {
+      console.error('Error joining attendance:', error);
+      return { success: false, error: 'Failed to join attendance' };
+    }
+  }, []);
+
+  const attendanceLeave = useCallback(async (sessionId: string) => {
+    try {
+      await sessionService.attendanceLeave(sessionId);
+      return { success: true };
+    } catch (error) {
+      console.error('Error leaving attendance:', error);
+      return { success: false, error: 'Failed to leave attendance' };
+    }
+  }, []);
+
+  // Fetch session attendance
+  const useSessionAttendance = (sessionId: string) => {
+    return useQuery({
+      queryKey: ['sessionAttendance', sessionId],
+      queryFn: () => sessionService.getSessionAttendance(sessionId),
+      enabled: !!sessionId
+    });
+  };
+
+  // Fetch session attendance (pattern: function, not hook)
+  const getSessionAttendance = useCallback(async (sessionId: string) => {
+    try {
+      return await sessionService.getSessionAttendance(sessionId);
+    } catch (error) {
+      console.error('Error fetching session attendance:', error);
+      return null;
+    }
+  }, []);
+
+  // Update attendance status
+  const updateAttendanceStatus = useCallback(async (sessionId: string, userId: string, status: string, name: string) => {
+    try {
+      await sessionService.updateAttendanceStatus(sessionId, userId, status, name);
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating attendance status:', error);
+      return { success: false, error: 'Failed to update attendance status' };
+    }
+  }, []);
+
   return {
     sessions: sessions || [],
     isLoading: isLoadingSessions,
@@ -100,8 +168,15 @@ export const useSessionManagement = () => {
     handleCreateSession,
     handleUpdateSession,
     handleDeleteSession,
+    markSessionAsOver,
     isCreating: createSessionMutation.isPending,
     isUpdating: updateSessionMutation.isPending,
     isDeleting: deleteSessionMutation.isPending,
+    isMarkingAsOver: markSessionAsOverMutation.isPending,
+    attendanceJoin,
+    attendanceLeave,
+    useSessionAttendance,
+    getSessionAttendance,
+    updateAttendanceStatus,
   };
 }; 

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   LuList, LuClock, LuCalendar, LuUsers, LuBookOpen, LuSettings, 
   LuLogOut, LuGraduationCap, LuChevronRight, LuStar, LuTrendingUp,
-  LuActivity, LuBell, LuMail, LuAward, LuFileText
+  LuAward, LuFileText
 } from 'react-icons/lu';
 
 interface SidebarProps {
@@ -54,13 +54,6 @@ export default function Sidebar({ activeTab, setActiveTab, facultyName, departme
       gradient: 'from-green-500 to-emerald-500',
       description: 'Track Presence',
       path: '/faculty/attendance'
-    },
-    { 
-      title: 'Students', 
-      icon: <LuUsers size={20} />, 
-      gradient: 'from-orange-500 to-red-500',
-      description: 'Student Management',
-      path: '/faculty/students'
     },
     { 
       title: 'Attendance Summary', 

@@ -7,6 +7,7 @@ import { useLocation } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
+import { useSessionManagement } from '../../application/hooks/useSessionManagement';
 
 interface Message {
   id: string;
@@ -459,17 +460,23 @@ export const VideoConferencePage: React.FC = () => {
     }
   };
 
-  const handleLeave = () => {
+  const handleLeave = async () => {
     if (localStream) {
       localStream.getTracks().forEach((track) => track.stop());
     }
-    
     Object.values(peerConnections.current).forEach(pc => pc.close());
-    
     if (socketRef.current) {
       socketRef.current.disconnect();
     }
-    
+    // Call attendanceLeave before redirecting
+    if (session?._id || session?.id) {
+      const sessionId = session._id || session.id;
+      try {
+        await attendanceLeave(sessionId);
+      } catch (err) {
+        console.error('Error calling attendanceLeave:', err);
+      }
+    }
     window.location.href = '/';
   };
 
@@ -545,6 +552,17 @@ export const VideoConferencePage: React.FC = () => {
       isHost: isHost,
     });
   }, [micOn, cameraOn, handRaised, faculty, isHost]);
+
+  const { attendanceJoin, attendanceLeave } = useSessionManagement();
+
+  useEffect(() => {
+    if (!session?._id && !session?.id) return;
+    const sessionId = session._id || session.id;
+    attendanceJoin(sessionId);
+    return () => {
+      attendanceLeave(sessionId);
+    };
+  }, [session, attendanceJoin, attendanceLeave]);
 
   return (
     <div className="w-screen h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col overflow-hidden">

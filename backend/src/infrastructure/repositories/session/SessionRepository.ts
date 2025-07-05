@@ -2,6 +2,7 @@ import { ISessionRepository } from '../../../application/session/repositories/IS
 import { VideoSession } from '../../../domain/session/entities/VideoSession';
 import { VideoSessionModel } from '../../database/mongoose/models/session.model';
 import { VideoSessionStatus } from '../../../domain/session/enums/VideoSessionStatus';
+import { User } from '../../database/mongoose/models/user.model';
 
 export class SessionRepository implements ISessionRepository {
   async create(session: VideoSession): Promise<VideoSession> {
@@ -59,5 +60,45 @@ export class SessionRepository implements ISessionRepository {
   async getAll(): Promise<VideoSession[]> {
     const sessions = await VideoSessionModel.find();
     return sessions.map(doc => doc.toObject() as VideoSession);
+  }
+
+  async getSessionAttendance(sessionId: string): Promise<any[]> {
+    const session = await VideoSessionModel.findById(sessionId);
+    if (!session) throw new Error('Session not found');
+    const attendance = session.attendance || [];
+    // Fetch user details for each attendance record
+    const userIds = attendance.map((a: any) => a.userId);
+    const users = await User.find({ _id: { $in: userIds } }).lean();
+    // Map userId to user info
+    const userMap = new Map(users.map((u: any) => [u._id.toString(), u]));
+    // Build the response array, only for users found in User collection
+    return attendance
+      .filter((a: any) => userMap.has(a.userId))
+      .map((a: any) => {
+        const user = userMap.get(a.userId);
+        return {
+          id: a.userId,
+          username: user ? (user.firstName + (user.lastName ? ' ' + user.lastName : '')) : '',
+          email: user ? user.email : '',
+          intervals: a.intervals || [],
+          status: a.status || null
+        };
+      });
+  }
+
+  async updateAttendanceStatus(sessionId: string, userId: string, status: string, name: string): Promise<void> {
+    const session = await VideoSessionModel.findById(sessionId);
+    if (!session) throw new Error('Session not found');
+    const attendance = session.attendance.find((a: any) => a.userId === userId);
+    if (!attendance) throw new Error('Attendance record not found');
+    attendance.status = status;
+    // Update attendeeList based on approval
+    if (status === 'approved') {
+      session.attendeeList = session.attendeeList.filter((a: any) => a.id !== userId);
+      session.attendeeList.push({ id: userId, name });
+    } else {
+      session.attendeeList = session.attendeeList.filter((a: any) => a.id !== userId);
+    }
+    await session.save();
   }
 } 

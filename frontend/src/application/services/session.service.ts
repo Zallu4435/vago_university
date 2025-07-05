@@ -50,6 +50,29 @@ class SessionService {
     const response = await httpClient.delete(`/faculty/sessions/video-sessions/${id}`);
     return response.data;
   }
+
+  async updateSessionStatus(id: string, status: string) {
+    const response = await httpClient.put(`/faculty/sessions/video-sessions/${id}/status`, { status });
+    return response.data;
+  }
+
+  async attendanceJoin(sessionId: string) {
+    return httpClient.post(`/faculty/sessions/video-sessions/${sessionId}/attendance/join`);
+  }
+
+  async attendanceLeave(sessionId: string) {
+    return httpClient.post(`/faculty/sessions/video-sessions/${sessionId}/attendance/leave`);
+  }
+
+  async getSessionAttendance(sessionId: string) {
+    const response = await httpClient.get(`/faculty/sessions/video-sessions/${sessionId}/attendance`);
+    return response.data.data;
+  }
+
+  async updateAttendanceStatus(sessionId: string, userId: string, status: string, name: string) {
+    const response = await httpClient.put(`/faculty/sessions/video-sessions/${sessionId}/attendance/${userId}/status`, { status, name });
+    return response.data;
+  }
 }
 
 export const sessionService = new SessionService(); 

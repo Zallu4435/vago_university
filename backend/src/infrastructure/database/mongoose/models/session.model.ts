@@ -6,6 +6,17 @@ export interface Attendee {
     name: string;
 }
 
+export interface AttendanceInterval {
+    joinedAt: Date;
+    leftAt?: Date;
+}
+
+export interface AttendanceRecord {
+    userId: string;
+    intervals: AttendanceInterval[];
+    status?: string;
+}
+
 export interface IVideoSession extends Document {
     title: string;
     hostId: string;
@@ -26,6 +37,7 @@ export interface IVideoSession extends Document {
     attendees?: number;
     attendeeList?: Attendee[];
     joinUrl?: string;
+    attendance?: AttendanceRecord[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -33,6 +45,17 @@ export interface IVideoSession extends Document {
 const AttendeeSchema = new Schema<Attendee>({
     id: { type: String, required: true },
     name: { type: String, required: true }
+}, { _id: false });
+
+const AttendanceIntervalSchema = new Schema<AttendanceInterval>({
+    joinedAt: { type: Date, required: true },
+    leftAt: { type: Date }
+}, { _id: false });
+
+const AttendanceRecordSchema = new Schema<AttendanceRecord>({
+    userId: { type: String, required: true },
+    intervals: { type: [AttendanceIntervalSchema], default: [] },
+    status: { type: String },
 }, { _id: false });
 
 const VideoSessionSchema = new Schema<IVideoSession>({
@@ -55,6 +78,7 @@ const VideoSessionSchema = new Schema<IVideoSession>({
     attendees: { type: Number, default: 0 },
     attendeeList: { type: [AttendeeSchema], default: [] },
     joinUrl: { type: String, trim: true },
+    attendance: { type: [AttendanceRecordSchema], default: [] },
 }, { timestamps: true });
 
 export const VideoSessionModel = mongoose.model<IVideoSession>('VideoSession', VideoSessionSchema); 

@@ -17,7 +17,7 @@ export interface GradeInfo {
 }
 
 export interface Course {
-  id: number;
+  id: string;
   title: string;
   specialization: string;
   faculty: string;
@@ -56,7 +56,7 @@ export interface RequirementsInfo {
 }
 
 interface EnrollmentData {
-  courseId: number;
+  courseId: string;
   term: string;
   section: string;
   reason: string;
@@ -75,10 +75,11 @@ export const academicService = {
     return response.data?.data;
   },
 
-  // Get available courses
-  getCourses: async (): Promise<Course[]> => {
-    const response = await httpClient.get('/academic/courses');
-    return response.data?.data.courses;
+  // Get available courses with optional search query
+  getCourses: async (query?: string): Promise<Course[]> => {
+    const params = query ? { search: query } : {};
+    const response = await httpClient.get('/academic/courses', { params });
+    return response.data?.data.courses || [];
   },
 
   // Get academic history
@@ -115,7 +116,7 @@ export const academicService = {
   },
 
   // Drop a course
-  dropCourse: async (courseId: number): Promise<void> => {
+  dropCourse: async (courseId: string): Promise<void> => {
     await httpClient.delete(`/academic/register/${courseId}`);
   },
 

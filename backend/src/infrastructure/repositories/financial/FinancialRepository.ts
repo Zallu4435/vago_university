@@ -3,6 +3,9 @@ import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
 import { v2 as cloudinary } from "cloudinary";
 import { StudentFinancialInfoModel, ChargeModel, PaymentModel, FinancialAidApplicationModel, ScholarshipModel, ScholarshipApplicationModel } from "../../database/mongoose/models/financial.model"
+import { User as UserModel } from "../../database/mongoose/models/user.model";
+import { ProgramModel } from "../../database/mongoose/models/studentProgram.model";
+import { EnrollmentModel } from "../../database/mongoose/models/courses/CourseModel";
 import { FinancialErrorType } from "../../../domain/financial/enums/FinancialErrorType";
 import {
     GetStudentFinancialInfoRequestDTO,
@@ -57,38 +60,103 @@ cloudinary.config({
 
 export class FinancialRepository implements IFinancialRepository {
     async getStudentFinancialInfo(params: GetStudentFinancialInfoRequestDTO): Promise<GetStudentFinancialInfoResponseDTO> {
-        const infos = await (StudentFinancialInfoModel as any).find({ studentId: params.studentId })
-            .populate("chargeId", "title description")
-            .lean();
-
-        const formattedInfos = infos.map((info: any) => ({
-            id: info._id.toString(),
-            studentId: info.studentId.toString(),
-            chargeId: info.chargeId?._id?.toString() || "",
-            amount: info.amount,
-            paymentDueDate: info.paymentDueDate.toISOString(),
-            status: info.status,
-            term: info.term,
-            issuedAt: info.issuedAt.toISOString(),
-            paidAt: info.paidAt ? info.paidAt.toISOString() : undefined,
-            method: info.method,
-            createdAt: info.createdAt?.toISOString() || new Date().toISOString(),
-            updatedAt: info.updatedAt?.toISOString() || new Date().toISOString(),
-            chargeTitle: (info.chargeId as any)?.title || "",
-            chargeDescription: (info.chargeId as any)?.description || "",
-        }));
-
-        return {
-            info: formattedInfos.filter((item) => item.status === "Pending"),
-            history: formattedInfos
-                .filter((item) => item.status === "Paid")
-                .map((item) => ({
-                    paidAt: item.paidAt,
-                    chargeTitle: item.chargeTitle,
-                    method: item.method,
-                    amount: item.amount,
-                })),
-        };
+        try {
+            console.log('[FinancialRepository] getStudentFinancialInfo called with studentId:', params.studentId);
+            
+            // Get student's program information
+            const studentProgram = await ProgramModel.findOne({ studentId: params.studentId }).lean();
+            console.log('[FinancialRepository] Student program:', studentProgram);
+            
+            if (!studentProgram) {
+                console.log('[FinancialRepository] No program found for student');
+                return {
+                    info: [],
+                    history: [],
+                };
+            }
+            
+            // Get all active charges that haven't exceeded the due date
+            const currentDate = new Date();
+            const allCharges = await (ChargeModel as any).find({ 
+                dueDate: { $gte: currentDate } // Only charges that haven't exceeded due date
+            }).lean();
+            console.log('[FinancialRepository] Active charges not exceeded due date:', allCharges.length);
+            
+            // Filter charges that apply to this student based on their program
+            const applicableCharges = allCharges.filter((charge: any) => {
+                // If charge is for "All Students", it applies to everyone
+                if (charge.applicableFor === "All Students") {
+                    return true;
+                }
+                
+                // If charge is for a specific program, check student's program
+                if (studentProgram.degree === charge.applicableFor) {
+                    return true;
+                }
+                
+                return false;
+            });
+            
+            console.log('[FinancialRepository] Applicable charges for student:', applicableCharges.length);
+            
+            // Get StudentFinancialInfo records for this student to check which charges have been paid
+            const studentFinancialInfo = await (StudentFinancialInfoModel as any).find({ 
+                studentId: params.studentId 
+            }).populate('paymentId').lean();
+            console.log('[FinancialRepository] StudentFinancialInfo records for student:', studentFinancialInfo.length);
+            
+            // Format charges for response and check payment status using StudentFinancialInfo
+            const formattedCharges = applicableCharges.map((charge: any) => {
+                // Check if student has already paid for this charge by looking in StudentFinancialInfo
+                const financialInfo = studentFinancialInfo.find((info: any) => 
+                    info.chargeId.toString() === charge._id.toString() && 
+                    info.status === "Paid"
+                );
+                
+                const isPaid = !!financialInfo;
+                
+                return {
+                    id: charge._id.toString(),
+                    studentId: params.studentId,
+                    chargeId: charge._id.toString(),
+                    amount: charge.amount,
+                    paymentDueDate: charge.dueDate.toISOString(),
+                    status: isPaid ? "Paid" as const : "Pending" as const,
+                    term: charge.term,
+                    issuedAt: charge.createdAt.toISOString(),
+                    paidAt: isPaid ? financialInfo.paidAt.toISOString() : undefined,
+                    method: isPaid ? financialInfo.method : undefined,
+                    createdAt: charge.createdAt.toISOString(),
+                    updatedAt: charge.updatedAt.toISOString(),
+                    chargeTitle: charge.title,
+                    chargeDescription: charge.description,
+                };
+            });
+            
+            // Format payment history from StudentFinancialInfo records
+            const formattedHistory = studentFinancialInfo
+                .filter((info: any) => info.status === "Paid")
+                .map((info: any) => ({
+                    id: info.paymentId ? info.paymentId.toString() : undefined, // Include payment ID
+                    paidAt: info.paidAt.toISOString(),
+                    chargeTitle: info.chargeId ? "Payment for " + info.term : "Payment",
+                    method: info.method,
+                    amount: info.amount,
+                }));
+            
+            console.log('[FinancialRepository] Returning formatted data:', {
+                chargesCount: formattedCharges.length,
+                historyCount: formattedHistory.length
+            });
+            
+            return {
+                info: formattedCharges,
+                history: formattedHistory,
+            };
+        } catch (error) {
+            console.error('[FinancialRepository] Error in getStudentFinancialInfo:', error);
+            throw error;
+        }
     }
 
     async getAllPayments(params: GetAllPaymentsRequestDTO): Promise<GetAllPaymentsResponseDTO> {
@@ -99,10 +167,13 @@ export class FinancialRepository implements IFinancialRepository {
 
         const total = await (PaymentModel as any).countDocuments(query);
         const payments = await (PaymentModel as any).find(query)
+            .sort({ date: -1 }) // Sort by date in descending order (newest first)
             .skip((params.page - 1) * params.limit)
             .limit(params.limit)
             .lean();
 
+        const totalPages = Math.ceil(total / params.limit);
+        
         return {
             data: payments.map((payment) => ({
                 id: payment._id.toString(),
@@ -115,7 +186,9 @@ export class FinancialRepository implements IFinancialRepository {
                 receiptUrl: payment.receiptUrl,
                 metadata: payment.metadata,
             })),
-            total,
+            totalPayments: total,
+            totalPages,
+            currentPage: params.page,
         };
     }
 
@@ -166,12 +239,34 @@ export class FinancialRepository implements IFinancialRepository {
                     { new: true }
                 ).lean();
 
-                if (!payment) throw new Error(FinancialErrorType.PaymentNotFound);
+                // Get the charge details to create proper StudentFinancialInfo record
+                if (!params.chargeId) {
+                    throw new Error('Charge ID is required for payment');
+                }
+                
+                const charge = await (ChargeModel as any).findById(params.chargeId).lean();
+                if (!charge) {
+                    throw new Error(`Charge with ID ${params.chargeId} not found`);
+                }
+                
+                if (charge) {
+                    const studentFinancialInfo = new (StudentFinancialInfoModel as any)({
+                        studentId: params.studentId,
+                        chargeId: charge._id,
+                        paymentId: payment._id, // Store the payment ID
+                        amount: payment.amount,
+                        paymentDueDate: charge.dueDate,
+                        status: "Paid",
+                        term: params.term,
+                        paidAt: new Date(), // Add the paidAt field
+                        issuedAt: charge.createdAt,
+                        method: payment.method
+                    });
+                    await studentFinancialInfo.save();
+                    console.log('[FinancialRepository] Created StudentFinancialInfo record for payment:', payment._id, 'with chargeId:', charge._id);
+                }
 
-                await (StudentFinancialInfoModel as any).updateMany(
-                    { studentId: params.studentId, term: params.term, status: "Pending" },
-                    { $set: { status: "Paid", method: params.method } }
-                );
+                if (!payment) throw new Error(FinancialErrorType.PaymentNotFound);
 
                 return {
                     id: payment._id.toString(),
@@ -199,7 +294,10 @@ export class FinancialRepository implements IFinancialRepository {
                     date: new Date(),
                     description: `Payment for ${params.term}`,
                     status: "Pending",
-                    metadata: { razorpayOrderId: order.id },
+                    metadata: { 
+                        razorpayOrderId: order.id,
+                        chargeId: params.chargeId // Store chargeId in payment metadata
+                    },
                 });
 
                 await payment.save();
@@ -220,14 +318,37 @@ export class FinancialRepository implements IFinancialRepository {
                 method: params.method,
                 amount: params.amount,
                 status: "Completed",
+                metadata: { 
+                    chargeId: params.chargeId // Store chargeId in payment metadata
+                },
             });
 
             await payment.save();
 
-            await (StudentFinancialInfoModel as any).updateMany(
-                { studentId: params.studentId, term: params.term, status: "Pending" },
-                { $set: { status: "Paid", method: params.method } }
-            );
+            // Create StudentFinancialInfo record for non-Razorpay payment
+            if (!params.chargeId) {
+                throw new Error('Charge ID is required for payment');
+            }
+            
+            const charge = await (ChargeModel as any).findById(params.chargeId).lean();
+            if (!charge) {
+                throw new Error(`Charge with ID ${params.chargeId} not found`);
+            }
+            
+            const studentFinancialInfo = new (StudentFinancialInfoModel as any)({
+                studentId: params.studentId,
+                chargeId: charge._id,
+                paymentId: payment._id, // Store the payment ID
+                amount: payment.amount,
+                paymentDueDate: charge.dueDate,
+                status: "Paid",
+                term: params.term,
+                paidAt: new Date(), // Add the paidAt field
+                issuedAt: charge.createdAt,
+                method: payment.method
+            });
+            await studentFinancialInfo.save();
+            console.log('[FinancialRepository] Created StudentFinancialInfo record for non-Razorpay payment:', payment._id, 'with chargeId:', charge._id);
 
             return {
                 id: payment._id.toString(),
@@ -546,11 +667,25 @@ export class FinancialRepository implements IFinancialRepository {
 
     async getAllCharges(params: GetAllChargesRequestDTO): Promise<GetAllChargesResponseDTO> {
         const query: any = {};
-        if (params.term) query.term = params.term;
-        if (params.status) query.status = params.status;
+        
+        // Add filters
+        if (params.term && params.term !== 'All Terms') query.term = params.term;
+        if (params.status && params.status !== 'All Statuses') query.status = params.status;
+        
+        // Add search functionality
+        if (params.search && params.search.trim()) {
+            const searchRegex = new RegExp(params.search.trim(), 'i');
+            query.$or = [
+                { title: searchRegex },
+                { description: searchRegex },
+                { term: searchRegex },
+                { applicableFor: searchRegex }
+            ];
+        }
 
         const total = await (ChargeModel as any).countDocuments(query);
         const charges = await (ChargeModel as any).find(query)
+            .sort({ createdAt: -1 }) // Sort by newest first
             .skip((params.page - 1) * params.limit)
             .limit(params.limit)
             .lean();

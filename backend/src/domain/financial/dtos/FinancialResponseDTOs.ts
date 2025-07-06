@@ -82,6 +82,7 @@ export interface DocumentDTO {
   export interface GetStudentFinancialInfoResponseDTO {
     info: StudentFinancialInfoResponseDTO[];
     history: Array<{
+      id?: string; // Payment ID
       paidAt?: string;
       chargeTitle?: string;
       method?: string;
@@ -91,7 +92,9 @@ export interface DocumentDTO {
   
   export interface GetAllPaymentsResponseDTO {
     data: PaymentResponseDTO[];
-    total: number;
+    totalPayments: number;
+    totalPages: number;
+    currentPage: number;
   }
   
   export interface GetOnePaymentResponseDTO {

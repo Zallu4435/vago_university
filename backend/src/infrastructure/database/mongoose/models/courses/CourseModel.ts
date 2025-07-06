@@ -34,7 +34,13 @@ const CourseSchema = new Schema(
   }
 );
 
-CourseSchema.index({ title: "text" });
+// Create a compound text index for better search performance
+CourseSchema.index({ 
+  title: "text", 
+  specialization: "text", 
+  faculty: "text", 
+  description: "text" 
+});
 
 export interface IEnrollmentDocument extends Document {
   studentId: mongoose.Types.ObjectId;

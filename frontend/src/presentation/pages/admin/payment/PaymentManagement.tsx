@@ -63,16 +63,6 @@ const paymentColumns = [
     ),
   },
   {
-    header: 'Description',
-    key: 'description',
-    render: (payment: Payment) => (
-      <div className="flex items-center text-gray-300">
-        <FiFileText size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{payment.title}</span>
-      </div>
-    ),
-  },
-  {
     header: 'Method',
     key: 'method',
     render: (payment: Payment) => (
@@ -256,21 +246,28 @@ const PaymentManagement: React.FC = () => {
       let response;
       
       if (activeTab === 'payments') {
-        response = await getAllPayments();
-        setData(response || []);
+        response = await getAllPayments({
+          page,
+          limit: 10,
+          status: filters.status !== 'All Statuses' ? filters.status : undefined,
+          startDate: filters.startDate || undefined,
+          endDate: undefined, // Add endDate if needed
+        });
+        setData(response.data || []);
+        setTotalPages(response.totalPages || 1);
       } else if (activeTab === 'financialAid') {
         response = await getFinancialAidApplications();
         setData(response || []);
+        setTotalPages(Math.ceil((response?.length || 0) / 10));
       } else {
         response = await getScholarshipApplications();
         setData(response || []);
+        setTotalPages(Math.ceil((response?.length || 0) / 10));
       }
-      
-      setTotalPages(Math.ceil((response?.length || 0) / 10));
     } catch (err) {
       console.error('Failed to fetch data:', err);
     }
-  }, [activeTab, getAllPayments, getFinancialAidApplications, getScholarshipApplications]);
+  }, [activeTab, getAllPayments, getFinancialAidApplications, getScholarshipApplications, page, filters]);
 
   useEffect(() => {
     fetchData();
@@ -357,6 +354,11 @@ const PaymentManagement: React.FC = () => {
     }, 300),
     []
   );
+
+  // Handle page change
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
 
   const handleResetFilters = () => {
     setFilters({ status: 'All Statuses', term: 'All Terms', startDate: '' });
@@ -514,7 +516,7 @@ const PaymentManagement: React.FC = () => {
                     totalPages={totalPages}
                     itemsCount={filteredData.length}
                     itemName={activeTab === 'payments' ? 'payments' : activeTab === 'financialAid' ? 'applications' : 'scholarship applications'}
-                    onPageChange={(newPage) => setPage(newPage)}
+                    onPageChange={handlePageChange}
                     onFirstPage={() => setPage(1)}
                     onLastPage={() => setPage(totalPages)}
                   />

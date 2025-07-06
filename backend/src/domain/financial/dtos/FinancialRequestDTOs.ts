@@ -26,6 +26,7 @@ export interface DocumentDTO {
     amount: number;
     method: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay" | "stripe";
     term: string;
+    chargeId: string; // Required chargeId to track which specific charge is being paid
     razorpayPaymentId?: string;
     razorpayOrderId?: string;
     razorpaySignature?: string;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { academicService, StudentInfo, GradeInfo, Course, AcademicHistory, ProgramInfo, ProgressInfo, RequirementsInfo } from '../services/academicService';
 
@@ -25,8 +25,28 @@ export const useGradeInfo = (options?: QueryOptions) => {
 export const useCourses = (options?: QueryOptions) => {
   return useQuery<Course[]>({
     queryKey: ['courses'],
-    queryFn: academicService.getCourses,
+    queryFn: () => academicService.getCourses(),
     enabled: options?.enabled ?? true
+  });
+};
+
+export const useCourseSearch = (searchQuery: string, debounceMs: number = 500) => {
+  const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
+
+  // Debounce the search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, debounceMs);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, debounceMs]);
+
+  return useQuery<Course[]>({
+    queryKey: ['courses', debouncedQuery],
+    queryFn: () => academicService.getCourses(debouncedQuery),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 };
 
@@ -63,7 +83,7 @@ export const useRequirementsInfo = (options?: QueryOptions) => {
 };
 
 interface EnrollmentData {
-  courseId: number;
+  courseId: string;
   term: string;
   section: string;
   reason: string;

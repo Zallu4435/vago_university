@@ -95,12 +95,19 @@ export class FinancialController implements IFinancialController {
       if (!httpRequest.user?.id) {
         return this.httpErrors.error_401();
       }
-      const { amount, method, term, razorpayPaymentId, razorpayOrderId, razorpaySignature } = httpRequest.body || {};
+      const { amount, method, term, chargeId, razorpayPaymentId, razorpayOrderId, razorpaySignature } = httpRequest.body || {};
+      
+      // Validate required fields
+      if (!chargeId) {
+        return this.httpErrors.error_400('Charge ID is required');
+      }
+      
       const response = await this.makePaymentUseCase.execute({
         studentId: httpRequest.user.id,
         amount: parseFloat(amount),
         method,
         term,
+        chargeId,
         razorpayPaymentId,
         razorpayOrderId,
         razorpaySignature,

@@ -54,13 +54,24 @@ import {
           $options: "i",
         };
       }
-      if (search) {
-        query.$text = { $search: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") };
+      if (search && search.trim()) {
+        // Search across multiple fields using regex for better flexibility
+        const searchRegex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+        query.$or = [
+          { title: searchRegex },
+          { specialization: searchRegex },
+          { faculty: searchRegex },
+          { description: searchRegex }
+        ];
+      } else {
+        // If no search query, sort by most recent courses first
+        // This will be handled in the find operation
       }
   
       const skip = (page - 1) * limit;
       const courses = await CourseModel.find(query)
         .select("title specialization faculty term credits")
+        .sort(search ? {} : { createdAt: -1 }) // Sort by newest first when no search
         .skip(skip)
         .limit(limit)
         .lean();

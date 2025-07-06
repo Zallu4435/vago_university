@@ -88,13 +88,13 @@ const UniversitySessionsDashboard = () => {
 
   return (
     <div className={`min-h-screen ${styles.background}`}>
-      <SessionHeader
+      {/* <SessionHeader
         userName={userAccess.userName}
         currentTime={currentTime}
         isEnrolled={userAccess.isEnrolled}
         sessionCount={filteredSessions.length}
         styles={styles}
-      />
+      /> */}
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         <SessionStats stats={sessionStats} styles={styles} />

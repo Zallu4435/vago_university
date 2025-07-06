@@ -136,13 +136,14 @@ export class GetCoursesUseCase implements IGetCoursesUseCase {
 
   async execute(input: GetCoursesRequestDTO): Promise<ResponseDTO<GetCoursesResponseDTO>> {
     try {
-      const courses = await this.academicRepository.findAllCourses();
+      const { search, page = 1, limit = 5 } = input;
+      const courses = await this.academicRepository.findAllCourses(search, page, limit);
       
       const response: GetCoursesResponseDTO = {
         courses: courses,
         totalCourses: courses.length,
         totalPages: 1, // Assuming single page for now
-        currentPage: 1
+        currentPage: page
       };
       
       return { data: response, success: true };

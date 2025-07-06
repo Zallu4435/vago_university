@@ -57,7 +57,10 @@ export enum EnrollmentStatus {
       public term: string,
       public maxEnrollment: number,
       public currentEnrollment: number,
-      public createdAt: string
+      public createdAt: string,
+      public schedule?: string,
+      public description?: string,
+      public prerequisites?: string[]
     ) {}
   }
   

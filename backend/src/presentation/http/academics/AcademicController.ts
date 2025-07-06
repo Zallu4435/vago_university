@@ -72,7 +72,16 @@ export class AcademicController implements IAcademicController {
 
     async getCourses(httpRequest: IHttpRequest): Promise<IHttpResponse> {
         try {
-            const result = await this.getCoursesUseCase.execute({});
+            const { search, page = 1, limit = 10 } = httpRequest.query;
+            
+            // If no search query is provided, limit to 5 courses by default
+            const defaultLimit = search ? Number(limit) : 5;
+            
+            const result = await this.getCoursesUseCase.execute({
+                search: search as string,
+                page: Number(page),
+                limit: defaultLimit
+            });
             if (!result.success) {
                 return this.httpErrors.error_400();
             }

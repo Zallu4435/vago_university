@@ -10,8 +10,13 @@ import { MdCurrencyRupee } from 'react-icons/md';
 
 interface StudentFinancialInfo {
   info: Array<{
+    id: string;
     amount?: number;
     paymentDueDate?: string;
+    chargeTitle?: string;
+    chargeDescription?: string;
+    term?: string;
+    status?: 'Pending' | 'Paid';
   }>;
   history: any[];
   financialAidStatus?: string;
@@ -44,20 +49,21 @@ export default function Financial() {
     financialAidStatus: '',
   });
 
+  const fetchFinancialData = async () => {
+    try {
+      const info: any = await getStudentFinancialInfo();
+      setStudentInfo({
+        info: Array.isArray(info?.info) ? info.info : [],
+        history: Array.isArray(info?.history) ? info.history : [],
+        financialAidStatus: typeof info?.financialAidStatus === 'string' ? info.financialAidStatus : '',
+      });
+    } catch (err) {
+      console.error('Error fetching financial data:', err);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const info: any = await getStudentFinancialInfo();
-        setStudentInfo({
-          info: Array.isArray(info?.info) ? info.info : [],
-          history: Array.isArray(info?.history) ? info.history : [],
-          financialAidStatus: typeof info?.financialAidStatus === 'string' ? info.financialAidStatus : '',
-        });
-      } catch (err) {
-        console.error('Error fetching financial data:', err);
-      }
-    };
-    fetchData();
+    fetchFinancialData();
   }, [getStudentFinancialInfo]);
 
 
@@ -142,6 +148,7 @@ export default function Financial() {
             <FeesPaymentsSection
               studentInfo={studentInfo?.info || []}
               paymentHistory={studentInfo?.history || []}
+              onPaymentSuccess={fetchFinancialData}
             />
           )}
           {activeTab === 'Financial Aid' && <FinancialAidSection />}

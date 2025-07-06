@@ -26,16 +26,30 @@ import {
     async getStudentFinancialInfo(): Promise<StudentFinancialInfo> {
       try {
         const response = await httpClient.get(`${this.baseUrl}/student-info`);
-        return response.data;
+        return response.data.data;
       } catch (error) {
         throw new Error('Failed to fetch student financial info');
       }
     }
   
-    async getAllPayments(): Promise<Payment[]> {
+    async getAllPayments(params?: {
+      page?: number;
+      limit?: number;
+      startDate?: string;
+      endDate?: string;
+      status?: string;
+    }): Promise<{ data: Payment[]; totalPayments: number; totalPages: number; currentPage: number }> {
       try {
-        const response = await httpClient.get(`${this.adminBaseUrl}/payments`);
-        return response.data.data.data;
+        const response = await httpClient.get(`${this.adminBaseUrl}/payments`, {
+          params: {
+            page: params?.page || 1,
+            limit: params?.limit || 10,
+            startDate: params?.startDate || undefined,
+            endDate: params?.endDate || undefined,
+            status: params?.status || undefined,
+          }
+        });
+        return response.data.data;
       } catch (error) {
         throw new Error('Failed to fetch all payments');
       }
@@ -167,13 +181,21 @@ import {
     async getCharges(filters?: {
       term?: string;
       status?: string;
-      startDate?: string;
+      search?: string;
+      page?: number;
+      limit?: number;
     }): Promise<Charge[]> {
       try {
         const response = await httpClient.get(`${this.adminBaseUrl}/charges`, {
-          params: filters
+          params: {
+            term: filters?.term || undefined,
+            status: filters?.status || undefined,
+            search: filters?.search || undefined,
+            page: filters?.page || 1,
+            limit: filters?.limit || 50
+          }
         });
-        return response.data.data;
+        return response.data.data.data;
       } catch (error) {
         throw new Error('Failed to fetch charges');
       }

@@ -34,15 +34,21 @@ export const useFinancial = () => {
   }, []);
 
 
-  const getAllPayments = useCallback(async (): Promise<Payment[]> => {
+  const getAllPayments = useCallback(async (params?: {
+    page?: number;
+    limit?: number;
+    startDate?: string;
+    endDate?: string;
+    status?: string;
+  }): Promise<{ data: Payment[]; totalPayments: number; totalPages: number; currentPage: number }> => {
     try {
       setLoading(true);
       setError(null);
-      const data = await financialService.getAllPayments();
+      const data = await financialService.getAllPayments(params);
       return data;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
-      return [];
+      return { data: [], totalPayments: 0, totalPages: 0, currentPage: 1 };
     } finally {
       setLoading(false);
     }
@@ -243,7 +249,9 @@ export const useFinancial = () => {
   const getCharges = useCallback(async (filters?: {
     term?: string;
     status?: string;
-    startDate?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
   }): Promise<Charge[]> => {
     try {
       setLoading(true);

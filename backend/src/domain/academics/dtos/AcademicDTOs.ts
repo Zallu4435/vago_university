@@ -28,7 +28,11 @@ export interface GetStudentInfoRequestDTO {
     creditsInProgress: string;
   }
   
-  export interface GetCoursesRequestDTO {}
+  export interface GetCoursesRequestDTO {
+  search?: string;
+  page?: number;
+  limit?: number;
+}
   
   export interface GetCoursesResponseDTO {
     courses: any[];

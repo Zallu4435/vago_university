@@ -14,7 +14,7 @@ import {
   export interface IAcademicRepository {
     findStudentById(userId: string): Promise<Student | null>;
     findGradeByUserId(userId: string): Promise<Grade | null>;
-    findAllCourses(): Promise<Course[]>;
+    findAllCourses(search?: string, page?: number, limit?: number): Promise<Course[]>;
     findAcademicHistory(userId: string, startTerm?: string, endTerm?: string): Promise<AcademicHistory[]>;
     findProgramByUserId(userId: string): Promise<Program | null>;
     findProgressByUserId(userId: string): Promise<Progress | null>;

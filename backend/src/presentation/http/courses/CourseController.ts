@@ -14,9 +14,13 @@ export class CourseController implements ICourseController {
   async getCourses(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
       const { page = 1, limit = 10, search, specialization, faculty, term } = httpRequest.query;
+      
+      // If no search query is provided, limit to 5 courses by default
+      const defaultLimit = search ? Number(limit) : 5;
+      
       const params: GetCoursesRequestDTO = {
         page: Number(page),
-        limit: Number(limit),
+        limit: defaultLimit,
         search: search as string,
         specialization: specialization as string,
         faculty: faculty as string,

@@ -222,7 +222,7 @@ export const VideoConferencePage: React.FC = () => {
       const newMessage: Message = {
         id: data.id,
         user: data.userName,
-        text: data.text,
+        text: data.text ?? data.message,
         timestamp: new Date(data.timestamp).toLocaleTimeString().slice(0, 5)
       };
       setMessages(prev => [...prev, newMessage]);

@@ -15,54 +15,48 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
   const [searchQuery, setSearchQuery] = useState('');
   const [charges, setCharges] = useState<Charge[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [filteredCharges, setFilteredCharges] = useState<Charge[]>([]);
 
-  // Fetch charges when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      fetchCharges();
-    }
-  }, [isOpen]);
-
-  // Update filtered charges when charges change
-  useEffect(() => {
-    setFilteredCharges(charges);
-  }, [charges]);
-
-  const fetchCharges = useCallback(async () => {
+  // Fetch charges when modal opens or search changes
+  const fetchCharges = useCallback(async (search?: string) => {
     setIsLoading(true);
     try {
       const fetchedCharges = await getCharges({
         term: undefined,
         status: undefined,
-        search: searchQuery,
-        page: "1",
-        limit: "10"
+        search: search,
+        page: 1,
+        limit: 50
       });
       setCharges(fetchedCharges);
     } catch (error) {
       console.error('Error fetching charges:', error);
+      setCharges([]);
     } finally {
       setIsLoading(false);
     }
-  }, [getCharges, searchQuery]);
+  }, [getCharges]);
 
-  // Debounced search
+  // Debounced search function - memoized to prevent recreation
   const debouncedSearch = useCallback(
     debounce((value: string) => {
-      setSearchQuery(value);
-      fetchCharges();
+      fetchCharges(value);
     }, 500),
     [fetchCharges]
   );
 
-  console.log(charges)
-
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    setSearchQuery(value);
     debouncedSearch(value);
   };
+
+  // Initial fetch when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchCharges();
+    }
+  }, [isOpen, fetchCharges]);
 
   const formattedDate = (date: string) => {
     const dateObj = new Date(date);
@@ -76,11 +70,14 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
     } else {
       document.body.classList.remove('no-scroll');
       setSearchQuery('');
+      setCharges([]);
     }
     return () => {
       document.body.classList.remove('no-scroll');
+      // Cancel any pending debounced calls
+      debouncedSearch.cancel();
     };
-  }, [isOpen]);
+  }, [isOpen, debouncedSearch]);
 
   // Particle effect
   const ghostParticles = Array(30)
@@ -166,7 +163,6 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
     },
   ];
 
-
   if (!isOpen) return null;
 
   return ReactDOM.createPortal(
@@ -227,6 +223,7 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
                 <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400" size={20} />
                 <input
                   type="text"
+                  value={searchQuery}
                   onChange={handleSearchChange}
                   placeholder="Search by title or description..."
                   className="w-full pl-12 pr-4 py-3 bg-gray-900/60 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
@@ -245,7 +242,7 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
               <div className="flex items-center justify-center py-12">
                 <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
               </div>
-            ) : filteredCharges.length > 0 ? (
+            ) : charges.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -261,7 +258,7 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredCharges.map((charge) => (
+                    {charges.map((charge) => (
                       <tr
                         key={charge.id}
                         className="border-b border-purple-500/20 hover:bg-gray-900/60 transition-colors"

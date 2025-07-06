@@ -5,7 +5,6 @@ import AssignmentsSection from './assignments/AssignmentsSection';
 import StudyMaterialsPage from './materials/StudyMaterialsPage';
 import UniversitySessionsDashboard from './sessions/UniversitySessionsDashboard';
 import VideoClassPage from './sessions/UniversitySessionsDashboard';
-import UniversityDashboard from './UniversityDashboard';
 import { ChatComponent } from './chat/ChatComponent';
 import StudentDashboard from '../user/Dashboard/StudentDashboard';
 
@@ -13,16 +12,7 @@ export default function StudentCanvas() {
   const [activeTab, setActiveTab] = useOutletContext<[string, (tab: string) => void]>();
   const { styles } = usePreferences();
 
-  const navItems = [
-    'Dashboard',
-    'Diploma Course',
-    'Chat',
-    'Video Class',
-    'Materials',
-    'Assignments',
-    'Sessions'
-  ];
-
+  
   const renderContent = () => {
     switch (activeTab) {  
       case 'Dashboard':

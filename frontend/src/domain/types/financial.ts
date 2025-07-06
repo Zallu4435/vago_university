@@ -9,21 +9,28 @@ export interface StudentFinancialInfo {
 
 export interface Charge {
   id: string;
+  title: string;
   description: string;
   amount: number;
   dueDate: string;
-  status: 'Paid' | 'Pending' | 'Overdue';
   term: string;
+  applicableFor: string;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+  status?: 'Active' | 'Inactive';
 }
 
 export interface Payment {
   id: string;
   date: string;
   description: string;
-  method: 'Credit Card' | 'Bank Transfer' | 'Financial Aid';
+  method: 'Credit Card' | 'Bank Transfer' | 'Financial Aid' | 'Razorpay';
   amount: number;
   status: 'Completed' | 'Pending' | 'Failed';
   receiptUrl?: string;
+  paidAt?: string;
+  chargeTitle?: string;
 }
 
 export interface FinancialAidApplication {
@@ -69,6 +76,10 @@ export interface ScholarshipApplication {
 
 export interface PaymentForm {
   amount: number;
-  method: 'Credit Card' | 'Bank Transfer' | 'Financial Aid';
+  method: 'Credit Card' | 'Bank Transfer' | 'Financial Aid' | 'Razorpay';
   term: string;
+  chargeId: string; // Required chargeId to track which specific charge is being paid
+  razorpayPaymentId?: string;
+  razorpayOrderId?: string;
+  razorpaySignature?: string;
 } 

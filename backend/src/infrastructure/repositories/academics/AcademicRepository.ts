@@ -109,21 +109,42 @@ export class AcademicRepository implements IAcademicRepository {
     }
   }
 
-  async findAllCourses(): Promise<Course[]> {
+  async findAllCourses(search?: string, page: number = 1, limit: number = 5): Promise<Course[]> {
     try {
-      const courses = await CourseModel.find()
-        .select('title specialization faculty credits term maxEnrollment currentEnrollment')
+      const query: any = {};
+      
+      if (search && search.trim()) {
+        // Search across multiple fields using regex for better flexibility
+        const searchRegex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+        query.$or = [
+          { title: searchRegex },
+          { specialization: searchRegex },
+          { faculty: searchRegex },
+          { description: searchRegex }
+        ];
+      }
+
+      const skip = (page - 1) * limit;
+      const courses = await CourseModel.find(query)
+        .select('title specialization faculty credits schedule term maxEnrollment currentEnrollment description prerequisites')
+        .sort(search ? {} : { createdAt: -1 }) // Sort by newest first when no search
+        .skip(skip)
+        .limit(limit)
         .lean();
+        
       return courses.map((course) => new Course(
         course._id.toString(),
         course.title,
         course.specialization,
         course.faculty,
         course.credits,
-        course.term,
+        course.term || '',
         course.maxEnrollment || 0,
         course.currentEnrollment || 0,
-        new Date().toISOString()
+        new Date().toISOString(),
+        course.schedule,
+        course.description,
+        course.prerequisites
       ));
     } catch (err) {
       console.error(`Error in findAllCourses:`, err);
@@ -228,7 +249,7 @@ export class AcademicRepository implements IAcademicRepository {
         return null;
       }
       const course = await CourseModel.findById(courseId)
-        .select('title specialization faculty credits term maxEnrollment currentEnrollment')
+        .select('title specialization faculty credits schedule term maxEnrollment currentEnrollment description prerequisites')
         .lean();
       if (!course) {
         return null;
@@ -239,10 +260,13 @@ export class AcademicRepository implements IAcademicRepository {
         course.specialization,
         course.faculty,
         course.credits,
-        course.term,
+        course.term || '',
         course.maxEnrollment || 0,
         course.currentEnrollment || 0,
-        new Date().toISOString()
+        new Date().toISOString(),
+        course.schedule,
+        course.description,
+        course.prerequisites
       );
     } catch (err) {
       console.error(`Error in findCourseById:`, err);

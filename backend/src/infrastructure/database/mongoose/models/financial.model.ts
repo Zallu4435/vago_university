@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 interface StudentFinancialInfo extends mongoose.Document {
   studentId: mongoose.Types.ObjectId;
   chargeId: mongoose.Types.ObjectId;
+  paymentId?: mongoose.Types.ObjectId;
   amount: number;
   paymentDueDate: Date;
   paidAt: Date;
@@ -19,6 +20,7 @@ interface Charge extends mongoose.Document {
   term: string;
   applicableFor: string;
   createdBy: mongoose.Types.ObjectId;
+  status?: "Active" | "Inactive";
 }
 
 interface Payment extends mongoose.Document {
@@ -82,6 +84,10 @@ const StudentFinancialInfoSchema = new mongoose.Schema<StudentFinancialInfo>(
       ref: "Charge",
       required: true,
     },
+    paymentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "FinancialPayment",
+    },
     amount: { type: Number, required: true },
     paymentDueDate: { type: Date, required: true },
     status: {
@@ -106,6 +112,7 @@ const ChargeSchema = new mongoose.Schema<Charge>(
     dueDate: { type: Date, required: true },
     applicableFor: { type: String, required: true }, 
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
+    status: { type: String, enum: ["Active", "Inactive"], default: "Active" },
   },
   { timestamps: true }
 );

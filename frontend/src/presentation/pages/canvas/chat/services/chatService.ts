@@ -2,6 +2,7 @@ import httpClient from '../../../../../frameworks/api/httpClient';
 import { Chat, Message, User, PaginatedResponse } from '../types/ChatTypes';
 
 class ChatService {
+  // Core chat operations
   async getChats(page = 1, limit = 20): Promise<PaginatedResponse<Chat>> {
     try {
       const response = await httpClient.get(`/chats?page=${page}&limit=${limit}`);
@@ -52,6 +53,7 @@ class ChatService {
     }
   }
 
+  // Message operations
   async getMessages(chatId: string, page = 1, limit = 20, before?: string): Promise<PaginatedResponse<Message>> {
     try {
       const response = await httpClient.get(`/chats/${chatId}/messages?page=${page}&limit=${limit}${before ? `&before=${before}` : ''}`);
@@ -81,9 +83,19 @@ class ChatService {
     }
   }
 
+  async editMessage(chatId: string, messageId: string, newContent: string): Promise<Message> {
+    try {
+      const response = await httpClient.put(`/chats/${chatId}/messages/${messageId}`, {
+        content: newContent
+      });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to edit message');
+    }
+  }
+
   async deleteMessage(chatId: string, messageId: string, deleteForEveryone: boolean): Promise<void> {
     if (!messageId || messageId === 'false' || typeof messageId !== 'string') {
-      console.error('[chatService.deleteMessage] Invalid messageId:', messageId);
       throw new Error('Invalid message selected for deletion.');
     }
     try {
@@ -92,25 +104,6 @@ class ChatService {
       });
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to delete message');
-    }
-  }
-
-  async deleteMessageInChat(chatId: string, messageId: string, deleteForEveryone: boolean): Promise<void> {
-    try {
-      await httpClient.delete(`/chats/${chatId}/messages/${messageId}`, {
-        data: { deleteForEveryone }
-      });
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to delete message');
-    }
-  }
-
-  async forwardMessage(messageId: string, targetChatId: string): Promise<Message> {
-    try {
-      const response = await httpClient.post(`/messages/${messageId}/forward`, { targetChatId });
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to forward message');
     }
   }
 
@@ -131,6 +124,7 @@ class ChatService {
     }
   }
 
+  // Reaction operations
   async addReaction(messageId: string, emoji: string, userId: string): Promise<void> {
     try {
       await httpClient.post(`/chats/messages/${messageId}/reactions`, { userId, emoji });
@@ -147,17 +141,12 @@ class ChatService {
     }
   }
 
+  // Group operations
   async createGroupChat(params: any): Promise<Chat> {
     try {
-      if (params instanceof FormData) {
-        const response = await httpClient.post('/chats/group', params);
-        return response.data;
-      } else {
-        const response = await httpClient.post('/chats/group', params);
-        return response.data;
-      }
+      const response = await httpClient.post('/chats/group', params);
+      return response.data;
     } catch (error: any) {
-      console.error('chatService.createGroupChat error:', error);
       throw new Error(error.response?.data?.error || 'Failed to create group chat');
     }
   }
@@ -220,35 +209,17 @@ class ChatService {
     }
   }
 
+  // User operations
   async searchUsers(query: string, page = 1, limit = 20): Promise<PaginatedResponse<User>> {
     try {
       const response = await httpClient.get(`/chats/users/search?query=${query}&page=${page}&limit=${limit}`);
-      return response.data.data;
+      return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to search users');
     }
   }
 
-  async editMessage(chatId: string, messageId: string, newContent: string): Promise<Message> {
-    try {
-      const response = await httpClient.put(`/chats/${chatId}/messages/${messageId}`, {
-        content: newContent
-      });
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to edit message');
-    }
-  }
-
-  async getChatById(chatId: string): Promise<Chat> {
-    try {
-      const response = await httpClient.get(`/chats/${chatId}`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch chat by ID');
-    }
-  }
-
+  // Chat management
   async deleteChat(chatId: string): Promise<void> {
     try {
       await httpClient.delete(`/chats/${chatId}`);

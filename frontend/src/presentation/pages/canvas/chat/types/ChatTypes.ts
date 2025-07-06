@@ -14,7 +14,7 @@ export interface User {
 
 export interface Attachment {
   id: string;
-  type: 'image' | 'document' | 'audio' | 'video';
+  type: 'image' | 'document' | 'audio' | 'video' | 'file';
   url: string;
   name: string;
   size: number;
@@ -34,7 +34,7 @@ export interface ReplyTo {
   content: string;
   senderId: string;
   senderName: string;
-  type: 'text' | 'document' | 'image' | 'audio' | 'video';
+  type: 'text' | 'document' | 'image' | 'audio' | 'video' | 'file';
   createdAt: string;
 }
 
@@ -50,7 +50,7 @@ export interface Message {
   senderId: string;
   senderName: string;
   content: string;
-  type: 'text' | 'image' | 'document' | 'audio' | 'video';
+  type: 'text' | 'image' | 'document' | 'audio' | 'video' | 'file';
   fileUrl?: string;
   fileName?: string;
   fileSize?: number;
@@ -68,7 +68,7 @@ export interface Message {
   deletedForEveryone?: boolean;
   attachments?: {
     id: string;
-    type: 'image' | 'document' | 'audio' | 'video';
+    type: 'image' | 'document' | 'audio' | 'video' | 'file';
     url: string;
     name: string;
     size: number;
@@ -81,7 +81,7 @@ export interface LastMessage {
   content: string;
   senderId: string;
   senderName: string;
-  type: 'text' | 'document' | 'image' | 'audio' | 'video';
+  type: 'text' | 'document' | 'image' | 'audio' | 'video' | 'file';
   status: 'sending' | 'delivered' | 'read' | 'failed';
   createdAt: string;
 }

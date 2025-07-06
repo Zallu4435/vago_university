@@ -16,6 +16,7 @@ import GroupSettingsModal from './components/GroupSettingsModal';
 import { useChatQueries } from './hooks/useChatQueries';
 import { useChatMutations } from './hooks/useChatMutations';
 import { chatService } from './services/chatService';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const socketRef = React.createRef<Socket | null>();
 
@@ -55,6 +56,7 @@ export const ChatComponent: React.FC = () => {
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const currentUserId = currentUser?.id;
   const token = useSelector((state: RootState) => state.auth.token);
+  const queryClient = useQueryClient();
 
   const {
     chatsResponse,
@@ -98,6 +100,10 @@ export const ChatComponent: React.FC = () => {
     if (messagesPage === 1 && messages.length > 0) {
       setAllMessages(messages);
       setHasMoreMessages(true);
+      // Scroll to bottom when initial messages are loaded
+      setTimeout(() => {
+        scrollToBottom();
+      }, 150);
     } else if (messagesPage > 1) {
       if (messages.length > 0) {
         setAllMessages(prev => [...messages, ...prev]);
@@ -138,15 +144,21 @@ export const ChatComponent: React.FC = () => {
   }, [isLoadingChats]);
 
   const handleChatSelect = async (chatId: string) => {
+    // Only reset messages if selecting a different chat
+    if (selectedChatId !== chatId) {
+      setAllMessages([]);
+      setMessagesPage(1);
+      setHasMoreMessages(true);
+      setOldestMessageTimestamp(null);
+    }
+    
     setSelectedChatId(chatId);
-    setAllMessages([]);
-    setMessagesPage(1);
-    setHasMoreMessages(true);
     setReplyToMessage(null);
+    
     const chatArray: Chat[] = Array.isArray(chats) ? chats as Chat[] : (chats?.data as Chat[] || []);
     if (!chatId || !chatArray) return;
+    
     try {
-      setOldestMessageTimestamp(null);
       await chatMutations.markMessagesAsRead.mutateAsync(chatId);
       scrollToBottom();
     } catch (error) {
@@ -262,6 +274,10 @@ export const ChatComponent: React.FC = () => {
         // Do NOT emit the message via socket.io from the frontend.
       }
       setReplyToMessage(null);
+      // Ensure scroll to bottom after sending message
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
     } catch (error) {
       console.error('Failed to send message:', error);
       toast.error('Failed to send message');
@@ -397,13 +413,29 @@ export const ChatComponent: React.FC = () => {
     }
   };
 
+  // Auto-scroll to bottom when chat is selected
   useEffect(() => {
-    if (scrollState.shouldScrollToBottom) {
-      scrollToBottom();
-    } else if (scrollRef.current && scrollState.oldScrollHeight) {
-      const newScrollHeight = scrollRef.current.scrollHeight;
-      scrollRef.current.scrollTop = newScrollHeight - scrollState.oldScrollHeight;
-      scrollState.oldScrollHeight = 0;
+    if (selectedChatId) {
+      // Force scroll to bottom when chat is selected, regardless of message count
+      setTimeout(() => {
+        scrollToBottom();
+      }, 200); // Increased timeout to ensure messages are loaded
+    }
+  }, [selectedChatId]);
+
+  // Auto-scroll to bottom when messages are loaded or updated
+  useEffect(() => {
+    if (allMessages.length > 0) {
+      if (scrollState.shouldScrollToBottom) {
+        // Use setTimeout to ensure DOM is updated
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
+      } else if (scrollRef.current && scrollState.oldScrollHeight) {
+        const newScrollHeight = scrollRef.current.scrollHeight;
+        scrollRef.current.scrollTop = newScrollHeight - scrollState.oldScrollHeight;
+        scrollState.oldScrollHeight = 0;
+      }
     }
   }, [allMessages]);
 
@@ -455,6 +487,8 @@ export const ChatComponent: React.FC = () => {
       // Normalize id for MongoDB (_id -> id)
       const normalizedMessage = { ...message, id: message.id || message._id };
       console.log('[Socket.IO] Received real-time message:', normalizedMessage);
+      
+      // Update messages in current chat if it matches
       if (normalizedMessage.chatId === selectedChatId) {
         setAllMessages(prev => {
           const idx = prev.findIndex(m => m.id === normalizedMessage.id);
@@ -474,12 +508,23 @@ export const ChatComponent: React.FC = () => {
           chatMutations.markMessagesAsRead.mutateAsync(selectedChatId!);
         }
       }
+      
+      // Always update chat list when a new message is received (for both sender and receiver)
+      queryClient.invalidateQueries({ queryKey: ['chats'] });
+    };
+
+    const handleChatUpdate = (updatedChat: any) => {
+      console.log('[Socket.IO] Received chat update:', updatedChat);
+      // Force re-render of chat list by invalidating the query
+      queryClient.invalidateQueries({ queryKey: ['chats'] });
     };
 
     socketRef.current.on('message', handleNewMessage);
+    socketRef.current.on('chat', handleChatUpdate);
 
     return () => {
       socketRef.current?.off('message', handleNewMessage);
+      socketRef.current?.off('chat', handleChatUpdate);
     };
   }, [selectedChatId, currentUser?.id, socketRef.current]);
 

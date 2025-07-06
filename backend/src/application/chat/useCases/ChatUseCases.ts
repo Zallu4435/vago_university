@@ -35,12 +35,7 @@ export class GetChatsUseCase {
   constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: GetChatsRequestDTO): Promise<GetChatsResponseDTO> {
-    try {
-      const result = await this.chatRepository.getChats(params);
-      return result;
-    } catch (error) {
-      throw error;
-    }
+    return this.chatRepository.getChats(params);
   }
 }
 
@@ -104,12 +99,7 @@ export class SearchUsersUseCase {
   constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: SearchUsersRequestDTO): Promise<SearchUsersResponseDTO> {
-    try {
-      const result = await this.chatRepository.searchUsers(params);
-      return result;
-    } catch (error) {
-      throw error;
-    }
+    return this.chatRepository.searchUsers(params);
   }
 }
 
@@ -117,12 +107,7 @@ export class CreateChatUseCase {
   constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: CreateChatRequestDTO): Promise<ChatSummaryDTO> {
-    try {
-      const result = await this.chatRepository.createChat(params);
-      return result;
-    } catch (error) {
-      throw error;
-    }
+    return this.chatRepository.createChat(params);
   }
 }
 
@@ -130,12 +115,7 @@ export class CreateGroupChatUseCase {
   constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: CreateGroupChatRequestDTO): Promise<ChatSummaryDTO> {
-    try {
-      const result = await this.chatRepository.createGroupChat(params);
-      return result;
-    } catch (error) {
-      throw error;
-    }
+    return this.chatRepository.createGroupChat(params);
   }
 }
 
@@ -143,11 +123,7 @@ export class AddGroupMemberUseCase {
   constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: AddGroupMemberRequestDTO): Promise<void> {
-    try {
-      await this.chatRepository.addGroupMember(params);
-    } catch (error) {
-      throw error;
-    }
+    return this.chatRepository.addGroupMember(params);
   }
 }
 
@@ -155,11 +131,7 @@ export class RemoveGroupMemberUseCase {
   constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: RemoveGroupMemberRequestDTO): Promise<void> {
-    try {
-      await this.chatRepository.removeGroupMember(params);
-    } catch (error) {
-      throw error;
-    }
+    return this.chatRepository.removeGroupMember(params);
   }
 }
 
@@ -167,11 +139,7 @@ export class UpdateGroupAdminUseCase {
   constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: UpdateGroupAdminRequestDTO): Promise<void> {
-    try {
-      await this.chatRepository.updateGroupAdmin(params);
-    } catch (error) {
-      throw error;
-    }
+    return this.chatRepository.updateGroupAdmin(params);
   }
 }
 
@@ -179,11 +147,7 @@ export class UpdateGroupSettingsUseCase {
   constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: UpdateGroupSettingsRequestDTO): Promise<void> {
-    try {
-      await this.chatRepository.updateGroupSettings(params);
-    } catch (error) {
-      throw error;
-    }
+    return this.chatRepository.updateGroupSettings(params);
   }
 }
 
@@ -191,11 +155,7 @@ export class UpdateGroupInfoUseCase {
   constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: UpdateGroupInfoRequestDTO): Promise<void> {
-    try {
-      await this.chatRepository.updateGroupInfo(params);
-    } catch (error) {
-      throw error;
-    }
+    return this.chatRepository.updateGroupInfo(params);
   }
 }
 
@@ -203,11 +163,7 @@ export class LeaveGroupUseCase {
   constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: LeaveGroupRequestDTO): Promise<void> {
-    try {
-      await this.chatRepository.leaveGroup(params);
-    } catch (error) {
-      throw error;
-    }
+    return this.chatRepository.leaveGroup(params);
   }
 }
 
@@ -215,11 +171,7 @@ export class EditMessageUseCase {
   constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: EditMessageRequestDTO): Promise<void> {
-    try {
-      await this.chatRepository.editMessage(params);
-    } catch (error) {
-      throw error;
-    }
+    return this.chatRepository.editMessage(params);
   }
 }
 
@@ -227,12 +179,7 @@ export class DeleteMessageUseCase {
   constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: DeleteMessageRequestDTO): Promise<void> {
-    try {
-      await this.chatRepository.deleteMessage(params);
-    } catch (error) {
-      console.error('[DeleteMessageUseCase] Error:', error, '\nParams:', params);
-      throw error;
-    }
+    return this.chatRepository.deleteMessage(params);
   }
 }
 
@@ -240,43 +187,30 @@ export class ReplyToMessageUseCase {
   constructor(private chatRepository: IChatRepository) { }
 
   async execute(params: ReplyToMessageRequestDTO): Promise<void> {
-    try {
-      await this.chatRepository.replyToMessage(params);
-    } catch (error) {
-      throw error;
-    }
+    return this.chatRepository.replyToMessage(params);
   }
 }
 
 export class DeleteChatUseCase {
   constructor(private chatRepository: IChatRepository) { }
+
   async execute(params: DeleteChatRequestDTO): Promise<void> {
-    try {
-      await this.chatRepository.deleteChat(params);
-    } catch (error) {
-      throw error;
-    }
+    return this.chatRepository.deleteChat(params);
   }
 }
 
 export class BlockChatUseCase {
   constructor(private chatRepository: IChatRepository) { }
+
   async execute(params: BlockChatRequestDTO): Promise<void> {
-    try {
-      await this.chatRepository.blockChat(params);
-    } catch (error) {
-      throw error;
-    }
+    return this.chatRepository.blockChat(params);
   }
 }
 
 export class ClearChatUseCase {
   constructor(private chatRepository: IChatRepository) { }
+
   async execute(params: ClearChatRequestDTO): Promise<void> {
-    try {
-      await this.chatRepository.clearChat(params);
-    } catch (error) {
-      throw error;
-    }
+    return this.chatRepository.clearChat(params);
   }
 } 

@@ -100,7 +100,7 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
         id: `temp-${Date.now()}`,
         chatId: params.chatId,
         senderId: currentUserId,
-        senderName: '', // Optionally use current user's name
+        senderName: '',
         content: params.content,
         type: (params.type || 'text') as 'text' | 'image' | 'file' | 'audio' | 'video',
         status: 'sending',
@@ -133,7 +133,7 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
         id: `temp-${Date.now()}`,
         chatId: variables.chatId,
         senderId: currentUserId,
-        senderName: 'You', // Replace with actual user name
+        senderName: 'You',
         content: variables.formData.get('content') as string || '',
         type: variables.file.type.startsWith('image/') ? 'image' : 'document',
         status: 'sending' as const,
@@ -202,229 +202,110 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
             ...old,
             pages: old.pages.map((page: any) => ({
               ...page,
-              messages: page.messages.filter((msg: any) => msg.id !== params.messageId),
-            })),
+              messages: page.messages.filter((msg: any) => msg.id !== params.messageId)
+            }))
           };
         }
         return old;
       });
       return { previousMessages };
     },
-    onError: (_err, params, context) => {
+    onError: (err, params, context) => {
       queryClient.setQueryData(['messages', params.chatId], context?.previousMessages);
-      toast.error('Failed to delete message.');
     },
     onSettled: (_data, _error, params) => {
-      queryClient.invalidateQueries({ queryKey: ['messages', params.chatId] });
-      if (params.chatId) queryClient.invalidateQueries({ queryKey: ['chat', params.chatId] });
+      queryClient.invalidateQueries({ queryKey: ['messages', params?.chatId] });
     }
   });
 
-  const forwardMessage = useMutation({
-    mutationFn: async (params: { messageId: string; targetChatId: string }) =>
-      chatService.forwardMessage(params.messageId, params.targetChatId),
-    onSuccess: () => {
-      if (chatId) queryClient.invalidateQueries({ queryKey: ['chat', chatId] });
+  const editMessage = useMutation({
+    mutationFn: async (params: { chatId: string; messageId: string; newContent: string }) =>
+      chatService.editMessage(params.chatId, params.messageId, params.newContent),
+    onSuccess: (_data, params) => {
+      queryClient.invalidateQueries({ queryKey: ['messages', params.chatId] });
     }
   });
 
   const replyToMessage = useMutation({
     mutationFn: async (params: { chatId: string; replyToId: string; content: string }) =>
       chatService.replyToMessage(params.chatId, params.replyToId, params.content),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['chat', variables.chatId] });
+    onSuccess: (_data, params) => {
+      queryClient.invalidateQueries({ queryKey: ['messages', params.chatId] });
+    }
+  });
+
+  const addReaction = useMutation({
+    mutationFn: async (params: { messageId: string; emoji: string }) => {
+      if (!currentUserId) throw new Error('User not authenticated');
+      return chatService.addReaction(params.messageId, params.emoji, currentUserId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
+    }
+  });
+
+  const removeReaction = useMutation({
+    mutationFn: async (params: { messageId: string }) => {
+      if (!currentUserId) throw new Error('User not authenticated');
+      return chatService.removeReaction(params.messageId, currentUserId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
     }
   });
 
   const markMessagesAsRead = useMutation({
     mutationFn: async (chatId: string) => chatService.markMessagesAsRead(chatId),
-    onMutate: async (chatId: string) => {
-      // Cancel outgoing fetches for chat lists and chat details
-      await queryClient.cancelQueries({ queryKey: ['chats'] });
-      await queryClient.cancelQueries({ queryKey: ['chat', chatId] });
-
-      // Save previous state for rollback
-      const previousChatsQueries = queryClient.getQueriesData({ queryKey: ['chats'] });
-      const previousChatDetails = queryClient.getQueryData(['chat', chatId]);
-
-      // Optimistically update all paginated chat list caches
-      previousChatsQueries.forEach(([key, oldData]: any) => {
-        if (!oldData) return;
-        if (Array.isArray(oldData)) {
-          queryClient.setQueryData(key, oldData.map((chat: any) =>
-            chat.id === chatId ? { ...chat, unreadCount: 0 } : chat
-          ));
-        } else if (oldData.data && Array.isArray(oldData.data)) {
-          queryClient.setQueryData(key, {
-            ...oldData,
-            data: oldData.data.map((chat: any) =>
-              chat.id === chatId ? { ...chat, unreadCount: 0 } : chat
-            ),
-          });
-        }
-      });
-
-      // Optimistically update chat details cache
-      if (previousChatDetails) {
-        queryClient.setQueryData(['chat', chatId], {
-          ...previousChatDetails,
-          chat: {
-            ...previousChatDetails.chat,
-            unreadCount: 0,
-          },
-        });
-      }
-
-      // Return rollback context
-      return { previousChatsQueries, previousChatDetails };
-    },
-    onError: (_err, chatId, context) => {
-      // Rollback chat lists
-      if (context?.previousChatsQueries) {
-        context.previousChatsQueries.forEach(([key, oldData]: any) => {
-          queryClient.setQueryData(key, oldData);
-        });
-      }
-      // Rollback chat details
-      if (context?.previousChatDetails) {
-        queryClient.setQueryData(['chat', chatId], context.previousChatDetails);
-      }
-    },
-    onSettled: (_data, _error, chatId) => {
-      // Optionally refetch to ensure consistency
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chats'] });
-      queryClient.invalidateQueries({ queryKey: ['chat', chatId] });
     }
   });
 
-  // Reaction mutations
-  const addReaction = useMutation({
-    mutationFn: async (params: { messageId: string; emoji: string; userId: string }) =>
-      chatService.addReaction(params.messageId, params.emoji, params.userId),
-    onMutate: async (params) => {
-      await queryClient.cancelQueries({ queryKey: ['messages', chatId] });
-      const previousMessages = queryClient.getQueryData(['messages', chatId]);
-      queryClient.setQueryData(['messages', chatId], (old: any[] = []) => {
-        return old.map((msg) => {
-          if (msg.id === params.messageId) {
-            // Add or update the reaction for this user/emoji
-            const existing = msg.reactions.find((r: any) => r.emoji === params.emoji && r.userId === params.userId);
-            if (existing) {
-              return msg;
-            }
-            return {
-              ...msg,
-              reactions: [
-                ...msg.reactions,
-                {
-                  id: `temp-${Date.now()}`,
-                  emoji: params.emoji,
-                  userId: params.userId,
-                  createdAt: new Date().toISOString(),
-                  count: 1,
-                },
-              ],
-            };
-          }
-          return msg;
-        });
-      });
-      return { previousMessages };
-    },
-    onError: (_err, _params, context) => {
-      queryClient.setQueryData(['messages', chatId], context?.previousMessages);
-    },
-    onSettled: () => {
-      if (chatId) queryClient.invalidateQueries({ queryKey: ['messages', chatId] });
-    },
-  });
-
-  const removeReaction = useMutation({
-    mutationFn: async (params: { messageId: string; userId: string }) =>
-      chatService.removeReaction(params.messageId, params.userId),
-    onMutate: async (params) => {
-      await queryClient.cancelQueries({ queryKey: ['messages', chatId] });
-      const previousMessages = queryClient.getQueryData(['messages', chatId]);
-      queryClient.setQueryData(['messages', chatId], (old: any[] = []) => {
-        return old.map((msg) => {
-          if (msg.id === params.messageId) {
-            return {
-              ...msg,
-              reactions: msg.reactions.filter((r: any) => r.userId !== params.userId),
-            };
-          }
-          return msg;
-        });
-      });
-      return { previousMessages };
-    },
-    onError: (_err, _params, context) => {
-      queryClient.setQueryData(['messages', chatId], context?.previousMessages);
-    },
-    onSettled: () => {
-      if (chatId) queryClient.invalidateQueries({ queryKey: ['messages', chatId] });
-    },
-  });
-
-  const editMessage = useMutation({
-    mutationFn: async (params: { chatId: string; messageId: string; newContent: string }) =>
-      chatService.editMessage(params.chatId, params.messageId, params.newContent),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['chat', variables.chatId] });
-    }
-  });
-
-  // Chat management mutations
   const deleteChat = useMutation({
     mutationFn: async (chatId: string) => chatService.deleteChat(chatId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chats'] });
-      queryClient.invalidateQueries({ queryKey: ['chat'] });
-    },
+    }
   });
 
   const blockChat = useMutation({
     mutationFn: async (chatId: string) => chatService.blockChat(chatId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chats'] });
-      queryClient.invalidateQueries({ queryKey: ['chat'] });
-    },
+    }
   });
 
   const clearChat = useMutation({
     mutationFn: async (chatId: string) => chatService.clearChat(chatId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['chats'] });
-      queryClient.invalidateQueries({ queryKey: ['chat'] });
-      if (chatId) queryClient.invalidateQueries({ queryKey: ['messages', chatId] });
-    },
+      queryClient.invalidateQueries({ queryKey: ['messages', chatId] });
+    }
   });
 
   return {
-    // Group
+    // Group mutations
     addGroupMember,
     removeGroupMember,
     updateGroupAdmin,
     updateGroupSettings,
     updateGroupInfo,
     leaveGroup,
-    // Chat
+
+    // Chat mutations
     createChat,
     createGroupChat,
-    // Message
-    sendMessage,
-    sendFile,
-    deleteMessage,
-    forwardMessage,
-    replyToMessage,
-    markMessagesAsRead,
-    // Reaction
-    addReaction,
-    removeReaction,
-    editMessage,
-    // Chat management
     deleteChat,
     blockChat,
     clearChat,
+
+    // Message mutations
+    sendMessage,
+    sendFile,
+    deleteMessage,
+    editMessage,
+    replyToMessage,
+    addReaction,
+    removeReaction,
+    markMessagesAsRead,
   };
 }; 

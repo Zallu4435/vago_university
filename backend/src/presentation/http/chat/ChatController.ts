@@ -715,6 +715,12 @@ export class ChatController {
       userId
     });
 
+    // Fetch the updated message and emit to the chat room
+    const updatedMessage = await require('../../../infrastructure/database/mongoose/models/chat/MessageModel').MessageModel.findById(messageId).lean();
+    if (updatedMessage) {
+      socketService.handleNewMessage(updatedMessage);
+    }
+
     return {
       statusCode: 200,
       body: { data: { message: 'Message edited successfully' } }

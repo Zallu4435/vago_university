@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiUsers } from 'react-icons/fi';
+import { FiUsers, FiMic, FiVideo, FiImage, FiFile, FiPlay } from 'react-icons/fi';
 import { Chat, Message, Styles, User, PaginatedResponse } from '../types/ChatTypes';
 import { formatChatTime } from '../utils/chatUtils';
 
@@ -17,6 +17,45 @@ interface ChatListProps {
   onUserSelect: (user: User) => void;
   currentUserId: string | undefined;
 }
+
+// Helper function to format message content based on type
+const formatLastMessage = (message: Message): string => {
+  if (!message) return '';
+  
+  // Check if message has attachments
+  if (message.attachments && message.attachments.length > 0) {
+    const attachment = message.attachments[0];
+    switch (attachment.type) {
+      case 'audio':
+        return '🎵 Audio';
+      case 'video':
+        return '🎥 Video';
+      case 'image':
+        return '📷 Image';
+      case 'document':
+        return '📄 Document';
+      case 'file':
+        return '📎 File';
+      default:
+        return '📎 Attachment';
+    }
+  }
+  
+  // Check message type
+  switch (message.type) {
+    case 'audio':
+      return '🎵 Audio';
+    case 'video':
+      return '🎥 Video';
+    case 'image':
+      return '📷 Image';
+    case 'file':
+      return '📎 File';
+    case 'text':
+    default:
+      return message.content || '';
+  }
+};
 
 export const ChatList: React.FC<ChatListProps> = ({
   chats,
@@ -69,15 +108,21 @@ export const ChatList: React.FC<ChatListProps> = ({
                         <>
                           {chat.type === 'group' && (
                             <span className="font-medium">
-                              {chat.lastMessage.senderId === currentUserId ? 'You' : chat.participants.find(p => p.id === chat.lastMessage?.senderId)?.firstName + ' ' + chat.participants.find(p => p.id === chat.lastMessage?.senderId)?.lastName}:
+                              {chat.lastMessage.senderId === currentUserId
+                                ? 'You'
+                                : chat.participants.find(p => p.id === chat.lastMessage?.senderId)?.firstName + ' ' + chat.participants.find(p => p.id === chat.lastMessage?.senderId)?.lastName}
+                              :
                             </span>
                           )}
                           {chat.type === 'direct' && (
                             <span className="font-medium">
-                              {chat.lastMessage.senderId === currentUserId ? 'You' : ''}:
+                              {chat.lastMessage.senderId === currentUserId
+                                ? 'You'
+                                : chat.participants.find(p => p.id === chat.lastMessage?.senderId)?.firstName + ' ' + chat.participants.find(p => p.id === chat.lastMessage?.senderId)?.lastName}
+                              :
                             </span>
                           )}{' '}
-                          {chat.lastMessage.content}
+                          {formatLastMessage(chat.lastMessage)}
                         </>
                       ) : (
                         <span className="italic text-gray-400">No messages yet</span>

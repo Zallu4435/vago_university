@@ -90,6 +90,7 @@ export class ChatRepository implements IChatRepository {
                 type: lastMessage.type,
                 senderId: lastMessage.senderId,
                 status: lastMessage.status,
+                attachments: lastMessage.attachments,
                 createdAt: lastMessage.createdAt,
               }
               : undefined,
@@ -228,6 +229,7 @@ export class ChatRepository implements IChatRepository {
                 type: lastMessage.type,
                 senderId: lastMessage.senderId,
                 status: lastMessage.status,
+                attachments: lastMessage.attachments,
                 createdAt: lastMessage.createdAt,
               }
               : undefined,
@@ -350,6 +352,7 @@ export class ChatRepository implements IChatRepository {
         type: message.type,
         senderId: message.senderId,
         status: message.status,
+        attachments: message.attachments,
         createdAt: message.createdAt,
       },
       updatedAt: new Date(),
@@ -626,7 +629,8 @@ export class ChatRepository implements IChatRepository {
         await ChatModel.findByIdAndUpdate(chatId, {
           lastMessage: {
             ...chat.lastMessage,
-            content: content
+            content: content,
+            attachments: message.attachments
           }
         });
       }
@@ -796,6 +800,7 @@ export class ChatRepository implements IChatRepository {
           type: newMessage.type,
           senderId: newMessage.senderId,
           status: newMessage.status,
+          attachments: newMessage.attachments,
           createdAt: newMessage.createdAt
         },
         updatedAt: new Date()
@@ -836,6 +841,7 @@ export class ChatRepository implements IChatRepository {
           type: newMessage.type,
           senderId: newMessage.senderId,
           status: newMessage.status,
+          attachments: newMessage.attachments,
           createdAt: newMessage.createdAt
         },
         updatedAt: new Date()

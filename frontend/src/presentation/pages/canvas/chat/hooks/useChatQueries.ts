@@ -55,17 +55,6 @@ export const useChatQueries = (params: {
     enabled: !!params.chatId && params.messagesPage !== undefined && params.messagesLimit !== undefined,
   });
 
-  // Chat by ID (alias)
-  const {
-    data: chatById,
-    isLoading: isLoadingChatById,
-    error: errorChatById
-  } = useQuery({
-    queryKey: ['chatById', params.chatId],
-    queryFn: () => chatService.getChatById(params.chatId!),
-    enabled: !!params.chatId,
-  });
-
   // Search users
   const {
     data: searchUsers,
@@ -85,7 +74,6 @@ export const useChatQueries = (params: {
     searchChats,
     chatDetails,
     messagesResponse,
-    chatById,
     searchUsers,
 
     // Loading states
@@ -93,7 +81,6 @@ export const useChatQueries = (params: {
     isLoadingSearchChats,
     isLoadingChatDetails,
     isLoadingMessages,
-    isLoadingChatById,
     isLoadingSearchUsers,
 
     // Error states
@@ -101,7 +88,6 @@ export const useChatQueries = (params: {
     errorSearchChats,
     errorChatDetails,
     errorMessages,
-    errorChatById,
     errorSearchUsers,
 
     // Helpers

@@ -3,6 +3,35 @@ import { ChatRepository } from "../../repositories/chat/ChatRepository";
 import { MessageStatus } from "../../../domain/chat/entities/Message";
 import jwt from "jsonwebtoken";
 
+interface AuthenticatedSocket {
+  userId: string;
+  collection: string;
+}
+
+interface SocketMessage {
+  chatId: string;
+  senderId: string;
+  content: string;
+  type: string;
+  id: string;
+}
+
+interface MessageStatusData {
+  messageId: string;
+  status: MessageStatus;
+}
+
+interface ReactionData {
+  messageId: string;
+  userId: string;
+  chatId: string;
+}
+
+interface DeleteMessageData {
+  messageId: string;
+  chatId: string;
+}
+
 export class SocketService {
   private io: SocketIOServer;
   private chatNamespace: Namespace;
@@ -14,154 +43,167 @@ export class SocketService {
     this.chatNamespace = this.io.of('/chat');
     this.chatRepository = new ChatRepository();
 
-    this.io.on('error', (error) => {
-      console.error('\n=== Socket.IO Server Error ===');
-      console.error('Error details:', error);
-    });
-
-    this.chatNamespace.on('error', (error) => {
-      console.error('\n=== Chat Namespace Error ===');
-      console.error('Error details:', error);
-    });
-
+    this.setupErrorHandlers();
     this.setupSocketHandlers();
   }
 
-  private setupSocketHandlers() {
-    this.chatNamespace.use((socket, next) => {
+  private setupErrorHandlers() {
+    this.io.on('error', (error) => {
+      console.error('[Socket.IO] Server Error:', error);
+    });
 
-      let token = socket.handshake.auth.token;
-      if (typeof token !== 'string') {
-        if (typeof token === 'object' && token !== null) {
-          if (socket.handshake.headers.cookie) {
-            const match = socket.handshake.headers.cookie.match(/auth_token=([^;]+)/);
-            if (match) {
-              token = match[1];
-            } else {
-              token = '';
-            }
-          } else {
-            token = '';
-          }
-        } else {
-          token = String(token);
-        }
-      }
+    this.chatNamespace.on('error', (error) => {
+      console.error('[Socket.IO] Chat Namespace Error:', error);
+    });
+  }
+
+  private setupSocketHandlers() {
+    this.chatNamespace.use(this.authenticateSocket.bind(this));
+    this.chatNamespace.on("connection", this.handleConnection.bind(this));
+  }
+
+  private authenticateSocket(socket: any, next: (err?: Error) => void) {
+    try {
+      const token = this.extractToken(socket);
+      
       if (!token) {
-        console.error('Authentication failed: No token provided');
         return next(new Error("Authentication error: No token provided"));
       }
 
-      try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret") as any;
-        socket.data.user = {
-          id: decoded.userId,
-          collection: decoded.collection,
-        };
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret") as any;
+      socket.data.user = {
+        userId: decoded.userId,
+        collection: decoded.collection,
+      } as AuthenticatedSocket;
 
-        next();
-      } catch (err) {
-        console.error('Authentication failed:', {
-          error: err,
-          token: typeof token === 'string' ? token.substring(0, 20) + '...' : token
-        });
-        next(new Error("Authentication error: Invalid token"));
+      next();
+    } catch (err) {
+      console.error('[Socket.IO] Authentication failed:', err);
+      next(new Error("Authentication error: Invalid token"));
+    }
+  }
+
+  private extractToken(socket: any): string | null {
+    // Try auth token first
+    let token = socket.handshake.auth.token;
+    
+    if (typeof token === 'string' && token) {
+      return token;
+    }
+
+    // Try cookie if auth token is not available
+    if (socket.handshake.headers.cookie) {
+      const match = socket.handshake.headers.cookie.match(/auth_token=([^;]+)/);
+      if (match) {
+        return match[1];
+      }
+    }
+
+    return null;
+  }
+
+  private handleConnection(socket: any) {
+    const userId = socket.data.user.userId;
+    this.userSockets.set(userId, socket.id);
+    
+    console.log(`[Socket.IO] User connected: ${userId}, socket id: ${socket.id}`);
+
+    // Send online users list to the newly connected user
+    socket.emit("onlineUsers", Array.from(this.userSockets.keys()));
+    
+    // Join user to their existing chats
+    this.joinUserChats(userId);
+
+    // Broadcast user status
+    this.broadcastUserStatus(userId, "online");
+
+    // Setup event listeners
+    this.setupEventListeners(socket, userId);
+  }
+
+  private setupEventListeners(socket: any, userId: string) {
+    socket.on("joinChat", (data: { chatId: string }) => {
+      socket.join(data.chatId);
+    });
+
+    socket.on("leaveChat", (data: { chatId: string }) => {
+      socket.leave(data.chatId);
+    });
+
+    socket.on("typing", (data: { chatId: string; isTyping: boolean }) => {
+      socket.to(data.chatId).emit("typing", {
+        userId,
+        chatId: data.chatId,
+        isTyping: data.isTyping
+      });
+    });
+
+    socket.on("message", async (message: SocketMessage) => {
+      if (!message.chatId) {
+        console.error('[Socket.IO] Received message with undefined chatId:', message);
+        return;
+      }
+      try {
+        await this.handleNewMessage(message);
+      } catch (error) {
+        console.error('[Socket.IO] Error handling new message:', error);
       }
     });
 
-    this.chatNamespace.on("connection", (socket) => {
-      const userId = socket.data.user.id;
-      this.userSockets.set(userId, socket.id);
-      // Send the list of currently online users to the newly connected socket
-      socket.emit("onlineUsers", Array.from(this.userSockets.keys()));
-      this.joinUserChats(userId);
+    socket.on("messageStatus", async (data: MessageStatusData) => {
+      try {
+        await this.chatRepository.updateMessageStatus(data.messageId, data.status);
+        socket.to(data.messageId).emit("messageStatus", data);
+      } catch (error) {
+        console.error('[Socket.IO] Error updating message status:', error);
+      }
+    });
 
-      console.log(`[Socket.IO] User connected: ${userId}, socket id: ${socket.id}`);
-
-      // Emit online status to all
-      this.chatNamespace.emit("userStatus", { userId, status: "online" });
-      // Emit online status for all other users to the newly connected user
-      Array.from(this.userSockets.keys()).forEach(id => {
-        if (id !== userId) {
-          socket.emit("userStatus", { userId: id, status: "online" });
-        }
-      });
-
-      socket.on("joinChat", (data: { chatId: string }) => {
-        socket.join(data.chatId);
-      });
-
-      socket.on("leaveChat", (data: { chatId: string }) => {
-        socket.leave(data.chatId);
-      });
-
-      socket.on("typing", (data: { chatId: string; isTyping: boolean }) => {
-        socket.to(data.chatId).emit("typing", {
-          userId,
-          chatId: data.chatId,
-          isTyping: data.isTyping
-        });
-      });
-
-      socket.on("message", async (message: any) => {
-        if (!message.chatId) {
-          console.error('Received message with undefined chatId:', message);
-          return;
-        }
-        try {
-          await this.handleNewMessage(message);
-        } catch (error) {
-          console.error('Error handling new message:', error);
-        }
-      });
-
-      socket.on("messageStatus", async (data: { messageId: string; status: MessageStatus }) => {
-        try {
-          await this.chatRepository.updateMessageStatus(data.messageId, data.status);
-          socket.to(data.messageId).emit("messageStatus", data);
-        } catch (error) {
-          console.error('Error updating message status:', error);
-        }
-      });
-
-      socket.on("removeReaction", (data: { messageId: string; userId: string; chatId: string }) => {
-        this.handleRemoveReaction(data.messageId, data.userId, data.chatId);
-      });
-
-      socket.on("deleteMessage", (data: { messageId: string; chatId: string }) => {
-        this.handleDeleteMessage(data.messageId, data.chatId);
-      });
-
-      socket.on("disconnect", (reason) => {
-        const userId = this.getUserIdBySocketId(socket.id);
-        if (userId) {
-          this.userSockets.delete(userId);
-          this.chatNamespace.emit("userStatus", { userId, status: "offline" });
-          console.log(`[Socket.IO] Emitted userStatus: offline for user ${userId}`);
-        } else {
-        }
+    socket.on("removeReaction", (data: ReactionData) => {
+      this.chatNamespace.to(data.chatId).emit("messageReactionRemoved", {
+        messageId: data.messageId,
+        userId: data.userId,
       });
     });
 
+    socket.on("deleteMessage", (data: DeleteMessageData) => {
+      this.chatNamespace.to(data.chatId).emit("messageDeleted", {
+        messageId: data.messageId,
+        chatId: data.chatId,
+      });
+    });
+
+    socket.on("disconnect", (reason: string) => {
+      this.handleDisconnect(socket, reason);
+    });
   }
 
-  private joinUserChats(userId: string) {
-    this.chatRepository
-      .getChats({ userId, page: 1, limit: 100 })
-      .then((response) => {
+  private handleDisconnect(socket: any, reason: string) {
+    const userId = this.getUserIdBySocketId(socket.id);
+    if (userId) {
+      this.userSockets.delete(userId);
+      this.broadcastUserStatus(userId, "offline");
+      console.log(`[Socket.IO] User disconnected: ${userId}, reason: ${reason}`);
+    }
+  }
+
+  private broadcastUserStatus(userId: string, status: "online" | "offline") {
+    this.chatNamespace.emit("userStatus", { userId, status });
+  }
+
+  private async joinUserChats(userId: string) {
+    try {
+      const response = await this.chatRepository.getChats({ userId, page: 1, limit: 100 });
+      const socketId = this.userSockets.get(userId);
+      
+      if (socketId) {
         response.data.forEach((chat) => {
-          const socketId = this.userSockets.get(userId);
-          if (socketId) {
-            this.chatNamespace.sockets.get(socketId)?.join(chat.id);
-          }
+          this.chatNamespace.sockets.get(socketId)?.join(chat.id);
         });
-      })
-      .catch((error) => {
-        console.error('Error joining user chats:', {
-          userId,
-          error
-        });
-      });
+      }
+    } catch (error) {
+      console.error('[Socket.IO] Error joining user chats:', { userId, error });
+    }
   }
 
   private getUserIdBySocketId(socketId: string): string | undefined {
@@ -171,65 +213,31 @@ export class SocketService {
     return undefined;
   }
 
-  public async handleNewMessage(message: any) {
+  public async handleNewMessage(message: SocketMessage) {
     const chatId = message.chatId;
+    
+    // Broadcast message to chat room
     this.chatNamespace.to(chatId).emit("message", message);
-    const chat = await this.chatRepository.getChatDetails(chatId, message.senderId);
-    if (chat) {
-      chat.participants.forEach((participant) => {
-        if (participant.id !== message.senderId) {
-          const socketId = this.userSockets.get(participant.id);
-          if (socketId) {
-            this.chatNamespace.to(socketId).emit("messageStatus", {
-              messageId: message.id,
-              status: "delivered"
-            });
+    
+    // Update message status for other participants
+    try {
+      const chat = await this.chatRepository.getChatDetails(chatId, message.senderId);
+      if (chat) {
+        chat.participants.forEach((participant) => {
+          if (participant.id !== message.senderId) {
+            const socketId = this.userSockets.get(participant.id);
+            if (socketId) {
+              this.chatNamespace.to(socketId).emit("messageStatus", {
+                messageId: message.id,
+                status: "delivered"
+              });
+            }
           }
-        }
-      });
+        });
+      }
+    } catch (error) {
+      console.error('[Socket.IO] Error handling message status:', error);
     }
-  }
-
-  public async handleMessageRead(chatId: string, userId: string) {
-    this.chatNamespace.to(chatId).emit("messageStatus", {
-      chatId,
-      userId,
-      status: "read"
-    });
-  }
-
-  public async handleReaction(messageId: string, reaction: any) {
-    const message = await this.chatRepository.getChatMessages({
-      chatId: reaction.chatId,
-      userId: reaction.userId,
-      page: 1,
-      limit: 1,
-    });
-    if (message.data.length > 0) {
-      const reactionData = reaction.emoji ? reaction : { userId: reaction.userId };
-      this.chatNamespace.to(reaction.chatId).emit("messageReaction", {
-        messageId,
-        reaction: reactionData,
-      });
-    }
-  }
-
-  public async handleUserStatus(userId: string, status: "online" | "offline") {
-    this.chatNamespace.emit("userStatus", { userId, status });
-  }
-
-  public async handleRemoveReaction(messageId: string, userId: string, chatId: string) {
-    this.chatNamespace.to(chatId).emit("messageReactionRemoved", {
-      messageId,
-      userId,
-    });
-  }
-
-  public async handleDeleteMessage(messageId: string, chatId: string) {
-    this.chatNamespace.to(chatId).emit("messageDeleted", {
-      messageId,
-      chatId,
-    });
   }
 
   public async handleUpdatedChat(chat: any) {

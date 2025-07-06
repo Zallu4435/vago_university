@@ -6,8 +6,10 @@ export interface NotificationResponseDTO {
     recipientId?: string;
     recipientName?: string;
     createdBy: string;
-    createdAt: string;
+    createdAt: string; // Will be converted to ISO string
     status: "sent" | "failed";
+    isRead: boolean; // Calculated based on whether current user is in readBy array
+    readBy: string[]; // Array of user IDs who have read this notification
 }
 
 export interface CreateNotificationResponseDTO {
@@ -27,4 +29,15 @@ export interface GetIndividualNotificationResponseDTO {
 
 export interface DeleteNotificationResponseDTO {
     message: string;
+}
+
+export interface MarkNotificationAsReadResponseDTO {
+    success: boolean;
+    message: string;
+}
+
+export interface MarkAllNotificationsAsReadResponseDTO {
+    success: boolean;
+    message: string;
+    updatedCount: number;
 }

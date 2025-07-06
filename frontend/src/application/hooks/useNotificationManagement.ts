@@ -109,6 +109,28 @@ export const useNotificationManagement = () => {
     },
   });
 
+  const { mutateAsync: markAsRead } = useMutation({
+    mutationFn: (id: string) => notificationService.markAsRead(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      toast.success('Notification marked as read');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to mark notification as read');
+    },
+  });
+
+  const { mutateAsync: markAllAsRead } = useMutation({
+    mutationFn: () => notificationService.markAllAsRead(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      toast.success('All notifications marked as read');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to mark all notifications as read');
+    },
+  });
+
   return {
     notifications: notificationsData?.notifications || [],
     totalPages: notificationsData?.totalPages || 0,
@@ -120,6 +142,8 @@ export const useNotificationManagement = () => {
     error,
     createNotification,
     deleteNotification,
+    markAsRead,
+    markAllAsRead,
     getNotificationDetails,
     selectedNotification,
     isLoadingNotificationDetails,

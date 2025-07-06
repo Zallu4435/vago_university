@@ -35,9 +35,9 @@ export const PresidentsWelcome: React.FC = () => {
         <div className="flex justify-center">
           <div className="relative group">
             <img
-              src="https://via.placeholder.com/400x300?text=President+Photo"
+              src="/images/president-welcome.webp"
               alt="University President"
-              className="rounded-xl w-full max-w-sm object-cover shadow-lg transform group-hover:-translate-y-1 transition-all duration-300"
+              className="rounded-xl w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl object-cover shadow-lg transform group-hover:-translate-y-1 transition-all duration-300"
             />
             <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 right-3 sm:right-4 bg-gradient-to-r from-cyan-700 to-blue-600 text-white p-3 sm:p-4 rounded-lg opacity-90">
               <h4 className="font-semibold text-sm sm:text-base">Prof. John Doe</h4>

@@ -9,16 +9,25 @@ interface AddNotificationModalProps {
   recipientTypes: string[];
 }
 
+interface FormData {
+  title: string;
+  message: string;
+  recipientType: string;
+  recipientId: string;
+  recipientName: string;
+  createdBy: string;
+}
+
 const AddNotificationModal: React.FC<AddNotificationModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
   recipientTypes,
 }) => {
-  const [formData, setFormData] = useState<Omit<Notification, '_id' | 'createdAt' | 'status'>>({
+  const [formData, setFormData] = useState<FormData>({
     title: '',
     message: '',
-    recipientType: 'all',
+    recipientType: '',
     recipientId: '',
     recipientName: '',
     createdBy: 'Admin', // Assume admin user for simplicity
@@ -30,9 +39,7 @@ const AddNotificationModal: React.FC<AddNotificationModalProps> = ({
     const newErrors: { [key: string]: string } = {};
     if (!formData.title) newErrors.title = 'Title is required';
     if (!formData.message) newErrors.message = 'Message is required';
-    if (formData.recipientType === 'individual' && !formData.recipientId) {
-      newErrors.recipientId = 'Recipient ID is required for individual notifications';
-    }
+    if (!formData.recipientType) newErrors.recipientType = 'Please select a recipient type';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -40,11 +47,20 @@ const AddNotificationModal: React.FC<AddNotificationModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      onSubmit(formData);
+      const notificationData: Omit<Notification, '_id' | 'createdAt' | 'status'> = {
+        title: formData.title,
+        message: formData.message,
+        recipientType: formData.recipientType as 'all' | 'all_students' | 'all_faculty',
+        recipientId: formData.recipientId,
+        recipientName: formData.recipientName,
+        createdBy: formData.createdBy,
+        isRead: false,
+      };
+      onSubmit(notificationData);
       setFormData({
         title: '',
         message: '',
-        recipientType: 'all',
+        recipientType: '',
         recipientId: '',
         recipientName: '',
         createdBy: 'Admin',
@@ -101,38 +117,16 @@ const AddNotificationModal: React.FC<AddNotificationModalProps> = ({
               onChange={handleChange}
               className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
             >
+              <option value="" disabled>Select a recipient</option>
               {recipientTypes.map((type) => (
                 <option key={type} value={type.toLowerCase().replace(/\s+/g, '_')}>
                   {type}
                 </option>
               ))}
             </select>
+            {errors.recipientType && <p className="text-red-400 text-xs mt-1">{errors.recipientType}</p>}
           </div>
-          {formData.recipientType === 'individual' && (
-            <>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-300 mb-1">Recipient ID</label>
-                <input
-                  type="text"
-                  name="recipientId"
-                  value={formData.recipientId}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
-                />
-                {errors.recipientId && <p className="text-red-400 text-xs mt-1">{errors.recipientId}</p>}
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-300 mb-1">Recipient Name</label>
-                <input
-                  type="text"
-                  name="recipientName"
-                  value={formData.recipientName}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
-                />
-              </div>
-            </>
-          )}
+
           <div className="flex justify-end gap-2">
             <button
               type="button"

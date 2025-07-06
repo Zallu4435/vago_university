@@ -15,6 +15,7 @@ export interface GetAllNotificationsRequestDTO {
     recipientType?: string;
     status?: string;
     dateRange?: string;
+    isRead?: boolean;
 }
 
 export interface GetIndividualNotificationRequestDTO {
@@ -23,6 +24,17 @@ export interface GetIndividualNotificationRequestDTO {
 
 export interface DeleteNotificationRequestDTO {
     notificationId: string;
+    authenticatedUserId: string;
+    collection: "register" | "admin" | "user" | "faculty";
+}
+
+export interface MarkNotificationAsReadRequestDTO {
+    notificationId: string;
+    authenticatedUserId: string;
+    collection: "register" | "admin" | "user" | "faculty";
+}
+
+export interface MarkAllNotificationsAsReadRequestDTO {
     authenticatedUserId: string;
     collection: "register" | "admin" | "user" | "faculty";
 }

@@ -8,6 +8,8 @@ export interface Notification {
     createdBy: string;
     createdAt: string;
     status: 'sent' | 'failed';
+    isRead: boolean;
+    type?: 'course' | 'assignment' | 'general' | 'default';
   }
   
   export interface NotificationApiResponse {

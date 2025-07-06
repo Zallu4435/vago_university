@@ -30,4 +30,16 @@ notificationRouter.delete(
   (req, res, next) => { expressAdapter(req, res, notificationController.deleteNotification.bind(notificationController)).catch(next); }
 );
 
+notificationRouter.patch(
+  "/:notificationId/read",
+  authMiddleware,
+  (req, res, next) => { expressAdapter(req, res, notificationController.markNotificationAsRead.bind(notificationController)).catch(next); }
+);
+
+notificationRouter.patch(
+  "/read-all",
+  authMiddleware,
+  (req, res, next) => { expressAdapter(req, res, notificationController.markAllNotificationsAsRead.bind(notificationController)).catch(next); }
+);
+
 export default notificationRouter;

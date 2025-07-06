@@ -6,6 +6,7 @@ import { logout } from '../../../redux/authSlice';
 import FacultySidebar from './FacultySidebar';
 import ProfileSettings from '../../user/Settings/ProfileSettings';
 import FacultyPreferenceSettings from './FacultyPreferenceSettings';
+import FacultyNotificationSettings from './FacultyNotificationSettings';
 
 export default function FacultySettings() {
   const [activeTab, setActiveTab] = useState('profile');
@@ -29,23 +30,7 @@ export default function FacultySettings() {
       case 'preferences':
         return <FacultyPreferenceSettings />;
       case 'notifications':
-        return (
-          <div className="flex-1 p-8">
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm h-full flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-slate-50"></div>
-              <div className="text-center relative z-10">
-                <div className="relative mb-6">
-                  <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    {/* Notification Icon */}
-                  </div>
-                </div>
-                <h2 className="text-3xl font-bold text-slate-800 mb-3">Notifications</h2>
-                <p className="text-slate-600 text-lg mb-6">Manage your notification preferences</p>
-                <div className="px-6 py-2 bg-green-100 rounded-full text-green-700 text-sm font-medium inline-block">Coming Soon</div>
-              </div>
-            </div>
-          </div>
-        );
+        return <FacultyNotificationSettings />;
       case 'financial':
         return (
           <div className="flex-1 p-8">

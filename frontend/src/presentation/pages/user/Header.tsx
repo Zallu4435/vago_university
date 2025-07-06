@@ -3,7 +3,7 @@ import { FaBell, FaBookOpen, FaSearch, FaBars, FaTimes, FaCog, FaQuestionCircle,
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePreferences } from '../../context/PreferencesContext';
 import { useNotificationManagement } from '../../../application/hooks/useNotificationManagement';
-import { toast } from 'react-hot-toast';
+import NotificationModal from '../../components/NotificationModal';
 
 interface HeaderProps {
   activeTab: string;
@@ -23,11 +23,11 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
   const location = useLocation();
   const navigate = useNavigate();
   const { styles, theme } = usePreferences();
-  const { notifications, markAsRead, getNotificationDetails } = useNotificationManagement();
+  const { notifications } = useNotificationManagement();
+  
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
-  const notificationDropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -51,23 +51,7 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
     setIsProfileDropdownOpen(false);
   };
 
-  const handleNotificationClick = async (notificationId: string) => {
-    try {
-      const details = await getNotificationDetails(notificationId);
-      if (details) {
-        if (details.type === 'course') {
-          navigate(`/courses/${details.courseId}`);
-        } else if (details.type === 'assignment') {
-          navigate(`/assignments/${details.assignmentId}`);
-        }
-        await markAsRead(notificationId);
-        setIsNotificationOpen(false);
-      }
-    } catch (error) {
-      console.error('Error handling notification:', error);
-      toast.error('Failed to open notification');
-    }
-  };
+
 
   const handlePortalToggle = () => {
     if (isCanvas) {
@@ -77,7 +61,7 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter(n => !(n as any).isRead).length;
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -89,13 +73,7 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
         setIsProfileDropdownOpen(false);
       }
 
-      // Close notification dropdown if clicking outside
-      if (
-        notificationDropdownRef.current &&
-        !notificationDropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsNotificationOpen(false);
-      }
+
 
       // Close mobile menu if clicking outside
       if (
@@ -242,52 +220,12 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
                 <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${styles.orb.primary} opacity-0 group-hover:opacity-10 transition-all duration-300`}></div>
               </button>
 
-              {/* Notification Dropdown */}
-              {isNotificationOpen && (
-                <div ref={notificationDropdownRef} className={`absolute right-0 mt-3 w-96 ${styles.card.background} backdrop-blur-xl rounded-2xl shadow-2xl z-50 border ${styles.border}`}>
-                  <div className={`absolute inset-0 bg-gradient-to-br ${styles.backgroundSecondary} opacity-50`}></div>
-                  <div className="relative z-10">
-                    <div className={`px-4 py-3 border-b ${styles.borderSecondary} flex justify-between items-center`}>
-                      <h3 className={`font-medium ${styles.textPrimary}`}>Notifications</h3>
-                      <span className={`text-sm ${styles.textSecondary}`}>{notifications.length} total</span>
-                    </div>
-                    <div className="max-h-96 overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <div className={`px-4 py-6 text-center ${styles.textSecondary}`}>
-                          No notifications
-                        </div>
-                      ) : (
-                        notifications.map((notification) => (
-                          <button
-                            key={notification._id}
-                            onClick={() => handleNotificationClick(notification._id)}
-                            className={`w-full text-left px-4 py-3 hover:bg-opacity-50 transition-all duration-200 ${
-                              !notification.isRead ? `${styles.card.background} bg-opacity-50` : ''
-                            }`}
-                          >
-                            <div className="flex items-start space-x-3">
-                              <div className={`flex-shrink-0 w-2 h-2 mt-2 rounded-full ${
-                                !notification.isRead ? `${styles.status.primary}` : `${styles.textSecondary}`
-                              }`} />
-                              <div className="flex-1">
-                                <p className={`font-medium ${styles.textPrimary}`}>
-                                  {notification.title}
-                                </p>
-                                <p className={`text-sm ${styles.textSecondary} mt-1`}>
-                                  {notification.message}
-                                </p>
-                                <p className={`text-xs ${styles.textSecondary} mt-2`}>
-                                  {new Date(notification.createdAt).toLocaleString()}
-                                </p>
-                              </div>
-                            </div>
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Notification Modal */}
+              <NotificationModal 
+                isOpen={isNotificationOpen}
+                onClose={() => setIsNotificationOpen(false)}
+                styles={styles}
+              />
             </div>
 
             {/* Mobile Profile Icon */}

@@ -39,7 +39,7 @@ const StatusBadge = ({ status }: { status: string }) => {
     },
   };
 
-  const config = statusConfig[status.toLowerCase()] || statusConfig.pending;
+  const config = statusConfig[status?.toLowerCase()] || statusConfig.pending;
 
   return (
     <span
@@ -49,7 +49,7 @@ const StatusBadge = ({ status }: { status: string }) => {
         className="h-1.5 w-1.5 rounded-full mr-1.5"
         style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
       ></span>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {status?.charAt(0).toUpperCase() + status?.slice(1)}
     </span>
   );
 };
@@ -67,6 +67,7 @@ const InfoCard = ({ icon: Icon, label, value }: { icon: React.ComponentType<{ si
 const NotificationDetailsModal: React.FC<NotificationDetailsModalProps> = ({ isOpen, onClose, notification }) => {
   if (!isOpen || !notification) return null;
 
+  console.log(notification, "popopopopppo")
   // Particle effect
   const ghostParticles = Array(30)
     .fill(0)
@@ -161,7 +162,7 @@ const NotificationDetailsModal: React.FC<NotificationDetailsModalProps> = ({ isO
                   : notification.recipientType?.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) || 'N/A'
               }
             />
-            <InfoCard icon={Info} label="Status" value={notification.status.charAt(0).toUpperCase() + notification.status.slice(1)} />
+            <InfoCard icon={Info} label="Status" value={notification?.status?.charAt(0)?.toUpperCase() + notification?.status?.slice(1)} />
           </div>
 
           {/* Description Section */}

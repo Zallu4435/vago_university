@@ -286,22 +286,35 @@ const DepartmentHome: React.FC = () => {
         <section
           id="hero"
           data-animate
-          className={`relative h-64 sm:h-80 lg:h-96 bg-gradient-to-b from-cyan-600 to-blue-600 flex items-center justify-center transition-all duration-800 ${isVisible.hero ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}
+          className={`relative h-64 sm:h-80 lg:h-96 flex items-center justify-center transition-all duration-800 overflow-hidden ${
+            isVisible.hero ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
+          style={{
+            backgroundImage: currentDepartment === 'computer-science' 
+              ? 'url(/images/computer-science.webp)'
+              : 'url(/images/business.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
         >
+          {/* Enhanced overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/60 via-blue-600/55 to-cyan-700/60"></div>
+          <div className="absolute inset-0 bg-black/25"></div>
+          
           <div className="relative z-10 w-full max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 text-center text-white">
             <div className="space-y-4 sm:space-y-6">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 px-2">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 px-2 drop-shadow-2xl">
                 {data.poster.title}
               </h1>
-              <p className="text-sm sm:text-base lg:text-lg text-cyan-100 max-w-3xl mx-auto px-2">
+              <p className="text-sm sm:text-base lg:text-lg text-cyan-100 max-w-3xl mx-auto px-2 drop-shadow-lg">
                 {data.poster.subtitle}
               </p>
-              <p className="text-xs sm:text-sm text-cyan-200 max-w-2xl mx-auto mb-4 sm:mb-6 px-2">
+              <p className="text-xs sm:text-sm text-cyan-200 max-w-2xl mx-auto mb-4 sm:mb-6 px-2 drop-shadow-md">
                 {data.poster.description}
               </p>
               <button
-                className="group inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg text-sm sm:text-base"
+                className="group inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white rounded-full border border-white/30 font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base"
               >
                 {data.poster.ctaText}
                 <FaArrowRight className="ml-2 group-hover:translate-x-2 transition-transform" />
@@ -454,7 +467,31 @@ const DepartmentHome: React.FC = () => {
                   </div>
                 </div>
                 <div className="lg:w-1/2 mt-6 sm:mt-8 lg:mt-0 lg:pr-6 lg:pr-8 w-full">
-                  <div className="h-48 sm:h-56 lg:h-64 bg-gradient-to-r from-gray-300 to-gray-400 rounded-lg sm:rounded-xl" />
+                  <div className="relative h-48 sm:h-56 lg:h-64 bg-gradient-to-r from-gray-300 to-gray-400 rounded-lg sm:rounded-xl flex items-center justify-center overflow-hidden">
+                    {/* Coming Soon Visual Elements */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 to-blue-50 opacity-80"></div>
+                    <div className="relative z-10 text-center">
+                      <div className="mb-4">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+                          <FaCalendarAlt className="text-white text-2xl sm:text-3xl" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <h4 className="text-lg sm:text-xl font-bold text-cyan-800">Coming Soon</h4>
+                        <p className="text-cyan-600 text-sm sm:text-base">Graduate Programs</p>
+                        <div className="flex justify-center space-x-1">
+                          <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                          <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                          <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Decorative elements */}
+                    <div className="absolute top-4 left-4 w-8 h-8 border-2 border-cyan-300/30 rounded-full"></div>
+                    <div className="absolute top-8 right-8 w-6 h-6 border-2 border-cyan-200/40 rounded-full"></div>
+                    <div className="absolute bottom-8 left-8 w-10 h-10 border-2 border-cyan-300/20 rounded-full"></div>
+                    <div className="absolute bottom-4 right-4 w-4 h-4 border-2 border-cyan-200/50 rounded-full"></div>
+                  </div>
                 </div>
               </div>
             </div>

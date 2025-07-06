@@ -33,6 +33,7 @@ export const themes: Record<ThemeType, ThemeStyles> = {
       error: 'text-red-400',
       warning: 'text-amber-400',
       info: 'text-slate-400',
+      primary: 'text-sky-400',
     },
     icon: {
       primary: 'text-slate-400',
@@ -82,6 +83,7 @@ export const themes: Record<ThemeType, ThemeStyles> = {
       error: 'text-red-600',
       warning: 'text-amber-600',
       info: 'text-slate-600',
+      primary: 'text-sky-600',
     },
     icon: {
       primary: 'text-slate-500',
@@ -131,6 +133,7 @@ export const themes: Record<ThemeType, ThemeStyles> = {
       error: 'text-red-600',
       warning: 'text-amber-600',
       info: 'text-slate-600',
+      primary: 'text-amber-600',
     },
     icon: {
       primary: 'text-amber-500',

@@ -3,12 +3,16 @@ import {
   IGetAllNotificationsUseCase,
   IGetIndividualNotificationUseCase,
   IDeleteNotificationUseCase,
+  IMarkNotificationAsReadUseCase,
+  IMarkAllNotificationsAsReadUseCase,
 } from '../../../application/notifications/useCases/NotificationUseCases';
 import {
   CreateNotificationRequestDTO,
   GetAllNotificationsRequestDTO,
   GetIndividualNotificationRequestDTO,
   DeleteNotificationRequestDTO,
+  MarkNotificationAsReadRequestDTO,
+  MarkAllNotificationsAsReadRequestDTO,
 } from '../../../domain/notifications/dtos/NotificationRequestDTOs';
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, INotificationController } from '../IHttp';
 
@@ -20,7 +24,9 @@ export class NotificationController implements INotificationController {
     private createNotificationUseCase: ICreateNotificationUseCase,
     private getAllNotificationsUseCase: IGetAllNotificationsUseCase,
     private getIndividualNotificationUseCase: IGetIndividualNotificationUseCase,
-    private deleteNotificationUseCase: IDeleteNotificationUseCase
+    private deleteNotificationUseCase: IDeleteNotificationUseCase,
+    private markNotificationAsReadUseCase: IMarkNotificationAsReadUseCase,
+    private markAllNotificationsAsReadUseCase: IMarkAllNotificationsAsReadUseCase
   ) {}
 
   async createNotification(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -81,6 +87,35 @@ export class NotificationController implements INotificationController {
       if (!notificationId || !authenticatedUserId || !collection) return this.httpErrors.error_401();
       const dto: DeleteNotificationRequestDTO = { notificationId, authenticatedUserId, collection };
       const response = await this.deleteNotificationUseCase.execute(dto);
+      if (!response.success) return this.httpErrors.error_403();
+      return this.httpSuccess.success_200(response.data);
+    } catch {
+      return this.httpErrors.error_500();
+    }
+  }
+
+  async markNotificationAsRead(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    try {
+      const { notificationId } = httpRequest.params || {};
+      const authenticatedUserId = httpRequest.user?.id;
+      const collection = httpRequest.user?.collection;
+      if (!notificationId || !authenticatedUserId || !collection) return this.httpErrors.error_401();
+      const dto: MarkNotificationAsReadRequestDTO = { notificationId, authenticatedUserId, collection };
+      const response = await this.markNotificationAsReadUseCase.execute(dto);
+      if (!response.success) return this.httpErrors.error_403();
+      return this.httpSuccess.success_200(response.data);
+    } catch {
+      return this.httpErrors.error_500();
+    }
+  }
+
+  async markAllNotificationsAsRead(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    try {
+      const authenticatedUserId = httpRequest.user?.id;
+      const collection = httpRequest.user?.collection;
+      if (!authenticatedUserId || !collection) return this.httpErrors.error_401();
+      const dto: MarkAllNotificationsAsReadRequestDTO = { authenticatedUserId, collection };
+      const response = await this.markAllNotificationsAsReadUseCase.execute(dto);
       if (!response.success) return this.httpErrors.error_403();
       return this.httpSuccess.success_200(response.data);
     } catch {

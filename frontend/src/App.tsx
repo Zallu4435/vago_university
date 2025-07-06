@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Provider } from 'react-redux';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import store from './presentation/redux/store';
@@ -6,7 +6,7 @@ import './index.css';
 import { useRefreshToken } from './application/hooks/useRefreshToken';
 import { ProtectedRoute } from './presentation/components/ProtectedRoute';
 
-// Layouts
+// Layouts - Keep these loaded initially
 import PublicLayout from './presentation/Layout/PublicLayout';
 import UGLayout from './presentation/Layout/UGLayout';
 import AdminLayout from './presentation/Layout/AdminLayout';
@@ -15,68 +15,78 @@ import FacultyLayout from './presentation/Layout/FacultyLayout';
 import DepartmentLayout from './presentation/Layout/DepartmentLayout';
 import ApplicationFormLayout from './presentation/Layout/ApplicationFormLayout';
 
-// Pages
+// Essential pages - Load immediately for better UX
 import { Home } from './presentation/pages/main/Home';
-import { HighlightsPage } from './presentation/pages/main/HighlightsPage';
-import { VagoNowPage } from './presentation/pages/main/VagoNowPage';
-import { LeadershipPage } from './presentation/pages/main/LeadershipPage';
 import { Admissions } from './presentation/pages/main/Admissions';
-import ContactUs from './presentation/components/ContactUs';
 import { Education } from './presentation/pages/main/Education';
 import { About } from './presentation/pages/main/About';
+import ContactUs from './presentation/components/ContactUs';
 import LoginPage from './presentation/pages/Auth/Login';
 import RegisterPage from './presentation/pages/Auth/Register';
-import { ApplicationForm } from './presentation/pages/ApplicationForm';
-import AdminDashboard from './presentation/pages/admin/Dasboard';
-import UserManagement from './presentation/pages/admin/User/UserManagement';
-import { UGHome } from './presentation/pages/ug_admissions/UGHome';
-import { UGAdmissions } from './presentation/pages/ug_admissions/UGAdmissions';
-import UGProgrammes from './presentation/pages/ug_admissions/UGProgrammes';
-import { UGScholarships } from './presentation/pages/ug_admissions/UGScholarships';
-import { UGWhy_VAGO } from './presentation/pages/ug_admissions/UGWhy_VAGO';
-import DashboardPage from './presentation/pages/user/Dashboard/StudentDashboard';
-import FacultyDashboard from './presentation/pages/faculty/FacultyDashboard';
-import FacultyRequestForm from './presentation/pages/Auth/FacultyRequest';
-import ConfirmAdmission from './presentation/pages/ConfirmAdmission';
-import ConfirmRegistration from './presentation/pages/Auth/ConfirmRegistration';
-import FacultyManagement from './presentation/pages/admin/FacultyManagement';
-import ConfirmFaculty from './presentation/pages/ConfirmFaculty';
-import Setting from './presentation/pages/user/Settings/Setting';
-import FacultySettings from './presentation/pages/faculty/settings/FacultySettings';
-import { useNavigate } from 'react-router-dom';
-import VideoManagementPage from './presentation/pages/admin/vedio/VedioManagement';
-import AdminCourseManagement from './presentation/pages/admin/course/CourseManagement';
-import AdminClubManagement from './presentation/pages/admin/campusLife/clubs/ClubManagement';
-import AdminSportsManagement from './presentation/pages/admin/campusLife/sports/SportsManagement';
-import AdminEventsManagement from './presentation/pages/admin/campusLife/events/EventsManagement';
-import CommunicationManagement from './presentation/pages/admin/communication/CommunicstionManagement';
-import PaymentManagement from './presentation/pages/admin/payment/PaymentManagement';
-import ComputerScience from './presentation/pages/departments/ComputerScience';
-import Business from './presentation/pages/departments/Business';
-import DepartmentHome from './presentation/pages/departments/DepartmentHome';
-import DepartmentAbout from './presentation/pages/departments/DepartmentAbout';
-import DepartmentEducation from './presentation/pages/departments/DepartmentEducation';
-import DepartmentCommunity from './presentation/pages/departments/DepartmentCommunity';
-import DepartmentEntrepreneur from './presentation/pages/departments/DepartmentEntrepreneur';
-import HelpSupportPage from './presentation/pages/HelpSupportPage';
-import ForgotPasswordModal from './presentation/pages/ForgotPassword';
-import ProgramPrerequisites from './presentation/pages/ProgramPrerequisites';
-import ScholarshipComponent from './presentation/pages/ScholarshipComponent';
-import NotificationManagement from './presentation/pages/admin/notification/NotificationManagement';
-import StudentCanvas from './presentation/pages/canvas/CanvasPage';
-import DiplomaManagement from './presentation/pages/admin/diploma/DiplomaManagement';
-import MaterialManagement from './presentation/pages/admin/material/MaterialManagement';
-import AssignmentManagement from './presentation/pages/faculty/assignment/AssignmentManagement';
-import SessionManagement from './presentation/pages/faculty/sessions/SessionManagement';
-import SiteManagement from './presentation/pages/admin/sites/SiteManagement';
-import { VideoConferencePage } from './presentation/VideoConference/VideoConferencePage';
-import EnquiryManagement from './presentation/pages/admin/EnquiryManagement';
-import SessionAttendancePage from './presentation/pages/faculty/attendance/SessionAttendancePage';
-import AttendanceSummaryPage from './presentation/pages/faculty/attendance/AttendanceSummaryPage';
+
+// Lazy load non-essential pages
+const HighlightsPage = lazy(() => import('./presentation/pages/main/HighlightsPage').then(module => ({ default: module.HighlightsPage })));
+const VagoNowPage = lazy(() => import('./presentation/pages/main/VagoNowPage').then(module => ({ default: module.VagoNowPage })));
+const LeadershipPage = lazy(() => import('./presentation/pages/main/LeadershipPage').then(module => ({ default: module.LeadershipPage })));
+const ApplicationForm = lazy(() => import('./presentation/pages/ApplicationForm').then(module => ({ default: module.ApplicationForm })));
+const AdminDashboard = lazy(() => import('./presentation/pages/admin/Dasboard'));
+const UserManagement = lazy(() => import('./presentation/pages/admin/User/UserManagement'));
+const UGHome = lazy(() => import('./presentation/pages/ug_admissions/UGHome').then(module => ({ default: module.UGHome })));
+const UGAdmissions = lazy(() => import('./presentation/pages/ug_admissions/UGAdmissions').then(module => ({ default: module.UGAdmissions })));
+const UGProgrammes = lazy(() => import('./presentation/pages/ug_admissions/UGProgrammes'));
+const UGScholarships = lazy(() => import('./presentation/pages/ug_admissions/UGScholarships').then(module => ({ default: module.UGScholarships })));
+const UGWhy_VAGO = lazy(() => import('./presentation/pages/ug_admissions/UGWhy_VAGO').then(module => ({ default: module.UGWhy_VAGO })));
+const DashboardPage = lazy(() => import('./presentation/pages/user/Dashboard/StudentDashboard'));
+const FacultyDashboard = lazy(() => import('./presentation/pages/faculty/FacultyDashboard'));
+const FacultyRequestForm = lazy(() => import('./presentation/pages/Auth/FacultyRequest'));
+const ConfirmAdmission = lazy(() => import('./presentation/pages/ConfirmAdmission'));
+const ConfirmRegistration = lazy(() => import('./presentation/pages/Auth/ConfirmRegistration'));
+const FacultyManagement = lazy(() => import('./presentation/pages/admin/FacultyManagement'));
+const ConfirmFaculty = lazy(() => import('./presentation/pages/ConfirmFaculty'));
+const Setting = lazy(() => import('./presentation/pages/user/Settings/Setting'));
+const FacultySettings = lazy(() => import('./presentation/pages/faculty/settings/FacultySettings'));
+const VideoManagementPage = lazy(() => import('./presentation/pages/admin/vedio/VedioManagement'));
+const AdminCourseManagement = lazy(() => import('./presentation/pages/admin/course/CourseManagement'));
+const AdminClubManagement = lazy(() => import('./presentation/pages/admin/campusLife/clubs/ClubManagement'));
+const AdminSportsManagement = lazy(() => import('./presentation/pages/admin/campusLife/sports/SportsManagement'));
+const AdminEventsManagement = lazy(() => import('./presentation/pages/admin/campusLife/events/EventsManagement'));
+const CommunicationManagement = lazy(() => import('./presentation/pages/admin/communication/CommunicstionManagement'));
+const PaymentManagement = lazy(() => import('./presentation/pages/admin/payment/PaymentManagement'));
+const ComputerScience = lazy(() => import('./presentation/pages/departments/ComputerScience'));
+const Business = lazy(() => import('./presentation/pages/departments/Business'));
+const DepartmentHome = lazy(() => import('./presentation/pages/departments/DepartmentHome'));
+const DepartmentAbout = lazy(() => import('./presentation/pages/departments/DepartmentAbout'));
+const DepartmentEducation = lazy(() => import('./presentation/pages/departments/DepartmentEducation'));
+const DepartmentCommunity = lazy(() => import('./presentation/pages/departments/DepartmentCommunity'));
+const DepartmentEntrepreneur = lazy(() => import('./presentation/pages/departments/DepartmentEntrepreneur'));
+const HelpSupportPage = lazy(() => import('./presentation/pages/HelpSupportPage'));
+const ForgotPasswordModal = lazy(() => import('./presentation/pages/ForgotPassword'));
+const ProgramPrerequisites = lazy(() => import('./presentation/pages/ProgramPrerequisites'));
+const ScholarshipComponent = lazy(() => import('./presentation/pages/ScholarshipComponent'));
+const NotificationManagement = lazy(() => import('./presentation/pages/admin/notification/NotificationManagement'));
+const StudentCanvas = lazy(() => import('./presentation/pages/canvas/CanvasPage'));
+const DiplomaManagement = lazy(() => import('./presentation/pages/admin/diploma/DiplomaManagement'));
+const MaterialManagement = lazy(() => import('./presentation/pages/admin/material/MaterialManagement'));
+const AssignmentManagement = lazy(() => import('./presentation/pages/faculty/assignment/AssignmentManagement'));
+const SessionManagement = lazy(() => import('./presentation/pages/faculty/sessions/SessionManagement'));
+const SiteManagement = lazy(() => import('./presentation/pages/admin/sites/SiteManagement'));
+const VideoConferencePage = lazy(() => import('./presentation/VideoConference/VideoConferencePage').then(module => ({ default: module.VideoConferencePage })));
+const EnquiryManagement = lazy(() => import('./presentation/pages/admin/EnquiryManagement'));
+const SessionAttendancePage = lazy(() => import('./presentation/pages/faculty/attendance/SessionAttendancePage'));
+const AttendanceSummaryPage = lazy(() => import('./presentation/pages/faculty/attendance/AttendanceSummaryPage'));
+
+// Loading component
+const LoadingSpinner = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-cyan-50 via-white to-cyan-50">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600 mx-auto mb-4"></div>
+      <p className="text-cyan-600 font-medium">Loading...</p>
+    </div>
+  </div>
+);
 
 const App: React.FC = () => {
   const { isError, error } = useRefreshToken();
-  const navigate = useNavigate();
 
   if (isError) {
     console.log('Refresh token failed:', error);
@@ -143,89 +153,239 @@ const App: React.FC = () => {
         <Route element={<ProtectedRoute allowedCollections={['register', 'user', 'faculty']} isPublic={true} />}>
           <Route element={<PublicLayout />}>
             <Route index element={<Home />} />
-            <Route path="highlights" element={<HighlightsPage />} />
-            <Route path="vago-now" element={<VagoNowPage />} />
-            <Route path="leadership" element={<LeadershipPage />} />
+            <Route path="highlights" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <HighlightsPage />
+              </Suspense>
+            } />
+            <Route path="vago-now" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <VagoNowPage />
+              </Suspense>
+            } />
+            <Route path="leadership" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <LeadershipPage />
+              </Suspense>
+            } />
             <Route path="admissions" element={<Admissions />} />
             <Route path="contact" element={<ContactUs />} />
             <Route path="education" element={<Education />} />
             <Route path="about" element={<About />} />
-            <Route path='program-prerequisites' element={<ProgramPrerequisites />} />
-            <Route path='undergraduate-scholarships' element={<ScholarshipComponent />} />
+            <Route path='program-prerequisites' element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <ProgramPrerequisites />
+              </Suspense>
+            } />
+            <Route path='undergraduate-scholarships' element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <ScholarshipComponent />
+              </Suspense>
+            } />
           </Route>
           <Route element={<UGLayout />}>
-            <Route path="ug" element={<UGHome />} />
-            <Route path="ug/admissions" element={<UGAdmissions />} />
-            <Route path="ug/programmes" element={<UGProgrammes />} />
-            <Route path="ug/scholarships" element={<UGScholarships />} />
-            <Route path="ug/why-vago" element={<UGWhy_VAGO />} />
+            <Route path="ug" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <UGHome />
+              </Suspense>
+            } />
+            <Route path="ug/admissions" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <UGAdmissions />
+              </Suspense>
+            } />
+            <Route path="ug/programmes" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <UGProgrammes />
+              </Suspense>
+            } />
+            <Route path="ug/scholarships" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <UGScholarships />
+              </Suspense>
+            } />
+            <Route path="ug/why-vago" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <UGWhy_VAGO />
+              </Suspense>
+            } />
             <Route path="ug/contact" element={<ContactUs />} />
           </Route>
         </Route>
 
         {/* Confirm Admission Route (no authentication required) */}
-        <Route path="/confirm-admission/:id/:action" element={<ConfirmAdmission />} />
+        <Route path="/confirm-admission/:id/:action" element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <ConfirmAdmission />
+          </Suspense>
+        } />
 
         {/* Admission Route (register only) */}
         <Route element={<ProtectedRoute allowedCollections={['register']} />}>
           <Route path="admission" element={<ApplicationFormLayout>
-            <ApplicationForm />
+            <Suspense fallback={<LoadingSpinner />}>
+              <ApplicationForm />
+            </Suspense>
           </ApplicationFormLayout>} />
         </Route>
 
         {/* Admin Routes (admin only) */}
         <Route element={<ProtectedRoute allowedCollections={['admin']} />}>
           <Route element={<AdminLayout />}>
-            <Route path="admin" element={<AdminDashboard />} />
-            <Route path="admin/user" element={<UserManagement />} />
-            <Route path="admin/faculty" element={<FacultyManagement />} />
-            <Route path="admin/course-management" element={<AdminCourseManagement />} />
-            <Route path="admin/content" element={<VideoManagementPage />} />
-            <Route path="admin/clubs" element={<AdminClubManagement />} />
-            <Route path="admin/sports" element={<AdminSportsManagement />} />
-            <Route path="admin/events" element={<AdminEventsManagement />} />
-            <Route path="admin/communication" element={<CommunicationManagement />} />
-            <Route path="admin/payment" element={<PaymentManagement />} />
-            <Route path="admin/notifications" element={<NotificationManagement />} />
-            <Route path="admin/diploma-courses" element={<DiplomaManagement />} />
-            <Route path="admin/material" element={<MaterialManagement />} />
-            <Route path="admin/site-management" element={<SiteManagement />} />
-            <Route path="admin/enquiry" element={<EnquiryManagement />} />
+            <Route path="admin" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <AdminDashboard />
+              </Suspense>
+            } />
+            <Route path="admin/user" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <UserManagement />
+              </Suspense>
+            } />
+            <Route path="admin/faculty" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <FacultyManagement />
+              </Suspense>
+            } />
+            <Route path="admin/course-management" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <AdminCourseManagement />
+              </Suspense>
+            } />
+            <Route path="admin/content" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <VideoManagementPage />
+              </Suspense>
+            } />
+            <Route path="admin/clubs" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <AdminClubManagement />
+              </Suspense>
+            } />
+            <Route path="admin/sports" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <AdminSportsManagement />
+              </Suspense>
+            } />
+            <Route path="admin/events" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <AdminEventsManagement />
+              </Suspense>
+            } />
+            <Route path="admin/communication" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <CommunicationManagement />
+              </Suspense>
+            } />
+            <Route path="admin/payment" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <PaymentManagement />
+              </Suspense>
+            } />
+            <Route path="admin/notifications" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <NotificationManagement />
+              </Suspense>
+            } />
+            <Route path="admin/diploma-courses" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <DiplomaManagement />
+              </Suspense>
+            } />
+            <Route path="admin/material" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <MaterialManagement />
+              </Suspense>
+            } />
+            <Route path="admin/site-management" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <SiteManagement />
+              </Suspense>
+            } />
+            <Route path="admin/enquiry" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <EnquiryManagement />
+              </Suspense>
+            } />
           </Route>
         </Route>
 
         {/* User Routes (user only) */}
         <Route element={<ProtectedRoute allowedCollections={['user']} />}>
           <Route element={<UserLayout />}>
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="canvas" element={<StudentCanvas />} />
+            <Route path="dashboard" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <DashboardPage />
+              </Suspense>
+            } />
+            <Route path="canvas" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <StudentCanvas />
+              </Suspense>
+            } />
           </Route>
         </Route>
 
         {/* Settings Route (user only, independent layout) */}
         <Route element={<ProtectedRoute allowedCollections={['user']} />}>
-          <Route path="settings" element={<Setting />} />
-          <Route path='help' element={<HelpSupportPage />} />
+          <Route path="settings" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <Setting />
+            </Suspense>
+          } />
+          <Route path='help' element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <HelpSupportPage />
+            </Suspense>
+          } />
         </Route>
 
         {/* Faculty Routes (faculty only) */}
         <Route element={<ProtectedRoute allowedCollections={['faculty']} />}>
           <Route element={<FacultyLayout />}>
-            <Route path="faculty" element={<FacultyDashboard />} />
-            <Route path="faculty/assignments" element={<AssignmentManagement />} />
-            <Route path="faculty/sessions" element={<SessionManagement />} />
-            <Route path="faculty/attendance" element={<SessionAttendancePage />} />
-            <Route path="faculty/attendance-summary" element={<AttendanceSummaryPage />} />
+            <Route path="faculty" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <FacultyDashboard />
+              </Suspense>
+            } />
+            <Route path="faculty/assignments" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <AssignmentManagement />
+              </Suspense>
+            } />
+            <Route path="faculty/sessions" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <SessionManagement />
+              </Suspense>
+            } />
+            <Route path="faculty/attendance" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <SessionAttendancePage />
+              </Suspense>
+            } />
+            <Route path="faculty/attendance-summary" element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <AttendanceSummaryPage />
+              </Suspense>
+            } />
           </Route>
         </Route>
 
         {/* Faculty Settings Route (faculty only, independent layout) */}
         <Route element={<ProtectedRoute allowedCollections={['faculty']} />}>
-          <Route path="faculty/settings" element={<FacultySettings />} />
+          <Route path="faculty/settings" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <FacultySettings />
+            </Suspense>
+          } />
         </Route>
 
         {/* Confirm Faculty Route */}
-        <Route path="/confirm-faculty/:id/:action" element={<ConfirmFaculty />} />
+        <Route path="/confirm-faculty/:id/:action" element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <ConfirmFaculty />
+          </Suspense>
+        } />
 
         {/* Department Routes */}
         <Route path="/departments" element={<DepartmentLayout />}>
@@ -246,10 +406,18 @@ const App: React.FC = () => {
         </Route>
 
         {/* Confirm Registration Route (no authentication required) */}
-        <Route path="/confirm-registration" element={<ConfirmRegistration />} />
+        <Route path="/confirm-registration" element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <ConfirmRegistration />
+          </Suspense>
+        } />
 
         {/* Video Conference Route (accessible to all authenticated users) */}
-        <Route path="/faculty/video-conference/:sessionId" element={<VideoConferencePage />} />
+        <Route path="/faculty/video-conference/:sessionId" element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <VideoConferencePage />
+          </Suspense>
+        } />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/register" replace />} />

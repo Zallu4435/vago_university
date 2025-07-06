@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { LuBell, LuLogOut, LuSearch, LuMoon, LuSun, LuSettings, LuUser } from 'react-icons/lu';
+import NotificationModal from '../../components/NotificationModal';
+import { useNotificationManagement } from '../../../application/hooks/useNotificationManagement';
 
 interface HeaderProps {
   currentDate: string;
@@ -16,17 +18,15 @@ export default function Header({ currentDate, facultyName, onLogout }: HeaderPro
   const [searchFocused, setSearchFocused] = useState(false);
   const [time, setTime] = useState(new Date());
   const navigate = useNavigate();
+  
+  // Get notifications data
+  const { notifications } = useNotificationManagement();
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-
-  const notifications = [
-    { id: 1, title: 'New assignment submitted', time: '2 min ago', type: 'info' },
-    { id: 2, title: 'Class reminder: Database Systems', time: '15 min ago', type: 'warning' },
-    { id: 3, title: 'Grade submission deadline', time: '1 hour ago', type: 'urgent' }
-  ];
 
   const getInitials = (name: string) => {
     return name.split(' ').map((n: string) => n[0]).join('').toUpperCase();
@@ -104,39 +104,17 @@ export default function Header({ currentDate, facultyName, onLogout }: HeaderPro
             className="bg-white/90 backdrop-blur-sm p-3 rounded-full hover:bg-white transition-all duration-200 shadow-lg border border-white/50"
           >
             <LuBell size={20} className="text-pink-600" />
-            <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center shadow-lg">
-              {notifications.length}
-            </span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center shadow-lg">
+                {unreadCount}
+              </span>
+            )}
           </button>
           
-          {showNotifications && (
-            <div className="absolute right-0 mt-3 w-80 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 z-50">
-              <div className="p-4 border-b border-gray-100">
-                <h3 className="text-lg font-bold text-gray-800">Notifications</h3>
-              </div>
-              <div className="max-h-80 overflow-y-auto">
-                {notifications.map((notification) => (
-                  <div key={notification.id} className="p-4 hover:bg-indigo-50/50 transition-colors border-b border-gray-50 last:border-b-0">
-                    <div className="flex items-start space-x-3">
-                      <div className={`w-2 h-2 rounded-full mt-2 ${
-                        notification.type === 'urgent' ? 'bg-red-500' :
-                        notification.type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
-                      }`}></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-800">{notification.title}</p>
-                        <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="p-3 border-t border-gray-100">
-                <button className="w-full text-center text-sm text-indigo-600 hover:text-indigo-800 font-medium">
-                  View All Notifications
-                </button>
-              </div>
-            </div>
-          )}
+          <NotificationModal 
+            isOpen={showNotifications}
+            onClose={() => setShowNotifications(false)}
+          />
         </div>
 
         {/* Profile Menu */}

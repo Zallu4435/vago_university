@@ -31,19 +31,9 @@ const formatDate = (dateString: string): string => {
 
   
     
-interface Notification {
-  _id: string;
-  title: string;
-  message: string;
-  recipientType: 'individual' | 'all_students' | 'all_faculty' | 'all';
-  recipientId?: string;
-  recipientName?: string;
-  createdBy: string;
-  createdAt: string;
-  status: 'sent' | 'failed';
-}
+import { Notification } from '../../../../domain/types/notification.types';
 
-const RECIPIENT_TYPES = ['All', 'Individual', 'All Students', 'All Faculty', 'All Students and Faculty'];
+const RECIPIENT_TYPES = ['All', 'All Students', 'All Faculty', 'All Students and Faculty'];
 const STATUSES = ['All', 'Sent', 'Failed'];
 
 const notificationColumns = [
@@ -161,8 +151,7 @@ const NotificationManagement: React.FC = () => {
   const handleViewNotification = async (notification: Notification) => {
     try {
       const details = await getNotificationDetails(notification._id);
-      console.log(details, "plplplplplplplpl")
-      setSelectedNotification(details?.notifications);
+      setSelectedNotification(details?.notification);
       setShowNotificationDetailsModal(true);
     } catch (error) {
       console.error('Error fetching notification details:', error);
@@ -173,7 +162,6 @@ const NotificationManagement: React.FC = () => {
   const handleSaveNotification = async (data: Omit<Notification, '_id' | 'createdAt' | 'status'>) => {
     try {
       await createNotification(data);
-      toast.success('Notification sent successfully');
       setShowAddNotificationModal(false);
     } catch (error: any) {
       toast.error(error.response?.data?.message || error.message || 'Failed to send notification');
@@ -189,7 +177,6 @@ const NotificationManagement: React.FC = () => {
     if (itemToDelete) {
       try {
         await deleteNotification(itemToDelete);
-        toast.success('Notification deleted successfully');
         setShowWarningModal(false);
         setItemToDelete(null);
       } catch (error: any) {
@@ -220,7 +207,7 @@ const NotificationManagement: React.FC = () => {
       label: 'View Notification',
       onClick: handleViewNotification,
       color: 'blue' as const,
-      disabled: isLoadingNotificationDetails,
+      disabled: () => isLoadingNotificationDetails,
     },
     {
       icon: <Trash2 size={16} />,
@@ -321,9 +308,9 @@ const NotificationManagement: React.FC = () => {
                     totalPages={totalPages}
                     itemsCount={filteredNotifications.length}
                     itemName="notifications"
-                    onPageChange={setPage}
-                    onFirstPage={() => setPage(1)}
-                    onLastPage={() => setPage(totalPages)}
+                    onPageChange={(newPage) => setPage(newPage)}
+                    onFirstPage={() => {}}
+                    onLastPage={() => {}}
                   />
                 </>
               )}
@@ -373,7 +360,7 @@ const NotificationManagement: React.FC = () => {
         type="danger"
       />
 
-      <style jsx>{`
+      <style>{`
         @keyframes floatingMist {
           0% {
             transform: translateY(0) translateX(0);

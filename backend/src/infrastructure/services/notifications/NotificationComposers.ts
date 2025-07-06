@@ -4,10 +4,14 @@ import {
   GetAllNotificationsUseCase,
   GetIndividualNotificationUseCase,
   DeleteNotificationUseCase,
+  MarkNotificationAsReadUseCase,
+  MarkAllNotificationsAsReadUseCase,
   ICreateNotificationUseCase,
   IGetAllNotificationsUseCase,
   IGetIndividualNotificationUseCase,
   IDeleteNotificationUseCase,
+  IMarkNotificationAsReadUseCase,
+  IMarkAllNotificationsAsReadUseCase,
 } from '../../../application/notifications/useCases/NotificationUseCases';
 import { NotificationRepository } from '../../repositories/notifications/NotificationRepository';
 import { NotificationController } from '../../../presentation/http/notifications/NotificationController';
@@ -19,10 +23,14 @@ export function getNotificationComposer(): INotificationController {
   const getAllNotificationsUseCase: IGetAllNotificationsUseCase = new GetAllNotificationsUseCase(repository);
   const getIndividualNotificationUseCase: IGetIndividualNotificationUseCase = new GetIndividualNotificationUseCase(repository);
   const deleteNotificationUseCase: IDeleteNotificationUseCase = new DeleteNotificationUseCase(repository);
+  const markNotificationAsReadUseCase: IMarkNotificationAsReadUseCase = new MarkNotificationAsReadUseCase(repository);
+  const markAllNotificationsAsReadUseCase: IMarkAllNotificationsAsReadUseCase = new MarkAllNotificationsAsReadUseCase(repository);
   return new NotificationController(
     createNotificationUseCase,
     getAllNotificationsUseCase,
     getIndividualNotificationUseCase,
-    deleteNotificationUseCase
+    deleteNotificationUseCase,
+    markNotificationAsReadUseCase,
+    markAllNotificationsAsReadUseCase
   );
 }

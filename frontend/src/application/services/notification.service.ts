@@ -15,7 +15,7 @@ class NotificationService {
       const response = await httpClient.get<NotificationApiResponse>(endpoint, {
         params: { page, limit, recipientType, status, dateRange },
       });
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch notifications');
     }
@@ -24,7 +24,7 @@ class NotificationService {
   async getNotificationDetails(id: string): Promise<Notification> {
     try {
       const response = await httpClient.get<Notification>(`/admin/notifications/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch notification details');
     }
@@ -44,6 +44,22 @@ class NotificationService {
       await httpClient.delete(`/admin/notifications/${id}`);
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to delete notification');
+    }
+  }
+
+  async markAsRead(id: string): Promise<void> {
+    try {
+      await httpClient.patch(`/admin/notifications/${id}/read`);
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to mark notification as read');
+    }
+  }
+
+  async markAllAsRead(): Promise<void> {
+    try {
+      await httpClient.patch('/admin/notifications/read-all');
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to mark all notifications as read');
     }
   }
 }

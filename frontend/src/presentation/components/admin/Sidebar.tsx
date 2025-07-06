@@ -30,10 +30,8 @@ const sidebarItems = [
   { name: 'Dashboard', path: '/admin', icon: <MdDashboard size={20} /> },
   { name: 'User', path: '/admin/user', icon: <MdPeople size={20} /> },
   { name: 'Faculty', path: '/admin/faculty', icon: <MdSchool size={20} /> },
-  { name: 'Poster', path: '/admin/poster', icon: <MdImage size={20} /> },
   { name: 'Diploma Courses', path: '/admin/diploma-courses', icon: <MdSchool size={20} /> },
   { name: 'Events', path: '/admin/events', icon: <MdEvent size={20} /> },
-  { name: 'Diploma Completers', path: '/admin/diploma-completers', icon: <MdMilitaryTech size={20} /> },
   { name: 'Clubs', path: '/admin/clubs', icon: <MdGroups size={20} /> },
   { name: 'Sports', path: '/admin/sports', icon: <MdSportsSoccer size={20} /> },
   { name: 'Assignment Submission', path: '/admin/assignments', icon: <MdAssignment size={20} /> },
@@ -51,11 +49,11 @@ const sidebarItems = [
 const groupedItems = [
   { category: 'Main', items: [sidebarItems[0]] },
   { category: 'People', items: [sidebarItems[1], sidebarItems[2]] },
-  { category: 'Content', items: [sidebarItems[3], sidebarItems[14], sidebarItems[13], sidebarItems[15]] },
-  { category: 'Education', items: [sidebarItems[4], sidebarItems[6], sidebarItems[11]] },
-  { category: 'Activities', items: [sidebarItems[5], sidebarItems[7], sidebarItems[8]] },
-  { category: 'Communication', items: [sidebarItems[9], sidebarItems[10], sidebarItems[12], sidebarItems[16]] },
-  { category: 'Payment', items: [sidebarItems[17]] },
+  { category: 'Content', items: [sidebarItems[12], sidebarItems[11], sidebarItems[13]] },
+  { category: 'Education', items: [sidebarItems[3], sidebarItems[9]] },
+  { category: 'Activities', items: [sidebarItems[4], sidebarItems[5], sidebarItems[6]] },
+  { category: 'Communication', items: [sidebarItems[7], sidebarItems[8], sidebarItems[10], sidebarItems[14]] },
+  { category: 'Payment', items: [sidebarItems[15]] },
 ];
 
 interface SidebarProps {

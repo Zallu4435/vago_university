@@ -313,6 +313,8 @@ export interface INotificationController extends IController {
   getAllNotifications(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getIndividualNotification(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   deleteNotification(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  markNotificationAsRead(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  markAllNotificationsAsRead(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface IFinancialController extends IController {

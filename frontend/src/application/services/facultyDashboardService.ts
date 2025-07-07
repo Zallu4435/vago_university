@@ -1,10 +1,9 @@
 import httpClient from "../../frameworks/api/httpClient";
 
 export interface DashboardStats {
-  activeSessions: number;
-  todayAttendance: number;
-  pendingApprovals: number;
-  totalStudents: number;
+  totalSessions: number;
+  totalAssignments: number;
+  totalAttendance: number;
 }
 
 export interface WeeklyAttendanceData {
@@ -12,9 +11,10 @@ export interface WeeklyAttendanceData {
   attendance: number;
 }
 
-export interface CoursePerformanceData {
-  course: string;
+export interface AssignmentPerformanceData {
+  assignment: string;
   score: number;
+  submissions: number;
 }
 
 export interface SessionDistributionData {
@@ -30,29 +30,25 @@ export interface RecentActivity {
   time: string;
 }
 
-
-
 export interface FacultyDashboardData {
   stats: DashboardStats;
   weeklyAttendance: WeeklyAttendanceData[];
-  coursePerformance: CoursePerformanceData[];
+  assignmentPerformance: AssignmentPerformanceData[];
   sessionDistribution: SessionDistributionData[];
   recentActivities: RecentActivity[];
 }
 
 class FacultyDashboardService {
-  // Fetch dashboard statistics
   async getDashboardStats(): Promise<DashboardStats> {
     try {
       const response = await httpClient.get('/faculty/dashboard/stats');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
       throw error;
     }
   }
 
-  // Fetch weekly attendance data
   async getWeeklyAttendance(): Promise<WeeklyAttendanceData[]> {
     try {
       const response = await httpClient.get('/faculty/dashboard/weekly-attendance');
@@ -63,18 +59,16 @@ class FacultyDashboardService {
     }
   }
 
-  // Fetch course performance data
-  async getCoursePerformance(): Promise<CoursePerformanceData[]> {
+  async getAssignmentPerformance(): Promise<AssignmentPerformanceData[]> {
     try {
-      const response = await httpClient.get('/faculty/dashboard/course-performance');
-      return response.data;
+      const response = await httpClient.get('/faculty/dashboard/assignment-performance');
+      return response.data.data;
     } catch (error) {
-      console.error('Error fetching course performance:', error);
+      console.error('Error fetching assignment performance:', error);
       throw error;
     }
   }
 
-  // Fetch session distribution data.data
   async getSessionDistribution(): Promise<SessionDistributionData[]> {
     try {
       const response = await httpClient.get('/faculty/dashboard/session-distribution');
@@ -85,7 +79,6 @@ class FacultyDashboardService {
     }
   }
 
-  // Fetch recent activities
   async getRecentActivities(): Promise<RecentActivity[]> {
     try {
       const response = await httpClient.get('/faculty/dashboard/recent-activities');
@@ -96,21 +89,18 @@ class FacultyDashboardService {
     }
   }
 
-
-
-  // Fetch all dashboard data at once
   async getAllDashboardData(): Promise<FacultyDashboardData> {
     try {
       const [
         stats,
         weeklyAttendance,
-        coursePerformance,
+        assignmentPerformance,
         sessionDistribution,
         recentActivities
       ] = await Promise.all([
         this?.getDashboardStats(),
         this?.getWeeklyAttendance(),
-        this?.getCoursePerformance(),
+        this?.getAssignmentPerformance(),
         this?.getSessionDistribution(),
         this?.getRecentActivities()
       ]);
@@ -118,7 +108,7 @@ class FacultyDashboardService {
       return {
         stats,
         weeklyAttendance,
-        coursePerformance,
+        assignmentPerformance,
         sessionDistribution,
         recentActivities
       };

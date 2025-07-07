@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { facultyDashboardService, FacultyDashboardData, DashboardStats, WeeklyAttendanceData, CoursePerformanceData, SessionDistributionData, RecentActivity } from '../services/facultyDashboardService';
+import { facultyDashboardService, FacultyDashboardData, DashboardStats, WeeklyAttendanceData, AssignmentPerformanceData, SessionDistributionData, RecentActivity } from '../services/facultyDashboardService';
 
 export const useFacultyDashboard = () => {
   const queryClient = useQueryClient();
@@ -9,7 +9,7 @@ export const useFacultyDashboard = () => {
     all: ['faculty', 'dashboard'] as const,
     stats: () => [...dashboardKeys.all, 'stats'] as const,
     weeklyAttendance: () => [...dashboardKeys.all, 'weekly-attendance'] as const,
-    coursePerformance: () => [...dashboardKeys.all, 'course-performance'] as const,
+    assignmentPerformance: () => [...dashboardKeys.all, 'assignment-performance'] as const,
     sessionDistribution: () => [...dashboardKeys.all, 'session-distribution'] as const,
     recentActivities: () => [...dashboardKeys.all, 'recent-activities'] as const,
   };
@@ -50,18 +50,13 @@ export const useFacultyDashboard = () => {
     enabled: !dashboardData, // Only fetch if not already available
   });
 
-  // Debug logging for weekly attendance
-  console.log('🔍 [useFacultyDashboard] weeklyAttendance data:', weeklyAttendance);
-  console.log('🔍 [useFacultyDashboard] isLoadingWeeklyAttendance:', isLoadingWeeklyAttendance);
-  console.log('🔍 [useFacultyDashboard] weeklyAttendanceError:', weeklyAttendanceError);
-
   const {
-    data: coursePerformance,
-    isLoading: isLoadingCoursePerformance,
-    error: coursePerformanceError
+    data: assignmentPerformance,
+    isLoading: isLoadingAssignmentPerformance,
+    error: assignmentPerformanceError
   } = useQuery({
-    queryKey: dashboardKeys.coursePerformance(),
-    queryFn: facultyDashboardService.getCoursePerformance,
+    queryKey: dashboardKeys.assignmentPerformance(),
+    queryFn: facultyDashboardService.getAssignmentPerformance,
     staleTime: 10 * 60 * 1000, // 10 minutes
     enabled: !dashboardData, // Only fetch if not already available
   });
@@ -88,29 +83,27 @@ export const useFacultyDashboard = () => {
     enabled: !dashboardData, // Only fetch if not already available
   });
 
-
-
   // Computed values - use dashboard data if available, otherwise use individual queries
   const finalStats = dashboardData?.stats || stats;
   const finalWeeklyAttendance = dashboardData?.weeklyAttendance || weeklyAttendance;
-  const finalCoursePerformance = dashboardData?.coursePerformance || coursePerformance;
+  const finalAssignmentPerformance = dashboardData?.assignmentPerformance || assignmentPerformance;
   const finalSessionDistribution = dashboardData?.sessionDistribution || sessionDistribution;
   const finalRecentActivities = dashboardData?.recentActivities || recentActivities;
 
   // Loading states
   const isLoading = isLoadingDashboard || 
-    (!dashboardData && (isLoadingStats || isLoadingWeeklyAttendance || isLoadingCoursePerformance || 
+    (!dashboardData && (isLoadingStats || isLoadingWeeklyAttendance || isLoadingAssignmentPerformance || 
      isLoadingSessionDistribution || isLoadingRecentActivities));
 
   // Error states
-  const hasError = dashboardError || statsError || weeklyAttendanceError || coursePerformanceError || 
+  const hasError = dashboardError || statsError || weeklyAttendanceError || assignmentPerformanceError || 
     sessionDistributionError || recentActivitiesError;
 
   return {
     // Data
     stats: finalStats,
     weeklyAttendance: finalWeeklyAttendance,
-    coursePerformance: finalCoursePerformance,
+    assignmentPerformance: finalAssignmentPerformance,
     sessionDistribution: finalSessionDistribution,
     recentActivities: finalRecentActivities,
     
@@ -118,7 +111,7 @@ export const useFacultyDashboard = () => {
     isLoading,
     isLoadingStats,
     isLoadingWeeklyAttendance,
-    isLoadingCoursePerformance,
+    isLoadingAssignmentPerformance,
     isLoadingSessionDistribution,
     isLoadingRecentActivities,
     
@@ -127,7 +120,7 @@ export const useFacultyDashboard = () => {
     dashboardError,
     statsError,
     weeklyAttendanceError,
-    coursePerformanceError,
+    assignmentPerformanceError,
     sessionDistributionError,
     recentActivitiesError,
     

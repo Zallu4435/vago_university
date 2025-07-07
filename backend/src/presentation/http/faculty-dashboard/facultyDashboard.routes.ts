@@ -14,7 +14,7 @@ router.get("/data", (req, res, next) => expressAdapter(req, res, facultyDashboar
 
 router.get("/weekly-attendance", (req, res, next) => expressAdapter(req, res, facultyDashboardController.getWeeklyAttendance.bind(facultyDashboardController)));
 
-router.get("/course-performance", (req, res, next) => expressAdapter(req, res, facultyDashboardController.getCoursePerformance.bind(facultyDashboardController)));
+router.get("/assignment-performance", (req, res, next) => expressAdapter(req, res, facultyDashboardController.getCoursePerformance.bind(facultyDashboardController)));
 
 router.get("/session-distribution", (req, res, next) => expressAdapter(req, res, facultyDashboardController.getSessionDistribution.bind(facultyDashboardController)));
 

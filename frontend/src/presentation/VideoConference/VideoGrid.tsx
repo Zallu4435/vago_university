@@ -22,13 +22,10 @@ interface VideoGridProps {
   localStream?: MediaStream | null;
 }
 
-// Get responsive grid layout based on participant count and screen size
 const getOptimalLayout = (participantCount: number, screenWidth: number, screenHeight: number) => {
-  // Account for header (80px) + control bar (96px) + padding (32px) = 208px
   const availableHeight = screenHeight - 208;
-  const availableWidth = screenWidth - 32; // Account for padding
+  const availableWidth = screenWidth - 32;
 
-  // Mobile (< 768px) - Always show max 4 participants
   if (screenWidth < 768) {
     if (participantCount === 1) {
       return {
@@ -44,8 +41,7 @@ const getOptimalLayout = (participantCount: number, screenWidth: number, screenH
       };
     }
   }
-  
-  // Medium devices (768px - 1024px) - Always show max 9 participants
+
   if (screenWidth < 1024) {
     if (participantCount === 1) {
       return {
@@ -67,8 +63,7 @@ const getOptimalLayout = (participantCount: number, screenWidth: number, screenH
       };
     }
   }
-  
-  // Large devices (1024px - 1440px) - Always show max 12 participants
+
   if (screenWidth < 1440) {
     if (participantCount === 1) {
       return {
@@ -96,8 +91,7 @@ const getOptimalLayout = (participantCount: number, screenWidth: number, screenH
       };
     }
   }
-  
-  // Extra Large devices (≥ 1440px) - Always show max 16 participants
+
   if (participantCount === 1) {
     return {
       gridClass: 'grid grid-cols-1 gap-6 p-8 place-items-center',
@@ -122,11 +116,11 @@ const getOptimalLayout = (participantCount: number, screenWidth: number, screenH
       maxVisible: 12,
       aspectRatio: 'aspect-video'
     };
-  } 
+  }
 };
 
-export const VideoGrid: React.FC<VideoGridProps> = ({ 
-  participants, 
+export const VideoGrid: React.FC<VideoGridProps> = ({
+  participants,
   compact = false,
   maxVisible = 25,
   localParticipantId,
@@ -137,7 +131,6 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
     height: window.innerHeight
   });
 
-  // Create refs array for video elements
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   useEffect(() => {
@@ -155,7 +148,6 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
   const effectiveMaxVisible = Math.min(layout.maxVisible, maxVisible);
   const visibleParticipants = participants.slice(0, effectiveMaxVisible);
 
-  // Set srcObject for each video element only when stream changes
   useEffect(() => {
     visibleParticipants.forEach((participant, idx) => {
       const ref = videoRefs.current[idx];

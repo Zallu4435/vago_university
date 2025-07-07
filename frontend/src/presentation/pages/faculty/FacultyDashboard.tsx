@@ -212,7 +212,7 @@ const FacultyDashboard: React.FC = () => {
   const {
     stats,
     weeklyAttendance,
-    coursePerformance,
+    assignmentPerformance,
     sessionDistribution,
     recentActivities,
     isLoading,
@@ -293,30 +293,24 @@ const FacultyDashboard: React.FC = () => {
             ) : (
               <div className="space-y-6">
                 {/* Top Row - Key Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <StatsCard
-                    title="Active Sessions"
-                value={stats?.activeSessions || 0}
-                icon={HiClock}
+                    title="Total Sessions"
+                    value={stats?.totalSessions || 0}
+                    icon={HiClock}
                     color="blue"
                   />
                   <StatsCard
-                    title="Today's Attendance"
-                value={`${stats?.todayAttendance || 0}%`}
-                icon={HiUsers}
+                    title="Total Assignments"
+                    value={stats?.totalAssignments || 0}
+                    icon={HiDocumentText}
                     color="green"
                   />
                   <StatsCard
-                    title="Pending Approvals"
-                value={stats?.pendingApprovals || 0}
-                icon={HiExclamationCircle}
+                    title="Total Attendance"
+                    value={stats?.totalAttendance || 0}
+                    icon={HiUsers}
                     color="orange"
-                  />
-                  <StatsCard
-                    title="Total Students"
-                value={stats?.totalStudents || 0}
-                icon={HiUsers}
-                    color="blue"
                   />
                 </div>
 
@@ -334,15 +328,25 @@ const FacultyDashboard: React.FC = () => {
                     </ResponsiveContainer>
                   </ChartCard>
 
-                  <ChartCard title="Course Performance">
+                  <ChartCard title="Assignment Performance">
                     <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={Array.isArray(coursePerformance) ? coursePerformance : []}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="course" />
-                        <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="score" fill="#10B981" />
-                      </BarChart>
+                      {Array.isArray(assignmentPerformance) && assignmentPerformance.length > 0 ? (
+                        <BarChart data={assignmentPerformance}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="assignment" />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="score" fill="#10B981" />
+                        </BarChart>
+                      ) : (
+                        <div className="flex items-center justify-center h-full">
+                          <div className="text-center text-gray-500">
+                            <HiDocumentText className="w-12 h-12 mx-auto mb-2" />
+                            <p className="text-sm">No assignment data available</p>
+                            <p className="text-xs">Create and publish assignments to see performance data</p>
+                          </div>
+                        </div>
+                      )}
                     </ResponsiveContainer>
                   </ChartCard>
 

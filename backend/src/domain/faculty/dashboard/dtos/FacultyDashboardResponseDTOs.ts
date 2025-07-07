@@ -1,8 +1,7 @@
 export interface DashboardStatsResponseDTO {
-  activeSessions: number;
-  todayAttendance: number;
-  pendingApprovals: number;
-  totalStudents: number;
+  totalSessions: number;
+  totalAssignments: number;
+  totalAttendance: number;
 }
 
 export interface WeeklyAttendanceResponseDTO {
@@ -10,9 +9,10 @@ export interface WeeklyAttendanceResponseDTO {
   attendance: number;
 }
 
-export interface CoursePerformanceResponseDTO {
-  course: string;
+export interface AssignmentPerformanceResponseDTO {
+  assignment: string;
   score: number;
+  submissions: number;
 }
 
 export interface SessionDistributionResponseDTO {
@@ -28,12 +28,10 @@ export interface RecentActivityResponseDTO {
   time: string;
 }
 
-
-
 export interface FacultyDashboardDataResponseDTO {
   stats: DashboardStatsResponseDTO;
   weeklyAttendance: WeeklyAttendanceResponseDTO[];
-  coursePerformance: CoursePerformanceResponseDTO[];
+  assignmentPerformance: AssignmentPerformanceResponseDTO[];
   sessionDistribution: SessionDistributionResponseDTO[];
   recentActivities: RecentActivityResponseDTO[];
 }
@@ -51,7 +49,7 @@ export interface GetFacultyWeeklyAttendanceResponseDTO {
 }
 
 export interface GetFacultyCoursePerformanceResponseDTO {
-  coursePerformance: CoursePerformanceResponseDTO[];
+  assignmentPerformance: AssignmentPerformanceResponseDTO[];
 }
 
 export interface GetFacultySessionDistributionResponseDTO {

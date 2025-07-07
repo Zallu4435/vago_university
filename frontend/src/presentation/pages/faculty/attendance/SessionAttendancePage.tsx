@@ -1,10 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { FaClock, FaUsers, FaEye, FaFileAlt, FaCalendarAlt, FaStopwatch, FaFilter, FaSearch, FaChevronDown, FaTimes } from 'react-icons/fa';
 import { useSessionManagement } from '../../../../application/hooks/useSessionManagement';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Session } from '../../../../application/hooks/useSessionManagement';
 
-// Add types for attendance data
 interface AttendanceInterval {
   joinedAt: string;
   leftAt?: string;
@@ -18,8 +17,7 @@ interface AttendanceUser {
 
 const SessionAttendancePage = () => {
   const queryClient = useQueryClient();
-  
-  // Use the session management hook
+
   const {
     sessions,
     isLoading: isLoadingSessions,
@@ -27,55 +25,65 @@ const SessionAttendancePage = () => {
     updateAttendanceStatus
   } = useSessionManagement();
 
-  // State for filters
   const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [attendanceFilter, setAttendanceFilter] = useState('all'); // all, high, medium, low
-  const [decisionFilter, setDecisionFilter] = useState('all'); // all, approved, declined, pending
+  const [attendanceFilter, setAttendanceFilter] = useState('all');
+  const [decisionFilter, setDecisionFilter] = useState('all');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [showFilters, setShowFilters] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [attendanceDecisions, setAttendanceDecisions] = useState(new Map());
+  const [isSearching, setIsSearching] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Set default sessionId when sessions load
   React.useEffect(() => {
     if (!selectedSessionId && sessions && sessions.length > 0) {
       setSelectedSessionId(sessions[1]._id);
     }
   }, [sessions, selectedSessionId]);
 
-  // Debug: log selected session ID
-  console.log('Selected session ID:', selectedSessionId);
 
-  // Build filters object for backend
   const filters = {
     search: searchTerm || undefined,
     decision: decisionFilter !== 'all' ? decisionFilter : undefined,
     attendanceLevel: attendanceFilter !== 'all' ? attendanceFilter : undefined,
+    startDate: dateRange.start || undefined,
+    endDate: dateRange.end || undefined,
   };
 
-  // Fetch attendance for selected session with filters
   const { data: currentAttendanceData = [], isLoading: isLoadingAttendance, refetch: refetchAttendance } = useSessionAttendance(selectedSessionId, filters);
 
-  // Get current session data
+  React.useEffect(() => {
+    if (selectedSessionId && refetchAttendance) {
+      refetchAttendance();
+    }
+  }, [selectedSessionId, refetchAttendance]);
+
+  React.useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const currentSession = sessions.find((s: any) => s._id === selectedSessionId);
 
-  // Calculate total time spent for a user
   const calculateTotalTime = (
     intervals: AttendanceInterval[],
     sessionEndTime?: string
   ): number => {
     return intervals.reduce((total: number, interval: AttendanceInterval) => {
       if (!interval.joinedAt) return total;
-  
+
       const joinTime = new Date(interval.joinedAt);
       const leaveTime = interval.leftAt
         ? new Date(interval.leftAt)
         : sessionEndTime
           ? new Date(sessionEndTime)
-          : new Date(); // fallback to now
-  
-      // Ensure both are valid and join < leave
+          : new Date();
+
       if (
         !isNaN(joinTime.getTime()) &&
         !isNaN(leaveTime.getTime()) &&
@@ -83,25 +91,23 @@ const SessionAttendancePage = () => {
       ) {
         total += leaveTime.getTime() - joinTime.getTime();
       }
-  
+
       return total;
     }, 0);
   };
-  
 
-  // Format duration in hours and minutes
+
   const formatDuration = (milliseconds: number): string => {
     const hours = Math.floor(milliseconds / (1000 * 60 * 60));
     const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
-  
+
     if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
     if (minutes > 0) return `${minutes}m ${seconds}s`;
     return `${seconds}s`;
   };
-  
 
-  // Format time for display
+
   const formatTime = (timestamp: string): string => {
     return new Date(timestamp).toLocaleTimeString('en-US', {
       hour: '2-digit',
@@ -109,9 +115,8 @@ const SessionAttendancePage = () => {
       second: '2-digit'
     });
   };
-  
 
-  // Calculate attendance percentage
+
   const calculateAttendancePercentage = (
     totalTimeMs: number,
     session?: Session
@@ -119,12 +124,11 @@ const SessionAttendancePage = () => {
     if (!session || !session.duration) return 0;
     const sessionDurationMs = session.duration
       ? session.duration * 60 * 1000
-      : 2 * 60 * 60 * 1000; // fallback to 2 hours
+      : 2 * 60 * 60 * 1000;
     return Math.round((totalTimeMs / sessionDurationMs) * 100);
   };
-  
 
-  // Process attendance data with calculations only (no filtering)
+
   const processedAttendance = useMemo(() => {
     if (!currentSession) return [];
     return (currentAttendanceData || []).map((user: AttendanceUser) => {
@@ -136,40 +140,90 @@ const SessionAttendancePage = () => {
         formattedTime: formatDuration(totalTime),
         attendancePercentage,
         sessionData: currentSession,
-        status: (user as any).status // status may come from backend
+        status: (user as any).status
       };
     });
   }, [currentAttendanceData, currentSession]);
 
-  // Filter sessions by date range
   const filteredSessions = useMemo(() => {
     if (!dateRange.start && !dateRange.end) return sessions;
     return sessions.filter((session: any) => {
       const sessionDate = new Date(session.startTime);
       const startDate = dateRange.start ? new Date(dateRange.start) : null;
       const endDate = dateRange.end ? new Date(dateRange.end) : null;
+
+      if (startDate) {
+        startDate.setHours(0, 0, 0, 0);
+      }
+      if (endDate) {
+        endDate.setHours(23, 59, 59, 999);
+      }
+
       if (startDate && sessionDate < startDate) return false;
       if (endDate && sessionDate > endDate) return false;
       return true;
     });
   }, [dateRange, sessions]);
 
+  // Debounced search function
+  const debouncedSearch = useCallback((searchValue: string) => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    setIsSearching(true);
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      setSearchTerm(searchValue);
+      setIsSearching(false);
+      if (refetchAttendance) {
+        refetchAttendance();
+      }
+    }, 500);
+  }, [refetchAttendance]);
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    debouncedSearch(value);
+  }, [debouncedSearch]);
+
+  const handleSearchKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+      setIsSearching(false);
+      setSearchTerm(e.currentTarget.value);
+      if (refetchAttendance) {
+        refetchAttendance();
+      }
+    }
+  }, [refetchAttendance]);
+
   const clearFilters = () => {
     setSearchTerm('');
     setAttendanceFilter('all');
     setDecisionFilter('all');
     setDateRange({ start: '', end: '' });
+    setIsSearching(false);
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    if (searchInputRef.current) {
+      searchInputRef.current.value = '';
+    }
+    if (refetchAttendance) {
+      refetchAttendance();
+    }
   };
 
   const handleAttendanceDecision = async (userId: string, decision: string) => {
     setAttendanceDecisions(prev => new Map(prev.set(userId, decision)));
-    // Call backend to update attendance status
     const user = (currentAttendanceData || []).find((u: any) => u.id.toString() === userId.toString());
     const name = user?.username || '';
     if (selectedSessionId && userId) {
       try {
         await updateAttendanceStatus(selectedSessionId, userId, decision, name);
-        // Invalidate and refetch attendance data to update UI immediately
         await queryClient.invalidateQueries({ queryKey: ['sessionAttendance', selectedSessionId] });
         if (refetchAttendance) {
           await refetchAttendance();
@@ -178,7 +232,6 @@ const SessionAttendancePage = () => {
         console.error('Error updating attendance status:', err);
       }
     }
-    console.log(`Attendance ${decision} for user ${userId}`);
   };
 
   const handleViewIntervals = (user: any) => {
@@ -202,7 +255,6 @@ const SessionAttendancePage = () => {
   };
 
   const getDecisionButtonStyle = (decision: string, currentDecision: string, userStatus?: string) => {
-    // Check if user has a status from backend
     if (userStatus === 'approved' || userStatus === 'approve') {
       if (decision === 'approve') return 'bg-green-600 text-white';
       return 'bg-gray-100 text-gray-700 hover:bg-gray-200';
@@ -211,7 +263,6 @@ const SessionAttendancePage = () => {
       if (decision === 'decline') return 'bg-red-600 text-white';
       return 'bg-gray-100 text-gray-700 hover:bg-gray-200';
     }
-    // Fallback to local state if no backend status
     if (decision === currentDecision) {
       if (decision === 'approve') return 'bg-green-600 text-white';
       if (decision === 'decline') return 'bg-red-600 text-white';
@@ -275,14 +326,21 @@ const SessionAttendancePage = () => {
         {/* Filters Section */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-            {/* Session Selector */}
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Select Session
               </label>
               <select
                 value={selectedSessionId}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedSessionId(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                  setSelectedSessionId(e.target.value);
+                  clearFilters();
+                  setTimeout(() => {
+                    if (searchInputRef.current) {
+                      searchInputRef.current.focus();
+                    }
+                  }, 100);
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 {filteredSessions.map((session: any) => (
@@ -299,14 +357,21 @@ const SessionAttendancePage = () => {
                 Search Students
               </label>
               <div className="relative">
-                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <FaSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isSearching ? 'text-blue-500 animate-pulse' : 'text-gray-400'}`} />
                 <input
+                  ref={searchInputRef}
                   type="text"
                   placeholder="Search by name or email..."
-                  value={searchTerm}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                  defaultValue={searchTerm}
+                  onChange={handleSearchChange}
+                  onKeyPress={handleSearchKeyPress}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
+                {isSearching && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -383,8 +448,16 @@ const SessionAttendancePage = () => {
                 </div>
               </div>
 
-              {/* Clear Filters */}
-              <div className="mt-4 flex justify-end">
+              {/* Filter Actions */}
+              <div className="mt-4 flex justify-end gap-2">
+                <button
+                  onClick={() => refetchAttendance && refetchAttendance()}
+                  disabled={isLoadingAttendance}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FaSearch className="w-4 h-4" />
+                  {isLoadingAttendance ? 'Loading...' : 'Apply Filters'}
+                </button>
                 <button
                   onClick={clearFilters}
                   className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
@@ -417,126 +490,126 @@ const SessionAttendancePage = () => {
           {processedAttendance.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    User
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Time Spent
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Attendance
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Sessions
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Faculty Decision
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {processedAttendance.map((user: AttendanceUser & { totalTime: number; formattedTime: string; attendancePercentage: number; sessionData: any, status?: string }) => (
-                  <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-blue-600 font-medium text-sm">
-                            {user.username.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {user.username}
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      User
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Time Spent
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Attendance
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Sessions
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Faculty Decision
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {processedAttendance.map((user: AttendanceUser & { totalTime: number; formattedTime: string; attendancePercentage: number; sessionData: any, status?: string }) => (
+                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span className="text-blue-600 font-medium text-sm">
+                              {user.username.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">
+                              {user.username}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{user.email}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <FaStopwatch className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm font-medium text-gray-900">
-                          {user.formattedTime}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">{user.email}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <FaStopwatch className="w-4 h-4 text-gray-400" />
+                          <span className="text-sm font-medium text-gray-900">
+                            {user.formattedTime}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAttendanceColor(user.attendancePercentage)}`}>
+                          {user.attendancePercentage}%
                         </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAttendanceColor(user.attendancePercentage)}`}>
-                        {user.attendancePercentage}%
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {user.intervals.length} session{user.intervals.length !== 1 ? 's' : ''}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {user.status === 'approved' || user.status === 'approve' ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full text-green-600 bg-green-100">Approved</span>
-                        ) : user.status === 'declined' || user.status === 'decline' ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full text-red-600 bg-red-100">Declined</span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full text-yellow-600 bg-yellow-100">Not updated</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleAttendanceDecision(user.id.toString(), 'approve')}
-                          className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${getDecisionButtonStyle('approve', attendanceDecisions.get(user.id.toString()) || '', user.status)}`}
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleAttendanceDecision(user.id.toString(), 'decline')}
-                          className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${getDecisionButtonStyle('decline', attendanceDecisions.get(user.id.toString()) || '', user.status)}`}
-                        >
-                          Decline
-                        </button>
-                        <button
-                          onClick={() => handleViewIntervals(user)}
-                          className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors flex items-center gap-1"
-                        >
-                          <FaEye className="w-3 h-3" />
-                          View Details
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="p-12 text-center">
-            <div className="text-gray-400 mb-4">
-              <FaUsers className="w-12 h-12 mx-auto" />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {user.intervals.length} session{user.intervals.length !== 1 ? 's' : ''}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {user.status === 'approved' || user.status === 'approve' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full text-green-600 bg-green-100">Approved</span>
+                          ) : user.status === 'declined' || user.status === 'decline' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full text-red-600 bg-red-100">Declined</span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full text-yellow-600 bg-yellow-100">Not updated</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleAttendanceDecision(user.id.toString(), 'approve')}
+                            className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${getDecisionButtonStyle('approve', attendanceDecisions.get(user.id.toString()) || '', user.status)}`}
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleAttendanceDecision(user.id.toString(), 'decline')}
+                            className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${getDecisionButtonStyle('decline', attendanceDecisions.get(user.id.toString()) || '', user.status)}`}
+                          >
+                            Decline
+                          </button>
+                          <button
+                            onClick={() => handleViewIntervals(user)}
+                            className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors flex items-center gap-1"
+                          >
+                            <FaEye className="w-3 h-3" />
+                            View Details
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Students Found</h3>
-            <p className="text-gray-500 mb-4">
-              No students match your current filter criteria or this session has no attendees.
-            </p>
-            <button
-              onClick={clearFilters}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Clear Filters
-            </button>
-          </div>
-        )}
-      </div>
+          ) : (
+            <div className="p-12 text-center">
+              <div className="text-gray-400 mb-4">
+                <FaUsers className="w-12 h-12 mx-auto" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Students Found</h3>
+              <p className="text-gray-500 mb-4">
+                No students match your current filter criteria or this session has no attendees.
+              </p>
+              <button
+                onClick={clearFilters}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Interval Details Modal */}
@@ -555,7 +628,7 @@ const SessionAttendancePage = () => {
                   {(() => {
                     const recommendation = getAttendanceRecommendation(selectedUser.attendancePercentage);
                     const decision = attendanceDecisions.get(selectedUser.id.toString());
-                    
+
                     return (
                       <div className="mt-2 flex items-center gap-2 text-sm">
                         <span className="text-gray-600">Status:</span>
@@ -582,7 +655,7 @@ const SessionAttendancePage = () => {
                 </button>
               </div>
             </div>
-            
+
             <div className="p-6 max-h-96 overflow-y-auto">
               <div className="space-y-4">
                 {selectedUser.intervals.map((interval: AttendanceInterval, index: number) => {

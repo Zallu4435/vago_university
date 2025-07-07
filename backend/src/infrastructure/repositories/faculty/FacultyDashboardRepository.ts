@@ -17,8 +17,8 @@ import {
   GetFacultyRecentActivitiesResponseDTO,
 } from "../../../domain/faculty/dashboard/dtos/FacultyDashboardResponseDTOs";
 import { VideoSessionModel } from "../../database/mongoose/models/session.model";
-import { User } from "../../database/mongoose/models/user.model";
 import { CourseModel } from "../../database/mongoose/models/courses/CourseModel";
+import { AssignmentModel } from "../../database/mongoose/assignment/AssignmentModel";
 
 export class FacultyDashboardRepository implements IFacultyDashboardRepository {
   async getDashboardStats(params: GetFacultyDashboardStatsRequestDTO): Promise<GetFacultyDashboardStatsResponseDTO> {
@@ -26,71 +26,13 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
       throw new Error("Invalid faculty ID");
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    // Get active sessions (sessions that are currently running or scheduled for today)
-    const activeSessions = await VideoSessionModel.countDocuments({
-      hostId: params.facultyId,
-      status: { $ne: "Ended" },
-      startTime: { $lte: new Date() },
-      endTime: { $gte: new Date() }
+    const totalSessions = await VideoSessionModel.countDocuments({
+      hostId: params.facultyId
     });
 
-    // Get today's attendance percentage
-    const todaySessions = await VideoSessionModel.find({
-      hostId: params.facultyId,
-      startTime: { $gte: today, $lt: tomorrow }
-    }).lean();
+    const totalAssignments = await AssignmentModel.countDocuments();
 
-    let totalExpectedAttendance = 0;
-    let totalActualAttendance = 0;
-
-    todaySessions.forEach(session => {
-      if (session.maxAttendees) {
-        totalExpectedAttendance += session.maxAttendees;
-      }
-      if (session.attendance && Array.isArray(session.attendance)) {
-        // Only count attendance records with approved status
-        const approvedAttendance = session.attendance.filter((a: any) => 
-          a.status === 'approved' || a.status === 'approve'
-        );
-        totalActualAttendance += approvedAttendance.length;
-      }
-    });
-
-    const todayAttendancePercentage = totalExpectedAttendance > 0 
-      ? Math.round((totalActualAttendance / totalExpectedAttendance) * 100) 
-      : 0;
-
-    // Get pending approvals (attendance records that need faculty approval)
-    const pendingApprovals = await VideoSessionModel.aggregate([
-      {
-        $match: {
-          hostId: params.facultyId,
-          "attendance.status": { $in: ["pending", null] }
-        }
-      },
-      {
-        $unwind: "$attendance"
-      },
-      {
-        $match: {
-          "attendance.status": { $in: ["pending", null] }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          count: { $sum: 1 }
-        }
-      }
-    ]);
-
-    // Get total students (unique students who have attended any session)
-    const totalStudents = await VideoSessionModel.aggregate([
+    const totalAttendance = await VideoSessionModel.aggregate([
       {
         $match: {
           hostId: params.facultyId
@@ -101,29 +43,26 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
       },
       {
         $group: {
-          _id: "$attendance.userId"
+          _id: null,
+          count: { $sum: 1 }
         }
-      },
-      {
-        $count: "total"
       }
     ]);
 
     return {
       stats: {
-        activeSessions,
-        todayAttendance: todayAttendancePercentage,
-        pendingApprovals: pendingApprovals[0]?.count || 0,
-        totalStudents: totalStudents[0]?.total || 0
+        totalSessions,
+        totalAssignments,
+        totalAttendance: totalAttendance[0]?.count || 0
       }
     };
   }
 
   async getDashboardData(params: GetFacultyDashboardDataRequestDTO): Promise<GetFacultyDashboardDataResponseDTO> {
-    const [stats, weeklyAttendance, coursePerformance, sessionDistribution, recentActivities] = await Promise.all([
+    const [stats, weeklyAttendance, assignmentPerformance, sessionDistribution, recentActivities] = await Promise.all([
       this.getDashboardStats(params),
       this.getWeeklyAttendance(params),
-      this.getCoursePerformance(params),
+      this.getAssignmentPerformance(params),
       this.getSessionDistribution(params),
       this.getRecentActivities(params)
     ]);
@@ -132,7 +71,7 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
       dashboardData: {
         stats: stats.stats,
         weeklyAttendance: weeklyAttendance.weeklyAttendance,
-        coursePerformance: coursePerformance.coursePerformance,
+        assignmentPerformance: assignmentPerformance.assignmentPerformance,
         sessionDistribution: sessionDistribution.sessionDistribution,
         recentActivities: recentActivities.recentActivities
       }
@@ -140,17 +79,12 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
   }
 
   async getWeeklyAttendance(params: GetFacultyWeeklyAttendanceRequestDTO): Promise<GetFacultyWeeklyAttendanceResponseDTO> {
-    console.log('🔍 [FacultyDashboardRepository] getWeeklyAttendance called with params:', params);
-    
     if (!mongoose.isValidObjectId(params.facultyId)) {
-      console.error('❌ [FacultyDashboardRepository] Invalid faculty ID:', params.facultyId);
       throw new Error("Invalid faculty ID");
     }
 
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const weeklyData = [];
-
-    console.log('📅 [FacultyDashboardRepository] Starting weekly attendance calculation...');
 
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
@@ -160,15 +94,10 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
       const dayEnd = new Date(date);
       dayEnd.setHours(23, 59, 59, 999);
 
-      console.log(`📅 [FacultyDashboardRepository] Processing day ${i}: ${days[date.getDay()]} (${dayStart.toISOString()} to ${dayEnd.toISOString()})`);
-
-      // Get sessions for this day
       const daySessions = await VideoSessionModel.find({
         hostId: params.facultyId,
         startTime: { $gte: dayStart, $lte: dayEnd }
       }).lean();
-
-      console.log(`📊 [FacultyDashboardRepository] Found ${daySessions.length} sessions for ${days[date.getDay()]}:`, daySessions);
 
       let totalExpectedAttendance = 0;
       let totalActualAttendance = 0;
@@ -178,19 +107,16 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
           totalExpectedAttendance += session.maxAttendees;
         }
         if (session.attendance && Array.isArray(session.attendance)) {
-          // Only count attendance records with approved status
-          const approvedAttendance = session.attendance.filter((a: any) => 
-            a.status === 'approved' || a.status === 'approve'
+          const actualAttendance = session.attendance.filter((a: any) =>
+            a.intervals && Array.isArray(a.intervals) && a.intervals.length > 0
           );
-          totalActualAttendance += approvedAttendance.length;
+          totalActualAttendance += actualAttendance.length;
         }
       });
 
-      const attendancePercentage = totalExpectedAttendance > 0 
-        ? Math.round((totalActualAttendance / totalExpectedAttendance) * 100) 
+      const attendancePercentage = totalExpectedAttendance > 0
+        ? Math.round((totalActualAttendance / totalExpectedAttendance) * 100)
         : 0;
-
-      console.log(`📊 [FacultyDashboardRepository] ${days[date.getDay()]} - Expected: ${totalExpectedAttendance}, Actual: ${totalActualAttendance}, Percentage: ${attendancePercentage}%`);
 
       weeklyData.push({
         day: days[date.getDay()],
@@ -198,56 +124,110 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
       });
     }
 
-    console.log('📊 [FacultyDashboardRepository] Final weekly data:', weeklyData);
-    console.log('📊 [FacultyDashboardRepository] Returning response:', { weeklyAttendance: weeklyData });
-
     return { weeklyAttendance: weeklyData };
   }
 
-  async getCoursePerformance(params: GetFacultyCoursePerformanceRequestDTO): Promise<GetFacultyCoursePerformanceResponseDTO> {
+  async getAssignmentPerformance(params: GetFacultyCoursePerformanceRequestDTO): Promise<GetFacultyCoursePerformanceResponseDTO> {
     if (!mongoose.isValidObjectId(params.facultyId)) {
       throw new Error("Invalid faculty ID");
     }
 
-    // Get courses taught by this faculty
-    const courses = await CourseModel.find({ faculty: params.facultyId }).lean();
-
-    const coursePerformance = await Promise.all(
-      courses.map(async (course) => {
-        // Calculate average attendance percentage for this course
-        const sessions = await VideoSessionModel.find({ 
-          hostId: params.facultyId,
-          course: course.title 
-        }).lean();
-
-        let totalExpectedAttendance = 0;
-        let totalActualAttendance = 0;
-
-        sessions.forEach(session => {
-          if (session.maxAttendees) {
-            totalExpectedAttendance += session.maxAttendees;
+    const assignmentPerformance = await AssignmentModel.aggregate([
+      {
+        $match: {
+          status: { $in: ['published', 'active'] }
+        }
+      },
+      {
+        $lookup: {
+          from: 'usersubmissions',
+          localField: '_id',
+          foreignField: 'assignmentId',
+          as: 'submissions'
+        }
+      },
+      {
+        $addFields: {
+          totalSubmissions: { $size: '$submissions' },
+          averageScore: {
+            $cond: {
+              if: { $gt: [{ $size: '$submissions' }, 0] },
+              then: { $avg: '$submissions.score' },
+              else: 0
+            }
           }
-          if (session.attendance && Array.isArray(session.attendance)) {
-            // Only count attendance records with approved status
-            const approvedAttendance = session.attendance.filter((a: any) => 
-              a.status === 'approved' || a.status === 'approve'
-            );
-            totalActualAttendance += approvedAttendance.length;
+        }
+      },
+      {
+        $project: {
+          assignment: '$title',
+          score: { $round: ['$averageScore', 1] },
+          submissions: '$totalSubmissions',
+          status: 1
+        }
+      },
+      {
+        $sort: { score: -1 }
+      },
+      {
+        $limit: 5
+      }
+    ]);
+
+    if (assignmentPerformance.length === 0) {
+      const allAssignmentData = await AssignmentModel.aggregate([
+        {
+          $lookup: {
+            from: 'usersubmissions',
+            localField: '_id',
+            foreignField: 'assignmentId',
+            as: 'submissions'
           }
-        });
+        },
+        {
+          $addFields: {
+            totalSubmissions: { $size: '$submissions' },
+            averageScore: {
+              $cond: {
+                if: { $gt: [{ $size: '$submissions' }, 0] },
+                then: { $avg: '$submissions.score' },
+                else: 0
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            assignment: '$title',
+            score: { $round: ['$averageScore', 1] },
+            submissions: '$totalSubmissions',
+            status: 1
+          }
+        },
+        {
+          $sort: { score: -1 }
+        },
+        {
+          $limit: 5
+        }
+      ]);
 
-        const averageAttendancePercentage = totalExpectedAttendance > 0 
-          ? Math.round((totalActualAttendance / totalExpectedAttendance) * 100) 
-          : 0;
+      return {
+        assignmentPerformance: allAssignmentData.map(item => ({
+          assignment: `${item.assignment} (${item.status})`,
+          score: item.score,
+          submissions: item.submissions
+        }))
+      };
+    }
 
-        return {
-          course: course.title || 'Unknown Course',
-          score: averageAttendancePercentage
-        };
-      })
-    );
-
-    return { coursePerformance };
+    return {
+      assignmentPerformance: assignmentPerformance.map(item => ({
+        assignment: item.assignment,
+        score: item.score,
+        submissions: item.submissions
+      }))
+    };
   }
 
   async getSessionDistribution(params: GetFacultySessionDistributionRequestDTO): Promise<GetFacultySessionDistributionResponseDTO> {
@@ -270,7 +250,7 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
     ]);
 
     const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
-    
+
     const sessionDistribution = sessionTypes.map((type, index) => ({
       name: type._id || 'Unknown',
       value: type.count,
@@ -287,7 +267,6 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
 
     const recentActivities = [];
 
-    // Get recent sessions with more detailed information
     const recentSessions = await VideoSessionModel.find({ hostId: params.facultyId })
       .sort({ createdAt: -1 })
       .limit(10)
@@ -315,7 +294,6 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
       });
     });
 
-    // Get recent course activities (if courses were recently created/updated)
     const recentCourses = await CourseModel.find({ faculty: params.facultyId })
       .sort({ updatedAt: -1 })
       .limit(5)
@@ -330,7 +308,6 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
       });
     });
 
-    // Sort by time and take the most recent 10
     recentActivities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
     recentActivities.splice(10);
 

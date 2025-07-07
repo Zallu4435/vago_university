@@ -71,6 +71,15 @@ class SessionService {
         value !== undefined && value !== null && value !== '' && value !== 'all'
       )
     ) as Record<string, string>;
+    
+    // Convert date objects to ISO strings if they exist
+    if (filteredParams.startDate) {
+      filteredParams.startDate = new Date(filteredParams.startDate).toISOString();
+    }
+    if (filteredParams.endDate) {
+      filteredParams.endDate = new Date(filteredParams.endDate).toISOString();
+    }
+    
     const params = new URLSearchParams(filteredParams).toString();
     const response = await httpClient.get(`/faculty/sessions/video-sessions/${sessionId}/attendance${params ? '?' + params : ''}`);
     return response.data.data;

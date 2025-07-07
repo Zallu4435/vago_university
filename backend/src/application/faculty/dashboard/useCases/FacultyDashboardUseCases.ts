@@ -76,13 +76,9 @@ export class GetFacultyDashboardDataUseCase implements IGetFacultyDashboardDataU
 export class GetFacultyWeeklyAttendanceUseCase implements IGetFacultyWeeklyAttendanceUseCase {
   constructor(private facultyDashboardRepository: IFacultyDashboardRepository) {}
 
-  async execute(params: GetFacultyWeeklyAttendanceRequestDTO): Promise<ResponseDTO<GetFacultyWeeklyAttendanceResponseDTO>> {
-    console.log('🔍 [GetFacultyWeeklyAttendanceUseCase] execute called with params:', params);
-    
+  async execute(params: GetFacultyWeeklyAttendanceRequestDTO): Promise<ResponseDTO<GetFacultyWeeklyAttendanceResponseDTO>> {    
     try {
-      console.log('🔍 [GetFacultyWeeklyAttendanceUseCase] Calling repository.getWeeklyAttendance...');
       const result = await this.facultyDashboardRepository.getWeeklyAttendance(params);
-      console.log('✅ [GetFacultyWeeklyAttendanceUseCase] Repository returned result:', result);
       return { data: result, success: true };
     } catch (error: any) {
       console.error('❌ [GetFacultyWeeklyAttendanceUseCase] Error:', error);
@@ -96,10 +92,10 @@ export class GetFacultyCoursePerformanceUseCase implements IGetFacultyCoursePerf
 
   async execute(params: GetFacultyCoursePerformanceRequestDTO): Promise<ResponseDTO<GetFacultyCoursePerformanceResponseDTO>> {
     try {
-      const result = await this.facultyDashboardRepository.getCoursePerformance(params);
+      const result = await this.facultyDashboardRepository.getAssignmentPerformance(params);
       return { data: result, success: true };
     } catch (error: any) {
-      return { data: { error: error.message || 'Failed to fetch course performance' }, success: false };
+      return { data: { error: error.message || 'Failed to fetch assignment performance' }, success: false };
     }
   }
 }

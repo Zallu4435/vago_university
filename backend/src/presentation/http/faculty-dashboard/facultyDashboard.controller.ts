@@ -75,34 +75,23 @@ export class FacultyDashboardController implements IFacultyDashboardController {
   }
 
   async getWeeklyAttendance(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log('🔍 [FacultyDashboardController] getWeeklyAttendance called');
-    console.log('🔍 [FacultyDashboardController] httpRequest.user:', httpRequest.user);
-    console.log('🔍 [FacultyDashboardController] httpRequest.params:', httpRequest.params);
-    
     try {
       const facultyId = httpRequest.user?.id || httpRequest.params?.facultyId;
-      console.log('🔍 [FacultyDashboardController] Extracted facultyId:', facultyId);
       
       if (!facultyId) {
-        console.error('❌ [FacultyDashboardController] Faculty ID is missing');
         return this.httpErrors.error_400("Faculty ID is required");
       }
 
       const params: GetFacultyWeeklyAttendanceRequestDTO = { facultyId };
-      console.log('🔍 [FacultyDashboardController] Calling use case with params:', params);
       
       const result = await this.getFacultyWeeklyAttendanceUseCase.execute(params);
-      console.log('🔍 [FacultyDashboardController] Use case result:', result);
 
       if (result.success) {
-        console.log('✅ [FacultyDashboardController] Success - returning data:', (result.data as any).weeklyAttendance);
         return this.httpSuccess.success_200((result.data as any).weeklyAttendance);
       } else {
-        console.error('❌ [FacultyDashboardController] Use case failed:', (result.data as any)?.error);
         return this.httpErrors.error_400((result.data as any)?.error || "Failed to fetch weekly attendance");
       }
     } catch (error: any) {
-      console.error('❌ [FacultyDashboardController] Error in getWeeklyAttendance:', error);
       return this.httpErrors.error_500(error.message, error.stack);
     }
   }
@@ -119,9 +108,9 @@ export class FacultyDashboardController implements IFacultyDashboardController {
       const result = await this.getFacultyCoursePerformanceUseCase.execute(params);
 
       if (result.success) {
-        return this.httpSuccess.success_200((result.data as any).coursePerformance);
+        return this.httpSuccess.success_200((result.data as any).assignmentPerformance);
       } else {
-        return this.httpErrors.error_400((result.data as any)?.error || "Failed to fetch course performance");
+        return this.httpErrors.error_400((result.data as any)?.error || "Failed to fetch assignment performance");
       }
     } catch (error: any) {
       return this.httpErrors.error_500(error.message, error.stack);

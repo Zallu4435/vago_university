@@ -135,6 +135,42 @@ export class SessionRepository implements ISessionRepository {
       });
     }
 
+    // Date range filtering
+    if (filters.startDate || filters.endDate) {
+      attendance = attendance.filter((a: any) => {
+        if (!Array.isArray(a.intervals) || a.intervals.length === 0) {
+          return false;
+        }
+
+        // Check if any interval falls within the date range
+        return a.intervals.some((interval: any) => {
+          if (!interval.joinedAt) return false;
+          
+          const joinDate = new Date(interval.joinedAt);
+          let startDate = null;
+          let endDate = null;
+
+          if (filters.startDate) {
+            startDate = new Date(filters.startDate);
+            startDate.setHours(0, 0, 0, 0); // Start of day
+          }
+          
+          if (filters.endDate) {
+            endDate = new Date(filters.endDate);
+            endDate.setHours(23, 59, 59, 999); // End of day
+          }
+
+          // If start date is specified, join date must be >= start date
+          if (startDate && joinDate < startDate) return false;
+          
+          // If end date is specified, join date must be <= end date
+          if (endDate && joinDate > endDate) return false;
+          
+          return true;
+        });
+      });
+    }
+
     const userIds = attendance.map((a: any) => a.userId);
     const users = await User.find({ _id: { $in: userIds } }).lean();
     const userMap = new Map(users.map((u: any) => [u._id.toString(), u]));

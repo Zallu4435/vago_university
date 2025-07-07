@@ -13,5 +13,5 @@ export const ReactionsPanel: React.FC<ReactionsPanelProps> = ({ reactions, onRem
     return () => { timers.forEach(clearTimeout); };
   }, [reactions, onRemoveReaction]);
 
-  return null; // This panel is handled by overlaying in VideoGrid, but can be extended for global reactions.
+  return null; 
 }; 

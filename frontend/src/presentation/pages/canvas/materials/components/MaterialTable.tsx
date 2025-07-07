@@ -58,7 +58,7 @@ const MaterialTable: React.FC<MaterialTableProps> = ({ materials, onDownload, on
                                 const materialData = material.props || material;
                                 
                                 return (
-                                    <tr key={materialData._id} className={`hover:bg-gray-50/50 transition-colors duration-150`}>
+                                    <tr key={materialData.id} className={`hover:bg-gray-50/50 transition-colors duration-150`}>
                                         <td className="py-4 sm:py-6 px-3 sm:px-6 w-[60%] sm:w-[30%]">
                                             <div className="flex items-center space-x-2 sm:space-x-4">
                                                 <div className="flex-shrink-0">
@@ -111,18 +111,18 @@ const MaterialTable: React.FC<MaterialTableProps> = ({ materials, onDownload, on
                                                     <FiDownload className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                 </button>
                                                 <button
-                                                    onClick={() => onBookmark(materialData._id)}
-                                                    className={`p-1.5 sm:p-2 rounded-lg ${styles.button.secondary} transition-colors hidden sm:block`}
+                                                    onClick={() => onBookmark(materialData.id)}
+                                                    className={`p-1.5 sm:p-2 rounded-lg ${materialData.isBookmarked ? styles.button.primary : styles.button.secondary} transition-colors hidden sm:block`}
                                                     aria-label={`Bookmark ${materialData.title}`}
                                                 >
-                                                    <FiBookmark className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                    <FiBookmark className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill={materialData.isBookmarked ? "currentColor" : "none"} />
                                                 </button>
                                                 <button
-                                                    onClick={() => onLike(materialData._id)}
-                                                    className={`p-1.5 sm:p-2 rounded-lg ${styles.button.secondary} transition-colors hidden sm:block`}
+                                                    onClick={() => onLike(materialData.id)}
+                                                    className={`p-1.5 sm:p-2 rounded-lg ${materialData.isLiked ? styles.button.primary : styles.button.secondary} transition-colors hidden sm:block`}
                                                     aria-label={`Like ${materialData.title}`}
                                                 >
-                                                    <FiHeart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                    <FiHeart className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill={materialData.isLiked ? "currentColor" : "none"} />
                                                 </button>
                                                 <button
                                                     className={`p-1.5 sm:p-2 rounded-lg ${styles.button.secondary} transition-colors sm:hidden`}
@@ -143,4 +143,4 @@ const MaterialTable: React.FC<MaterialTableProps> = ({ materials, onDownload, on
     );
 };
 
-export default MaterialTable; 
+export default MaterialTable;

@@ -20,6 +20,7 @@ interface EventType {
   fullTime?: string;
   additionalInfo?: string;
   requirements?: string;
+  userRequestStatus?: string;
 }
 
 interface EventsSectionProps {
@@ -226,9 +227,18 @@ export default function EventsSection({ events }: EventsSectionProps) {
                       {!showJoinForm ? (
                         <button
                           onClick={() => setShowJoinForm(true)}
-                          className={`group/btn mt-4 w-full bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-2 px-4 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 flex items-center justify-center space-x-2 text-sm`}
+                          disabled={selectedEvent?.userRequestStatus === 'pending' || selectedEvent?.userRequestStatus === 'approved'}
+                          className={`group/btn mt-4 w-full bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-2 px-4 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 flex items-center justify-center space-x-2 text-sm ${
+                            selectedEvent?.userRequestStatus === 'pending' || selectedEvent?.userRequestStatus === 'approved' ? 'opacity-60 cursor-not-allowed' : ''
+                          }`}
                         >
-                          <span>Register for Event</span>
+                          <span>
+                            {selectedEvent?.userRequestStatus === 'pending'
+                              ? 'Registration Pending'
+                              : selectedEvent?.userRequestStatus === 'approved'
+                                ? 'Already Registered'
+                                : 'Register for Event'}
+                          </span>
                           <FaCalendarAlt size={12} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
                         </button>
                       ) : (
@@ -322,9 +332,18 @@ export default function EventsSection({ events }: EventsSectionProps) {
                     {!showJoinForm ? (
                       <button
                         onClick={() => setShowJoinForm(true)}
-                          className={`group/btn mt-3 sm:mt-4 w-full bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-2 sm:py-3 px-4 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 flex items-center justify-center space-x-2 text-xs sm:text-sm md:text-base`}
+                        disabled={selectedEvent.userRequestStatus === 'pending' || selectedEvent.userRequestStatus === 'approved'}
+                        className={`group/btn mt-3 sm:mt-4 w-full bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-2 sm:py-3 px-4 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 flex items-center justify-center space-x-2 text-xs sm:text-sm md:text-base ${
+                          selectedEvent.userRequestStatus === 'pending' || selectedEvent.userRequestStatus === 'approved' ? 'opacity-60 cursor-not-allowed' : ''
+                        }`}
                       >
-                        <span>Register for Event</span>
+                        <span>
+                          {selectedEvent.userRequestStatus === 'pending'
+                            ? 'Registration Pending'
+                            : selectedEvent.userRequestStatus === 'approved'
+                              ? 'Already Registered'
+                              : 'Register for Event'}
+                        </span>
                         <FaCalendarAlt size={12} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
                       </button>
                     ) : (
@@ -370,6 +389,7 @@ EventsSection.propTypes = {
       fullTime: PropTypes.string,
       additionalInfo: PropTypes.string,
       requirements: PropTypes.string,
+      userRequestStatus: PropTypes.string,
     })
   ).isRequired,
 };

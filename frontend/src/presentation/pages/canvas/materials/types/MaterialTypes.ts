@@ -1,5 +1,5 @@
 export interface MaterialData {
-    _id: string;
+    id: string;
     title: string;
     description: string;
     subject: string;
@@ -24,7 +24,7 @@ export interface MaterialData {
 
 export interface Material {
     props?: MaterialData;
-    _id: string;
+    id: string;
     title: string;
     description: string;
     subject: string;

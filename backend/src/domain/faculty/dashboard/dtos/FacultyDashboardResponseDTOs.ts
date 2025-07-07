@@ -28,11 +28,7 @@ export interface RecentActivityResponseDTO {
   time: string;
 }
 
-export interface SystemStatusResponseDTO {
-  serverStatus: 'online' | 'offline';
-  database: 'connected' | 'disconnected';
-  lastBackup: string;
-}
+
 
 export interface FacultyDashboardDataResponseDTO {
   stats: DashboardStatsResponseDTO;
@@ -40,7 +36,6 @@ export interface FacultyDashboardDataResponseDTO {
   coursePerformance: CoursePerformanceResponseDTO[];
   sessionDistribution: SessionDistributionResponseDTO[];
   recentActivities: RecentActivityResponseDTO[];
-  systemStatus: SystemStatusResponseDTO;
 }
 
 export interface GetFacultyDashboardStatsResponseDTO {
@@ -67,6 +62,4 @@ export interface GetFacultyRecentActivitiesResponseDTO {
   recentActivities: RecentActivityResponseDTO[];
 }
 
-export interface GetFacultySystemStatusResponseDTO {
-  systemStatus: SystemStatusResponseDTO;
-} 
+ 

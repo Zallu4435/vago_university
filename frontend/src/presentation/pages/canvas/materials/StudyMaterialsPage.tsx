@@ -55,7 +55,7 @@ const StudyMaterialsPage: React.FC = () => {
   const handleDownload = async (material: any): Promise<void> => {
     try {
       const materialData = material.props || material;
-      await downloadMaterial(materialData._id);
+      await downloadMaterial(materialData.id);
     } catch (error) {
       console.error('Failed to download material:', error);
     }
@@ -103,15 +103,6 @@ const StudyMaterialsPage: React.FC = () => {
                 <div className={`h-0.5 sm:h-1 w-12 sm:w-16 bg-gradient-to-r ${styles.accent} rounded-full mt-1 group-hover:w-16 sm:group-hover:w-24 transition-all duration-300`}></div>
               </div>
             </div>
-            <button
-              onClick={handleSync}
-              className={`group/btn bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded-full transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 text-xs sm:text-sm`}
-            >
-              <span className="flex items-center justify-center space-x-1 sm:space-x-2">
-                <FiRefreshCw size={14} className="group-hover/btn:rotate-180 transition-transform duration-500" />
-                <span>Sync</span>
-              </span>
-            </button>
           </div>
         </div>
       </div>
@@ -171,7 +162,7 @@ const StudyMaterialsPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-6">
           {filteredMaterials.map((material: Material) => (
             <MaterialCard
-              key={material._id}
+              key={material.id}
               material={material}
               onDownload={handleDownload}
               onBookmark={handleBookmark}

@@ -36,23 +36,35 @@ export class CommunicationRepository implements ICommunicationRepository {
       "recipients._id": userId
     };
 
+    // If status filter is provided, filter by the specific user's recipient status
     if (status && (status as any) !== "all") {
-      query["recipients.status"] = status;
+      query.$and = [
+        { "recipients._id": userId },
+        { "recipients.status": status }
+      ];
     }
 
-      if (search) {
-        query.$or = [
-        { subject: { $regex: search, $options: "i" } },
-        { content: { $regex: search, $options: "i" } }
-        ];
+    if (search) {
+      const searchQuery = {
+        $or: [
+          { subject: { $regex: search, $options: "i" } },
+          { content: { $regex: search, $options: "i" } }
+        ]
+      };
+      
+      if (query.$and) {
+        query.$and.push(searchQuery);
+      } else {
+        query.$or = searchQuery.$or;
       }
+    }
 
-      const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit;
     const messages = await (MessageModel as any).find(query)
       .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean();
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
     const totalItems = await (MessageModel as any).countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
@@ -71,7 +83,8 @@ export class CommunicationRepository implements ICommunicationRepository {
         _id: r._id.toString(),
         name: r.name,
         email: r.email,
-        role: r.role
+        role: r.role,
+        status: r.status || MessageStatus.Unread
       })),
       status: message.recipients.find((r: any) => r._id === userId)?.status || MessageStatus.Unread,
       createdAt: message.createdAt,
@@ -81,7 +94,7 @@ export class CommunicationRepository implements ICommunicationRepository {
       recipientsCount: message.recipients.length
     }));
 
-      return {
+    return {
       messages: mappedMessages,
       pagination: {
         total: totalItems,
@@ -98,23 +111,22 @@ export class CommunicationRepository implements ICommunicationRepository {
       "sender._id": userId
     };
 
-    if (status && (status as any) !== "all") {
-      query["recipients.status"] = status;
-    }
+    // For sent messages, we don't filter by recipient status since the sender doesn't have a recipient status
+    // The status filter is not applicable for sent messages
 
-      if (search) {
-        query.$or = [
+    if (search) {
+      query.$or = [
         { subject: { $regex: search, $options: "i" } },
         { content: { $regex: search, $options: "i" } }
-        ];
-      }
+      ];
+    }
 
-      const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit;
     const messages = await (MessageModel as any).find(query)
       .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean();
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
     const totalItems = await (MessageModel as any).countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
@@ -133,7 +145,8 @@ export class CommunicationRepository implements ICommunicationRepository {
         _id: r._id.toString(),
         name: r.name,
         email: r.email,
-        role: r.role
+        role: r.role,
+        status: r.status || MessageStatus.Unread
       })),
       status: message.recipients.find((r: any) => r._id === userId)?.status || MessageStatus.Unread,
       createdAt: message.createdAt,
@@ -143,7 +156,7 @@ export class CommunicationRepository implements ICommunicationRepository {
       recipientsCount: message.recipients.length
     }));
 
-      return {
+    return {
       messages: mappedMessages,
       pagination: {
         total: totalItems,
@@ -178,8 +191,8 @@ export class CommunicationRepository implements ICommunicationRepository {
       
       // First check if it's a group identifier
       if (recipient.value === 'all_students') {
-        const students = await UserModel.find({ role: 'student' })
-          .select('_id firstName lastName email role')
+        const students = await UserModel.find()
+          .select('_id firstName lastName email')
           .lean();
         allRecipients.push(...students.map(student => ({
           _id: student._id.toString(),
@@ -190,7 +203,7 @@ export class CommunicationRepository implements ICommunicationRepository {
         })));
       } else if (recipient.value === 'all_faculty') {
         const faculty = await FacultyModel.find()
-          .select('_id firstName lastName email role')
+          .select('_id firstName lastName email')
           .lean();
         allRecipients.push(...faculty.map(faculty => ({
           _id: faculty._id.toString(),
@@ -199,10 +212,10 @@ export class CommunicationRepository implements ICommunicationRepository {
           role: 'faculty' as UserRole,
           status: MessageStatus.Unread
         })));
-      } else if (recipient.value === 'all_students_and_faculty') {
+      } else if (recipient.value === 'all_users') {
         const [students, faculty] = await Promise.all([
-          UserModel.find({ role: 'student' }).select('_id firstName lastName email role').lean(),
-          FacultyModel.find().select('_id firstName lastName email role').lean()
+          UserModel.find().select('_id firstName lastName email').lean(),
+          FacultyModel.find().select('_id firstName lastName email').lean()
         ]);
         
         allRecipients.push(
@@ -236,11 +249,50 @@ export class CommunicationRepository implements ICommunicationRepository {
           role: user.role,
           status: MessageStatus.Unread
         });
+      } else if (recipient.label && !recipient.value) {
+        // Handle individual recipient with only email (label)
+        console.log('Processing individual recipient by email:', recipient.label);
+        
+        // Try to find user by email in both User and Faculty collections
+        let user = await UserModel.findOne({ email: recipient.label }).lean();
+        let userRole = 'student';
+        
+        if (!user) {
+          user = await FacultyModel.findOne({ email: recipient.label }).lean();
+          userRole = 'faculty';
+        }
+        
+        if (!user) {
+          console.error('Recipient not found by email:', recipient.label);
+          throw new Error(`Recipient not found: ${recipient.label}`);
+        }
+        
+        allRecipients.push({
+          _id: user._id.toString(),
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+          role: userRole as UserRole,
+          status: MessageStatus.Unread
+        });
       } else {
         console.error('Invalid recipient value:', recipient.value);
         throw new Error(`Invalid recipient value: ${recipient.value}`);
       }
+    
     }
+    // Process attachments if provided
+    let processedAttachments = [];
+    if (attachments && Array.isArray(attachments)) {
+      processedAttachments = attachments.map((file: any) => ({
+        filename: file.originalname || file.name,
+        path: file.path || file.url,
+        contentType: file.mimetype || file.type,
+        size: file.size,
+        public_id: file.filename || file.public_id
+      }));
+    }
+
+    console.log('Repository sendMessage - Processed attachments:', processedAttachments);
 
     // Create message using MessageModel directly
     const message = await (MessageModel as any).create({
@@ -248,9 +300,11 @@ export class CommunicationRepository implements ICommunicationRepository {
       content,
       sender,
       recipients: allRecipients,
-      isBroadcast: recipientsList.length === 1 && ['all_students', 'all_faculty', 'all_students_and_faculty'].includes(recipientsList[0].value),
-      attachments: attachments || []
+      isBroadcast: recipientsList.length === 1 && ['all_students', 'all_faculty', 'all_users'].includes(recipientsList[0].value),
+      attachments: processedAttachments
     });
+
+    console.log('Repository sendMessage - Message created successfully:', message._id);
     return message;
   }
 
@@ -267,13 +321,35 @@ export class CommunicationRepository implements ICommunicationRepository {
 
   async deleteMessage(params: DeleteMessageRequestDTO): Promise<DeleteMessageResponseDTO> {
     const { messageId, userId } = params;
+    console.log('Repository deleteMessage - Starting with params:', params);
+    
     const message = await this.findMessageById(messageId);
-    if (!message || !message.canAccess(userId)) {
-      throw new Error("Message not found or user does not have access");
+    if (!message) {
+      throw new Error("Message not found");
+    }
+    
+    if (!message.canAccess(userId)) {
+      throw new Error("User does not have access to this message");
     }
 
-    await (MessageModel as any).findByIdAndDelete(messageId);
-    return { success: true, message: "Message deleted successfully" };
+    // If user is the sender, delete the entire message
+    if (message.isSender(userId)) {
+      console.log('Repository deleteMessage - User is sender, deleting entire message');
+      await (MessageModel as any).findByIdAndDelete(messageId);
+      return { success: true, message: "Message deleted successfully" };
+    }
+    
+    // If user is a recipient, remove them from recipients list
+    if (message.isRecipient(userId)) {
+      console.log('Repository deleteMessage - User is recipient, removing from recipients list');
+      await (MessageModel as any).updateOne(
+        { _id: messageId },
+        { $pull: { recipients: { _id: userId } } }
+      );
+      return { success: true, message: "Message removed from inbox" };
+    }
+
+    throw new Error("User does not have access to this message");
   }
 
   async getMessageDetails(params: GetMessageDetailsRequestDTO): Promise<GetMessageDetailsResponseDTO> {
@@ -435,10 +511,22 @@ export class CommunicationRepository implements ICommunicationRepository {
   }
 
   async findMessageById(messageId: string): Promise<Message | null> {
+    console.log('=== findMessageById DEBUG ===');
+    console.log('Looking for messageId:', messageId);
+    
     const message = await (MessageModel as any).findById(messageId).lean();
-    if (!message) return null;
+    console.log('Raw message from DB:', message);
+    
+    if (!message) {
+      console.log('Message not found in DB');
+      return null;
+    }
 
-    return new Message(
+    console.log('Message sender:', message.sender);
+    console.log('Message recipients:', message.recipients);
+    console.log('User trying to access:', messageId);
+
+    const messageEntity = new Message(
       message._id.toString(),
       message.subject,
       message.content,
@@ -449,6 +537,12 @@ export class CommunicationRepository implements ICommunicationRepository {
       message.createdAt.toISOString(),
       message.updatedAt.toISOString()
     );
+    
+    console.log('Created message entity');
+    console.log('Sender ID:', messageEntity.sender._id);
+    console.log('Recipient IDs:', messageEntity.recipients.map(r => r._id));
+    
+    return messageEntity;
   }
 
   async createMessage(message: Message): Promise<void> {
@@ -485,24 +579,101 @@ export class CommunicationRepository implements ICommunicationRepository {
   }
 
   async findUsersByType(type: string, search?: string, requesterId?: string): Promise<UserInfo[]> {
-    const query: any = { role: type };
-    if (search) {
-      query.$or = [
-        { firstName: { $regex: search, $options: "i" } },
-        { lastName: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } }
-      ];
+    console.log('=== Repository findUsersByType DEBUG ===');
+    console.log('Type received:', type);
+    console.log('Search:', search);
+    console.log('========================================');
+    
+    if (type === 'students' || type === 'all_students') {
+      // Fetch from UserModel (students)
+      const query: any = {};
+      if (search) {
+        query.$or = [
+          { firstName: { $regex: search, $options: "i" } },
+          { lastName: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } }
+        ];
+      }
+
+      const students = await UserModel.find(query)
+        .select("_id firstName lastName email")
+        .lean();
+
+      const mappedStudents = students.map((user: any) => ({
+        _id: user._id.toString(),
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        role: 'student'
+      }));
+      
+      console.log('Returning students count:', mappedStudents.length);
+      return mappedStudents;
     }
+    
+    if (type === 'faculty' || type === 'all_faculty') {
+      // Fetch from FacultyModel (faculty)
+      const query: any = {};
+      if (search) {
+        query.$or = [
+          { firstName: { $regex: search, $options: "i" } },
+          { lastName: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } }
+        ];
+      }
 
-    const users = await UserModel.find(query)
-      .select("_id firstName lastName email role")
-      .lean();
+      const faculty = await FacultyModel.find(query)
+        .select("_id firstName lastName email")
+        .lean();
 
-    return users.map((user: any) => ({
-      _id: user._id.toString(),
-      name: `${user.firstName} ${user.lastName}`,
-      email: user.email,
-      role: user.role
-    }));
+      const mappedFaculty = faculty.map((user: any) => ({
+        _id: user._id.toString(),
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        role: 'faculty'
+      }));
+      
+      console.log('Returning faculty count:', mappedFaculty.length);
+      return mappedFaculty;
+    }
+    
+    if (type === 'all') {
+      // Fetch from both User and Faculty collections
+      const [students, faculty] = await Promise.all([
+        UserModel.find().select('_id firstName lastName email').lean(),
+        FacultyModel.find().select('_id firstName lastName email').lean()
+      ]);
+      
+      const allUsers = [
+        ...students.map((user: any) => ({
+          _id: user._id.toString(),
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+          role: 'student'
+        })),
+        ...faculty.map((user: any) => ({
+          _id: user._id.toString(),
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+          role: 'faculty'
+        }))
+      ];
+      
+      // Apply search filter if provided
+      if (search) {
+        const searchLower = search.toLowerCase();
+        const filteredUsers = allUsers.filter(user => 
+          user.name.toLowerCase().includes(searchLower) ||
+          user.email.toLowerCase().includes(searchLower)
+        );
+        console.log('Filtered users count:', filteredUsers.length);
+        return filteredUsers;
+      }
+      
+      console.log('Returning all users count:', allUsers.length);
+      return allUsers;
+    }
+    
+    console.log('Unknown type, returning empty array');
+    return [];
   }
 }

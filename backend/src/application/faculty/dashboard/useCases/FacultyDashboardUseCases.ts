@@ -5,7 +5,6 @@ import {
   GetFacultyCoursePerformanceRequestDTO,
   GetFacultySessionDistributionRequestDTO,
   GetFacultyRecentActivitiesRequestDTO,
-  GetFacultySystemStatusRequestDTO,
 } from "../../../../domain/faculty/dashboard/dtos/FacultyDashboardRequestDTOs";
 import {
   GetFacultyDashboardStatsResponseDTO,
@@ -14,7 +13,6 @@ import {
   GetFacultyCoursePerformanceResponseDTO,
   GetFacultySessionDistributionResponseDTO,
   GetFacultyRecentActivitiesResponseDTO,
-  GetFacultySystemStatusResponseDTO,
 } from "../../../../domain/faculty/dashboard/dtos/FacultyDashboardResponseDTOs";
 import { IFacultyDashboardRepository } from "../repositories/IFacultyDashboardRepository";
 
@@ -47,9 +45,7 @@ export interface IGetFacultyRecentActivitiesUseCase {
   execute(params: GetFacultyRecentActivitiesRequestDTO): Promise<ResponseDTO<GetFacultyRecentActivitiesResponseDTO>>;
 }
 
-export interface IGetFacultySystemStatusUseCase {
-  execute(params: GetFacultySystemStatusRequestDTO): Promise<ResponseDTO<GetFacultySystemStatusResponseDTO>>;
-}
+
 
 export class GetFacultyDashboardStatsUseCase implements IGetFacultyDashboardStatsUseCase {
   constructor(private facultyDashboardRepository: IFacultyDashboardRepository) {}
@@ -81,10 +77,15 @@ export class GetFacultyWeeklyAttendanceUseCase implements IGetFacultyWeeklyAtten
   constructor(private facultyDashboardRepository: IFacultyDashboardRepository) {}
 
   async execute(params: GetFacultyWeeklyAttendanceRequestDTO): Promise<ResponseDTO<GetFacultyWeeklyAttendanceResponseDTO>> {
+    console.log('🔍 [GetFacultyWeeklyAttendanceUseCase] execute called with params:', params);
+    
     try {
+      console.log('🔍 [GetFacultyWeeklyAttendanceUseCase] Calling repository.getWeeklyAttendance...');
       const result = await this.facultyDashboardRepository.getWeeklyAttendance(params);
+      console.log('✅ [GetFacultyWeeklyAttendanceUseCase] Repository returned result:', result);
       return { data: result, success: true };
     } catch (error: any) {
+      console.error('❌ [GetFacultyWeeklyAttendanceUseCase] Error:', error);
       return { data: { error: error.message || 'Failed to fetch weekly attendance' }, success: false };
     }
   }
@@ -129,15 +130,4 @@ export class GetFacultyRecentActivitiesUseCase implements IGetFacultyRecentActiv
   }
 }
 
-export class GetFacultySystemStatusUseCase implements IGetFacultySystemStatusUseCase {
-  constructor(private facultyDashboardRepository: IFacultyDashboardRepository) {}
-
-  async execute(params: GetFacultySystemStatusRequestDTO): Promise<ResponseDTO<GetFacultySystemStatusResponseDTO>> {
-    try {
-      const result = await this.facultyDashboardRepository.getSystemStatus(params);
-      return { data: result, success: true };
-    } catch (error: any) {
-      return { data: { error: error.message || 'Failed to fetch system status' }, success: false };
-    }
-  }
-} 
+ 

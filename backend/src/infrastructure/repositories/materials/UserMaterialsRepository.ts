@@ -72,6 +72,9 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
     return {
       materials: materials.map((material: any) => {
         const obj = material.toObject();
+        const isBookmarked = obj.bookmarks && obj.bookmarks.some((b: any) => b.userId === userId);
+        const isLiked = obj.likes && obj.likes.some((l: any) => l.userId === userId);
+        
         return {
           id: obj._id.toString(),
           title: obj.title,
@@ -92,6 +95,8 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
           views: obj.views,
           downloads: obj.downloads,
           rating: obj.rating,
+          isBookmarked,
+          isLiked,
         };
       }),
       totalPages,
@@ -116,6 +121,9 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
     }
 
     const obj = material.toObject();
+    const isBookmarked = obj.bookmarks && obj.bookmarks.some((b: any) => b.userId === userId);
+    const isLiked = obj.likes && obj.likes.some((l: any) => l.userId === userId);
+    
     return {
       materials: [{
         id: obj._id.toString(),
@@ -137,6 +145,8 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
         views: obj.views,
         downloads: obj.downloads,
         rating: obj.rating,
+        isBookmarked,
+        isLiked,
       }],
       totalPages: 1,
       bookmarkedMaterials: [],

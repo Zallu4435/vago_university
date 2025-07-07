@@ -7,7 +7,7 @@ export interface Attendee {
 
 export interface CreateVideoSessionPayload {
   title: string;
-  hostId: string;
+  hostId?: string; // Optional since it will be set automatically by the backend
   startTime: string; // ISO string
   description?: string;
   instructor?: string;
@@ -64,8 +64,15 @@ class SessionService {
     return httpClient.post(`/faculty/sessions/video-sessions/${sessionId}/attendance/leave`);
   }
 
-  async getSessionAttendance(sessionId: string) {
-    const response = await httpClient.get(`/faculty/sessions/video-sessions/${sessionId}/attendance`);
+  async getSessionAttendance(sessionId: string, filters: any = {}) {
+    // Filter out empty values before creating query params
+    const filteredParams = Object.fromEntries(
+      Object.entries(filters).filter(([_, value]) => 
+        value !== undefined && value !== null && value !== '' && value !== 'all'
+      )
+    ) as Record<string, string>;
+    const params = new URLSearchParams(filteredParams).toString();
+    const response = await httpClient.get(`/faculty/sessions/video-sessions/${sessionId}/attendance${params ? '?' + params : ''}`);
     return response.data.data;
   }
 

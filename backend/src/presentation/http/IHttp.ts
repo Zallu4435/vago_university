@@ -356,6 +356,8 @@ export interface IVideoSessionController extends IController {
   updateSessionStatus(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getSessionAttendance(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   updateAttendanceStatus(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  recordAttendanceJoin(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  recordAttendanceLeave(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface IFacultyDashboardController extends IController {
@@ -365,7 +367,6 @@ export interface IFacultyDashboardController extends IController {
   getCoursePerformance(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getSessionDistribution(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getRecentActivities(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  getSystemStatus(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface IAdminDashboardController extends IController {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiFilter, FiChevronDown, FiX, FiSearch } from 'react-icons/fi';
 import { usePreferences } from '../../../../context/PreferencesContext';
 import { Material } from '../types/MaterialTypes';
@@ -39,6 +39,21 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
     materials
 }) => {
     const { styles } = usePreferences();
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+
+    // Debounce search term
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setSearchTerm(debouncedSearchTerm);
+        }, 500); // 500ms delay
+
+        return () => clearTimeout(timer);
+    }, [debouncedSearchTerm, setSearchTerm]);
+
+    // Update debounced term when searchTerm changes externally
+    useEffect(() => {
+        setDebouncedSearchTerm(searchTerm);
+    }, [searchTerm]);
 
     // Extract materials from props structure and get unique values
     const extractedMaterials = materials.map(item => item.props || item);
@@ -73,8 +88,8 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
                         type="text"
                         placeholder="Search materials, courses, instructors, or tags..."
                         className={`w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 ${styles.input.border} rounded-lg sm:rounded-xl ${styles.input.focus} ${styles.input.background} transition-all duration-200 text-sm sm:text-lg`}
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        value={debouncedSearchTerm}
+                        onChange={(e) => setDebouncedSearchTerm(e.target.value)}
                         aria-label="Search materials"
                     />
                 </div>

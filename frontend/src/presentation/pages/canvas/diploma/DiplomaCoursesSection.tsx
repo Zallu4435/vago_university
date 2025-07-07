@@ -36,7 +36,16 @@ const DiplomaCoursesSection = () => {
   const chapters = useMemo(() => {
     if (!selectedCourse) return [];
     if (selectedCourse.chapters && selectedCourse.chapters.length > 0) {
-      return selectedCourse.chapters;
+      // Map backend chapters to frontend format
+      return selectedCourse.chapters.map((chapter: any) => ({
+        id: chapter._id || chapter.id, // Handle both _id and id
+        title: chapter.title,
+        description: chapter.description || '',
+        duration: chapter.duration || '0',
+        videoUrl: chapter.videoUrl || '',
+        notes: chapter.description || '',
+        type: 'video',
+      }));
     }
     // If videos exist but chapters do not, map videos to chapters
     if ((selectedCourse as any).videos && (selectedCourse as any).videos.length > 0) {
@@ -66,7 +75,15 @@ const DiplomaCoursesSection = () => {
     color: '',
     bgColor: '',
     completionRate: 0,
-    chapters: course.chapters && course.chapters.length > 0 ? course.chapters : ((course.videos || []).map((video: any) => ({
+    chapters: course.chapters && course.chapters.length > 0 ? course.chapters.map((chapter: any) => ({
+      id: chapter._id || chapter.id, // Handle both _id and id
+      title: chapter.title,
+      description: chapter.description || '',
+      duration: chapter.duration || '0',
+      videoUrl: chapter.videoUrl || '',
+      notes: chapter.description || '',
+      type: 'video',
+    })) : ((course.videos || []).map((video: any) => ({
       id: video._id,
       title: video.title,
       duration: video.duration,
@@ -206,20 +223,21 @@ const DiplomaCoursesSection = () => {
                 const prevCompleted = isFirst
                   ? true
                   : completedChapters.has(String(prevId));
+                const chapterId = chapter._id || chapter.id;
                 // Debug logs
-                console.log('Chapter:', chapter.id, 'typeof chapter.id:', typeof chapter.id, 'isFirst:', isFirst, 'prevId:', prevId, 'typeof prevId:', typeof prevId, 'prevCompleted:', prevCompleted, 'completed:', completedChapters.has(String(chapter.id)), 'bookmarked:', bookmarkedChapters.has(String(chapter.id)));
+                console.log('Chapter:', chapterId, 'typeof chapterId:', typeof chapterId, 'isFirst:', isFirst, 'prevId:', prevId, 'typeof prevId:', typeof prevId, 'prevCompleted:', prevCompleted, 'completed:', completedChapters.has(String(chapterId)), 'bookmarked:', bookmarkedChapters.has(String(chapterId)));
                 console.log('completedChapters:', Array.from(completedChapters));
                 console.log('bookmarkedChapters:', Array.from(bookmarkedChapters));
                 return (
                   <ChapterItem
-                    key={chapter.id}
+                    key={chapterId}
                     chapter={chapter}
                     courseId={selectedCourse._id}
                     styles={styles}
                     isFirst={isFirst}
                     isPrevCompleted={prevCompleted}
-                    isCompleted={completedChapters.has(String(chapter.id))}
-                    isBookmarked={bookmarkedChapters.has(String(chapter.id))}
+                    isCompleted={completedChapters.has(String(chapterId))}
+                    isBookmarked={bookmarkedChapters.has(String(chapterId))}
                     onViewChapter={() => {
                       setModalVideo(chapter);
                       setVideoModalOpen(true);
@@ -252,20 +270,20 @@ const DiplomaCoursesSection = () => {
                 <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
                   {/* Bookmark button */}
                   <button
-                    className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition-colors mr-0 sm:mr-2 ${bookmarkedChapters.has(String(modalVideo.id)) ? 'bg-yellow-200 text-yellow-800' : 'bg-gray-200 text-gray-700'}`}
-                    onClick={() => handleBookmark(selectedCourse._id, modalVideo.id)}
+                    className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition-colors mr-0 sm:mr-2 ${bookmarkedChapters.has(String(modalVideo._id || modalVideo.id)) ? 'bg-yellow-200 text-yellow-800' : 'bg-gray-200 text-gray-700'}`}
+                    onClick={() => handleBookmark(selectedCourse._id, modalVideo._id || modalVideo.id)}
                   >
-                    {bookmarkedChapters.has(String(modalVideo.id)) ? 'Bookmarked' : 'Bookmark'}
+                    {bookmarkedChapters.has(String(modalVideo._id || modalVideo.id)) ? 'Bookmarked' : 'Bookmark'}
                   </button>
                   {/* Completed/Mark as Completed button */}
-                  {completedChapters.has(String(modalVideo.id)) ? (
+                  {completedChapters.has(String(modalVideo._id || modalVideo.id)) ? (
                     <span className="px-3 sm:px-4 py-2 rounded-lg bg-green-100 text-green-700 font-semibold">Completed</span>
                   ) : (
                     <button
                       className="bg-green-600 hover:bg-green-700 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold transition-colors"
                       onClick={() => {
                         if (selectedCourse && modalVideo) {
-                          markChapterComplete({ courseId: selectedCourse._id, chapterId: modalVideo.id });
+                          markChapterComplete({ courseId: selectedCourse._id, chapterId: modalVideo._id || modalVideo.id });
                           setVideoModalOpen(false);
                           setCurrentView('details');
                         }

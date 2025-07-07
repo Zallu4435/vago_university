@@ -5,6 +5,8 @@ import { FaSearch, FaChevronRight, FaTrash, FaEnvelopeOpen } from 'react-icons/f
 import PropTypes from 'prop-types';
 import WarningModal from '../../../components/WarningModal';
 import { usePreferences } from '../../../context/PreferencesContext';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../redux/store';
 
 export default function InboxSection() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
@@ -13,13 +15,33 @@ export default function InboxSection() {
   const { inboxMessages: messages, isLoadingInbox: isLoading, handleViewMessage, handleDeleteMessage } =
     useCommunicationManagement();
   const { styles, theme } = usePreferences();
+  const user = useSelector((state: RootState) => state.auth.user);
 
   console.log(messages, "messages ")
 
   const handleMessageClick = (message: Message) => {
+    console.log('=== handleMessageClick DEBUG ===');
+    console.log('Message clicked:', message);
+    console.log('Message recipients:', message.recipients);
+    
+    // Get current user ID from Redux
+    const currentUserId = user?.id;
+    console.log('Current user ID:', currentUserId);
+    
+    // Find the current user's recipient status for this message
+    const currentUserRecipient = message.recipients.find(r => r.id === currentUserId);
+    console.log('Current user recipient:', currentUserRecipient);
+    
+    const isCurrentUserUnread = currentUserRecipient?.status === 'unread';
+    console.log('Is current user unread:', isCurrentUserUnread);
+    console.log('================================');
+    
     setSelectedMessage(message);
-    if (message.recipients.find((r) => r.status === 'unread')) {
+    if (isCurrentUserUnread) {
+      console.log('Calling handleViewMessage for message:', message.id);
       handleViewMessage(message);
+    } else {
+      console.log('Message already read by current user, not calling handleViewMessage');
     }
   };
 
@@ -79,40 +101,47 @@ export default function InboxSection() {
         <div className={`lg:col-span-1 relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
           <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
           <div className="relative z-10 divide-y divide-amber-100/50">
-            {messages.map((message: Message) => (
-              <div
-                key={message.id}
-                className={`p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${
-                  selectedMessage?.id === message.id ? 'bg-orange-50/70' : ''
-                }`}
-                onClick={() => handleMessageClick(message)}
-              >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      {message.recipients.some((r) => r.status === 'unread') && (
-                        <span className={`w-2 h-2 rounded-full ${styles.status.warning}`}></span>
-                      )}
-                      <h3 className={`font-medium ${styles.textPrimary} text-sm sm:text-base truncate`}>{message.subject}</h3>
+            {messages.map((message: Message) => {
+              // Get current user ID from Redux
+              const currentUserId = user?.id;
+              const currentUserRecipient = message.recipients.find(r => r.id === currentUserId);
+              const isCurrentUserUnread = currentUserRecipient?.status === 'unread';
+              
+              return (
+                <div
+                  key={message.id}
+                  className={`p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${
+                    selectedMessage?.id === message.id ? 'bg-orange-50/70' : ''
+                  }`}
+                  onClick={() => handleMessageClick(message)}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        {isCurrentUserUnread && (
+                          <span className={`w-2 h-2 rounded-full ${styles.status.warning}`}></span>
+                        )}
+                        <h3 className={`font-medium ${styles.textPrimary} text-sm sm:text-base truncate`}>{message.subject}</h3>
+                      </div>
+                      <p className={`text-sm ${styles.textSecondary} truncate mt-1`}>{message.content}</p>
                     </div>
-                    <p className={`text-sm ${styles.textSecondary} truncate mt-1`}>{message.content}</p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(message);
+                      }}
+                      className={`ml-2 ${styles.icon.secondary} hover:${styles.status.error} transition-colors duration-300`}
+                    >
+                      <FaTrash size={16} />
+                    </button>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(message);
-                    }}
-                    className={`ml-2 ${styles.icon.secondary} hover:${styles.status.error} transition-colors duration-300`}
-                  >
-                    <FaTrash size={16} />
-                  </button>
+                  <div className="mt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs">
+                    <span className={`truncate ${styles.textSecondary}`}>From: {message.sender.email}</span>
+                    <span className={`mt-1 sm:mt-0 ${styles.textSecondary}`}>{new Date(message.createdAt).toLocaleDateString()}</span>
+                  </div>
                 </div>
-                <div className="mt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs">
-                  <span className={`truncate ${styles.textSecondary}`}>From: {message.sender.email}</span>
-                  <span className={`mt-1 sm:mt-0 ${styles.textSecondary}`}>{new Date(message.createdAt).toLocaleDateString()}</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
             {messages.length === 0 && (
               <div className={`p-4 text-center ${styles.textSecondary} text-sm`}>No messages found</div>
             )}
@@ -130,7 +159,6 @@ export default function InboxSection() {
                     <h2 className={`text-lg sm:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} mb-2`}>{selectedMessage.subject}</h2>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm">
                       <span className={`${styles.textSecondary}`}>From: {selectedMessage.sender.name}</span>
-                      <span className={`${styles.textSecondary}`}>To: {selectedMessage.recipients.map((r) => r.name).join(', ')}</span>
                     </div>
                   </div>
                   <div className={`text-xs sm:text-sm ${styles.textSecondary} mt-2 sm:mt-0`}>

@@ -6,8 +6,41 @@ import JoinRequestForm from './JoinRequestForm';
 import { usePreferences } from '../../../context/PreferencesContext';
 import ReactDOM from 'react-dom';
 
-export default function AthleticsSection({ sports }) {
-  const [selectedSport, setSelectedSport] = useState(sports[0] || null);
+  interface Game {
+  date?: string;
+  description?: string;
+}
+
+interface Sport {
+  id: string;
+  title: string;
+  type: string;
+  icon?: string;
+  color?: string;
+  division?: string;
+  headCoach?: string;
+  homeGames?: number | string[];
+  record?: string;
+  upcomingGames?: (string | Game)[];
+  participants?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  userRequestStatus?: string;
+}
+
+interface SportsData {
+  sports: Sport[];
+  totalItems: number;
+}
+
+interface JoinRequest {
+  clubId?: string;
+  sportId?: string;
+  request: any;
+}
+
+export default function AthleticsSection({ sports }: { sports: SportsData }) {
+  const [selectedSport, setSelectedSport] = useState(sports.sports[0] || null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [showMobileDetails, setShowMobileDetails] = useState(false);
@@ -30,6 +63,7 @@ export default function AthleticsSection({ sports }) {
         participants: sport.participants || 0,
         createdAt: sport.createdAt || new Date().toISOString(),
         updatedAt: sport.updatedAt || new Date().toISOString(),
+        userRequestStatus: sport.userRequestStatus || null,
       }))
       .filter((sport) =>
         sport.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -37,7 +71,7 @@ export default function AthleticsSection({ sports }) {
       );
   }, [sports, searchTerm]);
 
-  const handleJoinRequest = async (request) => {
+  const handleJoinRequest = async (request: any) => {
     if (!selectedSport) return;
     try {
       await requestToJoinSport({ sportId: selectedSport.id, request });
@@ -47,7 +81,7 @@ export default function AthleticsSection({ sports }) {
     }
   };
 
-  const handleSportClick = (sport) => {
+  const handleSportClick = (sport: Sport) => {
     setSelectedSport(sport);
     if (window.innerWidth < 640) {
       setShowMobileDetails(true);
@@ -221,12 +255,16 @@ export default function AthleticsSection({ sports }) {
                               <li key={index} className={`mb-2 flex text-sm sm:text-base ${styles.textPrimary}`}>
                                 <span className={`${styles.status.warning} mr-2`}>•</span>
                                 <span>
-                                  {new Date(game.date).toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric',
-                                  })}
-                                  : {game.description}
+                                  {typeof game === 'string' 
+                                    ? game
+                                    : game?.date
+                                      ? `${new Date(game.date).toLocaleDateString('en-US', {
+                                          month: 'short',
+                                          day: 'numeric',
+                                          year: 'numeric',
+                                        })}: ${game.description || ''}`
+                                      : game?.description || game
+                                  }
                                 </span>
                               </li>
                             ))}
@@ -249,9 +287,18 @@ export default function AthleticsSection({ sports }) {
                     {!showJoinForm ? (
                       <button
                         onClick={() => setShowJoinForm(true)}
-                        className={`group/btn mt-4 w-full bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-2 sm:py-3 px-4 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 flex items-center justify-center space-x-2 text-sm sm:text-base`}
+                        disabled={selectedSport.userRequestStatus === 'pending' || selectedSport.userRequestStatus === 'approved'}
+                        className={`group/btn mt-4 w-full bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-2 sm:py-3 px-4 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 flex items-center justify-center space-x-2 text-sm sm:text-base ${
+                          selectedSport.userRequestStatus === 'pending' || selectedSport.userRequestStatus === 'approved' ? 'opacity-60 cursor-not-allowed' : ''
+                        }`}
                       >
-                        <span>Try Out for Team</span>
+                        <span>
+                          {selectedSport.userRequestStatus === 'pending'
+                            ? 'Request Pending'
+                            : selectedSport.userRequestStatus === 'approved'
+                              ? 'Already Joined'
+                              : 'Try Out for Team'}
+                        </span>
                         <FaTrophy size={12} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
                       </button>
                     ) : (
@@ -335,15 +382,19 @@ export default function AthleticsSection({ sports }) {
                         <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-lg blur transition-all duration-300`}></div>
                         <div className="relative z-10">
                           {selectedSport.upcomingGames.map((game, index) => (
-                            <li key={index} className={`mb-2 flex text-sm ${styles.textPrimary}`}>
+                            <li key={index} className={`mb-2 flex text-sm sm:text-base ${styles.textPrimary}`}>
                               <span className={`${styles.status.warning} mr-2`}>•</span>
                               <span>
-                                {new Date(game.date).toLocaleDateString('en-US', {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: 'numeric',
-                                })}
-                                : {game.description}
+                                {typeof game === 'string' 
+                                  ? game
+                                  : game?.date
+                                    ? `${new Date(game.date).toLocaleDateString('en-US', {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        year: 'numeric',
+                                      })}: ${game.description || ''}`
+                                    : game?.description || game
+                                }
                               </span>
                             </li>
                           ))}
@@ -366,9 +417,18 @@ export default function AthleticsSection({ sports }) {
                   {!showJoinForm ? (
                     <button
                       onClick={() => setShowJoinForm(true)}
-                      className={`group/btn mt-4 w-full bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-2 px-4 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 flex items-center justify-center space-x-2 text-sm`}
+                      disabled={selectedSport.userRequestStatus === 'pending' || selectedSport.userRequestStatus === 'approved'}
+                      className={`group/btn mt-4 w-full bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-2 sm:py-3 px-4 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 flex items-center justify-center space-x-2 text-sm sm:text-base ${
+                        selectedSport.userRequestStatus === 'pending' || selectedSport.userRequestStatus === 'approved' ? 'opacity-60 cursor-not-allowed' : ''
+                      }`}
                     >
-                      <span>Try Out for Team</span>
+                      <span>
+                        {selectedSport.userRequestStatus === 'pending'
+                          ? 'Request Pending'
+                          : selectedSport.userRequestStatus === 'approved'
+                            ? 'Already Joined'
+                            : 'Try Out for Team'}
+                      </span>
                       <FaTrophy size={12} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
                     </button>
                   ) : (
@@ -400,26 +460,33 @@ export default function AthleticsSection({ sports }) {
 }
 
 AthleticsSection.propTypes = {
-  sports: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      type: PropTypes.string.isRequired,
-      icon: PropTypes.string,
-      color: PropTypes.string,
-      division: PropTypes.string,
-      headCoach: PropTypes.string,
-      homeGames: PropTypes.number,
-      record: PropTypes.string,
-      upcomingGames: PropTypes.arrayOf(
-        PropTypes.shape({
-          date: PropTypes.string.isRequired,
-          description: PropTypes.string.isRequired,
-        })
-      ),
-      participants: PropTypes.number,
-      createdAt: PropTypes.string,
-      updatedAt: PropTypes.string,
-    })
-  ).isRequired,
+  sports: PropTypes.shape({
+    sports: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        title: PropTypes.string.isRequired,
+        type: PropTypes.string.isRequired,
+        icon: PropTypes.string,
+        color: PropTypes.string,
+        division: PropTypes.string,
+        headCoach: PropTypes.string,
+        homeGames: PropTypes.oneOfType([PropTypes.number, PropTypes.array]),
+        record: PropTypes.string,
+        upcomingGames: PropTypes.arrayOf(
+          PropTypes.oneOfType([
+            PropTypes.string,
+            PropTypes.shape({
+              date: PropTypes.string,
+              description: PropTypes.string,
+            })
+          ])
+        ),
+        participants: PropTypes.number,
+        createdAt: PropTypes.string,
+        updatedAt: PropTypes.string,
+        userRequestStatus: PropTypes.string,
+      })
+    ),
+    totalItems: PropTypes.number,
+  }).isRequired,
 };

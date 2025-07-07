@@ -17,6 +17,12 @@ export class CreateVideoSessionUseCase {
         } else {
             throw new Error('startTime or (date and time) must be provided');
         }
+
+        // Ensure hostId is provided
+        if (!params.hostId) {
+            throw new Error('hostId is required');
+        }
+
         const session = new VideoSession(
             '',
             params.title,
@@ -136,8 +142,8 @@ export class UpdateVideoSessionStatusUseCase {
 
 export class GetSessionAttendanceUseCase {
     constructor(private sessionRepository: ISessionRepository) {}
-    async execute(sessionId: string): Promise<any[]> {
-        return this.sessionRepository.getSessionAttendance(sessionId);
+    async execute(sessionId: string, filters: any = {}): Promise<any[]> {
+        return this.sessionRepository.getSessionAttendance(sessionId, filters);
     }
 }
 
@@ -145,5 +151,19 @@ export class UpdateAttendanceStatusUseCase {
     constructor(private sessionRepository: ISessionRepository) {}
     async execute(sessionId: string, userId: string, status: string, name: string): Promise<void> {
         await this.sessionRepository.updateAttendanceStatus(sessionId, userId, status, name);
+    }
+}
+
+export class RecordAttendanceJoinUseCase {
+    constructor(private sessionRepository: ISessionRepository) {}
+    async execute(sessionId: string, userId: string): Promise<void> {
+        await this.sessionRepository.recordAttendanceJoin(sessionId, userId);
+    }
+}
+
+export class RecordAttendanceLeaveUseCase {
+    constructor(private sessionRepository: ISessionRepository) {}
+    async execute(sessionId: string, userId: string): Promise<void> {
+        await this.sessionRepository.recordAttendanceLeave(sessionId, userId);
     }
 } 

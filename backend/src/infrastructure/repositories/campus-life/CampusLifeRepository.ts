@@ -122,27 +122,33 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       .limit(params.limit)
       .lean();
 
+    let requests: any[] = [];
+    if (params.userId) {
+      requests = await (EventRequestModel as any).find({ userId: params.userId }).lean();
+    }
+
     return {
-      events: events.map(
-        (e: any) =>
-          new CampusEvent(
-            e._id.toString(),
-            e.title,
-            e.date,
-            e.time,
-            e.location,
-            e.organizer,
-            e.timeframe,
-            e.icon,
-            e.color,
-            e.description,
-            e.fullTime,
-            e.additionalInfo,
-            e.requirements,
-            e.createdAt.toISOString(),
-            e.updatedAt.toISOString()
-          )
-      ),
+      events: events.map((e: any) => {
+        const req = requests.find(r => r.eventId.toString() === e._id.toString());
+        return new CampusEvent(
+          e._id.toString(),
+          e.title,
+          e.date,
+          e.time,
+          e.location,
+          e.organizer,
+          e.timeframe,
+          e.icon,
+          e.color,
+          e.description,
+          e.fullTime,
+          e.additionalInfo,
+          e.requirements,
+          e.createdAt.toISOString(),
+          e.updatedAt.toISOString(),
+          req ? req.status : null
+        );
+      }),
       totalItems,
       totalPages,
       currentPage: params.page,
@@ -190,25 +196,31 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       .select("title type teams icon color division headCoach homeGames record upcomingGames createdAt updatedAt")
       .lean();
 
+    let requests: any[] = [];
+    if (params.userId) {
+      requests = await (SportRequestModel as any).find({ userId: params.userId }).lean();
+    }
+
     return {
-      sports: sports.map(
-        (s: any) =>
-          new Sport(
-            s._id.toString(),
-            s.title,
-            s.type as SportType,
-            [], // teams property doesn't exist in model
-            s.icon,
-            s.color,
-            s.division,
-            s.headCoach,
-            [s.homeGames?.toString() || ""], // convert number to string array
-            s.record,
-            s.upcomingGames?.map((g: any) => g.description) || [],
-            s.createdAt.toISOString(),
-            s.updatedAt.toISOString()
-          )
-      ),
+      sports: sports.map((s: any) => {
+        const req = requests.find(r => r.sportId.toString() === s._id.toString());
+        return new Sport(
+          s._id.toString(),
+          s.title,
+          s.type as SportType,
+          [], // teams property doesn't exist in model
+          s.icon,
+          s.color,
+          s.division,
+          s.headCoach,
+          [s.homeGames?.toString() || ""], // convert number to string array
+          s.record,
+          s.upcomingGames?.map((g: any) => g.description) || [],
+          s.createdAt.toISOString(),
+          s.updatedAt.toISOString(),
+          req ? req.status : null
+        );
+      }),
       totalItems,
     };
   }
@@ -255,25 +267,31 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       .select("name type members icon color status role nextMeeting about upcomingEvents createdAt updatedAt")
       .lean();
 
+    let requests: any[] = [];
+    if (params.userId) {
+      requests = await (ClubRequestModel as any).find({ userId: params.userId }).lean();
+    }
+
     return {
-      clubs: clubs.map(
-        (c: any) =>
-          new Club(
-            c._id.toString(),
-            c.name,
-            c.type,
-            parseInt(c.members) || 0, // convert string to number
-            c.icon,
-            c.color,
-            c.status as any,
-            c.role,
-            c.nextMeeting,
-            c.about,
-            c.upcomingEvents?.map((e: any) => e.description) || [],
-            c.createdAt.toISOString(),
-            c.updatedAt.toISOString()
-          )
-      ),
+      clubs: clubs.map((c: any) => {
+        const req = requests.find(r => r.clubId.toString() === c._id.toString());
+        return new Club(
+          c._id.toString(),
+          c.name,
+          c.type,
+          parseInt(c.members) || 0, // convert string to number
+          c.icon,
+          c.color,
+          c.status as any,
+          c.role,
+          c.nextMeeting,
+          c.about,
+          c.upcomingEvents?.map((e: any) => e.description) || [],
+          c.createdAt.toISOString(),
+          c.updatedAt.toISOString(),
+          req ? req.status : null
+        );
+      }),
       totalItems,
     };
   }

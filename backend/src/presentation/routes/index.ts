@@ -25,12 +25,13 @@ import siteSectionRoutes from '../http/site-management/siteSectionRoutes'
 import userSiteSectionRoutes from '../http/site-management/userSiteSectionRoutes'
 import enquiryRoutes from '../http/enquiry/enquiryRouter'
 import sessionRoutes from '../http/session/sessionRoutes'
-import facultyDashboardRoutes from './facultyDashboard.routes'
+import facultyDashboardRoutes from '../http/faculty-dashboard/facultyDashboard.routes'
 import dashboardRoutes from '../http/admin/dashboardRouter'
 
 const router = Router();
 
 router.use('/faculty/sessions', sessionRoutes);
+
 router.use('/faculty/dashboard', facultyDashboardRoutes);
 
 router.use("/diploma-courses", userDiplomaRoutes);

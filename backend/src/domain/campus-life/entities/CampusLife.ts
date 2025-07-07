@@ -35,7 +35,8 @@ export enum EventStatus {
       public additionalInfo: string,
       public requirements: string,
       public createdAt: string,
-      public updatedAt: string
+      public updatedAt: string,
+      public userRequestStatus?: 'pending' | 'approved' | 'rejected' | null
     ) {}
   }
   
@@ -53,7 +54,8 @@ export enum EventStatus {
       public record: string,
       public upcomingGames: string[],
       public createdAt: string,
-      public updatedAt: string
+      public updatedAt: string,
+      public userRequestStatus?: 'pending' | 'approved' | 'rejected' | null
     ) {}
   }
   
@@ -71,7 +73,8 @@ export enum EventStatus {
       public about: string,
       public upcomingEvents: string[],
       public createdAt: string,
-      public updatedAt: string
+      public updatedAt: string,
+      public userRequestStatus?: 'pending' | 'approved' | 'rejected' | null
     ) {}
   }
   

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { FaClock, FaUsers, FaEye, FaFileAlt, FaCalendarAlt, FaStopwatch, FaFilter, FaSearch, FaChevronDown, FaTimes } from 'react-icons/fa';
 import { useSessionManagement } from '../../../../application/hooks/useSessionManagement';
+import { useQueryClient } from '@tanstack/react-query';
 import type { Session } from '../../../../application/hooks/useSessionManagement';
 
 // Add types for attendance data
@@ -16,6 +17,8 @@ interface AttendanceUser {
 }
 
 const SessionAttendancePage = () => {
+  const queryClient = useQueryClient();
+  
   // Use the session management hook
   const {
     sessions,
@@ -44,8 +47,15 @@ const SessionAttendancePage = () => {
   // Debug: log selected session ID
   console.log('Selected session ID:', selectedSessionId);
 
-  // Fetch attendance for selected session
-  const { data: currentAttendanceData = [], isLoading: isLoadingAttendance } = useSessionAttendance(selectedSessionId);
+  // Build filters object for backend
+  const filters = {
+    search: searchTerm || undefined,
+    decision: decisionFilter !== 'all' ? decisionFilter : undefined,
+    attendanceLevel: attendanceFilter !== 'all' ? attendanceFilter : undefined,
+  };
+
+  // Fetch attendance for selected session with filters
+  const { data: currentAttendanceData = [], isLoading: isLoadingAttendance, refetch: refetchAttendance } = useSessionAttendance(selectedSessionId, filters);
 
   // Get current session data
   const currentSession = sessions.find((s: any) => s._id === selectedSessionId);
@@ -114,10 +124,10 @@ const SessionAttendancePage = () => {
   };
   
 
-  // Process attendance data with calculations and filters
+  // Process attendance data with calculations only (no filtering)
   const processedAttendance = useMemo(() => {
     if (!currentSession) return [];
-    let data = (currentAttendanceData || []).map((user: AttendanceUser) => {
+    return (currentAttendanceData || []).map((user: AttendanceUser) => {
       const totalTime = calculateTotalTime(user.intervals, currentSession?.endTime);
       const attendancePercentage = calculateAttendancePercentage(totalTime, currentSession);
       return {
@@ -129,32 +139,7 @@ const SessionAttendancePage = () => {
         status: (user as any).status // status may come from backend
       };
     });
-    // Apply filters
-    if (searchTerm) {
-      data = data.filter((user: AttendanceUser) =>
-        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    if (attendanceFilter !== 'all') {
-      data = data.filter((user: AttendanceUser & { attendancePercentage: number }) => {
-        if (attendanceFilter === 'high') return user.attendancePercentage >= 75;
-        if (attendanceFilter === 'medium') return user.attendancePercentage >= 50 && user.attendancePercentage < 75;
-        if (attendanceFilter === 'low') return user.attendancePercentage < 50;
-        return true;
-      });
-    }
-    if (decisionFilter !== 'all') {
-      data = data.filter((user: AttendanceUser) => {
-        const decision = attendanceDecisions.get(user.id.toString());
-        if (decisionFilter === 'approved') return decision === 'approve';
-        if (decisionFilter === 'declined') return decision === 'decline';
-        if (decisionFilter === 'pending') return !decision;
-        return true;
-      });
-    }
-    return data;
-  }, [currentAttendanceData, currentSession, searchTerm, attendanceFilter, decisionFilter, attendanceDecisions]);
+  }, [currentAttendanceData, currentSession]);
 
   // Filter sessions by date range
   const filteredSessions = useMemo(() => {
@@ -184,8 +169,11 @@ const SessionAttendancePage = () => {
     if (selectedSessionId && userId) {
       try {
         await updateAttendanceStatus(selectedSessionId, userId, decision, name);
-        // Optionally, refetch attendance here if you want to update UI
-        // if (refetchAttendance) refetchAttendance();
+        // Invalidate and refetch attendance data to update UI immediately
+        await queryClient.invalidateQueries({ queryKey: ['sessionAttendance', selectedSessionId] });
+        if (refetchAttendance) {
+          await refetchAttendance();
+        }
       } catch (err) {
         console.error('Error updating attendance status:', err);
       }

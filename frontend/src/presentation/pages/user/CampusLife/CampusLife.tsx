@@ -75,7 +75,7 @@ export default function CampusLife() {
               </div>
             </div>
             <p className={`mt-2 text-sm ${styles.textSecondary}`}>
-              {activeTab === 'Events' && `${(events?.data || events || []).length} Upcoming Events`}
+              {activeTab === 'Events' && `${(events || events || []).length} Upcoming Events`}
               {activeTab === 'Clubs' && `${(clubs?.data || clubs || []).length} Clubs Available`}
               {activeTab === 'Athletics' && `${(sports?.data || sports || []).length} Sports Teams`}
             </p>

@@ -124,6 +124,7 @@ export class UserDiplomaController implements IUserDiplomaController {
       }
 
       const result = await this.updateVideoProgressUseCase.execute({
+        userId: id,
         courseId,
         chapterId,
         progress
@@ -154,6 +155,7 @@ export class UserDiplomaController implements IUserDiplomaController {
       }
 
       const result = await this.markChapterCompleteUseCase.execute({
+        userId: id,
         courseId,
         chapterId
       });
@@ -183,6 +185,7 @@ export class UserDiplomaController implements IUserDiplomaController {
       }
 
       const result = await this.toggleBookmarkUseCase.execute({
+        userId: id,
         courseId,
         chapterId
       });

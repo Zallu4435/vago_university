@@ -18,7 +18,6 @@ import {
 import { DiplomaCourse } from "../../../domain/diploma/entities/DiplomaCourse";
 import { Diploma as DiplomaModel, IDiploma } from "../../../infrastructure/database/mongoose/models/diploma.model";
 import { UserProgress } from "../../../infrastructure/database/mongoose/models/userProgress.model";
-import mongoose from "mongoose";
 import { Video } from "../../../infrastructure/database/mongoose/models/video.model";
 
 export class UserDiplomaRepository implements IUserDiplomaRepository {
@@ -66,7 +65,6 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
           });
         }
 
-        // Fetch videos to create chapters
         let chapters = [];
         if (diploma.videoIds && diploma.videoIds.length > 0) {
           const videos = await Video.find({ _id: { $in: diploma.videoIds } }).lean();
@@ -194,10 +192,10 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
 
   async updateVideoProgress(params: UpdateVideoProgressRequestDTO): Promise<UpdateVideoProgressResponseDTO> {
     try {
-      const { courseId, chapterId, progress } = params;
+      const { userId, courseId, chapterId, progress } = params;
 
       const userProgress = await UserProgress.findOneAndUpdate(
-        { courseId, chapterId },
+        { userId, courseId, chapterId },
         { progress },
         { upsert: true, new: true }
       );
@@ -214,10 +212,10 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
 
   async markChapterComplete(params: MarkChapterCompleteRequestDTO): Promise<MarkChapterCompleteResponseDTO> {
     try {
-      const { courseId, chapterId } = params;
+      const { userId, courseId, chapterId } = params;
 
       const userProgress = await UserProgress.findOneAndUpdate(
-        { courseId, chapterId },
+        { userId, courseId, chapterId },
         { isCompleted: true },
         { upsert: true, new: true }
       );
@@ -234,12 +232,13 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
 
   async toggleBookmark(params: ToggleBookmarkRequestDTO): Promise<ToggleBookmarkResponseDTO> {
     try {
-      const { courseId, chapterId } = params;
+      const { userId, courseId, chapterId } = params;
 
-      const userProgress = await UserProgress.findOne({ courseId, chapterId });
+      const userProgress = await UserProgress.findOne({ userId, courseId, chapterId });
 
       if (!userProgress) {
         const newProgress = await UserProgress.create({
+          userId,
           courseId,
           chapterId,
           isBookmarked: true

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { IoAttachOutline as Paperclip, IoCloseOutline as X, IoSearchOutline as Search, IoMailOutline as Mail } from 'react-icons/io5';
 
-type RecipientType = 'all_students' | 'all_faculty' | 'all_users' | 'individual_students' | 'individual_faculty';
+type RecipientType = '' | 'all_students' | 'all_faculty' | 'all_users' | 'individual_students' | 'individual_faculty';
 
 interface User {
   id: string;
@@ -29,6 +29,7 @@ interface ComposeMessageModalProps {
 }
 
 const RECIPIENT_TYPES = [
+  { value: '', label: 'Select a recipient' },
   { value: 'all_students', label: 'All Students' },
   { value: 'all_faculty', label: 'All Faculty' },
   { value: 'all_users', label: 'All Students and Faculty' },
@@ -44,37 +45,37 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
   fetchUsers,
 }) => {
   const [form, setForm] = useState(initialForm);
-  const [recipientType, setRecipientType] = useState<RecipientType>('all_students');
+  const [recipientType, setRecipientType] = useState<RecipientType>('');
   const [users, setUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Prevent background scrolling and load users
+  // Prevent background scrolling
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add('no-scroll');
-      if (recipientType === 'individual_students' || recipientType === 'individual_faculty') {
-        loadUsers();
-      } else {
-        setUsers([]);
-      }
     } else {
       document.body.classList.remove('no-scroll');
     }
     return () => {
       document.body.classList.remove('no-scroll');
     };
-  }, [isOpen, recipientType]);
+  }, [isOpen]);
 
-  const loadUsers = async (search?: string) => {
-    if (!isOpen) return;
+  const loadUsers = async (type: RecipientType, search?: string) => {
+    if (!isOpen || !type) return;
+
+    console.log('=== ComposeMessageModal - loadUsers DEBUG ===');
+    console.log('type parameter:', type);
+    console.log('search:', search);
+    console.log('=============================================');
 
     setIsLoadingUsers(true);
     try {
-      const fetchedUsers = await fetchUsers(recipientType, search);
-      setUsers(fetchedUsers?.data);
+      const fetchedUsers = await fetchUsers(type, search);
+      setUsers(fetchedUsers?.users || []);
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
@@ -88,7 +89,7 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
       clearTimeout(searchTimeoutRef.current);
     }
     searchTimeoutRef.current = setTimeout(() => {
-      loadUsers(value);
+      loadUsers(recipientType, value);
     }, 300);
   };
 
@@ -117,15 +118,23 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
   };
 
   const handleRecipientTypeChange = (type: RecipientType) => {
+    console.log('=== ComposeMessageModal - handleRecipientTypeChange DEBUG ===');
+    console.log('New type selected:', type);
+    console.log('Previous type was:', recipientType);
+    console.log('===========================================================');
+    
     setRecipientType(type);
-    if (type === 'all_students' || type === 'all_faculty' || type === 'all_users') {
+    if (type === '') {
+      setForm(prev => ({ ...prev, to: [] }));
+      setUsers([]);
+    } else if (type === 'all_students' || type === 'all_faculty' || type === 'all_users') {
       setForm(prev => ({
         ...prev,
         to: [{ value: type, label: RECIPIENT_TYPES.find(t => t.value === type)?.label || '' }]
       }));
     } else {
       setForm(prev => ({ ...prev, to: [] }));
-      loadUsers();
+      loadUsers(type);
     }
   };
 

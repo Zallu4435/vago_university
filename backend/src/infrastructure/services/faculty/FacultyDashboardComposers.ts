@@ -6,10 +6,9 @@ import {
   GetFacultyCoursePerformanceUseCase,
   GetFacultySessionDistributionUseCase,
   GetFacultyRecentActivitiesUseCase,
-  GetFacultySystemStatusUseCase,
 } from "../../../application/faculty/dashboard/useCases/FacultyDashboardUseCases";
 import { FacultyDashboardRepository } from "../../repositories/faculty/FacultyDashboardRepository";
-import { FacultyDashboardController } from "../../../presentation/http/controllers/facultyDashboard.controller";
+import { FacultyDashboardController } from "../../../presentation/http/faculty-dashboard/facultyDashboard.controller";
 import { IFacultyDashboardController } from "../../../presentation/http/IHttp";
 
 export function getFacultyDashboardComposer(): IFacultyDashboardController {
@@ -21,7 +20,6 @@ export function getFacultyDashboardComposer(): IFacultyDashboardController {
   const getFacultyCoursePerformanceUseCase = new GetFacultyCoursePerformanceUseCase(facultyDashboardRepository);
   const getFacultySessionDistributionUseCase = new GetFacultySessionDistributionUseCase(facultyDashboardRepository);
   const getFacultyRecentActivitiesUseCase = new GetFacultyRecentActivitiesUseCase(facultyDashboardRepository);
-  const getFacultySystemStatusUseCase = new GetFacultySystemStatusUseCase(facultyDashboardRepository);
 
   return new FacultyDashboardController(
     getFacultyDashboardStatsUseCase,
@@ -29,7 +27,6 @@ export function getFacultyDashboardComposer(): IFacultyDashboardController {
     getFacultyWeeklyAttendanceUseCase,
     getFacultyCoursePerformanceUseCase,
     getFacultySessionDistributionUseCase,
-    getFacultyRecentActivitiesUseCase,
-    getFacultySystemStatusUseCase
+    getFacultyRecentActivitiesUseCase
   );
 } 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiSearch, FiRefreshCw, FiBell, FiArrowLeft } from 'react-icons/fi';
 import { usePreferences } from '../../../context/PreferencesContext';
 import { Assignment, SelectedFile, SortOption, FilterStatus } from './types/AssignmentTypes';
@@ -31,6 +31,21 @@ const AssignmentsSection = () => {
 
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [currentAssignment, setCurrentAssignment] = useState<Assignment | null>(null);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchTerm(debouncedSearchTerm);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [debouncedSearchTerm, setSearchTerm]);
+
+  // Update debounced term when searchTerm changes externally
+  useEffect(() => {
+    setDebouncedSearchTerm(searchTerm);
+  }, [searchTerm]);
 
   // No local filtering/sorting, use backend-driven assignments
   const currentAssignments = assignments;
@@ -46,16 +61,6 @@ const AssignmentsSection = () => {
               </h1>
               <p className={`${styles.textSecondary} text-base sm:text-lg`}>Track your academic progress and stay organized</p>
             </div>
-            <div className="flex items-center gap-3">
-              {/* <button className={`${styles.button.primary} px-3 sm:px-4 py-2 rounded-xl flex items-center gap-2`}>
-                <FiRefreshCw className="h-4 w-4" />
-                Sync
-              </button>
-              <button className={`${styles.button.primary} px-3 sm:px-4 py-2 rounded-xl flex items-center gap-2`}>
-                <FiBell className="h-4 w-4" />
-                Reminders
-              </button> */}
-            </div>
           </div>
 
           {/* Search and Filter Controls */}
@@ -66,9 +71,9 @@ const AssignmentsSection = () => {
                 <input
                   type="text"
                   placeholder="Search assignments..."
-                  value={searchTerm}
+                  value={debouncedSearchTerm}
                   onChange={(e) => {
-                    setSearchTerm(e.target.value);
+                    setDebouncedSearchTerm(e.target.value);
                     setCurrentPage(1);
                   }}
                   className={`w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 rounded-lg sm:rounded-xl ${styles.input.background} ${styles.input.border} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base`}

@@ -1,6 +1,6 @@
 import { Message, MessageForm, Admin } from '../../domain/types/communication';
 import httpClient from '../../frameworks/api/httpClient';
-type RecipientType = 'all_students' | 'all_faculty' | 'all_users' | 'individual_students' | 'individual_faculty';
+type RecipientType = '' | 'all_students' | 'all_faculty' | 'all_users' | 'individual_students' | 'individual_faculty';
 
 interface User {
   id: string;
@@ -38,7 +38,7 @@ export class CommunicationService {
     try {
       const baseUrl = this.getBaseUrl(!!params.isAdmin);
       const response = await httpClient.get(`${baseUrl}/inbox`, { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       throw new Error('Failed to fetch inbox messages');
     }
@@ -55,37 +55,60 @@ export class CommunicationService {
     try {
       const baseUrl = this.getBaseUrl(!!params.isAdmin);
       const response = await httpClient.get(`${baseUrl}/sent`, { params });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       throw new Error('Failed to fetch sent messages');
     }
   }
 
   async fetchUsers(type: RecipientType, search?: string): Promise<User[]> {
+    if (!type) {
+      return [];
+    }
+    console.log('=== CommunicationService - fetchUsers DEBUG ===');
+    console.log('Type received:', type);
+    console.log('Type typeof:', typeof type);
+    console.log('Search:', search);
+    console.log('==============================================');
+    
     const response = await httpClient.get(`/communication/admin/users`, {
       params: {
         type,
         search,
       },
     });
-    return response.data;
+    console.log('CommunicationService - fetchUsers response:', response.data);
+    return response.data.data;
   }
 
   async sendMessage(form: MessageForm): Promise<Message> {
+    console.log('CommunicationService - sendMessage called with form:', form);
+    
     const formData = new FormData();
     formData.append('to', JSON.stringify(form.to));
     formData.append('subject', form.subject);
     formData.append('message', form.message);
-    form.attachments.forEach((file) => {
+    
+    console.log('CommunicationService - Attachments to process:', form.attachments);
+    form.attachments.forEach((file, index) => {
+      console.log(`CommunicationService - Appending attachment ${index}:`, {
+        name: file.name,
+        type: file.type,
+        size: file.size
+      });
       formData.append('attachments', file);
     });
 
     const endpoint = form.isAdmin ? '/communication/admin/messages' : '/communication/admin/messages';
+    console.log('CommunicationService - Sending to endpoint:', endpoint);
+    
     const response = await httpClient.post(endpoint, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
+    
+    console.log('CommunicationService - Response received:', response.data);
     return response.data;
   }
 
@@ -100,9 +123,19 @@ export class CommunicationService {
 
   async markAsRead(messageId: string, isAdmin: boolean = false): Promise<void> {
     try {
+      console.log('=== CommunicationService markAsRead DEBUG ===');
+      console.log('MessageId:', messageId);
+      console.log('IsAdmin:', isAdmin);
+      
       const baseUrl = this.getBaseUrl(isAdmin);
-      await httpClient.put(`${baseUrl}/messages/${messageId}/read`);
+      const endpoint = `${baseUrl}/messages/${messageId}/read`;
+      console.log('Calling endpoint:', endpoint);
+      
+      await httpClient.put(endpoint);
+      console.log('Mark as read API call successful');
+      console.log('================================');
     } catch (error) {
+      console.error('Mark as read API call failed:', error);
       throw new Error('Failed to mark message as read');
     }
   }

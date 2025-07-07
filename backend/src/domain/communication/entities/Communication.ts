@@ -63,18 +63,18 @@ export class Message {
   }
 
   markAsRead(userId: string): void {
-    const recipient = this.recipients.find(r => r._id === userId);
+    const recipient = this.recipients.find(r => r._id.toString() === userId);
     if (recipient) {
       recipient.status = MessageStatus.Read;
     }
   }
 
   isRecipient(userId: string): boolean {
-    return this.recipients.some(r => r._id === userId);
+    return this.recipients.some(r => r._id.toString() === userId);
   }
 
   isSender(userId: string): boolean {
-    return this.sender._id === userId;
+    return this.sender._id.toString() === userId;
   }
 
   canAccess(userId: string): boolean {

@@ -83,7 +83,7 @@ console.log(chapter, "chapter from chapter")
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  onBookmark(courseId, chapter.id);
+                  onBookmark(courseId, chapter._id || chapter.id);
                 }}
                 className={`p-2 rounded-lg transition-colors text-xs sm:text-sm ${
                   isBookmarked 

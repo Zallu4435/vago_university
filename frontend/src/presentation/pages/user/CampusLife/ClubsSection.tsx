@@ -189,9 +189,12 @@ export default function ClubsSection({ clubs }) {
                                 <li key={index} className={`mb-3 flex text-sm ${styles.textPrimary}`}>
                                   <span className={`${styles.status.warning} mr-2`}>•</span>
                                   <span>
-                                    {event?.date
-                                      ? `${event.date}: ${event.description || ''}`
-                                      :  event}
+                                    {typeof event === 'string' 
+                                      ? event
+                                      : event?.date
+                                        ? `${event.date}: ${event.description || ''}`
+                                        : event?.description || event
+                                  }
                                   </span>
                                 </li>
                               ))}
@@ -212,9 +215,18 @@ export default function ClubsSection({ clubs }) {
                       {!showJoinForm ? (
                         <button
                           onClick={() => setShowJoinForm(true)}
-                          className={`group/btn mt-4 w-full bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-2 px-4 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 flex items-center justify-center space-x-2 text-sm`}
+                          disabled={selectedClub.userRequestStatus === 'pending' || selectedClub.userRequestStatus === 'approved'}
+                          className={`group/btn mt-4 w-full bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-2 px-4 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 flex items-center justify-center space-x-2 text-sm ${
+                            selectedClub.userRequestStatus === 'pending' || selectedClub.userRequestStatus === 'approved' ? 'opacity-60 cursor-not-allowed' : ''
+                          }`}
                         >
-                          <span>Request to Join</span>
+                          <span>
+                            {selectedClub.userRequestStatus === 'pending'
+                              ? 'Request Pending'
+                              : selectedClub.userRequestStatus === 'approved'
+                                ? 'Already Joined'
+                                : 'Request to Join'}
+                          </span>
                           <FaUsers size={12} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
                         </button>
                       ) : (
@@ -282,9 +294,16 @@ export default function ClubsSection({ clubs }) {
                         <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-lg blur transition-all duration-300`}></div>
                         <div className="relative z-10">
                           {selectedClub.upcomingEvents.map((event, index) => (
-                            <li key={index} className={`mb-3 flex text-sm sm:text-base ${styles.textPrimary}`}>
+                            <li key={index} className={`mb-3 flex text-sm ${styles.textPrimary}`}>
                               <span className={`${styles.status.warning} mr-2`}>•</span>
-                              <span>{event.date}: {event.description}</span>
+                              <span>
+                                {typeof event === 'string' 
+                                  ? event
+                                  : event?.date
+                                    ? `${event.date}: ${event.description || ''}`
+                                    : event?.description || event
+                                }
+                              </span>
                             </li>
                           ))}
                         </div>
@@ -304,9 +323,18 @@ export default function ClubsSection({ clubs }) {
                   {!showJoinForm ? (
                     <button
                       onClick={() => setShowJoinForm(true)}
-                      className={`group/btn mt-4 w-full bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-2 sm:py-3 px-4 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 flex items-center justify-center space-x-2 text-sm sm:text-base`}
+                      disabled={selectedClub.userRequestStatus === 'pending' || selectedClub.userRequestStatus === 'approved'}
+                      className={`group/btn mt-4 w-full bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-2 px-4 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 flex items-center justify-center space-x-2 text-sm ${
+                        selectedClub.userRequestStatus === 'pending' || selectedClub.userRequestStatus === 'approved' ? 'opacity-60 cursor-not-allowed' : ''
+                      }`}
                     >
-                      <span>Request to Join</span>
+                      <span>
+                        {selectedClub.userRequestStatus === 'pending'
+                          ? 'Request Pending'
+                          : selectedClub.userRequestStatus === 'approved'
+                            ? 'Already Joined'
+                            : 'Request to Join'}
+                      </span>
                       <FaUsers size={12} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
                     </button>
                   ) : (
@@ -335,25 +363,31 @@ export default function ClubsSection({ clubs }) {
 }
 
 ClubsSection.propTypes = {
-  clubs: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-      id: PropTypes.string,
-      name: PropTypes.string.isRequired,
-      type: PropTypes.string.isRequired,
-      members: PropTypes.string.isRequired,
-      icon: PropTypes.string.isRequired,
-      color: PropTypes.string.isRequired,
-      status: PropTypes.string,
-      role: PropTypes.string.isRequired,
-      nextMeeting: PropTypes.string.isRequired,
-      about: PropTypes.string,
-      upcomingEvents: PropTypes.arrayOf(
-        PropTypes.shape({
-          date: PropTypes.string.isRequired,
-          description: PropTypes.string.isRequired,
-        })
-      ),
-    })
-  ).isRequired,
+  clubs: PropTypes.shape({
+    clubs: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+        type: PropTypes.string.isRequired,
+        members: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+        icon: PropTypes.string.isRequired,
+        color: PropTypes.string.isRequired,
+        status: PropTypes.string,
+        role: PropTypes.string.isRequired,
+        nextMeeting: PropTypes.string.isRequired,
+        about: PropTypes.string,
+        upcomingEvents: PropTypes.arrayOf(
+          PropTypes.oneOfType([
+            PropTypes.string,
+            PropTypes.shape({
+              date: PropTypes.string,
+              description: PropTypes.string,
+            })
+          ])
+        ),
+        userRequestStatus: PropTypes.string,
+      })
+    ),
+    totalItems: PropTypes.number,
+  }).isRequired,
 };

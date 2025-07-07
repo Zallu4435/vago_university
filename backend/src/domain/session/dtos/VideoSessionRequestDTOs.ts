@@ -1,6 +1,6 @@
 export interface CreateVideoSessionRequestDTO {
     title: string;
-    hostId: string;
+    hostId?: string; // Optional since it will be automatically set by the backend
     startTime?: Date;
     date?: string; // Optional: ISO date string (e.g., '2025-07-21')
     time?: string; // Optional: time string (e.g., '13:12')

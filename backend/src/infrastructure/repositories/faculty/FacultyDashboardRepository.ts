@@ -7,7 +7,6 @@ import {
   GetFacultyCoursePerformanceRequestDTO,
   GetFacultySessionDistributionRequestDTO,
   GetFacultyRecentActivitiesRequestDTO,
-  GetFacultySystemStatusRequestDTO,
 } from "../../../domain/faculty/dashboard/dtos/FacultyDashboardRequestDTOs";
 import {
   GetFacultyDashboardStatsResponseDTO,
@@ -16,7 +15,6 @@ import {
   GetFacultyCoursePerformanceResponseDTO,
   GetFacultySessionDistributionResponseDTO,
   GetFacultyRecentActivitiesResponseDTO,
-  GetFacultySystemStatusResponseDTO,
 } from "../../../domain/faculty/dashboard/dtos/FacultyDashboardResponseDTOs";
 import { VideoSessionModel } from "../../database/mongoose/models/session.model";
 import { User } from "../../database/mongoose/models/user.model";
@@ -27,9 +25,6 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
     if (!mongoose.isValidObjectId(params.facultyId)) {
       throw new Error("Invalid faculty ID");
     }
-
-    console.log('🔍 FacultyDashboardRepository - getDashboardStats');
-    console.log('Faculty ID:', params.facultyId);
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -44,28 +39,31 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
       endTime: { $gte: new Date() }
     });
 
-    console.log('Active sessions found:', activeSessions);
+    // Get today's attendance percentage
+    const todaySessions = await VideoSessionModel.find({
+      hostId: params.facultyId,
+      startTime: { $gte: today, $lt: tomorrow }
+    }).lean();
 
-    // Get today's attendance
-    const todayAttendance = await VideoSessionModel.aggregate([
-      {
-        $match: {
-          hostId: params.facultyId,
-          startTime: { $gte: today, $lt: tomorrow }
-        }
-      },
-      {
-        $unwind: "$attendance"
-      },
-      {
-        $group: {
-          _id: null,
-          totalAttendance: { $sum: 1 }
-        }
+    let totalExpectedAttendance = 0;
+    let totalActualAttendance = 0;
+
+    todaySessions.forEach(session => {
+      if (session.maxAttendees) {
+        totalExpectedAttendance += session.maxAttendees;
       }
-    ]);
+      if (session.attendance && Array.isArray(session.attendance)) {
+        // Only count attendance records with approved status
+        const approvedAttendance = session.attendance.filter((a: any) => 
+          a.status === 'approved' || a.status === 'approve'
+        );
+        totalActualAttendance += approvedAttendance.length;
+      }
+    });
 
-    console.log('Today attendance aggregation result:', todayAttendance);
+    const todayAttendancePercentage = totalExpectedAttendance > 0 
+      ? Math.round((totalActualAttendance / totalExpectedAttendance) * 100) 
+      : 0;
 
     // Get pending approvals (attendance records that need faculty approval)
     const pendingApprovals = await VideoSessionModel.aggregate([
@@ -91,8 +89,6 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
       }
     ]);
 
-    console.log('Pending approvals aggregation result:', pendingApprovals);
-
     // Get total students (unique students who have attended any session)
     const totalStudents = await VideoSessionModel.aggregate([
       {
@@ -113,32 +109,10 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
       }
     ]);
 
-    console.log('Total students aggregation result:', totalStudents);
-
-    // Let's also check what sessions exist for this faculty
-    const allSessions = await VideoSessionModel.find({ hostId: params.facultyId }).lean();
-    console.log('All sessions for faculty:', allSessions.length);
-    console.log('Sample session:', allSessions[0]);
-
-    // Let's check ALL sessions in the database to see what exists
-    const allSessionsInDB = await VideoSessionModel.find({}).limit(5).lean();
-    console.log('Total sessions in database:', await VideoSessionModel.countDocuments({}));
-    console.log('Sample sessions from database:', allSessionsInDB);
-
-    // Let's also check if there are sessions with different faculty identifiers
-    const sessionsWithHostId = await VideoSessionModel.find({ hostId: { $exists: true } }).limit(5).lean();
-    console.log('Sessions with hostId field:', sessionsWithHostId.length);
-    console.log('Sample sessions with hostId:', sessionsWithHostId);
-
-    // Let's check if there are sessions with facultyId field instead
-    const sessionsWithFacultyId = await VideoSessionModel.find({ facultyId: { $exists: true } }).limit(5).lean();
-    console.log('Sessions with facultyId field:', sessionsWithFacultyId.length);
-    console.log('Sample sessions with facultyId:', sessionsWithFacultyId);
-
     return {
       stats: {
         activeSessions,
-        todayAttendance: todayAttendance[0]?.totalAttendance || 0,
+        todayAttendance: todayAttendancePercentage,
         pendingApprovals: pendingApprovals[0]?.count || 0,
         totalStudents: totalStudents[0]?.total || 0
       }
@@ -146,13 +120,12 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
   }
 
   async getDashboardData(params: GetFacultyDashboardDataRequestDTO): Promise<GetFacultyDashboardDataResponseDTO> {
-    const [stats, weeklyAttendance, coursePerformance, sessionDistribution, recentActivities, systemStatus] = await Promise.all([
+    const [stats, weeklyAttendance, coursePerformance, sessionDistribution, recentActivities] = await Promise.all([
       this.getDashboardStats(params),
       this.getWeeklyAttendance(params),
       this.getCoursePerformance(params),
       this.getSessionDistribution(params),
-      this.getRecentActivities(params),
-      this.getSystemStatus(params)
+      this.getRecentActivities(params)
     ]);
 
     return {
@@ -161,19 +134,23 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
         weeklyAttendance: weeklyAttendance.weeklyAttendance,
         coursePerformance: coursePerformance.coursePerformance,
         sessionDistribution: sessionDistribution.sessionDistribution,
-        recentActivities: recentActivities.recentActivities,
-        systemStatus: systemStatus.systemStatus
+        recentActivities: recentActivities.recentActivities
       }
     };
   }
 
   async getWeeklyAttendance(params: GetFacultyWeeklyAttendanceRequestDTO): Promise<GetFacultyWeeklyAttendanceResponseDTO> {
+    console.log('🔍 [FacultyDashboardRepository] getWeeklyAttendance called with params:', params);
+    
     if (!mongoose.isValidObjectId(params.facultyId)) {
+      console.error('❌ [FacultyDashboardRepository] Invalid faculty ID:', params.facultyId);
       throw new Error("Invalid faculty ID");
     }
 
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const weeklyData = [];
+
+    console.log('📅 [FacultyDashboardRepository] Starting weekly attendance calculation...');
 
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
@@ -183,29 +160,46 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
       const dayEnd = new Date(date);
       dayEnd.setHours(23, 59, 59, 999);
 
-      const attendance = await VideoSessionModel.aggregate([
-        {
-          $match: {
-            hostId: params.facultyId,
-            startTime: { $gte: dayStart, $lte: dayEnd }
-          }
-        },
-        {
-          $unwind: "$attendance"
-        },
-        {
-          $group: {
-            _id: null,
-            count: { $sum: 1 }
-          }
+      console.log(`📅 [FacultyDashboardRepository] Processing day ${i}: ${days[date.getDay()]} (${dayStart.toISOString()} to ${dayEnd.toISOString()})`);
+
+      // Get sessions for this day
+      const daySessions = await VideoSessionModel.find({
+        hostId: params.facultyId,
+        startTime: { $gte: dayStart, $lte: dayEnd }
+      }).lean();
+
+      console.log(`📊 [FacultyDashboardRepository] Found ${daySessions.length} sessions for ${days[date.getDay()]}:`, daySessions);
+
+      let totalExpectedAttendance = 0;
+      let totalActualAttendance = 0;
+
+      daySessions.forEach(session => {
+        if (session.maxAttendees) {
+          totalExpectedAttendance += session.maxAttendees;
         }
-      ]);
+        if (session.attendance && Array.isArray(session.attendance)) {
+          // Only count attendance records with approved status
+          const approvedAttendance = session.attendance.filter((a: any) => 
+            a.status === 'approved' || a.status === 'approve'
+          );
+          totalActualAttendance += approvedAttendance.length;
+        }
+      });
+
+      const attendancePercentage = totalExpectedAttendance > 0 
+        ? Math.round((totalActualAttendance / totalExpectedAttendance) * 100) 
+        : 0;
+
+      console.log(`📊 [FacultyDashboardRepository] ${days[date.getDay()]} - Expected: ${totalExpectedAttendance}, Actual: ${totalActualAttendance}, Percentage: ${attendancePercentage}%`);
 
       weeklyData.push({
         day: days[date.getDay()],
-        attendance: attendance[0]?.count || 0
+        attendance: attendancePercentage
       });
     }
+
+    console.log('📊 [FacultyDashboardRepository] Final weekly data:', weeklyData);
+    console.log('📊 [FacultyDashboardRepository] Returning response:', { weeklyAttendance: weeklyData });
 
     return { weeklyAttendance: weeklyData };
   }
@@ -220,26 +214,35 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
 
     const coursePerformance = await Promise.all(
       courses.map(async (course) => {
-        // Calculate average attendance for this course
+        // Calculate average attendance percentage for this course
         const sessions = await VideoSessionModel.find({ 
           hostId: params.facultyId,
           course: course.title 
         }).lean();
 
-        let totalAttendance = 0;
-        let totalSessions = sessions.length;
+        let totalExpectedAttendance = 0;
+        let totalActualAttendance = 0;
 
         sessions.forEach(session => {
-          if (session.attendance) {
-            totalAttendance += session.attendance.length;
+          if (session.maxAttendees) {
+            totalExpectedAttendance += session.maxAttendees;
+          }
+          if (session.attendance && Array.isArray(session.attendance)) {
+            // Only count attendance records with approved status
+            const approvedAttendance = session.attendance.filter((a: any) => 
+              a.status === 'approved' || a.status === 'approve'
+            );
+            totalActualAttendance += approvedAttendance.length;
           }
         });
 
-        const averageAttendance = totalSessions > 0 ? Math.round((totalAttendance / totalSessions) * 100) : 0;
+        const averageAttendancePercentage = totalExpectedAttendance > 0 
+          ? Math.round((totalActualAttendance / totalExpectedAttendance) * 100) 
+          : 0;
 
         return {
           course: course.title || 'Unknown Course',
-          score: averageAttendance
+          score: averageAttendancePercentage
         };
       })
     );
@@ -284,23 +287,48 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
 
     const recentActivities = [];
 
-    // Get recent sessions
+    // Get recent sessions with more detailed information
     const recentSessions = await VideoSessionModel.find({ hostId: params.facultyId })
       .sort({ createdAt: -1 })
-      .limit(5)
+      .limit(10)
       .lean();
 
     recentSessions.forEach(session => {
+      let message = '';
+      let type: 'attendance' | 'assignment' | 'announcement' | 'system' = 'attendance';
+
+      if (session.status === 'Ended') {
+        message = `Session "${session.title}" ended with ${session.attendance?.length || 0} attendees`;
+      } else if (session.status === 'Ongoing') {
+        message = `Session "${session.title}" is currently active`;
+      } else if (session.status === 'Scheduled') {
+        message = `Session "${session.title}" scheduled for ${new Date(session.startTime).toLocaleDateString()}`;
+      } else {
+        message = `Session "${session.title}" ${session.status}`;
+      }
+
       recentActivities.push({
         id: session._id.toString(),
-        type: 'attendance' as const,
-        message: `Session "${session.title}" ${session.status === 'ended' ? 'ended' : 'started'}`,
+        type,
+        message,
         time: session.createdAt.toISOString()
       });
     });
 
-    // Note: Assignment model doesn't exist, so we'll skip assignment activities for now
-    // In a real implementation, you would create the Assignment model or use an alternative
+    // Get recent course activities (if courses were recently created/updated)
+    const recentCourses = await CourseModel.find({ faculty: params.facultyId })
+      .sort({ updatedAt: -1 })
+      .limit(5)
+      .lean();
+
+    recentCourses.forEach(course => {
+      recentActivities.push({
+        id: course._id.toString(),
+        type: 'announcement' as const,
+        message: `Course "${course.title}" was updated`,
+        time: course.updatedAt.toISOString()
+      });
+    });
 
     // Sort by time and take the most recent 10
     recentActivities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
@@ -309,17 +337,5 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
     return { recentActivities };
   }
 
-  async getSystemStatus(params: GetFacultySystemStatusRequestDTO): Promise<GetFacultySystemStatusResponseDTO> {
-    // Check database connection
-    const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
-    
-    // Mock system status - in a real implementation, you'd check actual system metrics
-    const systemStatus = {
-      serverStatus: 'online' as const,
-      database: dbStatus as 'connected' | 'disconnected',
-      lastBackup: new Date().toISOString() // Mock backup time
-    };
 
-    return { systemStatus };
-  }
 } 

@@ -22,6 +22,4 @@ export interface GetFacultyRecentActivitiesRequestDTO {
   facultyId: string;
 }
 
-export interface GetFacultySystemStatusRequestDTO {
-  // No specific parameters needed for system status
-} 
+ 

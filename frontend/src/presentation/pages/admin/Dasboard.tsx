@@ -28,7 +28,8 @@ import {
 import { 
   GiOnTarget,
   GiTrophy,
-  GiLightningTear
+  GiLightningTear,
+  GiTwoCoins
 } from 'react-icons/gi';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Area, AreaChart } from 'recharts';
 
@@ -77,15 +78,11 @@ const AdminDashboard = () => {
   const safeActivitiesData = Array.isArray(activitiesData) ? activitiesData : [];
   const safeAlertsData = Array.isArray(alertsData) ? alertsData : [];
 
-  // console.log('User Growth Data:', safeUserGrowthData);
-  // console.log('Revenue Data:', safeRevenueData);
-  // console.log('Performance Data:', safePerformanceData);
-
   // Format currency
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
@@ -434,10 +431,10 @@ const AdminDashboard = () => {
           />
           <EnhancedMetricCard
             title="Total Revenue"
-            value={metrics ? formatCurrency(metrics.totalRevenue) : '$0'}
+            value={metrics ? formatCurrency(metrics.totalRevenue) : '₹0'}
             subtitle="This month"
             trend="+12%"
-            icon={HiCurrencyDollar}
+            icon={GiTwoCoins}
             bgGradient="bg-gradient-to-br from-emerald-600 to-emerald-800"
             trendUp={true}
             delay={100}
@@ -507,7 +504,7 @@ const AdminDashboard = () => {
             </ResponsiveContainer>
           </GlassPanel>
           
-          <GlassPanel title="Revenue Breakdown" icon={HiCurrencyDollar}>
+          <GlassPanel title="Revenue Breakdown" icon={GiTwoCoins}>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={safeRevenueData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -529,22 +526,6 @@ const AdminDashboard = () => {
               </BarChart>
             </ResponsiveContainer>
           </GlassPanel>
-        </div>
-
-        {/* Enhanced Quick Actions */}
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center">
-            <GiLightningTear className="h-5 w-5 mr-2 text-amber-400" />
-            Quick Actions
-          </h2>
-          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            <AnimatedQuickActionCard icon={HiUserAdd} title="Users" color="purple" delay={0} />
-            <AnimatedQuickActionCard icon={HiBookOpen} title="Courses" color="blue" delay={100} />
-            <AnimatedQuickActionCard icon={HiBell} title="Notifications" color="indigo" delay={200} />
-            <AnimatedQuickActionCard icon={HiCreditCard} title="Payments" color="emerald" delay={300} />
-            <AnimatedQuickActionCard icon={HiDocumentText} title="Materials" color="cyan" delay={400} />
-            <AnimatedQuickActionCard icon={HiVideoCamera} title="Videos" color="pink" delay={500} />
-          </div>
         </div>
 
         {/* Performance Overview - Full Width */}

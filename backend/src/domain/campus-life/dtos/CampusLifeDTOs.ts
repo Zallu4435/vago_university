@@ -7,6 +7,7 @@ export interface GetEventsRequestDTO {
   limit: number;
   search: string;
   status: 'upcoming' | 'past' | 'all';
+  userId?: string;
 }
 
 export interface GetEventByIdRequestDTO {
@@ -16,6 +17,7 @@ export interface GetEventByIdRequestDTO {
 export interface GetSportsRequestDTO {
   type?: 'VARSITY SPORTS' | 'INTRAMURAL SPORTS';
   search: string;
+  userId?: string;
 }
 
 export interface GetSportByIdRequestDTO {
@@ -26,6 +28,7 @@ export interface GetClubsRequestDTO {
   search: string;
   type?: string;
   status: 'active' | 'inactive' | 'all';
+  userId?: string;
 }
 
 export interface GetClubByIdRequestDTO {

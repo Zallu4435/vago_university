@@ -130,10 +130,10 @@ export const useSessionManagement = () => {
   }, []);
 
   // Fetch session attendance
-  const useSessionAttendance = (sessionId: string) => {
+  const useSessionAttendance = (sessionId: string, filters: any = {}) => {
     return useQuery({
-      queryKey: ['sessionAttendance', sessionId],
-      queryFn: () => sessionService.getSessionAttendance(sessionId),
+      queryKey: ['sessionAttendance', sessionId, filters],
+      queryFn: () => sessionService.getSessionAttendance(sessionId, filters),
       enabled: !!sessionId
     });
   };

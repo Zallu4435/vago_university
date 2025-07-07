@@ -174,19 +174,32 @@ export class DeleteMessageUseCase implements IDeleteMessageUseCase {
 
   async execute(params: DeleteMessageRequestDTO): Promise<ResponseDTO<DeleteMessageResponseDTO>> {
     try {
+      console.log('=== DeleteMessageUseCase DEBUG ===');
+      console.log('Params received:', params);
+      console.log('MessageId valid:', mongoose.isValidObjectId(params.messageId));
+      console.log('UserId valid:', mongoose.isValidObjectId(params.userId));
+      console.log('==================================');
+      
       if (!mongoose.isValidObjectId(params.messageId) || !mongoose.isValidObjectId(params.userId)) {
+        console.log('Invalid message ID or user ID');
         return { success: false, data: { error: "Invalid message ID or user ID" } };
       }
 
       const message = await this.repository.findMessageById(params.messageId);
+      console.log('Found message:', message ? 'Yes' : 'No');
+      
       if (!message || !message.canAccess(params.userId)) {
+        console.log('Message not found or user does not have access');
         return { success: false, data: { error: "Message not found or user does not have access" } };
       }
 
+      console.log('Calling repository deleteMessage...');
       await this.repository.deleteMessage(params);
+      console.log('Repository deleteMessage completed successfully');
 
       return { success: true, data: { success: true, message: "Message deleted successfully" } };
     } catch (error: any) {
+      console.error('DeleteMessageUseCase error:', error);
       return { success: false, data: { error: error.message } };
     }
   }

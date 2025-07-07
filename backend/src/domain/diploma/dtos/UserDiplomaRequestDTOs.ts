@@ -17,17 +17,20 @@ export interface GetUserDiplomaChapterRequestDTO {
 }
 
 export interface UpdateVideoProgressRequestDTO {
+  userId: string;
   courseId: string;
   chapterId: string;
   progress: number;
 }
 
 export interface MarkChapterCompleteRequestDTO {
+  userId: string;
   courseId: string;
   chapterId: string;
 }
 
 export interface ToggleBookmarkRequestDTO {
+  userId: string;
   courseId: string;
   chapterId: string;
 } 

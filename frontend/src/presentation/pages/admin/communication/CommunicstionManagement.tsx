@@ -143,25 +143,6 @@ const sentColumns = [
     ),
   },
   {
-    header: 'Status',
-    key: 'status',
-    render: (message: Message) => (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          message.status === 'delivered'
-            ? 'bg-green-900/30 text-green-400 border-green-500/30'
-            : 'bg-blue-900/30 text-blue-400 border-blue-500/30'
-        }`}
-      >
-        <span
-          className="h-1.5 w-1.5 rounded-full mr-1.5"
-          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
-        ></span>
-        {message.status.charAt(0).toUpperCase() + message.status.slice(1)}
-      </span>
-    ),
-  },
-  {
     header: 'Recipients',
     key: 'recipients',
     render: (message: Message) => (

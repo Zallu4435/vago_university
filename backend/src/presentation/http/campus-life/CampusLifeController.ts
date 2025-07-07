@@ -60,6 +60,7 @@ export class CampusLifeController implements ICampusLifeController {
         limit: Number(limit),
         search: String(search),
         status: String(status) as "upcoming" | "past" | "all",
+        userId: httpRequest.user.id,
       });
       if (!result.success) {
         return this.httpErrors.error_400();
@@ -100,6 +101,7 @@ export class CampusLifeController implements ICampusLifeController {
       const result = await this.getSportsUseCase.execute({
         type: type ? String(type) as "VARSITY SPORTS" | "INTRAMURAL SPORTS" : undefined,
         search: String(search),
+        userId: httpRequest.user.id,
       });
       if (!result.success) {
         return this.httpErrors.error_400();
@@ -138,6 +140,7 @@ export class CampusLifeController implements ICampusLifeController {
         search: String(search),
         type: type ? String(type) : undefined,
         status: String(status) as "active" | "inactive" | "all",
+        userId: httpRequest.user.id,
       });
       if (!result.success) {
         return this.httpErrors.error_400();

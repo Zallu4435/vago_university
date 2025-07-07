@@ -1,6 +1,6 @@
 import { ISessionRepository } from '../../../application/session/repositories/ISessionRepository';
 import { SessionRepository } from '../../repositories/session/SessionRepository';
-import { CreateVideoSessionUseCase, JoinVideoSessionUseCase, GetVideoSessionUseCase, DeleteVideoSessionUseCase, UpdateVideoSessionUseCase, GetAllVideoSessionsUseCase, UpdateVideoSessionStatusUseCase, GetSessionAttendanceUseCase, UpdateAttendanceStatusUseCase } from '../../../application/session/useCases/VideoSessionUseCases';
+import { CreateVideoSessionUseCase, JoinVideoSessionUseCase, GetVideoSessionUseCase, DeleteVideoSessionUseCase, UpdateVideoSessionUseCase, GetAllVideoSessionsUseCase, UpdateVideoSessionStatusUseCase, GetSessionAttendanceUseCase, UpdateAttendanceStatusUseCase, RecordAttendanceJoinUseCase, RecordAttendanceLeaveUseCase } from '../../../application/session/useCases/VideoSessionUseCases';
 import { VideoSessionController } from '../../../presentation/http/session/VideoSessionController';
 import { IVideoSessionController } from '../../../presentation/http/IHttp';
 
@@ -15,6 +15,9 @@ export function getVideoSessionComposer(): IVideoSessionController {
   const updateStatusUseCase = new UpdateVideoSessionStatusUseCase(repository);
   const getSessionAttendanceUseCase = new GetSessionAttendanceUseCase(repository);
   const updateAttendanceStatusUseCase = new UpdateAttendanceStatusUseCase(repository);
+  const recordAttendanceJoinUseCase = new RecordAttendanceJoinUseCase(repository);
+  const recordAttendanceLeaveUseCase = new RecordAttendanceLeaveUseCase(repository);
+  
   return new VideoSessionController(
     createUseCase,
     joinUseCase,
@@ -24,6 +27,8 @@ export function getVideoSessionComposer(): IVideoSessionController {
     getAllUseCase,
     updateStatusUseCase,
     getSessionAttendanceUseCase,
-    updateAttendanceStatusUseCase
+    updateAttendanceStatusUseCase,
+    recordAttendanceJoinUseCase,
+    recordAttendanceLeaveUseCase
   );
 } 

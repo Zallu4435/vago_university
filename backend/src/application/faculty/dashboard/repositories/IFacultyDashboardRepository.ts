@@ -5,7 +5,6 @@ import {
   GetFacultyCoursePerformanceRequestDTO,
   GetFacultySessionDistributionRequestDTO,
   GetFacultyRecentActivitiesRequestDTO,
-  GetFacultySystemStatusRequestDTO,
 } from "../../../../domain/faculty/dashboard/dtos/FacultyDashboardRequestDTOs";
 import {
   GetFacultyDashboardStatsResponseDTO,
@@ -14,7 +13,6 @@ import {
   GetFacultyCoursePerformanceResponseDTO,
   GetFacultySessionDistributionResponseDTO,
   GetFacultyRecentActivitiesResponseDTO,
-  GetFacultySystemStatusResponseDTO,
 } from "../../../../domain/faculty/dashboard/dtos/FacultyDashboardResponseDTOs";
 
 export interface IFacultyDashboardRepository {
@@ -24,5 +22,4 @@ export interface IFacultyDashboardRepository {
   getCoursePerformance(params: GetFacultyCoursePerformanceRequestDTO): Promise<GetFacultyCoursePerformanceResponseDTO>;
   getSessionDistribution(params: GetFacultySessionDistributionRequestDTO): Promise<GetFacultySessionDistributionResponseDTO>;
   getRecentActivities(params: GetFacultyRecentActivitiesRequestDTO): Promise<GetFacultyRecentActivitiesResponseDTO>;
-  getSystemStatus(params: GetFacultySystemStatusRequestDTO): Promise<GetFacultySystemStatusResponseDTO>;
 } 

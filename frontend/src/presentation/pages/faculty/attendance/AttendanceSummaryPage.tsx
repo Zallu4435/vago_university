@@ -68,9 +68,7 @@ const AttendanceSummaryPage = () => {
   // State for filters
   const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [attendanceFilter, setAttendanceFilter] = useState('all'); // all, high, medium, low
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
-  const [showFilters, setShowFilters] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'students' | 'details'>('students');
   const [selectedStudent, setSelectedStudent] = useState<StudentAttendanceData | null>(null);
@@ -186,17 +184,8 @@ const AttendanceSummaryPage = () => {
       );
     }
 
-    if (attendanceFilter !== 'all') {
-      data = data.filter((user: AttendanceUser & { attendancePercentage: number }) => {
-        if (attendanceFilter === 'high') return user.attendancePercentage >= 75;
-        if (attendanceFilter === 'medium') return user.attendancePercentage >= 50 && user.attendancePercentage < 75;
-        if (attendanceFilter === 'low') return user.attendancePercentage < 50;
-        return true;
-      });
-    }
-
     return data;
-  }, [currentAttendanceData, currentSession, searchTerm, attendanceFilter]);
+  }, [currentAttendanceData, currentSession, searchTerm]);
 
   // Calculate summary statistics
   const summaryStats = useMemo(() => {
@@ -235,7 +224,6 @@ const AttendanceSummaryPage = () => {
 
   const clearFilters = () => {
     setSearchTerm('');
-    setAttendanceFilter('all');
     setDateRange({ start: '', end: '' });
   };
 
@@ -365,17 +353,8 @@ const AttendanceSummaryPage = () => {
       );
     }
 
-    if (attendanceFilter !== 'all') {
-      data = data.filter(student => {
-        if (attendanceFilter === 'high') return student.averageAttendance >= 75;
-        if (attendanceFilter === 'medium') return student.averageAttendance >= 50 && student.averageAttendance < 75;
-        if (attendanceFilter === 'low') return student.averageAttendance < 50;
-        return true;
-      });
-    }
-
     return data;
-  }, [studentsAttendanceData, searchTerm, attendanceFilter]);
+  }, [studentsAttendanceData, searchTerm]);
 
   const handleStudentClick = (student: StudentAttendanceData) => {
     setSelectedStudent(student);
@@ -694,7 +673,7 @@ const AttendanceSummaryPage = () => {
           </div>
         )}
 
-        {/* Filters Section */}
+        {/* Search Section */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             <div className="flex-1">
@@ -712,50 +691,7 @@ const AttendanceSummaryPage = () => {
                 />
               </div>
             </div>
-
-            <div className="flex items-end gap-2">
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                <FaFilter className="w-4 h-4" />
-                Filters
-                <FaChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-              </button>
-            </div>
           </div>
-
-          {showFilters && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Attendance Level
-                  </label>
-                  <select
-                    value={attendanceFilter}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setAttendanceFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="all">All Levels</option>
-                    <option value="high">High (≥75%)</option>
-                    <option value="medium">Medium (50-74%)</option>
-                    <option value="low">Low (&lt;50%)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="mt-4 flex justify-end">
-                <button
-                  onClick={clearFilters}
-                  className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-                >
-                  <FaTimes className="w-4 h-4" />
-                  Clear Filters
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Students List */}
@@ -863,13 +799,13 @@ const AttendanceSummaryPage = () => {
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Students Found</h3>
               <p className="text-gray-500 mb-4">
-                No students match your current filter criteria.
+                No students match your search criteria.
               </p>
               <button
                 onClick={clearFilters}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Clear Filters
+                Clear Search
               </button>
             </div>
           )}

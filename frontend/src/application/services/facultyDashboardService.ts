@@ -30,11 +30,7 @@ export interface RecentActivity {
   time: string;
 }
 
-export interface SystemStatus {
-  serverStatus: 'online' | 'offline';
-  database: 'connected' | 'disconnected';
-  lastBackup: string;
-}
+
 
 export interface FacultyDashboardData {
   stats: DashboardStats;
@@ -42,7 +38,6 @@ export interface FacultyDashboardData {
   coursePerformance: CoursePerformanceData[];
   sessionDistribution: SessionDistributionData[];
   recentActivities: RecentActivity[];
-  systemStatus: SystemStatus;
 }
 
 class FacultyDashboardService {
@@ -101,16 +96,7 @@ class FacultyDashboardService {
     }
   }
 
-  // Fetch system status
-  async getSystemStatus(): Promise<SystemStatus> {
-    try {
-      const response = await httpClient.get('/faculty/dashboard/system-status');
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching system status:', error);
-      throw error;
-    }
-  }
+
 
   // Fetch all dashboard data at once
   async getAllDashboardData(): Promise<FacultyDashboardData> {
@@ -120,15 +106,13 @@ class FacultyDashboardService {
         weeklyAttendance,
         coursePerformance,
         sessionDistribution,
-        recentActivities,
-        systemStatus
+        recentActivities
       ] = await Promise.all([
         this?.getDashboardStats(),
         this?.getWeeklyAttendance(),
         this?.getCoursePerformance(),
         this?.getSessionDistribution(),
-        this?.getRecentActivities(),
-        this?.getSystemStatus()
+        this?.getRecentActivities()
       ]);
 
       return {
@@ -136,8 +120,7 @@ class FacultyDashboardService {
         weeklyAttendance,
         coursePerformance,
         sessionDistribution,
-        recentActivities,
-        systemStatus
+        recentActivities
       };
     } catch (error) {
       console.error('Error fetching all dashboard data:', error);

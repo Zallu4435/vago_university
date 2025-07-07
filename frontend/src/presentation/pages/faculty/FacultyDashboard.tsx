@@ -66,7 +66,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, value, trend, icon: Icon, 
         <div>
           <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
           <p className="text-2xl font-bold text-gray-900">{value}</p>
-          {trend && (
+          {trend !== undefined && (
             <p className={`text-sm flex items-center mt-1 ${trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
               <HiTrendingUp className="w-4 h-4 mr-1" />
               {trend > 0 ? '+' : ''}{trend}%
@@ -215,7 +215,6 @@ const FacultyDashboard: React.FC = () => {
     coursePerformance,
     sessionDistribution,
     recentActivities,
-    systemStatus,
     isLoading,
     hasError
   } = useFacultyDashboard();
@@ -298,28 +297,24 @@ const FacultyDashboard: React.FC = () => {
                   <StatsCard
                     title="Active Sessions"
                 value={stats?.activeSessions || 0}
-                    trend={8}
                 icon={HiClock}
                     color="blue"
                   />
                   <StatsCard
                     title="Today's Attendance"
                 value={`${stats?.todayAttendance || 0}%`}
-                    trend={3}
                 icon={HiUsers}
                     color="green"
                   />
                   <StatsCard
                     title="Pending Approvals"
                 value={stats?.pendingApprovals || 0}
-                    trend={-2}
                 icon={HiExclamationCircle}
                     color="orange"
                   />
                   <StatsCard
                     title="Total Students"
                 value={stats?.totalStudents || 0}
-                    trend={5}
                 icon={HiUsers}
                     color="blue"
                   />
@@ -406,7 +401,7 @@ const FacultyDashboard: React.FC = () => {
                 </div>
 
                 {/* Fourth Row - Recent Activity */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                   <InfoCard title="Recent Activity" expandable={true}>
                     <div className="space-y-3">
                   {(Array.isArray(recentActivities) ? recentActivities : [])?.map((activity) => (
@@ -418,35 +413,6 @@ const FacultyDashboard: React.FC = () => {
                           timestamp={activity.time}
                         />
                       ))}
-                    </div>
-                  </InfoCard>
-
-                  <InfoCard title="System Status">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-900">Server Status</span>
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      systemStatus?.serverStatus === 'online' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {systemStatus?.serverStatus || 'Unknown'}
-                    </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-900">Database</span>
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      systemStatus?.database === 'connected' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {systemStatus?.database || 'Unknown'}
-                    </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-900">Last Backup</span>
-                    <span className="text-sm text-gray-500">{systemStatus?.lastBackup || 'Unknown'}</span>
-                      </div>
                     </div>
                   </InfoCard>
                 </div>

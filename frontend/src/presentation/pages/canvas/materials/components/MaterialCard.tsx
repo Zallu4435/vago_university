@@ -67,7 +67,7 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
                 </div>
                 <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex items-center space-x-1">
                     <button
-                        onClick={() => onBookmark(materialData._id)}
+                        onClick={() => onBookmark(materialData.id)}
                         className={`p-1.5 sm:p-2 rounded-full backdrop-blur-sm transition-all duration-200 ${
                             isBookmarked || materialData.isBookmarked
                                 ? styles.button.primary
@@ -176,7 +176,7 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
                         Download
                     </button>
                     <button
-                        onClick={() => onLike(materialData._id)}
+                        onClick={() => onLike(materialData.id)}
                         className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl transition-all duration-200 ${
                             isLiked || materialData.isLiked
                                 ? `${styles.status.error} ${styles.button.primary}`
@@ -187,7 +187,7 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
                         <FiHeart className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill={isLiked || materialData.isLiked ? "currentColor" : "none"} />
                     </button>
                     <button
-                        onClick={() => onBookmark(materialData._id)}
+                        onClick={() => onBookmark(materialData.id)}
                         className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl transition-all duration-200 ${
                             isBookmarked || materialData.isBookmarked
                                 ? styles.button.primary

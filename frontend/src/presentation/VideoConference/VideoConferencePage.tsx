@@ -557,12 +557,35 @@ export const VideoConferencePage: React.FC = () => {
 
   useEffect(() => {
     if (!session?._id && !session?.id) return;
+    
     const sessionId = session._id || session.id;
-    attendanceJoin(sessionId);
+    console.log('[VideoConference] Calling attendanceJoin for session:', sessionId);
+    
+    // Call attendanceJoin immediately when session is available
+    attendanceJoin(sessionId).then(result => {
+      if (result.success) {
+        console.log('[VideoConference] Successfully joined attendance for session:', sessionId);
+      } else {
+        console.error('[VideoConference] Failed to join attendance:', result.error);
+      }
+    }).catch(error => {
+      console.error('[VideoConference] Error calling attendanceJoin:', error);
+    });
+
+    // Cleanup function to call attendanceLeave when component unmounts
     return () => {
-      attendanceLeave(sessionId);
+      console.log('[VideoConference] Calling attendanceLeave for session:', sessionId);
+      attendanceLeave(sessionId).then(result => {
+        if (result.success) {
+          console.log('[VideoConference] Successfully left attendance for session:', sessionId);
+        } else {
+          console.error('[VideoConference] Failed to leave attendance:', result.error);
+        }
+      }).catch(error => {
+        console.error('[VideoConference] Error calling attendanceLeave:', error);
+      });
     };
-  }, [session, attendanceJoin, attendanceLeave]);
+  }, [session?._id, session?.id]); // Only depend on session ID, not the functions
 
   return (
     <div className="w-screen h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col overflow-hidden">

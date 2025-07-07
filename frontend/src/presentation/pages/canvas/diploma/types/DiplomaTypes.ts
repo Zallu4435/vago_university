@@ -2,6 +2,7 @@ import { IconType } from 'react-icons';
 
 export interface Chapter {
   id: string;
+  _id?: string; // Backend field
   title: string;
   duration: string;
   videoUrl: string;

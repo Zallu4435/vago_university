@@ -8,7 +8,7 @@ interface UseCommunicationManagementProps {
   isAdmin?: boolean;
 }
 
-type RecipientType = 'all_students' | 'all_faculty' | 'all_users' | 'individual_students' | 'individual_faculty';
+type RecipientType = '' | 'all_students' | 'all_faculty' | 'all_users' | 'individual_students' | 'individual_faculty';
 
 interface User {
   id: string;
@@ -156,6 +156,9 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
 
   const fetchUsers = useCallback(async (type: RecipientType, search?: string): Promise<User[]> => {
     try {
+      if (!type) {
+        return [];
+      }
       const users = await communicationService.fetchUsers(type, search);
       return users;
     } catch (error) {

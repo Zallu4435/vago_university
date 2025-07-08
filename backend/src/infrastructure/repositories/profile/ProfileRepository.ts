@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
-import { User } from "../../database/mongoose/models/user.model";
-import { Faculty } from "../../database/mongoose/models/faculty.model";
+import { User } from "../../database/mongoose/auth/user.model";
+import { Faculty } from "../../database/mongoose/auth/faculty.model";
 import { ProfileErrorType } from "../../../domain/profile/enums/ProfileErrorType";
 import {
     GetProfileRequestDTO,

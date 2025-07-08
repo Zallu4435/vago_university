@@ -2,9 +2,9 @@ import mongoose from 'mongoose';
 import { ICommunicationRepository } from '../../../application/communication/repositories/ICommunicationRepository';
 import { Message, UserInfo, MessageStatus, UserRole } from "../../../domain/communication/entities/Communication";
 import { MessageModel } from '../../../infrastructure/database/mongoose/models/communication.model';
-import { User as UserModel } from '../../../infrastructure/database/mongoose/models/user.model';
-import { Admin as AdminModel } from '../../../infrastructure/database/mongoose/models/admin.model';
-import { Faculty as FacultyModel } from '../../../infrastructure/database/mongoose/models/faculty.model';
+import { User as UserModel } from '../../database/mongoose/auth/user.model';
+import { Admin as AdminModel } from '../../database/mongoose/auth/admin.model';
+import { Faculty as FacultyModel } from '../../database/mongoose/auth/faculty.model';
 import {
   GetInboxMessagesRequestDTO,
   GetSentMessagesRequestDTO,

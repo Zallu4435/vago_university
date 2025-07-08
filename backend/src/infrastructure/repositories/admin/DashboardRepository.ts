@@ -33,11 +33,11 @@ import {
 } from '../../../domain/admin/dtos/DashboardResponseDTOs';
 
 // Import correct models
-import { User } from '../../database/mongoose/models/user.model';
+import { User } from '../../database/mongoose/auth/user.model';
 import { CourseModel } from '../../database/mongoose/models/courses/CourseModel';
-import { Admission } from '../../database/mongoose/models/admission.model';
+import { Admission } from '../../database/mongoose/admission/AdmissionModel';
 import { Payment } from '../../database/mongoose/models/payment.model';
-import { Faculty } from '../../database/mongoose/models/faculty.model';
+import { Faculty } from '../../database/mongoose/auth/faculty.model';
 import { PaymentModel } from '../../database/mongoose/models/financial.model';
 import { StudentFinancialInfoModel } from '../../database/mongoose/models/financial.model';
 import { ChargeModel } from '../../database/mongoose/models/financial.model';

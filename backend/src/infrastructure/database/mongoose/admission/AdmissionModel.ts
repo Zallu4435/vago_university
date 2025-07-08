@@ -1,31 +1,14 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
-import { AdmissionStatus, RejectedBy } from "../../../../domain/admission/entities/Admission";
+import { IAdmission } from "../../../../domain/admission/entities/AdmissionTypes";
 
-interface IAdmission extends Document {
-  applicationId: string;
-  registerId: mongoose.Types.ObjectId;
-  personal: any;
-  choiceOfStudy: any[];
-  education: any;
-  achievements: any;
-  otherInformation: any;
-  documents: any;
-  declaration: any;
-  paymentId: string;
-  rejectedBy: RejectedBy | null;
-  status: AdmissionStatus;
-  confirmationToken: string | null;
-  tokenExpiry: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+interface IAdmissionDocument extends Omit<IAdmission, 'id'>, Document {}
 
 const AdmissionSchema: Schema = new Schema(
   {
     applicationId: { type: String, required: true, unique: true },
     registerId: { type: Schema.Types.ObjectId, required: true, ref: "Register" },
     personal: { type: Object, default: {} },
-    choiceOfStudy: { type: Array, default: [] },
+    choiceOfStudy: { type: [Schema.Types.Mixed], default: [] },
     education: { type: Object, default: {} },
     achievements: { type: Object, default: {} },
     otherInformation: { type: Object, default: {} },
@@ -40,5 +23,5 @@ const AdmissionSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-export const Admission: Model<IAdmission> =
-  mongoose.models.Admission || mongoose.model<IAdmission>("Admission", AdmissionSchema);
+export const Admission: Model<IAdmissionDocument> =
+  mongoose.models.Admission || mongoose.model<IAdmissionDocument>("Admission", AdmissionSchema);

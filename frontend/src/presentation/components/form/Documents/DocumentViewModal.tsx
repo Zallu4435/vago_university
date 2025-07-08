@@ -32,6 +32,18 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
     }
   }, [isOpen, doc, token]);
 
+  // Prevent background scrolling when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   const fetchDocument = async () => {
     if (!doc || !token) return;
     
@@ -40,6 +52,8 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
     
     try {
       const response = await documentUploadService.getDocument(doc.id, token);
+
+      console.log(response, "responseresponseresponse")
       
       if (response && response.pdfData) {
         setPdfData(response.pdfData);
@@ -57,8 +71,8 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
   if (!isOpen || !doc) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backdropFilter: 'blur(8px)', background: 'rgba(255,255,255,0.2)' }}>
+      <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         <div className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-6 py-4 flex items-center justify-between">
           <h3 className="text-xl font-semibold flex items-center gap-3">
             <FaFileAlt size={20} />
@@ -72,7 +86,7 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
           </button>
         </div>
         
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-1">
           <div className="mb-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex justify-between items-center">

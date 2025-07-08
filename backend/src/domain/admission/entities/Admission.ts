@@ -1,55 +1,26 @@
-import mongoose from "mongoose";
+import { 
+  AdmissionDraftProps, 
+  AdmissionProps, 
+  AdmissionStatus, 
+  RejectedBy,
+  PaymentStatus,
+  PaymentMethod
+} from "./AdmissionTypes";
 import { AdmissionErrorType } from "../enums/AdmissionErrorType";
 
-export enum PaymentStatus {
-  PENDING = "pending",
-  COMPLETED = "completed",
-  FAILED = "failed",
-}
-
-export enum PaymentMethod {
-  CREDIT_CARD = "credit_card",
-  STRIPE = "stripe",
-}
-
-export enum AdmissionStatus {
-  PENDING = "pending",
-  OFFERED = "offered",
-  APPROVED = "approved",
-  REJECTED = "rejected",
-}
-
-export enum RejectedBy {
-  ADMIN = "admin",
-  USER = "user"
-}
-
-interface AdmissionDraftProps {
-  applicationId: string;
-  registerId: mongoose.Types.ObjectId;
-  personal?: any;
-  choiceOfStudy?: any[];
-  education?: any;
-  achievements?: any;
-  otherInformation?: any;
-  documents?: any;
-  declaration?: any;
-  completedSteps?: string[];
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-interface AdmissionProps extends AdmissionDraftProps {
-  paymentId: string;
-  status?: AdmissionStatus;
-  rejectedBy?: RejectedBy | null;
-  confirmationToken?: string | null;
-  tokenExpiry?: Date | null;
-}
+export { 
+  PaymentStatus, 
+  PaymentMethod, 
+  AdmissionStatus, 
+  RejectedBy,
+  AdmissionDraftProps,
+  AdmissionProps
+} from "./AdmissionTypes";
 
 export class AdmissionDraft {
+  private _id?: string;
   private applicationId: string;
-  private registerId: mongoose.Types.ObjectId;
+  private registerId: string;
   private personal: any;
   private choiceOfStudy: any[];
   private education: any;
@@ -62,6 +33,7 @@ export class AdmissionDraft {
   private updatedAt?: Date;
 
   constructor(props: AdmissionDraftProps) {
+    this._id = props.id;
     this.applicationId = props.applicationId;
     this.registerId = props.registerId;
     this.personal = props.personal || {};
@@ -80,14 +52,12 @@ export class AdmissionDraft {
     if (!props.applicationId) {
       throw new Error(AdmissionErrorType.InvalidApplicationId);
     }
-    if (!mongoose.Types.ObjectId.isValid(props.registerId)) {
-      throw new Error(AdmissionErrorType.InvalidRegisterId);
-    }
     return new AdmissionDraft(props);
   }
 
+  get id(): string | undefined { return this._id; }
   getApplicationId(): string { return this.applicationId; }
-  getRegisterId(): mongoose.Types.ObjectId { return this.registerId; }
+  getRegisterId(): string { return this.registerId; }
   getPersonal(): any { return this.personal; }
   getChoiceOfStudy(): any[] { return this.choiceOfStudy; }
   getEducation(): any { return this.education; }

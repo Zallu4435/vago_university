@@ -2,8 +2,8 @@ import mongoose from "mongoose";
 import { getMessaging } from "firebase-admin/messaging";
 import '../../../config/firebase-admin'; 
 import { NotificationModel } from "../../database/mongoose/models/notification.model";
-import { User as UserModel } from "../../database/mongoose/models/user.model";
-import { Faculty as FacultyModel } from "../../database/mongoose/models/faculty.model";
+import { User as UserModel } from "../../database/mongoose/auth/user.model";
+import { Faculty as FacultyModel } from "../../database/mongoose/auth/faculty.model";
 import { NotificationErrorType } from "../../../domain/notifications/enums/NotificationErrorType";
 import {
     CreateNotificationRequestDTO,

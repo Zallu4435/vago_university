@@ -65,8 +65,15 @@ app.use("/api", indexRoute);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({ error: err.message || "Something went wrong" });
+  console.error('Error stack:', err.stack);
+  console.log('Error object:', err);
+  console.log('Error statusCode:', err.statusCode);
+  console.log('Error code:', err.code);
+  const status = err.statusCode || 500;
+  res.status(status).json({
+    error: err.message || "Something went wrong",
+    code: err.code || "INTERNAL_SERVER_ERROR"
+  });
 });
 
 // MongoDB connection

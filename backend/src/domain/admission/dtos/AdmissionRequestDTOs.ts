@@ -1,5 +1,4 @@
-import mongoose from "mongoose";
-import { AdmissionStatus, PaymentMethod } from "../entities/Admission";
+import { PaymentMethod, IAdmission } from "../entities/AdmissionTypes";
 
 export interface CreateApplicationRequestDTO {
   userId: string;
@@ -43,7 +42,4 @@ export interface ConfirmPaymentRequestDTO {
   stripePaymentIntentId: string;
 }
 
-export interface FinalizeAdmissionRequestDTO {
-  applicationId: string;
-  paymentId: string;
-}
+export type FinalizeAdmissionRequestDTO = Pick<IAdmission, "applicationId" | "paymentId">;

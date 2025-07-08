@@ -81,7 +81,7 @@ class DocumentUploadService {
         },
       });
 
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       console.error('Error fetching document:', error);
       console.error('Error response:', error.response?.data);

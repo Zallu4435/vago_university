@@ -1,6 +1,8 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import multer from 'multer';
+import { IDocument } from '../../../domain/admission/entities/AdmissionTypes';
+import { DocumentUploadFailedException } from '../../../domain/admission/errors/AdmissionErrors';
 
 // Configure Cloudinary
 cloudinary.config({
@@ -35,65 +37,36 @@ export const admissionDocumentUpload = multer({
 });
 
 export class DocumentUploadService {
-  async uploadDocument(file: Express.Multer.File, applicationId: string, documentType: string) {
-    try {
-      if (!file) {
-        throw new Error('No file provided');
-      }
-
-      // The file is already uploaded to Cloudinary by multer
-      const result = {
-        url: file.path,
-        publicId: file.filename,
-        fileName: file.originalname,
-        fileType: file.mimetype,
-      };
-
-      return {
-        success: true,
-        data: {
-          document: result,
-          message: 'Document uploaded successfully',
-        },
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        data: {
-          error: error.message || 'Failed to upload document',
-        },
-      };
+  async uploadDocument(file: Express.Multer.File, applicationId: string, documentType: string): Promise<IDocument> {
+    if (!file) {
+      throw new DocumentUploadFailedException('No file provided');
     }
+    // The file is already uploaded to Cloudinary by multer
+    return {
+      url: file.path,
+      publicId: file.filename,
+      fileName: file.originalname,
+      fileType: file.mimetype,
+      applicationId,
+      documentType,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
   }
 
-  async uploadMultipleDocuments(files: Express.Multer.File[], applicationId: string, documentTypes: string[]) {
-    try {
-      if (!files || files.length === 0) {
-        throw new Error('No files provided');
-      }
-
-      const documents = files.map((file, index) => ({
-        url: file.path,
-        publicId: file.filename,
-        fileName: file.originalname,
-        fileType: file.mimetype,
-        documentType: documentTypes[index],
-      }));
-
-      return {
-        success: true,
-        data: {
-          documents,
-          message: 'Documents uploaded successfully',
-        },
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        data: {
-          error: error.message || 'Failed to upload documents',
-        },
-      };
+  async uploadMultipleDocuments(files: Express.Multer.File[], applicationId: string, documentTypes: string[]): Promise<IDocument[]> {
+    if (!files || files.length === 0) {
+      throw new DocumentUploadFailedException('No files provided');
     }
+    return files.map((file, index) => ({
+      url: file.path,
+      publicId: file.filename,
+      fileName: file.originalname,
+      fileType: file.mimetype,
+      applicationId,
+      documentType: documentTypes[index],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }));
   }
 } 

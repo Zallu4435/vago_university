@@ -1,13 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-
-export interface IRegister extends Document {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  createdAt: Date;
-  pending: boolean;
-}
+import { IRegister } from "../../../../domain/auth/entities/AuthTypes";
 
 const registerSchema = new Schema<IRegister>({
   firstName: { type: String, required: true, trim: true },

@@ -24,7 +24,7 @@ import {
 import { Sport, SportStatus } from "../../../domain/sports/entities/Sport";
 import { SportRequest, SportRequestStatus } from "../../../domain/sports/entities/SportRequest";
 import { TeamModel, SportRequestModel } from "../../../infrastructure/database/mongoose/models/sports.model";
-import { User as UserModel } from "../../../infrastructure/database/mongoose/models/user.model";
+import { User as UserModel } from "../../database/mongoose/auth/user.model";
 import mongoose from "mongoose";
 
 export class SportsRepository implements ISportsRepository {

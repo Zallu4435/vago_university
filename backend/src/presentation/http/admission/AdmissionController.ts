@@ -8,9 +8,10 @@ import {
   FinalizeAdmissionUseCase,
   UploadDocumentUseCase,
   UploadMultipleDocumentsUseCase,
+  GetDocumentByKeyUseCase,
 } from "../../../application/admission/useCases/AdmissionUseCases";
-import { AdmissionDraft as AdmissionDraftModel } from "../../../infrastructure/database/mongoose/admission/AdmissionDraftModel";
-import mongoose from "mongoose";
+import axios from 'axios';
+
 
 export class AdmissionController implements IAdmissionController {
   private httpErrors: HttpErrors;
@@ -25,282 +26,105 @@ export class AdmissionController implements IAdmissionController {
     private finalizeAdmissionUseCase: FinalizeAdmissionUseCase,
     private uploadDocumentUseCase: UploadDocumentUseCase,
     private uploadMultipleDocumentsUseCase: UploadMultipleDocumentsUseCase,
+    private getDocumentByKeyUseCase: GetDocumentByKeyUseCase,
   ) {
     this.httpErrors = new HttpErrors();
     this.httpSuccess = new HttpSuccess();
   }
 
   async createApplication(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      if (!httpRequest.user) {
-        return this.httpErrors.error_401();
-      }
-      const { id: registerId } = httpRequest.user;
-      const { userId } = httpRequest.body || {};
-      if (!userId || userId !== registerId) {
-        return this.httpErrors.error_400();
-      }
-      if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return this.httpErrors.error_400();
-      }
-      const response = await this.createApplicationUseCase.execute({ userId });
-      if (!response.success) {
-        return this.httpErrors.error_400();
-      }
-      return this.httpSuccess.success_201(response.data);
-    } catch (error: any) {
-      return this.httpErrors.error_500();
-    }
+    if (!httpRequest.user) return this.httpErrors.error_401();
+    const { id: registerId } = httpRequest.user;
+    const { userId } = httpRequest.body || {};
+    if (!userId || userId !== registerId) return this.httpErrors.error_400();
+    const result = await this.createApplicationUseCase.execute({ userId });
+    return this.httpSuccess.success_201(result);
   }
 
   async getApplication(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      if (!httpRequest.user) {
-        return this.httpErrors.error_401();
-      }
-      const { id: registerId } = httpRequest.user;
-      const { userId } = httpRequest.params || {};
-      if (userId !== registerId) {
-        return this.httpErrors.error_403();
-      }
-      if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return this.httpErrors.error_400();
-      }
-      const response = await this.getApplicationUseCase.execute({ userId });
-      if (!response.success) {
-        return this.httpErrors.error_400();
-      }
-      return this.httpSuccess.success_200(response.data);
-    } catch (error: any) {
-      return this.httpErrors.error_500();
-    }
+    if (!httpRequest.user) return this.httpErrors.error_401();
+    const { id: registerId } = httpRequest.user;
+    const { userId } = httpRequest.params || {};
+    if (userId !== registerId) return this.httpErrors.error_403();
+    const result = await this.getApplicationUseCase.execute({ userId });
+    return this.httpSuccess.success_200(result);
   }
 
   async saveSection(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      if (!httpRequest.user) {
-        return this.httpErrors.error_401();
-      }
-      const { id: registerId } = httpRequest.user;
-      const { applicationId, section } = httpRequest.params || {};
-      const data = httpRequest.body;
-      const draft = await AdmissionDraftModel.findOne({ applicationId, registerId });
-      if (!draft) {
-        return this.httpErrors.error_403();
-      }
-      const response = await this.saveSectionUseCase.execute({ applicationId, section, data });
-      if (!response.success) {
-        return this.httpErrors.error_400();
-      }
-      return this.httpSuccess.success_200(response.data);
-    } catch (error: any) {
-      return this.httpErrors.error_500();
-    }
+    if (!httpRequest.user) return this.httpErrors.error_401();
+    const { applicationId, section } = httpRequest.params || {};
+    const data = httpRequest.body;
+    if (!applicationId || !section) return this.httpErrors.error_400();
+    const result = await this.saveSectionUseCase.execute({ applicationId, section, data });
+    return this.httpSuccess.success_200(result);
   }
 
   async processPayment(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      if (!httpRequest.user) {
-        return this.httpErrors.error_401();
-      }
-      const { id: registerId } = httpRequest.user;
-      const { applicationId, paymentDetails } = httpRequest.body || {};
-      const draft = await AdmissionDraftModel.findOne({ applicationId, registerId });
-      if (!draft) {
-        return this.httpErrors.error_403();
-      }
-      const response = await this.processPaymentUseCase.execute({ applicationId, paymentDetails });
-      if (!response.success) {
-        return this.httpErrors.error_400();
-      }
-      return this.httpSuccess.success_200(response.data);
-    } catch (error: any) {
-      return this.httpErrors.error_500();
-    }
+    if (!httpRequest.user) return this.httpErrors.error_401();
+    const { applicationId, paymentDetails } = httpRequest.body || {};
+    if (!applicationId || !paymentDetails) return this.httpErrors.error_400();
+    const result = await this.processPaymentUseCase.execute({ applicationId, paymentDetails });
+    return this.httpSuccess.success_200(result);
   }
 
   async confirmPayment(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      if (!httpRequest.user) {
-        return this.httpErrors.error_401();
-      }
-      const { id: registerId } = httpRequest.user;
-      const { paymentId, stripePaymentIntentId } = httpRequest.body || {};
-      
-      if (!paymentId || !stripePaymentIntentId) {
-        return this.httpErrors.error_400();
-      }
-      
-      const { PaymentModel } = await import("../../../infrastructure/database/mongoose/models/financial.model");
-      const payment = await PaymentModel.findById(paymentId);
-      
-      if (!payment) {
-        return this.httpErrors.error_404();
-      }
-      
-      if (!payment.studentId.equals(registerId)) {
-        return this.httpErrors.error_403();
-      }
-      
-      const response = await this.confirmPaymentUseCase.execute({ paymentId, stripePaymentIntentId });
-      
-      if (!response.success) {
-        return this.httpErrors.error_400();
-      }
-      
-      return this.httpSuccess.success_200(response.data);
-    } catch (error: any) {
-      return this.httpErrors.error_500();
-    }
+    if (!httpRequest.user) return this.httpErrors.error_401();
+    const { paymentId, stripePaymentIntentId } = httpRequest.body || {};
+    if (!paymentId || !stripePaymentIntentId) return this.httpErrors.error_400();
+    const result = await this.confirmPaymentUseCase.execute({ paymentId, stripePaymentIntentId });
+    return this.httpSuccess.success_200(result);
   }
 
   async handleFinalSubmit(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      if (!httpRequest.user) {
-        return this.httpErrors.error_401();
-      }
-      const { id: registerId } = httpRequest.user;
-      const { applicationId, paymentId } = httpRequest.body || {};
-      const draft = await AdmissionDraftModel.findOne({ applicationId, registerId });
-      if (!draft) {
-        return this.httpErrors.error_403();
-      }
-      const response = await this.finalizeAdmissionUseCase.execute({ applicationId, paymentId });
-      if (!response.success) {
-        return this.httpErrors.error_400();
-      }
-      return this.httpSuccess.success_200({ message: "Admission finalized", admission: response.data });
-    } catch (error: any) {
-      return this.httpErrors.error_500();
-    }
+    if (!httpRequest.user) return this.httpErrors.error_401();
+    const { applicationId, paymentId } = httpRequest.body || {};
+    if (!applicationId || !paymentId) return this.httpErrors.error_400();
+    const result = await this.finalizeAdmissionUseCase.execute({ applicationId, paymentId });
+    return this.httpSuccess.success_200({ message: "Admission finalized", admission: result });
   }
 
   async uploadDocument(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      if (!httpRequest.user) {
-        return this.httpErrors.error_401();
-      }
-      const { id: registerId } = httpRequest.user;
-      const { applicationId, documentType } = httpRequest.body || {};
-      const file = httpRequest.file;
-      
-      if (!file) {
-        return this.httpErrors.error_400();
-      }
-
-      if (!applicationId) {
-        return this.httpErrors.error_400();
-      }
-
-      if (!documentType) {
-        return this.httpErrors.error_400();
-      }
-
-      const draft = await AdmissionDraftModel.findOne({ applicationId, registerId });
-      
-      if (!draft) {
-        return this.httpErrors.error_403();
-      }
-      
-      const response = await this.uploadDocumentUseCase.execute({ applicationId, documentType, file });
-      
-      if (!response.success) {
-        return this.httpErrors.error_400();
-      }
-      
-      return this.httpSuccess.success_200(response.data);
-    } catch (error: any) {
-      return this.httpErrors.error_500();
-    }
+    if (!httpRequest.user) return this.httpErrors.error_401();
+    const { applicationId, documentType } = httpRequest.body || {};
+    const file = httpRequest.file;
+    if (!applicationId || !documentType || !file) return this.httpErrors.error_400();
+    const result = await this.uploadDocumentUseCase.execute({ applicationId, documentType, file });
+    return this.httpSuccess.success_200(result);
   }
 
   async uploadMultipleDocuments(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      if (!httpRequest.user) {
-        return this.httpErrors.error_401();
-      }
-      const { id: registerId } = httpRequest.user;
-      const { applicationId } = httpRequest.body || {};
-      const files = httpRequest.files || [];
-      
-      if (!applicationId || !mongoose.Types.ObjectId.isValid(applicationId)) {
-        return this.httpErrors.error_400();
-      }
-      
-      if (!files || files.length === 0) {
-        return this.httpErrors.error_400();
-      }
-      
-      const draft = await AdmissionDraftModel.findOne({ applicationId, registerId });
-      if (!draft) {
-        return this.httpErrors.error_403();
-      }
-      
-      const response = await this.uploadMultipleDocumentsUseCase.execute({ 
-        applicationId, 
-        files: files as Express.Multer.File[],
-        documentTypes: Array(files.length).fill('general') // Default document type for all files
-      });
-      
-      if (!response.success) {
-        return this.httpErrors.error_400();
-      }
-      
-      return this.httpSuccess.success_200(response.data);
-    } catch (error: any) {
-      return this.httpErrors.error_500();
-    }
+    if (!httpRequest.user) return this.httpErrors.error_401();
+    const { applicationId } = httpRequest.body || {};
+    const files = httpRequest.files || [];
+    if (!applicationId || !files || files.length === 0) return this.httpErrors.error_400();
+    const result = await this.uploadMultipleDocumentsUseCase.execute({
+      applicationId,
+      files: files as Express.Multer.File[],
+      documentTypes: Array(files.length).fill('general')
+    });
+    return this.httpSuccess.success_200(result);
   }
 
   async serveDocument(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      if (!httpRequest.user) {
-        return this.httpErrors.error_401();
-      }
-      const { id: registerId } = httpRequest.user;
-      const { documentId } = httpRequest.params || {};
-      
-      if (!documentId) {
-        return this.httpErrors.error_400();
-      }
-      
-      const draft = await AdmissionDraftModel.findOne({ 
-        registerId,
-        "documents.documents": { $elemMatch: { id: documentId } }
-      });
-      
-      if (!draft) {
-        return this.httpErrors.error_403();
-      }
-      
-      const document = draft.documents?.documents?.find(doc => doc.id === documentId);
-      
-      if (!document || !document.cloudinaryUrl) {
-        return this.httpErrors.error_404();
-      }
-      
-      const response = await fetch(document.cloudinaryUrl);
-      
-      if (!response.ok) {
-        return this.httpErrors.error_404();
-      }
-      
-      const pdfBuffer = await response.arrayBuffer();
-      
-      const result = {
-        statusCode: 200,
-        body: {
-          data: {
-            pdfData: Buffer.from(pdfBuffer).toString('base64'),
-            fileName: document.fileName,
-            contentType: 'application/pdf'
-          }
-        }
-      };
-      
-      return result;
-    } catch (error: any) {
-      return this.httpErrors.error_500();
+    console.log('[serveDocument] user:', httpRequest.user);
+    console.log('[serveDocument] params:', httpRequest.params);
+    if (!httpRequest.user) return this.httpErrors.error_401();
+    const { id: userId } = httpRequest.user;
+    const { documentId } = httpRequest.params || {};
+    if (!documentId) {
+      console.log('[serveDocument] Missing documentId');
+      return this.httpErrors.error_400();
     }
+    const document = await this.getDocumentByKeyUseCase.execute({ userId, documentKey: documentId });
+    console.log('[serveDocument] Fetched document:', document);
+    if (!document) return this.httpErrors.error_404();
+    if (!document.cloudinaryUrl) return this.httpErrors.error_404();
+    // Fetch the file from Cloudinary and return as base64
+    const response = await axios.get(document.cloudinaryUrl, { responseType: 'arraybuffer' });
+    const base64 = Buffer.from(response.data, 'binary').toString('base64');
+    return this.httpSuccess.success_200({
+      ...document,
+      pdfData: base64,
+    });
   }
 }

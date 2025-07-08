@@ -1,7 +1,7 @@
 import { ISessionRepository } from '../../../application/session/repositories/ISessionRepository';
 import { VideoSession } from '../../../domain/session/entities/VideoSession';
 import { VideoSessionModel } from '../../database/mongoose/models/session.model';
-import { User } from '../../database/mongoose/models/user.model';
+import { User } from '../../database/mongoose/auth/user.model';
 
 export class SessionRepository implements ISessionRepository {
   async create(session: VideoSession): Promise<VideoSession> {

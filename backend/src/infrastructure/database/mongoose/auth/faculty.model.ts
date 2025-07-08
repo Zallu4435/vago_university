@@ -1,17 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 import bcrypt from "bcryptjs";
-
-export interface IFaculty extends Document {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  createdAt: Date;
-  phone?: string;
-  profilePicture?: string;
-  passwordChangedAt?: Date;
-  fcmTokens: string[];
-}
+import { IFaculty } from "../../../../domain/auth/entities/AuthTypes";
 
 const facultySchema = new Schema<IFaculty>({
   firstName: { type: String, required: true, trim: true },

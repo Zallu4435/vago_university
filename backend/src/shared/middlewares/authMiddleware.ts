@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { Register } from '../../infrastructure/database/mongoose/models/register.model';
-import { Admin } from '../../infrastructure/database/mongoose/models/admin.model';
-import { User } from '../../infrastructure/database/mongoose/models/user.model';
-import { Faculty } from '../../infrastructure/database/mongoose/models/faculty.model';
-import { Admission } from '../../infrastructure/database/mongoose/models/admission.model';
+import { Register } from '../../infrastructure/database/mongoose/auth/register.model';
+import { Admin } from '../../infrastructure/database/mongoose/auth/admin.model';
+import { User } from '../../infrastructure/database/mongoose/auth/user.model';
+import { Faculty } from '../../infrastructure/database/mongoose/auth/faculty.model';
+import { Admission } from '../../infrastructure/database/mongoose/admission/AdmissionModel';
 
 interface JwtPayload {
   userId: string;

@@ -13,7 +13,7 @@ import {
   Meeting,
   EnrollmentStatus,
 } from "../../../domain/academics/entities/Academic";
-import { User as UserModel } from '../../../infrastructure/database/mongoose/models/user.model';
+import { User as UserModel } from '../../database/mongoose/auth/user.model';
 import { ProgramModel } from '../../../infrastructure/database/mongoose/models/studentProgram.model';
 import { EnrollmentModel } from '../../../infrastructure/database/mongoose/models/courses/CourseModel';
 import { GradeModel } from '../../../infrastructure/database/mongoose/models/grade.model';

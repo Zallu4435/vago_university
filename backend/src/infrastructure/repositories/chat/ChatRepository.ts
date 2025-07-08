@@ -33,8 +33,8 @@ import {
 import { IChatRepository } from "../../../application/chat/repositories/IChatRepository";
 import { ChatModel } from "../../../infrastructure/database/mongoose/models/chat/ChatModel";
 import { MessageModel } from "../../../infrastructure/database/mongoose/models/chat/MessageModel";
-import { User as UserModel } from "../../../infrastructure/database/mongoose/models/user.model";
-import { Faculty as FacultyModel } from "../../../infrastructure/database/mongoose/models/faculty.model";
+import { User as UserModel } from "../../database/mongoose/auth/user.model";
+import { Faculty as FacultyModel } from "../../database/mongoose/auth/faculty.model";
 import { MessageStatus } from "../../../domain/chat/entities/Message";
 import { MessageType } from "../../../domain/chat/entities/MessageType";
 import { ChatType } from "../../../domain/chat/entities/Chat";

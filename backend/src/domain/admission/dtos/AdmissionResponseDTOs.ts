@@ -1,11 +1,9 @@
-import { Admission, AdmissionDraft } from "../entities/Admission";
+import { IAdmissionDraft, IAdmission, IDocument } from "../entities/AdmissionTypes";
 
-export interface CreateApplicationResponseDTO {
-  applicationId: string;
-}
+export type CreateApplicationResponseDTO = Pick<IAdmission, "applicationId">;
 
 export interface GetApplicationResponseDTO {
-  draft: AdmissionDraft | null;
+  draft: IAdmissionDraft | null;
 }
 
 export interface SaveSectionResponseDTO {
@@ -30,27 +28,17 @@ export interface ConfirmPaymentResponseDTO {
 }
 
 export interface FinalizeAdmissionResponseDTO {
-  admission: Admission;
+  admission: IAdmission;
 }
 
 export interface UploadDocumentResponseDTO {
   success: boolean;
   message: string;
-  document: {
-    url: string;
-    publicId: string;
-    fileName: string;
-    fileType: string;
-  };
+  document: Pick<IDocument, "url" | "publicId" | "fileName" | "fileType">;
 }
 
 export interface UploadMultipleDocumentsResponseDTO {
   success: boolean;
   message: string;
-  documents: Array<{
-    url: string;
-    publicId: string;
-    fileName: string;
-    fileType: string;
-  }>;
+  documents: Array<Pick<IDocument, "url" | "publicId" | "fileName" | "fileType">>;
 }

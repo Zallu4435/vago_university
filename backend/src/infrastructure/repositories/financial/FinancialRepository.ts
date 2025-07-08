@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
 import { v2 as cloudinary } from "cloudinary";
 import { StudentFinancialInfoModel, ChargeModel, PaymentModel, FinancialAidApplicationModel, ScholarshipModel, ScholarshipApplicationModel } from "../../database/mongoose/models/financial.model"
-import { User as UserModel } from "../../database/mongoose/models/user.model";
+import { User as UserModel } from "../../database/mongoose/auth/user.model";
 import { ProgramModel } from "../../database/mongoose/models/studentProgram.model";
 import { EnrollmentModel } from "../../database/mongoose/models/courses/CourseModel";
 import { FinancialErrorType } from "../../../domain/financial/enums/FinancialErrorType";

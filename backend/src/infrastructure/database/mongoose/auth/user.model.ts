@@ -1,17 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 import bcrypt from "bcryptjs";
-
-export interface IUser extends Document {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  createdAt: Date;
-  phone?: string;
-  profilePicture?: string;
-  passwordChangedAt?: Date;
-  fcmTokens: string[];
-}
+import { IUser } from "../../../../domain/auth/entities/AuthTypes";
 
 const userSchema = new Schema<IUser>({
   firstName: { type: String, required: true, trim: true },

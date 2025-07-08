@@ -1,131 +1,155 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { emailService } from "../../services/email.service";
-import { otpStorage } from "../../services/otpStorage";
-import { AuthErrorType } from "../../../domain/auth/enums/AuthErrorType";
-import { config } from "../../../config/config";
+// infrastructure/repositories/auth/AuthRepository.ts (Updated)
 import {
-    RegisterRequestDTO,
-    LoginRequestDTO,
-    RefreshTokenRequestDTO,
-    LogoutRequestDTO,
-    RegisterFacultyRequestDTO,
-    SendEmailOtpRequestDTO,
-    VerifyEmailOtpRequestDTO,
-    ResetPasswordRequestDTO,
+    UserAlreadyExistsError, InvalidCredentialsError, EmailNotConfirmedError,
+    AdmissionExistsError, EmailNotFoundError,
+    FacultyAlreadyExistsError, UserNotFoundError, AlreadyConfirmedError
+} from "../../../domain/auth/errors/AuthErrors";
+
+// DTOs for contract
+import {
+    RegisterRequestDTO, LoginRequestDTO, RefreshTokenRequestDTO, LogoutRequestDTO,
+    RegisterFacultyRequestDTO, SendEmailOtpRequestDTO, ResetPasswordRequestDTO,
 } from "../../../domain/auth/dtos/AuthRequestDTOs";
 import {
-    RegisterResponseDTO,
-    LoginResponseDTO,
-    RefreshTokenResponseDTO,
-    LogoutResponseDTO,
-    RegisterFacultyResponseDTO,
-    SendEmailOtpResponseDTO,
-    VerifyEmailOtpResponseDTO,
-    ResetPasswordResponseDTO,
+    RegisterResponseDTO, LoginResponseDTO, RefreshTokenResponseDTO, LogoutResponseDTO,
+    RegisterFacultyResponseDTO, SendEmailOtpResponseDTO, ResetPasswordResponseDTO,
 } from "../../../domain/auth/dtos/AuthResponseDTOs";
+
 import { IAuthRepository } from "../../../application/auth/repositories/IAuthRepository";
-import { Register } from "../../database/mongoose/models/register.model";
-import { Admin } from "../../database/mongoose/models/admin.model";
-import { User as UserModel } from "../../database/mongoose/models/user.model";
-import { Faculty as FacultyModel } from "../../database/mongoose/models/faculty.model";
+
+// Mongoose Models
+import { Register } from "../../database/mongoose/auth/register.model";
+import { Admin } from "../../database/mongoose/auth/admin.model";
+import { User as UserModel } from "../../database/mongoose/auth/user.model";
+import { Faculty as FacultyModel } from "../../database/mongoose/auth/faculty.model";
 import { FacultyRegister } from "../../database/mongoose/models/facultyRegister.model";
 import { Admission } from "../../database/mongoose/admission/AdmissionModel";
 
 export class AuthRepository implements IAuthRepository {
+
+    private async findUserByEmailAcrossCollections(
+        email: string
+    ): Promise<{ user: any; collection: "register" | "admin" | "user" | "faculty" } | null> {
+        let user;
+
+        user = await Admin.findOne({ email });
+        if (user) return { user, collection: "admin" };
+
+        user = await UserModel.findOne({ email });
+        if (user) return { user, collection: "user" };
+
+        user = await FacultyModel.findOne({ email });
+        if (user) return { user, collection: "faculty" };
+
+        user = await Register.findOne({ email });
+        if (user) return { user, collection: "register" };
+
+        return null;
+    }
+
+    private async findUserByIdAcrossCollections(
+        userId: string,
+        collectionType: "register" | "admin" | "user" | "faculty"
+    ): Promise<{ user: any; collection: "register" | "admin" | "user" | "faculty" } | null> {
+        let user;
+        switch (collectionType) {
+            case "register":
+                user = await Register.findById(userId);
+                break;
+            case "admin":
+                user = await Admin.findById(userId);
+                break;
+            case "user":
+                user = await UserModel.findById(userId);
+                break;
+            case "faculty":
+                user = await FacultyModel.findById(userId);
+                break;
+            default:
+                return null;
+        }
+        if (user) return { user, collection: collectionType };
+        return null;
+    }
+
+    // --- REGISTER ---
     async register(params: RegisterRequestDTO): Promise<RegisterResponseDTO> {
         const existingUser = await Register.findOne({ email: params.email });
         if (existingUser) {
-            throw new Error(AuthErrorType.UserAlreadyExists);
+            throw new UserAlreadyExistsError(params.email);
         }
-
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(params.password, salt);
-
-        const confirmationToken = jwt.sign(
-            { email: params.email },
-            process.env.JWT_SECRET || "your-secret-key",
-            { expiresIn: "1d" }
-        );
 
         const user = new Register({
             firstName: params.firstName,
             lastName: params.lastName,
             email: params.email,
-            password: hashedPassword,
+            password: params.password, // This should be the already-hashed password from Use Case
             pending: true,
         });
 
         await user.save();
 
-        const confirmationUrl = `${config.frontendUrl}/confirm-registration?token=${confirmationToken}`;
-
-        await emailService.sendRegistrationConfirmationEmail({
-            to: params.email,
-            name: params.firstName,
-            confirmationUrl,
-        });
-
         return {
-            message: "Registration successful. Please check your email to confirm your account.",
+            message: "User registered successfully, pending confirmation.",
             user: {
+                id: user._id.toString(),
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
+                pending: user.pending,
             },
         };
     }
 
+    // --- LOGIN ---
     async login(params: LoginRequestDTO): Promise<LoginResponseDTO> {
-        let user;
-        let collection: "register" | "admin" | "user" | "faculty" = "register";
+        const userResult = await this.findUserByEmailAcrossCollections(params.email);
 
-        user = await Admin.findOne({ email: params.email });
-        if (user) {
-            collection = "admin";
+        if (!userResult) {
+            throw new InvalidCredentialsError(); // For security, imply invalid credentials instead of "user not found"
         }
 
-        if (!user) {
-            user = await UserModel.findOne({ email: params.email });
-            if (user) collection = "user";
-        }
+        const { user, collection } = userResult;
 
-        if (!user) {
-            user = await FacultyModel.findOne({ email: params.email });
-            if (user) collection = "faculty";
-        }
-
-        if (!user) {
-            user = await Register.findOne({ email: params.email });
-            if (user) {
-                const admission = await Admission.findOne({ registerId: user._id });
-                if (admission) {
-                    throw new Error(AuthErrorType.AdmissionExists);
-                }
-                if (user.pending) {
-                    throw new Error("Please confirm your email before logging in.");
-                }
-                collection = "register";
+        if (collection === "register") {
+            const admission = await Admission.findOne({ registerId: user._id });
+            if (admission) {
+                throw new AdmissionExistsError();
+            }
+            if (user.pending) {
+                throw new EmailNotConfirmedError();
             }
         }
 
-        if (!user) {
-            throw new Error(AuthErrorType.InvalidCredentials);
-        }
+        return {
+            token: "", // Placeholder: generated by Use Case
+            user: {
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                id: user._id?.toString(),
+                profilePicture: (user as any).profilePicture || "",
+                password: user.password, // Include password hash for Use Case comparison
+            },
+            collection,
+        };
+    }
 
-        const isPasswordValid = await bcrypt.compare(params.password, user.password);
-        if (!isPasswordValid) {
-            throw new Error(AuthErrorType.InvalidCredentials);
-        }
-
-        const token = jwt.sign(
-            { userId: user._id, email: user.email, collection },
-            process.env.JWT_SECRET || "your-secret-key",
-            { expiresIn: "1h" }
+    // --- REFRESH TOKEN ---
+    async refreshToken(params: RefreshTokenRequestDTO): Promise<RefreshTokenResponseDTO> {
+        const userResult = await this.findUserByIdAcrossCollections(
+            params.userId as string,
+            params.collection as "register" | "admin" | "user" | "faculty"
         );
 
+        if (!userResult || userResult.user.email !== params.email) {
+            throw new UserNotFoundError("User linked to token not found or email mismatch.");
+        }
+
+        const { user, collection } = userResult;
+
         return {
-            token,
+            token: "", // Placeholder: generated by Use Case
             user: {
                 firstName: user.firstName,
                 lastName: user.lastName,
@@ -137,69 +161,16 @@ export class AuthRepository implements IAuthRepository {
         };
     }
 
-    async refreshToken(params: RefreshTokenRequestDTO): Promise<RefreshTokenResponseDTO> {
-        try {
-            const decoded = jwt.verify(
-                params.token,
-                process.env.JWT_SECRET || "your-secret-key"
-            ) as {
-                userId: string;
-                email: string;
-                collection: "register" | "admin" | "user" | "faculty";
-            };
-
-            let user;
-            switch (decoded.collection) {
-                case "register":
-                    user = await Register.findById(decoded.userId);
-                    break;
-                case "admin":
-                    user = await Admin.findById(decoded.userId);
-                    break;
-                case "user":
-                    user = await UserModel.findById(decoded.userId);
-                    break;
-                case "faculty":
-                    user = await FacultyModel.findById(decoded.userId);
-                    break;
-                default:
-                    throw new Error(AuthErrorType.InvalidToken);
-            }
-
-            if (!user || user.email !== decoded.email) {
-                throw new Error(AuthErrorType.InvalidToken);
-            }
-
-            const newToken = jwt.sign(
-                { userId: user._id, email: user.email, collection: decoded.collection },
-                process.env.JWT_SECRET || "your-secret-key",
-                { expiresIn: "1h" }
-            );
-
-            return {
-                token: newToken,
-                user: {
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    email: user.email,
-                    id: user._id?.toString(),
-                    profilePicture: (user as any).profilePicture || "",
-                },
-                collection: decoded.collection,
-            };
-        } catch (error) {
-            throw new Error(AuthErrorType.InvalidToken);
-        }
-    }
-
+    // --- LOGOUT ---
     async logout(params: LogoutRequestDTO): Promise<LogoutResponseDTO> {
         return { message: "Logged out successfully" };
     }
 
+    // --- REGISTER FACULTY ---
     async registerFaculty(params: RegisterFacultyRequestDTO): Promise<RegisterFacultyResponseDTO> {
         const existingFaculty = await FacultyRegister.findOne({ email: params.email });
         if (existingFaculty) {
-            throw new Error(AuthErrorType.FacultyAlreadyExists);
+            throw new FacultyAlreadyExistsError(params.email);
         }
 
         const faculty = new FacultyRegister({
@@ -216,14 +187,8 @@ export class AuthRepository implements IAuthRepository {
 
         await faculty.save();
 
-        const token = jwt.sign(
-            { userId: faculty._id, email: faculty.email, collection: "faculty" },
-            process.env.JWT_SECRET || "your-secret-key",
-            { expiresIn: "1h" }
-        );
-
         return {
-            token,
+            token: "", // Placeholder: generated by Use Case
             user: {
                 fullName: faculty.fullName,
                 email: faculty.email,
@@ -235,118 +200,48 @@ export class AuthRepository implements IAuthRepository {
         };
     }
 
+    // --- SEND EMAIL OTP ---
     async sendEmailOtp(params: SendEmailOtpRequestDTO): Promise<SendEmailOtpResponseDTO> {
-        let user = await Admin.findOne({ email: params.email });
-        let collection: "register" | "admin" | "user" | "faculty" = "admin";
+        const userResult = await this.findUserByEmailAcrossCollections(params.email);
 
-        if (!user) {
-            user = await UserModel.findOne({ email: params.email });
-            if (user) collection = "user";
+        if (!userResult) {
+            throw new EmailNotFoundError();
         }
-
-        if (!user) {
-            user = await FacultyModel.findOne({ email: params.email });
-            if (user) collection = "faculty";
-        }
-
-        if (!user) {
-            user = await Register.findOne({ email: params.email });
-            if (user) collection = "register";
-        }
-
-        if (!user) {
-            throw new Error(AuthErrorType.EmailNotFound);
-        }
-
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        otpStorage.storeOtp(params.email, otp);
-
-        await emailService.sendPasswordResetOtpEmail({
-            to: params.email,
-            name: user.firstName || "User",
-            otp,
-        });
-
-        return { message: "OTP sent successfully" };
+        return { message: "User found for OTP." };
     }
 
-    async verifyEmailOtp(params: VerifyEmailOtpRequestDTO): Promise<VerifyEmailOtpResponseDTO> {
-        const storedOtp = otpStorage.getOtp(params.email);
+    // --- VERIFY EMAIL OTP (REMOVED from repo logic) ---
+    // This method is now entirely handled by OtpService and JwtService within the Use Case.
+    // async verifyEmailOtp(params: VerifyEmailOtpRequestDTO): Promise<VerifyEmailOtpResponseDTO> {
+    //     // This method should be removed from here.
+    //     // Its logic is now in VerifyEmailOtpUseCase.
+    //     throw new Error("VerifyEmailOtp logic moved to Use Case and OtpService.");
+    // }
 
-        if (!storedOtp || storedOtp.otp !== params.otp) {
-            throw new Error(AuthErrorType.InvalidOtp);
-        }
-
-        otpStorage.clearOtp(params.email);
-
-        const resetToken = jwt.sign(
-            { email: params.email, type: "password-reset" },
-            process.env.JWT_SECRET || "your-secret-key",
-            { expiresIn: "15m" }
-        );
-
-        return { resetToken };
-    }
-
+    // --- RESET PASSWORD ---
     async resetPassword(params: ResetPasswordRequestDTO): Promise<ResetPasswordResponseDTO> {
-        let payload: { email: string; type: string };
-        try {
-            payload = jwt.verify(
-                params.resetToken,
-                process.env.JWT_SECRET || "your-secret-key"
-            ) as { email: string; type: string };
-            if (payload.type !== "password-reset") {
-                throw new Error(AuthErrorType.InvalidToken);
-            }
-        } catch (err) {
-            throw new Error(AuthErrorType.InvalidToken);
+        const userResult = await this.findUserByEmailAcrossCollections(params.email); // `email` comes from verified token in Use Case
+
+        if (!userResult) {
+            throw new UserNotFoundError();
         }
 
-        const { email } = payload;
+        const { user, collection } = userResult;
+        let Model: any;
 
-        let user = await Admin.findOne({ email });
-        let collection: "register" | "admin" | "user" | "faculty" = "admin";
-        let Model: any = Admin;
-
-        if (!user) {
-            user = await UserModel.findOne({ email });
-            if (user) {
-                collection = "user";
-                Model = UserModel;
-            }
+        switch (collection) {
+            case "admin": Model = Admin; break;
+            case "user": Model = UserModel; break;
+            case "faculty": Model = FacultyModel; break;
+            case "register": Model = Register; break;
+            default: throw new Error("Invalid user collection type.");
         }
 
-        if (!user) {
-            user = await FacultyModel.findOne({ email });
-            if (user) {
-                collection = "faculty";
-                Model = FacultyModel;
-            }
-        }
-
-        if (!user) {
-            user = await Register.findOne({ email });
-            if (user) {
-                collection = "register";
-                Model = Register;
-            }
-        }
-
-        if (!user) {
-            throw new Error(AuthErrorType.EmailNotFound);
-        }
-
-        const hashedPassword = await bcrypt.hash(params.newPassword, 10);
-        await Model.updateOne({ email }, { password: hashedPassword });
-
-        const token = jwt.sign(
-            { userId: user._id, email: user.email, collection },
-            process.env.JWT_SECRET || "your-secret-key",
-            { expiresIn: "1h" }
-        );
+        // `params.newPassword` is expected to be already hashed by the Use Case.
+        await Model.updateOne({ email: params.email }, { password: params.newPassword });
 
         return {
-            token,
+            token: "", // Placeholder: generated by Use Case
             user: {
                 firstName: user.firstName,
                 lastName: user.lastName,
@@ -358,22 +253,20 @@ export class AuthRepository implements IAuthRepository {
         };
     }
 
-    async confirmRegistration(token: string): Promise<{ message: string }> {
-        let payload: { email: string };
-        try {
-            payload = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key") as { email: string };
-        } catch (err) {
-            throw new Error("Invalid or expired confirmation token");
-        }
-        const user = await Register.findOne({ email: payload.email });
+    // --- CONFIRM REGISTRATION (UPDATED SIGNATURE) ---
+    async confirmRegistration(email: string): Promise<{ message: string }> {
+        const user = await Register.findOne({ email: email });
+
         if (!user) {
-            throw new Error("User not found");
+            throw new UserNotFoundError("User for confirmation not found.");
         }
         if (!user.pending) {
-            throw new Error("User already confirmed");
+            throw new AlreadyConfirmedError("User account is already confirmed.");
         }
+
         user.pending = false;
         await user.save();
+
         return { message: "Email confirmed successfully. You can now log in." };
     }
 }

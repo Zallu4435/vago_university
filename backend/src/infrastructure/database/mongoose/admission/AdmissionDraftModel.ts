@@ -1,26 +1,14 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
+import { IAdmissionDraft } from "../../../../domain/admission/entities/AdmissionTypes";
 
-interface IAdmissionDraft extends Document {
-  applicationId: string;
-  registerId: mongoose.Types.ObjectId;
-  personal: any;
-  choiceOfStudy: any[];
-  education: any;
-  achievements: any;
-  otherInformation: any;
-  documents: any;
-  declaration: any;
-  completedSteps: string[];
-  createdAt: Date;
-  updatedAt: Date;
-}
+interface IAdmissionDraftDocument extends Omit<IAdmissionDraft, 'id'>, Document {}
 
 const AdmissionDraftSchema: Schema = new Schema(
   {
     applicationId: { type: String, required: true, unique: true },
     registerId: { type: Schema.Types.ObjectId, required: true, ref: "Register" },
     personal: { type: Object, default: {} },
-    choiceOfStudy: { type: Array, default: [] },
+    choiceOfStudy: { type: [Schema.Types.Mixed], default: [] },
     education: { type: Object, default: {} },
     achievements: { type: Object, default: {} },
     otherInformation: { type: Object, default: {} },
@@ -31,5 +19,5 @@ const AdmissionDraftSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-export const AdmissionDraft: Model<IAdmissionDraft> =
-  mongoose.models.AdmissionDraft || mongoose.model<IAdmissionDraft>("AdmissionDraft", AdmissionDraftSchema);
+export const AdmissionDraft: Model<IAdmissionDraftDocument> =
+  mongoose.models.AdmissionDraft || mongoose.model<IAdmissionDraftDocument>("AdmissionDraft", AdmissionDraftSchema);

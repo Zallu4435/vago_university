@@ -21,8 +21,8 @@ import {
 } from "../../../domain/admin/dtos/AdmissionResponseDTOs";
 import { IAdmissionRepository } from "../../../application/admin/repositories/IAdmissionRepository";
 import { Admission as AdmissionModel } from '../../database/mongoose/admission/AdmissionModel'
-import { Register } from "../../database/mongoose/models/register.model";
-import { User } from "../../database/mongoose/models/user.model";
+import { Register } from "../../database/mongoose/auth/register.model";
+import { User } from "../../database/mongoose/auth/user.model";
 import { ProgramModel } from "../../database/mongoose/models/studentProgram.model";
 
 

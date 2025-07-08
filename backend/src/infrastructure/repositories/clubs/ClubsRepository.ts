@@ -25,7 +25,7 @@ import {
   } from "../../../domain/clubs/dtos/ClubRequestResponseDTOs";
   import { IClubsRepository } from "../../../application/clubs/repositories/IClubsRepository";
   import { ClubModel, ClubRequestModel } from "../../../infrastructure/database/mongoose/models/clubs/ClubModel";
-  import { User as UserModel } from "../../../infrastructure/database/mongoose/models/user.model";
+  import { User as UserModel } from "../../database/mongoose/auth/user.model";
   import { Club, ClubStatus } from "../../../domain/clubs/entities/Club";
   import { ClubRequest, ClubRequestStatus } from "../../../domain/clubs/entities/ClubRequest";
   import mongoose from "mongoose";

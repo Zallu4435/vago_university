@@ -8,7 +8,8 @@ import {
   DeleteAdmissionUseCase,
   ConfirmAdmissionOfferUseCase,
 } from "../../../application/admin/useCases/AdmissionUseCases";
-import { Admission } from "../../../infrastructure/database/mongoose/models/admission.model";
+import { Admission } from "../../../infrastructure/database/mongoose/admission/AdmissionModel";
+
 
 export class AdminAdmissionController implements IAdminAdmissionController {
   private httpErrors: HttpErrors;

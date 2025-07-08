@@ -12,8 +12,9 @@ import { FormSubmissionFlow } from '../components/form/FormSubmissionFlow';
 import { useApplicationForm, useApplicationData } from '../../application/hooks/useApplicationForm';
 import styles from './ApplicationForm.module.css';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../redux/store';
+import { logout } from '../redux/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
@@ -34,7 +35,11 @@ interface FormData {
   registerId?: string;
 }
 
-export const ApplicationForm: React.FC = () => {
+interface ApplicationFormProps {
+  onLogout?: () => void;
+}
+
+export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState('personalDetails');
   const [formProgress, setFormProgress] = useState(0);
   const [wavePosition, setWavePosition] = useState(0);
@@ -51,6 +56,7 @@ export const ApplicationForm: React.FC = () => {
   const choiceOfStudyRef = useRef<{ trigger: () => Promise<boolean>; getValues: () => ProgrammeChoice[] }>(null);
 
   const { token, user, collection } = useAuth();
+  const dispatch = useDispatch();
   const [applicationId, setApplicationId] = useState<string | undefined>(undefined);
 
   const methods = useForm<FormData>({
@@ -523,6 +529,8 @@ export const ApplicationForm: React.FC = () => {
     }
   };
 
+  const handleLogout = onLogout || (() => dispatch(logout()));
+
   if (isInitializing || isFetching) {
     return (
       <div className="container mx-auto py-8 px-4 max-w-6xl flex items-center justify-center h-64">
@@ -586,6 +594,7 @@ export const ApplicationForm: React.FC = () => {
         }}
         onBackToForm={() => setShowSummary(false)}
         token={token}
+        onLogout={handleLogout}
       />
     );
   }
@@ -611,6 +620,7 @@ export const ApplicationForm: React.FC = () => {
           setValue('declaration', { privacyPolicy: false, marketingEmail: false, marketingCall: false }, { shouldValidate: false });
         }}
         token={token}
+        onLogout={handleLogout}
       />
     );
   }

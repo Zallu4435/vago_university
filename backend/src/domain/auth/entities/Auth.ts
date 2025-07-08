@@ -1,30 +1,9 @@
 import mongoose from "mongoose";
 import { AuthErrorType } from "../enums/AuthErrorType";
-
-export interface UserProps {
-  _id?: mongoose.Types.ObjectId;
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  profilePicture?: string;
-}
-
-export interface FacultyProps {
-  _id?: mongoose.Types.ObjectId;
-  fullName: string;
-  email: string;
-  phone: string;
-  department: string;
-  qualification: string;
-  experience: string;
-  aboutMe: string;
-  cvUrl?: string;
-  certificatesUrl?: string[];
-}
+import { UserProps, FacultyProps } from "./AuthTypes";
 
 export class User {
-  private _id?: mongoose.Types.ObjectId;
+  private _id?: string;
   private _firstName: string;
   private _lastName: string;
   private _email: string;
@@ -32,7 +11,7 @@ export class User {
   private _profilePicture?: string;
 
   constructor(props: UserProps) {
-    this._id = props._id;
+    this._id = props.id;
     this._firstName = props.firstName;
     this._lastName = props.lastName;
     this._email = props.email;
@@ -42,12 +21,12 @@ export class User {
 
   static create(props: UserProps): User {
     if (!props.firstName || !props.lastName || !props.email || !props.password) {
-      throw new Error(AuthErrorType.MissingRequiredFields);
+      throw new Error('Missing required fields');
     }
     return new User(props);
   }
 
-  get id(): mongoose.Types.ObjectId | undefined { return this._id; }
+  get id(): string | undefined { return this._id; }
   get firstName(): string { return this._firstName; }
   get lastName(): string { return this._lastName; }
   get email(): string { return this._email; }
@@ -56,7 +35,7 @@ export class User {
 }
 
 export class Faculty {
-  private _id?: mongoose.Types.ObjectId;
+  private _id?: string;
   private _fullName: string;
   private _email: string;
   private _phone: string;
@@ -68,7 +47,7 @@ export class Faculty {
   private _certificatesUrl?: string[];
 
   constructor(props: FacultyProps) {
-    this._id = props._id;
+    this._id = props.id;
     this._fullName = props.fullName;
     this._email = props.email;
     this._phone = props.phone;
@@ -82,12 +61,12 @@ export class Faculty {
 
   static create(props: FacultyProps): Faculty {
     if (!props.fullName || !props.email || !props.phone || !props.department || !props.qualification || !props.experience || !props.aboutMe) {
-      throw new Error(AuthErrorType.MissingRequiredFields);
+      throw new Error('Missing required fields');
     }
     return new Faculty(props);
   }
 
-  get id(): mongoose.Types.ObjectId | undefined { return this._id; }
+  get id(): string | undefined { return this._id; }
   get fullName(): string { return this._fullName; }
   get email(): string { return this._email; }
   get phone(): string { return this._phone; }

@@ -22,6 +22,7 @@ interface FormSubmissionFlowProps {
   onBackToForm?: () => void;
   onConfirm?: () => void;
   token: string | null;
+  onLogout?: () => void; // Added onLogout prop
 }
 
 export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
@@ -29,7 +30,8 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
   onPaymentComplete,
   onBackToForm,
   onConfirm,
-  token
+  token,
+  onLogout
 }) => {
   const [showPayment, setShowPayment] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -53,16 +55,10 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
     return String(value);
   };
 
-  const handleStartNewApplication = () => {
-    localStorage.removeItem('applicationId');
-    if (onPaymentComplete) {
-      onPaymentComplete();
-    }
-  };
-
   const handleRedirectToHome = () => {
     localStorage.removeItem('applicationId');
-    window.location.href = '/';
+    if (onLogout) onLogout(); // Log out the user
+    window.location.href = '/'; // Redirect to home
   };
 
   const handleViewDocument = (document: DocumentUpload) => {
@@ -147,11 +143,6 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                   Application ID: <span className="font-semibold text-cyan-700">{formData.applicationId}</span>
             </p>
                 <div className="flex justify-center space-x-6">
-              {/* <Button
-                label="Start New Application"
-                onClick={handleStartNewApplication}
-                    className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-sm"
-              /> */}
               <Button
                 label="Return to Home"
                 onClick={handleRedirectToHome}

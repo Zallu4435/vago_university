@@ -1,208 +1,174 @@
-import mongoose from "mongoose";
-import { AdmissionErrorType } from "../../../domain/admission/enums/AdmissionErrorType";
 import {
-    CreateApplicationRequestDTO,
-    GetApplicationRequestDTO,
-    SaveSectionRequestDTO,
-    ProcessPaymentRequestDTO,
-    ConfirmPaymentRequestDTO,
-    FinalizeAdmissionRequestDTO,
-    UploadDocumentRequestDTO,
-    UploadMultipleDocumentsRequestDTO,
+    CreateApplicationRequestDTO, GetApplicationRequestDTO, SaveSectionRequestDTO, ProcessPaymentRequestDTO, ConfirmPaymentRequestDTO, FinalizeAdmissionRequestDTO, UploadDocumentRequestDTO, UploadMultipleDocumentsRequestDTO,
 } from "../../../domain/admission/dtos/AdmissionRequestDTOs";
 import {
-    CreateApplicationResponseDTO,
-    GetApplicationResponseDTO,
-    SaveSectionResponseDTO,
-    ProcessPaymentResponseDTO,
-    ConfirmPaymentResponseDTO,
-    FinalizeAdmissionResponseDTO,
-    UploadDocumentResponseDTO,
-    UploadMultipleDocumentsResponseDTO,
+    CreateApplicationResponseDTO, GetApplicationResponseDTO, SaveSectionResponseDTO, ProcessPaymentResponseDTO, ConfirmPaymentResponseDTO, FinalizeAdmissionResponseDTO, UploadDocumentResponseDTO, UploadMultipleDocumentsResponseDTO,
 } from "../../../domain/admission/dtos/AdmissionResponseDTOs";
-
 import { IAdmissionsRepository } from "../repositories/IAdmissionsRepository";
+import {
+    InvalidUserIdException, InvalidSectionException, PaymentProcessingFailedException, PaymentNotFoundException, AdmissionFinalizationFailedException, DocumentUploadFailedException
+} from "../../../domain/admission/errors/AdmissionErrors";
+import { isValidObjectId } from "mongoose";
+import { IAdmissionDraft, IAdmission } from '../../../domain/admission/entities/AdmissionTypes';
 
-interface ResponseDTO<T> {
-    data: T | { error: string };
-    success: boolean;
+function mapToIAdmissionDraft(draft: any): IAdmissionDraft {
+    return {
+        id: draft._id?.toString(),
+        applicationId: draft.applicationId,
+        registerId: draft.registerId,
+        personal: draft.personal,
+        choiceOfStudy: draft.choiceOfStudy,
+        education: draft.education,
+        achievements: draft.achievements,
+        otherInformation: draft.otherInformation,
+        documents: draft.documents,
+        declaration: draft.declaration,
+        completedSteps: draft.completedSteps,
+        createdAt: draft.createdAt,
+        updatedAt: draft.updatedAt,
+    };
 }
 
-export interface ICreateApplicationUseCase {
-    execute(params: CreateApplicationRequestDTO): Promise<ResponseDTO<CreateApplicationResponseDTO>>;
+function mapToIAdmission(admission: any): IAdmission {
+    return {
+        id: admission._id?.toString(),
+        applicationId: admission.applicationId,
+        registerId: admission.registerId,
+        personal: admission.personal,
+        choiceOfStudy: admission.choiceOfStudy,
+        education: admission.education,
+        achievements: admission.achievements,
+        otherInformation: admission.otherInformation,
+        documents: admission.documents,
+        declaration: admission.declaration,
+        completedSteps: admission.completedSteps,
+        createdAt: admission.createdAt,
+        updatedAt: admission.updatedAt,
+        paymentId: admission.paymentId?.toString(),
+        status: admission.status,
+        rejectedBy: admission.rejectedBy,
+        confirmationToken: admission.confirmationToken,
+        tokenExpiry: admission.tokenExpiry,
+    };
 }
 
-export interface IGetApplicationUseCase {
-    execute(params: GetApplicationRequestDTO): Promise<ResponseDTO<GetApplicationResponseDTO>>;
-}
-
-export interface ISaveSectionUseCase {
-    execute(params: SaveSectionRequestDTO): Promise<ResponseDTO<SaveSectionResponseDTO>>;
-}
-
-export interface IProcessPaymentUseCase {
-    execute(params: ProcessPaymentRequestDTO): Promise<ResponseDTO<ProcessPaymentResponseDTO>>;
-}
-
-export interface IConfirmPaymentUseCase {
-    execute(params: ConfirmPaymentRequestDTO): Promise<ResponseDTO<ConfirmPaymentResponseDTO>>;
-}
-
-export interface IUploadDocumentUseCase {
-    execute(params: UploadDocumentRequestDTO): Promise<ResponseDTO<UploadDocumentResponseDTO>>;
-}
-
-export interface IUploadMultipleDocumentsUseCase {
-    execute(params: UploadMultipleDocumentsRequestDTO): Promise<ResponseDTO<UploadMultipleDocumentsResponseDTO>>;
-}
-
-export interface IFinalizeAdmissionUseCase {
-    execute(params: FinalizeAdmissionRequestDTO): Promise<ResponseDTO<FinalizeAdmissionResponseDTO>>;
-}
-
-export class CreateApplicationUseCase implements ICreateApplicationUseCase {
+export class CreateApplicationUseCase {
     constructor(private admissionsRepository: IAdmissionsRepository) { }
-
-    async execute(params: CreateApplicationRequestDTO): Promise<ResponseDTO<CreateApplicationResponseDTO>> {
-        try {
-            if (!mongoose.Types.ObjectId.isValid(params.userId)) {
-                return { data: { error: AdmissionErrorType.InvalidRegisterId }, success: false };
-            }
-            const result = await this.admissionsRepository.createApplication(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("CreateApplicationUseCase: Error:", error);
-            return { data: { error: error.message || AdmissionErrorType.ApplicationNotFound }, success: false };
+    async execute(params: CreateApplicationRequestDTO): Promise<CreateApplicationResponseDTO> {
+        if (!params.userId || !isValidObjectId(params.userId)) {
+            throw new InvalidUserIdException();
         }
+        return this.admissionsRepository.createApplication(params);
     }
 }
 
-export class GetApplicationUseCase implements IGetApplicationUseCase {
+export class GetApplicationUseCase {
     constructor(private admissionsRepository: IAdmissionsRepository) { }
-
-    async execute(params: GetApplicationRequestDTO): Promise<ResponseDTO<GetApplicationResponseDTO>> {
-        try {
-            if (!mongoose.Types.ObjectId.isValid(params.userId)) {
-                return { data: { error: AdmissionErrorType.InvalidRegisterId }, success: false };
-            }
-            const result = await this.admissionsRepository.getApplication(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("GetApplicationUseCase: Error:", error);
-            return { data: { error: error.message || AdmissionErrorType.ApplicationNotFound }, success: false };
+    async execute(params: GetApplicationRequestDTO): Promise<GetApplicationResponseDTO> {
+        if (!params.userId || !isValidObjectId(params.userId)) {
+            throw new InvalidUserIdException();
         }
+        const draft = await this.admissionsRepository.findDraftByRegisterId(params.userId);
+        return {
+            draft: draft ? mapToIAdmissionDraft(draft) : null,
+        };
     }
 }
 
-export class SaveSectionUseCase implements ISaveSectionUseCase {
+export class SaveSectionUseCase {
     constructor(private admissionsRepository: IAdmissionsRepository) { }
-
-    async execute(params: SaveSectionRequestDTO): Promise<ResponseDTO<SaveSectionResponseDTO>> {
-        try {
+    async execute(params: SaveSectionRequestDTO): Promise<SaveSectionResponseDTO> {
             const validSections = [
-                "personalInfo",
-                "choiceOfStudy",
-                "education",
-                "achievements",
-                "otherInformation",
-                "documents",
-                "declaration",
+            "personalInfo", "choiceOfStudy", "education", "achievements", "otherInformation", "documents", "declaration"
             ];
             if (!validSections.includes(params.section)) {
-                return { data: { error: AdmissionErrorType.InvalidSection }, success: false };
-            }
-            const result = await this.admissionsRepository.saveSection(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("SaveSectionUseCase: Error:", error);
-            return { data: { error: error.message || AdmissionErrorType.ApplicationNotFound }, success: false };
+            throw new InvalidSectionException();
         }
+        const draft = await this.admissionsRepository.findDraftByApplicationId(params.applicationId);
+        if (!draft) throw new Error("Application not found");
+
+        const sectionMap: { [key: string]: string } = {
+            personalInfo: "personal",
+            choiceOfStudy: "choiceOfStudy",
+            education: "education",
+            achievements: "achievements",
+            otherInformation: "otherInformation",
+            documents: "documents",
+            declaration: "declaration",
+        };
+        const field = sectionMap[params.section];
+        if (!field) throw new InvalidSectionException();
+
+        draft[field] = params.data;
+        if (!draft.completedSteps.includes(field)) {
+            draft.completedSteps.push(field);
+        }
+        await this.admissionsRepository.saveDraft(draft);
+
+        return {
+            success: true,
+            message: "Section saved successfully",
+            data: mapToIAdmissionDraft(draft),
+        };
     }
 }
 
-export class ProcessPaymentUseCase implements IProcessPaymentUseCase {
+export class ProcessPaymentUseCase {
     constructor(private admissionsRepository: IAdmissionsRepository) { }
-
-    async execute(params: ProcessPaymentRequestDTO): Promise<ResponseDTO<ProcessPaymentResponseDTO>> {
-        try {
+    async execute(params: ProcessPaymentRequestDTO): Promise<ProcessPaymentResponseDTO> {
             if (!params.applicationId || !params.paymentDetails) {
-                return { data: { error: AdmissionErrorType.PaymentProcessingFailed }, success: false };
-            }
-            const result = await this.admissionsRepository.processPayment(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("ProcessPaymentUseCase: Error:", error);
-            return { data: { error: error.message || AdmissionErrorType.PaymentProcessingFailed }, success: false };
+            throw new PaymentProcessingFailedException();
         }
+        return this.admissionsRepository.processPayment(params);
     }
 }
 
-export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
+export class ConfirmPaymentUseCase {
     constructor(private admissionsRepository: IAdmissionsRepository) { }
-
-    async execute(params: ConfirmPaymentRequestDTO): Promise<ResponseDTO<ConfirmPaymentResponseDTO>> {
-        try {
-            
+    async execute(params: ConfirmPaymentRequestDTO): Promise<ConfirmPaymentResponseDTO> {
             if (!params.paymentId || !params.stripePaymentIntentId) {
-                return { data: { error: AdmissionErrorType.PaymentProcessingFailed }, success: false };
-            }
-            
-            const result = await this.admissionsRepository.confirmPayment(params);
-            
-            return { data: result, success: true };
-        } catch (error: any) {
-            return { data: { error: error.message || AdmissionErrorType.PaymentProcessingFailed }, success: false };
+            throw new PaymentProcessingFailedException();
         }
+        return this.admissionsRepository.confirmPayment(params);
     }
 }
 
-export class FinalizeAdmissionUseCase implements IFinalizeAdmissionUseCase {
+export class FinalizeAdmissionUseCase {
     constructor(private admissionsRepository: IAdmissionsRepository) { }
-
-    async execute(params: FinalizeAdmissionRequestDTO): Promise<ResponseDTO<FinalizeAdmissionResponseDTO>> {
-        try {
+    async execute(params: FinalizeAdmissionRequestDTO): Promise<FinalizeAdmissionResponseDTO> {
             if (!params.applicationId || !params.paymentId) {
-                return { data: { error: AdmissionErrorType.InvalidApplicationId }, success: false };
-            }
-            const result = await this.admissionsRepository.finalizeAdmission(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("FinalizeAdmissionUseCase: Error:", error);
-            return { data: { error: error.message || AdmissionErrorType.ApplicationNotFound }, success: false };
+            throw new AdmissionFinalizationFailedException();
         }
+        const result = await this.admissionsRepository.finalizeAdmission(params);
+        return {
+            admission: mapToIAdmission(result.admission),
+        };
     }
 }
 
-export class UploadDocumentUseCase implements IUploadDocumentUseCase {
+export class UploadDocumentUseCase {
     constructor(private admissionsRepository: IAdmissionsRepository) { }
-
-    async execute(params: UploadDocumentRequestDTO): Promise<ResponseDTO<UploadDocumentResponseDTO>> {
-        try {
+    async execute(params: UploadDocumentRequestDTO): Promise<UploadDocumentResponseDTO> {
             if (!params.applicationId || !params.file) {
-                return { data: { error: 'Document upload failed' }, success: false };
-            }
-            const result = await this.admissionsRepository.uploadDocument(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("UploadDocumentUseCase: Error:", error);
-            return { data: { error: error.message || 'Document upload failed' }, success: false };
+            throw new DocumentUploadFailedException();
         }
+        return this.admissionsRepository.uploadDocument(params);
     }
 }
 
-export class UploadMultipleDocumentsUseCase implements IUploadMultipleDocumentsUseCase {
+export class UploadMultipleDocumentsUseCase {
     constructor(private admissionsRepository: IAdmissionsRepository) { }
-
-    async execute(params: UploadMultipleDocumentsRequestDTO): Promise<ResponseDTO<UploadMultipleDocumentsResponseDTO>> {
-        try {
+    async execute(params: UploadMultipleDocumentsRequestDTO): Promise<UploadMultipleDocumentsResponseDTO> {
             if (!params.applicationId || !params.files) {
-                return { data: { error: 'Documents upload failed' }, success: false };
-            }
-            const result = await this.admissionsRepository.uploadMultipleDocuments(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("UploadMultipleDocumentsUseCase: Error:", error);
-            return { data: { error: error.message || 'Documents upload failed' }, success: false };
+            throw new DocumentUploadFailedException();
         }
+        return this.admissionsRepository.uploadMultipleDocuments(params);
+    }
+}
+
+export class GetDocumentByKeyUseCase {
+    constructor(private admissionsRepository: IAdmissionsRepository) { }
+    async execute(params: { userId: string; documentKey: string }): Promise<any | null> {
+        return this.admissionsRepository.getDocumentByKey(params);
     }
 }

@@ -1,35 +1,19 @@
-import { User, Faculty } from "../entities/Auth";
+import { IUser, FacultyProps } from "../entities/AuthTypes";
 
 export interface RegisterResponseDTO {
   message: string;
-  user: {
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
+  user: Pick<IUser, "firstName" | "lastName" | "email"> & { id: string };
 }
 
 export interface LoginResponseDTO {
   token: string;
-  user: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    id: string;
-    profilePicture?: string;
-  };
+  user: Pick<IUser, "firstName" | "lastName" | "email" | "id" | "profilePicture"> & { password: string };
   collection: "register" | "admin" | "user" | "faculty";
 }
 
 export interface RefreshTokenResponseDTO {
   token: string;
-  user: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    id: string;
-    profilePicture?: string;
-  };
+  user: Pick<IUser, "firstName" | "lastName" | "email" | "id" | "profilePicture">;
   collection: "register" | "admin" | "user" | "faculty";
 }
 
@@ -39,13 +23,7 @@ export interface LogoutResponseDTO {
 
 export interface RegisterFacultyResponseDTO {
   token: string;
-  user: {
-    fullName: string;
-    email: string;
-    phone: string;
-    department: string;
-    id: string;
-  };
+  user: Pick<FacultyProps, "fullName" | "email" | "phone" | "department" | "id">;
   collection: "faculty";
 }
 
@@ -59,12 +37,6 @@ export interface VerifyEmailOtpResponseDTO {
 
 export interface ResetPasswordResponseDTO {
   token: string;
-  user: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    id: string;
-    profilePicture?: string;
-  };
+  user: Pick<IUser, "firstName" | "lastName" | "email" | "id" | "profilePicture">;
   collection: "register" | "admin" | "user" | "faculty";
 }

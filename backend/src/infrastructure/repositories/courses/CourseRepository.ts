@@ -23,7 +23,7 @@ import {
   } from "../../../domain/courses/dtos/EnrollmentRequestDTOs";
   import { ICoursesRepository } from "../../../application/courses/repositories/ICoursesRepository";
   import { CourseModel, EnrollmentModel } from "../../../infrastructure/database/mongoose/models/courses/CourseModel";
-  import { User as UserModel } from "../../../infrastructure/database/mongoose/models/user.model";
+  import { User as UserModel } from "../../database/mongoose/auth/user.model";
   import { Course } from "../../../domain/courses/entities/Course";
   import { Enrollment, EnrollmentStatus } from "../../../domain/courses/entities/CourseEnrollment";
   import { CourseErrorType } from "../../../domain/courses/enums/CourseErrorType";

@@ -9,7 +9,7 @@ import {
   RefreshDashboardRequestDTO,
   DismissAlertRequestDTO,
   MarkActivityAsReadRequestDTO,
-} from "../../../domain/admin/dtos/DashboardRequestDTOs";
+} from "../../../domain/admindashboard/dtos/DashboardRequestDTOs";
 import {
   GetDashboardDataResponseDTO,
   GetDashboardMetricsResponseDTO,
@@ -21,7 +21,7 @@ import {
   RefreshDashboardResponseDTO,
   DismissAlertResponseDTO,
   MarkActivityAsReadResponseDTO,
-} from "../../../domain/admin/dtos/DashboardResponseDTOs";
+} from "../../../domain/admindashboard/dtos/DashboardResponseDTOs";
 
 export interface IDashboardRepository {
   getDashboardData(params: GetDashboardDataRequestDTO): Promise<GetDashboardDataResponseDTO>;

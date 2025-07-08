@@ -1,39 +1,41 @@
+import { AdminAdmission, AdminAdmissionStatus } from '../entities/AdminAdmissionTypes';
+
 export interface AdmissionResponseDTO {
     _id: string;
     fullName: string;
     email: string;
     createdAt: string;
-    status: "pending" | "approved" | "rejected" | "offered";
+    status: AdminAdmissionStatus;
     program: string;
-  }
+}
   
-  export interface GetAdmissionsResponseDTO {
+export interface GetAdmissionsResponseDTO {
     admissions: AdmissionResponseDTO[];
     totalAdmissions: number;
     totalPages: number;
     currentPage: number;
-  }
+}
   
-  export interface GetAdmissionByIdResponseDTO {
-    admission: any;
-  }
+export interface GetAdmissionByIdResponseDTO {
+    admission: AdminAdmission;
+}
   
-  export interface GetAdmissionByTokenResponseDTO {
-    admission: any;
-  }
+export interface GetAdmissionByTokenResponseDTO {
+    admission: AdminAdmission;
+}
   
-  export interface ApproveAdmissionResponseDTO {
+export interface ApproveAdmissionResponseDTO {
     message: string;
-  }
+}
   
-  export interface RejectAdmissionResponseDTO {
+export interface RejectAdmissionResponseDTO {
     message: string;
-  }
+}
   
-  export interface DeleteAdmissionResponseDTO {
+export interface DeleteAdmissionResponseDTO {
     message: string;
-  }
+}
   
-  export interface ConfirmAdmissionOfferResponseDTO {
+export interface ConfirmAdmissionOfferResponseDTO {
     message: string;
-  }
+}

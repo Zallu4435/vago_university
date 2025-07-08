@@ -16,14 +16,17 @@ const facultyStorage = new CloudinaryStorage({
     allowed_formats: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
     resource_type: (req: any, file: any) => {
       const ext = file.originalname.split('.').pop()?.toLowerCase();
-      if (['pdf', 'doc', 'docx'].includes(ext)) return 'raw';
-      return 'image';
+      const type = (['pdf', 'doc', 'docx'].includes(ext)) ? 'raw' : 'image';
+      console.log('[Cloudinary] resource_type:', type, 'for', file.originalname);
+      return type;
     },
     public_id: (req: any, file: any) => {
       const timestamp = Date.now();
       const originalName = file.originalname.split('.')[0];
       const fieldName = file.fieldname; // 'cv' or 'certificates'
-      return `faculty_${fieldName}_${timestamp}_${originalName}`;
+      const id = `faculty_${fieldName}_${timestamp}_${originalName}`;
+      console.log('[Cloudinary] public_id:', id);
+      return id;
     }
   } as any,
 });

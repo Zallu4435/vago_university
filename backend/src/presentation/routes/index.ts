@@ -26,7 +26,7 @@ import userSiteSectionRoutes from '../http/site-management/userSiteSectionRoutes
 import enquiryRoutes from '../http/enquiry/enquiryRouter'
 import sessionRoutes from '../http/session/sessionRoutes'
 import facultyDashboardRoutes from '../http/faculty-dashboard/facultyDashboard.routes'
-import dashboardRoutes from '../http/admin/dashboardRouter'
+import dashboardRoutes from '../http/admindashboard/dashboardRouter'
 
 const router = Router();
 

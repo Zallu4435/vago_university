@@ -5,8 +5,8 @@ import { getUserSiteSectionsComposer } from '../../../infrastructure/services/si
 const userSiteSectionRouter = Router();
 const userSiteSectionController = getUserSiteSectionsComposer();
 
-userSiteSectionRouter.get('/', (req, res) =>
-  expressAdapter(req, res, userSiteSectionController.getSections.bind(userSiteSectionController))
+userSiteSectionRouter.get('/', (req, res, next) =>
+  expressAdapter(req, res, next, userSiteSectionController.getSections.bind(userSiteSectionController))
 );
 
 export default userSiteSectionRouter; 

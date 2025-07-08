@@ -10,43 +10,43 @@ const facultyController = getFacultyComposer();
 facultyRouter.post(
   "/:id/confirm/:action",
   async (req, res, next) => {
-    await expressAdapter(req, res, facultyController.confirmFacultyOffer.bind(facultyController));
+    await expressAdapter(req, res, next, facultyController.confirmFacultyOffer.bind(facultyController));
   }
 );
 
 facultyRouter.get(
   "/:id/token",
   async (req, res, next) => {
-    await expressAdapter(req, res, facultyController.getFacultyByToken.bind(facultyController));
+    await expressAdapter(req, res, next, facultyController.getFacultyByToken.bind(facultyController));
   }
 );
 
 // Protected routes (auth required)
 facultyRouter.get("/", authMiddleware, async (req, res, next) => {
-  await expressAdapter(req, res, facultyController.getFaculty.bind(facultyController));
+  await expressAdapter(req, res, next, facultyController.getFaculty.bind(facultyController));
 });
 
 facultyRouter.get("/:id", authMiddleware, async (req, res, next) => {
-  await expressAdapter(req, res, facultyController.getFacultyById.bind(facultyController));
+  await expressAdapter(req, res, next, facultyController.getFacultyById.bind(facultyController));
 });
 
 facultyRouter.post("/:id/approve", authMiddleware, async (req, res, next) => {
-  await expressAdapter(req, res, facultyController.approveFaculty.bind(facultyController));
+  await expressAdapter(req, res, next, facultyController.approveFaculty.bind(facultyController));
 });
 
 facultyRouter.post("/:id/reject", authMiddleware, async (req, res, next) => {
-  await expressAdapter(req, res, facultyController.rejectFaculty.bind(facultyController));
+  await expressAdapter(req, res, next, facultyController.rejectFaculty.bind(facultyController));
 });
 
 facultyRouter.delete("/:id", authMiddleware, async (req, res, next) => {
-  await expressAdapter(req, res, facultyController.deleteFaculty.bind(facultyController));
+  await expressAdapter(req, res, next, facultyController.deleteFaculty.bind(facultyController));
 });
 
 facultyRouter.get(
   "/:facultyId/document",
   authMiddleware,
   async (req, res, next) => {
-    await expressAdapter(req, res, facultyController.downloadCertificate.bind(facultyController));
+    await expressAdapter(req, res, next, facultyController.downloadCertificate.bind(facultyController));
   }
 );
 
@@ -55,7 +55,7 @@ facultyRouter.get(
   "/:facultyId/documents",
   authMiddleware,
   async (req, res, next) => {
-    await expressAdapter(req, res, facultyController.serveDocument.bind(facultyController));
+    await expressAdapter(req, res, next, facultyController.serveDocument.bind(facultyController));
   }
 );
 

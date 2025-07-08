@@ -20,9 +20,10 @@ import {
 } from "../../../domain/faculty/dtos/FacultyResponseDTOs";
 
 export interface IFacultyRepository {
-    getFaculty(params: GetFacultyRequestDTO): Promise<GetFacultyResponseDTO>;
-    getFacultyById(params: GetFacultyByIdRequestDTO): Promise<GetFacultyByIdResponseDTO>;
-    getFacultyByToken(params: GetFacultyByTokenRequestDTO): Promise<GetFacultyByTokenResponseDTO>;
+    findFaculty(query: any, options: { skip?: number; limit?: number; select?: string }): Promise<any[]>;
+    countFaculty(query: any): Promise<number>;
+    getFacultyById(params: GetFacultyByIdRequestDTO): Promise<any>;
+    getFacultyByToken(params: GetFacultyByTokenRequestDTO): Promise<any>;
     approveFaculty(params: ApproveFacultyRequestDTO): Promise<ApproveFacultyResponseDTO>;
     rejectFaculty(params: RejectFacultyRequestDTO): Promise<RejectFacultyResponseDTO>;
     deleteFaculty(params: DeleteFacultyRequestDTO): Promise<DeleteFacultyResponseDTO>;

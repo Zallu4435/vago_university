@@ -11,13 +11,15 @@ import {
 import { AdmissionRepository } from '../../repositories/admin/AdmissionRepository';
 import { AdminAdmissionController } from '../../../presentation/http/admin/AdmissionController';
 import { IAdminAdmissionController } from '../../../presentation/http/IHttp';
+import { emailService } from '../../services/email.service';
+import { config } from '../../../config/config';
 
 export function getAdminAdmissionsComposer(): IAdminAdmissionController {
     const repository: IAdmissionRepository = new AdmissionRepository();
     const getAdmissionsUseCase = new GetAdmissionsUseCase(repository);
     const getAdmissionByIdUseCase = new GetAdmissionByIdUseCase(repository);
     const getAdmissionByTokenUseCase = new GetAdmissionByTokenUseCase(repository);
-    const approveAdmissionUseCase = new ApproveAdmissionUseCase(repository);
+    const approveAdmissionUseCase = new ApproveAdmissionUseCase(repository, emailService, config);
     const rejectAdmissionUseCase = new RejectAdmissionUseCase(repository);
     const deleteAdmissionUseCase = new DeleteAdmissionUseCase(repository);
     const confirmAdmissionOfferUseCase = new ConfirmAdmissionOfferUseCase(repository);

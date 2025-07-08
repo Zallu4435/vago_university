@@ -1,4 +1,4 @@
-import { AdminDashboardController } from '../../../presentation/http/admin/DashboardController';
+import { AdminDashboardController } from '../../../presentation/http/admindashboard/DashboardController';
 import {
   GetDashboardDataUseCase,
   GetDashboardMetricsUseCase,
@@ -10,8 +10,8 @@ import {
   RefreshDashboardUseCase,
   DismissAlertUseCase,
   MarkActivityAsReadUseCase,
-} from '../../../application/admin/useCases/DashboardUseCases';
-import { DashboardRepository } from '../../repositories/admin/DashboardRepository';
+} from '../../../application/admindashboard/useCases/DashboardUseCases';
+import { DashboardRepository } from '../../repositories/admindashboard/DashboardRepository';
 
 export function getAdminDashboardComposer() {
   // Create repository

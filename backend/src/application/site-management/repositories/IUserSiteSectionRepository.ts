@@ -1,6 +1,6 @@
-import { GetUserSiteSectionsRequestDTO } from '../../../domain/site-management/dtos/UserSiteSectionDTOs';
-import { GetUserSiteSectionsResponseDTO } from '../../../domain/site-management/dtos/UserSiteSectionDTOs';
+import { GetUserSiteSectionsRequestDTO, GetUserSiteSectionsResponseDTO } from '../../../domain/site-management/dtos/UserSiteSectionDTOs';
 
 export interface IUserSiteSectionRepository {
-  getUserSections(params: GetUserSiteSectionsRequestDTO): Promise<GetUserSiteSectionsResponseDTO>;
+  findSectionsRaw(query: any, skip: number, limit: number): Promise<any[]>;
+  countSectionsRaw(query: any): Promise<number>;
 } 

@@ -1,3 +1,5 @@
+// AdminDashboardTypes.ts
+
 export interface DashboardMetrics {
   totalUsers: number;
   totalRevenue: number;
@@ -51,46 +53,4 @@ export interface DashboardData {
   performance: PerformanceData[];
   activities: ActivityItem[];
   alerts: SystemAlert[];
-}
-
-export interface GetDashboardDataResponseDTO {
-  data: DashboardData;
-}
-
-export interface GetDashboardMetricsResponseDTO {
-  data: DashboardMetrics;
-}
-
-export interface GetUserGrowthDataResponseDTO {
-  data: UserGrowthData[];
-}
-
-export interface GetRevenueDataResponseDTO {
-  data: RevenueData[];
-}
-
-export interface GetPerformanceDataResponseDTO {
-  data: PerformanceData[];
-}
-
-export interface GetRecentActivitiesResponseDTO {
-  data: ActivityItem[];
-}
-
-export interface GetSystemAlertsResponseDTO {
-  data: SystemAlert[];
-}
-
-export interface RefreshDashboardResponseDTO {
-  data: DashboardData;
-}
-
-export interface DismissAlertResponseDTO {
-  success: boolean;
-  message: string;
-}
-
-export interface MarkActivityAsReadResponseDTO {
-  success: boolean;
-  message: string;
 } 

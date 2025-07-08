@@ -1,33 +1,20 @@
-import mongoose from "mongoose";
 import { AdmissionErrorType } from "../enums/AdmissionErrorType";
+import {
+  AdminAdmission,
+  AdminAdmissionStatus,
+  AdminAdmissionChoiceOfStudy,
+  AdminAdmissionPersonal
+} from "./AdminAdmissionTypes";
 
-export interface AdmissionProps {
-  _id?: mongoose.Types.ObjectId;
-  registerId: mongoose.Types.ObjectId;
-  applicationId: string;
-  personal: {
-    fullName: string;
-    emailAddress: string;
-  };
-  choiceOfStudy: Array<{
-    programme: string;
-    degree?: string;
-    catalogYear?: string;
-  }>;
-  status: "pending" | "approved" | "rejected" | "offered";
-  confirmationToken?: string;
-  tokenExpiry?: Date;
-  rejectedBy?: string;
-  createdAt?: Date;
-}
+export interface AdmissionProps extends AdminAdmission {}
 
 export class Admission {
-  private _id?: mongoose.Types.ObjectId;
-  private _registerId: mongoose.Types.ObjectId;
+  private _id?: string;
+  private _registerId: string;
   private _applicationId: string;
-  private _personal: { fullName: string; emailAddress: string };
-  private _choiceOfStudy: Array<{ programme: string; degree?: string; catalogYear?: string }>;
-  private _status: "pending" | "approved" | "rejected" | "offered";
+  private _personal: AdminAdmissionPersonal;
+  private _choiceOfStudy: AdminAdmissionChoiceOfStudy[];
+  private _status: AdminAdmissionStatus;
   private _confirmationToken?: string;
   private _tokenExpiry?: Date;
   private _rejectedBy?: string;
@@ -53,18 +40,18 @@ export class Admission {
     return new Admission(props);
   }
 
-  get id(): mongoose.Types.ObjectId | undefined { return this._id; }
-  get registerId(): mongoose.Types.ObjectId { return this._registerId; }
+  get id(): string | undefined { return this._id; }
+  get registerId(): string { return this._registerId; }
   get applicationId(): string { return this._applicationId; }
-  get personal(): { fullName: string; emailAddress: string } { return this._personal; }
-  get choiceOfStudy(): Array<{ programme: string; degree?: string; catalogYear?: string }> { return this._choiceOfStudy; }
-  get status(): "pending" | "approved" | "rejected" | "offered" { return this._status; }
+  get personal(): AdminAdmissionPersonal { return this._personal; }
+  get choiceOfStudy(): AdminAdmissionChoiceOfStudy[] { return this._choiceOfStudy; }
+  get status(): AdminAdmissionStatus { return this._status; }
   get confirmationToken(): string | undefined { return this._confirmationToken; }
   get tokenExpiry(): Date | undefined { return this._tokenExpiry; }
   get rejectedBy(): string | undefined { return this._rejectedBy; }
   get createdAt(): Date | undefined { return this._createdAt; }
 
-  updateStatus(status: "pending" | "approved" | "rejected" | "offered", rejectedBy?: string): void {
+  updateStatus(status: AdminAdmissionStatus, rejectedBy?: string): void {
     if (!["pending", "approved", "rejected", "offered"].includes(status)) {
       throw new Error(AdmissionErrorType.InvalidStatus);
     }

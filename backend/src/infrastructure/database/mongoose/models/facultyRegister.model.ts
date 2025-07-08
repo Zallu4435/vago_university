@@ -1,23 +1,7 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import { IFacultyRegister } from '../../../../domain/faculty/FacultyTypes';
 
-interface IFacultyRegister extends Document {
-  fullName: string;
-  email: string;
-  phone: string;
-  department: string;
-  qualification: string;
-  experience: string;
-  aboutMe: string;
-  password: string;
-  cvUrl?: string;
-  certificatesUrl?: string[];
-  status: "pending" | "offered" | "approved" | "rejected";
-  rejectedBy: "admin" | "user" | null;
-  confirmationToken: string | null;
-  tokenExpiry: Date | null;
-}
-
-const FacultyRegisterSchema: Schema = new Schema(
+const FacultyRegisterSchema: Schema = new Schema<IFacultyRegister>(
   {
     fullName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
@@ -34,8 +18,6 @@ const FacultyRegisterSchema: Schema = new Schema(
       enum: ["admin", "user", null],
       default: null,
     },
-
-    // ✅ Added "offered" to represent email offer sent but waiting for user confirmation
     status: {
       type: String,
       enum: ["pending", "offered", "approved", "rejected"],

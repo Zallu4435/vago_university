@@ -109,6 +109,7 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
   };
 
   const handleViewDocument = async (document: any) => {
+    console.log('[handleViewDocument] Document:', document);
     if (!document) {
       return;
     }
@@ -134,19 +135,20 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             window.open(url, '_blank', 'noopener,noreferrer');
             setTimeout(() => window.URL.revokeObjectURL(url), 1000);
           } else {
-            console.error('No PDF data received from backend');
+            console.log('[handleViewDocument] No pdfData, falling back to direct URL');
             window.open(document.url, '_blank', 'noopener,noreferrer');
           }
         } else {
+          console.log('[handleViewDocument] No document.id or token, falling back to direct URL');
           window.open(document.url, '_blank', 'noopener,noreferrer');
         }
       }
     } catch (error) {
-      console.error('Error opening document:', error);
+      console.error('[handleViewDocument] Error opening document:', error);
       try {
         window.open(document.url, '_blank', 'noopener,noreferrer');
       } catch (fallbackError) {
-        console.error('Error with fallback document opening:', fallbackError);
+        console.error('[handleViewDocument] Error with fallback document opening:', fallbackError);
       }
     }
   };

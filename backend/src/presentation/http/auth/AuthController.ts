@@ -73,7 +73,7 @@ export class AuthController implements IAuthController {
   }
 
   async registerFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log('=== FACULTY REGISTRATION START ===');
+    console.log('=== CONTROLLER: FACULTY REGISTRATION START ===');
     console.log('Request body:', httpRequest.body);
     console.log('Request files:', httpRequest.files);
 
@@ -84,45 +84,23 @@ export class AuthController implements IAuthController {
       return this.httpErrors.error_400("All required fields must be provided!");
     }
 
-    const files = httpRequest.files as { [fieldname: string]: Express.Multer.File[] };
+    const files = httpRequest.files as Express.Multer.File[];
     let cvUrl: string | undefined;
-    let certificatesUrl: string[] | undefined;
+    let certificatesUrl: string[] = [];
 
     console.log('Files structure:', files);
     console.log('Files type:', typeof files);
-    console.log('Files is array:', Array.isArray(files)); // Note: httpRequest.files is an object not an array when using fields()
+    console.log('Files is array:', Array.isArray(files));
 
-    if (files) {
-      // Handle CV file upload
-      const cvFiles = files['cv'];
-      if (cvFiles && cvFiles.length > 0) {
-        const cvFile = cvFiles[0];
-        console.log('CV file uploaded:', {
-          originalname: cvFile.originalname,
-          mimetype: cvFile.mimetype,
-          size: cvFile.size,
-          path: cvFile.path
-        });
-        cvUrl = cvFile.path; // This is the Cloudinary URL
-      } else {
-        console.log('No CV file found');
-      }
-
-      // Handle certificates files upload
-      const certificateFiles = files['certificates'];
-      if (certificateFiles && certificateFiles.length > 0) {
-        console.log('Certificates uploaded:', certificateFiles.length, 'files');
-        certificatesUrl = certificateFiles.map((file, index) => {
-          console.log(`Certificate ${index + 1}:`, {
-            originalname: file.originalname,
-            mimetype: file.mimetype,
-            size: file.size,
-            path: file.path
-          });
-          return file.path; // This is the Cloudinary URL
-        });
-      } else {
-        console.log('No certificates found');
+    if (Array.isArray(files)) {
+      for (const file of files) {
+        if (file.fieldname === 'cv') {
+          cvUrl = file.path;
+          console.log('CV file found:', file.path);
+        } else if (file.fieldname === 'certificates') {
+          certificatesUrl.push(file.path);
+          console.log('Certificate file found:', file.path);
+        }
       }
     } else {
       console.log('No files uploaded or invalid file structure');
@@ -140,21 +118,24 @@ export class AuthController implements IAuthController {
       certificatesUrl
     });
 
-    // Direct call, Use Case will throw error on failure
-    const data = await this.registerFacultyUseCase.execute({
-      fullName,
-      email,
-      phone,
-      department,
-      qualification,
-      experience,
-      aboutMe,
-      cvUrl,
-      certificatesUrl,
-    });
-
-    console.log('=== FACULTY REGISTRATION SUCCESS ===');
-    return this.httpSuccess.success_201(data);
+    try {
+      const data = await this.registerFacultyUseCase.execute({
+        fullName,
+        email,
+        phone,
+        department,
+        qualification,
+        experience,
+        aboutMe,
+        cvUrl,
+        certificatesUrl,
+      });
+      console.log('=== CONTROLLER: FACULTY REGISTRATION SUCCESS ===');
+      return this.httpSuccess.success_201(data);
+    } catch (err) {
+      console.error('=== CONTROLLER: FACULTY REGISTRATION ERROR ===', err);
+      throw err;
+    }
   }
 
   async sendEmailOtp(httpRequest: IHttpRequest): Promise<IHttpResponse> {

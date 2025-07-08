@@ -58,7 +58,7 @@ class FacultyService {
       });
 
       console.log('Faculty document fetch response:', response.data);
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       console.error('Error fetching faculty document:', error);
       throw new Error(error.response?.data?.error || 'Failed to fetch faculty document');

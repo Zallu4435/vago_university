@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAdminDashboard } from '../../../application/hooks/useAdminDashboard';
-import { 
-  HiUsers, 
-  HiCurrencyDollar, 
-  HiBookOpen, 
-  HiClock, 
-  HiUserAdd, 
-  HiPlus, 
-  HiBell, 
-  HiDocumentText, 
-  HiCreditCard, 
+import {
+  HiUsers,
+  HiCurrencyDollar,
+  HiBookOpen,
+  HiClock,
+  HiUserAdd,
+  HiPlus,
+  HiBell,
+  HiDocumentText,
+  HiCreditCard,
   HiCog,
   HiTrendingUp,
   HiTrendingDown,
@@ -25,7 +25,7 @@ import {
   HiStar,
   HiXCircle
 } from 'react-icons/hi';
-import { 
+import {
   GiOnTarget,
   GiTrophy,
   GiLightningTear,
@@ -55,12 +55,12 @@ const AdminDashboard = () => {
   useEffect(() => {
     // Simulate loading with staggered animations
     setTimeout(() => setLoading(false), 1200);
-    
+
     // Update time every second
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
-    
+
     return () => clearInterval(timer);
   }, []);
 
@@ -95,7 +95,7 @@ const AdminDashboard = () => {
 
   // Get alert icon based on type
   const getAlertIcon = (type: string) => {
-    switch(type) {
+    switch (type) {
       case 'success': return <HiCheckCircle className="h-5 w-5 text-emerald-400 mt-0.5" />;
       case 'warning': return <HiExclamationCircle className="h-5 w-5 text-amber-400 mt-0.5" />;
       case 'error': return <HiExclamationCircle className="h-5 w-5 text-red-400 mt-0.5" />;
@@ -105,7 +105,7 @@ const AdminDashboard = () => {
 
   // Get alert background color based on type
   const getAlertBgColor = (type: string) => {
-    switch(type) {
+    switch (type) {
       case 'success': return 'bg-emerald-900/30';
       case 'warning': return 'bg-amber-900/30';
       case 'error': return 'bg-red-900/30';
@@ -115,7 +115,7 @@ const AdminDashboard = () => {
 
   // Get alert border color based on type
   const getAlertBorderColor = (type: string) => {
-    switch(type) {
+    switch (type) {
       case 'success': return 'border-emerald-400';
       case 'warning': return 'border-amber-400';
       case 'error': return 'border-red-400';
@@ -125,7 +125,7 @@ const AdminDashboard = () => {
 
   // Get alert text color based on type
   const getAlertTextColor = (type: string) => {
-    switch(type) {
+    switch (type) {
       case 'success': return 'text-emerald-200';
       case 'warning': return 'text-amber-200';
       case 'error': return 'text-red-200';
@@ -135,7 +135,7 @@ const AdminDashboard = () => {
 
   // Get alert subtext color based on type
   const getAlertSubtextColor = (type: string) => {
-    switch(type) {
+    switch (type) {
       case 'success': return 'text-emerald-300';
       case 'warning': return 'text-amber-300';
       case 'error': return 'text-red-300';
@@ -172,13 +172,13 @@ const AdminDashboard = () => {
 
 
   const EnhancedMetricCard = ({ title, value, subtitle, trend, icon: Icon, bgGradient, trendUp, delay = 0 }: any) => (
-    <div 
+    <div
       className="group relative"
       style={{ animationDelay: `${delay}ms` }}
     >
       {/* Ghost orb background */}
       <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
-      
+
       <div className={`${bgGradient} rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden backdrop-blur-xl`}>
         {/* Animated background orbs */}
         <div className="absolute inset-0 opacity-10">
@@ -186,7 +186,7 @@ const AdminDashboard = () => {
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-12 -translate-x-12 group-hover:scale-125 transition-transform duration-700 blur-xl"></div>
           <div className="absolute top-1/2 left-1/2 w-16 h-16 bg-white rounded-full -translate-x-8 -translate-y-8 group-hover:scale-110 transition-transform duration-600 blur-lg"></div>
         </div>
-        
+
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
@@ -202,7 +202,7 @@ const AdminDashboard = () => {
               <HiSparkles className="h-5 w-5 text-white opacity-70 animate-pulse" />
             </div>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <p className="text-white text-opacity-80 text-sm">{subtitle}</p>
             <div className="flex items-center bg-white bg-opacity-20 rounded-full px-3 py-1 backdrop-blur-sm">
@@ -219,33 +219,12 @@ const AdminDashboard = () => {
     </div>
   );
 
-  const AnimatedQuickActionCard = ({ icon: Icon, title, onClick, color = "purple", delay = 0 }: any) => (
-    <div 
-      className="group relative"
-      style={{ animationDelay: `${delay}ms` }}
-      onClick={onClick}
-    >
-      {/* Ghost orb background */}
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
-      
-      <div className="relative bg-gray-800/50 backdrop-blur-sm rounded-lg p-4 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 border border-purple-500/20">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-700/50 to-gray-800/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-        <div className="relative z-10 flex flex-col items-center text-center">
-          <div className={`bg-gradient-to-br from-${color}-500/20 to-${color}-600/20 p-3 rounded-full mb-2 group-hover:scale-110 transition-transform duration-300 shadow-md backdrop-blur-sm border border-${color}-500/30`}>
-            <Icon className={`h-5 w-5 text-${color}-400`} />
-          </div>
-          <h3 className="text-xs font-semibold text-gray-200 group-hover:text-white transition-colors duration-200">{title}</h3>
-          <div className="mt-1 w-0 group-hover:w-full h-0.5 bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300"></div>
-        </div>
-      </div>
-    </div>
-  );
 
   const GlassPanel = ({ title, children, icon: Icon }: any) => (
     <div className="group relative">
       {/* Ghost orb background */}
       <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
-      
+
       <div className="relative bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-purple-500/20">
         {/* Animated background patterns */}
         <div className="absolute inset-0 opacity-5">
@@ -253,7 +232,7 @@ const AdminDashboard = () => {
           <div className="absolute bottom-4 right-4 w-6 h-6 border-purple-500/20 rotate-12 rounded-full"></div>
           <div className="absolute top-1/2 right-4 w-4 h-4 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rotate-45 rounded-sm"></div>
         </div>
-        
+
         <div className="relative z-10">
           <div className="flex items-center mb-6">
             <div className="bg-gradient-to-br from-purple-500 to-blue-600 p-2 rounded-lg shadow-lg backdrop-blur-sm">
@@ -269,7 +248,7 @@ const AdminDashboard = () => {
 
   const EnhancedActivityItem = ({ action, user, time, avatar, type = "default" }: any) => {
     const getTypeColor = (type: string) => {
-      switch(type) {
+      switch (type) {
         case 'success': return 'from-emerald-400 to-emerald-600';
         case 'warning': return 'from-amber-400 to-orange-500';
         case 'info': return 'from-blue-400 to-blue-600';
@@ -331,14 +310,13 @@ const AdminDashboard = () => {
                 height: `${Math.random() * 12 + 4}px`,
                 top: `${Math.random() * 100}%`,
                 left: `${Math.random() * 100}%`,
-                animation: `floatingMist ${Math.random() * 15 + 20}s ease-in-out infinite ${
-                  Math.random() * 5
-                }s`,
+                animation: `floatingMist ${Math.random() * 15 + 20}s ease-in-out infinite ${Math.random() * 5
+                  }s`,
               }}
             />
           ))}
         </div>
-        
+
         <div className="space-y-6 relative z-10 flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
         </div>
@@ -351,7 +329,7 @@ const AdminDashboard = () => {
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-400 text-lg mb-4">Error loading dashboard</div>
-          <button 
+          <button
             onClick={handleRefresh}
             className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
           >
@@ -377,14 +355,13 @@ const AdminDashboard = () => {
               height: `${Math.random() * 12 + 4}px`,
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
-              animation: `floatingMist ${Math.random() * 15 + 20}s ease-in-out infinite ${
-                Math.random() * 5
-              }s`,
+              animation: `floatingMist ${Math.random() * 15 + 20}s ease-in-out infinite ${Math.random() * 5
+                }s`,
             }}
           />
         ))}
       </div>
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Header */}
         <div className="mb-8">
@@ -468,14 +445,14 @@ const AdminDashboard = () => {
               <AreaChart data={safeUserGrowthData}>
                 <defs>
                   <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.1}/>
+                    <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis dataKey="month" stroke="#9CA3AF" />
                 <YAxis stroke="#9CA3AF" />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{
                     backgroundColor: 'rgba(31, 41, 55, 0.95)',
                     border: '1px solid rgba(139, 92, 246, 0.2)',
@@ -485,17 +462,17 @@ const AdminDashboard = () => {
                     color: '#F9FAFB'
                   }}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="users" 
-                  stroke="#8B5CF6" 
+                <Area
+                  type="monotone"
+                  dataKey="users"
+                  stroke="#8B5CF6"
                   strokeWidth={3}
                   fill="url(#colorUsers)"
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="target" 
-                  stroke="#10B981" 
+                <Line
+                  type="monotone"
+                  dataKey="target"
+                  stroke="#10B981"
                   strokeWidth={2}
                   strokeDasharray="5 5"
                   dot={{ fill: '#10B981' }}
@@ -503,14 +480,14 @@ const AdminDashboard = () => {
               </AreaChart>
             </ResponsiveContainer>
           </GlassPanel>
-          
+
           <GlassPanel title="Revenue Breakdown" icon={GiTwoCoins}>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={safeRevenueData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis dataKey="month" stroke="#9CA3AF" />
                 <YAxis stroke="#9CA3AF" />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{
                     backgroundColor: 'rgba(31, 41, 55, 0.95)',
                     border: '1px solid rgba(139, 92, 246, 0.2)',
@@ -586,13 +563,13 @@ const AdminDashboard = () => {
               )}
             </div>
           </GlassPanel>
-          
+
           <GlassPanel title="System Alerts" icon={HiBell}>
             <div className="space-y-4">
               {safeAlertsData.length > 0 ? (
                 safeAlertsData.map((alert) => (
-                  <div 
-                    key={alert.id} 
+                  <div
+                    key={alert.id}
                     className={`flex items-start space-x-3 p-3 ${getAlertBgColor(alert.type)} backdrop-blur-sm rounded-lg border-l-4 ${getAlertBorderColor(alert.type)} hover:opacity-80 transition-opacity duration-200 cursor-pointer`}
                     onClick={() => handleDismissAlert(alert.id)}
                   >
@@ -601,7 +578,7 @@ const AdminDashboard = () => {
                       <p className={`text-sm font-medium ${getAlertTextColor(alert.type)}`}>{alert.title}</p>
                       <p className={`text-xs ${getAlertSubtextColor(alert.type)}`}>{alert.message}</p>
                     </div>
-                    <button 
+                    <button
                       className="text-gray-400 hover:text-white transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();

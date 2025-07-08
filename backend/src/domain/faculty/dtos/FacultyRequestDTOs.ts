@@ -1,7 +1,9 @@
+import { FacultyStatus } from '../FacultyTypes';
+
 export interface GetFacultyRequestDTO {
     page: number;
     limit: number;
-    status?: string;
+    status?: FacultyStatus;
     department?: string;
     dateRange?: string;
   }

@@ -1,22 +1,54 @@
-import { GetUserSiteSectionsRequestDTO, GetUserSiteSectionsResponseDTO } from "../../../domain/site-management/dtos/UserSiteSectionDTOs";
+import { GetUserSiteSectionsRequestDTO, GetUserSiteSectionsResponseDTO, UserSiteSectionDTO } from "../../../domain/site-management/dtos/UserSiteSectionDTOs";
 import { IUserSiteSectionRepository } from "../repositories/IUserSiteSectionRepository";
 
 export interface IGetUserSiteSectionsUseCase {
   execute(params: GetUserSiteSectionsRequestDTO): Promise<{ success: boolean; data: GetUserSiteSectionsResponseDTO }>;
 }
 
+function toUserDTO(doc: any): UserSiteSectionDTO {
+  return {
+    id: doc._id.toString(),
+    sectionKey: doc.sectionKey,
+    title: doc.title,
+    description: doc.description,
+    image: doc.image || '',
+    link: doc.link || '',
+    category: doc.category,
+    createdAt: doc.createdAt?.toISOString() || new Date().toISOString(),
+    updatedAt: doc.updatedAt?.toISOString() || new Date().toISOString(),
+  };
+}
+
 export class GetUserSiteSectionsUseCase implements IGetUserSiteSectionsUseCase {
   constructor(private readonly userSiteSectionRepository: IUserSiteSectionRepository) {}
 
   async execute(params: GetUserSiteSectionsRequestDTO): Promise<{ success: boolean; data: GetUserSiteSectionsResponseDTO }> {
-    try {
-      const data = await this.userSiteSectionRepository.getUserSections(params);
-      return { success: true, data };
-    } catch (error) {
-      return { 
-        success: false, 
-        data: { sections: [], total: 0, page: 1, limit: 10, totalPages: 1 } 
-      };
+    const { sectionKey, page = 1, limit = 10, search, category } = params;
+    const query: any = { sectionKey };
+    if (search && search.trim() !== '') {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { category: { $regex: search, $options: 'i' } },
+      ];
     }
+    if (category && category.trim() !== '') {
+      query.category = category;
+    }
+    const skip = (page - 1) * limit;
+    const [docs, total] = await Promise.all([
+      this.userSiteSectionRepository.findSectionsRaw(query, skip, limit),
+      this.userSiteSectionRepository.countSectionsRaw(query),
+    ]);
+    return {
+      success: true,
+      data: {
+        sections: docs.map(toUserDTO),
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 } 

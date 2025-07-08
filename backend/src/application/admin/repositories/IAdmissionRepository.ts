@@ -25,4 +25,6 @@ import {
     rejectAdmission(params: RejectAdmissionRequestDTO): Promise<RejectAdmissionResponseDTO>;
     deleteAdmission(params: DeleteAdmissionRequestDTO): Promise<DeleteAdmissionResponseDTO>;
     confirmAdmissionOffer(params: ConfirmAdmissionOfferRequestDTO): Promise<ConfirmAdmissionOfferResponseDTO>;
+    findAdmissionById(id: string): Promise<any>;
+    saveAdmission(admission: any): Promise<any>;
   }

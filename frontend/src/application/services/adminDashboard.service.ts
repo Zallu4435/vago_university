@@ -72,7 +72,7 @@ class AdminDashboardService {
   async getMetrics(): Promise<DashboardMetrics> {
     try {
       const response = await httpClient.get<ApiResponse<DashboardMetrics>>('/admin/dashboard/metrics');
-      return response.data.data.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch metrics');
     }
@@ -81,7 +81,7 @@ class AdminDashboardService {
   async getUserGrowthData(): Promise<UserGrowthData[]> {
     try {
       const response = await httpClient.get<ApiResponse<UserGrowthData[]>>('/admin/dashboard/user-growth');
-      return response.data.data.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch user growth data');
     }
@@ -90,7 +90,7 @@ class AdminDashboardService {
   async getRevenueData(): Promise<RevenueData[]> {
     try {
       const response = await httpClient.get<ApiResponse<RevenueData[]>>('/admin/dashboard/revenue');
-      return response.data.data.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch revenue data');
     }
@@ -99,7 +99,7 @@ class AdminDashboardService {
   async getPerformanceData(): Promise<PerformanceData[]> {
     try {
       const response = await httpClient.get<ApiResponse<PerformanceData[]>>('/admin/dashboard/performance');
-      return response.data.data.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch performance data');
     }
@@ -108,7 +108,7 @@ class AdminDashboardService {
   async getRecentActivities(): Promise<ActivityItem[]> {
     try {
       const response = await httpClient.get<ApiResponse<ActivityItem[]>>('/admin/dashboard/activities');
-      return response.data.data.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch recent activities');
     }
@@ -117,7 +117,7 @@ class AdminDashboardService {
   async getSystemAlerts(): Promise<SystemAlert[]> {
     try {
       const response = await httpClient.get<ApiResponse<SystemAlert[]>>('/admin/dashboard/alerts');
-      return response.data.data.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch system alerts');
     }

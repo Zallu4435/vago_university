@@ -11,9 +11,6 @@ import {
     ConfirmAdmissionOfferRequestDTO,
 } from "../../../domain/admin/dtos/AdmissionRequestDTOs";
 import {
-    GetAdmissionsResponseDTO,
-    GetAdmissionByIdResponseDTO,
-    GetAdmissionByTokenResponseDTO,
     ApproveAdmissionResponseDTO,
     RejectAdmissionResponseDTO,
     DeleteAdmissionResponseDTO,
@@ -27,7 +24,7 @@ import { ProgramModel } from "../../database/mongoose/models/studentProgram.mode
 
 
 export class AdmissionRepository implements IAdmissionRepository {
-    async getAdmissions(params: GetAdmissionsRequestDTO): Promise<GetAdmissionsResponseDTO> {
+    async getAdmissions(params: GetAdmissionsRequestDTO): Promise<any> {
         const { page = 1, limit = 5, status = "all", program = "all", dateRange = "all", startDate, endDate } = params;
 
         const filter: Record<string, any> = {};
@@ -73,34 +70,25 @@ export class AdmissionRepository implements IAdmissionRepository {
             choiceOfStudy: 1,
         };
 
-        const admissionsRaw = await AdmissionModel.find(filter)
+        const admissions = await AdmissionModel.find(filter)
             .select(projection)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
             .lean();
 
-        const admissions = admissionsRaw.map((admission) => ({
-            _id: admission._id.toString(),
-            fullName: admission.personal?.fullName || "N/A",
-            email: admission.personal?.emailAddress || "N/A",
-            createdAt: admission.createdAt.toISOString(),
-            status: (admission.status || "pending") as "pending" | "approved" | "rejected" | "offered",
-            program: admission.choiceOfStudy?.[0]?.programme || "N/A",
-        }));
-
         const totalAdmissions = await AdmissionModel.countDocuments(filter);
         const totalPages = Math.ceil(totalAdmissions / limit);
 
         return {
-            admissions,
+            admissions, // raw admissions, not mapped
             totalAdmissions,
             totalPages,
             currentPage: page,
         };
     }
 
-    async getAdmissionById(params: GetAdmissionByIdRequestDTO): Promise<GetAdmissionByIdResponseDTO> {
+    async getAdmissionById(params: GetAdmissionByIdRequestDTO): Promise<any> {
         const admission = await AdmissionModel.findById(params.id).lean();
         if (!admission) {
             throw new Error(AdmissionErrorType.AdmissionNotFound);
@@ -108,7 +96,7 @@ export class AdmissionRepository implements IAdmissionRepository {
         return { admission };
     }
 
-    async getAdmissionByToken(params: GetAdmissionByTokenRequestDTO): Promise<GetAdmissionByTokenResponseDTO> {
+    async getAdmissionByToken(params: GetAdmissionByTokenRequestDTO): Promise<any> {
 
         const admission = await AdmissionModel.findById(params.admissionId)
             .select("personal choiceOfStudy status confirmationToken tokenExpiry")
@@ -136,53 +124,20 @@ export class AdmissionRepository implements IAdmissionRepository {
         return { admission };
     }
 
+    async findAdmissionById(id: string) {
+        return AdmissionModel.findById(id);
+    }
+
+    async saveAdmission(admission: any) {
+        return admission.save();
+    }
+
     async approveAdmission(params: ApproveAdmissionRequestDTO): Promise<ApproveAdmissionResponseDTO> {
-        const admission = await AdmissionModel.findById(params.id);
-        if (!admission) {
-            throw new Error(AdmissionErrorType.AdmissionNotFound);
-        }
-        if (admission.status !== "pending") {
-            throw new Error(AdmissionErrorType.AdmissionAlreadyProcessed);
-        }
-
-        const confirmationToken = this.generateConfirmationToken();
-        admission.confirmationToken = confirmationToken;
-        admission.tokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-        admission.status = "offered" as any;
-        await admission.save();
-
-        const acceptUrl = `${config.frontendUrl}/confirm-admission/${params.id}/accept?token=${confirmationToken}`;
-        const rejectUrl = `${config.frontendUrl}/confirm-admission/${params.id}/reject?token=${confirmationToken}`;
-
-        await emailService.sendAdmissionOfferEmail({
-            to: admission.personal.emailAddress,
-            name: admission.personal.fullName,
-            programDetails: params.additionalInfo?.programDetails || "",
-            startDate: admission.createdAt.toDateString() || "",
-            scholarshipInfo: params.additionalInfo?.scholarshipInfo || "",
-            additionalNotes: params.additionalInfo?.additionalNotes || "",
-            acceptUrl,
-            rejectUrl,
-            expiryDays: 7,
-        });
-
-        return { message: "Admission offer email sent" };
+        throw new Error('Business logic moved to use case layer. Use findAdmissionById and saveAdmission instead.');
     }
 
     async rejectAdmission(params: RejectAdmissionRequestDTO): Promise<RejectAdmissionResponseDTO> {
-        const admission = await AdmissionModel.findById(params.id);
-        if (!admission) {
-            throw new Error(AdmissionErrorType.AdmissionNotFound);
-        }
-        if (admission.status !== "pending") {
-            throw new Error(AdmissionErrorType.AdmissionAlreadyProcessed);
-        }
-
-        admission.status = "rejected" as any;
-        admission.rejectedBy = "admin" as any;
-        await admission.save();
-
-        return { message: "Admission rejected" };
+        throw new Error('Business logic moved to use case layer. Use findAdmissionById and saveAdmission instead.');
     }
 
     async deleteAdmission(params: DeleteAdmissionRequestDTO): Promise<DeleteAdmissionResponseDTO> {
@@ -220,7 +175,6 @@ export class AdmissionRepository implements IAdmissionRepository {
         if (params.action === "accept") {
             admission.status = "approved" as any;
             admission.rejectedBy = undefined;
-
             const registerUser = await Register.findById(admission.registerId);
             if (!registerUser) {
                 throw new Error(AdmissionErrorType.RegisterUserNotFound);

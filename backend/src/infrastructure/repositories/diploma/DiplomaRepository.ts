@@ -8,21 +8,11 @@ import {
   EnrollStudentRequestDTO,
   UnenrollStudentRequestDTO,
 } from "../../../domain/diploma/dtos/DiplomaRequestDTOs";
-import {
-  GetDiplomasResponseDTO,
-  GetDiplomaByIdResponseDTO,
-  CreateDiplomaResponseDTO,
-  UpdateDiplomaResponseDTO,
-  EnrollStudentResponseDTO,
-  UnenrollStudentResponseDTO,
-  DiplomaSummaryDTO,
-} from "../../../domain/diploma/dtos/DiplomaResponseDTOs";
-import { Diploma } from "../../../domain/diploma/entities/Diploma";
-import { Diploma as DiplomaModel, IDiploma } from "../../../infrastructure/database/mongoose/models/diploma.model";
+import { Diploma as DiplomaModel } from "../../../infrastructure/database/mongoose/models/diploma.model";
 import mongoose from "mongoose";
 
 export class DiplomaRepository implements IDiplomaRepository {
-  async getDiplomas(params: GetDiplomasRequestDTO): Promise<GetDiplomasResponseDTO> {
+  async getDiplomas(params: GetDiplomasRequestDTO) {
     const { page, limit } = params;
     const skip = (page - 1) * limit;
 
@@ -35,137 +25,44 @@ export class DiplomaRepository implements IDiplomaRepository {
       DiplomaModel.countDocuments(),
     ]);
 
-    const totalPages = Math.ceil(totalItems / limit);
-
-    const mappedDiplomas: DiplomaSummaryDTO[] = diplomas.map((diploma: IDiploma) => ({
-      id: diploma._id.toString(),
-      title: diploma.title,
-      description: diploma.description,
-      price: diploma.price,
-      category: diploma.category,
-      thumbnail: diploma.thumbnail,
-      duration: diploma.duration,
-      prerequisites: diploma.prerequisites,
-      status: diploma.status,
-      createdAt: diploma.createdAt.toISOString(),
-      updatedAt: diploma.updatedAt.toISOString(),
-      videoIds: diploma.videoIds.map((id: mongoose.Types.ObjectId) => id.toString()),
-    }));
-
-    return {
-      diplomas: mappedDiplomas,
-      totalPages,
-      currentPage: page,
-      totalItems,
-    };
+    return { diplomas, totalItems };
   }
 
-  async getDiplomaById(params: GetDiplomaByIdRequestDTO): Promise<GetDiplomaByIdResponseDTO | null> {
-    const diploma = await DiplomaModel.findById(params.id).lean();
-    if (!diploma) return null;
-
-    return {
-      diploma: new Diploma({
-        id: diploma._id.toString(),
-        title: diploma.title,
-        description: diploma.description,
-        price: diploma.price,
-        category: diploma.category,
-        thumbnail: diploma.thumbnail,
-        duration: diploma.duration,
-        prerequisites: diploma.prerequisites,
-        status: diploma.status,
-        createdAt: diploma.createdAt,
-        updatedAt: diploma.updatedAt,
-        videoIds: diploma.videoIds.map((id: mongoose.Types.ObjectId) => id.toString()),
-      }),
-    };
+  async getDiplomaById(params: GetDiplomaByIdRequestDTO) {
+    return DiplomaModel.findById(params.id).lean();
   }
 
-  async createDiploma(params: CreateDiplomaRequestDTO): Promise<CreateDiplomaResponseDTO> {
-    const diploma = await DiplomaModel.create({
-      ...params,
-      videoIds: [],
-    });
-
-    return {
-      diploma: new Diploma({
-        id: diploma._id.toString(),
-        title: diploma.title,
-        description: diploma.description,
-        price: diploma.price,
-        category: diploma.category,
-        thumbnail: diploma.thumbnail,
-        duration: diploma.duration,
-        prerequisites: diploma.prerequisites,
-        status: diploma.status,
-        createdAt: diploma.createdAt,
-        updatedAt: diploma.updatedAt,
-        videoIds: diploma.videoIds.map((id: mongoose.Types.ObjectId) => id.toString()),
-      }),
-    };
+  async createDiploma(params: CreateDiplomaRequestDTO) {
+    return DiplomaModel.create({ ...params, videoIds: [] });
   }
 
-  async updateDiploma(params: UpdateDiplomaRequestDTO): Promise<UpdateDiplomaResponseDTO | null> {
-    const diploma = await DiplomaModel.findByIdAndUpdate(
+  async updateDiploma(params: UpdateDiplomaRequestDTO) {
+    return DiplomaModel.findByIdAndUpdate(
       params.id,
       { $set: params },
       { new: true }
     ).lean();
-
-    if (!diploma) return null;
-
-    return {
-      diploma: new Diploma({
-        id: diploma._id.toString(),
-        title: diploma.title,
-        description: diploma.description,
-        price: diploma.price,
-        category: diploma.category,
-        thumbnail: diploma.thumbnail,
-        duration: diploma.duration,
-        prerequisites: diploma.prerequisites,
-        status: diploma.status,
-        createdAt: diploma.createdAt,
-        updatedAt: diploma.updatedAt,
-        videoIds: diploma.videoIds.map((id: mongoose.Types.ObjectId) => id.toString()),
-      }),
-    };
   }
 
-  async deleteDiploma(params: DeleteDiplomaRequestDTO): Promise<void> {
+  async deleteDiploma(params: DeleteDiplomaRequestDTO) {
     await DiplomaModel.findByIdAndDelete(params.id);
   }
 
-  async enrollStudent(params: EnrollStudentRequestDTO): Promise<EnrollStudentResponseDTO> {
+  async enrollStudent(params: EnrollStudentRequestDTO) {
     const diploma = await DiplomaModel.findById(params.diplomaId);
-    if (!diploma) {
-      throw new Error("Diploma not found");
-    }
-
+    if (!diploma) return null;
     await DiplomaModel.findByIdAndUpdate(params.diplomaId, {
       $addToSet: { students: new mongoose.Types.ObjectId(params.studentId) },
     });
-
-    return {
-      success: true,
-      message: "Student enrolled successfully",
-    };
+    return true;
   }
 
-  async unenrollStudent(params: UnenrollStudentRequestDTO): Promise<UnenrollStudentResponseDTO> {
+  async unenrollStudent(params: UnenrollStudentRequestDTO) {
     const diploma = await DiplomaModel.findById(params.diplomaId);
-    if (!diploma) {
-      throw new Error("Diploma not found");
-    }
-
+    if (!diploma) return null;
     await DiplomaModel.findByIdAndUpdate(params.diplomaId, {
       $pull: { students: new mongoose.Types.ObjectId(params.studentId) },
     });
-
-    return {
-      success: true,
-      message: "Student unenrolled successfully",
-    };
+    return true;
   }
 } 

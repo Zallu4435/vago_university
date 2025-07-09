@@ -1,3 +1,5 @@
+import { DiplomaProps } from '../entities/diplomatypes';
+
 export interface GetDiplomasRequestDTO {
   page: number;
   limit: number;
@@ -11,28 +13,9 @@ export interface GetDiplomaByIdRequestDTO {
   id: string;
 }
 
-export interface CreateDiplomaRequestDTO {
-  title: string;
-  description: string;
-  price: number;
-  category: string;
-  thumbnail: string;
-  duration: string;
-  prerequisites: string[];
-  status: boolean;
-}
+export type CreateDiplomaRequestDTO = Pick<DiplomaProps, 'title' | 'description' | 'price' | 'category' | 'thumbnail' | 'duration' | 'prerequisites' | 'status'>;
 
-export interface UpdateDiplomaRequestDTO {
-  id: string;
-  title?: string;
-  description?: string;
-  price?: number;
-  category?: string;
-  thumbnail?: string;
-  duration?: string;
-  prerequisites?: string[];
-  status?: boolean;
-}
+export type UpdateDiplomaRequestDTO = { id: string } & Partial<Pick<DiplomaProps, 'title' | 'description' | 'price' | 'category' | 'thumbnail' | 'duration' | 'prerequisites' | 'status'>>;
 
 export interface DeleteDiplomaRequestDTO {
   id: string;

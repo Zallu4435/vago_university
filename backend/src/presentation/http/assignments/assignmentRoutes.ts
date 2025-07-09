@@ -105,53 +105,53 @@ router.get('/download-file', authMiddleware, async (req: any, res: any) => {
   }
 });
 
-router.get('/analytics', authMiddleware, (req, res) => {
-    expressAdapter(req, res, assignmentController.getAnalytics.bind(assignmentController));
+router.get('/analytics', authMiddleware, (req, res, next) => {
+    expressAdapter(req, res, next, assignmentController.getAnalytics.bind(assignmentController));
 });
 
-router.put('/:assignmentId/submissions/:submissionId/review', authMiddleware, (req, res) => {
-    expressAdapter(req, res, assignmentController.reviewSubmission.bind(assignmentController));
+router.put('/:assignmentId/submissions/:submissionId/review', authMiddleware, (req, res, next) => {
+    expressAdapter(req, res, next, assignmentController.reviewSubmission.bind(assignmentController));
 });
 
-router.get('/', authMiddleware, (req, res) => {
-    expressAdapter(req, res, assignmentController.getAssignments.bind(assignmentController));
+router.get('/', authMiddleware, (req, res, next) => {
+    expressAdapter(req, res, next, assignmentController.getAssignments.bind(assignmentController));
 });
 
-router.get('/:id', authMiddleware, (req, res) => {
-    expressAdapter(req, res, assignmentController.getAssignmentById.bind(assignmentController));
+router.get('/:id', authMiddleware, (req, res, next) => {
+    expressAdapter(req, res, next, assignmentController.getAssignmentById.bind(assignmentController));
 });
 
 router.post('/',
     authMiddleware,
     assignmentUpload.array('files', 5),
-    (req, res) => {
-        expressAdapter(req, res, assignmentController.createAssignment.bind(assignmentController));
+    (req, res, next) => {
+        expressAdapter(req, res, next, assignmentController.createAssignment.bind(assignmentController));
     }
 );
 
-router.put('/:id', authMiddleware, assignmentUpload.array('files', 5), (req, res) => {
-    expressAdapter(req, res, assignmentController.updateAssignment.bind(assignmentController));
+router.put('/:id', authMiddleware, assignmentUpload.array('files', 5), (req, res, next) => {
+    expressAdapter(req, res, next, assignmentController.updateAssignment.bind(assignmentController));
 });
 
-router.delete('/:id', authMiddleware, (req, res) => {
-    expressAdapter(req, res, assignmentController.deleteAssignment.bind(assignmentController));
+router.delete('/:id', authMiddleware, (req, res, next) => {
+    expressAdapter(req, res, next, assignmentController.deleteAssignment.bind(assignmentController));
 });
 
 // Submission routes
-router.get('/:assignmentId/submissions', authMiddleware, (req, res) => {
-    expressAdapter(req, res, assignmentController.getSubmissions.bind(assignmentController));
+router.get('/:assignmentId/submissions', authMiddleware, (req, res, next) => {
+    expressAdapter(req, res, next, assignmentController.getSubmissions.bind(assignmentController));
 });
 
-router.get('/:assignmentId/submissions/:submissionId', authMiddleware, (req, res) => {
-    expressAdapter(req, res, assignmentController.getSubmissionById.bind(assignmentController));
+router.get('/:assignmentId/submissions/:submissionId', authMiddleware, (req, res, next) => {
+    expressAdapter(req, res, next, assignmentController.getSubmissionById.bind(assignmentController));
 });
 
-router.get('/:assignmentId/submissions/:submissionId/download', authMiddleware, (req, res) => {
-    expressAdapter(req, res, assignmentController.downloadSubmission.bind(assignmentController));
+router.get('/:assignmentId/submissions/:submissionId/download', authMiddleware, (req, res, next) => {
+    expressAdapter(req, res, next, assignmentController.downloadSubmission.bind(assignmentController));
 });
 
-router.get('/:id/files/view', authMiddleware, (req, res) => {
-    expressAdapter(req, res, assignmentController.viewAssignmentFile.bind(assignmentController));
+router.get('/:id/files/view', authMiddleware, (req, res, next) => {
+    expressAdapter(req, res, next, assignmentController.viewAssignmentFile.bind(assignmentController));
 });
 
 // New endpoint for downloading submission files (similar to student side)

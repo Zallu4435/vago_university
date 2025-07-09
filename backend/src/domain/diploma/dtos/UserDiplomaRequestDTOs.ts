@@ -1,3 +1,5 @@
+import { DiplomaCourse, Chapter } from '../entities/diplomatypes';
+
 export interface GetUserDiplomasRequestDTO {
   userId: string;
   page: number;

@@ -1,19 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-
-export interface ICourseDocument extends Document {
-  title: string;
-  specialization: string;
-  faculty: string;
-  credits: number;
-  schedule: string;
-  maxEnrollment: number;
-  currentEnrollment: number;
-  description?: string;
-  term?: string;
-  prerequisites?: string[];
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { ICourseDocument, IEnrollmentDocument } from "../../../../../domain/courses/entities/coursetypes";
 
 const CourseSchema = new Schema(
   {
@@ -35,22 +21,12 @@ const CourseSchema = new Schema(
 );
 
 // Create a compound text index for better search performance
-CourseSchema.index({ 
-  title: "text", 
-  specialization: "text", 
-  faculty: "text", 
-  description: "text" 
+CourseSchema.index({
+  title: "text",
+  specialization: "text",
+  faculty: "text",
+  description: "text"
 });
-
-export interface IEnrollmentDocument extends Document {
-  studentId: mongoose.Types.ObjectId;
-  courseId: mongoose.Types.ObjectId;
-  status: "Pending" | "Approved" | "Rejected";
-  requestedAt: Date;
-  reason?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 const EnrollmentSchema = new Schema<IEnrollmentDocument>({
   studentId: { type: Schema.Types.ObjectId, required: true, ref: "User" },

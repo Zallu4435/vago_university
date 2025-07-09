@@ -1,24 +1,4 @@
-export enum DiplomaStatus {
-  ACTIVE = "active",
-  INACTIVE = "inactive",
-  DRAFT = "draft",
-  COMPLETED = "completed"
-}
-
-export interface DiplomaProps {
-  id?: string;
-  title: string;
-  description: string;
-  price: number;
-  category: string;
-  thumbnail: string;
-  duration: string;
-  prerequisites: string[];
-  status: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
-  videoIds?: string[];
-}
+import { DiplomaStatus, DiplomaProps } from './diplomatypes';
 
 export class Diploma {
   public readonly id?: string;

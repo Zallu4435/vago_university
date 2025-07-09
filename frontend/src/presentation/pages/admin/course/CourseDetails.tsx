@@ -5,7 +5,7 @@ interface CourseDetailsProps {
   isOpen: boolean;
   onClose: () => void;
   course: {
-    _id: string;
+    id: string;
     title: string;
     specialization: string;
     faculty: string;
@@ -22,6 +22,8 @@ interface CourseDetailsProps {
 }
 
 const CourseDetails: React.FC<CourseDetailsProps> = ({ isOpen, onClose, course }) => {
+
+  console.log(course, "ppopooopo")
   // Prevent background scrolling when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -97,7 +99,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ isOpen, onClose, course }
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-purple-100">{course.title}</h2>
-                <p className="text-sm text-purple-300">Course ID: {course._id?.slice(-8).toUpperCase()}</p>
+                <p className="text-sm text-purple-300">Course ID: {course.id?.slice(-8).toUpperCase()}</p>
               </div>
             </div>
             <button
@@ -115,7 +117,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ isOpen, onClose, course }
           <div className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-6">
               <span className="px-4 py-2 bg-gray-800/80 border border-purple-600/30 rounded-lg text-sm text-purple-300">
-                ID: {course._id?.slice(-8).toUpperCase()}
+                ID: {course.id?.slice(-8).toUpperCase()}
               </span>
               <span className="px-4 py-2 bg-gray-800/80 border border-purple-600/30 rounded-lg text-sm text-purple-300">
                 {availableSpots} spots available

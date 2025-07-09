@@ -150,6 +150,7 @@ export interface IDiplomaController extends IController {
   createDiploma(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   updateDiploma(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   deleteDiploma(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  enrollStudent(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface IVideoController extends IController {

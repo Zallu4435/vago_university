@@ -34,7 +34,6 @@ const sidebarItems = [
   { name: 'Events', path: '/admin/events', icon: <MdEvent size={20} /> },
   { name: 'Clubs', path: '/admin/clubs', icon: <MdGroups size={20} /> },
   { name: 'Sports', path: '/admin/sports', icon: <MdSportsSoccer size={20} /> },
-  { name: 'Assignment Submission', path: '/admin/assignments', icon: <MdAssignment size={20} /> },
   { name: 'Communication Tool', path: '/admin/communication', icon: <MdMessage size={20} /> },
   { name: 'Course Management', path: '/admin/course-management', icon: <MdBook size={20} /> },
   { name: 'Notification System', path: '/admin/notifications', icon: <MdNotifications size={20} /> },
@@ -49,11 +48,11 @@ const sidebarItems = [
 const groupedItems = [
   { category: 'Main', items: [sidebarItems[0]] },
   { category: 'People', items: [sidebarItems[1], sidebarItems[2]] },
-  { category: 'Content', items: [sidebarItems[12], sidebarItems[11], sidebarItems[13]] },
-  { category: 'Education', items: [sidebarItems[3], sidebarItems[9]] },
+  { category: 'Content', items: [sidebarItems[11], sidebarItems[10], sidebarItems[12]] },
+  { category: 'Education', items: [sidebarItems[3], sidebarItems[8]] },
   { category: 'Activities', items: [sidebarItems[4], sidebarItems[5], sidebarItems[6]] },
-  { category: 'Communication', items: [sidebarItems[7], sidebarItems[8], sidebarItems[10], sidebarItems[14]] },
-  { category: 'Payment', items: [sidebarItems[15]] },
+  { category: 'Communication', items: [sidebarItems[7], sidebarItems[9], sidebarItems[13]] },
+  { category: 'Payment', items: [sidebarItems[14]] },
 ];
 
 interface SidebarProps {

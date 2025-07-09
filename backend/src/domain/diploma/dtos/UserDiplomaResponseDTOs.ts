@@ -1,5 +1,4 @@
-import { DiplomaCourse } from '../entities/DiplomaCourse';
-import { Chapter } from '../entities/Chapter';
+import { DiplomaCourse, Chapter } from '../entities/diplomatypes';
 
 export interface GetUserDiplomasResponseDTO {
   courses: DiplomaCourse[];
@@ -9,9 +8,9 @@ export interface GetUserDiplomasResponseDTO {
   totalPages: number;
 }
 
-export interface GetUserDiplomaByIdResponseDTO extends DiplomaCourse {}
+export type GetUserDiplomaByIdResponseDTO = DiplomaCourse;
 
-export interface GetUserDiplomaChapterResponseDTO extends Chapter {}
+export type GetUserDiplomaChapterResponseDTO = Chapter;
 
 export interface UpdateVideoProgressResponseDTO {
   message: string;

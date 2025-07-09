@@ -21,6 +21,7 @@ interface CourseDetailsModalProps {
 }
 
 export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course, isEnrolling }: CourseDetailsModalProps) {
+  console.log('CourseDetailsModal props:', { isOpen, course });
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [enrollmentData, setEnrollmentData] = useState({ reason: '' });

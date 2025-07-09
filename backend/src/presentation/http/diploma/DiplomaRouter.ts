@@ -26,4 +26,8 @@ diplomaRouter.delete("/:id", authMiddleware, (req, res, next) => {
   expressAdapter(req, res, next, diplomaController.deleteDiploma.bind(diplomaController));
 });
 
+diplomaRouter.post("/:diplomaId/diploma-enrollments", authMiddleware, (req, res, next) => {
+  expressAdapter(req, res, next, diplomaController.enrollStudent.bind(diplomaController));
+});
+
 export default diplomaRouter; 

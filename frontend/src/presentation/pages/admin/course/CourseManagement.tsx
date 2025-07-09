@@ -11,7 +11,7 @@ import CourseForm from './CourseForm';
 import EnrollmentRequestDetails from './EnrollmentRequestDetails';
 
 interface Course {
-  _id: string;
+  id: string;
   title: string;
   specialization: string;
   faculty: string;
@@ -25,7 +25,7 @@ interface Course {
 }
 
 interface EnrollmentRequest {
-  _id: string;
+  id: string;
   studentName: string;
   courseTitle: string;
   requestedAt: string;
@@ -285,7 +285,7 @@ const AdminCourseManagement: React.FC = () => {
       label: 'Edit Course',
       onClick: (course: Course) => {
         handleEditCourse(course.id);
-        setEditingCourse(courseDetails?.props);
+        setEditingCourse(courseDetails);
         setShowCourseModal(true);
       },
       color: 'green' as const,
@@ -454,14 +454,14 @@ const AdminCourseManagement: React.FC = () => {
             {
               icon: <FiBookOpen />,
               title: 'Total Courses',
-              value: courses?.length.toString() || '0',
+              value: courses?.length?.toString() || '0',
               change: '+5.2%',
               isPositive: true,
             },
             {
               icon: <FiClipboard />,
               title: 'Active Courses',
-              value: courses?.filter((c) => c.currentEnrollment > 0).length.toString() || '0',
+              value: courses?.filter((c) => c.currentEnrollment > 0).length?.toString() || '0',
               change: '+2.1%',
               isPositive: true,
             },
@@ -607,7 +607,7 @@ const AdminCourseManagement: React.FC = () => {
           onClose={() => {
             setShowCourseDetail(false);
           }}
-          course={courseDetails?.props}
+          course={courseDetails}
           isLoading={isLoadingCourseDetails}
         />
       )}

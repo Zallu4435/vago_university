@@ -8,44 +8,44 @@ const campusLifeController = getCampusLifeComposer();
 
 campusLifeRouter.use(authMiddleware);
 
-campusLifeRouter.get("/", (req, res) =>
-  expressAdapter(req, res, campusLifeController.getCampusLifeOverview.bind(campusLifeController))
+campusLifeRouter.get("/", (req, res, next) =>
+  expressAdapter(req, res, next, campusLifeController.getCampusLifeOverview.bind(campusLifeController))
 );
 
-campusLifeRouter.get("/events", (req, res) =>
-  expressAdapter(req, res, campusLifeController.getEvents.bind(campusLifeController))
+campusLifeRouter.get("/events", (req, res, next) =>
+  expressAdapter(req, res, next, campusLifeController.getEvents.bind(campusLifeController))
 );
 
-campusLifeRouter.get("/events/:eventId", (req, res) =>
-  expressAdapter(req, res, campusLifeController.getEventById.bind(campusLifeController))
+campusLifeRouter.get("/events/:eventId", (req, res, next) =>
+  expressAdapter(req, res, next, campusLifeController.getEventById.bind(campusLifeController))
 );
 
-campusLifeRouter.post("/events/:eventId/join", (req, res) =>
-  expressAdapter(req, res, campusLifeController.joinEvent.bind(campusLifeController))
+campusLifeRouter.post("/events/:eventId/join", (req, res, next) =>
+  expressAdapter(req, res, next, campusLifeController.joinEvent.bind(campusLifeController))
 );
 
-campusLifeRouter.get("/sports", (req, res) =>
-  expressAdapter(req, res, campusLifeController.getSports.bind(campusLifeController))
+campusLifeRouter.get("/sports", (req, res, next) =>
+  expressAdapter(req, res, next, campusLifeController.getSports.bind(campusLifeController))
 );
 
-campusLifeRouter.get("/sports/:sportId", (req, res) =>
-  expressAdapter(req, res, campusLifeController.getSportById.bind(campusLifeController))
+campusLifeRouter.get("/sports/:sportId", (req, res, next) =>
+  expressAdapter(req, res, next, campusLifeController.getSportById.bind(campusLifeController))
 );
 
-campusLifeRouter.post("/sports/:sportId/join", (req, res) =>
-  expressAdapter(req, res, campusLifeController.joinSport.bind(campusLifeController))
+campusLifeRouter.post("/sports/:sportId/join", (req, res, next) =>
+  expressAdapter(req, res, next, campusLifeController.joinSport.bind(campusLifeController))
 );
 
-campusLifeRouter.get("/clubs", (req, res) =>
-  expressAdapter(req, res, campusLifeController.getClubs.bind(campusLifeController))
+campusLifeRouter.get("/clubs", (req, res, next) =>
+  expressAdapter(req, res, next, campusLifeController.getClubs.bind(campusLifeController))
 );
 
-campusLifeRouter.get("/clubs/:clubId", (req, res) =>
-  expressAdapter(req, res, campusLifeController.getClubById.bind(campusLifeController))
+campusLifeRouter.get("/clubs/:clubId", (req, res, next) =>
+  expressAdapter(req, res, next, campusLifeController.getClubById.bind(campusLifeController))
 );
 
-campusLifeRouter.post("/clubs/:clubId/join", (req, res) =>
-  expressAdapter(req, res, campusLifeController.joinClub.bind(campusLifeController))
+campusLifeRouter.post("/clubs/:clubId/join", (req, res, next) =>
+  expressAdapter(req, res, next, campusLifeController.joinClub.bind(campusLifeController))
 );
 
 export default campusLifeRouter;

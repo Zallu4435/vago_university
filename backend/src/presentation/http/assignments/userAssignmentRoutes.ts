@@ -144,12 +144,12 @@ router.get('/download-reference-file', authMiddleware, async (req: Request, res:
   }
 });
 
-router.get('/', authMiddleware, (req, res) => {
-  expressAdapter(req, res, userAssignmentController.getAssignments.bind(userAssignmentController));
+router.get('/', authMiddleware, (req, res, next) => {
+  expressAdapter(req, res, next, userAssignmentController.getAssignments.bind(userAssignmentController));
 });
 
-router.get('/:id', authMiddleware, (req, res) => {
-  expressAdapter(req, res, userAssignmentController.getAssignmentById.bind(userAssignmentController));
+router.get('/:id', authMiddleware, (req, res, next) => {
+  expressAdapter(req, res, next, userAssignmentController.getAssignmentById.bind(userAssignmentController));
 });
 
 router.post('/:id/submit', authMiddleware, (req: Request, res: Response, next: NextFunction) => {
@@ -204,16 +204,16 @@ router.post('/:id/submit', authMiddleware, (req: Request, res: Response, next: N
 
     console.log('Route: All validations passed, calling controller...');
     console.log('=== ROUTE: ASSIGNMENT SUBMIT/RESUBMIT VALIDATION COMPLETED ===');
-    expressAdapter(req, res, userAssignmentController.submitAssignment.bind(userAssignmentController));
+    expressAdapter(req, res, next, userAssignmentController.submitAssignment.bind(userAssignmentController));
   });
 });
 
-router.get('/:id/status', authMiddleware, (req, res) => {
-  expressAdapter(req, res, userAssignmentController.getAssignmentStatus.bind(userAssignmentController));
+router.get('/:id/status', authMiddleware, (req, res, next) => {
+  expressAdapter(req, res, next, userAssignmentController.getAssignmentStatus.bind(userAssignmentController));
 });
 
-router.get('/:id/feedback', authMiddleware, (req, res) => {
-  expressAdapter(req, res, userAssignmentController.getAssignmentFeedback.bind(userAssignmentController));
+router.get('/:id/feedback', authMiddleware, (req, res, next) => {
+  expressAdapter(req, res, next, userAssignmentController.getAssignmentFeedback.bind(userAssignmentController));
 });
 
 export default router; 

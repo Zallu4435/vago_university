@@ -1,19 +1,5 @@
 import { CourseErrorType } from "../enums/CourseErrorType";
-
-export enum EnrollmentStatus {
-  Pending = "Pending",
-  Approved = "Approved",
-  Rejected = "Rejected",
-}
-
-interface EnrollmentProps {
-  id?: string;
-  studentId: string;
-  courseId: string;
-  status: EnrollmentStatus;
-  requestedAt?: Date;
-  reason?: string;
-}
+import { EnrollmentProps, EnrollmentStatus } from "./coursetypes";
 
 export class Enrollment {
   private idValue?: string;

@@ -1,19 +1,11 @@
 import { Diploma } from "../entities/Diploma";
+import { DiplomaProps } from "../entities/diplomatypes";
 
-export interface DiplomaSummaryDTO {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  category: string;
-  thumbnail: string;
-  duration: string;
-  prerequisites: string[];
-  status: boolean;
+export type DiplomaSummaryDTO = Pick<DiplomaProps, 'id' | 'title' | 'description' | 'price' | 'category' | 'thumbnail' | 'duration' | 'prerequisites' | 'status' | 'createdAt' | 'updatedAt' | 'videoIds'> & {
   createdAt: string;
   updatedAt: string;
   videoIds: string[];
-}
+};
 
 export interface GetDiplomasResponseDTO {
   diplomas: DiplomaSummaryDTO[];

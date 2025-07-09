@@ -1,18 +1,5 @@
 import { CourseErrorType } from "../enums/CourseErrorType";
-
-interface CourseProps {
-  id?: string;
-  title: string;
-  specialization: string;
-  faculty: string;
-  credits: number;
-  schedule: string;
-  maxEnrollment: number;
-  currentEnrollment?: number;
-  description?: string;
-  term?: string;
-  prerequisites?: string[];
-}
+import { CourseProps } from "./coursetypes";
 
 export class Course {
   private readonly props: CourseProps;

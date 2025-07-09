@@ -20,14 +20,28 @@ export interface GetCoursesResponseDTO extends PaginatedResponseDTO<CourseSummar
   data: CourseSummaryDTO[];
 }
 
+export interface CourseDetailsDTO {
+  id: string;
+  title: string;
+  specialization: string;
+  faculty: string;
+  credits: number;
+  schedule: string;
+  maxEnrollment: number;
+  currentEnrollment: number;
+  description?: string;
+  term?: string;
+  prerequisites?: string[];
+}
+
 export interface GetCourseByIdResponseDTO {
-  course: Course;
+  course: CourseDetailsDTO;
 }
 
 export interface CreateCourseResponseDTO {
-  course: Course;
+  course: CourseDetailsDTO;
 }
 
 export interface UpdateCourseResponseDTO {
-  course: Course;
+  course: CourseDetailsDTO;
 }

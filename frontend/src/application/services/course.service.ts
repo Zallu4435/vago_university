@@ -21,7 +21,7 @@ class CourseService {
           params: { page, limit, specialization, faculty, term },
         }
       );
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || "Failed to fetch courses");
     }
@@ -33,7 +33,7 @@ class CourseService {
         `/admin/courses/${courseId}`
       );
       console.log("Course details response:", response.data);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error("Error fetching course details:", error);
       throw error;

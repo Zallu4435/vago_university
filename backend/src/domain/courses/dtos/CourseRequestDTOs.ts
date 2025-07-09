@@ -1,43 +1,22 @@
+import { CourseProps } from '../entities/coursetypes';
+
 export interface GetCoursesRequestDTO {
-    page: number;
-    limit: number;
-    specialization?: string;
-    faculty?: string;
-    term?: string;
-    search?: string;
-  }
-  
-  export interface GetCourseByIdRequestDTO {
-    id: string;
-  }
-  
-  export interface CreateCourseRequestDTO {
-    title: string;
-    specialization: string;
-    faculty: string;
-    credits: number;
-    schedule: string;
-    maxEnrollment: number;
-    currentEnrollment?: number;
-    description?: string;
-    term?: string;
-    prerequisites?: string[];
-  }
-  
-  export interface UpdateCourseRequestDTO {
-    id: string;
-    title?: string;
-    specialization?: string;
-    faculty?: string;
-    credits?: number;
-    schedule?: string;
-    maxEnrollment?: number;
-    currentEnrollment?: number;
-    description?: string;
-    term?: string;
-    prerequisites?: string[];
-  }
-  
-  export interface DeleteCourseRequestDTO {
-    id: string;
-  }
+  page: number;
+  limit: number;
+  specialization?: string;
+  faculty?: string;
+  term?: string;
+  search?: string;
+}
+
+export interface GetCourseByIdRequestDTO {
+  id: string;
+}
+
+export type CreateCourseRequestDTO = Pick<CourseProps, 'title' | 'specialization' | 'faculty' | 'credits' | 'schedule' | 'maxEnrollment' | 'currentEnrollment' | 'description' | 'term' | 'prerequisites'>;
+
+export type UpdateCourseRequestDTO = { id: string } & Partial<Pick<CourseProps, 'title' | 'specialization' | 'faculty' | 'credits' | 'schedule' | 'maxEnrollment' | 'currentEnrollment' | 'description' | 'term' | 'prerequisites'>>;
+
+export interface DeleteCourseRequestDTO {
+  id: string;
+}

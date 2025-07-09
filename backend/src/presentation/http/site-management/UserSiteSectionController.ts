@@ -1,7 +1,7 @@
 import { IHttpRequest, IHttpResponse } from "../IHttp";
 import { IGetUserSiteSectionsUseCase } from "../../../application/site-management/useCases/UserSiteSectionUseCases";
 import { GetUserSiteSectionsRequestDTO } from "../../../domain/site-management/dtos/UserSiteSectionDTOs";
-import { SiteSectionKey } from "../../../domain/site-management/entities/SiteSection";
+import { SiteSectionKey } from "../../../domain/site-management/entities/SiteSectionTypes";
 
 export class UserSiteSectionController {
   constructor(

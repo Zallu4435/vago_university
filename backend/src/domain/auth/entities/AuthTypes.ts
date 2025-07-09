@@ -37,6 +37,7 @@ export interface IUser extends IPerson {
   profilePicture?: string;
   passwordChangedAt?: Date;
   fcmTokens: string[];
+  blocked?: boolean;
 }
 
 export interface IAdmin extends IPerson {}
@@ -46,6 +47,7 @@ export interface IFaculty extends IPerson {
   profilePicture?: string;
   passwordChangedAt?: Date;
   fcmTokens: string[];
+  blocked?: boolean;
 }
 
 export interface IRegister extends IPerson {

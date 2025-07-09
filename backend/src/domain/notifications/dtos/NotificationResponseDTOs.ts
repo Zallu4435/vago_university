@@ -1,13 +1,15 @@
+import { NotificationRecipientType, NotificationStatus } from "../entities/NotificationTypes";
+
 export interface NotificationResponseDTO {
     _id: string;
     title: string;
     message: string;
-    recipientType: "individual" | "all_students" | "all_faculty" | "all" | "all_students_and_faculty";
+    recipientType: NotificationRecipientType;
     recipientId?: string;
     recipientName?: string;
     createdBy: string;
     createdAt: string; // Will be converted to ISO string
-    status: "sent" | "failed";
+    status: NotificationStatus;
     isRead: boolean; // Calculated based on whether current user is in readBy array
     readBy: string[]; // Array of user IDs who have read this notification
 }

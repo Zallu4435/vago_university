@@ -4,23 +4,23 @@ import { getSiteSectionsComposer } from '../../../infrastructure/services/site-m
 import { authMiddleware } from '../../../shared/middlewares/authMiddleware';
 import { siteSectionImageUpload } from '../../../config/cloudinary.config';
 
-const siteSectionRouter = Router();
-const siteSectionController = getSiteSectionsComposer();
+const SiteSectionRouter = Router();
+const SiteSectionController = getSiteSectionsComposer();
 
-siteSectionRouter.get('/', authMiddleware, (req, res) =>
-  expressAdapter(req, res, siteSectionController.getSections.bind(siteSectionController))
+SiteSectionRouter.get('/', authMiddleware, (req, res, next) =>
+  expressAdapter(req, res, next, SiteSectionController.getSections.bind(SiteSectionController))
 );
-siteSectionRouter.get('/:id', authMiddleware, (req, res) =>
-  expressAdapter(req, res, siteSectionController.getSectionById.bind(siteSectionController))
+SiteSectionRouter.get('/:id', authMiddleware, (req, res, next) =>
+  expressAdapter(req, res, next, SiteSectionController.getSectionById.bind(SiteSectionController))
 );
-siteSectionRouter.post('/', authMiddleware, siteSectionImageUpload.single('image'), (req, res) =>
-  expressAdapter(req, res, siteSectionController.createSection.bind(siteSectionController))
+SiteSectionRouter.post('/', authMiddleware, siteSectionImageUpload.single('image'), (req, res, next) =>
+  expressAdapter(req, res, next, SiteSectionController.createSection.bind(SiteSectionController))
 );
-siteSectionRouter.put('/:id', authMiddleware, siteSectionImageUpload.single('image'), (req, res) =>
-  expressAdapter(req, res, siteSectionController.updateSection.bind(siteSectionController))
+SiteSectionRouter.put('/:id', authMiddleware, siteSectionImageUpload.single('image'), (req, res, next) =>
+  expressAdapter(req, res, next, SiteSectionController.updateSection.bind(SiteSectionController))
 );
-siteSectionRouter.delete('/:id', authMiddleware, (req, res) =>
-  expressAdapter(req, res, siteSectionController.deleteSection.bind(siteSectionController))
+SiteSectionRouter.delete('/:id', authMiddleware, (req, res, next) =>
+  expressAdapter(req, res, next, SiteSectionController.deleteSection.bind(SiteSectionController))
 );
 
-export default siteSectionRouter;
+export default SiteSectionRouter;

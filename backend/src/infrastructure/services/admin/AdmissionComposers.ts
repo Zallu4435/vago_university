@@ -7,6 +7,7 @@ import {
     RejectAdmissionUseCase,
     DeleteAdmissionUseCase,
     ConfirmAdmissionOfferUseCase,
+    BlockAdmissionUseCase,
 } from '../../../application/admin/useCases/AdmissionUseCases';
 import { AdmissionRepository } from '../../repositories/admin/AdmissionRepository';
 import { AdminAdmissionController } from '../../../presentation/http/admin/AdmissionController';
@@ -23,6 +24,7 @@ export function getAdminAdmissionsComposer(): IAdminAdmissionController {
     const rejectAdmissionUseCase = new RejectAdmissionUseCase(repository);
     const deleteAdmissionUseCase = new DeleteAdmissionUseCase(repository);
     const confirmAdmissionOfferUseCase = new ConfirmAdmissionOfferUseCase(repository);
+    const blockAdmissionUseCase = new BlockAdmissionUseCase(repository);
     return new AdminAdmissionController(
         getAdmissionsUseCase,
         getAdmissionByIdUseCase,
@@ -30,6 +32,7 @@ export function getAdminAdmissionsComposer(): IAdminAdmissionController {
         approveAdmissionUseCase,
         rejectAdmissionUseCase,
         deleteAdmissionUseCase,
-        confirmAdmissionOfferUseCase
+        confirmAdmissionOfferUseCase,
+        blockAdmissionUseCase
     );
 }

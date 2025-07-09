@@ -29,4 +29,6 @@ export interface IFacultyRepository {
     deleteFaculty(params: DeleteFacultyRequestDTO): Promise<DeleteFacultyResponseDTO>;
     confirmFacultyOffer(params: ConfirmFacultyOfferRequestDTO): Promise<ConfirmFacultyOfferResponseDTO>;
     downloadCertificate(params: DownloadCertificateRequestDTO): Promise<DownloadCertificateResponseDTO>;
+    blockFaculty(id: string): Promise<{ message: string }>;
+    saveFaculty(faculty: any): Promise<any>;
 }

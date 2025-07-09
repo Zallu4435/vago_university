@@ -287,6 +287,7 @@ export interface IAdminAdmissionController extends IController {
   deleteAdmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   confirmAdmissionOffer(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   serveDocument(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  blockAdmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface IFacultyController extends IController {
@@ -299,6 +300,7 @@ export interface IFacultyController extends IController {
   confirmFacultyOffer(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   downloadCertificate(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   serveDocument(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  blockFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface IProfileController extends IController {

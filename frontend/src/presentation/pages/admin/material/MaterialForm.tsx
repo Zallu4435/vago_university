@@ -11,14 +11,14 @@ const materialSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters'),
   subject: z.string().min(1, 'Subject is required'),
   course: z.string().min(1, 'Course is required'),
-  semester: z.number().min(1, 'Semester must be at least 1').max(8, 'Semester cannot exceed 8'),
+  semester: z.string().min(1, 'Semester is required'),
   type: z.enum(['pdf', 'video']),
   file: z.any().optional(), // File input (handled separately)
   thumbnail: z.any().optional(), // Thumbnail input
   tags: z.array(z.string()).min(1, 'At least one tag is required'),
   difficulty: z.enum(['Beginner', 'Intermediate', 'Advanced']),
   estimatedTime: z.string().min(1, 'Estimated time is required'),
-  isNew: z.boolean(),
+  isNewMaterial: z.boolean(),
   isRestricted: z.boolean(),
 });
 
@@ -50,12 +50,12 @@ const MaterialForm: React.FC<MaterialFormProps> = ({ isOpen, onClose, onSubmit, 
       description: initialData?.description || '',
       subject: initialData?.subject || '',
       course: initialData?.course || '',
-      semester: initialData?.semester || 1,
+      semester: initialData?.semester || '1',
       type: initialData?.type || 'pdf',
       tags: initialData?.tags || [],
       difficulty: initialData?.difficulty || 'Beginner',
       estimatedTime: initialData?.estimatedTime || '',
-      isNew: initialData?.isNew || false,
+      isNewMaterial: initialData?.isNewMaterial || false,
       isRestricted: initialData?.isRestricted || false,
     },
   });
@@ -75,7 +75,7 @@ const MaterialForm: React.FC<MaterialFormProps> = ({ isOpen, onClose, onSubmit, 
         tags: initialData.tags,
         difficulty: initialData.difficulty,
         estimatedTime: initialData.estimatedTime,
-        isNew: initialData.isNew,
+        isNewMaterial: initialData.isNewMaterial,
         isRestricted: initialData.isRestricted,
       });
       setFileName(initialData.fileUrl.split('/').pop() || null);
@@ -86,12 +86,12 @@ const MaterialForm: React.FC<MaterialFormProps> = ({ isOpen, onClose, onSubmit, 
         description: '',
         subject: '',
         course: '',
-        semester: 1,
+        semester: '1',
         type: 'pdf',
         tags: [],
         difficulty: 'Beginner',
         estimatedTime: '',
-        isNew: false,
+        isNewMaterial: false,
         isRestricted: false,
       });
       setFileName(null);
@@ -240,12 +240,11 @@ const MaterialForm: React.FC<MaterialFormProps> = ({ isOpen, onClose, onSubmit, 
                     render={({ field }) => (
                       <input
                         {...field}
-                        type="number"
+                        type="text"
                         className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
                           errors.semester ? 'border-red-500' : 'border-purple-500/30'
                         }`}
                         placeholder="1"
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                       />
                     )}
                   />
@@ -364,7 +363,7 @@ const MaterialForm: React.FC<MaterialFormProps> = ({ isOpen, onClose, onSubmit, 
                 </div>
                 <div className="flex items-center gap-4">
                   <Controller
-                    name="isNew"
+                    name="isNewMaterial"
                     control={control}
                     render={({ field }) => (
                       <label className="flex items-center text-sm text-purple-300">

@@ -92,6 +92,7 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
   const status = admissionData?.status || 'pending';
   const applicationId = admissionData?.applicationId;
   const createdAt = admissionData?.createdAt;
+  const blocked = admissionData?.blocked;
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({
@@ -263,6 +264,11 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
                   <span className="text-sm text-purple-300">
                     ID: {applicationId || 'N/A'}
                   </span>
+                  {blocked && (
+                    <span className="bg-red-600/30 text-red-100 px-3 py-1 rounded-full text-sm font-medium border border-red-500/50">
+                      Blocked
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

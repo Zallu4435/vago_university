@@ -1,25 +1,10 @@
-import {
-  CreateEnquiryRequestDTO,
-  GetEnquiriesRequestDTO,
-  GetEnquiryByIdRequestDTO,
-  UpdateEnquiryStatusRequestDTO,
-  DeleteEnquiryRequestDTO,
-  SendEnquiryReplyRequestDTO,
-} from "../../../domain/enquiry/dtos/EnquiryRequestDTOs";
-import {
-  CreateEnquiryResponseDTO,
-  GetEnquiriesResponseDTO,
-  GetEnquiryByIdResponseDTO,
-  UpdateEnquiryStatusResponseDTO,
-  DeleteEnquiryResponseDTO,
-  SendEnquiryReplyResponseDTO,
-} from "../../../domain/enquiry/dtos/EnquiryResponseDTOs";
+import { EnquiryProps } from "../../../domain/enquiry/entities/EnquiryTypes";
 
 export interface IEnquiryRepository {
-  createEnquiry(params: CreateEnquiryRequestDTO): Promise<CreateEnquiryResponseDTO>;
-  getEnquiries(params: GetEnquiriesRequestDTO): Promise<GetEnquiriesResponseDTO>;
-  getEnquiryById(params: GetEnquiryByIdRequestDTO): Promise<GetEnquiryByIdResponseDTO>;
-  updateEnquiryStatus(params: UpdateEnquiryStatusRequestDTO): Promise<UpdateEnquiryStatusResponseDTO>;
-  deleteEnquiry(params: DeleteEnquiryRequestDTO): Promise<DeleteEnquiryResponseDTO>;
-  sendReply(params: SendEnquiryReplyRequestDTO): Promise<SendEnquiryReplyResponseDTO>;
+  create(data: EnquiryProps): Promise<any>;
+  find(filter: any, options: { skip?: number; limit?: number; sort?: any }): Promise<any[]>;
+  count(filter: any): Promise<number>;
+  findById(id: string): Promise<any | null>;
+  update(id: string, data: EnquiryProps): Promise<any | null>;
+  delete(id: string): Promise<void>;
 } 

@@ -1,43 +1,36 @@
 import { VideoStatus } from '../enums/VideoStatus';
+import { IVideo, IDiplomaInfo } from './VideoTypes';
 
-interface DiplomaInfo {
+export class Video implements IVideo {
     id: string;
     title: string;
-    category: string;
-}
+    duration: string;
+    uploadedAt: Date;
+    module: number;
+    status: VideoStatus;
+    diplomaId: string;
+    description: string;
+    videoUrl: string;
+    diploma?: IDiplomaInfo;
 
-export class Video {
-    constructor(
-        public readonly id: string,
-        public readonly title: string,
-        public readonly duration: string,
-        public readonly uploadedAt: Date,
-        public readonly module: number,
-        public readonly status: VideoStatus,
-        public readonly diplomaId: string,
-        public readonly description: string,
-        public readonly videoUrl: string,
-        public readonly diploma?: DiplomaInfo
-    ) {}
+    constructor(props: IVideo) {
+        this.id = props.id || new Date().getTime().toString();
+        this.title = props.title;
+        this.duration = props.duration;
+        this.uploadedAt = props.uploadedAt || new Date();
+        this.module = props.module;
+        this.status = props.status;
+        this.diplomaId = props.diplomaId || '';
+        this.description = props.description;
+        this.videoUrl = props.videoUrl || '';
+        this.diploma = props.diploma;
+    }
 
-    static create(params: {
-        title: string;
-        duration: string;
-        module: number;
-        status: VideoStatus;
-        diplomaId: string;
-        description: string;
-    }): Video {
-        return new Video(
-            new Date().getTime().toString(),
-            params.title,
-            params.duration,
-            new Date(),
-            params.module,
-            params.status,
-            params.diplomaId,
-            params.description,
-            ''
-        );
+    static create(props: Omit<IVideo, 'id' | 'uploadedAt'>): Video {
+        return new Video({
+            ...props,
+            id: new Date().getTime().toString(),
+            uploadedAt: new Date(),
+        });
     }
 } 

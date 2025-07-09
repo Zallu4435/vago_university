@@ -7,13 +7,13 @@ export interface RegisterResponseDTO {
 
 export interface LoginResponseDTO {
   token: string;
-  user: Pick<IUser, "firstName" | "lastName" | "email" | "id" | "profilePicture"> & { password: string };
+  user: Pick<IUser, "firstName" | "lastName" | "email" | "id" | "profilePicture"> & { password: string; blocked?: boolean };
   collection: "register" | "admin" | "user" | "faculty";
 }
 
 export interface RefreshTokenResponseDTO {
   token: string;
-  user: Pick<IUser, "firstName" | "lastName" | "email" | "id" | "profilePicture">;
+  user: Pick<IUser, "firstName" | "lastName" | "email" | "id" | "profilePicture"> & { blocked?: boolean };
   collection: "register" | "admin" | "user" | "faculty";
 }
 

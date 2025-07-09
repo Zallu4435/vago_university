@@ -23,6 +23,7 @@ const FacultyRegisterSchema: Schema = new Schema<IFacultyRegister>(
       enum: ["pending", "offered", "approved", "rejected"],
       default: "pending",
     },
+    blocked: { type: Boolean, default: false },
     confirmationToken: { type: String, default: null },
     tokenExpiry: { type: Date, default: null },
   },

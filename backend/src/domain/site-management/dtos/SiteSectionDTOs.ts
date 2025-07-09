@@ -1,4 +1,4 @@
-import { SiteSectionKey } from '../entities/SiteSection';
+import { SiteSectionKey, ISiteSection, IHighlightSection, IVagoNowSection, ILeadershipSection } from '../entities/SiteSectionTypes';
 
 // Request DTOs
 export interface GetSiteSectionsRequestDTO {
@@ -12,21 +12,18 @@ export interface GetSiteSectionByIdRequestDTO {
   id: string;
 }
 
-export interface CreateSiteSectionRequestDTO {
-  sectionKey: SiteSectionKey;
-  title: string;
-  description: string;
-  image?: string;
-  link?: string;
-  category?: string;
-}
+export type CreateSiteSectionRequestDTO = IHighlightSection | IVagoNowSection | ILeadershipSection;
 
 export interface UpdateSiteSectionRequestDTO {
   id: string;
   title?: string;
   description?: string;
+  content?: string;
+  bio?: string;
   image?: string;
+  photo?: string;
   link?: string;
+  position?: string;
   category?: string;
 }
 
@@ -35,17 +32,7 @@ export interface DeleteSiteSectionRequestDTO {
 }
 
 // Response DTOs
-export interface SiteSectionDTO {
-  id: string;
-  sectionKey: SiteSectionKey;
-  title: string;
-  description: string;
-  image: string;
-  link: string;
-  category?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+export type SiteSectionDTO = ISiteSection;
 
 export interface GetSiteSectionsResponseDTO {
   sections: SiteSectionDTO[];

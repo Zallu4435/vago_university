@@ -1,22 +1,12 @@
 import mongoose, { Schema, Document, model } from "mongoose";
-
-export interface ISiteSectionDocument extends Document {
-  sectionKey: 'highlights' | 'vagoNow' | 'leadership';
-  title: string;
-  description: string;
-  image: string;
-  link: string;
-  category?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { SiteSectionKey, ISiteSectionDocument } from '../../../../../domain/site-management/entities/SiteSectionTypes';
 
 const SiteSectionSchema = new Schema<ISiteSectionDocument>(
   {
     sectionKey: { 
       type: String, 
       required: true, 
-      enum: ['highlights', 'vagoNow', 'leadership'],
+      enum: Object.values(SiteSectionKey),
       index: true 
     },
     title: { type: String, required: true, trim: true },

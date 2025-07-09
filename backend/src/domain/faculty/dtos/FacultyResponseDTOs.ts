@@ -11,6 +11,7 @@ export interface FacultyResponseDTO {
     certificatesUrl?: string[];
     createdAt: string;
     status: "pending" | "approved" | "rejected" | "offered";
+    blocked?: boolean;
   }
   
   export interface GetFacultyResponseDTO {

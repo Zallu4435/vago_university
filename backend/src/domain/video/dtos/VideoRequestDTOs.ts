@@ -1,13 +1,5 @@
 import { VideoStatus } from '../enums/VideoStatus';
-
-interface VideoDataDTO {
-    title: string;
-    duration: string;
-    module: number;
-    status: VideoStatus;
-    description: string;
-    videoUrl?: string;
-}
+import { IVideoBase } from '../entities/VideoTypes';
 
 export interface GetVideosRequestDTO {
     category?: string;
@@ -20,12 +12,11 @@ export interface GetVideoByIdRequestDTO {
     id: string;
 }
 
-export interface CreateVideoRequestDTO extends VideoDataDTO {
-    category: string;
+export interface CreateVideoRequestDTO extends Omit<IVideoBase, 'id' | 'uploadedAt'> {
     videoFile?: Express.Multer.File;
 }
 
-export interface UpdateVideoRequestDTO extends Partial<VideoDataDTO> {
+export interface UpdateVideoRequestDTO extends Partial<Omit<IVideoBase, 'uploadedAt'>> {
     id: string;
     videoFile?: Express.Multer.File;
 }

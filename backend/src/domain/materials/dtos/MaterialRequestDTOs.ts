@@ -1,3 +1,5 @@
+import { MaterialType, MaterialDifficulty, MaterialProps, CreateMaterialProps, UpdateMaterialProps } from "../entities/MaterialTypes";
+
 export interface GetMaterialsRequestDTO {
   subject?: string;
   course?: string;
@@ -8,24 +10,6 @@ export interface GetMaterialsRequestDTO {
   limit: number;
 }
 export interface GetMaterialByIdRequestDTO { id: string; }
-export interface CreateMaterialRequestDTO {
-  title: string;
-  description: string;
-  subject: string;
-  course: string;
-  semester: number;
-  type: string;
-  fileUrl: string;
-  thumbnailUrl: string;
-  tags: string[];
-  difficulty: string;
-  estimatedTime: string;
-  isNewMaterial: boolean;
-  isRestricted: boolean;
-  uploadedBy: string;
-}
-export interface UpdateMaterialRequestDTO {
-  id: string;
-  data: Partial<CreateMaterialRequestDTO>;
-}
+export type CreateMaterialRequestDTO = CreateMaterialProps;
+export type UpdateMaterialRequestDTO = UpdateMaterialProps;
 export interface DeleteMaterialRequestDTO { id: string; } 

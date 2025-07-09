@@ -132,6 +132,14 @@ export class AdmissionRepository implements IAdmissionRepository {
         return admission.save();
     }
 
+    async findUserByEmail(email: string) {
+        return User.findOne({ email });
+    }
+
+    async saveUser(user: any) {
+        return user.save();
+    }
+
     async approveAdmission(params: ApproveAdmissionRequestDTO): Promise<ApproveAdmissionResponseDTO> {
         throw new Error('Business logic moved to use case layer. Use findAdmissionById and saveAdmission instead.');
     }

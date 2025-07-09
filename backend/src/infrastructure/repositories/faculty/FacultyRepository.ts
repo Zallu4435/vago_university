@@ -34,7 +34,7 @@ import { FacultyRegister } from "../../database/mongoose/models/facultyRegister.
 export class FacultyRepository implements IFacultyRepository {
     async findFaculty(query: any, options: { skip?: number; limit?: number; select?: string }): Promise<any[]> {
         return (FacultyRegister as any).find(query)
-            .select(options.select || "")
+            .select((options.select ? options.select + ' blocked' : 'blocked'))
             .skip(options.skip || 0)
             .limit(options.limit || 0)
             .lean();
@@ -50,7 +50,7 @@ export class FacultyRepository implements IFacultyRepository {
         }
 
         const faculty = await (FacultyRegister as any).findById(params.id)
-            .select("fullName email phone department qualification experience aboutMe cvUrl certificatesUrl createdAt status")
+            .select('fullName email phone department qualification experience aboutMe cvUrl certificatesUrl createdAt status blocked')
             .lean();
 
         if (!faculty) {
@@ -140,6 +140,37 @@ export class FacultyRepository implements IFacultyRepository {
         }
         // The rest of the logic (authorization, file fetch, etc) should be in the use case
         return null as any;
+    }
+
+    async blockFaculty(id: string): Promise<{ message: string }> {
+        console.log('Repository blockFaculty called with id:', id);
+        // Step 1: Find faculty in FacultyRegister by id
+        const facultyRegister = await FacultyRegister.findById(id);
+        console.log('FacultyRegister found:', facultyRegister);
+        // Step 2: Get email if found
+        const email = facultyRegister ? facultyRegister.email : undefined;
+        // Step 3: Find faculty in FacultyModel by email if email exists
+        let facultyModel = email ? await FacultyModel.findOne({ email }) : null;
+        console.log('FacultyModel found by email:', facultyModel);
+        // Step 4: Toggle blocked in both if found
+        let blockedStatus: boolean | undefined = undefined;
+        if (facultyModel) {
+            facultyModel.blocked = !facultyModel.blocked;
+            blockedStatus = facultyModel.blocked;
+            await facultyModel.save();
+        }
+        if (facultyRegister) {
+            facultyRegister.blocked = blockedStatus !== undefined ? blockedStatus : !facultyRegister.blocked;
+            await facultyRegister.save();
+        }
+        if (!facultyModel && !facultyRegister) {
+            throw new Error('Faculty not found in FacultyRegister or FacultyModel');
+        }
+        return { message: (blockedStatus ?? facultyRegister?.blocked) ? 'Faculty blocked' : 'Faculty unblocked' };
+    }
+
+    async saveFaculty(faculty: any) {
+        return faculty.save();
     }
 
     private generateConfirmationToken(): string {

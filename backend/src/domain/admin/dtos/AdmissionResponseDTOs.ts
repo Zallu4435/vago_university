@@ -17,11 +17,11 @@ export interface GetAdmissionsResponseDTO {
 }
   
 export interface GetAdmissionByIdResponseDTO {
-    admission: AdminAdmission;
+    admission: AdminAdmission; // includes 'blocked' property
 }
   
 export interface GetAdmissionByTokenResponseDTO {
-    admission: AdminAdmission;
+    admission: AdminAdmission; // includes 'blocked' property
 }
   
 export interface ApproveAdmissionResponseDTO {

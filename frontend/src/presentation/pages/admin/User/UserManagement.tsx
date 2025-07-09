@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useUserManagement } from '../../../../application/hooks/useUserManagement';
-import { FiUsers, FiClipboard, FiBarChart2, FiUser, FiMail, FiCalendar, FiBook, FiEye, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import { FiUsers, FiClipboard, FiBarChart2, FiUser, FiMail, FiCalendar, FiBook, FiEye, FiCheckCircle, FiXCircle, FiSlash } from 'react-icons/fi';
 import { debounce } from 'lodash';
 import ApprovalModal from '../../../components/admin/ApprovalModal';
 import WarningModal from '../../../components/WarningModal';
@@ -16,6 +16,7 @@ interface User {
   program: string;
   status: string;
   createdAt: string;
+  blocked: boolean; // Added blocked property
 }
 
 const formatDate = (dateString: string): string => {
@@ -134,6 +135,8 @@ const UserManagement: React.FC = () => {
     declaration: true,
     application: true,
   });
+  const [showBlockWarning, setShowBlockWarning] = useState(false);
+  const [admissionToBlock, setAdmissionToBlock] = useState<User | null>(null);
 
   const {
     users,
@@ -148,6 +151,7 @@ const UserManagement: React.FC = () => {
     approveAdmission,
     rejectAdmission,
     deleteAdmission,
+    blockAdmission, // <-- add this
   } = useUserManagement();
 
   const debouncedFilterChange = useCallback(
@@ -229,6 +233,18 @@ const UserManagement: React.FC = () => {
     }
   };
 
+  const handleBlock = async (user: User) => {
+    try {
+      await blockAdmission(user._id);
+      setShowBlockWarning(false);
+      setAdmissionToBlock(null);
+    } catch (error) {
+      // Optionally show error toast
+      setShowBlockWarning(false);
+      setAdmissionToBlock(null);
+    }
+  };
+
   const handleResetFilters = () => {
     setFilters({
       status: '',
@@ -265,6 +281,21 @@ const UserManagement: React.FC = () => {
       },
       color: 'red' as const,
       disabled: (user: User) => user.status !== 'pending',
+    },
+    {
+      icon: (
+        <span className="inline-flex items-center justify-center rounded-full bg-red-600 text-white p-1 shadow" title="Block/Unblock">
+          <FiSlash size={16} />
+        </span>
+      ),
+      label: 'Block/Unblock',
+      onClick: (user: User) => {
+        console.log('Block/Unblock action clicked for user:', user);
+        setAdmissionToBlock(user);
+        setShowBlockWarning(true);
+      },
+      color: 'red',
+      disabled: (user: User) => user.status !== 'approved',
     },
   ];
 
@@ -464,6 +495,22 @@ const UserManagement: React.FC = () => {
           confirmText="Delete"
           cancelText="Cancel"
           type="danger"
+        />
+      )}
+
+      {showBlockWarning && admissionToBlock && (
+        <WarningModal
+          isOpen={showBlockWarning}
+          onClose={() => {
+            setShowBlockWarning(false);
+            setAdmissionToBlock(null);
+          }}
+          onConfirm={() => handleBlock(admissionToBlock)}
+          title={admissionToBlock.blocked ? 'Unblock User' : 'Block User'}
+          message={`Are you sure you want to ${admissionToBlock.blocked ? 'unblock' : 'block'} ${admissionToBlock.fullName}? This will ${admissionToBlock.blocked ? 'allow' : 'prevent'} them from logging in.`}
+          confirmText={admissionToBlock.blocked ? 'Unblock' : 'Block'}
+          cancelText="Cancel"
+          type="warning"
         />
       )}
 

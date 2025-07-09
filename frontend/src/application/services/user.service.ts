@@ -59,6 +59,15 @@ class UserService {
       throw new Error(error.response?.data?.error || 'Failed to delete admission');
     }
   }
+
+  async blockAdmission(id: string): Promise<{ message: string }> {
+    try {
+      const response = await httpClient.post(`/admin/admissions/${id}/block`);
+      return response.data.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to block/unblock admission');
+    }
+  }
 }
 
 export const userService = new UserService();

@@ -26,11 +26,12 @@ const facultySchema = new Schema<IFaculty>({
   },
   passwordChangedAt: { type: Date },
   fcmTokens: [{ type: String }],
+  blocked: { type: Boolean, default: false },
 });
 
 // Pre-save middleware to hash password
 facultySchema.pre("save", async function (next) {
-  const faculty = this as IFaculty;
+  const faculty = this as any;
 
   // Only hash the password if it has been modified (or is new)
   if (!faculty.isModified("password")) return next();

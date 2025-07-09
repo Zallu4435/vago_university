@@ -38,6 +38,10 @@ facultyRouter.post("/:id/reject", authMiddleware, async (req, res, next) => {
   await expressAdapter(req, res, next, facultyController.rejectFaculty.bind(facultyController));
 });
 
+facultyRouter.post("/:id/block", authMiddleware, async (req, res, next) => {
+  await expressAdapter(req, res, next, facultyController.blockFaculty.bind(facultyController));
+});
+
 facultyRouter.delete("/:id", authMiddleware, async (req, res, next) => {
   await expressAdapter(req, res, next, facultyController.deleteFaculty.bind(facultyController));
 });

@@ -71,3 +71,10 @@ export class AlreadyConfirmedError extends DomainError {
         super(message, "AlreadyConfirmedError");
     }
 }
+
+export class BlockedAccountError extends Error {
+  constructor(message = 'Account is blocked. Please contact support.') {
+    super(message);
+    this.name = 'BlockedAccountError';
+  }
+}

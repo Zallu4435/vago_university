@@ -27,4 +27,6 @@ import {
     confirmAdmissionOffer(params: ConfirmAdmissionOfferRequestDTO): Promise<ConfirmAdmissionOfferResponseDTO>;
     findAdmissionById(id: string): Promise<any>;
     saveAdmission(admission: any): Promise<any>;
+    findUserByEmail(email: string): Promise<any>;
+    saveUser(user: any): Promise<any>;
   }

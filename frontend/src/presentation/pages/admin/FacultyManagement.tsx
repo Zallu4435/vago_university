@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useFacultyManagement } from '../../../application/hooks/useFacultyManagement';
-import { FiFileText, FiUsers, FiClipboard, FiBarChart2, FiUser, FiMail, FiCalendar, FiBriefcase, FiEye, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import { FiFileText, FiUsers, FiClipboard, FiBarChart2, FiUser, FiMail, FiCalendar, FiBriefcase, FiEye, FiCheckCircle, FiXCircle, FiLock, FiUnlock } from 'react-icons/fi';
 import { debounce } from 'lodash';
 import WarningModal from '../../components/WarningModal';
 import FacultyDetailsModal from '../../components/admin/FacultyDetailsModal';
@@ -15,6 +15,7 @@ interface Faculty {
   department: string;
   status: string;
   createdAt: string;
+  blocked?: boolean;
 }
 
 interface FacultyFilters {
@@ -132,6 +133,8 @@ const FacultyManagement: React.FC = () => {
   const [facultyToDelete, setFacultyToDelete] = useState<Faculty | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [showApproveWarning, setShowApproveWarning] = useState(false);
+  const [showBlockWarning, setShowBlockWarning] = useState(false);
+  const [facultyToBlock, setFacultyToBlock] = useState<Faculty | null>(null);
 
   const {
     faculty,
@@ -146,6 +149,8 @@ const FacultyManagement: React.FC = () => {
     approveFaculty,
     rejectFaculty,
     deleteFaculty,
+    updateFacultyStatus,
+    blockFaculty,
   } = useFacultyManagement();
 
   const handleFilterChange = (field: string, value: string) => {
@@ -266,6 +271,16 @@ const FacultyManagement: React.FC = () => {
       color: 'red' as const,
       disabled: (faculty: Faculty) => faculty.status !== 'pending',
     },
+    {
+      icon: <FiLock size={16} />,
+      label: 'Block/Unblock',
+      onClick: (faculty: Faculty) => {
+        setFacultyToBlock(faculty);
+        setShowBlockWarning(true);
+      },
+      color: 'red',
+      disabled: (faculty: Faculty) => faculty.status !== 'approved',
+    },
   ];
 
   const filteredFaculty = faculty?.filter((member) => {
@@ -296,6 +311,13 @@ const FacultyManagement: React.FC = () => {
           new Date(new Date().setMonth(new Date().getMonth() - 3)));
     return (nameMatch || emailMatch) && statusMatch && departmentMatch && dateMatch;
   });
+
+  // Block/unblock handler for modal
+  const handleBlock = (faculty: Faculty) => {
+    blockFaculty.mutate(faculty._id);
+    setShowBlockWarning(false);
+    setFacultyToBlock(null);
+  };
 
   if (isLoading) {
     return (
@@ -464,6 +486,22 @@ const FacultyManagement: React.FC = () => {
         />
       )}
 
+      {showBlockWarning && facultyToBlock && (
+        <WarningModal
+          isOpen={showBlockWarning}
+          onClose={() => {
+            setShowBlockWarning(false);
+            setFacultyToBlock(null);
+          }}
+          onConfirm={() => handleBlock(facultyToBlock)}
+          title={facultyToBlock.blocked ? 'Unblock Faculty' : 'Block Faculty'}
+          message={`Are you sure you want to ${facultyToBlock.blocked ? 'unblock' : 'block'} ${facultyToBlock.fullName}? This will ${facultyToBlock.blocked ? 'allow' : 'prevent'} them from logging in.`}
+          confirmText={facultyToBlock.blocked ? 'Unblock' : 'Block'}
+          cancelText="Cancel"
+          type="warning"
+        />
+      )}
+
       <FacultyDetailsModal
         isOpen={isDetailsModalOpen}
         onClose={() => {
@@ -471,9 +509,10 @@ const FacultyManagement: React.FC = () => {
           setSelectedFaculty(null);
         }}
         faculty={selectedFaculty}
+        onBlockToggle={handleBlock}
       />
 
-      <style jsx>{`
+      <style>{`
         @keyframes floatingMist {
           0% {
             transform: translateY(0) translateX(0);

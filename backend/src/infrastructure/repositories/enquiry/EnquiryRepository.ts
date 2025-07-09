@@ -1,195 +1,41 @@
-import mongoose from "mongoose";
-import { Enquiry, EnquiryStatus } from "../../../domain/enquiry/entities/Enquiry";
-import { EnquiryErrorType } from "../../../domain/enquiry/enums/EnquiryErrorType";
-import {
-  CreateEnquiryRequestDTO,
-  GetEnquiriesRequestDTO,
-  GetEnquiryByIdRequestDTO,
-  UpdateEnquiryStatusRequestDTO,
-  DeleteEnquiryRequestDTO,
-  SendEnquiryReplyRequestDTO,
-} from "../../../domain/enquiry/dtos/EnquiryRequestDTOs";
-import {
-  CreateEnquiryResponseDTO,
-  GetEnquiriesResponseDTO,
-  GetEnquiryByIdResponseDTO,
-  UpdateEnquiryStatusResponseDTO,
-  DeleteEnquiryResponseDTO,
-  SendEnquiryReplyResponseDTO,
-} from "../../../domain/enquiry/dtos/EnquiryResponseDTOs";
+import { EnquiryProps } from "../../../domain/enquiry/entities/EnquiryTypes";
 import { IEnquiryRepository } from "../../../application/enquiry/repositories/IEnquiryRepository";
 import { Enquiry as EnquiryModel } from "../../database/mongoose/models/enquiry.model";
-import { emailService } from "../../services/email.service";
 
 export class EnquiryRepository implements IEnquiryRepository {
-  async createEnquiry(params: CreateEnquiryRequestDTO): Promise<CreateEnquiryResponseDTO> {
+  async create(data: EnquiryProps): Promise<any> {
     const enquiry = new EnquiryModel({
-      name: params.name,
-      email: params.email,
-      subject: params.subject,
-      message: params.message,
-      status: EnquiryStatus.PENDING,
+      name: data.name,
+      email: data.email,
+      subject: data.subject,
+      message: data.message,
+      status: data.status,
     });
 
-    const savedEnquiry = await enquiry.save();
-    
-    return {
-      enquiry: new Enquiry({
-        id: savedEnquiry._id.toString(),
-        name: savedEnquiry.name,
-        email: savedEnquiry.email,
-        subject: savedEnquiry.subject,
-        message: savedEnquiry.message,
-        status: savedEnquiry.status,
-        createdAt: savedEnquiry.createdAt,
-        updatedAt: savedEnquiry.updatedAt,
-      }),
-    };
+    return await enquiry.save();
   }
 
-  async getEnquiries(params: GetEnquiriesRequestDTO): Promise<GetEnquiriesResponseDTO> {
-    const { page = 1, limit = 10, status, startDate, endDate, search } = params;
-    const skip = (page - 1) * limit;
-
-    // Build query
-    const query: any = {};
-
-    // Status filter
-    if (status && (status as any) !== "all") {
-      query.status = status;
-    }
-
-    // Custom date range
-    if (startDate && endDate) {
-      query.createdAt = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
-      };
-    }
-
-    // Search filter
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
-        { subject: { $regex: search, $options: "i" } },
-        { message: { $regex: search, $options: "i" } },
-      ];
-    }
-
-    const [enquiries, total] = await Promise.all([
-      EnquiryModel.find(query)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
-      EnquiryModel.countDocuments(query),
-    ]);
-
-    const totalPages = Math.ceil(total / limit);
-
-    return {
-      enquiries: enquiries.map((enquiry) =>
-        new Enquiry({
-          id: enquiry._id.toString(),
-          name: enquiry.name,
-          email: enquiry.email,
-          subject: enquiry.subject,
-          message: enquiry.message,
-          status: enquiry.status,
-          createdAt: enquiry.createdAt,
-          updatedAt: enquiry.updatedAt,
-        })
-      ),
-      total,
-      page,
-      limit,
-      totalPages,
-    };
+  async find(filter: any, options: { skip?: number; limit?: number; sort?: any } = {}): Promise<any[]> {
+    return EnquiryModel.find(filter)
+      .sort(options.sort ?? {})
+      .skip(options.skip ?? 0)
+      .limit(options.limit ?? 0)
+      .lean();
   }
 
-  async getEnquiryById(params: GetEnquiryByIdRequestDTO): Promise<GetEnquiryByIdResponseDTO> {
-    const enquiry = await EnquiryModel.findById(params.id).lean();
-
-    if (!enquiry) {
-      throw new Error(EnquiryErrorType.EnquiryNotFound);
-    }
-
-    return {
-      enquiry: new Enquiry({
-        id: enquiry._id.toString(),
-        name: enquiry.name,
-        email: enquiry.email,
-        subject: enquiry.subject,
-        message: enquiry.message,
-        status: enquiry.status,
-        createdAt: enquiry.createdAt,
-        updatedAt: enquiry.updatedAt,
-      }),
-    };
+  async count(filter: any): Promise<number> {
+    return EnquiryModel.countDocuments(filter);
   }
 
-  async updateEnquiryStatus(params: UpdateEnquiryStatusRequestDTO): Promise<UpdateEnquiryStatusResponseDTO> {
-    const enquiry = await EnquiryModel.findById(params.id);
-    if (!enquiry) {
-      throw new Error(EnquiryErrorType.EnquiryNotFound);
-    }
-
-    enquiry.status = params.status;
-    await enquiry.save();
-
-    return {
-      enquiry: new Enquiry({
-        id: enquiry._id.toString(),
-        name: enquiry.name,
-        email: enquiry.email,
-        subject: enquiry.subject,
-        message: enquiry.message,
-        status: enquiry.status,
-        createdAt: enquiry.createdAt,
-        updatedAt: enquiry.updatedAt,
-      }),
-    };
+  async findById(id: string): Promise<any | null> {
+    return EnquiryModel.findById(id).lean();
   }
 
-  async deleteEnquiry(params: DeleteEnquiryRequestDTO): Promise<DeleteEnquiryResponseDTO> {
-    const enquiry = await EnquiryModel.findById(params.id);
-    if (!enquiry) {
-      throw new Error(EnquiryErrorType.EnquiryNotFound);
-    }
-
-    await EnquiryModel.findByIdAndDelete(params.id);
-
-    return {
-      success: true,
-      message: "Enquiry deleted successfully",
-    };
+  async update(id: string, data: EnquiryProps): Promise<any | null> {
+    return EnquiryModel.findByIdAndUpdate(id, data, { new: true });
   }
 
-  async sendReply(params: SendEnquiryReplyRequestDTO): Promise<SendEnquiryReplyResponseDTO> {
-    const enquiry = await EnquiryModel.findById(params.id);
-    if (!enquiry) {
-      throw new Error(EnquiryErrorType.EnquiryNotFound);
-    }
-
-    try {
-      // Send email reply to the user
-      await emailService.sendEnquiryReplyEmail({
-        to: enquiry.email,
-        name: enquiry.name,
-        originalSubject: enquiry.subject,
-        originalMessage: enquiry.message,
-        replyMessage: params.replyMessage,
-        adminName: "Support Team"
-      });
-
-      return {
-        success: true,
-        message: "Reply sent successfully",
-      };
-    } catch (error) {
-      console.error("Error sending reply:", error);
-      throw new Error(EnquiryErrorType.ReplyFailed);
-    }
+  async delete(id: string): Promise<void> {
+    await EnquiryModel.findByIdAndDelete(id);
   }
 } 

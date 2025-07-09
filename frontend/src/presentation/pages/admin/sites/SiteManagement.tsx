@@ -272,12 +272,12 @@ const SiteManagement = () => {
     try {
       console.log('Form Data:', formData); // Debug log
       if (selectedId) {
-        await updateSection.mutateAsync({ id: selectedId, data: formData });
+        await updateSection.mutateAsync({ id: selectedId, data: { ...formData, sectionKey: activeTab } });
         toast.success('Section updated successfully!');
       } else {
         await createSection.mutateAsync({ ...formData, sectionKey: activeTab });
       }
-    setShowForm(false);
+      setShowForm(false);
       setSelectedId(null);
     } catch (error) {
       console.error('Form submission error:', error);

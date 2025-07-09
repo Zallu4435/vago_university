@@ -50,13 +50,13 @@ class SiteManagementService {
     if (page) params.append('page', page.toString());
     
     const response = await httpClient.get<SiteSectionsResponse>(`/admin/site-sections?${params.toString()}`);
-    return response.data.sections;
+    return response.data.data.sections;
   }
 
   // Get section by ID
   async getSectionById(id: string): Promise<SiteSection> {
     const response = await httpClient.get<{ section: SiteSection }>(`/admin/site-sections/${id}`);
-    return response.data.section;
+    return response.data.data.section;
   }
 
   // Create new section
@@ -77,7 +77,8 @@ class SiteManagementService {
       headers['Content-Type'] = 'multipart/form-data';
     }
     const response = await httpClient.post<{ section: SiteSection }>('/admin/site-sections', payload, { headers });
-    return response.data.section;
+    console.log(response, "popopopopop")
+    return response.data.data.section;
   }
 
   // Update section
@@ -98,7 +99,8 @@ class SiteManagementService {
       headers['Content-Type'] = 'multipart/form-data';
     }
     const response = await httpClient.put<{ section: SiteSection }>(`/admin/site-sections/${id}`, payload, { headers });
-    return response.data.section;
+    console.log(response, "pl[k[akof[kdf")
+    return response.data.data.section;
   }
 
   // Delete section

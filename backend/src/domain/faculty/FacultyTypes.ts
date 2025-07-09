@@ -26,6 +26,7 @@ export interface IFacultyRegister extends FacultyProps {
   rejectedBy: FacultyRejectedBy;
   confirmationToken: string | null;
   tokenExpiry: Date | null;
+  blocked?: boolean;
 }
 
 export interface IFaculty extends FacultyProps {

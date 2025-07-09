@@ -8,6 +8,7 @@ import {
   DeleteEnquiryUseCase,
   SendEnquiryReplyUseCase,
 } from "../../../application/enquiry/useCases/EnquiryUseCases";
+import { emailService } from "../../services/email.service";
 
 export function getEnquiryComposer(): EnquiryController {
   const enquiryRepository = new EnquiryRepository();
@@ -17,7 +18,7 @@ export function getEnquiryComposer(): EnquiryController {
   const getEnquiryByIdUseCase = new GetEnquiryByIdUseCase(enquiryRepository);
   const updateEnquiryStatusUseCase = new UpdateEnquiryStatusUseCase(enquiryRepository);
   const deleteEnquiryUseCase = new DeleteEnquiryUseCase(enquiryRepository);
-  const sendEnquiryReplyUseCase = new SendEnquiryReplyUseCase(enquiryRepository);
+  const sendEnquiryReplyUseCase = new SendEnquiryReplyUseCase(enquiryRepository, emailService);
 
   return new EnquiryController(
     createEnquiryUseCase,

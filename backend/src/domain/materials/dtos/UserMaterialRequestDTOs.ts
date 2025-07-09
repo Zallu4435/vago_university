@@ -1,3 +1,5 @@
+import { MaterialType, MaterialDifficulty, MaterialProps, CreateMaterialProps, UpdateMaterialProps } from "../entities/MaterialTypes";
+
 export interface GetUserMaterialsRequestDTO {
   userId: string;
   subject?: string;
@@ -17,17 +19,6 @@ export interface GetUserMaterialByIdRequestDTO {
   id: string;
 }
 
-export interface ToggleBookmarkRequestDTO {
-  userId: string;
-  materialId: string;
-}
-
-export interface ToggleLikeRequestDTO {
-  userId: string;
-  materialId: string;
-}
-
-export interface DownloadMaterialRequestDTO {
-  userId: string;
-  materialId: string;
-} 
+export type ToggleBookmarkRequestDTO = Pick<GetUserMaterialByIdRequestDTO, 'userId' | 'id'>;
+export type ToggleLikeRequestDTO = Pick<GetUserMaterialByIdRequestDTO, 'userId' | 'id'>;
+export type DownloadMaterialRequestDTO = Pick<GetUserMaterialByIdRequestDTO, 'userId' | 'id'>; 

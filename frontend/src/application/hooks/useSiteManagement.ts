@@ -36,6 +36,7 @@ export const useSiteManagement = () => {
   const createSection = useMutation({
     mutationFn: (data: CreateSiteSectionData) => siteManagementService.createSection(data),
     onSuccess: (data) => {
+      console.log(data, "kaojspaijsoiajs")
       queryClient.invalidateQueries({ queryKey: ['site-sections', data.sectionKey] });
       toast.success(`${data.sectionKey === 'highlights' ? 'Highlight' : data.sectionKey === 'vagoNow' ? 'VAGO Now' : 'Leadership'} created successfully`);
     },
@@ -46,14 +47,15 @@ export const useSiteManagement = () => {
     mutationFn: ({ id, data }: { id: string; data: UpdateSiteSectionData }) => 
       siteManagementService.updateSection(id, data),
     onSuccess: (data) => {
-      // Update the section list cache
-      queryClient.setQueryData(['site-sections', data.sectionKey, page], (oldSections: SiteSection[] | undefined) => {
+  
+      console.log('[updateSection onSuccess] sectionKey:', data.sectionKey);
+      const key = data.sectionKey || activeTab;
+      queryClient.setQueryData(['site-sections', key, page], (oldSections: SiteSection[] | undefined) => {
         if (!oldSections) return oldSections;
-        return oldSections.map(section => section.id === data.id ? data : section);
+        return oldSections.map(section => section.id === data.id ? { ...data, sectionKey: key } : section);
       });
-      // Update the individual section cache
-      queryClient.setQueryData(['site-section', data.id], data);
-      toast.success(`${data.sectionKey === 'highlights' ? 'Highlight' : data.sectionKey === 'vagoNow' ? 'VAGO Now' : 'Leadership'} updated successfully`);
+      queryClient.setQueryData(['site-section', data.id], { ...data, sectionKey: key });
+      toast.success(`${key === 'highlights' ? 'Highlight' : key === 'vagoNow' ? 'VAGO Now' : 'Leadership'} updated successfully`);
     },
     onError: () => toast.error('Failed to update section'),
   });

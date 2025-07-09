@@ -1,5 +1,3 @@
-import mongoose from "mongoose";
-import { EnquiryErrorType } from "../../../domain/enquiry/enums/EnquiryErrorType";
 import {
   CreateEnquiryRequestDTO,
   GetEnquiriesRequestDTO,
@@ -17,9 +15,32 @@ import {
   SendEnquiryReplyResponseDTO,
 } from "../../../domain/enquiry/dtos/EnquiryResponseDTOs";
 import { IEnquiryRepository } from "../repositories/IEnquiryRepository";
+import { Enquiry, EnquiryProps } from "../../../domain/enquiry/entities/Enquiry";
+import { EnquiryStatus } from "../../../domain/enquiry/entities/EnquiryTypes";
+import { IEmailService } from "../../auth/service/IEmailService";
+import {
+  EnquiryNotFoundError,
+  InvalidEnquiryIdError,
+  InvalidEmailError,
+  EnquiryValidationError,
+  EnquiryReplyFailedError,
+} from "../../../domain/enquiry/errors/EnquiryErrors";
 
 // Email validation regex
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function toEnquiryProps(raw: any): EnquiryProps {
+  return {
+    id: raw._id?.toString() ?? raw.id,
+    name: raw.name,
+    email: raw.email,
+    subject: raw.subject,
+    message: raw.message,
+    status: raw.status,
+    createdAt: raw.createdAt,
+    updatedAt: raw.updatedAt,
+  };
+}
 
 export interface ICreateEnquiryUseCase {
   execute(params: CreateEnquiryRequestDTO): Promise<CreateEnquiryResponseDTO>;
@@ -49,16 +70,23 @@ export class CreateEnquiryUseCase implements ICreateEnquiryUseCase {
   constructor(private enquiryRepository: IEnquiryRepository) {}
 
   async execute(params: CreateEnquiryRequestDTO): Promise<CreateEnquiryResponseDTO> {
+    // Business logic validation
     if (!emailRegex.test(params.email)) {
-      throw new Error(EnquiryErrorType.InvalidEmail);
+      throw new InvalidEmailError(params.email);
     }
 
-    try {
-      return await this.enquiryRepository.createEnquiry(params);
-    } catch (error) {
-      console.error("CreateEnquiryUseCase: Error:", error);
-      throw new Error(error.message || EnquiryErrorType.EnquiryCreationFailed);
-    }
+    // Create enquiry entity with business logic
+    const enquiry = Enquiry.create({
+      ...params,
+      status: EnquiryStatus.PENDING, // Add default status
+    });
+    
+    // Save to database via repository
+    const dbResult = await this.enquiryRepository.create(enquiry.props);
+    
+    return {
+      enquiry: toEnquiryProps(dbResult),
+    };
   }
 }
 
@@ -66,12 +94,50 @@ export class GetEnquiriesUseCase implements IGetEnquiriesUseCase {
   constructor(private enquiryRepository: IEnquiryRepository) {}
 
   async execute(params: GetEnquiriesRequestDTO): Promise<GetEnquiriesResponseDTO> {
-    try {
-      return await this.enquiryRepository.getEnquiries(params);
-    } catch (error) {
-      console.error("GetEnquiriesUseCase: Error:", error);
-      throw new Error(error.message || "Failed to fetch enquiries");
+    const { page = 1, limit = 10, status, startDate, endDate, search } = params;
+    const skip = (page - 1) * limit;
+
+    // Build query/filter logic here (business logic)
+    const filter: any = {};
+
+    // Status filter - handle string values from frontend
+    if (status && typeof status === 'string') {
+      const statusStr = status.toLowerCase();
+      if (statusStr !== "all" && statusStr !== "all statuses" && Object.values(EnquiryStatus).includes(statusStr as EnquiryStatus)) {
+        filter.status = statusStr;
+      }
     }
+
+    // Custom date range
+    if (startDate && endDate) {
+      filter.createdAt = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+
+    // Search filter
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+        { subject: { $regex: search, $options: "i" } },
+        { message: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const sort = { createdAt: -1 };
+    const enquiries = await this.enquiryRepository.find(filter, { skip, limit, sort });
+    const total = await this.enquiryRepository.count(filter);
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      enquiries: enquiries.map(toEnquiryProps),
+      total,
+      page,
+      limit,
+      totalPages,
+    };
   }
 }
 
@@ -80,15 +146,17 @@ export class GetEnquiryByIdUseCase implements IGetEnquiryByIdUseCase {
 
   async execute(params: GetEnquiryByIdRequestDTO): Promise<GetEnquiryByIdResponseDTO> {
     if (!params.id) {
-      throw new Error(EnquiryErrorType.InvalidEnquiryId);
+      throw new InvalidEnquiryIdError();
     }
 
-    try {
-      return await this.enquiryRepository.getEnquiryById(params);
-    } catch (error) {
-      console.error("GetEnquiryByIdUseCase: Error:", error);
-      throw new Error(error.message || EnquiryErrorType.EnquiryNotFound);
+    const enquiry = await this.enquiryRepository.findById(params.id);
+    if (!enquiry) {
+      throw new EnquiryNotFoundError(params.id);
     }
+
+    return {
+      enquiry: toEnquiryProps(enquiry),
+    };
   }
 }
 
@@ -97,15 +165,28 @@ export class UpdateEnquiryStatusUseCase implements IUpdateEnquiryStatusUseCase {
 
   async execute(params: UpdateEnquiryStatusRequestDTO): Promise<UpdateEnquiryStatusResponseDTO> {
     if (!params.id) {
-      throw new Error(EnquiryErrorType.InvalidEnquiryId);
+      throw new InvalidEnquiryIdError();
     }
 
-    try {
-      return await this.enquiryRepository.updateEnquiryStatus(params);
-    } catch (error) {
-      console.error("UpdateEnquiryStatusUseCase: Error:", error);
-      throw new Error(error.message || EnquiryErrorType.EnquiryUpdateFailed);
+    // Get existing enquiry
+    const existingEnquiry = await this.enquiryRepository.findById(params.id);
+    if (!existingEnquiry) {
+      throw new EnquiryNotFoundError(params.id);
     }
+
+    // Create updated enquiry using entity's update method
+    const existingProps = toEnquiryProps(existingEnquiry);
+    const updatedEnquiry = Enquiry.update(existingProps, { status: params.status });
+    
+    // Update in database
+    const dbResult = await this.enquiryRepository.update(params.id, updatedEnquiry.props);
+    if (!dbResult) {
+      throw new EnquiryNotFoundError(params.id);
+    }
+
+    return {
+      enquiry: toEnquiryProps(dbResult),
+    };
   }
 }
 
@@ -114,35 +195,64 @@ export class DeleteEnquiryUseCase implements IDeleteEnquiryUseCase {
 
   async execute(params: DeleteEnquiryRequestDTO): Promise<DeleteEnquiryResponseDTO> {
     if (!params.id) {
-      throw new Error(EnquiryErrorType.InvalidEnquiryId);
+      throw new InvalidEnquiryIdError();
     }
 
-    try {
-      return await this.enquiryRepository.deleteEnquiry(params);
-    } catch (error) {
-      console.error("DeleteEnquiryUseCase: Error:", error);
-      throw new Error(error.message || EnquiryErrorType.EnquiryDeletionFailed);
+    // Check if enquiry exists
+    const enquiry = await this.enquiryRepository.findById(params.id);
+    if (!enquiry) {
+      throw new EnquiryNotFoundError(params.id);
     }
+
+    // Delete from database
+    await this.enquiryRepository.delete(params.id);
+
+    return {
+      success: true,
+      message: "Enquiry deleted successfully",
+    };
   }
 }
 
 export class SendEnquiryReplyUseCase implements ISendEnquiryReplyUseCase {
-  constructor(private enquiryRepository: IEnquiryRepository) {}
+  constructor(
+    private enquiryRepository: IEnquiryRepository,
+    private emailService: IEmailService
+  ) {}
 
   async execute(params: SendEnquiryReplyRequestDTO): Promise<SendEnquiryReplyResponseDTO> {
     if (!params.id) {
-      throw new Error(EnquiryErrorType.InvalidEnquiryId);
+      throw new InvalidEnquiryIdError();
     }
 
     if (!params.replyMessage || params.replyMessage.trim().length === 0) {
-      throw new Error("Reply message is required");
+      throw new EnquiryValidationError("replyMessage", "Reply message is required");
+    }
+
+    // Get enquiry from database
+    const enquiry = await this.enquiryRepository.findById(params.id);
+    if (!enquiry) {
+      throw new EnquiryNotFoundError(params.id);
     }
 
     try {
-      return await this.enquiryRepository.sendReply(params);
+      // Send email reply using injected email service
+      await this.emailService.sendEnquiryReplyEmail({
+        to: enquiry.email,
+        name: enquiry.name,
+        originalSubject: enquiry.subject,
+        originalMessage: enquiry.message,
+        replyMessage: params.replyMessage,
+        adminName: "Support Team"
+      });
+
+      return {
+        success: true,
+        message: "Reply sent successfully",
+      };
     } catch (error) {
-      console.error("SendEnquiryReplyUseCase: Error:", error);
-      throw new Error(error.message || "Failed to send reply");
+      console.error("Error sending reply:", error);
+      throw new EnquiryReplyFailedError("Failed to send reply");
     }
   }
 } 

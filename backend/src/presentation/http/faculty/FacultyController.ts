@@ -23,7 +23,8 @@ export class FacultyController implements IFacultyController {
     private rejectFacultyUseCase: RejectFacultyUseCase,
     private deleteFacultyUseCase: DeleteFacultyUseCase,
     private confirmFacultyOfferUseCase: ConfirmFacultyOfferUseCase,
-    private downloadCertificateUseCase: DownloadCertificateUseCase
+    private downloadCertificateUseCase: DownloadCertificateUseCase,
+    private blockFacultyUseCase: any
   ) {
     this.httpErrors = new HttpErrors();
     this.httpSuccess = new HttpSuccess();
@@ -148,6 +149,19 @@ export class FacultyController implements IFacultyController {
       requestingUserId,
       type: String(type),
     });
+    if (!response.success) {
+      return this.httpErrors.error_400();
+    }
+    return this.httpSuccess.success_200(response.data);
+  }
+
+  async blockFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    const { id } = httpRequest.params || {};
+    console.log('BlockFaculty Controller called with id:', id);
+    if (!id) {
+      return this.httpErrors.error_400();
+    }
+    const response = await this.blockFacultyUseCase.execute({ id });
     if (!response.success) {
       return this.httpErrors.error_400();
     }

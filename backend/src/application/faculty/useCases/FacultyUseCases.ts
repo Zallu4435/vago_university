@@ -80,6 +80,10 @@ export interface IDownloadCertificateUseCase {
     execute(params: DownloadCertificateRequestDTO): Promise<ResponseDTO<DownloadCertificateResponseDTO>>;
 }
 
+export interface IBlockFacultyUseCase {
+    execute(params: { id: string }): Promise<ResponseDTO<{ message: string }>>;
+}
+
 function mapFacultyToDTO(f: any): FacultyResponseDTO {
     return {
         _id: f._id.toString(),
@@ -94,6 +98,7 @@ function mapFacultyToDTO(f: any): FacultyResponseDTO {
         certificatesUrl: f.certificatesUrl,
         createdAt: f.createdAt instanceof Date ? f.createdAt.toISOString() : new Date(f.createdAt).toISOString(),
         status: f.status,
+        blocked: f.blocked,
     };
 }
 
@@ -417,5 +422,14 @@ export class DownloadCertificateUseCase implements IDownloadCertificateUseCase {
         const fileName = params.certificateUrl.split("/").pop() || `${params.type}_${params.facultyId}.pdf`;
         const fileStream = response.data;
         return { data: { fileStream, fileSize, fileName }, success: true };
+    }
+}
+
+export class BlockFacultyUseCase implements IBlockFacultyUseCase {
+    constructor(private facultyRepository: IFacultyRepository) { }
+
+    async execute(params: { id: string }): Promise<ResponseDTO<{ message: string }>> {
+        const result = await this.facultyRepository.blockFaculty(params.id);
+        return { data: result, success: true };
     }
 }

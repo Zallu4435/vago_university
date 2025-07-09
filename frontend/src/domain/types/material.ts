@@ -1,17 +1,17 @@
 export interface Material {
-    _id: string;
+    id: string;
     title: string;
     description: string;
     subject: string;
     course: string;
-    semester: number;
+    semester: string;
     type: 'pdf' | 'video';
     fileUrl: string;
     thumbnailUrl: string;
     tags: string[];
     difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
     estimatedTime: string;
-    isNew: boolean;
+    isNewMaterial: boolean;
     isRestricted: boolean;
     uploadedBy: string;
     uploadedAt: string;

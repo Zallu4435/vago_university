@@ -1,10 +1,8 @@
-import mongoose from "mongoose";
-import { getMessaging } from "firebase-admin/messaging";
-import '../../../config/firebase-admin'; 
 import { NotificationModel } from "../../database/mongoose/models/notification.model";
 import { User as UserModel } from "../../database/mongoose/auth/user.model";
 import { Faculty as FacultyModel } from "../../database/mongoose/auth/faculty.model";
-import { NotificationErrorType } from "../../../domain/notifications/enums/NotificationErrorType";
+import { INotificationRepository } from "../../../application/notifications/repositories/INotificationRepository";
+import { NotificationProps } from "../../../domain/notifications/entities/NotificationTypes";
 import {
     CreateNotificationRequestDTO,
     GetAllNotificationsRequestDTO,
@@ -22,87 +20,74 @@ import {
     MarkNotificationAsReadResponseDTO,
     MarkAllNotificationsAsReadResponseDTO,
 } from "../../../domain/notifications/dtos/NotificationResponseDTOs";
-import { INotificationRepository } from "../../../application/notifications/repositories/INotificationRepository";
-
 
 export class NotificationRepository implements INotificationRepository {
+    // Simple CRUD operations
+    async create(data: NotificationProps): Promise<any> {
+        const notification = new NotificationModel({
+            title: data.title,
+            message: data.message,
+            recipientType: data.recipientType,
+            recipientId: data.recipientId,
+            recipientName: data.recipientName,
+            createdBy: data.createdBy,
+            createdAt: data.createdAt || new Date(),
+            status: data.status,
+            readBy: [],
+        });
+
+        return await notification.save();
+    }
+
+    async find(filter: any, options: { skip?: number; limit?: number; sort?: any } = {}): Promise<any[]> {
+        return NotificationModel.find(filter)
+            .sort(options.sort ?? {})
+            .skip(options.skip ?? 0)
+            .limit(options.limit ?? 0)
+            .lean();
+    }
+
+    async count(filter: any): Promise<number> {
+        return NotificationModel.countDocuments(filter);
+    }
+
+    async findById(id: string): Promise<any | null> {
+        return NotificationModel.findById(id).lean();
+    }
+
+    async update(id: string, data: Partial<NotificationProps>): Promise<any | null> {
+        return NotificationModel.findByIdAndUpdate(id, data, { new: true });
+    }
+
+    async delete(id: string): Promise<void> {
+        await NotificationModel.findByIdAndDelete(id);
+    }
+
+    // User-specific methods
+    async findUsersByCollection(collection: string): Promise<any[]> {
+        return UserModel.find().select("fcmTokens").lean();
+    }
+
+    async findFacultyByCollection(collection: string): Promise<any[]> {
+        return FacultyModel.find().select("fcmTokens").lean();
+    }
+
+    // Original DTO-based methods (for backward compatibility)
     async createNotification(params: CreateNotificationRequestDTO): Promise<CreateNotificationResponseDTO> {
-        const { title, message, recipientType, recipientId, recipientName, createdBy } = params;
+        const notification = new NotificationModel({
+            title: params.title,
+            message: params.message,
+            recipientType: params.recipientType,
+            recipientId: params.recipientId,
+            recipientName: params.recipientName,
+            createdBy: params.createdBy,
+            createdAt: new Date(),
+            status: "sent",
+            readBy: [],
+        });
 
-        try {
-            const fcmMessage = {
-                notification: { title, body: message },
-            };
-
-            let tokens: string[] = [];
-
-            if (recipientType === "individual" && recipientId) {
-                await getMessaging().send({ ...fcmMessage, token: recipientId });
-            } else {
-                let students = [];
-                let faculty = [];
-
-                if (["all_students", "all", "all_students_and_faculty"].includes(recipientType)) {
-                    students = await UserModel.find().select("fcmTokens");
-                }
-                if (["all_faculty", "all", "all_students_and_faculty"].includes(recipientType)) {
-                    faculty = await FacultyModel.find().select("fcmTokens");
-                }
-
-                const studentTokens = students.flatMap((user) => user.fcmTokens || []);
-                const facultyTokens = faculty.flatMap((faculty) => faculty.fcmTokens || []);
-                tokens = [...new Set([...studentTokens, ...facultyTokens])];
-
-                if (tokens.length === 0) {
-                    throw new Error(NotificationErrorType.NoFCMTokensFound);
-                }
-
-                const batchSize = 500;
-                const batches = [];
-                for (let i = 0; i < tokens.length; i += batchSize) {
-                    batches.push(tokens.slice(i, i + batchSize));
-                }
-
-                await Promise.all(
-                    batches.map((batch) =>
-                        getMessaging().sendEachForMulticast({
-                            notification: { title, body: message },
-                            tokens: batch,
-                        })
-                    )
-                );
-            }
-
-            const notification = new NotificationModel({
-                title,
-                message,
-                recipientType,
-                recipientId,
-                recipientName,
-                createdBy,
-                createdAt: new Date(),
-                status: "sent",
-                readBy: [],
-            });
-
-            await notification.save();
-
-            return { notificationId: notification._id.toString() };
-        } catch (error: any) {
-            const notification = new NotificationModel({
-                title,
-                message,
-                recipientType,
-                recipientId,
-                recipientName,
-                createdBy,
-                createdAt: new Date(),
-                status: "failed",
-                readBy: [],
-            });
-            await notification.save();
-            throw new Error(error.message || NotificationErrorType.MissingRequiredFields);
-        }
+        await notification.save();
+        return { notificationId: notification._id.toString() };
     }
 
     async getAllNotifications(params: GetAllNotificationsRequestDTO): Promise<GetAllNotificationsResponseDTO> {
@@ -120,21 +105,18 @@ export class NotificationRepository implements INotificationRepository {
                 validRecipientTypes.push("all_faculty", "individual");
             }
 
-            // User should see notifications that are:
-            // 1. Sent specifically to them (individual with their userId)
-            // 2. Sent to their user type (all_students, all_faculty, etc.)
             query.$or = [
                 { recipientType: "individual", recipientId: userId },
                 { recipientType: { $in: validRecipientTypes } },
             ];
         }
 
-        // Add isRead filter if provided - filter based on whether user is in readBy array
+        // Add isRead filter if provided
         if (isRead !== undefined && userId) {
             if (isRead) {
-                query.readBy = userId; // User has read this notification
+                query.readBy = userId;
             } else {
-                query.readBy = { $ne: userId }; // User has not read this notification
+                query.readBy = { $ne: userId };
             }
         }
 
@@ -170,7 +152,7 @@ export class NotificationRepository implements INotificationRepository {
             createdBy: n.createdBy,
             createdAt: typeof n.createdAt === 'string' ? n.createdAt : n.createdAt.toISOString(),
             status: n.status,
-            isRead: n.readBy && n.readBy.includes(userId), // Check if current user is in readBy array
+            isRead: n.readBy && n.readBy.includes(userId),
             readBy: n.readBy || [],
         }));
 
@@ -185,7 +167,7 @@ export class NotificationRepository implements INotificationRepository {
     async getIndividualNotification(params: GetIndividualNotificationRequestDTO): Promise<GetIndividualNotificationResponseDTO> {
         const notification = await NotificationModel.findById(params.notificationId).lean();
         if (!notification) {
-            throw new Error(NotificationErrorType.NotificationNotFound);
+            throw new Error("Notification not found");
         }
 
         return {
@@ -199,85 +181,41 @@ export class NotificationRepository implements INotificationRepository {
                 createdBy: notification.createdBy,
                 createdAt: typeof notification.createdAt === 'string' ? notification.createdAt : notification.createdAt.toISOString(),
                 status: notification.status,
-                isRead: false,
+                isRead: false, // This will be calculated in use case
                 readBy: notification.readBy || [],
             },
         };
     }
 
     async deleteNotification(params: DeleteNotificationRequestDTO): Promise<DeleteNotificationResponseDTO> {
-        const { notificationId, authenticatedUserId, collection } = params;
-
-        const query: any = { _id: notificationId };
-        if (collection !== "admin") {
-            query.createdBy = authenticatedUserId;
-        }
-
-        const notification = await NotificationModel.findOne(query);
+        const notification = await NotificationModel.findById(params.notificationId);
         if (!notification) {
-            throw new Error(NotificationErrorType.UnauthorizedAccess);
+            throw new Error("Notification not found");
         }
 
-        await NotificationModel.deleteOne({ _id: notificationId });
-
+        await NotificationModel.findByIdAndDelete(params.notificationId);
         return { message: "Notification deleted successfully" };
     }
 
     async markNotificationAsRead(params: MarkNotificationAsReadRequestDTO): Promise<MarkNotificationAsReadResponseDTO> {
-        const { notificationId, authenticatedUserId, collection } = params;
-
-        // Build query to find notification that the user is authorized to mark as read
-        const query: any = { _id: notificationId };
-        
-        if (collection !== "admin") {
-            // For non-admin users, they can only mark notifications as read if:
-            // 1. It's sent specifically to them (individual with their userId)
-            // 2. It's sent to their user type (all_students, all_faculty, etc.)
-            const validRecipientTypes = ["all", "all_students_and_faculty"];
-            
-            if (collection === "user") {
-                validRecipientTypes.push("all_students", "individual");
-            } else if (collection === "faculty") {
-                validRecipientTypes.push("all_faculty", "individual");
-            }
-
-            query.$or = [
-                { recipientType: "individual", recipientId: authenticatedUserId },
-                { recipientType: { $in: validRecipientTypes } },
-            ];
-        }
-
-        const notification = await NotificationModel.findOne(query);
+        const notification = await NotificationModel.findById(params.notificationId);
         if (!notification) {
-            throw new Error(NotificationErrorType.UnauthorizedAccess);
+            throw new Error("Notification not found");
         }
 
-        // Check if user has already read this notification
-        if (notification.readBy && notification.readBy.includes(authenticatedUserId)) {
-            return { success: true, message: "Notification already marked as read" };
+        if (!notification.readBy.includes(params.authenticatedUserId)) {
+            notification.readBy.push(params.authenticatedUserId);
+            await notification.save();
         }
 
-        // Add user to readBy array
-        await NotificationModel.updateOne(
-            { _id: notificationId },
-            { $addToSet: { readBy: authenticatedUserId } } // $addToSet prevents duplicates
-        );
-
-        return { success: true, message: "Notification marked as read successfully" };
+        return { success: true, message: "Notification marked as read" };
     }
 
     async markAllNotificationsAsRead(params: MarkAllNotificationsAsReadRequestDTO): Promise<MarkAllNotificationsAsReadResponseDTO> {
         const { authenticatedUserId, collection } = params;
 
-        // Build query to find unread notifications that the user is authorized to mark as read
-        const query: any = { 
-            readBy: { $ne: authenticatedUserId } // Not already read by this user
-        };
-        
+        const query: any = {};
         if (collection !== "admin") {
-            // For non-admin users, they can only mark notifications as read if:
-            // 1. It's sent specifically to them (individual with their userId)
-            // 2. It's sent to their user type (all_students, all_faculty, etc.)
             const validRecipientTypes = ["all", "all_students_and_faculty"];
             
             if (collection === "user") {
@@ -293,14 +231,14 @@ export class NotificationRepository implements INotificationRepository {
         }
 
         const result = await NotificationModel.updateMany(
-            query,
-            { $addToSet: { readBy: authenticatedUserId } } // Add user to readBy array
+            { ...query, readBy: { $ne: authenticatedUserId } },
+            { $push: { readBy: authenticatedUserId } }
         );
 
-        return { 
-            success: true, 
-            message: `${result.modifiedCount} notifications marked as read successfully`,
-            updatedCount: result.modifiedCount
+        return {
+            success: true,
+            message: "All notifications marked as read",
+            updatedCount: result.modifiedCount,
         };
     }
 }

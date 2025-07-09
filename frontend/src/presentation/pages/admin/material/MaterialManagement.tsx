@@ -161,7 +161,7 @@ const MaterialManagement: React.FC = () => {
         dataToSend = fd;
       }
       if (editingMaterial) {
-        await updateMaterial({ id: editingMaterial._id, data: dataToSend });
+        await updateMaterial({ id: editingMaterial.id, data: dataToSend });
       } else {
         await createMaterial(dataToSend);
       }
@@ -174,7 +174,7 @@ const MaterialManagement: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (materialToDelete) {
-      await deleteMaterial(materialToDelete._id);
+      await deleteMaterial(materialToDelete.id);
       setShowDeleteWarning(false);
       setMaterialToDelete(null);
     }
@@ -182,7 +182,7 @@ const MaterialManagement: React.FC = () => {
 
   const handleConfirmToggle = async () => {
     if (materialToToggle) {
-      await toggleRestrictionMaterial({ id: materialToToggle.material._id, isRestricted: materialToToggle.isRestricted });
+      await toggleRestrictionMaterial({ id: materialToToggle.material.id, isRestricted: materialToToggle.isRestricted });
       setShowToggleWarning(false);
       setMaterialToToggle(null);
     }
@@ -193,7 +193,7 @@ const MaterialManagement: React.FC = () => {
       icon: <FiEye size={16} />,
       label: 'View Material',
       onClick: (material: Material) => {
-        handleViewMaterial(material._id);
+        handleViewMaterial(material.id);
         setShowMaterialDetail(true);
       },
       color: 'blue' as const,
@@ -202,7 +202,7 @@ const MaterialManagement: React.FC = () => {
       icon: <FiEdit size={16} />,
       label: 'Edit Material',
       onClick: (material: Material) => {
-        handleEditMaterial(material._id);
+        handleEditMaterial(material.id);
         setEditingMaterial(material);
         setShowMaterialModal(true);
       },

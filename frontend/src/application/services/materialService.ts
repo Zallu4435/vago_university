@@ -8,15 +8,15 @@ export const materialService = {
     limit: number
   ): Promise<{ materials: Material[]; totalPages: number }> {
     const response = await httpClient.get('/admin/materials', { params: { ...filters, page, limit } });
-    return response.data;
+    return response.data.data;
   },
 
   async getMaterialById(id: string): Promise<Material> {
     const response = await httpClient.get(`/admin/materials/${id}`);
-    return response.data.material;
+    return response.data.data.material;
   },
 
-  async createMaterial(data: Omit<Material, '_id' | 'uploadedAt' | 'views' | 'downloads' | 'rating'> | FormData): Promise<Material> {
+  async createMaterial(data: Omit<Material, 'id' | 'uploadedAt' | 'views' | 'downloads' | 'rating'> | FormData): Promise<Material> {
     const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
     const response = await httpClient.post(
       '/admin/materials',

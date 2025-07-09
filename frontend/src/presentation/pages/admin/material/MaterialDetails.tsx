@@ -61,7 +61,7 @@ const MaterialDetails: React.FC<MaterialDetailsProps> = ({ isOpen, onClose, mate
                     <strong>Status:</strong> {material.isRestricted ? 'Restricted' : 'Public'}
                   </p>
                   <p className="text-sm text-purple-300 mb-2">
-                    <strong>New:</strong> {material.isNew ? 'Yes' : 'No'}
+                    <strong>New:</strong> {material.isNewMaterial ? 'Yes' : 'No'}
                   </p>
                 </div>
                 <div>

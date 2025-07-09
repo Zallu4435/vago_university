@@ -13,9 +13,9 @@ import {
 } from '../../../domain/site-management/dtos/SiteSectionDTOs';
 
 export interface ISiteSectionRepository {
-  getSections(params: GetSiteSectionsRequestDTO): Promise<GetSiteSectionsResponseDTO>;
-  getSectionById(params: GetSiteSectionByIdRequestDTO): Promise<GetSiteSectionByIdResponseDTO | null>;
-  createSection(params: CreateSiteSectionRequestDTO): Promise<CreateSiteSectionResponseDTO>;
-  updateSection(params: UpdateSiteSectionRequestDTO): Promise<UpdateSiteSectionResponseDTO | null>;
+  getSections(query: any): Promise<any[]>;
+  getSectionById(params: GetSiteSectionByIdRequestDTO): Promise<any | null>;
+  createSection(params: CreateSiteSectionRequestDTO): Promise<any>;
+  updateSection(params: UpdateSiteSectionRequestDTO): Promise<any | null>;
   deleteSection(params: DeleteSiteSectionRequestDTO): Promise<void>;
 }

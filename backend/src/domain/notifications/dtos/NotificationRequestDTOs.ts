@@ -1,7 +1,9 @@
+import { NotificationRecipientType } from "../entities/NotificationTypes";
+
 export interface CreateNotificationRequestDTO {
     title: string;
     message: string;
-    recipientType: "individual" | "all_students" | "all_faculty" | "all" | "all_students_and_faculty";
+    recipientType: NotificationRecipientType;
     recipientId?: string;
     recipientName?: string;
     createdBy: string;

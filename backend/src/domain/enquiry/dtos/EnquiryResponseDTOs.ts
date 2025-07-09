@@ -1,11 +1,11 @@
-import { Enquiry } from "../entities/Enquiry";
+import { EnquiryProps } from "../entities/EnquiryTypes";
 
 export interface CreateEnquiryResponseDTO {
-  enquiry: Enquiry;
+  enquiry: EnquiryProps;
 }
 
 export interface GetEnquiriesResponseDTO {
-  enquiries: Enquiry[];
+  enquiries: EnquiryProps[];
   total: number;
   page: number;
   limit: number;
@@ -13,11 +13,11 @@ export interface GetEnquiriesResponseDTO {
 }
 
 export interface GetEnquiryByIdResponseDTO {
-  enquiry: Enquiry;
+  enquiry: EnquiryProps;
 }
 
 export interface UpdateEnquiryStatusResponseDTO {
-  enquiry: Enquiry;
+  enquiry: EnquiryProps;
 }
 
 export interface DeleteEnquiryResponseDTO {

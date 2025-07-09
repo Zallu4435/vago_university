@@ -8,9 +8,10 @@ interface FacultyDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   faculty: any; // Replace 'any' with your Faculty type
+  onBlockToggle?: (facultyId: string, blocked: boolean) => void; // <-- add this prop
 }
 
-const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClose, faculty }) => {
+const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClose, faculty, onBlockToggle }) => {
   const { token } = useSelector((state: RootState) => state.auth);
   
   // Prevent backend scrolling when modal is open
@@ -185,15 +186,41 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
                 <div className="flex items-center mt-2 space-x-4">
                   <StatusBadge status={faculty.status} />
                   <span className="text-sm text-purple-300">ID: {faculty._id}</span>
+                  {/* Blocked status badge */}
+                  {typeof faculty.blocked === 'boolean' && (
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ml-2 ${faculty.blocked ? 'bg-red-900/40 text-red-400 border-red-500/40' : 'bg-green-900/40 text-green-400 border-green-500/40'}`}>
+                      {faculty.blocked ? 'Blocked' : 'Active'}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-purple-500/20 rounded-full transition-colors"
-            >
-              <FiX size={24} className="text-purple-300" />
-            </button>
+            <div className="flex items-center space-x-2">
+              {/* Block/Unblock button */}
+              {typeof faculty.blocked === 'boolean' && onBlockToggle && (
+                <button
+                  onClick={() => onBlockToggle(faculty._id, faculty.blocked)}
+                  className={`flex items-center px-4 py-2 rounded-lg font-semibold border transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500/50 shadow-md ${faculty.blocked ? 'bg-green-700/80 hover:bg-green-600/80 text-white border-green-500/40' : 'bg-red-700/80 hover:bg-red-600/80 text-white border-red-500/40'}`}
+                  title={faculty.blocked ? 'Unblock Faculty' : 'Block Faculty'}
+                >
+                  {faculty.blocked ? (
+                    <>
+                      <FiUser className="mr-2" /> Unblock
+                    </>
+                  ) : (
+                    <>
+                      <FiUser className="mr-2" /> Block
+                    </>
+                  )}
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-purple-500/20 rounded-full transition-colors"
+              >
+                <FiX size={24} className="text-purple-300" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -345,7 +372,7 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .no-scroll {
           overflow: hidden;
         }
@@ -447,7 +474,7 @@ const InfoRow = ({ label, value }: { label: string; value: string | number | boo
 );
 
 const StatusBadge = ({ status }: { status: string }) => {
-  const statusConfig = {
+  const statusConfig: { [key: string]: { bg: string; text: string; border: string } } = {
     pending: { bg: 'bg-yellow-600/30', text: 'text-yellow-100', border: 'border-yellow-500/50' },
     approved: { bg: 'bg-green-600/30', text: 'text-green-100', border: 'border-green-500/50' },
     rejected: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },

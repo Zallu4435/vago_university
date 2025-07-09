@@ -1,15 +1,5 @@
-import mongoose, { Schema, Document } from "mongoose";
-import { EnquiryStatus } from "../../../../domain/enquiry/entities/Enquiry";
-
-export interface IEnquiry extends Document {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  status: EnquiryStatus;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import mongoose, { Schema } from "mongoose";
+import { EnquiryStatus, IEnquiry } from "../../../../domain/enquiry/entities/EnquiryTypes";
 
 const enquirySchema = new Schema<IEnquiry>(
   {

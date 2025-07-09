@@ -29,20 +29,20 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
     // Extract material data from props structure
     const materialData = material.props || material;
 
-    // Function to convert semester number to readable name
-    const getSemesterName = (semester: number) => {
+    // Function to convert semester string to readable name
+    const getSemesterName = (semester: string) => {
         const currentYear = new Date().getFullYear();
-        const semesterNames = {
-            1: `Fall ${currentYear}`,
-            2: `Spring ${currentYear + 1}`,
-            3: `Summer ${currentYear + 1}`,
-            4: `Fall ${currentYear + 1}`,
-            5: `Spring ${currentYear + 2}`,
-            6: `Summer ${currentYear + 2}`,
-            7: `Fall ${currentYear + 2}`,
-            8: `Spring ${currentYear + 3}`
+        const semesterNames: { [key: string]: string } = {
+            '1': `Fall ${currentYear}`,
+            '2': `Spring ${currentYear + 1}`,
+            '3': `Summer ${currentYear + 1}`,
+            '4': `Fall ${currentYear + 1}`,
+            '5': `Spring ${currentYear + 2}`,
+            '6': `Summer ${currentYear + 2}`,
+            '7': `Fall ${currentYear + 2}`,
+            '8': `Spring ${currentYear + 3}`
         };
-        return semesterNames[semester as keyof typeof semesterNames] || `Semester ${semester}`;
+        return semesterNames[semester] || `Semester ${semester}`;
     };
 
     return (
@@ -54,7 +54,7 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex items-center space-x-1.5 sm:space-x-2">
-                    {materialData.isNew && (
+                    {materialData.isNewMaterial && (
                         <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-lg animate-pulse">
                             NEW
                         </span>

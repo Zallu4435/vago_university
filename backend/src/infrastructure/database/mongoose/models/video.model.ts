@@ -1,18 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { VideoStatus } from '../../../../domain/video/enums/VideoStatus';
-
-export interface IVideo extends Document {
-    title: string;
-    duration: string;
-    uploadedAt: Date;
-    module: number;
-    status: VideoStatus;
-    diplomaId: mongoose.Types.ObjectId;
-    description: string;
-    videoUrl: string;
-    createdAt: Date;
-    updatedAt: Date;
-}
+import { IVideo } from '../../../../domain/video/entities/VideoTypes';
 
 const videoSchema = new Schema<IVideo>(
     {
@@ -27,7 +15,7 @@ const videoSchema = new Schema<IVideo>(
         },
         uploadedAt: {
             type: Date,
-            default: Date.now,
+            default: Date.now,  
         },
         module: {
             type: Number,

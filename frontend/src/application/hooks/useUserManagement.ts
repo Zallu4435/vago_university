@@ -83,6 +83,17 @@ export const useUserManagement = () => {
     },
   });
 
+  const { mutateAsync: blockAdmission } = useMutation({
+    mutationFn: (id: string) => userService.blockAdmission(id),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['admissions'] });
+      toast.success(data?.message || 'User block status updated');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to block/unblock user');
+    },
+  });
+
 
   return {
     users: data?.admissions || [],
@@ -97,5 +108,6 @@ export const useUserManagement = () => {
     approveAdmission,
     rejectAdmission,
     deleteAdmission,
+    blockAdmission,
   };
 };

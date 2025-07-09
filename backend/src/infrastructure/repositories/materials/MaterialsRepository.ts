@@ -1,43 +1,42 @@
 import { IMaterialsRepository } from '../../../application/materials/repositories/IMaterialsRepository';
-import { GetMaterialsRequestDTO, GetMaterialByIdRequestDTO, CreateMaterialRequestDTO, UpdateMaterialRequestDTO, DeleteMaterialRequestDTO } from '../../../domain/materials/dtos/MaterialRequestDTOs';
-import { GetMaterialsResponseDTO, GetMaterialByIdResponseDTO, CreateMaterialResponseDTO, UpdateMaterialResponseDTO } from '../../../domain/materials/dtos/MaterialResponseDTOs';
 import { MaterialModel } from '../../database/mongoose/material/MaterialModel';
 
 export class MaterialsRepository implements IMaterialsRepository {
-  async getMaterials(params: GetMaterialsRequestDTO): Promise<GetMaterialsResponseDTO> {
-    const { subject, course, semester, type, uploadedBy, page, limit } = params;
-    const query: any = {};
-    if (subject && subject !== 'All Subjects') query.subject = subject;
-    if (course && course !== 'All Courses') query.course = course;
-    if (semester && semester !== 0) query.semester = semester;
-    if (type && type !== 'All Types') query.type = type;
-    if (uploadedBy && uploadedBy !== 'All Uploaders') query.uploadedBy = uploadedBy;
-
-    const skip = (page - 1) * limit;
-    const materials = await (MaterialModel as any).find(query).sort({ uploadedAt: -1 }).skip(skip).limit(limit);
-    const total = await (MaterialModel as any).countDocuments(query);
-    const totalPages = Math.ceil(total / limit);
-
-    return { materials: materials.map((m: any) => m.toObject()), totalPages };
+  async find(filter: any, options: { skip?: number; limit?: number; sort?: any } = {}): Promise<any[]> {
+    return MaterialModel.find(filter)
+      .sort(options.sort ?? {})
+      .skip(options.skip ?? 0)
+      .limit(options.limit ?? 0);
   }
 
-  async getMaterialById(params: GetMaterialByIdRequestDTO): Promise<GetMaterialByIdResponseDTO | null> {
-    const material = await (MaterialModel as any).findById(params.id);
-    return material ? { material: material.toObject() } : null;
+  async count(filter: any): Promise<number> {
+    return MaterialModel.countDocuments(filter);
   }
 
-  async createMaterial(params: CreateMaterialRequestDTO): Promise<CreateMaterialResponseDTO> {
-    const material = new (MaterialModel as any)({ ...params, uploadedBy: params.uploadedBy || 'defaultUser' });
+  async findById(id: string): Promise<any | null> {
+    return MaterialModel.findById(id);
+  }
+
+  async create(data: any): Promise<any> {
+    console.log('=== MATERIAL REPOSITORY CREATE DEBUG ===');
+    console.log('Creating material with data:', data);
+    console.log('=== MATERIAL REPOSITORY CREATE DEBUG END ===');
+    
+    const material = new MaterialModel(data);
     await material.save();
-    return { material: material.toObject() };
+    return material;
   }
 
-  async updateMaterial(params: UpdateMaterialRequestDTO): Promise<UpdateMaterialResponseDTO | null> {
-    const material = await (MaterialModel as any).findByIdAndUpdate(params.id, params.data, { new: true });
-    return material ? { material: material.toObject() } : null;
+  async update(id: string, data: any): Promise<any | null> {
+    console.log('=== MATERIAL REPOSITORY UPDATE DEBUG ===');
+    console.log('Updating material with id:', id);
+    console.log('Update data:', data);
+    console.log('=== MATERIAL REPOSITORY UPDATE DEBUG END ===');
+    
+    return MaterialModel.findByIdAndUpdate(id, data, { new: true });
   }
 
-  async deleteMaterial(params: DeleteMaterialRequestDTO): Promise<void> {
-    await (MaterialModel as any).findByIdAndDelete(params.id);
+  async delete(id: string): Promise<void> {
+    await MaterialModel.findByIdAndDelete(id);
   }
 } 

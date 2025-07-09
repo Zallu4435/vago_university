@@ -37,6 +37,10 @@ admissionRouter.post("/:id/reject", authMiddleware, (req, res, next) => {
     expressAdapter(req, res, next, admissionController.rejectAdmission.bind(admissionController));
 });
 
+admissionRouter.post("/:id/block", authMiddleware, (req, res, next) => {
+    expressAdapter(req, res, next, admissionController.blockAdmission.bind(admissionController));
+});
+
 admissionRouter.delete("/:id", authMiddleware, (req, res, next) => {
     expressAdapter(req, res, next, admissionController.deleteAdmission.bind(admissionController));
 });

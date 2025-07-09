@@ -118,6 +118,17 @@ class FacultyService {
       throw new Error(error.response?.data?.error || 'Failed to update faculty status');
     }
   }
+
+  async blockFaculty(id: string): Promise<{ message: string; faculty: Faculty }> {
+    try {
+      const response = await httpClient.post<{ message: string; faculty: Faculty }>(
+        `/admin/faculty/${id}/block`
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to block/unblock faculty');
+    }
+  }
 }
 
 export const facultyService = new FacultyService();

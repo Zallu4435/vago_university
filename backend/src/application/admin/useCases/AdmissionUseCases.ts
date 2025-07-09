@@ -61,18 +61,31 @@ export interface IConfirmAdmissionOfferUseCase {
     execute(params: ConfirmAdmissionOfferRequestDTO): Promise<ResponseDTO<ConfirmAdmissionOfferResponseDTO>>;
 }
 
+export interface IBlockAdmissionUseCase {
+    execute(params: { id: string }): Promise<ResponseDTO<{ message: string }>>;
+}
+
 export class GetAdmissionsUseCase implements IGetAdmissionsUseCase {
     constructor(private admissionRepository: IAdmissionRepository) { }
 
     async execute(params: GetAdmissionsRequestDTO): Promise<ResponseDTO<GetAdmissionsResponseDTO>> {
         const result = await this.admissionRepository.getAdmissions(params);
-        const admissions = result.admissions.map((admission: any) => ({
-            _id: admission._id.toString(),
-            fullName: admission.personal?.fullName || "N/A",
-            email: admission.personal?.emailAddress || "N/A",
-            createdAt: admission.createdAt instanceof Date ? admission.createdAt.toISOString() : new Date(admission.createdAt).toISOString(),
-            status: (admission.status || "pending") as "pending" | "approved" | "rejected" | "offered",
-            program: admission.choiceOfStudy?.[0]?.programme || "N/A",
+        // Fetch blocked status for each admission
+        const admissions = await Promise.all(result.admissions.map(async (admission: any) => {
+            let blocked = false;
+            if (admission.personal?.emailAddress) {
+                const user = await this.admissionRepository.findUserByEmail(admission.personal.emailAddress);
+                blocked = user?.blocked ?? false;
+            }
+            return {
+                _id: admission._id.toString(),
+                fullName: admission.personal?.fullName || "N/A",
+                email: admission.personal?.emailAddress || "N/A",
+                createdAt: admission.createdAt instanceof Date ? admission.createdAt.toISOString() : new Date(admission.createdAt).toISOString(),
+                status: (admission.status || "pending") as "pending" | "approved" | "rejected" | "offered",
+                program: admission.choiceOfStudy?.[0]?.programme || "N/A",
+                blocked,
+            };
         }));
         return {
             data: {
@@ -92,7 +105,13 @@ export class GetAdmissionByIdUseCase implements IGetAdmissionByIdUseCase {
         if (!result || !result.admission) {
             throw new AdminAdmissionNotFoundError();
         }
-        return { data: result, success: true };
+        // Add blocked status
+        let blocked = false;
+        if (result.admission.personal?.emailAddress) {
+            const user = await this.admissionRepository.findUserByEmail(result.admission.personal.emailAddress);
+            blocked = user?.blocked ?? false;
+        }
+        return { data: { ...result, admission: { ...result.admission, blocked } }, success: true };
     }
 }
 
@@ -189,5 +208,28 @@ export class ConfirmAdmissionOfferUseCase implements IConfirmAdmissionOfferUseCa
             throw new AdminAdmissionNotFoundError();
         }
         return { data: result, success: true };
+    }
+}
+
+export class BlockAdmissionUseCase implements IBlockAdmissionUseCase {
+    constructor(private admissionRepository: IAdmissionRepository) { }
+
+    async execute(params: { id: string }): Promise<ResponseDTO<{ message: string }>> {
+        // Find the admission
+        const admission = await this.admissionRepository.findAdmissionById(params.id);
+        if (!admission) {
+            throw new AdminAdmissionNotFoundError();
+        }
+        // Find the user by email (assuming email is unique)
+        const user = await this.admissionRepository.findUserByEmail(admission.personal.emailAddress);
+        if (!user) {
+            throw new AdminRegisterUserNotFoundError();
+        }
+        user.blocked = !user.blocked;
+        await this.admissionRepository.saveUser(user);
+        return {
+            data: { message: user.blocked ? 'User blocked' : 'User unblocked' },
+            success: true,
+        };
     }
 }

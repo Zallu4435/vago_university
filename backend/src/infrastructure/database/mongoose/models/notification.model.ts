@@ -1,31 +1,19 @@
 import mongoose, { Schema } from "mongoose";
-
-interface Notification {
-  _id: string;
-  title: string;
-  message: string;
-  recipientType: "individual" | "all_students" | "all_faculty" | "all" | "all_students_and_faculty";
-  recipientId?: string;
-  recipientName?: string;
-  createdBy: string;
-  createdAt: Date;
-  status: "sent" | "failed";
-  readBy: string[]; // Array of user IDs who have read this notification
-}
+import { NotificationRecipientType, NotificationStatus, Notification } from "../../../../domain/notifications/entities/NotificationTypes";
 
 const NotificationSchema = new Schema<Notification>({
   title: { type: String, required: true },
   message: { type: String, required: true },
   recipientType: {
     type: String,
-    enum: ['individual', 'all_students', 'all_faculty', 'all', 'all_students_and_faculty'],
+    enum: Object.values(NotificationRecipientType),
     required: true,
   },
   recipientId: { type: String, required: false },
   recipientName: { type: String, required: false },
   createdBy: { type: String, required: true },
   createdAt: { type: Date, default: Date.now, required: true },
-  status: { type: String, enum: ["sent", "failed"], required: true },
+  status: { type: String, enum: Object.values(NotificationStatus), required: true },
   readBy: { type: [String], default: [] }, // Array of user IDs who have read this notification
 });
 

@@ -130,6 +130,7 @@ export class AuthRepository implements IAuthRepository {
                 id: user._id?.toString(),
                 profilePicture: (user as any).profilePicture || "",
                 password: user.password, // Include password hash for Use Case comparison
+                blocked: user.blocked, // Add this line
             },
             collection,
         };

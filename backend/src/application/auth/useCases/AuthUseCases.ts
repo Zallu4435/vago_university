@@ -21,7 +21,7 @@ import { IAuthRepository } from '../repositories/IAuthRepository';
 import { IJwtService } from "../../../infrastructure/services/auth/JwtService";
 import { IOtpService } from '../../../infrastructure/services/auth/OtpService';
 import { IEmailService } from "../service/IEmailService";
-import { InvalidCredentialsError, InvalidTokenError } from "../../../domain/auth/errors/AuthErrors";
+import { InvalidCredentialsError, InvalidTokenError, BlockedAccountError } from "../../../domain/auth/errors/AuthErrors";
 
 // --- Use Case Interfaces (UPDATED: No ResponseDTO wrapper) ---
 export interface IRegisterUseCase {
@@ -125,6 +125,11 @@ export class LoginUseCase implements ILoginUseCase {
     const isPasswordValid = await bcrypt.compare(params.password, user.password as string);
     if (!isPasswordValid) {
       throw new InvalidCredentialsError(); // Throw domain error
+    }
+
+    // Blocked check
+    if (user.blocked) {
+      throw new BlockedAccountError();
     }
 
     // Generate token (business logic)

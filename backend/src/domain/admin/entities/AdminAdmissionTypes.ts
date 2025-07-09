@@ -24,4 +24,5 @@ export interface AdminAdmission {
   tokenExpiry?: Date;
   rejectedBy?: string;
   createdAt?: Date;
+  blocked?: boolean;
 } 

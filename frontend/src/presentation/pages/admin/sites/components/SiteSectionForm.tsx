@@ -67,7 +67,13 @@ const SiteSectionForm: React.FC<SiteSectionFormProps> = ({ fields, initialData, 
 
   const onSubmit = async (data: FormData) => {
     try {
-      await onSuccess({ ...data, id: initialData?.id || Date.now() });
+      if (initialData?.id) {
+        // Only include id if editing
+        await onSuccess({ ...data, id: initialData.id });
+      } else {
+        // Do not include id when creating
+        await onSuccess(data);
+      }
     } catch (error) {
       console.error('Form submission error:', error);
     }

@@ -21,7 +21,8 @@ export class AdminAdmissionController implements IAdminAdmissionController {
     private approveAdmissionUseCase: ApproveAdmissionUseCase,
     private rejectAdmissionUseCase: RejectAdmissionUseCase,
     private deleteAdmissionUseCase: DeleteAdmissionUseCase,
-    private confirmAdmissionOfferUseCase: ConfirmAdmissionOfferUseCase
+    private confirmAdmissionOfferUseCase: ConfirmAdmissionOfferUseCase,
+    private blockAdmissionUseCase: any
   ) {
     this.httpErrors = new HttpErrors();
     this.httpSuccess = new HttpSuccess();
@@ -193,5 +194,18 @@ export class AdminAdmissionController implements IAdminAdmissionController {
     };
 
     return result_response;
+  }
+
+  async blockAdmission(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    const { id } = httpRequest.params || {};
+    if (!id) {
+      return this.httpErrors.error_400();
+    }
+    // The use case will toggle block/unblock and return a message
+    const response = await this.blockAdmissionUseCase.execute({ id });
+    if (!response.success) {
+      return this.httpErrors.error_400();
+    }
+    return this.httpSuccess.success_200(response.data);
   }
 }

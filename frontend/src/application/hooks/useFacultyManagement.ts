@@ -74,7 +74,7 @@ export const useFacultyManagement = () => {
   // Reject faculty mutation
   const rejectFaculty = useMutation({
     mutationFn: (data: { id: string; reason: string }) => 
-      facultyService.rejectFaculty(data),
+      facultyService.rejectFaculty(data.id, data.reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['faculty'] });
       toast.success('Faculty request rejected successfully');
@@ -99,13 +99,25 @@ export const useFacultyManagement = () => {
   // Update faculty status mutation
   const updateFacultyStatus = useMutation({
     mutationFn: (data: { id: string; status: string }) => 
-      facultyService.updateFacultyStatus(data),
+      facultyService.updateFacultyStatus(data.id, data.status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['faculty'] });
       toast.success('Faculty status updated successfully');
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Error updating faculty status');
+    }
+  });
+
+  // Block/unblock faculty mutation
+  const blockFaculty = useMutation({
+    mutationFn: (id: string) => facultyService.blockFaculty(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['faculty'] });
+      toast.success('Faculty block status updated');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Error updating faculty block status');
     }
   });
 
@@ -122,6 +134,7 @@ export const useFacultyManagement = () => {
     approveFaculty,
     rejectFaculty,
     deleteFaculty,
-    updateFacultyStatus
+    updateFacultyStatus,
+    blockFaculty // <-- expose blockFaculty
   };
 };

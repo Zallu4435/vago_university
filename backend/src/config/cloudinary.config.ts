@@ -280,6 +280,16 @@ const materialUpload = multer({
   storage: materialStorage,
   limits: { fileSize: 20 * 1024 * 1024 }, 
   fileFilter: (req: any, file: any, cb: any) => {
+    console.log('=== MATERIAL UPLOAD DEBUG ===');
+    console.log('Request body:', req.body);
+    console.log('File fieldname:', file.fieldname);
+    console.log('File details:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size
+    });
+    console.log('=== MATERIAL UPLOAD DEBUG END ===');
+    
     const ext = file.originalname.split('.').pop()?.toLowerCase();
     const allowedMimeTypes = [
       'application/pdf',
@@ -300,7 +310,10 @@ const materialUpload = multer({
     }
     cb(null, true);
   }
-});
+}).fields([
+  { name: 'file', maxCount: 1 },
+  { name: 'thumbnail', maxCount: 1 }
+]);
 
 const admissionDocumentUpload = multer({
   storage: admissionDocumentStorage,

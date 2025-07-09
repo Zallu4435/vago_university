@@ -47,18 +47,79 @@ export class GetUserAssignmentsUseCase implements IGetUserAssignmentsUseCase {
   constructor(private userAssignmentRepository: IUserAssignmentRepository) {}
 
   async execute(params: GetUserAssignmentsRequestDTO): Promise<ResponseDTO<GetUserAssignmentsResponseDTO>> {
-    try {
       if (params.page && (isNaN(params.page) || params.page < 1)) {
         return { data: { error: AssignmentErrorType.InvalidPageOrLimit }, success: false };
       }
       if (params.limit && (isNaN(params.limit) || params.limit < 1)) {
         return { data: { error: AssignmentErrorType.InvalidPageOrLimit }, success: false };
       }
-      const result = await this.userAssignmentRepository.getAssignments(params, params.studentId);
-      return { data: result, success: true };
-    } catch (error: any) {
-      return { data: { error: error.message }, success: false };
+    const { assignments, page, limit, status, studentId } = await this.userAssignmentRepository.getAssignments(params, params.studentId);
+    // Fetch submissions for all assignments for the student
+    const assignmentIds = assignments.map((assignment: any) => assignment._id);
+    const submissions = await (require('../../../infrastructure/database/mongoose/assignment/SubmissionModel').SubmissionModel).find({
+      assignmentId: { $in: assignmentIds },
+      studentId: studentId
+    }).lean();
+    const submissionMap = new Map();
+    submissions.forEach((submission: any) => {
+      submissionMap.set(submission.assignmentId.toString(), submission);
+    });
+    // Filtering by status (graded/submitted) if needed
+    let filteredAssignments = assignments;
+    if (status && status !== 'all') {
+      if (status === 'graded') {
+        filteredAssignments = assignments.filter((assignment: any) => {
+          const submission = submissionMap.get(assignment._id.toString());
+          return submission && submission.status === 'reviewed';
+        });
+      } else if (status === 'submitted') {
+        filteredAssignments = assignments.filter((assignment: any) => {
+          const submission = submissionMap.get(assignment._id.toString());
+          return !!submission;
+        });
+      } else {
+        filteredAssignments = assignments.filter((assignment: any) => assignment.status === status);
+      }
     }
+    const total = filteredAssignments.length;
+    const paginatedAssignments = filteredAssignments.slice((page - 1) * limit, page * limit);
+    const result = {
+      assignments: paginatedAssignments.map((assignment: any) => {
+        const assignmentData = {
+          _id: assignment._id.toString(),
+          title: assignment.title,
+          subject: assignment.subject,
+          dueDate: assignment.dueDate,
+          maxMarks: assignment.maxMarks,
+          description: assignment.description,
+          files: assignment.files,
+          createdAt: assignment.createdAt,
+          updatedAt: assignment.updatedAt,
+          status: assignment.status,
+          totalSubmissions: assignment.totalSubmissions
+        };
+        const submission = submissionMap.get(assignment._id.toString());
+        return {
+          ...assignmentData,
+          submission: submission ? {
+            id: submission._id.toString(),
+            studentId: submission.studentId,
+            studentName: submission.studentName,
+            assignmentId: submission.assignmentId,
+            files: submission.files,
+            submittedDate: submission.submittedDate,
+            status: submission.status,
+            marks: submission.marks,
+            feedback: submission.feedback,
+            isLate: submission.isLate
+          } : null
+        };
+      }),
+      total,
+      page,
+      limit
+    };
+    return { data: result, success: true };
   }
 }
 
@@ -66,18 +127,46 @@ export class GetUserAssignmentByIdUseCase implements IGetUserAssignmentByIdUseCa
   constructor(private userAssignmentRepository: IUserAssignmentRepository) {}
 
   async execute(params: GetUserAssignmentByIdRequestDTO): Promise<ResponseDTO<GetUserAssignmentResponseDTO>> {
-    try {
       if (!mongoose.isValidObjectId(params.id)) {
         return { data: { error: AssignmentErrorType.InvalidAssignmentId }, success: false };
       }
-      const result = await this.userAssignmentRepository.getAssignmentById(params, params.studentId);
-      if (!result) {
+    const { assignment, submission } = await this.userAssignmentRepository.getAssignmentById(params, params.studentId);
+    if (!assignment) {
         return { data: { error: AssignmentErrorType.AssignmentNotFound }, success: false };
       }
-      return { data: result, success: true };
-    } catch (error: any) {
-      return { data: { error: error.message }, success: false };
-    }
+    const assignmentData = {
+      _id: assignment._id.toString(),
+      title: assignment.title,
+      subject: assignment.subject,
+      dueDate: assignment.dueDate,
+      maxMarks: assignment.maxMarks,
+      description: assignment.description,
+      files: assignment.files,
+      createdAt: assignment.createdAt,
+      updatedAt: assignment.updatedAt,
+      status: assignment.status,
+      totalSubmissions: assignment.totalSubmissions
+    };
+    return {
+      data: {
+        assignment: {
+          ...assignmentData,
+          submission: submission ? {
+            id: submission._id.toString(),
+            studentId: submission.studentId,
+            studentName: submission.studentName,
+            assignmentId: submission.assignmentId,
+            files: submission.files,
+            submittedDate: submission.submittedDate,
+            status: submission.status,
+            marks: submission.marks,
+            feedback: submission.feedback,
+            isLate: submission.isLate
+          } : null
+        }
+      },
+      success: true
+    };
   }
 }
 
@@ -85,40 +174,29 @@ export class SubmitUserAssignmentUseCase implements ISubmitUserAssignmentUseCase
   constructor(private userAssignmentRepository: IUserAssignmentRepository) {}
 
   async execute(params: SubmitUserAssignmentRequestDTO): Promise<ResponseDTO<SubmitUserAssignmentResponseDTO>> {
-    console.log('=== USECASE: SUBMIT ASSIGNMENT STARTED ===');
-    console.log('UseCase: Input params:', {
-      assignmentId: params.assignmentId,
-      file: params.file ? {
-        originalname: params.file.originalname,
-        size: params.file.size,
-        mimetype: params.file.mimetype
-      } : 'No file',
-      studentId: params.studentId
-    });
-
-    try {
       if (!mongoose.isValidObjectId(params.assignmentId)) {
-        console.error('UseCase: Invalid assignment ID:', params.assignmentId);
         return { data: { error: AssignmentErrorType.InvalidAssignmentId }, success: false };
       }
-      
       if (!params.file) {
-        console.error('UseCase: No file provided');
         return { data: { error: AssignmentErrorType.FileRequired }, success: false };
       }
-
-      console.log('UseCase: Validation passed, calling repository...');
-      const result = await this.userAssignmentRepository.submitAssignment(params, params.studentId);
-      console.log('UseCase: Repository call successful, result:', result);
-
-      console.log('=== USECASE: SUBMIT ASSIGNMENT COMPLETED ===');
-      return { data: result, success: true };
-    } catch (error: any) {
-      console.error('UseCase: Error in submitAssignment:', error);
-      console.error('UseCase: Error stack:', error.stack);
-      console.log('=== USECASE: SUBMIT ASSIGNMENT FAILED ===');
-      return { data: { error: error.message }, success: false };
+    const { submission } = await this.userAssignmentRepository.submitAssignment(params, params.studentId);
+    if (!submission) {
+      return { data: { error: 'Submission failed' }, success: false };
     }
+    const submissionObj = {
+      id: submission._id.toString(),
+      studentId: submission.studentId,
+      studentName: submission.studentName,
+      assignmentId: submission.assignmentId,
+      files: submission.files,
+      submittedDate: submission.submittedDate,
+      status: submission.status,
+      marks: submission.marks,
+      feedback: submission.feedback,
+      isLate: submission.isLate
+    };
+    return { data: { submission: submissionObj }, success: true };
   }
 }
 
@@ -126,15 +204,21 @@ export class GetUserAssignmentStatusUseCase implements IGetUserAssignmentStatusU
   constructor(private userAssignmentRepository: IUserAssignmentRepository) {}
 
   async execute(params: GetUserAssignmentStatusRequestDTO): Promise<ResponseDTO<GetUserAssignmentStatusResponseDTO>> {
-    try {
       if (!mongoose.isValidObjectId(params.assignmentId)) {
         return { data: { error: AssignmentErrorType.InvalidAssignmentId }, success: false };
       }
-      const result = await this.userAssignmentRepository.getAssignmentStatus(params, params.studentId);
-      return { data: result, success: true };
-    } catch (error: any) {
-      return { data: { error: error.message }, success: false };
+    const { submission } = await this.userAssignmentRepository.getAssignmentStatus(params, params.studentId);
+    if (!submission) {
+      return { data: { status: 'pending' }, success: true };
     }
+    return {
+      data: {
+        status: submission.status,
+        submittedAt: submission.submittedDate,
+        score: submission.marks
+      },
+      success: true
+    };
   }
 }
 
@@ -142,14 +226,20 @@ export class GetUserAssignmentFeedbackUseCase implements IGetUserAssignmentFeedb
   constructor(private userAssignmentRepository: IUserAssignmentRepository) {}
 
   async execute(params: GetUserAssignmentFeedbackRequestDTO): Promise<ResponseDTO<GetUserAssignmentFeedbackResponseDTO>> {
-    try {
       if (!mongoose.isValidObjectId(params.assignmentId)) {
         return { data: { error: AssignmentErrorType.InvalidAssignmentId }, success: false };
       }
-      const result = await this.userAssignmentRepository.getAssignmentFeedback(params, params.studentId);
-      return { data: result, success: true };
-    } catch (error: any) {
-      return { data: { error: error.message }, success: false };
+    const { submission } = await this.userAssignmentRepository.getAssignmentFeedback(params, params.studentId);
+    if (!submission) {
+      return { data: { error: 'Feedback not found' }, success: false };
     }
+    return {
+      data: {
+        feedback: submission.feedback || '',
+        score: submission.marks || 0,
+        reviewedAt: new Date()
+      },
+      success: true
+    };
   }
 } 

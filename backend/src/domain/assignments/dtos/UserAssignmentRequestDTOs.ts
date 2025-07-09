@@ -1,6 +1,8 @@
+import { AssignmentStatus } from '../assignmenttypes';
+
 export interface GetUserAssignmentsRequestDTO {
   subject?: string;
-  status?: 'pending' | 'submitted' | 'reviewed' | 'published' | 'graded' | 'all';
+  status?: AssignmentStatus;
   page?: number;
   limit?: number;
   studentId?: string;

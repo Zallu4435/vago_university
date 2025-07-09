@@ -1,19 +1,6 @@
 import mongoose from "mongoose";
 import { FinancialErrorType } from "../enums/FinancialErrorType";
-
-export interface ChargeProps {
-  _id?: mongoose.Types.ObjectId;
-  title: string;
-  description: string;
-  amount: number;
-  term: string;
-  dueDate: Date;
-  applicableFor: string;
-  createdBy?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  status?: "Active" | "Inactive";
-}
+import { ChargeProps } from "../financialtypes";
 
 export class Charge {
   private _id?: mongoose.Types.ObjectId;

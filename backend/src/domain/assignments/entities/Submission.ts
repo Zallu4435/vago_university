@@ -1,14 +1,4 @@
-export enum SubmissionStatus {
-  Pending = 'pending',
-  Reviewed = 'reviewed',
-  Late = 'late'
-}
-
-export interface SubmissionFile {
-  fileName: string;
-  fileUrl: string;
-  fileSize: number;
-}
+import { SubmissionFile, SubmissionStatus } from '../assignmenttypes';
 
 export class Submission {
   constructor(

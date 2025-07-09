@@ -75,18 +75,16 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
     <div className="fixed inset-0 z-[9999] overflow-y-auto">
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-gradient-to-br from-black/20 via-black/40 to-black/60 backdrop-blur-sm transition-opacity duration-300 ${
-          isAnimating ? 'opacity-100' : 'opacity-0'
-        }`}
+        className={`fixed inset-0 bg-gradient-to-br from-black/20 via-black/40 to-black/60 backdrop-blur-sm transition-opacity duration-300 ${isAnimating ? 'opacity-100' : 'opacity-0'
+          }`}
         onClick={handleClose}
       />
 
       {/* Modal Container */}
       <div className="flex min-h-full items-center justify-center p-2 sm:p-4">
         <div
-          className={`relative w-full max-w-lg transform transition-all duration-300 ${
-            isAnimating ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'
-          }`}
+          className={`relative w-full max-w-lg transform transition-all duration-300 ${isAnimating ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'
+            }`}
         >
           {/* Main Modal */}
           <div className={`relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
@@ -158,13 +156,12 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
                       <div className="flex items-center justify-between mb-2">
                         <span className={`text-xs font-medium ${theme == 'dark' ? 'text-white' : styles.textTertiary} uppercase tracking-wider`}>Enrollment Status</span>
                         <span
-                          className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-medium ${
-                            isFullyBooked
+                          className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-medium ${isFullyBooked
                               ? styles.status.error.replace('text-', 'bg-') + '/10 text-red-800'
                               : availableSpots <= 5
-                              ? styles.status.warning.replace('text-', 'bg-') + '/10 text-yellow-800'
-                              : styles.status.success.replace('text-', 'bg-') + '/10 text-green-800'
-                          }`}
+                                ? styles.status.warning.replace('text-', 'bg-') + '/10 text-yellow-800'
+                                : styles.status.success.replace('text-', 'bg-') + '/10 text-green-800'
+                            }`}
                         >
                           {isFullyBooked ? 'Full' : availableSpots <= 5 ? 'Almost Full' : 'Available'}
                         </span>
@@ -218,11 +215,10 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
                     <button
                       onClick={handleEnrollClick}
                       disabled={isFullyBooked || isEnrolling}
-                      className={`group/btn flex-1 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 ${
-                        isFullyBooked
+                      className={`group/btn flex-1 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 ${isFullyBooked
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                           : `bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white`
-                      }`}
+                        }`}
                     >
                       <span className="flex items-center justify-center space-x-2">
                         <span className="text-sm sm:text-base">{isFullyBooked ? 'Course Full' : 'Enroll Now'}</span>

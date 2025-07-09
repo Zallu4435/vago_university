@@ -1,15 +1,10 @@
 import { Assignment } from '../entities/Assignment';
 import { Submission } from '../entities/Submission';
+import { AssignmentStatus, Pagination } from '../assignmenttypes';
+import type { AssignmentWithSubmission } from '../assignmenttypes';
 
-export interface AssignmentWithSubmission extends Assignment {
-  submission: Submission | null;
-}
-
-export interface GetUserAssignmentsResponseDTO {
+export interface GetUserAssignmentsResponseDTO extends Pagination {
   assignments: AssignmentWithSubmission[];
-  total: number;
-  page: number;
-  limit: number;
 }
 
 export interface GetUserAssignmentResponseDTO {
@@ -21,7 +16,7 @@ export interface SubmitUserAssignmentResponseDTO {
 }
 
 export interface GetUserAssignmentStatusResponseDTO {
-  status: 'pending' | 'submitted' | 'reviewed';
+  status: AssignmentStatus;
   submittedAt?: Date;
   score?: number;
 }

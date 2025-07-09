@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { ICommunicationRepository } from '../repositories/ICommunicationRepository';
 import {
-    GetInboxMessagesRequestDTO,
+  GetInboxMessagesRequestDTO,
   GetSentMessagesRequestDTO,
   SendMessageRequestDTO,
   MarkMessageAsReadRequestDTO,
@@ -12,11 +12,11 @@ import {
   FetchUsersRequestDTO,
 } from "../../../domain/communication/dtos/CommunicationRequestDTOs";
 import {
-    GetInboxMessagesResponseDTO,
-    GetSentMessagesResponseDTO,
-    SendMessageResponseDTO,
+  GetInboxMessagesResponseDTO,
+  GetSentMessagesResponseDTO,
+  SendMessageResponseDTO,
   MarkMessageAsReadResponseDTO,
-    DeleteMessageResponseDTO,
+  DeleteMessageResponseDTO,
   GetMessageDetailsResponseDTO,
   GetAllAdminsResponseDTO,
   GetUserGroupsResponseDTO,
@@ -28,24 +28,24 @@ export interface ResponseDTO<T> {
   success: boolean;
   data: T | { error: string };
 }
-  
-  export interface IGetInboxMessagesUseCase {
+
+export interface IGetInboxMessagesUseCase {
   execute(params: GetInboxMessagesRequestDTO): Promise<ResponseDTO<GetInboxMessagesResponseDTO>>;
-  }
-  
-  export interface IGetSentMessagesUseCase {
+}
+
+export interface IGetSentMessagesUseCase {
   execute(params: GetSentMessagesRequestDTO): Promise<ResponseDTO<GetSentMessagesResponseDTO>>;
-  }
-  
-  export interface ISendMessageUseCase {
+}
+
+export interface ISendMessageUseCase {
   execute(params: SendMessageRequestDTO): Promise<ResponseDTO<SendMessageResponseDTO>>;
-  }
-  
+}
+
 export interface IMarkMessageAsReadUseCase {
   execute(params: MarkMessageAsReadRequestDTO): Promise<ResponseDTO<MarkMessageAsReadResponseDTO>>;
-  }
-  
-  export interface IDeleteMessageUseCase {
+}
+
+export interface IDeleteMessageUseCase {
   execute(params: DeleteMessageRequestDTO): Promise<ResponseDTO<DeleteMessageResponseDTO>>;
 }
 
@@ -69,18 +69,50 @@ export class GetInboxMessagesUseCase implements IGetInboxMessagesUseCase {
   constructor(private readonly repository: ICommunicationRepository) { }
 
   async execute(params: GetInboxMessagesRequestDTO): Promise<ResponseDTO<GetInboxMessagesResponseDTO>> {
-    try {
-      if (!mongoose.isValidObjectId(params.userId)) {
-        return { success: false, data: { error: "Invalid user ID" } };
-      }
-      if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
-        return { success: false, data: { error: "Invalid page or limit parameters" } };
-      }
-      const result = await this.repository.getInboxMessages(params);
-      return { success: true, data: result };
-    } catch (error: any) {
-      return { success: false, data: { error: error.message } };
+    if (!mongoose.isValidObjectId(params.userId)) {
+      return { success: false, data: { error: "Invalid user ID" } };
     }
+    if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
+      return { success: false, data: { error: "Invalid page or limit parameters" } };
+    }
+    const { messages, totalItems, totalPages, page, limit, userId } = await this.repository.getInboxMessages(params);
+    const MessageStatus = require("../../../domain/communication/entities/Communication").MessageStatus;
+    const mappedMessages = messages.map((message: any) => ({
+      _id: message._id.toString(),
+      subject: message.subject,
+      content: message.content,
+      sender: {
+        _id: message.sender._id.toString(),
+        name: message.sender.name,
+        email: message.sender.email,
+        role: message.sender.role
+      },
+      recipients: message.recipients.map((r: any) => ({
+        _id: r._id.toString(),
+        name: r.name,
+        email: r.email,
+        role: r.role,
+        status: r.status || MessageStatus.Unread
+      })),
+      status: message.recipients.find((r: any) => r._id === userId)?.status || MessageStatus.Unread,
+      createdAt: message.createdAt,
+      updatedAt: message.updatedAt,
+      isBroadcast: message.isBroadcast,
+      attachments: message.attachments,
+      recipientsCount: message.recipients.length
+    }));
+    return {
+      success: true,
+      data: {
+        messages: mappedMessages,
+        pagination: {
+          total: totalItems,
+          page,
+          limit,
+          totalPages
+        }
+      }
+    };
   }
 }
 
@@ -88,18 +120,50 @@ export class GetSentMessagesUseCase implements IGetSentMessagesUseCase {
   constructor(private readonly repository: ICommunicationRepository) { }
 
   async execute(params: GetSentMessagesRequestDTO): Promise<ResponseDTO<GetSentMessagesResponseDTO>> {
-    try {
-      if (!mongoose.isValidObjectId(params.userId)) {
-        return { success: false, data: { error: "Invalid user ID" } };
-      }
-      if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
-        return { success: false, data: { error: "Invalid page or limit parameters" } };
-      }
-      const result = await this.repository.getSentMessages(params);
-      return { success: true, data: result };
-    } catch (error: any) {
-      return { success: false, data: { error: error.message } };
+    if (!mongoose.isValidObjectId(params.userId)) {
+      return { success: false, data: { error: "Invalid user ID" } };
     }
+    if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
+      return { success: false, data: { error: "Invalid page or limit parameters" } };
+    }
+    const { messages, totalItems, totalPages, page, limit, userId } = await this.repository.getSentMessages(params);
+    const MessageStatus = require("../../../domain/communication/entities/Communication").MessageStatus;
+    const mappedMessages = messages.map((message: any) => ({
+      _id: message._id.toString(),
+      subject: message.subject,
+      content: message.content,
+      sender: {
+        _id: message.sender._id.toString(),
+        name: message.sender.name,
+        email: message.sender.email,
+        role: message.sender.role
+      },
+      recipients: message.recipients.map((r: any) => ({
+        _id: r._id.toString(),
+        name: r.name,
+        email: r.email,
+        role: r.role,
+        status: r.status || MessageStatus.Unread
+      })),
+      status: message.recipients.find((r: any) => r._id === userId)?.status || MessageStatus.Unread,
+      createdAt: message.createdAt,
+      updatedAt: message.updatedAt,
+      isBroadcast: message.isBroadcast,
+      attachments: message.attachments,
+      recipientsCount: message.recipients.length
+    }));
+    return {
+      success: true,
+      data: {
+        messages: mappedMessages,
+        pagination: {
+          total: totalItems,
+          page,
+          limit,
+          totalPages
+        }
+      }
+    };
   }
 }
 
@@ -107,37 +171,14 @@ export class SendMessageUseCase implements ISendMessageUseCase {
   constructor(private readonly repository: ICommunicationRepository) { }
 
   async execute(params: SendMessageRequestDTO): Promise<ResponseDTO<SendMessageResponseDTO>> {
-    try {
-      console.log('SendMessageUseCase - Starting with params:', params);
-
-      if (!mongoose.isValidObjectId(params.senderId)) {
-        console.error('SendMessageUseCase - Invalid sender ID:', params.senderId);
-        return { success: false, data: { error: "Invalid sender ID" } };
-      }
-      if (!params.subject || !params.content || !params.to.length) {
-        console.error('SendMessageUseCase - Missing required fields');
-        return { success: false, data: { error: "Missing required fields" } };
-      }
-
-      console.log('SendMessageUseCase - Finding sender');
-      const sender = await this.repository.findUserById(params.senderId, params.senderRole);
-      console.log('SendMessageUseCase - Found sender:', sender);
-
-      if (!sender) {
-        console.error('SendMessageUseCase - Sender not found');
-        return { success: false, data: { error: "Sender not found" } };
-      }
-
-      console.log('SendMessageUseCase - Processing message type');
-      // Let the repository handle the recipient processing
-      const message = await this.repository.sendMessage(params);
-      console.log('SendMessageUseCase - Message created and saved');
-
-      return { success: true, data: message };
-    } catch (error: any) {
-      console.error('SendMessageUseCase - Error:', error);
-      return { success: false, data: { error: error.message } };
+    if (!mongoose.isValidObjectId(params.senderId)) {
+      return { success: false, data: { error: "Invalid sender ID" } };
     }
+    if (!params.subject || !params.content || !params.to.length) {
+      return { success: false, data: { error: "Missing required fields" } };
+    }
+    const message = await this.repository.sendMessage(params);
+    return { success: true, data: message };
   }
 }
 
@@ -145,27 +186,11 @@ export class MarkMessageAsReadUseCase implements IMarkMessageAsReadUseCase {
   constructor(private readonly repository: ICommunicationRepository) { }
 
   async execute(params: MarkMessageAsReadRequestDTO): Promise<ResponseDTO<MarkMessageAsReadResponseDTO>> {
-    try {
-      if (!mongoose.isValidObjectId(params.messageId) || !mongoose.isValidObjectId(params.userId)) {
-        return { success: false, data: { error: "Invalid message ID or user ID" } };
-      }
-
-      const message = await this.repository.findMessageById(params.messageId);
-      if (!message || !message.isRecipient(params.userId)) {
-        return { success: false, data: { error: "Message not found or user is not a recipient" } };
-      }
-
-      const recipient = message.recipients.find(r => r._id === params.userId);
-      if (recipient?.status === MessageStatus.Read) {
-        return { success: true, data: { success: true, message: "Message already marked as read" } };
-      }
-
-      await this.repository.updateMessageRecipientStatus(params.messageId, params.userId, MessageStatus.Read);
-
-      return { success: true, data: { success: true, message: "Message marked as read" } };
-    } catch (error: any) {
-      return { success: false, data: { error: error.message } };
+    if (!mongoose.isValidObjectId(params.messageId) || !mongoose.isValidObjectId(params.userId)) {
+      return { success: false, data: { error: "Invalid message ID or user ID" } };
     }
+    await this.repository.markMessageAsRead(params);
+    return { success: true, data: { success: true, message: "Message marked as read" } };
   }
 }
 
@@ -173,35 +198,11 @@ export class DeleteMessageUseCase implements IDeleteMessageUseCase {
   constructor(private readonly repository: ICommunicationRepository) { }
 
   async execute(params: DeleteMessageRequestDTO): Promise<ResponseDTO<DeleteMessageResponseDTO>> {
-    try {
-      console.log('=== DeleteMessageUseCase DEBUG ===');
-      console.log('Params received:', params);
-      console.log('MessageId valid:', mongoose.isValidObjectId(params.messageId));
-      console.log('UserId valid:', mongoose.isValidObjectId(params.userId));
-      console.log('==================================');
-      
-      if (!mongoose.isValidObjectId(params.messageId) || !mongoose.isValidObjectId(params.userId)) {
-        console.log('Invalid message ID or user ID');
-        return { success: false, data: { error: "Invalid message ID or user ID" } };
-      }
-
-      const message = await this.repository.findMessageById(params.messageId);
-      console.log('Found message:', message ? 'Yes' : 'No');
-      
-      if (!message || !message.canAccess(params.userId)) {
-        console.log('Message not found or user does not have access');
-        return { success: false, data: { error: "Message not found or user does not have access" } };
-      }
-
-      console.log('Calling repository deleteMessage...');
-      await this.repository.deleteMessage(params);
-      console.log('Repository deleteMessage completed successfully');
-
-      return { success: true, data: { success: true, message: "Message deleted successfully" } };
-    } catch (error: any) {
-      console.error('DeleteMessageUseCase error:', error);
-      return { success: false, data: { error: error.message } };
+    if (!mongoose.isValidObjectId(params.messageId) || !mongoose.isValidObjectId(params.userId)) {
+      return { success: false, data: { error: "Invalid message ID or user ID" } };
     }
+    await this.repository.deleteMessage(params);
+    return { success: true, data: { success: true, message: "Message deleted successfully" } };
   }
 }
 
@@ -209,20 +210,14 @@ export class GetMessageDetailsUseCase implements IGetMessageDetailsUseCase {
   constructor(private readonly repository: ICommunicationRepository) { }
 
   async execute(params: GetMessageDetailsRequestDTO): Promise<ResponseDTO<GetMessageDetailsResponseDTO>> {
-    try {
-      if (!mongoose.isValidObjectId(params.messageId) || !mongoose.isValidObjectId(params.userId)) {
-        return { success: false, data: { error: "Invalid message ID or user ID" } };
-      }
-
-      const message = await this.repository.findMessageById(params.messageId);
-      if (!message || !message.canAccess(params.userId)) {
-        return { success: false, data: { error: "Message not found or user does not have access" } };
-      }
-
-      return { success: true, data: message };
-    } catch (error: any) {
-      return { success: false, data: { error: error.message } };
+    if (!mongoose.isValidObjectId(params.messageId)) {
+      return { success: false, data: { error: "Invalid message ID" } };
     }
+    const message = await this.repository.getMessageDetails(params);
+    if (!message) {
+      return { success: false, data: { error: "Message not found" } };
+    }
+    return { success: true, data: message };
   }
 }
 
@@ -230,43 +225,23 @@ export class GetAllAdminsUseCase implements IGetAllAdminsUseCase {
   constructor(private readonly repository: ICommunicationRepository) { }
 
   async execute(params: GetAllAdminsRequestDTO): Promise<ResponseDTO<GetAllAdminsResponseDTO>> {
-    try {
-      console.log('GetAllAdminsUseCase - Executing with params:', params);
-      const response = await this.repository.getAllAdmins(params);
-      console.log('GetAllAdminsUseCase - Repository response:', response);
-      return { success: true, data: response };
-    } catch (error: any) {
-      console.error('GetAllAdminsUseCase - Error:', error);
-      return { success: false, data: { error: error.message } };
-    }
+    const admins = await this.repository.getAllAdmins(params);
+    const mappedAdmins = admins.map((admin: any) => ({
+      _id: admin._id.toString(),
+      name: `${admin.firstName} ${admin.lastName}`,
+      email: admin.email,
+      role: 'admin'
+    }));
+    return { success: true, data: { admins: mappedAdmins } };
   }
 }
 
 export class GetUserGroupsUseCase implements IGetUserGroupsUseCase {
+  constructor(private readonly repository: ICommunicationRepository) { }
+
   async execute(params: GetUserGroupsRequestDTO): Promise<ResponseDTO<GetUserGroupsResponseDTO>> {
-    try {
-      const groups = [
-        { value: 'all-students', label: 'All Students' },
-        { value: 'all-faculty', label: 'All Faculty' },
-        { value: 'all-staff', label: 'All Staff' },
-        { value: 'freshman', label: 'Freshman Students' },
-        { value: 'sophomore', label: 'Sophomore Students' },
-        { value: 'junior', label: 'Junior Students' },
-        { value: 'senior', label: 'Senior Students' },
-        { value: 'individual', label: 'Individual User' },
-      ];
-
-      const filteredGroups = params.search
-        ? groups.filter(group => 
-            group.label.toLowerCase().includes(params.search!.toLowerCase()) ||
-            group.value.toLowerCase().includes(params.search!.toLowerCase())
-          )
-        : groups;
-
-      return { success: true, data: { groups: filteredGroups } };
-    } catch (error: any) {
-      return { success: false, data: { error: error.message } };
-    }
+    const groups = await this.repository.getUserGroups(params);
+    return { success: true, data: { groups } };
   }
 }
 
@@ -274,15 +249,13 @@ export class FetchUsersUseCase implements IFetchUsersUseCase {
   constructor(private readonly repository: ICommunicationRepository) { }
 
   async execute(params: FetchUsersRequestDTO): Promise<ResponseDTO<FetchUsersResponseDTO>> {
-    try {
-      if (!mongoose.isValidObjectId(params.requesterId)) {
-        return { success: false, data: { error: "Invalid requester ID" } };
-      }
-
-      const users = await this.repository.findUsersByType(params.type, params.search, params.requesterId);
-      return { success: true, data: { users } };
-    } catch (error: any) {
-      return { success: false, data: { error: error.message } };
-    }
+    const users = await this.repository.fetchUsers(params);
+    const mappedUsers = users.map((user: any) => ({
+      _id: user._id.toString(),
+      name: `${user.firstName} ${user.lastName}`,
+      email: user.email,
+      role: user.role
+    }));
+    return { success: true, data: { users: mappedUsers } };
   }
-  }
+}

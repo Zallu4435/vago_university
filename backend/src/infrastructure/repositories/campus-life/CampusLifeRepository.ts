@@ -28,7 +28,69 @@ import { TeamModel, SportRequestModel } from "../../../infrastructure/database/m
 import { ClubModel, ClubRequestModel } from "../../../infrastructure/database/mongoose/models/clubs/ClubModel";
 
 export class CampusLifeRepository implements ICampusLifeRepository {
-  async getCampusLifeOverview(params: GetCampusLifeOverviewRequestDTO): Promise<CampusLifeOverviewResponseDTO> {
+  async findEvents(query: any, skip: number, limit: number) {
+    return (CampusEventModel as any).find(query)
+      .select("title date time location organizer timeframe icon color description fullTime additionalInfo requirements createdAt updatedAt")
+      .skip(skip)
+      .limit(limit)
+      .lean();
+  }
+
+  async findEventById(eventId: string) {
+    return (CampusEventModel as any).findById(eventId)
+      .select("title date time location organizer timeframe icon color description fullTime additionalInfo requirements createdAt updatedAt")
+      .lean();
+  }
+
+  async findSports(query: any) {
+    return (TeamModel as any).find(query)
+      .select("title type teams icon color division headCoach homeGames record upcomingGames createdAt updatedAt")
+      .lean();
+  }
+
+  async findSportById(sportId: string) {
+    return (TeamModel as any).findById(sportId)
+      .select("title type teams icon color division headCoach homeGames record upcomingGames createdAt updatedAt")
+      .lean();
+  }
+
+  async findClubs(query: any) {
+    return (ClubModel as any).find(query)
+      .select("name type members icon color status role nextMeeting about upcomingEvents createdAt updatedAt")
+      .lean();
+  }
+
+  async findClubById(clubId: string) {
+    return (ClubModel as any).findById(clubId)
+      .select("name type members icon color status role nextMeeting about upcomingEvents createdAt updatedAt")
+      .lean();
+  }
+
+  async findEventRequestsByUser(userId: string) {
+    return (EventRequestModel as any).find({ userId }).lean();
+  }
+
+  async findSportRequestsByUser(userId: string) {
+    return (SportRequestModel as any).find({ userId }).lean();
+  }
+
+  async findClubRequestsByUser(userId: string) {
+    return (ClubRequestModel as any).find({ userId }).lean();
+  }
+
+  async countEvents(query: any) {
+    return (CampusEventModel as any).countDocuments(query);
+  }
+
+  async countSports(query: any) {
+    return (TeamModel as any).countDocuments(query);
+  }
+
+  async countClubs(query: any) {
+    return (ClubModel as any).countDocuments(query);
+  }
+
+  async getCampusLifeOverview(params: GetCampusLifeOverviewRequestDTO): Promise<any> {
     const events = await (CampusEventModel as any).find()
       .select("title date time location organizer timeframe icon color description fullTime additionalInfo requirements createdAt updatedAt")
       .limit(10)
@@ -41,68 +103,10 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       .select("name type members icon color status role nextMeeting about upcomingEvents createdAt updatedAt")
       .limit(10)
       .lean();
-
-    return {
-      events: events.map(
-        (e: any) =>
-          new CampusEvent(
-            e._id.toString(),
-            e.title,
-            e.date,
-            e.time,
-            e.location,
-            e.organizer,
-            e.timeframe,
-            e.icon,
-            e.color,
-            e.description,
-            e.fullTime,
-            e.additionalInfo,
-            e.requirements,
-            e.createdAt.toISOString(),
-            e.updatedAt.toISOString()
-          )
-      ),
-      sports: sports.map(
-        (s: any) =>
-          new Sport(
-            s._id.toString(),
-            s.title,
-            s.type as SportType,
-            [], // teams property doesn't exist in model
-            s.icon,
-            s.color,
-            s.division,
-            s.headCoach,
-            [s.homeGames?.toString() || ""], // convert number to string array
-            s.record,
-            s.upcomingGames?.map((g: any) => g.description) || [],
-            s.createdAt.toISOString(),
-            s.updatedAt.toISOString()
-          )
-      ),
-      clubs: clubs.map(
-        (c: any) =>
-          new Club(
-            c._id.toString(),
-            c.name,
-            c.type,
-            parseInt(c.members) || 0, // convert string to number
-            c.icon,
-            c.color,
-            c.status as any,
-            c.role,
-            c.nextMeeting,
-            c.about,
-            c.upcomingEvents?.map((e: any) => e.description) || [],
-            c.createdAt.toISOString(),
-            c.updatedAt.toISOString()
-          )
-      ),
-    };
+    return { events, sports, clubs };
   }
 
-  async getEvents(params: GetEventsRequestDTO): Promise<GetEventsResponseDTO> {
+  async getEvents(params: GetEventsRequestDTO): Promise<any> {
     const query: any = {};
     if (params.search) {
       query.title = { $regex: params.search, $options: "i" };
@@ -111,78 +115,22 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       const today = new Date().toISOString().split("T")[0];
       query.date = params.status === "upcoming" ? { $gte: today } : { $lt: today };
     }
-
-    const totalItems = await (CampusEventModel as any).countDocuments(query);
+    const totalItems = await this.countEvents(query);
     const totalPages = Math.ceil(totalItems / params.limit);
     const skip = (params.page - 1) * params.limit;
-
-    const events = await (CampusEventModel as any).find(query)
-      .select("title date time location organizer timeframe icon color description fullTime additionalInfo requirements createdAt updatedAt")
-      .skip(skip)
-      .limit(params.limit)
-      .lean();
-
+    const events = await this.findEvents(query, skip, params.limit);
     let requests: any[] = [];
     if (params.userId) {
-      requests = await (EventRequestModel as any).find({ userId: params.userId }).lean();
+      requests = await this.findEventRequestsByUser(params.userId);
     }
-
-    return {
-      events: events.map((e: any) => {
-        const req = requests.find(r => r.eventId.toString() === e._id.toString());
-        return new CampusEvent(
-          e._id.toString(),
-          e.title,
-          e.date,
-          e.time,
-          e.location,
-          e.organizer,
-          e.timeframe,
-          e.icon,
-          e.color,
-          e.description,
-          e.fullTime,
-          e.additionalInfo,
-          e.requirements,
-          e.createdAt.toISOString(),
-          e.updatedAt.toISOString(),
-          req ? req.status : null
-        );
-      }),
-      totalItems,
-      totalPages,
-      currentPage: params.page,
-    };
+    return { events, requests, totalItems, totalPages, currentPage: params.page };
   }
 
-  async getEventById(params: GetEventByIdRequestDTO): Promise<GetEventByIdResponseDTO | null> {
-    const event = await (CampusEventModel as any).findById(params.eventId)
-      .select("title date time location organizer timeframe icon color description fullTime additionalInfo requirements createdAt updatedAt")
-      .lean();
-    if (!event) return null;
-
-    return {
-      event: new CampusEvent(
-        event._id.toString(),
-        event.title,
-        event.date,
-        event.time,
-        event.location,
-        event.organizer,
-        event.timeframe,
-        event.icon,
-        event.color,
-        event.description,
-        event.fullTime,
-        event.additionalInfo,
-        event.requirements,
-        event.createdAt.toISOString(),
-        event.updatedAt.toISOString()
-      ),
-    };
+  async getEventById(params: GetEventByIdRequestDTO): Promise<any> {
+    return await this.findEventById(params.eventId);
   }
 
-  async getSports(params: GetSportsRequestDTO): Promise<GetSportsResponseDTO> {
+  async getSports(params: GetSportsRequestDTO): Promise<any> {
     const query: any = {};
     if (params.type) {
       query.type = params.type;
@@ -190,67 +138,20 @@ export class CampusLifeRepository implements ICampusLifeRepository {
     if (params.search) {
       query.title = { $regex: params.search, $options: "i" };
     }
-
-    const totalItems = await (TeamModel as any).countDocuments(query);
-    const sports = await (TeamModel as any).find(query)
-      .select("title type teams icon color division headCoach homeGames record upcomingGames createdAt updatedAt")
-      .lean();
-
+    const totalItems = await this.countSports(query);
+    const sports = await this.findSports(query);
     let requests: any[] = [];
     if (params.userId) {
-      requests = await (SportRequestModel as any).find({ userId: params.userId }).lean();
+      requests = await this.findSportRequestsByUser(params.userId);
     }
-
-    return {
-      sports: sports.map((s: any) => {
-        const req = requests.find(r => r.sportId.toString() === s._id.toString());
-        return new Sport(
-          s._id.toString(),
-          s.title,
-          s.type as SportType,
-          [], // teams property doesn't exist in model
-          s.icon,
-          s.color,
-          s.division,
-          s.headCoach,
-          [s.homeGames?.toString() || ""], // convert number to string array
-          s.record,
-          s.upcomingGames?.map((g: any) => g.description) || [],
-          s.createdAt.toISOString(),
-          s.updatedAt.toISOString(),
-          req ? req.status : null
-        );
-      }),
-      totalItems,
-    };
+    return { sports, requests, totalItems };
   }
 
-  async getSportById(params: GetSportByIdRequestDTO): Promise<GetSportByIdResponseDTO | null> {
-    const sport = await (TeamModel as any).findById(params.sportId)
-      .select("title type teams icon color division headCoach homeGames record upcomingGames createdAt updatedAt")
-      .lean();
-    if (!sport) return null;
-
-    return {
-      sport: new Sport(
-        sport._id.toString(),
-        sport.title,
-        sport.type as SportType,
-        [], // teams property doesn't exist in model
-        sport.icon,
-        sport.color,
-        sport.division,
-        sport.headCoach,
-        [sport.homeGames?.toString() || ""], // convert number to string array
-        sport.record,
-        sport.upcomingGames?.map((g: any) => g.description) || [],
-        sport.createdAt.toISOString(),
-        sport.updatedAt.toISOString()
-      ),
-    };
+  async getSportById(params: GetSportByIdRequestDTO): Promise<any> {
+    return await this.findSportById(params.sportId);
   }
 
-  async getClubs(params: GetClubsRequestDTO): Promise<GetClubsResponseDTO> {
+  async getClubs(params: GetClubsRequestDTO): Promise<any> {
     const query: any = {};
     if (params.search) {
       query.name = { $regex: params.search, $options: "i" };
@@ -261,85 +162,20 @@ export class CampusLifeRepository implements ICampusLifeRepository {
     if (params.status !== "all") {
       query.status = params.status;
     }
-
-    const totalItems = await (ClubModel as any).countDocuments(query);
-    const clubs = await (ClubModel as any).find(query)
-      .select("name type members icon color status role nextMeeting about upcomingEvents createdAt updatedAt")
-      .lean();
-
+    const totalItems = await this.countClubs(query);
+    const clubs = await this.findClubs(query);
     let requests: any[] = [];
     if (params.userId) {
-      requests = await (ClubRequestModel as any).find({ userId: params.userId }).lean();
+      requests = await this.findClubRequestsByUser(params.userId);
     }
-
-    return {
-      clubs: clubs.map((c: any) => {
-        const req = requests.find(r => r.clubId.toString() === c._id.toString());
-        return new Club(
-          c._id.toString(),
-          c.name,
-          c.type,
-          parseInt(c.members) || 0, // convert string to number
-          c.icon,
-          c.color,
-          c.status as any,
-          c.role,
-          c.nextMeeting,
-          c.about,
-          c.upcomingEvents?.map((e: any) => e.description) || [],
-          c.createdAt.toISOString(),
-          c.updatedAt.toISOString(),
-          req ? req.status : null
-        );
-      }),
-      totalItems,
-    };
+    return { clubs, requests, totalItems };
   }
 
-  async getClubById(params: GetClubByIdRequestDTO): Promise<GetClubByIdResponseDTO | null> {
-    const club = await (ClubModel as any).findById(params.clubId)
-      .select("name type members icon color status role nextMeeting about upcomingEvents createdAt updatedAt")
-      .lean();
-    if (!club) return null;
-
-    return {
-      club: new Club(
-        club._id.toString(),
-        club.name,
-        club.type,
-        parseInt(club.members) || 0, // convert string to number
-        club.icon,
-        club.color,
-        club.status as any,
-        club.role,
-        club.nextMeeting,
-        club.about,
-        club.upcomingEvents?.map((e: any) => e.description) || [],
-        club.createdAt.toISOString(),
-        club.updatedAt.toISOString()
-      ),
-    };
+  async getClubById(params: GetClubByIdRequestDTO): Promise<any> {
+    return await this.findClubById(params.clubId);
   }
 
-  async joinClub(params: JoinClubRequestDTO): Promise<JoinClubResponseDTO> {
-    const club = await (ClubModel as any).findById(params.clubId).lean();
-    if (!club) {
-      throw new Error("Club not found");
-    }
-
-    const user = await mongoose.model("User").findById(params.studentId).lean();
-    if (!user) {
-      throw new Error("Student not found");
-    }
-
-    const existingRequest = await (ClubRequestModel as any).findOne({
-      clubId: params.clubId,
-      userId: params.studentId,
-    }).lean();
-    if (existingRequest) {
-      throw new Error("Join request already submitted for this club");
-    }
-
+  async joinClub(params: JoinClubRequestDTO): Promise<any> {
     const newRequest = new (ClubRequestModel as any)({
       clubId: params.clubId,
       userId: params.studentId,
@@ -348,36 +184,11 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       additionalInfo: params.additionalInfo || "",
       createdAt: new Date(),
     });
-
     await newRequest.save();
-
-    return {
-      requestId: newRequest._id.toString(),
-      status: newRequest.status,
-      message: "Join request submitted successfully",
-    };
+    return newRequest;
   }
 
-  async joinSport(params: JoinSportRequestDTO): Promise<JoinSportResponseDTO> {
-    const sport = await (TeamModel as any).findById(params.sportId).lean();
-    if (!sport) {
-      throw new Error("Sport not found");
-    }
-
-    const user = await mongoose.model("User").findById(params.studentId).lean();
-    if (!user) {
-      throw new Error("Student not found");
-    }
-
-    const existingRequest = await (SportRequestModel as any).findOne({
-      sportId: params.sportId,
-      userId: params.studentId,
-    }).lean();
-
-    if (existingRequest) {
-      throw new Error("Join request already submitted for this sport");
-    }
-
+  async joinSport(params: JoinSportRequestDTO): Promise<any> {
     const newRequest = new (SportRequestModel as any)({
       sportId: params.sportId,
       userId: params.studentId,
@@ -386,35 +197,11 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       additionalInfo: params.additionalInfo || "",
       createdAt: new Date(),
     });
-
     await newRequest.save();
-
-    return {
-      requestId: newRequest._id.toString(),
-      status: newRequest.status,
-      message: "Join request submitted successfully",
-    };
+    return newRequest;
   }
 
-  async joinEvent(params: JoinEventRequestDTO): Promise<JoinEventResponseDTO> {
-    const event = await (CampusEventModel as any).findById(params.eventId).lean();
-    if (!event) {
-      throw new Error("Event not found");
-    }
-
-    const user = await mongoose.model("User").findById(params.studentId).lean();
-    if (!user) {
-      throw new Error("Student not found");
-    }
-
-    const existingRequest = await (EventRequestModel as any).findOne({
-      eventId: params.eventId,
-      userId: params.studentId,
-    }).lean();
-    if (existingRequest) {
-      throw new Error("Join request already submitted for this event");
-    }
-
+  async joinEvent(params: JoinEventRequestDTO): Promise<any> {
     const newRequest = new (EventRequestModel as any)({
       eventId: params.eventId,
       userId: params.studentId,
@@ -423,13 +210,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       additionalInfo: params.additionalInfo || "",
       createdAt: new Date(),
     });
-
     await newRequest.save();
-
-    return {
-      requestId: newRequest._id.toString(),
-      status: newRequest.status,
-      message: "Join request submitted successfully",
-    };
+    return newRequest;
   }
 }

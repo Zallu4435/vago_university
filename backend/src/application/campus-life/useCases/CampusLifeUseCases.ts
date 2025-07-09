@@ -73,8 +73,62 @@ export class GetCampusLifeOverviewUseCase implements IGetCampusLifeOverviewUseCa
 
   async execute(params: GetCampusLifeOverviewRequestDTO): Promise<ResponseDTO<CampusLifeOverviewResponseDTO>> {
     try {
-      const result = await this.campusLifeRepository.getCampusLifeOverview(params);
-      return { success: true, data: result };
+      const { events, sports, clubs } = await this.campusLifeRepository.getCampusLifeOverview(params);
+      const CampusEvent = require("../../../domain/campus-life/entities/CampusLife").CampusEvent;
+      const Sport = require("../../../domain/campus-life/entities/CampusLife").Sport;
+      const Club = require("../../../domain/campus-life/entities/CampusLife").Club;
+      return {
+        success: true,
+        data: {
+          events: events.map((e: any) => new CampusEvent(
+            e._id.toString(),
+            e.title,
+            e.date,
+            e.time,
+            e.location,
+            e.organizer,
+            e.timeframe,
+            e.icon,
+            e.color,
+            e.description,
+            e.fullTime,
+            e.additionalInfo,
+            e.requirements,
+            e.createdAt.toISOString(),
+            e.updatedAt.toISOString()
+          )),
+          sports: sports.map((s: any) => new Sport(
+            s._id.toString(),
+            s.title,
+            s.type,
+            [],
+            s.icon,
+            s.color,
+            s.division,
+            s.headCoach,
+            [s.homeGames?.toString() || ""],
+            s.record,
+            s.upcomingGames?.map((g: any) => g.description) || [],
+            s.createdAt.toISOString(),
+            s.updatedAt.toISOString()
+          )),
+          clubs: clubs.map((c: any) => new Club(
+            c._id.toString(),
+            c.name,
+            c.type,
+            parseInt(c.members) || 0,
+            c.icon,
+            c.color,
+            c.status,
+            c.role,
+            c.nextMeeting,
+            c.about,
+            c.upcomingEvents?.map((e: any) => e.description) || [],
+            c.createdAt.toISOString(),
+            c.updatedAt.toISOString()
+          ))
+        }
+      };
     } catch (error: any) {
       return { success: false, data: { error: error.message } };
     }
@@ -92,8 +146,37 @@ export class GetEventsUseCase implements IGetEventsUseCase {
       if (params.status && !['upcoming', 'past', 'all'].includes(params.status)) {
         return { success: false, data: { error: "Invalid status; must be 'upcoming', 'past', or 'all'" } };
       }
-      const result = await this.campusLifeRepository.getEvents(params);
-      return { success: true, data: result };
+      const { events: rawEvents, requests, totalItems, totalPages, currentPage } = await this.campusLifeRepository.getEvents(params);
+      const CampusEvent = require("../../../domain/campus-life/entities/CampusLife").CampusEvent;
+      return {
+        success: true,
+        data: {
+          events: rawEvents.map((e: any) => {
+            const req = requests.find((r: any) => r.eventId.toString() === e._id.toString());
+            return new CampusEvent(
+              e._id.toString(),
+              e.title,
+              e.date,
+              e.time,
+              e.location,
+              e.organizer,
+              e.timeframe,
+              e.icon,
+              e.color,
+              e.description,
+              e.fullTime,
+              e.additionalInfo,
+              e.requirements,
+              e.createdAt.toISOString(),
+              e.updatedAt.toISOString(),
+              req ? req.status : null
+            );
+          }),
+          totalItems,
+          totalPages,
+          currentPage,
+        }
+      };
     } catch (error: any) {
       return { success: false, data: { error: error.message } };
     }
@@ -108,11 +191,33 @@ export class GetEventByIdUseCase implements IGetEventByIdUseCase {
       if (!mongoose.isValidObjectId(params.eventId)) {
         return { success: false, data: { error: "Invalid event ID" } };
       }
-      const result = await this.campusLifeRepository.getEventById(params);
-      if (!result) {
+      const rawEvent = await this.campusLifeRepository.getEventById(params);
+      if (!rawEvent) {
         return { success: false, data: { error: "Event not found" } };
       }
-      return { success: true, data: result };
+      const CampusEvent = require("../../../domain/campus-life/entities/CampusLife").CampusEvent;
+      return {
+        success: true,
+        data: {
+          event: new CampusEvent(
+            rawEvent._id.toString(),
+            rawEvent.title,
+            rawEvent.date,
+            rawEvent.time,
+            rawEvent.location,
+            rawEvent.organizer,
+            rawEvent.timeframe,
+            rawEvent.icon,
+            rawEvent.color,
+            rawEvent.description,
+            rawEvent.fullTime,
+            rawEvent.additionalInfo,
+            rawEvent.requirements,
+            rawEvent.createdAt.toISOString(),
+            rawEvent.updatedAt.toISOString()
+          )
+        }
+      };
     } catch (error: any) {
       return { success: false, data: { error: error.message } };
     }
@@ -127,8 +232,33 @@ export class GetSportsUseCase implements IGetSportsUseCase {
       if (params.type && !['VARSITY SPORTS', 'INTRAMURAL SPORTS'].includes(params.type)) {
         return { success: false, data: { error: "Invalid type; must be 'VARSITY SPORTS' or 'INTRAMURAL SPORTS'" } };
       }
-      const result = await this.campusLifeRepository.getSports(params);
-      return { success: true, data: result };
+      const { sports, requests, totalItems } = await this.campusLifeRepository.getSports(params);
+      const Sport = require("../../../domain/campus-life/entities/CampusLife").Sport;
+      return {
+        success: true,
+        data: {
+          sports: sports.map((s: any) => {
+            const req = requests.find(r => r.sportId.toString() === s._id.toString());
+            return new Sport(
+              s._id.toString(),
+              s.title,
+              s.type,
+              [],
+              s.icon,
+              s.color,
+              s.division,
+              s.headCoach,
+              [s.homeGames?.toString() || ""],
+              s.record,
+              s.upcomingGames?.map((g: any) => g.description) || [],
+              s.createdAt.toISOString(),
+              s.updatedAt.toISOString(),
+              req ? req.status : null
+            );
+          }),
+          totalItems
+        }
+      };
     } catch (error: any) {
       return { success: false, data: { error: error.message } };
     }
@@ -143,11 +273,31 @@ export class GetSportByIdUseCase implements IGetSportByIdUseCase {
       if (!mongoose.isValidObjectId(params.sportId)) {
         return { success: false, data: { error: "Invalid sport ID" } };
       }
-      const result = await this.campusLifeRepository.getSportById(params);
-      if (!result) {
+      const sport = await this.campusLifeRepository.getSportById(params);
+      if (!sport) {
         return { success: false, data: { error: "Sport not found" } };
       }
-      return { success: true, data: result };
+      const Sport = require("../../../domain/campus-life/entities/CampusLife").Sport;
+      return {
+        success: true,
+        data: {
+          sport: new Sport(
+            sport._id.toString(),
+            sport.title,
+            sport.type,
+            [],
+            sport.icon,
+            sport.color,
+            sport.division,
+            sport.headCoach,
+            [sport.homeGames?.toString() || ""],
+            sport.record,
+            sport.upcomingGames?.map((g: any) => g.description) || [],
+            sport.createdAt.toISOString(),
+            sport.updatedAt.toISOString()
+          )
+        }
+      };
     } catch (error: any) {
       return { success: false, data: { error: error.message } };
     }
@@ -162,8 +312,33 @@ export class GetClubsUseCase implements IGetClubsUseCase {
       if (params.status && !['active', 'inactive', 'all'].includes(params.status)) {
         return { success: false, data: { error: "Invalid status; must be 'active', 'inactive', or 'all'" } };
       }
-      const result = await this.campusLifeRepository.getClubs(params);
-      return { success: true, data: result };
+      const { clubs, requests, totalItems } = await this.campusLifeRepository.getClubs(params);
+      const Club = require("../../../domain/campus-life/entities/CampusLife").Club;
+      return {
+        success: true,
+        data: {
+          clubs: clubs.map((c: any) => {
+            const req = requests.find(r => r.clubId.toString() === c._id.toString());
+            return new Club(
+              c._id.toString(),
+              c.name,
+              c.type,
+              parseInt(c.members) || 0,
+              c.icon,
+              c.color,
+              c.status,
+              c.role,
+              c.nextMeeting,
+              c.about,
+              c.upcomingEvents?.map((e: any) => e.description) || [],
+              c.createdAt.toISOString(),
+              c.updatedAt.toISOString(),
+              req ? req.status : null
+            );
+          }),
+          totalItems
+        }
+      };
     } catch (error: any) {
       return { success: false, data: { error: error.message } };
     }
@@ -178,11 +353,31 @@ export class GetClubByIdUseCase implements IGetClubByIdUseCase {
       if (!mongoose.isValidObjectId(params.clubId)) {
         return { success: false, data: { error: "Invalid club ID" } };
       }
-      const result = await this.campusLifeRepository.getClubById(params);
-      if (!result) {
+      const club = await this.campusLifeRepository.getClubById(params);
+      if (!club) {
         return { success: false, data: { error: "Club not found" } };
       }
-      return { success: true, data: result };
+      const Club = require("../../../domain/campus-life/entities/CampusLife").Club;
+      return {
+        success: true,
+        data: {
+          club: new Club(
+            club._id.toString(),
+            club.name,
+            club.type,
+            parseInt(club.members) || 0,
+            club.icon,
+            club.color,
+            club.status,
+            club.role,
+            club.nextMeeting,
+            club.about,
+            club.upcomingEvents?.map((e: any) => e.description) || [],
+            club.createdAt.toISOString(),
+            club.updatedAt.toISOString()
+          )
+        }
+      };
     } catch (error: any) {
       return { success: false, data: { error: error.message } };
     }
@@ -200,8 +395,17 @@ export class JoinClubUseCase implements IJoinClubUseCase {
       if (!params.reason) {
         return { success: false, data: { error: "Reason is required" } };
       }
-      const result = await this.campusLifeRepository.joinClub(params);
-      return { success: true, data: result };
+      // Check for existing request, club, and user in the use case if needed
+      // For now, just create the request
+      const newRequest = await this.campusLifeRepository.joinClub(params);
+      return {
+        success: true,
+        data: {
+          requestId: newRequest._id.toString(),
+          status: newRequest.status,
+          message: "Join request submitted successfully"
+        }
+      };
     } catch (error: any) {
       return { success: false, data: { error: error.message } };
     }
@@ -219,8 +423,17 @@ export class JoinSportUseCase implements IJoinSportUseCase {
       if (!params.reason) {
         return { success: false, data: { error: "Reason is required" } };
       }
-      const result = await this.campusLifeRepository.joinSport(params);
-      return { success: true, data: result };
+      // Check for existing request, sport, and user in the use case if needed
+      // For now, just create the request
+      const newRequest = await this.campusLifeRepository.joinSport(params);
+      return {
+        success: true,
+        data: {
+          requestId: newRequest._id.toString(),
+          status: newRequest.status,
+          message: "Join request submitted successfully"
+        }
+      };
     } catch (error: any) {
       return { success: false, data: { error: error.message } };
     }
@@ -238,8 +451,17 @@ export class JoinEventUseCase implements IJoinEventUseCase {
       if (!params.reason) {
         return { success: false, data: { error: "Reason is required" } };
       }
-      const result = await this.campusLifeRepository.joinEvent(params);
-      return { success: true, data: result };
+      // Check for existing request, event, and user in the use case if needed
+      // For now, just create the request
+      const newRequest = await this.campusLifeRepository.joinEvent(params);
+      return {
+        success: true,
+        data: {
+          requestId: newRequest._id.toString(),
+          status: newRequest.status,
+          message: "Join request submitted successfully"
+        }
+      };
     } catch (error: any) {
       return { success: false, data: { error: error.message } };
     }

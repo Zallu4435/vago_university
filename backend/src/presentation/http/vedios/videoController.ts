@@ -47,12 +47,20 @@ export class VideoController implements IVideoController {
     async getVideoById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
         const { id } = httpRequest.params;
         if (!id) {
-            return this.httpErrors.error_400();
+            return this.httpErrors.error_400('Missing video ID');
         }
         const requestDTO: GetVideoByIdRequestDTO = { id };
         const result = await this.getVideoByIdUseCase.execute(requestDTO);
         if (!result.success) {
-            return this.httpErrors.error_400();
+            // Pass through specific error message if available
+            const errorMsg = (result.data as any)?.error || 'Bad request';
+            if (errorMsg === 'InvalidVideoId') {
+                return this.httpErrors.error_400('Invalid video ID format');
+            }
+            if (errorMsg === 'VideoNotFound') {
+                return this.httpErrors.error_404('Video not found');
+            }
+            return this.httpErrors.error_400(errorMsg);
         }
         return this.httpSuccess.success_200(result.data);
     }

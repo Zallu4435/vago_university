@@ -80,25 +80,31 @@ export class GetStudentInfoUseCase implements IGetStudentInfoUseCase {
 
   async execute(input: GetStudentInfoRequestDTO): Promise<ResponseDTO<GetStudentInfoResponseDTO>> {
     try {
-      const student = await this.academicRepository.findStudentById(input.userId);
-      if (!student) {
+      const result = await this.academicRepository.findStudentById(input.userId);
+      if (!result) {
         return { data: { error: "Student not found" }, success: false };
       }
-      
+      const { user, program, pendingEnrollments } = result;
+      const pendingCredits = pendingEnrollments
+        .filter((enrollment: any) => enrollment.courseId)
+        .reduce((sum: number, enrollment: any) => sum + ((enrollment.courseId as any).credits || 0), 0);
+      // Get academic standing from user's academic status
+      const academicStanding = 'Good';
+      // Get advisor from user's advisor field
+      const advisor = 'Unknown';
       const response: GetStudentInfoResponseDTO = {
-        name: `${student.firstName} ${student.lastName}`,
-        id: student.id,
-        email: student.email,
-        phone: student.phone,
-        profilePicture: student.profilePicture,
-        major: student.major,
-        catalogYear: student.catalogYear,
-        academicStanding: student.academicStanding,
-        advisor: student.advisor,
-        pendingCredits: student.pendingCredits,
-        credits: student.credits
+        name: `${user.firstName} ${user.lastName}`,
+        id: input.userId,
+        email: user.email,
+        phone: user.phone?.toString(),
+        profilePicture: user.profilePicture,
+        major: program.degree,
+        catalogYear: program.catalogYear,
+        academicStanding,
+        advisor,
+        pendingCredits,
+        credits: program.credits || 0
       };
-      
       return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };
@@ -115,15 +121,13 @@ export class GetGradeInfoUseCase implements IGetGradeInfoUseCase {
       if (!grade) {
         return { data: { error: "Grade information not found" }, success: false };
       }
-      
       const response: GetGradeInfoResponseDTO = {
-        cumulativeGPA: grade.cumulativeGPA,
-        termGPA: grade.termGPA,
-        termName: grade.termName,
-        creditsEarned: grade.creditsEarned,
-        creditsInProgress: grade.creditsInProgress
+        cumulativeGPA: grade.cumulativeGPA || 'N/A',
+        termGPA: grade.termGPA || 'N/A',
+        termName: grade.termName || 'Unknown Term',
+        creditsEarned: grade.creditsEarned || '0',
+        creditsInProgress: grade.creditsInProgress || '0'
       };
-      
       return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };
@@ -138,14 +142,26 @@ export class GetCoursesUseCase implements IGetCoursesUseCase {
     try {
       const { search, page = 1, limit = 5 } = input;
       const courses = await this.academicRepository.findAllCourses(search, page, limit);
-      
+      const mappedCourses = courses.map((course: any) => ({
+        id: course._id.toString(),
+        title: course.title,
+        specialization: course.specialization,
+        faculty: course.faculty,
+        credits: course.credits,
+        term: course.term || '',
+        maxEnrollment: course.maxEnrollment || 0,
+        currentEnrollment: course.currentEnrollment || 0,
+        createdAt: course.createdAt ? new Date(course.createdAt).toISOString() : new Date().toISOString(),
+        schedule: course.schedule,
+        description: course.description,
+        prerequisites: course.prerequisites
+      }));
       const response: GetCoursesResponseDTO = {
-        courses: courses,
-        totalCourses: courses.length,
-        totalPages: 1, // Assuming single page for now
+        courses: mappedCourses,
+        totalCourses: mappedCourses.length,
+        totalPages: 1, // You may want to calculate this based on total count
         currentPage: page
       };
-      
       return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };
@@ -159,16 +175,14 @@ export class GetAcademicHistoryUseCase implements IGetAcademicHistoryUseCase {
   async execute(input: GetAcademicHistoryRequestDTO): Promise<ResponseDTO<GetAcademicHistoryResponseDTO>> {
     try {
       const history = await this.academicRepository.findAcademicHistory(input.userId, input.startTerm, input.endTerm);
-      
       const response: GetAcademicHistoryResponseDTO = {
-        history: history.map(item => ({
-          term: item.term,
-          credits: item.credits,
-          gpa: item.gpa,
-          id: item.id
+        history: history.map((record: any) => ({
+          term: record.term,
+          credits: record.credits,
+          gpa: record.gpa,
+          id: record.id
         }))
       };
-      
       return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };
@@ -185,12 +199,10 @@ export class GetProgramInfoUseCase implements IGetProgramInfoUseCase {
       if (!program) {
         return { data: { error: "Program information not found" }, success: false };
       }
-      
       const response: GetProgramInfoResponseDTO = {
         degree: program.degree,
         catalogYear: program.catalogYear
       };
-      
       return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };
@@ -207,15 +219,13 @@ export class GetProgressInfoUseCase implements IGetProgressInfoUseCase {
       if (!progress) {
         return { data: { error: "Progress information not found" }, success: false };
       }
-      
       const response: GetProgressInfoResponseDTO = {
-        overallProgress: progress.overallProgress,
-        totalCredits: progress.totalCredits,
-        completedCredits: progress.completedCredits,
-        remainingCredits: progress.remainingCredits,
-        estimatedGraduation: progress.estimatedGraduation
+        overallProgress: progress.overallProgress || 0,
+        totalCredits: progress.totalCredits || 0,
+        completedCredits: progress.completedCredits || 0,
+        remainingCredits: progress.remainingCredits || 0,
+        estimatedGraduation: progress.estimatedGraduation || 'To be determined'
       };
-      
       return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };
@@ -232,13 +242,11 @@ export class GetRequirementsInfoUseCase implements IGetRequirementsInfoUseCase {
       if (!requirements) {
         return { data: { error: "Requirements information not found" }, success: false };
       }
-      
       const response: GetRequirementsInfoResponseDTO = {
-        core: requirements.core,
-        elective: requirements.elective,
-        general: requirements.general
+        core: requirements.core || { percentage: 0, completed: 0, total: 0 },
+        elective: requirements.elective || { percentage: 0, completed: 0, total: 0 },
+        general: requirements.general || { percentage: 0, completed: 0, total: 0 }
       };
-      
       return { data: response, success: true };
     } catch (error: any) {
       return { data: { error: error.message }, success: false };

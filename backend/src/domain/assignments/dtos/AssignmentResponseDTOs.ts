@@ -1,11 +1,9 @@
 import { Assignment } from '../entities/Assignment';
 import { Submission } from '../entities/Submission';
+import { Pagination, AnalyticsData } from '../assignmenttypes';
 
-export interface GetAssignmentsResponseDTO {
+export interface GetAssignmentsResponseDTO extends Pagination {
   assignments: Assignment[];
-  total: number;
-  page: number;
-  limit: number;
 }
 
 export interface GetAssignmentResponseDTO {
@@ -20,11 +18,8 @@ export interface UpdateAssignmentResponseDTO {
   assignment: Assignment;
 }
 
-export interface GetSubmissionsResponseDTO {
+export interface GetSubmissionsResponseDTO extends Pagination {
   submissions: Submission[];
-  total: number;
-  page: number;
-  limit: number;
 }
 
 export interface GetSubmissionResponseDTO {
@@ -35,23 +30,4 @@ export interface ReviewSubmissionResponseDTO {
   submission: Submission;
 }
 
-export interface AnalyticsResponseDTO {
-  totalAssignments: number;
-  totalSubmissions: number;
-  submissionRate: number;
-  averageSubmissionTimeHours: number;
-  subjectDistribution: Record<string, number>;
-  statusDistribution: Record<string, number>;
-  recentSubmissions: Array<{
-    assignmentTitle: string;
-    studentName: string;
-    submittedAt: Date;
-    score: number;
-  }>;
-  topPerformers: Array<{
-    studentId: string;
-    studentName: string;
-    averageScore: number;
-    submissionsCount: number;
-  }>;
-} 
+export type AnalyticsResponseDTO = AnalyticsData; 

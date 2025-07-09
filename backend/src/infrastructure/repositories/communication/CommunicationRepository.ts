@@ -30,20 +30,17 @@ import {
 } from "../../../domain/communication/dtos/CommunicationResponseDTOs";
 
 export class CommunicationRepository implements ICommunicationRepository {
-  async getInboxMessages(params: GetInboxMessagesRequestDTO): Promise<GetInboxMessagesResponseDTO> {
+  async getInboxMessages(params: GetInboxMessagesRequestDTO): Promise<any> {
     const { userId, page, limit, search, status } = params;
     const query: any = {
       "recipients._id": userId
     };
-
-    // If status filter is provided, filter by the specific user's recipient status
     if (status && (status as any) !== "all") {
       query.$and = [
         { "recipients._id": userId },
         { "recipients.status": status }
       ];
     }
-
     if (search) {
       const searchQuery = {
         $or: [
@@ -51,322 +48,71 @@ export class CommunicationRepository implements ICommunicationRepository {
           { content: { $regex: search, $options: "i" } }
         ]
       };
-      
       if (query.$and) {
         query.$and.push(searchQuery);
       } else {
         query.$or = searchQuery.$or;
       }
     }
-
     const skip = (page - 1) * limit;
     const messages = await (MessageModel as any).find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
-
     const totalItems = await (MessageModel as any).countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
-
-    const mappedMessages: MessageSummaryDTO[] = messages.map((message: any) => ({
-      _id: message._id.toString(),
-      subject: message.subject,
-      content: message.content,
-      sender: {
-        _id: message.sender._id.toString(),
-        name: message.sender.name,
-        email: message.sender.email,
-        role: message.sender.role
-      },
-      recipients: message.recipients.map((r: any) => ({
-        _id: r._id.toString(),
-        name: r.name,
-        email: r.email,
-        role: r.role,
-        status: r.status || MessageStatus.Unread
-      })),
-      status: message.recipients.find((r: any) => r._id === userId)?.status || MessageStatus.Unread,
-      createdAt: message.createdAt,
-      updatedAt: message.updatedAt,
-      isBroadcast: message.isBroadcast,
-      attachments: message.attachments,
-      recipientsCount: message.recipients.length
-    }));
-
-    return {
-      messages: mappedMessages,
-      pagination: {
-        total: totalItems,
-        page,
-        limit,
-        totalPages
-      }
-    };
+    return { messages, totalItems, totalPages, page, limit, userId, status, search };
   }
 
-  async getSentMessages(params: GetSentMessagesRequestDTO): Promise<GetSentMessagesResponseDTO> {
-    const { userId, page, limit, search, status } = params;
+  async getSentMessages(params: GetSentMessagesRequestDTO): Promise<any> {
+    const { userId, page, limit, search } = params;
     const query: any = {
       "sender._id": userId
     };
-
-    // For sent messages, we don't filter by recipient status since the sender doesn't have a recipient status
-    // The status filter is not applicable for sent messages
-
     if (search) {
       query.$or = [
         { subject: { $regex: search, $options: "i" } },
         { content: { $regex: search, $options: "i" } }
       ];
     }
-
     const skip = (page - 1) * limit;
     const messages = await (MessageModel as any).find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
-
     const totalItems = await (MessageModel as any).countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
-
-    const mappedMessages: MessageSummaryDTO[] = messages.map((message: any) => ({
-      _id: message._id.toString(),
-      subject: message.subject,
-      content: message.content,
-      sender: {
-        _id: message.sender._id.toString(),
-        name: message.sender.name,
-        email: message.sender.email,
-        role: message.sender.role
-      },
-      recipients: message.recipients.map((r: any) => ({
-        _id: r._id.toString(),
-        name: r.name,
-        email: r.email,
-        role: r.role,
-        status: r.status || MessageStatus.Unread
-      })),
-      status: message.recipients.find((r: any) => r._id === userId)?.status || MessageStatus.Unread,
-      createdAt: message.createdAt,
-      updatedAt: message.updatedAt,
-      isBroadcast: message.isBroadcast,
-      attachments: message.attachments,
-      recipientsCount: message.recipients.length
-    }));
-
-    return {
-      messages: mappedMessages,
-      pagination: {
-        total: totalItems,
-        page,
-        limit,
-        totalPages
-      }
-    };
+    return { messages, totalItems, totalPages, page, limit, userId, search };
   }
 
-  async sendMessage(params: SendMessageRequestDTO): Promise<SendMessageResponseDTO> {
-    console.log('Repository sendMessage - Starting with params:', params);
-    const { senderId, senderRole, subject, content, to, attachments } = params;
-    console.log('Repository sendMessage - Extracted params:', { senderId, senderRole, subject, content, to, attachments });
-
-    const sender = await this.findUserById(senderId, senderRole);
-    console.log('Repository sendMessage - Found sender:', sender);
-    if (!sender) {
-      console.error('Repository sendMessage - Sender not found');
-      throw new Error("Sender not found");
-    }
-
-    console.log('Repository sendMessage - Processing recipients');
-    // Parse the to parameter if it's a string
-    const recipientsList = typeof to === 'string' ? JSON.parse(to) : to;
-    console.log('Repository sendMessage - Parsed recipients:', recipientsList);
-    
-    let allRecipients = [];
-    
-    for (const recipient of recipientsList) {
-      console.log('Processing recipient:', recipient);
-      
-      // First check if it's a group identifier
-      if (recipient.value === 'all_students') {
-        const students = await UserModel.find()
-          .select('_id firstName lastName email')
-          .lean();
-        allRecipients.push(...students.map(student => ({
-          _id: student._id.toString(),
-          name: `${student.firstName} ${student.lastName}`,
-          email: student.email,
-          role: 'student' as UserRole,
-          status: MessageStatus.Unread
-        })));
-      } else if (recipient.value === 'all_faculty') {
-        const faculty = await FacultyModel.find()
-          .select('_id firstName lastName email')
-          .lean();
-        allRecipients.push(...faculty.map(faculty => ({
-          _id: faculty._id.toString(),
-          name: `${faculty.firstName} ${faculty.lastName}`,
-          email: faculty.email,
-          role: 'faculty' as UserRole,
-          status: MessageStatus.Unread
-        })));
-      } else if (recipient.value === 'all_users') {
-        const [students, faculty] = await Promise.all([
-          UserModel.find().select('_id firstName lastName email').lean(),
-          FacultyModel.find().select('_id firstName lastName email').lean()
-        ]);
-        
-        allRecipients.push(
-          ...students.map(student => ({
-            _id: student._id.toString(),
-            name: `${student.firstName} ${student.lastName}`,
-            email: student.email,
-            role: 'student' as UserRole,
-            status: MessageStatus.Unread
-          })),
-          ...faculty.map(faculty => ({
-            _id: faculty._id.toString(),
-            name: `${faculty.firstName} ${faculty.lastName}`,
-            email: faculty.email,
-            role: 'faculty' as UserRole,
-            status: MessageStatus.Unread
-          }))
-        );
-      } else if (mongoose.Types.ObjectId.isValid(recipient.value)) {
-        // Handle individual recipient - must be a valid MongoDB ObjectId
-        const userRole = senderRole === 'admin' ? 'user' : 'admin';
-        const user = await this.findUserById(recipient.value, userRole);
-        if (!user) {
-          console.error('Recipient not found:', recipient.value);
-          throw new Error(`Recipient not found: ${recipient.value}`);
-        }
-        allRecipients.push({
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          status: MessageStatus.Unread
-        });
-      } else if (recipient.label && !recipient.value) {
-        // Handle individual recipient with only email (label)
-        console.log('Processing individual recipient by email:', recipient.label);
-        
-        // Try to find user by email in both User and Faculty collections
-        let user = await UserModel.findOne({ email: recipient.label }).lean();
-        let userRole = 'student';
-        
-        if (!user) {
-          user = await FacultyModel.findOne({ email: recipient.label }).lean();
-          userRole = 'faculty';
-        }
-        
-        if (!user) {
-          console.error('Recipient not found by email:', recipient.label);
-          throw new Error(`Recipient not found: ${recipient.label}`);
-        }
-        
-        allRecipients.push({
-          _id: user._id.toString(),
-          name: `${user.firstName} ${user.lastName}`,
-          email: user.email,
-          role: userRole as UserRole,
-          status: MessageStatus.Unread
-        });
-      } else {
-        console.error('Invalid recipient value:', recipient.value);
-        throw new Error(`Invalid recipient value: ${recipient.value}`);
-      }
-    
-    }
-    // Process attachments if provided
-    let processedAttachments = [];
-    if (attachments && Array.isArray(attachments)) {
-      processedAttachments = attachments.map((file: any) => ({
-        filename: file.originalname || file.name,
-        path: file.path || file.url,
-        contentType: file.mimetype || file.type,
-        size: file.size,
-        public_id: file.filename || file.public_id
-      }));
-    }
-
-    console.log('Repository sendMessage - Processed attachments:', processedAttachments);
-
-    // Create message using MessageModel directly
-    const message = await (MessageModel as any).create({
-      subject,
-      content,
-      sender,
-      recipients: allRecipients,
-      isBroadcast: recipientsList.length === 1 && ['all_students', 'all_faculty', 'all_users'].includes(recipientsList[0].value),
-      attachments: processedAttachments
-    });
-
-    console.log('Repository sendMessage - Message created successfully:', message._id);
-    return message;
+  async sendMessage(params: SendMessageRequestDTO): Promise<any> {
+    // Only create and return the raw message document, no mapping or business logic
+    const message = await (MessageModel as any).create(params);
+    return message.toObject ? message.toObject() : message;
   }
 
-  async markMessageAsRead(params: MarkMessageAsReadRequestDTO): Promise<MarkMessageAsReadResponseDTO> {
+  async markMessageAsRead(params: MarkMessageAsReadRequestDTO): Promise<any> {
     const { messageId, userId } = params;
-    const message = await this.findMessageById(messageId);
-    if (!message || !message.isRecipient(userId)) {
-      throw new Error("Message not found or user is not a recipient");
-    }
-
     await this.updateMessageRecipientStatus(messageId, userId, MessageStatus.Read);
     return { success: true, message: "Message marked as read" };
   }
 
-  async deleteMessage(params: DeleteMessageRequestDTO): Promise<DeleteMessageResponseDTO> {
+  async deleteMessage(params: DeleteMessageRequestDTO): Promise<any> {
     const { messageId, userId } = params;
-    console.log('Repository deleteMessage - Starting with params:', params);
-    
-    const message = await this.findMessageById(messageId);
-    if (!message) {
-      throw new Error("Message not found");
-    }
-    
-    if (!message.canAccess(userId)) {
-      throw new Error("User does not have access to this message");
-    }
-
-    // If user is the sender, delete the entire message
-    if (message.isSender(userId)) {
-      console.log('Repository deleteMessage - User is sender, deleting entire message');
       await (MessageModel as any).findByIdAndDelete(messageId);
       return { success: true, message: "Message deleted successfully" };
     }
     
-    // If user is a recipient, remove them from recipients list
-    if (message.isRecipient(userId)) {
-      console.log('Repository deleteMessage - User is recipient, removing from recipients list');
-      await (MessageModel as any).updateOne(
-        { _id: messageId },
-        { $pull: { recipients: { _id: userId } } }
-      );
-      return { success: true, message: "Message removed from inbox" };
-    }
-
-    throw new Error("User does not have access to this message");
+  async getMessageDetails(params: GetMessageDetailsRequestDTO): Promise<any> {
+    const { messageId } = params;
+    return await (MessageModel as any).findById(messageId).lean();
   }
 
-  async getMessageDetails(params: GetMessageDetailsRequestDTO): Promise<GetMessageDetailsResponseDTO> {
-    const { messageId, userId } = params;
-    const message = await this.findMessageById(messageId);
-    if (!message || !message.canAccess(userId)) {
-      throw new Error("Message not found or user does not have access");
-    }
-
-    return message;
-  }
-
-  async getAllAdmins(params: GetAllAdminsRequestDTO): Promise<GetAllAdminsResponseDTO> {
-    console.log('Repository getAllAdmins - Starting with params:', params);
+  async getAllAdmins(params: GetAllAdminsRequestDTO): Promise<any> {
     const { search } = params;
     const query: any = {};
-    
     if (search) {
       query.$or = [
         { firstName: { $regex: search, $options: "i" } },
@@ -374,32 +120,13 @@ export class CommunicationRepository implements ICommunicationRepository {
         { email: { $regex: search, $options: "i" } }
       ];
     }
-
-    console.log('Repository getAllAdmins - Query:', query);
     const admins = await AdminModel.find(query)
       .select("_id firstName lastName email")
       .lean();
-    console.log('Repository getAllAdmins - Found admins:', admins.length);
-
-    const mappedAdmins = admins.map((admin: any) => ({
-      _id: admin._id.toString(),
-      name: `${admin.firstName} ${admin.lastName}`,
-      email: admin.email,
-      role: 'admin'
-    }));
-    console.log('Repository getAllAdmins - Mapped admins:', mappedAdmins);
-
-    return {
-      admins: mappedAdmins.map(admin => ({
-        _id: admin._id,
-        name: admin.name,
-        email: admin.email,
-        role: admin.role as UserRole
-      }))
-    };
+    return admins;
   }
 
-  async getUserGroups(params: GetUserGroupsRequestDTO): Promise<GetUserGroupsResponseDTO> {
+  async getUserGroups(params: GetUserGroupsRequestDTO): Promise<any> {
     const { search } = params;
     const groups = [
       { value: 'all-students', label: 'All Students' },
@@ -411,21 +138,18 @@ export class CommunicationRepository implements ICommunicationRepository {
       { value: 'senior', label: 'Senior Students' },
       { value: 'individual', label: 'Individual User' }
     ];
-
     const filteredGroups = search
       ? groups.filter(group => 
           group.label.toLowerCase().includes(search.toLowerCase()) ||
           group.value.toLowerCase().includes(search.toLowerCase())
         )
       : groups;
-
-    return { groups: filteredGroups };
+    return filteredGroups;
   }
 
-  async fetchUsers(params: FetchUsersRequestDTO): Promise<FetchUsersResponseDTO> {
-    const { type, search, requesterId } = params;
+  async fetchUsers(params: FetchUsersRequestDTO): Promise<any> {
+    const { type, search } = params;
     const query: any = {};
-
     if (type === "students") {
       query.role = UserRole.Student;
     } else if (type === "faculty") {
@@ -433,7 +157,6 @@ export class CommunicationRepository implements ICommunicationRepository {
     } else if (type === "staff") {
       query.role = UserRole.Staff;
     }
-
     if (search) {
       query.$or = [
         { firstName: { $regex: search, $options: "i" } },
@@ -441,19 +164,10 @@ export class CommunicationRepository implements ICommunicationRepository {
         { email: { $regex: search, $options: "i" } }
       ];
     }
-
     const users = await UserModel.find(query)
       .select("_id firstName lastName email role")
       .lean();
-
-    return {
-      users: users.map((user: any) => ({
-        _id: user._id.toString(),
-        name: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        role: user.role
-      }))
-    };
+    return users;
   }
 
   async findUserById(userId: string, role: string): Promise<UserInfo | null> {

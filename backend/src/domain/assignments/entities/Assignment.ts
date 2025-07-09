@@ -1,8 +1,4 @@
-interface AssignmentFile {
-  fileName: string;
-  fileUrl: string;
-  fileSize: number;
-}
+import { AssignmentFile } from '../assignmenttypes';
 
 export class Assignment {
   constructor(

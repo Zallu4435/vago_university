@@ -6,6 +6,7 @@ import Pagination from '../User/Pagination';
 import AddVideoModal from './AddVideoModal';
 import VideoPreviewModal from './VideoPreviewModal';
 import { useVideoManagement } from '../../../hooks/useVideoManagement';
+import WarningModal from '../../../components/WarningModal';
 
 interface Video {
   id: string;
@@ -63,6 +64,8 @@ const VideoManagementPage = () => {
   const [filters, setFilters] = useState<Filters>({ status: 'all', category: '' });
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [videoToDelete, setVideoToDelete] = useState<Video | null>(null);
 
   const {
     diplomasData,
@@ -91,10 +94,10 @@ const VideoManagementPage = () => {
   };
 
   const filteredVideos = (videosData?.videos || [])
-    ?.filter(video => 
+    ?.filter(video =>
       filters.category ? video.diploma?.category === filters.category : true
     )
-    ?.filter(video => 
+    ?.filter(video =>
       video.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -102,20 +105,20 @@ const VideoManagementPage = () => {
   const paginatedVideos = filteredVideos?.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   const tabs = [
-    { 
-      label: `All Videos (${filteredVideos.length})`, 
-      icon: <FiVideo size={16} />, 
-      active: activeTab === 'all' 
+    {
+      label: `All Videos (${filteredVideos.length})`,
+      icon: <FiVideo size={16} />,
+      active: activeTab === 'all'
     },
-    { 
-      label: `Published (${filteredVideos.filter(v => v.status === 'Published').length})`, 
-      icon: <FiVideo size={16} />, 
-      active: activeTab === 'published' 
+    {
+      label: `Published (${filteredVideos.filter(v => v.status === 'Published').length})`,
+      icon: <FiVideo size={16} />,
+      active: activeTab === 'published'
     },
-    { 
-      label: `Drafts (${filteredVideos.filter(v => v.status === 'Draft').length})`, 
-      icon: <FiVideo size={16} />, 
-      active: activeTab === 'drafts' 
+    {
+      label: `Drafts (${filteredVideos.filter(v => v.status === 'Draft').length})`,
+      icon: <FiVideo size={16} />,
+      active: activeTab === 'drafts'
     }
   ];
 
@@ -132,7 +135,8 @@ const VideoManagementPage = () => {
   };
 
   const onDeleteVideo = (video: Video) => {
-    handleDeleteVideo(video);
+    setVideoToDelete(video);
+    setShowDeleteModal(true);
   };
 
   // Convert Video to VideoForEdit for the AddVideoModal
@@ -155,12 +159,12 @@ const VideoManagementPage = () => {
     try {
       console.log('VedioManagement: Edit button clicked for video', video);
       console.log('VedioManagement: video.videoUrl =', video.videoUrl);
-      
+
       // Fetch the complete video data from backend
       const fetchedVideo = await fetchVideoById(video.id);
       console.log('VedioManagement: Fetched video from backend', fetchedVideo);
       console.log('VedioManagement: fetchedVideo.videoUrl =', fetchedVideo.videoUrl);
-      
+
       // Convert to VideoForEdit format
       const videoForEdit: VideoForEdit = {
         _id: fetchedVideo.id,
@@ -173,11 +177,11 @@ const VideoManagementPage = () => {
         description: fetchedVideo.description,
         videoUrl: fetchedVideo.videoUrl,
       };
-      
+
       console.log('VedioManagement: Converted to VideoForEdit', videoForEdit);
       console.log('VedioManagement: videoForEdit.videoUrl =', videoForEdit.videoUrl);
       console.log('VedioManagement: Available categories', filterOptions.categories);
-      
+
       setSelectedVideo(videoForEdit);
       setShowAddModal(true);
     } catch (error) {
@@ -246,21 +250,19 @@ const VideoManagementPage = () => {
           <div className="flex items-center bg-gray-800/60 backdrop-blur-sm rounded-lg p-1 border border-purple-500/30">
             <button
               onClick={() => setViewMode('table')}
-              className={`p-2 rounded text-sm ${
-                viewMode === 'table' 
-                  ? 'bg-purple-600/30 text-white shadow-sm border border-purple-500/50' 
-                  : 'text-purple-300 hover:text-white'
-              }`}
+              className={`p-2 rounded text-sm ${viewMode === 'table'
+                ? 'bg-purple-600/30 text-white shadow-sm border border-purple-500/50'
+                : 'text-purple-300 hover:text-white'
+                }`}
             >
               <FiList className="h-4 w-4" />
             </button>
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded text-sm ${
-                viewMode === 'grid' 
-                  ? 'bg-purple-600/30 text-white shadow-sm border border-purple-500/50' 
-                  : 'text-purple-300 hover:text-white'
-              }`}
+              className={`p-2 rounded text-sm ${viewMode === 'grid'
+                ? 'bg-purple-600/30 text-white shadow-sm border border-purple-500/50'
+                : 'text-purple-300 hover:text-white'
+                }`}
             >
               <FiGrid className="h-4 w-4" />
             </button>
@@ -346,11 +348,10 @@ const VideoManagementPage = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full border ${
-                            video.status === 'Published' 
-                              ? 'bg-green-900/30 text-green-400 border-green-500/30'
-                              : 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
-                          }`}>
+                          <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full border ${video.status === 'Published'
+                            ? 'bg-green-900/30 text-green-400 border-green-500/30'
+                            : 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
+                            }`}>
                             <span
                               className="h-1.5 w-1.5 rounded-full mr-1.5"
                               style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
@@ -367,7 +368,7 @@ const VideoManagementPage = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex items-center space-x-2">
                             <button
-                              onClick={() => {setSelectedVideo(convertVideoForEdit(video)); setShowPreviewModal(true);}}
+                              onClick={() => { setSelectedVideo(convertVideoForEdit(video)); setShowPreviewModal(true); }}
                               className="text-blue-400 hover:text-blue-300"
                             >
                               <FiEye className="h-4 w-4" />
@@ -412,11 +413,10 @@ const VideoManagementPage = () => {
                         <h3 className="text-sm font-medium text-white line-clamp-2">
                           {video.title}
                         </h3>
-                        <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full border inline-flex items-center ${
-                          video.status === 'Published' 
-                            ? 'bg-green-900/30 text-green-400 border-green-500/30'
-                            : 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
-                        }`}>
+                        <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full border inline-flex items-center ${video.status === 'Published'
+                          ? 'bg-green-900/30 text-green-400 border-green-500/30'
+                          : 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
+                          }`}>
                           <span
                             className="h-1.5 w-1.5 rounded-full mr-1.5"
                             style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
@@ -430,11 +430,11 @@ const VideoManagementPage = () => {
                           {video.duration}
                         </div>
                         <div className="flex items-center">
-                          <FiBookOpen className='h-3 w-3 mr-1 text-purple-400'/>
+                          <FiBookOpen className='h-3 w-3 mr-1 text-purple-400' />
                           Module {video.module}
                         </div>
                         <div className="flex items-center">
-                          <FiBriefcase className='h-3 w-3 mr-1 text-purple-400'/>
+                          <FiBriefcase className='h-3 w-3 mr-1 text-purple-400' />
                           {video.diploma?.category || 'Unknown'}
                         </div>
                         <div className="flex items-center">
@@ -444,7 +444,7 @@ const VideoManagementPage = () => {
                       </div>
                       <div className="flex items-center justify-between">
                         <button
-                          onClick={() => {setSelectedVideo(convertVideoForEdit(video)); setShowPreviewModal(true);}}
+                          onClick={() => { setSelectedVideo(convertVideoForEdit(video)); setShowPreviewModal(true); }}
                           className="text-xs text-blue-400 hover:text-blue-300 font-medium"
                         >
                           Preview
@@ -493,6 +493,22 @@ const VideoManagementPage = () => {
         isOpen={showPreviewModal}
         onClose={() => setShowPreviewModal(false)}
         video={selectedVideo}
+      />
+
+      {/* Use the reusable WarningModal for delete confirmation */}
+      <WarningModal
+        isOpen={showDeleteModal && !!videoToDelete}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={() => {
+          if (videoToDelete) handleDeleteVideo(videoToDelete);
+          setShowDeleteModal(false);
+          setVideoToDelete(null);
+        }}
+        title="Delete Video"
+        message={`Are you sure you want to delete "${videoToDelete?.title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
       />
 
       <style>

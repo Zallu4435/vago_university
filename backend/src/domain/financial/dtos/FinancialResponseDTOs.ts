@@ -1,3 +1,5 @@
+import { ChargeProps, PaymentProps } from "../financialtypes";
+
 export interface DocumentDTO {
     id: string;
     name: string;
@@ -22,17 +24,7 @@ export interface DocumentDTO {
     chargeDescription?: string;
   }
   
-  export interface PaymentResponseDTO {
-    id: string;
-    studentId: string;
-    date: string;
-    description: string;
-    method: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay" | "stripe";
-    amount: number;
-    status: "Completed" | "Pending" | "Failed";
-    receiptUrl?: string;
-    metadata?: Record<string, any>;
-  }
+  export type PaymentResponseDTO = Omit<PaymentProps, "_id" | "createdAt" | "updatedAt"> & { id: string; date: string };
   
   export interface FinancialAidApplicationResponseDTO {
     id: string;
@@ -65,19 +57,7 @@ export interface DocumentDTO {
     documents: DocumentDTO[];
   }
   
-  export interface ChargeResponseDTO {
-    id: string;
-    title: string;
-    description: string;
-    amount: number;
-    term: string;
-    dueDate: string;
-    applicableFor: string;
-    createdBy?: string;
-    createdAt: string;
-    updatedAt: string;
-    status?: "Active" | "Inactive";
-  }
+  export type ChargeResponseDTO = Omit<ChargeProps, "_id"> & { id: string };
   
   export interface GetStudentFinancialInfoResponseDTO {
     info: StudentFinancialInfoResponseDTO[];

@@ -1,19 +1,6 @@
 import mongoose from "mongoose";
 import { FinancialErrorType } from "../enums/FinancialErrorType";
-
-export interface PaymentProps {
-  _id?: mongoose.Types.ObjectId;
-  studentId: string;
-  date: Date;
-  description: string;
-  method: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay" | "stripe";
-  amount: number;
-  status: "Completed" | "Pending" | "Failed";
-  receiptUrl?: string;
-  metadata?: Record<string, any>;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+import { PaymentProps } from "../financialtypes";
 
 export class Payment {
   private _id?: mongoose.Types.ObjectId;

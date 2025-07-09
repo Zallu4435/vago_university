@@ -1,3 +1,5 @@
+import { ChargeProps, PaymentProps } from "../financialtypes";
+
 export interface DocumentDTO {
     id: string;
     name: string;
@@ -21,16 +23,13 @@ export interface DocumentDTO {
     paymentId: string;
   }
   
-  export interface MakePaymentRequestDTO {
-    studentId: string;
-    amount: number;
-    method: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay" | "stripe";
+  export type MakePaymentRequestDTO = Pick<PaymentProps, "studentId" | "amount" | "method"> & {
     term: string;
-    chargeId: string; // Required chargeId to track which specific charge is being paid
+    chargeId: string;
     razorpayPaymentId?: string;
     razorpayOrderId?: string;
     razorpaySignature?: string;
-  }
+  };
   
   export interface GetFinancialAidApplicationsRequestDTO {
     studentId: string;
@@ -97,15 +96,7 @@ export interface DocumentDTO {
     status?: "Approved" | "Pending" | "Rejected";
   }
   
-  export interface CreateChargeRequestDTO {
-    title: string;
-    description: string;
-    amount: number;
-    term: string;
-    dueDate: Date;
-    applicableFor: string;
-    createdBy: string;
-  }
+  export type CreateChargeRequestDTO = Pick<ChargeProps, "title" | "description" | "amount" | "term" | "dueDate" | "applicableFor" | "createdBy">;
   
   export interface GetAllChargesRequestDTO {
     term?: string;

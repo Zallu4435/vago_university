@@ -1,37 +1,35 @@
-import { Schema, model, models } from "mongoose";
+import mongoose, { Schema, model, models } from "mongoose";
+import { 
+  OrganizerType, 
+  EventType, 
+  Timeframe, 
+  EventStatus, 
+  Event,
+  EventRequest,
+  EventRequestStatus
+} from "../../../../../domain/events/entities/EventTypes";
 
-const campusEventSchema = new Schema(
+const campusEventSchema = new Schema<Event>(
   {
     title: { type: String, required: true, minlength: 3 },
     organizer: { type: String, required: true, minlength: 2 },
     organizerType: {
       type: String,
       required: true,
-      enum: ["department", "club", "student", "administration", "external"],
+      enum: Object.values(OrganizerType),
     },
     eventType: {
       type: String,
       required: true,
-      enum: [
-        "workshop",
-        "seminar",
-        "fest",
-        "competition",
-        "exhibition",
-        "conference",
-        "hackathon",
-        "cultural",
-        "sports",
-        "academic",
-      ],
-      },
+      enum: Object.values(EventType),
+    },
     date: { type: String, required: true },
     time: { type: String, required: true },
     location: { type: String, required: true, minlength: 3 },
     timeframe: {
       type: String,
       required: true,
-      enum: ["morning", "afternoon", "evening", "night", "allday"],
+      enum: Object.values(Timeframe),
     },
     icon: { type: String, default: "📅" },
     color: { type: String, default: "#8B5CF6" },
@@ -42,8 +40,8 @@ const campusEventSchema = new Schema(
     status: {
       type: String,
       required: true,
-      enum: ["upcoming", "completed", "cancelled"],
-      default: "upcoming",
+      enum: Object.values(EventStatus),
+      default: EventStatus.Upcoming,
     },
     maxParticipants: { type: Number, default: 0 },
     registrationRequired: { type: Boolean, default: false },
@@ -54,13 +52,13 @@ const campusEventSchema = new Schema(
   }
 );
 
-const eventRequestSchema = new Schema({
-  eventId: { type: Schema.Types.ObjectId, ref: "CampusEvent", required: true },
-  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+const eventRequestSchema = new Schema<EventRequest>({
+  eventId: { type: Schema.Types.ObjectId, ref: "CampusEvent", required: true } as any,
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true } as any,
   status: {
     type: String,
-    enum: ["pending", "approved", "rejected"],
-    default: "pending",
+    enum: Object.values(EventRequestStatus),
+    default: EventRequestStatus.Pending,
     required: true,
   },
   whyJoin: { type: String, required: true, trim: true },
@@ -74,7 +72,11 @@ const eventRequestSchema = new Schema({
 eventRequestSchema.index({ eventId: 1 });
 eventRequestSchema.index({ userId: 1 });
 
-export const CampusEventModel =
-  models.CampusEvent || model("CampusEvent", campusEventSchema);
-export const EventRequestModel =
-  models.EventRequest || model("EventRequest", eventRequestSchema);
+export const CampusEventModel = mongoose.model<Event>(
+  "CampusEvent", 
+  campusEventSchema
+);
+export const EventRequestModel = mongoose.model<EventRequest>(
+  "EventRequest", 
+  eventRequestSchema
+);

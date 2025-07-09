@@ -1,3 +1,20 @@
+import { SportProps, SportRequestProps, SportStatus, SportRequestStatus } from "../entities/SportTypes";
+
+// Reusable types for Sport
+export type SportDataDTO = Pick<SportProps, 
+  'title' | 'type' | 'headCoach' | 'playerCount' | 'formedOn' | 'logo' | 'division'
+> & {
+  status?: SportStatus;
+};
+
+// Reusable types for SportRequest
+export type SportRequestDataDTO = Pick<SportRequestProps, 
+  'sportId' | 'userId' | 'whyJoin'
+> & {
+  additionalInfo?: string;
+};
+
+// Request DTOs
 export interface GetSportsRequestDTO {
   page: number;
   limit: number;
@@ -10,28 +27,11 @@ export interface GetSportByIdRequestDTO {
   id: string;
 }
 
-export interface CreateSportRequestDTO {
-  title: string;
-  type: string;
-  headCoach: string;
-  playerCount: number;
-  status: string;
-  formedOn: string;
-  logo: string;
-  division?: string;
-}
+export interface CreateSportRequestDTO extends SportDataDTO {}
 
-export interface UpdateSportRequestDTO {
+export type UpdateSportRequestDTO = {
   id: string;
-  title?: string;
-  type?: string;
-  headCoach?: string;
-  playerCount?: number;
-  status?: string;
-  formedOn?: string;
-  logo?: string;
-  division?: string;
-}
+} & Partial<SportDataDTO>;
 
 export interface DeleteSportRequestDTO {
   id: string;
@@ -58,9 +58,4 @@ export interface GetSportRequestDetailsRequestDTO {
   id: string;
 }
 
-export interface JoinSportRequestDTO {
-  sportId: string;
-  studentId: string;
-  reason: string;
-  additionalInfo?: string;
-} 
+export interface JoinSportRequestDTO extends SportRequestDataDTO {} 

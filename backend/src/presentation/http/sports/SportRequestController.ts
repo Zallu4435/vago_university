@@ -23,144 +23,98 @@ export class SportRequestController implements ISportRequestController {
   }
 
   async getSportRequests(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      const {
-        page = "1",
-        limit = "10",
-        status = "all",
-        type = "all",
-        startDate,
-        endDate,
-      } = httpRequest.query;
+    const {
+      page = "1",
+      limit = "10",
+      status = "all",
+      type = "all",
+      startDate,
+      endDate,
+    } = httpRequest.query;
 
-      if (
-        isNaN(Number(page)) ||
-        isNaN(Number(limit)) ||
-        Number(page) < 1 ||
-        Number(limit) < 1
-      ) {
-        return this.httpErrors.error_400();
-      }
-
-      const result = await this.getSportRequestsUseCase.execute({
-        page: Number(page),
-        limit: Number(limit),
-        status: String(status),
-        type: String(type),
-        startDate: startDate ? String(startDate) : undefined,
-        endDate: endDate ? String(endDate) : undefined,
-      });
-
-      if (!result.success || 'error' in result.data) {
-        return this.httpErrors.error_400();
-      }
-
-      return this.httpSuccess.success_200({
-        data: result.data.requests,
-        totalPages: result.data.totalPages,
-        totalItems: result.data.totalItems,
-        currentPage: result.data.currentPage,
-      });
-    } catch (err) {
-      console.error(`Error in getSportRequests:`, err);
+    if (
+      isNaN(Number(page)) ||
+      isNaN(Number(limit)) ||
+      Number(page) < 1 ||
+      Number(limit) < 1
+    ) {
       return this.httpErrors.error_400();
     }
+
+    const result = await this.getSportRequestsUseCase.execute({
+      page: Number(page),
+      limit: Number(limit),
+      status: String(status),
+      type: String(type),
+      startDate: startDate ? String(startDate) : undefined,
+      endDate: endDate ? String(endDate) : undefined,
+    });
+
+    return this.httpSuccess.success_200({
+      data: result.data,
+      totalPages: result.totalPages,
+      totalItems: result.totalItems,
+      currentPage: result.currentPage,
+    });
   }
 
   async approveSportRequest(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      const { id } = httpRequest.params;
+    const { id } = httpRequest.params;
 
-      if (!id) {
-        return this.httpErrors.error_400();
-      }
-
-      await this.approveSportRequestUseCase.execute({ id });
-      return this.httpSuccess.success_200({ message: "Sport request approved successfully" });
-    } catch (err) {
-      console.error(`Error in approveSportRequest:`, err);
+    if (!id) {
       return this.httpErrors.error_400();
     }
+
+    const result = await this.approveSportRequestUseCase.execute({ id });
+    return this.httpSuccess.success_200(result);
   }
 
   async rejectSportRequest(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      const { id } = httpRequest.params;
+    const { id } = httpRequest.params;
 
-      if (!id) {
-        return this.httpErrors.error_400();
-      }
-
-      await this.rejectSportRequestUseCase.execute({ id });
-      return this.httpSuccess.success_200({ message: "Sport request rejected successfully" });
-    } catch (err) {
-      console.error(`Error in rejectSportRequest:`, err);
+    if (!id) {
       return this.httpErrors.error_400();
     }
+
+    const result = await this.rejectSportRequestUseCase.execute({ id });
+    return this.httpSuccess.success_200(result);
   }
 
   async getSportRequestDetails(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      const { id } = httpRequest.params;
+    const { id } = httpRequest.params;
 
-      if (!id) {
-        return this.httpErrors.error_400();
-      }
-
-      const requestDetails = await this.getSportRequestDetailsUseCase.execute({ id });
-      if (!requestDetails) {
-        return this.httpErrors.error_404();
-      }
-
-      return this.httpSuccess.success_200(requestDetails);
-    } catch (err) {
-      console.error(`Error in getSportRequestDetails:`, err);
+    if (!id) {
       return this.httpErrors.error_400();
     }
+
+    const requestDetails = await this.getSportRequestDetailsUseCase.execute({ id });
+    return this.httpSuccess.success_200(requestDetails);
   }
 
   async joinSport(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      const { sportId } = httpRequest.params;
-      const { reason, additionalInfo } = httpRequest.body;
-      const studentId = httpRequest.headers?.user?.id;
+    const { sportId } = httpRequest.params;
+    const { reason, additionalInfo } = httpRequest.body;
+    const studentId = httpRequest.headers?.user?.id;
 
-      if (!sportId) {
-        return this.httpErrors.error_400();
-      }
-
-      if (!studentId) {
-        return this.httpErrors.error_400();
-      }
-
-      if (!reason) {
-        return this.httpErrors.error_400();
-      }
-
-      const result = await this.joinSportUseCase.execute({
-        sportId,
-        studentId,
-        reason,
-        additionalInfo,
-      });
-
-      if (!result.success || 'error' in result.data) {
-        return this.httpErrors.error_400();
-      }
-
-      return this.httpSuccess.success_200({
-        success: true,
-        message: "Join request submitted successfully.",
-        requestId: result.data.requestId,
-        status: result.data.status,
-        timestamp: new Date().toISOString(),
-      });
-    } catch (error: any) {
-      console.error(`Error in joinSport:`, error);
-      if (error.message?.includes("not found")) {
-        return this.httpErrors.error_404();
-      }
-      return this.httpErrors.error_500();
+    if (!sportId) {
+      return this.httpErrors.error_400();
     }
+
+    if (!studentId) {
+      return this.httpErrors.error_400();
+    }
+
+    if (!reason) {
+      return this.httpErrors.error_400();
+    }
+
+    const result = await this.joinSportUseCase.execute({
+      sportId,
+      studentId,
+      reason,
+      additionalInfo,
+    });
+
+    return this.httpSuccess.success_200(result);
   }
 } 

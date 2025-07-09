@@ -1,19 +1,5 @@
 import { EventErrorType } from "../enums/EventErrorType";
-
-export enum EventRequestStatus {
-  Pending = "pending",
-  Approved = "approved",
-  Rejected = "rejected",
-}
-
-interface EventRequestProps {
-  id?: string;
-  eventId: string;
-  userId: string;
-  status: EventRequestStatus;
-  whyJoin: string;
-  additionalInfo?: string;
-}
+import { EventRequestProps, EventRequestStatus } from "./EventTypes";
 
 export class EventRequest {
   private _id?: string;

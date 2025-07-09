@@ -1,19 +1,4 @@
-export enum SportRequestStatus {
-  Pending = "pending",
-  Approved = "approved",
-  Rejected = "rejected",
-}
-
-interface SportRequestProps {
-  id?: string;
-  sportId: string;
-  userId: string;
-  status?: SportRequestStatus;
-  whyJoin: string;
-  additionalInfo?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+import { SportRequestProps, SportRequestStatus } from "./SportTypes";
 
 export class SportRequest {
   private id?: string;

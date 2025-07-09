@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   IoCloseOutline as X, 
   IoCalendarOutline as Calendar, 
@@ -43,13 +44,13 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
     rejected: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },
   };
 
-  const config = statusConfig[status.toLowerCase()] || statusConfig.pending;
+  const config = statusConfig[status?.toLowerCase()] || statusConfig.pending;
 
   return (
     <span
       className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.bg} ${config.text} ${config.border}`}
     >
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {status?.charAt(0)?.toUpperCase() + status?.slice(1)}
     </span>
   );
 };
@@ -71,7 +72,6 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
   onApprove,
   onReject,
 }) => {
-
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add('no-scroll');
@@ -103,7 +103,7 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
     });
   };
 
-  // Particle effect
+  // Particle effect (unchanged)
   const ghostParticles = Array(30)
     .fill(0)
     .map((_, i) => ({
@@ -114,101 +114,115 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
       animDelay: Math.random() * 5,
     }));
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-          <div className="absolute inset-0 bg-gray-900 opacity-75"></div>
-        </div>
-
-        <div className="inline-block align-bottom bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-          {/* Header Section */}
-          <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg border border-purple-500/30">
-                  <Sparkles size={28} className="text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-purple-100">{request.eventName}</h2>
-                  <p className="text-sm text-purple-300 mt-1">Request ID: {request.id}</p>
-                  <div className="flex items-center mt-2 space-x-4">
-                    <StatusBadge status={request.status} />
-                  </div>
-                </div>
+  const modalContent = (
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
+      <div className="relative bg-gray-800 rounded-lg shadow-xl border border-purple-500/30 w-full max-w-2xl mx-auto my-8 overflow-hidden">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg border border-purple-500/30">
+              <Sparkles size={24} className="text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-purple-100">{request.event?.title || request.eventName}</h2>
+              <p className="text-xs text-purple-300 mt-1">Request ID: {request.id}</p>
+              <div className="flex items-center mt-1 space-x-2">
+                <StatusBadge status={request.status} />
               </div>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-purple-500/20 rounded-full transition-colors"
-              >
-                <X size={24} className="text-purple-300" />
-              </button>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-purple-500/20 rounded-full transition-colors"
+          >
+            <X size={22} className="text-purple-300" />
+          </button>
+        </div>
+        {/* Scrollable Content Section */}
+        <div className="p-6 max-h-[70vh] overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <InfoCard icon={User} label="Requested By" value={request.user?.name || request.requestedBy} />
+            <InfoCard icon={Mail} label="Email" value={request.user?.email || 'N/A'} />
+            <InfoCard icon={MapPin} label="Venue" value={request.event?.location || request.proposedVenue} />
+            <InfoCard icon={Calendar} label="Event Date" value={request.event?.date ? formatDate(request.event.date) : formatDate(request.proposedDate)} />
+            <InfoCard icon={Clock} label="Requested At" value={formatDateTime(request.createdAt || request.requestedAt)} />
+            <InfoCard icon={Users} label="Expected Participants" value={request.expectedParticipants?.toString() || 'N/A'} />
+            <InfoCard icon={DocumentText} label="Type" value={request.type} />
+            <InfoCard icon={Info} label="Status" value={request.status} />
+          </div>
+
+          <div className="mb-6">
+            <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg shadow-sm overflow-hidden">
+              <div className="p-4 bg-gray-900/60 flex items-center">
+                <Info size={20} className="text-purple-300" />
+                <h3 className="ml-3 text-lg font-semibold text-purple-100">Event Description</h3>
+              </div>
+              <div className="p-6">
+                <p className="text-purple-200 leading-relaxed">{request.event?.description || request.description}</p>
+              </div>
             </div>
           </div>
 
-          {/* Content Section */}
-          <div className="p-6">
-            {/* Key Info Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <InfoCard icon={User} label="Requested By" value={request.requestedBy} />
-              <InfoCard icon={MapPin} label="Proposed Venue" value={request.proposedVenue} />
-              <InfoCard icon={Calendar} label="Proposed Date" value={formatDate(request.proposedDate)} />
-              <InfoCard icon={Clock} label="Requested At" value={formatDateTime(request.requestedAt)} />
-              <InfoCard icon={Users} label="Expected Participants" value={request.expectedParticipants.toString()} />
-              <InfoCard icon={DocumentText} label="Type" value={request.type} />
+          <div className="mb-6">
+            <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg shadow-sm overflow-hidden">
+              <div className="p-4 bg-gray-900/60 flex items-center">
+                <Heart size={20} className="text-pink-300" />
+                <h3 className="ml-3 text-lg font-semibold text-pink-100">Why Join</h3>
+              </div>
+              <div className="p-6">
+                <p className="text-pink-200 leading-relaxed">{request.whyJoin}</p>
+              </div>
             </div>
+          </div>
 
-            {/* Description Section */}
-            <div className="mb-8">
+          {request.additionalInfo && (
+            <div className="mb-6">
               <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg shadow-sm overflow-hidden">
                 <div className="p-4 bg-gray-900/60 flex items-center">
                   <Info size={20} className="text-purple-300" />
-                  <h3 className="ml-3 text-lg font-semibold text-purple-100">Event Description</h3>
+                  <h3 className="ml-3 text-lg font-semibold text-purple-100">Additional Info</h3>
                 </div>
                 <div className="p-6">
-                  <p className="text-purple-200 leading-relaxed">{request.description}</p>
+                  <p className="text-purple-200 leading-relaxed">{request.additionalInfo}</p>
                 </div>
               </div>
             </div>
+          )}
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4">
-              <button
-                onClick={onClose}
-                className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-gray-500/50"
-              >
-                Close
-              </button>
-              {request.status === 'pending' && (
-                <>
-                  <button
-                    onClick={() => onApprove?.(request.id)}
-                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center border border-blue-500/50"
-                  >
-                    <Check size={18} className="mr-2" />
-                    Approve Request
-                  </button>
-                  <button
-                    onClick={() => onReject?.(request.id)}
-                    className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center border border-red-500/50"
-                  >
-                    <Reject size={18} className="mr-2" />
-                    Reject Request
-                  </button>
-                </>
-              )}
-              {request.status === 'approved' && (
-                <div className="flex items-center space-x-3 px-6 py-3 bg-green-600/30 border border-green-500/50 rounded-lg">
-                  <Check size={20} className="text-green-100" />
-                  <span className="text-green-100 font-semibold">Request Approved</span>
-                </div>
-              )}
-            </div>
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4 mt-4">
+            <button
+              onClick={onClose}
+              className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white py-2 px-5 rounded-lg font-semibold transition-colors border border-gray-500/50"
+            >
+              Close
+            </button>
+            {request.status === 'pending' && (
+              <>
+                <button
+                  onClick={() => onApprove?.(request.id)}
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-2 px-5 rounded-lg font-semibold transition-colors flex items-center justify-center border border-blue-500/50"
+                >
+                  <Check size={18} className="mr-2" />
+                  Approve Request
+                </button>
+                <button
+                  onClick={() => onReject?.(request.id)}
+                  className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-2 px-5 rounded-lg font-semibold transition-colors flex items-center justify-center border border-red-500/50"
+                >
+                  <Reject size={18} className="mr-2" />
+                  Reject Request
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
+
+  // Remove createPortal and just return the modalContent directly
+  return modalContent;
 };
 
 export default EventRequestDetailsModal;

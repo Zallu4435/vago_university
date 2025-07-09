@@ -1,4 +1,4 @@
-import { OrganizerType, EventType, Timeframe, EventStatus } from "../entities/Event";
+import { OrganizerType, EventType, Timeframe, EventStatus } from "../entities/EventTypes";
 
 interface EventDataDTO {
   title: string;

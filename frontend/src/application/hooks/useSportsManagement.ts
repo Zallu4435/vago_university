@@ -214,7 +214,7 @@ export const useSportsManagement = () => {
 
   return {
     teams: teamsData?.sports || [],
-    playerRequests: playerRequestsData?.data?.requests || [],
+    playerRequests: playerRequestsData?.data || [],
     totalPages: activeTab === 'teams' ? teamsData?.totalPages || 0 : playerRequestsData?.totalPages || 0,
     page,
     setPage,

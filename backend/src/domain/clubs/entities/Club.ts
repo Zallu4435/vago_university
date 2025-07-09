@@ -1,28 +1,5 @@
 import { ClubErrorType } from "../enums/ClubErrorType";
-
-export enum ClubStatus {
-  Active = "active",
-  Inactive = "inactive",
-}
-
-interface ClubProps {
-  id?: string;
-  name: string;
-  type: string;
-  createdBy: string;
-  status?: ClubStatus;
-  description?: string;
-  members?: string[];
-  color?: string;
-  icon?: string;
-  nextMeeting?: string;
-  about?: string;
-  enteredMembers?: number;
-  upcomingEvents?: { date: string; description: string }[];
-  role?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+import { ClubProps, ClubStatus } from "./ClubTypes";
 
 export class Club {
   private id?: string;

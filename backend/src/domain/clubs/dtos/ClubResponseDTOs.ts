@@ -1,20 +1,43 @@
-import { Club } from "../entities/Club";
-import { ClubRequest, ClubRequestStatus } from "../entities/ClubRequest";
+import { Club, ClubRequest, ClubProps } from "../entities/ClubTypes";
 
-export interface ClubSummaryDTO {
+// Reusable types for Club responses
+export type ClubSummaryData = Pick<ClubProps, 
+  'name' | 'type' | 'members' | 'color' | 'icon'
+> & {
   id: string;
-  name: string;
-  type: string;
   status: string;
   memberCount: number;
   image?: string;
-}
+};
 
-export interface GetClubsResponseDTO {
-  data: ClubSummaryDTO[];
+// Reusable types for ClubRequest responses
+export type ClubRequestSummaryData = {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  clubId: string;
+  clubName: string;
+  clubType: string;
+  clubDescription?: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+// Generic pagination type
+export interface PaginatedResponseDTO<T> {
   totalItems: number;
   totalPages: number;
   currentPage: number;
+  data: T[];
+}
+
+// Response DTOs
+export interface ClubSummaryDTO extends ClubSummaryData {}
+
+export interface GetClubsResponseDTO extends PaginatedResponseDTO<ClubSummaryDTO> {
+  data: ClubSummaryDTO[];
 }
 
 export interface GetClubByIdResponseDTO {
@@ -28,6 +51,7 @@ export interface CreateClubResponseDTO {
 export interface UpdateClubResponseDTO {
   club: Club;
 }
+
 export interface JoinClubResponseDTO {
   message: string;
   club: Club;
@@ -38,25 +62,10 @@ export interface LeaveClubResponseDTO {
   club: Club;
 }
 
-export interface ClubRequestDTO {
-  id: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  clubId: string;
-  clubName: string;
-  clubType: string;
-  clubDescription?: string;
-  status: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export interface ClubRequestDTO extends ClubRequestSummaryData {}
 
-export interface GetClubRequestsResponseDTO {
+export interface GetClubRequestsResponseDTO extends PaginatedResponseDTO<ClubRequestDTO> {
   data: ClubRequestDTO[];
-  totalItems: number;
-  totalPages: number;
-  currentPage: number;
 }
 
 export interface CreateClubRequestResponseDTO {

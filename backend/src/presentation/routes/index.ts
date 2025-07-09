@@ -5,9 +5,9 @@ import auuthRoutes from "../http/auth/authRouter";
 import facultyRoutes from "../http/faculty/facultyRouter";
 import profileRoutes from "../http/profile/profileRouter";
 import courseRoutes from "../http/courses/coursesRoutes";
-import clubRoutes from "../http/clubs/clubRoutes";
-import sportRoutes from "../http/sports/SportRoutes";
-import eventRoutes from "../http/events/eventRoutes";
+import { clubRouter, clubRequestRouter } from "../http/clubs/clubRoutes";
+import { sportRouter, sportRequestRouter } from "../http/sports/SportRoutes";
+import { eventRouter, eventRequestRouter } from "../http/events/eventRoutes";
 import communicationRoutes from '../http/communication/CommunicationRouter'
 import campusLifeRoutes from "../http/campus-life/campusLifeRoutes";
 import academicRoutes from "../http/academics/AcademicRouter";
@@ -58,11 +58,17 @@ router.use("/auth", auuthRoutes);
 
 router.use("/admin/courses", courseRoutes);
 
-router.use("/admin/clubs", clubRoutes);
+router.use("/admin/clubs", clubRouter);
 
-router.use("/admin/sports", sportRoutes);
+router.use("/admin/club-requests", clubRequestRouter);
 
-router.use("/admin/events", eventRoutes);
+router.use("/admin/sports", sportRouter);
+
+router.use("/admin/sport-requests", sportRequestRouter);
+
+router.use("/admin/events", eventRouter);
+
+router.use("/admin/event-requests", eventRequestRouter);
 
 router.use('/communication', communicationRoutes);
 

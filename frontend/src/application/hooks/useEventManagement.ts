@@ -195,7 +195,7 @@ export const useEventManagement = () => {
 
   return {
     events: eventsData?.data || [],
-    eventRequests: eventRequestsData?.eventRequests || [],
+    eventRequests: (eventRequestsData?.eventRequests || []).map(req => ({ ...req, id: req.requestedId })),
     totalPages: activeTab === 'events' ? eventsData?.totalPages || 0 : eventRequestsData?.totalPages || 0,
     page,
     setPage,

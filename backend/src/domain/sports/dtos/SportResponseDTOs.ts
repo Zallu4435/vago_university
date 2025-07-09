@@ -1,27 +1,52 @@
-import { Sport } from "../entities/Sport";
-import { SportRequest } from "../entities/SportRequest";
+import { Sport, SportRequest, SportProps } from "../entities/SportTypes";
 
-export interface SportSummaryDTO {
+// Reusable types for Sport responses
+export type SportSummaryData = Pick<SportProps, 
+  'title' | 'type' | 'headCoach' | 'playerCount' | 'formedOn' | 'logo' | 'division' | 'participants' | 'icon' | 'color'
+> & {
   id: string;
-  title: string;
-  type: string;
-  headCoach: string;
-  playerCount: number;
   status: string;
-  formedOn: string;
-  logo: string;
-  division?: string;
-  participants?: number;
-  icon?: string;
-  color?: string;
   createdAt: string;
-}
+};
 
-export interface GetSportsResponseDTO {
-  sports: SportSummaryDTO[];
+// Reusable types for SportRequest responses
+export type SportRequestSummaryData = {
+  sportName: string;
+  requestId: string;
+  requestedBy: string;
+  type: string;
+  requestedAt: string;
+  status: string;
+};
+
+export type SportRequestDetailsData = {
+  id: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  whyJoin: string;
+  additionalInfo: string;
+  sport: Pick<SportProps, 'title' | 'type' | 'headCoach' | 'playerCount' | 'division'> & { id: string };
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+};
+
+// Generic pagination type
+export interface PaginatedResponseDTO<T> {
   totalItems: number;
   totalPages: number;
   currentPage: number;
+  data: T[];
+}
+
+// Response DTOs
+export interface SportSummaryDTO extends SportSummaryData {}
+
+export interface GetSportsResponseDTO extends PaginatedResponseDTO<SportSummaryDTO> {
+  sports: SportSummaryDTO[];
 }
 
 export interface GetSportByIdResponseDTO {
@@ -36,44 +61,14 @@ export interface UpdateSportResponseDTO {
   sport: Sport;
 }
 
-export interface SimplifiedSportRequestDTO {
-  sportName: string;
-  requestId: string;
-  requestedBy: string;
-  type: string;
-  requestedAt: string;
-  status: string;
-}
+export interface SimplifiedSportRequestDTO extends SportRequestSummaryData {}
 
-export interface GetSportRequestsResponseDTO {
+export interface GetSportRequestsResponseDTO extends PaginatedResponseDTO<SimplifiedSportRequestDTO> {
   requests: SimplifiedSportRequestDTO[];
-  totalItems: number;
-  totalPages: number;
-  currentPage: number;
 }
 
 export interface GetSportRequestDetailsResponseDTO {
-  sportRequest: {
-    id: string;
-    status: string;
-    createdAt: string;
-    updatedAt: string;
-    whyJoin: string;
-    additionalInfo: string;
-    sport: {
-      id: string;
-      title: string;
-      type: string;
-      headCoach: string;
-      playerCount: number;
-      division: string;
-    };
-    user?: {
-      id: string;
-      name: string;
-      email: string;
-    };
-  };
+  sportRequest: SportRequestDetailsData;
 }
 
 export interface JoinSportResponseDTO {

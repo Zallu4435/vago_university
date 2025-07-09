@@ -41,7 +41,7 @@ class EventService {
   async getEventDetails(id: string): Promise<Event> {
     try {
       const response = await httpClient.get<Event>(`/admin/events/${id}`);
-      return response.data.event;
+      return response.data.data.event;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch event details');
     }
@@ -98,10 +98,10 @@ class EventService {
         params.endDate = endDate;
       }
 
-      const response = await httpClient.get<EventApiResponse>('/admin/events/requests', {
+      const response = await httpClient.get<EventApiResponse>('/admin/event-requests', {
         params
       });
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       console.error('getEventRequests error:', error);
       throw new Error(error.response?.data?.error || 'Failed to fetch event requests');
@@ -110,7 +110,7 @@ class EventService {
 
   async approveEventRequest(id: string): Promise<void> {
     try {
-      await httpClient.post(`/admin/events/requests/${id}/approve`);
+      await httpClient.post(`/admin/event-requests/${id}/approve`);
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to approve event request');
     }
@@ -118,7 +118,7 @@ class EventService {
 
   async rejectEventRequest(id: string): Promise<void> {
     try {
-      await httpClient.post(`/admin/events/requests/${id}/reject`);
+      await httpClient.post(`/admin/event-requests/${id}/reject`);
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to reject event request');
     }
@@ -127,8 +127,8 @@ class EventService {
 
   async getEventRequestDetails(id: string): Promise<EventRequest> {
     try {
-      const response = await httpClient.get<EventRequest>(`/admin/events/requests/${id}`);
-      return response.data;
+      const response = await httpClient.get<EventRequest>(`/admin/event-requests/${id}`);
+      return response.data.data.eventRequest;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch event request details');
     }

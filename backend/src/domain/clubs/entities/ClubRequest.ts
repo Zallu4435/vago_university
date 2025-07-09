@@ -1,19 +1,5 @@
 import { ClubErrorType } from "../enums/ClubErrorType";
-
-export enum ClubRequestStatus {
-  Pending = "pending",
-  Approved = "approved",
-  Rejected = "rejected",
-}
-
-interface ClubRequestProps {
-  id?: string;
-  clubId: string;
-  userId: string;
-  status: ClubRequestStatus;
-  whyJoin: string;
-  additionalInfo?: string;
-}
+import { ClubRequestProps, ClubRequestStatus } from "./ClubTypes";
 
 export class ClubRequest {
   private idValue?: string;
@@ -27,7 +13,7 @@ export class ClubRequest {
     this.idValue = props.id;
     this.clubIdValue = props.clubId;
     this.userIdValue = props.userId;
-    this.statusValue = props.status;
+    this.statusValue = props.status || ClubRequestStatus.Pending;
     this.whyJoinValue = props.whyJoin;
     this.additionalInfoValue = props.additionalInfo || "";
   }

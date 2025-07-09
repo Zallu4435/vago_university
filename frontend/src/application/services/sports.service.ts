@@ -22,7 +22,7 @@ class SportsService {
       }
 
       const response = await httpClient.get<SportsApiResponse>('/admin/sports', { params });
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       console.error('getTeams error:', error);
       throw new Error(error.response?.data?.error || 'Failed to fetch teams');
@@ -46,8 +46,9 @@ class SportsService {
         params.endDate = endDate;
       }
 
-      const response = await httpClient.get<SportsApiResponse>('/admin/sports/player-requests', { params });
-      return response.data;
+      const response = await httpClient.get<SportsApiResponse>('/admin/sport-requests', { params });
+      console.log(response.data, "hushuoshduohsu")
+      return response.data.data;
     } catch (error: any) {
       console.error('getPlayerRequests error:', error);
       throw new Error(error.response?.data?.error || 'Failed to fetch player requests');
@@ -82,7 +83,7 @@ class SportsService {
 
   async approvePlayerRequest(id: string): Promise<void> {
     try {
-      await httpClient.post(`/admin/sports/player-requests/${id}/approve`);
+      await httpClient.post(`/admin/sport-requests/${id}/approve`);
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to approve player request');
     }
@@ -90,7 +91,7 @@ class SportsService {
 
   async rejectPlayerRequest(id: string): Promise<void> {
     try {
-      await httpClient.post(`/admin/sports/player-requests/${id}/reject`);
+      await httpClient.post(`/admin/sport-requests/${id}/reject`);
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to reject player request');
     }
@@ -108,7 +109,7 @@ class SportsService {
 
   async getESportRequestDetails(id: string): Promise<PlayerRequest> {
     try {
-      const response = await httpClient.get<PlayerRequest>(`/admin/sports/player-requests/${id}`);
+      const response = await httpClient.get<PlayerRequest>(`/admin/sport-requests/${id}`);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch sports request details');
@@ -117,7 +118,7 @@ class SportsService {
 
   async getRequestDetails(id: string): Promise<PlayerRequest> {
     try {
-      const response = await httpClient.get(`/admin/sports/player-requests/${id}`);
+      const response = await httpClient.get(`/admin/sport-requests/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching request details:', error);

@@ -102,7 +102,7 @@ const clubColumns = [
     key: 'createdBy',
     render: (club: Club) => (
       <div className="flex items-center text-gray-300">
-        {club.createdBy.includes('Admin') ? (
+        {club.createdBy?.includes('Admin') ? (
           <Building size={14} className="text-purple-400 mr-2" />
         ) : (
           <User size={14} className="text-purple-400 mr-2" />
@@ -123,7 +123,7 @@ const clubColumns = [
     key: 'members',
     render: (club: Club) => (
       <div className="flex items-center text-gray-300">
-        <span className="text-sm">{club.enteredMembers || '0'}</span>
+        <span className="text-sm">{club.memberCount || '0'}</span>
       </div>
     ),
   },
@@ -226,6 +226,7 @@ const AdminClubManagement: React.FC = () => {
     getClubRequestDetails,
     isLoadingClubDetails,
   } = useClubManagement();
+
 
   const [activeTab, setActiveTab] = useState<'clubs' | 'requests'>('clubs');
   const [searchQuery, setSearchQuery] = useState('');

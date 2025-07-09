@@ -1,24 +1,4 @@
-export enum SportStatus {
-  Active = "active",
-  Inactive = "inactive",
-}
-
-interface SportProps {
-  id?: string;
-  title: string;
-  type: string;
-  headCoach: string;
-  playerCount: number;
-  status?: SportStatus;
-  formedOn: string;
-  logo: string;
-  division?: string;
-  participants?: number;
-  icon?: string;
-  color?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+import { SportProps, SportStatus } from "./SportTypes";
 
 export class Sport {
   private id?: string;

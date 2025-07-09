@@ -22,96 +22,55 @@ export class EventController implements IEventController {
   }
 
   async getEvents(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      const { page = "1", limit = "10", type = "all", status = "all", startDate, endDate } = httpRequest.query || {};
-      const getEventsRequestDTO: GetEventsRequestDTO = {
-        page: Number(page),
-        limit: Number(limit),
-        type: String(type),
-        status: String(status),
-        startDate: startDate ? new Date(String(startDate)) : undefined,
-        endDate: endDate ? new Date(String(endDate)) : undefined,
-      };
-      const response = await this.getEventsUseCase.execute(getEventsRequestDTO);
-      if (!response.success) {
-        return this.httpErrors.error_400();
-      }
-      return this.httpSuccess.success_200(response.data);
-    } catch (error: any) {
-      return this.httpErrors.error_500();
-    }
+    const { page = "1", limit = "10", type = "all", status = "all", startDate, endDate } = httpRequest.query || {};
+    const getEventsRequestDTO: GetEventsRequestDTO = {
+      page: Number(page),
+      limit: Number(limit),
+      type: String(type),
+      status: String(status),
+      startDate: startDate ? new Date(String(startDate)) : undefined,
+      endDate: endDate ? new Date(String(endDate)) : undefined,
+    };
+    const response = await this.getEventsUseCase.execute(getEventsRequestDTO);
+    return this.httpSuccess.success_200(response);
   }
 
   async getEventById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      const { id } = httpRequest.params || {};
-      if (!id) {
-        return this.httpErrors.error_400();
-      }
-      const getEventByIdRequestDTO: GetEventByIdRequestDTO = { id };
-      const response = await this.getEventByIdUseCase.execute(getEventByIdRequestDTO);
-      if (!response.success) {
-        if ('error' in response.data && response.data.error === "Event not found!") {
-          return this.httpErrors.error_404();
-        }
-        return this.httpErrors.error_400();
-      }
-      return this.httpSuccess.success_200(response.data);
-    } catch (error: any) {
-      return this.httpErrors.error_500();
+    const { id } = httpRequest.params || {};
+    if (!id) {
+      return this.httpErrors.error_400();
     }
+    const getEventByIdRequestDTO: GetEventByIdRequestDTO = { id };
+    const response = await this.getEventByIdUseCase.execute(getEventByIdRequestDTO);
+    return this.httpSuccess.success_200(response);
   }
 
   async createEvent(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      if (!httpRequest.body || Object.keys(httpRequest.body).length === 0) {
-        return this.httpErrors.error_400();
-      }
-      const createEventRequestDTO: CreateEventRequestDTO = httpRequest.body;
-      const response = await this.createEventUseCase.execute(createEventRequestDTO);
-      if (!response.success) {
-        return this.httpErrors.error_400();
-      }
-      return this.httpSuccess.success_201(response.data);
-    } catch (error: any) {
-      return this.httpErrors.error_500();
+    if (!httpRequest.body || Object.keys(httpRequest.body).length === 0) {
+      return this.httpErrors.error_400();
     }
+    const createEventRequestDTO: CreateEventRequestDTO = httpRequest.body;
+    const response = await this.createEventUseCase.execute(createEventRequestDTO);
+    return this.httpSuccess.success_201(response);
   }
 
   async updateEvent(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      const { id } = httpRequest.params || {};
-      if (!id || !httpRequest.body || Object.keys(httpRequest.body).length === 0) {
-        return this.httpErrors.error_400();
-      }
-      const updateEventRequestDTO: UpdateEventRequestDTO = { id, ...httpRequest.body };
-      const response = await this.updateEventUseCase.execute(updateEventRequestDTO);
-      if (!response.success) {
-        if ('error' in response.data && response.data.error === "Event not found!") {
-          return this.httpErrors.error_404();
-        }
-        return this.httpErrors.error_400();
-      }
-      return this.httpSuccess.success_200(response.data);
-    } catch (error: any) {
-      return this.httpErrors.error_500();
+    const { id } = httpRequest.params || {};
+    if (!id || !httpRequest.body || Object.keys(httpRequest.body).length === 0) {
+      return this.httpErrors.error_400();
     }
+    const updateEventRequestDTO: UpdateEventRequestDTO = { id, ...httpRequest.body };
+    const response = await this.updateEventUseCase.execute(updateEventRequestDTO);
+    return this.httpSuccess.success_200(response);
   }
 
   async deleteEvent(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      const { id } = httpRequest.params || {};
-      if (!id) {
-        return this.httpErrors.error_400();
-      }
-      const deleteEventRequestDTO: DeleteEventRequestDTO = { id };
-      const response = await this.deleteEventUseCase.execute(deleteEventRequestDTO);
-      if (!response.success) {
-        return this.httpErrors.error_400();
-      }
-      return this.httpSuccess.success_200(response.data);
-    } catch (error: any) {
-      return this.httpErrors.error_500();
+    const { id } = httpRequest.params || {};
+    if (!id) {
+      return this.httpErrors.error_400();
     }
+    const deleteEventRequestDTO: DeleteEventRequestDTO = { id };
+    const response = await this.deleteEventUseCase.execute(deleteEventRequestDTO);
+    return this.httpSuccess.success_200(response);
   }
 }

@@ -1,61 +1,11 @@
 import { EventErrorType } from "../enums/EventErrorType";
-
-export enum OrganizerType {
-  Department = "department",
-  Club = "club",
-  Student = "student",
-  Administration = "administration",
-  External = "external",
-}
-
-export enum EventType {
-  Workshop = "workshop",
-  Seminar = "seminar",
-  Fest = "fest",
-  Competition = "competition",
-  Exhibition = "exhibition",
-  Conference = "conference",
-  Hackathon = "hackathon",
-  Cultural = "cultural",
-  Sports = "sports",
-  Academic = "academic",
-}
-
-export enum Timeframe {
-  Morning = "morning",
-  Afternoon = "afternoon",
-  Evening = "evening",
-  Night = "night",
-  AllDay = "allday",
-}
-
-export enum EventStatus {
-  Upcoming = "upcoming",
-  Completed = "completed",
-  Cancelled = "cancelled",
-}
-
-interface EventProps {
-  id?: string;
-  title: string;
-  organizer: string;
-  organizerType: OrganizerType;
-  eventType: EventType;
-  date: string;
-  time: string;
-  location: string;
-  timeframe: Timeframe;
-  status?: EventStatus;
-  icon?: string;
-  color?: string;
-  description?: string;
-  fullTime?: boolean;
-  additionalInfo?: string;
-  requirements?: string;
-  maxParticipants?: number;
-  registrationRequired?: boolean;
-  participants?: number;
-}
+import { 
+  EventProps, 
+  OrganizerType, 
+  EventType, 
+  Timeframe, 
+  EventStatus 
+} from "./EventTypes";
 
 export class Event {
   private _id?: string;

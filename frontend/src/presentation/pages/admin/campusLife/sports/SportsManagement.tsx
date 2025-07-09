@@ -100,16 +100,6 @@ const teamColumns = [
     ),
   },
   {
-    header: 'Coach',
-    key: 'coach',
-    render: (team: Team) => (
-      <div className="flex items-center text-gray-300">
-        <User size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{team.headCoach}</span>
-      </div>
-    ),
-  },
-  {
     header: 'Players',
     key: 'playerCount',
     render: (team: Team) => (
@@ -168,7 +158,7 @@ const playerRequestColumns = [
     render: (request: PlayerRequest) => (
       <div className="flex items-center text-gray-300">
         <Users size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{request.teamName}</span>
+        <span className="text-sm">{request.sportName}</span>
       </div>
     ),
   },
@@ -241,6 +231,8 @@ const AdminSportsManagement: React.FC = () => {
 
   } = useSportsManagement();
 
+
+  console.log(playerRequests, "teamsteamsteamsteams")
 
 
   const [activeTab, setActiveTab] = useState<'teams' | 'requests'>('teams');

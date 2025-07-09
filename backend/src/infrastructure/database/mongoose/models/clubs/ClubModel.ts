@@ -1,12 +1,22 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
+import { 
+  Club, 
+  ClubRequest, 
+  ClubStatus, 
+  ClubRequestStatus 
+} from "../../../../../domain/clubs/entities/ClubTypes";
 
-const clubSchema = new Schema({
+const clubSchema = new Schema<Club>({
   name: { type: String, required: true, trim: true },
   type: { type: String, required: true, trim: true },
-  members: { type: String, trim: true, default: "" },
+  members: { type: [String], default: [] },
   icon: { type: String, trim: true, default: "🎓" },
   color: { type: String, trim: true, default: "#8B5CF6" },
-  status: { type: String, enum: ["active", "inactive"], default: "active" },
+  status: { 
+    type: String, 
+    enum: Object.values(ClubStatus), 
+    default: ClubStatus.Active 
+  },
   role: { type: String, required: true, trim: true },
   nextMeeting: { type: String, trim: true, default: "" },
   about: { type: String, trim: true, default: "" },
@@ -31,13 +41,13 @@ clubSchema.pre("save", function (next) {
   next();
 });
 
-const clubRequestSchema = new Schema({
-  clubId: { type: Schema.Types.ObjectId, ref: "Club", required: true },
-  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+const clubRequestSchema = new Schema<ClubRequest>({
+  clubId: { type: Schema.Types.ObjectId, ref: "Club", required: true } as any,
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true } as any,
   status: {
     type: String,
-    enum: ["pending", "approved", "rejected"],
-    default: "pending",
+    enum: Object.values(ClubRequestStatus),
+    default: ClubRequestStatus.Pending,
     required: true,
   },
   whyJoin: { type: String, required: true, trim: true },
@@ -49,5 +59,11 @@ const clubRequestSchema = new Schema({
 clubRequestSchema.index({ clubId: 1 });
 clubRequestSchema.index({ userId: 1 });
 
-export const ClubModel = model("Club", clubSchema);
-export const ClubRequestModel = model("ClubRequest", clubRequestSchema);
+export const ClubModel = mongoose.model<Club>(
+  "Club", 
+  clubSchema
+);
+export const ClubRequestModel = mongoose.model<ClubRequest>(
+  "ClubRequest", 
+  clubRequestSchema
+);

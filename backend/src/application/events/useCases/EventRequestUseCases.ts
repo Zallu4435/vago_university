@@ -3,147 +3,141 @@ import { GetEventRequestsResponseDTO, GetEventRequestDetailsResponseDTO } from "
 import { IEventsRepository } from "../repositories/IEventsRepository";
 import { EventErrorType } from "../../../domain/events/enums/EventErrorType";
 import mongoose from "mongoose";
+import { EventRequestStatus } from "../../../domain/events/entities/EventTypes";
+import { InvalidEventRequestIdError, EventRequestNotFoundError, AssociatedEventNotFoundError, InvalidEventStatusError } from "../../../domain/events/errors/EventErrors";
 
-interface ResponseDTO<T> {
-  data: T | { error: string };
-  success: boolean;
-}
-
+// --- Use Case Interfaces (UPDATED: No ResponseDTO wrapper, direct returns) ---
 export interface IGetEventRequestsUseCase {
-  execute(params: GetEventRequestsRequestDTO): Promise<{
-    success: boolean;
-    data: GetEventRequestsResponseDTO | { error: string };
-  }>;
+  execute(params: GetEventRequestsRequestDTO): Promise<GetEventRequestsResponseDTO>;
 }
 
 export interface IApproveEventRequestUseCase {
-  execute(params: ApproveEventRequestRequestDTO): Promise<ResponseDTO<{ message: string }>>;
+  execute(params: ApproveEventRequestRequestDTO): Promise<{ message: string }>;
 }
 
 export interface IRejectEventRequestUseCase {
-  execute(params: RejectEventRequestRequestDTO): Promise<ResponseDTO<{ message: string }>>;
+  execute(params: RejectEventRequestRequestDTO): Promise<{ message: string }>;
 }
 
 export interface IGetEventRequestDetailsUseCase {
-  execute(params: GetEventRequestDetailsRequestDTO): Promise<ResponseDTO<GetEventRequestDetailsResponseDTO>>;
+  execute(params: GetEventRequestDetailsRequestDTO): Promise<GetEventRequestDetailsResponseDTO>;
 }
 
 export class GetEventRequestsUseCase implements IGetEventRequestsUseCase {
   constructor(private eventsRepository: IEventsRepository) { }
 
-  async execute(params: GetEventRequestsRequestDTO): Promise<{
-    success: boolean;
-    data: GetEventRequestsResponseDTO | { error: string };
-  }> {
-    try {
-      const { page, limit, startDate, endDate } = params;
-
-      if (page < 1 || limit < 1) {
-        return {
-          success: false,
-          data: { error: "Invalid pagination parameters" },
-        };
-      }
-
-      let formattedStartDate: Date | undefined;
-      let formattedEndDate: Date | undefined;
-
-      if (startDate) {
-        const start = new Date(startDate);
-        if (isNaN(start.getTime())) {
-          return {
-            success: false,
-            data: { error: "Invalid start date format" },
-          };
-        }
-        formattedStartDate = start;
-      }
-
-      if (endDate) {
-        const end = new Date(endDate);
-        if (isNaN(end.getTime())) {
-          return {
-            success: false,
-            data: { error: "Invalid end date format" },
-          };
-        }
-        formattedEndDate = end;
-      }
-
-      if (formattedStartDate && formattedEndDate && formattedStartDate > formattedEndDate) {
-        return {
-          success: false,
-          data: { error: "Start date cannot be after end date" },
-        };
-      }
-
-      const response = await this.eventsRepository.getEventRequests({
-        ...params,
-        startDate: formattedStartDate,
-        endDate: formattedEndDate,
-      });
-
-      return {
-        success: true,
-        data: response,
-      };
-    } catch (error) {
-      console.error("Error in GetEventRequestsUseCase:", error);
-      return {
-        success: false,
-        data: { error: "Internal server error" },
-      };
+  async execute(params: GetEventRequestsRequestDTO): Promise<GetEventRequestsResponseDTO> {
+    // Business logic validation
+    if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
+      throw new Error("Invalid page or limit parameters");
     }
+    if (params.startDate && isNaN(params.startDate.getTime())) {
+      throw new Error("Invalid startDate format");
+    }
+    if (params.endDate && isNaN(params.endDate.getTime())) {
+      throw new Error("Invalid endDate format");
+    }
+
+    // Get raw DB results from repository
+    const result: any = await this.eventsRepository.getEventRequests(params);
+
+    // Business logic: Filter and map results
+    const filteredRequests = result.rawRequests.filter((req: any) => req.eventId);
+    const mappedRequests = filteredRequests.map((req: any) => ({
+      eventName: req.eventId?.title || "Unknown Event",
+      requestedId: req._id.toString(),
+      requestedBy: req.userId?.email || "Unknown User",
+      type: req.eventId?.eventType || "Unknown Type",
+      requestedDate: req.createdAt ? new Date(req.createdAt).toISOString() : "N/A",
+      status: req.status || "pending",
+      proposedDate: req.eventId?.date ? new Date(req.eventId.date).toISOString() : "N/A",
+    }));
+
+    return {
+      data: mappedRequests,
+      totalItems: filteredRequests.length,
+      totalPages: Math.ceil(filteredRequests.length / params.limit),
+      currentPage: result.currentPage,
+    };
   }
 }
 
 export class ApproveEventRequestUseCase implements IApproveEventRequestUseCase {
   constructor(private eventsRepository: IEventsRepository) { }
 
-  async execute(params: ApproveEventRequestRequestDTO): Promise<ResponseDTO<{ message: string }>> {
-    try {
-      if (!mongoose.isValidObjectId(params.id)) {
-        return { data: { error: EventErrorType.InvalidEventId }, success: false };
-      }
-      await this.eventsRepository.approveEventRequest(params);
-      return { data: { message: "Event request approved successfully" }, success: true };
-    } catch (error: any) {
-      return { data: { error: error.message }, success: false };
+  async execute(params: ApproveEventRequestRequestDTO): Promise<{ message: string }> {
+    if (!mongoose.isValidObjectId(params.id)) {
+      throw new InvalidEventRequestIdError(params.id);
     }
+    const eventRequestDetails: any = await this.eventsRepository.getEventRequestDetails({ id: params.id });
+    if (!eventRequestDetails) {
+      throw new EventRequestNotFoundError(params.id);
+    }
+    if (eventRequestDetails.status !== "pending") {
+      throw new InvalidEventStatusError(eventRequestDetails.status);
+    }
+    await this.eventsRepository.approveEventRequest(params);
+    return { message: "Event request approved successfully" };
   }
 }
 
 export class RejectEventRequestUseCase implements IRejectEventRequestUseCase {
   constructor(private eventsRepository: IEventsRepository) { }
 
-  async execute(params: RejectEventRequestRequestDTO): Promise<ResponseDTO<{ message: string }>> {
-    try {
-      if (!mongoose.isValidObjectId(params.id)) {
-        return { data: { error: EventErrorType.InvalidEventId }, success: false };
-      }
-      await this.eventsRepository.rejectEventRequest(params);
-      return { data: { message: "Event request rejected successfully" }, success: true };
-    } catch (error: any) {
-      return { data: { error: error.message }, success: false };
+  async execute(params: RejectEventRequestRequestDTO): Promise<{ message: string }> {
+    if (!mongoose.isValidObjectId(params.id)) {
+      throw new InvalidEventRequestIdError(params.id);
     }
+    const eventRequestDetails: any = await this.eventsRepository.getEventRequestDetails({ id: params.id });
+    if (!eventRequestDetails) {
+      throw new EventRequestNotFoundError(params.id);
+    }
+    if (eventRequestDetails.status !== "pending") {
+      throw new InvalidEventStatusError(eventRequestDetails.status);
+    }
+    await this.eventsRepository.rejectEventRequest(params);
+    return { message: "Event request rejected successfully" };
   }
 }
 
 export class GetEventRequestDetailsUseCase implements IGetEventRequestDetailsUseCase {
   constructor(private eventsRepository: IEventsRepository) { }
 
-  async execute(params: GetEventRequestDetailsRequestDTO): Promise<ResponseDTO<GetEventRequestDetailsResponseDTO>> {
-    try {
-      if (!mongoose.isValidObjectId(params.id)) {
-        return { data: { error: EventErrorType.InvalidEventId }, success: false };
-      }
-      const result = await this.eventsRepository.getEventRequestDetails(params);
-      if (!result) {
-        return { data: { error: EventErrorType.EventRequestNotFound }, success: false };
-      }
-      return { data: result, success: true };
-    } catch (error: any) {
-      return { data: { error: error.message }, success: false };
+  async execute(params: GetEventRequestDetailsRequestDTO): Promise<GetEventRequestDetailsResponseDTO> {
+    if (!mongoose.isValidObjectId(params.id)) {
+      throw new InvalidEventRequestIdError(params.id);
     }
+    const eventRequest: any = await this.eventsRepository.getEventRequestDetails(params);
+    if (!eventRequest) {
+      throw new EventRequestNotFoundError(params.id);
+    }
+    if (!eventRequest.eventId) {
+      throw new AssociatedEventNotFoundError();
+    }
+    return {
+      eventRequest: {
+        id: eventRequest._id.toString(),
+        status: eventRequest.status,
+        createdAt: eventRequest.createdAt.toISOString(),
+        updatedAt: eventRequest.updatedAt.toISOString(),
+        whyJoin: eventRequest.whyJoin,
+        additionalInfo: eventRequest.additionalInfo || "",
+        event: {
+          id: eventRequest.eventId._id.toString(),
+          title: eventRequest.eventId.title,
+          description: eventRequest.eventId.description,
+          date: eventRequest.eventId.date,
+          location: eventRequest.eventId.location,
+          participantsCount: eventRequest.eventId.participantsCount,
+        },
+        user: eventRequest.userId
+          ? {
+            id: eventRequest.userId._id.toString(),
+            name: `${eventRequest.userId.firstName} ${eventRequest.userId.lastName}`.trim(),
+            email: eventRequest.userId.email,
+          }
+          : undefined,
+      },
+    };
   }
 }

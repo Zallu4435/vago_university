@@ -4,55 +4,75 @@ import { getClubsComposer } from "../../../infrastructure/services/clubs/ClubCom
 import { getClubRequestsComposer } from "../../../infrastructure/services/clubs/ClubRequestComposers";
 import { authMiddleware } from "../../../shared/middlewares/authMiddleware";
 
+// --- Club Router ---
 const clubRouter = Router();
 const clubController = getClubsComposer();
+
+clubRouter.get(
+  "/",
+  authMiddleware,
+  (req, res, next) =>
+    expressAdapter(req, res, next, clubController.getClubs.bind(clubController))
+);
+
+clubRouter.get(
+  "/:id",
+  authMiddleware,
+  (req, res, next) =>
+    expressAdapter(req, res, next, clubController.getClubById.bind(clubController))
+);
+
+clubRouter.post(
+  "/",
+  authMiddleware,
+  (req, res, next) =>
+    expressAdapter(req, res, next, clubController.createClub.bind(clubController))
+);
+
+clubRouter.put(
+  "/:id",
+  authMiddleware,
+  (req, res, next) =>
+    expressAdapter(req, res, next, clubController.updateClub.bind(clubController))
+);
+
+clubRouter.delete(
+  "/:id",
+  authMiddleware,
+  (req, res, next) =>
+    expressAdapter(req, res, next, clubController.deleteClub.bind(clubController))
+);
+
+// --- Club Request Router ---
+const clubRequestRouter = Router();
 const clubRequestController = getClubRequestsComposer();
 
-// Club request routes
-clubRouter.get("/club-requests", authMiddleware, (req, res) =>
-  expressAdapter(
-    req,
-    res,
-    clubRequestController.getClubRequests.bind(clubRequestController)
-  )
-);
-clubRouter.get("/club-requests/:id", authMiddleware, (req, res) =>
-  expressAdapter(
-    req,
-    res,
-    clubRequestController.getClubRequestDetails.bind(clubRequestController)
-  )
-);
-clubRouter.post("/club-requests/:id/approve", authMiddleware, (req, res) =>
-  expressAdapter(
-    req,
-    res,
-    clubRequestController.approveClubRequest.bind(clubRequestController)
-  )
-);
-clubRouter.post("/club-requests/:id/reject", authMiddleware, (req, res) =>
-  expressAdapter(
-    req,
-    res,
-    clubRequestController.rejectClubRequest.bind(clubRequestController)
-  )
+clubRequestRouter.get(
+  "/",
+  authMiddleware,
+  (req, res, next) =>
+    expressAdapter(req, res, next, clubRequestController.getClubRequests.bind(clubRequestController))
 );
 
-// Club routes
-clubRouter.get("/", authMiddleware, (req, res) =>
-  expressAdapter(req, res, clubController.getClubs.bind(clubController))
-);
-clubRouter.get("/:id", authMiddleware, (req, res) =>
-  expressAdapter(req, res, clubController.getClubById.bind(clubController))
-);
-clubRouter.post("/", authMiddleware, (req, res) =>
-  expressAdapter(req, res, clubController.createClub.bind(clubController))
-);
-clubRouter.put("/:id", authMiddleware, (req, res) =>
-  expressAdapter(req, res, clubController.updateClub.bind(clubController))
-);
-clubRouter.delete("/:id", authMiddleware, (req, res) =>
-  expressAdapter(req, res, clubController.deleteClub.bind(clubController))
+clubRequestRouter.get(
+  "/:id",
+  authMiddleware,
+  (req, res, next) =>
+    expressAdapter(req, res, next, clubRequestController.getClubRequestDetails.bind(clubRequestController))
 );
 
-export default clubRouter;
+clubRequestRouter.patch(
+  "/:id/approve",
+  authMiddleware,
+  (req, res, next) =>
+    expressAdapter(req, res, next, clubRequestController.approveClubRequest.bind(clubRequestController))
+);
+
+clubRequestRouter.patch(
+  "/:id/reject",
+  authMiddleware,
+  (req, res, next) =>
+    expressAdapter(req, res, next, clubRequestController.rejectClubRequest.bind(clubRequestController))
+);
+
+export { clubRouter, clubRequestRouter };

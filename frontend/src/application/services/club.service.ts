@@ -14,7 +14,7 @@ class ClubService {
       const response = await httpClient.get<ClubApiResponse>('/admin/clubs', {
         params: { page, limit, category, status, dateRange },
       });
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch clubs');
     }
@@ -23,7 +23,7 @@ class ClubService {
   async getClubDetails(id: string): Promise<Club> {
     try {
       const response = await httpClient.get<Club>(`/admin/clubs/${id}`);
-      return response.data.club;
+      return response.data.data.club;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch club details');
     }
@@ -63,10 +63,10 @@ class ClubService {
     dateRange?: string
   ): Promise<ClubApiResponse> {
     try {
-      const response = await httpClient.get('/admin/clubs/club-requests', {
+      const response = await httpClient.get('/admin/club-requests', {
         params: { page, limit, category, status, dateRange },
       });
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch club requests');
     }
@@ -74,7 +74,7 @@ class ClubService {
 
   async approveClubRequest(id: string): Promise<void> {
     try {
-      await httpClient.post(`/admin/clubs/club-requests/${id}/approve`);
+      await httpClient.post(`/admin/club-requests/${id}/approve`);
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to approve club request');
     }
@@ -82,7 +82,7 @@ class ClubService {
 
   async rejectClubRequest(id: string): Promise<void> {
     try {
-      await httpClient.post(`/admin/clubs/club-requests/${id}/reject`);
+      await httpClient.post(`/admin/club-requests/${id}/reject`);
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to reject club request');
     }
@@ -90,8 +90,8 @@ class ClubService {
 
   async getClubRequestDetails(id: string): Promise<ClubRequest> {
     try {
-      const response = await httpClient.get<ClubRequest>(`/admin/clubs/club-requests/${id}`);
-      return response.data;
+      const response = await httpClient.get<ClubRequest>(`/admin/club-requests/${id}`);
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch event request details');
     }

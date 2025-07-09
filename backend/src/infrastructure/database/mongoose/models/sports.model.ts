@@ -1,6 +1,12 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
+import { 
+  Sport, 
+  SportRequest, 
+  SportStatus, 
+  SportRequestStatus 
+} from "../../../../domain/sports/entities/SportTypes";
 
-const teamSchema = new Schema({
+const teamSchema = new Schema<Sport>({
   title: { type: String, required: true, minlength: 2 },
   type: { type: String, required: true },
   category: { type: String, required: true },
@@ -38,8 +44,8 @@ const teamSchema = new Schema({
   status: {
     type: String,
     required: true,
-    enum: ["active", "inactive"],
-    default: "active",
+    enum: Object.values(SportStatus),
+    default: SportStatus.Active,
   },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
@@ -50,17 +56,17 @@ teamSchema.path("upcomingGames").validate(function (value: any[]) {
 }, "At least one upcoming game is required");
 
 teamSchema.pre("save", function (next) {
-  this.updatedAt = new Date();
+  (this as any).updatedAt = new Date();
   next();
 });
 
-const sportRequestSchema = new Schema({
-  sportId: { type: Schema.Types.ObjectId, ref: "Team", required: true },
-  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+const sportRequestSchema = new Schema<SportRequest>({
+  sportId: { type: Schema.Types.ObjectId, ref: "Team", required: true } as any,
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true } as any,
   status: {
     type: String,
-    enum: ["pending", "approved", "rejected"],
-    default: "pending",
+    enum: Object.values(SportRequestStatus),
+    default: SportRequestStatus.Pending,
     required: true,
   },
   whyJoin: { type: String, required: true, trim: true },
@@ -72,5 +78,11 @@ const sportRequestSchema = new Schema({
 sportRequestSchema.index({ clubId: 1 });
 sportRequestSchema.index({ userId: 1 });
 
-export const TeamModel = model("Team", teamSchema);
-export const SportRequestModel = model("SportRequest", sportRequestSchema);
+export const TeamModel = mongoose.model<Sport>(
+  "Team", 
+  teamSchema
+);
+export const SportRequestModel = mongoose.model<SportRequest>(
+  "SportRequest", 
+  sportRequestSchema
+);

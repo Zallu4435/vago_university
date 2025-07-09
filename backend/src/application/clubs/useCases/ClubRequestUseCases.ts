@@ -1,4 +1,3 @@
-import { IClubsRepository } from "../repositories/IClubsRepository";
 import {
   GetClubRequestsRequestDTO,
   ApproveClubRequestRequestDTO,
@@ -8,81 +7,114 @@ import {
 import {
   GetClubRequestsResponseDTO,
   GetClubRequestDetailsResponseDTO,
+  SimplifiedClubRequestDTO,
 } from "../../../domain/clubs/dtos/ClubRequestResponseDTOs";
+import { IClubsRepository } from "../repositories/IClubsRepository";
+import mongoose from "mongoose";
 
-// Local ResponseDTO type if missing
-export interface ResponseDTO<T> {
-  success: boolean;
-  data: T | { error: string };
-}
+export class GetClubRequestsUseCase {
+  constructor(private clubsRepository: IClubsRepository) { }
 
-export interface IGetClubRequestsUseCase {
-  execute(dto: GetClubRequestsRequestDTO): Promise<ResponseDTO<GetClubRequestsResponseDTO>>;
-}
-
-export interface IApproveClubRequestUseCase {
-  execute(dto: ApproveClubRequestRequestDTO): Promise<ResponseDTO<{ message: string }>>;
-}
-
-export interface IRejectClubRequestUseCase {
-  execute(dto: RejectClubRequestRequestDTO): Promise<ResponseDTO<{ message: string }>>;
-}
-
-export interface IGetClubRequestDetailsUseCase {
-  execute(dto: GetClubRequestDetailsRequestDTO): Promise<ResponseDTO<GetClubRequestDetailsResponseDTO>>;
-}
-
-export class GetClubRequestsUseCase implements IGetClubRequestsUseCase {
-  constructor(private clubsRepository: IClubsRepository) {}
-
-  async execute(dto: GetClubRequestsRequestDTO): Promise<ResponseDTO<GetClubRequestsResponseDTO>> {
-    try {
-      const data = await this.clubsRepository.getClubRequests(dto);
-      return { success: true, data };
-    } catch (error: any) {
-      return { success: false, data: { error: error.message || "Failed to get club requests" } };
+  async execute(params: GetClubRequestsRequestDTO): Promise<GetClubRequestsResponseDTO> {
+    if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
+      throw new Error("Invalid page or limit parameters");
     }
+    const { rawRequests, totalItems, totalPages, currentPage } = await this.clubsRepository.getClubRequests(params);
+    const mappedRequests: SimplifiedClubRequestDTO[] = rawRequests.map((req: any) => ({
+      clubName: req.clubId?.name || "Unknown Club",
+      requestedId: req._id.toString(),
+      requestedBy: req.userId?.email || "Unknown User",
+      type: req.clubId?.type || "Unknown Type",
+      requestedAt: req.createdAt ? new Date(req.createdAt).toISOString() : "N/A",
+      status: req.status || "pending",
+    }));
+    return {
+      data: mappedRequests,
+      totalItems,
+      totalPages,
+      currentPage,
+    };
   }
 }
 
-export class ApproveClubRequestUseCase implements IApproveClubRequestUseCase {
-  constructor(private clubsRepository: IClubsRepository) {}
+export class ApproveClubRequestUseCase {
+  constructor(private clubsRepository: IClubsRepository) { }
 
-  async execute(dto: ApproveClubRequestRequestDTO): Promise<ResponseDTO<{ message: string }>> {
-    try {
-      await this.clubsRepository.approveClubRequest(dto);
-      return { success: true, data: { message: "Club request approved successfully" } };
-    } catch (error: any) {
-      return { success: false, data: { error: error.message || "Failed to approve club request" } };
+  async execute(params: ApproveClubRequestRequestDTO): Promise<{ message: string }> {
+    if (!mongoose.isValidObjectId(params.id)) {
+      throw new Error("Invalid club request ID");
     }
+    // Get the club request to validate business rules
+    const clubRequest: any = await this.clubsRepository.getClubRequestDetails({ id: params.id });
+    if (!clubRequest) {
+      throw new Error("Club request not found");
+    }
+    if (clubRequest.status !== "pending") {
+      throw new Error("Club request is not in pending status");
+    }
+    await this.clubsRepository.approveClubRequest(params);
+    return { message: "Club request approved successfully" };
   }
 }
 
-export class RejectClubRequestUseCase implements IRejectClubRequestUseCase {
-  constructor(private clubsRepository: IClubsRepository) {}
+export class RejectClubRequestUseCase {
+  constructor(private clubsRepository: IClubsRepository) { }
 
-  async execute(dto: RejectClubRequestRequestDTO): Promise<ResponseDTO<{ message: string }>> {
-    try {
-      await this.clubsRepository.rejectClubRequest(dto);
-      return { success: true, data: { message: "Club request rejected successfully" } };
-    } catch (error: any) {
-      return { success: false, data: { error: error.message || "Failed to reject club request" } };
+  async execute(params: RejectClubRequestRequestDTO): Promise<{ message: string }> {
+    if (!mongoose.isValidObjectId(params.id)) {
+      throw new Error("Invalid club request ID");
     }
+    // Get the club request to validate business rules
+    const clubRequest: any = await this.clubsRepository.getClubRequestDetails({ id: params.id });
+    if (!clubRequest) {
+      throw new Error("Club request not found");
+    }
+    if (clubRequest.status !== "pending") {
+      throw new Error("Club request is not in pending status");
+    }
+    await this.clubsRepository.rejectClubRequest(params);
+    return { message: "Club request rejected successfully" };
   }
 }
 
-export class GetClubRequestDetailsUseCase implements IGetClubRequestDetailsUseCase {
-  constructor(private clubsRepository: IClubsRepository) {}
+export class GetClubRequestDetailsUseCase {
+  constructor(private clubsRepository: IClubsRepository) { }
 
-  async execute(dto: GetClubRequestDetailsRequestDTO): Promise<ResponseDTO<GetClubRequestDetailsResponseDTO>> {
-    try {
-      const data = await this.clubsRepository.getClubRequestDetails(dto);
-      if (!data) {
-        return { success: false, data: { error: "Club request not found!" } };
-      }
-      return { success: true, data };
-    } catch (error: any) {
-      return { success: false, data: { error: error.message || "Failed to get club request details" } };
+  async execute(params: GetClubRequestDetailsRequestDTO): Promise<GetClubRequestDetailsResponseDTO> {
+    if (!mongoose.isValidObjectId(params.id)) {
+      throw new Error("Invalid club request ID");
     }
+    const clubRequest: any = await this.clubsRepository.getClubRequestDetails(params);
+    if (!clubRequest) {
+      throw new Error("Club request not found");
+    }
+    if (!clubRequest.clubId) {
+      throw new Error("Associated club not found");
+    }
+    return {
+      clubRequest: {
+        id: clubRequest._id.toString(),
+        status: clubRequest.status,
+        createdAt: clubRequest.createdAt.toISOString(),
+        updatedAt: clubRequest.updatedAt.toISOString(),
+        whyJoin: clubRequest.whyJoin,
+        additionalInfo: clubRequest.additionalInfo || "",
+        club: {
+          id: clubRequest.clubId._id.toString(),
+          name: clubRequest.clubId.name,
+          type: clubRequest.clubId.type,
+          about: clubRequest.clubId.about || "",
+          nextMeeting: clubRequest.clubId.nextMeeting || "",
+          enteredMembers: clubRequest.clubId.enteredMembers || 0,
+        },
+        user: clubRequest.userId
+          ? {
+              id: clubRequest.userId._id.toString(),
+              name: `${clubRequest.userId.firstName} ${clubRequest.userId.lastName}`.trim(),
+              email: clubRequest.userId.email,
+            }
+          : undefined,
+      },
+    };
   }
 } 

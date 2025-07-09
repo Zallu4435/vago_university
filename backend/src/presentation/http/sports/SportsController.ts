@@ -23,102 +23,65 @@ export class SportsController implements ISportsController {
   }
 
   async getSports(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      const { page = "1", limit = "10", sportType = "all", status = "all", coach = "all" } = httpRequest.query;
+    const { page = "1", limit = "10", sportType = "all", status = "all", coach = "all" } = httpRequest.query;
 
-      if (
-        isNaN(Number(page)) ||
-        isNaN(Number(limit)) ||
-        Number(page) < 1 ||
-        Number(limit) < 1
-      ) {
-        return this.httpErrors.error_400();
-      }
-
-      const result = await this.getSportsUseCase.execute({
-        page: Number(page),
-        limit: Number(limit),
-        sportType: String(sportType),
-        status: String(status),
-        coach: String(coach),
-      });
-
-      if (!result.success) {
-        return this.httpErrors.error_400();
-      }
-
-      return this.httpSuccess.success_200(result.data);
-    } catch (err) {
-      console.error(`Error in getSports:`, err);
+    if (
+      isNaN(Number(page)) ||
+      isNaN(Number(limit)) ||
+      Number(page) < 1 ||
+      Number(limit) < 1
+    ) {
       return this.httpErrors.error_400();
     }
+
+    const result = await this.getSportsUseCase.execute({
+      page: Number(page),
+      limit: Number(limit),
+      sportType: String(sportType),
+      status: String(status),
+      coach: String(coach),
+    });
+
+    return this.httpSuccess.success_200(result);
   }
 
   async getSportById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      const { id } = httpRequest.params;
+    const { id } = httpRequest.params;
 
-      if (!id) {
-        return this.httpErrors.error_400();
-      }
-
-      const sport = await this.getSportByIdUseCase.execute({ id });
-      if (!sport) {
-        return this.httpErrors.error_404();
-      }
-
-      return this.httpSuccess.success_200(sport);
-    } catch (err) {
-      console.error(`Error in getSportById:`, err);
-      return this.httpErrors.error_500();
+    if (!id) {
+      return this.httpErrors.error_400();
     }
+
+    const sport = await this.getSportByIdUseCase.execute({ id });
+    return this.httpSuccess.success_200(sport);
   }
 
   async createSport(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      const sportData = httpRequest.body;
-      const sport = await this.createSportUseCase.execute(sportData);
-      return this.httpSuccess.success_201(sport);
-    } catch (err) {
-      console.error(`Error in createSport:`, err);
-      return this.httpErrors.error_400();
-    }
+    const sportData = httpRequest.body;
+    const sport = await this.createSportUseCase.execute(sportData);
+    return this.httpSuccess.success_201(sport);
   }
 
   async updateSport(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      const { id } = httpRequest.params;
-      const sportData = httpRequest.body;
+    const { id } = httpRequest.params;
+    const sportData = httpRequest.body;
 
-      if (!id) {
-        return this.httpErrors.error_400();
-      }
-
-      const sport = await this.updateSportUseCase.execute({ id, ...sportData });
-      if (!sport) {
-        return this.httpErrors.error_404();
-      }
-
-      return this.httpSuccess.success_200(sport);
-    } catch (err) {
-      console.error(`Error in updateSport:`, err);
+    if (!id) {
       return this.httpErrors.error_400();
     }
+
+    const sport = await this.updateSportUseCase.execute({ id, ...sportData });
+    return this.httpSuccess.success_200(sport);
   }
 
   async deleteSport(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      const { id } = httpRequest.params;
+    const { id } = httpRequest.params;
 
-      if (!id) {
-        return this.httpErrors.error_400();
-      }
-
-      await this.deleteSportUseCase.execute({ id });
-      return this.httpSuccess.success_200({ message: "Sport deleted successfully" });
-    } catch (err) {
-      console.error(`Error in deleteSport:`, err);
+    if (!id) {
       return this.httpErrors.error_400();
     }
+
+    const result = await this.deleteSportUseCase.execute({ id });
+    return this.httpSuccess.success_200(result);
   }
 } 

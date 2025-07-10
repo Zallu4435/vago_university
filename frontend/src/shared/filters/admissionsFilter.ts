@@ -1,4 +1,4 @@
-import { User } from "../../domain/types/usermanagement";
+import { User } from "../../domain/types/management/usermanagement";
 
 export function filterAdmissions(
   users: User[],

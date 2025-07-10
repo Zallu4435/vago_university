@@ -36,4 +36,5 @@ export interface INotificationRepository {
     // User-specific methods
     findUsersByCollection(collection: string): Promise<any[]>;
     findFacultyByCollection(collection: string): Promise<any[]>;
+    removeToken(token: string): Promise<void>;
 }

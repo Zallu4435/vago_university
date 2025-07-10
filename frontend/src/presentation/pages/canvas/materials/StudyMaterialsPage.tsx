@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import {
   FiGrid,
   FiList,
-  FiRefreshCw
 } from 'react-icons/fi';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 import MaterialCard from './components/MaterialCard';
 import MaterialTable from './components/MaterialTable';
 import MaterialFilters from './components/MaterialFilters';
-import { ViewMode, SortOption, Material } from './types/MaterialTypes';
+import { ViewMode, SortOption, Material } from '../../../../domain/types/canvas/materials';
 import { useStudyMaterials } from './hooks/useStudyMaterials';
 
 const StudyMaterialsPage: React.FC = () => {

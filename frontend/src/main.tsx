@@ -2,108 +2,108 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
-import store from "./presentation/redux/store";
+import store from "./appStore/store";
 import App from "./App";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
-import { PreferencesProvider } from "./presentation/context/PreferencesContext";
-import NotificationPermissionModal from "./components/NotificationPermissionModal";
-
-// import { getMessaging, getToken, onMessage } from "firebase/messaging";
-// import { messaging, VAPID_KEY } from "./firebase/setup";
-// import httpClient from "./frameworks/api/httpClient";
+import { PreferencesProvider } from "./application/context/PreferencesContext";
+import NotificationPermissionModal from "./presentation/components/common/NotificationPermissionModal";
+import { setupFirebaseMessaging } from "./services/firebase";
+import httpClient from "./frameworks/api/httpClient";
 
 const queryClient = new QueryClient();
 
-// async function setupFirebaseMessaging(registration: ServiceWorkerRegistration) {
-//   try {
+if ('serviceWorker' in navigator) {
+  console.log('[Service Worker] Browser supports service workers');
+  
+  // Add message listener for marking notifications as read
+  navigator.serviceWorker.addEventListener('message', async (event) => {
+    console.log('[Service Worker] Received message from service worker:', event.data);
+    
+    if (event.data?.type === 'MARK_NOTIFICATION_READ' && event.data?.notificationId) {
+      console.log('[Service Worker] Processing mark-as-read request:', event.data.notificationId);
+      try {
+        // Get the notification service from the store
+        const state = store.getState();
+        const userId = state.auth.user?.id;
+        const collection = state.auth.collection;
 
-//     if (Notification.permission !== 'granted') {
-//       const permission = await Notification.requestPermission();
-//       if (permission !== 'granted') {
-//         console.error('Notification permission denied');
-//         return;
-//       }
-//     }
+        console.log('[Service Worker] User context for mark-as-read:', {
+          userId,
+          collection,
+          notificationId: event.data.notificationId
+        });
 
-//     const messagingInstance = getMessaging();
+        if (userId && collection) {
+          console.log('[Service Worker] Sending mark-as-read request to backend');
+          const response = await httpClient.post(`/notifications/${event.data.notificationId}/mark-read`, {
+            userId,
+            collection
+          });
+          console.log('[Service Worker] Successfully marked notification as read:', response.data);
+        } else {
+          console.error('[Service Worker] Missing user context for mark-as-read');
+        }
+      } catch (error) {
+        console.error('[Service Worker] Failed to mark notification as read:', error);
+      }
+    }
+  });
 
-//     const token = await getToken(messagingInstance, {
-//       vapidKey: VAPID_KEY,
-//       serviceWorkerRegistration: registration
-//     });
+  // First, unregister any existing service workers
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    console.log('[Service Worker] Found existing service workers:', registrations.length);
+    for (let registration of registrations) {
+      console.log('[Service Worker] Unregistering service worker:', registration.scope);
+      registration.unregister();
+    }
+  });
 
-//     const state = store.getState();
-//     const userId = state.auth.user?.id;
-//     const collection = state.auth.collection;
+  window.addEventListener('load', async () => {
+    try {
+      console.log('[Service Worker] Registering service worker...');
+      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+        scope: '/'
+      });
 
-//     if (!userId || !collection) {
-//       console.error('User ID or collection not found in Redux store');
-//       return;
-//     }
+      console.log('[Service Worker] Service Worker registered successfully:', {
+        scope: registration.scope,
+        state: registration.active?.state
+      });
 
-//     try {
-//       const response = await httpClient.post(`/fcm/${collection}/${userId}/fcm-token`, {
-//         token,
-//       });
+      if (registration.active) {
+        console.log('[Service Worker] Service worker is already active, setting up messaging');
+        await setupFirebaseMessaging(registration);
+      } else {
+        console.log('[Service Worker] Service worker is not active, waiting for activation');
+        registration.addEventListener('activate', async () => {
+          console.log('[Service Worker] Service worker activated, setting up messaging');
+          await setupFirebaseMessaging(registration);
+        });
+      }
 
-//       if (response.status == 200) {
-//         console.log('Token sent to backend successfully');
-//       } else {
-//         console.error('Failed to send token to backend');
-//       }
-//     } catch (error) {
-//       console.error('Error sending token to backend:', error);
-//     }
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        console.log('[Service Worker] New service worker found:', newWorker?.state);
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            console.log('[Service Worker] Service worker state changed:', newWorker.state);
+            if (newWorker.state === 'activated') {
+              console.log('[Service Worker] New service worker activated, setting up messaging');
+              setupFirebaseMessaging(registration);
+            }
+          });
+        }
+      });
 
-//     // Handle foreground messages
-//     onMessage(messagingInstance, (payload) => {
-//     });
-
-//   } catch (error) {
-//     console.error('Error setting up Firebase Messaging:', error);
-//   }
-// }
-
-// if ('serviceWorker' in navigator) {
-//   navigator.serviceWorker.getRegistrations().then(registrations => {
-//     for (let registration of registrations) {
-//       registration.unregister();
-//     }
-//   });
-
-//   window.addEventListener('load', async () => {
-//     try {
-//       const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
-//         scope: '/'
-//       });
-//       if (registration.active) {
-//         await setupFirebaseMessaging(registration);
-//       } else {
-//         registration.addEventListener('activate', async () => {
-//           await setupFirebaseMessaging(registration);
-//         });
-//       }
-
-//       registration.addEventListener('updatefound', () => {
-//         const newWorker = registration.installing;
-//         if (newWorker) {
-//           newWorker.addEventListener('statechange', () => {
-//             if (newWorker.state === 'activated') {
-//               setupFirebaseMessaging(registration);
-//             }
-//           });
-//         }
-//       });
-
-//     } catch (error) {
-//       console.error('Service Worker registration failed:', error);
-//     }
-//   });
-// } else {
-//   console.log('Service Worker is not supported in this browser');
-// }
+    } catch (error) {
+      console.error('[Service Worker] Service Worker registration failed:', error);
+    }
+  });
+} else {
+  console.log('[Service Worker] Service Worker is not supported in this browser');
+}
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   // <React.StrictMode>

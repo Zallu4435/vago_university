@@ -1,6 +1,6 @@
-import NUSScholarships from "../../components/ug_admissions/NUSScholarships";
-import StudentTestimonials from "../../components/ug_admissions/StudentTestimonials";
-import { useSectionAnimation } from "../../../application/hooks/useSectionAnimation";
+import NUSScholarships from "../../components/public/ug_admissions/NUSScholarships";
+import StudentTestimonials from "../../components/public/ug_admissions/StudentTestimonials";
+import { useSectionAnimation } from "../../../shared/hooks/useSectionAnimation";
 
 export const UGScholarships: React.FC = () => {
   const isVisible = useSectionAnimation();

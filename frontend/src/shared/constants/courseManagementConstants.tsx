@@ -1,5 +1,5 @@
 import { FiBook, FiBriefcase, FiUser, FiHash, FiClock, FiUsers, FiClipboard } from 'react-icons/fi';
-import { Course, EnrollmentRequest } from '../../domain/types/coursemanagement';
+import { Course, EnrollmentRequest } from '../../domain/types/management/coursemanagement';
 
 export const SPECIALIZATIONS = [
   'All Specializations',

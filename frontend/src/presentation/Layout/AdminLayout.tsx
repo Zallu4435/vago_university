@@ -1,7 +1,7 @@
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../redux/authSlice';
-import { RootState } from '../redux/store';
+import { logout } from '../../appStore/authSlice';
+import { RootState } from '../../appStore/store';
 import Sidebar from '../components/admin/Sidebar';
 import AdminHeader from '../components/admin/Header';
 import { useState } from 'react';

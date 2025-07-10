@@ -19,7 +19,7 @@ import {
   EventDetailsStatusBadgeProps,
   EventDetailsInfoCardProps,
   ParticleConfig
-} from '../../../../../domain/types/eventmanagement';
+} from '../../../../../domain/types/management/eventmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 
 const StatusBadge: React.FC<EventDetailsStatusBadgeProps> = ({ status }) => {

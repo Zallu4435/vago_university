@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { FaArrowLeft, FaSearch, FaFilter, FaTimes, FaStar, FaCalendar, FaTag } from 'react-icons/fa';
 import { useHighlights, useHighlightsCategories } from '../../../application/hooks/useSiteSections';
 import { SiteSection } from '../../../application/services/siteSections.service';
-import SiteSectionModal from '../../components/SiteSectionModal';
+import SiteSectionModal from '../../components/public/SiteSectionModal';
 
 export const HighlightsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');

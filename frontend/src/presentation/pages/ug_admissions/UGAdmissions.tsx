@@ -1,8 +1,8 @@
-import AdmissionCategories from "../../components/ug_admissions/AdmissionCategories";
-import AdmissionsAssessment from "../../components/ug_admissions/AdmissionsAssessment";
-import ApplicationProcess from "../../components/ug_admissions/ApplicationProcess";
-import EssentialSteps from "../../components/ug_admissions/EssentialSteps";
-import { useSectionAnimation } from "../../../application/hooks/useSectionAnimation";
+import AdmissionCategories from "../../components/public/ug_admissions/AdmissionCategories";
+import AdmissionsAssessment from "../../components/public/ug_admissions/AdmissionsAssessment";
+import ApplicationProcess from "../../components/public/ug_admissions/ApplicationProcess";
+import EssentialSteps from "../../components/public/ug_admissions/EssentialSteps";
+import { useSectionAnimation } from "../../../shared/hooks/useSectionAnimation";
 
 export const UGAdmissions: React.FC = () => {
   const isVisible = useSectionAnimation();

@@ -1,5 +1,5 @@
 import httpClient from '../../../../../frameworks/api/httpClient';
-import { DiplomaCourse, Chapter } from '../types/DiplomaTypes';
+import { DiplomaCourse, Chapter } from '../../../../../domain/types/canvas/diploma';
 
 export const diplomaService = {
   getAllCourses: async (): Promise<DiplomaCourse[]> => {

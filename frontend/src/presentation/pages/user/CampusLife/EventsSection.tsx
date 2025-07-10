@@ -3,29 +3,9 @@ import { FaSearch, FaCalendarAlt, FaClock, FaMapPin, FaArrowRight } from 'react-
 import PropTypes from 'prop-types';
 import { useCampusLife } from '../../../../application/hooks/useCampusLife';
 import JoinRequestForm from './JoinRequestForm';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 import ReactDOM from 'react-dom';
-
-interface EventType {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  organizer: string;
-  timeframe: string;
-  icon: string;
-  color: string;
-  description?: string;
-  fullTime?: string;
-  additionalInfo?: string;
-  requirements?: string;
-  userRequestStatus?: string;
-}
-
-interface EventsSectionProps {
-  events: EventType[];
-}
+import type { EventType, EventsSectionProps } from '../../../../domain/types/user/campus-life';
 
 export default function EventsSection({ events }: EventsSectionProps) {
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(events[0] || null);

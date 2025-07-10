@@ -1,42 +1,6 @@
 import httpClient from '../../frameworks/api/httpClient';
-import { DiplomaCourse, Chapter, DiplomaApiResponse } from '../../domain/types/diploma';
+import { Chapter, DiplomaApiResponse } from '../../domain/types/diploma';
 
-interface Video {
-    _id: string;
-    title: string;
-    duration: string;
-    uploadedAt: string;
-    module: number;
-    status: "Published" | "Draft";
-    diplomaId: string;
-    description: string;
-    videoFile?: File;
-}
-
-interface Diploma {
-    _id: string;
-    title: string;
-    description: string;
-    price: number;
-    category: string;
-    thumbnail: string;
-    duration: string;
-    prerequisites: string[];
-    status: boolean;
-    createdAt: string;
-    updatedAt: string;
-    videoIds: string[];
-}
-
-interface Enrollment {
-    _id: string;
-    studentName: string;
-    studentEmail: string;
-    courseTitle: string;
-    enrollmentDate: string;
-    status: "Approved" | "Pending" | "Rejected";
-    progress: number;
-}
 
 class DiplomaService {
     async getDiplomaCourses(

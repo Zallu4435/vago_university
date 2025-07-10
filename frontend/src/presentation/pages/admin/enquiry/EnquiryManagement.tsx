@@ -4,10 +4,10 @@ import { debounce } from 'lodash';
 import Header from '../../../components/admin/management/Header';
 import ApplicationsTable from '../../../components/admin/management/ApplicationsTable';
 import Pagination from '../../../components/admin/management/Pagination';
-import WarningModal from '../../../components/WarningModal';
+import WarningModal from '../../../components/common/WarningModal';
 import EnquiryDetailsModal from './EnquiryDetailsModal';
 import { useEnquiryManagement } from '../../../../application/hooks/useEnquiryManagement';
-import { Enquiry } from '../../../../domain/types/enquirymanagement';
+import { Enquiry } from '../../../../domain/types/management/enquirymanagement';
 import ReplyModal from './ReplyModal';
 import { toast } from 'react-hot-toast';
 import {

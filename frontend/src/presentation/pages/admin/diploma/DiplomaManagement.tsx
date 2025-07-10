@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FiPlus, FiEye, FiEdit, FiTrash2, FiBook, FiUsers, FiPercent, FiCheck, FiX } from 'react-icons/fi';
 import { useAdminDiplomaManagement } from '../../../../application/hooks/useAdminDiplomaManagement';
-import WarningModal from '../../../components/WarningModal';
+import WarningModal from '../../../components/common/WarningModal';
 import Header from '../../../components/admin/management/Header';
 import Pagination from '../../../components/admin/management/Pagination';
 import ApplicationsTable from '../../../components/admin/management/ApplicationsTable';
@@ -9,7 +9,7 @@ import DiplomaForm from './DiplomaForm';
 import DiplomaDetails from './DiplomaDetails';
 import EnrollmentDetails from './EnrollmentDetails';
 import { debounce } from 'lodash';
-import { Diploma, Enrollment } from '../../../../domain/types/diplomamanagement';
+import { Diploma, Enrollment } from '../../../../domain/types/management/diplomamanagement';
 import { CATEGORIES, diplomaColumns, enrollmentColumns } from '../../../../shared/constants/diplomaManagementConstants';
 import { filterDiplomas, filterEnrollments } from '../../../../shared/filters/diplomaFilter';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';

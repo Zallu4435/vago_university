@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { applicationService } from '../services/applicationService';
 import {
-  FormData,
   PersonalInfo,
   ProgrammeChoice,
   EducationData,
@@ -10,7 +9,7 @@ import {
   OtherInformationSection,
   DocumentUploadSection,
   DeclarationSection
-} from '../../domain/types/formTypes';
+} from '../../domain/types/application';
 
 export const useApplicationForm = (token: string | null) => {
   const queryClient = useQueryClient();

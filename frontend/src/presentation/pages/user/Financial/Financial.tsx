@@ -5,34 +5,11 @@ import FeesPaymentsSection from './FeesPaymentsSection';
 import FinancialAidSection from './FinancialAidSection';
 import ScholarshipsSection from './ScholarshipsSection';
 import { useFinancial } from '../../../../application/hooks/useFinancial';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 import { MdCurrencyRupee } from 'react-icons/md';
+import type { StudentFinancialInfo } from '../../../../domain/types/user/financial';
+import { formatDateTime } from '../../../../shared/utils/dateUtils';
 
-interface StudentFinancialInfo {
-  info: Array<{
-    id: string;
-    amount?: number;
-    paymentDueDate?: string;
-    chargeTitle?: string;
-    chargeDescription?: string;
-    term?: string;
-    status?: 'Pending' | 'Paid';
-  }>;
-  history: any[];
-  financialAidStatus?: string;
-}
-
-const formatDate = (dateString: string): string => {
-  if (!dateString) return 'N/A';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
 
 export default function Financial() {
   const {
@@ -122,7 +99,7 @@ export default function Financial() {
               <div>
                 <span className="font-medium">Payment Due:</span>{' '}
                 {studentInfo?.info?.[0]?.paymentDueDate
-                  ? formatDate(studentInfo.info[0].paymentDueDate)
+                  ? formatDateTime(studentInfo.info[0].paymentDueDate)
                   : 'N/A'}
               </div>
               <div>

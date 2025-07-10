@@ -11,11 +11,11 @@ import toast from 'react-hot-toast';
 import AddNotificationModal from './AddNotificationModal';
 import NotificationDetailsModal from './NotificationDetailsModal';
 import { useNotificationManagement } from '../../../../application/hooks/useNotificationManagement';
-import WarningModal from '../../../components/WarningModal';
+import WarningModal from '../../../components/common/WarningModal';
 import ApplicationsTable from '../../../components/admin/management/ApplicationsTable';
 import Pagination from '../../../components/admin/management/Pagination';
 import Header from '../../../components/admin/management/Header';
-import { Notification } from '../../../../domain/types/notificationmanagement';
+import { Notification } from '../../../../domain/types/management/notificationmanagement';
 import { RECIPIENT_TYPES, STATUSES, notificationColumns } from '../../../../shared/constants/notificationManagementConstants';
 import { filterNotifications } from '../../../../shared/filters/notificationManagementFilter';
 

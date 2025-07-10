@@ -1,7 +1,7 @@
-import GraduationSupport from "../../components/ug_admissions/GraduationSupport";
-import NUSEducationFramework from "../../components/ug_admissions/NUSEducationFramework";
-import StudentTestimonials from "../../components/ug_admissions/StudentTestimonials";
-import { useSectionAnimation } from "../../../application/hooks/useSectionAnimation";
+import GraduationSupport from "../../components/public/ug_admissions/GraduationSupport";
+import NUSEducationFramework from "../../components/public/ug_admissions/NUSEducationFramework";
+import StudentTestimonials from "../../components/public/ug_admissions/StudentTestimonials";
+import { useSectionAnimation } from "../../../shared/hooks/useSectionAnimation";
 
 export const UGWhy_VAGO: React.FC = () => {
   const isVisible = useSectionAnimation();

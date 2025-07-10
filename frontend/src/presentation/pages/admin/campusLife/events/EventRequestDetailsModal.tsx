@@ -20,7 +20,7 @@ import {
   EventRequestDetailsStatusBadgeProps,
   EventRequestDetailsInfoCardProps,
   ParticleConfig
-} from '../../../../../domain/types/eventmanagement';
+} from '../../../../../domain/types/management/eventmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate, formatDateTime } from '../../../../../shared/utils/dateUtils';
 

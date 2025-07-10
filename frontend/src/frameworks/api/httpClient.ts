@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { logout } from '../../presentation/redux/authSlice';
-import store from '../../presentation/redux/store';
+import { logout } from '../../appStore/authSlice';
+import store from '../../appStore/store';
 
 const httpClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'https://vago-university.onrender.com/api',

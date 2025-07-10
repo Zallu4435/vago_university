@@ -1,5 +1,5 @@
 // Video management filter
-import { Video } from "../../domain/types/videomanagement";
+import { Video } from "../../domain/types/management/videomanagement";
 
 export function filterVideos(videos: Video[], filters: { status: string; category: string }, searchQuery: string): Video[] {
   return videos

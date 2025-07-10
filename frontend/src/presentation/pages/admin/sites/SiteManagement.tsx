@@ -3,7 +3,7 @@ import { FiPlus, FiStar, FiZap, FiUser, FiEye, FiEdit, FiTrash2 } from 'react-ic
 import Header from '../../../components/admin/management/Header';
 import ApplicationsTable from '../../../components/admin/management/ApplicationsTable';
 import Pagination from '../../../components/admin/management/Pagination';
-import WarningModal from '../../../components/WarningModal';
+import WarningModal from '../../../components/common/WarningModal';
 import SiteSectionForm from './SiteSectionForm';
 import SiteSectionViewModal from './SiteSectionViewModal';
 import { useSiteManagement, SiteSectionKey } from '../../../../application/hooks/useSiteManagement';

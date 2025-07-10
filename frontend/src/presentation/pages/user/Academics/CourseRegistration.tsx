@@ -2,22 +2,9 @@ import { useState, useMemo } from 'react';
 import { FaSearch, FaArrowRight, FaTimes } from 'react-icons/fa';
 import { useCourseRegistration, useCourseSearch } from '../../../../application/hooks/useAcademic';
 import CourseDetailsModal from './CourseDetailsModal';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
+import { Course, CourseRegistrationProps } from '../../../../domain/types/user/academics';
 
-// Import the Course type from the service instead of defining it locally
-import { Course } from '../../../../application/services/academicService';
-
-interface StudentInfo {
-  credits: number;
-  pendingCredits: number;
-}
-
-interface CourseRegistrationProps {
-  studentInfo: StudentInfo;
-  courses: Course[];
-  enrolledCredits: number;
-  waitlistedCredits: number;
-}
 
 export default function CourseRegistration({ studentInfo, courses, enrolledCredits, waitlistedCredits }: CourseRegistrationProps) {
   const [searchQuery, setSearchQuery] = useState('');

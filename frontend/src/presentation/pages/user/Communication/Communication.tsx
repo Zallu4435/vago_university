@@ -3,7 +3,7 @@ import CommunicationTabs from './CommunicationTabs';
 import InboxSection from './InboxSection';
 import SentSection from './SentSection';
 import { FaEnvelope } from 'react-icons/fa';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 export default function Communication() {
   const [activeTab, setActiveTab] = useState('Inbox');

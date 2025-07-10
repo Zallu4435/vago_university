@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { FiPlus, FiEye, FiEdit, FiTrash2, FiBookOpen, FiClipboard, FiBarChart2, FiCheck, FiX } from 'react-icons/fi';
 import { useCourseManagement } from '../../../../application/hooks/useCourseManagement';
-import WarningModal from '../../../components/WarningModal';
+import WarningModal from '../../../components/common/WarningModal';
 import Header from '../../../components/admin/management/Header';
 import Pagination from '../../../components/admin/management/Pagination';
 import ApplicationsTable from '../../../components/admin/management/ApplicationsTable';
@@ -9,7 +9,7 @@ import { debounce } from 'lodash';
 import CourseDetails from './CourseDetails';
 import CourseForm from './CourseForm';
 import EnrollmentRequestDetails from './EnrollmentRequestDetails';
-import { Course, EnrollmentRequest } from '../../../../domain/types/coursemanagement';
+import { Course, EnrollmentRequest } from '../../../../domain/types/management/coursemanagement';
 import { SPECIALIZATIONS, FACULTIES, TERMS, REQUEST_STATUSES, courseColumns, enrollmentRequestColumns } from '../../../../shared/constants/courseManagementConstants';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';

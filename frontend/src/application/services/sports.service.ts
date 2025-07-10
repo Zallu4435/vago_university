@@ -1,5 +1,5 @@
+import { PlayerRequest, SportsApiResponse, Team } from '../../domain/types/management/sportmanagement';
 import httpClient from '../../frameworks/api/httpClient';
-import { Team, PlayerRequest, SportsApiResponse } from '../../domain/types/sports';
 
 class SportsService {
   async getTeams(

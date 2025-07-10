@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiSearch, FiRefreshCw, FiBell, FiArrowLeft } from 'react-icons/fi';
-import { usePreferences } from '../../../context/PreferencesContext';
-import { Assignment, SelectedFile, SortOption, FilterStatus } from './types/AssignmentTypes';
-// import { filterAndSortAssignments } from './utils/assignmentUtils';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
+import { Assignment, SortOption, FilterStatus } from '../../../../domain/types/canvas/assignment';
 import { AssignmentCard } from './components/AssignmentCard';
 import { UploadModal } from './components/UploadModal';
 import { useUserAssignments } from './hooks/useUserAssignments';

@@ -1,5 +1,5 @@
 import { FaGraduationCap } from 'react-icons/fa';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 export default function AcademicInfo({ major = 'Computer Science', academicStanding = 'Good', advisor = 'Dr. Emma Wilson' }) {
   const { styles, theme } = usePreferences();

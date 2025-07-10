@@ -1,10 +1,10 @@
 import React, { Suspense, lazy } from 'react';
 import { Provider } from 'react-redux';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import store from './presentation/redux/store';
+import store from './appStore/store';
 import './index.css';
 import { useRefreshToken } from './application/hooks/useRefreshToken';
-import { ProtectedRoute } from './presentation/components/ProtectedRoute';
+import { ProtectedRoute } from './frameworks/router/ProtectedRoute';
 
 // Layouts - Keep these loaded initially
 import PublicLayout from './presentation/Layout/PublicLayout';
@@ -20,7 +20,7 @@ import { Home } from './presentation/pages/main/Home';
 import { Admissions } from './presentation/pages/main/Admissions';
 import { Education } from './presentation/pages/main/Education';
 import { About } from './presentation/pages/main/About';
-import ContactUs from './presentation/components/ContactUs';
+import ContactUs from './presentation/pages/static/ContactUs';
 import LoginPage from './presentation/pages/Auth/Login';
 import RegisterPage from './presentation/pages/Auth/Register';
 
@@ -28,7 +28,7 @@ import RegisterPage from './presentation/pages/Auth/Register';
 const HighlightsPage = lazy(() => import('./presentation/pages/main/HighlightsPage').then(module => ({ default: module.HighlightsPage })));
 const VagoNowPage = lazy(() => import('./presentation/pages/main/VagoNowPage').then(module => ({ default: module.VagoNowPage })));
 const LeadershipPage = lazy(() => import('./presentation/pages/main/LeadershipPage').then(module => ({ default: module.LeadershipPage })));
-const ApplicationForm = lazy(() => import('./presentation/pages/ApplicationForm').then(module => ({ default: module.ApplicationForm })));
+const ApplicationForm = lazy(() => import('./presentation/pages/application/ApplicationForm').then(module => ({ default: module.ApplicationForm })));
 const AdminDashboard = lazy(() => import('./presentation/pages/admin/Dasboard'));
 const UserManagement = lazy(() => import('./presentation/pages/admin/User/UserManagement'));
 const UGHome = lazy(() => import('./presentation/pages/ug_admissions/UGHome').then(module => ({ default: module.UGHome })));
@@ -39,10 +39,10 @@ const UGWhy_VAGO = lazy(() => import('./presentation/pages/ug_admissions/UGWhy_V
 const DashboardPage = lazy(() => import('./presentation/pages/user/Dashboard/StudentDashboard'));
 const FacultyDashboard = lazy(() => import('./presentation/pages/faculty/FacultyDashboard'));
 const FacultyRequestForm = lazy(() => import('./presentation/pages/Auth/FacultyRequest'));
-const ConfirmAdmission = lazy(() => import('./presentation/pages/ConfirmAdmission'));
+const ConfirmAdmission = lazy(() => import('./presentation/pages/Auth/ConfirmAdmission'));
 const ConfirmRegistration = lazy(() => import('./presentation/pages/Auth/ConfirmRegistration'));
 const FacultyManagement = lazy(() => import('./presentation/pages/admin/faculty/FacultyManagement'));
-const ConfirmFaculty = lazy(() => import('./presentation/pages/ConfirmFaculty'));
+const ConfirmFaculty = lazy(() => import('./presentation/pages/Auth/ConfirmFaculty'));
 const Setting = lazy(() => import('./presentation/pages/user/Settings/Setting'));
 const FacultySettings = lazy(() => import('./presentation/pages/faculty/settings/FacultySettings'));
 const VideoManagementPage = lazy(() => import('./presentation/pages/admin/vedio/VedioManagement'));
@@ -59,10 +59,10 @@ const DepartmentAbout = lazy(() => import('./presentation/pages/departments/Depa
 const DepartmentEducation = lazy(() => import('./presentation/pages/departments/DepartmentEducation'));
 const DepartmentCommunity = lazy(() => import('./presentation/pages/departments/DepartmentCommunity'));
 const DepartmentEntrepreneur = lazy(() => import('./presentation/pages/departments/DepartmentEntrepreneur'));
-const HelpSupportPage = lazy(() => import('./presentation/pages/HelpSupportPage'));
-const ForgotPasswordModal = lazy(() => import('./presentation/pages/ForgotPassword'));
-const ProgramPrerequisites = lazy(() => import('./presentation/pages/ProgramPrerequisites'));
-const ScholarshipComponent = lazy(() => import('./presentation/pages/ScholarshipComponent'));
+const HelpSupportPage = lazy(() => import('./presentation/pages/static/HelpSupportPage'));
+const ForgotPasswordModal = lazy(() => import('./presentation/pages/Auth/ForgotPassword'));
+const ProgramPrerequisites = lazy(() => import('./presentation/pages/static/ProgramPrerequisites'));
+const ScholarshipComponent = lazy(() => import('./presentation/pages/static/ScholarshipComponent'));
 const NotificationManagement = lazy(() => import('./presentation/pages/admin/notification/NotificationManagement'));
 const StudentCanvas = lazy(() => import('./presentation/pages/canvas/CanvasPage'));
 const DiplomaManagement = lazy(() => import('./presentation/pages/admin/diploma/DiplomaManagement'));
@@ -70,7 +70,7 @@ const MaterialManagement = lazy(() => import('./presentation/pages/admin/materia
 const AssignmentManagement = lazy(() => import('./presentation/pages/faculty/assignment/AssignmentManagement'));
 const SessionManagement = lazy(() => import('./presentation/pages/faculty/sessions/SessionManagement'));
 const SiteManagement = lazy(() => import('./presentation/pages/admin/sites/SiteManagement'));
-const VideoConferencePage = lazy(() => import('./presentation/VideoConference/VideoConferencePage').then(module => ({ default: module.VideoConferencePage })));
+const VideoConferencePage = lazy(() => import('./presentation/pages/VideoConference/VideoConferencePage').then(module => ({ default: module.VideoConferencePage })));
 const EnquiryManagement = lazy(() => import('./presentation/pages/admin/enquiry/EnquiryManagement'));
 const SessionAttendancePage = lazy(() => import('./presentation/pages/faculty/attendance/SessionAttendancePage'));
 const AttendanceSummaryPage = lazy(() => import('./presentation/pages/faculty/attendance/AttendanceSummaryPage'));

@@ -6,8 +6,8 @@ import {
   IoCloseOutline as X,
   IoMailOutline as Mail,
 } from 'react-icons/io5';
-import WarningModal from '../../../components/WarningModal';
-import { Message, MessageDetailsModalProps } from '../../../../domain/types/communicationmanagement';
+import WarningModal from '../../../components/common/WarningModal';
+import { Message, MessageDetailsModalProps } from '../../../../domain/types/management/communicationmanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const MessageDetailsModal: React.FC<MessageDetailsModalProps> = ({

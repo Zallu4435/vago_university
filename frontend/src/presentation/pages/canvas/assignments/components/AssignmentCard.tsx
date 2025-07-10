@@ -1,16 +1,10 @@
 import React, { useState } from 'react';
 import { FiCalendar, FiClock, FiUpload, FiDownload, FiEye, FiFile, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
-import { Assignment } from '../types/AssignmentTypes';
 import { getDaysLeft, formatDueDate, getStatusColor } from '../utils/assignmentUtils';
 import { GradeModal } from './GradeModal';
 import { userAssignmentService } from '../services/userAssignmentService';
+import { AssignmentCardProps } from '../../../../../domain/types/canvas/assignment';
 
-interface AssignmentCardProps {
-  assignment: Assignment;
-  styles: any;
-  onUpload: (assignment: Assignment) => void;
-  onViewGrade: (assignment: Assignment) => void;
-}
 
 export const AssignmentCard: React.FC<AssignmentCardProps> = ({
   assignment,

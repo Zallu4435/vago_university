@@ -15,7 +15,7 @@ import {
   InfoCardProps, 
   ClubDetailsModalProps,
   ParticleConfig 
-} from '../../../../../domain/types/clubmanagement';
+} from '../../../../../domain/types/management/clubmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate } from '../../../../../shared/utils/dateUtils';
 

@@ -3,7 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IoCloseOutline as X } from 'react-icons/io5';
 import { FiUpload, FiVideo, FiCheck } from 'react-icons/fi';
-import { AddVideoModalProps, VideoFormInputs } from '../../../../domain/types/videomanagement';
+import { AddVideoModalProps, VideoFormInputs } from '../../../../domain/types/management/videomanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 import { videoSchema } from '../../../../domain/validation/management/videoSchema';
 

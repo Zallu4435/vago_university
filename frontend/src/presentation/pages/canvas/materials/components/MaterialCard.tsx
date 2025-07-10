@@ -1,20 +1,12 @@
 import React from 'react';
-import { Material } from '../types/MaterialTypes';
-import { usePreferences } from '../../../../context/PreferencesContext';
+import { usePreferences } from '../../../../../application/context/PreferencesContext';
 import {
-    FiDownload, FiInfo, FiHeart, FiShare2, FiBookmark,
+    FiDownload, FiInfo, FiHeart, FiBookmark,
     FiUser, FiClock, FiCalendar, FiBook, FiLock, FiStar, FiEye
 } from 'react-icons/fi';
 import { getFileIcon, getDifficultyColor, formatDate, formatNumber } from '../utils/materialUtils';
+import { MaterialCardProps } from '../../../../../domain/types/canvas/materials';
 
-interface MaterialCardProps {
-    material: Material;
-    onDownload: (material: Material) => void;
-    onBookmark: (materialId: string) => void;
-    onLike: (materialId: string) => void;
-    isBookmarked: boolean;
-    isLiked: boolean;
-}
 
 const MaterialCard: React.FC<MaterialCardProps> = ({
     material,
@@ -68,11 +60,10 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
                 <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex items-center space-x-1">
                     <button
                         onClick={() => onBookmark(materialData.id)}
-                        className={`p-1.5 sm:p-2 rounded-full backdrop-blur-sm transition-all duration-200 ${
-                            isBookmarked || materialData.isBookmarked
+                        className={`p-1.5 sm:p-2 rounded-full backdrop-blur-sm transition-all duration-200 ${isBookmarked || materialData.isBookmarked
                                 ? styles.button.primary
                                 : 'bg-black/20 text-white hover:bg-black/40'
-                        }`}
+                            }`}
                         aria-label={`Bookmark ${materialData.title}`}
                     >
                         <FiBookmark className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill={isBookmarked || materialData.isBookmarked ? "currentColor" : "none"} />
@@ -177,22 +168,20 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
                     </button>
                     <button
                         onClick={() => onLike(materialData.id)}
-                        className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl transition-all duration-200 ${
-                            isLiked || materialData.isLiked
+                        className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl transition-all duration-200 ${isLiked || materialData.isLiked
                                 ? `${styles.status.error} ${styles.button.primary}`
                                 : styles.button.secondary
-                        }`}
+                            }`}
                         aria-label={`Like ${materialData.title}`}
                     >
                         <FiHeart className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill={isLiked || materialData.isLiked ? "currentColor" : "none"} />
                     </button>
                     <button
                         onClick={() => onBookmark(materialData.id)}
-                        className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl transition-all duration-200 ${
-                            isBookmarked || materialData.isBookmarked
+                        className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl transition-all duration-200 ${isBookmarked || materialData.isBookmarked
                                 ? styles.button.primary
                                 : styles.button.secondary
-                        }`}
+                            }`}
                         aria-label={`Bookmark ${materialData.title}`}
                     >
                         <FiBookmark className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill={isBookmarked || materialData.isBookmarked ? "currentColor" : "none"} />

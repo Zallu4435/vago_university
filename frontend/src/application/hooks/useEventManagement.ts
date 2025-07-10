@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { eventService } from '../services/event.service';
-import { Event  } from '../../domain/types/event';
+import { Event } from '../../domain/types/management/eventmanagement';
 
 interface Filters {
   eventType: string;

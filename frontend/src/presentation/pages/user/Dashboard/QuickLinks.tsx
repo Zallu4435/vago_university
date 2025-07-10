@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { FaBookmark, FaBookOpen, FaCalendarAlt, FaDollarSign, FaThLarge, FaArrowRight } from 'react-icons/fa';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 export default function QuickLinks() {
   const { styles, theme } = usePreferences();

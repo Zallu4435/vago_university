@@ -2,8 +2,8 @@ import React from 'react';
 import { FiX, FiUser, FiMail, FiBook, FiAward, FiClock, FiFileText, FiDownload, FiEye, FiInfo } from 'react-icons/fi';
 import { facultyService } from '../../../../application/services/faculty.service';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../redux/store';
-import { FacultyDetailsModalProps } from '../../../../domain/types/facultyManagement';
+import { RootState } from '../../../../appStore/store';
+import { FacultyDetailsModalProps } from '../../../../domain/types/management/facultyManagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClose, faculty, onBlockToggle }) => {

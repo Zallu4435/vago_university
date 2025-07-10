@@ -1,49 +1,8 @@
+import { Diploma, Enrollment } from '../../domain/types/management/diplomamanagement';
+import { Video } from '../../domain/types/management/videomanagement';
 import httpClient from '../../frameworks/api/httpClient';
 
-interface Video {
-    id: string;
-    title: string;
-    duration: string;
-    uploadedAt: string;
-    module: number;
-    status: "Published" | "Draft";
-    diplomaId: string;
-    description: string;
-    videoUrl: string;
-    createdAt: string;
-    updatedAt: string;
-    videoFile?: File;
-    diploma?: {
-        id: string;
-        title: string;
-        category: string;
-    };
-}
 
-interface Diploma {
-    _id: string;
-    title: string;
-    description: string;
-    price: number;
-    category: string;
-    thumbnail: string;
-    duration: string;
-    prerequisites: string[];
-    status: boolean;
-    createdAt: string;
-    updatedAt: string;
-    videoIds: string[];
-}
-
-interface Enrollment {
-    _id: string;
-    studentName: string;
-    studentEmail: string;
-    courseTitle: string;
-    enrollmentDate: string;
-    status: "Approved" | "Pending" | "Rejected";
-    progress: number;
-}
 
 export const diplomaBackendService = {
     async getDiplomas(page: number, limit: number): Promise<{ diplomas: Diploma[]; totalPages: number }> {

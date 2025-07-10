@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FiXCircle, FiPlus, FiX, FiBook } from 'react-icons/fi';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
-import { CourseFormProps } from '../../../../domain/types/coursemanagement';
+import { CourseFormProps } from '../../../../domain/types/management/coursemanagement';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { courseSchema, CourseFormData } from '../../../../domain/validation/management/courseSchema';

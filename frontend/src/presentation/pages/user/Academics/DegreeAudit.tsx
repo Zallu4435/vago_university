@@ -1,5 +1,5 @@
 import { FaChartLine, FaArrowRight } from 'react-icons/fa';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 export default function DegreeAudit({ studentInfo, programInfo, progressInfo, requirementsInfo }) {
   const { styles, theme } = usePreferences();

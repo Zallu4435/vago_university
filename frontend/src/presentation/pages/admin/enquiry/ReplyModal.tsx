@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FiX, FiSend } from 'react-icons/fi';
-import { ReplyModalProps } from '../../../../domain/types/enquirymanagement';
+import { ReplyModalProps } from '../../../../domain/types/management/enquirymanagement';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { enquiryReplySchema, EnquiryReplyFormData } from '../../../../domain/validation/management/enquiryReplySchema';

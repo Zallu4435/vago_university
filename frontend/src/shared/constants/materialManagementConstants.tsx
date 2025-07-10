@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiFileText, FiVideo, FiUser, FiTag } from 'react-icons/fi';
-import { Material } from '../../domain/types/materialmanagement';
+import { Material } from '../../domain/types/management/materialmanagement';
 
 // Material Filter Options
 export const SUBJECTS = ['All Subjects', 'Mathematics', 'Computer Science', 'Physics', 'Chemistry'];

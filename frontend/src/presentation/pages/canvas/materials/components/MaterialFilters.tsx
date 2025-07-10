@@ -1,25 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FiFilter, FiChevronDown, FiX, FiSearch } from 'react-icons/fi';
-import { usePreferences } from '../../../../context/PreferencesContext';
-import { Material } from '../types/MaterialTypes';
+import { usePreferences } from '../../../../../application/context/PreferencesContext';
+import { MaterialFiltersProps } from '../../../../../domain/types/canvas/materials';
 
-interface MaterialFiltersProps {
-    searchTerm: string;
-    setSearchTerm: (term: string) => void;
-    selectedCourse: string;
-    setSelectedCourse: (course: string) => void;
-    selectedType: string;
-    setSelectedType: (type: string) => void;
-    selectedSemester: string;
-    setSelectedSemester: (semester: string) => void;
-    selectedDifficulty: string;
-    setSelectedDifficulty: (difficulty: string) => void;
-    sortBy: string;
-    setSortBy: (sort: string) => void;
-    showFilters: boolean;
-    setShowFilters: (show: boolean) => void;
-    materials: Material[];
-}
 
 const MaterialFilters: React.FC<MaterialFiltersProps> = ({
     searchTerm,

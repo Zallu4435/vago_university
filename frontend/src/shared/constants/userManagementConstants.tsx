@@ -1,5 +1,5 @@
 import { FiUser, FiMail, FiBook} from 'react-icons/fi';
-import { User } from '../../domain/types/usermanagement';
+import { User } from '../../domain/types/management/usermanagement';
 
 export const PROGRAMS = [
   'All Programs',

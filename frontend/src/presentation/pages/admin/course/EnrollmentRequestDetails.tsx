@@ -18,7 +18,7 @@ import {
   StatusBadgeProps,
   InfoCardProps,
   CourseRequestDetailsModalProps,
-} from '../../../../domain/types/coursemanagement';
+} from '../../../../domain/types/management/coursemanagement';
 import { formatDate, formatDateTime } from '../../../../shared/utils/dateUtils';
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {

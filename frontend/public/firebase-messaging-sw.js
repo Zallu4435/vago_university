@@ -4,67 +4,123 @@
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
 
-// Initialize the Firebase app in the service worker
-firebase.initializeApp({
-  apiKey: "AIzaSyBjBmm32nCdjBodbUW_qvysHNyrfvaDKpU",
-  authDomain: "vago-university.firebaseapp.com",
-  projectId: "vago-university",
-  storageBucket: "vago-university.firebasestorage.app",
+console.log('[SW] Service worker script starting');
+
+// Initialize the Firebase app in the service worker by loading from env
+const firebaseConfig = {
+  apiKey: "AIzaSyBZVN-SZjvK_qXHD4GXD8o4i0uGc3q-DFY",
+  authDomain: "university-management-pla-d4e23.firebaseapp.com",
+  projectId: "university-management-pla-d4e23",
+  storageBucket: "university-management-pla-d4e23.appspot.com",
   messagingSenderId: "963590986597",
-  appId: "1:963590986597:web:4906c24584898696c39f8c",
-  measurementId: "G-0M835WHH24"
-});
+  appId: "1:963590986597:web:c0e1e5d9c2c2f0c6c6f6f6"
+};
 
-// Retrieve an instance of Firebase Messaging
-const messaging = firebase.messaging();
+try {
+  console.log('[SW] Initializing Firebase with config:', {
+    projectId: firebaseConfig.projectId,
+    messagingSenderId: firebaseConfig.messagingSenderId
+  });
+  firebase.initializeApp(firebaseConfig);
+  console.log('[SW] Firebase initialized successfully');
+} catch (error) {
+  console.error('[SW] Failed to initialize Firebase:', error);
+}
 
-// Handle background messages
-messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
-  
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/notification-icon.png',
-    badge: '/notification-badge.png',
-    vibrate: [200, 100, 200],
-    data: payload.data || {},
-    actions: [
-      {
-        action: 'open',
-        title: 'Open'
-      },
-      {
-        action: 'close',
-        title: 'Close'
-      }
-    ]
-  };
+// Retrieve an instance of  Firebase Messaging
+try {
+  console.log('[SW] Creating Firebase Messaging instance');
+  const messaging = firebase.messaging();
+  console.log('[SW] Firebase Messaging instance created successfully');
 
-  return self.registration.showNotification(notificationTitle, notificationOptions);
-});
+  // Handle background messages
+  messaging.onBackgroundMessage(async (payload) => {
+    console.log('[Service Worker] Received background message:', payload);
+
+    // Check if any window clients are active (app is open)
+    const windowClients = await clients.matchAll({
+      type: 'window',
+      includeUncontrolled: true
+    });
+
+    // Only show notification if no window clients are active (app is in background)
+    if (windowClients.length === 0 && payload.notification) {
+      console.log('[Service Worker] App is in background, showing notification');
+      const notificationOptions = {
+        body: payload.notification.body,
+        icon: '/favicon.ico',
+        badge: '/favicon.ico',
+        tag: payload.data?.notificationId, // Prevent duplicate notifications
+        data: payload.data,
+        requireInteraction: true, // Keep notification until user interacts with it
+        actions: [
+          {
+            action: 'view',
+            title: 'View'
+          },
+          {
+            action: 'dismiss',
+            title: 'Dismiss'
+          }
+        ]
+      };
+
+      await self.registration.showNotification(
+        payload.notification.title,
+        notificationOptions
+      );
+    } else {
+      console.log('[Service Worker] App is in foreground, skipping notification');
+    }
+  });
+} catch (error) {
+  console.error('[SW] Error setting up Firebase Messaging:', error);
+}
 
 // Handle notification click
 self.addEventListener('notificationclick', (event) => {
-  console.log('Notification click received:', event);
+  console.log('[Service Worker] Notification clicked:', event);
 
-  event.notification.close();
+  const notification = event.notification;
+  const action = event.action;
+  const notificationData = notification.data;
 
-  if (event.action === 'open') {
-    // Open the app or specific page
+  notification.close();
+
+  if (action === 'view' && notificationData?.notificationId) {
+    // Open the app to the notifications page
+    const urlToOpen = new URL('/notifications', self.location.origin).href;
+    
     event.waitUntil(
-      clients.matchAll({ type: 'window' }).then((clientList) => {
-        // If a window is already open, focus it
-        for (const client of clientList) {
-          if (client.url === '/' && 'focus' in client) {
-            return client.focus();
+      clients.matchAll({ type: 'window', includeUncontrolled: true })
+        .then((windowClients) => {
+          // If a window client is available, focus it and navigate
+          for (const client of windowClients) {
+            if (client.url === urlToOpen) {
+              return client.focus();
+            }
           }
-        }
-        // Otherwise, open a new window
-        if (clients.openWindow) {
-          return clients.openWindow('/');
-        }
-      })
+          // If no window client is available, open a new window
+          return clients.openWindow(urlToOpen);
+        })
     );
   }
+});
+
+// Handle service worker installation
+self.addEventListener('install', (event) => {
+  console.log('[SW] Service Worker installed', {
+    timestamp: new Date().toISOString(),
+    event: event
+  });
+  self.skipWaiting();
+});
+
+// Handle service worker activation
+self.addEventListener('activate', (event) => {
+  console.log('[SW] Service Worker activated', {
+    timestamp: new Date().toISOString(),
+    event: event
+  });
+  event.waitUntil(clients.claim());
 });

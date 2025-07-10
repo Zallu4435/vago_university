@@ -3,7 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { chargeSchema, ChargeFormDataRaw } from '../../../../domain/validation/management/chargeSchema';
 import { FiX as X, FiDollarSign, FiCalendar, FiFileText } from 'react-icons/fi';
-import { AddChargeModalProps, ChargeFormData } from '../../../../domain/types/financialmanagement';
+import { AddChargeModalProps, ChargeFormData } from '../../../../domain/types/management/financialmanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubmit }) => {

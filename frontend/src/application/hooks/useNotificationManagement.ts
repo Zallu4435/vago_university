@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { notificationService } from '../services/notification.service';
-import { Notification } from '../../domain/types/notification.types';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../presentation/redux/store';
+import { RootState } from '../../appStore/store';
 import { User } from '../../domain/types/userTypes';
+import { Notification } from '../../domain/types/management/notificationmanagement';
 
 interface Filters {
   recipientType: string;

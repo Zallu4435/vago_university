@@ -23,8 +23,8 @@ import {
 } from 'react-icons/md';
 import { IoSearchOutline as Search } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../../redux/authSlice';
-import { RootState } from '../../redux/store';
+import { logout } from '../../../appStore/authSlice';
+import { RootState } from '../../../appStore/store';
 
 const sidebarItems = [
   { name: 'Dashboard', path: '/admin', icon: <MdDashboard size={20} /> },

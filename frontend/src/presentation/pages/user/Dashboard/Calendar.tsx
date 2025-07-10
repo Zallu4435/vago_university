@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { FaCalendarAlt, FaArrowRight } from 'react-icons/fa';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 interface SpecialDate {
   type: 'exam' | 'deadline' | 'event';

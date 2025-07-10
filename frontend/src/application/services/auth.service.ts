@@ -1,15 +1,7 @@
 import httpClient from '../../frameworks/api/httpClient';
-import { User } from '../../domain/types/userTypes';
+import { LoginResponse } from '../../domain/types/auth/Login';
+import { RegisterResponse } from '../../domain/types/auth/Register';
 
-interface RegisterResponse {
-  message: string;
-  user: User;
-}
-
-interface LoginResponse {
-  token: string;
-  user: User;
-}
 
 class AuthService {
   async registerUser(data: {

@@ -16,9 +16,9 @@ import {
 import ProfileSettings from './ProfileSettings';
 import Sidebar from './Sidebar';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../redux/store';
+import { RootState } from '../../../../appStore/store';
 import { useNavigate } from 'react-router-dom';
-import { logout } from '../../../redux/authSlice';
+import { logout } from '../../../../appStore/authSlice';
 import PreferenceSettings from './PreferenceSettings';
 import { socketRef } from '../../canvas/chat/ChatComponent';
 

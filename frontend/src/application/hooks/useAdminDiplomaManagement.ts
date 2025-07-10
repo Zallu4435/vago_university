@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
-import { Diploma, Enrollment } from '../../domain/types/diploma';
 import { diplomaBackendService } from '../../application/services/diplomaBackend.service';
+import { Diploma } from '../../domain/types/management/videomanagement';
+import { Enrollment } from '../../domain/types/management/diplomamanagement';
 
 interface Filters {
   category: string;

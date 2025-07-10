@@ -3,7 +3,7 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { IoCloseOutline as X, IoAdd, IoTrash, IoSparklesOutline as Sparkles } from 'react-icons/io5';
-import { AddTeamModalProps, OrganizerTypeOption, UpcomingGame, ParticleConfig } from '../../../../../domain/types/sportmanagement';
+import { AddTeamModalProps, OrganizerTypeOption, UpcomingGame, ParticleConfig } from '../../../../../domain/types/management/sportmanagement';
 import {
   ORGANIZER_TYPE_OPTIONS,
   ICON_OPTIONS,

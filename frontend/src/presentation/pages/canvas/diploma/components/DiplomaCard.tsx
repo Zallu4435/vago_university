@@ -1,16 +1,6 @@
 import React from 'react';
 import { FiLock, FiClock, FiUsers, FiStar, FiBook } from 'react-icons/fi';
-import { DiplomaCourse } from '../types/DiplomaTypes';
-
-interface DiplomaCardProps {
-  course: DiplomaCourse;
-  index: number;
-  styles: any;
-  userAdmitted: boolean;
-  completedChapters: Set<string>;
-  onViewDetails: (course: DiplomaCourse) => void;
-  onStartCourse: (courseId: string) => void;
-}
+import { DiplomaCardProps } from '../../../../../domain/types/canvas/diploma';
 
 export const DiplomaCard: React.FC<DiplomaCardProps> = ({
   course,

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FaSearch, FaFilter, FaCalendar, FaPlus, FaUsers, FaCheckCircle, FaTrash, FaEdit } from 'react-icons/fa';
 import { Assignment } from './types/index';
-import WarningModal from '../../../components/WarningModal';
+import WarningModal from '../../../components/common/WarningModal';
 import { assignmentService } from './services/assignmentService';
 
 interface AssignmentListProps {

@@ -19,12 +19,12 @@ import {
 } from 'react-icons/fi';
 import ApprovalModal from './ApprovalModal';
 import RejectModal from '../../../components/admin/RejectModal';
-import WarningModal from '../../../components/WarningModal';
+import WarningModal from '../../../components/common/WarningModal';
 import { useUserManagement } from '../../../../application/hooks/useUserManagement';
 import { documentUploadService } from '../../../../application/services/documentUploadService';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../redux/store';
-import { ApplicantDetailsProps } from '../../../../domain/types/usermanagement';
+import { RootState } from '../../../../appStore/store';
+import { ApplicantDetailsProps } from '../../../../domain/types/management/usermanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate } from '../../../../shared/utils/dateUtils';
 

@@ -1,4 +1,4 @@
-import { Diploma, Enrollment } from '../../domain/types/diplomamanagement';
+import { Diploma, Enrollment } from '../../domain/types/management/diplomamanagement';
 
 export function filterDiplomas(diplomas: Diploma[], searchTerm: string): Diploma[] {
   return diplomas.filter((diploma) =>

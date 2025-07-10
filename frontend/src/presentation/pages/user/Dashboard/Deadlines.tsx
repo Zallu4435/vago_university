@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { FaCalendarAlt, FaClock, FaExclamationTriangle } from 'react-icons/fa';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 interface Deadline {
   title: string;

@@ -1,13 +1,6 @@
 // src/application/services/faculty.service.ts
+import { Faculty, FacultyApiResponse, FacultyApprovalData } from '../../domain/types/management/facultyManagement';
 import httpClient from '../../frameworks/api/httpClient';
-import { Faculty, FacultyApprovalData } from '../../domain/types/faculty.types';
-
-interface FacultyApiResponse {
-  faculty: Faculty[];
-  totalPages: number;
-  currentPage: number;
-  totalItems: number;
-}
 
 class FacultyService {
   async getFaculty(

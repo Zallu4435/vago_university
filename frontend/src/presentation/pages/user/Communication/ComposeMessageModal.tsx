@@ -1,16 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useCommunicationManagement } from '../../../../application/hooks/useCommunication';
-import { MessageForm, Admin } from '../../../../domain/types/communication';
+import { MessageForm, Admin, ComposeMessageModalProps } from '../../../../domain/types/user/communication/index';
 import { communicationService } from '../../../../application/services/communicationService';
 import { FaTimes, FaPaperPlane } from 'react-icons/fa';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 
-export interface ComposeMessageModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSend: (form: MessageForm) => void;
-  initialForm?: MessageForm;
-}
 
 const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
   isOpen,
@@ -94,18 +87,16 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
     <div className="fixed inset-0 z-[9999] overflow-y-auto">
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-gradient-to-br from-black/20 via-black/40 to-black/60 backdrop-blur-sm transition-opacity duration-300 ${
-          isAnimating ? 'opacity-100' : 'opacity-0'
-        }`}
+        className={`fixed inset-0 bg-gradient-to-br from-black/20 via-black/40 to-black/60 backdrop-blur-sm transition-opacity duration-300 ${isAnimating ? 'opacity-100' : 'opacity-0'
+          }`}
         onClick={handleClose}
       />
 
       {/* Modal Container */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div
-          className={`relative w-full max-w-2xl transform transition-all duration-300 ${
-            isAnimating ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'
-          }`}
+          className={`relative w-full max-w-2xl transform transition-all duration-300 ${isAnimating ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'
+            }`}
         >
           {/* Main Modal */}
           <div className={`relative overflow-hidden rounded-3xl shadow-2xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>

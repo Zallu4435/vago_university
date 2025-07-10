@@ -1,12 +1,7 @@
 // src/application/hooks/useCampusLife.ts
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { campusLifeService } from '../services/campus-life.service';
-import { Event, Sport, Club } from '../../domain/types/campus-life';
-
-export interface JoinRequest {
-  reason: string;
-  additionalInfo: string;
-}
+import { JoinRequest } from '../../domain/types/user/campus-life';
 
 export const useCampusLife = (activeTab?: string) => {
   // Fetch events

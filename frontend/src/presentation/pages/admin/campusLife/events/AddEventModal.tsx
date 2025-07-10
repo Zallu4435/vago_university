@@ -9,7 +9,7 @@ import {
   OrganizerTypeOption,
   EventTypeOption,
   ParticleConfig
-} from '../../../../../domain/types/eventmanagement';
+} from '../../../../../domain/types/management/eventmanagement';
 import {
   TIMEFRAME_OPTIONS,
   ORGANIZER_TYPE_OPTIONS,

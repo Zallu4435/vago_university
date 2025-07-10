@@ -1,4 +1,4 @@
-import { Club, ClubRequest } from '../../domain/types/clubmanagement';
+import { Club, ClubRequest } from '../../domain/types/management/clubmanagement';
 
 export function filterClubs(
   clubs: Club[],

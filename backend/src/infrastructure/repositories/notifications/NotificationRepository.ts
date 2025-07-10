@@ -72,6 +72,18 @@ export class NotificationRepository implements INotificationRepository {
         return FacultyModel.find().select("fcmTokens").lean();
     }
 
+    async removeToken(token: string): Promise<void> {
+        // Remove token from all users and faculty
+        await UserModel.updateMany(
+            { fcmTokens: token },
+            { $pull: { fcmTokens: token } }
+        );
+        await FacultyModel.updateMany(
+            { fcmTokens: token },
+            { $pull: { fcmTokens: token } }
+        );
+    }
+
     // Original DTO-based methods (for backward compatibility)
     async createNotification(params: CreateNotificationRequestDTO): Promise<CreateNotificationResponseDTO> {
         const notification = new NotificationModel({

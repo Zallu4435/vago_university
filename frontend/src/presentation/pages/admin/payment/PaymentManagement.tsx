@@ -10,7 +10,7 @@ import ActionModal from './ActionModal';
 import AddChargeModal from './AddChargeModal';
 import ViewChargesModal from './ViewChargesModal';
 import PaymentDetailsModal from './PaymentDetailsModal';
-import { Charge, Payment, FinancialAidApplication, ScholarshipApplication, Filters } from '../../../../domain/types/financialmanagement';
+import { Charge, Payment, FinancialAidApplication, ScholarshipApplication, Filters } from '../../../../domain/types/management/financialmanagement';
 import { toast } from 'react-hot-toast';
 import { STATUSES, TERMS, paymentColumns, financialAidColumns, scholarshipColumns } from '../../../../shared/constants/paymentManagementConstants';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FaBell, FaCog, FaEye, FaEyeSlash, FaCheck, FaTimes } from 'react-icons/fa';
 import { useNotificationManagement } from '../../../../application/hooks/useNotificationManagement';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 export default function FacultyNotificationSettings() {
   const { styles } = usePreferences();

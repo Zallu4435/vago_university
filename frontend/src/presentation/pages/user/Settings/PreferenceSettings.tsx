@@ -11,7 +11,7 @@ import {
   FiSave
 } from 'react-icons/fi';
 import { IconType } from 'react-icons';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 interface Theme {
   id: string;

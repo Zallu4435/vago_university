@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
-import { SiteSectionFormProps, SectionField } from '../../../../domain/types/sitemanagement';
+import { SiteSectionFormProps, SectionField } from '../../../../domain/types/management/sitemanagement';
 
 // Create dynamic Zod schema based on fields
 const createSchema = (fields: SectionField[]) => {

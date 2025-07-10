@@ -11,7 +11,7 @@ import {
   FaDownload, 
   FaCalendarAlt 
 } from 'react-icons/fa';
-import { Session, SessionStats } from '../types/SessionTypes';
+import { Session, SessionStats } from '../../../../../domain/types/canvas/session';
 
 export const getStatusBadge = (status: string, isLive: boolean, styles: any): JSX.Element => {
   const baseClasses = "px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1";

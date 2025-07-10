@@ -1,6 +1,6 @@
 import React from 'react';
 import { IoCloseOutline as X, IoCalendarOutline as Calendar, IoPersonOutline as User, IoInformationCircleOutline as Info } from 'react-icons/io5';
-import { Notification, NotificationDetailsModalProps, StatusBadgeProps, InfoCardProps } from '../../../../domain/types/notificationmanagement';
+import { Notification, NotificationDetailsModalProps, StatusBadgeProps, InfoCardProps } from '../../../../domain/types/management/notificationmanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate } from '../../../../shared/utils/dateUtils';
 

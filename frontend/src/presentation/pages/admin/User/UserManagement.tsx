@@ -3,12 +3,12 @@ import { useUserManagement } from '../../../../application/hooks/useUserManageme
 import { FiUsers, FiClipboard, FiBarChart2, FiEye, FiCheckCircle, FiXCircle, FiSlash } from 'react-icons/fi';
 import { debounce } from 'lodash';
 import ApprovalModal from './ApprovalModal';
-import WarningModal from '../../../components/WarningModal';
+import WarningModal from '../../../components/common/WarningModal';
 import Header from '../../../components/admin/management/Header';
 import ApplicationsTable from '../../../components/admin/management/ApplicationsTable';
 import Pagination from '../../../components/admin/management/Pagination';
 import ApplicantDetails from './ApplicantDetails';
-import { User } from '../../../../domain/types/usermanagement';
+import { User } from '../../../../domain/types/management/usermanagement';
 import { formatDate } from '../../../../shared/utils/dateUtils';
 import {
   PROGRAMS,

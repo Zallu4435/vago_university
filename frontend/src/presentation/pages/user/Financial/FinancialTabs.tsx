@@ -1,10 +1,6 @@
 import PropTypes from 'prop-types';
-import { usePreferences } from '../../../context/PreferencesContext';
-
-interface FinancialTabsProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-}
+import { usePreferences } from '../../../../application/context/PreferencesContext';
+import type { FinancialTabsProps } from '../../../../domain/types/user/financial';
 
 export default function FinancialTabs({ activeTab, setActiveTab }: FinancialTabsProps) {
   const tabs = ['Fees and Payments', 'Financial Aid', 'Scholarships'];

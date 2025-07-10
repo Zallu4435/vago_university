@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { IoClose as Close } from 'react-icons/io5';
-import { Notification, AddNotificationModalProps, NotificationFormData } from '../../../../domain/types/notificationmanagement';
+import { AddNotificationModalProps } from '../../../../domain/types/management/notificationmanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';

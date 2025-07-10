@@ -1,19 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userMaterialService } from '../services/userMaterialService';
-import { Material } from '../types/MaterialTypes';
+import { GetMaterialsFilters } from '../../../../../domain/types/canvas/materials';
 
-interface GetMaterialsFilters {
-  subject?: string;
-  course?: string;
-  semester?: string;
-  type?: string;
-  difficulty?: string;
-  page?: number;
-  limit?: number;
-  search?: string;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
 
 export const useStudyMaterials = (filters: GetMaterialsFilters = {}) => {
   const queryClient = useQueryClient();

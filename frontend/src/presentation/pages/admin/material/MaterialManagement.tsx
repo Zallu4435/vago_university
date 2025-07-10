@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { FiPlus, FiEye, FiEdit, FiTrash2, FiFileText, FiVideo, FiUser, FiClock, FiLock, FiUnlock, FiTag } from 'react-icons/fi';
 import { useMaterialManagement } from '../../../../application/hooks/useMaterialManagement';
 import { debounce } from 'lodash';
-import WarningModal from '../../../components/WarningModal';
+import WarningModal from '../../../components/common/WarningModal';
 import Header from '../../../components/admin/management/Header';
 import Pagination from '../../../components/admin/management/Pagination';
 import ApplicationsTable from '../../../components/admin/management/ApplicationsTable';
 import MaterialForm from './MaterialForm';
 import MaterialDetails from './MaterialDetails';
-import { Material } from '../../../../domain/types/materialmanagement';
+import { Material } from '../../../../domain/types/management/materialmanagement';
 import {
   SUBJECTS,
   COURSES,

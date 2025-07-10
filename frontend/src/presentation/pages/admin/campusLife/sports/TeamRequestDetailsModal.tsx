@@ -19,7 +19,7 @@ import {
   TeamRequestDetailsInfoCardProps,
   StatusType,
   TeamRequestDetails 
-} from '../../../../../domain/types/sportmanagement';
+} from '../../../../../domain/types/management/sportmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate, formatDateTime } from '../../../../../shared/utils/dateUtils';
 

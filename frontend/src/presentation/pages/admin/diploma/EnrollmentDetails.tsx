@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiXCircle, FiUser, FiBook, FiClock, FiPercent } from 'react-icons/fi';
-import { EnrollmentDetailsProps, InfoCardProps } from '../../../../domain/types/diplomamanagement';
+import { EnrollmentDetailsProps, InfoCardProps } from '../../../../domain/types/management/diplomamanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const EnrollmentDetails: React.FC<EnrollmentDetailsProps> = ({ isOpen, onClose, enrollment, isLoading }) => {

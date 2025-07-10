@@ -1,5 +1,5 @@
 import React from 'react';
-import { SessionHeaderProps } from '../types/SessionTypes';
+import { SessionHeaderProps } from '../../../../../domain/types/canvas/session';
 
 export const SessionHeader: React.FC<SessionHeaderProps> = ({
   userName,

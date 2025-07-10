@@ -1,6 +1,5 @@
-import { useEffect } from 'react';
 import { FaBell, FaArrowRight } from 'react-icons/fa';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 interface Announcement {
   title: string;

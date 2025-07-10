@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { materialSchema, MaterialFormData } from '../../../../domain/validation/management/materialSchema';
 import { IoCloseOutline as X } from 'react-icons/io5';
 import { FiFileText, FiCheck } from 'react-icons/fi';
-import { Material, MaterialFormProps } from '../../../../domain/types/materialmanagement';
+import { Material, MaterialFormProps } from '../../../../domain/types/management/materialmanagement';
 
 const SUBJECTS = ['Mathematics', 'Computer Science', 'Physics', 'Chemistry'];
 const COURSES = ['B.Sc. Mathematics', 'B.Tech. CS', 'B.Sc. Physics'];

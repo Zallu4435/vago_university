@@ -1,5 +1,5 @@
 import React from 'react';
-import { OrganizerTypeOption } from '../../domain/types/sportmanagement';
+import { OrganizerTypeOption } from '../../domain/types/management/sportmanagement';
 
 // Sport Management Constants
 export const SPORT_TYPES = ['All', 'Football', 'Basketball', 'Badminton', 'Athletics', 'Swimming'] as const;

@@ -3,41 +3,9 @@ import { FaSearch, FaTrophy, FaUsers, FaArrowRight } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import { useCampusLife } from '../../../../application/hooks/useCampusLife';
 import JoinRequestForm from './JoinRequestForm';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 import ReactDOM from 'react-dom';
-
-  interface Game {
-  date?: string;
-  description?: string;
-}
-
-interface Sport {
-  id: string;
-  title: string;
-  type: string;
-  icon?: string;
-  color?: string;
-  division?: string;
-  headCoach?: string;
-  homeGames?: number | string[];
-  record?: string;
-  upcomingGames?: (string | Game)[];
-  participants?: number;
-  createdAt?: string;
-  updatedAt?: string;
-  userRequestStatus?: string;
-}
-
-interface SportsData {
-  sports: Sport[];
-  totalItems: number;
-}
-
-interface JoinRequest {
-  clubId?: string;
-  sportId?: string;
-  request: any;
-}
+import type { Sport, SportsData } from '../../../../domain/types/user/campus-life';
 
 export default function AthleticsSection({ sports }: { sports: SportsData }) {
   const [selectedSport, setSelectedSport] = useState(sports.sports[0] || null);

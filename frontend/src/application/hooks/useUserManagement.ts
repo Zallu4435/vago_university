@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { userService } from '../services/user.service';
-import { AdmissionApiResponse, AdmissionDetails } from '../../domain/types/admission';
+import { AdmissionApiResponse } from '../../domain/types/management/usermanagement';
 
 interface Filters {
   status: string;

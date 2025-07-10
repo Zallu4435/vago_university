@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FiXCircle, FiPlus, FiX, FiBook } from 'react-icons/fi';
-import { DiplomaFormProps } from '../../../../domain/types/diplomamanagement';
+import { DiplomaFormProps } from '../../../../domain/types/management/diplomamanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';

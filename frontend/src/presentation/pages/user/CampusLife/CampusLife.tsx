@@ -5,7 +5,7 @@ import ClubsSection from './ClubsSection';
 import AthleticsSection from './AthleticsSection';
 import { useCampusLife } from '../../../../application/hooks/useCampusLife';
 import { FaUsers } from 'react-icons/fa';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 export default function CampusLife() {
   const [activeTab, setActiveTab] = useState('Events');

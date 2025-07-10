@@ -1,4 +1,4 @@
-import { Course, EnrollmentRequest } from '../../domain/types/coursemanagement';
+import { Course, EnrollmentRequest } from '../../domain/types/management/coursemanagement';
 
 export function filterCourses(courses: Course[], searchTerm: string): Course[] {
   return courses.filter((course) =>

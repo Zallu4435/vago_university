@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { IoCloseOutline as X, IoAdd, IoTrash } from 'react-icons/io5';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
-import { AddClubModalProps, ClubFormData } from '../../../../../domain/types/clubmanagement';
+import { AddClubModalProps, ClubFormData } from '../../../../../domain/types/management/clubmanagement';
 import { clubSchema } from '../../../../../domain/validation/management/clubSchema';
 
 const AddClubModal: React.FC<AddClubModalProps> = ({

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaArrowRight, FaUsers, FaLaptopCode, FaHandshake, FaGraduationCap, FaMoneyBillWave } from 'react-icons/fa';
-import { useSectionAnimation } from '../../../application/hooks/useSectionAnimation';
+import { useSectionAnimation } from '../../../shared/hooks/useSectionAnimation';
 
 interface AlumniTestimonial {
   name: string;

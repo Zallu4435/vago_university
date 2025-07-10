@@ -8,7 +8,7 @@ import {
   FiDollarSign, 
   FiMessageSquare 
 } from 'react-icons/fi';
-import { ApprovalModalProps } from '../../../../domain/types/usermanagement';
+import { ApprovalModalProps } from '../../../../domain/types/management/usermanagement';
 
 const ApprovalModal: React.FC<ApprovalModalProps> = ({
   isOpen,

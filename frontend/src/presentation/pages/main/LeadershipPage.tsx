@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { FaArrowLeft, FaSearch, FaFilter, FaTimes, FaUserTie, FaCalendar, FaTag, FaEnvelope, FaPhone, FaLinkedin } from 'react-icons/fa';
 import { useLeadership, useLeadershipCategories } from '../../../application/hooks/useSiteSections';
 import { SiteSection } from '../../../application/services/siteSections.service';
-import SiteSectionModal from '../../components/SiteSectionModal';
+import SiteSectionModal from '../../components/public/SiteSectionModal';
 
 export const LeadershipPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');

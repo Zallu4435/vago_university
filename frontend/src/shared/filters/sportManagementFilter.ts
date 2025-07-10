@@ -1,4 +1,4 @@
-import { Team, PlayerRequest, Filters } from '../../domain/types/sportmanagement';
+import { Team, PlayerRequest, Filters } from '../../domain/types/management/sportmanagement';
 import { SPORT_TYPES, TEAM_STATUSES, REQUEST_STATUSES, DATE_RANGES } from '../constants/sportManagementConstants';
 
 // Filter teams based on search term and filters

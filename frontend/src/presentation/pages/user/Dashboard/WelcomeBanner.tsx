@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../redux/store';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { RootState } from '../../../../appStore/store';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 export default function WelcomeBanner() {
   const { styles, theme } = usePreferences();

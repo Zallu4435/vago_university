@@ -1,6 +1,6 @@
 import React from 'react';
 import { IoCloseOutline as X, IoCreateOutline as Edit, IoPeopleOutline as Users, IoPersonOutline as User, IoTrophyOutline as Trophy, IoCalendarOutline as Calendar, IoInformationCircleOutline as Info, IoBusinessOutline as Building } from 'react-icons/io5';
-import { TeamDetailsModalProps, StatusBadgeProps, InfoCardProps, UpcomingGame, TeamDetailsTeam } from '../../../../../domain/types/sportmanagement';
+import { TeamDetailsModalProps, StatusBadgeProps, InfoCardProps, UpcomingGame, TeamDetailsTeam } from '../../../../../domain/types/management/sportmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 
 const StatusBadge = ({ status }: StatusBadgeProps) => {

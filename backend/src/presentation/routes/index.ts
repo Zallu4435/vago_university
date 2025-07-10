@@ -27,6 +27,7 @@ import enquiryRoutes from '../http/enquiry/enquiryRouter'
 import sessionRoutes from '../http/session/sessionRoutes'
 import facultyDashboardRoutes from '../http/faculty-dashboard/facultyDashboard.routes'
 import dashboardRoutes from '../http/admindashboard/dashboardRouter'
+import studentDashboardRoutes from '../http/student-dashboard/studentDashboardRouter'
 
 const router = Router();
 
@@ -91,6 +92,10 @@ router.use("/admin/site-sections", siteSectionRoutes);
 router.use("/site-sections", userSiteSectionRoutes);
 
 router.use("/enquiries", enquiryRoutes);
+
+router.use("/student/dashboard", studentDashboardRoutes);
+
+
 
 
 export default router;

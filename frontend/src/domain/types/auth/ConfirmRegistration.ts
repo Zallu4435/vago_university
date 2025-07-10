@@ -1,0 +1,1 @@
+export type ConfirmRegistrationStatus = 'loading' | 'success' | 'error'; 

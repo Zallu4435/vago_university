@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { FaThLarge, FaMapMarkerAlt } from 'react-icons/fa';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 interface Class {
   code: string;

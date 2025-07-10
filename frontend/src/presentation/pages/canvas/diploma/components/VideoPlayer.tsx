@@ -1,12 +1,6 @@
 import React, { useEffect } from 'react';
 import { FiPlay, FiPause, FiSkipForward, FiVolume2, FiSettings, FiMaximize2 } from 'react-icons/fi';
-
-interface VideoPlayerProps {
-  styles: any;
-  isPlaying: boolean;
-  videoProgress: number;
-  onPlayPause: () => void;
-}
+import { VideoPlayerProps } from '../../../../../domain/types/canvas/diploma';
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   styles,

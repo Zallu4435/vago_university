@@ -11,7 +11,7 @@ import {
   IoCheckmarkOutline as Check,
   IoClose as Cancel,
 } from 'react-icons/io5';
-import { EnquiryDetailsModalProps } from '../../../../domain/types/enquirymanagement';
+import { EnquiryDetailsModalProps } from '../../../../domain/types/management/enquirymanagement';
 
 const StatusBadge = ({ status }: { status: string }) => {
   const statusConfig: Record<string, { bg: string; text: string; border: string }> = {

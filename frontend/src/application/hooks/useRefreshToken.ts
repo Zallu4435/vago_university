@@ -2,9 +2,9 @@ import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMutation } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
-import { setAuth, logout } from '../../presentation/redux/authSlice';
+import { setAuth, logout } from '../../appStore/authSlice';
 import httpClient from '../../frameworks/api/httpClient';
-import { RootState } from '../../presentation/redux/store';
+import { RootState } from '../../appStore/store';
 
 interface RefreshTokenResponse {
   token: string;

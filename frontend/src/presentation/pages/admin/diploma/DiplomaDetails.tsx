@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiXCircle, FiBook, FiBriefcase, FiDollarSign, FiClock, FiUsers, FiCalendar } from 'react-icons/fi';
-import { DiplomaDetailsProps, InfoCardProps } from '../../../../domain/types/diplomamanagement';
+import { DiplomaDetailsProps, InfoCardProps } from '../../../../domain/types/management/diplomamanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const DiplomaDetails: React.FC<DiplomaDetailsProps> = ({ isOpen, onClose, diploma, isLoading }) => {

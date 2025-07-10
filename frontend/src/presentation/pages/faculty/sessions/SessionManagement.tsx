@@ -5,7 +5,7 @@ import EditSessionModal from './EditSessionModal';
 import { Session } from './types';
 import { useSessionManagement } from '../../../../application/hooks/useSessionManagement';
 import SessionDetailsModal from './SessionDetailsModal';
-import WarningModal from '../../../components/WarningModal';
+import WarningModal from '../../../components/common/WarningModal';
 
 export default function SessionManagement() {
   const {

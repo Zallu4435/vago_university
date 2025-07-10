@@ -1,8 +1,8 @@
 import React from 'react';
-import  CollegesFacultiesSchools  from "../../components/main/CollegesFacultiesSchools";
-import  AcademicCalendar  from "../../components/main/AcademicCalendar";
-import  NeedHelp  from "../../components/main/NeedHelp";
-import { useSectionAnimation } from "../../../application/hooks/useSectionAnimation";
+import  CollegesFacultiesSchools  from "../../components/public/main/CollegesFacultiesSchools";
+import  AcademicCalendar  from "../../components/public/main/AcademicCalendar";
+import  NeedHelp  from "../../components/public/main/NeedHelp";
+import { useSectionAnimation } from "../../../shared/hooks/useSectionAnimation";
 
 export const Education: React.FC = () => {
   const isVisible = useSectionAnimation();

@@ -1,11 +1,11 @@
 import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { Header } from '../components/Header';
-import { Navbar } from '../components/Navbar';
-import { Footer } from '../components/main/Footer';
+import { Header } from '../components/public/Header';
+import { Navbar } from '../components/public/Navbar';
+import { Footer } from '../components/public/Footer';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../redux/authSlice';
-import { RootState } from '../redux/store';
+import { logout } from '../../appStore/authSlice';
+import { RootState } from '../../appStore/store';
 
 const PublicLayout: React.FC = () => {
   const dispatch = useDispatch();

@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaRecordVinyl, FaClock, FaCheckCircle, FaEye } from 'react-icons/fa';
-import { SessionStatsProps } from '../types/SessionTypes';
+import { SessionStatsProps } from '../../../../../domain/types/canvas/session';
 
 export const SessionStats: React.FC<SessionStatsProps> = ({ stats, styles }) => {
   return (

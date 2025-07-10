@@ -1,24 +1,7 @@
 import { Fragment, useState, useEffect } from 'react';
 import { FaTimes, FaCheck, FaArrowRight } from 'react-icons/fa';
-import { usePreferences } from '../../../context/PreferencesContext';
-
-interface CourseDetailsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: (enrollmentData: { reason: string }) => void;
-  course: {
-    title: string;
-    specialization: string;
-    faculty: string;
-    credits: number;
-    schedule: string;
-    maxEnrollment: number;
-    currentEnrollment: number;
-    description?: string;
-    prerequisites?: string[];
-  };
-  isEnrolling: boolean;
-}
+import { usePreferences } from '../../../../application/context/PreferencesContext';
+import type { CourseDetailsModalProps } from '../../../../domain/types/user/academics';
 
 export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course, isEnrolling }: CourseDetailsModalProps) {
   console.log('CourseDetailsModal props:', { isOpen, course });

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { FiPlay, FiVideo, FiLoader } from 'react-icons/fi';
 import { IoCloseOutline as X } from 'react-icons/io5';
-import { useVideoManagement } from '../../../hooks/useVideoManagement';
-import { Video, VideoForEdit, VideoPreviewModalProps } from '../../../../domain/types/videomanagement';
+import { useVideoManagement } from '../../../../application/hooks/useVideoManagement';
+import { Video, VideoForEdit, VideoPreviewModalProps } from '../../../../domain/types/management/videomanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const VideoPreviewModal: React.FC<VideoPreviewModalProps> = ({ isOpen, onClose, video }) => {

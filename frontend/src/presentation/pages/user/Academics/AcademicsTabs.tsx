@@ -1,9 +1,6 @@
-import { usePreferences } from "../../../context/PreferencesContext";
+import { usePreferences } from "../../../../application/context/PreferencesContext";
+import { AcademicsTabsProps } from "../../../../domain/types/user/academics";
 
-interface AcademicsTabsProps {
-  activeSubTab: string;
-  setActiveSubTab: (tab: string) => void;
-}
 
 export default function AcademicsTabs({ activeSubTab, setActiveSubTab }: AcademicsTabsProps) {
   const tabs = ['Course Registration', 'Academic Records', 'Degree Audit'];

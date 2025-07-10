@@ -5,19 +5,15 @@ import { FaRegCheckCircle, FaRegIdCard, FaShieldAlt } from 'react-icons/fa';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { useDispatch } from 'react-redux';
 import Cookies from 'js-cookie';
-import { Input } from '../../components/Input';
-import { Button } from '../../components/Button';
+import { Input } from '../../components/base/Input';
+import { Button } from '../../components/base/Button';
 import { loginSchema } from '../../../domain/validation/login';
 import { useLoginUser } from '../../../application/hooks/useAuthQueries';
-import { useAnimation } from '../../../application/hooks/useAnimation';
-import { setAuth } from '../../redux/authSlice';
+import { useAnimation } from '../../../shared/hooks/useAnimation';
+import { setAuth } from '../../../appStore/authSlice';
 import { toast } from 'react-hot-toast';
 import { useState } from 'react';
-
-interface FormData {
-  email: string;
-  password: string;
-}
+import type { LoginFormData } from '../../../domain/types/auth/Login';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -28,7 +24,7 @@ const LoginPage = () => {
   const [pendingError, setPendingError] = useState('');
   const [loginError, setLoginError] = useState('');
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
@@ -39,7 +35,7 @@ const LoginPage = () => {
   const mutation = useLoginUser();
 
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = (data: LoginFormData) => {
     setPendingError('');
     setLoginError('');
     mutation.mutate(data, {

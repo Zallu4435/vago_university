@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
-import { useSectionAnimation } from '../../../application/hooks/useSectionAnimation';
+import { useSectionAnimation } from '../../../shared/hooks/useSectionAnimation';
 
 interface DepartmentData {
   poster: {

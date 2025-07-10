@@ -1,8 +1,8 @@
-import { ArticleGrid } from "../../components/main/ArticleGrid";
-import { PresidentsWelcome } from "../../components/main/PresidentsWelcome";
-import { VagoNow } from "../../components/main/VagoNow";
-import { ThoughtLeadership } from "../../components/main/ThoughtLeadership";
-import { useSectionAnimation } from "../../../application/hooks/useSectionAnimation";
+import { ArticleGrid } from "../../components/public/main/ArticleGrid";
+import { PresidentsWelcome } from "../../components/public/main/PresidentsWelcome";
+import { VagoNow } from "../../components/public/main/VagoNow";
+import { ThoughtLeadership } from "../../components/public/main/ThoughtLeadership";
+import { useSectionAnimation } from "../../../shared/hooks/useSectionAnimation";
 import React from "react";
 
 export const Home: React.FC = () => {

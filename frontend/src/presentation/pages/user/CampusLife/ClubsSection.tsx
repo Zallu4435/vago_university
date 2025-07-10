@@ -3,23 +3,24 @@ import { FaCalendarAlt, FaSearch, FaUsers, FaArrowLeft } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import { useCampusLife } from '../../../../application/hooks/useCampusLife';
 import JoinRequestForm from './JoinRequestForm';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 import ReactDOM from 'react-dom';
+import type { ClubType, ClubsSectionProps, ClubUpcomingEvent } from '../../../../domain/types/user/campus-life';
 
-export default function ClubsSection({ clubs }) {
-  const [selectedClub, setSelectedClub] = useState(clubs[0] || null);
+export default function ClubsSection({ clubs }: ClubsSectionProps) {
+  const [selectedClub, setSelectedClub] = useState<ClubType | null>(clubs[0] || null);
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showMobileDetails, setShowMobileDetails] = useState(false);
   const { requestToJoinClub, isJoiningClub, joinClubError } = useCampusLife();
   const { styles, theme } = usePreferences();
 
-  const filteredClubs = clubs?.clubs?.filter((club) =>
+  const filteredClubs = clubs.filter((club: ClubType) =>
     club.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     club.type.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleClubClick = (club) => {
+  const handleClubClick = (club: ClubType) => {
     setSelectedClub(club);
     if (window.innerWidth < 640) {
       setShowMobileDetails(true);
@@ -37,7 +38,7 @@ export default function ClubsSection({ clubs }) {
     };
   }, [showMobileDetails]);
 
-  const handleJoinRequest = async (request) => {
+  const handleJoinRequest = async (request: any) => {
     if (!selectedClub) return;
     try {
       await requestToJoinClub({ clubId: selectedClub.id, request });
@@ -109,7 +110,7 @@ export default function ClubsSection({ clubs }) {
                 MY CLUBS
               </div>
               <div className="max-h-96 overflow-y-auto divide-y divide-amber-100/50">
-                {filteredClubs.map((club) => (
+                {filteredClubs.map((club: ClubType) => (
                   <div
                     key={club.id}
                     className={`p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${selectedClub?.id === club.id ? 'bg-orange-50/70' : ''
@@ -185,16 +186,15 @@ export default function ClubsSection({ clubs }) {
                           <ul className={`relative overflow-hidden rounded-lg p-4 mb-4 border ${styles.border} group/item hover:${styles.card.hover} transition-all duration-300`}>
                             <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-lg blur transition-all duration-300`}></div>
                             <div className="relative z-10">
-                              {selectedClub.upcomingEvents.map((event, index) => (
+                              {selectedClub.upcomingEvents.map((event: string | ClubUpcomingEvent, index: number) => (
                                 <li key={index} className={`mb-3 flex text-sm ${styles.textPrimary}`}>
                                   <span className={`${styles.status.warning} mr-2`}>•</span>
                                   <span>
-                                    {typeof event === 'string' 
+                                    {typeof event === 'string'
                                       ? event
                                       : event?.date
                                         ? `${event.date}: ${event.description || ''}`
-                                        : event?.description || event
-                                  }
+                                        : event?.description || ''}
                                   </span>
                                 </li>
                               ))}
@@ -293,16 +293,15 @@ export default function ClubsSection({ clubs }) {
                       <ul className={`relative overflow-hidden rounded-lg p-4 mb-4 border ${styles.border} group/item hover:${styles.card.hover} transition-all duration-300`}>
                         <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-lg blur transition-all duration-300`}></div>
                         <div className="relative z-10">
-                          {selectedClub.upcomingEvents.map((event, index) => (
+                          {selectedClub.upcomingEvents.map((event: string | ClubUpcomingEvent, index: number) => (
                             <li key={index} className={`mb-3 flex text-sm ${styles.textPrimary}`}>
                               <span className={`${styles.status.warning} mr-2`}>•</span>
                               <span>
-                                {typeof event === 'string' 
+                                {typeof event === 'string'
                                   ? event
                                   : event?.date
                                     ? `${event.date}: ${event.description || ''}`
-                                    : event?.description || event
-                                }
+                                    : event?.description || ''}
                               </span>
                             </li>
                           ))}

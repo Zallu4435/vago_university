@@ -1,5 +1,5 @@
 import { useOutletContext } from 'react-router-dom';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 import WelcomeBanner from './WelcomeBanner';
 import Announcements from './Announcements';
 import Deadlines from './Deadlines';
@@ -11,43 +11,36 @@ import Academics from '../Academics/Academics';
 import CampusLife from '../CampusLife/CampusLife';
 import Communication from '../Communication/Communication';
 import Financial from '../Financial/Financial';
+import { useStudentDashboard } from '../../../../application/hooks/useStudentDashboard';
+
+// Type for special dates
+type SpecialDateType = {
+  type: 'exam' | 'deadline' | 'event';
+};
 
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useOutletContext() as [string, (tab: string) => void];
   const { styles } = usePreferences();
 
-  const announcements = [
-    { title: 'Library Hours Extended', date: 'Apr 24, 2025' },
-    { title: 'Registration Deadline Approaching', date: 'Apr 28, 2025' },
-    { title: 'Campus Event: Spring Festival', date: 'May 2, 2025' }
-  ];
+  const {
+    announcements,
+    deadlines,
+    classes,
+    onlineTopics,
+    calendarDays,
+    specialDates,
+    isLoading,
+    hasError,
+    dashboardError
+  } = useStudentDashboard();
 
-  const deadlines = [
-    { title: 'CS301 Assignment Due', date: 'Tomorrow', urgent: true },
-    { title: 'BIO220 Project Submission', date: 'May 5' },
-  ];
-
-  const classes = [
-    { code: 'CS301', name: 'Data Structures', time: '09:00-10:30AM', room: 'Room D201', status: 'Live' },
-    { code: 'MATH154', name: 'Linear Algebra', time: '11:00-12:30PM', room: 'Room A103', status: 'Next' }
-  ];
-
-  const onlineTopics = [
-    { title: 'Advanced Database Design', votes: 24, voted: true },
-    { title: 'Machine Learning Fundamentals', votes: 18, voted: false },
-    { title: 'Web Development with React', votes: 12, voted: false },
-    { title: 'Research Paper Writing Workshop', votes: 8, voted: false }
-  ];
-
-  const calendarDays = Array.from({ length: 31 }, (_, i) => i + 1);
-  const specialDates: Record<number, { type: 'exam' | 'deadline' | 'event' }> = {
-    10: { type: 'exam' },
-    15: { type: 'deadline' },
-    3: { type: 'event' }
-  };
+  if (isLoading) return <div>Loading...</div>;
+  if (hasError) return <div>Error: {dashboardError ? String(dashboardError) : 'Failed to load dashboard data.'}</div>;
 
   const handleVote = (index: number) => {
-    console.log(`Voted for ${onlineTopics[index].title}`);
+    if (onlineTopics && onlineTopics[index]) {
+      console.log(`Voted for ${onlineTopics[index].title}`);
+    }
   };
 
   return (

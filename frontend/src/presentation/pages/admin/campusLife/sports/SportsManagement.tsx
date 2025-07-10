@@ -14,7 +14,7 @@ import { debounce } from 'lodash';
 import Header from '../../../../components/admin/management/Header';
 import ApplicationsTable from '../../../../components/admin/management/ApplicationsTable';
 import Pagination from '../../../../components/admin/management/Pagination';
-import WarningModal from '../../../../components/WarningModal';
+import WarningModal from '../../../../components/common/WarningModal';
 import AddTeamModal from './AddTeamModal';
 import TeamDetailsModal from './TeamDetailsModal';
 import { useSportsManagement } from '../../../../../application/hooks/useSportsManagement';
@@ -24,7 +24,7 @@ import {
   PlayerRequest,
   Filters,
   ItemToAction,
-} from '../../../../../domain/types/sportmanagement';
+} from '../../../../../domain/types/management/sportmanagement';
 import { formatDate } from '../../../../../shared/utils/dateUtils';
 import {
   SPORT_TYPES,

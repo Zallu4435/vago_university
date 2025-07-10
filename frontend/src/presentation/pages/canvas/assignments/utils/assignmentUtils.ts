@@ -1,4 +1,4 @@
-import { Assignment, SortOption, FilterStatus } from '../types/AssignmentTypes';
+import { Assignment, SortOption, FilterStatus } from '../../../../../domain/types/canvas/assignment';
 
 export const getDaysLeft = (dueDate: string): number => {
   const now = new Date();

@@ -20,7 +20,7 @@ import {
   ClubRequestDetailsStatusBadgeProps,
   ClubRequestDetailsInfoCardProps,
   ParticleConfig
-} from '../../../../../domain/types/clubmanagement';
+} from '../../../../../domain/types/management/clubmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate, formatDateTime } from '../../../../../shared/utils/dateUtils';
 

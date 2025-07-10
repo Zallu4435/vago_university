@@ -1,5 +1,5 @@
+import { Notification, NotificationApiResponse } from '../../domain/types/management/notificationmanagement';
 import httpClient from '../../frameworks/api/httpClient';
-import { Notification, NotificationApiResponse } from '../../domain/types/notification.types';
 
 class NotificationService {
   async getNotifications(

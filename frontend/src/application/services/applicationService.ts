@@ -6,24 +6,11 @@ import {
   AchievementSection,
   OtherInformationSection,
   DocumentUploadSection,
-  DeclarationSection
-} from '../../domain/types/formTypes';
+  DeclarationSection,
+  PaymentResult,
+  SubmissionResult
+} from '../../domain/types/application';
 import { applicationController } from '../controller/ApplicationController';
-
-// Define payment result interface to match backend response
-interface PaymentResult {
-  paymentId: string;
-  status: string;
-  message?: string;
-  clientSecret?: string;
-  stripePaymentIntentId?: string;
-}
-
-// Define submission result interface
-interface SubmissionResult {
-  message: string;
-  admission: any;
-}
 
 class ApplicationService {
   async createApplication(userId: string, token: string): Promise<{ applicationId: string }> {

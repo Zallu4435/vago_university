@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { FaCheck, FaChalkboardTeacher, FaBook, FaCalendarAlt, FaHourglassHalf, FaUsers, FaListOl, FaTag, FaInfoCircle, FaPlay, FaVideo, FaTimes } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import type { RootState } from '../../../redux/store';
+import type { RootState } from '../../../../appStore/store';
 
 interface SessionDetailsModalProps {
   session: any;

@@ -15,7 +15,7 @@ import toast from 'react-hot-toast';
 import Header from '../../../../components/admin/management/Header';
 import ApplicationsTable from '../../../../components/admin/management/ApplicationsTable';
 import Pagination from '../../../../components/admin/management/Pagination';
-import WarningModal from '../../../../components/WarningModal';
+import WarningModal from '../../../../components/common/WarningModal';
 import AddEventModal from './AddEventModal';
 import EventDetailsModal from './EventDetailsModal';
 import EventRequestDetailsModal from './EventRequestDetailsModal';
@@ -25,7 +25,7 @@ import {
   EventRequest,
   Filters,
   ItemToAction,
-} from '../../../../../domain/types/eventmanagement';
+} from '../../../../../domain/types/management/eventmanagement';
 import {
   EVENT_TYPES,
   EVENT_STATUSES,

@@ -1,10 +1,6 @@
 import PropTypes from 'prop-types';
-import { usePreferences } from '../../../context/PreferencesContext';
-
-interface CampusLifeTabsProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-}
+import { usePreferences } from '../../../../application/context/PreferencesContext';
+import { CampusLifeTabsProps } from '../../../../domain/types/user/campus-life';
 
 export default function CampusLifeTabs({ activeTab, setActiveTab }: CampusLifeTabsProps) {
   const tabs = ['Events', 'Clubs', 'Athletics'];

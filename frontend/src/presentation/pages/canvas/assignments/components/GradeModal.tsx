@@ -1,13 +1,9 @@
 import React from 'react';
 import { FiX, FiAward, FiFileText, FiDownload, FiCheckCircle, FiAlertCircle, FiCalendar, FiClock } from 'react-icons/fi';
-import { Assignment } from '../types/AssignmentTypes';
 import { formatDueDate } from '../utils/assignmentUtils';
 import { userAssignmentService } from '../services/userAssignmentService';
+import { GradeModalProps } from '../../../../../domain/types/canvas/assignment';
 
-interface GradeModalProps {
-  assignment: Assignment;
-  onClose: () => void;
-}
 
 export const GradeModal: React.FC<GradeModalProps> = ({ assignment, onClose }) => {
   if (!assignment.submission) {

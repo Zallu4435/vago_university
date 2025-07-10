@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { facultyDashboardService, FacultyDashboardData, DashboardStats, WeeklyAttendanceData, AssignmentPerformanceData, SessionDistributionData, RecentActivity } from '../services/facultyDashboardService';
+import { facultyDashboardService } from '../services/facultyDashboardService';
 
 export const useFacultyDashboard = () => {
   const queryClient = useQueryClient();

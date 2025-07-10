@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { IoAttachOutline as Paperclip, IoCloseOutline as X, IoSearchOutline as Search, IoMailOutline as Mail } from 'react-icons/io5';
-import { RecipientType, User, ComposeMessageModalProps } from '../../../../domain/types/communicationmanagement';
+import { RecipientType, User, ComposeMessageModalProps } from '../../../../domain/types/management/communicationmanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const RECIPIENT_TYPES = [

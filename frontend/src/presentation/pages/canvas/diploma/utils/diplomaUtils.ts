@@ -1,6 +1,6 @@
 import { IconType } from 'react-icons';
 import { FiPlay, FiTarget, FiCheckCircle, FiCode } from 'react-icons/fi';
-import { ChapterType } from '../types/DiplomaTypes';
+import { ChapterType } from '../../../../../domain/types/diploma';
 
 export const getChapterTypeIcon = (type: ChapterType): IconType => {
   switch (type) {

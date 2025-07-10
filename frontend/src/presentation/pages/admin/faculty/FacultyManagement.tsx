@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useFacultyManagement } from '../../../../application/hooks/useFacultyManagement';
 import { FiFileText, FiUsers, FiClipboard, FiBarChart2, FiUser, FiMail, FiCalendar, FiBriefcase, FiEye, FiCheckCircle, FiXCircle, FiLock, FiUnlock } from 'react-icons/fi';
 import { debounce } from 'lodash';
-import WarningModal from '../../../components/WarningModal';
+import WarningModal from '../../../components/common/WarningModal';
 import FacultyDetailsModal from './FacultyDetailsModal';
 import Header from '../../../components/admin/management/Header';
 import Pagination from '../../../components/admin/management/Pagination';
@@ -13,7 +13,7 @@ import { filterFaculty } from '../../../../shared/filters/facultyFilter';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import EmptyState from '../../../../shared/components/EmptyState';
-import { Faculty, FacultyFilters } from '../../../../domain/types/facultyManagement';
+import { Faculty, FacultyFilters } from '../../../../domain/types/management/facultyManagement';
 
 const facultyColumns = [
   ...baseFacultyColumns.slice(0, 3),

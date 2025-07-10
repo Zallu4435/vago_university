@@ -5,7 +5,7 @@ import { enquiryService } from '../services/enquiry.service';
 import { 
   Enquiry, 
   CreateEnquiryData
-} from '../../domain/types/enquirymanagement';
+} from '../../domain/types/management/enquirymanagement';
 
 interface Filters {
   status: string;

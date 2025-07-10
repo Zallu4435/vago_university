@@ -1,35 +1,39 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FaPaperPlane, FaTimes } from 'react-icons/fa';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { joinRequestSchema, JoinRequestFormValues } from '../../../../domain/validation/user/JoinRequestSchema';
 
-export default function JoinRequestForm({ onSubmit, onCancel, isLoading, title }) {
-  const [reason, setReason] = useState('');
-  const [additionalInfo, setAdditionalInfo] = useState('');
-  const [reasonError, setReasonError] = useState(null);
+interface JoinRequestFormProps {
+  onSubmit: (data: JoinRequestFormValues) => void;
+  onCancel: () => void;
+  isLoading: boolean;
+  title: string;
+}
+
+export default function JoinRequestForm({ onSubmit, onCancel, isLoading, title }: JoinRequestFormProps) {
   const { styles, theme } = usePreferences();
-
   const maxReasonLength = 500;
   const maxAdditionalInfoLength = 300;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    watch,
+  } = useForm<JoinRequestFormValues>({
+    resolver: zodResolver(joinRequestSchema),
+    mode: 'onTouched',
+  });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (reason.trim().length === 0) {
-      setReasonError('Reason is required.');
-      return;
-    }
-    if (reason.length > maxReasonLength) {
-      setReasonError(`Reason cannot exceed ${maxReasonLength} characters.`);
-      return;
-    }
-    if (additionalInfo.length > maxAdditionalInfoLength) {
-      setReasonError(`Additional information cannot exceed ${maxAdditionalInfoLength} characters.`);
-      return;
-    }
-    setReasonError(null);
-    onSubmit({ reason, additionalInfo });
-    setReason('');
-    setAdditionalInfo('');
+  const watchedReason = watch('reason', '');
+  const watchedAdditionalInfo = watch('additionalInfo', '');
+
+  const onFormSubmit = (data: JoinRequestFormValues) => {
+    onSubmit(data);
+    reset();
   };
 
   return (
@@ -55,7 +59,7 @@ export default function JoinRequestForm({ onSubmit, onCancel, isLoading, title }
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 sm:space-y-5">
           <div>
             <label
               htmlFor="reason"
@@ -65,8 +69,7 @@ export default function JoinRequestForm({ onSubmit, onCancel, isLoading, title }
             </label>
             <textarea
               id="reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              {...register('reason')}
               className={`block w-full px-4 py-2 ${styles.input.background} border ${styles.input.border} rounded-lg focus:${styles.input.focus} transition-all duration-300 text-sm sm:text-base ${styles.textSecondary} placeholder-${styles.textSecondary}`}
               rows={3}
               required
@@ -74,11 +77,11 @@ export default function JoinRequestForm({ onSubmit, onCancel, isLoading, title }
               disabled={isLoading}
             />
             <div className="flex justify-between items-center mt-1">
-              <p className={`text-xs ${reasonError ? styles.status.error : styles.textSecondary}`}>
-                {reasonError || 'Required'}
+              <p className={`text-xs ${errors.reason ? styles.status.error : styles.textSecondary}`}>
+                {errors.reason?.message || 'Required'}
               </p>
               <p className={`text-xs ${styles.textSecondary}`}>
-                {reason.length}/{maxReasonLength}
+                {watchedReason.length}/{maxReasonLength}
               </p>
             </div>
           </div>
@@ -92,17 +95,18 @@ export default function JoinRequestForm({ onSubmit, onCancel, isLoading, title }
             </label>
             <textarea
               id="additionalInfo"
-              value={additionalInfo}
-              onChange={(e) => setAdditionalInfo(e.target.value)}
+              {...register('additionalInfo')}
               className={`block w-full px-4 py-2 ${styles.input.background} border ${styles.input.border} rounded-lg focus:${styles.input.focus} transition-all duration-300 text-sm sm:text-base ${styles.textSecondary} placeholder-${styles.textSecondary}`}
               rows={2}
               placeholder="Any additional information you'd like to share..."
               disabled={isLoading}
             />
             <div className="flex justify-between items-center mt-1">
-              <p className={`text-xs ${styles.textSecondary}`}>Optional</p>
+              <p className={`text-xs ${errors.additionalInfo ? styles.status.error : styles.textSecondary}`}>
+                {errors.additionalInfo?.message || 'Optional'}
+              </p>
               <p className={`text-xs ${styles.textSecondary}`}>
-                {additionalInfo.length}/{maxAdditionalInfoLength}
+                {(watchedAdditionalInfo || '').length}/{maxAdditionalInfoLength}
               </p>
             </div>
           </div>

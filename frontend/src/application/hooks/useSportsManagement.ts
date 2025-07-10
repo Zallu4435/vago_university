@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { sportsService } from '../services/sports.service';
-import { Team } from '../../domain/types/sports';
+import { Team } from '../../domain/types/management/sportmanagement';
 
 interface Filters {
   sportType: string;

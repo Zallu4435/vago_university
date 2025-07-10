@@ -1,5 +1,5 @@
 import { FaBookOpen, FaArrowRight } from 'react-icons/fa';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 export default function AcademicRecords({ studentInfo, gradeInfo, academicHistory }) {
   const { styles, theme } = usePreferences();

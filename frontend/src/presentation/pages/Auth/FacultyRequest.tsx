@@ -5,11 +5,12 @@ import { FaCheckCircle, FaUpload, FaSpinner } from 'react-icons/fa';
 import { facultyRequestSchema, type FacultyRequestFormData } from '../../../domain/validation/facultyRequestSchema';
 import { facultyRequestService } from '../../../application/services/facultyRequest.service';
 import { Link } from 'react-router-dom';
+import type { FacultyRequestError } from '../../../domain/types/auth/FacultyRequest';
 
 export default function FacultyRequestForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<FacultyRequestError>(null);
 
   const { register, handleSubmit, formState: { errors }, watch, reset } = useForm<FacultyRequestFormData>({
     resolver: zodResolver(facultyRequestSchema),

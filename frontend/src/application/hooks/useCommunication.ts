@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { communicationService } from '../../application/services/communicationService';
-import { Message, MessageForm } from '../../domain/types/communication';
 import debounce from 'lodash/debounce';
+import { Message, MessageForm } from '../../domain/types/user/communication';
 
 interface UseCommunicationManagementProps {
   isAdmin?: boolean;

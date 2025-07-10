@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../redux/store';
+import { RootState } from '../../../../appStore/store';
 import { useNavigate } from 'react-router-dom';
-import { logout } from '../../../redux/authSlice';
+import { logout } from '../../../../appStore/authSlice';
 import FacultySidebar from './FacultySidebar';
 import ProfileSettings from '../../user/Settings/ProfileSettings';
 import FacultyPreferenceSettings from './FacultyPreferenceSettings';

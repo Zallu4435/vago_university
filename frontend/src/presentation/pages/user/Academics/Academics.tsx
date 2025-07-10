@@ -5,7 +5,7 @@ import CourseRegistration from './CourseRegistration';
 import AcademicRecords from './AcademicRecords';
 import DegreeAudit from './DegreeAudit';
 import { useStudentInfo, useGradeInfo, useCourses, useAcademicHistory, useProgramInfo, useProgressInfo, useRequirementsInfo } from '../../../../application/hooks/useAcademic';
-import { usePreferences } from '../../../context/PreferencesContext';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 export default function Academics() {
   const [activeSubTab, setActiveSubTab] = useState('Course Registration');
@@ -130,7 +130,7 @@ export default function Academics() {
   return (
     <div className={`min-h-screen flex flex-col relative overflow-hidden ${styles.background}`}>
       {/* Background layers */}
-   
+
       <div className="relative z-10 flex flex-col min-h-screen">
         <AcademicInfo
           major={studentInfo?.major || fallbackStudentInfo.major}

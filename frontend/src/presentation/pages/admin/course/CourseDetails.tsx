@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiXCircle, FiBook, FiBriefcase, FiUser, FiHash, FiClock, FiUsers, FiCalendar } from 'react-icons/fi';
-import { CourseDetailsProps, InfoCardProps } from '../../../../domain/types/coursemanagement';
+import { CourseDetailsProps, InfoCardProps } from '../../../../domain/types/management/coursemanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate } from '../../../../shared/utils/dateUtils';
 

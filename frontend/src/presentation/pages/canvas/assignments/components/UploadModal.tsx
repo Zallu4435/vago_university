@@ -1,16 +1,8 @@
 import React, { useEffect } from 'react';
 import { FiX, FiFileText, FiUpload } from 'react-icons/fi';
-import { Assignment } from '../types/AssignmentTypes';
 import { formatDueDate } from '../utils/assignmentUtils';
+import { UploadModalProps } from '../../../../../domain/types/canvas/assignment';
 
-interface UploadModalProps {
-  assignment: Assignment;
-  styles: any;
-  selectedFile: File | null;
-  onClose: () => void;
-  onFileSelect: (file: File) => void;
-  onSubmit: () => void;
-}
 
 export const UploadModal: React.FC<UploadModalProps> = ({
   assignment,

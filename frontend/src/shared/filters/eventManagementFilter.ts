@@ -1,4 +1,4 @@
-import { Event, EventRequest, Filters } from '../../domain/types/eventmanagement';
+import { Event, EventRequest, Filters } from '../../domain/types/management/eventmanagement';
 
 export const filterEvents = (events: Event[], filters: Filters, searchTerm: string): Event[] => {
   return events.filter((event) => {

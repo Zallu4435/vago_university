@@ -1,6 +1,6 @@
 // src/application/services/event.service.ts
+import { EventApiResponse, EventRequest } from '../../domain/types/management/eventmanagement';
 import httpClient from '../../frameworks/api/httpClient';
-import { Event, EventRequest, EventApiResponse } from '../../domain/types/event';
 
 class EventService {
   async getEvents(

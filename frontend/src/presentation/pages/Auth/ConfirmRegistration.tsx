@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { FaSpinner, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { authService } from '../../../application/services/auth.service';
+import type { ConfirmRegistrationStatus } from '../../../domain/types/auth/ConfirmRegistration';
 
 const ConfirmRegistration = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [status, setStatus] = useState<ConfirmRegistrationStatus>('loading');
   const [message, setMessage] = useState('');
 
   useEffect(() => {

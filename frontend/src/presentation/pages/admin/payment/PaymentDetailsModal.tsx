@@ -8,7 +8,7 @@ import {
   IoDocumentTextOutline as FileText,
   IoDownloadOutline as Download,
 } from 'react-icons/io5';
-import { Payment, PaymentDetailsModalProps } from '../../../../domain/types/financialmanagement';
+import { Payment, PaymentDetailsModalProps } from '../../../../domain/types/management/financialmanagement';
 
 const StatusBadge = ({ status }: { status: string }) => {
   const statusConfig = {

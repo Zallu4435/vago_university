@@ -21,5 +21,4 @@ router.get("/session-distribution", (req, res, next) => expressAdapter(req, res,
 router.get("/recent-activities", (req, res, next) => expressAdapter(req, res, next, facultyDashboardController.getRecentActivities.bind(facultyDashboardController)));
 
 
-
 export default router; 

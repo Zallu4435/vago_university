@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaGraduationCap, FaArrowRight, FaClock } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import { useSectionAnimation } from '../../../application/hooks/useSectionAnimation';
+import { useSectionAnimation } from '../../../shared/hooks/useSectionAnimation';
 import computingImage from '../../../assets/images/ug-programs/programs/school-of-computing.jpg'
 import businessImage from '../../../assets/images/ug-programs/programs/school-of-business.jpg';
 

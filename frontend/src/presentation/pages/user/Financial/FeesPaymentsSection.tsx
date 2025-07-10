@@ -2,37 +2,9 @@ import { useState, useEffect } from 'react';
 import { FaMoneyCheckAlt } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { useFinancial } from '../../../../application/hooks/useFinancial';
-import { usePreferences } from '../../../context/PreferencesContext';
-import PaymentReceiptModal from '../../../components/PaymentReceiptModal';
-
-interface Charge {
-  id: string;
-  amount?: number;
-  chargeTitle?: string;
-  chargeDescription?: string;
-  term?: string;
-  paymentDueDate?: string;
-  status?: 'Pending' | 'Paid';
-  name?: string;
-  email?: string;
-  contact?: string;
-}
-
-interface Payment {
-  id?: string;
-  paidAt?: string;
-  date?: string;
-  chargeTitle?: string;
-  description?: string;
-  method?: 'Financial Aid' | 'Credit Card' | 'Bank Transfer' | 'Razorpay';
-  amount?: number;
-}
-
-interface FeesPaymentsSectionProps {
-  studentInfo: Charge[];
-  paymentHistory: Payment[];
-  onPaymentSuccess?: () => void; // Callback to refresh financial data
-}
+import { usePreferences } from '../../../../application/context/PreferencesContext';
+import PaymentReceiptModal from './PaymentReceiptModal';
+import type { Charge, Payment, FeesPaymentsSectionProps } from '../../../../domain/types/user/financial';
 
 export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPaymentSuccess }: FeesPaymentsSectionProps) {
   const { makePayment, loading, error } = useFinancial();

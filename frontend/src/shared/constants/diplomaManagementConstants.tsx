@@ -1,5 +1,5 @@
 import { FiBook, FiBriefcase, FiUser, FiClock } from 'react-icons/fi';
-import { Diploma, Enrollment } from '../../domain/types/diplomamanagement';
+import { Diploma, Enrollment } from '../../domain/types/management/diplomamanagement';
 
 export const CATEGORIES = ['All Categories', 'Programming', 'Data Science', 'Business', 'Design', 'Marketing'];
 export const STATUSES = ['All', 'Active', 'Inactive', 'Pending', 'Approved', 'Rejected'];

@@ -1,5 +1,5 @@
 import { FiStar, FiZap, FiUser } from 'react-icons/fi';
-import { Section, SiteSectionKey } from '../../domain/types/sitemanagement';
+import { Section, SiteSectionKey } from '../../domain/types/management/sitemanagement';
 import { SiteSection } from '../../application/services/siteManagement.service';
 import { formatDate } from '../utils/dateUtils';
 

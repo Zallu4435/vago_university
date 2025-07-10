@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaArrowRight, FaGraduationCap, FaGlobeAmericas, FaDollarSign, FaUsers, FaCalendarAlt, FaStar } from 'react-icons/fa';
-import { useSectionAnimation } from '../../../application/hooks/useSectionAnimation';
+import { useSectionAnimation } from '../../../shared/hooks/useSectionAnimation';
 import { useLocation } from 'react-router-dom';
 
 // Import images from assets

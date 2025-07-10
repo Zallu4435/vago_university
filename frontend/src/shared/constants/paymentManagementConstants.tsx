@@ -1,6 +1,6 @@
 // Payment Management Constants
 import { FiDollarSign, FiCreditCard, FiFileText, FiAward } from 'react-icons/fi';
-import { Payment } from '../../domain/types/financialmanagement';
+import { Payment } from '../../domain/types/management/financialmanagement';
 
 export const STATUSES = ['All Statuses', 'Pending', 'Approved', 'Rejected'];
 export const TERMS = ['All Terms', 'Fall 2024', 'Spring 2025', 'Summer 2025'];

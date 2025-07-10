@@ -72,50 +72,88 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
         // Create notification entity with business logic
         const notification = Notification.create({
             ...params,
-            status: NotificationStatus.SENT,
+            status: NotificationStatus.PENDING,
         });
 
         try {
-            // Send FCM notification
-            await this.sendFCMNotification(params);
-
-            // Save to database
+            // First save to database to get an ID
             const dbResult = await this.notificationRepository.create(notification.props);
-            return { notificationId: dbResult._id.toString() };
+            const notificationId = dbResult._id.toString();
+
+            // Then send FCM notification with the ID
+            try {
+                await this.sendFCMNotification({
+                    ...params,
+                    id: notificationId
+                });
+                
+                // Update status to sent
+                await this.notificationRepository.update(notificationId, { status: NotificationStatus.SENT });
+            } catch (error) {
+                // If FCM fails, update status to failed
+                await this.notificationRepository.update(notificationId, { status: NotificationStatus.FAILED });
+                throw error;
+            }
+
+            return { notificationId };
         } catch (error) {
-            // If FCM fails, save with failed status
-            const failedNotification = Notification.create({
-                ...params,
-                status: NotificationStatus.FAILED,
-            });
-            
-            const dbResult = await this.notificationRepository.create(failedNotification.props);
             throw new NotificationCreationFailedError(error.message);
         }
     }
 
-    private async sendFCMNotification(params: CreateNotificationRequestDTO): Promise<void> {
-        const { title, message, recipientType, recipientId } = params;
-        const fcmMessage = { notification: { title, body: message } };
+    private async sendFCMNotification(params: CreateNotificationRequestDTO & { id: string }): Promise<void> {
+        console.log('[Backend] Starting to send FCM notification:', {
+            title: params.title,
+            recipientType: params.recipientType,
+            hasRecipientId: !!params.recipientId
+        });
+
+        const { title, message, recipientType, recipientId, id } = params;
+        const fcmMessage = { 
+            notification: { title, body: message },
+            data: { notificationId: id.toString() }
+        };
+
+        console.log('[Backend] Constructed FCM message:', fcmMessage);
 
         if (recipientType === NotificationRecipientType.INDIVIDUAL && recipientId) {
-            await getMessaging().send({ ...fcmMessage, token: recipientId });
+            console.log('[Backend] Sending individual notification to token:', recipientId);
+            try {
+                const result = await getMessaging().send({ ...fcmMessage, token: recipientId });
+                console.log('[Backend] Individual notification sent successfully:', result);
+            } catch (error) {
+                console.error('[Backend] Failed to send individual notification:', error);
+                // If token is invalid, remove it from the user's tokens
+                if (error.code === 'messaging/invalid-registration-token' ||
+                    error.code === 'messaging/registration-token-not-registered') {
+                    await this.notificationRepository.removeToken(recipientId);
+                }
+                throw error;
+            }
         } else {
+            console.log('[Backend] Preparing to send bulk notifications');
             let students: any[] = [];
             let faculty: any[] = [];
 
             if ([NotificationRecipientType.ALL_STUDENTS, NotificationRecipientType.ALL, NotificationRecipientType.ALL_STUDENTS_AND_FACULTY].includes(recipientType)) {
+                console.log('[Backend] Fetching student tokens');
                 students = await this.notificationRepository.findUsersByCollection("user");
+                console.log('[Backend] Found students:', students.length);
             }
             if ([NotificationRecipientType.ALL_FACULTY, NotificationRecipientType.ALL, NotificationRecipientType.ALL_STUDENTS_AND_FACULTY].includes(recipientType)) {
+                console.log('[Backend] Fetching faculty tokens');
                 faculty = await this.notificationRepository.findFacultyByCollection("faculty");
+                console.log('[Backend] Found faculty:', faculty.length);
             }
 
             const studentTokens = students.flatMap((user) => user.fcmTokens || []);
             const facultyTokens = faculty.flatMap((faculty) => faculty.fcmTokens || []);
             const tokens = [...new Set([...studentTokens, ...facultyTokens])];
 
+            console.log('[Backend] Total unique FCM tokens:', tokens.length);
+
             if (tokens.length === 0) {
+                console.error('[Backend] No FCM tokens found for bulk send');
                 throw new Error("No FCM tokens found");
             }
 
@@ -126,14 +164,54 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
                 batches.push(tokens.slice(i, i + batchSize));
             }
 
-            await Promise.all(
-                batches.map((batch) =>
-                    getMessaging().sendEachForMulticast({
-                        notification: { title, body: message },
-                        tokens: batch,
+            console.log('[Backend] Sending notifications in', batches.length, 'batches');
+
+            try {
+                const results = await Promise.all(
+                    batches.map(async (batch, index) => {
+                        console.log('[Backend] Sending batch', index + 1, 'of', batches.length);
+                        const result = await getMessaging().sendEachForMulticast({
+                            notification: { title, body: message },
+                            data: { notificationId: params.id },
+                            tokens: batch,
+                        });
+
+                        // Log detailed errors and clean up invalid tokens
+                        result.responses.forEach(async (response, idx) => {
+                            if (!response.success) {
+                                console.error('[Backend] Token error:', {
+                                    token: batch[idx].substring(0, 10) + '...',
+                                    error: response.error.code,
+                                    errorMessage: response.error.message
+                                });
+
+                                // Remove invalid tokens
+                                if (response.error.code === 'messaging/invalid-registration-token' ||
+                                    response.error.code === 'messaging/registration-token-not-registered') {
+                                    const token = batch[idx];
+                                    await this.notificationRepository.removeToken(token);
+                                }
+                            }
+                        });
+
+                        console.log('[Backend] Batch', index + 1, 'result:', {
+                            successCount: result.successCount,
+                            failureCount: result.failureCount,
+                            errors: result.responses
+                                .filter(r => !r.success)
+                                .map(r => ({
+                                    code: r.error.code,
+                                    message: r.error.message
+                                }))
+                        });
+                        return result;
                     })
-                )
-            );
+                );
+                console.log('[Backend] All notification batches sent successfully:', results);
+            } catch (error) {
+                console.error('[Backend] Error sending notification batches:', error);
+                throw error;
+            }
         }
     }
 }

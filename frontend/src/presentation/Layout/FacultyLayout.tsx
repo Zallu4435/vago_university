@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
-import { logout } from '../redux/authSlice';
+import { RootState } from '../../appStore/store';
+import { logout } from '../../appStore/authSlice';
 import Sidebar from '../pages/faculty/Sidebar';
 import Header from '../pages/faculty/Header';
 

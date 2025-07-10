@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { FiXCircle, FiStar } from 'react-icons/fi';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
-import { SiteSectionViewModalProps, SectionField } from '../../../../domain/types/sitemanagement';
+import { SiteSectionViewModalProps, SectionField } from '../../../../domain/types/management/sitemanagement';
 
 const SiteSectionViewModal: React.FC<SiteSectionViewModalProps> = ({ fields, data, onClose }) => {
   usePreventBodyScroll(true);

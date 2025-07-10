@@ -3,7 +3,7 @@ import {
   IoTimeOutline as Clock,
   IoPersonOutline as Users,
 } from 'react-icons/io5';
-import { Message, MessageColumn } from '../../domain/types/communicationmanagement';
+import { Message, MessageColumn } from '../../domain/types/management/communicationmanagement';
 
 export const STATUSES = ['All Statuses', 'Unread', 'Read', 'Delivered', 'Opened'];
 

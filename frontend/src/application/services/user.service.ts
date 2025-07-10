@@ -1,6 +1,6 @@
 // frontend/src/application/services/user.service.ts
+import { AdmissionApiResponse, AdmissionDetails } from '../../domain/types/management/usermanagement';
 import httpClient from '../../frameworks/api/httpClient';
-import { AdmissionApiResponse, AdmissionDetails } from '../../domain/types/admission';
 
 class UserService {
   async getAdmissions(

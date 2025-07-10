@@ -12,26 +12,15 @@ import toast from 'react-hot-toast';
 import Header from '../../../../components/admin/management/Header';
 import ApplicationsTable from '../../../../components/admin/management/ApplicationsTable';
 import Pagination from '../../../../components/admin/management/Pagination';
-import WarningModal from '../../../../components/WarningModal';
+import WarningModal from '../../../../components/common/WarningModal';
 import AddClubModal from './AddClubModal';
 import ClubDetailsModal from './ClubDetailsModal';
 import ClubRequestDetailsModal from './ClubRequestDetailsModal';
 import { useClubManagement } from '../../../../../application/hooks/useClubManagement';
-import { Club, ClubRequest, ClubActionConfig } from '../../../../../domain/types/clubmanagement';
+import { Club, ClubRequest, ClubActionConfig } from '../../../../../domain/types/management/clubmanagement';
 import { CATEGORIES, CLUB_STATUSES, REQUEST_STATUSES, DATE_RANGES, ICONS, COLORS, clubColumns, clubRequestColumns } from '../../../../../shared/constants/clubManagementConstants';
 import { filterClubs, filterClubRequests } from '../../../../../shared/filters/clubManagementFilter';
 
-const formatDate = (dateString: string): string => {
-  if (!dateString) return 'N/A';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
 
 const AdminClubManagement: React.FC = () => {
   const {

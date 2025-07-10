@@ -1,8 +1,8 @@
 import React from 'react';
-import UndergraduateProgrammes from "../../components/ug_admissions/UndergraduateProgrammes";
-import UndergraduatePublications from "../../components/ug_admissions/UndergraduatePublications";
-import WhatMakesNUSDifferent from "../../components/ug_admissions/WhatMakesNUSDifferent";
-import { useSectionAnimation } from "../../../application/hooks/useSectionAnimation";
+import UndergraduateProgrammes from "../../components/public/ug_admissions/UndergraduateProgrammes";
+import UndergraduatePublications from "../../components/public/ug_admissions/UndergraduatePublications";
+import WhatMakesNUSDifferent from "../../components/public/ug_admissions/WhatMakesNUSDifferent";
+import { useSectionAnimation } from "../../../shared/hooks/useSectionAnimation";
 
 export const UGHome: React.FC = () => {
   const isVisible = useSectionAnimation();

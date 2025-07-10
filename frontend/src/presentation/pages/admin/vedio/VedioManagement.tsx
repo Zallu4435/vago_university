@@ -4,10 +4,10 @@ import Header from '../../../components/admin/management/Header';
 import Pagination from '../../../components/admin/management/Pagination';
 import AddVideoModal from './AddVideoModal';
 import VideoPreviewModal from './VideoPreviewModal';
-import { useVideoManagement } from '../../../hooks/useVideoManagement';
-import WarningModal from '../../../components/WarningModal';
+import { useVideoManagement } from '../../../../application/hooks/useVideoManagement';
+import WarningModal from '../../../components/common/WarningModal';
 import { ITEMS_PER_PAGE, STATUS_OPTIONS, getTabs } from '../../../../shared/constants/videoManagementConstants';
-import { Video, VideoForEdit, Filters } from '../../../../domain/types/videomanagement';
+import { Video, VideoForEdit, Filters } from '../../../../domain/types/management/videomanagement';
 import { filterVideos } from '../../../../shared/filters/videoManagementFilter';
 
 const VideoManagementPage = () => {

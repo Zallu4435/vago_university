@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaFilter } from 'react-icons/fa';
-import { SessionFiltersProps } from '../types/SessionTypes';
+import { SessionFiltersProps } from '../../../../../domain/types/canvas/session';
 
 export const SessionFilters: React.FC<SessionFiltersProps> = ({
   filters,

@@ -1,19 +1,7 @@
 import React from 'react';
 import { FiLock, FiClock, FiCheckCircle, FiBookmark } from 'react-icons/fi';
-import { Chapter } from '../types/DiplomaTypes';
 import { getChapterTypeIcon, getChapterTypeColor } from '../utils/diplomaUtils';
-
-interface ChapterItemProps {
-  chapter: Chapter;
-  courseId: string;
-  styles: any;
-  isFirst: boolean;
-  isPrevCompleted: boolean;
-  isCompleted: boolean;
-  isBookmarked: boolean;
-  onViewChapter: (chapter: Chapter) => void;
-  onBookmark: (courseId: string, chapterId: string) => void;
-}
+import { ChapterItemProps } from '../../../../../domain/types/canvas/diploma';
 
 export const ChapterItem: React.FC<ChapterItemProps> = ({
   chapter,

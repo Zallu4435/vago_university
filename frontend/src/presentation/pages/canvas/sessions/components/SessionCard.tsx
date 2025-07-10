@@ -12,7 +12,6 @@ import {
   FaDesktop,
   FaComments
 } from 'react-icons/fa';
-import { SessionCardProps } from '../types/SessionTypes';
 import { 
   getStatusBadge, 
   getDifficultyBadge, 
@@ -21,14 +20,9 @@ import {
 } from '../utils/sessionUtils';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import type { RootState } from '../../../../redux/store';
+import type { RootState } from '../../../../../appStore/store';
+import { BackendSession, SessionCardProps } from '../../../../../domain/types/canvas/session';
 
-// Patch: ensure session.startTime exists for backend data
-interface BackendSession {
-  startTime: string;
-  joinUrl?: string;
-  [key: string]: any;
-}
 
 export const SessionCard: React.FC<SessionCardProps> = ({
   session,

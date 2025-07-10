@@ -1,8 +1,8 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../redux/store';
-import { Header } from '../components/Header';
-import { logout } from '../redux/authSlice';
+import { RootState } from '../../appStore/store';
+import { Header } from '../components/public/Header';
+import { logout } from '../../appStore/authSlice';
 import { useNavigate } from 'react-router-dom';
 
 const ApplicationFormLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {

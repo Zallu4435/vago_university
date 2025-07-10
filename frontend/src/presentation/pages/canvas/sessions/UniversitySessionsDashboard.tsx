@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaFilter } from 'react-icons/fa';
-import { usePreferences } from '../../../context/PreferencesContext';
-import { Session, UserAccess, Filters } from './types/SessionTypes';
-import { SessionHeader } from './components/SessionHeader';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
+import { UserAccess, Filters } from '../../../../domain/types/canvas/session';
 import { SessionStats } from './components/SessionStats';
 import { SessionFilters } from './components/SessionFilters';
 import { SessionCard } from './components/SessionCard';

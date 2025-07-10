@@ -1,8 +1,8 @@
 import React from 'react';
-import MissionVision from '../../components/main/MissionVision';
-import UniversityLeadership from '../../components/main/UniversityLeadership';
-import InNumbers from '../../components/main/InNumbers';
-import { useSectionAnimation } from '../../../application/hooks/useSectionAnimation';
+import MissionVision from '../../components/public/main/MissionVision';
+import UniversityLeadership from '../../components/public/main/UniversityLeadership';
+import InNumbers from '../../components/public/main/InNumbers';
+import { useSectionAnimation } from '../../../shared/hooks/useSectionAnimation';
 
 export const About: React.FC = () => {
   const isVisible = useSectionAnimation();

@@ -1,18 +1,11 @@
 import React from 'react';
-import { Material } from '../types/MaterialTypes';
-import { usePreferences } from '../../../../context/PreferencesContext';
+import { usePreferences } from '../../../../../application/context/PreferencesContext';
 import {
-    FiDownload, FiBookmark, FiHeart, FiLock, FiStar,
-    FiEye, FiClock, FiCalendar, FiUser, FiBook, FiMoreVertical
+    FiDownload, FiBookmark, FiHeart, FiMoreVertical
 } from 'react-icons/fi';
-import { getFileIcon, getDifficultyColor, formatDate, formatNumber } from '../utils/materialUtils';
+import { getFileIcon, getDifficultyColor } from '../utils/materialUtils';
+import { MaterialTableProps } from '../../../../../domain/types/canvas/materials';
 
-interface MaterialTableProps {
-    materials: Material[];
-    onDownload: (material: Material) => void;
-    onBookmark: (materialId: string) => void;
-    onLike: (materialId: string) => void;
-}
 
 const MaterialTable: React.FC<MaterialTableProps> = ({ materials, onDownload, onBookmark, onLike }) => {
     const { styles } = usePreferences();

@@ -9,7 +9,7 @@ import { Chat, Message, User } from './types/ChatTypes';
 import { getStyles } from './utils/chatUtils';
 import { FiPlus, FiUser, FiArrowLeft, FiUsers, FiMessageSquare } from 'react-icons/fi';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../presentation/redux/store';
+import { RootState } from '../../../../appStore/store';
 import { toast } from 'react-hot-toast';
 import CreateGroupModal from './components/CreateGroupModal';
 import GroupSettingsModal from './components/GroupSettingsModal';

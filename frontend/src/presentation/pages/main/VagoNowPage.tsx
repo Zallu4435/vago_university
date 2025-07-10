@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { FaArrowLeft, FaSearch, FaFilter, FaTimes, FaBolt, FaCalendar, FaTag, FaMapMarkerAlt } from 'react-icons/fa';
 import { useVagoNow, useVagoNowCategories } from '../../../application/hooks/useSiteSections';
 import { SiteSection } from '../../../application/services/siteSections.service';
-import SiteSectionModal from '../../components/SiteSectionModal';
+import SiteSectionModal from '../../components/public/SiteSectionModal';
 
 export const VagoNowPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');

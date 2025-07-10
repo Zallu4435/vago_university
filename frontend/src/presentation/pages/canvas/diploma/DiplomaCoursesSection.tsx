@@ -1,14 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  FiArrowLeft, FiBookOpen, FiAward, FiHeart, FiShare2, FiDownload, FiBookmark, FiCheckCircle,
-  FiClock, FiUsers, FiStar, FiEye, FiTrendingUp, FiCode, FiBarChart
+  FiArrowLeft, FiBookOpen, FiAward, FiHeart, FiShare2,
+  FiClock, FiUsers, FiStar
 } from 'react-icons/fi';
-import { usePreferences } from '../../../context/PreferencesContext';
-import { ViewMode } from './types/DiplomaTypes';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 import { DiplomaCard } from './components/DiplomaCard';
 import { ChapterItem } from './components/ChapterItem';
-import { VideoPlayer } from './components/VideoPlayer';
 import { useDiplomaManagement } from '../../../../application/hooks/useDiplomaManagement';
+import { ViewMode } from '../../../../domain/types/canvas/diploma';
 
 const DiplomaCoursesSection = () => {
   const { styles } = usePreferences();

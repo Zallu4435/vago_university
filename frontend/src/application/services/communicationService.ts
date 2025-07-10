@@ -1,20 +1,13 @@
-import { Message, MessageForm, Admin } from '../../domain/types/communication';
+import { Message, MessageForm, User } from '../../domain/types/user/communication';
 import httpClient from '../../frameworks/api/httpClient';
 type RecipientType = '' | 'all_students' | 'all_faculty' | 'all_users' | 'individual_students' | 'individual_faculty';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-}
 
 export class CommunicationService {
   private static instance: CommunicationService;
   private readonly userBaseUrl = '/communication';
   private readonly adminBaseUrl = '/communication/admin';
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): CommunicationService {
     if (!CommunicationService.instance) {
@@ -70,7 +63,7 @@ export class CommunicationService {
     console.log('Type typeof:', typeof type);
     console.log('Search:', search);
     console.log('==============================================');
-    
+
     const response = await httpClient.get(`/communication/admin/users`, {
       params: {
         type,
@@ -83,12 +76,12 @@ export class CommunicationService {
 
   async sendMessage(form: MessageForm): Promise<Message> {
     console.log('CommunicationService - sendMessage called with form:', form);
-    
+
     const formData = new FormData();
     formData.append('to', JSON.stringify(form.to));
     formData.append('subject', form.subject);
     formData.append('message', form.message);
-    
+
     console.log('CommunicationService - Attachments to process:', form.attachments);
     form.attachments.forEach((file, index) => {
       console.log(`CommunicationService - Appending attachment ${index}:`, {
@@ -101,13 +94,13 @@ export class CommunicationService {
 
     const endpoint = form.isAdmin ? '/communication/admin/messages' : '/communication/admin/messages';
     console.log('CommunicationService - Sending to endpoint:', endpoint);
-    
+
     const response = await httpClient.post(endpoint, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
-    
+
     console.log('CommunicationService - Response received:', response.data);
     return response.data;
   }
@@ -126,11 +119,11 @@ export class CommunicationService {
       console.log('=== CommunicationService markAsRead DEBUG ===');
       console.log('MessageId:', messageId);
       console.log('IsAdmin:', isAdmin);
-      
+
       const baseUrl = this.getBaseUrl(isAdmin);
       const endpoint = `${baseUrl}/messages/${messageId}/read`;
       console.log('Calling endpoint:', endpoint);
-      
+
       await httpClient.put(endpoint);
       console.log('Mark as read API call successful');
       console.log('================================');

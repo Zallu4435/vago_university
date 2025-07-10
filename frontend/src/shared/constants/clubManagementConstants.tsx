@@ -5,7 +5,7 @@ import {
   IoBusinessOutline as Building,
   IoPersonOutline as User,
 } from 'react-icons/io5';
-import { Club, ClubRequest, ClubColumn } from '../../domain/types/clubmanagement';
+import { Club, ClubRequest, ClubColumn } from '../../domain/types/management/clubmanagement';
 import { formatDate } from '../utils/dateUtils';
 
 export const CATEGORIES = ['All', 'Tech', 'Cultural', 'Sports', 'Arts', 'Academic'];

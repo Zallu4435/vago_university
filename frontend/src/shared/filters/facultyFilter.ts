@@ -1,4 +1,4 @@
-import { Faculty } from "../../domain/types/facultyManagement";
+import { Faculty } from "../../domain/types/management/facultyManagement";
 
 export function filterFaculty(
   faculty: Faculty[],

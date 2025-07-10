@@ -4,22 +4,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaRegCheckCircle, FaRegIdCard, FaShieldAlt } from 'react-icons/fa';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
-import { Input } from '../../components/Input';
-import { Button } from '../../components/Button';
+import { Input } from '../../components/base/Input';
+import { Button } from '../../components/base/Button';
 import { registerSchema } from '../../../domain/validation/register';
 import { useRegisterUser } from '../../../application/hooks/useAuthQueries';
-import { usePasswordStrength } from '../../../application/hooks/usePasswordStrength';
-import { useAnimation } from '../../../application/hooks/useAnimation';
-import { toast } from 'react-hot-toast'; 
-
-interface FormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  acceptTerms: boolean;
-}
+import { usePasswordStrength } from '../../../shared/hooks/usePasswordStrength';
+import { useAnimation } from '../../../shared/hooks/useAnimation';
+import type { RegisterFormData } from '../../../domain/types/auth/Register';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -30,7 +21,7 @@ const RegisterPage = () => {
   const [confirmationMessage, setConfirmationMessage] = useState('');
   const [formError, setFormError] = useState('');
 
-  const { register, handleSubmit, watch, formState: { errors }, reset } = useForm<FormData>({
+  const { register, handleSubmit, watch, formState: { errors }, reset } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       firstName: '',
@@ -47,7 +38,7 @@ const RegisterPage = () => {
 
   const mutation = useRegisterUser();
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = (data: RegisterFormData) => {
     setFormError('');
     mutation.mutate(
       {
@@ -210,18 +201,7 @@ const RegisterPage = () => {
 
                 <Button
                   type="submit"
-                  label={
-                    mutation.isPending ? (
-                      <span className="flex items-center justify-center">
-                        <svg className="animate-spin h-4 w-4 sm:h-5 sm:w-5 mr-2" viewBox="0 0 24 24">
-                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        </svg>
-                        Registering...
-                      </span>
-                    ) : (
-                      'Register'
-                    )
-                  }
+                  label={mutation.isPending ? 'Registering...' : 'Register'}
                   disabled={mutation.isPending}
                   variant="primary"
                   className="w-full"

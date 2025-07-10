@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userAssignmentService } from '../services/userAssignmentService';
-import { Assignment, SelectedFile, SortOption, FilterStatus } from '../types/AssignmentTypes';
+import { SelectedFile, SortOption, FilterStatus } from '../../../../../domain/types/canvas/assignment';
 
 export const useUserAssignments = () => {
   const queryClient = useQueryClient();

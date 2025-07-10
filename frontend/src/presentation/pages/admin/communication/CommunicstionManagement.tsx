@@ -19,11 +19,11 @@ import { useCommunicationManagement } from '../../../../application/hooks/useCom
 import Header from '../../../components/admin/management/Header';
 import ApplicationsTable from '../../../components/admin/management/ApplicationsTable';
 import Pagination from '../../../components/admin/management/Pagination';
-import WarningModal from '../../../components/WarningModal';
+import WarningModal from '../../../components/common/WarningModal';
 import ComposeMessageModal from './ComposeMessageModal'; // Shared with user side
 import MessageDetailsModal from './MessageDetailsModal'; // Shared with user side
 import debounce from 'lodash/debounce';
-import { Message, MessageStatus, MessageTab, UserGroup, MessageAction, MessageColumn } from '../../../../domain/types/communicationmanagement';
+import { Message, MessageStatus, MessageTab, UserGroup, MessageAction, MessageColumn } from '../../../../domain/types/management/communicationmanagement';
 import { STATUSES, USER_GROUPS, ITEMS_PER_PAGE, inboxColumns, sentColumns } from '../../../../shared/constants/communicationManagementConstants';
 
 const CommunicationManagement: React.FC = () => {

@@ -1,5 +1,5 @@
 // src/application/services/campus-life.service.ts
-import { CampusLifeResponse, Event, Sport, Club, JoinRequest } from '../../domain/types/campus-life';
+import { CampusLifeResponse, Event, Sport, Club, JoinRequest } from '../../domain/types/user/campus-life';
 import httpClient from '../../frameworks/api/httpClient';
 
 class CampusLifeService {

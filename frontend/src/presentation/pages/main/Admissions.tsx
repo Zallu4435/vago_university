@@ -1,7 +1,7 @@
-import { Programmes } from "../../components/main/Programmes";
-import Scholarships from "../../components/main/Scholarships";
-import Apply from "../../components/main/Apply";
-import { useSectionAnimation } from "../../../application/hooks/useSectionAnimation";
+import { Programmes } from "../../components/public/main/Programmes";
+import Scholarships from "../../components/public/main/Scholarships";
+import Apply from "../../components/public/main/Apply";
+import { useSectionAnimation } from "../../../shared/hooks/useSectionAnimation";
 import React from "react";
 
 export const Admissions: React.FC = () => {

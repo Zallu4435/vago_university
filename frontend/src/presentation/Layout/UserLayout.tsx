@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import Header from '../pages/user/Header';
-import Footer from '../pages/user/Footer';
-import { logout } from '../redux/authSlice';
+import Header from '../components/user/Header';
+import Footer from '../components/user/Footer';
+import { logout } from '../../appStore/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
-import { usePreferences } from '../context/PreferencesContext';
+import { RootState } from '../../appStore/store';
+import { usePreferences } from '../../application/context/PreferencesContext';
 import { socketRef } from '../pages/canvas/chat/ChatComponent';
 
 const UserLayout = () => {

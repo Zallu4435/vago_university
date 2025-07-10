@@ -1,23 +1,9 @@
 import { useState, useEffect } from 'react';
 import { FaHandHoldingUsd, FaTimes } from 'react-icons/fa';
 import { useFinancial } from '../../../../application/hooks/useFinancial';
-import { FinancialAidApplication } from '../../../../domain/types/financialmanagement';
-import { usePreferences } from '../../../context/PreferencesContext';
-
-type ApplicationType = 'Grant' | 'Loan' | 'Work Study';
-
-interface Document {
-  name: string;
-  url: string;
-}
-
-interface ApplicationForm {
-  studentId: string;
-  term: string;
-  amount: number;
-  type: ApplicationType;
-  documents: Document[];
-}
+import { FinancialAidApplication } from '../../../../domain/types/management/financialmanagement';
+import type { Document, ApplicationType, ApplicationForm } from '../../../../domain/types/user/financial';
+import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 export default function FinancialAidSection() {
   const {

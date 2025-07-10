@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   IoCloseOutline as X,
   IoCalendarOutline as Calendar,
@@ -13,45 +13,17 @@ import {
   IoMailOutline as Mail,
   IoIdCardOutline as IdCard,
 } from 'react-icons/io5';
-import { IconType } from 'react-icons';
+import { 
+  TeamRequestDetailsModalProps, 
+  TeamRequestDetailsStatusBadgeProps, 
+  TeamRequestDetailsInfoCardProps,
+  StatusType,
+  TeamRequestDetails 
+} from '../../../../../domain/types/sportmanagement';
+import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
+import { formatDate, formatDateTime } from '../../../../../shared/utils/dateUtils';
 
-type StatusType = 'pending' | 'approved' | 'rejected';
-
-interface TeamRequestDetails {
-  sportRequest: {
-    id: string;
-    status: string;
-    createdAt: string;
-    updatedAt: string;
-    whyJoin: string;
-    additionalInfo: string;
-    sport: {
-      id: string;
-      title: string;
-      type: string;
-      headCoach: string;
-      playerCount: number;
-      division: string;
-    };
-    user: {
-      id: string;
-      name: string;
-      email: string;
-    };
-  };
-}
-
-interface StatusBadgeProps {
-  status: StatusType;
-}
-
-interface InfoCardProps {
-  icon: IconType;
-  label: string;
-  value: string | number;
-}
-
-const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
+const StatusBadge: React.FC<TeamRequestDetailsStatusBadgeProps> = ({ status }) => {
   const statusConfig = {
     pending: { bg: 'bg-yellow-600/30', text: 'text-yellow-100', border: 'border-yellow-500/50' },
     approved: { bg: 'bg-green-600/30', text: 'text-green-100', border: 'border-green-500/50' },
@@ -69,7 +41,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   );
 };
 
-const InfoCard: React.FC<InfoCardProps> = ({ icon: Icon, label, value }) => (
+const InfoCard: React.FC<TeamRequestDetailsInfoCardProps> = ({ icon: Icon, label, value }) => (
   <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
     <div className="flex items-center mb-2">
       <Icon size={18} className="text-purple-300" />
@@ -79,14 +51,6 @@ const InfoCard: React.FC<InfoCardProps> = ({ icon: Icon, label, value }) => (
   </div>
 );
 
-interface TeamRequestDetailsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  request: TeamRequestDetails | null;
-  onApprove?: (id: string) => void;
-  onReject?: (id: string) => void;
-}
-
 const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
   isOpen,
   onClose,
@@ -95,39 +59,12 @@ const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
   onReject,
 }) => {
   // Prevent background scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, [isOpen]);
+  usePreventBodyScroll(isOpen);
 
   if (!isOpen || !request) return null;
 
   console.log(request, "qqqqqqqqqqqqqqqqqqqqq")
   const { sport, user } = request.sportRequest;
-
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  const formatDateTime = (dateString: string): string => {
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
 
   // Particle effect
   const ghostParticles = Array(30)

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { 
   IoCloseOutline as X, 
   IoCalendarOutline as Calendar, 
@@ -10,19 +10,20 @@ import {
   IoSparklesOutline as Sparkles,
   IoTicketOutline as Ticket,
   IoInformationCircleOutline as Info,
-  IoBusinessOutline as Building // Added Building icon
+  IoBusinessOutline as Building
 } from 'react-icons/io5';
-import { Event, EventRequest } from '../../../../../domain/types/event';
+import { 
+  Event, 
+  EventRequest, 
+  EventDetailsModalProps,
+  EventDetailsStatusBadgeProps,
+  EventDetailsInfoCardProps,
+  ParticleConfig
+} from '../../../../../domain/types/eventmanagement';
+import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 
-interface EventDetailsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  event: Event | EventRequest | null;
-  onEdit?: (event: Event) => void;
-}
-
-const StatusBadge = ({ status }: { status: string }) => {
-  const statusConfig = {
+const StatusBadge: React.FC<EventDetailsStatusBadgeProps> = ({ status }) => {
+  const statusConfig: Record<string, { bg: string; text: string; border: string }> = {
     upcoming: { bg: 'bg-blue-600/30', text: 'text-blue-100', border: 'border-blue-500/50' },
     completed: { bg: 'bg-green-600/30', text: 'text-green-100', border: 'border-green-500/50' },
     cancelled: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },
@@ -42,7 +43,7 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-const InfoCard = ({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?: number | string; className?: string }>; label: string; value: string }) => (
+const InfoCard: React.FC<EventDetailsInfoCardProps> = ({ icon: Icon, label, value }) => (
   <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-4 shadow-sm">
     <div className="flex items-center mb-2">
       <Icon size={18} className="text-purple-300" />
@@ -58,21 +59,12 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
   event,
   onEdit,
 }) => {
-  // Prevent backend scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, [isOpen]);
+  // Use the shared prevent body scroll hook
+  usePreventBodyScroll(isOpen);
 
   if (!isOpen || !event) return null;
 
-  const getOrganizerIcon = (type: string) => {
+  const getOrganizerIcon = (type: string | undefined) => {
     switch (type) {
       case 'department': return Building;
       case 'club': return Users;
@@ -83,7 +75,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
   const OrganizerIcon = getOrganizerIcon('_organizerType' in event ? event._organizerType : 'default');
 
   // Particle effect
-  const ghostParticles = Array(30)
+  const ghostParticles: ParticleConfig[] = Array(30)
     .fill(0)
     .map((_, i) => ({
       size: Math.random() * 10 + 5,
@@ -129,10 +121,10 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
                 <Sparkles size={28} className="text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-purple-100">{event._title}</h2>
-                <p className="text-sm text-purple-300 mt-1">Event ID: {event._id}</p>
+                <h2 className="text-2xl font-bold text-purple-100">{event._title || event.name || 'Untitled Event'}</h2>
+                <p className="text-sm text-purple-300 mt-1">Event ID: {event._id || event.id}</p>
                 <div className="flex items-center mt-2 space-x-4">
-                  <StatusBadge status={event._status} />
+                  <StatusBadge status={event._status || event.status} />
                 </div>
               </div>
             </div>
@@ -149,12 +141,12 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           {/* Key Info Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <InfoCard icon={OrganizerIcon} label="Organizer" value={event._organizer} />
-            <InfoCard icon={Ticket} label="Event Type" value={event._eventType} />
-            <InfoCard icon={MapPin} label="Venue" value={event._location} />
-            <InfoCard icon={Clock} label="Timeframe" value={event._timeframe} />
-            <InfoCard icon={Users} label="Participants" value={`${event._participants} / ${event._maxParticipants} registered`} />
-            <InfoCard icon={Calendar} label="Registration" value={event._registrationRequired ? "Required" : "Not Required"} />
+            <InfoCard icon={OrganizerIcon} label="Organizer" value={event._organizer || event.organizer || 'Unknown'} />
+            <InfoCard icon={Ticket} label="Event Type" value={event._eventType || event.type || 'Unknown'} />
+            <InfoCard icon={MapPin} label="Venue" value={event._location || event.venue || 'TBD'} />
+            <InfoCard icon={Clock} label="Timeframe" value={event._timeframe || `${event.date} ${event.time}` || 'TBD'} />
+            <InfoCard icon={Users} label="Participants" value={`${event._participants || event.participants || 0} / ${event._maxParticipants || event.maxParticipants || 0} registered`} />
+            <InfoCard icon={Calendar} label="Registration" value={event._registrationRequired !== undefined ? (event._registrationRequired ? "Required" : "Not Required") : (event.registrationRequired ? "Required" : "Not Required")} />
           </div>
 
           {/* Description Section */}
@@ -165,7 +157,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
                 <h3 className="ml-3 text-lg font-semibold text-purple-100">Event Description</h3>
               </div>
               <div className="p-6">
-                <p className="text-purple-200 leading-relaxed">{event._description}</p>
+                <p className="text-purple-200 leading-relaxed">{event._description || event.description || 'No description available'}</p>
                 {event._additionalInfo && (
                   <div className="mt-4 p-4 bg-gray-900/60 rounded-lg border border-purple-500/30">
                     <h4 className="text-sm font-medium text-purple-300 mb-2 flex items-center">
@@ -213,11 +205,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
-        .no-scroll {
-          overflow: hidden;
-        }
-
+      <style>{`
         @keyframes floatParticle {
           0% {
             transform: translateY(0) translateX(0);

@@ -12,223 +12,31 @@ import {
 } from 'react-icons/io5';
 import { debounce } from 'lodash';
 import toast from 'react-hot-toast';
-import Header from '../../User/Header';
-import ApplicationsTable from '../../User/ApplicationsTable';
-import Pagination from '../../User/Pagination';
+import Header from '../../../../components/admin/management/Header';
+import ApplicationsTable from '../../../../components/admin/management/ApplicationsTable';
+import Pagination from '../../../../components/admin/management/Pagination';
 import WarningModal from '../../../../components/WarningModal';
 import AddEventModal from './AddEventModal';
 import EventDetailsModal from './EventDetailsModal';
 import EventRequestDetailsModal from './EventRequestDetailsModal';
 import { useEventManagement } from '../../../../../application/hooks/useEventManagement';
-
-const formatDate = (dateString: string): string => {
-  if (!dateString) return 'N/A';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
-export interface Event {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  organizerType: string;
-  eventType: string;
-  icon: string;
-  color: string;
-  description?: string;
-  fullTime: boolean;
-  additionalInfo?: string;
-  requirements?: string;
-  status: string;
-  maxParticipants: number;
-  registrationRequired: boolean;
-  createdAt: string;
-  organizer: string;
-}
-
-interface EventRequest {
-  id: string;
-  eventName: string;
-  requestedBy: string;
-  requesterType: string;
-  type: string;
-  proposedDate: string;
-  proposedVenue: string;
-  status: string;
-  requestedAt: string;
-  description: string;
-  expectedParticipants: number;
-}
-
-interface Filters {
-  [key: string]: string;
-  eventType: string;
-  dateRange: string;
-  status: string;
-}
-
-const EVENT_TYPES = ['All', 'Workshop', 'Seminar', 'Fest', 'Competition', 'Exhibition'];
-const EVENT_STATUSES = ['All', 'Upcoming', 'Completed', 'Cancelled'];
-const REQUEST_STATUSES = ['All', 'Pending', 'Approved', 'Rejected'];
-const DATE_RANGES = ['All', 'Last Week', 'Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'];
-const ORGANIZERS = ['All', 'Department', 'Club', 'Student'];
-
-const eventColumns = [
-  {
-    header: 'Event',
-    key: 'title',
-    render: (event: Event) => (
-      <div>
-        <p className="font-medium text-gray-200">{event.title}</p>
-        <p className="text-xs text-gray-400">ID: {event.id?.slice(0, 7)}</p>
-      </div>
-    ),
-    width: '20%',
-  },
-  {
-    header: 'Organizer Type',
-    key: 'organizerType',
-    render: (event: Event) => (
-      <div className="flex items-center text-gray-300">
-        {event.organizerType?.toLowerCase() === 'department' ? (
-          <Building size={14} className="text-purple-400 mr-2" />
-        ) : event.organizerType?.toLowerCase() === 'club' ? (
-          <GraduationCap size={14} className="text-purple-400 mr-2" />
-        ) : (
-          <User size={14} className="text-purple-400 mr-2" />
-        )}
-        <div>
-          <p className="text-sm capitalize">{event.organizerType}</p>
-        </div>
-      </div>
-    ),
-  },
-  {
-    header: 'Type',
-    key: 'eventType',
-    render: (event: Event) => (
-      <div className="text-sm text-gray-300 capitalize">{event.eventType}</div>
-    ),
-  },
-  {
-    header: 'Date & Time',
-    key: 'date',
-    render: (event: Event) => (
-      <div className="flex items-center text-gray-300">
-        <Calendar size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{formatDate(event.date)}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Venue',
-    key: 'location',
-    render: (event: Event) => (
-      <div className="flex items-center text-gray-300">
-        <MapPin size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{event.location}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Status',
-    key: 'status',
-    render: (event: Event) => (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${event.status === 'upcoming'
-            ? 'bg-blue-900/30 text-blue-400 border-blue-500/30'
-            : event.status === 'completed'
-              ? 'bg-green-900/30 text-green-400 border-green-500/30'
-              : 'bg-red-900/30 text-red-400 border-red-500/30'
-          }`}
-      >
-        <span
-          className="h-1.5 w-1.5 rounded-full mr-1.5"
-          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
-        ></span>
-        {event.status?.charAt(0).toUpperCase() + event.status?.slice(1)}
-      </span>
-    ),
-  },
-];
-
-const eventRequestColumns = [
-  {
-    header: 'Request',
-    key: 'eventName',
-    render: (request: EventRequest) => (
-      <div>
-        <p className="font-medium text-gray-200">{request.eventName}</p>
-        <p className="text-xs text-gray-400">ID: {request.id?.slice(0, 7)}</p>
-      </div>
-    ),
-    width: '20%',
-  },
-  {
-    header: 'Requested By',
-    key: 'requestedBy',
-    render: (request: EventRequest) => (
-      <div className="flex items-center text-gray-300">
-        {request.requesterType?.toLowerCase() === 'department' ? (
-          <Building size={14} className="text-purple-400 mr-2" />
-        ) : request.requesterType?.toLowerCase() === 'club' ? (
-          <GraduationCap size={14} className="text-purple-400 mr-2" />
-        ) : (
-          <User size={14} className="text-purple-400 mr-2" />
-        )}
-        <div>
-          <p className="text-sm">{request.requestedBy}</p>
-          <p className="text-xs text-gray-400 capitalize">{request?.requesterType}</p>
-        </div>
-      </div>
-    ),
-  },
-  {
-    header: 'Type',
-    key: 'type',
-    render: (request: EventRequest) => (
-      <div className="text-sm text-gray-300 capitalize">{request.type}</div>
-    ),
-  },
-  {
-    header: 'Proposed Date',
-    key: 'proposedDate',
-    render: (request: EventRequest) => (
-      <div className="flex items-center text-gray-300">
-        <Calendar size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{formatDate(request.proposedDate)}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Status',
-    key: 'status',
-    render: (request: EventRequest) => (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${request.status === 'pending'
-            ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
-            : request.status === 'approved'
-              ? 'bg-green-900/30 text-green-400 border-green-500/30'
-              : 'bg-red-900/30 text-red-400 border-red-500/30'
-          }`}
-      >
-        <span
-          className="h-1.5 w-1.5 rounded-full mr-1.5"
-          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
-        ></span>
-        {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-      </span>
-    ),
-  },
-];
+import {
+  Event,
+  EventRequest,
+  Filters,
+  ItemToAction,
+} from '../../../../../domain/types/eventmanagement';
+import {
+  EVENT_TYPES,
+  EVENT_STATUSES,
+  REQUEST_STATUSES,
+  DATE_RANGES,
+  ORGANIZERS,
+  getEventColumns,
+  getEventRequestColumns,
+} from '../../../../../shared/constants/eventManagementConstants';
+import { formatDate } from '../../../../../shared/utils/dateUtils';
+import { filterEvents, filterEventRequests } from '../../../../../shared/filters/eventManagementFilter';
 
 const AdminEventsManagement: React.FC = () => {
   const {
@@ -259,99 +67,15 @@ const AdminEventsManagement: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | EventRequest | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<EventRequest | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(false);
-  const [itemToAction, setItemToAction] = useState<{
-    id: string;
-    type: 'event' | 'eventRequest';
-    action: 'delete' | 'reject' | 'approve';
-  } | null>(null);
+  const [itemToAction, setItemToAction] = useState<ItemToAction | null>(null);
 
-  const filteredEvents = events.filter((event) => {
-    const matchesSearch = searchTerm
-      ? event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.organizerType?.toLowerCase().includes(searchTerm.toLowerCase())
-      : true;
+  // Get column definitions from constants
+  const eventColumns = getEventColumns(Calendar, MapPin, Building, GraduationCap, User, formatDate);
+  const eventRequestColumns = getEventRequestColumns(Calendar, Building, GraduationCap, User, formatDate);
 
-    const matchesEventType =
-      filters.eventType === 'All' || event.eventType?.toLowerCase() === filters.eventType.toLowerCase();
-
-    const matchesStatus =
-      filters.status === 'All' || event.status?.toLowerCase() === filters.status.toLowerCase();
-
-    let matchesDateRange = true;
-    if (filters.dateRange && filters.dateRange !== 'All' && event.date) {
-      const eventDate = new Date(event.date);
-      const now = new Date();
-      const diffTime = Math.abs(now.getTime() - eventDate.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      switch (filters.dateRange) {
-        case 'Last Week':
-          matchesDateRange = diffDays <= 7;
-          break;
-        case 'Last Month':
-          matchesDateRange = diffDays <= 30;
-          break;
-        case 'Last 3 Months':
-          matchesDateRange = diffDays <= 90;
-          break;
-        case 'Last 6 Months':
-          matchesDateRange = diffDays <= 180;
-          break;
-        case 'Last Year':
-          matchesDateRange = diffDays <= 365;
-          break;
-        default:
-          matchesDateRange = true;
-      }
-    }
-
-    return matchesSearch && matchesEventType && matchesStatus && matchesDateRange;
-  });
-
-  const filteredEventRequests = eventRequests.filter((request) => {
-    const matchesSearch = searchTerm
-      ? request.eventName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.requestedBy?.toLowerCase().includes(searchTerm.toLowerCase())
-      : true;
-
-    const matchesEventType =
-      filters.eventType === 'All' || request.type?.toLowerCase() === filters.eventType.toLowerCase();
-
-    const matchesStatus =
-      filters.status === 'All' || request.status?.toLowerCase() === filters.status.toLowerCase();
-
-    let matchesDateRange = true;
-    if (filters.dateRange && filters.dateRange !== 'All' && request.proposedDate) {
-      const requestDate = new Date(request.proposedDate);
-      const now = new Date();
-      const diffTime = Math.abs(now.getTime() - requestDate.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      switch (filters.dateRange) {
-        case 'Last Week':
-          matchesDateRange = diffDays <= 7;
-          break;
-        case 'Last Month':
-          matchesDateRange = diffDays <= 30;
-          break;
-        case 'Last 3 Months':
-          matchesDateRange = diffDays <= 90;
-          break;
-        case 'Last 6 Months':
-          matchesDateRange = diffDays <= 180;
-          break;
-        case 'Last Year':
-          matchesDateRange = diffDays <= 365;
-          break;
-        default:
-          matchesDateRange = true;
-      }
-    }
-
-    return matchesSearch && matchesEventType && matchesStatus && matchesDateRange;
-  });
+  // Use shared filter utilities
+  const filteredEvents = filterEvents(events, filters, searchTerm);
+  const filteredEventRequests = filterEventRequests(eventRequests, filters, searchTerm);
 
   const handleAddEvent = () => {
     setSelectedEvent(null);
@@ -702,8 +426,6 @@ const AdminEventsManagement: React.FC = () => {
           organizer: selectedEvent._organizer,
         } : undefined}
         isEditing={!!selectedEvent}
-        eventTypes={EVENT_TYPES.filter(type => type !== 'All')}
-        organizers={ORGANIZERS.filter(org => org !== 'All')}
       />
 
       <EventDetailsModal

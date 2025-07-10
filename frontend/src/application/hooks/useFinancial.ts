@@ -8,7 +8,7 @@ import {
   Scholarship,
   ScholarshipApplication,
   PaymentForm
-} from '../../domain/types/financial';
+} from '../../domain/types/financialmanagement';
 import { financialService } from '../services/financialService';
 
 export const useFinancial = () => {

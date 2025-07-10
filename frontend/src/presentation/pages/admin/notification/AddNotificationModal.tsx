@@ -1,22 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { IoClose as Close } from 'react-icons/io5';
-import { Notification } from '../../../../domain/types/notification.types';
-
-interface AddNotificationModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: Omit<Notification, '_id' | 'createdAt' | 'status'>) => void;
-  recipientTypes: string[];
-}
-
-interface FormData {
-  title: string;
-  message: string;
-  recipientType: string;
-  recipientId: string;
-  recipientName: string;
-  createdBy: string;
-}
+import { Notification, AddNotificationModalProps, NotificationFormData } from '../../../../domain/types/notificationmanagement';
+import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { notificationSchema, NotificationFormData } from '../../../../domain/validation/management/notificationSchema';
 
 const AddNotificationModal: React.FC<AddNotificationModalProps> = ({
   isOpen,
@@ -24,55 +12,28 @@ const AddNotificationModal: React.FC<AddNotificationModalProps> = ({
   onSubmit,
   recipientTypes,
 }) => {
-  const [formData, setFormData] = useState<FormData>({
-    title: '',
-    message: '',
-    recipientType: '',
-    recipientId: '',
-    recipientName: '',
-    createdBy: 'Admin', // Assume admin user for simplicity
+
+  usePreventBodyScroll(isOpen);
+
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<NotificationFormData>({
+    resolver: zodResolver(notificationSchema),
+    defaultValues: {
+      title: '',
+      message: '',
+      recipientType: '',
+      recipientId: '',
+      recipientName: '',
+      createdBy: 'Admin',
+    },
   });
 
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
-  const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
-    if (!formData.title) newErrors.title = 'Title is required';
-    if (!formData.message) newErrors.message = 'Message is required';
-    if (!formData.recipientType) newErrors.recipientType = 'Please select a recipient type';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validateForm()) {
-      const notificationData: Omit<Notification, '_id' | 'createdAt' | 'status'> = {
-        title: formData.title,
-        message: formData.message,
-        recipientType: formData.recipientType as 'all' | 'all_students' | 'all_faculty',
-        recipientId: formData.recipientId,
-        recipientName: formData.recipientName,
-        createdBy: formData.createdBy,
-        isRead: false,
-      };
-      onSubmit(notificationData);
-      setFormData({
-        title: '',
-        message: '',
-        recipientType: '',
-        recipientId: '',
-        recipientName: '',
-        createdBy: 'Admin',
-      });
-    }
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const onFormSubmit = (data: NotificationFormData) => {
+    const notificationData = {
+      ...data,
+      isRead: false,
+    };
+    onSubmit(notificationData);
+    reset();
   };
 
   if (!isOpen) return null;
@@ -86,35 +47,29 @@ const AddNotificationModal: React.FC<AddNotificationModalProps> = ({
             <Close size={24} />
           </button>
         </div>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onFormSubmit)}>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-300 mb-1">Title</label>
             <input
               type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
+              {...register('title')}
               className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
             />
-            {errors.title && <p className="text-red-400 text-xs mt-1">{errors.title}</p>}
+            {errors.title && <p className="text-red-400 text-xs mt-1">{errors.title.message}</p>}
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-300 mb-1">Message</label>
             <textarea
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
+              {...register('message')}
               className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
               rows={4}
             />
-            {errors.message && <p className="text-red-400 text-xs mt-1">{errors.message}</p>}
+            {errors.message && <p className="text-red-400 text-xs mt-1">{errors.message.message}</p>}
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-300 mb-1">Recipient Type</label>
             <select
-              name="recipientType"
-              value={formData.recipientType}
-              onChange={handleChange}
+              {...register('recipientType')}
               className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
             >
               <option value="" disabled>Select a recipient</option>
@@ -124,7 +79,7 @@ const AddNotificationModal: React.FC<AddNotificationModalProps> = ({
                 </option>
               ))}
             </select>
-            {errors.recipientType && <p className="text-red-400 text-xs mt-1">{errors.recipientType}</p>}
+            {errors.recipientType && <p className="text-red-400 text-xs mt-1">{errors.recipientType.message}</p>}
           </div>
 
           <div className="flex justify-end gap-2">

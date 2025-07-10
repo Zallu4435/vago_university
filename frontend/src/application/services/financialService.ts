@@ -6,7 +6,7 @@ import {
     Scholarship, 
     ScholarshipApplication,
     PaymentForm 
-  } from '../../domain/types/financial';
+  } from '../../domain/types/financialmanagement';
   import httpClient from '../../frameworks/api/httpClient';
   
   export class FinancialService {

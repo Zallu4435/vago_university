@@ -1,4 +1,4 @@
-import { Material } from '../../domain/types/material';
+import { Material } from '../../domain/types/materialmanagement';
 import httpClient from '../../frameworks/api/httpClient';
 
 export const materialService = {

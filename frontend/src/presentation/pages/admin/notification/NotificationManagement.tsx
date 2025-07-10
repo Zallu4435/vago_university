@@ -12,97 +12,12 @@ import AddNotificationModal from './AddNotificationModal';
 import NotificationDetailsModal from './NotificationDetailsModal';
 import { useNotificationManagement } from '../../../../application/hooks/useNotificationManagement';
 import WarningModal from '../../../components/WarningModal';
-import ApplicationsTable from '../User/ApplicationsTable';
-import Pagination from '../User/Pagination';
-import Header from '../User/Header';
-
-
-const formatDate = (dateString: string): string => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  
-    
-import { Notification } from '../../../../domain/types/notification.types';
-
-const RECIPIENT_TYPES = ['All', 'All Students', 'All Faculty', 'All Students and Faculty'];
-const STATUSES = ['All', 'Sent', 'Failed'];
-
-const notificationColumns = [
-  {
-    header: 'Notification',
-    key: 'title',
-    render: (notification: Notification) => (
-      <div className="flex items-center gap-3">
-        <span
-          className="text-2xl w-8 h-8 rounded-lg flex items-center justify-center bg-purple-900/20 text-purple-500"
-        >
-          {notification.recipientType === 'individual' ? <User /> : <Group />}
-        </span>
-        <div>
-          <p className="font-medium text-gray-200">{notification.title}</p>
-          <p className="text-xs text-gray-400">ID: {notification._id?.slice(0, 7)}</p>
-        </div>
-      </div>
-    ),
-    width: '20%',
-  },
-  {
-    header: 'Recipient',
-    key: 'recipient',
-    render: (notification: Notification) => (
-      <div className="text-sm text-gray-300">
-        {notification.recipientType === 'individual'
-          ? notification.recipientName || 'N/A'
-          : notification.recipientType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
-      </div>
-    ),
-  },
-  {
-    header: 'Created By',
-    key: 'createdBy',
-    render: (notification: Notification) => (
-      <div className="flex items-center text-gray-300">
-        <User size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{notification.createdBy}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Created At',
-    key: 'createdAt',
-    render: (notification: Notification) => (
-      <div className="text-sm text-gray-300">{formatDate(notification.createdAt)}</div>
-    ),
-  },
-  {
-    header: 'Status',
-    key: 'status',
-    render: (notification: Notification) => (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          notification.status.toLowerCase() === 'sent'
-            ? 'bg-green-900/30 text-green-400 border-green-500/30'
-            : 'bg-red-900/30 text-red-400 border-red-500/30'
-        }`}
-      >
-        <span
-          className="h-1.5 w-1.5 rounded-full mr-1.5"
-          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
-        ></span>
-        {notification.status.charAt(0).toUpperCase() + notification.status.slice(1)}
-      </span>
-    ),
-  },
-];
+import ApplicationsTable from '../../../components/admin/management/ApplicationsTable';
+import Pagination from '../../../components/admin/management/Pagination';
+import Header from '../../../components/admin/management/Header';
+import { Notification } from '../../../../domain/types/notificationmanagement';
+import { RECIPIENT_TYPES, STATUSES, notificationColumns } from '../../../../shared/constants/notificationManagementConstants';
+import { filterNotifications } from '../../../../shared/filters/notificationManagementFilter';
 
 const NotificationManagement: React.FC = () => {
   const {
@@ -127,21 +42,7 @@ const NotificationManagement: React.FC = () => {
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
-  const filteredNotifications = notifications.filter((notification) => {
-    const matchesSearch = searchQuery
-      ? notification.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        notification._id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        notification.createdBy?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (notification.recipientType === 'individual' &&
-          notification.recipientName?.toLowerCase().includes(searchQuery.toLowerCase()))
-      : true;
-    const matchesRecipientType =
-      filters.recipientType === 'All' ||
-      notification.recipientType.toLowerCase() === filters.recipientType.toLowerCase().replace(/\s+/g, '_');
-    const matchesStatus =
-      filters.status === 'All' || notification.status.toLowerCase() === filters.status.toLowerCase();
-    return matchesSearch && matchesRecipientType && matchesStatus;
-  });
+  const filteredNotifications = filterNotifications(notifications, filters, searchQuery);
 
   const handleAddNotification = () => {
     setSelectedNotification(null);
@@ -285,7 +186,7 @@ const NotificationManagement: React.FC = () => {
           }}
           debouncedFilterChange={debouncedFilterChange}
           handleResetFilters={handleResetFilters}
-          onTabClick={() => {}}
+          onTabClick={() => { }}
         />
 
         <div className="mt-8">
@@ -309,8 +210,8 @@ const NotificationManagement: React.FC = () => {
                     itemsCount={filteredNotifications.length}
                     itemName="notifications"
                     onPageChange={(newPage) => setPage(newPage)}
-                    onFirstPage={() => {}}
-                    onLastPage={() => {}}
+                    onFirstPage={() => { }}
+                    onLastPage={() => { }}
                   />
                 </>
               )}

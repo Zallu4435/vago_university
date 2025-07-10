@@ -1,33 +1,10 @@
 import React, { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { chargeSchema, ChargeFormDataRaw } from '../../../../domain/validation/management/chargeSchema';
 import { FiX as X, FiDollarSign, FiCalendar, FiFileText } from 'react-icons/fi';
-
-// Zod validation schema based on ChargeSchema
-const chargeSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().min(1, 'Description is required'),
-  amount: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Valid amount is required').transform(val => Number(val)),
-  term: z.string().min(1, 'Term is required'),
-  dueDate: z.string().min(10, 'Due date is required'),
-  applicableFor: z.string().min(1, 'Applicable for is required'),
-});
-
-type ChargeFormData = z.infer<typeof chargeSchema>;
-
-interface AddChargeModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (charge: {
-    title: string;
-    description: string;
-    amount: number;
-    term: string;
-    dueDate: string;
-    applicableFor: string;
-  }) => void;
-}
+import { AddChargeModalProps, ChargeFormData } from '../../../../domain/types/financialmanagement';
+import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubmit }) => {
   const {
@@ -35,8 +12,8 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<ChargeFormData>({
-    resolver: zodResolver(chargeSchema),
+  } = useForm<ChargeFormDataRaw>({
+    resolver: zodResolver(chargeSchema) as any, // Type assertion to bypass resolver type mismatch
     defaultValues: {
       title: '',
       description: '',
@@ -48,23 +25,17 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
     mode: 'onChange',
   });
 
-  const handleFormSubmit = (data: ChargeFormData) => {
-    onSubmit(data);
+  const handleFormSubmit = (data: ChargeFormDataRaw) => {
+    const transformed: ChargeFormData = {
+      ...data,
+      amount: typeof data.amount === 'string' ? Number(data.amount) : data.amount,
+    };
+    onSubmit(transformed);
     reset();
     onClose();
   };
 
-  // Prevent backend scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, [isOpen]);
+  usePreventBodyScroll(isOpen);
 
   // Particle effect
   const ghostParticles = Array(30)

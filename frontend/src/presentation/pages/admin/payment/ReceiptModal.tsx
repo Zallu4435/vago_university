@@ -1,11 +1,6 @@
 import React from 'react';
 import { FiX } from 'react-icons/fi';
-
-interface ReceiptModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  receiptUrl: string;
-}
+import { ReceiptModalProps } from '../../../../domain/types/financialmanagement';
 
 const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, receiptUrl }) => {
   if (!isOpen) return null;

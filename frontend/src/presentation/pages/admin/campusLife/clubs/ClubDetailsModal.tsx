@@ -8,17 +8,19 @@ import {
   IoInformationCircleOutline as Info,
   IoSparklesOutline as Sparkles,
 } from 'react-icons/io5';
-import { Club, ClubRequest } from '../../../../../domain/types/club';
+import { 
+  Club, 
+  ClubRequest, 
+  StatusBadgeProps, 
+  InfoCardProps, 
+  ClubDetailsModalProps,
+  ParticleConfig 
+} from '../../../../../domain/types/clubmanagement';
+import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
+import { formatDate } from '../../../../../shared/utils/dateUtils';
 
-interface ClubDetailsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  club: Club | ClubRequest | null;
-  onEdit?: (club: Club) => void;
-}
-
-const StatusBadge = ({ status }: { status: string }) => {
-  const statusConfig = {
+const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
+  const statusConfig: Record<string, { bg: string; text: string; border: string }> = {
     active: {
       bg: 'bg-green-600/30',
       text: 'text-green-100',
@@ -57,7 +59,7 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-const InfoCard = ({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?: number | string; className?: string }>; label: string; value: string }) => (
+const InfoCard: React.FC<InfoCardProps> = ({ icon: Icon, label, value }) => (
   <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
     <div className="flex items-center mb-2">
       <Icon size={18} className="text-purple-300" />
@@ -67,19 +69,10 @@ const InfoCard = ({ icon: Icon, label, value }: { icon: React.ComponentType<{ si
   </div>
 );
 
-const formatDate = (dateString: string): string => {
-  if (!dateString) return 'N/A';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
 const ClubDetailsModal: React.FC<ClubDetailsModalProps> = ({ isOpen, onClose, club, onEdit }) => {
+  // Use the shared prevent body scroll hook
+  usePreventBodyScroll(isOpen);
+
   if (!isOpen || !club) return null;
 
   const isClub = '_id' in club && 'createdBy' in club;
@@ -88,7 +81,7 @@ const ClubDetailsModal: React.FC<ClubDetailsModalProps> = ({ isOpen, onClose, cl
   const OrganizerIcon = createdBy?.includes('Admin') ? Building : User;
 
   // Particle effect
-  const ghostParticles = Array(30)
+  const ghostParticles: ParticleConfig[] = Array(30)
     .fill(0)
     .map((_, i) => ({
       size: Math.random() * 10 + 5,
@@ -265,7 +258,7 @@ const ClubDetailsModal: React.FC<ClubDetailsModalProps> = ({ isOpen, onClose, cl
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes floatParticle {
           0% {
             transform: translateY(0) translateX(0);

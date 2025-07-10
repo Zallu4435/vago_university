@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FaHandHoldingUsd, FaTimes } from 'react-icons/fa';
 import { useFinancial } from '../../../../application/hooks/useFinancial';
-import { FinancialAidApplication } from '../../../../domain/types/financial';
+import { FinancialAidApplication } from '../../../../domain/types/financialmanagement';
 import { usePreferences } from '../../../context/PreferencesContext';
 
 type ApplicationType = 'Grant' | 'Loan' | 'Work Study';

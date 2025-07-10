@@ -41,7 +41,7 @@ const FacultyDashboard = lazy(() => import('./presentation/pages/faculty/Faculty
 const FacultyRequestForm = lazy(() => import('./presentation/pages/Auth/FacultyRequest'));
 const ConfirmAdmission = lazy(() => import('./presentation/pages/ConfirmAdmission'));
 const ConfirmRegistration = lazy(() => import('./presentation/pages/Auth/ConfirmRegistration'));
-const FacultyManagement = lazy(() => import('./presentation/pages/admin/FacultyManagement'));
+const FacultyManagement = lazy(() => import('./presentation/pages/admin/faculty/FacultyManagement'));
 const ConfirmFaculty = lazy(() => import('./presentation/pages/ConfirmFaculty'));
 const Setting = lazy(() => import('./presentation/pages/user/Settings/Setting'));
 const FacultySettings = lazy(() => import('./presentation/pages/faculty/settings/FacultySettings'));
@@ -71,7 +71,7 @@ const AssignmentManagement = lazy(() => import('./presentation/pages/faculty/ass
 const SessionManagement = lazy(() => import('./presentation/pages/faculty/sessions/SessionManagement'));
 const SiteManagement = lazy(() => import('./presentation/pages/admin/sites/SiteManagement'));
 const VideoConferencePage = lazy(() => import('./presentation/VideoConference/VideoConferencePage').then(module => ({ default: module.VideoConferencePage })));
-const EnquiryManagement = lazy(() => import('./presentation/pages/admin/EnquiryManagement'));
+const EnquiryManagement = lazy(() => import('./presentation/pages/admin/enquiry/EnquiryManagement'));
 const SessionAttendancePage = lazy(() => import('./presentation/pages/faculty/attendance/SessionAttendancePage'));
 const AttendanceSummaryPage = lazy(() => import('./presentation/pages/faculty/attendance/AttendanceSummaryPage'));
 

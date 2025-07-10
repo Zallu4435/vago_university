@@ -1,26 +1,10 @@
 import React from 'react';
 import { IoCloseOutline as X, IoCalendarOutline as Calendar, IoPersonOutline as User, IoInformationCircleOutline as Info } from 'react-icons/io5';
-import { Notification } from '../../../../domain/types/notification.types';
+import { Notification, NotificationDetailsModalProps, StatusBadgeProps, InfoCardProps } from '../../../../domain/types/notificationmanagement';
+import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
+import { formatDate } from '../../../../shared/utils/dateUtils';
 
-interface NotificationDetailsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  notification: Notification | null;
-}
-
-const formatDate = (dateString: string): string => {
-  if (!dateString) return 'N/A';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
-const StatusBadge = ({ status }: { status: string }) => {
+const StatusBadge = ({ status }: StatusBadgeProps) => {
   const statusConfig = {
     sent: {
       bg: 'bg-green-600/30',
@@ -54,7 +38,7 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-const InfoCard = ({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?: number | string; className?: string }>; label: string; value: string }) => (
+const InfoCard = ({ icon: Icon, label, value }: InfoCardProps) => (
   <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
     <div className="flex items-center mb-2">
       <Icon size={18} className="text-purple-300" />
@@ -65,6 +49,9 @@ const InfoCard = ({ icon: Icon, label, value }: { icon: React.ComponentType<{ si
 );
 
 const NotificationDetailsModal: React.FC<NotificationDetailsModalProps> = ({ isOpen, onClose, notification }) => {
+  
+  usePreventBodyScroll(isOpen);
+
   if (!isOpen || !notification) return null;
 
   console.log(notification, "popopopopppo")

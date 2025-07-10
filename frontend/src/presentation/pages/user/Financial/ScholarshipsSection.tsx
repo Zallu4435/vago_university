@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FaAward, FaTimes } from 'react-icons/fa';
 import { useFinancial } from '../../../../application/hooks/useFinancial';
-import { Scholarship, ScholarshipApplication } from '../../../../domain/types/financial';
+import { Scholarship, ScholarshipApplication } from '../../../../domain/types/financialmanagement';
 import { usePreferences } from '../../../context/PreferencesContext';
 
 export default function ScholarshipsSection() {

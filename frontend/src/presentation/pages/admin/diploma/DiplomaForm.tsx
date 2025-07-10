@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { FiXCircle, FiPlus, FiX, FiBook } from 'react-icons/fi';
-
-interface DiplomaFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: any) => void;
-  initialData?: any;
-  isEditing?: boolean;
-  categories: string[];
-}
+import { DiplomaFormProps } from '../../../../domain/types/diplomamanagement';
+import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { diplomaSchema, DiplomaFormData } from '../../../../domain/validation/management/diplomaSchema';
 
 const DiplomaForm: React.FC<DiplomaFormProps> = ({
   isOpen,
@@ -18,81 +14,52 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
   isEditing,
   categories,
 }) => {
-  const [formData, setFormData] = useState({
-    title: initialData?.title || '',
-    description: initialData?.description || '',
-    price: initialData?.price || 0,
-    category: initialData?.category || '',
-    thumbnail: initialData?.thumbnail || '',
-    duration: initialData?.duration || '',
-    prerequisites: initialData?.prerequisites || [],
-    status: initialData?.status ?? true,
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm<DiplomaFormData>({
+    resolver: zodResolver(diplomaSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      price: 0,
+      category: '',
+      thumbnail: '',
+      duration: '',
+      prerequisites: [],
+      status: true,
+      ...initialData,
+    },
   });
 
+  useEffect(() => {
+    if (isOpen && initialData) {
+      reset({ ...initialData });
+    }
+  }, [isOpen, initialData, reset]);
+
+  usePreventBodyScroll(isOpen);
+
+  const prerequisites = watch('prerequisites');
   const [newPrerequisite, setNewPrerequisite] = useState('');
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        title: initialData.title || '',
-        description: initialData.description || '',
-        price: initialData.price || 0,
-        category: initialData.category || '',
-        thumbnail: initialData.thumbnail || '',
-        duration: initialData.duration || '',
-        prerequisites: initialData.prerequisites || [],
-        status: initialData.status ?? true,
-      });
-    }
-  }, [initialData]);
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, [isOpen]);
-
-  const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
-    if (!formData.title) newErrors.title = 'Title is required';
-    if (!formData.category) newErrors.category = 'Category is required';
-    if (formData.price <= 0) newErrors.price = 'Price must be greater than 0';
-    if (!formData.duration) newErrors.duration = 'Duration is required';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
   const handleAddPrerequisite = () => {
-    if (newPrerequisite.trim() && !formData.prerequisites.includes(newPrerequisite.trim())) {
-      setFormData({
-        ...formData,
-        prerequisites: [...formData.prerequisites, newPrerequisite.trim()],
-      });
+    if (newPrerequisite.trim() && !prerequisites.includes(newPrerequisite.trim())) {
+      setValue('prerequisites', [...prerequisites, newPrerequisite.trim()]);
       setNewPrerequisite('');
     }
   };
 
   const handleRemovePrerequisite = (prerequisite: string) => {
-    setFormData({
-      ...formData,
-      prerequisites: formData.prerequisites.filter((p) => p !== prerequisite),
-    });
+    setValue('prerequisites', prerequisites.filter((p: string) => p !== prerequisite));
   };
 
-  const handleSubmit = () => {
-    if (!validateForm()) return;
-
-    const submitData = {
-      ...formData,
-      price: Number(formData.price),
-    };
-    onSubmit(submitData);
+  const onFormSubmit = (data: DiplomaFormData) => {
+    onSubmit(data);
   };
 
   if (!isOpen) return null;
@@ -151,24 +118,22 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
           </div>
         </div>
 
-        <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <div className="space-y-4">
             <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
               <label className="block text-sm font-medium text-purple-300 mb-2">Title</label>
               <input
                 type="text"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                {...register('title')}
                 className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />
-              {errors.title && <p className="text-red-400 text-sm mt-1">{errors.title}</p>}
+              {errors.title && <p className="text-red-400 text-sm mt-1">{errors.title.message}</p>}
             </div>
 
             <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
               <label className="block text-sm font-medium text-purple-300 mb-2">Description</label>
               <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                {...register('description')}
                 rows={3}
                 className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />
@@ -178,8 +143,7 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
                 <label className="block text-sm font-medium text-purple-300 mb-2">Category</label>
                 <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  {...register('category')}
                   className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 >
                   <option value="">Select Category</option>
@@ -189,20 +153,19 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
                     </option>
                   ))}
                 </select>
-                {errors.category && <p className="text-red-400 text-sm mt-1">{errors.category}</p>}
+                {errors.category && <p className="text-red-400 text-sm mt-1">{errors.category.message}</p>}
               </div>
 
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
                 <label className="block text-sm font-medium text-purple-300 mb-2">Price ($)</label>
                 <input
                   type="number"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                  {...register('price', { valueAsNumber: true })}
                   className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                   min="0"
                   step="0.01"
                 />
-                {errors.price && <p className="text-red-400 text-sm mt-1">{errors.price}</p>}
+                {errors.price && <p className="text-red-400 text-sm mt-1">{errors.price.message}</p>}
               </div>
             </div>
 
@@ -210,8 +173,7 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
               <label className="block text-sm font-medium text-purple-300 mb-2">Thumbnail URL</label>
               <input
                 type="text"
-                value={formData.thumbnail}
-                onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
+                {...register('thumbnail')}
                 className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 placeholder="https://example.com/thumbnail.jpg"
               />
@@ -221,12 +183,11 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
               <label className="block text-sm font-medium text-purple-300 mb-2">Duration</label>
               <input
                 type="text"
-                value={formData.duration}
-                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                {...register('duration')}
                 className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 placeholder="e.g., 6 weeks"
               />
-              {errors.duration && <p className="text-red-400 text-sm mt-1">{errors.duration}</p>}
+              {errors.duration && <p className="text-red-400 text-sm mt-1">{errors.duration.message}</p>}
             </div>
 
             <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
@@ -248,7 +209,7 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {formData.prerequisites.map((prerequisite, index) => (
+                  {prerequisites.map((prerequisite: string, index: number) => (
                     <div
                       key={index}
                       className="flex items-center gap-1 px-3 py-1 bg-gray-900/60 border border-purple-600/30 rounded-lg text-purple-300"
@@ -271,11 +232,10 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
               <div className="flex items-center">
                 <input
                   type="checkbox"
-                  checked={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.checked })}
+                  {...register('status')}
                   className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 bg-gray-900/60 rounded"
                 />
-                <span className="ml-2 text-sm text-purple-300">{formData.status ? 'Active' : 'Inactive'}</span>
+                <span className="ml-2 text-sm text-purple-300">{watch('status') ? 'Active' : 'Inactive'}</span>
               </div>
             </div>
           </div>
@@ -289,15 +249,15 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
                 Cancel
               </button>
               <button
-                onClick={handleSubmit}
+                type="submit"
                 className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={Object.keys(errors).length > 0 || !formData.title || !formData.category || !formData.duration}
+                disabled={Object.keys(errors).length > 0}
               >
                 {isEditing ? 'Update Diploma' : 'Add Diploma'}
               </button>
             </div>
           </div>
-        </div>
+        </form>
       </div>
 
       <style jsx>{`

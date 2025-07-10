@@ -2,39 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { FiPlay, FiVideo, FiLoader } from 'react-icons/fi';
 import { IoCloseOutline as X } from 'react-icons/io5';
 import { useVideoManagement } from '../../../hooks/useVideoManagement';
-
-interface Video {
-  id: string;
-  title: string;
-  duration: string;
-  uploadedAt: string;
-  module: number;
-  status: string;
-  courseId: string;
-  description: string;
-  videoUrl: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Interface for AddVideoModal compatibility
-interface VideoForEdit {
-  _id: string;
-  title: string;
-  duration: string;
-  uploadedAt: string;
-  module: number;
-  status: string;
-  diplomaId: string;
-  description: string;
-  videoFile?: File;
-}
-
-interface VideoPreviewModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  video: VideoForEdit | null;
-}
+import { Video, VideoForEdit, VideoPreviewModalProps } from '../../../../domain/types/videomanagement';
+import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const VideoPreviewModal: React.FC<VideoPreviewModalProps> = ({ isOpen, onClose, video }) => {
   const [fetchedVideo, setFetchedVideo] = useState<Video | null>(null);
@@ -43,17 +12,7 @@ const VideoPreviewModal: React.FC<VideoPreviewModalProps> = ({ isOpen, onClose, 
   
   const { fetchVideoById } = useVideoManagement(1, 10, { status: 'all', category: '' }, 'all');
 
-  // Prevent backend scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, [isOpen]);
+  usePreventBodyScroll(isOpen);
 
   // Fetch video data when modal opens
   useEffect(() => {

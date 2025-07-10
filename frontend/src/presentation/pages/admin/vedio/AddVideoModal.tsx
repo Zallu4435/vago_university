@@ -1,46 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { IoCloseOutline as X } from 'react-icons/io5';
-import { FiUpload, FiVideo, FiBookOpen, FiClock, FiInfo, FiCheck } from 'react-icons/fi';
-import { z as zod } from 'zod';
-
-interface Video {
-  _id: string;
-  title: string;
-  duration: string;
-  uploadedAt: string;
-  module: number;
-  status: "Published" | "Draft";
-  diplomaId: string;
-  description: string;
-  videoFile?: File;
-  videoUrl: string;
-}
-
-interface AddVideoModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  selectedVideo: Video | null;
-  onSave: (videoData: FormData | Partial<Video>) => void;
-  categories: string[];
-}
-
-const videoSchema = z.object({
-  title: z.string().min(2, 'Video title must be at least 2 characters'),
-  category: z.string().min(1, 'Category is required'),
-  module: z.string()
-    .min(1, 'Module is required')
-    .refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) >= 1, 'Module must be a valid number at least 1'),
-  order: z.string()
-    .optional()
-    .refine((val) => !val || (!isNaN(parseInt(val, 10)) && parseInt(val, 10) >= 1), 'Order must be a valid number at least 1'),
-  description: z.string().optional(),
-  status: z.enum(['Draft', 'Published']),
-});
-
-type VideoFormInputs = z.infer<typeof videoSchema>;
+import { FiUpload, FiVideo, FiCheck } from 'react-icons/fi';
+import { AddVideoModalProps, VideoFormInputs } from '../../../../domain/types/videomanagement';
+import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
+import { videoSchema } from '../../../../domain/validation/management/videoSchema';
 
 const AddVideoModal: React.FC<AddVideoModalProps> = ({
   isOpen,
@@ -76,9 +41,7 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
 
   // Reset form when selectedVideo changes (for editing)
   useEffect(() => {
-    console.log('AddVideoModal: selectedVideo changed', selectedVideo);
-    console.log('AddVideoModal: selectedVideo.videoUrl =', selectedVideo?.videoUrl);
-    
+
     if (selectedVideo) {
       const formData = {
         title: selectedVideo.title,
@@ -89,7 +52,6 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
         status: selectedVideo.status as "Published" | "Draft",
       };
       
-      console.log('AddVideoModal: Resetting form with data', formData);
       reset(formData);
     } else {
       // Reset to default values for new video
@@ -102,12 +64,13 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
         status: 'Draft' as const,
       };
       
-      console.log('AddVideoModal: Resetting form with default data', defaultData);
       reset(defaultData);
     }
     // Clear selected file when modal opens/closes
     setSelectedFile(null);
   }, [selectedVideo, reset]);
+
+  usePreventBodyScroll(isOpen);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -162,11 +125,7 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
 
     // For updates, if no new file is selected, we need to handle it differently
     if (selectedVideo && !selectedFile) {
-      console.log('Update without new file - keeping existing video');
-      console.log('selectedVideo object:', selectedVideo);
-      console.log('selectedVideo.videoUrl:', selectedVideo.videoUrl);
-      
-      // Create a plain object for update without file
+
       const updateData = {
         id: selectedVideo._id,
         title: data.title,
@@ -179,13 +138,8 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
         // No videoFile property - backend will keep existing
       };
       
-      console.log('📤 Sending update data without new file:', updateData);
-      console.log('📤 videoUrl being sent:', updateData.videoUrl);
-      
       try {
-        console.log('🚀 Uploading video (no new file)...');
         await onSave(updateData);
-        console.log('✅ Video upload (no new file) complete!');
         onClose();
       } catch (error) {
         console.error('Error updating video:', error);
@@ -200,9 +154,7 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
     }
 
     try {
-      console.log('🚀 Uploading video...');
       await onSave(formData);
-      console.log('✅ Video upload complete!');
       onClose();
     } catch (error) {
       console.error('Error saving video:', error);

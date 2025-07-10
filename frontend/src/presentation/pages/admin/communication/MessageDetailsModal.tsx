@@ -7,42 +7,8 @@ import {
   IoMailOutline as Mail,
 } from 'react-icons/io5';
 import WarningModal from '../../../components/WarningModal';
-
-interface Message {
-  id: string;
-  subject: string;
-  content: string;
-  sender: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-  };
-  recipients: Array<{
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    status: 'read' | 'unread';
-  }>;
-  isBroadcast: boolean;
-  createdAt: string;
-  updatedAt: string;
-  status: 'read' | 'unread' | 'delivered' | 'opened';
-  recipientsCount: number;
-  date?: string;
-  time?: string;
-}
-
-interface MessageDetailsModalProps {
-  message: Message;
-  onReply: () => void;
-  onArchive: () => void;
-  onDelete: () => void;
-  isOpen: boolean;
-  onClose: () => void;
-  messageType: 'inbox' | 'sent';
-}
+import { Message, MessageDetailsModalProps } from '../../../../domain/types/communicationmanagement';
+import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const MessageDetailsModal: React.FC<MessageDetailsModalProps> = ({
   message,
@@ -55,17 +21,7 @@ const MessageDetailsModal: React.FC<MessageDetailsModalProps> = ({
 }) => {
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
 
-  // Prevent background scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, [isOpen]);
+  usePreventBodyScroll(isOpen);
 
   if (!isOpen) return null;
 

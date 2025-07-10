@@ -1,16 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { FiXCircle, FiPlus, FiX, FiBook } from 'react-icons/fi';
-
-interface CourseFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: any) => void;
-  initialData?: any;
-  isEditing?: boolean;
-  specializations: string[];
-  faculties: string[];
-  terms: string[];
-}
+import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
+import { CourseFormProps } from '../../../../domain/types/coursemanagement';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { courseSchema, CourseFormData } from '../../../../domain/validation/management/courseSchema';
 
 const CourseForm: React.FC<CourseFormProps> = ({
   isOpen,
@@ -22,88 +16,65 @@ const CourseForm: React.FC<CourseFormProps> = ({
   faculties,
   terms,
 }) => {
-  const [formData, setFormData] = useState({
-    title: initialData?.title || '',
-    description: initialData?.description || '',
-    specialization: initialData?.specialization || '',
-    credits: initialData?.credits || 0,
-    faculty: initialData?.faculty || '',
-    schedule: initialData?.schedule || '',
-    maxEnrollment: initialData?.maxEnrollment || 0,
-    prerequisites: initialData?.prerequisites || [],
-    term: initialData?.term || '',
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm<CourseFormData>({
+    resolver: zodResolver(courseSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      specialization: '',
+      credits: 0,
+      faculty: '',
+      schedule: '',
+      maxEnrollment: 0,
+      prerequisites: [],
+      term: '',
+      ...initialData,
+    },
   });
 
-  console.log(initialData, ':data from the course')
+  useEffect(() => {
+    if (isOpen && initialData) {
+      reset({ ...initialData });
+    }
+  }, [isOpen, initialData, reset]);
 
+  usePreventBodyScroll(isOpen);
+
+  const prerequisites = watch('prerequisites');
   const [newPrerequisite, setNewPrerequisite] = useState('');
 
-  // Update form data when initialData changes
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        title: initialData.title || '',
-        description: initialData.description || '',
-        specialization: initialData.specialization || '',
-        credits: initialData.credits || 0,
-        faculty: initialData.faculty || '',
-        schedule: initialData.schedule || '',
-        maxEnrollment: initialData.maxEnrollment || 0,
-        prerequisites: initialData.prerequisites || [],
-        term: initialData.term || '',
-      });
-    }
-  }, [initialData]);
-
-  // Prevent background scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, [isOpen]);
-
   const handleAddPrerequisite = () => {
-    if (newPrerequisite.trim() && !formData.prerequisites.includes(newPrerequisite.trim())) {
-      setFormData({
-        ...formData,
-        prerequisites: [...formData.prerequisites, newPrerequisite.trim()],
-      });
+    if (newPrerequisite.trim() && !prerequisites.includes(newPrerequisite.trim())) {
+      setValue('prerequisites', [...prerequisites, newPrerequisite.trim()]);
       setNewPrerequisite('');
     }
   };
 
   const handleRemovePrerequisite = (prerequisite: string) => {
-    setFormData({
-      ...formData,
-      prerequisites: formData.prerequisites.filter((p) => p !== prerequisite),
-    });
+    setValue('prerequisites', prerequisites.filter((p: string) => p !== prerequisite));
   };
 
-  const handleSubmit = () => {
-    // Validate required fields
-    if (!formData.title || !formData.specialization || !formData.faculty || !formData.term) {
-      return;
-    }
-
-    // Convert numeric fields to numbers
-    const submitData = {
-      ...formData,
-      credits: Number(formData.credits),
-      maxEnrollment: Number(formData.maxEnrollment),
-    };
-
-    onSubmit(submitData);
+  const onFormSubmit = (data: CourseFormData) => {
+    onSubmit(data);
   };
 
   if (!isOpen) return null;
 
   // Particle effect
-  const ghostParticles = Array(30)
+  const ghostParticles: {
+    size: number;
+    top: number;
+    left: number;
+    animDuration: number;
+    animDelay: number;
+  }[] = Array(30)
     .fill(0)
     .map((_, i) => ({
       size: Math.random() * 10 + 5,
@@ -167,96 +138,97 @@ const CourseForm: React.FC<CourseFormProps> = ({
 
         {/* Content Section */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
+          <form onSubmit={handleSubmit(onFormSubmit)}>
           <div className="space-y-4">
             <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
               <label className="block text-sm font-medium text-purple-300 mb-2">Course Title</label>
               <input
                 type="text"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  {...register('title')}
                 className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 required
               />
+                {errors.title && <p className="text-red-400 text-xs mt-1">{errors.title.message}</p>}
             </div>
 
             <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
               <label className="block text-sm font-medium text-purple-300 mb-2">Description</label>
               <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  {...register('description')}
                 rows={3}
                 className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />
+                {errors.description && <p className="text-red-400 text-xs mt-1">{errors.description.message}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
                 <label className="block text-sm font-medium text-purple-300 mb-2">Specialization</label>
                 <select
-                  value={formData.specialization}
-                  onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
+                    {...register('specialization')}
                   className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                   required
                 >
                   <option value="">Select Specialization</option>
                   {specializations
-                    .filter((spec) => spec !== 'All Specializations')
-                    .map((spec) => (
+                    .filter((spec: string) => spec !== 'All Specializations')
+                    .map((spec: string) => (
                       <option key={spec} value={spec}>
                         {spec}
                       </option>
                     ))}
                 </select>
+                  {errors.specialization && <p className="text-red-400 text-xs mt-1">{errors.specialization.message}</p>}
               </div>
 
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
                 <label className="block text-sm font-medium text-purple-300 mb-2">Credits</label>
                 <input
                   type="number"
-                  value={formData.credits}
-                  onChange={(e) => setFormData({ ...formData, credits: parseInt(e.target.value) || 0 })}
+                    {...register('credits', { valueAsNumber: true })}
                   className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                   min="0"
                 />
-              </div>
+                  {errors.credits && <p className="text-red-400 text-xs mt-1">{errors.credits.message}</p>}
+                </div>
             </div>
 
             <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
               <label className="block text-sm font-medium text-purple-300 mb-2">Faculty</label>
               <select
-                value={formData.faculty}
-                onChange={(e) => setFormData({ ...formData, faculty: e.target.value })}
+                  {...register('faculty')}
                 className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 required
               >
                 <option value="">Select Faculty</option>
                 {faculties
-                  .filter((faculty) => faculty !== 'All Faculties')
-                  .map((faculty) => (
+                  .filter((faculty: string) => faculty !== 'All Faculties')
+                  .map((faculty: string) => (
                     <option key={faculty} value={faculty}>
                       {faculty}
                     </option>
                   ))}
               </select>
+                {errors.faculty && <p className="text-red-400 text-xs mt-1">{errors.faculty.message}</p>}
             </div>
 
             <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
               <label className="block text-sm font-medium text-purple-300 mb-2">Term</label>
               <select
-                value={formData.term}
-                onChange={(e) => setFormData({ ...formData, term: e.target.value })}
+                  {...register('term')}
                 className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 required
               >
                 <option value="">Select Term</option>
                 {terms
-                  .filter((term) => term !== 'All Terms')
-                  .map((term) => (
+                  .filter((term: string) => term !== 'All Terms')
+                  .map((term: string) => (
                     <option key={term} value={term}>
                       {term}
                     </option>
                   ))}
               </select>
+                {errors.term && <p className="text-red-400 text-xs mt-1">{errors.term.message}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -264,23 +236,23 @@ const CourseForm: React.FC<CourseFormProps> = ({
                 <label className="block text-sm font-medium text-purple-300 mb-2">Schedule</label>
                 <input
                   type="text"
-                  value={formData.schedule}
-                  onChange={(e) => setFormData({ ...formData, schedule: e.target.value })}
+                    {...register('schedule')}
                   placeholder="e.g., MWF 10:00-11:45"
                   className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 />
+                  {errors.schedule && <p className="text-red-400 text-xs mt-1">{errors.schedule.message}</p>}
               </div>
 
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
                 <label className="block text-sm font-medium text-purple-300 mb-2">Max Enrollment</label>
                 <input
                   type="number"
-                  value={formData.maxEnrollment}
-                  onChange={(e) => setFormData({ ...formData, maxEnrollment: parseInt(e.target.value) || 0 })}
+                    {...register('maxEnrollment', { valueAsNumber: true })}
                   className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                   min="0"
                 />
-              </div>
+                  {errors.maxEnrollment && <p className="text-red-400 text-xs mt-1">{errors.maxEnrollment.message}</p>}
+                </div>
             </div>
 
             <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
@@ -302,7 +274,7 @@ const CourseForm: React.FC<CourseFormProps> = ({
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {formData.prerequisites.map((prerequisite, index) => (
+                    {prerequisites.map((prerequisite: string, index: number) => (
                     <div
                       key={index}
                       className="flex items-center gap-1 px-3 py-1 bg-gray-900/60 border border-purple-600/30 rounded-lg text-purple-300"
@@ -316,7 +288,8 @@ const CourseForm: React.FC<CourseFormProps> = ({
                       </button>
                     </div>
                   ))}
-                </div>
+                  </div>
+                  {errors.prerequisites && <p className="text-red-400 text-xs mt-1">{errors.prerequisites.message as string}</p>}
               </div>
             </div>
           </div>
@@ -330,18 +303,19 @@ const CourseForm: React.FC<CourseFormProps> = ({
                 Cancel
               </button>
               <button
-                onClick={handleSubmit}
+                  type="submit"
                 className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!formData.title || !formData.specialization || !formData.faculty || !formData.term}
+                  disabled={Object.keys(errors).length > 0}
               >
                 {isEditing ? 'Update Course' : 'Add Course'}
               </button>
             </div>
           </div>
+          </form>
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .no-scroll {
           overflow: hidden;
         }

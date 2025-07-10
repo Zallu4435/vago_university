@@ -1,212 +1,20 @@
 import React, { useState } from 'react';
-import { FiPlus, FiEye, FiEdit, FiTrash2, FiBook, FiBriefcase, FiUser, FiClock, FiUsers, FiPercent, FiCheck, FiX } from 'react-icons/fi';
+import { FiPlus, FiEye, FiEdit, FiTrash2, FiBook, FiUsers, FiPercent, FiCheck, FiX } from 'react-icons/fi';
 import { useAdminDiplomaManagement } from '../../../../application/hooks/useAdminDiplomaManagement';
 import WarningModal from '../../../components/WarningModal';
-import Header from '../User/Header';
-import Pagination from '../User/Pagination';
-import ApplicationsTable from '../User/ApplicationsTable';
+import Header from '../../../components/admin/management/Header';
+import Pagination from '../../../components/admin/management/Pagination';
+import ApplicationsTable from '../../../components/admin/management/ApplicationsTable';
 import DiplomaForm from './DiplomaForm';
 import DiplomaDetails from './DiplomaDetails';
 import EnrollmentDetails from './EnrollmentDetails';
 import { debounce } from 'lodash';
-
-interface Diploma {
-    id: string;
-    title: string;
-    description: string;
-    price: number;
-    category: string;
-    thumbnail: string;
-    duration: string;
-    prerequisites: string[];
-    status: boolean;
-    createdAt: string;
-    updatedAt: string;
-    videoIds: string[];
-    videoCount: number; // Derived from videoIds.length
-}
-
-interface Enrollment {
-    id: string;
-    studentName: string;
-    studentEmail: string;
-    courseTitle: string;
-    enrollmentDate: string;
-    status: 'Pending' | 'Approved' | 'Rejected';
-    progress: number;
-}
-
-const CATEGORIES = ['All Categories', 'Programming', 'Data Science', 'Business', 'Design', 'Marketing'];
-const STATUSES = ['All', 'Active', 'Inactive', 'Pending', 'Approved', 'Rejected'];
-
-const diplomaColumns = [
-    {
-        header: 'Title',
-        key: 'title',
-        render: (diploma: Diploma) => (
-            <div className="flex items-center text-gray-300">
-                <FiBook size={14} className="text-purple-400 mr-2" />
-                <span className="text-sm">{diploma.title}</span>
-            </div>
-        ),
-        width: '25%',
-    },
-    {
-        header: 'Category',
-        key: 'category',
-        render: (diploma: Diploma) => (
-            <div className="flex items-center text-gray-300">
-                <FiBriefcase size={14} className="text-purple-400 mr-2" />
-                <span className="text-sm">{diploma.category}</span>
-            </div>
-        ),
-    },
-    {
-        header: 'Price',
-        key: 'price',
-        render: (diploma: Diploma) => (
-            <div className="flex items-center text-gray-300">
-                <span className="text-sm">₹{diploma.price.toFixed(2)}</span>
-            </div>
-        ),
-    },
-    {
-        header: 'Duration',
-        key: 'duration',
-        render: (diploma: Diploma) => (
-            <div className="flex items-center text-gray-300">
-                <FiClock size={14} className="text-purple-400 mr-2" />
-                <span className="text-sm">{diploma.duration}</span>
-            </div>
-        ),
-    },
-    {
-        header: 'Videos',
-        key: 'videoCount',
-        render: (diploma: Diploma) => (
-            <div className="flex items-center text-gray-300">
-                <FiBook size={14} className="text-purple-400 mr-2" />
-                <span className="text-sm">{diploma.videoCount}</span>
-            </div>
-        ),
-    },
-    {
-        header: 'Status',
-        key: 'status',
-        render: (diploma: Diploma) => (
-            <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${diploma.status ? 'bg-green-900/30 text-green-400 border-green-500/30' : 'bg-red-900/30 text-red-400 border-red-500/30'
-                    }`}
-            >
-                <span className="h-1.5 w-1.5 rounded-full mr-1.5" style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}></span>
-                {diploma.status ? 'Active' : 'Inactive'}
-            </span>
-        ),
-    },
-];
-
-const enrollmentColumns = [
-    {
-        header: 'Student',
-        key: 'studentName',
-        render: (enrollment: Enrollment) => (
-            <div className="flex items-center text-gray-300">
-                <FiUser size={14} className="text-purple-400 mr-2" />
-                <span className="text-sm">{enrollment.studentName}</span>
-            </div>
-        ),
-        width: '20%',
-    },
-    {
-        header: 'Course',
-        key: 'courseTitle',
-        render: (enrollment: Enrollment) => (
-            <div className="flex items-center text-gray-300">
-                <FiBook size={14} className="text-purple-400 mr-2" />
-                <span className="text-sm">{enrollment.courseTitle}</span>
-            </div>
-        ),
-    },
-    {
-        header: 'Progress',
-        key: 'progress',
-        render: (enrollment: Enrollment) => (
-            <div className="flex items-center space-x-3">
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-gray-300">{enrollment.progress}%</span>
-                        <span className="text-xs text-gray-400">
-                            {enrollment.progress === 100 ? 'Complete' :
-                                enrollment.progress >= 75 ? 'Almost Done' :
-                                    enrollment.progress >= 50 ? 'In Progress' :
-                                        enrollment.progress > 0 ? 'Getting Started' : 'Not Started'}
-                        </span>
-                    </div>
-                    <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                        <div
-                            className={`h-full rounded-full transition-all duration-500 ease-out relative ${enrollment.progress === 100
-                                    ? 'bg-gradient-to-r from-green-500 to-emerald-500'
-                                    : enrollment.progress >= 75
-                                        ? 'bg-gradient-to-r from-blue-500 to-cyan-500'
-                                        : enrollment.progress >= 50
-                                            ? 'bg-gradient-to-r from-yellow-500 to-orange-500'
-                                            : enrollment.progress > 0
-                                                ? 'bg-gradient-to-r from-purple-500 to-pink-500'
-                                                : 'bg-gray-600'
-                                }`}
-                            style={{ width: `${enrollment.progress}%` }}
-                        >
-                            {enrollment.progress > 0 && (
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-                <div className="flex-shrink-0">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 ${enrollment.progress === 100
-                            ? 'bg-green-500/20 text-green-400 border-green-500/50'
-                            : enrollment.progress >= 75
-                                ? 'bg-blue-500/20 text-blue-400 border-blue-500/50'
-                                : enrollment.progress >= 50
-                                    ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50'
-                                    : enrollment.progress > 0
-                                        ? 'bg-purple-500/20 text-purple-400 border-purple-500/50'
-                                        : 'bg-gray-500/20 text-gray-400 border-gray-500/50'
-                        }`}>
-                        {enrollment.progress === 100 ? '✓' : Math.round(enrollment.progress)}
-                    </div>
-                </div>
-            </div>
-        ),
-    },
-    {
-        header: 'Status',
-        key: 'status',
-        render: (enrollment: Enrollment) => (
-            <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${enrollment.status === 'Approved'
-                        ? 'bg-green-900/30 text-green-400 border-green-500/30'
-                        : enrollment.status === 'Pending'
-                            ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
-                            : 'bg-red-900/30 text-red-400 border-red-500/30'
-                    }`}
-            >
-                <span className="h-1.5 w-1.5 rounded-full mr-1.5" style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}></span>
-                {enrollment.status}
-            </span>
-        ),
-    },
-    {
-        header: 'Enrollment Date',
-        key: 'enrollmentDate',
-        render: (enrollment: Enrollment) => (
-            <div className="flex items-center text-gray-300">
-                <FiClock size={14} className="text-purple-400 mr-2" />
-                <span className="text-sm">{new Date(enrollment.enrollmentDate).toLocaleDateString()}</span>
-            </div>
-        ),
-    },
-];
+import { Diploma, Enrollment } from '../../../../domain/types/diplomamanagement';
+import { CATEGORIES, diplomaColumns, enrollmentColumns } from '../../../../shared/constants/diplomaManagementConstants';
+import { filterDiplomas, filterEnrollments } from '../../../../shared/filters/diplomaFilter';
+import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../../shared/components/ErrorMessage';
+import EmptyState from '../../../../shared/components/EmptyState';
 
 const DiplomaManagement: React.FC = () => {
     const {
@@ -397,29 +205,15 @@ const DiplomaManagement: React.FC = () => {
     ];
 
     if (isLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-            </div>
-        );
+        return <LoadingSpinner />;
     }
 
     if (error) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="text-red-500">Error: {error.message}</div>
-            </div>
-        );
+        return <ErrorMessage message={error.message} />;
     }
 
-    const filteredDiplomas = diplomas.filter((diploma) =>
-        diploma.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    const filteredEnrollments = enrollments.filter((enrollment) =>
-        enrollment.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        enrollment.courseTitle.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredDiplomas = filterDiplomas(diplomas, searchTerm);
+    const filteredEnrollments = filterEnrollments(enrollments, searchTerm);
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 relative">
@@ -542,29 +336,21 @@ const DiplomaManagement: React.FC = () => {
                                             />
                                         </>
                                     ) : (
-                                        <div className="flex flex-col items-center justify-center py-12">
-                                            <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
-                                                <FiUsers size={32} className="text-purple-400" />
-                                            </div>
-                                            <h3 className="text-lg font-medium text-white mb-1">No Enrollments Found</h3>
-                                            <p className="text-gray-400 text-center max-w-sm">
-                                                There are no enrollment requests matching your current filters.
-                                            </p>
-                                        </div>
+                                        <EmptyState
+                                            icon={<FiUsers size={32} className="text-purple-400" />}
+                                            title="No Enrollments Found"
+                                            message="There are no enrollment requests matching your current filters."
+                                        />
                                     )}
                                 </div>
                             )}
 
                             {activeTab === 'diplomas' && filteredDiplomas.length === 0 && (
-                                <div className="flex flex-col items-center justify-center py-12">
-                                    <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
-                                        <FiBook size={32} className="text-purple-400" />
-                                    </div>
-                                    <h3 className="text-lg font-medium text-white mb-1">No Diplomas Found</h3>
-                                    <p className="text-gray-400 text-center max-w-sm">
-                                        There are no diploma courses matching your current filters.
-                                    </p>
-                                </div>
+                                <EmptyState
+                                    icon={<FiBook size={32} className="text-purple-400" />}
+                                    title="No Diplomas Found"
+                                    message="There are no diploma courses matching your current filters."
+                                />
                             )}
                         </div>
                     </div>

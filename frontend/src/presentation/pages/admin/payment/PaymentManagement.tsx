@@ -1,214 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiDollarSign, FiCheckCircle, FiXCircle, FiEye, FiCreditCard, FiFileText, FiAward, FiPlus, FiList } from 'react-icons/fi';
+import { FiDollarSign, FiCheckCircle, FiXCircle, FiEye, FiFileText, FiAward, FiPlus, FiList } from 'react-icons/fi';
 import { debounce } from 'lodash';
 import { useFinancial } from '../../../../application/hooks/useFinancial';
-import Header from '../User/Header';
-import ApplicationsTable from '../User/ApplicationsTable';
-import Pagination from '../User/Pagination';
+import Header from '../../../components/admin/management/Header';
+import ApplicationsTable from '../../../components/admin/management/ApplicationsTable';
+import Pagination from '../../../components/admin/management/Pagination';
 import ReceiptModal from './ReceiptModal';
 import ActionModal from './ActionModal';
 import AddChargeModal from './AddChargeModal';
 import ViewChargesModal from './ViewChargesModal';
 import PaymentDetailsModal from './PaymentDetailsModal';
-import { Charge, Payment } from '../../../../domain/types/financial';
+import { Charge, Payment, FinancialAidApplication, ScholarshipApplication, Filters } from '../../../../domain/types/financialmanagement';
 import { toast } from 'react-hot-toast';
+import { STATUSES, TERMS, paymentColumns, financialAidColumns, scholarshipColumns } from '../../../../shared/constants/paymentManagementConstants';
+import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../../shared/components/ErrorMessage';
+import EmptyState from '../../../../shared/components/EmptyState';
 
-interface FinancialAidApplication {
-  id: string;
-  studentId: string;
-  term: string;
-  status: 'Approved' | 'Pending' | 'Rejected';
-  amount: number;
-  type: 'Grant' | 'Loan' | 'Scholarship';
-  documents: { id: string; name: string; url: string; status: string }[];
-}
-
-interface ScholarshipApplication {
-  id: string;
-  scholarshipId: string;
-  studentId: string;
-  status: 'Approved' | 'Pending' | 'Rejected';
-  documents: { id: string; name: string; url: string; status: string }[];
-}
-
-interface Filters {
-  status: string;
-  term: string;
-  startDate: string;
-}
-
-const STATUSES = ['All Statuses', 'Pending', 'Approved', 'Rejected'];
-const TERMS = ['All Terms', 'Fall 2024', 'Spring 2025', 'Summer 2025'];
-
-const paymentColumns = [
-  {
-    header: 'Student ID',
-    key: 'studentId',
-    render: (payment: Payment) => (
-      <div className="flex items-center text-gray-300">
-        <FiCreditCard size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{payment.studentId}</span>
-      </div>
-    ),
-    width: '15%',
-  },
-  {
-    header: 'Date',
-    key: 'date',
-    render: (payment: Payment) => (
-      <div className="flex items-center text-gray-300">
-        <FiFileText size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{new Date(payment.date).toLocaleDateString()}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Method',
-    key: 'method',
-    render: (payment: Payment) => (
-      <div className="flex items-center text-gray-300">
-        <FiCreditCard size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{payment.method}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Amount',
-    key: 'amount',
-    render: (payment: Payment) => (
-      <div className="flex items-center text-gray-300">
-        <FiDollarSign size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">${payment.amount.toFixed(2)}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Status',
-    key: 'status',
-    render: (payment: Payment) => (
-      <div className="flex items-center text-gray-300">
-        <FiFileText size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{payment.status}</span>
-      </div>
-    ),
-  },
-];
-
-const financialAidColumns = [
-  {
-    header: 'Student ID',
-    key: 'studentId',
-    render: (app: FinancialAidApplication) => (
-      <div className="flex items-center text-gray-300">
-        <FiCreditCard size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{app.studentId}</span>
-      </div>
-    ),
-    width: '15%',
-  },
-  {
-    header: 'Term',
-    key: 'term',
-    render: (app: FinancialAidApplication) => (
-      <div className="flex items-center text-gray-300">
-        <FiFileText size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{app.term}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Type',
-    key: 'type',
-    render: (app: FinancialAidApplication) => (
-      <div className="flex items-center text-gray-300">
-        <FiFileText size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{app.type}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Amount',
-    key: 'amount',
-    render: (app: FinancialAidApplication) => (
-      <div className="flex items-center text-gray-300">
-        <FiDollarSign size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">${app.amount.toFixed(2)}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Status',
-    key: 'status',
-    render: (app: FinancialAidApplication) => (
-      <div className="flex items-center text-gray-300">
-        <FiFileText size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{app.status}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Date',
-    key: 'applicationDate',
-    render: (app: FinancialAidApplication) => (
-      <div className="flex items-center text-gray-300">
-        <FiFileText size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{new Date(app.applicationDate).toLocaleDateString()}</span>
-      </div>
-    ),
-  },
-];
-
-const scholarshipColumns = [
-  {
-    header: 'Student ID',
-    key: 'studentId',
-    render: (app: ScholarshipApplication) => (
-      <div className="flex items-center text-gray-300">
-        <FiCreditCard size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{app.studentId}</span>
-      </div>
-    ),
-    width: '15%',
-  },
-  {
-    header: 'Scholarship ID',
-    key: 'scholarshipId',
-    render: (app: ScholarshipApplication) => (
-      <div className="flex items-center text-gray-300">
-        <FiAward size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{app.scholarshipId}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Status',
-    key: 'status',
-    render: (app: ScholarshipApplication) => (
-      <div className="flex items-center text-gray-300">
-        <FiFileText size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{app.status}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Date',
-    key: 'applicationDate',
-    render: (app: ScholarshipApplication) => (
-      <div className="flex items-center text-gray-300">
-        <FiFileText size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{new Date(app.applicationDate).toLocaleDateString()}</span>
-      </div>
-    ),
-  },
-];
-
-// Helper function to convert id to _id for table compatibility
-const convertToTableData = <T extends { id: string }>(data: T[]) => {
-  return data.map(item => ({
-    ...item,
-    _id: item.id
-  }));
-};
 
 const PaymentManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'payments' | 'financialAid' | 'scholarships'>('payments');
@@ -244,7 +52,6 @@ const PaymentManagement: React.FC = () => {
   const fetchData = useCallback(async () => {
     try {
       let response;
-      
       if (activeTab === 'payments') {
         response = await getAllPayments({
           page,
@@ -253,15 +60,15 @@ const PaymentManagement: React.FC = () => {
           startDate: filters.startDate || undefined,
           endDate: undefined, // Add endDate if needed
         });
-        setData(response.data || []);
+        setData(response.data ? response.data.map((item: any) => ({ ...item, _id: item.id })) : []);
         setTotalPages(response.totalPages || 1);
       } else if (activeTab === 'financialAid') {
         response = await getFinancialAidApplications();
-        setData(response || []);
+        setData(response ? response.map((item: any) => ({ ...item, _id: item.id })) : []);
         setTotalPages(Math.ceil((response?.length || 0) / 10));
       } else {
         response = await getScholarshipApplications();
-        setData(response || []);
+        setData(response ? response.map((item: any) => ({ ...item, _id: item.id })) : []);
         setTotalPages(Math.ceil((response?.length || 0) / 10));
       }
     } catch (err) {
@@ -275,7 +82,7 @@ const PaymentManagement: React.FC = () => {
 
   const filteredData = data.filter((item: any) => {
     const matchesSearch = searchQuery
-      ? item.studentId.toLowerCase().includes(searchQuery.toLowerCase())
+      ? item.studentId && item.studentId.toLowerCase().includes(searchQuery.toLowerCase())
       : true;
     return matchesSearch;
   });
@@ -390,19 +197,11 @@ const PaymentManagement: React.FC = () => {
   ];
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-500">Error: {error}</div>
-      </div>
-    );
+    return <ErrorMessage message={error} />;
   }
 
   return (
@@ -501,13 +300,13 @@ const PaymentManagement: React.FC = () => {
               {filteredData.length > 0 ? (
                 <>
                   <ApplicationsTable
-                    data={filteredData}
+                    data={filteredData.map((item: any) => ({ ...item, _id: item._id || item.id }))}
                     columns={
                       activeTab === 'payments'
                         ? paymentColumns
                         : activeTab === 'financialAid'
-                        ? financialAidColumns
-                        : scholarshipColumns
+                          ? financialAidColumns
+                          : scholarshipColumns
                     }
                     actions={activeTab === 'payments' ? paymentActions : applicationActions}
                   />
@@ -522,23 +321,11 @@ const PaymentManagement: React.FC = () => {
                   />
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
-                    {activeTab === 'payments' ? (
-                      <FiDollarSign size={32} className="text-purple-400" />
-                    ) : activeTab === 'financialAid' ? (
-                      <FiFileText size={32} className="text-purple-400" />
-                    ) : (
-                      <FiAward size={32} className="text-purple-400" />
-                    )}
-                  </div>
-                  <h3 className="text-lg font-medium text-white mb-1">
-                    No {activeTab === 'payments' ? 'Payments' : activeTab === 'financialAid' ? 'Financial Aid Applications' : 'Scholarship Applications'} Found
-                  </h3>
-                  <p className="text-gray-400 text-center max-w-sm">
-                    There are no {activeTab === 'payments' ? 'payments' : activeTab === 'financialAid' ? 'financial aid applications' : 'scholarship applications'} matching your current filters. Try adjusting your search criteria.
-                  </p>
-                </div>
+                <EmptyState
+                  icon={activeTab === 'payments' ? <FiDollarSign size={32} className="text-purple-400" /> : activeTab === 'financialAid' ? <FiFileText size={32} className="text-purple-400" /> : <FiAward size={32} className="text-purple-400" />}
+                  title={`No ${activeTab === 'payments' ? 'Payments' : activeTab === 'financialAid' ? 'Financial Aid Applications' : 'Scholarship Applications'} Found`}
+                  message={`There are no ${activeTab === 'payments' ? 'payments' : activeTab === 'financialAid' ? 'financial aid applications' : 'scholarship applications'} matching your current filters. Try adjusting your search criteria.`}
+                />
               )}
             </div>
           </div>

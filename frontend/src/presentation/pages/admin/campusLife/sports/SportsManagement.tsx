@@ -11,199 +11,39 @@ import {
   IoPersonOutline as User,
 } from 'react-icons/io5';
 import { debounce } from 'lodash';
-import Header from '../../User/Header';
-import ApplicationsTable from '../../User/ApplicationsTable';
-import Pagination from '../../User/Pagination';
+import Header from '../../../../components/admin/management/Header';
+import ApplicationsTable from '../../../../components/admin/management/ApplicationsTable';
+import Pagination from '../../../../components/admin/management/Pagination';
 import WarningModal from '../../../../components/WarningModal';
 import AddTeamModal from './AddTeamModal';
 import TeamDetailsModal from './TeamDetailsModal';
 import { useSportsManagement } from '../../../../../application/hooks/useSportsManagement';
 import TeamRequestDetailsModal from './TeamRequestDetailsModal';
-
-const formatDate = (dateString: string): string => {
-  if (!dateString) return 'N/A';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
-interface Team {
-  id: string;
-  title: string;
-  type: string;
-  headCoach: string;
-  playerCount: number;
-  status: string;
-  createdAt: string;
-  logo: string;
-  category: string;
-  organizer: string;
-  organizerType: string;
-  icon: string;
-  color: string;
-  division: string;
-  homeGames: number;
-  record: string;
-  upcomingGames: { date: string; description: string }[];
-}
-
-interface PlayerRequest {
-  requestId: string;
-  teamName: string;
-  requestedBy: string;
-  type: string;
-  requestedDate: string;
-  status: string;
-}
-
-const SPORT_TYPES = ['All', 'Football', 'Basketball', 'Badminton', 'Athletics', 'Swimming'];
-const TEAM_STATUSES = ['All', 'Active', 'Inactive'];
-const REQUEST_STATUSES = ['All', 'Pending', 'Approved', 'Rejected'];
-const COACHES = ['All', 'Dr. John Smith', 'Prof. Sarah Johnson', 'Mr. Mike Wilson'];
-const DATE_RANGES = ['All', 'Last Week', 'Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'];
-const TEAM_CATEGORIES = ['Varsity', 'Club', 'Intramural'];
-const DIVISIONS = ['Division I', 'Division II', 'Division III'];
-
-const teamColumns = [
-  {
-    header: 'Team',
-    key: 'name',
-    render: (team: Team) => (
-      <div className="flex items-center gap-3">
-        <span 
-          className="text-2xl w-8 h-8 rounded-lg flex items-center justify-center"
-          style={{ backgroundColor: `${team.color}20`, color: team.color }}
-        >
-          {team.icon}
-        </span>
-        <div>
-          <p className="font-medium text-gray-200">{team.title}</p>
-          <p className="text-xs text-gray-400">ID: {team._id?.slice(0, 7)}</p>
-        </div>
-      </div>
-    ),
-    width: '20%',
-  },
-  {
-    header: 'Sport',
-    key: 'sportType',
-    render: (team: Team) => (
-      <div className="flex items-center text-gray-300">
-        <Trophy size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{team.type}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Players',
-    key: 'playerCount',
-    render: (team: Team) => (
-      <div className="flex items-center text-gray-300">
-        <Users size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{team.playerCount}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Status',
-    key: 'status',
-    render: (team: Team) => (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          team.status === 'Active'
-            ? 'bg-green-900/30 text-green-400 border-green-500/30'
-            : 'bg-gray-900/30 text-gray-400 border-gray-500/30'
-        }`}
-      >
-        <span
-          className="h-1.5 w-1.5 rounded-full mr-1.5"
-          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
-        ></span>
-        {team.status}
-      </span>
-    ),
-  },
-  {
-    header: 'Formed On',
-    key: 'formedOn',
-    render: (team: Team) => (
-      <div className="flex items-center text-gray-300">
-        <Users size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{formatDate(team.createdAt)}</span>
-      </div>
-    ),
-  },
-];
-
-const playerRequestColumns = [
-  {
-    header: 'Student',
-    key: 'studentName',
-    render: (request: PlayerRequest) => (
-      <div>
-        <p className="font-medium text-gray-200">{request.requestedBy}</p>
-        <p className="text-xs text-gray-400">ID: {request?.requestId?.slice(0, 7)}</p>
-      </div>
-    ),
-    width: '20%',
-  },
-  {
-    header: 'Team',
-    key: 'team',
-    render: (request: PlayerRequest) => (
-      <div className="flex items-center text-gray-300">
-        <Users size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{request.sportName}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Sport',
-    key: 'sport',
-    render: (request: PlayerRequest) => (
-      <div className="flex items-center text-gray-300">
-        <Trophy size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{request.type}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Requested Date',
-    key: 'requestedAt',
-    render: (request: PlayerRequest) => (
-      <div className="flex items-center text-gray-300">
-        <Users size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{formatDate(request.requestedAt)}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Status',
-    key: 'status',
-    render: (request: PlayerRequest) => (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          request.status === 'pending'
-            ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
-            : request.status === 'approved'
-              ? 'bg-green-900/30 text-green-400 border-green-500/30'
-              : 'bg-red-900/30 text-red-400 border-red-500/30'
-        }`}
-      >
-        <span
-          className="h-1.5 w-1.5 rounded-full mr-1.5"
-          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
-        ></span>
-        {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-      </span>
-    ),
-  },
-];
+import {
+  Team,
+  PlayerRequest,
+  Filters,
+  ItemToAction,
+} from '../../../../../domain/types/sportmanagement';
+import { formatDate } from '../../../../../shared/utils/dateUtils';
+import {
+  SPORT_TYPES,
+  TEAM_STATUSES,
+  REQUEST_STATUSES,
+  COACHES,
+  DATE_RANGES,
+  TEAM_CATEGORIES,
+  DIVISIONS,
+  getTeamColumns,
+  getPlayerRequestColumns,
+} from '../../../../../shared/constants/sportManagementConstants';
+import {
+  filterTeams,
+  filterPlayerRequests,
+  resetFilters,
+  formatDateRangeValue,
+  getFilterOptions,
+} from '../../../../../shared/filters/sportManagementFilter';
 
 const AdminSportsManagement: React.FC = () => {
   const {
@@ -232,8 +72,6 @@ const AdminSportsManagement: React.FC = () => {
   } = useSportsManagement();
 
 
-  console.log(playerRequests, "teamsteamsteamsteams")
-
 
   const [activeTab, setActiveTab] = useState<'teams' | 'requests'>('teams');
   const [searchTerm, setSearchTerm] = useState('');
@@ -252,7 +90,7 @@ const AdminSportsManagement: React.FC = () => {
       // Format date range value
       let formattedValue = value;
       if (field === 'dateRange') {
-        formattedValue = value.toLowerCase().replace(/\s+/g, '_');
+        formattedValue = formatDateRangeValue(value);
       }
 
       setFilters((prev) => {
@@ -264,11 +102,7 @@ const AdminSportsManagement: React.FC = () => {
   );
 
   const handleResetFilters = () => {
-    setFilters({
-      sportType: 'all',
-      status: 'all',
-      dateRange: 'all'
-    });
+    setFilters(resetFilters());
     setSearchTerm('');
   };
 
@@ -276,94 +110,12 @@ const AdminSportsManagement: React.FC = () => {
   const handleTabChangeWithFilters = (tab: 'teams' | 'requests') => {
     setActiveTab(tab);
     handleTabChange(tab);
-    setFilters({
-      sportType: 'all',
-      status: 'all',
-      dateRange: 'all'
-    });
+    setFilters(resetFilters());
     setPage(1);
   };
 
-
-  const filteredTeams = teams?.filter((team) => {
-    const matchesSearch = searchTerm
-      ? team.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        team.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        team.headCoach.toLowerCase().includes(searchTerm.toLowerCase())
-      : true;
-    const matchesSportType = filters.sportType.toLowerCase() === 'all' || 
-      team.type?.toLowerCase() === filters.sportType.toLowerCase();
-    const matchesStatus = filters.status.toLowerCase() === 'all' || 
-      team.status?.toLowerCase() === filters.status.toLowerCase();
-    let matchesDateRange = true;
-    if (filters.dateRange && filters.dateRange.toLowerCase() !== 'all' && team.createdAt) {
-      const teamDate = new Date(team.createdAt);
-      const now = new Date();
-      const diffTime = Math.abs(now.getTime() - teamDate.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      switch (filters.dateRange.toLowerCase()) {
-        case 'last_week':
-          matchesDateRange = diffDays <= 7;
-          break;
-        case 'last_month':
-          matchesDateRange = diffDays <= 30;
-          break;
-        case 'last_3_months':
-          matchesDateRange = diffDays <= 90;
-          break;
-        case 'last_6_months':
-          matchesDateRange = diffDays <= 180;
-          break;
-        case 'last_year':
-          matchesDateRange = diffDays <= 365;
-          break;
-        default:
-          matchesDateRange = true;
-      }
-    }
-    return matchesSearch && matchesSportType && matchesStatus && matchesDateRange;
-  }) || [];
-
-  const filteredPlayerRequests = playerRequests?.filter((request) => {
-    const matchesSearch = searchTerm
-      ? request.requestedBy.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.requestId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.teamName.toLowerCase().includes(searchTerm.toLowerCase())
-      : true;
-    const matchesSportType = filters.sportType.toLowerCase() === 'all' || 
-      request.type?.toLowerCase() === filters.sportType.toLowerCase();
-    const matchesStatus = filters.status.toLowerCase() === 'all' || 
-      request.status?.toLowerCase() === filters.status.toLowerCase();
-    let matchesDateRange = true;
-    if (filters.dateRange && filters.dateRange.toLowerCase() !== 'all' && request.requestedDate) {
-      const requestDate = new Date(request.requestedDate);
-      const now = new Date();
-      const diffTime = Math.abs(now.getTime() - requestDate.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      switch (filters.dateRange.toLowerCase()) {
-        case 'last_week':
-          matchesDateRange = diffDays <= 7;
-          break;
-        case 'last_month':
-          matchesDateRange = diffDays <= 30;
-          break;
-        case 'last_3_months':
-          matchesDateRange = diffDays <= 90;
-          break;
-        case 'last_6_months':
-          matchesDateRange = diffDays <= 180;
-          break;
-        case 'last_year':
-          matchesDateRange = diffDays <= 365;
-          break;
-        default:
-          matchesDateRange = true;
-      }
-    }
-    return matchesSearch && matchesSportType && matchesStatus && matchesDateRange;
-  }) || [];
+  const filteredTeams = filterTeams(teams || [], searchTerm, filters);
+  const filteredPlayerRequests = filterPlayerRequests(playerRequests || [], searchTerm, filters);
 
   const handleAddTeam = () => {
     setSelectedTeamId(null);
@@ -608,11 +360,7 @@ const AdminSportsManagement: React.FC = () => {
           setSearchQuery={setSearchTerm}
           searchPlaceholder="Search teams or player requests..."
           filters={filters}
-          filterOptions={{
-            sportType: SPORT_TYPES,
-            status: activeTab === 'teams' ? TEAM_STATUSES : REQUEST_STATUSES,
-            dateRange: DATE_RANGES,
-          }}
+          filterOptions={getFilterOptions(activeTab)}
           debouncedFilterChange={debouncedFilterChange}
           handleResetFilters={handleResetFilters}
           onTabClick={(index) => {
@@ -638,7 +386,7 @@ const AdminSportsManagement: React.FC = () => {
 
               {activeTab === 'teams' && filteredTeams.length > 0 && (
                 <>
-                  <ApplicationsTable data={filteredTeams} columns={teamColumns} actions={teamActions} />
+                  <ApplicationsTable data={filteredTeams} columns={getTeamColumns(Users, Trophy, formatDate)} actions={teamActions} />
                   <Pagination
                     page={page}
                     totalPages={totalPages}
@@ -655,7 +403,7 @@ const AdminSportsManagement: React.FC = () => {
                 <>
                   <ApplicationsTable
                     data={filteredPlayerRequests}
-                    columns={playerRequestColumns}
+                    columns={getPlayerRequestColumns(Users, Trophy, formatDate)}
                     actions={playerRequestActions}
                   />
                   <Pagination

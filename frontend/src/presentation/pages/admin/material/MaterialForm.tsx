@@ -1,36 +1,10 @@
 import React, { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { materialSchema, MaterialFormData } from '../../../../domain/validation/management/materialSchema';
 import { IoCloseOutline as X } from 'react-icons/io5';
-import { FiFileText, FiVideo, FiTag, FiClock, FiInfo, FiCheck } from 'react-icons/fi';
-import { Material } from '../../../../domain/types/material';
-
-const materialSchema = z.object({
-  title: z.string().min(2, 'Title must be at least 2 characters'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  subject: z.string().min(1, 'Subject is required'),
-  course: z.string().min(1, 'Course is required'),
-  semester: z.string().min(1, 'Semester is required'),
-  type: z.enum(['pdf', 'video']),
-  file: z.any().optional(), // File input (handled separately)
-  thumbnail: z.any().optional(), // Thumbnail input
-  tags: z.array(z.string()).min(1, 'At least one tag is required'),
-  difficulty: z.enum(['Beginner', 'Intermediate', 'Advanced']),
-  estimatedTime: z.string().min(1, 'Estimated time is required'),
-  isNewMaterial: z.boolean(),
-  isRestricted: z.boolean(),
-});
-
-type MaterialFormData = z.infer<typeof materialSchema>;
-
-interface MaterialFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: Partial<Material>) => void;
-  initialData?: Material | null;
-  isEditing?: boolean;
-}
+import { FiFileText, FiCheck } from 'react-icons/fi';
+import { Material, MaterialFormProps } from '../../../../domain/types/materialmanagement';
 
 const SUBJECTS = ['Mathematics', 'Computer Science', 'Physics', 'Chemistry'];
 const COURSES = ['B.Sc. Mathematics', 'B.Tech. CS', 'B.Sc. Physics'];

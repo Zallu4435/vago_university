@@ -3,88 +3,20 @@ import { FiPlus, FiEye, FiEdit, FiTrash2, FiFileText, FiVideo, FiUser, FiClock, 
 import { useMaterialManagement } from '../../../../application/hooks/useMaterialManagement';
 import { debounce } from 'lodash';
 import WarningModal from '../../../components/WarningModal';
-import Header from '../User/Header';
-import Pagination from '../User/Pagination';
-import ApplicationsTable from '../User/ApplicationsTable';
+import Header from '../../../components/admin/management/Header';
+import Pagination from '../../../components/admin/management/Pagination';
+import ApplicationsTable from '../../../components/admin/management/ApplicationsTable';
 import MaterialForm from './MaterialForm';
 import MaterialDetails from './MaterialDetails';
-import { Material } from '../../../../domain/types/material';
-
-const SUBJECTS = ['All Subjects', 'Mathematics', 'Computer Science', 'Physics', 'Chemistry'];
-const COURSES = ['All Courses', 'B.Sc. Mathematics', 'B.Tech. CS', 'B.Sc. Physics'];
-const SEMESTERS = ['All Semesters', '1', '2', '3', '4', '5', '6'];
-const TYPES = ['All Types', 'pdf', 'video'];
-const UPLOADERS = ['All Uploaders', 'Dr. Smith', 'Prof. Jones'];
-
-const materialColumns = [
-  {
-    header: 'Title',
-    key: 'title',
-    render: (material: Material) => (
-      <div className="flex items-center text-gray-300">
-        {material.type === 'pdf' ? <FiFileText size={14} className="text-purple-400 mr-2" /> : <FiVideo size={14} className="text-purple-400 mr-2" />}
-        <span className="text-sm">{material.title}</span>
-      </div>
-    ),
-    width: '25%',
-  },
-  {
-    header: 'Subject',
-    key: 'subject',
-    render: (material: Material) => (
-      <div className="flex items-center text-gray-300">
-        <FiTag size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{material.subject}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Course',
-    key: 'course',
-    render: (material: Material) => (
-      <span className="text-sm text-gray-300">{material.course}</span>
-    ),
-  },
-  {
-    header: 'Semester',
-    key: 'semester',
-    render: (material: Material) => (
-      <span className="text-sm text-gray-300">{material.semester}</span>
-    ),
-  },
-  {
-    header: 'Type',
-    key: 'type',
-    render: (material: Material) => (
-      <span className="text-sm text-gray-300 capitalize">{material.type}</span>
-    ),
-  },
-  {
-    header: 'Uploaded By',
-    key: 'uploadedBy',
-    render: (material: Material) => (
-      <div className="flex items-center text-gray-300">
-        <FiUser size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{material.uploadedBy}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Status',
-    key: 'isRestricted',
-    render: (material: Material) => (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${material.isRestricted
-            ? 'bg-red-900/30 text-red-400 border-red-500/30'
-            : 'bg-green-900/30 text-green-400 border-green-500/30'
-          }`}
-      >
-        <span className="h-1.5 w-1.5 rounded-full mr-1.5" style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}></span>
-        {material.isRestricted ? 'Restricted' : 'Public'}
-      </span>
-    ),
-  },
-];
+import { Material } from '../../../../domain/types/materialmanagement';
+import {
+  SUBJECTS,
+  COURSES,
+  SEMESTERS,
+  TYPES,
+  UPLOADERS,
+  getMaterialColumns,
+} from '../../../../shared/constants/materialManagementConstants';
 
 const MaterialManagement: React.FC = () => {
   const {
@@ -116,6 +48,9 @@ const MaterialManagement: React.FC = () => {
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
   const [materialToToggle, setMaterialToToggle] = useState<{ material: Material; isRestricted: boolean } | null>(null);
   const [showToggleWarning, setShowToggleWarning] = useState(false);
+
+  // Get column definitions from constants
+  const materialColumns = getMaterialColumns();
 
   const debouncedFilterChange = debounce((field: string, value: string) => {
     setFilters((prev) => ({

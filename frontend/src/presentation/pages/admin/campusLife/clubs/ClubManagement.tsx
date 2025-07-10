@@ -9,14 +9,17 @@ import {
 } from 'react-icons/io5';
 import { debounce } from 'lodash';
 import toast from 'react-hot-toast';
-import Header from '../../User/Header';
-import ApplicationsTable from '../../User/ApplicationsTable';
-import Pagination from '../../User/Pagination';
+import Header from '../../../../components/admin/management/Header';
+import ApplicationsTable from '../../../../components/admin/management/ApplicationsTable';
+import Pagination from '../../../../components/admin/management/Pagination';
 import WarningModal from '../../../../components/WarningModal';
 import AddClubModal from './AddClubModal';
 import ClubDetailsModal from './ClubDetailsModal';
 import ClubRequestDetailsModal from './ClubRequestDetailsModal';
 import { useClubManagement } from '../../../../../application/hooks/useClubManagement';
+import { Club, ClubRequest, ClubActionConfig } from '../../../../../domain/types/clubmanagement';
+import { CATEGORIES, CLUB_STATUSES, REQUEST_STATUSES, DATE_RANGES, ICONS, COLORS, clubColumns, clubRequestColumns } from '../../../../../shared/constants/clubManagementConstants';
+import { filterClubs, filterClubRequests } from '../../../../../shared/filters/clubManagementFilter';
 
 const formatDate = (dateString: string): string => {
   if (!dateString) return 'N/A';
@@ -29,181 +32,6 @@ const formatDate = (dateString: string): string => {
     minute: '2-digit',
   });
 };
-
-interface Club {
-  id: string;
-  name: string;
-  type: string;
-  members: string;
-  icon: string;
-  color: string;
-  status: string;
-  role: string;
-  nextMeeting: string;
-  about: string;
-  createdBy: string;
-  createdAt: string;
-  upcomingEvents: { date: string; description: string }[];
-}
-
-interface ClubRequest {
-  _id: string;
-  name: string;
-  type: string;
-  members: string;
-  icon: string;
-  color: string;
-  role: string;
-  nextMeeting: string;
-  about: string;
-  requestedBy: string;
-  createdAt: string;
-  status: string;
-  rejectionReason: string;
-  upcomingEvents: { date: string; description: string }[];
-}
-
-const CATEGORIES = ['All', 'Tech', 'Cultural', 'Sports', 'Arts', 'Academic'];
-const CLUB_STATUSES = ['All', 'Active', 'Inactive'];
-const REQUEST_STATUSES = ['All', 'Pending', 'Approved', 'Rejected'];
-const DATE_RANGES = ['All', 'Last Week', 'Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'];
-const ICONS = ['🎓', '🎨', '⚽', '💻', '🎭', '📚', '🎤', '🎮', '🏆', '🔬'];
-const COLORS = ['#8B5CF6', '#06B6D4', '#EF4444', '#10B981', '#F59E0B', '#EC4899', '#6366F1', '#84CC16', '#F97316', '#DC2626'];
-
-const clubColumns = [
-  {
-    header: 'Club',
-    key: 'name',
-    render: (club: Club) => (
-      <div className="flex items-center gap-3">
-        <span
-          className="text-2xl w-8 h-8 rounded-lg flex items-center justify-center"
-          style={{ backgroundColor: `${club.color}20`, color: club.color }}
-        >
-          {club.icon}
-        </span>
-        <div>
-          <p className="font-medium text-gray-200">{club.name}</p>
-          <p className="text-xs text-gray-400">ID: {club.id?.slice(0, 7)}</p>
-        </div>
-      </div>
-    ),
-    width: '20%',
-  },
-  {
-    header: 'Type',
-    key: 'type',
-    render: (club: Club) => (
-      <div className="text-sm text-gray-300 capitalize">{club.type}</div>
-    ),
-  },
-  {
-    header: 'Created By',
-    key: 'createdBy',
-    render: (club: Club) => (
-      <div className="flex items-center text-gray-300">
-        {club.createdBy?.includes('Admin') ? (
-          <Building size={14} className="text-purple-400 mr-2" />
-        ) : (
-          <User size={14} className="text-purple-400 mr-2" />
-        )}
-        <span className="text-sm">{club.createdBy}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Created Date',
-    key: 'createdAt',
-    render: (club: Club) => (
-      <div className="text-sm text-gray-300">{formatDate(club.createdAt)}</div>
-    ),
-  },
-  {
-    header: 'Members',
-    key: 'members',
-    render: (club: Club) => (
-      <div className="flex items-center text-gray-300">
-        <span className="text-sm">{club.memberCount || '0'}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Status',
-    key: 'status',
-    render: (club: Club) => (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${club.status.toLowerCase() === 'active'
-            ? 'bg-green-900/30 text-green-400 border-green-500/30'
-            : 'bg-red-900/30 text-red-400 border-red-500/30'
-          }`}
-      >
-        <span
-          className="h-1.5 w-1.5 rounded-full mr-1.5"
-          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
-        ></span>
-        {club.status.charAt(0).toUpperCase() + club.status.slice(1)}
-      </span>
-    ),
-  },
-];
-
-const clubRequestColumns = [
-  {
-    header: 'Request',
-    key: 'name',
-    render: (request: ClubRequest) => (
-      <div>
-        <p className="font-medium text-gray-200">{request.clubName}</p>
-        <p className="text-xs text-gray-400">ID: {request.requestedId?.slice(0, 7)}</p>
-      </div>
-    ),
-    width: '20%',
-  },
-  {
-    header: 'Requested By',
-    key: 'requestedBy',
-    render: (request: ClubRequest) => (
-      <div className="flex items-center text-gray-300">
-        <User size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{request.requestedBy}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Type',
-    key: 'type',
-    render: (request: ClubRequest) => (
-      <div className="text-sm text-gray-300 capitalize">{request.type}</div>
-    ),
-  },
-  {
-    header: 'Requested At',
-    key: 'createdAt',
-    render: (request: ClubRequest) => (
-      <div className="text-sm text-gray-300">{formatDate(request.requestedAt)}</div>
-    ),
-  },
-  {
-    header: 'Status',
-    key: 'status',
-    render: (request: ClubRequest) => (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${request.status.toLowerCase() === 'pending'
-            ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
-            : request.status.toLowerCase() === 'approved'
-              ? 'bg-green-900/30 text-green-400 border-green-500/30'
-              : 'bg-red-900/30 text-red-400 border-red-500/30'
-          }`}
-      >
-        <span
-          className="h-1.5 w-1.5 rounded-full mr-1.5"
-          style={{ boxShadow: '0 0 8px currentColor', backgroundColor: 'currentColor' }}
-        ></span>
-        {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-      </span>
-    ),
-  },
-];
 
 const AdminClubManagement: React.FC = () => {
   const {
@@ -242,31 +70,8 @@ const AdminClubManagement: React.FC = () => {
   const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<ClubRequest | null>(null);
 
-  const filteredClubs = clubs.filter((club) => {
-    const matchesSearch = searchQuery
-      ? club.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      club._id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      club.createdBy?.toLowerCase().includes(searchQuery.toLowerCase())
-      : true;
-    const matchesCategory =
-      filters.category === 'All' || club.type?.toLowerCase() === filters.category.toLowerCase();
-    const matchesStatus =
-      filters.status === 'All' || club.status?.toLowerCase() === filters.status.toLowerCase();
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
-
-  const filteredClubRequests = clubRequests.filter((request) => {
-    const matchesSearch = searchQuery
-      ? request.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request._id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request.requestedBy?.toLowerCase().includes(searchQuery.toLowerCase())
-      : true;
-    const matchesCategory =
-      filters.category === 'All' || request.type?.toLowerCase() === filters.category.toLowerCase();
-    const matchesStatus =
-      filters.status === 'All' || request.status?.toLowerCase() === filters.status.toLowerCase();
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
+  const filteredClubs = filterClubs(clubs, searchQuery, filters);
+  const filteredClubRequests = filterClubRequests(clubRequests, searchQuery, filters);
 
   const handleAddClub = () => {
     setSelectedClub(null);
@@ -384,7 +189,7 @@ const AdminClubManagement: React.FC = () => {
     setSearchQuery('');
   };
 
-  const clubActions = [
+  const clubActions: ClubActionConfig[] = [
     {
       icon: <Eye size={16} />,
       label: 'View Club',
@@ -407,7 +212,7 @@ const AdminClubManagement: React.FC = () => {
     },
   ];
 
-  const clubRequestActions = [
+  const clubRequestActions: ClubActionConfig[] = [
     {
       icon: <Eye size={16} />,
       label: 'View Request',

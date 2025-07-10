@@ -13,40 +13,13 @@ import {
   IoMailOutline as Mail,
 } from 'react-icons/io5';
 import { IconType } from 'react-icons';
-
-type StatusType = 'pending' | 'approved' | 'rejected';
-
-interface CourseRequestDetails {
-  id: string;
-  status: StatusType;
-  createdAt: string;
-  updatedAt: string;
-  reason: string;
-  additionalInfo?: string;
-  course: {
-    id: string;
-    title: string;
-    specialization: string;
-    term: string;
-    faculty: string;
-    credits: number;
-  };
-  user?: {
-    id: string;
-    name: string;
-    email: string;
-  };
-}
-
-interface StatusBadgeProps {
-  status: StatusType;
-}
-
-interface InfoCardProps {
-  icon: IconType;
-  label: string;
-  value: string | number;
-}
+import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
+import {
+  StatusBadgeProps,
+  InfoCardProps,
+  CourseRequestDetailsModalProps,
+} from '../../../../domain/types/coursemanagement';
+import { formatDate, formatDateTime } from '../../../../shared/utils/dateUtils';
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const statusConfig = {
@@ -66,23 +39,18 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   );
 };
 
-const InfoCard: React.FC<InfoCardProps> = ({ icon: Icon, label, value }) => (
-  <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
-    <div className="flex items-center mb-2">
-      <Icon size={18} className="text-purple-300" />
-      <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
+const InfoCard: React.FC<InfoCardProps> = ({ icon, label, value }) => {
+  const Icon = icon as IconType;
+  return (
+    <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
+      <div className="flex items-center mb-2">
+        <Icon size={18} className="text-purple-300" />
+        <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
+      </div>
+      <p className="text-white font-semibold">{value}</p>
     </div>
-    <p className="text-white font-semibold">{value}</p>
-  </div>
-);
-
-interface CourseRequestDetailsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  request: CourseRequestDetails | null;
-  onApprove?: (id: string) => void;
-  onReject?: (id: string) => void;
-}
+  );
+};
 
 const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
   isOpen,
@@ -91,39 +59,11 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
   onApprove,
   onReject,
 }) => {
-  // Prevent background scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, [isOpen]);
+  usePreventBodyScroll(isOpen);
 
   if (!isOpen || !request) return null;
 
   const { course, user } = request;
-
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  const formatDateTime = (dateString: string): string => {
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
 
   // Particle effect
   const ghostParticles = Array(30)
@@ -319,7 +259,7 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .no-scroll {
           overflow: hidden;
         }

@@ -1,32 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FiXCircle, FiUser, FiBook, FiClock, FiPercent } from 'react-icons/fi';
-
-interface EnrollmentDetailsProps {
-  isOpen: boolean;
-  onClose: () => void;
-  enrollment: {
-    _id: string;
-    studentName: string;
-    studentEmail: string;
-    courseTitle: string;
-    enrollmentDate: string;
-    status: 'Pending' | 'Approved' | 'Rejected';
-    progress: number;
-  };
-  isLoading: boolean;
-}
+import { EnrollmentDetailsProps, InfoCardProps } from '../../../../domain/types/diplomamanagement';
+import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const EnrollmentDetails: React.FC<EnrollmentDetailsProps> = ({ isOpen, onClose, enrollment, isLoading }) => {
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, [isOpen]);
+  usePreventBodyScroll(isOpen);
 
   if (!isOpen || isLoading) return null;
 
@@ -201,12 +179,6 @@ const EnrollmentDetails: React.FC<EnrollmentDetailsProps> = ({ isOpen, onClose, 
     </div>
   );
 };
-
-interface InfoCardProps {
-  icon: React.ReactNode;
-  label: string;
-  value: string | JSX.Element;
-}
 
 const InfoCard: React.FC<InfoCardProps> = ({ icon, label, value }) => (
   <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">

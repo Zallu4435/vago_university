@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { materialService } from '../services/materialService';
-import { Material } from '../../domain/types/material';
+import { Material } from '../../domain/types/materialmanagement';
 import { toast } from 'react-hot-toast';
 
 export const useMaterialManagement = () => {

@@ -3,45 +3,20 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { IoCloseOutline as X, IoAdd, IoTrash, IoSparklesOutline as Sparkles } from 'react-icons/io5';
-
-// Zod validation schema
-const teamSchema = z.object({
-  title: z.string().min(2, 'Team name must be at least 2 characters'),
-  type: z.string().min(1, 'Sport type is required'),
-  category: z.string().min(1, 'Team category is required'),
-  organizer: z.string().min(2, 'Organizer name is required'),
-  organizerType: z.enum(['department', 'club', 'student', 'administration', 'external'], {
-    errorMap: () => ({ message: 'Organizer type is required' }),
-  }),
-  icon: z.string().default('⚽'),
-  color: z.string().default('#8B5CF6'),
-  division: z.string().min(1, 'Division is required'),
-  headCoach: z.string().min(2, 'Head coach name is required'),
-  homeGames: z.number().min(0, 'Home games must be 0 or greater'),
-  record: z.string().regex(/^\d+-\d+-\d+$/, 'Record must be in format: W-L-T'),
-  upcomingGames: z.array(
-    z.object({
-      date: z.string().min(10, 'Date is required'),
-      description: z.string().min(5, 'Description must be at least 5 characters'),
-    })
-  ).min(1, 'At least one upcoming game is required'),
-  participants: z.number().min(0, 'Participants must be 0 or greater').default(0),
-  status: z.enum(['active', 'inactive']).default('active'),
-});
+import { AddTeamModalProps, OrganizerTypeOption, UpcomingGame, ParticleConfig } from '../../../../../domain/types/sportmanagement';
+import {
+  ORGANIZER_TYPE_OPTIONS,
+  ICON_OPTIONS,
+  COLOR_OPTIONS,
+  DEFAULT_TEAM_FORM_VALUES,
+  PARTICLE_COUNT,
+  PARTICLE_SIZE_RANGE,
+  PARTICLE_ANIMATION_RANGE,
+  PARTICLE_DELAY_RANGE,
+} from '../../../../../shared/constants/sportManagementConstants';
+import { teamSchema } from '../../../../../domain/validation/management/teamSchema';
 
 type TeamFormData = z.infer<typeof teamSchema>;
-
-interface AddTeamModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: TeamFormData) => void;
-  initialData?: Partial<TeamFormData>;
-  isEditing?: boolean;
-  sportTypes: string[];
-  coaches: string[];
-  divisions: string[];
-  teamCategories: string[];
-}
 
 const AddTeamModal: React.FC<AddTeamModalProps> = ({
   isOpen,
@@ -64,20 +39,7 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
   } = useForm<TeamFormData>({
     resolver: zodResolver(teamSchema),
     defaultValues: {
-      title: '',
-      type: '',
-      category: '',
-      organizer: '',
-      organizerType: 'department',
-      icon: '⚽',
-      color: '#8B5CF6',
-      division: '',
-      headCoach: '',
-      homeGames: 0,
-      record: '0-0-0',
-      upcomingGames: [{ date: '', description: '' }],
-      participants: 0,
-      status: 'active',
+      ...DEFAULT_TEAM_FORM_VALUES,
       ...initialData,
     },
     mode: 'onChange',
@@ -90,26 +52,6 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
 
   const watchedIcon = watch('icon');
   const watchedColor = watch('color');
-
-  const organizerTypeOptions = [
-    { value: 'department', label: 'Department', emoji: '🏛️' },
-    { value: 'club', label: 'Club', emoji: '🎉' },
-    { value: 'student', label: 'Student', emoji: '🎓' },
-    { value: 'administration', label: 'Administration', emoji: '📋' },
-    { value: 'external', label: 'External', emoji: '🌍' },
-  ];
-
-  const iconOptions = [
-    '📅', '🎉', '🏆', '🎭', '🎵', '🏃', '🍽️', '🎨', '📚', '💼',
-    '🔬', '🎯', '⚽', '🎪', '🎬', '🏛️', '🌟', '🎊', '🎓', '💡',
-    '🚀', '🎮', '🏋️', '🎤', '📸', '🎸', '🏆', '🎺', '🎻', '🎲'
-  ];
-
-  const colorOptions = [
-    '#8B5CF6', '#06B6D4', '#10B981', '#F59E0B', '#EF4444',
-    '#EC4899', '#6366F1', '#84CC16', '#F97316', '#8B5A2B',
-    '#DC2626', '#7C3AED', '#059669', '#DB2777', '#9333EA'
-  ];
 
   const handleFormSubmit = (data: TeamFormData) => {
     const teamData = {
@@ -126,7 +68,7 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
       record: data.record,
       upcomingGames: data.upcomingGames,
       participants: data.participants || 0,
-      status: data.status || 'active',
+      status: data.status || 'Active',
     };
     onSubmit(teamData);
     reset();
@@ -137,34 +79,19 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
     if (isOpen && initialData) {
       reset({ ...initialData });
     } else if (isOpen && !isEditing) {
-      reset({
-        title: '',
-        type: '',
-        category: '',
-        organizer: '',
-        organizerType: 'department',
-        icon: '⚽',
-        color: '#8B5CF6',
-        division: '',
-        headCoach: '',
-        homeGames: 0,
-        record: '0-0-0',
-        upcomingGames: [{ date: '', description: '' }],
-        participants: 0,
-        status: 'active',
-      });
+      reset(DEFAULT_TEAM_FORM_VALUES);
     }
   }, [isOpen, initialData, isEditing, reset]);
 
   // Particle effect
-  const ghostParticles = Array(30)
+  const ghostParticles = Array(PARTICLE_COUNT)
     .fill(0)
     .map((_, i) => ({
-      size: Math.random() * 10 + 5,
+      size: Math.random() * (PARTICLE_SIZE_RANGE.max - PARTICLE_SIZE_RANGE.min) + PARTICLE_SIZE_RANGE.min,
       top: Math.random() * 100,
       left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
+      animDuration: Math.random() * (PARTICLE_ANIMATION_RANGE.max - PARTICLE_ANIMATION_RANGE.min) + PARTICLE_ANIMATION_RANGE.min,
+      animDelay: Math.random() * PARTICLE_DELAY_RANGE.max,
     }));
 
   if (!isOpen) return null;
@@ -349,7 +276,7 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
                             errors.organizerType ? 'border-red-500' : 'border-purple-600/30'
                           }`}
                         >
-                          {organizerTypeOptions.map((option) => (
+                          {ORGANIZER_TYPE_OPTIONS.map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.emoji} {option.label}
                             </option>
@@ -566,7 +493,7 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
                       Team Icon
                     </label>
                     <div className="grid grid-cols-6 gap-2 p-4 bg-gray-900/60 rounded-lg border border-purple-600/30 max-h-40 overflow-y-auto">
-                      {iconOptions.map((icon) => (
+                      {ICON_OPTIONS.map((icon) => (
                         <button
                           key={icon}
                           type="button"
@@ -588,7 +515,7 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
                       Team Color
                     </label>
                     <div className="grid grid-cols-5 gap-2 p-4 bg-gray-900/60 rounded-lg border border-purple-600/30">
-                      {colorOptions.map((color) => (
+                      {COLOR_OPTIONS.map((color) => (
                         <button
                           key={color}
                           type="button"
@@ -658,7 +585,7 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes floatParticle {
           0% {
             transform: translateY(0) translateX(0);

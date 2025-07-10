@@ -3,7 +3,6 @@ import { FiClock, FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import { FaHandHoldingUsd } from 'react-icons/fa'; // optional: new icon for 'offered'
 
 const StatusBadge = ({ status }) => {
-    console.log(status)
   const statusConfig = {
     pending: {
       icon: <FiClock size={14} className="mr-1" />,
@@ -30,8 +29,6 @@ const StatusBadge = ({ status }) => {
       label: 'Offered',
     },
   };
-
-  console.log(status)
 
   const { icon, bgColor, textColor, label } = statusConfig[status] || statusConfig.pending;
 

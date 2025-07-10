@@ -1,44 +1,31 @@
-import React, { useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import React from 'react';
 import { 
   IoCloseOutline as X, 
   IoCalendarOutline as Calendar, 
+  IoTimeOutline as Clock, 
   IoLocationOutline as MapPin, 
   IoPeopleOutline as Users, 
   IoPersonOutline as User, 
   IoInformationCircleOutline as Info,
-  IoTimeOutline as Clock,
-  IoCheckmarkCircleOutline as Check,
-  IoCloseCircleOutline as Reject,
-  IoSparklesOutline as Sparkles,
   IoDocumentTextOutline as DocumentText,
+  IoSparklesOutline as Sparkles,
   IoHeartOutline as Heart,  
-  IoMailOutline as Mail
+  IoMailOutline as Mail,
+  IoCheckmarkOutline as Check,
+  IoCloseCircleOutline as Reject
 } from 'react-icons/io5';
-import { EventRequest } from '../../../../../domain/types/event';
+import { 
+  EventRequest,
+  EventRequestDetailsModalProps,
+  EventRequestDetailsStatusBadgeProps,
+  EventRequestDetailsInfoCardProps,
+  ParticleConfig
+} from '../../../../../domain/types/eventmanagement';
+import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
+import { formatDate, formatDateTime } from '../../../../../shared/utils/dateUtils';
 
-type StatusType = 'pending' | 'approved' | 'rejected';
-
-interface StatusBadgeProps {
-  status: StatusType;
-}
-
-interface InfoCardProps {
-  icon: React.ComponentType<{ size?: number | string; className?: string }>;
-  label: string;
-  value: string;
-}
-
-interface EventRequestDetailsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  request: EventRequest | null;
-  onApprove?: (id: string) => void;
-  onReject?: (id: string) => void;
-}
-
-const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
-  const statusConfig = {
+const StatusBadge: React.FC<EventRequestDetailsStatusBadgeProps> = ({ status }) => {
+  const statusConfig: Record<string, { bg: string; text: string; border: string }> = {
     pending: { bg: 'bg-yellow-600/30', text: 'text-yellow-100', border: 'border-yellow-500/50' },
     approved: { bg: 'bg-green-600/30', text: 'text-green-100', border: 'border-green-500/50' },
     rejected: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },
@@ -55,7 +42,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   );
 };
 
-const InfoCard: React.FC<InfoCardProps> = ({ icon: Icon, label, value }) => (
+const InfoCard: React.FC<EventRequestDetailsInfoCardProps> = ({ icon: Icon, label, value }) => (
   <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-4 shadow-sm">
     <div className="flex items-center mb-2">
       <Icon size={18} className="text-purple-300" />
@@ -72,39 +59,13 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
   onApprove,
   onReject,
 }) => {
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, [isOpen]);
+  // Use the shared prevent body scroll hook
+  usePreventBodyScroll(isOpen);
 
   if (!isOpen || !request) return null;
 
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  const formatDateTime = (dateString: string): string => {
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  // Particle effect (unchanged)
-  const ghostParticles = Array(30)
+  // Particle effect
+  const ghostParticles: ParticleConfig[] = Array(30)
     .fill(0)
     .map((_, i) => ({
       size: Math.random() * 10 + 5,
@@ -114,7 +75,7 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
       animDelay: Math.random() * 5,
     }));
 
-  const modalContent = (
+  return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
       <div className="relative bg-gray-800 rounded-lg shadow-xl border border-purple-500/30 w-full max-w-2xl mx-auto my-8 overflow-hidden">
         {/* Header Section */}
@@ -220,9 +181,6 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
       </div>
     </div>
   );
-
-  // Remove createPortal and just return the modalContent directly
-  return modalContent;
 };
 
 export default EventRequestDetailsModal;

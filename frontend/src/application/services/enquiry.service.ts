@@ -3,7 +3,7 @@ import {
   Enquiry, 
   EnquiryApiResponse, 
   CreateEnquiryData
-} from '../../domain/types/enquiry';
+} from '../../domain/types/enquirymanagement';
 
 class EnquiryService {
   private baseUrl = '/enquiries';

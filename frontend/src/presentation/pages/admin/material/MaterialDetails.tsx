@@ -1,14 +1,7 @@
 import React from 'react';
 import { IoCloseOutline as X } from 'react-icons/io5';
-import { FiFileText, FiVideo, FiTag, FiClock, FiUser, FiEye, FiDownload, FiStar } from 'react-icons/fi';
-import { Material } from '../../../../domain/types/material';
-
-interface MaterialDetailsProps {
-  isOpen: boolean;
-  onClose: () => void;
-  material: Material;
-  isLoading: boolean;
-}
+import { FiFileText, FiVideo, FiEye, FiDownload, FiStar } from 'react-icons/fi';
+import { Material, MaterialDetailsProps } from '../../../../domain/types/materialmanagement';
 
 const MaterialDetails: React.FC<MaterialDetailsProps> = ({ isOpen, onClose, material, isLoading }) => {
   if (!isOpen) return null;

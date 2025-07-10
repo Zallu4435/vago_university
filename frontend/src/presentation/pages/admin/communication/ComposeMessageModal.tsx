@@ -1,32 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { IoAttachOutline as Paperclip, IoCloseOutline as X, IoSearchOutline as Search, IoMailOutline as Mail } from 'react-icons/io5';
-
-type RecipientType = '' | 'all_students' | 'all_faculty' | 'all_users' | 'individual_students' | 'individual_faculty';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-}
-
-interface ComposeMessageModalProps {
-  initialForm: {
-    to: { value: string; label: string }[];
-    subject: string;
-    message: string;
-    attachments: File[];
-  };
-  onSend: (form: {
-    to: { value: string; label: string }[];
-    subject: string;
-    message: string;
-    attachments: File[];
-  }) => void;
-  onCancel: () => void;
-  isOpen: boolean;
-  fetchUsers: (type: RecipientType, search?: string) => Promise<User[]>;
-}
+import { RecipientType, User, ComposeMessageModalProps } from '../../../../domain/types/communicationmanagement';
+import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const RECIPIENT_TYPES = [
   { value: '', label: 'Select a recipient' },
@@ -52,17 +27,7 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Prevent background scrolling
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, [isOpen]);
+  usePreventBodyScroll(isOpen);
 
   const loadUsers = async (type: RecipientType, search?: string) => {
     if (!isOpen || !type) return;

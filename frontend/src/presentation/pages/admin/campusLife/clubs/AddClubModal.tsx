@@ -3,40 +3,9 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { IoCloseOutline as X, IoAdd, IoTrash } from 'react-icons/io5';
-
-// Zod validation schema
-const clubSchema = z.object({
-  name: z.string().min(2, 'Club name must be at least 2 characters'),
-  type: z.string().min(1, 'Club type is required'),
-  members: z.string().regex(/^\d+$/, 'Members must be a number').optional().or(z.literal('')),
-  icon: z.string().default('🎓'),
-  color: z.string().default('#8B5CF6'),
-  status: z.enum(['active', 'inactive']).default('active').optional(),
-  role: z.string().min(1, 'Role is required'),
-  nextMeeting: z.string().optional(),
-  about: z.string().optional(),
-  createdBy: z.string().min(2, 'Creator name is required'),
-  upcomingEvents: z.array(
-    z.object({
-      date: z.string().min(10, 'Date is required'),
-      description: z.string().min(5, 'Description must be at least 5 characters'),
-    })
-  ).optional(),
-});
-
-type ClubFormData = z.infer<typeof clubSchema>;
-
-interface AddClubModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: ClubFormData) => void;
-  initialData?: Partial<ClubFormData>;
-  isEditing?: boolean;
-  clubTypes: string[];
-  roles: string[];
-  icons: string[];
-  colors: string[];
-}
+import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
+import { AddClubModalProps, ClubFormData } from '../../../../../domain/types/clubmanagement';
+import { clubSchema } from '../../../../../domain/validation/management/clubSchema';
 
 const AddClubModal: React.FC<AddClubModalProps> = ({
   isOpen,
@@ -102,7 +71,7 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
     onClose();
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen && initialData) {
       reset({ ...initialData, upcomingEvents: initialData.upcomingEvents || [] });
     } else if (isOpen && !isEditing) {
@@ -122,17 +91,7 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
     }
   }, [isOpen, initialData, isEditing, reset]);
 
-  // Prevent backend scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, [isOpen]);
+  usePreventBodyScroll(isOpen);
 
   // Particle effect
   const ghostParticles = Array(30)
@@ -226,9 +185,8 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                         <input
                           {...field}
                           type="text"
-                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.name ? 'border-red-500' : 'border-purple-500/30'
-                          }`}
+                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.name ? 'border-red-500' : 'border-purple-500/30'
+                            }`}
                           placeholder="Enter club name"
                         />
                       )}
@@ -248,9 +206,8 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                       render={({ field }) => (
                         <select
                           {...field}
-                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.type ? 'border-red-500' : 'border-purple-500/30'
-                          }`}
+                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.type ? 'border-red-500' : 'border-purple-500/30'
+                            }`}
                         >
                           <option value="">Select Type</option>
                           {clubTypes.map((type) => (
@@ -276,9 +233,8 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                       render={({ field }) => (
                         <select
                           {...field}
-                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.role ? 'border-red-500' : 'border-purple-500/30'
-                          }`}
+                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.role ? 'border-red-500' : 'border-purple-500/30'
+                            }`}
                         >
                           <option value="">Select Role</option>
                           {roles.map((role) => (
@@ -305,9 +261,8 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                         <input
                           {...field}
                           type="text"
-                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.createdBy ? 'border-red-500' : 'border-purple-500/30'
-                          }`}
+                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.createdBy ? 'border-red-500' : 'border-purple-500/30'
+                            }`}
                           placeholder="Enter creator name"
                         />
                       )}
@@ -338,9 +293,8 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                         <input
                           {...field}
                           type="text"
-                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.members ? 'border-red-500' : 'border-purple-500/30'
-                          }`}
+                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.members ? 'border-red-500' : 'border-purple-500/30'
+                            }`}
                           placeholder="e.g., 12"
                         />
                       )}
@@ -360,9 +314,8 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                       render={({ field }) => (
                         <select
                           {...field}
-                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.status ? 'border-red-500' : 'border-purple-500/30'
-                          }`}
+                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.status ? 'border-red-500' : 'border-purple-500/30'
+                            }`}
                         >
                           <option value="active">Active</option>
                           <option value="inactive">Inactive</option>
@@ -385,9 +338,8 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                         <input
                           {...field}
                           type="datetime-local"
-                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.nextMeeting ? 'border-red-500' : 'border-purple-500/30'
-                          }`}
+                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.nextMeeting ? 'border-red-500' : 'border-purple-500/30'
+                            }`}
                         />
                       )}
                     />
@@ -407,9 +359,8 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                         <textarea
                           {...field}
                           rows={4}
-                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                            errors.about ? 'border-red-500' : 'border-purple-500/30'
-                          }`}
+                          className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.about ? 'border-red-500' : 'border-purple-500/30'
+                            }`}
                           placeholder="Enter club description"
                         />
                       )}
@@ -454,9 +405,8 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                             <input
                               {...field}
                               type="datetime-local"
-                              className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                                errors.upcomingEvents?.[index]?.date ? 'border-red-500' : 'border-purple-500/30'
-                              }`}
+                              className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.upcomingEvents?.[index]?.date ? 'border-red-500' : 'border-purple-500/30'
+                                }`}
                             />
                           )}
                         />
@@ -489,9 +439,8 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                               {...field}
                               type="text"
                               placeholder="Event description"
-                              className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                                errors.upcomingEvents?.[index]?.description ? 'border-red-500' : 'border-purple-500/30'
-                              }`}
+                              className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.upcomingEvents?.[index]?.description ? 'border-red-500' : 'border-purple-500/30'
+                                }`}
                             />
                           )}
                         />
@@ -525,11 +474,10 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                         key={icon}
                         type="button"
                         onClick={() => setValue('icon', icon)}
-                        className={`w-10 h-10 text-xl rounded-lg transition-all duration-200 hover:scale-110 ${
-                          watchedIcon === icon
+                        className={`w-10 h-10 text-xl rounded-lg transition-all duration-200 hover:scale-110 ${watchedIcon === icon
                             ? 'bg-purple-600/30 border-purple-500/50 shadow-lg'
                             : 'bg-gray-900/60 border-purple-500/30 hover:bg-purple-900/20'
-                        }`}
+                          }`}
                       >
                         {icon}
                       </button>
@@ -547,11 +495,10 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                         key={color}
                         type="button"
                         onClick={() => setValue('color', color)}
-                        className={`w-12 h-12 rounded-lg transition-all duration-200 hover:scale-110 ${
-                          watchedColor === color
+                        className={`w-12 h-12 rounded-lg transition-all duration-200 hover:scale-110 ${watchedColor === color
                             ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-900'
                             : ''
-                        }`}
+                          }`}
                         style={{ backgroundColor: color }}
                       />
                     ))}

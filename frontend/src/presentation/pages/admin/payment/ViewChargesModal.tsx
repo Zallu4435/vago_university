@@ -2,13 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FiDollarSign, FiX, FiFileText, FiSearch } from 'react-icons/fi';
 import { debounce } from 'lodash';
 import { useFinancial } from '../../../../application/hooks/useFinancial';
-import { Charge } from '../../../../domain/types/financial';
+import { Charge, ViewChargesModalProps } from '../../../../domain/types/financialmanagement';
 import ReactDOM from 'react-dom';
-
-interface ViewChargesModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
 
 const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) => {
   const { getCharges } = useFinancial();

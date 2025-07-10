@@ -1,214 +1,20 @@
 import React, { useState, useCallback } from 'react';
-import { FiPlus, FiEye, FiEdit, FiTrash2, FiBook, FiBriefcase, FiUser, FiHash, FiClock, FiUsers, FiBookOpen, FiClipboard, FiBarChart2, FiCheck, FiX } from 'react-icons/fi';
+import { FiPlus, FiEye, FiEdit, FiTrash2, FiBookOpen, FiClipboard, FiBarChart2, FiCheck, FiX } from 'react-icons/fi';
 import { useCourseManagement } from '../../../../application/hooks/useCourseManagement';
 import WarningModal from '../../../components/WarningModal';
-import Header from '../User/Header';
-import Pagination from '../User/Pagination';
-import ApplicationsTable from '../User/ApplicationsTable';
+import Header from '../../../components/admin/management/Header';
+import Pagination from '../../../components/admin/management/Pagination';
+import ApplicationsTable from '../../../components/admin/management/ApplicationsTable';
 import { debounce } from 'lodash';
 import CourseDetails from './CourseDetails';
 import CourseForm from './CourseForm';
 import EnrollmentRequestDetails from './EnrollmentRequestDetails';
-
-interface Course {
-  id: string;
-  title: string;
-  specialization: string;
-  faculty: string;
-  credits: number;
-  schedule: string;
-  maxEnrollment: number;
-  currentEnrollment: number;
-  description?: string;
-  prerequisites?: string[];
-  term: string;
-}
-
-interface EnrollmentRequest {
-  id: string;
-  studentName: string;
-  courseTitle: string;
-  requestedAt: string;
-  status: string;
-  specialization: string;
-  term: string;
-  studentId: string;
-  studentEmail: string;
-  studentPhone?: string;
-  reason?: string;
-  previousCourses?: {
-    courseId: string;
-    courseName: string;
-    grade: string;
-    term: string;
-  }[];
-  academicStanding?: {
-    gpa: number;
-    creditsCompleted: number;
-    standing: 'Good' | 'Warning' | 'Probation';
-  };
-  additionalNotes?: string;
-  lastUpdatedAt: string;
-  updatedBy?: string;
-}
-
-const SPECIALIZATIONS = [
-  'All Specializations',
-  'Computer Science',
-  'Information Technology',
-  'Software Engineering',
-  'Data Science',
-  'Artificial Intelligence',
-  'Cybersecurity',
-  'Web Development',
-  'Mobile Development',
-  'Database Management',
-  'Cloud Computing',
-  'Network Engineering',
-  'Game Development',
-];
-
-const FACULTIES = ['All Faculties', 'Dr. Sarah Johnson', 'Dr. Michael Chen'];
-const TERMS = ['All Terms', 'Fall 2024', 'Spring 2024', 'Summer 2024'];
-const REQUEST_STATUSES = ['All', 'Pending', 'Approved', 'Rejected'];
-
-const courseColumns = [
-  {
-    header: 'Title',
-    key: 'title',
-    render: (course: Course) => (
-      <div className="flex items-center text-gray-300">
-        <FiBook size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{course.title || 'N/A'}</span>
-      </div>
-    ),
-    width: '20%',
-  },
-  {
-    header: 'Specialization',
-    key: 'specialization',
-    render: (course: Course) => (
-      <div className="flex items-center text-gray-300">
-        <FiBriefcase size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{course.specialization || 'N/A'}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Faculty',
-    key: 'faculty',
-    render: (course: Course) => (
-      <div className="flex items-center text-gray-300">
-        <FiUser size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{course.faculty || 'N/A'}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Credits',
-    key: 'credits',
-    render: (course: Course) => (
-      <div className="flex items-center text-gray-300">
-        <FiHash size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{course.credits ?? 'N/A'}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Schedule',
-    key: 'schedule',
-    render: (course: Course) => (
-      <div className="flex items-center text-gray-300">
-        <FiClock size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{course.schedule || 'N/A'}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Enrollment',
-    key: 'currentEnrollment',
-    render: (course: Course) => (
-      <div className="flex items-center text-gray-300">
-        <FiUsers size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{`${course.currentEnrollment}/${course.maxEnrollment}`}</span>
-      </div>
-    ),
-  },
-];
-
-const enrollmentRequestColumns = [
-  {
-    header: 'Student Name',
-    key: 'studentName',
-    render: (request: EnrollmentRequest) => (
-      <div className="flex items-center text-gray-300">
-        <FiUser size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{request.studentName || 'N/A'}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Course',
-    key: 'courseTitle',
-    render: (request: EnrollmentRequest) => (
-      <div className="flex items-center text-gray-300">
-        <FiBook size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{request.courseTitle || 'N/A'}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Specialization',
-    key: 'specialization',
-    render: (request: EnrollmentRequest) => (
-      <div className="flex items-center text-gray-300">
-        <FiBriefcase size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{request.specialization || 'N/A'}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Term',
-    key: 'term',
-    render: (request: EnrollmentRequest) => (
-      <div className="flex items-center text-gray-300">
-        <FiClock size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{request.term || 'N/A'}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Requested At',
-    key: 'requestedAt',
-    render: (request: EnrollmentRequest) => (
-      <div className="flex items-center text-gray-300">
-        <FiClock size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{new Date(request.requestedAt).toLocaleDateString()}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Status',
-    key: 'status',
-    render: (request: EnrollmentRequest) => (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          request.status === 'Pending'
-            ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
-            : request.status === 'Approved'
-            ? 'bg-green-900/30 text-green-400 border-green-500/30'
-            : 'bg-red-900/30 text-red-400 border-red-500/30'
-        }`}
-      >
-        <span
-          className="h-1.5 w-1.5 rounded-full mr-1.5"
-          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
-        ></span>
-        {request.status}
-      </span>
-    ),
-  },
-];
+import { Course, EnrollmentRequest } from '../../../../domain/types/coursemanagement';
+import { SPECIALIZATIONS, FACULTIES, TERMS, REQUEST_STATUSES, courseColumns, enrollmentRequestColumns } from '../../../../shared/constants/courseManagementConstants';
+import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../../shared/components/ErrorMessage';
+import EmptyState from '../../../../shared/components/EmptyState';
+import { filterCourses, filterEnrollmentRequests } from '../../../../shared/filters/courseFilter';
 
 const AdminCourseManagement: React.FC = () => {
   const {
@@ -242,7 +48,6 @@ const AdminCourseManagement: React.FC = () => {
     handleViewRequest,
   } = useCourseManagement();
 
-  console.log(courseDetails, "ppppp")
 
   const [searchTerm, setSearchTerm] = useState('');
   const [showCourseModal, setShowCourseModal] = useState(false);
@@ -411,20 +216,15 @@ const AdminCourseManagement: React.FC = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-500">Error: {error.message}</div>
-      </div>
-    );
+    return <ErrorMessage message={error.message || 'Failed to load courses.'} />;
   }
+
+  const filteredCourses = filterCourses(courses, searchTerm);
+  const filteredEnrollmentRequests = filterEnrollmentRequests(enrollmentRequests, searchTerm);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 relative">
@@ -515,17 +315,17 @@ const AdminCourseManagement: React.FC = () => {
                 </button>
               )}
 
-              {activeTab === 'courses' && courses.length > 0 && (
+              {activeTab === 'courses' && filteredCourses.length > 0 && (
                 <>
                   <ApplicationsTable
-                    data={courses}
+                    data={filteredCourses}
                     columns={courseColumns}
                     actions={courseActions}
                   />
                   <Pagination
                     page={page}
                     totalPages={totalPages || 1}
-                    itemsCount={courses.length}
+                    itemsCount={filteredCourses.length}
                     itemName="courses"
                     onPageChange={(newPage) => setPage(newPage)}
                     onFirstPage={() => setPage(1)}
@@ -538,20 +338,18 @@ const AdminCourseManagement: React.FC = () => {
                 <div className="space-y-8">
                   <h3 className="text-lg font-medium text-white">Course Enrollment Requests</h3>
                   {isLoadingRequests ? (
-                    <div className="flex items-center justify-center py-12">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-                    </div>
-                  ) : enrollmentRequests.length > 0 ? (
+                    <LoadingSpinner />
+                  ) : filteredEnrollmentRequests.length > 0 ? (
                     <>
                       <ApplicationsTable
-                        data={enrollmentRequests}
+                        data={filteredEnrollmentRequests}
                         columns={enrollmentRequestColumns}
                         actions={enrollmentRequestActions}
                       />
                       <Pagination
                         page={page}
                         totalPages={enrollmentRequestsTotalPages}
-                        itemsCount={enrollmentRequests.length}
+                        itemsCount={filteredEnrollmentRequests.length}
                         itemName="requests"
                         onPageChange={(newPage) => setPage(newPage)}
                         onFirstPage={() => setPage(1)}
@@ -559,29 +357,21 @@ const AdminCourseManagement: React.FC = () => {
                       />
                     </>
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-12">
-                      <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
-                        <FiClipboard size={32} className="text-purple-400" />
-                      </div>
-                      <h3 className="text-lg font-medium text-white mb-1">No Requests Found</h3>
-                      <p className="text-gray-400 text-center max-w-sm">
-                        There are no course enrollment requests at the moment.
-                      </p>
-                    </div>
+                    <EmptyState
+                      icon={<FiClipboard size={32} className="text-purple-400" />}
+                      title="No Requests Found"
+                      message="There are no course enrollment requests at the moment."
+                    />
                   )}
                 </div>
               )}
 
-              {activeTab === 'courses' && courses.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
-                    <FiBookOpen size={32} className="text-purple-400" />
-                  </div>
-                  <h3 className="text-lg font-medium text-white mb-1">No Courses Found</h3>
-                  <p className="text-gray-400 text-center max-w-sm">
-                    There are no courses matching your current filters. Try adjusting your search criteria.
-                  </p>
-                </div>
+              {activeTab === 'courses' && filteredCourses.length === 0 && (
+                <EmptyState
+                  icon={<FiBookOpen size={32} className="text-purple-400" />}
+                  title="No Courses Found"
+                  message="There are no courses matching your current filters. Try adjusting your search criteria."
+                />
               )}
             </div>
           </div>

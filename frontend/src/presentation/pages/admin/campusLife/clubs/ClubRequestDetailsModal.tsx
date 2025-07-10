@@ -13,23 +13,19 @@ import {
   IoStarOutline as Star,
   IoTimeOutline as Clock,
 } from 'react-icons/io5';
-import { IconType } from 'react-icons';
+import { 
+  StatusType,
+  ClubRequestDetailsModalProps,
+  ClubRequestDetails,
+  ClubRequestDetailsStatusBadgeProps,
+  ClubRequestDetailsInfoCardProps,
+  ParticleConfig
+} from '../../../../../domain/types/clubmanagement';
+import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
+import { formatDate, formatDateTime } from '../../../../../shared/utils/dateUtils';
 
-type StatusType = 'pending' | 'approved' | 'rejected';
-
-interface StatusBadgeProps {
-  status: StatusType;
-}
-
-interface InfoCardProps {
-  icon: IconType;
-  label: string;
-  value: string;
-  highlight?: boolean;
-}
-
-const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
-  const statusConfig = {
+const StatusBadge: React.FC<ClubRequestDetailsStatusBadgeProps> = ({ status }) => {
+  const statusConfig: Record<StatusType, { bg: string; text: string; border: string }> = {
     pending: {
       bg: 'bg-yellow-600/30',
       text: 'text-yellow-100',
@@ -58,7 +54,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   );
 };
 
-const InfoCard: React.FC<InfoCardProps> = ({ icon: Icon, label, value, highlight = false }) => {
+const InfoCard: React.FC<ClubRequestDetailsInfoCardProps> = ({ icon: Icon, label, value, highlight = false }) => {
   return (
     <div
       className={`bg-gray-800/80 border border-purple-500/30 rounded-lg p-4 shadow-sm ${
@@ -75,57 +71,6 @@ const InfoCard: React.FC<InfoCardProps> = ({ icon: Icon, label, value, highlight
   );
 };
 
-const formatDate = (dateString: string): string => {
-  if (!dateString) return 'N/A';
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};
-
-const formatDateTime = (dateString: string): string => {
-  if (!dateString) return 'N/A';
-  return new Date(dateString).toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
-interface ClubRequestDetails {
-  clubRequest: {
-    id: string;
-    status: StatusType;
-    createdAt: string;
-    updatedAt: string;
-    whyJoin: string;
-    additionalInfo?: string;
-    club: {
-      id: string;
-      name: string;
-      type: string;
-      about: string;
-      enteredMembers: number;
-      nextMeeting?: string;
-    };
-    user: {
-      name?: string;
-      email: string;
-    };
-  };
-}
-
-interface ClubRequestDetailsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  request: ClubRequestDetails | null;
-  onApprove?: (id: string) => void;
-  onReject?: (id: string) => void;
-}
-
 const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
   isOpen,
   onClose,
@@ -133,13 +78,16 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
   onApprove,
   onReject,
 }) => {
+  // Use the shared prevent body scroll hook
+  usePreventBodyScroll(isOpen);
+
   if (!isOpen || !request) return null;
 
   const { clubRequest } = request;
   const { club, user } = clubRequest;
 
   // Particle effect
-  const ghostParticles = Array(30)
+  const ghostParticles: ParticleConfig[] = Array(30)
     .fill(0)
     .map((_, i) => ({
       size: Math.random() * 10 + 5,
@@ -323,7 +271,7 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
         }

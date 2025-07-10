@@ -1,42 +1,29 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { IoCloseOutline as X } from 'react-icons/io5';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-
-// Zod validation schema
-const eventSchema = z.object({
-  title: z.string().min(1, 'Event title is required').min(3, 'Title must be at least 3 characters'),
-  date: z.string().min(1, 'Date is required'),
-  time: z.string().min(1, 'Time is required'),
-  location: z.string().min(1, 'Location is required').min(3, 'Location must be at least 3 characters'),
-  organizer: z.string().min(1, 'Organizer is required').min(2, 'Organizer name must be at least 2 characters'),
-  organizerType: z.enum(['department', 'club', 'student', 'administration', 'external'], {
-    errorMap: () => ({ message: 'Organizer type is required' }),
-  }),
-  eventType: z.enum(['workshop', 'seminar', 'fest', 'competition', 'exhibition', 'conference', 'hackathon', 'cultural', 'sports', 'academic'], {
-    errorMap: () => ({ message: 'Event type is required' }),
-  }),
-  timeframe: z.string().optional(),
-  icon: z.string().default('📅'),
-  color: z.string().default('#8B5CF6'),
-  description: z.string().optional(),
-  fullTime: z.boolean().default(false),
-  additionalInfo: z.string().optional(),
-  requirements: z.string().optional(),
-  maxParticipants: z.number().min(0, 'Max participants must be a non-negative number').default(0),
-  registrationRequired: z.boolean().default(false),
-});
+import { 
+  AddEventModalProps,
+  TimeframeOption,
+  OrganizerTypeOption,
+  EventTypeOption,
+  ParticleConfig
+} from '../../../../../domain/types/eventmanagement';
+import {
+  TIMEFRAME_OPTIONS,
+  ORGANIZER_TYPE_OPTIONS,
+  EVENT_TYPE_OPTIONS,
+  EVENT_ICONS,
+  EVENT_COLORS,
+  EVENT_VALIDATION_MESSAGES,
+  EVENT_SUCCESS_MESSAGES,
+  EVENT_ERROR_MESSAGES,
+} from '../../../../../shared/constants/eventManagementConstants';
+import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
+import { eventSchema } from '../../../../../domain/validation/management/eventSchema';
 
 type EventFormData = z.infer<typeof eventSchema>;
-
-interface AddEventModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: EventFormData) => void;
-  initialData?: Partial<EventFormData>;
-  isEditing?: boolean;
-}
 
 const AddEventModal: React.FC<AddEventModalProps> = ({
   isOpen,
@@ -45,6 +32,9 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
   initialData,
   isEditing = false,
 }) => {
+  // Use the shared prevent body scroll hook
+  usePreventBodyScroll(isOpen);
+
   const {
     control,
     handleSubmit,
@@ -103,59 +93,6 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
     }
   }, [isOpen, initialData, isEditing, reset]);
 
-  // Prevent backend scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, [isOpen]);
-
-  const timeframeOptions = [
-    { value: 'morning', label: 'Morning (6AM-12PM)', emoji: '🌅' },
-    { value: 'afternoon', label: 'Afternoon (12PM-6PM)', emoji: '☀️' },
-    { value: 'evening', label: 'Evening (6PM-10PM)', emoji: '🌆' },
-    { value: 'night', label: 'Night (10PM-6AM)', emoji: '🌙' },
-    { value: 'allday', label: 'All Day', emoji: '🌍' },
-  ];
-
-  const organizerTypeOptions = [
-    { value: 'department', label: 'Department', emoji: '🏛️' },
-    { value: 'club', label: 'Club', emoji: '🎉' },
-    { value: 'student', label: 'Student', emoji: '🎓' },
-    { value: 'administration', label: 'Administration', emoji: '📋' },
-    { value: 'external', label: 'External', emoji: '🌍' },
-  ];
-
-  const eventTypeOptions = [
-    { value: 'workshop', label: 'Workshop', emoji: '🔧' },
-    { value: 'seminar', label: 'Seminar', emoji: '📢' },
-    { value: 'fest', label: 'Fest', emoji: '🎊' },
-    { value: 'competition', label: 'Competition', emoji: '🏆' },
-    { value: 'exhibition', label: 'Exhibition', emoji: '🖼️' },
-    { value: 'conference', label: 'Conference', emoji: '💼' },
-    { value: 'hackathon', label: 'Hackathon', emoji: '💻' },
-    { value: 'cultural', label: 'Cultural', emoji: '🎭' },
-    { value: 'sports', label: 'Sports', emoji: '⚽' },
-    { value: 'academic', label: 'Academic', emoji: '📚' },
-  ];
-
-  const iconOptions = [
-    '📅', '🎉', '🏆', '🎭', '🎵', '🏃', '🍽️', '🎨', '📚', '💼',
-    '🔬', '🎯', '⚽', '🎪', '🎬', '🏛️', '🌟', '🎊', '🎓', '💡',
-    '🚀', '🎮', '🏋️', '🎤', '📸', '🎸', '🏆', '🎺', '🎻', '🎲'
-  ];
-
-  const colorOptions = [
-    '#8B5CF6', '#06B6D4', '#10B981', '#F59E0B', '#EF4444',
-    '#EC4899', '#6366F1', '#84CC16', '#F97316', '#8B5A2B',
-    '#DC2626', '#7C3AED', '#059669', '#DB2777', '#9333EA'
-  ];
-
   const onFormSubmit = (data: EventFormData) => {
     // Transform the data to match backend expectations
     const eventData = {
@@ -175,8 +112,8 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
       requirements: data.requirements,
       maxParticipants: data.maxParticipants,
       registrationRequired: data.registrationRequired,
-      participants: data.participants || 0,
-      status: data.status || 'upcoming',
+      participants: 0,
+      status: 'upcoming',
     };
 
     console.log(eventData, "eventData ")
@@ -184,7 +121,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
   };
 
   // Particle effect
-  const ghostParticles = Array(30)
+  const ghostParticles: ParticleConfig[] = Array(30)
     .fill(0)
     .map((_, i) => ({
       size: Math.random() * 10 + 5,
@@ -394,7 +331,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                             errors.organizerType ? 'border-red-500' : 'border-purple-500/30'
                           }`}
                         >
-                          {organizerTypeOptions.map((option) => (
+                          {ORGANIZER_TYPE_OPTIONS.map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.emoji} {option.label}
                             </option>
@@ -422,7 +359,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                             errors.eventType ? 'border-red-500' : 'border-purple-500/30'
                           }`}
                         >
-                          {eventTypeOptions.map((option) => (
+                          {EVENT_TYPE_OPTIONS.map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.emoji} {option.label}
                             </option>
@@ -471,7 +408,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                       control={control}
                       render={({ field }) => (
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                          {timeframeOptions.map((option) => (
+                          {TIMEFRAME_OPTIONS.map((option) => (
                             <button
                               key={option.value}
                               type="button"
@@ -621,7 +558,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                     Event Icon
                   </label>
                   <div className="grid grid-cols-6 gap-2 p-4 bg-gray-900/60 rounded-lg border border-purple-500/30 max-h-40 overflow-y-auto custom-scrollbar">
-                    {iconOptions.map((icon, index) => (
+                    {EVENT_ICONS.map((icon, index) => (
                       <button
                         key={index}
                         type="button"
@@ -644,7 +581,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                     Event Color
                   </label>
                   <div className="grid grid-cols-5 gap-2 p-4 bg-gray-900/60 rounded-lg border border-purple-500/30">
-                    {colorOptions.map((color) => (
+                    {EVENT_COLORS.map((color) => (
                       <button
                         key={color}
                         type="button"
@@ -719,11 +656,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
-        .no-scroll {
-          overflow: hidden;
-        }
-
+      <style>{`
         @keyframes floatParticle {
           0% {
             transform: translateY(0) translateX(0);

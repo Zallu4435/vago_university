@@ -1,29 +1,19 @@
 import React from 'react';
-import { FiPlus, FiStar, FiZap, FiUser, FiEye, FiEdit, FiTrash2, FiLink, FiImage, FiAlignLeft } from 'react-icons/fi';
-import Header from '../User/Header';
-import ApplicationsTable from '../User/ApplicationsTable';
-import Pagination from '../User/Pagination';
+import { FiPlus, FiStar, FiZap, FiUser, FiEye, FiEdit, FiTrash2 } from 'react-icons/fi';
+import Header from '../../../components/admin/management/Header';
+import ApplicationsTable from '../../../components/admin/management/ApplicationsTable';
+import Pagination from '../../../components/admin/management/Pagination';
 import WarningModal from '../../../components/WarningModal';
-import SiteSectionForm from './components/SiteSectionForm';
-import SiteSectionViewModal from './components/SiteSectionViewModal';
+import SiteSectionForm from './SiteSectionForm';
+import SiteSectionViewModal from './SiteSectionViewModal';
 import { useSiteManagement, SiteSectionKey } from '../../../../application/hooks/useSiteManagement';
 import { SiteSection } from '../../../../application/services/siteManagement.service';
 import { toast } from 'react-hot-toast';
-
-interface SectionField {
-  name: string;
-  label: string;
-  type: string;
-  required?: boolean;
-  placeholder?: string;
-}
-
-interface Section {
-  key: SiteSectionKey;
-  label: string;
-  icon: React.ReactNode;
-  fields: SectionField[];
-}
+import { SECTIONS, createColumns, columnsMap } from '../../../../shared/constants/siteManagementConstants';
+import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../../shared/components/ErrorMessage';
+import EmptyState from '../../../../shared/components/EmptyState';
+import { filterSiteSections } from '../../../../shared/filters/siteManagementFilter';
 
 // Helper function to convert SiteSection to table-compatible format
 const convertToTableData = (sections: SiteSection[]) => {
@@ -33,112 +23,6 @@ const convertToTableData = (sections: SiteSection[]) => {
   }));
 };
 
-const SECTIONS: Section[] = [
-  {
-    key: 'highlights',
-    label: 'Highlights',
-    icon: <FiStar size={16} />,
-    fields: [
-      { name: 'title', label: 'Title', type: 'text', required: true, placeholder: 'Enter highlight title' },
-      { name: 'category', label: 'Category', type: 'text', required: true, placeholder: 'General News, Research, Education, Events, Facilities, Student Life' },
-      { name: 'description', label: 'Description', type: 'textarea', required: true, placeholder: 'Enter highlight description' },
-      { name: 'image', label: 'Image', type: 'image' },
-      { name: 'link', label: 'Link', type: 'text', placeholder: 'https://example.com' }
-    ]
-  },
-  {
-    key: 'vagoNow',
-    label: 'VAGO Now',
-    icon: <FiZap size={16} />,
-    fields: [
-      { name: 'title', label: 'Title', type: 'text', required: true, placeholder: 'Enter VAGO Now title' },
-      { name: 'category', label: 'Category', type: 'text', required: true, placeholder: 'Events, Facilities, Research, Student Life, Financial Services, Business, Technology, Health Services' },
-      { name: 'description', label: 'Description', type: 'textarea', required: true, placeholder: 'Enter VAGO Now description' },
-      { name: 'image', label: 'Image', type: 'image' },
-      { name: 'link', label: 'Link', type: 'text', placeholder: 'https://example.com' }
-    ]
-  },
-  {
-    key: 'leadership',
-    label: 'Leadership',
-    icon: <FiUser size={16} />,
-    fields: [
-      { name: 'title', label: 'Name', type: 'text', required: true, placeholder: 'Enter leader name' },
-      { name: 'category', label: 'Department', type: 'text', required: true, placeholder: 'Academic Affairs, Student Services, Finance, Human Resources, IT Services, Facilities Management, Research & Development, External Relations' },
-      { name: 'description', label: 'Position', type: 'textarea', required: true, placeholder: 'Enter position title' },
-      { name: 'image', label: 'Photo', type: 'image' },
-      { name: 'link', label: 'Link', type: 'text', placeholder: 'https://example.com' }
-    ]
-  }
-];
-
-// Date formatter function
-const formatDate = (dateString: string): string => {
-  if (!dateString) return 'N/A';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
-// Unified columns for all sections
-const createColumns = (sectionKey: SiteSectionKey) => [
-  {
-    header: 'Title',
-    key: 'title',
-    render: (item: SiteSection & { _id: string }) => (
-      <div className="flex items-center text-gray-300">
-        {sectionKey === 'highlights' && <FiStar size={14} className="text-purple-400 mr-2" />}
-        {sectionKey === 'vagoNow' && <FiZap size={14} className="text-purple-400 mr-2" />}
-        {sectionKey === 'leadership' && <FiUser size={14} className="text-purple-400 mr-2" />}
-        <span className="text-sm">{item.title || 'N/A'}</span>
-      </div>
-    ),
-    width: '25%',
-  },
-  {
-    header: 'Category',
-    key: 'category',
-    render: (item: SiteSection & { _id: string }) => (
-      <div className="flex items-center text-gray-300">
-        <span className="text-sm bg-purple-900/30 px-2 py-1 rounded text-purple-300">
-          {item.category || 'N/A'}
-        </span>
-      </div>
-    ),
-    width: '20%',
-  },
-  {
-    header: 'Created',
-    key: 'createdAt',
-    render: (item: SiteSection & { _id: string }) => (
-      <div className="flex items-center text-gray-300">
-        <span className="text-sm">{formatDate(item.createdAt)}</span>
-      </div>
-    ),
-    width: '20%',
-  },
-  {
-    header: 'Updated',
-    key: 'updatedAt',
-    render: (item: SiteSection & { _id: string }) => (
-      <div className="flex items-center text-gray-300">
-        <span className="text-sm">{formatDate(item.updatedAt)}</span>
-      </div>
-    ),
-    width: '20%',
-  },
-];
-
-const columnsMap: Record<SiteSectionKey, any[]> = {
-  highlights: createColumns('highlights'),
-  vagoNow: createColumns('vagoNow'),
-  leadership: createColumns('leadership'),
-};
 
 const SiteManagement = () => {
   const {
@@ -179,35 +63,7 @@ const SiteManagement = () => {
   const section = SECTIONS.find(s => s.key === activeTab)!;
 
   // Filtering logic
-  const filteredData = sections?.filter(item => {
-    // Global search
-    if (searchQuery && !Object.values(item).some(val => String(val).toLowerCase().includes(searchQuery.toLowerCase()))) {
-      return false;
-    }
-    
-    // Field filters
-    for (const key in filters) {
-      if (filters[key] && String(item[key as keyof SiteSection] ?? '').toLowerCase() !== filters[key].toLowerCase()) {
-        return false;
-      }
-    }
-    
-    // Date filters
-    if (dateFilters.startDate || dateFilters.endDate) {
-      const itemDate = new Date(item.createdAt);
-      const startDate = dateFilters.startDate ? new Date(dateFilters.startDate) : null;
-      const endDate = dateFilters.endDate ? new Date(dateFilters.endDate) : null;
-      
-      if (startDate && itemDate < startDate) {
-        return false;
-      }
-      if (endDate && itemDate > endDate) {
-        return false;
-      }
-    }
-    
-    return true;
-  });
+  const filteredData = sections ? filterSiteSections(sections, filters, searchQuery, dateFilters) : [];
 
   // Convert to table-compatible format
   const tableData = convertToTableData(filteredData || []);
@@ -335,19 +191,11 @@ const SiteManagement = () => {
   ];
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-500">Error: {error.message || 'Failed to load data.'}</div>
-      </div>
-    );
+    return <ErrorMessage message={error.message || 'Failed to load data.'} />;
   }
 
   return (
@@ -401,15 +249,11 @@ const SiteManagement = () => {
                   />
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
-                    {section.icon}
-                  </div>
-                  <h3 className="text-lg font-medium text-white mb-1">No {section.label} Found</h3>
-                  <p className="text-gray-400 text-center max-w-sm">
-                    There are no {section.label.toLowerCase()} at the moment.
-                  </p>
-                </div>
+                <EmptyState
+                  icon={section.icon}
+                  title={`No ${section.label} Found`}
+                  message={`There are no ${section.label.toLowerCase()} at the moment.`}
+                />
               )}
             </div>
           </div>

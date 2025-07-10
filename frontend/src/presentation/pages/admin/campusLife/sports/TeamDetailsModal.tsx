@@ -1,40 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { IoCloseOutline as X, IoCreateOutline as Edit, IoPeopleOutline as Users, IoPersonOutline as User, IoTrophyOutline as Trophy, IoCalendarOutline as Calendar, IoInformationCircleOutline as Info, IoBusinessOutline as Building } from 'react-icons/io5';
+import { TeamDetailsModalProps, StatusBadgeProps, InfoCardProps, UpcomingGame, TeamDetailsTeam } from '../../../../../domain/types/sportmanagement';
+import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 
-interface UpcomingGame {
-  date: string;
-  description: string;
-  _id: string;
-}
-
-interface Team {
-  id: string;
-  name: string;
-  sportType: string;
-  category: string;
-  organizer: string;
-  organizerType: string;
-  logo: string;
-  color: string;
-  division: string;
-  coach: string;
-  homeGames: number;
-  record: string;
-  upcomingGames: UpcomingGame[];
-  playerCount: number;
-  status: string;
-  formedOn: string;
-  description?: string;
-}
-
-interface TeamDetailsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  team: Team | null;
-  onEdit: (team: Team) => void;
-}
-
-const StatusBadge = ({ status }: { status: string }) => {
+const StatusBadge = ({ status }: StatusBadgeProps) => {
   const statusConfig = {
     active: { bg: 'bg-green-600/30', text: 'text-green-100', border: 'border-green-500/50' },
     pending: { bg: 'bg-yellow-600/30', text: 'text-yellow-100', border: 'border-yellow-500/50' },
@@ -52,7 +21,7 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-const InfoCard = ({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?: number | string; className?: string }>; label: string; value: string | number }) => (
+const InfoCard = ({ icon: Icon, label, value }: InfoCardProps) => (
   <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
     <div className="flex items-center mb-2">
       <Icon size={18} className="text-purple-300" />
@@ -64,18 +33,7 @@ const InfoCard = ({ icon: Icon, label, value }: { icon: React.ComponentType<{ si
 
 const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, team, onEdit }) => {
 
-  console.log(team, "popopopo")
-  // Prevent background scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, [isOpen]);
+  usePreventBodyScroll(isOpen);
 
   if (!isOpen || !team) return null;
 

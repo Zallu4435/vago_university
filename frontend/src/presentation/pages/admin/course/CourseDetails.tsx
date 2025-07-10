@@ -1,53 +1,16 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FiXCircle, FiBook, FiBriefcase, FiUser, FiHash, FiClock, FiUsers, FiCalendar } from 'react-icons/fi';
-
-interface CourseDetailsProps {
-  isOpen: boolean;
-  onClose: () => void;
-  course: {
-    id: string;
-    title: string;
-    specialization: string;
-    faculty: string;
-    credits: number;
-    schedule: string;
-    maxEnrollment: number;
-    currentEnrollment: number;
-    description?: string;
-    prerequisites?: string[];
-    term?: string;
-    createdAt?: string;
-    updatedAt?: string;
-  };
-}
+import { CourseDetailsProps, InfoCardProps } from '../../../../domain/types/coursemanagement';
+import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
+import { formatDate } from '../../../../shared/utils/dateUtils';
 
 const CourseDetails: React.FC<CourseDetailsProps> = ({ isOpen, onClose, course }) => {
-
-  console.log(course, "ppopooopo")
-  // Prevent background scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, [isOpen]);
+  usePreventBodyScroll(isOpen);
 
   if (!isOpen || !course) return null;
 
   const enrollmentPercentage = (course.currentEnrollment / course.maxEnrollment) * 100;
   const availableSpots = course.maxEnrollment - course.currentEnrollment;
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
 
   // Particle effect
   const ghostParticles = Array(30)
@@ -266,12 +229,6 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ isOpen, onClose, course }
     </div>
   );
 };
-
-interface InfoCardProps {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}
 
 const InfoCard: React.FC<InfoCardProps> = ({ icon, label, value }) => (
   <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">

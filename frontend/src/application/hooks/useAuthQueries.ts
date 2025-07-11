@@ -21,8 +21,7 @@ export const useLoginUser = () => {
   const queryClient = useQueryClient();
   return useMutation<LoginResponse, Error, { email: string; password: string }>({
     mutationFn: authService.loginUser,
-    onSuccess: (data) => {
-      localStorage.setItem('auth_token', data.token);
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
   });

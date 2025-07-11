@@ -4,8 +4,14 @@ export interface LoginFormData {
 } 
 
 export interface LoginResponse {
-  token: string;
-  user: User;
+  user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    id?: string;
+    profilePicture?: string;
+  };
+  collection: 'register' | 'admin' | 'user' | 'faculty';
 }
 // domain/types/user.ts (extend if needed)
 export interface User {

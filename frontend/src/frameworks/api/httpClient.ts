@@ -1,26 +1,34 @@
 import axios from 'axios';
-import { logout } from '../../appStore/authSlice';
 import store from '../../appStore/store';
+import { logout, setAuth } from '../../appStore/authSlice';
 
 const httpClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'https://vago-university.onrender.com/api',
   timeout: 15000,
-  withCredentials: true,
+  withCredentials: true, // Required for cookies
 });
+
+// Track refresh token attempts
+let isRefreshing = false;
+let failedQueue: { resolve: Function; reject: Function }[] = [];
+let lastLoginTime = 0;
+const MIN_TIME_SINCE_LOGIN = 2000; // 2 seconds
+
+const processQueue = (error: any = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve();
+    }
+  });
+  failedQueue = [];
+};
 
 httpClient.interceptors.request.use(
   (config) => {
-    const publicEndpoints = ['/auth/login', '/auth/register', '/auth/refresh'];
-    if (!publicEndpoints.some((endpoint) => config.url?.includes(endpoint))) {
-      const token = store.getState().auth.token;
-      if (token) {
-        config.headers['Authorization'] = `Bearer ${token}`;
-      }
-    }
-    
     // Handle video uploads with longer timeout
     if (config.data instanceof FormData && config.url?.includes('/videos')) {
-      // console.log('🎬 Video upload detected, setting extended timeout');
       config.timeout = 60000; // 1 minute for video uploads
       delete config.headers['Content-Type']; // Let browser set multipart/form-data with boundary
     } else if (config.data instanceof FormData) {
@@ -28,30 +36,20 @@ httpClient.interceptors.request.use(
     } else {
       config.headers['Content-Type'] = 'application/json';
     }
+
+    // If this is a login request, update lastLoginTime
+    if (config.url?.includes('/auth/login')) {
+      lastLoginTime = Date.now();
+    }
     
-    // console.log('Request:', config.method, config.url, config.headers, config.data instanceof FormData ? 'FormData' : config.data);
     return config;
   },
   (error) => Promise.reject(error)
 );
 
 httpClient.interceptors.response.use(
-  (response) => {
-    // console.log('Response received:', {
-    //   status: response.status,
-    //   data: response.data,
-    //   headers: response.headers
-    // });
-    return response;
-  },
+  (response) => response,
   async (error) => {
-    console.error('Response error:', {
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message,
-      code: error.code
-    });
-    
     // Handle timeout errors specifically
     if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
       console.error('⏱️ Request timeout error');
@@ -60,21 +58,58 @@ httpClient.interceptors.response.use(
       });
       return Promise.reject(error);
     }
-    
+
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Skip refresh token logic for:
+    // 1. Refresh token requests
+    // 2. Retried requests
+    // 3. Requests made too soon after login
+    if (
+      error.response?.status === 401 && 
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/refresh-token') &&
+      Date.now() - lastLoginTime > MIN_TIME_SINCE_LOGIN
+    ) {
+      if (isRefreshing) {
+        // Queue this request while refresh is in progress
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(() => httpClient(originalRequest))
+          .catch((err) => Promise.reject(err));
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
+
       try {
-        const response = await httpClient.post('/auth/refresh');
-        const newToken = response.data.token;
-        store.dispatch({ type: 'auth/setToken', payload: newToken });
-        originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+        console.log('📤 Sending refresh token request...');
+        const response = await httpClient.post('/auth/refresh-token');
+        console.log('✅ Token refreshed, updating auth state');
+        
+        // Update auth state with refreshed data
+        store.dispatch(setAuth({
+          user: response.data.data.user,
+          collection: response.data.data.collection
+        }));
+        
+        console.log('✅ Processing queue');
+        processQueue();
         return httpClient(originalRequest);
-      } catch (refreshError) {
-        store.dispatch(logout());
-        window.location.href = '/register';
+      } catch (refreshError: any) {
+        console.error('❌ Token refresh failed:', refreshError);
+        if (refreshError.response?.status === 401) {
+          console.log('🚫 Refresh token expired or invalid');
+          console.log('🚪 Logging out user due to invalid refresh token');
+          store.dispatch(logout());
+        } else {
+          console.log('⚠️ Refresh token request failed:', refreshError.message);
+        }
+        processQueue(refreshError);
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 
@@ -86,7 +121,7 @@ httpClient.interceptors.response.use(
     }
 
     if (error.response?.status >= 500) {
-      console.error('Server error:', error.response.data);
+      console.error('🔥 Server error:', error.response.data);
       import('react-hot-toast').then((toast) => {
         toast.default.error('A server error occurred. Please try again later.');
       });

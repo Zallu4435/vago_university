@@ -8,10 +8,10 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ allowedCollections, isPublic = false }: ProtectedRouteProps) => {
-  const { token, collection } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, collection } = useSelector((state: RootState) => state.auth);
   const location = useLocation();
 
-  if (token && (location.pathname === '/login' || location.pathname === '/register')) {
+  if (isAuthenticated && (location.pathname === '/login' || location.pathname === '/register')) {
     switch (collection) {
       case 'register':
         return <Navigate to="/admission" replace />;
@@ -26,19 +26,19 @@ export const ProtectedRoute = ({ allowedCollections, isPublic = false }: Protect
     }
   }
 
-  if (!token && !isPublic) {
+  if (!isAuthenticated && !isPublic) {
     return <Navigate to="/register" replace />;
   }
 
   if (isPublic) {
-    if (token && collection === 'admin') {
+    if (isAuthenticated && collection === 'admin') {
       return <Navigate to="/admin" replace />;
     }
     return <Outlet />;
   }
 
   // Handle protected routes
-  if (token && collection && !allowedCollections.includes(collection)) {
+  if (isAuthenticated && collection && !allowedCollections.includes(collection)) {
     switch (collection) {
       case 'register':
         return <Navigate to="/admission" replace />;

@@ -1,60 +1,75 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMutation } from '@tanstack/react-query';
-import Cookies from 'js-cookie';
-import { setAuth, logout } from '../../appStore/authSlice';
+import { logout, setAuth } from '../../appStore/authSlice';
 import httpClient from '../../frameworks/api/httpClient';
+import { AxiosError } from 'axios';
 import { RootState } from '../../appStore/store';
 
 interface RefreshTokenResponse {
-  token: string;
-  user: {
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-  collection: 'register' | 'admin' | 'user' | 'faculty';
+  data: {
+    user: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      id: string;
+      profilePicture?: string;
+    };
+    collection: 'register' | 'admin' | 'user' | 'faculty';
+  }
 }
 
-const refreshToken = async (token: string): Promise<RefreshTokenResponse> => {
-  console.log('Attempting to refresh token:', token); // Debug
-  const response = await httpClient.post('/auth/refresh-token', { token });
-  return response.data.data;
+const refreshToken = async (): Promise<RefreshTokenResponse> => {
+  console.log('🔄 Attempting to refresh token using httpOnly cookie');
+  const response = await httpClient.post('/auth/refresh-token');
+  console.log('✅ Refresh token success:', response.data);
+  return response.data;
 };
 
 export const useRefreshToken = () => {
   const dispatch = useDispatch();
-  const hasRun = useRef(false); // Prevent multiple runs
-  const { token } = useSelector((state: RootState) => state.auth); // Check Redux token
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const lastRefreshAttempt = useRef<number>(0);
+  const MIN_REFRESH_INTERVAL = 15000; // 15 seconds
+  const lastAuthChange = useRef<number>(Date.now());
+  const MIN_TIME_AFTER_AUTH_CHANGE = 2000; // 2 seconds
 
-  const mutation = useMutation({
+  const { mutate, isError, error } = useMutation({
     mutationFn: refreshToken,
-    onSuccess: (data) => {
-      console.log('Refresh token success:', data); // Debug
-      Cookies.set('auth_token', data.token, { secure: true, sameSite: 'strict', expires: 1 });
-      console.log(data, 'data from the refresh token.')
-      dispatch(setAuth({ token: data.token, user: data.user, collection: data.collection }));
+    onSuccess: (response) => {
+      console.log('✅ Updating auth state with refreshed data:', response.data);
+      dispatch(setAuth({
+        user: response.data.user,
+        collection: response.data.collection
+      }));
     },
-    onError: (error) => {
-      console.error('Refresh token error:', error); // Debug
-      Cookies.remove('auth_token');
+    onError: (error: AxiosError) => {
+      console.log('❌ Token refresh failed:', error);
+      console.log('🚫 Refresh token expired or invalid');
+      console.log('🚪 Logging out due to refresh failure');
       dispatch(logout());
     },
   });
 
+  // Track when isAuthenticated changes
   useEffect(() => {
-    if (hasRun.current) return; // Run only once
-    hasRun.current = true;
+    lastAuthChange.current = Date.now();
+  }, [isAuthenticated]);
 
-    // Only attempt refresh if Redux token is null (page refresh) and cookie exists
-    if (!token) {
-      const cookieToken = Cookies.get('auth_token');
-      console.log('Redux token missing, cookie token:', cookieToken); // Debug
-      if (cookieToken && !mutation.isPending) {
-        mutation.mutate(cookieToken);
-      }
+  useEffect(() => {
+    const now = Date.now();
+    // Only attempt refresh if:
+    // 1. User is authenticated
+    // 2. Enough time has passed since last attempt
+    // 3. Enough time has passed since auth state change
+    if (isAuthenticated && 
+        now - lastRefreshAttempt.current > MIN_REFRESH_INTERVAL &&
+        now - lastAuthChange.current > MIN_TIME_AFTER_AUTH_CHANGE) {
+      console.log('🔄 Refresh token attempt');
+      lastRefreshAttempt.current = now;
+      mutate();
     }
-  }, []); // Empty dependencies to run once on mount
+  }, [mutate, isAuthenticated]);
 
-  return mutation;
+  return { mutate, isError, error };
 };

@@ -132,15 +132,20 @@ export class LoginUseCase implements ILoginUseCase {
       throw new BlockedAccountError();
     }
 
-    // Generate token (business logic)
-    const token = this.jwtService.generateToken(
-      { userId: user.id, email: user.email, collection },
-      "1h"
-    );
+    const tokenPayload = { 
+      userId: user.id, 
+      email: user.email, 
+      collection 
+    };
+
+    // Generate both access and refresh tokens
+    const accessToken = this.jwtService.generateAccessToken(tokenPayload);
+    const refreshToken = this.jwtService.generateRefreshToken(tokenPayload);
 
     // Return the full DTO directly
     return {
-      token,
+      accessToken,
+      refreshToken,
       user: {
         firstName: user.firstName,
         lastName: user.lastName,
@@ -161,9 +166,13 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
   ) { }
 
   async execute(params: RefreshTokenRequestDTO): Promise<RefreshTokenResponseDTO> {
-    // Verify the incoming token first
+    // Verify the incoming refresh token
     let decodedPayload: { userId: string; email: string; collection: "register" | "admin" | "user" | "faculty" };
-    decodedPayload = this.jwtService.verifyToken(params.token); // JwtService throws InvalidTokenError if invalid
+    try {
+      decodedPayload = this.jwtService.verifyToken(params.refreshToken, true); // true indicates refresh token verification
+    } catch (error) {
+      throw new InvalidTokenError("Invalid or expired refresh token");
+    }
 
     // Use repository to fetch user based on decoded ID and collection
     const resultFromRepo = await this.authRepository.refreshToken({
@@ -173,14 +182,18 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
       collection: decodedPayload.collection,
     });
 
-    // Generate a new token
-    const newToken = this.jwtService.generateToken(
-      { userId: resultFromRepo.user.id, email: resultFromRepo.user.email, collection: resultFromRepo.collection },
-      "1h"
-    );
+    const tokenPayload = {
+      userId: resultFromRepo.user.id,
+      email: resultFromRepo.user.email,
+      collection: resultFromRepo.collection
+    };
+
+    // Generate only a new access token, keep the same refresh token
+    const accessToken = this.jwtService.generateAccessToken(tokenPayload);
 
     return {
-      token: newToken,
+      accessToken,
+      // Don't generate a new refresh token
       user: {
         firstName: resultFromRepo.user.firstName,
         lastName: resultFromRepo.user.lastName,

@@ -1,3 +1,15 @@
+export interface Cookie {
+  name: string;
+  value: string;
+  options: {
+    httpOnly?: boolean;
+    secure?: boolean;
+    sameSite?: 'strict' | 'lax' | 'none';
+    path?: string;
+    maxAge?: number;
+  };
+}
+
 export interface IHttpRequest {
   headers?: any;
   body?: any;
@@ -12,6 +24,9 @@ export interface IHttpRequest {
     lastName: string;
     email: string;
   };
+  cookies?: {
+    [key: string]: string;
+  };
 }
 
 export interface IHttpResponse {
@@ -21,6 +36,7 @@ export interface IHttpResponse {
     data?: any;
     details?: any;
   };
+  cookies?: Cookie[];
 }
 
 export class HttpRequest implements IHttpRequest {
@@ -37,7 +53,8 @@ export class HttpRequest implements IHttpRequest {
       email: string;
     },
     public file?: Express.Multer.File,
-    public files?: Express.Multer.File[]
+    public files?: Express.Multer.File[],
+    public cookies?: { [key: string]: string }
   ) { }
 }
 

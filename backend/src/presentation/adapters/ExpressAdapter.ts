@@ -16,12 +16,22 @@ export async function expressAdapter(
     req.params,
     req.user,
     req.file,
-    files
+    files,
+    req.cookies
   );
 
-  handler(httpRequest)
-    .then((response: IHttpResponse) => {
-      res.status(response.statusCode).json(response.body);
-    })
-    .catch(next); // Let errors propagate to the global error handler
+  try {
+    const response = await handler(httpRequest);
+
+    // Set cookies if present
+    if (response.cookies) {
+      for (const cookie of response.cookies) {
+        res.cookie(cookie.name, cookie.value, cookie.options);
+      }
+    }
+
+    res.status(response.statusCode).json(response.body);
+  } catch (error) {
+    next(error); // Let errors propagate to the global error handler
+  }
 }

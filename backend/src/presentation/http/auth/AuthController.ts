@@ -47,29 +47,129 @@ export class AuthController implements IAuthController {
   }
 
   async login(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    console.log('👉 Login attempt');
     const { email, password } = httpRequest.body;
     if (!email || !password) {
       return this.httpErrors.error_400("Email and password are required");
     }
-    // Direct call, Use Case will throw error on failure
+
+    // Get tokens from login use case
     const data = await this.loginUseCase.execute({ email, password });
-    return this.httpSuccess.success_200(data);
+    console.log('✅ Login successful, setting tokens in cookies');
+    
+    // Create response with user data (excluding tokens)
+    const response = this.httpSuccess.success_200({
+      user: data.user,
+      collection: data.collection
+    });
+
+    // Set both tokens as cookies
+    response.cookies = [
+      {
+        name: 'refresh_token',
+        value: data.refreshToken,
+        options: {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+          path: '/',
+          maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        }
+      },
+      {
+        name: 'access_token',
+        value: data.accessToken,
+        options: {
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+          path: '/',
+          maxAge: 3 * 60 * 60 * 1000 // 3 hours
+        }
+      }
+    ];
+
+    console.log('🔐 Tokens set in cookies with durations:');
+    console.log('   Access Token: 3 hours');
+    console.log('   Refresh Token: 7 days');
+
+    return response;
   }
 
   async refreshToken(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { token } = httpRequest.body;
-    if (!token) {
-      return this.httpErrors.error_400("Token is required");
+    console.log('👉 Token refresh attempt');
+    
+    // Get refresh token from httpOnly cookie
+    const refreshToken = httpRequest.cookies?.refresh_token;
+    
+    if (!refreshToken) {
+      console.log('❌ No refresh token found in cookies');
+      return this.httpErrors.error_401("No refresh token provided");
     }
-    // Direct call, Use Case will throw error on failure
-    const data = await this.refreshTokenUseCase.execute({ token });
-    return this.httpSuccess.success_200(data);
+
+    console.log('✅ Refresh token found in cookies, validating...');
+    
+    // Get new access token only
+    const data = await this.refreshTokenUseCase.execute({ refreshToken });
+    
+    // Create response
+    const response = this.httpSuccess.success_200({
+      user: data.user,
+      collection: data.collection
+    });
+
+    console.log('✅ Token refresh successful, setting new access token');
+
+    // Set new access token cookie only
+    response.cookies = [
+      {
+        name: 'access_token',
+        value: data.accessToken,
+        options: {
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+          path: '/',
+          maxAge: 3 * 60 * 60 * 1000 // 3 hours
+        }
+      }
+    ];
+
+    console.log('🔐 New access token set with duration:');
+    console.log('   Access Token: 3 hours');
+
+    return response;
   }
 
   async logout(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    // Direct call, Use Case will throw error on failure
-    const data = await this.logoutUseCase.execute({});
-    return this.httpSuccess.success_200(data);
+    console.log('👉 Logout attempt');
+    
+    // Clear both token cookies
+    const response = this.httpSuccess.success_200({ message: "Logged out successfully" });
+    response.cookies = [
+      {
+        name: 'refresh_token',
+        value: '',
+        options: {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+          path: '/',
+          maxAge: 0
+        }
+      },
+      {
+        name: 'access_token',
+        value: '',
+        options: {
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+          path: '/',
+          maxAge: 0
+        }
+      }
+    ];
+
+    console.log('✅ All tokens cleared from cookies');
+    return response;
   }
 
   async registerFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse> {

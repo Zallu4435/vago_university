@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { config } from "./config/config";
 import indexRoute from './presentation/routes/index'
 import path from "path";
@@ -12,33 +13,28 @@ import { setupSessionSocketHandlers } from './infrastructure/services/socket/Ses
 const app = express();
 const httpServer = createServer(app);
 
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:3000",
-      "http://10.0.14.4:5173",
-      "http://10.0.14.4:3000"
-    ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+// CORS configuration
+const corsOptions = {
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://10.0.14.4:5173",
+    "http://10.0.14.4:3000"
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  exposedHeaders: ["Set-Cookie"]
+};
+
+app.use(cors(corsOptions));
+
+// Add cookie-parser middleware
+app.use(cookieParser());
 
 // Create a single Socket.IO server instance
 const io = new SocketIOServer(httpServer, {
-  cors: {
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:3000",
-      "http://10.0.14.4:5173",
-      "http://10.0.14.4:3000"
-    ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  },
+  cors: corsOptions,
   transports: ["websocket", "polling"],
   path: '/socket.io',
   pingTimeout: 60000,

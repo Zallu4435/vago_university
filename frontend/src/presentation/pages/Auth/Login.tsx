@@ -40,16 +40,15 @@ const LoginPage = () => {
     setLoginError('');
     mutation.mutate(data, {
       onSuccess: (response) => {
-        Cookies.set('auth_token', response.token, { secure: true, sameSite: 'strict' });
+        console.log('Login response:', response);
+        // The tokens are now handled by HTTP-only cookies set by the backend
         dispatch(setAuth({
-          token: response.token,
-          user: {
-            ...response.user,
-            profilePicture: response.profilePicture,
-          },
-          collection: response.collection,
+          user: response.user,
+          collection: response.collection
         }));
+        
         toast.success('Login successful!');
+        console.log('Navigating to:', response.collection);
         switch (response.collection) {
           case 'register':
             navigate('/admission');
@@ -63,6 +62,9 @@ const LoginPage = () => {
           case 'faculty':
             navigate('/faculty');
             break;
+          default:
+            console.error('Unknown collection type:', response.collection);
+            navigate('/dashboard');
         }
       },
       onError: (error: Error) => {

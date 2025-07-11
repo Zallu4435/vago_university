@@ -6,14 +6,16 @@ export interface RegisterResponseDTO {
 }
 
 export interface LoginResponseDTO {
-  token: string;
+  accessToken: string;
+  refreshToken: string;
   user: Pick<IUser, "firstName" | "lastName" | "email" | "id" | "profilePicture"> & { password: string; blocked?: boolean };
   collection: "register" | "admin" | "user" | "faculty";
 }
 
 export interface RefreshTokenResponseDTO {
-  token: string;
-  user: Pick<IUser, "firstName" | "lastName" | "email" | "id" | "profilePicture"> & { blocked?: boolean };
+  accessToken: string;
+  refreshToken: string;
+  user: Pick<IUser, "firstName" | "lastName" | "email" | "id" | "profilePicture">;
   collection: "register" | "admin" | "user" | "faculty";
 }
 

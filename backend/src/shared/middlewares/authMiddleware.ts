@@ -1,25 +1,19 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { Register } from '../../infrastructure/database/mongoose/auth/register.model';
-import { Admin } from '../../infrastructure/database/mongoose/auth/admin.model';
-import { User } from '../../infrastructure/database/mongoose/auth/user.model';
-import { Faculty } from '../../infrastructure/database/mongoose/auth/faculty.model';
-import { Admission } from '../../infrastructure/database/mongoose/admission/AdmissionModel';
-
-interface JwtPayload {
-  userId: string;
-  email: string;
-  collection: 'register' | 'admin' | 'user' | 'faculty';
-  firstName: string;
-  lastName: string;
-}
+import { Request, Response, NextFunction } from "express";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { Admin } from "../../infrastructure/database/mongoose/auth/admin.model";
+import { User } from "../../infrastructure/database/mongoose/auth/user.model";
+import { Faculty } from "../../infrastructure/database/mongoose/auth/faculty.model";
+import { Register } from "../../infrastructure/database/mongoose/auth/register.model";
+import { Admission } from "../../infrastructure/database/mongoose/admission/AdmissionModel";
+import { config } from "../../config/config";
 
 interface AuthenticatedUser {
-  id: string;
-  collection: 'register' | 'admin' | 'user' | 'faculty';
+  userId: string;
+  collection: "register" | "admin" | "user" | "faculty";
   firstName: string;
   lastName: string;
   email: string;
+  profilePicture?: string;
 }
 
 declare global {
@@ -31,20 +25,45 @@ declare global {
 }
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.error('authMiddleware: Missing or invalid Authorization header');
-      res.status(401).json({ error: 'Authorization header missing or invalid' });
+    // Get access token from cookie
+    const accessToken = req.cookies?.access_token;
+    if (!accessToken) {
+      console.error('authMiddleware: No access token found in cookies');
+      console.log('Available cookies:', req.cookies);
+      res.status(401).json({ 
+        error: 'Access token missing',
+        message: 'Please log in again to continue.',
+        code: 'TOKEN_MISSING'
+      });
       return;
     }
 
-    const token = authHeader.split(' ')[1];
-    // console.log('authMiddleware: Token received:', token.slice(0, 10) + '...');
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret') as JwtPayload;
-    // console.log('authMiddleware: Token decoded:', decoded);
+    // Verify access token
+    let decoded;
+    try {
+      decoded = jwt.verify(accessToken, config.jwt.secret) as JwtPayload;
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        console.error('authMiddleware: Access token expired');
+        res.status(401).json({ 
+          error: 'Token expired',
+          message: 'Your session has expired. Please refresh the page.',
+          code: 'TOKEN_EXPIRED'
+        });
+        return;
+      }
+      if (error instanceof jwt.JsonWebTokenError) {
+        console.error('authMiddleware: Invalid access token');
+        res.status(401).json({ 
+          error: 'Invalid token',
+          message: 'Your session is invalid. Please log in again.',
+          code: 'TOKEN_INVALID'
+        });
+        return;
+      }
+      throw error;
+    }
 
     let user;
     switch (decoded.collection) {
@@ -63,36 +82,52 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
           const admission = await Admission.findOne({ registerId: user._id });
           if (admission) {
             console.error('authMiddleware: User has an admission and cannot access:', decoded.userId);
-            res.status(403).json({ error: 'User has already made an admission' });
+            res.status(403).json({ 
+              error: 'User has already made an admission',
+              message: 'You have already submitted an admission application.',
+              code: 'ADMISSION_EXISTS'
+            });
             return;
           }
         }
         break;
       default:
         console.error('authMiddleware: Invalid collection:', decoded.collection);
-        res.status(403).json({ error: 'Invalid user collection' });
+        res.status(403).json({ 
+          error: 'Invalid user collection',
+          message: 'Your user type is not recognized. Please contact support.',
+          code: 'INVALID_COLLECTION'
+        });
         return;
     }
 
     if (!user) {
-      console.error('authMiddleware: User not found for userId:', decoded.userId, 'in collection:', decoded.collection);
-      res.status(401).json({ error: 'User not found in specified collection' });
+      console.error('authMiddleware: User not found:', decoded.userId);
+      res.status(401).json({ 
+        error: 'User not found',
+        message: 'Your user account was not found. Please log in again.',
+        code: 'USER_NOT_FOUND'
+      });
       return;
     }
 
-    // Attach user to request
+    // Add user info to request with all necessary fields
     req.user = {
-      id: decoded.userId,
+      userId: decoded.userId,
       collection: decoded.collection,
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      profilePicture: user.profilePicture
     };
 
     next();
-  } catch (error: any) {
-    console.error('authMiddleware: Error:', error.message);
-    res.status(401).json({ error: 'Invalid or expired token' });
-    return;
+  } catch (error) {
+    console.error('authMiddleware: Unexpected error:', error);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      message: 'An unexpected error occurred. Please try again later.',
+      code: 'INTERNAL_ERROR'
+    });
   }
 };

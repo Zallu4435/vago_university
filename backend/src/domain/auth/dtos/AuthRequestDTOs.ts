@@ -8,10 +8,7 @@ export interface LoginRequestDTO {
 }
 
 export interface RefreshTokenRequestDTO {
-  token: string;
-  userId: string;
-  email: string;
-  collection: "register" | "admin" | "user" | "faculty";
+  refreshToken: string;
 }
 
 export interface LogoutRequestDTO {

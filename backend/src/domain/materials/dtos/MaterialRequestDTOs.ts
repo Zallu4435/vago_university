@@ -4,8 +4,11 @@ export interface GetMaterialsRequestDTO {
   subject?: string;
   course?: string;
   semester?: number;
-  type?: string;
-  uploadedBy?: string;
+  search?: string;
+  status?: string;
+  dateRange?: string;
+  startDate?: string;
+  endDate?: string;
   page: number;
   limit: number;
 }

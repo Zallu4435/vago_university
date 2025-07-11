@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FiPlay, FiEdit, FiTrash2, FiUpload, FiEye, FiGrid, FiList, FiCalendar, FiClock, FiBookOpen, FiVideo, FiBriefcase } from 'react-icons/fi';
 import Header from '../../../components/admin/management/Header';
 import Pagination from '../../../components/admin/management/Pagination';
@@ -8,19 +8,62 @@ import { useVideoManagement } from '../../../../application/hooks/useVideoManage
 import WarningModal from '../../../components/common/WarningModal';
 import { ITEMS_PER_PAGE, STATUS_OPTIONS, getTabs } from '../../../../shared/constants/videoManagementConstants';
 import { Video, VideoForEdit, Filters } from '../../../../domain/types/management/videomanagement';
-import { filterVideos } from '../../../../shared/filters/videoManagementFilter';
 
 const VideoManagementPage = () => {
   const [viewMode, setViewMode] = useState('table');
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<VideoForEdit | null>(null);
-  const [filters, setFilters] = useState<Filters>({ status: 'all', category: '' });
+  const [filters, setFilters] = useState<Filters>({ status: 'all', category: '', dateRange: 'all' });
+  const [debouncedFilters, setDebouncedFilters] = useState<Filters>({ status: 'all', category: '', dateRange: 'all' });
   const [page, setPage] = useState(1);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [videoToDelete, setVideoToDelete] = useState<Video | null>(null);
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+      setPage(1); // Reset to first page when search changes
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Debounce filters
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedFilters(filters);
+      setPage(1); // Reset to first page when filters change
+    }, 300); // 300ms delay for filters
+
+    return () => clearTimeout(timer);
+  }, [filters]);
+
+  // Map slug to display name
+  function slugToDisplayName(slug: string) {
+    return slug
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  const normalizedFilters = {
+    ...debouncedFilters,
+    category:
+      debouncedFilters.category && debouncedFilters.category !== 'all'
+        ? slugToDisplayName(debouncedFilters.category)
+        : '',
+    status:
+      debouncedFilters.status && debouncedFilters.status !== 'all'
+        ? slugToDisplayName(debouncedFilters.status)
+        : '',
+  };
+
+  console.log('normalizedFilters:', normalizedFilters);
 
   const {
     diplomasData,
@@ -30,34 +73,46 @@ const VideoManagementPage = () => {
     handleSaveVideo,
     handleDeleteVideo,
     fetchVideoById,
-  } = useVideoManagement(page, ITEMS_PER_PAGE, filters, activeTab);
+  } = useVideoManagement(page, ITEMS_PER_PAGE, normalizedFilters, debouncedSearchQuery, activeTab);
 
   const filterOptions = {
     status: STATUS_OPTIONS,
-    categories: diplomasData?.diplomas.map(d => d.category) || [],
+    category: diplomasData?.diplomas.map(d => d.category) || [],
   };
 
   const debouncedFilterChange = (field: string, value: string) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
-    setPage(1);
   };
 
   const handleResetFilters = () => {
-    setFilters({ status: 'all', category: '' });
+    setFilters({ status: 'all', category: '', dateRange: 'all' });
     setSearchQuery('');
     setPage(1);
   };
 
-  const filteredVideos = filterVideos(videosData?.videos || [], filters, searchQuery);
+  // Remove frontend filtering since we're now using backend filtering
+  const paginatedVideos = videosData?.videos || [];
+  const totalPages = videosData?.totalPages || 1;
 
-  const totalPages = videosData?.totalPages || Math.ceil(filteredVideos.length / ITEMS_PER_PAGE);
-  const paginatedVideos = filteredVideos?.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
-
-  const tabs = getTabs(filteredVideos, activeTab);
+  const tabs = getTabs(paginatedVideos, activeTab);
 
   const handleTabClick = (index: number) => {
     const tabKeys = ['all', 'published', 'drafts'];
-    setActiveTab(tabKeys[index]);
+    const newActiveTab = tabKeys[index];
+    setActiveTab(newActiveTab);
+    
+    // Update filters based on active tab
+    const statusMap: { [key: string]: string } = {
+      'all': 'all',
+      'published': 'Published',
+      'drafts': 'Draft'
+    };
+    
+    setFilters(prev => ({
+      ...prev,
+      status: statusMap[newActiveTab] || 'all'
+    }));
+    
     setPage(1);
   };
 
@@ -209,9 +264,6 @@ const VideoManagementPage = () => {
                         Video
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase tracking-wider">
-                        Duration
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase tracking-wider">
                         Module
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-purple-300 uppercase tracking-wider">
@@ -246,12 +298,6 @@ const VideoManagementPage = () => {
                                 ID: {video.id}
                               </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center text-sm text-white">
-                            <FiClock className="h-4 w-4 mr-1 text-purple-400" />
-                            {video.duration}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
@@ -404,9 +450,19 @@ const VideoManagementPage = () => {
       <AddVideoModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        selectedVideo={selectedVideo}
+        selectedVideo={selectedVideo ? {
+          id: selectedVideo._id,
+          title: selectedVideo.title,
+          duration: selectedVideo.duration,
+          uploadedAt: selectedVideo.uploadedAt,
+          module: selectedVideo.module,
+          status: selectedVideo.status,
+          diplomaId: selectedVideo.diplomaId,
+          description: selectedVideo.description,
+          videoUrl: selectedVideo.videoUrl,
+        } : null}
         onSave={onSaveVideo}
-        categories={filterOptions.categories}
+        categories={filterOptions.category}
       />
       <VideoPreviewModal
         isOpen={showPreviewModal}

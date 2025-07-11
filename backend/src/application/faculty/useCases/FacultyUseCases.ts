@@ -20,7 +20,6 @@ import {
     DownloadCertificateResponseDTO,
     FacultyResponseDTO,
 } from "../../../domain/faculty/dtos/FacultyResponseDTOs";
-import { FacultyErrorType } from "../../../domain/faculty/enums/FacultyErrorType";
 import { IFacultyRepository } from "../repositories/IFacultyRepository";
 import { emailService } from '../../../infrastructure/services/email.service';
 import { config } from '../../../config/config';
@@ -106,35 +105,65 @@ export class GetFacultyUseCase implements IGetFacultyUseCase {
     constructor(private facultyRepository: IFacultyRepository) { }
 
     async execute(params: GetFacultyRequestDTO): Promise<ResponseDTO<GetFacultyResponseDTO>> {
-        // Build query object based on business rules
-        const { page = 1, limit = 5, status = "all", department = "all_departments", dateRange = "all" } = params;
+        const { page = 1, limit = 5, status = "all", department = "all_departments", dateRange = "all", search, startDate, endDate } = params;
+
         const query: any = {};
-        if (status !== "all") {
+
+        if (status && !status.startsWith("all")) {
             query.status = { $regex: `^${status}$`, $options: "i" };
         }
-        if (department !== "all_departments") {
-            const normalizedDepartment = department.replace(/_/g, "-");
+        if (department && !department.startsWith("all")) {
+            const normalizedDepartment = department.toLowerCase().replace(/\s+/g, '_');            
             query.department = { $regex: `^${normalizedDepartment}$`, $options: "i" };
         }
-        if (dateRange !== "all") {
+
+        if (dateRange && !dateRange.startsWith("all")) {
             const now = new Date();
-            let startDate: Date;
+            let calculatedStartDate: Date;
             switch (dateRange) {
-                case "last7days":
-                    startDate = new Date(now.setDate(now.getDate() - 7));
+                case "last_week":
+                    calculatedStartDate = new Date(now.setDate(now.getDate() - 7));
                     break;
-                case "last30days":
                 case "last_month":
-                    startDate = new Date(now.setDate(now.getDate() - 30));
+                    calculatedStartDate = new Date(now.setDate(now.getDate() - 30));
                     break;
-                case "last90days":
-                    startDate = new Date(now.setDate(now.getDate() - 90));
+                case "last_3_months":
+                    calculatedStartDate = new Date(now.setDate(now.getDate() - 90));
+                    break;
+                case "custom":
+                    if (startDate && endDate) {
+                        console.log('Processing custom date range:', { startDate, endDate });
+                        const startDateTime = new Date(startDate);
+                        const endDateTime = new Date(endDate);
+
+                        endDateTime.setHours(23, 59, 59, 999);
+
+                        query.createdAt = {
+                            $gte: startDateTime,
+                            $lte: endDateTime,
+                        };
+                    } else {
+                        console.log('Custom date range missing startDate or endDate:', { startDate, endDate });
+                    }
                     break;
                 default:
                     throw new Error(`Invalid dateRange: ${dateRange}`);
             }
-            query.createdAt = { $gte: startDate };
+            if (dateRange !== "custom") {
+                query.createdAt = { $gte: calculatedStartDate };
+            }
         }
+
+        // Add search functionality
+        if (search && search.trim()) {
+            query.$or = [
+                { fullName: { $regex: search.trim(), $options: "i" } },
+                { email: { $regex: search.trim(), $options: "i" } }
+            ];
+        }
+
+        console.log('Faculty backend final query object:', query);
+
         const skip = (page - 1) * limit;
         const faculty = await this.facultyRepository.findFaculty(query, {
             skip,

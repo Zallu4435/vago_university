@@ -1,5 +1,4 @@
-import { FiUser, FiMail, FiBriefcase, FiCalendar } from 'react-icons/fi';
-import React from 'react';
+import { FiUser, FiMail, FiBriefcase } from 'react-icons/fi';
 
 export const DEPARTMENTS = [
   'All Departments',

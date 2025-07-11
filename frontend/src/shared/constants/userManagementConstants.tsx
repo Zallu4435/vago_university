@@ -4,7 +4,7 @@ import { User } from '../../domain/types/management/usermanagement';
 export const PROGRAMS = [
   'All Programs',
   'Computer Science',
-  'Business Administration',
+  'Business',
   'Engineering',
   'Medicine',
   'Arts & Social Sciences',

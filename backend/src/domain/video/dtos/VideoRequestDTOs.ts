@@ -6,6 +6,10 @@ export interface GetVideosRequestDTO {
     page: number;
     limit: number;
     status?: string;
+    search?: string;
+    dateRange?: string;
+    startDate?: string;
+    endDate?: string;
 }
 
 export interface GetVideoByIdRequestDTO {

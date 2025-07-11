@@ -29,7 +29,7 @@ export class AdminAdmissionController implements IAdminAdmissionController {
   }
 
   async getAdmissions(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { page = 1, limit = 5, status = "all", program = "all", dateRange = "all", startDate, endDate } = httpRequest.query || {};
+    const { page = 1, limit = 5, status = "all", program = "all", dateRange = "all", startDate, endDate, search } = httpRequest.query || {};
     const response = await this.getAdmissionsUseCase.execute({
       page: Number(page),
       limit: Number(limit),
@@ -38,6 +38,7 @@ export class AdminAdmissionController implements IAdminAdmissionController {
       dateRange: String(dateRange),
       startDate: startDate ? String(startDate) : undefined,
       endDate: endDate ? String(endDate) : undefined,
+      search: search ? String(search) : undefined,
     });
     if (!response.success) {
       return this.httpErrors.error_400();

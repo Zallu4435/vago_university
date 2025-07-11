@@ -30,12 +30,16 @@ export class VideoController implements IVideoController {
     }
 
     async getVideos(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-        const { page = 1, limit = 10, status, category } = httpRequest.query;
+        const { page = 1, limit = 10, status, category, search, dateRange, startDate, endDate } = httpRequest.query;
         const requestDTO: GetVideosRequestDTO = {
             category,
             page: Number(page),
             limit: Number(limit),
             status: status as string | undefined,
+            search: search as string | undefined,
+            dateRange: dateRange as string | undefined,
+            startDate: startDate as string | undefined,
+            endDate: endDate as string | undefined,
         };
         const result = await this.getVideosUseCase.execute(requestDTO);
         if (!result.success) {

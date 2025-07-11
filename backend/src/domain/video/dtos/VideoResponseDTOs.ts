@@ -15,6 +15,14 @@ export interface VideoSummaryDTO {
     module: number;
     status: VideoStatus;
     uploadedAt: Date;
+    videoUrl: string;
+    description: string;
+    diplomaId: string;
+    diploma?: {
+        id: string;
+        title: string;
+        category: string;
+    };
 }
 
 export interface GetVideosResponseDTO extends PaginatedResponseDTO<VideoSummaryDTO> {}

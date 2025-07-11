@@ -6,6 +6,7 @@ export interface GetAdmissionsRequestDTO {
     dateRange?: string;
     startDate?: string;
     endDate?: string;
+    search?: string;
   }
   
   export interface GetAdmissionByIdRequestDTO {

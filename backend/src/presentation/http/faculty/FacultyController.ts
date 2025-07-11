@@ -31,7 +31,7 @@ export class FacultyController implements IFacultyController {
   }
 
   async getFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { page = "1", limit = "5", status = "all", department = "all_departments", dateRange = "all" } = httpRequest.query || {};
+    const { page = "1", limit = "5", status = "all", department = "all_departments", dateRange = "all", search, startDate, endDate } = httpRequest.query || {};
     if (isNaN(Number(page)) || isNaN(Number(limit)) || Number(page) < 1 || Number(limit) < 1) {
       return this.httpErrors.error_400();
     }
@@ -41,6 +41,9 @@ export class FacultyController implements IFacultyController {
       status: status as any, // Accept string or FacultyStatus
       department: String(department),
       dateRange: String(dateRange),
+      search: search ? String(search) : undefined,
+      startDate: startDate ? String(startDate) : undefined,
+      endDate: endDate ? String(endDate) : undefined,
     });
     if (!response.success) {
       return this.httpErrors.error_400();

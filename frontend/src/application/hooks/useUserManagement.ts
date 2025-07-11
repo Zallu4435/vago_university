@@ -2,15 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { userService } from '../services/user.service';
-import { AdmissionApiResponse } from '../../domain/types/management/usermanagement';
-
-interface Filters {
-  status: string;
-  program: string;
-  dateRange: string;
-  startDate?: string;
-  endDate?: string;
-}
+import { AdmissionApiResponse, Filters } from '../../domain/types/management/usermanagement';
 
 export const useUserManagement = () => {
   const queryClient = useQueryClient();
@@ -19,6 +11,7 @@ export const useUserManagement = () => {
     status: 'all',
     program: 'all',
     dateRange: 'all',
+    search: '',
   });
   const limit = 5;
 
@@ -32,9 +25,10 @@ export const useUserManagement = () => {
         filters.program !== 'all' ? filters.program : undefined,
         filters.dateRange !== 'all' ? filters.dateRange : undefined,
         filters.startDate,
-        filters.endDate
+        filters.endDate,
+        filters.search
       ),
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 
   const { mutateAsync: getAdmissionDetails } = useMutation({

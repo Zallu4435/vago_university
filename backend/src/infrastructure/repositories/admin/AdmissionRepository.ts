@@ -25,20 +25,34 @@ import { ProgramModel } from "../../database/mongoose/models/studentProgram.mode
 
 export class AdmissionRepository implements IAdmissionRepository {
     async getAdmissions(params: GetAdmissionsRequestDTO): Promise<any> {
-        const { page = 1, limit = 5, status = "all", program = "all", dateRange = "all", startDate, endDate } = params;
+        const { page = 1, limit = 5, status = "all", program = "all", dateRange = "all", startDate, endDate, search } = params;
+
+        // Debug logging
+        console.log('Backend received filter values:', { page, limit, status, program, dateRange, startDate, endDate, search });
 
         const filter: Record<string, any> = {};
-        if (status !== "all") {
+        
+        // Handle status filter - accept "all", "all_status", "all_statuses", etc.
+        if (status && !status.startsWith("all")) {
             filter.status = status === "approved" ? { $in: ["approved", "offered"] } : status;
         }
-        if (program !== "all" && program !== "all_programs") {
+        
+        // Handle program filter - accept "all", "all_program", "all_programs", etc.
+        if (program && !program.startsWith("all")) {
+            // Convert frontend program name to database format
+            // e.g., "computer_science" -> "Computer Science"
+            const normalizedProgram = program.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            console.log('Program filter:', { original: program, normalized: normalizedProgram });
+            
             filter.choiceOfStudy = {
                 $elemMatch: {
-                    programme: { $regex: `^${program}$`, $options: "i" },
+                    programme: { $regex: `^${normalizedProgram}$`, $options: "i" },
                 },
             };
         }
-        if (dateRange !== "all") {
+        
+        // Handle date range filter - accept "all", "all_date", "all_dates", etc.
+        if (dateRange && !dateRange.startsWith("all")) {
             const now = new Date();
             if (dateRange === "last_week") {
                 filter.createdAt = {
@@ -53,12 +67,34 @@ export class AdmissionRepository implements IAdmissionRepository {
                     $gte: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000),
                 };
             } else if (dateRange === "custom" && startDate && endDate) {
+                console.log('Processing custom date range:', { startDate, endDate });
+                const startDateTime = new Date(startDate);
+                const endDateTime = new Date(endDate);
+                
+                // Set end date to end of day (23:59:59.999)
+                endDateTime.setHours(23, 59, 59, 999);
+                
+                console.log('Processed dates:', { 
+                    startDateTime: startDateTime.toISOString(), 
+                    endDateTime: endDateTime.toISOString() 
+                });
+                
                 filter.createdAt = {
-                    $gte: new Date(startDate),
-                    $lte: new Date(endDate),
+                    $gte: startDateTime,
+                    $lte: endDateTime,
                 };
             }
         }
+        
+        // Add search functionality
+        if (search && search.trim()) {
+            filter.$or = [
+                { "personal.fullName": { $regex: search.trim(), $options: "i" } },
+                { "personal.emailAddress": { $regex: search.trim(), $options: "i" } }
+            ];
+        }
+
+        console.log('Admission backend final query object:', filter);
 
         const skip = (page - 1) * limit;
         const projection = {
@@ -70,6 +106,17 @@ export class AdmissionRepository implements IAdmissionRepository {
             choiceOfStudy: 1,
         };
 
+        // Debug: Show all unique programs in the database
+        if (program && !program.startsWith("all")) {
+            const allAdmissions = await AdmissionModel.find({}).select('choiceOfStudy').lean();
+            const allPrograms = allAdmissions
+                .map(admission => admission.choiceOfStudy?.[0]?.programme)
+                .filter(Boolean);
+            const uniquePrograms = [...new Set(allPrograms)];
+            console.log('All programs in database:', uniquePrograms);
+            console.log('Exact query being executed:', JSON.stringify(filter, null, 2));
+        }
+
         const admissions = await AdmissionModel.find(filter)
             .select(projection)
             .sort({ createdAt: -1 })
@@ -79,6 +126,8 @@ export class AdmissionRepository implements IAdmissionRepository {
 
         const totalAdmissions = await AdmissionModel.countDocuments(filter);
         const totalPages = Math.ceil(totalAdmissions / limit);
+
+        console.log('Backend query results:', { totalAdmissions, totalPages, admissionsCount: admissions.length });
 
         return {
             admissions, // raw admissions, not mapped

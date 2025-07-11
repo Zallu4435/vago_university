@@ -12,7 +12,8 @@ export const useFacultyManagement = () => {
     department: 'all_departments',
     dateRange: 'all',
     startDate: undefined,
-    endDate: undefined
+    endDate: undefined,
+    search: '',
   });
 
   const queryClient = useQueryClient();
@@ -32,7 +33,8 @@ export const useFacultyManagement = () => {
         department: filters.department === 'all_departments' ? undefined : filters.department,
         dateRange: filters.dateRange === 'all' ? undefined : filters.dateRange,
         startDate: filters.startDate,
-        endDate: filters.endDate
+        endDate: filters.endDate,
+        search: filters.search,
       };
 
       return facultyService.getFaculty(
@@ -42,9 +44,11 @@ export const useFacultyManagement = () => {
         cleanFilters.department,
         cleanFilters.dateRange,
         cleanFilters.startDate,
-        cleanFilters.endDate
+        cleanFilters.endDate,
+        cleanFilters.search
       );
-    }
+    },
+    placeholderData: (previousData) => previousData,
   });
 
   // Get faculty details

@@ -27,6 +27,7 @@ export interface FacultyFilters {
   dateRange: string;
   startDate?: string;
   endDate?: string;
+  search?: string;
 }
 
 export interface FacultyDetailsModalProps {

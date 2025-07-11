@@ -23,6 +23,7 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
     formState: { errors, isSubmitting },
     reset,
     watch,
+    setError,
   } = useForm<VideoFormInputs>({
     resolver: zodResolver(videoSchema),
     defaultValues: {
@@ -45,10 +46,10 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
     if (selectedVideo) {
       const formData = {
         title: selectedVideo.title,
-        category: selectedVideo.diplomaId,
+        category: selectedVideo.diploma?.category || selectedVideo.diplomaId,
         module: selectedVideo.module.toString(),
         order: '1',
-        description: selectedVideo.description || '',
+        description: selectedVideo.description,
         status: selectedVideo.status as "Published" | "Draft",
       };
       
@@ -96,12 +97,11 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
   const handleFormSubmit = async (data: VideoFormInputs) => {
     // For new videos, require a file
     if (!selectedVideo && !selectedFile) {
-      alert('Please select a video file');
-      return;
-    }
-
-    if (!data.category) {
-      alert('Please select a category');
+      // Set a custom error for file validation
+      setError('root', {
+        type: 'manual',
+        message: 'Please select a video file'
+      });
       return;
     }
 
@@ -115,7 +115,7 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
     formData.append('category', data.category);
     formData.append('module', moduleNumber.toString());
     formData.append('status', data.status);
-    formData.append('description', data.description || '');
+    formData.append('description', data.description);
     formData.append('duration', '0:00');
     
     // Only append video file if a new one is selected
@@ -127,12 +127,12 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
     if (selectedVideo && !selectedFile) {
 
       const updateData = {
-        id: selectedVideo._id,
+        id: selectedVideo.id,
         title: data.title,
         category: data.category,
         module: moduleNumber, // Convert to number
         status: data.status,
-        description: data.description || '',
+        description: data.description,
         duration: '0:00',
         videoUrl: selectedVideo.videoUrl, // Pass existing video URL
         // No videoFile property - backend will keep existing
@@ -143,14 +143,17 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
         onClose();
       } catch (error) {
         console.error('Error updating video:', error);
-        alert(error instanceof Error ? error.message : 'Failed to update video');
+        setError('root', {
+          type: 'manual',
+          message: error instanceof Error ? error.message : 'Failed to update video'
+        });
       }
       return;
     }
 
     // For updates with new file, include the video ID
     if (selectedVideo && selectedFile) {
-      formData.append('id', selectedVideo._id);
+      formData.append('id', selectedVideo.id);
     }
 
     try {
@@ -158,7 +161,10 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
       onClose();
     } catch (error) {
       console.error('Error saving video:', error);
-      alert(error instanceof Error ? error.message : 'Failed to save video');
+      setError('root', {
+        type: 'manual',
+        message: error instanceof Error ? error.message : 'Failed to save video'
+      });
     }
   };
 
@@ -174,7 +180,7 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
             </h2>
             {selectedVideo && (
               <p className="text-sm text-purple-300 mt-1">
-                Editing: {selectedVideo.title} • Category: {selectedVideo.diplomaId}
+                Editing: {selectedVideo.title} • Category: {selectedVideo.diploma?.category || selectedVideo.diplomaId}
               </p>
             )}
           </div>
@@ -188,6 +194,12 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
 
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <form onSubmit={handleSubmit(handleFormSubmit)}>
+            {/* Root error display */}
+            {errors.root && (
+              <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-4">
+                <p className="text-red-400 text-sm">{errors.root.message}</p>
+              </div>
+            )}
             <div className="grid grid-cols-1 gap-8">
               <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-purple-100 mb-4 flex items-center gap-2">
@@ -396,7 +408,7 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
 
                 <div className="mt-6">
                   <label className="block text-sm font-medium text-purple-300 mb-2">
-                    Description
+                    Description *
                   </label>
                   <Controller
                     name="description"

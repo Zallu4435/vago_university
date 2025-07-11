@@ -3,11 +3,34 @@ import httpClient from '../../frameworks/api/httpClient';
 
 export const materialService = {
   async getMaterials(
-    filters: { subject?: string; course?: string; semester?: string; type?: string; uploadedBy?: string },
+    filters: { 
+      subject?: string; 
+      course?: string; 
+      semester?: string; 
+      search?: string;
+      status?: string;
+      dateRange?: string;
+      startDate?: string;
+      endDate?: string;
+    },
     page: number,
     limit: number
   ): Promise<{ materials: Material[]; totalPages: number }> {
-    const response = await httpClient.get('/admin/materials', { params: { ...filters, page, limit } });
+    const params: any = { page, limit };
+    
+    // Add filters only if they have meaningful values
+    if (filters.subject && filters.subject !== 'All Subjects') params.subject = filters.subject;
+    if (filters.course && filters.course !== 'All Courses') params.course = filters.course;
+    if (filters.semester && filters.semester !== 'All Semesters') params.semester = filters.semester;
+    if (filters.search && filters.search.trim()) params.search = filters.search.trim();
+    if (filters.status && filters.status !== 'all') params.status = filters.status;
+    if (filters.dateRange && filters.dateRange !== 'all') params.dateRange = filters.dateRange;
+    if (filters.startDate) params.startDate = filters.startDate;
+    if (filters.endDate) params.endDate = filters.endDate;
+
+    console.log('getMaterials params:', params); // Debugging log
+
+    const response = await httpClient.get('/admin/materials', { params });
     return response.data.data;
   },
 

@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiPlus, FiEye, FiEdit, FiTrash2, FiFileText, FiVideo, FiUser, FiClock, FiLock, FiUnlock, FiTag } from 'react-icons/fi';
 import { useMaterialManagement } from '../../../../application/hooks/useMaterialManagement';
-import { debounce } from 'lodash';
 import WarningModal from '../../../components/common/WarningModal';
 import Header from '../../../components/admin/management/Header';
 import Pagination from '../../../components/admin/management/Pagination';
@@ -18,14 +17,52 @@ import {
   getMaterialColumns,
 } from '../../../../shared/constants/materialManagementConstants';
 
+const ITEMS_PER_PAGE = 10;
+
 const MaterialManagement: React.FC = () => {
+  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const [filters, setFilters] = useState({
+    subject: 'All Subjects',
+    course: 'All Courses',
+    semester: 'All Semesters',
+    status: 'all',
+    dateRange: 'all',
+  });
+  const [debouncedFilters, setDebouncedFilters] = useState(filters);
+  const [activeTab, setActiveTab] = useState('all');
+  const [showMaterialModal, setShowMaterialModal] = useState(false);
+  const [showMaterialDetail, setShowMaterialDetail] = useState(false);
+  const [editingMaterial, setEditingMaterial] = useState<Material | null>(null);
+  const [materialToDelete, setMaterialToDelete] = useState<Material | null>(null);
+  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
+  const [materialToToggle, setMaterialToToggle] = useState<{ material: Material; isRestricted: boolean } | null>(null);
+  const [showToggleWarning, setShowToggleWarning] = useState(false);
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+      setPage(1); // Reset to first page when search changes
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Debounce filters
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedFilters(filters);
+      setPage(1); // Reset to first page when filters change
+    }, 300); // 300ms delay for filters
+
+    return () => clearTimeout(timer);
+  }, [filters]);
+
   const {
     materials,
     totalPages,
-    page,
-    setPage,
-    filters,
-    setFilters,
     isLoading,
     error,
     createMaterial,
@@ -36,40 +73,48 @@ const MaterialManagement: React.FC = () => {
     isLoadingMaterialDetails,
     handleViewMaterial,
     handleEditMaterial,
-    activeTab,
-    handleTabChange,
-  } = useMaterialManagement();
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showMaterialModal, setShowMaterialModal] = useState(false);
-  const [showMaterialDetail, setShowMaterialDetail] = useState(false);
-  const [editingMaterial, setEditingMaterial] = useState<Material | null>(null);
-  const [materialToDelete, setMaterialToDelete] = useState<Material | null>(null);
-  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
-  const [materialToToggle, setMaterialToToggle] = useState<{ material: Material; isRestricted: boolean } | null>(null);
-  const [showToggleWarning, setShowToggleWarning] = useState(false);
+  } = useMaterialManagement(page, ITEMS_PER_PAGE, debouncedFilters, debouncedSearchQuery, activeTab);
 
   // Get column definitions from constants
   const materialColumns = getMaterialColumns();
 
-  const debouncedFilterChange = debounce((field: string, value: string) => {
+  const debouncedFilterChange = (field: string, value: string) => {
     setFilters((prev) => ({
       ...prev,
       [field]: value,
     }));
-    setPage(1);
-  }, 300);
+  };
 
   const handleResetFilters = () => {
     setFilters({
       subject: 'All Subjects',
       course: 'All Courses',
       semester: 'All Semesters',
-      type: 'All Types',
-      uploadedBy: 'All Uploaders',
+      status: 'all',
+      dateRange: 'all',
     });
+    setSearchQuery('');
     setPage(1);
-    setSearchTerm('');
+  };
+
+  const handleTabClick = (index: number) => {
+    const tabKeys = ['all', 'restricted', 'unrestricted'];
+    const newActiveTab = tabKeys[index];
+    setActiveTab(newActiveTab);
+    
+    // Update filters based on active tab
+    const statusMap: { [key: string]: string } = {
+      'all': 'all',
+      'restricted': 'restricted',
+      'unrestricted': 'unrestricted'
+    };
+    
+    setFilters(prev => ({
+      ...prev,
+      status: statusMap[newActiveTab] || 'all'
+    }));
+    
+    setPage(1);
   };
 
   const handleAddMaterial = () => {
@@ -179,9 +224,8 @@ const MaterialManagement: React.FC = () => {
     );
   }
 
-  const filteredMaterials = materials.filter((material) =>
-    material.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Remove frontend filtering since we're now using backend filtering
+  const paginatedMaterials = materials || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 relative">
@@ -211,21 +255,21 @@ const MaterialManagement: React.FC = () => {
             {
               icon: <FiFileText />,
               title: 'Total Materials',
-              value: filteredMaterials.length.toString(),
+              value: paginatedMaterials.length.toString(),
               change: '+5.2%',
               isPositive: true,
             },
             {
               icon: <FiTag />,
               title: 'Restricted Materials',
-              value: filteredMaterials.filter((m) => m.isRestricted).length.toString(),
+              value: paginatedMaterials.filter((m) => m.isRestricted).length.toString(),
               change: '+1.5%',
               isPositive: true,
             },
             {
               icon: <FiClock />,
               title: 'Avg. Views',
-              value: Math.round(filteredMaterials.reduce((acc, m) => acc + m.views, 0) / (filteredMaterials.length || 1)).toString(),
+              value: Math.round(paginatedMaterials.reduce((acc, m) => acc + m.views, 0) / (paginatedMaterials.length || 1)).toString(),
               change: '+3.8%',
               isPositive: true,
             },
@@ -233,21 +277,20 @@ const MaterialManagement: React.FC = () => {
           tabs={[
             { label: 'All Materials', icon: <FiFileText size={16} />, active: activeTab === 'all' },
             { label: 'Restricted', icon: <FiLock size={16} />, active: activeTab === 'restricted' },
+            { label: 'Unrestricted', icon: <FiUnlock size={16} />, active: activeTab === 'unrestricted' },
           ]}
-          searchQuery={searchTerm}
-          setSearchQuery={setSearchTerm}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
           searchPlaceholder="Search materials..."
           filters={filters}
           filterOptions={{
             subject: SUBJECTS,
             course: COURSES,
             semester: SEMESTERS,
-            type: TYPES,
-            uploadedBy: UPLOADERS,
           }}
           debouncedFilterChange={debouncedFilterChange}
           handleResetFilters={handleResetFilters}
-          onTabClick={(index) => handleTabChange(index === 0 ? 'all' : 'restricted')}
+          onTabClick={(index) => handleTabClick(index)}
         />
 
         <div className="mt-8">
@@ -261,19 +304,19 @@ const MaterialManagement: React.FC = () => {
                 Add Material
               </button>
 
-              {filteredMaterials.length > 0 ? (
+              {paginatedMaterials.length > 0 ? (
                 <>
                   <ApplicationsTable
-                    data={filteredMaterials}
+                    data={paginatedMaterials}
                     columns={materialColumns}
                     actions={materialActions}
                   />
                   <Pagination
                     page={page}
                     totalPages={totalPages}
-                    itemsCount={filteredMaterials.length}
+                    itemsCount={paginatedMaterials.length}
                     itemName="materials"
-                    onPageChange={(newPage) => setPage(newPage)}
+                    onPageChange={setPage}
                     onFirstPage={() => setPage(1)}
                     onLastPage={() => setPage(totalPages)}
                   />

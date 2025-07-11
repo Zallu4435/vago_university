@@ -44,3 +44,12 @@ export interface AdmissionApiResponse {
   currentPage: number;
   totalItems: number;
 } 
+
+export interface Filters {
+  status: string;
+  program: string;
+  dateRange: string;
+  startDate?: string;
+  endDate?: string;
+  search?: string;
+}

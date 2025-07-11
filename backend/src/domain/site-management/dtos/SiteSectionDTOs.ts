@@ -6,6 +6,11 @@ export interface GetSiteSectionsRequestDTO {
   page?: number;
   limit?: number;
   search?: string;
+  category?: string;
+  dateRange?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
 }
 
 export interface GetSiteSectionByIdRequestDTO {

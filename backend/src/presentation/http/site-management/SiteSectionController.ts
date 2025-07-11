@@ -24,7 +24,17 @@ export class SiteSectionController {
   ) { }
 
   async getSections(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { sectionKey, page = 1, limit = 10, search } = httpRequest.query;
+    const { 
+      sectionKey, 
+      page = 1, 
+      limit = 10, 
+      search,
+      category,
+      dateRange,
+      startDate,
+      endDate,
+      status
+    } = httpRequest.query;
     const pageNum = Number(page);
     const limitNum = Number(limit);
     if (isNaN(pageNum) || pageNum < 1) {
@@ -44,6 +54,11 @@ export class SiteSectionController {
       page: pageNum,
       limit: limitNum,
       search: search as string,
+      category: category as string,
+      dateRange: dateRange as string,
+      startDate: startDate as string,
+      endDate: endDate as string,
+      status: status as string,
     };
     const result = await this.getSiteSectionsUseCase.execute(params);
     if (!result.success) {

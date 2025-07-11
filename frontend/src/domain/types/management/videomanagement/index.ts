@@ -42,7 +42,10 @@ export interface Diploma {
 export interface Filters {
   status: string;
   category: string;
-  [key: string]: string;
+  dateRange: string;
+  startDate?: string;
+  endDate?: string;
+  [key: string]: string | undefined;
 }
 
 export interface VideoPreviewModalProps {
@@ -65,6 +68,6 @@ export interface VideoFormInputs {
   category: string;
   module: string;
   order?: string;
-  description?: string;
+  description: string;
   status: 'Draft' | 'Published';
 } 

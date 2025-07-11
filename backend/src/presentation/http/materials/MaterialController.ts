@@ -18,6 +18,10 @@ export class MaterialController implements IMaterialController {
 
   async getMaterials(httpRequest: IHttpRequest): Promise<IHttpResponse> {
       const { query } = httpRequest;
+      console.log('=== MaterialController getMaterials DEBUG ===');
+      console.log('Query parameters received:', query);
+      console.log('=== MaterialController getMaterials DEBUG END ===');
+      
       const result = await this.getMaterialsUseCase.execute(query);
       return this.httpSuccess.success_200(result);
   }

@@ -43,11 +43,25 @@ function isFile(value: any): value is File {
 
 class SiteManagementService {
   // Get all sections by type
-  async getSections(sectionKey: 'highlights' | 'vagoNow' | 'leadership', limit?: number, page?: number): Promise<SiteSection[]> {
+  async getSections(
+    sectionKey: 'highlights' | 'vagoNow' | 'leadership', 
+    limit?: number, 
+    page?: number,
+    search?: string,
+    category?: string,
+    dateRange?: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<SiteSection[]> {
     const params = new URLSearchParams();
     params.append('sectionKey', sectionKey);
     if (limit) params.append('limit', limit.toString());
     if (page) params.append('page', page.toString());
+    if (search) params.append('search', search);
+    if (category) params.append('category', category);
+    if (dateRange) params.append('dateRange', dateRange);
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
     
     const response = await httpClient.get<SiteSectionsResponse>(`/admin/site-sections?${params.toString()}`);
     return response.data.data.sections;

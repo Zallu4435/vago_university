@@ -9,6 +9,6 @@ export const videoSchema = z.object({
   order: z.string()
     .optional()
     .refine((val) => !val || (!isNaN(parseInt(val, 10)) && parseInt(val, 10) >= 1), 'Order must be a valid number at least 1'),
-  description: z.string().optional(),
+  description: z.string().min(10, 'Description must be at least 10 characters'),
   status: z.enum(['Draft', 'Published']),
 }); 

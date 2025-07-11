@@ -6,6 +6,9 @@ export interface GetFacultyRequestDTO {
     status?: FacultyStatus;
     department?: string;
     dateRange?: string;
+    search?: string;
+    startDate?: string;
+    endDate?: string;
   }
   
   export interface GetFacultyByIdRequestDTO {

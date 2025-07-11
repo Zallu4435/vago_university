@@ -10,7 +10,8 @@ class FacultyService {
     department?: string,
     dateRange?: string,
     startDate?: string,
-    endDate?: string
+    endDate?: string,
+    search?: string
   ): Promise<FacultyApiResponse> {
     try {
       const params: Record<string, string | number> = {
@@ -24,6 +25,7 @@ class FacultyService {
       if (dateRange) params.dateRange = dateRange;
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
+      if (search) params.search = search;
 
       const response = await httpClient.get<FacultyApiResponse>('/admin/faculty', {
         params

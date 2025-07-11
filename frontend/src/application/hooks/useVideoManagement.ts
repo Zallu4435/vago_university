@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { diplomaBackendService } from '../services/diplomaBackend.service';
 import { toast } from 'react-hot-toast';
 
-interface Video {
+interface VideoForHook {
   id: string;
   title: string;
   duration: string;
@@ -13,8 +13,8 @@ interface Video {
   diplomaId: string;
   description: string;
   videoUrl: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
   diploma?: {
     id: string;
     title: string;
@@ -22,18 +22,18 @@ interface Video {
   };
 }
 
-interface Diploma {
-  _id: string;
+interface DiplomaForHook {
+  id: string;
   title: string;
   category: string;
   videoIds: string[];
 }
 
-export const useVideoManagement = (page: number, itemsPerPage: number, filters: { status: string; category: string }, activeTab: string) => {
+export const useVideoManagement = (page: number, itemsPerPage: number, filters: { status: string; category: string; dateRange: string; startDate?: string; endDate?: string }, searchQuery: string, activeTab: string) => {
   const queryClient = useQueryClient();
 
   // Fetch diplomas
-  const { data: diplomasData, isLoading: isLoadingDiplomas } = useQuery<{ diplomas: Diploma[] }, Error>({
+  const { data: diplomasData, isLoading: isLoadingDiplomas } = useQuery<{ diplomas: DiplomaForHook[] }, Error>({
     queryKey: ['diplomas'],
     queryFn: async () => {
       const { diplomas } = await diplomaBackendService.getDiplomas(1, 100);
@@ -42,13 +42,22 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
   });
 
   // Fetch videos
-  const { data: videosData, isLoading: isLoadingVideos } = useQuery<{ videos: Video[]; totalPages: number }, Error>({
-    queryKey: ['videos', page, filters, activeTab],
-    queryFn: () => diplomaBackendService.getVideos(filters.category || '', page, itemsPerPage, activeTab === 'all' ? undefined : activeTab),
+  const { data: videosData, isLoading: isLoadingVideos } = useQuery<{ videos: VideoForHook[]; totalPages: number }, Error>({
+    queryKey: ['videos', page, filters, searchQuery, activeTab],
+    queryFn: () => diplomaBackendService.getVideos(
+      filters.category || '', 
+      page, 
+      itemsPerPage, 
+      filters.status || undefined, // Use normalized status from filters
+      searchQuery || undefined,
+      filters.dateRange || undefined,
+      filters.startDate,
+      filters.endDate
+    ),
   });
 
   // Fetch single video by ID - memoized to prevent infinite re-renders
-  const fetchVideoById = useCallback(async (videoId: string): Promise<Video> => {
+  const fetchVideoById = useCallback(async (videoId: string): Promise<VideoForHook> => {
     try {
       const video = await diplomaBackendService.getVideoById(videoId);
       return video;
@@ -74,7 +83,7 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
 
   // Update video mutation
   const updateVideoMutation = useMutation({
-    mutationFn: ({ videoId, videoData }: { videoId: string; videoData: Partial<Video> | FormData }) =>
+    mutationFn: ({ videoId, videoData }: { videoId: string; videoData: Partial<VideoForHook> | FormData }) =>
       diplomaBackendService.updateVideo(videoId, videoData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['videos'] });
@@ -99,7 +108,7 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
   });
 
   // Handle video save (create or update)
-  const handleSaveVideo = async (videoData: FormData | Partial<Video>): Promise<void> => {
+  const handleSaveVideo = async (videoData: FormData | Partial<VideoForHook>): Promise<void> => {
     try {
       if (videoData instanceof FormData) {
         // Check if this is an update (has videoId) or create
@@ -141,7 +150,7 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
   };
 
   // Handle video delete
-  const handleDeleteVideo = (video: Video) => {
+  const handleDeleteVideo = (video: VideoForHook) => {
     deleteVideoMutation.mutate(video.id);
   };
 

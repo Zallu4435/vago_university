@@ -82,12 +82,10 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 <FilterSelect
                   key={field}
                   label={field.charAt(0).toUpperCase() + field.slice(1)}
-                  value={filters[field] || `all_${field}s`}
+                  value={filters[field] || 'all'}
                   onChange={(e) => debouncedFilterChange(field, e.target.value)}
                   options={filterOptions[field].map((item) => ({
-                    value: item === `All ${field.charAt(0).toUpperCase() + field.slice(1)}s`
-                      ? `all_${field}s`
-                      : item?.toLowerCase().replace(/\s+/g, '_'),
+                    value: item.startsWith('All ') ? 'all' : item?.toLowerCase().replace(/\s+/g, '_'),
                     label: item,
                   }))}
                 />
@@ -153,15 +151,15 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               )}
             </div>
 
-            {filters && Object.keys(filters).some((key) => filters[key] !== `all_${key}s` && key !== 'dateRange' && filters[key] !== 'all') && (
+            {filters && Object.keys(filters).some((key) => filters[key] !== 'all' && key !== 'dateRange') && (
               <div className="mt-6 pt-4 border-t border-purple-500/20">
                 <div className="flex flex-wrap gap-2">
                   {Object.keys(filters).map((key) =>
-                    filters[key] !== `all_${key}s` && key !== 'dateRange' && filters[key] !== 'all' ? (
+                    filters[key] !== 'all' && key !== 'dateRange' ? (
                       <ActiveFilter
                         key={key}
                         label={`${key.charAt(0).toUpperCase() + key.slice(1)}: ${filters[key]?.replace(/_/g, ' ')}`}
-                        onRemove={() => debouncedFilterChange(key, `all_${key}s`)}
+                        onRemove={() => debouncedFilterChange(key, 'all')}
                       />
                     ) : null
                   )}

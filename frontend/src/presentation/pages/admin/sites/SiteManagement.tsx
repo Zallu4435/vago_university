@@ -13,7 +13,7 @@ import { SECTIONS, createColumns, columnsMap } from '../../../../shared/constant
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import EmptyState from '../../../../shared/components/EmptyState';
-import { filterSiteSections } from '../../../../shared/filters/siteManagementFilter';
+
 
 // Helper function to convert SiteSection to table-compatible format
 const convertToTableData = (sections: SiteSection[]) => {
@@ -25,6 +25,39 @@ const convertToTableData = (sections: SiteSection[]) => {
 
 
 const SiteManagement = () => {
+  const [selected, setSelected] = React.useState<SiteSection | null>(null);
+  const [showForm, setShowForm] = React.useState(false);
+  const [showView, setShowView] = React.useState(false);
+  const [showDelete, setShowDelete] = React.useState(false);
+  const [editData, setEditData] = React.useState<SiteSection | null>(null);
+  const [filters, setFilters] = React.useState<{ [key: string]: string }>({});
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = React.useState('');
+  const [dateFilters, setDateFilters] = React.useState<{
+    startDate?: string;
+    endDate?: string;
+  }>({});
+
+  // Get filter values, only send to backend if not 'all'
+  const categoryFilter = filters.category && filters.category !== 'all' ? filters.category : undefined;
+  const dateRangeFilter = filters.dateRange && filters.dateRange !== 'all' ? filters.dateRange : undefined;
+  const startDate = dateFilters.startDate || '';
+  const endDate = dateFilters.endDate || '';
+
+  // Debounce search query
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Reset page when filters change
+  React.useEffect(() => {
+    setPage(1);
+  }, [debouncedSearchQuery, categoryFilter, dateRangeFilter, startDate, endDate]);
+
   const {
     activeTab,
     setActiveTab,
@@ -35,42 +68,50 @@ const SiteManagement = () => {
     sections,
     selectedSection,
     isLoading,
-    isLoadingSection,
     error,
     sectionError,
     createSection,
     updateSection,
     deleteSection,
-    createHighlight,
-    createVagoNow,
-    createLeadership,
     handleViewSection,
     handleEditSection,
-  } = useSiteManagement();
-
-  const [selected, setSelected] = React.useState<SiteSection | null>(null);
-  const [showForm, setShowForm] = React.useState(false);
-  const [showView, setShowView] = React.useState(false);
-  const [showDelete, setShowDelete] = React.useState(false);
-  const [editData, setEditData] = React.useState<SiteSection | null>(null);
-  const [filters, setFilters] = React.useState<{ [key: string]: string }>({});
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const [dateFilters, setDateFilters] = React.useState<{ 
-    startDate?: string; 
-    endDate?: string; 
-  }>({});
+  } = useSiteManagement(
+    debouncedSearchQuery,
+    categoryFilter,
+    dateRangeFilter,
+    startDate,
+    endDate,
+  );
 
   const section = SECTIONS.find(s => s.key === activeTab)!;
 
-  // Filtering logic
-  const filteredData = sections ? filterSiteSections(sections, filters, searchQuery, dateFilters) : [];
-
   // Convert to table-compatible format
-  const tableData = convertToTableData(filteredData || []);
+  const tableData = convertToTableData(sections || []);
 
-  // Filter options
+  // Filter options - predefined static options
   const filterOptions: { [key: string]: string[] } = {
-    category: Array.from(new Set(sections?.map(item => item.category).filter((cat): cat is string => Boolean(cat)) || [])),
+    category: [
+      'All Categories',
+      'Events',
+      'News',
+      'Research',
+      'Education',
+      'Student Life',
+      'Facilities',
+      'Awards',
+      'Technology',
+      'Business',
+      'Health Services',
+      'Financial Services',
+      'Academic Affairs',
+      'Student Services',
+      'Finance',
+      'Human Resources',
+      'IT Services',
+      'Facilities Management',
+      'Research & Development',
+      'External Relations'
+    ],
   };
 
   // Date filter handlers
@@ -79,10 +120,15 @@ const SiteManagement = () => {
       ...prev,
       [field]: value
     }));
+    // Set dateRange to 'custom' when custom dates are selected
+    if (value) {
+      setFilters(prev => ({ ...prev, dateRange: 'custom' }));
+    }
   };
 
   const handleResetDateFilters = () => {
     setDateFilters({});
+    setFilters(prev => ({ ...prev, dateRange: '' }));
   };
 
   // Combined reset function
@@ -209,7 +255,7 @@ const SiteManagement = () => {
             icon: tab.icon,
             active: activeTab === tab.key
           }))}
-          onTabClick={(index) => setActiveTab(SECTIONS[index].key)}
+          onTabClick={(index) => setActiveTab(SECTIONS[index].key as SiteSectionKey)}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           debouncedFilterChange={(field, value) => setFilters(prev => ({ ...prev, [field]: value }))}
@@ -226,13 +272,13 @@ const SiteManagement = () => {
         <div className="mt-8">
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
             <div className="px-6 py-5">
-            <button
+              <button
                 onClick={handleAdd}
                 className="mb-4 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-            >
+              >
                 <FiPlus size={16} />
                 Add {section.label}
-            </button>
+              </button>
               {tableData.length > 0 ? (
                 <>
                   <ApplicationsTable
@@ -259,38 +305,38 @@ const SiteManagement = () => {
           </div>
         </div>
       </div>
-        {showForm && (
-          <SiteSectionForm
-            fields={section.fields}
+      {showForm && (
+        <SiteSectionForm
+          fields={section.fields}
           initialData={selectedSection || undefined}
           onClose={() => {
             setShowForm(false);
             setSelectedId(null);
           }}
-            onSuccess={handleFormSuccess}
-          />
-        )}
+          onSuccess={handleFormSuccess}
+        />
+      )}
       {showView && selectedSection && (
-          <SiteSectionViewModal
-            fields={section.fields}
+        <SiteSectionViewModal
+          fields={section.fields}
           data={selectedSection as Record<string, any>}
           onClose={() => {
             setShowView(false);
             setSelectedId(null);
           }}
-          />
-        )}
-          <WarningModal
+        />
+      )}
+      <WarningModal
         isOpen={showDelete}
         onClose={() => setShowDelete(false)}
         onConfirm={confirmDelete}
         title={`Delete ${section.label}`}
-            message={`Are you sure you want to delete this ${section.label.toLowerCase()}?`}
+        message={`Are you sure you want to delete this ${section.label.toLowerCase()}?`}
         confirmText="Delete"
         cancelText="Cancel"
         type="danger"
-          />
-      </div>
+      />
+    </div>
   );
 };
 

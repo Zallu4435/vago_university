@@ -5,7 +5,13 @@ import { toast } from 'react-hot-toast';
 
 export type SiteSectionKey = 'highlights' | 'vagoNow' | 'leadership';
 
-export const useSiteManagement = () => {
+export const useSiteManagement = (
+  search?: string,
+  category?: string,
+  dateRange?: string,
+  startDate?: string,
+  endDate?: string
+) => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<SiteSectionKey>('highlights');
   const [page, setPage] = useState(1);
@@ -17,8 +23,8 @@ export const useSiteManagement = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['site-sections', activeTab, page],
-    queryFn: () => siteManagementService.getSections(activeTab, 10, page),
+    queryKey: ['site-sections', activeTab, page, search, category, dateRange, startDate, endDate],
+    queryFn: () => siteManagementService.getSections(activeTab, 10, page, search, category, dateRange, startDate, endDate),
   });
 
   // Fetch individual section by ID

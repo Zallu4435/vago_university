@@ -15,7 +15,6 @@ import {
   STATUSES,
   userColumns as baseUserColumns,
 } from '../../../../shared/constants/userManagementConstants';
-import { filterAdmissions } from '../../../../shared/filters/admissionsFilter';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import EmptyState from '../../../../shared/components/EmptyState';
@@ -97,8 +96,23 @@ const UserManagement: React.FC = () => {
     []
   );
 
+  // Handle search query changes with debouncing
+  const debouncedSearchChange = useCallback(
+    debounce((query: string) => {
+      setFilters((prev) => ({ ...prev, search: query }));
+      setPage(1); // Reset to first page when searching
+    }, 500),
+    []
+  );
+
   const handleCustomDateChange = (field: 'startDate' | 'endDate', value: string) => {
     setCustomDateRange((prev) => ({ ...prev, [field]: value }));
+    // Also update the filters state so the dates get sent to the backend
+    setFilters((prev) => ({ 
+      ...prev, 
+      [field]: value,
+      dateRange: 'custom' // Set dateRange to 'custom' when custom dates are selected
+    }));
   };
 
   const handleViewDetails = async (user: User) => {
@@ -180,11 +194,15 @@ const UserManagement: React.FC = () => {
 
   const handleResetFilters = () => {
     setFilters({
-      status: '',
-      program: '',
-      dateRange: '',
+      status: 'all',
+      program: 'all',
+      dateRange: 'all',
+      search: '', // Keep search empty
+      startDate: '', // Clear custom start date
+      endDate: '', // Clear custom end date
     });
     setCustomDateRange({ startDate: '', endDate: '' });
+    setPage(1); // Reset page to 1 when resetting filters
   };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -231,7 +249,8 @@ const UserManagement: React.FC = () => {
     },
   ];
 
-  const filteredAdmissions = filterAdmissions(users, searchQuery, filters, customDateRange);
+  // Remove frontend filtering since we're using backend search
+  // const filteredAdmissions = filterAdmissions(users, searchQuery, filters, customDateRange);
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -276,14 +295,14 @@ const UserManagement: React.FC = () => {
             {
               icon: <FiClipboard />,
               title: 'Pending',
-              value: users?.filter((u) => u.status.toLowerCase() === 'pending').length || '0',
+              value: users?.filter((u: any) => u.status.toLowerCase() === 'pending').length || '0',
               change: '-2.1%',
               isPositive: true,
             },
             {
               icon: <FiBarChart2 />,
               title: 'Approval Rate',
-              value: `${((users?.filter((u) => u.status.toLowerCase() === 'approved').length / users?.length) * 100 || 0).toFixed(2)}%`,
+              value: `${((users?.filter((u: any) => u.status.toLowerCase() === 'approved').length / users?.length) * 100 || 0).toFixed(2)}%`,
               change: '+3.8%',
               isPositive: true,
             },
@@ -292,7 +311,10 @@ const UserManagement: React.FC = () => {
             { label: 'All Applications', icon: <FiUsers size={16} />, active: true },
           ]}
           searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
+          setSearchQuery={(query) => {
+            setSearchQuery(query);
+            debouncedSearchChange(query);
+          }}
           searchPlaceholder="Search by name or email..."
           filters={filters}
           filterOptions={{
@@ -308,10 +330,10 @@ const UserManagement: React.FC = () => {
         <div className="mt-8">
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
             <div className="px-6 py-5">
-              {filteredAdmissions?.length > 0 ? (
+              {users?.length > 0 ? (
                 <>
                   <ApplicationsTable
-                    data={filteredAdmissions}
+                    data={users}
                     columns={userColumns}
                     actions={userActions}
                     formatDate={formatDate}
@@ -319,9 +341,9 @@ const UserManagement: React.FC = () => {
                   <Pagination
                     page={page}
                     totalPages={totalPages || 1}
-                    itemsCount={filteredAdmissions.length}
+                    itemsCount={users.length}
                     itemName="applications"
-                    onPageChange={(newPage) => setPage(newPage)}
+                    onPageChange={(newPage: number) => setPage(newPage)}
                     onFirstPage={() => setPage(1)}
                     onLastPage={() => setPage(totalPages)}
                   />

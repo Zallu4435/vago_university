@@ -10,11 +10,12 @@ class UserService {
     program?: string,
     dateRange?: string,
     startDate?: string,
-    endDate?: string
+    endDate?: string,
+    search?: string
   ): Promise<AdmissionApiResponse> {
     try {
       const response = await httpClient.get<AdmissionApiResponse>('/admin/admissions', {
-        params: { page, limit, status, program, dateRange, startDate, endDate },
+        params: { page, limit, status, program, dateRange, startDate, endDate, search },
       });
       return response.data.data;
     } catch (error: any) {

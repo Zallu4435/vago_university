@@ -13,10 +13,16 @@ export const diplomaBackendService = {
         };
     },
 
-    async getVideos(category?: string, page: number = 1, limit: number = 10, status?: string): Promise<{ videos: Video[]; totalPages: number }> {
+    async getVideos(category?: string, page: number = 1, limit: number = 10, status?: string, search?: string, dateRange?: string, startDate?: string, endDate?: string): Promise<{ videos: Video[]; totalPages: number }> {
         const params: any = { page, limit };
         if (status && status !== 'all') params.status = status;
         if (category && category !== 'all') params.category = category;
+        if (search && search.trim()) params.search = search.trim();
+        if (dateRange && dateRange !== 'all') params.dateRange = dateRange;
+        if (startDate) params.startDate = startDate;
+        if (endDate) params.endDate = endDate;
+
+        console.log('getVideos params:', params); // Debugging log
 
         const response = await httpClient.get('/admin/vedio/videos', { params });
         return {

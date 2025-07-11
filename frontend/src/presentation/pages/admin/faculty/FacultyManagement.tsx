@@ -9,7 +9,6 @@ import Pagination from '../../../components/admin/management/Pagination';
 import ApplicationsTable from '../../../components/admin/management/ApplicationsTable';
 import { DEPARTMENTS, STATUSES, facultyColumns as baseFacultyColumns } from '../../../../shared/constants/facultyManagementConstants';
 import { formatDate } from '../../../../shared/utils/dateUtils';
-import { filterFaculty } from '../../../../shared/filters/facultyFilter';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import EmptyState from '../../../../shared/components/EmptyState';
@@ -102,8 +101,23 @@ const FacultyManagement: React.FC = () => {
     []
   );
 
+  // Handle search query changes with debouncing
+  const debouncedSearchChange = useCallback(
+    debounce((query: string) => {
+      setFilters((prev) => ({ ...prev, search: query }));
+      setPage(1); // Reset to first page when searching
+    }, 500),
+    []
+  );
+
   const handleCustomDateChange = (field: 'startDate' | 'endDate', value: string) => {
     setCustomDateRange((prev) => ({ ...prev, [field]: value }));
+    // Also update the filters state so the dates get sent to the backend
+    setFilters((prev) => ({ 
+      ...prev, 
+      [field]: value,
+      dateRange: 'custom' // Set dateRange to 'custom' when custom dates are selected
+    }));
   };
 
   const handleViewDetails = async (faculty: Faculty) => {
@@ -168,8 +182,12 @@ const FacultyManagement: React.FC = () => {
       status: 'all',
       department: 'all_departments',
       dateRange: 'all',
+      search: '', // Clear search
+      startDate: '', // Clear custom start date
+      endDate: '', // Clear custom end date
     });
     setCustomDateRange({ startDate: '', endDate: '' });
+    setPage(1); // Reset page to 1 when resetting filters
   };
 
   const facultyActions = [
@@ -208,7 +226,8 @@ const FacultyManagement: React.FC = () => {
     },
   ];
 
-  const filteredFaculty = filterFaculty(faculty, searchQuery, filters, customDateRange);
+  // Remove frontend filtering since we're using backend search
+  // const filteredFaculty = filterFaculty(faculty, searchQuery, filters, customDateRange);
 
   // Block/unblock handler for modal
   const handleBlock = (faculty: Faculty) => {
@@ -276,8 +295,11 @@ const FacultyManagement: React.FC = () => {
             { label: 'All Faculty', icon: <FiUsers size={16} />, active: true },
           ]}
           searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          searchPlaceholder="Search faculty..."
+          setSearchQuery={(query) => {
+            setSearchQuery(query);
+            debouncedSearchChange(query);
+          }}
+          searchPlaceholder="Search by name or email..."
           filters={filters}
           filterOptions={{
             status: STATUSES,
@@ -292,10 +314,10 @@ const FacultyManagement: React.FC = () => {
         <div className="mt-8">
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
             <div className="px-6 py-5">
-              {filteredFaculty?.length > 0 ? (
+              {faculty?.length > 0 ? (
                 <>
                   <ApplicationsTable
-                    data={filteredFaculty}
+                    data={faculty}
                     columns={facultyColumns}
                     actions={facultyActions}
                     formatDate={formatDate}
@@ -303,9 +325,9 @@ const FacultyManagement: React.FC = () => {
                   <Pagination
                     page={page}
                     totalPages={totalPages || 1}
-                    itemsCount={filteredFaculty.length}
+                    itemsCount={faculty.length}
                     itemName="faculty"
-                    onPageChange={(newPage) => setPage(newPage)}
+                    onPageChange={(newPage: number) => setPage(newPage)}
                     onFirstPage={() => setPage(1)}
                     onLastPage={() => setPage(totalPages)}
                   />

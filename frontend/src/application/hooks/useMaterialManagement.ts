@@ -1,29 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { materialService } from '../services/materialService';
 import { Material } from '../../domain/types/management/materialmanagement';
 import { toast } from 'react-hot-toast';
 
-export const useMaterialManagement = () => {
+export const useMaterialManagement = (
+  page: number = 1,
+  itemsPerPage: number = 10,
+  filters: {
+    subject: string;
+    course: string;
+    semester: string;
+    status: string;
+    dateRange: string;
+    startDate?: string;
+    endDate?: string;
+  },
+  searchQuery: string = '',
+  activeTab: string = 'all'
+) => {
   const queryClient = useQueryClient();
-  const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState({
-    subject: 'All Subjects',
-    course: 'All Courses',
-    semester: 'All Semesters',
-    type: 'All Types',
-    uploadedBy: 'All Uploaders',
-  });
-  const [activeTab, setActiveTab] = useState<'all' | 'restricted'>('all');
   const [selectedMaterialId, setSelectedMaterialId] = useState<string | null>(null);
 
   const { data: materialsData, isLoading, error } = useQuery<{ materials: Material[]; totalPages: number }, Error>({
-    queryKey: ['materials', page, filters, activeTab],
-    queryFn: () => materialService.getMaterials(filters, page, 10),
-    select: (data) => ({
-      materials: activeTab === 'restricted' ? data.materials.filter((m) => m.isRestricted) : data.materials,
-      totalPages: data.totalPages,
-    }),
+    queryKey: ['materials', page, filters, searchQuery, activeTab],
+    queryFn: () => materialService.getMaterials(
+      {
+        ...filters,
+        search: searchQuery,
+        status: activeTab === 'restricted' ? 'restricted' : activeTab === 'unrestricted' ? 'unrestricted' : undefined
+      },
+      page,
+      itemsPerPage
+    ),
   });
 
   const createMaterialMutation = useMutation({
@@ -79,29 +88,20 @@ export const useMaterialManagement = () => {
     enabled: !!selectedMaterialId,
   });
 
-  const handleViewMaterial = (id: string) => {
+  const handleViewMaterial = useCallback((id: string) => {
     setSelectedMaterialId(id);
-  };
+  }, []);
 
-  const handleEditMaterial = (id: string) => {
+  const handleEditMaterial = useCallback((id: string) => {
     queryClient.prefetchQuery({
       queryKey: ['materialDetails', id],
       queryFn: () => materialService.getMaterialById(id),
     });
-  };
-
-  const handleTabChange = (tab: 'all' | 'restricted') => {
-    setActiveTab(tab);
-    setPage(1);
-  };
+  }, [queryClient]);
 
   return {
     materials: materialsData?.materials || [],
     totalPages: Number(materialsData?.totalPages) || 1,
-    page,
-    setPage,
-    filters,
-    setFilters,
     isLoading,
     error,
     createMaterial: createMaterialMutation.mutate,
@@ -112,7 +112,5 @@ export const useMaterialManagement = () => {
     isLoadingMaterialDetails,
     handleViewMaterial,
     handleEditMaterial,
-    activeTab,
-    handleTabChange,
   };
 };

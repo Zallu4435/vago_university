@@ -43,7 +43,7 @@ export class CommunicationController implements ICommunicationController {
 
   async getInboxMessages(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { page = "1", limit = "10", search = "", status = "all" } = httpRequest.query || {};
-    const { id: userId } = httpRequest.user || {};
+    const { userId } = httpRequest.user || {};
     if (!userId) {
       return this.httpErrors.error_401();
     }
@@ -66,7 +66,7 @@ export class CommunicationController implements ICommunicationController {
 
   async getSentMessages(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { page = "1", limit = "10", search = "", status = "all" } = httpRequest.query || {};
-    const { id: userId } = httpRequest.user || {};
+    const { userId } = httpRequest.user || {};
     if (!userId) {
       return this.httpErrors.error_401();
     }
@@ -89,7 +89,7 @@ export class CommunicationController implements ICommunicationController {
 
   async sendMessage(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { subject, message, to, attachments } = httpRequest.body || {};
-    const { id: userId, collection: role } = httpRequest.user || {};
+    const { userId, collection: role } = httpRequest.user || {};
     if (!userId || !role) {
       return this.httpErrors.error_401();
     }
@@ -113,7 +113,7 @@ export class CommunicationController implements ICommunicationController {
 
   async markMessageAsRead(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { messageId } = httpRequest.params || {};
-    const { id: userId } = httpRequest.user || {};
+    const { userId } = httpRequest.user || {};
     if (!messageId || !userId) {
       return this.httpErrors.error_400();
     }
@@ -133,7 +133,7 @@ export class CommunicationController implements ICommunicationController {
 
   async deleteMessage(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { messageId } = httpRequest.params || {};
-    const { id: userId } = httpRequest.user || {};
+    const { userId } = httpRequest.user || {};
     if (!messageId || !userId) {
       return this.httpErrors.error_400();
     }
@@ -153,7 +153,7 @@ export class CommunicationController implements ICommunicationController {
 
   async getMessageDetails(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { messageId } = httpRequest.params || {};
-    const { id: userId } = httpRequest.user || {};
+    const { userId } = httpRequest.user || {};
     if (!messageId || !userId) {
       return this.httpErrors.error_400();
     }
@@ -203,7 +203,7 @@ export class CommunicationController implements ICommunicationController {
 
   async fetchUsers(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { type, search = "" } = httpRequest.query || {};
-    const { id: userId } = httpRequest.user || {};
+    const { userId } = httpRequest.user || {};
     if (!userId) {
       return this.httpErrors.error_401();
     }
@@ -241,7 +241,7 @@ export class CommunicationController implements ICommunicationController {
 
   async getAdminInboxMessages(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { page = "1", limit = "10", search = "", status = "all" } = httpRequest.query || {};
-    const { id: userId, collection: role } = httpRequest.user || {};
+    const { userId, collection: role } = httpRequest.user || {};
     if (!userId || role !== 'admin') {
       return this.httpErrors.error_403();
     }
@@ -264,7 +264,7 @@ export class CommunicationController implements ICommunicationController {
 
   async getAdminSentMessages(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { page = "1", limit = "10", search = "", status = "all" } = httpRequest.query || {};
-    const { id: userId, collection: role } = httpRequest.user || {};
+    const { userId, collection: role } = httpRequest.user || {};
     if (!userId || role !== 'admin') {
       return this.httpErrors.error_403();
     }
@@ -287,7 +287,7 @@ export class CommunicationController implements ICommunicationController {
 
   async sendAdminMessage(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { subject, message, to } = httpRequest.body || {};
-    const { id: userId, collection: role } = httpRequest.user || {};
+    const { userId, collection: role } = httpRequest.user || {};
     if (!userId || role !== 'admin') {
       return this.httpErrors.error_403();
     }
@@ -315,7 +315,7 @@ export class CommunicationController implements ICommunicationController {
 
   async deleteAdminMessage(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { messageId } = httpRequest.params || {};
-    const { id: userId, collection: role } = httpRequest.user || {};
+    const { userId, collection: role } = httpRequest.user || {};
     if (!userId || role !== 'admin') {
       return this.httpErrors.error_403();
     }

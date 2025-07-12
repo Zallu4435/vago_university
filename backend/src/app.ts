@@ -9,6 +9,8 @@ import { createServer } from "http";
 import { Server as SocketIOServer } from 'socket.io';
 import chatRouter from "./presentation/http/chat/chatRoutes";
 import { setupSessionSocketHandlers } from './infrastructure/services/socket/SessionSocketService';
+import Logger from "./shared/utils/logger";
+import { loggerMiddleware } from "./shared/middlewares/loggerMiddleware";
 
 const app = express();
 const httpServer = createServer(app);
@@ -32,6 +34,9 @@ app.use(cors(corsOptions));
 // Add cookie-parser middleware
 app.use(cookieParser());
 
+// Add logger middleware
+app.use(loggerMiddleware);
+
 // Create a single Socket.IO server instance
 const io = new SocketIOServer(httpServer, {
   cors: corsOptions,
@@ -49,11 +54,11 @@ app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Initialize Socket.IO services
-console.log('Initializing Socket.IO services...');
+Logger.info('Initializing Socket.IO services...');
 import { SocketService } from "./infrastructure/services/socket/SocketService";
 const socketService = new SocketService(io);
 setupSessionSocketHandlers(io);
-console.log('Socket.IO services initialized');
+Logger.info('Socket.IO services initialized');
 
 // Routes
 app.use("/api/chats", chatRouter);
@@ -61,10 +66,12 @@ app.use("/api", indexRoute);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Error stack:', err.stack);
-  console.log('Error object:', err);
-  console.log('Error statusCode:', err.statusCode);
-  console.log('Error code:', err.code);
+  Logger.error(`Error: ${err.message}`);
+  Logger.error(`Stack: ${err.stack}`);
+  Logger.debug(`Error object: ${JSON.stringify(err)}`);
+  Logger.debug(`Error statusCode: ${err.statusCode}`);
+  Logger.debug(`Error code: ${err.code}`);
+  
   const status = err.statusCode || 500;
   res.status(status).json({
     error: err.message || "Something went wrong",
@@ -79,9 +86,9 @@ mongoose
     socketTimeoutMS: 45000,
     connectTimeoutMS: 30000,
   })
-  .then(() => console.log("MongoDB connected successfully"))
+  .then(() => Logger.info("MongoDB connected successfully"))
   .catch((err) => {
-    console.error("MongoDB connection error:", err);
+    Logger.error(`MongoDB connection error: ${err}`);
     process.exit(1);
   });
 

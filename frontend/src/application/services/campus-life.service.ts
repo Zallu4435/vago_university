@@ -6,7 +6,7 @@ class CampusLifeService {
   async getCampusLifeData(): Promise<CampusLifeResponse> {
     try {
       const response = await httpClient.get('/campus-life');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       throw error;
     }

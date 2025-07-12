@@ -22,12 +22,13 @@ export const PersonalSection: React.FC = () => {
                   id={field.id}
                   name={field.id}
                   label={field.label}
-                  options={field.options}
+                  options={field.options || []}
                   value={value as string}
                   onChange={onChange}
                   onBlur={onBlur}
                   ref={ref}
                   required={field.required}
+                  placeholder={field.placeholder}
                   className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                   labelClassName="text-cyan-700"
                 />

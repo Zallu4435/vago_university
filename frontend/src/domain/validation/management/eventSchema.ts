@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { EVENT_VALIDATION_MESSAGES } from '../../../../shared/constants/eventManagementConstants';
+import { EVENT_VALIDATION_MESSAGES } from '../../../shared/constants/eventManagementConstants';
 
 export const eventSchema = z.object({
   title: z.string().min(1, EVENT_VALIDATION_MESSAGES.titleRequired).min(3, 'Title must be at least 3 characters'),

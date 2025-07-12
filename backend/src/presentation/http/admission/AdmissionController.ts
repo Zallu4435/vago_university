@@ -34,7 +34,7 @@ export class AdmissionController implements IAdmissionController {
 
   async createApplication(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     if (!httpRequest.user) return this.httpErrors.error_401();
-    const { id: registerId } = httpRequest.user;
+    const { userId: registerId } = httpRequest.user;
     const { userId } = httpRequest.body || {};
     if (!userId || userId !== registerId) return this.httpErrors.error_400();
     const result = await this.createApplicationUseCase.execute({ userId });
@@ -43,7 +43,7 @@ export class AdmissionController implements IAdmissionController {
 
   async getApplication(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     if (!httpRequest.user) return this.httpErrors.error_401();
-    const { id: registerId } = httpRequest.user;
+    const { userId: registerId } = httpRequest.user;
     const { userId } = httpRequest.params || {};
     if (userId !== registerId) return this.httpErrors.error_403();
     const result = await this.getApplicationUseCase.execute({ userId });
@@ -109,7 +109,7 @@ export class AdmissionController implements IAdmissionController {
     console.log('[serveDocument] user:', httpRequest.user);
     console.log('[serveDocument] params:', httpRequest.params);
     if (!httpRequest.user) return this.httpErrors.error_401();
-    const { id: userId } = httpRequest.user;
+    const { userId } = httpRequest.user;
     const { documentId } = httpRequest.params || {};
     if (!documentId) {
       console.log('[serveDocument] Missing documentId');

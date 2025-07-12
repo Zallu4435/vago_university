@@ -31,7 +31,7 @@ import { DocumentUploadService } from '../../services/admission/DocumentUploadSe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2025-04-30.basil" });
 
 export class AdmissionsRepository implements IAdmissionsRepository {
-    
+
     private documentUploadService: DocumentUploadService;
 
     constructor() {
@@ -62,17 +62,14 @@ export class AdmissionsRepository implements IAdmissionsRepository {
         return { applicationId: draft.applicationId };
     }
 
-    // Data access only: find draft by registerId
     async findDraftByRegisterId(userId: string) {
         return AdmissionDraftModel.findOne({ registerId: userId }).lean();
     }
 
-    // Data access only: find draft by applicationId
     async findDraftByApplicationId(applicationId: string) {
         return AdmissionDraftModel.findOne({ applicationId });
     }
 
-    // Data access only: save draft
     async saveDraft(draft: any) {
         return draft.save();
     }
@@ -194,7 +191,6 @@ export class AdmissionsRepository implements IAdmissionsRepository {
 
         await newAdmission.save();
         await AdmissionDraftModel.deleteOne({ applicationId: params.applicationId });
-        // Return the raw newAdmission object
         return {
             admission: newAdmission.toObject(),
         };
@@ -265,8 +261,8 @@ export class AdmissionsRepository implements IAdmissionsRepository {
         }
         console.log('[getDocumentByKey] documents field:', draft.documents);
         const docsArray = Array.isArray(draft.documents.documents)
-          ? draft.documents.documents
-          : [];
+            ? draft.documents.documents
+            : [];
         const found = docsArray.find((doc: any) => doc.id === params.documentKey);
         console.log('[getDocumentByKey] found document:', found);
         return found || null;

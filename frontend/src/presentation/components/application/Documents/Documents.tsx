@@ -4,34 +4,23 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { DocumentInstructions } from './DocumentInstructions';
 import { DocumentUploadTable } from './DocumentUploadTable';
 import { DocumentUpload, DocumentUploadSectionFormData, DocumentUploadSectionSchema } from '../../../../domain/validation/DocumentSchema';
+import { DocumentUploadSection } from '../../../../domain/types/application';
 import { toast } from 'react-hot-toast';
 import { documentUploadService } from '../../../../application/services/documentUploadService';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../../appStore/store';
 
-const useAuth = () => {
-  const { token, user, collection } = useSelector((state: RootState) => state.auth);
-  return { token, user, collection };
-};
-
-export interface DocumentUploadSection {
-  documents: DocumentUpload[];
+export interface DocumentsRef {
+  trigger: () => Promise<boolean>;
+  getValues: () => DocumentUploadSection;
 }
 
-interface DocumentsProps {
+export interface DocumentsProps {
   initialData?: DocumentUploadSection;
   onSave: (data: DocumentUploadSection) => void;
   applicationId: string;
 }
 
-interface DocumentsRef {
-  trigger: () => Promise<boolean>;
-  getValues: () => DocumentUploadSection;
-}
-
 export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
   ({ initialData, onSave, applicationId }, ref) => {
-    const { token } = useAuth();
 
     const defaultDocuments: DocumentUpload[] = [
       { id: 'passport', name: 'Passport' },
@@ -69,8 +58,8 @@ export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
 
     const handleFileUpload = async (id: string, file: File) => {
 
-      if (!file || !token) {
-        console.error('Missing file or token:', { hasFile: !!file, hasToken: !!token });
+      if (!file) {
+        console.error('Missing file');
         return;
       }
 
@@ -91,7 +80,7 @@ export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
       }
 
       try {
-        const uploadResult = await documentUploadService.uploadDocument(applicationId, id, file, token);
+        const uploadResult = await documentUploadService.uploadDocument(applicationId, id, file);
         const documents = watch('documents');
         const updatedDocuments = documents.map(doc =>
           doc.id === id

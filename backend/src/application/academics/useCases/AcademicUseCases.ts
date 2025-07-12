@@ -159,7 +159,7 @@ export class GetCoursesUseCase implements IGetCoursesUseCase {
       const response: GetCoursesResponseDTO = {
         courses: mappedCourses,
         totalCourses: mappedCourses.length,
-        totalPages: 1, // You may want to calculate this based on total count
+        totalPages: 1, 
         currentPage: page
       };
       return { data: response, success: true };
@@ -364,8 +364,8 @@ export class ScheduleMeetingUseCase implements IScheduleMeetingUseCase {
         reason: input.reason,
         preferredTime: input.preferredTime,
         notes: input.notes,
-        meetingTime: input.date, // Using date as meeting time for now
-        location: "Academic Advisor Office", // Default location
+        meetingTime: input.date, 
+        location: "Academic Advisor Office",
         createdAt: new Date().toISOString()
       });
       

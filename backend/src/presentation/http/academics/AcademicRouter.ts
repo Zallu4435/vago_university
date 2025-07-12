@@ -6,10 +6,8 @@ import { expressAdapter } from '../../adapters/ExpressAdapter';
 const router = Router();
 const academicController = getAcademicComposer();
 
-// Apply JWT authentication to all routes
 router.use(authMiddleware);
 
-// Routes
 router.get('/student-info', (req, res, next) => 
   expressAdapter(req, res, next, academicController.getStudentInfo.bind(academicController))
 );

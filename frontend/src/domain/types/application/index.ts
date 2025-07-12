@@ -205,7 +205,6 @@ export interface FormSubmissionFlowProps {
     onPaymentComplete: () => void;
     onBackToForm?: () => void;
     onConfirm?: () => void;
-    token: string | null;
     onLogout?: () => void;
 }
 
@@ -233,7 +232,6 @@ export interface PaymentProps {
     };
     onComplete: () => void;
     onPrevious: () => void;
-    token: string | null;
 }
 
 export interface PaymentDetailsProps {

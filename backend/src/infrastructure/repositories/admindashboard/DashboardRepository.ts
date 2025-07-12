@@ -54,7 +54,6 @@ import { ClubModel } from '../../database/mongoose/models/clubs/ClubModel';
 
 export class DashboardRepository implements IDashboardRepository {
   async getDashboardData(params: GetDashboardDataRequestDTO): Promise<any> {
-    // Only fetch raw data from the database or other repositories, no business logic or mapping
     const [
       metricsRaw,
       userGrowthRaw,
@@ -63,13 +62,13 @@ export class DashboardRepository implements IDashboardRepository {
       activitiesRaw,
       alertsRaw
     ] = await Promise.all([
-        this.getDashboardMetrics({}),
-        this.getUserGrowthData({}),
-        this.getRevenueData({}),
-        this.getPerformanceData({}),
-        this.getRecentActivities({}),
-        this.getSystemAlerts({}),
-      ]);
+      this.getDashboardMetrics({}),
+      this.getUserGrowthData({}),
+      this.getRevenueData({}),
+      this.getPerformanceData({}),
+      this.getRecentActivities({}),
+      this.getSystemAlerts({}),
+    ]);
     return {
       metricsRaw,
       userGrowthRaw,
@@ -81,18 +80,17 @@ export class DashboardRepository implements IDashboardRepository {
   }
 
   async getDashboardMetrics(params: GetDashboardMetricsRequestDTO): Promise<any> {
-    // Only fetch raw data from the database
-      const [totalUsers, totalFaculty, totalCourses, pendingAdmissions, completedPayments, pendingFinancialAid] = await Promise.all([
-        User.countDocuments({}),
-        Faculty.countDocuments({}),
-        CourseModel.countDocuments({}),
-        Admission.countDocuments({ status: 'pending' }),
-        PaymentModel.aggregate([
-          { $match: { status: 'Completed' } },
-          { $group: { _id: null, total: { $sum: '$amount' } } },
-        ]),
-        FinancialAidApplicationModel.countDocuments({ status: 'Pending' }),
-      ]);
+    const [totalUsers, totalFaculty, totalCourses, pendingAdmissions, completedPayments, pendingFinancialAid] = await Promise.all([
+      User.countDocuments({}),
+      Faculty.countDocuments({}),
+      CourseModel.countDocuments({}),
+      Admission.countDocuments({ status: 'pending' }),
+      PaymentModel.aggregate([
+        { $match: { status: 'Completed' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
+      ]),
+      FinancialAidApplicationModel.countDocuments({ status: 'Pending' }),
+    ]);
     return {
       totalUsers,
       totalFaculty,
@@ -104,20 +102,19 @@ export class DashboardRepository implements IDashboardRepository {
   }
 
   async getUserGrowthData(params: GetUserGrowthDataRequestDTO): Promise<any> {
-    // Only fetch raw user and faculty registration data for the last 6 months
-      const { period = 'monthly', startDate, endDate } = params;
-      const end = endDate ? new Date(endDate) : new Date();
-      const start = startDate ? new Date(startDate) : new Date(end.getTime() - 6 * 30 * 24 * 60 * 60 * 1000);
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const { period = 'monthly', startDate, endDate } = params;
+    const end = endDate ? new Date(endDate) : new Date();
+    const start = startDate ? new Date(startDate) : new Date(end.getTime() - 6 * 30 * 24 * 60 * 60 * 1000);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const userGrowthRaw: any[] = [];
-      for (let i = 0; i < 6; i++) {
-        const date = new Date(start.getTime() + i * 30 * 24 * 60 * 60 * 1000);
-        const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
-        const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    for (let i = 0; i < 6; i++) {
+      const date = new Date(start.getTime() + i * 30 * 24 * 60 * 60 * 1000);
+      const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+      const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
       const usersCount = await User.countDocuments({ createdAt: { $gte: monthStart, $lte: monthEnd } });
       const facultyCount = await Faculty.countDocuments({ createdAt: { $gte: monthStart, $lte: monthEnd } });
       userGrowthRaw.push({
-          month: months[date.getMonth()],
+        month: months[date.getMonth()],
         usersCount,
         facultyCount
       });
@@ -126,32 +123,31 @@ export class DashboardRepository implements IDashboardRepository {
   }
 
   async getRevenueData(params: GetRevenueDataRequestDTO): Promise<any> {
-    // Only fetch raw payment data for the last 6 months
-      const { period = 'monthly', startDate, endDate } = params;
-      const end = endDate ? new Date(endDate) : new Date();
-      const start = startDate ? new Date(startDate) : new Date(end.getTime() - 6 * 30 * 24 * 60 * 60 * 1000);
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const { period = 'monthly', startDate, endDate } = params;
+    const end = endDate ? new Date(endDate) : new Date();
+    const start = startDate ? new Date(startDate) : new Date(end.getTime() - 6 * 30 * 24 * 60 * 60 * 1000);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const revenueRaw: any[] = [];
-      for (let i = 0; i < 6; i++) {
-        const date = new Date(start.getTime() + i * 30 * 24 * 60 * 60 * 1000);
-        const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
-        const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-        const payments = await PaymentModel.aggregate([
-          {
-            $match: {
-              status: 'Completed',
-              date: { $gte: monthStart, $lte: monthEnd },
-            },
+    for (let i = 0; i < 6; i++) {
+      const date = new Date(start.getTime() + i * 30 * 24 * 60 * 60 * 1000);
+      const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+      const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+      const payments = await PaymentModel.aggregate([
+        {
+          $match: {
+            status: 'Completed',
+            date: { $gte: monthStart, $lte: monthEnd },
           },
-          {
-            $group: {
-              _id: '$method',
-              total: { $sum: '$amount' },
-            },
+        },
+        {
+          $group: {
+            _id: '$method',
+            total: { $sum: '$amount' },
           },
-        ]);
+        },
+      ]);
       revenueRaw.push({
-          month: months[date.getMonth()],
+        month: months[date.getMonth()],
         payments
       });
     }
@@ -159,39 +155,38 @@ export class DashboardRepository implements IDashboardRepository {
   }
 
   async getPerformanceData(params: GetPerformanceDataRequestDTO): Promise<any> {
-    // Only fetch raw counts for all relevant collections
-      const [
-        userCount,
-        facultyCount,
-        courseCount,
-        admissionCount,
-        paymentCount,
-        enquiryCount,
-        notificationCount,
-        communicationCount,
-        financialAidCount,
-        scholarshipCount,
-        videoCount,
-        sportsCount,
-        diplomaCount,
-        eventsCount,
+    const [
+      userCount,
+      facultyCount,
+      courseCount,
+      admissionCount,
+      paymentCount,
+      enquiryCount,
+      notificationCount,
+      communicationCount,
+      financialAidCount,
+      scholarshipCount,
+      videoCount,
+      sportsCount,
+      diplomaCount,
+      eventsCount,
       clubsCount
-      ] = await Promise.all([
-        User.countDocuments({}),
-        Faculty.countDocuments({}),
-        CourseModel.countDocuments({}),
-        Admission.countDocuments({}),
-        PaymentModel.countDocuments({ status: 'Completed' }),
-        Enquiry.countDocuments({}),
-        NotificationModel.countDocuments({}),
-        MessageModel.countDocuments({}),
-        FinancialAidApplicationModel.countDocuments({}),
-        ScholarshipApplicationModel.countDocuments({}),
-        Video.countDocuments({}),
-        TeamModel.countDocuments({}),
-        Diploma.countDocuments({}),
-        CampusEventModel.countDocuments({}),
-        ClubModel.countDocuments({}),
+    ] = await Promise.all([
+      User.countDocuments({}),
+      Faculty.countDocuments({}),
+      CourseModel.countDocuments({}),
+      Admission.countDocuments({}),
+      PaymentModel.countDocuments({ status: 'Completed' }),
+      Enquiry.countDocuments({}),
+      NotificationModel.countDocuments({}),
+      MessageModel.countDocuments({}),
+      FinancialAidApplicationModel.countDocuments({}),
+      ScholarshipApplicationModel.countDocuments({}),
+      Video.countDocuments({}),
+      TeamModel.countDocuments({}),
+      Diploma.countDocuments({}),
+      CampusEventModel.countDocuments({}),
+      ClubModel.countDocuments({}),
     ]);
     return {
       userCount,
@@ -214,7 +209,7 @@ export class DashboardRepository implements IDashboardRepository {
 
   async getRecentActivities(params: GetRecentActivitiesRequestDTO): Promise<any> {
     // Only fetch raw recent admissions, payments, enquiries, notifications
-      const [recentAdmissions, recentPayments, recentEnquiries, recentNotifications] = await Promise.all([
+    const [recentAdmissions, recentPayments, recentEnquiries, recentNotifications] = await Promise.all([
       Admission.find({}).sort({ createdAt: -1 }).limit(3).populate('registerId', 'firstName lastName email'),
       PaymentModel.find({ status: 'Completed' }).sort({ date: -1 }).limit(3).populate('studentId', 'firstName lastName email'),
       Enquiry.find({}).sort({ createdAt: -1 }).limit(3),
@@ -231,9 +226,9 @@ export class DashboardRepository implements IDashboardRepository {
   async getSystemAlerts(params: GetSystemAlertsRequestDTO): Promise<any> {
     // Only fetch raw counts for alerts
     const [pendingAdmissions, pendingFinancialAid, failedPayments, overdueCharges, completedPayments] = await Promise.all([
-        Admission.countDocuments({ status: 'pending' }),
-        FinancialAidApplicationModel.countDocuments({ status: 'Pending' }),
-        PaymentModel.countDocuments({ status: 'Failed' }),
+      Admission.countDocuments({ status: 'pending' }),
+      FinancialAidApplicationModel.countDocuments({ status: 'Pending' }),
+      PaymentModel.countDocuments({ status: 'Failed' }),
       StudentFinancialInfoModel.countDocuments({ status: 'Pending', paymentDueDate: { $lt: new Date() } }),
       PaymentModel.countDocuments({ status: 'Completed' }),
     ]);
@@ -248,7 +243,7 @@ export class DashboardRepository implements IDashboardRepository {
 
   async refreshDashboard(params: RefreshDashboardRequestDTO): Promise<any> {
     // Just call getDashboardData for fresh raw data
-      return await this.getDashboardData({});
+    return await this.getDashboardData({});
   }
 
   async dismissAlert(params: DismissAlertRequestDTO): Promise<any> {
@@ -266,7 +261,7 @@ export class DashboardRepository implements IDashboardRepository {
     const now = new Date();
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000);
-    
+
     if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;

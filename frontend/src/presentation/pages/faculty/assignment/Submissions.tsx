@@ -585,7 +585,9 @@ export default function Submissions({
             marks: selectedSubmission.marks ?? 0,
             feedback: selectedSubmission.feedback ?? '',
             isLate: selectedSubmission.isLate,
-            fileName: selectedSubmission.files[0]?.split('/').pop() || 'No file',
+            fileName: typeof selectedSubmission.files[0] === 'string' 
+              ? selectedSubmission.files[0]?.split('/').pop() || 'No file'
+              : selectedSubmission.files[0]?.fileName || 'No file',
             fileSize: 'Unknown',
           }}
           saveReview={handleReviewSubmit}

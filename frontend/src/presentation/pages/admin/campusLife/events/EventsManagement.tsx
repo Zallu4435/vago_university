@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   IoAdd as Plus,
   IoEyeOutline as Eye,
@@ -36,7 +36,6 @@ import {
   getEventRequestColumns,
 } from '../../../../../shared/constants/eventManagementConstants';
 import { formatDate } from '../../../../../shared/utils/dateUtils';
-import { filterEvents, filterEventRequests } from '../../../../../shared/filters/eventManagementFilter';
 
 const AdminEventsManagement: React.FC = () => {
   const {
@@ -45,6 +44,8 @@ const AdminEventsManagement: React.FC = () => {
     totalPages,
     page,
     setPage,
+    searchTerm,
+    setSearchTerm,
     filters,
     setFilters,
     isLoading,
@@ -60,11 +61,11 @@ const AdminEventsManagement: React.FC = () => {
   } = useEventManagement();
 
   const [activeTab, setActiveTab] = useState<'events' | 'requests'>('events');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [showAddEventModal, setShowAddEventModal] = useState(false);
   const [showEventDetailsModal, setShowEventDetailsModal] = useState(false);
   const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<Event | EventRequest | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<EventRequest | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [itemToAction, setItemToAction] = useState<ItemToAction | null>(null);
@@ -73,9 +74,20 @@ const AdminEventsManagement: React.FC = () => {
   const eventColumns = getEventColumns(Calendar, MapPin, Building, GraduationCap, User, formatDate);
   const eventRequestColumns = getEventRequestColumns(Calendar, Building, GraduationCap, User, formatDate);
 
-  // Use shared filter utilities
-  const filteredEvents = filterEvents(events, filters, searchTerm);
-  const filteredEventRequests = filterEventRequests(eventRequests, filters, searchTerm);
+  // Debounced search function that updates the actual search term
+  const debouncedSearchChange = useCallback(
+    debounce((query: string) => {
+      setSearchTerm(query);
+      setPage(1); // Reset to first page when searching
+    }, 500), // 500ms delay
+    [setSearchTerm, setPage]
+  );
+
+  // Handle search input change
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    debouncedSearchChange(query);
+  };
 
   const handleAddEvent = () => {
     setSelectedEvent(null);
@@ -85,7 +97,7 @@ const AdminEventsManagement: React.FC = () => {
   const handleEditEvent = async (event: Event) => {
     try {
       const details = await getEventDetails(event.id);
-      setSelectedEvent({ ...details, id: event.id });
+      setSelectedEvent(details);
       setShowAddEventModal(true);
     } catch (error) {
       console.error('Error fetching event details:', error);
@@ -99,7 +111,8 @@ const AdminEventsManagement: React.FC = () => {
         const details = await getEventDetails(event.id);
         setSelectedEvent(details);
       } else {
-        setSelectedEvent(event);
+        // Handle EventRequest case
+        setSelectedEvent(null);
       }
       setShowEventDetailsModal(true);
     } catch (error) {
@@ -108,7 +121,7 @@ const AdminEventsManagement: React.FC = () => {
     }
   };
 
-  const handleSaveEvent = async (data: Omit<Event, 'id' | 'createdAt'>) => {
+  const handleSaveEvent = async (data: any) => {
     try {
       if (selectedEvent && 'id' in selectedEvent) {
         await updateEvent({ id: selectedEvent.id, data });
@@ -173,17 +186,23 @@ const AdminEventsManagement: React.FC = () => {
       eventType: 'All',
       dateRange: 'All',
       status: 'All',
+      organizerType: 'All',
     });
+    setSearchQuery('');
+    setSearchTerm('');
+    setPage(1);
   };
 
+  // Debounced filter change that maintains focus
   const debouncedFilterChange = useCallback(
     debounce((field: string, value: string) => {
       setFilters((prev) => ({
         ...prev,
         [field]: value || 'All',
       }));
+      setPage(1); // Reset to first page when filtering
     }, 300),
-    []
+    [setFilters, setPage]
   );
 
   const eventActions = [
@@ -280,21 +299,21 @@ const AdminEventsManagement: React.FC = () => {
             {
               icon: <Calendar />,
               title: 'Total Events',
-              value: filteredEvents.length.toString(),
+              value: events.length.toString(),
               change: '+10%',
               isPositive: true,
             },
             {
               icon: <Calendar />,
               title: 'Upcoming Events',
-              value: filteredEvents.filter((e) => e.status?.toLowerCase() === 'upcoming').length.toString(),
+              value: events.filter((e: Event) => e.status?.toLowerCase() === 'upcoming').length.toString(),
               change: '+8%',
               isPositive: true,
             },
             {
               icon: <Building />,
               title: 'Department Events',
-              value: filteredEvents.filter((e) => e.organizerType?.toLowerCase() === 'department').length.toString(),
+              value: events.filter((e: Event) => e.organizerType?.toLowerCase() === 'department').length.toString(),
               change: '+5%',
               isPositive: true,
             },
@@ -303,14 +322,14 @@ const AdminEventsManagement: React.FC = () => {
             { label: 'Events', icon: <Calendar size={16} />, active: activeTab === 'events' },
             { label: 'Event Requests', icon: <Edit size={16} />, active: activeTab === 'requests' },
           ]}
-          searchQuery={searchTerm}
-          setSearchQuery={setSearchTerm}
+          searchQuery={searchQuery}
+          setSearchQuery={handleSearchChange}
           searchPlaceholder="Search events or requests..."
-          filters={filters}
+          filters={filters as any}
           filterOptions={{
-            eventType: EVENT_TYPES,
-            dateRange: DATE_RANGES,
-            status: activeTab === 'events' ? EVENT_STATUSES : REQUEST_STATUSES,
+            eventType: EVENT_TYPES as unknown as string[],
+            dateRange: DATE_RANGES as unknown as string[],
+            status: (activeTab === 'events' ? EVENT_STATUSES : REQUEST_STATUSES) as unknown as string[],
           }}
           debouncedFilterChange={debouncedFilterChange}
           handleResetFilters={handleResetFilters}
@@ -323,7 +342,11 @@ const AdminEventsManagement: React.FC = () => {
               eventType: 'All',
               dateRange: 'All',
               status: 'All',
+              organizerType: 'All',
             });
+            setSearchQuery('');
+            setSearchTerm('');
+            setPage(1);
           }}
         />
 
@@ -341,39 +364,39 @@ const AdminEventsManagement: React.FC = () => {
                 </button>
               )}
 
-              {activeTab === 'events' && filteredEvents.length > 0 && (
+              {activeTab === 'events' && events.length > 0 && (
                 <>
-                  <ApplicationsTable data={filteredEvents} columns={eventColumns} actions={eventActions} />
+                  <ApplicationsTable data={events} columns={eventColumns} actions={eventActions as any} />
                   <Pagination
                     page={page}
                     totalPages={totalPages}
-                    itemsCount={filteredEvents.length}
+                    itemsCount={events.length}
                     itemName="events"
-                    onPageChange={setPage}
+                    onPageChange={(newPage: number) => setPage(newPage) as any}
                     onFirstPage={() => setPage(1)}
                     onLastPage={() => setPage(totalPages)}
                   />
                 </>
               )}
-              {activeTab === 'requests' && filteredEventRequests.length > 0 && (
+              {activeTab === 'requests' && eventRequests.length > 0 && (
                 <>
                   <ApplicationsTable
-                    data={filteredEventRequests}
+                    data={eventRequests}
                     columns={eventRequestColumns}
-                    actions={eventRequestActions}
+                    actions={eventRequestActions as any}
                   />
                   <Pagination
                     page={page}
                     totalPages={totalPages}
-                    itemsCount={filteredEventRequests.length}
+                    itemsCount={eventRequests.length}
                     itemName="event requests"
-                    onPageChange={setPage}
+                    onPageChange={(newPage: number) => setPage(newPage) as any}
                     onFirstPage={() => setPage(1)}
                     onLastPage={() => setPage(totalPages)}
                   />
                 </>
               )}
-              {activeTab === 'events' && filteredEvents.length === 0 && (
+              {activeTab === 'events' && events.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <Calendar size={32} className="text-purple-400" />
@@ -384,7 +407,7 @@ const AdminEventsManagement: React.FC = () => {
                   </p>
                 </div>
               )}
-              {activeTab === 'requests' && filteredEventRequests.length === 0 && (
+              {activeTab === 'requests' && eventRequests.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <Edit size={32} className="text-purple-400" />
@@ -444,7 +467,7 @@ const AdminEventsManagement: React.FC = () => {
           setShowRequestDetailsModal(false);
           setSelectedRequest(null);
         }}
-        request={selectedRequest}
+        request={selectedRequest as any}
         onApprove={(id) => {
           setItemToAction({ id, type: 'eventRequest', action: 'approve' });
           setShowWarningModal(true);
@@ -484,10 +507,10 @@ const AdminEventsManagement: React.FC = () => {
             : 'Reject'
         }
         cancelText="Cancel"
-        type={itemToAction?.action === 'approve' ? 'success' : 'danger'}
+        type={itemToAction?.action === 'approve' ? 'info' : 'danger'}
       />
 
-      <style jsx>{`
+      <style>{`
         @keyframes floatingMist {
           0% {
             transform: translateY(0) translateX(0);

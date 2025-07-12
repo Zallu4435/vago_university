@@ -8,15 +8,18 @@ interface Filters {
   eventType: string;
   dateRange: string;
   status: string;
+  organizerType: string;
 }
 
 export const useEventManagement = () => {
   const queryClient = useQueryClient();
   const [page, setPage] = useState<number>(1);
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [filters, setFilters] = useState<Filters>({
     eventType: 'All',
     dateRange: 'All',
     status: 'All',
+    organizerType: 'All',
   });
   const [activeTab, setActiveTab] = useState<'events' | 'requests' | 'participants'>('events');
   const limit = 10;
@@ -59,7 +62,7 @@ export const useEventManagement = () => {
   };
 
   const { data: eventsData, isLoading: isLoadingEvents, error: eventsError } = useQuery({
-    queryKey: ['events', page, filters, limit],
+    queryKey: ['events', page, filters, searchTerm, limit],
     queryFn: () => {
       const dateRange = getDateRangeFilter(filters.dateRange);
       return eventService.getEvents(
@@ -67,14 +70,16 @@ export const useEventManagement = () => {
         limit,
         filters.eventType !== 'All' ? filters.eventType : undefined,
         filters.status !== 'All' ? filters.status : undefined,
-        dateRange
+        dateRange,
+        searchTerm || undefined,
+        filters.organizerType !== 'All' ? filters.organizerType : undefined
       );
     },
     enabled: activeTab === 'events', 
   });
 
   const { data: eventRequestsData, isLoading: isLoadingRequests, error: requestsError } = useQuery({
-    queryKey: ['eventRequests', page, filters, limit],
+    queryKey: ['eventRequests', page, filters, searchTerm, limit],
     queryFn: () => {
       const dateRange = getDateRangeFilter(filters.dateRange);
       return eventService.getEventRequests(
@@ -82,7 +87,9 @@ export const useEventManagement = () => {
         limit,
         filters.eventType !== 'All' ? filters.eventType : undefined,
         filters.status !== 'All' ? filters.status : undefined,
-        dateRange
+        dateRange,
+        searchTerm || undefined,
+        filters.organizerType !== 'All' ? filters.organizerType : undefined
       );
     },
     enabled: activeTab === 'requests', 
@@ -164,7 +171,7 @@ export const useEventManagement = () => {
 
     if (tab === 'events') {
       queryClient.fetchQuery({
-        queryKey: ['events', page, filters, limit],
+        queryKey: ['events', page, filters, searchTerm, limit],
         queryFn: () => {
           const dateRange = getDateRangeFilter(filters.dateRange);
           return eventService.getEvents(
@@ -172,13 +179,15 @@ export const useEventManagement = () => {
             limit,
             filters.eventType !== 'All' ? filters.eventType : undefined,
             filters.status !== 'All' ? filters.status : undefined,
-            dateRange
+            dateRange,
+            searchTerm || undefined,
+            filters.organizerType !== 'All' ? filters.organizerType : undefined
           );
         },
       });
     } else if (tab === 'requests') {
       queryClient.fetchQuery({
-        queryKey: ['eventRequests', page, filters, limit],
+        queryKey: ['eventRequests', page, filters, searchTerm, limit],
         queryFn: () => {
           const dateRange = getDateRangeFilter(filters.dateRange);
           return eventService.getEventRequests(
@@ -186,7 +195,9 @@ export const useEventManagement = () => {
             limit,
             filters.eventType !== 'All' ? filters.eventType : undefined,
             filters.status !== 'All' ? filters.status : undefined,
-            dateRange
+            dateRange,
+            searchTerm || undefined,
+            filters.organizerType !== 'All' ? filters.organizerType : undefined
           );
         },
       });
@@ -199,6 +210,8 @@ export const useEventManagement = () => {
     totalPages: activeTab === 'events' ? eventsData?.totalPages || 0 : eventRequestsData?.totalPages || 0,
     page,
     setPage,
+    searchTerm,
+    setSearchTerm,
     filters,
     setFilters,
     isLoading: isLoadingEvents || isLoadingRequests ,

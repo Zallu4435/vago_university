@@ -7,12 +7,22 @@ import {
   MarkChapterCompleteRequestDTO,
   ToggleBookmarkRequestDTO
 } from "../../../domain/diploma/dtos/UserDiplomaRequestDTOs";
+import {
+  GetUserDiplomasResponseDTO,
+  GetUserDiplomaByIdResponseDTO,
+  GetUserDiplomaChapterResponseDTO,
+  UpdateVideoProgressResponseDTO,
+  MarkChapterCompleteResponseDTO,
+  ToggleBookmarkResponseDTO
+} from "../../../domain/diploma/dtos/UserDiplomaResponseDTOs";
 import { Diploma as DiplomaModel } from "../../../infrastructure/database/mongoose/models/diploma.model";
 import { UserProgress } from "../../../infrastructure/database/mongoose/models/userProgress.model";
 import { Video } from "../../../infrastructure/database/mongoose/models/video.model";
+import { VideoStatus } from "../../../domain/video/enums/VideoStatus";
+import mongoose from "mongoose";
 
 export class UserDiplomaRepository implements IUserDiplomaRepository {
-  async getUserDiplomas(params: GetUserDiplomasRequestDTO) {
+  async getUserDiplomas(params: GetUserDiplomasRequestDTO): Promise<GetUserDiplomasResponseDTO> {
     const { userId, page, limit, category, status, dateRange } = params;
     const skip = (page - 1) * limit;
 
@@ -35,7 +45,7 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
       query.createdAt = { $gte: date };
     }
 
-    const [diplomas, total] = await Promise.all([
+    const [diplomaDocs, total] = await Promise.all([
       DiplomaModel.find(query)
         .skip(skip)
         .limit(limit)
@@ -43,74 +53,183 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
       DiplomaModel.countDocuments(query)
     ]);
 
-    return { diplomas, total, page, limit };
+    // Fetch videos for each diploma
+    const courses = await Promise.all(diplomaDocs.map(async (doc) => {
+      const videos = await Video.find({ 
+        diplomaId: doc._id, 
+        status: VideoStatus.Published 
+      }).sort({ module: 1 }).lean();
+      
+      const chapters = videos.map(video => ({
+        _id: video._id.toString(),
+        title: video.title,
+        description: video.description,
+        videoUrl: video.videoUrl || '',
+        duration: parseInt(video.duration) || 0,
+        order: video.module || 0,
+        isPublished: video.status === VideoStatus.Published,
+        createdAt: video.uploadedAt || new Date(),
+        updatedAt: video.uploadedAt || new Date()
+      }));
+
+      return {
+        _id: doc._id.toString(),
+        title: doc.title,
+        description: doc.description,
+        category: doc.category,
+        status: doc.status ? 'published' : 'draft' as 'published' | 'draft' | 'archived',
+        instructor: 'Faculty Instructor', // Default value
+        department: doc.category || 'General',
+        chapters,
+        createdAt: doc.createdAt || new Date(),
+        updatedAt: doc.updatedAt || new Date()
+      };
+    }));
+
+    return { 
+      courses, 
+      total, 
+      page, 
+      limit,
+      totalPages: Math.ceil(total / limit)
+    };
   }
 
-  async getUserDiplomaById(params: GetUserDiplomaByIdRequestDTO) {
-    return DiplomaModel.findOne({
+  async getUserDiplomaById(params: GetUserDiplomaByIdRequestDTO): Promise<GetUserDiplomaByIdResponseDTO | null> {
+    const diploma = await DiplomaModel.findOne({
       _id: params.id,
       status: true
-    });
+    }).lean();
+    
+    if (!diploma) return null;
+    
+    // Fetch videos for this diploma
+    const videos = await Video.find({ 
+      diplomaId: diploma._id, 
+      status: VideoStatus.Published 
+    }).sort({ module: 1 }).lean();
+    
+    const chapters = videos.map(video => ({
+      _id: video._id.toString(),
+      title: video.title,
+      description: video.description,
+      videoUrl: video.videoUrl || '',
+      duration: parseInt(video.duration) || 0,
+      order: video.module || 0,
+      isPublished: video.status === VideoStatus.Published,
+      createdAt: video.uploadedAt || new Date(),
+      updatedAt: video.uploadedAt || new Date()
+    }));
+    
+    // Transform to match DiplomaCourse interface
+    return {
+      _id: diploma._id.toString(),
+      title: diploma.title,
+      description: diploma.description,
+      category: diploma.category,
+      status: diploma.status ? 'published' : 'draft' as 'published' | 'draft' | 'archived',
+      instructor: 'Faculty Instructor', // Default value
+      department: diploma.category || 'General',
+      chapters,
+      createdAt: diploma.createdAt || new Date(),
+      updatedAt: diploma.updatedAt || new Date()
+    };
   }
 
-  async getUserDiplomaChapter(params: GetUserDiplomaChapterRequestDTO) {
+  async getUserDiplomaChapter(params: GetUserDiplomaChapterRequestDTO): Promise<GetUserDiplomaChapterResponseDTO | null> {
     const diploma = await DiplomaModel.findOne({
       _id: params.courseId,
       status: true
     });
     if (!diploma) return null;
-    return Video.findOne({ _id: params.chapterId }).lean();
+    
+    const chapter = await Video.findOne({ _id: params.chapterId }).lean();
+    if (!chapter) return null;
+    
+    // Transform to match Chapter interface
+    return {
+      _id: chapter._id.toString(),
+      title: chapter.title,
+      description: chapter.description,
+      videoUrl: chapter.videoUrl || '',
+      duration: parseInt(chapter.duration) || 0,
+      order: chapter.module || 0,
+      isPublished: chapter.status === VideoStatus.Published,
+      createdAt: chapter.uploadedAt || new Date(),
+      updatedAt: chapter.uploadedAt || new Date()
+    };
   }
 
-  async updateVideoProgress(params: UpdateVideoProgressRequestDTO) {
+  async updateVideoProgress(params: UpdateVideoProgressRequestDTO): Promise<UpdateVideoProgressResponseDTO> {
     const { userId, courseId, chapterId, progress } = params;
-    return UserProgress.findOneAndUpdate(
+    const userProgress = await UserProgress.findOneAndUpdate(
       { userId, courseId, chapterId },
       { progress },
       { upsert: true, new: true }
     );
+    
+    return {
+      message: 'Progress updated successfully',
+      progress: userProgress.progress
+    };
   }
 
-  async markChapterComplete(params: MarkChapterCompleteRequestDTO) {
+  async markChapterComplete(params: MarkChapterCompleteRequestDTO): Promise<MarkChapterCompleteResponseDTO> {
     const { userId, courseId, chapterId } = params;
-    return UserProgress.findOneAndUpdate(
+    const userProgress = await UserProgress.findOneAndUpdate(
       { userId, courseId, chapterId },
       { isCompleted: true },
       { upsert: true, new: true }
     );
+    
+    return {
+      message: 'Chapter marked as complete',
+      completed: true
+    };
   }
 
-  async toggleBookmark(params: ToggleBookmarkRequestDTO) {
+  async toggleBookmark(params: ToggleBookmarkRequestDTO): Promise<ToggleBookmarkResponseDTO> {
     const { userId, courseId, chapterId } = params;
     const userProgress = await UserProgress.findOne({ userId, courseId, chapterId });
+    let isBookmarked = false;
+    
     if (!userProgress) {
-      return UserProgress.create({
+      await UserProgress.create({
         userId,
         courseId,
         chapterId,
         isBookmarked: true
       });
+      isBookmarked = true;
+    } else {
+      userProgress.isBookmarked = !userProgress.isBookmarked;
+      await userProgress.save();
+      isBookmarked = userProgress.isBookmarked;
     }
-    userProgress.isBookmarked = !userProgress.isBookmarked;
-    await userProgress.save();
-    return userProgress;
+    
+    return {
+      message: isBookmarked ? 'Chapter bookmarked' : 'Chapter unbookmarked',
+      bookmarked: isBookmarked
+    };
   }
 
-  async getCompletedChapters(userId: string, courseId: string) {
+  async getCompletedChapters(userId: string, courseId: string): Promise<string[]> {
     const completedChapters = await UserProgress.find({
       userId,
       courseId,
       isCompleted: true
     }).select('chapterId');
-    return completedChapters;
+    
+    return completedChapters.map(chapter => chapter.chapterId.toString());
   }
 
-  async getBookmarkedChapters(userId: string, courseId: string) {
+  async getBookmarkedChapters(userId: string, courseId: string): Promise<string[]> {
     const bookmarkedChapters = await UserProgress.find({
       userId,
       courseId,
       isBookmarked: true
     }).select('chapterId');
-    return bookmarkedChapters;
+    
+    return bookmarkedChapters.map(chapter => chapter.chapterId.toString());
   }
 } 

@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../appStore/store';
 import { useSessionManagement } from '../../../application/hooks/useSessionManagement';
 import { Message, Participant, Reaction } from '../../../domain/types/videoConference';
+import { VideoGrid } from './VideoGrid';
 
 
 export const VideoConferencePage: React.FC = () => {

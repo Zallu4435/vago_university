@@ -137,7 +137,7 @@ export class CampusLifeController implements ICampusLifeController {
   async joinClub(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { clubId } = httpRequest.params;
     const { reason, additionalInfo } = httpRequest.body;
-    const studentId = httpRequest.user?.id;
+    const studentId = httpRequest.user?.userId;
     if (!httpRequest.user || !studentId) {
       return this.httpErrors.error_401();
     }
@@ -156,7 +156,7 @@ export class CampusLifeController implements ICampusLifeController {
   async joinSport(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { sportId } = httpRequest.params;
     const { reason, additionalInfo } = httpRequest.body;
-    const studentId = httpRequest.user?.id;
+    const studentId = httpRequest.user?.userId;
     if (!httpRequest.user || !studentId) {
       return this.httpErrors.error_401();
     }
@@ -175,7 +175,7 @@ export class CampusLifeController implements ICampusLifeController {
   async joinEvent(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { eventId } = httpRequest.params;
     const { reason, additionalInfo } = httpRequest.body;
-    const studentId = httpRequest.user?.id;
+    const studentId = httpRequest.user?.userId;
     if (!httpRequest.user || !studentId) {
       return this.httpErrors.error_401();
     }

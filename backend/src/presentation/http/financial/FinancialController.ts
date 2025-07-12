@@ -44,10 +44,10 @@ export class FinancialController implements IFinancialController {
   ) {}
 
   async getStudentFinancialInfo(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    if (!httpRequest.user?.id) {
+    if (!httpRequest.user?.userId) {
       return this.httpErrors.error_401();
     }
-    const response = await this.getStudentFinancialInfoUseCase.execute({ studentId: httpRequest.user.id });
+    const response = await this.getStudentFinancialInfoUseCase.execute({ studentId: httpRequest.user.userId });
     if (!response.success) {
       return this.httpErrors.error_400();
     }
@@ -79,7 +79,7 @@ export class FinancialController implements IFinancialController {
   }
 
   async makePayment(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    if (!httpRequest.user?.id) {
+    if (!httpRequest.user?.userId) {
       return this.httpErrors.error_401();
     }
     const { amount, method, term, chargeId, razorpayPaymentId, razorpayOrderId, razorpaySignature } = httpRequest.body || {};
@@ -88,7 +88,7 @@ export class FinancialController implements IFinancialController {
       return this.httpErrors.error_400('Charge ID is required');
     }
     const response = await this.makePaymentUseCase.execute({
-      studentId: httpRequest.user.id,
+      studentId: httpRequest.user.userId,
       amount: parseFloat(amount),
       method,
       term,
@@ -104,12 +104,12 @@ export class FinancialController implements IFinancialController {
   }
 
   async getFinancialAidApplications(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    if (!httpRequest.user?.id) {
+    if (!httpRequest.user?.userId) {
       return this.httpErrors.error_401();
     }
     const { status } = httpRequest.query || {};
     const response = await this.getFinancialAidApplicationsUseCase.execute({
-      studentId: httpRequest.user.id,
+      studentId: httpRequest.user.userId,
       status,
     });
     if (!response.success) {
@@ -133,12 +133,12 @@ export class FinancialController implements IFinancialController {
   }
 
   async applyForFinancialAid(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    if (!httpRequest.user?.id) {
+    if (!httpRequest.user?.userId) {
       return this.httpErrors.error_401();
     }
     const { term, amount, type, documents } = httpRequest.body || {};
     const response = await this.applyForFinancialAidUseCase.execute({
-      studentId: httpRequest.user.id,
+      studentId: httpRequest.user.userId,
       term,
       amount,
       type,
@@ -160,12 +160,12 @@ export class FinancialController implements IFinancialController {
   }
 
   async getScholarshipApplications(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    if (!httpRequest.user?.id) {
+    if (!httpRequest.user?.userId) {
       return this.httpErrors.error_401();
     }
     const { status } = httpRequest.query || {};
     const response = await this.getScholarshipApplicationsUseCase.execute({
-      studentId: httpRequest.user.id,
+      studentId: httpRequest.user.userId,
       status,
     });
     if (!response.success) {
@@ -188,12 +188,12 @@ export class FinancialController implements IFinancialController {
   }
 
   async applyForScholarship(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    if (!httpRequest.user?.id) {
+    if (!httpRequest.user?.userId) {
       return this.httpErrors.error_401();
     }
     const { scholarshipId, documents } = httpRequest.body || {};
     const response = await this.applyForScholarshipUseCase.execute({
-      studentId: httpRequest.user.id,
+      studentId: httpRequest.user.userId,
       scholarshipId,
       documents,
     });
@@ -216,12 +216,12 @@ export class FinancialController implements IFinancialController {
 
   async getPaymentReceipt(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { paymentId } = httpRequest.params || {};
-    if (!httpRequest.user?.id) {
+    if (!httpRequest.user?.userId) {
       return this.httpErrors.error_401();
     }
     const response = await this.getPaymentReceiptUseCase.execute({ 
       paymentId,
-      studentId: httpRequest.user.id 
+      studentId: httpRequest.user.userId 
     });
     if (!response.success) {
       return this.httpErrors.error_400();
@@ -230,13 +230,13 @@ export class FinancialController implements IFinancialController {
   }
 
   async updateFinancialAidApplication(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    if (!httpRequest.user?.id) {
+    if (!httpRequest.user?.userId) {
       return this.httpErrors.error_401();
     }
     const { applicationId } = httpRequest.params || {};
     const { status, amount } = httpRequest.body || {};
     const response = await this.updateFinancialAidApplicationUseCase.execute({
-      studentId: httpRequest.user.id,
+      studentId: httpRequest.user.userId,
       applicationId,
       status,
       amount,
@@ -248,13 +248,13 @@ export class FinancialController implements IFinancialController {
   }
 
   async updateScholarshipApplication(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    if (!httpRequest.user?.id) {
+    if (!httpRequest.user?.userId) {
       return this.httpErrors.error_401();
     }
     const { applicationId } = httpRequest.params || {};
     const { status } = httpRequest.body || {};
     const response = await this.updateScholarshipApplicationUseCase.execute({
-      studentId: httpRequest.user.id,
+      studentId: httpRequest.user.userId,
       applicationId,
       status,
     });
@@ -266,7 +266,7 @@ export class FinancialController implements IFinancialController {
 
   async createCharge(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { title, description, amount, term, dueDate, applicableFor } = httpRequest.body || {};
-    if (!httpRequest.user?.id) {
+    if (!httpRequest.user?.userId) {
       return this.httpErrors.error_401();
     }
     const response = await this.createChargeUseCase.execute({
@@ -276,7 +276,7 @@ export class FinancialController implements IFinancialController {
       term,
       dueDate: new Date(dueDate),
       applicableFor,
-      createdBy: httpRequest.user.id,
+      createdBy: httpRequest.user.userId,
     });
     if (!response.success) {
       return this.httpErrors.error_400();

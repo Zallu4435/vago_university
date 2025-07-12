@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Payment } from './Payment/Payment';
 import { Button } from '../base/Button';
-import { 
-  FaExclamationCircle, 
+import {
+  FaExclamationCircle,
   FaFileAlt,
   FaUserCircle,
   FaGraduationCap,
@@ -21,7 +21,6 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
   onPaymentComplete,
   onBackToForm,
   onConfirm,
-  token,
   onLogout
 }) => {
   const [showPayment, setShowPayment] = useState(false);
@@ -30,7 +29,6 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
   const [selectedDocument, setSelectedDocument] = useState<DocumentUpload | null>(null);
   const [showDocumentModal, setShowDocumentModal] = useState(false);
 
-  // Utility function to format different types of data
   const formatValue = (value: any): string => {
     if (value === null || value === undefined) return '—';
     if (typeof value === 'boolean') return value ? 'Yes' : 'No';
@@ -63,13 +61,13 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
   };
 
   const renderKeyValueSection = (
-    title: string, 
-    data: Record<string, any>, 
+    title: string,
+    data: Record<string, any>,
     icon: React.ReactNode,
     excludeKeys: string[] = []
   ) => {
     if (!data) return null;
-    
+
     const filteredEntries = Object.entries(data)
       .filter(([key]) => !excludeKeys.includes(key) && data[key] !== null && data[key] !== undefined)
       .filter(([, value]) => {
@@ -102,8 +100,8 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
               );
             }
             return (
-              <div 
-                key={key} 
+              <div
+                key={key}
                 className="flex justify-between py-3 text-sm border-b border-cyan-50 last:border-0"
               >
                 <strong className="text-cyan-800 capitalize">{key.replace(/([A-Z])/g, ' $1')}</strong>
@@ -118,7 +116,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
     );
   };
 
-    return (
+  return (
     <>
       {showConfirmation ? (
         <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4">
@@ -128,17 +126,17 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                 <FaCheckCircle className="text-6xl mx-auto mb-4" />
                 <h1 className="text-3xl font-bold mb-2">Application Submitted!</h1>
                 <p className="text-green-100 text-lg">
-              Your application has been successfully submitted. You will receive a confirmation email soon.
-            </p>
+                  Your application has been successfully submitted. We will review your application and inform you of the next steps.
+                </p>
                 <p className="text-gray-600 text-base mb-8">
                   Application ID: <span className="font-semibold text-cyan-700">{formData.applicationId}</span>
-            </p>
+                </p>
                 <div className="flex justify-center space-x-6">
-              <Button
-                label="Return to Home"
-                onClick={handleRedirectToHome}
+                  <Button
+                    label="Return to Home"
+                    onClick={handleRedirectToHome}
                     className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-sm"
-              />
+                  />
                 </div>
               </div>
             </div>
@@ -146,74 +144,74 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
         </div>
       ) : !showPayment ? (
         <div className="max-w-6xl mx-auto">
-        {submissionStatus.success === true && (
+          {submissionStatus.success === true && (
             <div className="mb-6 bg-green-50 border-l-4 border-green-400 p-4 rounded-lg flex items-start gap-3">
-            <FaExclamationCircle className="text-green-500 mt-0.5 flex-shrink-0" size={20} />
-            <div>
-              <p className="text-sm text-green-800">{submissionStatus.message}</p>
+              <FaExclamationCircle className="text-green-500 mt-0.5 flex-shrink-0" size={20} />
+              <div>
+                <p className="text-sm text-green-800">{submissionStatus.message}</p>
+              </div>
             </div>
-          </div>
-        )}
-        {submissionStatus.success === false && (
+          )}
+          {submissionStatus.success === false && (
             <div className="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-lg flex items-start gap-3">
-            <FaExclamationCircle className="text-red-500 mt-0.5 flex-shrink-0" size={20} />
-            <div>
-              <p className="text-sm text-red-800">{submissionStatus.message}</p>
+              <FaExclamationCircle className="text-red-500 mt-0.5 flex-shrink-0" size={20} />
+              <div>
+                <p className="text-sm text-red-800">{submissionStatus.message}</p>
+              </div>
             </div>
-          </div>
-        )}
-          
+          )}
+
           <div className="bg-white shadow-lg rounded-xl border border-cyan-100 overflow-hidden">
             <div className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-8 py-6">
               <h2 className="text-2xl font-semibold">Application Summary</h2>
               <p className="text-cyan-100 text-lg mt-2">Please review your information before proceeding</p>
-          </div>
-            
-            <div className="bg-amber-50 border-l-4 border-amber-400 p-6 flex items-start gap-3">
-            <FaExclamationCircle className="text-amber-500 mt-0.5 flex-shrink-0" size={20} />
-            <div>
-                <p className="text-amber-800 font-medium">
-                Please carefully review your application details before final submission.
-                Once submitted, changes cannot be made.
-              </p>
             </div>
-          </div>
-            
+
+            <div className="bg-amber-50 border-l-4 border-amber-400 p-6 flex items-start gap-3">
+              <FaExclamationCircle className="text-amber-500 mt-0.5 flex-shrink-0" size={20} />
+              <div>
+                <p className="text-amber-800 font-medium">
+                  Please carefully review your application details before final submission.
+                  Once submitted, changes cannot be made.
+                </p>
+              </div>
+            </div>
+
             <div className="p-8">
               <div className="space-y-6 max-h-[70vh] overflow-auto pr-2">
-              {renderKeyValueSection(
-                'Personal Information', 
-                formData.personalInfo, 
+                {renderKeyValueSection(
+                  'Personal Information',
+                  formData.personalInfo,
                   <FaUserCircle className="text-cyan-600" size={20} />,
-                ['applicationId']
-              )}
-                
+                  ['applicationId']
+                )}
+
                 {formData.choiceOfStudy && formData.choiceOfStudy.length > 0 && (
                   <div className="mb-6 bg-white rounded-xl border border-cyan-100 shadow-sm overflow-hidden">
                     <div className="bg-gradient-to-r from-cyan-50 to-blue-50 px-6 py-4 border-b border-cyan-100 flex items-center gap-3">
                       <FaGraduationCap className="text-cyan-600" size={20} />
                       <h3 className="text-lg font-semibold text-cyan-900">Choices of Study</h3>
-                  </div>
+                    </div>
                     <div className="p-6">
-                    {formData.choiceOfStudy.map((choice: any, index: number) => (
-                      <div 
-                        key={index} 
+                      {formData.choiceOfStudy.map((choice: any, index: number) => (
+                        <div
+                          key={index}
                           className="mb-4 pb-4 border-b border-cyan-50 last:border-0"
-                      >
+                        >
                           <div className="flex justify-between mb-2">
                             <strong className="text-cyan-800">Programme {index + 1}:</strong>
-                          <span className="text-gray-900 font-medium">{choice.programme}</span>
-                        </div>
-                        <div className="flex justify-between">
+                            <span className="text-gray-900 font-medium">{choice.programme}</span>
+                          </div>
+                          <div className="flex justify-between">
                             <strong className="text-cyan-800">Preferred Major:</strong>
-                          <span className="text-gray-900 font-medium">{choice.preferredMajor}</span>
+                            <span className="text-gray-900 font-medium">{choice.preferredMajor}</span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-                
+                )}
+
                 {formData.education && (
                   <div className="mb-6 bg-white rounded-xl border border-cyan-100 shadow-sm overflow-hidden">
                     <div className="bg-gradient-to-r from-cyan-50 to-blue-50 px-6 py-4 border-b border-cyan-100 flex items-center gap-3">
@@ -253,7 +251,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                           </div>
                         </div>
                       )}
-                      
+
                       {formData.education.studentType === 'transfer' && formData.education.transfer && (
                         <div className="space-y-3">
                           <div className="flex justify-between">
@@ -271,8 +269,8 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                           <div className="flex justify-between">
                             <strong className="text-cyan-800">Previous University:</strong>
                             <span className="text-gray-900 font-medium">
-                              {formData.education.transfer.previousUniversity === 'other' 
-                                ? formData.education.transfer.otherUniversity 
+                              {formData.education.transfer.previousUniversity === 'other'
+                                ? formData.education.transfer.otherUniversity
                                 : formData.education.transfer.previousUniversity}
                             </span>
                           </div>
@@ -294,7 +292,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                           </div>
                         </div>
                       )}
-                      
+
                       {formData.education.studentType === 'international' && formData.education.international && (
                         <div className="space-y-4">
                           <div className="space-y-3">
@@ -323,7 +321,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                               <span className="text-gray-900 font-medium capitalize">{formData.education.international.resultType}</span>
                             </div>
                           </div>
-                          
+
                           {formData.education.international.subjects && formData.education.international.subjects.length > 0 && (
                             <div>
                               <strong className="text-cyan-800 block mb-2">Subjects:</strong>
@@ -336,7 +334,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                               </ul>
                             </div>
                           )}
-                          
+
                           {/* English Proficiency Tests */}
                           {formData.education.international.ielts && Object.values(formData.education.international.ielts).some(val => val) && (
                             <div>
@@ -349,7 +347,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                               </div>
                             </div>
                           )}
-                          
+
                           {formData.education.international.toefl && Object.values(formData.education.international.toefl).some(val => val) && (
                             <div>
                               <strong className="text-cyan-800 block mb-2">TOEFL:</strong>
@@ -360,7 +358,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                               </div>
                             </div>
                           )}
-                          
+
                           {formData.education.international.sat && Object.values(formData.education.international.sat).some(val => val) && (
                             <div>
                               <strong className="text-cyan-800 block mb-2">SAT:</strong>
@@ -372,7 +370,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                               </div>
                             </div>
                           )}
-                          
+
                           {formData.education.international.act && Object.values(formData.education.international.act).some(val => val) && (
                             <div>
                               <strong className="text-cyan-800 block mb-2">ACT:</strong>
@@ -386,7 +384,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                               </div>
                             </div>
                           )}
-                          
+
                           {formData.education.international.ap && formData.education.international.ap.subjects && formData.education.international.ap.subjects.length > 0 && (
                             <div>
                               <strong className="text-cyan-800 block mb-2">AP Subjects:</strong>
@@ -404,7 +402,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                     </div>
                   </div>
                 )}
-                
+
                 {formData.achievements && (
                   <div className="mb-6 bg-white rounded-xl border border-cyan-100 shadow-sm overflow-hidden">
                     <div className="bg-gradient-to-r from-cyan-50 to-blue-50 px-6 py-4 border-b border-cyan-100 flex items-center gap-3">
@@ -428,7 +426,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                           <strong className="text-cyan-800 block mb-2">Achievements:</strong>
                           <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
                             {formData.achievements.achievements.map((achievement: any, index: number) => (
-                        <li key={index}>
+                              <li key={index}>
                                 {achievement.activity} - {achievement.level} ({achievement.levelOfAchievement})
                               </li>
                             ))}
@@ -438,26 +436,26 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                     </div>
                   </div>
                 )}
-                
+
                 {formData.otherInformation && (
                   <>
                     {formData.otherInformation.health && (
                       renderKeyValueSection(
-                        'Health Information', 
-                        formData.otherInformation.health, 
+                        'Health Information',
+                        formData.otherInformation.health,
                         <FaHeartbeat className="text-cyan-600" size={20} />
                       )
                     )}
                     {formData.otherInformation.legal && (
                       renderKeyValueSection(
-                        'Legal Information', 
-                        formData.otherInformation.legal, 
+                        'Legal Information',
+                        formData.otherInformation.legal,
                         <FaBalanceScale className="text-cyan-600" size={20} />
                       )
                     )}
                   </>
                 )}
-                
+
                 {formData.documents && formData.documents.documents && (
                   <div className="mb-6 bg-white rounded-xl border border-cyan-100 shadow-sm overflow-hidden">
                     <div className="bg-gradient-to-r from-cyan-50 to-blue-50 px-6 py-4 border-b border-cyan-100 flex items-center gap-3">
@@ -483,51 +481,50 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                                 View
                               </button>
                             )}
-                        </li>
-                      ))}
-                    </ul>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                </div>
-              )}
-                
+                )}
+
                 {renderKeyValueSection(
-                  'Declaration', 
-                  formData.declaration || {}, 
+                  'Declaration',
+                  formData.declaration || {},
                   <FaClipboardList className="text-cyan-600" size={20} />
                 )}
-            </div>
-              
+              </div>
+
               <div className="flex items-center justify-between mt-8 pt-6 border-t border-cyan-100">
-              <Button
-                label="Back to Edit"
-                onClick={onBackToForm}
+                <Button
+                  label="Back to Edit"
+                  onClick={onBackToForm}
                   className="flex items-center gap-2 text-cyan-700 bg-white border border-cyan-300 hover:bg-cyan-50 px-6 py-3 rounded-lg font-medium transition-all duration-300"
-              />
-              <Button
-                label="Proceed to Payment"
-                onClick={() => setShowPayment(true)}
+                />
+                <Button
+                  label="Proceed to Payment"
+                  onClick={() => setShowPayment(true)}
                   className="flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-sm"
-              />
+                />
+              </div>
             </div>
           </div>
-        </div>
-          
+
           <div className="text-center mt-6">
             <p className="text-sm text-gray-500 flex items-center justify-center gap-2">
               <FaFileAlt size={16} />
-            Your information is secure and will only be used for application purposes
-          </p>
+              Your information is secure and will only be used for application purposes
+            </p>
+          </div>
         </div>
-      </div>
       ) : (
-    <Payment
-      formData={formData}
-      onComplete={() => setShowConfirmation(true)}
-      onPrevious={() => setShowPayment(false)}
-      token={token}
-    />
+        <Payment
+          formData={formData}
+          onComplete={() => setShowConfirmation(true)}
+          onPrevious={() => setShowPayment(false)}
+        />
       )}
-      
+
       {/* Document View Modal */}
       <DocumentViewModal
         isOpen={showDocumentModal}

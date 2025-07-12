@@ -40,7 +40,7 @@ export class AcademicController implements IAcademicController {
         if (!httpRequest.user) {
             return this.httpErrors.error_401();
         }
-        const result = await this.getStudentInfoUseCase.execute({ userId: httpRequest.user.id });
+        const result = await this.getStudentInfoUseCase.execute({ userId: httpRequest.user.userId });
         if (!result.success) {
             return this.httpErrors.error_400();
         }
@@ -52,7 +52,7 @@ export class AcademicController implements IAcademicController {
             return this.httpErrors.error_401();
         }
         const result = await this.getGradeInfoUseCase.execute({
-            userId: httpRequest.user.id,
+            userId: httpRequest.user.userId,
         });
         if (!result.success) {
             return this.httpErrors.error_400();
@@ -62,7 +62,6 @@ export class AcademicController implements IAcademicController {
 
     async getCourses(httpRequest: IHttpRequest): Promise<IHttpResponse> {
         const { search, page = 1, limit = 10 } = httpRequest.query;
-        // If no search query is provided, limit to 5 courses by default
         const defaultLimit = search ? Number(limit) : 5;
         const result = await this.getCoursesUseCase.execute({
             search: search as string,
@@ -81,7 +80,7 @@ export class AcademicController implements IAcademicController {
         }
         const { startTerm, endTerm } = httpRequest.query;
         const result = await this.getAcademicHistoryUseCase.execute({
-            userId: httpRequest.user.id,
+            userId: httpRequest.user.userId,
             startTerm: startTerm ? String(startTerm) : undefined,
             endTerm: endTerm ? String(endTerm) : undefined,
         });
@@ -95,7 +94,7 @@ export class AcademicController implements IAcademicController {
         if (!httpRequest.user) {
             return this.httpErrors.error_401();
         }
-        const result = await this.getProgramInfoUseCase.execute({ userId: httpRequest.user.id });
+        const result = await this.getProgramInfoUseCase.execute({ userId: httpRequest.user.userId });
         if (!result.success) {
             return this.httpErrors.error_400();
         }
@@ -107,7 +106,7 @@ export class AcademicController implements IAcademicController {
             return this.httpErrors.error_401();
         }
         const result = await this.getProgressInfoUseCase.execute({
-            userId: httpRequest.user.id,
+            userId: httpRequest.user.userId,
         });
         if (!result.success) {
             return this.httpErrors.error_400();
@@ -119,7 +118,7 @@ export class AcademicController implements IAcademicController {
         if (!httpRequest.user) {
             return this.httpErrors.error_401();
         }
-        const result = await this.getRequirementsInfoUseCase.execute({ userId: httpRequest.user.id });
+        const result = await this.getRequirementsInfoUseCase.execute({ userId: httpRequest.user.userId });
         if (!result.success) {
             return this.httpErrors.error_400();
         }
@@ -139,7 +138,7 @@ export class AcademicController implements IAcademicController {
             return this.httpErrors.error_400();
         }
         const result = await this.registerCourseUseCase.execute({
-            studentId: httpRequest.user.id,
+            studentId: httpRequest.user.userId,
             courseId,
             reason,
         });
@@ -158,7 +157,7 @@ export class AcademicController implements IAcademicController {
             return this.httpErrors.error_400();
         }
         const result = await this.dropCourseUseCase.execute({
-            studentId: httpRequest.user.id,
+            studentId: httpRequest.user.userId,
             courseId,
         });
         if (!result.success) {
@@ -182,7 +181,7 @@ export class AcademicController implements IAcademicController {
             return this.httpErrors.error_400();
         }
         const result = await this.requestTranscriptUseCase.execute({
-            studentId: httpRequest.user.id,
+            studentId: httpRequest.user.userId,
             deliveryMethod,
             address,
             email,
@@ -208,7 +207,7 @@ export class AcademicController implements IAcademicController {
             return this.httpErrors.error_400();
         }
         const result = await this.scheduleMeetingUseCase.execute({
-            studentId: httpRequest.user.id,
+            studentId: httpRequest.user.userId,
             date,
             reason,
             preferredTime,

@@ -61,12 +61,8 @@ cloudinary.config({
 export class FinancialRepository implements IFinancialRepository {
     async getStudentFinancialInfo(params: GetStudentFinancialInfoRequestDTO): Promise<GetStudentFinancialInfoResponseDTO> {
         try {
-            console.log('[FinancialRepository] getStudentFinancialInfo called with studentId:', params.studentId);
-            
-            // Get student's program information
             const studentProgram = await ProgramModel.findOne({ studentId: params.studentId }).lean();
-            console.log('[FinancialRepository] Student program:', studentProgram);
-            
+
             if (!studentProgram) {
                 console.log('[FinancialRepository] No program found for student');
                 return {
@@ -74,47 +70,36 @@ export class FinancialRepository implements IFinancialRepository {
                     history: [],
                 };
             }
-            
-            // Get all active charges that haven't exceeded the due date
+
             const currentDate = new Date();
-            const allCharges = await (ChargeModel as any).find({ 
-                dueDate: { $gte: currentDate } // Only charges that haven't exceeded due date
+            const allCharges = await (ChargeModel as any).find({
+                dueDate: { $gte: currentDate }
             }).lean();
-            console.log('[FinancialRepository] Active charges not exceeded due date:', allCharges.length);
-            
-            // Filter charges that apply to this student based on their program
+
             const applicableCharges = allCharges.filter((charge: any) => {
-                // If charge is for "All Students", it applies to everyone
                 if (charge.applicableFor === "All Students") {
                     return true;
                 }
-                
-                // If charge is for a specific program, check student's program
+
                 if (studentProgram.degree === charge.applicableFor) {
                     return true;
                 }
-                
+
                 return false;
             });
-            
-            console.log('[FinancialRepository] Applicable charges for student:', applicableCharges.length);
-            
-            // Get StudentFinancialInfo records for this student to check which charges have been paid
-            const studentFinancialInfo = await (StudentFinancialInfoModel as any).find({ 
-                studentId: params.studentId 
+
+            const studentFinancialInfo = await (StudentFinancialInfoModel as any).find({
+                studentId: params.studentId
             }).populate('paymentId').lean();
-            console.log('[FinancialRepository] StudentFinancialInfo records for student:', studentFinancialInfo.length);
-            
-            // Format charges for response and check payment status using StudentFinancialInfo
+
             const formattedCharges = applicableCharges.map((charge: any) => {
-                // Check if student has already paid for this charge by looking in StudentFinancialInfo
-                const financialInfo = studentFinancialInfo.find((info: any) => 
-                    info.chargeId.toString() === charge._id.toString() && 
+                const financialInfo = studentFinancialInfo.find((info: any) =>
+                    info.chargeId.toString() === charge._id.toString() &&
                     info.status === "Paid"
                 );
-                
+
                 const isPaid = !!financialInfo;
-                
+
                 return {
                     id: charge._id.toString(),
                     studentId: params.studentId,
@@ -132,23 +117,17 @@ export class FinancialRepository implements IFinancialRepository {
                     chargeDescription: charge.description,
                 };
             });
-            
-            // Format payment history from StudentFinancialInfo records
+
             const formattedHistory = studentFinancialInfo
                 .filter((info: any) => info.status === "Paid")
                 .map((info: any) => ({
-                    id: info.paymentId ? info.paymentId.toString() : undefined, // Include payment ID
+                    id: info.paymentId ? info.paymentId.toString() : undefined, 
                     paidAt: info.paidAt.toISOString(),
                     chargeTitle: info.chargeId ? "Payment for " + info.term : "Payment",
                     method: info.method,
                     amount: info.amount,
                 }));
-            
-            console.log('[FinancialRepository] Returning formatted data:', {
-                chargesCount: formattedCharges.length,
-                historyCount: formattedHistory.length
-            });
-            
+
             return {
                 info: formattedCharges,
                 history: formattedHistory,
@@ -167,13 +146,13 @@ export class FinancialRepository implements IFinancialRepository {
 
         const total = await (PaymentModel as any).countDocuments(query);
         const payments = await (PaymentModel as any).find(query)
-            .sort({ date: -1 }) // Sort by date in descending order (newest first)
+            .sort({ date: -1 }) 
             .skip((params.page - 1) * params.limit)
             .limit(params.limit)
             .lean();
 
         const totalPages = Math.ceil(total / params.limit);
-        
+
         return {
             data: payments.map((payment) => ({
                 id: payment._id.toString(),
@@ -214,59 +193,175 @@ export class FinancialRepository implements IFinancialRepository {
     }
 
     async makePayment(params: MakePaymentRequestDTO): Promise<MakePaymentResponseDTO> {
-        if (params.method === "Razorpay") {
-            if (params.razorpayPaymentId && params.razorpayOrderId && params.razorpaySignature) {
-                const generatedSignature = crypto
-                    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
-                    .update(`${params.razorpayOrderId}|${params.razorpayPaymentId}`)
-                    .digest("hex");
+        if (!params.chargeId) {
+            throw new Error('Charge ID is required for payment');
+        }
 
-                if (generatedSignature !== params.razorpaySignature) {
-                    throw new Error(FinancialErrorType.InvalidPaymentSignature);
-                }
+        const charge = await (ChargeModel as any).findById(params.chargeId).lean();
+        if (!charge) {
+            throw new Error(`Charge with ID ${params.chargeId} not found`);
+        }
 
-                const payment = await (PaymentModel as any).findOneAndUpdate(
-                    { "metadata.razorpayOrderId": params.razorpayOrderId, studentId: params.studentId },
-                    {
-                        $set: {
-                            "metadata.razorpayPaymentId": params.razorpayPaymentId,
-                            "metadata.razorpaySignature": params.razorpaySignature,
-                            status: "Completed",
-                            date: new Date(),
-                            description: `Payment for ${params.term}`,
+        const existingPending = await (StudentFinancialInfoModel as any).findOne({
+            studentId: params.studentId,
+            chargeId: params.chargeId,
+            status: "Pending",
+            paymentId: { $exists: false }
+        }).lean();
+
+        if (existingPending) {
+            const timeSinceStart = Date.now() - new Date(existingPending.issuedAt).getTime();
+            const fiveMinutesInMs = 5 * 60 * 1000;
+
+            if (timeSinceStart < fiveMinutesInMs) {
+                throw new Error("Payment for this charge is already in progress. Please complete the transaction in your other tab or wait for the pending transaction to expire.");
+            } else {
+                await (StudentFinancialInfoModel as any).deleteOne({
+                    _id: existingPending._id
+                });
+                console.log(`[FinancialRepository] Deleted stale transaction for student ${params.studentId}, charge ${params.chargeId}`);
+            }
+        }
+
+        const existingPaid = await (StudentFinancialInfoModel as any).findOne({
+            studentId: params.studentId,
+            chargeId: params.chargeId,
+            status: "Paid"
+        }).lean();
+
+        if (existingPaid) {
+            throw new Error("This charge has already been paid.");
+        }
+
+        const transactionLock = new (StudentFinancialInfoModel as any)({
+            studentId: params.studentId,
+            chargeId: charge._id,
+            amount: params.amount,
+            status: "Pending", 
+            term: params.term,
+            issuedAt: new Date(),
+            paymentDueDate: charge.dueDate,
+            method: params.method
+        });
+
+        await transactionLock.save();
+
+        try {
+            if (params.method === "Razorpay") {
+                if (params.razorpayPaymentId && params.razorpayOrderId && params.razorpaySignature) {
+                    const generatedSignature = crypto
+                        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+                        .update(`${params.razorpayOrderId}|${params.razorpayPaymentId}`)
+                        .digest("hex");
+
+                    if (generatedSignature !== params.razorpaySignature) {
+                        throw new Error(FinancialErrorType.InvalidPaymentSignature);
+                    }
+
+                    const payment = await (PaymentModel as any).findOneAndUpdate(
+                        { "metadata.razorpayOrderId": params.razorpayOrderId, studentId: params.studentId },
+                        {
+                            $set: {
+                                "metadata.razorpayPaymentId": params.razorpayPaymentId,
+                                "metadata.razorpaySignature": params.razorpaySignature,
+                                status: "Completed",
+                                date: new Date(),
+                                description: `Payment for ${params.term}`,
+                            },
                         },
-                    },
-                    { new: true }
-                ).lean();
+                        { new: true }
+                    ).lean();
 
-                // Get the charge details to create proper StudentFinancialInfo record
-                if (!params.chargeId) {
-                    throw new Error('Charge ID is required for payment');
-                }
-                
-                const charge = await (ChargeModel as any).findById(params.chargeId).lean();
-                if (!charge) {
-                    throw new Error(`Charge with ID ${params.chargeId} not found`);
-                }
-                
-                if (charge) {
-                    const studentFinancialInfo = new (StudentFinancialInfoModel as any)({
-                        studentId: params.studentId,
-                        chargeId: charge._id,
-                        paymentId: payment._id, // Store the payment ID
+                    if (!payment) {
+                        throw new Error(FinancialErrorType.PaymentNotFound);
+                    }
+
+                    await (StudentFinancialInfoModel as any).findByIdAndUpdate(
+                        transactionLock._id,
+                        {
+                            paymentId: payment._id,
+                            status: "Paid",
+                            paidAt: new Date(),
+                        }
+                    );
+
+
+                    return {
+                        id: payment._id.toString(),
+                        date: payment.date.toISOString(),
+                        description: payment.description,
+                        method: payment.method,
                         amount: payment.amount,
-                        paymentDueDate: charge.dueDate,
-                        status: "Paid",
-                        term: params.term,
-                        paidAt: new Date(), // Add the paidAt field
-                        issuedAt: charge.createdAt,
-                        method: payment.method
+                        status: payment.status,
+                        metadata: payment.metadata,
+                    };
+                } else {
+                    // Create Razorpay order
+                    const shortStudentId = params.studentId.slice(-6);
+                    const shortReceipt = `r_${shortStudentId}_${Date.now()}`;
+                    const order = await razorpay.orders.create({
+                        amount: params.amount * 100,
+                        currency: "INR",
+                        receipt: shortReceipt,
                     });
-                    await studentFinancialInfo.save();
-                    console.log('[FinancialRepository] Created StudentFinancialInfo record for payment:', payment._id, 'with chargeId:', charge._id);
-                }
 
-                if (!payment) throw new Error(FinancialErrorType.PaymentNotFound);
+                    const payment = new PaymentModel({
+                        studentId: params.studentId,
+                        amount: params.amount,
+                        method: params.method,
+                        term: params.term,
+                        date: new Date(),
+                        description: `Payment for ${params.term}`,
+                        status: "Pending",
+                        metadata: {
+                            razorpayOrderId: order.id,
+                            chargeId: params.chargeId,
+                            transactionLockId: transactionLock._id
+                        },
+                    });
+
+                    await payment.save();
+
+                    await (StudentFinancialInfoModel as any).findByIdAndUpdate(
+                        transactionLock._id,
+                        {
+                            paymentId: payment._id
+                        }
+                    );
+
+                    return {
+                        id: payment._id.toString(),
+                        orderId: order.id,
+                        amount: payment.amount,
+                        currency: "INR",
+                        status: payment.status,
+                    };
+                }
+            } else {
+                const payment = new PaymentModel({
+                    studentId: params.studentId,
+                    date: new Date(),
+                    description: `Payment for ${params.term}`,
+                    method: params.method,
+                    amount: params.amount,
+                    status: "Completed",
+                    metadata: {
+                        chargeId: params.chargeId, 
+                        transactionLockId: transactionLock._id 
+                    },
+                });
+
+                await payment.save();
+
+                await (StudentFinancialInfoModel as any).findByIdAndUpdate(
+                    transactionLock._id,
+                    {
+                        paymentId: payment._id,
+                        status: "Paid",
+                        paidAt: new Date(),
+                    }
+                );
+
 
                 return {
                     id: payment._id.toString(),
@@ -275,89 +370,13 @@ export class FinancialRepository implements IFinancialRepository {
                     method: payment.method,
                     amount: payment.amount,
                     status: payment.status,
-                    metadata: payment.metadata,
-                };
-            } else {
-                const shortStudentId = params.studentId.slice(-6);
-                const shortReceipt = `r_${shortStudentId}_${Date.now()}`;
-                const order = await razorpay.orders.create({
-                    amount: params.amount * 100,
-                    currency: "INR",
-                    receipt: shortReceipt,
-                });
-
-                const payment = new PaymentModel({
-                    studentId: params.studentId,
-                    amount: params.amount,
-                    method: params.method,
-                    term: params.term,
-                    date: new Date(),
-                    description: `Payment for ${params.term}`,
-                    status: "Pending",
-                    metadata: { 
-                        razorpayOrderId: order.id,
-                        chargeId: params.chargeId // Store chargeId in payment metadata
-                    },
-                });
-
-                await payment.save();
-
-                return {
-                    id: payment._id.toString(),
-                    orderId: order.id,
-                    amount: payment.amount,
-                    currency: "INR",
-                    status: payment.status,
                 };
             }
-        } else {
-            const payment = new PaymentModel({
-                studentId: params.studentId,
-                date: new Date(),
-                description: `Payment for ${params.term}`,
-                method: params.method,
-                amount: params.amount,
-                status: "Completed",
-                metadata: { 
-                    chargeId: params.chargeId // Store chargeId in payment metadata
-                },
-            });
-
-            await payment.save();
-
-            // Create StudentFinancialInfo record for non-Razorpay payment
-            if (!params.chargeId) {
-                throw new Error('Charge ID is required for payment');
-            }
-            
-            const charge = await (ChargeModel as any).findById(params.chargeId).lean();
-            if (!charge) {
-                throw new Error(`Charge with ID ${params.chargeId} not found`);
-            }
-            
-            const studentFinancialInfo = new (StudentFinancialInfoModel as any)({
-                studentId: params.studentId,
-                chargeId: charge._id,
-                paymentId: payment._id, // Store the payment ID
-                amount: payment.amount,
-                paymentDueDate: charge.dueDate,
-                status: "Paid",
-                term: params.term,
-                paidAt: new Date(), // Add the paidAt field
-                issuedAt: charge.createdAt,
-                method: payment.method
-            });
-            await studentFinancialInfo.save();
-            console.log('[FinancialRepository] Created StudentFinancialInfo record for non-Razorpay payment:', payment._id, 'with chargeId:', charge._id);
-
-            return {
-                id: payment._id.toString(),
-                date: payment.date.toISOString(),
-                description: payment.description,
-                method: payment.method,
-                amount: payment.amount,
-                status: payment.status,
-            };
+        } catch (error) {
+            console.error('[FinancialRepository] Error during payment processing:', error);
+            await (StudentFinancialInfoModel as any).findByIdAndDelete(transactionLock._id);
+            console.log(`[FinancialRepository] Removed transaction lock ${transactionLock._id} due to error`);
+            throw error;
         }
     }
 
@@ -667,11 +686,11 @@ export class FinancialRepository implements IFinancialRepository {
 
     async getAllCharges(params: GetAllChargesRequestDTO): Promise<GetAllChargesResponseDTO> {
         const query: any = {};
-        
+
         // Add filters
         if (params.term && params.term !== 'All Terms') query.term = params.term;
         if (params.status && params.status !== 'All Statuses') query.status = params.status;
-        
+
         // Add search functionality
         if (params.search && params.search.trim()) {
             const searchRegex = new RegExp(params.search.trim(), 'i');

@@ -119,7 +119,7 @@ export const assignmentService = {
   getFileDownloadUrl: async (fileUrl: string, fileName: string) => {
     try {
       console.log('Service: Getting download URL for file:', fileName);
-      const response = await httpClient.get('/faculty/assignments/download-file', {
+      const response = await httpClient.get('/faculty/assignments/download-submission-file', {
         params: { fileUrl, fileName },
         responseType: 'blob'
       });

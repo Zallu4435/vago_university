@@ -34,7 +34,7 @@ export class UserAssignmentController implements IUserAssignmentController {
       limit: limit ? parseInt(limit as string) : undefined,
       search: search as string,
       sortBy: sortBy as string,
-      studentId: httpRequest.user?.id
+      studentId: httpRequest.user?.userId
     });
     if (!result.success) {
       return this.httpErrors.error_400();
@@ -44,7 +44,7 @@ export class UserAssignmentController implements IUserAssignmentController {
 
   async getAssignmentById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params;
-    const result = await this.getUserAssignmentByIdUseCase.execute({ id, studentId: httpRequest.user?.id });
+    const result = await this.getUserAssignmentByIdUseCase.execute({ id, studentId: httpRequest.user?.userId });
     if (!result.success) {
       return this.httpErrors.error_400();
     }
@@ -95,7 +95,7 @@ export class UserAssignmentController implements IUserAssignmentController {
     const result = await this.submitUserAssignmentUseCase.execute({
       assignmentId: id,
       file: file,
-      studentId: httpRequest.user?.id
+      studentId: httpRequest.user?.userId
     });
     if (!result.success) {
       return this.httpErrors.error_400();
@@ -107,7 +107,7 @@ export class UserAssignmentController implements IUserAssignmentController {
     const { assignmentId } = httpRequest.params;
     const result = await this.getUserAssignmentStatusUseCase.execute({
       assignmentId,
-      studentId: httpRequest.user?.id
+      studentId: httpRequest.user?.userId
     });
     if (!result.success) {
       return this.httpErrors.error_400();
@@ -119,7 +119,7 @@ export class UserAssignmentController implements IUserAssignmentController {
     const { assignmentId } = httpRequest.params;
     const result = await this.getUserAssignmentFeedbackUseCase.execute({
       assignmentId,
-      studentId: httpRequest.user?.id
+      studentId: httpRequest.user?.userId
     });
     if (!result.success) {
       return this.httpErrors.error_400();

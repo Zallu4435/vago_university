@@ -82,7 +82,6 @@ export class GetAdmissionsUseCase implements IGetAdmissionsUseCase {
         });
         
         const result = await this.admissionRepository.getAdmissions(params);
-        // Fetch blocked status for each admission
         const admissions = await Promise.all(result.admissions.map(async (admission: any) => {
             let blocked = false;
             if (admission.personal?.emailAddress) {
@@ -117,7 +116,6 @@ export class GetAdmissionByIdUseCase implements IGetAdmissionByIdUseCase {
         if (!result || !result.admission) {
             throw new AdminAdmissionNotFoundError();
         }
-        // Add blocked status
         let blocked = false;
         if (result.admission.personal?.emailAddress) {
             const user = await this.admissionRepository.findUserByEmail(result.admission.personal.emailAddress);
@@ -135,7 +133,6 @@ export class GetAdmissionByTokenUseCase implements IGetAdmissionByTokenUseCase {
         if (!result || !result.admission) {
             throw new AdminAdmissionNotFoundError();
         }
-        // Additional token checks can be added here if needed
         return { data: result, success: true };
     }
 }
@@ -144,7 +141,7 @@ export class ApproveAdmissionUseCase implements IApproveAdmissionUseCase {
     constructor(
         private admissionRepository: IAdmissionRepository,
         private emailService: IEmailService,
-        private config: any // changed from typeof config to any to fix linter error
+        private config: any
     ) { }
 
     async execute(params: ApproveAdmissionRequestDTO): Promise<ResponseDTO<ApproveAdmissionResponseDTO>> {
@@ -227,12 +224,10 @@ export class BlockAdmissionUseCase implements IBlockAdmissionUseCase {
     constructor(private admissionRepository: IAdmissionRepository) { }
 
     async execute(params: { id: string }): Promise<ResponseDTO<{ message: string }>> {
-        // Find the admission
         const admission = await this.admissionRepository.findAdmissionById(params.id);
         if (!admission) {
             throw new AdminAdmissionNotFoundError();
         }
-        // Find the user by email (assuming email is unique)
         const user = await this.admissionRepository.findUserByEmail(admission.personal.emailAddress);
         if (!user) {
             throw new AdminRegisterUserNotFoundError();

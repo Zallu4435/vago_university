@@ -60,7 +60,7 @@ export class ChatController {
 
   async getChats(req: IHttpRequest): Promise<IHttpResponse> {
     try {
-      if (!req.user?.id) {
+      if (!req.user?.userId) {
         return {
           statusCode: 401,
           body: { error: "User not authenticated" }
@@ -68,7 +68,7 @@ export class ChatController {
       }
 
       const params: GetChatsRequestDTO = {
-        userId: req.user.id,
+        userId: req.user.userId,
         page: parseInt(req.query?.page as string) || 1,
         limit: parseInt(req.query?.limit as string) || 10,
       };
@@ -107,7 +107,7 @@ export class ChatController {
 
   async searchChats(req: IHttpRequest): Promise<IHttpResponse> {
     try {
-      if (!req.user?.id) {
+      if (!req.user?.userId) {
         return {
           statusCode: 401,
           body: { error: "User not authenticated" }
@@ -115,7 +115,7 @@ export class ChatController {
       }
 
       const params: SearchChatsRequestDTO = {
-        userId: req.user.id,
+        userId: req.user.userId,
         query: req.query?.query as string,
         page: parseInt(req.query?.page as string) || 1,
         limit: parseInt(req.query?.limit as string) || 10,
@@ -142,7 +142,7 @@ export class ChatController {
   async getChatMessages(req: IHttpRequest): Promise<IHttpResponse> {
     try {
       const { chatId } = req.params;
-      const userId = req.user?.id;
+      const userId = req.user?.userId;
       if (!chatId || !userId) {
         return {
           statusCode: 400,
@@ -185,7 +185,7 @@ export class ChatController {
 
   async sendMessage(req: IHttpRequest): Promise<IHttpResponse> {
     try {
-      if (!req.user?.id) {
+      if (!req.user?.userId) {
         return {
           statusCode: 401,
           body: { error: "User not authenticated" }
@@ -272,7 +272,7 @@ export class ChatController {
 
       const params: SendMessageRequestDTO = {
         chatId,
-        senderId: req.user.id,
+        senderId: req.user.userId,
         content: messageContent,
         type: attachments?.length ? (attachments[0].type === MessageType.Image ? MessageType.Image : MessageType.File) : MessageType.Text,
         attachments,
@@ -282,7 +282,7 @@ export class ChatController {
       // Fetch the most recent message (should be the one just saved)
       const messagesResult = await this.getChatMessagesUseCase.execute({
         chatId,
-        userId: req.user.id,
+        userId: req.user.userId,
         page: 1,
         limit: 1,
       });
@@ -306,7 +306,7 @@ export class ChatController {
   }
 
   async markMessagesAsRead(req: IHttpRequest): Promise<IHttpResponse> {
-    if (!req.user?.id) {
+    if (!req.user?.userId) {
       return {
         statusCode: 401,
         body: { error: 'Unauthorized' }
@@ -323,7 +323,7 @@ export class ChatController {
 
     const params: MarkMessagesAsReadRequestDTO = {
       chatId,
-      userId: req.user.id
+      userId: req.user.userId
     };
 
     await this.markMessagesAsReadUseCase.execute(params);
@@ -335,7 +335,7 @@ export class ChatController {
   }
 
   async addReaction(req: IHttpRequest): Promise<IHttpResponse> {
-    if (!req.user?.id) {
+    if (!req.user?.userId) {
       return {
         statusCode: 401,
         body: { error: "User not authenticated" }
@@ -360,7 +360,7 @@ export class ChatController {
 
     const params: AddReactionRequestDTO = {
       messageId,
-      userId: req.user.id,
+      userId: req.user.userId,
       emoji,
     };
 
@@ -377,7 +377,7 @@ export class ChatController {
   }
 
   async removeReaction(req: IHttpRequest): Promise<IHttpResponse> {
-    if (!req.user?.id) {
+    if (!req.user?.userId) {
       return {
         statusCode: 401,
         body: { error: "User not authenticated" }
@@ -394,7 +394,7 @@ export class ChatController {
 
     const params: RemoveReactionRequestDTO = {
       messageId,
-      userId: req.user.id,
+      userId: req.user.userId,
     };
 
     await this.removeReactionUseCase.execute(params);
@@ -411,7 +411,7 @@ export class ChatController {
 
   async getChatDetails(req: IHttpRequest): Promise<IHttpResponse> {
     const { chatId } = req.params;
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     if (!chatId || !userId) {
       return {
         statusCode: 400,
@@ -434,7 +434,7 @@ export class ChatController {
   }
 
   async searchUsers(req: IHttpRequest): Promise<IHttpResponse> {
-    if (!req.user?.id) {
+    if (!req.user?.userId) {
       return {
         statusCode: 401,
         body: { error: "User not authenticated" }
@@ -442,7 +442,7 @@ export class ChatController {
     }
 
     const params: SearchUsersRequestDTO = {
-      userId: req.user.id,
+      userId: req.user.userId,
       query: req.query?.query as string,
       page: parseInt(req.query?.page as string) || 1,
       limit: parseInt(req.query?.limit as string) || 20,
@@ -459,7 +459,7 @@ export class ChatController {
   }
 
   async createChat(req: IHttpRequest): Promise<IHttpResponse> {
-    if (!req.user?.id) {
+    if (!req.user?.userId) {
       return {
         statusCode: 401,
         body: { error: "User not authenticated" }
@@ -467,7 +467,7 @@ export class ChatController {
     }
 
     const params: CreateChatRequestDTO = {
-      creatorId: req.user.id,
+      creatorId: req.user.userId,
       participantId: req.body.participantId,
       type: req.body.type || 'direct',
       name: req.body.name,
@@ -482,7 +482,7 @@ export class ChatController {
   }
 
   async createGroupChat(req: IHttpRequest): Promise<IHttpResponse> {
-    if (!req.user?.id) {
+    if (!req.user?.userId) {
       return {
         statusCode: 401,
         body: { error: "User not authenticated" }
@@ -500,7 +500,7 @@ export class ChatController {
       name,
       description,
       participants,
-      creatorId: req.user.id,
+      creatorId: req.user.userId,
       settings
     };
     if (req.file && (req.file.path || (req.file as any).url)) {
@@ -516,7 +516,7 @@ export class ChatController {
   }
 
   async addGroupMember(req: IHttpRequest): Promise<IHttpResponse> {
-    if (!req.user?.id) {
+    if (!req.user?.userId) {
       return {
         statusCode: 401,
         body: { error: "User not authenticated" }
@@ -535,12 +535,12 @@ export class ChatController {
     const params: AddGroupMemberRequestDTO = {
       chatId,
       userId,
-      addedBy: req.user.id
+      addedBy: req.user.userId
     };
 
     await this.addGroupMemberUseCase.execute(params);
     
-    const updatedChat = await this.getChatDetailsUseCase.execute(chatId, req.user.id);
+    const updatedChat = await this.getChatDetailsUseCase.execute(chatId, req.user.userId);
     return {
       statusCode: 200,
       body: { data: updatedChat }
@@ -548,7 +548,7 @@ export class ChatController {
   }
 
   async removeGroupMember(req: IHttpRequest): Promise<IHttpResponse> {
-    if (!req.user?.id) {
+    if (!req.user?.userId) {
       return {
         statusCode: 401,
         body: { error: "User not authenticated" }
@@ -566,12 +566,12 @@ export class ChatController {
     const params: RemoveGroupMemberRequestDTO = {
       chatId,
       userId,
-      removedBy: req.user.id
+      removedBy: req.user.userId
     };
 
     await this.removeGroupMemberUseCase.execute(params);
     
-    const updatedChat = await this.getChatDetailsUseCase.execute(chatId, req.user.id);
+    const updatedChat = await this.getChatDetailsUseCase.execute(chatId, req.user.userId);
     return {
       statusCode: 200,
       body: { data: updatedChat }
@@ -579,7 +579,7 @@ export class ChatController {
   }
 
   async updateGroupAdmin(req: IHttpRequest): Promise<IHttpResponse> {
-    if (!req.user?.id) {
+    if (!req.user?.userId) {
       return {
         statusCode: 401,
         body: { error: "User not authenticated" }
@@ -599,7 +599,7 @@ export class ChatController {
       chatId,
       userId,
       isAdmin,
-      updatedBy: req.user.id
+      updatedBy: req.user.userId
     };
 
     await this.updateGroupAdminUseCase.execute(params);
@@ -611,7 +611,7 @@ export class ChatController {
   }
 
   async updateGroupSettings(req: IHttpRequest): Promise<IHttpResponse> {
-    if (!req.user?.id) {
+    if (!req.user?.userId) {
       return {
         statusCode: 401,
         body: { error: "User not authenticated" }
@@ -630,7 +630,7 @@ export class ChatController {
     const params: UpdateGroupSettingsRequestDTO = {
       chatId,
       settings,
-      updatedBy: req.user.id
+      updatedBy: req.user.userId
     };
 
     await this.updateGroupSettingsUseCase.execute(params);
@@ -642,7 +642,7 @@ export class ChatController {
   }
 
   async updateGroupInfo(req: IHttpRequest): Promise<IHttpResponse> {
-    if (!req.user?.id) {
+    if (!req.user?.userId) {
       return {
         statusCode: 401,
         body: { error: "User not authenticated" }
@@ -663,7 +663,7 @@ export class ChatController {
       name,
       description,
       avatar,
-      updatedBy: req.user.id
+      updatedBy: req.user.userId
     };
 
     await this.updateGroupInfoUseCase.execute(params);
@@ -675,7 +675,7 @@ export class ChatController {
   }
 
   async leaveGroup(req: IHttpRequest): Promise<IHttpResponse> {
-    if (!req.user?.id) {
+    if (!req.user?.userId) {
       return {
         statusCode: 401,
         body: { error: "User not authenticated" }
@@ -692,7 +692,7 @@ export class ChatController {
 
     const params: LeaveGroupRequestDTO = {
       chatId,
-      userId: req.user.id
+      userId: req.user.userId
     };
 
     await this.leaveGroupUseCase.execute(params);
@@ -706,7 +706,7 @@ export class ChatController {
   async editMessage(req: IHttpRequest): Promise<IHttpResponse> {
     const { chatId, messageId } = req.params;
     const { content } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     await this.editMessageUseCase.execute({
       chatId,
@@ -730,7 +730,7 @@ export class ChatController {
   async deleteMessage(req: IHttpRequest): Promise<IHttpResponse> {
     const { chatId, messageId } = req.params;
     const { deleteForEveryone } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
     try {
       await this.deleteMessageUseCase.execute({
         messageId,
@@ -756,7 +756,7 @@ export class ChatController {
   }
 
   async replyToMessage(req: IHttpRequest): Promise<IHttpResponse> {
-    if (!req.user?.id) {
+    if (!req.user?.userId) {
       return {
         statusCode: 401,
         body: { error: "User not authenticated" }
@@ -783,7 +783,7 @@ export class ChatController {
       chatId,
       messageId,
       content,
-      userId: req.user.id
+      userId: req.user.userId
     };
 
     await this.replyToMessageUseCase.execute(params);
@@ -796,7 +796,7 @@ export class ChatController {
 
   async deleteChat(req: IHttpRequest): Promise<IHttpResponse> {
     const { chatId } = req.params;
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     if (!chatId || !userId) {
       return { statusCode: 400, body: { error: 'Chat ID and user ID are required' } };
     }
@@ -811,7 +811,7 @@ export class ChatController {
 
   async blockChat(req: IHttpRequest): Promise<IHttpResponse> {
     const { chatId } = req.params;
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     if (!chatId || !userId) {
       return { statusCode: 400, body: { error: 'Chat ID and user ID are required' } };
     }
@@ -826,7 +826,7 @@ export class ChatController {
 
   async clearChat(req: IHttpRequest): Promise<IHttpResponse> {
     const { chatId } = req.params;
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     if (!chatId || !userId) {
       return { statusCode: 400, body: { error: 'Chat ID and user ID are required' } };
     }

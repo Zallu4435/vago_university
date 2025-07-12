@@ -19,6 +19,7 @@ export interface IHttpRequest {
   files?: Express.Multer.File[];
   user?: {
     id: string;
+    userId?: string; // Add userId field for compatibility
     collection: 'register' | 'admin' | 'user' | 'faculty';
     firstName: string;
     lastName: string;

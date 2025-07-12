@@ -8,7 +8,9 @@ class EventService {
     limit: number,
     type?: string,
     status?: string,
-    dateRange?: string
+    dateRange?: string,
+    search?: string,
+    organizerType?: string
   ): Promise<EventApiResponse> {
     try {
       const params: Record<string, string | number> = {
@@ -26,6 +28,12 @@ class EventService {
         const [startDate, endDate] = dateRange.split(',');
         params.startDate = startDate;
         params.endDate = endDate;
+      }
+      if (search && search.trim()) {
+        params.search = search.trim();
+      }
+      if (organizerType && organizerType !== 'All') {
+        params.organizerType = organizerType;
       }
 
       const response = await httpClient.get<EventApiResponse>('/admin/events', {
@@ -78,7 +86,9 @@ class EventService {
     limit: number,
     type?: string,
     status?: string,
-    dateRange?: string
+    dateRange?: string,
+    search?: string,
+    organizerType?: string
   ): Promise<EventApiResponse> {
     try {
       const params: Record<string, string | number> = {
@@ -96,6 +106,12 @@ class EventService {
         const [startDate, endDate] = dateRange.split(',');
         params.startDate = startDate;
         params.endDate = endDate;
+      }
+      if (search && search.trim()) {
+        params.search = search.trim();
+      }
+      if (organizerType && organizerType !== 'All') {
+        params.organizerType = organizerType;
       }
 
       const response = await httpClient.get<EventApiResponse>('/admin/event-requests', {

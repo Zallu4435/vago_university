@@ -20,7 +20,7 @@ export class VideoSessionController implements IVideoSessionController {
   ) { }
 
   async createSession(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const facultyId = httpRequest.user?.id;
+    const facultyId = httpRequest.user?.userId;
     if (!facultyId) {
       return httpErrors.error_401('Faculty ID not found in request');
     }
@@ -85,7 +85,7 @@ export class VideoSessionController implements IVideoSessionController {
 
   async recordAttendanceJoin(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const sessionId = httpRequest.params.id;
-    const userId = httpRequest.user?.id;
+    const userId = httpRequest.user?.userId;
     if (!userId) {
       return httpErrors.error_401('User ID not found in request');
     }
@@ -95,7 +95,7 @@ export class VideoSessionController implements IVideoSessionController {
 
   async recordAttendanceLeave(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const sessionId = httpRequest.params.id;
-    const userId = httpRequest.user?.id;
+    const userId = httpRequest.user?.userId;
     if (!userId) {
       return httpErrors.error_401('User ID not found in request');
     }

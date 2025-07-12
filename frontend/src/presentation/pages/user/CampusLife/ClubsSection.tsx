@@ -15,7 +15,9 @@ export default function ClubsSection({ clubs }: ClubsSectionProps) {
   const { requestToJoinClub, isJoiningClub, joinClubError } = useCampusLife();
   const { styles, theme } = usePreferences();
 
-  const filteredClubs = clubs.filter((club: ClubType) =>
+  console.log(clubs, "popoppppoop")
+
+  const filteredClubs = clubs?.clubs?.filter((club: ClubType) =>
     club.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     club.type.toLowerCase().includes(searchTerm.toLowerCase())
   );

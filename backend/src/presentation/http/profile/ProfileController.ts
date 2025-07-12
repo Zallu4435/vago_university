@@ -27,7 +27,7 @@ export class ProfileController implements IProfileController {
   }
 
   async getProfile(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const userId = httpRequest.user?.id;
+    const userId = httpRequest.user?.userId;
     if (!userId) {
       return this.httpErrors.error_401();
     }
@@ -41,7 +41,7 @@ export class ProfileController implements IProfileController {
   }
 
   async updateProfile(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const userId = httpRequest.user?.id;
+    const userId = httpRequest.user?.userId;
     if (!userId) {
       return this.httpErrors.error_401();
     }
@@ -56,7 +56,7 @@ export class ProfileController implements IProfileController {
   }
 
   async changePassword(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const userId = httpRequest.user?.id;
+    const userId = httpRequest.user?.userId;
     if (!userId) {
       return this.httpErrors.error_401();
     }
@@ -71,7 +71,7 @@ export class ProfileController implements IProfileController {
   }
 
   async updateProfilePicture(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const userId = httpRequest.user?.id;
+    const userId = httpRequest.user?.userId;
     const file = httpRequest.file;
     if (!userId) {
       return this.httpErrors.error_401();

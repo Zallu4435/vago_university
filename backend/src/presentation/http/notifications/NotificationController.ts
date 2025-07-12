@@ -31,7 +31,7 @@ export class NotificationController implements INotificationController {
 
   async createNotification(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { title, message, recipientType, recipientId, recipientName } = httpRequest.body;
-    const createdBy = httpRequest.user?.id;
+    const createdBy = httpRequest.user?.userId;
     if (!createdBy || !title || !message || !recipientType) return this.httpErrors.error_400();
     const dto: CreateNotificationRequestDTO = { title, message, recipientType, recipientId, recipientName, createdBy };
     const data = await this.createNotificationUseCase.execute(dto);
@@ -40,7 +40,7 @@ export class NotificationController implements INotificationController {
 
   async getAllNotifications(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { page = "1", limit = "10", recipientType, status, dateRange } = httpRequest.query || {};
-    const userId = httpRequest.user?.id;
+    const userId = httpRequest.user?.userId;
     const collection = httpRequest.user?.collection;
     if (!userId || !collection) return this.httpErrors.error_401();
     const dto: GetAllNotificationsRequestDTO = {
@@ -66,7 +66,7 @@ export class NotificationController implements INotificationController {
 
   async deleteNotification(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { notificationId } = httpRequest.params || {};
-    const authenticatedUserId = httpRequest.user?.id;
+    const authenticatedUserId = httpRequest.user?.userId;
     const collection = httpRequest.user?.collection;
     if (!notificationId || !authenticatedUserId || !collection) return this.httpErrors.error_401();
     const dto: DeleteNotificationRequestDTO = { notificationId, authenticatedUserId, collection };
@@ -76,7 +76,7 @@ export class NotificationController implements INotificationController {
 
   async markNotificationAsRead(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { notificationId } = httpRequest.params || {};
-    const authenticatedUserId = httpRequest.user?.id;
+    const authenticatedUserId = httpRequest.user?.userId;
     const collection = httpRequest.user?.collection;
     if (!notificationId || !authenticatedUserId || !collection) return this.httpErrors.error_401();
     const dto: MarkNotificationAsReadRequestDTO = { notificationId, authenticatedUserId, collection };
@@ -85,7 +85,7 @@ export class NotificationController implements INotificationController {
   }
 
   async markAllNotificationsAsRead(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const authenticatedUserId = httpRequest.user?.id;
+    const authenticatedUserId = httpRequest.user?.userId;
     const collection = httpRequest.user?.collection;
     if (!authenticatedUserId || !collection) return this.httpErrors.error_401();
     const dto: MarkAllNotificationsAsReadRequestDTO = { authenticatedUserId, collection };

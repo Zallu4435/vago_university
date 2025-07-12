@@ -33,7 +33,7 @@ export class FacultyDashboardController implements IFacultyDashboardController {
   }
 
   async getDashboardStats(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const facultyId = httpRequest.user?.id || httpRequest.params?.facultyId;
+    const facultyId = httpRequest.user?.userId || httpRequest.params?.facultyId;
     if (!facultyId) {
       return this.httpErrors.error_400("Faculty ID is required");
     }
@@ -47,7 +47,7 @@ export class FacultyDashboardController implements IFacultyDashboardController {
   }
 
   async getDashboardData(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const facultyId = httpRequest.user?.id || httpRequest.params?.facultyId;
+    const facultyId = httpRequest.user?.userId || httpRequest.params?.facultyId;
     if (!facultyId) {
       return this.httpErrors.error_400("Faculty ID is required");
     }
@@ -61,7 +61,7 @@ export class FacultyDashboardController implements IFacultyDashboardController {
   }
 
   async getWeeklyAttendance(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const facultyId = httpRequest.user?.id || httpRequest.params?.facultyId;
+    const facultyId = httpRequest.user?.userId || httpRequest.params?.facultyId;
     if (!facultyId) {
       return this.httpErrors.error_400("Faculty ID is required");
     }
@@ -75,7 +75,7 @@ export class FacultyDashboardController implements IFacultyDashboardController {
   }
 
   async getCoursePerformance(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const facultyId = httpRequest.user?.id || httpRequest.params?.facultyId;
+    const facultyId = httpRequest.user?.userId || httpRequest.params?.facultyId;
     if (!facultyId) {
       return this.httpErrors.error_400("Faculty ID is required");
     }
@@ -89,7 +89,7 @@ export class FacultyDashboardController implements IFacultyDashboardController {
   }
 
   async getSessionDistribution(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const facultyId = httpRequest.user?.id || httpRequest.params?.facultyId;
+    const facultyId = httpRequest.user?.userId || httpRequest.params?.facultyId;
     if (!facultyId) {
       return this.httpErrors.error_400("Faculty ID is required");
     }
@@ -103,7 +103,7 @@ export class FacultyDashboardController implements IFacultyDashboardController {
   }
 
   async getRecentActivities(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const facultyId = httpRequest.user?.id || httpRequest.params?.facultyId;
+    const facultyId = httpRequest.user?.userId || httpRequest.params?.facultyId;
     if (!facultyId) {
       return this.httpErrors.error_400("Faculty ID is required");
     }

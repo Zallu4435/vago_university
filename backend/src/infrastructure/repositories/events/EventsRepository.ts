@@ -38,17 +38,76 @@ import { EventRequestStatus } from "../../../domain/events/entities/EventTypes";
 // Repository Implementation (UPDATED: Pure data access, no business logic)
 export class EventsRepository implements IEventsRepository {
   async getEvents(params: GetEventsRequestDTO): Promise<any> {
-    const { page, limit, type, status, startDate, endDate } = params;
+    const { page, limit, type, status, startDate, endDate, search, organizerType, dateRange } = params;
     const query: any = {};
-    if (type !== "all") query.eventType = type;
-    if (status !== "all") query.status = status;
-    if (startDate || endDate) {
+    
+    // Type filter
+    if (type && type !== "all") {
+      query.eventType = { $regex: `^${type}$`, $options: "i" };
+    }
+    
+    // Status filter
+    if (status && status !== "all") {
+      query.status = { $regex: `^${status}$`, $options: "i" };
+    }
+    
+    // Organizer type filter
+    if (organizerType && organizerType !== "all") {
+      query.organizerType = { $regex: `^${organizerType}$`, $options: "i" };
+    }
+
+    // Date range filter
+    if (dateRange && dateRange !== "all") {
+      const now = new Date();
+      let calculatedStartDate: Date;
+      
+      switch (dateRange) {
+        case "last_week":
+          calculatedStartDate = new Date(now.setDate(now.getDate() - 7));
+          break;
+        case "last_month":
+          calculatedStartDate = new Date(now.setDate(now.getDate() - 30));
+          break;
+        case "last_3_months":
+          calculatedStartDate = new Date(now.setDate(now.getDate() - 90));
+          break;
+        case "last_6_months":
+          calculatedStartDate = new Date(now.setDate(now.getDate() - 180));
+          break;
+        case "last_year":
+          calculatedStartDate = new Date(now.setDate(now.getDate() - 365));
+          break;
+        default:
+          calculatedStartDate = now;
+      }
+      
+      query.date = { $gte: calculatedStartDate.toISOString().split('T')[0] };
+    } else if (startDate || endDate) {
+      // Custom date range
       query.date = {};
       if (startDate) query.date.$gte = startDate.toISOString().split('T')[0];
       if (endDate) query.date.$lte = endDate.toISOString().split('T')[0];
     }
+
+    // Search functionality
+    if (search && search.trim()) {
+      query.$or = [
+        { title: { $regex: search.trim(), $options: "i" } },
+        { description: { $regex: search.trim(), $options: "i" } },
+        { organizer: { $regex: search.trim(), $options: "i" } },
+        { location: { $regex: search.trim(), $options: "i" } },
+        { additionalInfo: { $regex: search.trim(), $options: "i" } }
+      ];
+    }
+
+    console.log('Events backend final query object:', query);
+
     const skip = (page - 1) * limit;
-    const events = await (CampusEventModel as any).find(query).skip(skip).limit(limit).lean();
+    const events = await (CampusEventModel as any).find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
     const totalItems = await (CampusEventModel as any).countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
     return { events, totalItems, totalPages, currentPage: page };
@@ -77,16 +136,54 @@ export class EventsRepository implements IEventsRepository {
   async getEventRequests(
     params: GetEventRequestsRequestDTO
   ): Promise<any> {
-    const { page, limit, status, startDate, endDate, type } = params;
+    const { page, limit, status, startDate, endDate, type, search, organizerType, dateRange } = params;
     const query: any = {};
-    if (status !== "all") {
-      query.status = status;
+    
+    // Status filter
+    if (status && status !== "all") {
+      query.status = { $regex: `^${status}$`, $options: "i" };
     }
+    
     const eventQuery: any = {};
+    
+    // Type filter
     if (type && type.toLowerCase() !== "all") {
-      eventQuery.eventType = type;
+      eventQuery.eventType = { $regex: `^${type}$`, $options: "i" };
     }
-    if (startDate || endDate) {
+    
+    // Organizer type filter
+    if (organizerType && organizerType !== "all") {
+      eventQuery.organizerType = { $regex: `^${organizerType}$`, $options: "i" };
+    }
+
+    // Date range filter
+    if (dateRange && dateRange !== "all") {
+      const now = new Date();
+      let calculatedStartDate: Date;
+      
+      switch (dateRange) {
+        case "last_week":
+          calculatedStartDate = new Date(now.setDate(now.getDate() - 7));
+          break;
+        case "last_month":
+          calculatedStartDate = new Date(now.setDate(now.getDate() - 30));
+          break;
+        case "last_3_months":
+          calculatedStartDate = new Date(now.setDate(now.getDate() - 90));
+          break;
+        case "last_6_months":
+          calculatedStartDate = new Date(now.setDate(now.getDate() - 180));
+          break;
+        case "last_year":
+          calculatedStartDate = new Date(now.setDate(now.getDate() - 365));
+          break;
+        default:
+          calculatedStartDate = now;
+      }
+      
+      eventQuery.date = { $gte: calculatedStartDate.toISOString().split('T')[0] };
+    } else if (startDate || endDate) {
+      // Custom date range
       eventQuery.date = {};
       if (startDate) {
         const start = new Date(startDate);
@@ -99,6 +196,20 @@ export class EventsRepository implements IEventsRepository {
         eventQuery.date.$lte = end.toISOString().split('T')[0];
       }
     }
+
+    // Search functionality for events
+    if (search && search.trim()) {
+      eventQuery.$or = [
+        { title: { $regex: search.trim(), $options: "i" } },
+        { description: { $regex: search.trim(), $options: "i" } },
+        { organizer: { $regex: search.trim(), $options: "i" } },
+        { location: { $regex: search.trim(), $options: "i" } },
+        { additionalInfo: { $regex: search.trim(), $options: "i" } }
+      ];
+    }
+
+    console.log('Event requests backend final event query object:', eventQuery);
+
     const matchingEvents = await (CampusEventModel as any).find(eventQuery)
       .select("_id")
       .lean();
@@ -106,16 +217,17 @@ export class EventsRepository implements IEventsRepository {
     if (eventIds.length > 0) {
       query.eventId = { $in: eventIds };
     }
+    
     const totalItems = await (EventRequestModel as any).countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
     const skip = (page - 1) * limit;
     const rawRequests = await (EventRequestModel as any).find(query)
       .populate({
         path: "eventId",
-        select: "title eventType date",
+        select: "title eventType date organizer location description",
         match: eventQuery
       })
-      .populate("userId", "email")
+      .populate("userId", "firstName lastName email")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

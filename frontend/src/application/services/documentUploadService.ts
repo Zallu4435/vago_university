@@ -11,10 +11,16 @@ export interface MultipleDocumentUploadResult {
   documents: DocumentUploadResult[];
 }
 
+export interface DocumentViewResult {
+  pdfData: string;
+  fileName: string;
+  fileType: string;
+}
+
 class DocumentUploadService {
   private baseUrl = '/admission';
 
-  async uploadDocument(applicationId: string, documentType: string, file: File, token: string): Promise<DocumentUploadResult> {
+  async uploadDocument(applicationId: string, documentType: string, file: File): Promise<DocumentUploadResult> {
     if (!applicationId || applicationId === '') {
       throw new Error('Application ID is required for document upload');
     }
@@ -31,7 +37,6 @@ class DocumentUploadService {
 
       const response = await httpClient.post(`${this.baseUrl}/documents/upload`, formData, {
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
@@ -45,7 +50,7 @@ class DocumentUploadService {
     }
   }
 
-  async uploadMultipleDocuments(applicationId: string, files: File[], documentTypes: string[], token: string): Promise<MultipleDocumentUploadResult> {
+  async uploadMultipleDocuments(applicationId: string, files: File[], documentTypes: string[]): Promise<MultipleDocumentUploadResult> {
     try {
       const formData = new FormData();
       
@@ -60,7 +65,6 @@ class DocumentUploadService {
 
       const response = await httpClient.post(`${this.baseUrl}/documents/upload-multiple`, formData, {
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
@@ -72,32 +76,19 @@ class DocumentUploadService {
     }
   }
 
-  async getDocument(documentId: string, token: string): Promise<any> {
-    try {   
-      const response = await httpClient.get(`/admission/documents/${documentId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
+  async getDocument(documentId: string): Promise<DocumentViewResult> {
+    try {
+      const response = await httpClient.get(`${this.baseUrl}/documents/${documentId}`);
       return response.data.data;
     } catch (error: any) {
       console.error('Error fetching document:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
       throw new Error(error.response?.data?.error || error.message || 'Failed to fetch document');
     }
   }
 
-  async getAdminDocument(documentId: string, admissionId: string, token: string): Promise<any> {
+  async getAdminDocument(documentId: string, admissionId: string): Promise<any> {
     try {
-      const response = await httpClient.get(`/admin/admissions/documents/${documentId}?admissionId=${admissionId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await httpClient.get(`/admin/admission/documents/${documentId}?admissionId=${admissionId}`);
 
       return response.data.data;
     } catch (error: any) {

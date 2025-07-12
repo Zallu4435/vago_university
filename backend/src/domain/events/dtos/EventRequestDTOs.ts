@@ -28,6 +28,9 @@ export interface GetEventsRequestDTO {
   status: string;
   startDate?: Date;
   endDate?: Date;
+  search?: string;
+  organizerType?: string;
+  dateRange?: string;
 }
 
 export interface GetEventByIdRequestDTO {

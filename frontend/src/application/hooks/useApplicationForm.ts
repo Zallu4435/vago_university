@@ -11,14 +11,13 @@ import {
   DeclarationSection
 } from '../../domain/types/application';
 
-export const useApplicationForm = (token: string | null) => {
+export const useApplicationForm = () => {
   const queryClient = useQueryClient();
 
-  const { mutateAsync: createApplication, isLoading: isCreating } = useMutation({
+  const { mutateAsync: createApplication, isPending: isCreating } = useMutation({
     mutationFn: async (userId: string) => {
-      if (!token) throw new Error('Authentication token is missing');
       if (!userId) throw new Error('User ID is missing');
-      return await applicationService.createApplication(userId, token);
+      return await applicationService.createApplication(userId);
     },
     onSuccess: (data, userId) => {
       queryClient.invalidateQueries({ queryKey: ['application', userId] });
@@ -30,10 +29,9 @@ export const useApplicationForm = (token: string | null) => {
     }
   });
 
-  const { mutateAsync: savePersonalInfo, isLoading: isSavingPersonalInfo } = useMutation({
+  const { mutateAsync: savePersonalInfo, isPending: isSavingPersonalInfo } = useMutation({
     mutationFn: async ({ applicationId, data }: { applicationId: string, data: PersonalInfo }) => {
-      if (!token) throw new Error('Authentication token is missing');
-      return await applicationService.savePersonalInfo(applicationId, data, token);
+      return await applicationService.savePersonalInfo(applicationId, data);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
@@ -45,10 +43,9 @@ export const useApplicationForm = (token: string | null) => {
     }
   });
 
-  const { mutateAsync: saveChoiceOfStudy, isLoading: isSavingChoiceOfStudy } = useMutation({
+  const { mutateAsync: saveChoiceOfStudy, isPending: isSavingChoiceOfStudy } = useMutation({
     mutationFn: async ({ applicationId, data }: { applicationId: string, data: ProgrammeChoice[] }) => {
-      if (!token) throw new Error('Authentication token is missing');
-      return await applicationService.saveChoiceOfStudy(applicationId, data, token);
+      return await applicationService.saveChoiceOfStudy(applicationId, data);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
@@ -60,10 +57,9 @@ export const useApplicationForm = (token: string | null) => {
     }
   });
 
-  const { mutateAsync: saveEducation, isLoading: isSavingEducation } = useMutation({
+  const { mutateAsync: saveEducation, isPending: isSavingEducation } = useMutation({
     mutationFn: async ({ applicationId, data }: { applicationId: string, data: EducationData }) => {
-      if (!token) throw new Error('Authentication token is missing');
-      return await applicationService.saveEducation(applicationId, data, token);
+      return await applicationService.saveEducation(applicationId, data);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
@@ -75,10 +71,9 @@ export const useApplicationForm = (token: string | null) => {
     }
   });
 
-  const { mutateAsync: saveAchievements, isLoading: isSavingAchievements } = useMutation({
+  const { mutateAsync: saveAchievements, isPending: isSavingAchievements } = useMutation({
     mutationFn: async ({ applicationId, data }: { applicationId: string, data: AchievementSection }) => {
-      if (!token) throw new Error('Authentication token is missing');
-      return await applicationService.saveAchievements(applicationId, data, token);
+      return await applicationService.saveAchievements(applicationId, data);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
@@ -90,10 +85,9 @@ export const useApplicationForm = (token: string | null) => {
     }
   });
 
-  const { mutateAsync: saveOtherInfo, isLoading: isSavingOtherInfo } = useMutation({
+  const { mutateAsync: saveOtherInfo, isPending: isSavingOtherInfo } = useMutation({
     mutationFn: async ({ applicationId, data }: { applicationId: string, data: OtherInformationSection }) => {
-      if (!token) throw new Error('Authentication token is missing');
-      return await applicationService.saveOtherInfo(applicationId, data, token);
+      return await applicationService.saveOtherInfo(applicationId, data);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
@@ -105,10 +99,9 @@ export const useApplicationForm = (token: string | null) => {
     }
   });
 
-  const { mutateAsync: saveDocuments, isLoading: isSavingDocuments } = useMutation({
+  const { mutateAsync: saveDocuments, isPending: isSavingDocuments } = useMutation({
     mutationFn: async ({ applicationId, data }: { applicationId: string, data: DocumentUploadSection }) => {
-      if (!token) throw new Error('Authentication token is missing');
-      return await applicationService.saveDocuments(applicationId, data, token);
+      return await applicationService.saveDocuments(applicationId, data);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
@@ -120,10 +113,9 @@ export const useApplicationForm = (token: string | null) => {
     }
   });
 
-  const { mutateAsync: saveDeclaration, isLoading: isSavingDeclaration } = useMutation({
+  const { mutateAsync: saveDeclaration, isPending: isSavingDeclaration } = useMutation({
     mutationFn: async ({ applicationId, data }: { applicationId: string, data: DeclarationSection }) => {
-      if (!token) throw new Error('Authentication token is missing');
-      return await applicationService.saveDeclaration(applicationId, data, token);
+      return await applicationService.saveDeclaration(applicationId, data);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
@@ -135,16 +127,10 @@ export const useApplicationForm = (token: string | null) => {
     }
   });
 
-  const { mutateAsync: processPayment, isLoading: isProcessingPayment } = useMutation({
+  const { mutateAsync: processPayment, isPending: isProcessingPayment } = useMutation({
     mutationFn: async ({ applicationId, paymentDetails }: { applicationId: string, paymentDetails: any }) => {
-
-      if (!token) {
-        console.error('useApplicationForm: Token is missing');
-        throw new Error('Authentication token is missing. Please log in again.');
-      }
-
       try {
-        return await applicationService.processPayment(applicationId, paymentDetails, token);
+        return await applicationService.processPayment(applicationId, paymentDetails);
       } catch (error: any) {
         if (error.message.includes('token') || error.response?.status === 401) {
           throw new Error('Your session has expired. Please log in again.');
@@ -161,10 +147,9 @@ export const useApplicationForm = (token: string | null) => {
     }
   });
 
-  const { mutateAsync: submitApplication, isLoading: isSubmitting } = useMutation({
+  const { mutateAsync: submitApplication, isPending: isSubmitting } = useMutation({
     mutationFn: async ({ applicationId, paymentId }: { applicationId: string, paymentId: string }) => {
-      if (!token) throw new Error('Authentication token is missing');
-      return await applicationService.submitApplication(applicationId, paymentId, token);
+      return await applicationService.submitApplication(applicationId, paymentId);
     },
     onSuccess: (data) => {
       toast.success(data.message || 'Application submitted successfully!');
@@ -175,10 +160,9 @@ export const useApplicationForm = (token: string | null) => {
     }
   });
 
-  const { mutateAsync: confirmPayment, isLoading: isConfirmingPayment } = useMutation({
+  const { mutateAsync: confirmPayment, isPending: isConfirmingPayment } = useMutation({
     mutationFn: async ({ paymentId, stripePaymentIntentId }: { paymentId: string, stripePaymentIntentId: string }) => {
-      if (!token) throw new Error('Authentication token is missing');
-      return await applicationService.confirmPayment(paymentId, stripePaymentIntentId, token);
+      return await applicationService.confirmPayment(paymentId, stripePaymentIntentId);
     },
     onSuccess: (data) => {
       console.log('Payment confirmed successfully:', data);
@@ -199,47 +183,26 @@ export const useApplicationForm = (token: string | null) => {
     saveDocuments,
     saveDeclaration,
     processPayment,
-    confirmPayment,
     submitApplication,
-    isLoading:
-      isCreating ||
-      isSavingPersonalInfo ||
-      isSavingChoiceOfStudy ||
-      isSavingEducation ||
-      isSavingAchievements ||
-      isSavingOtherInfo ||
-      isSavingDocuments ||
-      isSavingDeclaration ||
-      isSubmitting ||
-      isProcessingPayment ||
-      isConfirmingPayment
+    confirmPayment,
+    isLoading: isCreating || isSavingPersonalInfo || isSavingChoiceOfStudy || isSavingEducation || isSavingAchievements || isSavingOtherInfo || isSavingDocuments || isSavingDeclaration || isProcessingPayment || isSubmitting || isConfirmingPayment,
   };
 };
 
-export const useApplicationData = (userId: string | undefined, token: string | null) => {
+export const useApplicationData = (userId: string | undefined) => {
   return useQuery({
     queryKey: ['application', userId],
     queryFn: async () => {
-      if (!userId || !token) {
-        console.warn('useApplicationData: Missing userId or token', { userId, token });
-        throw new Error('User ID or token is missing');
-      }
-      return await applicationService.getApplicationById(userId, token);
+      if (!userId) throw new Error('User ID is required');
+      return await applicationService.getApplicationById(userId);
     },
-    enabled: !!userId && !!token,
-    staleTime: 60000,
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
     retry: (failureCount, error: any) => {
-      if (error?.message === 'User ID or token is missing' || error?.response?.status === 401 || error?.response?.status === 404) {
-        console.warn('useApplicationData: Stopping retry due to auth or not found error', { failureCount, error });
-        return false;
+      if (error.message.includes('401') || error.message.includes('403')) {
+        return false; // Don't retry auth errors
       }
       return failureCount < 3;
     },
-    onError: (error: any) => {
-      console.error('useApplicationData: Error fetching application data:', error);
-      if (error?.response?.status !== 404) {
-        toast.error(error.message || 'Failed to fetch application data');
-      }
-    }
   });
 };

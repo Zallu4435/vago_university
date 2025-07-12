@@ -1,6 +1,3 @@
-import { emailService } from "../../services/email.service";
-import { config } from "../../../config/config";
-import { AdmissionErrorType } from "../../../domain/admin/enums/AdmissionErrorType";
 import {
     GetAdmissionsRequestDTO,
     GetAdmissionByIdRequestDTO,
@@ -27,31 +24,23 @@ export class AdmissionRepository implements IAdmissionRepository {
     async getAdmissions(params: GetAdmissionsRequestDTO): Promise<any> {
         const { page = 1, limit = 5, status = "all", program = "all", dateRange = "all", startDate, endDate, search } = params;
 
-        // Debug logging
-        console.log('Backend received filter values:', { page, limit, status, program, dateRange, startDate, endDate, search });
-
         const filter: Record<string, any> = {};
-        
-        // Handle status filter - accept "all", "all_status", "all_statuses", etc.
+
         if (status && !status.startsWith("all")) {
             filter.status = status === "approved" ? { $in: ["approved", "offered"] } : status;
         }
-        
-        // Handle program filter - accept "all", "all_program", "all_programs", etc.
+
         if (program && !program.startsWith("all")) {
-            // Convert frontend program name to database format
-            // e.g., "computer_science" -> "Computer Science"
             const normalizedProgram = program.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
             console.log('Program filter:', { original: program, normalized: normalizedProgram });
-            
+
             filter.choiceOfStudy = {
                 $elemMatch: {
                     programme: { $regex: `^${normalizedProgram}$`, $options: "i" },
                 },
             };
         }
-        
-        // Handle date range filter - accept "all", "all_date", "all_dates", etc.
+
         if (dateRange && !dateRange.startsWith("all")) {
             const now = new Date();
             if (dateRange === "last_week") {
@@ -70,23 +59,21 @@ export class AdmissionRepository implements IAdmissionRepository {
                 console.log('Processing custom date range:', { startDate, endDate });
                 const startDateTime = new Date(startDate);
                 const endDateTime = new Date(endDate);
-                
-                // Set end date to end of day (23:59:59.999)
+
                 endDateTime.setHours(23, 59, 59, 999);
-                
-                console.log('Processed dates:', { 
-                    startDateTime: startDateTime.toISOString(), 
-                    endDateTime: endDateTime.toISOString() 
+
+                console.log('Processed dates:', {
+                    startDateTime: startDateTime.toISOString(),
+                    endDateTime: endDateTime.toISOString()
                 });
-                
+
                 filter.createdAt = {
                     $gte: startDateTime,
                     $lte: endDateTime,
                 };
             }
         }
-        
-        // Add search functionality
+
         if (search && search.trim()) {
             filter.$or = [
                 { "personal.fullName": { $regex: search.trim(), $options: "i" } },
@@ -94,7 +81,6 @@ export class AdmissionRepository implements IAdmissionRepository {
             ];
         }
 
-        console.log('Admission backend final query object:', filter);
 
         const skip = (page - 1) * limit;
         const projection = {
@@ -106,7 +92,6 @@ export class AdmissionRepository implements IAdmissionRepository {
             choiceOfStudy: 1,
         };
 
-        // Debug: Show all unique programs in the database
         if (program && !program.startsWith("all")) {
             const allAdmissions = await AdmissionModel.find({}).select('choiceOfStudy').lean();
             const allPrograms = allAdmissions
@@ -130,7 +115,7 @@ export class AdmissionRepository implements IAdmissionRepository {
         console.log('Backend query results:', { totalAdmissions, totalPages, admissionsCount: admissions.length });
 
         return {
-            admissions, // raw admissions, not mapped
+            admissions,
             totalAdmissions,
             totalPages,
             currentPage: page,
@@ -161,7 +146,6 @@ export class AdmissionRepository implements IAdmissionRepository {
             throw new Error(AdmissionErrorType.InvalidToken);
         }
 
-        // Check if token is expired
         if (!admission.tokenExpiry || new Date() > admission.tokenExpiry) {
             throw new Error(AdmissionErrorType.TokenExpired);
         }

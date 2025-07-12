@@ -6,11 +6,20 @@ import { Education } from '../../components/application/Education/Education';
 import { Achievements } from '../../components/application/Achievements/Achievements';
 import { Documents, DocumentUploadSection } from '../../components/application/Documents/Documents';
 import { Declaration } from '../../components/application/Declaration';
-import type { FormData, ApplicationFormProps, ProgrammeChoice } from '../../../domain/types/application';
+import type { 
+  FormData, 
+  ApplicationFormProps, 
+  ProgrammeChoice,
+  PersonalInfo,
+  EducationData,
+  AchievementSection,
+  OtherInformationSection,
+  DeclarationSection
+} from '../../../domain/types/application';
 import Other_Info from '../../components/application/Other_Information/Other_Info';
 import { FormSubmissionFlow } from '../../components/application/FormSubmissionFlow';
 import { useApplicationForm, useApplicationData } from '../../../application/hooks/useApplicationForm';
-import styles from './ApplicationForm.module.css';
+import styles from './css/ApplicationForm.module.css';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../appStore/store';
@@ -19,8 +28,8 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
 const useAuth = () => {
-  const { token, user, collection } = useSelector((state: RootState) => state.auth);
-  return { token, user, collection };
+  const { user, collection } = useSelector((state: RootState) => state.auth);
+  return { user, collection };
 };
 
 export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) => {
@@ -39,7 +48,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
   const documentsFormRef = useRef<{ trigger: () => Promise<boolean>; getValues: () => DocumentUploadSection }>(null);
   const choiceOfStudyRef = useRef<{ trigger: () => Promise<boolean>; getValues: () => ProgrammeChoice[] }>(null);
 
-  const { token, user, collection } = useAuth();
+  const { user, collection } = useAuth();
   const dispatch = useDispatch();
   const [applicationId, setApplicationId] = useState<string | undefined>(undefined);
 
@@ -53,16 +62,6 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
         questions: { 1: '', 2: '', 3: '', 4: '', 5: '' },
         achievements: [],
         hasNoAchievements: false,
-        showModal: false,
-        newAchievement: [],
-        referenceContact: {
-          firstName: '',
-          lastName: '',
-          position: '',
-          email: '',
-          phone: { country: '', area: '', number: '' },
-        },
-        editingIndex: null,
       },
       otherInformation: undefined,
       documents: undefined,
@@ -85,14 +84,14 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
     saveDocuments,
     saveDeclaration,
     isLoading: isSaving,
-  } = useApplicationForm(token);
+  } = useApplicationForm();
 
-  const { data: fetchedData, isLoading: isFetching, error: fetchError } = useApplicationData(user?.id, token);
+  const { data: fetchedData, isLoading: isFetching, error: fetchError } = useApplicationData(user?.id);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!token || !user) {
+    if (!user) {
       navigate('/login');
       return;
     }
@@ -112,7 +111,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
           navigate('/');
       }
     }
-  }, [token, user, collection, navigate]);
+  }, [user, collection, navigate]);
 
   useEffect(() => {
     const initializeApplication = async () => {
@@ -124,13 +123,13 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
         return;
       }
 
-      if (fetchedData && fetchedData.applicationId) {
+      if (fetchedData && (fetchedData as any).applicationId) {
         // Existing application found
-        setApplicationId(fetchedData.applicationId);
-        setValue('applicationId', fetchedData.applicationId, { shouldValidate: false });
+        setApplicationId((fetchedData as any).applicationId);
+        setValue('applicationId', (fetchedData as any).applicationId, { shouldValidate: false });
       } else {
         try {
-          const response = await createApplication(user?.id);
+          const response = await createApplication(user?.id || '');
           setApplicationId(response.applicationId);
           setValue('applicationId', response.applicationId, { shouldValidate: false });
         } catch (error) {
@@ -577,7 +576,10 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
           setShowPayment(true);
         }}
         onBackToForm={() => setShowSummary(false)}
-        token={token}
+        onPaymentComplete={() => {
+          setShowSummary(false);
+          setShowPayment(true);
+        }}
         onLogout={handleLogout}
       />
     );
@@ -603,7 +605,6 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
           setValue('documents', undefined, { shouldValidate: false });
           setValue('declaration', { privacyPolicy: false, marketingEmail: false, marketingCall: false }, { shouldValidate: false });
         }}
-        token={token}
         onLogout={handleLogout}
       />
     );

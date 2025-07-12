@@ -5,12 +5,11 @@ import { authMiddleware } from '../../shared/middlewares/authMiddleware';
 
 const router = Router();
 
-// Endpoint to save FCM token for a user or faculty
 router.post('/:type/:id/fcm-token', authMiddleware, async (req: Request, res: Response) => {
   try {
     console.log("reached here ");
-    const { type, id } = req.params; // type: 'user' or 'faculty'
-    const { token } = req.body; // FCM token from frontend
+    const { type, id } = req.params; 
+    const { token } = req.body; 
 
     console.log( type, id, token)
     if (!token || typeof token !== 'string') {
@@ -18,8 +17,7 @@ router.post('/:type/:id/fcm-token', authMiddleware, async (req: Request, res: Re
       return;
     }
 
-    // Check if user is authorized (matches ID or is admin)
-    if (!req.user || (req.user.id !== id)) {
+    if (!req.user || (req.user.userId !== id)) {
       res.status(403).json({ error: 'Unauthorized' });
       return;
     }
@@ -34,10 +32,9 @@ router.post('/:type/:id/fcm-token', authMiddleware, async (req: Request, res: Re
       return;
     }
 
-    // Add token to fcmTokens, avoiding duplicates
     const updated = await (Model as typeof UserModel).findByIdAndUpdate(
       id,
-      { $addToSet: { fcmTokens: token } }, // Only add if not already present
+      { $addToSet: { fcmTokens: token } },
       { new: true }
     );
 

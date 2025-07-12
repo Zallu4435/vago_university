@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Button } from '../../base/Button';
 import { FormSubmissionFlow } from '../FormSubmissionFlow';
-import { DeclarationSection } from '../../../../domain/types/formTypes';
+import { DeclarationSection } from '../../../../domain/types/application';
 
 interface DeclarationProps {
   value: DeclarationSection;
@@ -102,6 +102,10 @@ export const Declaration: React.FC<DeclarationProps> = ({ value, onChange }) => 
           onBackToForm={() => setIsSubmitting(false)}
           onPaymentComplete={() => {
             onChange({ privacyPolicy: false, marketingEmail: false, marketingCall: false }); // Reset declaration
+          }}
+          onLogout={() => {
+            // Handle logout if needed
+            window.location.href = '/login';
           }}
         />
       )}

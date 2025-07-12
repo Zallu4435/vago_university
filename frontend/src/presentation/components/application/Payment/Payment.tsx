@@ -14,27 +14,18 @@ import type { PaymentProps } from '../../../../domain/types/application';
 export const Payment: React.FC<PaymentProps> = ({ 
   formData, 
   onComplete, 
-  onPrevious,
-  token
+  onPrevious
 }) => {
   const [selectedMethod, setSelectedMethod] = useState<string>('stripe');
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
-  const { processPayment, confirmPayment, submitApplication } = useApplicationForm(token);
+  const { processPayment, confirmPayment, submitApplication } = useApplicationForm();
   const [submissionStatus, setSubmissionStatus] = useState<{
     success: boolean | null;
     message: string | null;
   }>({ success: null, message: null });
 
   const handlePayment = async (paymentDetails?: { paymentMethodId: string }) => {
-    if (!token) {
-      setSubmissionStatus({
-        success: false,
-        message: 'Your session has expired. Please log in again.'
-      });
-      return;
-    }
-
     setIsProcessing(true);
     setPaymentError(null);
     setSubmissionStatus({ success: null, message: null });

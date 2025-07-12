@@ -11,9 +11,7 @@ import {
   DownloadSubmissionUseCase,
   GetAnalyticsUseCase
 } from '../../../application/assignments/useCases/AssignmentUseCases';
-import axios from 'axios';
-import { v2 as cloudinary } from 'cloudinary';
-import { config } from '../../../config/config';
+
 
 export class AssignmentController implements IAssignmentController {
   private httpSuccess: HttpSuccess;

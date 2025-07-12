@@ -96,8 +96,8 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
       if (onViewDocument) {
         onViewDocument(document);
       } else {
-        if (document.id && token) {
-          const response = await documentUploadService.getAdminDocument(document.id, admissionData._id, token);
+        if (document.id) {
+          const response = await documentUploadService.getAdminDocument(document.id, admissionData._id);
           if (response && response.pdfData) {
             const byteCharacters = atob(response.pdfData);
             const byteNumbers = new Array(byteCharacters.length);
@@ -114,7 +114,7 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             window.open(document.url, '_blank', 'noopener,noreferrer');
           }
         } else {
-          console.log('[handleViewDocument] No document.id or token, falling back to direct URL');
+          console.log('[handleViewDocument] No document.id, falling back to direct URL');
           window.open(document.url, '_blank', 'noopener,noreferrer');
         }
       }
@@ -138,8 +138,8 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
       if (onDownloadDocument) {
         onDownloadDocument(doc);
       } else {
-        if (doc.id && token) {
-          const response = await documentUploadService.getAdminDocument(doc.id, admissionData._id, token);
+        if (doc.id) {
+          const response = await documentUploadService.getAdminDocument(doc.id, admissionData._id);
 
           if (response && response.pdfData) {
             const byteCharacters = atob(response.pdfData);
@@ -174,7 +174,7 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             console.error('No PDF data in response');
           }
         } else {
-          console.error('Missing document ID or token');
+          console.error('Missing document ID');
         }
       }
     } catch (error) {

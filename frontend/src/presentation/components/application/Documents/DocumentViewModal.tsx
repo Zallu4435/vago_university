@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes, FaFileAlt, FaEye, FaSpinner } from 'react-icons/fa';
-import { DocumentUpload } from '../../../../domain/types/formTypes';
+import { DocumentUpload } from '../../../../domain/types/application';
 import { documentUploadService } from '../../../../application/services/documentUploadService';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../../appStore/store';
-
-const useAuth = () => {
-  const { token } = useSelector((state: RootState) => state.auth);
-  return { token };
-};
+import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 interface DocumentViewModalProps {
   isOpen: boolean;
@@ -21,37 +15,27 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
   onClose,
   document: doc
 }) => {
-  const { token } = useAuth();
   const [pdfData, setPdfData] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Use the reusable prevent body scroll hook
+  usePreventBodyScroll(isOpen);
+
   useEffect(() => {
-    if (isOpen && doc && token) {
+    if (isOpen && doc) {
       fetchDocument();
     }
-  }, [isOpen, doc, token]);
-
-  // Prevent background scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+  }, [isOpen, doc]);
 
   const fetchDocument = async () => {
-    if (!doc || !token) return;
+    if (!doc) return;
     
     setLoading(true);
     setError(null);
     
     try {
-      const response = await documentUploadService.getDocument(doc.id, token);
+      const response = await documentUploadService.getDocument(doc.id);
 
       console.log(response, "responseresponseresponse")
       
@@ -86,7 +70,7 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
           </button>
         </div>
         
-        <div className="p-6 overflow-y-auto flex-1">
+        <div className="p-6 flex-1 overflow-y-auto">
           <div className="mb-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex justify-between items-center">

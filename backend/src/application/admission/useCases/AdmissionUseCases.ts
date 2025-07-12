@@ -78,10 +78,10 @@ export class GetApplicationUseCase {
 export class SaveSectionUseCase {
     constructor(private admissionsRepository: IAdmissionsRepository) { }
     async execute(params: SaveSectionRequestDTO): Promise<SaveSectionResponseDTO> {
-            const validSections = [
+        const validSections = [
             "personalInfo", "choiceOfStudy", "education", "achievements", "otherInformation", "documents", "declaration"
-            ];
-            if (!validSections.includes(params.section)) {
+        ];
+        if (!validSections.includes(params.section)) {
             throw new InvalidSectionException();
         }
         const draft = await this.admissionsRepository.findDraftByApplicationId(params.applicationId);
@@ -116,7 +116,7 @@ export class SaveSectionUseCase {
 export class ProcessPaymentUseCase {
     constructor(private admissionsRepository: IAdmissionsRepository) { }
     async execute(params: ProcessPaymentRequestDTO): Promise<ProcessPaymentResponseDTO> {
-            if (!params.applicationId || !params.paymentDetails) {
+        if (!params.applicationId || !params.paymentDetails) {
             throw new PaymentProcessingFailedException();
         }
         return this.admissionsRepository.processPayment(params);
@@ -126,7 +126,7 @@ export class ProcessPaymentUseCase {
 export class ConfirmPaymentUseCase {
     constructor(private admissionsRepository: IAdmissionsRepository) { }
     async execute(params: ConfirmPaymentRequestDTO): Promise<ConfirmPaymentResponseDTO> {
-            if (!params.paymentId || !params.stripePaymentIntentId) {
+        if (!params.paymentId || !params.stripePaymentIntentId) {
             throw new PaymentProcessingFailedException();
         }
         return this.admissionsRepository.confirmPayment(params);
@@ -136,7 +136,7 @@ export class ConfirmPaymentUseCase {
 export class FinalizeAdmissionUseCase {
     constructor(private admissionsRepository: IAdmissionsRepository) { }
     async execute(params: FinalizeAdmissionRequestDTO): Promise<FinalizeAdmissionResponseDTO> {
-            if (!params.applicationId || !params.paymentId) {
+        if (!params.applicationId || !params.paymentId) {
             throw new AdmissionFinalizationFailedException();
         }
         const result = await this.admissionsRepository.finalizeAdmission(params);
@@ -149,7 +149,7 @@ export class FinalizeAdmissionUseCase {
 export class UploadDocumentUseCase {
     constructor(private admissionsRepository: IAdmissionsRepository) { }
     async execute(params: UploadDocumentRequestDTO): Promise<UploadDocumentResponseDTO> {
-            if (!params.applicationId || !params.file) {
+        if (!params.applicationId || !params.file) {
             throw new DocumentUploadFailedException();
         }
         return this.admissionsRepository.uploadDocument(params);
@@ -159,7 +159,7 @@ export class UploadDocumentUseCase {
 export class UploadMultipleDocumentsUseCase {
     constructor(private admissionsRepository: IAdmissionsRepository) { }
     async execute(params: UploadMultipleDocumentsRequestDTO): Promise<UploadMultipleDocumentsResponseDTO> {
-            if (!params.applicationId || !params.files) {
+        if (!params.applicationId || !params.files) {
             throw new DocumentUploadFailedException();
         }
         return this.admissionsRepository.uploadMultipleDocuments(params);

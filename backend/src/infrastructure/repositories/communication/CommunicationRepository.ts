@@ -16,18 +16,7 @@ import {
   GetUserGroupsRequestDTO,
   FetchUsersRequestDTO,
 } from "../../../domain/communication/dtos/CommunicationRequestDTOs";
-import {
-  GetInboxMessagesResponseDTO,
-  GetSentMessagesResponseDTO,
-  SendMessageResponseDTO,
-  MarkMessageAsReadResponseDTO,
-  DeleteMessageResponseDTO,
-  GetMessageDetailsResponseDTO,
-  GetAllAdminsResponseDTO,
-  GetUserGroupsResponseDTO,
-  FetchUsersResponseDTO,
-  MessageSummaryDTO,
-} from "../../../domain/communication/dtos/CommunicationResponseDTOs";
+
 
 export class CommunicationRepository implements ICommunicationRepository {
   async getInboxMessages(params: GetInboxMessagesRequestDTO): Promise<any> {
@@ -88,7 +77,6 @@ export class CommunicationRepository implements ICommunicationRepository {
   }
 
   async sendMessage(params: SendMessageRequestDTO): Promise<any> {
-    // Only create and return the raw message document, no mapping or business logic
     const message = await (MessageModel as any).create(params);
     return message.toObject ? message.toObject() : message;
   }
@@ -293,13 +281,8 @@ export class CommunicationRepository implements ICommunicationRepository {
   }
 
   async findUsersByType(type: string, search?: string, requesterId?: string): Promise<UserInfo[]> {
-    console.log('=== Repository findUsersByType DEBUG ===');
-    console.log('Type received:', type);
-    console.log('Search:', search);
-    console.log('========================================');
-    
+
     if (type === 'students' || type === 'all_students') {
-      // Fetch from UserModel (students)
       const query: any = {};
       if (search) {
         query.$or = [
@@ -325,7 +308,6 @@ export class CommunicationRepository implements ICommunicationRepository {
     }
     
     if (type === 'faculty' || type === 'all_faculty') {
-      // Fetch from FacultyModel (faculty)
       const query: any = {};
       if (search) {
         query.$or = [

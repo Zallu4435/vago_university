@@ -22,7 +22,18 @@ export class EventController implements IEventController {
   }
 
   async getEvents(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { page = "1", limit = "10", type = "all", status = "all", startDate, endDate } = httpRequest.query || {};
+    const { 
+      page = "1", 
+      limit = "10", 
+      type = "all", 
+      status = "all", 
+      startDate, 
+      endDate,
+      search,
+      organizerType = "all",
+      dateRange = "all"
+    } = httpRequest.query || {};
+    
     const getEventsRequestDTO: GetEventsRequestDTO = {
       page: Number(page),
       limit: Number(limit),
@@ -30,7 +41,13 @@ export class EventController implements IEventController {
       status: String(status),
       startDate: startDate ? new Date(String(startDate)) : undefined,
       endDate: endDate ? new Date(String(endDate)) : undefined,
+      search: search ? String(search) : undefined,
+      organizerType: String(organizerType),
+      dateRange: String(dateRange),
     };
+    
+    console.log('Event controller received parameters:', getEventsRequestDTO);
+    
     const response = await this.getEventsUseCase.execute(getEventsRequestDTO);
     return this.httpSuccess.success_200(response);
   }

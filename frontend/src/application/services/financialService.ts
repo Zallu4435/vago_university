@@ -38,16 +38,21 @@ import {
       startDate?: string;
       endDate?: string;
       status?: string;
+      studentId?: string;
+      term?: string;
     }): Promise<{ data: Payment[]; totalPayments: number; totalPages: number; currentPage: number }> {
       try {
+        const queryParams: any = {
+          page: params?.page || 1,
+          limit: params?.limit || 10,
+        };
+        if (params?.startDate) queryParams.startDate = params.startDate;
+        if (params?.endDate) queryParams.endDate = params.endDate;
+        if (params?.status) queryParams.status = params.status;
+        if (params?.studentId) queryParams.studentId = params.studentId;
+        if (params?.term && params.term !== 'All Terms') queryParams.term = params.term;
         const response = await httpClient.get(`${this.adminBaseUrl}/payments`, {
-          params: {
-            page: params?.page || 1,
-            limit: params?.limit || 10,
-            startDate: params?.startDate || undefined,
-            endDate: params?.endDate || undefined,
-            status: params?.status || undefined,
-          }
+          params: queryParams,
         });
         return response.data.data;
       } catch (error) {
@@ -204,6 +209,7 @@ import {
     async getPaymentDetails(paymentId: string): Promise<Payment> {
       try {
         const response = await httpClient.get(`${this.adminBaseUrl}/payments/${paymentId}`);
+        console.log(response.data.data.payment, "response.data.data.paymentresponse.data.data.payment")
         return response.data.data.payment;
       } catch (error) {
         throw new Error('Failed to fetch payment details');

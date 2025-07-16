@@ -8,6 +8,7 @@ import { useVideoManagement } from '../../../../application/hooks/useVideoManage
 import WarningModal from '../../../components/common/WarningModal';
 import { ITEMS_PER_PAGE, STATUS_OPTIONS, getTabs } from '../../../../shared/constants/videoManagementConstants';
 import { Video, VideoForEdit, Filters } from '../../../../domain/types/management/videomanagement';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
 const VideoManagementPage = () => {
   const [viewMode, setViewMode] = useState('table');
@@ -38,12 +39,11 @@ const VideoManagementPage = () => {
     const timer = setTimeout(() => {
       setDebouncedFilters(filters);
       setPage(1); // Reset to first page when filters change
-    }, 300); // 300ms delay for filters
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [filters]);
 
-  // Map slug to display name
   function slugToDisplayName(slug: string) {
     return slug
       .split('_')
@@ -63,7 +63,6 @@ const VideoManagementPage = () => {
         : '',
   };
 
-  console.log('normalizedFilters:', normalizedFilters);
 
   const {
     diplomasData,
@@ -90,7 +89,6 @@ const VideoManagementPage = () => {
     setPage(1);
   };
 
-  // Remove frontend filtering since we're now using backend filtering
   const paginatedVideos = videosData?.videos || [];
   const totalPages = videosData?.totalPages || 1;
 
@@ -100,19 +98,18 @@ const VideoManagementPage = () => {
     const tabKeys = ['all', 'published', 'drafts'];
     const newActiveTab = tabKeys[index];
     setActiveTab(newActiveTab);
-    
-    // Update filters based on active tab
+
     const statusMap: { [key: string]: string } = {
       'all': 'all',
       'published': 'Published',
       'drafts': 'Draft'
     };
-    
+
     setFilters(prev => ({
       ...prev,
       status: statusMap[newActiveTab] || 'all'
     }));
-    
+
     setPage(1);
   };
 
@@ -127,7 +124,6 @@ const VideoManagementPage = () => {
     setShowDeleteModal(true);
   };
 
-  // Convert Video to VideoForEdit for the AddVideoModal
   const convertVideoForEdit = (video: Video): VideoForEdit => {
     return {
       _id: video.id,
@@ -142,7 +138,6 @@ const VideoManagementPage = () => {
     };
   };
 
-  // Handle edit button click - fetch video from backend
   const handleEditVideo = async (video: Video) => {
     try {
       const fetchedVideo = await fetchVideoById(video.id);
@@ -168,14 +163,6 @@ const VideoManagementPage = () => {
       setShowAddModal(true);
     }
   };
-
-  if (isLoadingDiplomas || isLoadingVideos) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 relative">
@@ -243,8 +230,14 @@ const VideoManagementPage = () => {
           </div>
         </div>
 
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl border border-purple-500/30">
-          <div className="p-6">
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl border border-purple-500/30 min-h-[300px] relative">
+          {/* Loading overlay for video list/grid only */}
+          {isLoadingDiplomas || isLoadingVideos ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-900/60 z-20 rounded-xl">
+              <LoadingSpinner />
+            </div>
+          ) : null}
+          <div className={`p-6 ${isLoadingDiplomas || isLoadingVideos ? 'opacity-50 pointer-events-none select-none' : ''}`}>
             {paginatedVideos.length === 0 ? (
               <div className="text-center py-12">
                 <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">

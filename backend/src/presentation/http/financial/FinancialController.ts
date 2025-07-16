@@ -41,7 +41,7 @@ export class FinancialController implements IFinancialController {
     private readonly updateScholarshipApplicationUseCase: IUpdateScholarshipApplicationUseCase,
     private readonly createChargeUseCase: ICreateChargeUseCase,
     private readonly getAllChargesUseCase: IGetAllChargesUseCase
-  ) {}
+  ) { }
 
   async getStudentFinancialInfo(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     if (!httpRequest.user?.userId) {
@@ -55,11 +55,12 @@ export class FinancialController implements IFinancialController {
   }
 
   async getAllPayments(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { startDate, endDate, status, page = "1", limit = "10" } = httpRequest.query || {};
+    const { startDate, endDate, status, studentId, page = "1", limit = "10" } = httpRequest.query || {};
     const response = await this.getAllPaymentsUseCase.execute({
       startDate,
       endDate,
       status,
+      studentId,
       page: parseInt(page as string),
       limit: parseInt(limit as string),
     });
@@ -219,9 +220,9 @@ export class FinancialController implements IFinancialController {
     if (!httpRequest.user?.userId) {
       return this.httpErrors.error_401();
     }
-    const response = await this.getPaymentReceiptUseCase.execute({ 
+    const response = await this.getPaymentReceiptUseCase.execute({
       paymentId,
-      studentId: httpRequest.user.userId 
+      studentId: httpRequest.user.userId
     });
     if (!response.success) {
       return this.httpErrors.error_400();

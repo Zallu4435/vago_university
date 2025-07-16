@@ -46,6 +46,7 @@ import {
     GetAllChargesResponseDTO,
 } from "../../../domain/financial/dtos/FinancialResponseDTOs";
 import { IFinancialRepository } from "../../../application/financial/repositories/IFinancialRepository";
+import mongoose from 'mongoose';
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID!,
@@ -140,9 +141,21 @@ export class FinancialRepository implements IFinancialRepository {
 
     async getAllPayments(params: GetAllPaymentsRequestDTO): Promise<GetAllPaymentsResponseDTO> {
         const query: any = {};
-        if (params.startDate) query.date = { $gte: new Date(params.startDate) };
-        if (params.endDate) query.date = { ...query.date, $lte: new Date(params.endDate) };
+        if (params.startDate && params.endDate) {
+            query.date = { $gte: new Date(params.startDate), $lte: new Date(params.endDate) };
+        } else if (params.startDate) {
+            query.date = { $gte: new Date(params.startDate) };
+        } else if (params.endDate) {
+            query.date = { $lte: new Date(params.endDate) };
+        }
         if (params.status) query.status = params.status;
+        if (params.studentId) {
+            if (mongoose.Types.ObjectId.isValid(params.studentId)) {
+                query.studentId = params.studentId;
+            } else {
+                return { data: [], totalPages: 1, totalPayments: 0, currentPage: params.page };
+            }
+        }
 
         const total = await (PaymentModel as any).countDocuments(query);
         const payments = await (PaymentModel as any).find(query)

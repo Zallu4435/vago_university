@@ -15,6 +15,7 @@ export interface DocumentDTO {
     startDate?: string;
     endDate?: string;
     status?: string;
+    studentId?: string; // Added for filtering by studentId
     page: number;
     limit: number;
   }

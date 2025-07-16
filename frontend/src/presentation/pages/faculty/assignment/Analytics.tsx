@@ -194,7 +194,7 @@ export default function Analytics({ analytics, isLoading, onShow, onHide }: Anal
     return (
         <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 p-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Assignment Analytics</h2>
-            
+
             {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
@@ -207,11 +207,15 @@ export default function Analytics({ analytics, isLoading, onShow, onHide }: Anal
                 </div>
                 <div className="p-4 bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl">
                     <p className="text-sm text-gray-600">Submission Rate</p>
-                    <p className="text-2xl font-bold text-violet-600">{(analytics.submissionRate * 100).toFixed(1)}%</p>
+                    <p className="text-2xl font-bold text-violet-600">
+                        {typeof analytics.submissionRate === 'number' ? (analytics.submissionRate * 100).toFixed(1) : '0.0'}%
+                    </p>
                 </div>
                 <div className="p-4 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl">
                     <p className="text-sm text-gray-600">Average Marks</p>
-                    <p className="text-2xl font-bold text-yellow-600">{analytics.averageMarks?.toFixed(1)}</p>
+                    <p className="text-2xl font-bold text-yellow-600">
+                        {typeof analytics.averageMarks === 'number' ? analytics.averageMarks.toFixed(1) : '0.0'}
+                    </p>
                 </div>
             </div>
 

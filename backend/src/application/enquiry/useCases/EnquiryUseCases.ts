@@ -26,7 +26,6 @@ import {
   EnquiryReplyFailedError,
 } from "../../../domain/enquiry/errors/EnquiryErrors";
 
-// Email validation regex
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function toEnquiryProps(raw: any): EnquiryProps {
@@ -70,18 +69,15 @@ export class CreateEnquiryUseCase implements ICreateEnquiryUseCase {
   constructor(private enquiryRepository: IEnquiryRepository) {}
 
   async execute(params: CreateEnquiryRequestDTO): Promise<CreateEnquiryResponseDTO> {
-    // Business logic validation
     if (!emailRegex.test(params.email)) {
       throw new InvalidEmailError(params.email);
     }
 
-    // Create enquiry entity with business logic
     const enquiry = Enquiry.create({
       ...params,
-      status: EnquiryStatus.PENDING, // Add default status
+      status: EnquiryStatus.PENDING,
     });
     
-    // Save to database via repository
     const dbResult = await this.enquiryRepository.create(enquiry.props);
     
     return {
@@ -110,10 +106,15 @@ export class GetEnquiriesUseCase implements IGetEnquiriesUseCase {
 
     // Custom date range
     if (startDate && endDate) {
-      filter.createdAt = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
-      };
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      // Only add to filter if both are valid dates
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        filter.createdAt = {
+          $gte: start,
+          $lte: end,
+        };
+      }
     }
 
     // Search filter

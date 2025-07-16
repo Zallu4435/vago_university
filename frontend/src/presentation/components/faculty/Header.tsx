@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { LuBell, LuLogOut, LuSearch, LuMoon, LuSun, LuSettings, LuUser } from 'react-icons/lu';
-import NotificationModal from '../../components/common/NotificationModal';
+import NotificationModal from '../common/NotificationModal';
 import { useNotificationManagement } from '../../../application/hooks/useNotificationManagement';
 
 interface HeaderProps {

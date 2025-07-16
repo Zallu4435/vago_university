@@ -16,9 +16,9 @@ interface CreateAssignmentModalProps {
   setSelectedAssignment: (assignment: Assignment | null) => void;
 }
 
-export default function CreateAssignmentModal({ 
-  newAssignment, 
-  setNewAssignment, 
+export default function CreateAssignmentModal({
+  newAssignment,
+  setNewAssignment,
   setShowCreateModal,
   onSubmit,
   isLoading,
@@ -36,7 +36,7 @@ export default function CreateAssignmentModal({
     if (selectedAssignment) {
       // Format the date to YYYY-MM-DD for the input
       const formattedDate = new Date(selectedAssignment.dueDate).toISOString().split('T')[0];
-      
+
       // Pre-fill the form with the selected assignment's data
       setNewAssignment({
         title: selectedAssignment.title,
@@ -190,7 +190,7 @@ export default function CreateAssignmentModal({
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 w-full max-w-2xl max-h-[90vh] flex flex-col mx-4">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 rounded-t-3xl">
+        <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 rounded-t-3xl">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-2xl font-bold text-white">
@@ -218,24 +218,24 @@ export default function CreateAssignmentModal({
             </div>
           )}
           <div className="relative group animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Assignment Title</label>
             <input
               type="text"
               value={newAssignment.title}
               onChange={(e) => setNewAssignment({ ...newAssignment, title: e.target.value })}
-              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/80"
+              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white/80"
               placeholder="Enter assignment title"
               disabled={isLoading}
             />
           </div>
           <div className="relative group animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
             <select
               value={newAssignment.subject}
               onChange={(e) => setNewAssignment({ ...newAssignment, subject: e.target.value })}
-              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/80"
+              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white/80"
               disabled={isLoading}
             >
               <option value="">Select Subject</option>
@@ -247,24 +247,24 @@ export default function CreateAssignmentModal({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="relative group animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Due Date</label>
               <input
                 type="date"
                 value={newAssignment.dueDate}
                 onChange={(e) => setNewAssignment({ ...newAssignment, dueDate: e.target.value })}
-                className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/80"
+                className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white/80"
                 disabled={isLoading}
               />
             </div>
             <div className="relative group animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Maximum Marks</label>
               <input
                 type="number"
                 value={newAssignment.maxMarks}
                 onChange={(e) => setNewAssignment({ ...newAssignment, maxMarks: e.target.value })}
-                className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/80"
+                className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white/80"
                 placeholder="100"
                 min="1"
                 disabled={isLoading}
@@ -272,20 +272,20 @@ export default function CreateAssignmentModal({
             </div>
           </div>
           <div className="relative group animate-fadeInUp" style={{ animationDelay: '0.5s' }}>
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
             <textarea
               rows={6}
               value={newAssignment.description}
               onChange={(e) => setNewAssignment({ ...newAssignment, description: e.target.value })}
-              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/80 resize-none"
+              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white/80 resize-none"
               placeholder="Provide detailed assignment instructions..."
               disabled={isLoading}
             />
           </div>
           <div className="space-y-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">Reference Materials</label>
-            
+
             {/* Existing Files */}
             {existingFiles.length > 0 && (
               <div className="mb-4">
@@ -316,13 +316,13 @@ export default function CreateAssignmentModal({
 
             {/* File Upload Area */}
             <div
-              className="relative border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center transition-all bg-gray-50/80 hover:bg-gray-100/80"
+              className="relative border-2 border-dashed border-pink-300 rounded-2xl p-6 text-center transition-all bg-pink-50/80 hover:bg-pink-100/80"
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-0 group-hover:opacity-20 transition-opacity"></div>
-              <FaUpload size={32} className="mx-auto text-indigo-500 mb-2" />
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-0 group-hover:opacity-20 transition-opacity"></div>
+              <FaUpload size={32} className="mx-auto text-pink-500 mb-2" />
               <p className="text-gray-600 font-medium">Drag and drop files or click to browse</p>
               <p className="text-gray-500 text-sm mt-1">Add new files to the existing ones</p>
               <input
@@ -358,7 +358,7 @@ export default function CreateAssignmentModal({
             </button>
             <button
               onClick={handleSubmit}
-              className="px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading}
             >
               {isLoading ? (selectedAssignment ? 'Updating...' : 'Creating...') : (selectedAssignment ? 'Update Assignment' : 'Create Assignment')}

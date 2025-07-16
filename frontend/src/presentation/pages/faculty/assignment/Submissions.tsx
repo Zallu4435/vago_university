@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { FaSearch, FaDownload, FaEye, FaComment, FaCheck, FaClock, FaExclamationTriangle, FaFilter, FaUsers, FaFileAlt, FaStar, FaCode, FaCalculator, FaFlask, FaLanguage, FaHistory, FaGlobe, FaBook } from 'react-icons/fa';
 import ReviewModal from './ReviewModal';
 import { Assignment, Submission } from './types';
@@ -165,19 +166,19 @@ export default function Submissions({
       {/* Enhanced Assignment Header */}
       <div className="relative">
         <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-pink-500/10"></div>
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl shadow-lg">
+                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-3xl shadow-lg">
                   {getSubjectIcon(assignment.subject)}
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
                     {assignment.title}
                   </h2>
-                  <p className="text-indigo-600 font-medium text-lg">{assignment.subject}</p>
+                  <p className="text-pink-600 font-medium text-lg">{assignment.subject}</p>
                   <p className="text-gray-500 text-sm">Max Marks: {assignment.maxMarks}</p>
                 </div>
               </div>
@@ -186,7 +187,7 @@ export default function Submissions({
                 <button
                   onClick={handleBulkDownload}
                   disabled={selectedSubmissions.length === 0}
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2"
+                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2"
                 >
                   <FaDownload size={16} />
                   <span>Download Selected ({selectedSubmissions.length})</span>
@@ -228,25 +229,25 @@ export default function Submissions({
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-6">
         <div className="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
           <div className="flex-1 relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-            <div className="relative bg-white rounded-2xl border-2 border-gray-100 focus-within:border-indigo-300 transition-all">
-              <FaSearch size={20} className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+            <div className="relative bg-white rounded-2xl border-2 border-gray-100 focus-within:border-pink-300 transition-all">
+              <FaSearch size={20} className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-pink-500 transition-colors" />
               <input
                 type="text"
                 placeholder="Search students by name or ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-14 pr-6 py-4 bg-transparent border-none focus:outline-none text-gray-700 placeholder-gray-400 text-lg"
+                className="w-full pl-14 pr-6 py-4 bg-transparent border-none focus:outline-none text-gray-700 placeholder-gray-400 text-lg rounded-2xl"
               />
             </div>
           </div>
 
           <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="relative px-6 py-4 bg-white border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-300 text-gray-700 font-medium cursor-pointer hover:border-indigo-200 transition-all"
+              className="relative px-6 py-4 bg-white border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-pink-300 text-gray-700 font-medium cursor-pointer hover:border-pink-200 transition-all"
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
@@ -260,8 +261,8 @@ export default function Submissions({
               onClick={() => setViewMode('grid')}
               className={`px-4 py-2 rounded-xl transition-all font-medium ${
                 viewMode === 'grid' 
-                  ? 'bg-white shadow-md text-indigo-600' 
-                  : 'text-gray-600 hover:text-indigo-600'
+                  ? 'bg-white shadow-md text-pink-600' 
+                  : 'text-gray-600 hover:text-pink-600'
               }`}
             >
               Grid
@@ -270,8 +271,8 @@ export default function Submissions({
               onClick={() => setViewMode('table')}
               className={`px-4 py-2 rounded-xl transition-all font-medium ${
                 viewMode === 'table' 
-                  ? 'bg-white shadow-md text-indigo-600' 
-                  : 'text-gray-600 hover:text-indigo-600'
+                  ? 'bg-white shadow-md text-pink-600' 
+                  : 'text-gray-600 hover:text-pink-600'
               }`}
             >
               Table
@@ -281,7 +282,7 @@ export default function Submissions({
 
         {searchTerm && (
           <div className="mt-4 text-center">
-            <span className="inline-flex items-center px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full text-sm font-medium border border-indigo-200">
+            <span className="inline-flex items-center px-4 py-2 bg-pink-50 text-pink-700 rounded-full text-sm font-medium border border-pink-200">
               {filteredSubmissions.length} result{filteredSubmissions.length !== 1 ? 's' : ''} found
             </span>
           </div>
@@ -298,7 +299,7 @@ export default function Submissions({
             return (
               <div 
                 key={submission._id} 
-                className="group relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-8 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 animate-fadeInUp"
+                className="group relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl border border-pink-100 p-8 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 animate-fadeInUp"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-xl"></div>
@@ -318,7 +319,7 @@ export default function Submissions({
                           }
                         }}
                       />
-                      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-12 w-12 rounded-2xl flex items-center justify-center text-white text-lg font-bold shadow-lg">
+                      <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-12 w-12 rounded-2xl flex items-center justify-center text-white text-lg font-bold shadow-lg">
                         {submission.studentName.split(' ').map(n => n[0]).join('')}
                       </div>
                     </div>
@@ -330,10 +331,10 @@ export default function Submissions({
                   </div>
 
                   <div className="mb-6">
-                    <h3 className="font-bold text-gray-800 text-xl mb-1 group-hover:text-indigo-600 transition-colors">
+                    <h3 className="font-bold text-pink-800 text-xl mb-1 group-hover:text-pink-600 transition-colors">
                       {submission.studentName}
                     </h3>
-                    <p className="text-indigo-600 font-medium text-sm mb-2">{submission.studentId}</p>
+                    <p className="text-pink-600 font-medium text-sm mb-2">{submission.studentId}</p>
                     
                     <div className="flex items-center space-x-3">
                       <span className="text-sm text-gray-600">
@@ -364,7 +365,7 @@ export default function Submissions({
                             href={submission.files[0]} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-indigo-600 hover:text-indigo-800 font-medium truncate block"
+                            className="text-pink-600 hover:text-pink-800 font-medium truncate block"
                           >
                             View Submission
                           </a>
@@ -410,7 +411,7 @@ export default function Submissions({
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => handleReview(submission)}
-                      className="flex-1 p-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl hover:from-indigo-600 hover:to-purple-700 transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2"
+                      className="flex-1 p-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2"
                     >
                       <FaEye size={16} />
                       <span>Review</span>
@@ -422,10 +423,10 @@ export default function Submissions({
           })}
         </div>
       ) : (
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 overflow-hidden">
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-gray-50 to-gray-100/50">
+              <thead className="bg-gradient-to-r from-purple-50 to-pink-50">
                 <tr>
                   <th className="px-8 py-6 text-left">
                     <input
@@ -474,7 +475,7 @@ export default function Submissions({
                           </div>
                           <div>
                             <p className="font-bold text-gray-900 text-lg">{submission.studentName}</p>
-                            <p className="text-sm text-indigo-600 font-medium">{submission.studentId}</p>
+                            <p className="text-sm text-pink-600 font-medium">{submission.studentId}</p>
                           </div>
                         </div>
                       </td>
@@ -563,17 +564,17 @@ export default function Submissions({
       {/* Empty State */}
       {filteredSubmissions.length === 0 && (
         <div className="text-center py-16 animate-fadeIn">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-pink-50 rounded-full mb-4">
             <FaSearch size={32} className="text-gray-400" />
           </div>
-          <h3 className="text-2xl font-semibold text-gray-800 mb-2">No Submissions Found</h3>
-          <p className="text-gray-500 max-w-md mx-auto">
+          <h3 className="text-2xl font-semibold text-pink-800 mb-2">No Submissions Found</h3>
+          <p className="text-pink-500 max-w-md mx-auto">
             Try adjusting your search or filter criteria to find the submissions you're looking for.
           </p>
         </div>
       )}
 
-      {selectedSubmission && (
+      {selectedSubmission && ReactDOM.createPortal(
         <ReviewModal
           submission={{
             id: selectedSubmission._id,
@@ -593,7 +594,8 @@ export default function Submissions({
           saveReview={handleReviewSubmit}
           onClose={handleCloseReview}
           isLoading={isReviewing}
-        />
+        />,
+        document.body
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaSearch, FaPlus, FaEdit, FaTrash, FaClock, FaCheck, FaPlay } from 'react-icons/fa';
+import { FaCheckCircle, FaSpinner } from 'react-icons/fa';
 import CreateSessionModal from './CreateSessionModal';
-import EditSessionModal from './EditSessionModal';
 import { Session } from './types';
 import { useSessionManagement } from '../../../../application/hooks/useSessionManagement';
 import SessionDetailsModal from './SessionDetailsModal';
@@ -12,7 +12,7 @@ export default function SessionManagement() {
     sessions,
     isLoading,
     handleCreateSession,
-    handleUpdateSession,
+    handleUpdateSession, 
     handleDeleteSession,
     markSessionAsOver,
     isMarkingAsOver,
@@ -67,53 +67,49 @@ export default function SessionManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      <div className="h-full w-full px-6">
-        <div className="max-w-7xl mx-auto flex flex-col">
-          {/* Fixed Header Section */}
-          <div className="flex-none py-6">
-            <div className="space-y-8">
-              {/* Header */}
-              <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8">
-                <div className="flex items-center justify-between mb-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-8 px-2 sm:px-6">
+      <div className="max-w-7xl mx-auto flex flex-col gap-8">
+        {/* Header Section */}
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                   <div>
-                    <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent mb-1">
                       Session Management
                     </h2>
                     <p className="text-gray-500">Manage live and recorded sessions for your courses</p>
                   </div>
                   <button
                     onClick={() => setShowCreateModal(true)}
-                    className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl hover:from-indigo-600 hover:to-purple-700 transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2"
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
                     <FaPlus size={16} />
                     <span>Create Session</span>
                   </button>
-                </div>
               </div>
 
               {/* Filters */}
-              <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-6">
-                <div className="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6">
+          <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+            {/* Search */}
                   <div className="flex-1 relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                    <div className="relative bg-white rounded-2xl border-2 border-gray-100 focus-within:border-indigo-300 transition-all">
-                      <FaSearch size={20} className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity pointer-events-none"></div>
+              <div className="relative bg-white rounded-2xl border-2 border-gray-100 focus-within:border-pink-300 transition-all">
+                <FaSearch size={20} className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-pink-500 transition-colors" />
                       <input
                         type="text"
                         placeholder="Search by title or instructor..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-14 pr-6 py-4 bg-transparent border-none focus:outline-none text-gray-700 placeholder-gray-400 text-lg"
+                  className="w-full pl-14 pr-6 py-4 bg-transparent border-none focus:outline-none text-gray-700 placeholder-gray-400 text-lg rounded-2xl"
                       />
                     </div>
                   </div>
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+            {/* Status Filter */}
+            <div className="relative group w-full md:w-auto">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity pointer-events-none"></div>
                     <select
                       value={filterStatus}
                       onChange={(e) => setFilterStatus(e.target.value)}
-                      className="relative px-6 py-4 bg-white border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-300 text-gray-700 font-medium cursor-pointer hover:border-indigo-200 transition-all"
+                className="relative w-full md:w-auto px-6 py-4 bg-white border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-pink-300 text-gray-700 font-medium cursor-pointer hover:border-pink-200 transition-all"
                     >
                       <option value="all">All Status</option>
                       <option value="upcoming">Upcoming</option>
@@ -121,12 +117,13 @@ export default function SessionManagement() {
                       <option value="completed">Completed</option>
                     </select>
                   </div>
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+            {/* Course Filter */}
+            <div className="relative group w-full md:w-auto">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity pointer-events-none"></div>
                     <select
                       value={filterCourse}
                       onChange={(e) => setFilterCourse(e.target.value)}
-                      className="relative px-6 py-4 bg-white border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-indigo-300 text-gray-700 font-medium cursor-pointer hover:border-indigo-200 transition-all"
+                className="relative w-full md:w-auto px-6 py-4 bg-white border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-pink-300 text-gray-700 font-medium cursor-pointer hover:border-pink-200 transition-all"
                     >
                       <option value="all">All Courses</option>
                       <option>Database Systems</option>
@@ -134,35 +131,29 @@ export default function SessionManagement() {
                       <option>Data Structures</option>
                       <option>Algorithms</option>
                     </select>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
 
-          {/* Scrollable Table Section */}
-          <div className="flex-1 pb-6">
-            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 h-full">
-              <div className="h-full overflow-auto">
-                <table className="w-full">
-                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100/50 sticky top-0 z-10">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-gray-900 font-bold uppercase">Title</th>
-                      <th className="px-6 py-4 text-left text-gray-900 font-bold uppercase">Instructor</th>
-                      <th className="px-6 py-4 text-left text-gray-900 font-bold uppercase">Course</th>
-                      <th className="px-6 py-4 text-left text-gray-900 font-bold uppercase">Status</th>
-                      <th className="px-6 py-4 text-left text-gray-900 font-bold uppercase">Attendees</th>
-                      <th className="px-6 py-4 text-left text-gray-900 font-bold uppercase">Actions</th>
+        {/* Table Section */}
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 overflow-x-auto">
+          <table className="w-full min-w-[900px]">
+            <thead className="bg-gradient-to-r from-purple-50 to-pink-50 sticky top-0 z-10">
+              <tr>
+                <th className="px-6 py-4 text-left text-purple-900 font-bold uppercase">Title</th>
+                <th className="px-6 py-4 text-left text-purple-900 font-bold uppercase">Instructor</th>
+                <th className="px-6 py-4 text-left text-purple-900 font-bold uppercase">Course</th>
+                <th className="px-6 py-4 text-left text-purple-900 font-bold uppercase">Status</th>
+                <th className="px-6 py-4 text-left text-purple-900 font-bold uppercase">Attendees</th>
+                <th className="px-6 py-4 text-left text-purple-900 font-bold uppercase">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-pink-50">
                     {filteredSessions.map((session: any, index: number) => {
                       const statusConfig = getStatusConfig(session.status);
                       return (
-                        <tr key={session._id || session.id} className="hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all animate-fadeInUp" style={{ animationDelay: `${index * 0.05}s` }}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <p className="font-bold text-gray-900">{session.title}</p>
-                          </td>
+                  <tr key={session._id || session.id} className={`hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-pink-50/50 transition-all ${index % 2 === 0 ? 'bg-white' : 'bg-pink-50'} animate-fadeInUp`} style={{ animationDelay: `${index * 0.05}s` }}>
+                    <td className="px-6 py-4 whitespace-nowrap font-bold text-purple-900">{session.title}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-gray-700">{session.instructor}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-gray-700">{session.course}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -173,24 +164,24 @@ export default function SessionManagement() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-gray-700">{session.attendees}/{session.maxAttendees}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center space-x-2">
+                      <div className="flex flex-wrap gap-2">
                               <button
                                 onClick={() => { setSelectedSession(session); setShowDetailsModal(true); }}
-                                className="p-3 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-xl transition-all border border-gray-200 hover:border-gray-300 hover:scale-110 transform"
+                          className="p-3 bg-purple-50 text-purple-600 hover:bg-pink-100 rounded-xl transition-all border border-pink-100 hover:border-pink-200 hover:scale-110 transform min-w-[40px]"
                                 title="View"
                               >
                                 View
                               </button>
                               <button
                                 onClick={() => { setSelectedSession(session); setShowEditModal(true); }}
-                                className="p-3 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl transition-all border border-indigo-200 hover:border-indigo-300 hover:scale-110 transform"
+                          className="p-3 bg-pink-50 text-pink-600 hover:bg-pink-100 rounded-xl transition-all border border-pink-200 hover:border-pink-300 hover:scale-110 transform min-w-[40px]"
                                 title="Edit"
                               >
                                 <FaEdit size={16} />
                               </button>
                               <button
                                 onClick={() => { setSessionToDelete(session); setShowDeleteModal(true); }}
-                                className="p-3 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl transition-all border border-red-200 hover:border-red-300 hover:scale-50 transform"
+                          className="p-3 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl transition-all border border-red-200 hover:border-red-300 hover:scale-110 transform min-w-[40px]"
                                 title="Delete"
                               >
                                 <FaTrash size={16} />
@@ -198,11 +189,16 @@ export default function SessionManagement() {
                               {session.status !== 'Ended' && (
                                 <button
                                   onClick={() => markSessionAsOver(session._id || session.id)}
-                                  className="p-3 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 rounded-xl transition-all border border-yellow-200 hover:border-yellow-300 hover:scale-110 transform"
+                            className="p-3 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 rounded-xl transition-all border border-yellow-200 hover:border-yellow-300 hover:scale-110 transform min-w-[40px] flex items-center justify-center"
                                   title="Mark as Over"
+                            aria-label="Mark as Over"
                                   disabled={isMarkingAsOver}
                                 >
-                                  {isMarkingAsOver ? 'Marking...' : 'Mark as Over'}
+                            {isMarkingAsOver ? (
+                              <FaSpinner className="animate-spin" size={18} />
+                            ) : (
+                              <FaCheckCircle size={18} />
+                            )}
                                 </button>
                               )}
                             </div>
@@ -212,24 +208,21 @@ export default function SessionManagement() {
                     })}
                   </tbody>
                 </table>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Empty State */}
       {filteredSessions.length === 0 && (
         <div className="text-center py-16 animate-fadeIn">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4">
-            <FaSearch size={32} className="text-gray-400" />
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-pink-50 rounded-full mb-4">
+              <FaSearch size={32} className="text-pink-400" />
           </div>
-          <h3 className="text-2xl font-semibold text-gray-800 mb-2">No Sessions Found</h3>
-          <p className="text-gray-500 max-w-md mx-auto">
+            <h3 className="text-2xl font-semibold text-purple-800 mb-2">No Sessions Found</h3>
+            <p className="text-pink-500 max-w-md mx-auto">
             Try adjusting your search or filter criteria to find the sessions you're looking for.
           </p>
         </div>
       )}
+      </div>
 
       {/* Modals */}
       {showCreateModal && (
@@ -238,11 +231,12 @@ export default function SessionManagement() {
           createSession={onCreateSession}
         />
       )}
-      {showEditModal && selectedSession && (
-        <EditSessionModal
-          session={selectedSession}
-          setShowEditModal={setShowEditModal}
+      {/* Use CreateSessionModal for edit as well */}
+      {selectedSession && showEditModal && (
+        <CreateSessionModal
+          setShowCreateModal={(show) => { setShowEditModal(show); if (!show) setSelectedSession(null); }}
           editSession={onEditSession}
+          sessionToEdit={selectedSession}
         />
       )}
       {showDetailsModal && selectedSession && (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiPlus, FiStar, FiZap, FiUser, FiEye, FiEdit, FiTrash2 } from 'react-icons/fi';
+import { FiPlus, FiUser, FiEye, FiEdit, FiTrash2 } from 'react-icons/fi';
 import Header from '../../../components/admin/management/Header';
 import ApplicationsTable from '../../../components/admin/management/ApplicationsTable';
 import Pagination from '../../../components/admin/management/Pagination';
@@ -9,13 +9,12 @@ import SiteSectionViewModal from './SiteSectionViewModal';
 import { useSiteManagement, SiteSectionKey } from '../../../../application/hooks/useSiteManagement';
 import { SiteSection } from '../../../../application/services/siteManagement.service';
 import { toast } from 'react-hot-toast';
-import { SECTIONS, createColumns, columnsMap } from '../../../../shared/constants/siteManagementConstants';
+import { SECTIONS, columnsMap } from '../../../../shared/constants/siteManagementConstants';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import EmptyState from '../../../../shared/components/EmptyState';
 
 
-// Helper function to convert SiteSection to table-compatible format
 const convertToTableData = (sections: SiteSection[]) => {
   return sections.map(section => ({
     ...section,
@@ -38,13 +37,11 @@ const SiteManagement = () => {
     endDate?: string;
   }>({});
 
-  // Get filter values, only send to backend if not 'all'
   const categoryFilter = filters.category && filters.category !== 'all' ? filters.category : undefined;
   const dateRangeFilter = filters.dateRange && filters.dateRange !== 'all' ? filters.dateRange : undefined;
   const startDate = dateFilters.startDate || '';
   const endDate = dateFilters.endDate || '';
 
-  // Debounce search query
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
@@ -69,7 +66,6 @@ const SiteManagement = () => {
     selectedSection,
     isLoading,
     error,
-    sectionError,
     createSection,
     updateSection,
     deleteSection,
@@ -85,10 +81,8 @@ const SiteManagement = () => {
 
   const section = SECTIONS.find(s => s.key === activeTab)!;
 
-  // Convert to table-compatible format
   const tableData = convertToTableData(sections || []);
 
-  // Filter options - predefined static options
   const filterOptions: { [key: string]: string[] } = {
     category: [
       'All Categories',
@@ -114,24 +108,16 @@ const SiteManagement = () => {
     ],
   };
 
-  // Date filter handlers
   const handleDateFilterChange = (field: 'startDate' | 'endDate', value: string) => {
     setDateFilters(prev => ({
       ...prev,
       [field]: value
     }));
-    // Set dateRange to 'custom' when custom dates are selected
     if (value) {
       setFilters(prev => ({ ...prev, dateRange: 'custom' }));
     }
   };
 
-  const handleResetDateFilters = () => {
-    setDateFilters({});
-    setFilters(prev => ({ ...prev, dateRange: '' }));
-  };
-
-  // Combined reset function
   const handleResetAllFilters = () => {
     setFilters({});
     setSearchQuery('');
@@ -236,10 +222,6 @@ const SiteManagement = () => {
     },
   ];
 
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
-
   if (error) {
     return <ErrorMessage message={error.message || 'Failed to load data.'} />;
   }
@@ -270,8 +252,13 @@ const SiteManagement = () => {
           stats={stats}
         />
         <div className="mt-8">
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
-            <div className="px-6 py-5">
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20 min-h-[300px] relative">
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-900/60 z-20 rounded-xl">
+                <LoadingSpinner />
+              </div>
+            )}
+            <div className={`px-6 py-5 ${isLoading ? 'opacity-50 pointer-events-none select-none' : ''}`}>
               <button
                 onClick={handleAdd}
                 className="mb-4 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"

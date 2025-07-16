@@ -1,6 +1,6 @@
-import React from 'react';
 import { IoPersonOutline as User, IoPeopleOutline as Group } from 'react-icons/io5';
-import { Notification } from '../../domain/types/notification.types';
+import { Notification } from '../../domain/types/management/notificationmanagement';
+import { formatDate } from '../utils/dateUtils';
 
 export const RECIPIENT_TYPES = ['All', 'All Students', 'All Faculty', 'All Students and Faculty'];
 export const STATUSES = ['All', 'Sent', 'Failed'];
@@ -49,7 +49,7 @@ export const notificationColumns = [
     header: 'Created At',
     key: 'createdAt',
     render: (notification: Notification) => (
-      <div className="text-sm text-gray-300">{notification.createdAt}</div>
+      <div className="text-sm text-gray-300">{formatDate(notification.createdAt)}</div>
     ),
   },
   {

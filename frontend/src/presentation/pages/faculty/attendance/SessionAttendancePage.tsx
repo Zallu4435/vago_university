@@ -3,6 +3,7 @@ import { FaClock, FaUsers, FaEye, FaFileAlt, FaCalendarAlt, FaStopwatch, FaFilte
 import { useSessionManagement } from '../../../../application/hooks/useSessionManagement';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Session } from '../../../../application/hooks/useSessionManagement';
+import SessionAttendanceViewModal from './SessionAttendanceViewModal'
 
 interface AttendanceInterval {
   joinedAt: string;
@@ -286,16 +287,19 @@ const SessionAttendancePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-8 px-2 sm:px-6">
+      <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <div className="inline-flex items-center space-x-3 bg-white/95 backdrop-blur-xl rounded-3xl px-8 py-6 shadow-2xl border border-pink-100">
+            <div className="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+              <span className="text-white text-3xl"><FaFileAlt /></span>
+            </div>
+            <div className="text-left">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
                 Session Attendance Management
               </h1>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mt-2">
                 <div className="flex items-center gap-2">
                   <FaFileAlt className="w-4 h-4" />
                   <span className="font-medium">{currentSession?.name}</span>
@@ -324,7 +328,7 @@ const SessionAttendancePage = () => {
         </div>
 
         {/* Filters Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -341,7 +345,7 @@ const SessionAttendancePage = () => {
                     }
                   }, 100);
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
               >
                 {filteredSessions.map((session: any) => (
                   <option key={session._id} value={session._id}>
@@ -357,7 +361,7 @@ const SessionAttendancePage = () => {
                 Search Students
               </label>
               <div className="relative">
-                <FaSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isSearching ? 'text-blue-500 animate-pulse' : 'text-gray-400'}`} />
+                <FaSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isSearching ? 'text-pink-500 animate-pulse' : 'text-gray-400'}`} />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -365,11 +369,11 @@ const SessionAttendancePage = () => {
                   defaultValue={searchTerm}
                   onChange={handleSearchChange}
                   onKeyPress={handleSearchKeyPress}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                 />
                 {isSearching && (
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-pink-500"></div>
                   </div>
                 )}
               </div>
@@ -379,7 +383,7 @@ const SessionAttendancePage = () => {
             <div className="flex items-end">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-pink-50 text-pink-700 rounded-lg hover:bg-pink-100 transition-colors"
               >
                 <FaFilter className="w-4 h-4" />
                 Filters
@@ -390,7 +394,7 @@ const SessionAttendancePage = () => {
 
           {/* Advanced Filters */}
           {showFilters && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="mt-6 pt-6 border-t border-pink-100">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Attendance Filter */}
                 <div>
@@ -400,7 +404,7 @@ const SessionAttendancePage = () => {
                   <select
                     value={attendanceFilter}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setAttendanceFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                   >
                     <option value="all">All Levels</option>
                     <option value="high">High (≥75%)</option>
@@ -417,7 +421,7 @@ const SessionAttendancePage = () => {
                   <select
                     value={decisionFilter}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDecisionFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                   >
                     <option value="all">All Decisions</option>
                     <option value="approved">Approved</option>
@@ -436,13 +440,13 @@ const SessionAttendancePage = () => {
                       type="date"
                       value={dateRange.start}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                     />
                     <input
                       type="date"
                       value={dateRange.end}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                     />
                   </div>
                 </div>
@@ -453,14 +457,14 @@ const SessionAttendancePage = () => {
                 <button
                   onClick={() => refetchAttendance && refetchAttendance()}
                   disabled={isLoadingAttendance}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <FaSearch className="w-4 h-4" />
                   {isLoadingAttendance ? 'Loading...' : 'Apply Filters'}
                 </button>
                 <button
                   onClick={clearFilters}
-                  className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 text-pink-700 hover:text-pink-900 transition-colors"
                 >
                   <FaTimes className="w-4 h-4" />
                   Clear Filters
@@ -471,12 +475,12 @@ const SessionAttendancePage = () => {
         </div>
 
         {/* Attendance Table */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 overflow-hidden">
+          <div className="p-6 border-b border-pink-100">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FaUsers className="w-5 h-5 text-blue-600" />
-                <h2 className="text-xl font-semibold text-gray-900">Faculty Attendance Review</h2>
+                <FaUsers className="w-5 h-5 text-pink-600" />
+                <h2 className="text-xl font-semibold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Faculty Attendance Review</h2>
                 <span className="text-sm text-gray-500 ml-2">Review and approve student attendance based on session time</span>
               </div>
               {processedAttendance.length === 0 && (
@@ -490,7 +494,7 @@ const SessionAttendancePage = () => {
           {processedAttendance.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gradient-to-r from-purple-50 to-pink-50">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       User
@@ -500,9 +504,6 @@ const SessionAttendancePage = () => {
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Time Spent
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Attendance
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Sessions
@@ -515,13 +516,13 @@ const SessionAttendancePage = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-pink-100">
                   {processedAttendance.map((user: AttendanceUser & { totalTime: number; formattedTime: string; attendancePercentage: number; sessionData: any, status?: string }) => (
-                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={user.id} className="hover:bg-pink-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span className="text-blue-600 font-medium text-sm">
+                          <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                            <span className="text-white font-medium text-sm">
                               {user.username.charAt(0).toUpperCase()}
                             </span>
                           </div>
@@ -537,16 +538,11 @@ const SessionAttendancePage = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                          <FaStopwatch className="w-4 h-4 text-gray-400" />
+                          <FaClock className="w-4 h-4 text-gray-400" />
                           <span className="text-sm font-medium text-gray-900">
                             {user.formattedTime}
                           </span>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAttendanceColor(user.attendancePercentage)}`}>
-                          {user.attendancePercentage}%
-                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
@@ -556,11 +552,11 @@ const SessionAttendancePage = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
                           {user.status === 'approved' || user.status === 'approve' ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full text-green-600 bg-green-100">Approved</span>
+                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white">Approved</span>
                           ) : user.status === 'declined' || user.status === 'decline' ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full text-red-600 bg-red-100">Declined</span>
+                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-red-500 to-pink-600 text-white">Declined</span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full text-yellow-600 bg-yellow-100">Not updated</span>
+                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-yellow-500 to-orange-600 text-white">Not updated</span>
                           )}
                         </div>
                       </td>
@@ -580,7 +576,7 @@ const SessionAttendancePage = () => {
                           </button>
                           <button
                             onClick={() => handleViewIntervals(user)}
-                            className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors flex items-center gap-1"
+                            className="px-3 py-1 bg-pink-50 text-pink-700 rounded-lg text-xs font-medium hover:bg-pink-100 transition-colors flex items-center gap-1"
                           >
                             <FaEye className="w-3 h-3" />
                             View Details
@@ -594,7 +590,7 @@ const SessionAttendancePage = () => {
             </div>
           ) : (
             <div className="p-12 text-center">
-              <div className="text-gray-400 mb-4">
+              <div className="text-pink-200 mb-4">
                 <FaUsers className="w-12 h-12 mx-auto" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Students Found</h3>
@@ -603,7 +599,7 @@ const SessionAttendancePage = () => {
               </p>
               <button
                 onClick={clearFilters}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
               >
                 Clear Filters
               </button>
@@ -613,102 +609,16 @@ const SessionAttendancePage = () => {
       </div>
 
       {/* Interval Details Modal */}
-      {selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Session Details for {selectedUser.username}
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Total time: {formatDuration(calculateTotalTime(selectedUser.intervals, currentSession?.endTime))} ({selectedUser.attendancePercentage}% attendance)
-                  </p>
-                  {(() => {
-                    const recommendation = getAttendanceRecommendation(selectedUser.attendancePercentage);
-                    const decision = attendanceDecisions.get(selectedUser.id.toString());
-
-                    return (
-                      <div className="mt-2 flex items-center gap-2 text-sm">
-                        <span className="text-gray-600">Status:</span>
-                        {decision ? (
-                          <span className={`font-medium ${decision === 'approve' ? 'text-green-600' : 'text-red-600'}`}>
-                            {decision === 'approve' ? 'Approved' : 'Declined'}
-                          </span>
-                        ) : (
-                          <span className="text-yellow-600 font-medium">
-                            Recommended: {recommendation.charAt(0).toUpperCase() + recommendation.slice(1)}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </div>
-                <button
-                  onClick={closeIntervalModal}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <div className="p-6 max-h-96 overflow-y-auto">
-              <div className="space-y-4">
-                {selectedUser.intervals.map((interval: AttendanceInterval, index: number) => {
-                  let intervalDuration = 0;
-                  if (interval.joinedAt) {
-                    const joinTime = new Date(interval.joinedAt);
-                    let leaveTime: Date;
-                    if (interval.leftAt) {
-                      leaveTime = new Date(interval.leftAt);
-                    } else if (currentSession?.endTime) {
-                      leaveTime = new Date(currentSession.endTime);
-                    } else {
-                      leaveTime = new Date();
-                    }
-                    if (!isNaN(joinTime.getTime()) && !isNaN(leaveTime.getTime()) && leaveTime > joinTime) {
-                      intervalDuration = leaveTime.getTime() - joinTime.getTime();
-                    }
-                  }
-                  return (
-                    <div key={index} className="bg-gray-50 rounded-lg p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span className="text-blue-600 font-medium text-sm">
-                              {index + 1}
-                            </span>
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">
-                              Session {index + 1}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {interval.joinedAt ? formatTime(interval.joinedAt) : 'Invalid'} - {interval.leftAt ? formatTime(interval.leftAt) : (currentSession?.endTime ? formatTime(currentSession.endTime) : 'Now')}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-medium text-gray-900">
-                            {formatDuration(intervalDuration)}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            Duration
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <SessionAttendanceViewModal
+        selectedUser={selectedUser}
+        currentSession={currentSession}
+        attendanceDecisions={attendanceDecisions}
+        closeIntervalModal={closeIntervalModal}
+        formatDuration={formatDuration}
+        calculateTotalTime={calculateTotalTime}
+        formatTime={formatTime}
+        getAttendanceRecommendation={getAttendanceRecommendation}
+      />
     </div>
   );
 };

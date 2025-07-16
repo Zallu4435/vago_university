@@ -31,7 +31,7 @@ export class NotificationRepository implements INotificationRepository {
             recipientId: data.recipientId,
             recipientName: data.recipientName,
             createdBy: data.createdBy,
-            createdAt: data.createdAt || new Date(),
+            createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
             status: data.status,
             readBy: [],
         });
@@ -40,14 +40,36 @@ export class NotificationRepository implements INotificationRepository {
     }
 
     async find(filter: any, options: { skip?: number; limit?: number; sort?: any } = {}): Promise<any[]> {
-        return NotificationModel.find(filter)
+        // Add search support
+        if (filter.search) {
+            const searchRegex = new RegExp(filter.search, 'i');
+            filter.$or = [
+                ...(filter.$or || []),
+                { title: { $regex: searchRegex } },
+                { message: { $regex: searchRegex } }
+            ];
+            delete filter.search;
+        }
+        const result = await NotificationModel.find(filter)
             .sort(options.sort ?? {})
             .skip(options.skip ?? 0)
             .limit(options.limit ?? 0)
             .lean();
+        console.log('[NotificationRepository] Query result:', result);
+        return result;
     }
 
     async count(filter: any): Promise<number> {
+        // Add search support
+        if (filter.search) {
+            const searchRegex = new RegExp(filter.search, 'i');
+            filter.$or = [
+                ...(filter.$or || []),
+                { title: { $regex: searchRegex } },
+                { message: { $regex: searchRegex } }
+            ];
+            delete filter.search;
+        }
         return NotificationModel.countDocuments(filter);
     }
 
@@ -103,7 +125,7 @@ export class NotificationRepository implements INotificationRepository {
     }
 
     async getAllNotifications(params: GetAllNotificationsRequestDTO): Promise<GetAllNotificationsResponseDTO> {
-        const { userId, collection, page = 1, limit = 10, recipientType, status, dateRange, isRead } = params;
+        const { userId, collection, page = 1, limit = 10, recipientType, status, dateRange, isRead, search } = params;
 
         const query: any = {};
 
@@ -143,6 +165,16 @@ export class NotificationRepository implements INotificationRepository {
         if (dateRange && dateRange !== "All") {
             const [start, end] = dateRange.split(",");
             query.createdAt = { $gte: new Date(start), $lte: new Date(end) };
+        }
+
+        // Add search support
+        if (search) {
+            const searchRegex = new RegExp(search, 'i');
+            query.$or = [
+                ...(query.$or || []),
+                { title: { $regex: searchRegex } },
+                { message: { $regex: searchRegex } }
+            ];
         }
 
         const notifications = await NotificationModel.find(query)

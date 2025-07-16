@@ -34,10 +34,10 @@ const userColumns = [
     render: (user: User) => (
       <span
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${user.status.toLowerCase() === 'approved'
-            ? 'bg-green-900/30 text-green-400 border-green-500/30'
-            : user.status.toLowerCase() === 'rejected'
-              ? 'bg-red-900/30 text-red-400 border-red-500/30'
-              : 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
+          ? 'bg-green-900/30 text-green-400 border-green-500/30'
+          : user.status.toLowerCase() === 'rejected'
+            ? 'bg-red-900/30 text-red-400 border-red-500/30'
+            : 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
           }`}
         role="status"
       >
@@ -108,8 +108,8 @@ const UserManagement: React.FC = () => {
   const handleCustomDateChange = (field: 'startDate' | 'endDate', value: string) => {
     setCustomDateRange((prev) => ({ ...prev, [field]: value }));
     // Also update the filters state so the dates get sent to the backend
-    setFilters((prev) => ({ 
-      ...prev, 
+    setFilters((prev) => ({
+      ...prev,
       [field]: value,
       dateRange: 'custom' // Set dateRange to 'custom' when custom dates are selected
     }));

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { FiHelpCircle, FiClock, FiCheckSquare } from 'react-icons/fi';
 import { debounce } from 'lodash';
 import Header from '../../../components/admin/management/Header';
@@ -17,10 +17,31 @@ import {
   ENQUIRY_STATS,
   ENQUIRY_TABS,
 } from '../../../../shared/constants/enquiryManagementConstants';
-import { filterEnquiries } from '../../../../shared/filters/enquiryFilter';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import EmptyState from '../../../../shared/components/EmptyState';
+
+// Utility to convert preset keywords to date ranges
+function getDateRangeFromKeyword(keyword: string): { startDate: string; endDate: string } {
+  const now = new Date();
+  let startDate = '';
+  let endDate = now.toISOString();
+  switch (keyword) {
+    case 'last_week':
+      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      break;
+    case 'last_month':
+      startDate = new Date(new Date().setMonth(now.getMonth() - 1)).toISOString();
+      break;
+    case 'last_3_months':
+      startDate = new Date(new Date().setMonth(now.getMonth() - 3)).toISOString();
+      break;
+    default:
+      startDate = '';
+      endDate = '';
+  }
+  return { startDate, endDate };
+}
 
 const EnquiryManagement: React.FC = () => {
   const {
@@ -29,20 +50,28 @@ const EnquiryManagement: React.FC = () => {
     page,
     setPage,
     filters,
+    setFilters,
     searchQuery,
+    setSearchQuery,
+    customDateRange,
+    setCustomDateRange,
     deleteEnquiry,
     updateEnquiryStatus,
-    handleFilterChange,
     resetFilters,
     sendReply,
     isLoading,
     error,
   } = useEnquiryManagement();
 
-  const [customDateRange, setCustomDateRange] = useState({
-    startDate: '',
-    endDate: '',
-  });
+  const [searchInput, setSearchInput] = useState(searchQuery);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearchQuery(searchInput);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchInput]);
 
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
   const [enquiryToDelete, setEnquiryToDelete] = useState<Enquiry | null>(null);
@@ -51,27 +80,33 @@ const EnquiryManagement: React.FC = () => {
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [enquiryToReply, setEnquiryToReply] = useState<Enquiry | null>(null);
 
-  // Debounced filter change
   const debouncedFilterChange = useCallback(
     debounce((field: string, value: string) => {
-      handleFilterChange({ [field]: value } as any);
+      if (field === 'dateRange') {
+        if (value === 'all') {
+          setCustomDateRange({ startDate: '', endDate: '' });
+        } else if (value === 'custom') {
+        } else {
+          const { startDate, endDate } = getDateRangeFromKeyword(value);
+          setCustomDateRange({ startDate, endDate });
+        }
+        setFilters((prev: any) => ({ ...prev, [field]: value }));
+        setPage(1);
+      } else {
+        setFilters((prev: any) => ({ ...prev, [field]: value }));
+        setPage(1);
+      }
     }, 300),
-    [handleFilterChange]
+    [setFilters, setCustomDateRange, setPage]
   );
 
   // Handle custom date range change
   const handleCustomDateChange = useCallback((field: 'startDate' | 'endDate', value: string) => {
     setCustomDateRange(prev => ({ ...prev, [field]: value }));
     setPage(1);
-  }, [setPage]);
+  }, [setCustomDateRange, setPage]);
 
-  // Handle delete enquiry
-  const handleDeleteEnquiry = (enquiry: Enquiry) => {
-    setEnquiryToDelete(enquiry);
-    setShowDeleteWarning(true);
-  };
 
-  // Handle confirm delete
   const handleConfirmDelete = async () => {
     if (enquiryToDelete) {
       try {
@@ -84,17 +119,9 @@ const EnquiryManagement: React.FC = () => {
     }
   };
 
-  // Handle view enquiry
-  const handleViewEnquiry = (enquiry: Enquiry) => {
-    setSelectedEnquiry(enquiry);
-    setShowEnquiryDetails(true);
-  };
-
-  // Handle update enquiry status
   const handleUpdateStatus = async (enquiryId: string, status: string) => {
     try {
       await updateEnquiryStatus({ id: enquiryId, status });
-      // Update the selectedEnquiry state to reflect the change immediately
       if (selectedEnquiry && selectedEnquiry.id === enquiryId) {
         setSelectedEnquiry({ ...selectedEnquiry, status: status as any });
       }
@@ -114,10 +141,6 @@ const EnquiryManagement: React.FC = () => {
     }
   };
 
-  // Filter data based on search and filters
-  const filteredEnquiries = useMemo(() => {
-    return filterEnquiries(enquiries, searchQuery, filters.status);
-  }, [enquiries, searchQuery, filters]);
 
   return (
     <>
@@ -149,8 +172,8 @@ const EnquiryManagement: React.FC = () => {
             },
           ]}
           tabs={ENQUIRY_TABS}
-          searchQuery={searchQuery}
-          setSearchQuery={(q: string) => {}} // This will be handled by the hook
+          searchQuery={searchInput}
+          setSearchQuery={setSearchInput}
           searchPlaceholder="Search by name, email, or subject..."
           filters={filters as any}
           filterOptions={{
@@ -161,7 +184,6 @@ const EnquiryManagement: React.FC = () => {
           handleCustomDateChange={handleCustomDateChange}
           handleResetFilters={() => {
             resetFilters();
-            setCustomDateRange({ startDate: '', endDate: '' });
           }}
         />
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20 mt-8">
@@ -170,24 +192,24 @@ const EnquiryManagement: React.FC = () => {
               <LoadingSpinner />
             ) : error ? (
               <ErrorMessage message={error.message || 'Failed to load enquiries.'} />
-            ) : filteredEnquiries.length > 0 ? (
+            ) : enquiries.length > 0 ? (
               <>
                 <ApplicationsTable
-                  data={filteredEnquiries}
+                  data={enquiries}
                   columns={ENQUIRY_COLUMNS}
                   actions={ENQUIRY_ACTIONS.map((action, idx) => ({
                     ...action,
                     onClick: idx === 0
                       ? (item: any) => {
-                          setSelectedEnquiry(item);
-                          setShowEnquiryDetails(true);
-                        }
+                        setSelectedEnquiry(item);
+                        setShowEnquiryDetails(true);
+                      }
                       : idx === 1
-                      ? (item: any) => {
+                        ? (item: any) => {
                           setEnquiryToReply(item);
                           setShowReplyModal(true);
                         }
-                      : (item: any) => {
+                        : (item: any) => {
                           setEnquiryToDelete(item);
                           setShowDeleteWarning(true);
                         },
@@ -196,9 +218,9 @@ const EnquiryManagement: React.FC = () => {
                 <Pagination
                   page={page}
                   totalPages={totalPages}
-                  itemsCount={filteredEnquiries.length}
+                  itemsCount={enquiries.length}
                   itemName="enquiries"
-                  onPageChange={(newPage) => setPage(newPage)}
+                  onPageChange={(newPage: number) => setPage(newPage)}
                   onFirstPage={() => setPage(1)}
                   onLastPage={() => setPage(totalPages)}
                 />

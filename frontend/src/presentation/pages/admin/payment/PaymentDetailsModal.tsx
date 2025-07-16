@@ -63,6 +63,8 @@ const formatDate = (dateString: string): string => {
 };
 
 const PaymentDetailsModal: React.FC<PaymentDetailsModalProps> = ({ isOpen, onClose, payment }) => {
+
+  console.log(payment, "pospdikpsojdoisahduishgd")
   if (!isOpen || !payment) return null;
 
   return (

@@ -84,10 +84,13 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                   label={field.charAt(0).toUpperCase() + field.slice(1)}
                   value={filters[field] || 'all'}
                   onChange={(e) => debouncedFilterChange(field, e.target.value)}
-                  options={filterOptions[field].map((item) => ({
-                    value: item.startsWith('All ') ? 'all' : item?.toLowerCase().replace(/\s+/g, '_'),
-                    label: item,
-                  }))}
+                  options={filterOptions[field].map((item) => {
+                    if (item === 'All') return { value: 'all', label: item };
+                    if (item === 'All Students') return { value: 'all_students', label: item };
+                    if (item === 'All Faculty') return { value: 'all_faculty', label: item };
+                    if (item === 'All Students and Faculty') return { value: 'all_students_and_faculty', label: item };
+                    return { value: item?.toLowerCase().replace(/\s+/g, '_'), label: item };
+                  })}
                 />
               ))}
 

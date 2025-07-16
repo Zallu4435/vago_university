@@ -3,13 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { enquiryService } from '../services/enquiry.service';
 import { 
-  Enquiry, 
   CreateEnquiryData
 } from '../../domain/types/management/enquirymanagement';
 
 interface Filters {
   status: string;
-  dateRange: string;
 }
 
 export const useEnquiryManagement = () => {
@@ -18,29 +16,30 @@ export const useEnquiryManagement = () => {
   const [selectedEnquiryId, setSelectedEnquiryId] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({
     status: 'All Statuses',
-    dateRange: 'All Time',
   });
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [dateRange, setDateRange] = useState<{ startDate: string; endDate: string }>({
+  const [customDateRange, setCustomDateRange] = useState<{ startDate: string; endDate: string }>({
     startDate: '',
     endDate: '',
   });
   const limit = 10;
 
   const { data: enquiriesData, isLoading: isLoadingEnquiries, error: enquiriesError } = useQuery({
-    queryKey: ['enquiries', page, filters, searchQuery, dateRange, limit],
+    queryKey: ['enquiries', page, filters, searchQuery, customDateRange, limit],
     queryFn: () => {
       const status = filters.status !== 'All Statuses' ? filters.status : undefined;
-      const dateRangeParam = filters.dateRange !== 'All Time' ? filters.dateRange : undefined;
-      
+      let { startDate, endDate } = customDateRange;
+      // Ensure ISO format if present
+      startDate = startDate ? new Date(startDate).toISOString() : '';
+      endDate = endDate ? new Date(endDate).toISOString() : '';
+      console.log('ENQUIRY QUERY PARAMS', { page, limit, status, searchQuery, startDate, endDate });
       return enquiryService.getEnquiries(
         page,
         limit,
         status,
-        dateRangeParam,
-        dateRange.startDate,
-        dateRange.endDate,
-        searchQuery
+        searchQuery,
+        startDate,
+        endDate
       );
     },
   });
@@ -102,28 +101,22 @@ export const useEnquiryManagement = () => {
     setSelectedEnquiryId(enquiryId);
   };
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    setPage(1);
-  };
-
   const handleFilterChange = (newFilters: Partial<Filters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
     setPage(1);
   };
 
-  const handleDateRangeChange = (startDate: string, endDate: string) => {
-    setDateRange({ startDate, endDate });
+  const handleCustomDateRangeChange = (startDate: string, endDate: string) => {
+    setCustomDateRange({ startDate, endDate });
     setPage(1);
   };
 
   const resetFilters = () => {
     setFilters({
       status: 'All Statuses',
-      dateRange: 'All Time',
     });
     setSearchQuery('');
-    setDateRange({ startDate: '', endDate: '' });
+    setCustomDateRange({ startDate: '', endDate: '' });
     setPage(1);
   };
 
@@ -134,8 +127,11 @@ export const useEnquiryManagement = () => {
     page,
     setPage,
     filters,
+    setFilters,
     searchQuery,
-    dateRange,
+    setSearchQuery,
+    customDateRange,
+    setCustomDateRange,
     isLoading: isLoadingEnquiries,
     error: enquiriesError,
     enquiryDetails,
@@ -145,9 +141,9 @@ export const useEnquiryManagement = () => {
     deleteEnquiry,
     sendReply,
     handleViewEnquiry,
-    handleSearch,
+    handleSearch: setSearchQuery,
     handleFilterChange,
-    handleDateRangeChange,
+    handleCustomDateRangeChange,
     resetFilters,
     setSelectedEnquiryId,
   };

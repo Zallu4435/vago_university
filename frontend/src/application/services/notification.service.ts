@@ -2,18 +2,19 @@ import { Notification, NotificationApiResponse } from '../../domain/types/manage
 import httpClient from '../../frameworks/api/httpClient';
 
 class NotificationService {
-  async getNotifications(
-    isAdmin: boolean,
-    page: number = 1,
-    limit: number = 10,
+  async getNotifications(filters: {
+    isAdmin?: boolean,
+    page?: number,
+    limit?: number,
     recipientType?: string,
     status?: string,
-    dateRange?: string
-  ): Promise<NotificationApiResponse> {
+    dateRange?: string,
+    search?: string
+  }): Promise<NotificationApiResponse> {
     try {
       const endpoint = '/admin/notifications';
       const response = await httpClient.get<NotificationApiResponse>(endpoint, {
-        params: { page, limit, recipientType, status, dateRange },
+        params: filters,
       });
       return response.data.data;
     } catch (error: any) {

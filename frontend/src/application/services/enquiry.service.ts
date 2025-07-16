@@ -1,7 +1,7 @@
 import httpClient from '../../frameworks/api/httpClient';
-import { 
-  Enquiry, 
-  EnquiryApiResponse, 
+import {
+  Enquiry,
+  EnquiryApiResponse,
   CreateEnquiryData
 } from '../../domain/types/management/enquirymanagement';
 
@@ -13,7 +13,6 @@ class EnquiryService {
     limit: number = 10,
     status?: string,
     search?: string,
-    subject?: string,
     startDate?: string,
     endDate?: string
   ): Promise<EnquiryApiResponse> {
@@ -22,9 +21,8 @@ class EnquiryService {
     if (limit) params.append('limit', limit.toString());
     if (status && status !== 'All Statuses') params.append('status', status);
     if (search) params.append('search', search);
-    if (subject && subject !== 'All Subjects') params.append('subject', subject);
-    if (startDate) params.append('startDate', startDate);
-    if (endDate) params.append('endDate', endDate);
+    params.append('startDate', startDate ?? '');
+    params.append('endDate', endDate ?? '');
 
     const response = await httpClient.get(`${this.baseUrl}?${params.toString()}`);
     return response.data.data;

@@ -372,35 +372,33 @@ const AttendanceSummaryPage = () => {
 
   if (viewMode === 'details' && selectedStudent) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-8 px-2 sm:px-6">
+        <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={handleBackToStudents}
-                  className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  <FaArrowLeft className="w-4 h-4" />
-                </button>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                    {selectedStudent.studentName}'s Attendance Details
-                  </h1>
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <FaUser className="w-4 h-4" />
-                      <span>{selectedStudent.studentEmail}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <FaCalendarAlt className="w-4 h-4" />
-                      <span>{selectedStudent.totalSessions} sessions</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <FaPercentage className="w-4 h-4" />
-                      <span>{selectedStudent.averageAttendance}% average</span>
-                    </div>
+          <div className="flex flex-col items-center justify-center gap-4">
+            <div className="inline-flex items-center space-x-3 bg-white/95 backdrop-blur-xl rounded-3xl px-8 py-6 shadow-2xl border border-pink-100">
+              <button
+                onClick={handleBackToStudents}
+                className="p-2 bg-pink-50 text-pink-700 rounded-lg hover:bg-pink-100 transition-colors"
+              >
+                <FaArrowLeft className="w-4 h-4" />
+              </button>
+              <div className="text-left">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent mb-2">
+                  {selectedStudent.studentName}'s Attendance Details
+                </h1>
+                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <FaUser className="w-4 h-4" />
+                    <span>{selectedStudent.studentEmail}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaCalendarAlt className="w-4 h-4" />
+                    <span>{selectedStudent.totalSessions} sessions</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaPercentage className="w-4 h-4" />
+                    <span>{selectedStudent.averageAttendance}% average</span>
                   </div>
                 </div>
               </div>
@@ -409,7 +407,7 @@ const AttendanceSummaryPage = () => {
 
           {/* Student Summary Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Sessions</p>
@@ -418,8 +416,7 @@ const AttendanceSummaryPage = () => {
                 <FaCalendarAlt className="w-8 h-8 text-blue-600" />
               </div>
             </div>
-            
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Average Attendance</p>
@@ -428,8 +425,7 @@ const AttendanceSummaryPage = () => {
                 <FaPercentage className="w-8 h-8 text-green-600" />
               </div>
             </div>
-            
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Approved Sessions</p>
@@ -438,8 +434,7 @@ const AttendanceSummaryPage = () => {
                 <FaCheckCircle className="w-8 h-8 text-yellow-600" />
               </div>
             </div>
-            
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Time</p>
@@ -451,45 +446,30 @@ const AttendanceSummaryPage = () => {
           </div>
 
           {/* Session Details Table */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 overflow-hidden">
+            <div className="p-6 border-b border-pink-100">
               <div className="flex items-center gap-2">
-                <FaFileAlt className="w-5 h-5 text-blue-600" />
-                <h2 className="text-xl font-semibold text-gray-900">Session Attendance Details</h2>
+                <FaFileAlt className="w-5 h-5 text-pink-600" />
+                <h2 className="text-xl font-semibold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Session Attendance Details</h2>
               </div>
             </div>
-
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gradient-to-r from-purple-50 to-pink-50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Session
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Time Spent
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Attendance %
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Session</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Spent</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendance %</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-pink-100">
                   {selectedStudent.sessionDetails.map((session, index) => (
-                    <tr key={index} className="hover:bg-gray-50 transition-colors">
+                    <tr key={index} className="hover:bg-pink-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {session.sessionTitle}
-                        </div>
+                        <div className="text-sm font-medium text-gray-900">{session.sessionTitle}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500">{session.sessionDate}</div>
@@ -497,26 +477,19 @@ const AttendanceSummaryPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <FaStopwatch className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm font-medium text-gray-900">
-                            {formatDuration(session.timeSpent)}
-                          </span>
+                          <span className="text-sm font-medium text-gray-900">{formatDuration(session.timeSpent)}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAttendanceColor(session.attendancePercentage)}`}>
-                          {session.attendancePercentage}%
-                        </span>
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAttendanceColor(session.attendancePercentage)}`}>{session.attendancePercentage}%</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(session.status)}`}>
-                          {session.status === 'approved' || session.status === 'approve' ? 'Approved' : 
-                           session.status === 'declined' || session.status === 'decline' ? 'Declined' : 'Pending'}
-                        </span>
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(session.status)}`}>{session.status === 'approved' || session.status === 'approve' ? 'Approved' : session.status === 'declined' || session.status === 'decline' ? 'Declined' : 'Pending'}</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
                           onClick={() => handleViewSessionIntervals(session)}
-                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-200 transition-colors flex items-center gap-1"
+                          className="px-3 py-1 bg-pink-50 text-pink-700 rounded-lg text-xs font-medium hover:bg-pink-100 transition-colors flex items-center gap-1"
                         >
                           <FaEye className="w-3 h-3" />
                           View Intervals
@@ -532,24 +505,18 @@ const AttendanceSummaryPage = () => {
 
         {/* Session Intervals Modal */}
         {selectedSessionForIntervals && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
-              <div className="p-6 border-b border-gray-200">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-2xl border border-pink-100">
+              <div className="p-6 border-b border-pink-100">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Session Intervals for {selectedStudent?.studentName}
-                    </h3>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {selectedSessionForIntervals.sessionTitle} - {selectedSessionForIntervals.sessionDate}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Total time: {formatDuration(selectedSessionForIntervals.timeSpent)} ({selectedSessionForIntervals.attendancePercentage}% attendance)
-                    </p>
+                    <h3 className="text-lg font-semibold text-gray-900">Session Intervals for {selectedStudent?.studentName}</h3>
+                    <p className="text-sm text-gray-500 mt-1">{selectedSessionForIntervals.sessionTitle} - {selectedSessionForIntervals.sessionDate}</p>
+                    <p className="text-sm text-gray-500 mt-1">Total time: {formatDuration(selectedSessionForIntervals.timeSpent)} ({selectedSessionForIntervals.attendancePercentage}% attendance)</p>
                   </div>
                   <button
                     onClick={closeIntervalModal}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    className="text-gray-400 hover:text-pink-500 transition-colors p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -557,8 +524,7 @@ const AttendanceSummaryPage = () => {
                   </button>
                 </div>
               </div>
-              
-              <div className="p-6 max-h-96 overflow-y-auto">
+              <div className="p-6 max-h-96 overflow-y-auto bg-white/80">
                 <div className="space-y-4">
                   {selectedSessionForIntervals.intervals.map((interval: AttendanceInterval, index: number) => {
                     let intervalDuration = 0;
@@ -575,31 +541,20 @@ const AttendanceSummaryPage = () => {
                       }
                     }
                     return (
-                      <div key={index} className="bg-gray-50 rounded-lg p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                              <span className="text-blue-600 font-medium text-sm">
-                                {index + 1}
-                              </span>
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">
-                                Interval {index + 1}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {interval.joinedAt ? formatTime(interval.joinedAt) : 'Invalid'} - {interval.leftAt ? formatTime(interval.leftAt) : 'Now'}
-                              </div>
-                            </div>
+                      <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-4 border border-pink-100 shadow flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-lg font-bold shadow">{index + 1}</div>
+                          <div>
+                            <div className="text-base font-semibold text-gray-900">Interval {index + 1}</div>
+                            <div className="text-xs text-gray-500">{interval.joinedAt ? formatTime(interval.joinedAt) : 'Invalid'} - {interval.leftAt ? formatTime(interval.leftAt) : 'Now'}</div>
                           </div>
-                          <div className="text-right">
-                            <div className="text-sm font-medium text-gray-900">
-                              {formatDuration(intervalDuration)}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              Duration
-                            </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                            <FaClock className="w-3 h-3 mr-1" />
+                            {formatDuration(intervalDuration)}
                           </div>
+                          <div className="text-xs text-gray-400 mt-1">Duration</div>
                         </div>
                       </div>
                     );
@@ -614,15 +569,16 @@ const AttendanceSummaryPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-8 px-2 sm:px-6">
+      <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                Student Attendance Summary
-              </h1>
+        <div className="flex flex-col items-center justify-center gap-4">
+          <div className="inline-flex items-center space-x-3 bg-white/95 backdrop-blur-xl rounded-3xl px-8 py-6 shadow-2xl border border-pink-100">
+            <div className="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+              <span className="text-white text-3xl"><FaUsers /></span>
+            </div>
+            <div className="text-left">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Student Attendance Summary</h1>
               <p className="text-gray-600">Click on a student to view their detailed attendance across all sessions</p>
             </div>
           </div>
@@ -631,7 +587,7 @@ const AttendanceSummaryPage = () => {
         {/* Summary Statistics */}
         {summaryStats && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Students</p>
@@ -640,8 +596,7 @@ const AttendanceSummaryPage = () => {
                 <FaUserGraduate className="w-8 h-8 text-blue-600" />
               </div>
             </div>
-            
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Average Attendance</p>
@@ -650,8 +605,7 @@ const AttendanceSummaryPage = () => {
                 <FaPercentage className="w-8 h-8 text-green-600" />
               </div>
             </div>
-            
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">High Attendance</p>
@@ -660,8 +614,7 @@ const AttendanceSummaryPage = () => {
                 <FaCheckCircle className="w-8 h-8 text-yellow-600" />
               </div>
             </div>
-            
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Time</p>
@@ -674,20 +627,18 @@ const AttendanceSummaryPage = () => {
         )}
 
         {/* Search Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search Students
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search Students</label>
               <div className="relative">
-                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-pink-400 w-4 h-4" />
                 <input
                   type="text"
                   placeholder="Search by name or email..."
                   value={searchTerm}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                 />
               </div>
             </div>
@@ -695,11 +646,11 @@ const AttendanceSummaryPage = () => {
         </div>
 
         {/* Students List */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 overflow-hidden">
+          <div className="p-6 border-b border-pink-100">
             <div className="flex items-center gap-2">
-              <FaUsers className="w-5 h-5 text-blue-600" />
-              <h2 className="text-xl font-semibold text-gray-900">Students</h2>
+              <FaUsers className="w-5 h-5 text-pink-600" />
+              <h2 className="text-xl font-semibold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Students</h2>
               <span className="text-sm text-gray-500 ml-2">Click on a student to view their attendance details</span>
             </div>
           </div>
@@ -707,45 +658,27 @@ const AttendanceSummaryPage = () => {
           {filteredStudents.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gradient-to-r from-purple-50 to-pink-50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Student
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Total Sessions
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Average Attendance
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Approved Sessions
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Total Time
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sessions</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Average Attendance</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approved Sessions</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Time</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-pink-100">
                   {filteredStudents.map((student) => (
-                    <tr key={student.studentId} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => handleStudentClick(student)}>
+                    <tr key={student.studentId} className="hover:bg-pink-50 transition-colors cursor-pointer" onClick={() => handleStudentClick(student)}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span className="text-blue-600 font-medium text-sm">
-                              {student.studentName.charAt(0).toUpperCase()}
-                            </span>
+                          <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                            <span className="text-white font-medium text-sm">{student.studentName.charAt(0).toUpperCase()}</span>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {student.studentName}
-                            </div>
+                            <div className="text-sm font-medium text-gray-900">{student.studentName}</div>
                           </div>
                         </div>
                       </td>
@@ -753,26 +686,18 @@ const AttendanceSummaryPage = () => {
                         <div className="text-sm text-gray-500">{student.studentEmail}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {student.totalSessions}
-                        </div>
+                        <div className="text-sm font-medium text-gray-900">{student.totalSessions}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAttendanceColor(student.averageAttendance)}`}>
-                          {student.averageAttendance}%
-                        </span>
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAttendanceColor(student.averageAttendance)}`}>{student.averageAttendance}%</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {student.approvedSessions}
-                        </div>
+                        <div className="text-sm font-medium text-gray-900">{student.approvedSessions}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <FaStopwatch className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm font-medium text-gray-900">
-                            {formatDuration(student.totalTimeSpent)}
-                          </span>
+                          <span className="text-sm font-medium text-gray-900">{formatDuration(student.totalTimeSpent)}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -781,7 +706,7 @@ const AttendanceSummaryPage = () => {
                             e.stopPropagation();
                             handleStudentClick(student);
                           }}
-                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-200 transition-colors flex items-center gap-1"
+                          className="px-3 py-1 bg-pink-50 text-pink-700 rounded-lg text-xs font-medium hover:bg-pink-100 transition-colors flex items-center gap-1"
                         >
                           <FaEye className="w-3 h-3" />
                           View Details
@@ -794,16 +719,14 @@ const AttendanceSummaryPage = () => {
             </div>
           ) : (
             <div className="p-12 text-center">
-              <div className="text-gray-400 mb-4">
+              <div className="text-pink-200 mb-4">
                 <FaUsers className="w-12 h-12 mx-auto" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Students Found</h3>
-              <p className="text-gray-500 mb-4">
-                No students match your search criteria.
-              </p>
+              <p className="text-gray-500 mb-4">No students match your search criteria.</p>
               <button
                 onClick={clearFilters}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
               >
                 Clear Search
               </button>

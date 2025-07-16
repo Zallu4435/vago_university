@@ -86,7 +86,7 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
                     ...params,
                     id: notificationId
                 });
-                
+
                 // Update status to sent
                 await this.notificationRepository.update(notificationId, { status: NotificationStatus.SENT });
             } catch (error) {
@@ -109,7 +109,7 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
         });
 
         const { title, message, recipientType, recipientId, id } = params;
-        const fcmMessage = { 
+        const fcmMessage = {
             notification: { title, body: message },
             data: { notificationId: id.toString() }
         };
@@ -220,23 +220,26 @@ export class GetAllNotificationsUseCase implements IGetAllNotificationsUseCase {
     constructor(private notificationRepository: INotificationRepository) { }
 
     async execute(params: GetAllNotificationsRequestDTO): Promise<GetAllNotificationsResponseDTO> {
-        const { userId, collection, page = 1, limit = 10, recipientType, status, dateRange, isRead } = params;
+        const { userId, collection, page = 1, limit = 10, recipientType, status, dateRange, isRead, search } = params;
+
+        // Debug log for incoming filter params
+        console.log('[Notification] Incoming filter params:', {
+            page, limit, recipientType, status, dateRange, search
+        });
 
         // Build query/filter logic here (business logic)
         const filter: any = {};
 
         // Build query based on user's collection and what notifications they should see
         if (userId && collection !== "admin") {
-            const validRecipientTypes = [NotificationRecipientType.ALL, NotificationRecipientType.ALL_STUDENTS_AND_FACULTY];
-            
-            if (collection === "user") {
-                validRecipientTypes.push(NotificationRecipientType.ALL_STUDENTS, NotificationRecipientType.INDIVIDUAL);
-            } else if (collection === "faculty") {
-                validRecipientTypes.push(NotificationRecipientType.ALL_FACULTY, NotificationRecipientType.INDIVIDUAL);
-            }
-
+            const validRecipientTypes = [
+                'all',
+                'all_students',
+                'all_faculty',
+                'all_students_and_faculty'
+            ];
             filter.$or = [
-                { recipientType: NotificationRecipientType.INDIVIDUAL, recipientId: userId },
+                { recipientId: userId },
                 { recipientType: { $in: validRecipientTypes } },
             ];
         }
@@ -250,8 +253,8 @@ export class GetAllNotificationsUseCase implements IGetAllNotificationsUseCase {
             }
         }
 
-        if (recipientType && recipientType !== "All") {
-            filter.recipientType = recipientType.toLowerCase();
+        if (recipientType && recipientType !== "all") {
+            filter.recipientType = recipientType;
         }
 
         if (status && status !== "All") {
@@ -259,13 +262,53 @@ export class GetAllNotificationsUseCase implements IGetAllNotificationsUseCase {
         }
 
         if (dateRange && dateRange !== "All") {
-            const [start, end] = dateRange.split(",");
-            filter.createdAt = { $gte: new Date(start), $lte: new Date(end) };
+            let start, end;
+            if (["last_week", "last_month", "last_3_months", "last_6_months", "last_year"].includes(dateRange)) {
+                const now = new Date();
+                const startDate = new Date(now);
+                switch (dateRange) {
+                    case "last_week":
+                        startDate.setDate(now.getDate() - 7);
+                        break;
+                    case "last_month":
+                        startDate.setMonth(now.getMonth() - 1);
+                        break;
+                    case "last_3_months":
+                        startDate.setMonth(now.getMonth() - 3);
+                        break;
+                    case "last_6_months":
+                        startDate.setMonth(now.getMonth() - 6);
+                        break;
+                    case "last_year":
+                        startDate.setFullYear(now.getFullYear() - 1);
+                        break;
+                }
+                start = startDate.toISOString();
+                end = now.toISOString();
+            } else if (dateRange.includes(",")) {
+                [start, end] = dateRange.split(",");
+            }
+            console.log('[Notification] dateRange start:', start, 'end:', end);
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            if (start && end && !isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+                filter.createdAt = { $gte: startDate, $lte: endDate };
+            } else {
+                console.warn('[Notification] Invalid dateRange, skipping createdAt filter:', { start, end });
+            }
         }
+
+        // Add search support
+        if (search) {
+            filter.search = search;
+        }
+
+        // Debug log for final filter object
+        console.log('[Notification] MongoDB filter:', filter);
 
         const skip = (page - 1) * limit;
         const sort = { createdAt: -1 };
-        
+
         const notifications = await this.notificationRepository.find(filter, { skip, limit, sort });
         const totalItems = await this.notificationRepository.count(filter);
         const totalPages = Math.ceil(totalItems / limit);
@@ -382,7 +425,7 @@ export class MarkAllNotificationsAsReadUseCase implements IMarkAllNotificationsA
         const filter: any = {};
         if (collection !== "admin") {
             const validRecipientTypes = [NotificationRecipientType.ALL, NotificationRecipientType.ALL_STUDENTS_AND_FACULTY];
-            
+
             if (collection === "user") {
                 validRecipientTypes.push(NotificationRecipientType.ALL_STUDENTS, NotificationRecipientType.INDIVIDUAL);
             } else if (collection === "faculty") {

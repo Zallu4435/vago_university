@@ -45,7 +45,7 @@ class FacultyService {
     try {
       console.log('Fetching faculty document with ID:', facultyId, 'type:', type);
       console.log('Using URL:', `/faculty/${facultyId}/documents?type=${type}&documentUrl=${encodeURIComponent(documentUrl)}`);
-      
+
       const response = await httpClient.get(`/admin/faculty/${facultyId}/documents?type=${type}&documentUrl=${encodeURIComponent(documentUrl)}`, {
         headers: {
           'Content-Type': 'application/json',

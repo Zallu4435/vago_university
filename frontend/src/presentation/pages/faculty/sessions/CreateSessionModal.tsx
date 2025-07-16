@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { Session, NewSession } from './types';
 
 interface CreateSessionModalProps {
   setShowCreateModal: (show: boolean) => void;
-  createSession: (session: Session) => void;
+  createSession?: (session: Session) => void;
+  editSession?: (session: Session) => void;
+  sessionToEdit?: Session | null;
 }
 
-export default function CreateSessionModal({ setShowCreateModal, createSession }: CreateSessionModalProps) {
+export default function CreateSessionModal({ setShowCreateModal, createSession, editSession, sessionToEdit }: CreateSessionModalProps) {
+  const isEditMode = !!sessionToEdit;
   const [newSession, setNewSession] = useState<NewSession>({
     title: '',
     instructor: '',
@@ -21,6 +24,37 @@ export default function CreateSessionModal({ setShowCreateModal, createSession }
     difficulty: 'beginner'
   });
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (isEditMode && sessionToEdit) {
+      setNewSession({
+        title: sessionToEdit.title || '',
+        instructor: sessionToEdit.instructor || '',
+        course: sessionToEdit.course || '',
+        date: sessionToEdit.date || '',
+        time: sessionToEdit.time || '',
+        duration: sessionToEdit.duration || '',
+        maxAttendees: sessionToEdit.maxAttendees ? String(sessionToEdit.maxAttendees) : '',
+        description: sessionToEdit.description || '',
+        tags: Array.isArray(sessionToEdit.tags) ? sessionToEdit.tags.join(', ') : '',
+        difficulty: sessionToEdit.difficulty || 'beginner',
+      });
+    } else {
+      setNewSession({
+        title: '',
+        instructor: '',
+        course: '',
+        date: '',
+        time: '',
+        duration: '',
+        maxAttendees: '',
+        description: '',
+        tags: '',
+        difficulty: 'beginner'
+      });
+    }
+    setError('');
+  }, [isEditMode, sessionToEdit]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,43 +83,41 @@ export default function CreateSessionModal({ setShowCreateModal, createSession }
       setError('Please enter a valid maximum number of attendees');
       return;
     }
-    const durationNum = parseFloat(newSession.duration);
-    if (isNaN(durationNum) || durationNum <= 0) {
+    const durationNum = newSession.duration;
+    if (!durationNum || isNaN(Number(durationNum)) || Number(durationNum) <= 0) {
       setError('Please enter a valid duration');
       return;
     }
 
-    // Transform payload for backend
-    const { date, time, duration, tags, ...rest } = newSession;
-    const startTime = new Date(`${date}T${time}:00.000Z`).toISOString();
-    createSession({
-      ...rest,
-      startTime,
-      duration: Number(duration),
+    const sessionPayload: Session = {
+      id: sessionToEdit?.id || Date.now(),
+      title: newSession.title,
+      instructor: newSession.instructor,
+      course: newSession.course,
+      date: newSession.date,
+      time: newSession.time,
+      duration: newSession.duration,
       maxAttendees: maxAttendeesNum,
-      tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-      isLive: false,
-      hasRecording: false,
-      attendees: 0,
-      attendeeList: []
-    });
+      description: newSession.description,
+      tags: newSession.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+      difficulty: newSession.difficulty,
+      status: sessionToEdit?.status || 'upcoming',
+      isLive: sessionToEdit?.isLive || false,
+      hasRecording: sessionToEdit?.hasRecording || false,
+      recordingUrl: sessionToEdit?.recordingUrl,
+      attendees: sessionToEdit?.attendees || 0,
+      attendeeList: sessionToEdit?.attendeeList || [],
+    };
+    if (isEditMode && editSession) {
+      editSession(sessionPayload);
+    } else if (createSession) {
+      createSession(sessionPayload);
+    }
     setError('');
   };
 
   const handleClose = () => {
     setShowCreateModal(false);
-    setNewSession({
-      title: '',
-      instructor: '',
-      course: '',
-      date: '',
-      time: '',
-      duration: '',
-      maxAttendees: '',
-      description: '',
-      tags: '',
-      difficulty: 'beginner'
-    });
     setError('');
   };
 
@@ -93,11 +125,11 @@ export default function CreateSessionModal({ setShowCreateModal, createSession }
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 w-full max-w-2xl max-h-[90vh] flex flex-col mx-4">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 rounded-t-3xl">
+        <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 rounded-t-3xl">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-2xl font-bold text-white">Create New Session</h3>
-              <p className="text-white/80 text-sm mt-1">Set up a new live session for your course</p>
+              <h3 className="text-2xl font-bold text-white">{isEditMode ? 'Edit Session' : 'Create New Session'}</h3>
+              <p className="text-white/80 text-sm mt-1">{isEditMode ? 'Update session details' : 'Set up a new live session for your course'}</p>
             </div>
             <button
               onClick={handleClose}
@@ -116,23 +148,23 @@ export default function CreateSessionModal({ setShowCreateModal, createSession }
             </div>
           )}
           <div className="relative group animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Session Title</label>
             <input
               type="text"
               value={newSession.title}
               onChange={(e) => setNewSession({ ...newSession, title: e.target.value })}
-              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/80"
+              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white/80"
               placeholder="Enter session title"
             />
           </div>
           <div className="relative group animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Instructor</label>
             <select
               value={newSession.instructor}
               onChange={(e) => setNewSession({ ...newSession, instructor: e.target.value })}
-              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/80"
+              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white/80"
             >
               <option value="">Select Instructor</option>
               <option>Dr. Alice Smith</option>
@@ -140,12 +172,12 @@ export default function CreateSessionModal({ setShowCreateModal, createSession }
             </select>
           </div>
           <div className="relative group animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Course</label>
             <select
               value={newSession.course}
               onChange={(e) => setNewSession({ ...newSession, course: e.target.value })}
-              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/80"
+              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white/80"
             >
               <option value="">Select Course</option>
               <option>Database Systems</option>
@@ -156,80 +188,80 @@ export default function CreateSessionModal({ setShowCreateModal, createSession }
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="relative group animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
               <input
                 type="date"
                 value={newSession.date}
                 onChange={(e) => setNewSession({ ...newSession, date: e.target.value })}
-                className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/80"
+                className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white/80"
               />
             </div>
             <div className="relative group animate-fadeInUp" style={{ animationDelay: '0.5s' }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Time</label>
               <input
                 type="time"
                 value={newSession.time}
                 onChange={(e) => setNewSession({ ...newSession, time: e.target.value })}
-                className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/80"
+                className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white/80"
               />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="relative group animate-fadeInUp" style={{ animationDelay: '0.6s' }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Duration (hours)</label>
               <input
                 type="number"
                 step="0.5"
                 value={newSession.duration}
                 onChange={(e) => setNewSession({ ...newSession, duration: e.target.value })}
-                className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/80"
+                className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white/80"
                 placeholder="e.g., 2"
               />
             </div>
             <div className="relative group animate-fadeInUp" style={{ animationDelay: '0.7s' }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Max Attendees</label>
               <input
                 type="number"
                 value={newSession.maxAttendees}
                 onChange={(e) => setNewSession({ ...newSession, maxAttendees: e.target.value })}
-                className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/80"
+                className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white/80"
                 placeholder="e.g., 50"
               />
             </div>
           </div>
           <div className="relative group animate-fadeInUp" style={{ animationDelay: '0.8s' }}>
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
             <textarea
               rows={4}
               value={newSession.description}
               onChange={(e) => setNewSession({ ...newSession, description: e.target.value })}
-              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/80 resize-none"
+              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white/80 resize-none"
               placeholder="Provide session details..."
             />
           </div>
           <div className="relative group animate-fadeInUp" style={{ animationDelay: '0.9s' }}>
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Tags (comma-separated)</label>
             <input
               type="text"
               value={newSession.tags}
               onChange={(e) => setNewSession({ ...newSession, tags: e.target.value })}
-              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/80"
+              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white/80"
               placeholder="e.g., SQL, Database"
             />
           </div>
           <div className="relative group animate-fadeInUp" style={{ animationDelay: '1.0s' }}>
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
             <select
               value={newSession.difficulty}
               onChange={(e) => setNewSession({ ...newSession, difficulty: e.target.value as 'beginner' | 'intermediate' | 'advanced' })}
-              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/80"
+              className="relative w-full px-4 py-3 rounded-2xl border-2 border-gray-100 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white/80"
             >
               <option value="beginner">Beginner</option>
               <option value="intermediate">Intermediate</option>
@@ -249,9 +281,10 @@ export default function CreateSessionModal({ setShowCreateModal, createSession }
             </button>
             <button
               onClick={handleSubmit}
-              className="px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg"
+              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105"
+              type="submit"
             >
-              Create Session
+              {isEditMode ? 'Update Session' : 'Create Session'}
             </button>
           </div>
         </div>

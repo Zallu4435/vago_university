@@ -9,11 +9,11 @@ interface ColumnConfig<T> {
 }
 
 interface ActionConfig<T> {
-  icon: React.ReactNode;
-  label: string;
+  icon: React.ReactNode | ((item: T) => React.ReactNode);
+  label: string | ((item: T) => string);
   onClick: (item: T) => void;
   color: 'blue' | 'green' | 'red';
-  disabled?: (item: T) => boolean;
+  disabled?: boolean | ((item: T) => boolean);
 }
 
 interface ApplicationsTableProps<T> {
@@ -65,16 +65,21 @@ const ApplicationsTable = <T extends { _id: string }>({
                 {actions.length > 0 && (
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div className="flex space-x-2">
-                      {actions.map((action, idx) => (
-                        <ActionButton
-                          key={idx}
-                          icon={action.icon}
-                          label={action.label}
-                          onClick={() => action.onClick(item)}
-                          color={action.color}
-                          disabled={action.disabled ? action.disabled(item) : false}
-                        />
-                      ))}
+                      {actions.map((action, idx) => {
+                        const icon = typeof action.icon === 'function' ? action.icon(item) : action.icon;
+                        const label = typeof action.label === 'function' ? action.label(item) : action.label;
+                        const disabled = typeof action.disabled === 'function' ? action.disabled(item) : !!action.disabled;
+                        return (
+                          <ActionButton
+                            key={idx}
+                            icon={icon}
+                            label={label}
+                            onClick={() => action.onClick(item)}
+                            color={action.color}
+                            disabled={disabled}
+                          />
+                        );
+                      })}
                     </div>
                   </td>
                 )}

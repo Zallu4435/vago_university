@@ -11,6 +11,7 @@ interface Filters {
   recipientType: string;
   status: string;
   dateRange: string;
+  search?: string;
 }
 
 export const useNotificationManagement = () => {
@@ -27,48 +28,20 @@ export const useNotificationManagement = () => {
 
   const isAdmin = user?.role === 'admin';
 
-  const getDateRangeFilter = (dateRange: string): string | undefined => {
-    if (!dateRange || dateRange === 'All') return undefined;
-
-    const now = new Date();
-    const startDate = new Date();
-
-    const range = dateRange.toLowerCase();
-
-    switch (range) {
-      case 'last week':
-        startDate.setDate(now.getDate() - 7);
-        break;
-      case 'last month':
-        startDate.setMonth(now.getMonth() - 1);
-        break;
-      case 'last 3 months':
-        startDate.setMonth(now.getMonth() - 3);
-        break;
-      case 'last 6 months':
-        startDate.setMonth(now.getMonth() - 6);
-        break;
-      case 'last year':
-        startDate.setFullYear(now.getFullYear() - 1);
-        break;
-      default:
-        return undefined;
-    }
-
-    return `${startDate.toISOString()},${now.toISOString()}`;
-  };
-
   const { data: notificationsData, isLoading, error } = useQuery({
     queryKey: ['notifications', page, filters, limit, isAdmin],
     queryFn: () => {
-      const dateRange = getDateRangeFilter(filters.dateRange);
-      const recipientType =
-        filters.recipientType !== 'All' ? filters.recipientType.toLowerCase().replace(/\s+/g, '_') : undefined;
-      const status = filters.status !== 'All' ? filters.status.toLowerCase() : undefined;
-
-      return notificationService.getNotifications(isAdmin, page, limit, recipientType, status, dateRange);
+      return notificationService.getNotifications({
+        isAdmin,
+        page,
+        limit,
+        recipientType: filters.recipientType !== 'All' ? filters.recipientType.toLowerCase().replace(/\s+/g, '_') : undefined,
+        status: filters.status !== 'All' ? filters.status.toLowerCase() : undefined,
+        dateRange: filters.dateRange !== 'All' ? filters.dateRange : undefined,
+        search: filters.search ? filters.search : undefined,
+      });
     },
-    enabled: !!user, // Only fetch when user is authenticated
+    enabled: !!user,
   });
 
   const { data: selectedNotification, isLoading: isLoadingNotificationDetails } = useQuery({

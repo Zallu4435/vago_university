@@ -2,7 +2,17 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { LuTrendingUp } from 'react-icons/lu';
 
-export default function StatsSection({ stats }) {
+interface Stat {
+  title: string;
+  value: number;
+  icon: React.ReactNode;
+}
+
+interface StatsSectionProps {
+  stats: Stat[];
+}
+
+export default function StatsSection({ stats }: StatsSectionProps) {
   const [animatedStats, setAnimatedStats] = useState([0, 0, 0]);
 
   useEffect(() => {
@@ -31,19 +41,21 @@ export default function StatsSection({ stats }) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      {stats.map((stat, index) => (
+      {stats.map((stat: Stat, index: number) => (
         <div
           key={index}
-          className="bg-white rounded-xl shadow-md p-6 border-b-4 border-indigo-500 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+          className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
         >
           <div className="flex justify-between items-start">
             <div>
               <h3 className="text-gray-500 font-medium mb-1">{stat.title}</h3>
-              <p className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+              <p className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-pink-500">
                 {animatedStats[index]}
               </p>
             </div>
-            <div className="bg-indigo-50 p-3 rounded-lg">{stat.icon}</div>
+            <div className="bg-gradient-to-br from-purple-100 to-pink-100 p-4 rounded-xl flex items-center justify-center">
+              {stat.icon}
+            </div>
           </div>
           <div className="mt-4 flex items-center text-xs text-green-500 font-medium">
             <LuTrendingUp size={14} className="mr-1" />

@@ -1,303 +1,76 @@
 import { useState, useCallback } from 'react';
-import { useSelector } from 'react-redux';
-import {
-  StudentFinancialInfo,
-  Charge,
-  Payment,
-  FinancialAidApplication,
-  Scholarship,
-  ScholarshipApplication,
-  PaymentForm
-} from '../../domain/types/management/financialmanagement';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Payment } from '../../domain/types/management/financialmanagement';
 import { financialService } from '../services/financialService';
+import { toast } from 'react-hot-toast';
 
-export const useFinancial = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const role = useSelector((state: any) => state.auth.role);
-  const isAdmin = role === 'admin';
-
-  const getStudentFinancialInfo = useCallback(async (): Promise<StudentFinancialInfo | null> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await financialService.getStudentFinancialInfo();
-      console.log(data, 'data')
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-
-  const getAllPayments = useCallback(async (params?: {
-    page?: number;
-    limit?: number;
+export const usePaymentsManagement = (
+  page: number = 1,
+  itemsPerPage: number = 10,
+  filters: {
+    status?: string;
     startDate?: string;
     endDate?: string;
-    status?: string;
-  }): Promise<{ data: Payment[]; totalPayments: number; totalPages: number; currentPage: number }> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await financialService.getAllPayments(params);
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return { data: [], totalPayments: 0, totalPages: 0, currentPage: 1 };
-    } finally {
-      setLoading(false);
-    }
+    studentId?: string;
+  } = {},
+  searchQuery: string = '',
+  activeTab: string = 'all'
+) => {
+  const queryClient = useQueryClient();
+  const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
+
+  const { data: paymentsData, isLoading, error } = useQuery<{ data: Payment[]; totalPages: number }, Error>({
+    queryKey: ['payments', page, filters, searchQuery, activeTab],
+    queryFn: () => financialService.getAllPayments({
+      ...filters,
+      studentId: searchQuery || filters.studentId || undefined,
+      // Only send status if it is a real payment status
+      status: (filters.status && filters.status !== 'All Statuses' && filters.status !== 'payments' && filters.status !== 'financialAid' && filters.status !== 'scholarships') ? filters.status : undefined,
+      page,
+      limit: itemsPerPage,
+    }),
+  });
+
+  const createPaymentMutation = useMutation({
+    mutationFn: (data: import('../../domain/types/management/financialmanagement').PaymentForm) =>
+      financialService.makePayment(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payments'] });
+      toast.success('Payment created successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to create payment');
+    },
+  });
+
+  // No updatePayment or deletePayment for payments in financialService
+
+  const { data: paymentDetails, isLoading: isLoadingPaymentDetails } = useQuery<Payment, Error>({
+    queryKey: ['paymentDetails', selectedPaymentId],
+    queryFn: () => financialService.getPaymentDetails(selectedPaymentId || ''),
+    enabled: !!selectedPaymentId,
+  });
+
+  const handleViewPayment = useCallback((id: string) => {
+    setSelectedPaymentId(id);
   }, []);
 
-  const makePayment = useCallback(async (payment: PaymentForm): Promise<Payment | null> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await financialService.makePayment(payment);
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const getFinancialAidApplications = useCallback(async (): Promise<FinancialAidApplication[]> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = isAdmin
-        ? await financialService.getAllFinancialAidApplications()
-        : await financialService.getFinancialAidApplications();
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }, [isAdmin]);
-
-  const getAllFinancialAidApplications = useCallback(async (): Promise<FinancialAidApplication[]> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await financialService.getAllFinancialAidApplications();
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const applyForFinancialAid = useCallback(async (
-    application: Omit<FinancialAidApplication, 'id' | 'status' | 'applicationDate'>
-  ): Promise<FinancialAidApplication | null> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await financialService.applyForFinancialAid(application);
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const updateFinancialAidApplication = useCallback(async (
-    id: string,
-    data: { status: 'Approved' | 'Rejected'; amount?: number }
-  ): Promise<FinancialAidApplication | null> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await financialService.updateFinancialAidApplication(id, data);
-      return result;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const getAvailableScholarships = useCallback(async (): Promise<Scholarship[]> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await financialService.getAvailableScholarships();
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const getScholarshipApplications = useCallback(async (): Promise<ScholarshipApplication[]> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = isAdmin
-        ? await financialService.getAllScholarshipApplications()
-        : await financialService.getScholarshipApplications();
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }, [isAdmin]);
-
-  const getAllScholarshipApplications = useCallback(async (): Promise<ScholarshipApplication[]> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await financialService.getAllScholarshipApplications();
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const applyForScholarship = useCallback(async (
-    application: Omit<ScholarshipApplication, 'id' | 'status' | 'applicationDate'>
-  ): Promise<ScholarshipApplication | null> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await financialService.applyForScholarship(application);
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const updateScholarshipApplication = useCallback(async (
-    id: string,
-    data: { status: 'Approved' | 'Rejected' }
-  ): Promise<ScholarshipApplication | null> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await financialService.updateScholarshipApplication(id, data);
-      return result;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const uploadDocument = useCallback(async (
-    file: File,
-    type: 'financial-aid' | 'scholarship'
-  ): Promise<{ url: string } | null> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await financialService.uploadDocument(file, type);
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const createCharge = useCallback(async (chargeData: {
-    title: string;
-    description: string;
-    amount: number;
-    term: string;
-    dueDate: string;
-    applicableFor: string;
-  }): Promise<Charge | null> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await financialService.createCharge(chargeData);
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const getCharges = useCallback(async (filters?: {
-    term?: string;
-    status?: string;
-    search?: string;
-    page?: number;
-    limit?: number;
-  }): Promise<Charge[]> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await financialService.getCharges(filters);
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const getPaymentDetails = useCallback(async (paymentId: string): Promise<Payment | null> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await financialService.getPaymentDetails(paymentId);
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const handleEditPayment = useCallback((id: string) => {
+    queryClient.prefetchQuery({
+      queryKey: ['paymentDetails', id],
+      queryFn: () => financialService.getPaymentDetails(id),
+    });
+  }, [queryClient]);
 
   return {
-    loading,
+    payments: paymentsData?.data || [],
+    totalPages: Number(paymentsData?.totalPages) || 1,
+    isLoading,
     error,
-    getStudentFinancialInfo,
-    getAllPayments,
-    makePayment,
-    getFinancialAidApplications,
-    getAllFinancialAidApplications,
-    applyForFinancialAid,
-    updateFinancialAidApplication,
-    getAvailableScholarships,
-    getScholarshipApplications,
-    getAllScholarshipApplications,
-    applyForScholarship,
-    updateScholarshipApplication,
-    uploadDocument,
-    createCharge,
-    getCharges,
-    getPaymentDetails,
+    createPayment: createPaymentMutation.mutate,
+    paymentDetails,
+    isLoadingPaymentDetails,
+    handleViewPayment,
+    handleEditPayment,
   };
 };

@@ -1,78 +1,52 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiDollarSign, FiX, FiFileText, FiSearch } from 'react-icons/fi';
 import { debounce } from 'lodash';
-import { useFinancial } from '../../../../application/hooks/useFinancial';
+import { useQuery } from '@tanstack/react-query';
+import { financialService } from '../../../../application/services/financialService';
 import { Charge, ViewChargesModalProps } from '../../../../domain/types/management/financialmanagement';
 import ReactDOM from 'react-dom';
 
 const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) => {
-  const { getCharges } = useFinancial();
   const [searchQuery, setSearchQuery] = useState('');
-  const [charges, setCharges] = useState<Charge[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  // Fetch charges when modal opens or search changes
-  const fetchCharges = useCallback(async (search?: string) => {
-    setIsLoading(true);
-    try {
-      const fetchedCharges = await getCharges({
-        term: undefined,
-        status: undefined,
-        search: search,
-        page: 1,
-        limit: 50
-      });
-      setCharges(fetchedCharges);
-    } catch (error) {
-      console.error('Error fetching charges:', error);
-      setCharges([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getCharges]);
-
-  // Debounced search function - memoized to prevent recreation
-  const debouncedSearch = useCallback(
-    debounce((value: string) => {
-      fetchCharges(value);
-    }, 500),
-    [fetchCharges]
-  );
-
-  // Handle search input change
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    debouncedSearch(value);
-  };
-
-  // Initial fetch when modal opens
+  // Debounce search input
   useEffect(() => {
-    if (isOpen) {
-      fetchCharges();
-    }
-  }, [isOpen, fetchCharges]);
+    const handler = setTimeout(() => setDebouncedSearch(searchQuery), 400);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
-  const formattedDate = (date: string) => {
-    const dateObj = new Date(date);
-    return `${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
-  };
+  // Fetch charges using react-query
+  const { data: charges = [], isLoading } = useQuery<Charge[]>({
+    queryKey: ['charges', debouncedSearch, isOpen],
+    queryFn: async () => {
+      if (!isOpen) return [];
+      return await financialService.getCharges({
+        search: debouncedSearch,
+        page: 1,
+        limit: 50,
+      });
+    },
+    enabled: isOpen,
+  });
 
-  // Initial fetch and cleanup
+  // Reset search and scroll lock on open/close
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add('no-scroll');
     } else {
       document.body.classList.remove('no-scroll');
       setSearchQuery('');
-      setCharges([]);
     }
     return () => {
       document.body.classList.remove('no-scroll');
-      // Cancel any pending debounced calls
-      debouncedSearch.cancel();
     };
-  }, [isOpen, debouncedSearch]);
+  }, [isOpen]);
+
+  const formattedDate = (date: string) => {
+    const dateObj = new Date(date);
+    return `${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
+  };
 
   // Particle effect
   const ghostParticles = Array(30)
@@ -178,7 +152,6 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
         />
       ))}
 
-
       {/* Main Container */}
       <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-5xl max-h-[90vh] rounded-2xl border border-purple-500/30 shadow-2xl overflow-hidden relative z-[10000]">
         {/* Inner glow effect */}
@@ -219,7 +192,7 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={handleSearchChange}
+                  onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Search by title or description..."
                   className="w-full pl-12 pr-4 py-3 bg-gray-900/60 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                 />
@@ -283,7 +256,7 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .no-scroll {
           overflow: hidden;
         }

@@ -17,7 +17,7 @@ import Pagination from '../../../components/admin/management/Pagination';
 import Header from '../../../components/admin/management/Header';
 import { Notification } from '../../../../domain/types/management/notificationmanagement';
 import { RECIPIENT_TYPES, STATUSES, notificationColumns } from '../../../../shared/constants/notificationManagementConstants';
-import { filterNotifications } from '../../../../shared/filters/notificationManagementFilter';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
 const NotificationManagement: React.FC = () => {
   const {
@@ -36,13 +36,29 @@ const NotificationManagement: React.FC = () => {
   } = useNotificationManagement();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [showAddNotificationModal, setShowAddNotificationModal] = useState(false);
   const [showNotificationDetailsModal, setShowNotificationDetailsModal] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
-  const filteredNotifications = filterNotifications(notifications, filters, searchQuery);
+  // Debounce search query and send to backend
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+      setPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Update backend filters when debounced search or filters change
+  React.useEffect(() => {
+    setFilters(prev => ({
+      ...prev,
+      search: debouncedSearchQuery,
+    }));
+  }, [debouncedSearchQuery]);
 
   const handleAddNotification = () => {
     setSelectedNotification(null);
@@ -89,6 +105,7 @@ const NotificationManagement: React.FC = () => {
   const debouncedFilterChange = useCallback(
     debounce((field: string, value: string) => {
       setFilters((prev) => ({ ...prev, [field]: value }));
+      setPage(1);
     }, 300),
     []
   );
@@ -98,8 +115,10 @@ const NotificationManagement: React.FC = () => {
       recipientType: 'All',
       status: 'All',
       dateRange: 'All',
+      search: '',
     });
     setSearchQuery('');
+    setPage(1);
   };
 
   const notificationActions = [
@@ -117,14 +136,6 @@ const NotificationManagement: React.FC = () => {
       color: 'red' as const,
     },
   ];
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -162,14 +173,14 @@ const NotificationManagement: React.FC = () => {
             {
               icon: <Group />,
               title: 'Total Notifications',
-              value: filteredNotifications.length.toString(),
+              value: notifications.length.toString(),
               change: '+10%',
               isPositive: true,
             },
             {
               icon: <User />,
               title: 'Sent Notifications',
-              value: filteredNotifications.filter((n) => n.status.toLowerCase() === 'sent').length.toString(),
+              value: notifications.filter((n) => n.status.toLowerCase() === 'sent').length.toString(),
               change: '+5%',
               isPositive: true,
             },
@@ -190,8 +201,14 @@ const NotificationManagement: React.FC = () => {
         />
 
         <div className="mt-8">
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
-            <div className="px-6 py-5">
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20 min-h-[300px] relative">
+            {/* Loading overlay for table/grid only */}
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-900/60 z-20 rounded-xl">
+                <LoadingSpinner />
+              </div>
+            )}
+            <div className={`px-6 py-5 ${isLoading ? 'opacity-50 pointer-events-none select-none' : ''}`}>
               <button
                 onClick={handleAddNotification}
                 className="mb-4 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
@@ -201,21 +218,21 @@ const NotificationManagement: React.FC = () => {
                 Add Notification
               </button>
 
-              {filteredNotifications.length > 0 && (
+              {notifications.length > 0 && (
                 <>
-                  <ApplicationsTable data={filteredNotifications} columns={notificationColumns} actions={notificationActions} />
+                  <ApplicationsTable data={notifications} columns={notificationColumns} actions={notificationActions} />
                   <Pagination
                     page={page}
                     totalPages={totalPages}
-                    itemsCount={filteredNotifications.length}
+                    itemsCount={notifications.length}
                     itemName="notifications"
                     onPageChange={(newPage) => setPage(newPage)}
-                    onFirstPage={() => { }}
-                    onLastPage={() => { }}
+                    onFirstPage={() => setPage(1)}
+                    onLastPage={() => setPage(totalPages)}
                   />
                 </>
               )}
-              {filteredNotifications.length === 0 && (
+              {notifications.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <Group size={32} className="text-purple-400" />

@@ -79,12 +79,12 @@ export default function ReviewModal({ submission, saveReview, onClose, isLoading
   const statusConfig = getStatusConfig(submission.status);
 
   return (
-    <div className="fixed inset-0 z-[9999] animate-fadeIn">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose}></div>
-      <div className="fixed inset-0 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[99999] animate-fadeIn">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-[99999]" onClick={handleClose}></div>
+      <div className="fixed inset-0 flex items-center justify-center p-4 z-[99999]">
         <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 w-full max-w-2xl max-h-[90vh] flex flex-col transform animate-scaleIn">
           {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 rounded-t-3xl">
+          <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 rounded-t-3xl">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold text-white">Review Submission</h2>
               <button
@@ -102,7 +102,7 @@ export default function ReviewModal({ submission, saveReview, onClose, isLoading
             <div className="bg-gray-50/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-100/50 shadow-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-12 w-12 rounded-2xl flex items-center justify-center text-white text-lg font-bold shadow-lg">
+                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-12 w-12 rounded-2xl flex items-center justify-center text-white text-lg font-bold shadow-lg">
                     {submission.studentName.split(' ').map(n => n[0]).join('')}
                   </div>
                   <div>
@@ -155,7 +155,7 @@ export default function ReviewModal({ submission, saveReview, onClose, isLoading
                   Marks
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
                   <input
                     type="number"
                     id="marks"
@@ -226,7 +226,7 @@ export default function ReviewModal({ submission, saveReview, onClose, isLoading
                   Feedback
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
                   <textarea
                     id="feedback"
                     value={feedback}

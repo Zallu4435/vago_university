@@ -109,32 +109,32 @@ export default function AssignmentList({
     <div className="space-y-8">
       {/* Enhanced Search and Filter Section */}
       <div className="relative">
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-6 md:p-8">
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6 md:p-8">
           <div className="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
             {/* Search Input */}
             <div className="flex-1 relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-              <div className="relative bg-white rounded-2xl border-2 border-gray-100 focus-within:border-indigo-300 transition-all">
-                <FaSearch size={20} className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+              <div className="relative bg-white rounded-2xl border-2 border-gray-100 focus-within:border-pink-300 transition-all">
+                <FaSearch size={20} className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-pink-500 transition-colors" />
                 <input
                   type="text"
                   placeholder="Search assignments by title or subject..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-14 pr-6 py-4 bg-transparent border-none focus:outline-none text-gray-700 placeholder-gray-400 text-lg"
+                  className="w-full pl-14 pr-6 py-4 bg-transparent border-none focus:outline-none text-gray-700 placeholder-gray-400 text-lg rounded-2xl"
                 />
               </div>
             </div>
 
             {/* Filter Button */}
-            <button className="px-6 py-4 bg-white border-2 border-gray-200 rounded-2xl hover:border-indigo-300 hover:bg-indigo-50 transition-all group">
-              <FaFilter size={20} className="text-gray-500 group-hover:text-indigo-600 transition-colors" />
+            <button className="px-6 py-4 bg-white border-2 border-gray-200 rounded-2xl hover:border-pink-300 hover:bg-pink-50 transition-all group">
+              <FaFilter size={20} className="text-gray-500 group-hover:text-pink-600 transition-colors" />
             </button>
 
             {/* Create Assignment Button */}
             <button
               onClick={() => setShowCreateModal(true)}
-              className="relative px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-xl hover:shadow-2xl flex items-center space-x-3 group"
+              className="relative px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 shadow-xl hover:shadow-2xl flex items-center space-x-3 group"
             >
               <div className="absolute inset-0 bg-white rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity"></div>
               <FaPlus size={20} className="relative z-10" />
@@ -145,7 +145,7 @@ export default function AssignmentList({
 
         {/* Floating Search Results Count */}
         {searchTerm && (
-          <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-indigo-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg animate-bounce">
+          <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-pink-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg animate-bounce">
             {filteredAssignments.length} result{filteredAssignments.length !== 1 ? 's' : ''} found
           </div>
         )}
@@ -156,11 +156,11 @@ export default function AssignmentList({
         {filteredAssignments.map((assignment, index) => (
           <div
             key={assignment._id}
-            className="group relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-8 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 animate-fadeInUp"
+            className="group relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl border border-pink-100 p-8 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 animate-fadeInUp"
             style={{ animationDelay: `${index * 0.1}s` }}
           >
             {/* Gradient Border Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-xl"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-pink-400 rounded-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-xl"></div>
 
             {/* Card Content */}
             <div className="relative z-10">
@@ -173,14 +173,14 @@ export default function AssignmentList({
                       {assignment.status.toUpperCase()}
                     </span>
                   </div>
-                  <h3 className="font-bold text-gray-800 text-xl mb-2 group-hover:text-indigo-600 transition-colors">
+                  <h3 className="font-bold text-purple-900 text-xl mb-2 group-hover:text-pink-600 transition-colors">
                     {assignment.title}
                   </h3>
-                  <p className="text-sm text-indigo-600 font-medium mb-3">{assignment.subject}</p>
+                  <p className="text-sm text-pink-600 font-medium mb-3">{assignment.subject}</p>
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
-                    className="p-3 text-gray-400 hover:text-blue-600 rounded-xl hover:bg-blue-50 transition-all"
+                    className="p-3 text-gray-400 hover:text-pink-600 rounded-xl hover:bg-pink-50 transition-all"
                     onClick={() => handleEditClick(assignment)}
                     disabled={isUpdating || isFetchingAssignment}
                   >
@@ -197,18 +197,18 @@ export default function AssignmentList({
               </div>
 
               {/* Description */}
-              <p className="text-gray-600 text-sm mb-6 line-clamp-3 leading-relaxed">
+              <p className="text-gray-700 text-sm mb-6 line-clamp-3 leading-relaxed">
                 {assignment.description}
               </p>
 
               {/* Stats Row */}
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl p-4 text-center border border-indigo-200">
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-4 text-center border border-pink-100">
                   <div className="flex items-center justify-center space-x-2 mb-1">
-                    <FaUsers className="text-indigo-600" size={16} />
-                    <p className="text-2xl font-bold text-indigo-600">{assignment.submissionCount ?? 0}</p>
+                    <FaUsers className="text-pink-600" size={16} />
+                    <p className="text-2xl font-bold text-pink-600">{assignment.submissionCount ?? 0}</p>
                   </div>
-                  <p className="text-xs text-indigo-600 font-medium">Submissions</p>
+                  <p className="text-xs text-pink-600 font-medium">Submissions</p>
                 </div>
                 <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-4 text-center border border-green-200">
                   <div className="flex items-center justify-center space-x-2 mb-1">
@@ -222,7 +222,7 @@ export default function AssignmentList({
               {/* Due Date */}
               <div className="flex items-center justify-between text-sm mb-6">
                 <div className="flex items-center space-x-2 text-gray-600">
-                  <FaCalendar size={14} className="text-indigo-500" />
+                  <FaCalendar size={14} className="text-pink-500" />
                   <span className="font-medium">Due: {new Date(assignment.dueDate).toLocaleDateString()}</span>
                 </div>
               </div>
@@ -233,7 +233,7 @@ export default function AssignmentList({
                   setSelectedAssignment(assignment);
                   setActiveTab('submissions');
                 }}
-                className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-4 rounded-2xl hover:from-indigo-600 hover:to-purple-700 transition-all font-semibold transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 group"
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all font-semibold transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 group"
               >
                 <span>View Submissions</span>
                 <div className="w-0 group-hover:w-5 transition-all duration-300 overflow-hidden">
@@ -248,14 +248,14 @@ export default function AssignmentList({
       {/* Empty State */}
       {filteredAssignments.length === 0 && (
         <div className="text-center py-16">
-          <div className="w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-32 h-32 bg-gradient-to-br from-purple-50 to-pink-50 rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="text-6xl">📝</span>
           </div>
-          <h3 className="text-2xl font-bold text-gray-600 mb-2">No assignments found</h3>
-          <p className="text-gray-500 mb-6">Try adjusting your search terms or create a new assignment</p>
+          <h3 className="text-2xl font-bold text-pink-700 mb-2">No assignments found</h3>
+          <p className="text-pink-500 mb-6">Try adjusting your search terms or create a new assignment</p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-8 py-3 rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all"
+            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-xl font-medium hover:from-purple-600 hover:to-pink-600 transition-all"
           >
             Create Your First Assignment
           </button>

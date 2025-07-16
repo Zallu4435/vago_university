@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiPlus, FiEye, FiEdit, FiTrash2, FiFileText, FiVideo, FiUser, FiClock, FiLock, FiUnlock, FiTag } from 'react-icons/fi';
+import { FiPlus, FiEye, FiEdit, FiTrash2, FiFileText, FiClock, FiLock, FiUnlock, FiTag } from 'react-icons/fi';
 import { useMaterialManagement } from '../../../../application/hooks/useMaterialManagement';
 import WarningModal from '../../../components/common/WarningModal';
 import Header from '../../../components/admin/management/Header';
@@ -12,10 +12,9 @@ import {
   SUBJECTS,
   COURSES,
   SEMESTERS,
-  TYPES,
-  UPLOADERS,
   getMaterialColumns,
 } from '../../../../shared/constants/materialManagementConstants';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -40,22 +39,20 @@ const MaterialManagement: React.FC = () => {
   const [materialToToggle, setMaterialToToggle] = useState<{ material: Material; isRestricted: boolean } | null>(null);
   const [showToggleWarning, setShowToggleWarning] = useState(false);
 
-  // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-      setPage(1); // Reset to first page when search changes
-    }, 500); // 500ms delay
+      setPage(1)
+    }, 500); 
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Debounce filters
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedFilters(filters);
-      setPage(1); // Reset to first page when filters change
-    }, 300); // 300ms delay for filters
+      setPage(1); 
+    }, 300); 
 
     return () => clearTimeout(timer);
   }, [filters]);
@@ -75,7 +72,6 @@ const MaterialManagement: React.FC = () => {
     handleEditMaterial,
   } = useMaterialManagement(page, ITEMS_PER_PAGE, debouncedFilters, debouncedSearchQuery, activeTab);
 
-  // Get column definitions from constants
   const materialColumns = getMaterialColumns();
 
   const debouncedFilterChange = (field: string, value: string) => {
@@ -102,7 +98,6 @@ const MaterialManagement: React.FC = () => {
     const newActiveTab = tabKeys[index];
     setActiveTab(newActiveTab);
     
-    // Update filters based on active tab
     const statusMap: { [key: string]: string } = {
       'all': 'all',
       'restricted': 'restricted',
@@ -168,11 +163,14 @@ const MaterialManagement: React.FC = () => {
     }
   };
 
+  type MaterialWithId = Material & { _id: string };
+  const paginatedMaterials: MaterialWithId[] = (materials || []).map((m) => ({ ...m, _id: m.id }));
+
   const materialActions = [
     {
       icon: <FiEye size={16} />,
       label: 'View Material',
-      onClick: (material: Material) => {
+      onClick: (material: MaterialWithId) => {
         handleViewMaterial(material.id);
         setShowMaterialDetail(true);
       },
@@ -181,7 +179,7 @@ const MaterialManagement: React.FC = () => {
     {
       icon: <FiEdit size={16} />,
       label: 'Edit Material',
-      onClick: (material: Material) => {
+      onClick: (material: MaterialWithId) => {
         handleEditMaterial(material.id);
         setEditingMaterial(material);
         setShowMaterialModal(true);
@@ -191,30 +189,26 @@ const MaterialManagement: React.FC = () => {
     {
       icon: <FiTrash2 size={16} />,
       label: 'Delete Material',
-      onClick: (material: Material) => {
+      onClick: (material: MaterialWithId) => {
         setMaterialToDelete(material);
         setShowDeleteWarning(true);
       },
       color: 'red' as const,
     },
     {
-      icon: (material: Material) => (material.isRestricted ? <FiUnlock size={16} /> : <FiLock size={16} />),
-      label: (material: Material) => (material.isRestricted ? 'Unrestrict Material' : 'Restrict Material'),
-      onClick: (material: Material) => {
+      icon: <FiLock size={16} />, // Will be replaced below
+      label: 'Restrict/Unrestrict', // Will be replaced below
+      onClick: (material: MaterialWithId) => {
         setMaterialToToggle({ material, isRestricted: !material.isRestricted });
         setShowToggleWarning(true);
       },
       color: 'yellow' as const,
+      // Custom render for icon/label in ApplicationsTable
+      customIcon: (material: MaterialWithId) => (material.isRestricted ? <FiUnlock size={16} /> : <FiLock size={16} />),
+      customLabel: (material: MaterialWithId) => (material.isRestricted ? 'Unrestrict Material' : 'Restrict Material'),
     },
   ];
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -223,9 +217,6 @@ const MaterialManagement: React.FC = () => {
       </div>
     );
   }
-
-  // Remove frontend filtering since we're now using backend filtering
-  const paginatedMaterials = materials || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 relative">
@@ -294,8 +285,14 @@ const MaterialManagement: React.FC = () => {
         />
 
         <div className="mt-8">
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
-            <div className="px-6 py-5">
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20 min-h-[300px] relative">
+            {/* Loading overlay for material table/grid only */}
+            {isLoading ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-900/60 z-20 rounded-xl">
+                <LoadingSpinner />
+              </div>
+            ) : null}
+            <div className={`px-6 py-5 ${isLoading ? 'opacity-50 pointer-events-none select-none' : ''}`}>
               <button
                 onClick={handleAddMaterial}
                 className="mb-4 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
@@ -309,14 +306,23 @@ const MaterialManagement: React.FC = () => {
                   <ApplicationsTable
                     data={paginatedMaterials}
                     columns={materialColumns}
-                    actions={materialActions}
+                    actions={materialActions.map(action => {
+                      if ('customIcon' in action && 'customLabel' in action) {
+                        return {
+                          ...action,
+                          icon: (action as any).customIcon,
+                          label: (action as any).customLabel,
+                        };
+                      }
+                      return action;
+                    })}
                   />
                   <Pagination
                     page={page}
                     totalPages={totalPages}
                     itemsCount={paginatedMaterials.length}
                     itemName="materials"
-                    onPageChange={setPage}
+                    onPageChange={(p: number) => setPage(p)}
                     onFirstPage={() => setPage(1)}
                     onLastPage={() => setPage(totalPages)}
                   />
@@ -382,7 +388,7 @@ const MaterialManagement: React.FC = () => {
         type="warning"
       />
 
-      <style jsx>{`
+      <style>{`
         @keyframes floatingMist {
           0% {
             transform: translateY(0) translateX(0);

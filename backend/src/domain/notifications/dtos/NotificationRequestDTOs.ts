@@ -18,6 +18,7 @@ export interface GetAllNotificationsRequestDTO {
     status?: string;
     dateRange?: string;
     isRead?: boolean;
+    search?: string;
 }
 
 export interface GetIndividualNotificationRequestDTO {

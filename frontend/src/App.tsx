@@ -37,7 +37,7 @@ const UGProgrammes = lazy(() => import('./presentation/pages/ug_admissions/UGPro
 const UGScholarships = lazy(() => import('./presentation/pages/ug_admissions/UGScholarships').then(module => ({ default: module.UGScholarships })));
 const UGWhy_VAGO = lazy(() => import('./presentation/pages/ug_admissions/UGWhy_VAGO').then(module => ({ default: module.UGWhy_VAGO })));
 const DashboardPage = lazy(() => import('./presentation/pages/user/Dashboard/StudentDashboard'));
-const FacultyDashboard = lazy(() => import('./presentation/pages/faculty/FacultyDashboard'));
+const FacultyDashboard = lazy(() => import('./presentation/pages/faculty/dashboard/FacultyDashboard'));
 const FacultyRequestForm = lazy(() => import('./presentation/pages/Auth/FacultyRequest'));
 const ConfirmAdmission = lazy(() => import('./presentation/pages/Auth/ConfirmAdmission'));
 const ConfirmRegistration = lazy(() => import('./presentation/pages/Auth/ConfirmRegistration'));

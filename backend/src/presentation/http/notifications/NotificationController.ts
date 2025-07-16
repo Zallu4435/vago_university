@@ -39,7 +39,7 @@ export class NotificationController implements INotificationController {
   }
 
   async getAllNotifications(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { page = "1", limit = "10", recipientType, status, dateRange } = httpRequest.query || {};
+    const { page = "1", limit = "10", recipientType, status, dateRange, search } = httpRequest.query || {};
     const userId = httpRequest.user?.userId;
     const collection = httpRequest.user?.collection;
     if (!userId || !collection) return this.httpErrors.error_401();
@@ -51,6 +51,7 @@ export class NotificationController implements INotificationController {
       recipientType,
       status,
       dateRange,
+      search,
     };
     const data = await this.getAllNotificationsUseCase.execute(dto);
     return this.httpSuccess.success_200(data);

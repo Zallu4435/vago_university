@@ -231,7 +231,7 @@ export const useClubManagement = () => {
     setPage,
     filters,
     setFilters,
-    isLoading: isLoadingClubs || isLoadingRequests ,
+    isLoading: isLoadingClubs || isLoadingRequests,
     error: clubsError || requestsError,
     createClub,
     updateClub,

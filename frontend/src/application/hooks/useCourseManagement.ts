@@ -21,7 +21,7 @@ interface RequestFilters {
   term: string;
 }
 
-export const useCourseManagement = () => {
+export const useCourseManagement = (searchQuery: string = "") => {
   const queryClient = useQueryClient();
   const [page, setPage] = useState<number>(1);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
@@ -46,7 +46,7 @@ export const useCourseManagement = () => {
     isLoading: isLoadingCourses,
     error: coursesError,
   } = useQuery<CourseApiResponse, Error>({
-    queryKey: ["courses", page, filters, limit],
+    queryKey: ["courses", page, filters, limit, searchQuery],
     queryFn: () =>
       courseService.getCourses(
         page,
@@ -55,7 +55,8 @@ export const useCourseManagement = () => {
           ? filters.specialization
           : undefined,
         filters.faculty !== "All Faculties" ? filters.faculty : undefined,
-        filters.term !== "All Terms" ? filters.term : undefined
+        filters.term !== "All Terms" ? filters.term : undefined,
+        searchQuery && searchQuery.trim() !== "" ? searchQuery : undefined
       ),
     enabled: activeTab === 'courses'
   });
@@ -227,7 +228,7 @@ export const useCourseManagement = () => {
     setRequestFilters,
     activeTab,
     handleTabChange,
-    courseDetails : courseDetails?.course,
+    courseDetails: courseDetails?.course,
     isLoadingCourseDetails,
     handleViewCourse,
     handleEditCourse,

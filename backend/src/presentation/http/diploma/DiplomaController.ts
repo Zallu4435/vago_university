@@ -26,7 +26,18 @@ export class DiplomaController implements IDiplomaController {
   }
 
   async getDiplomas(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { page = "1", limit = "10", department = "all", status = "all", instructor = "all", dateRange = "all" } = httpRequest.query;
+    const {
+      page = "1",
+      limit = "10",
+      department = "all",
+      category = "all",
+      status = "all",
+      instructor = "all",
+      dateRange = "all",
+      startDate,
+      endDate,
+      search
+    } = httpRequest.query;
 
     if (
       isNaN(Number(page)) ||
@@ -37,13 +48,22 @@ export class DiplomaController implements IDiplomaController {
       return this.httpErrors.error_400();
     }
 
+    // Debug: Log all params
+    console.log('[DiplomaController] getDiplomas params:', {
+      page, limit, department, category, status, instructor, dateRange, startDate, endDate, search
+    });
+
     const result = await this.getDiplomasUseCase.execute({
       page: Number(page),
       limit: Number(limit),
       department: String(department),
+      category: String(category),
       status: String(status),
       instructor: String(instructor),
       dateRange: String(dateRange),
+      startDate: startDate ? String(startDate) : undefined,
+      endDate: endDate ? String(endDate) : undefined,
+      search: search ? String(search) : undefined,
     });
 
     if (!result.success) {

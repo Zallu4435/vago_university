@@ -12,13 +12,14 @@ class CourseService {
     limit: number,
     specialization?: string,
     faculty?: string,
-    term?: string
+    term?: string,
+    search?: string
   ): Promise<CourseApiResponse> {
     try {
       const response = await httpClient.get<CourseApiResponse>(
         "/admin/courses",
         {
-          params: { page, limit, specialization, faculty, term },
+          params: { page, limit, specialization, faculty, term, search },
         }
       );
       return response.data.data;

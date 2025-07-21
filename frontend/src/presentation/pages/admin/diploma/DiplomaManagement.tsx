@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { FiPlus, FiEye, FiEdit, FiTrash2, FiBook, FiUsers, FiPercent, FiCheck, FiX } from 'react-icons/fi';
 import { useAdminDiplomaManagement } from '../../../../application/hooks/useAdminDiplomaManagement';
 import WarningModal from '../../../components/common/WarningModal';
@@ -11,19 +11,35 @@ import EnrollmentDetails from './EnrollmentDetails';
 import { debounce } from 'lodash';
 import { Diploma, Enrollment } from '../../../../domain/types/management/diplomamanagement';
 import { CATEGORIES, diplomaColumns, enrollmentColumns } from '../../../../shared/constants/diplomaManagementConstants';
-import { filterDiplomas, filterEnrollments } from '../../../../shared/filters/diplomaFilter';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import EmptyState from '../../../../shared/components/EmptyState';
 
 const DiplomaManagement: React.FC = () => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    const debouncedSetSearch = useMemo(() => debounce((val: string) => setDebouncedSearch(val), 400), []);
+    const DATE_RANGES = [
+        'All',
+        'last_week',
+        'last_month',
+        'last_3_months',
+        'custom',
+    ];
+    const [filters, setFilters] = useState({
+        category: 'All Categories',
+        status: 'All',
+        dateRange: 'All',
+        startDate: '',
+        endDate: '',
+    });
     const {
         diplomas,
         totalPages,
         page,
         setPage,
-        filters,
-        setFilters,
+        filters: hookFilters,
+        setFilters: setHookFilters,
         isLoading,
         error,
         createDiploma,
@@ -44,9 +60,8 @@ const DiplomaManagement: React.FC = () => {
         handleViewEnrollment,
         activeTab,
         handleTabChange,
-    } = useAdminDiplomaManagement();
+    } = useAdminDiplomaManagement(debouncedSearch, filters);
 
-    const [searchTerm, setSearchTerm] = useState('');
     const [showDiplomaModal, setShowDiplomaModal] = useState(false);
     const [showDiplomaDetail, setShowDiplomaDetail] = useState(false);
     const [editingDiploma, setEditingDiploma] = useState<Diploma | null>(null);
@@ -60,10 +75,12 @@ const DiplomaManagement: React.FC = () => {
     const [showEnrollmentDetails, setShowEnrollmentDetails] = useState(false);
 
     const debouncedFilterChange = debounce((field: string, value: string) => {
-        setFilters((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
+        setFilters((prev) => {
+            if (field === 'dateRange' && value !== 'custom') {
+                return { ...prev, dateRange: value, startDate: '', endDate: '' };
+            }
+            return { ...prev, [field]: value };
+        });
         setPage(1);
     }, 300);
 
@@ -71,6 +88,9 @@ const DiplomaManagement: React.FC = () => {
         setFilters({
             category: 'All Categories',
             status: 'All',
+            dateRange: 'All',
+            startDate: '',
+            endDate: '',
         });
         setPage(1);
         setSearchTerm('');
@@ -204,16 +224,12 @@ const DiplomaManagement: React.FC = () => {
         },
     ];
 
-    if (isLoading) {
-        return <LoadingSpinner />;
-    }
-
     if (error) {
         return <ErrorMessage message={error.message} />;
     }
 
-    const filteredDiplomas = filterDiplomas(diplomas, searchTerm);
-    const filteredEnrollments = filterEnrollments(enrollments, searchTerm);
+    const filteredDiplomas = diplomas;
+    const filteredEnrollments = enrollments;
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 relative">
@@ -267,17 +283,45 @@ const DiplomaManagement: React.FC = () => {
                         { label: 'Enrollments', icon: <FiUsers size={16} />, active: activeTab === 'enrollments' },
                     ]}
                     searchQuery={searchTerm}
-                    setSearchQuery={setSearchTerm}
+                    setSearchQuery={(val) => {
+                        setSearchTerm(val);
+                        debouncedSetSearch(val);
+                    }}
                     searchPlaceholder="Search diplomas or enrollments..."
                     filters={filters}
                     filterOptions={{
                         category: CATEGORIES,
                         status: activeTab === 'diplomas' ? ['All', 'Active', 'Inactive'] : ['All', 'Pending', 'Approved', 'Rejected'],
+                        dateRange: DATE_RANGES,
                     }}
                     debouncedFilterChange={debouncedFilterChange}
                     handleResetFilters={handleResetFilters}
                     onTabClick={(index) => handleTabChange(index === 0 ? 'diplomas' : 'enrollments')}
                 />
+
+                {/* Show custom date pickers if custom dateRange is selected */}
+                {filters.dateRange === 'custom' && (
+                    <div className="flex gap-4 mb-4">
+                        <div>
+                            <label className="block text-sm text-gray-300 mb-1">Start Date</label>
+                            <input
+                                type="date"
+                                className="px-2 py-1 rounded bg-gray-700 text-white border border-gray-600"
+                                value={filters.startDate}
+                                onChange={e => setFilters(prev => ({ ...prev, startDate: e.target.value }))}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm text-gray-300 mb-1">End Date</label>
+                            <input
+                                type="date"
+                                className="px-2 py-1 rounded bg-gray-700 text-white border border-gray-600"
+                                value={filters.endDate}
+                                onChange={e => setFilters(prev => ({ ...prev, endDate: e.target.value }))}
+                            />
+                        </div>
+                    </div>
+                )}
 
                 <div className="mt-8">
                     <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
@@ -292,23 +336,35 @@ const DiplomaManagement: React.FC = () => {
                                 </button>
                             )}
 
-                            {activeTab === 'diplomas' && filteredDiplomas.length > 0 && (
-                                <>
-                                    <ApplicationsTable
-                                        data={filteredDiplomas}
-                                        columns={diplomaColumns}
-                                        actions={diplomaActions}
+                            {activeTab === 'diplomas' && (
+                                isLoading ? (
+                                    <div className="flex justify-center items-center py-8">
+                                        <LoadingSpinner />
+                                    </div>
+                                ) : filteredDiplomas.length > 0 ? (
+                                    <>
+                                        <ApplicationsTable
+                                            data={filteredDiplomas}
+                                            columns={diplomaColumns}
+                                            actions={diplomaActions}
+                                        />
+                                        <Pagination
+                                            page={page}
+                                            totalPages={totalPages}
+                                            itemsCount={filteredDiplomas.length}
+                                            itemName="diplomas"
+                                            onPageChange={(newPage) => setPage(newPage)}
+                                            onFirstPage={() => setPage(1)}
+                                            onLastPage={() => setPage(totalPages)}
+                                        />
+                                    </>
+                                ) : (
+                                    <EmptyState
+                                        icon={<FiBook size={32} className="text-purple-400" />}
+                                        title="No Diplomas Found"
+                                        message="There are no diploma courses matching your current filters."
                                     />
-                                    <Pagination
-                                        page={page}
-                                        totalPages={totalPages}
-                                        itemsCount={filteredDiplomas.length}
-                                        itemName="diplomas"
-                                        onPageChange={(newPage) => setPage(newPage)}
-                                        onFirstPage={() => setPage(1)}
-                                        onLastPage={() => setPage(totalPages)}
-                                    />
-                                </>
+                                )
                             )}
 
                             {activeTab === 'enrollments' && (

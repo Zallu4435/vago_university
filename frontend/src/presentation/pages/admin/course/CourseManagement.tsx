@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { FiPlus, FiEye, FiEdit, FiTrash2, FiBookOpen, FiClipboard, FiBarChart2, FiCheck, FiX } from 'react-icons/fi';
 import { useCourseManagement } from '../../../../application/hooks/useCourseManagement';
 import WarningModal from '../../../components/common/WarningModal';
@@ -14,9 +14,35 @@ import { SPECIALIZATIONS, FACULTIES, TERMS, REQUEST_STATUSES, courseColumns, enr
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import EmptyState from '../../../../shared/components/EmptyState';
-import { filterCourses, filterEnrollmentRequests } from '../../../../shared/filters/courseFilter';
+import { filterEnrollmentRequests } from '../../../../shared/filters/courseFilter';
 
 const AdminCourseManagement: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [showCourseModal, setShowCourseModal] = useState(false);
+  const [showCourseDetail, setShowCourseDetail] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
+  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
+  const [showApproveWarning, setShowApproveWarning] = useState(false);
+  const [showRejectWarning, setShowRejectWarning] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<EnrollmentRequest | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [showRequestDetails, setShowRequestDetails] = useState(false);
+
+  // Debounce search term updates
+  const debouncedSetSearchTerm = useMemo(() => debounce((value: string) => {
+    setDebouncedSearchTerm(value);
+  }, 300), []);
+
+  // Update debounced search term when searchTerm changes
+  React.useEffect(() => {
+    debouncedSetSearchTerm(searchTerm);
+    return () => {
+      debouncedSetSearchTerm.cancel();
+    };
+  }, [searchTerm, debouncedSetSearchTerm]);
+
   const {
     courses,
     totalPages,
@@ -46,20 +72,8 @@ const AdminCourseManagement: React.FC = () => {
     requestDetails,
     isLoadingRequestDetails,
     handleViewRequest,
-  } = useCourseManagement();
+  } = useCourseManagement(debouncedSearchTerm);
 
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showCourseModal, setShowCourseModal] = useState(false);
-  const [showCourseDetail, setShowCourseDetail] = useState(false);
-  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
-  const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
-  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
-  const [showApproveWarning, setShowApproveWarning] = useState(false);
-  const [showRejectWarning, setShowRejectWarning] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<EnrollmentRequest | null>(null);
-  const [rejectReason, setRejectReason] = useState('');
-  const [showRequestDetails, setShowRequestDetails] = useState(false);
 
   const handleSaveCourse = async (formData: Partial<Course>) => {
     try {
@@ -215,15 +229,11 @@ const AdminCourseManagement: React.FC = () => {
     }
   };
 
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
-
   if (error) {
     return <ErrorMessage message={error.message || 'Failed to load courses.'} />;
   }
 
-  const filteredCourses = filterCourses(courses, searchTerm);
+  // Use courses directly from the hook
   const filteredEnrollmentRequests = filterEnrollmentRequests(enrollmentRequests, searchTerm);
 
   return (
@@ -315,23 +325,35 @@ const AdminCourseManagement: React.FC = () => {
                 </button>
               )}
 
-              {activeTab === 'courses' && filteredCourses.length > 0 && (
-                <>
-                  <ApplicationsTable
-                    data={filteredCourses}
-                    columns={courseColumns}
-                    actions={courseActions}
+              {activeTab === 'courses' && (
+                isLoading ? (
+                  <div className="flex justify-center items-center py-8">
+                    <LoadingSpinner />
+                  </div>
+                ) : courses.length > 0 ? (
+                  <>
+                    <ApplicationsTable
+                      data={courses}
+                      columns={courseColumns}
+                      actions={courseActions}
+                    />
+                    <Pagination
+                      page={page}
+                      totalPages={totalPages || 1}
+                      itemsCount={courses.length}
+                      itemName="courses"
+                      onPageChange={(newPage) => setPage(newPage)}
+                      onFirstPage={() => setPage(1)}
+                      onLastPage={() => setPage(totalPages)}
+                    />
+                  </>
+                ) : (
+                  <EmptyState
+                    icon={<FiBookOpen size={32} className="text-purple-400" />}
+                    title="No Courses Found"
+                    message="There are no courses matching your current filters. Try adjusting your search criteria."
                   />
-                  <Pagination
-                    page={page}
-                    totalPages={totalPages || 1}
-                    itemsCount={filteredCourses.length}
-                    itemName="courses"
-                    onPageChange={(newPage) => setPage(newPage)}
-                    onFirstPage={() => setPage(1)}
-                    onLastPage={() => setPage(totalPages)}
-                  />
-                </>
+                )
               )}
 
               {activeTab === 'requests' && (
@@ -366,7 +388,7 @@ const AdminCourseManagement: React.FC = () => {
                 </div>
               )}
 
-              {activeTab === 'courses' && filteredCourses.length === 0 && (
+              {activeTab === 'courses' && courses.length === 0 && (
                 <EmptyState
                   icon={<FiBookOpen size={32} className="text-purple-400" />}
                   title="No Courses Found"

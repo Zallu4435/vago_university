@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { 
+import {
   IoAdd as Plus,
   IoEyeOutline as Eye,
   IoCreateOutline as Edit,
@@ -44,6 +44,7 @@ import {
   formatDateRangeValue,
   getFilterOptions,
 } from '../../../../../shared/filters/sportManagementFilter';
+import LoadingSpinner from '../../../../../shared/components/LoadingSpinner';
 
 const AdminSportsManagement: React.FC = () => {
   const {
@@ -86,7 +87,7 @@ const AdminSportsManagement: React.FC = () => {
   const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
 
   const debouncedFilterChange = useCallback(
-    debounce((field: string, value: string) => {      
+    debounce((field: string, value: string) => {
       // Format date range value
       let formattedValue = value;
       if (field === 'dateRange') {
@@ -180,9 +181,9 @@ const AdminSportsManagement: React.FC = () => {
     if (selectedRequest) {
       try {
         await approvePlayerRequest(selectedRequest.requestId);
-        setPlayerRequests(prevRequests => 
-          prevRequests?.map(request => 
-            request.requestId === selectedRequest.requestId 
+        setPlayerRequests(prevRequests =>
+          prevRequests?.map(request =>
+            request.requestId === selectedRequest.requestId
               ? { ...request, status: 'approved' }
               : request
           )
@@ -209,9 +210,9 @@ const AdminSportsManagement: React.FC = () => {
     if (selectedRequest) {
       try {
         await rejectPlayerRequest(selectedRequest.requestId);
-        setPlayerRequests(prevRequests => 
-          prevRequests?.map(request => 
-            request.requestId === selectedRequest.requestId 
+        setPlayerRequests(prevRequests =>
+          prevRequests?.map(request =>
+            request.requestId === selectedRequest.requestId
               ? { ...request, status: 'rejected' }
               : request
           )
@@ -280,14 +281,6 @@ const AdminSportsManagement: React.FC = () => {
       disabled: (request: PlayerRequest) => request.status !== 'pending',
     },
   ];
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -371,8 +364,9 @@ const AdminSportsManagement: React.FC = () => {
         />
 
         <div className="mt-8">
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
-            <div className="px-6 py-5">
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20 relative">
+            {isLoading && <LoadingSpinner />}
+            <div className={isLoading ? "opacity-50 pointer-events-none px-6 py-5" : "px-6 py-5"}>
               {activeTab === 'teams' && (
                 <button
                   onClick={handleAddTeam}

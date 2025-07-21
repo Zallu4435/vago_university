@@ -18,6 +18,10 @@ import mongoose from "mongoose";
 export class CoursesRepository implements ICoursesRepository {
   async getCourses(params: GetCoursesRequestDTO) {
     const { page, limit, specialization, faculty, term, search } = params;
+    // Debug: Log all courses in the database before filtering
+    const allCourses = await CourseModel.find({}).lean();
+    console.log('[CourseRepository] ALL courses in DB:', allCourses);
+    console.log('[CourseRepository] getCourses called with params:', params);
     const query: any = {};
     if (specialization && specialization !== "all") {
       const formattedSpecialization = specialization.replace(/_/g, " ");
@@ -27,13 +31,20 @@ export class CoursesRepository implements ICoursesRepository {
       };
     }
     if (faculty && faculty !== "all") {
+       const formattedFaculty = faculty
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
       query.faculty = {
-        $regex: `^${faculty.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+        $regex: `^${formattedFaculty.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
         $options: "i",
       };
     }
     if (term && term !== "all") {
-      const formattedTerm = term.replace(/_/g, " ");
+      const formattedTerm = term
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
       query.term = {
         $regex: `^${formattedTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
         $options: "i",
@@ -48,6 +59,7 @@ export class CoursesRepository implements ICoursesRepository {
         { description: searchRegex }
       ];
     }
+    console.log('[CourseRepository] MongoDB query:', JSON.stringify(query, null, 2));
     const skip = (page - 1) * limit;
     const courses = await CourseModel.find(query)
       .select("title specialization faculty term credits")
@@ -56,6 +68,7 @@ export class CoursesRepository implements ICoursesRepository {
       .limit(limit)
       .lean();
     const totalItems = await CourseModel.countDocuments(query);
+    console.log(`[CourseRepository] courses found: ${courses.length}, totalItems: ${totalItems}`);
     return { courses, totalItems, page, limit };
   }
 

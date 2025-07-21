@@ -5,7 +5,6 @@ import {
   IoCreateOutline as Edit,
   IoTrashOutline as Trash2,
   IoBusinessOutline as Building,
-  IoPersonOutline as User,
 } from 'react-icons/io5';
 import { debounce } from 'lodash';
 import toast from 'react-hot-toast';
@@ -20,6 +19,7 @@ import { useClubManagement } from '../../../../../application/hooks/useClubManag
 import { Club, ClubRequest, ClubActionConfig } from '../../../../../domain/types/management/clubmanagement';
 import { CATEGORIES, CLUB_STATUSES, REQUEST_STATUSES, DATE_RANGES, ICONS, COLORS, clubColumns, clubRequestColumns } from '../../../../../shared/constants/clubManagementConstants';
 import { filterClubs, filterClubRequests } from '../../../../../shared/filters/clubManagementFilter';
+import LoadingSpinner from '../../../../../shared/components/LoadingSpinner';
 
 
 const AdminClubManagement: React.FC = () => {
@@ -225,14 +225,6 @@ const AdminClubManagement: React.FC = () => {
     },
   ];
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -333,7 +325,11 @@ const AdminClubManagement: React.FC = () => {
 
               {activeTab === 'clubs' && filteredClubs.length > 0 && (
                 <>
-                  <ApplicationsTable data={filteredClubs} columns={clubColumns} actions={clubActions} />
+                  {isLoading ? (
+                    <LoadingSpinner />
+                  ) : (
+                    <ApplicationsTable data={filteredClubs} columns={clubColumns} actions={clubActions} />
+                  )}
                   <Pagination
                     page={page}
                     totalPages={totalPages}
@@ -347,11 +343,17 @@ const AdminClubManagement: React.FC = () => {
               )}
               {activeTab === 'requests' && filteredClubRequests.length > 0 && (
                 <>
-                  <ApplicationsTable
-                    data={filteredClubRequests}
-                    columns={clubRequestColumns}
-                    actions={clubRequestActions}
-                  />
+                  {isLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+                    </div>
+                  ) : (
+                    <ApplicationsTable
+                      data={filteredClubRequests}
+                      columns={clubRequestColumns}
+                      actions={clubRequestActions}
+                    />
+                  )}
                   <Pagination
                     page={page}
                     totalPages={totalPages}
@@ -452,22 +454,22 @@ const AdminClubManagement: React.FC = () => {
           itemToAction?.type === 'club'
             ? 'Delete Club'
             : itemToAction?.action === 'approve'
-            ? 'Approve Club Request'
-            : 'Reject Club Request'
+              ? 'Approve Club Request'
+              : 'Reject Club Request'
         }
         message={
           itemToAction?.type === 'club'
             ? 'Are you sure you want to delete this club? This action cannot be undone.'
             : itemToAction?.action === 'approve'
-            ? 'Are you sure you want to approve this club request?'
-            : 'Are you sure you want to reject this club request?'
+              ? 'Are you sure you want to approve this club request?'
+              : 'Are you sure you want to reject this club request?'
         }
         confirmText={
           itemToAction?.type === 'club'
             ? 'Delete'
             : itemToAction?.action === 'approve'
-            ? 'Approve'
-            : 'Reject'
+              ? 'Approve'
+              : 'Reject'
         }
         cancelText="Cancel"
         type={itemToAction?.action === 'approve' ? 'success' : 'danger'}

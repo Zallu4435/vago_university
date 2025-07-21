@@ -4,9 +4,13 @@ export interface GetDiplomasRequestDTO {
   page: number;
   limit: number;
   department: string;
+  category?: string;
   status: string;
   instructor: string;
   dateRange: string;
+  startDate?: string;
+  endDate?: string;
+  search?: string;
 }
 
 export interface GetDiplomaByIdRequestDTO {

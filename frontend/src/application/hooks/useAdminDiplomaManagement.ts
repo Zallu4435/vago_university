@@ -2,23 +2,21 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { diplomaBackendService } from '../../application/services/diplomaBackend.service';
-import { Diploma } from '../../domain/types/management/videomanagement';
-import { Enrollment } from '../../domain/types/management/diplomamanagement';
+import { Diploma, Enrollment } from '../../domain/types/management/diplomamanagement';
 
-interface Filters {
+type Filters = {
   category: string;
   status: string;
-}
+  dateRange: string;
+  startDate?: string;
+  endDate?: string;
+};
 
-export const useAdminDiplomaManagement = () => {
+export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters) => {
   const queryClient = useQueryClient();
   const [page, setPage] = useState<number>(1);
   const [selectedDiplomaId, setSelectedDiplomaId] = useState<string | null>(null);
   const [selectedEnrollmentId, setSelectedEnrollmentId] = useState<string | null>(null);
-  const [filters, setFilters] = useState<Filters>({
-    category: 'All Categories',
-    status: 'All',
-  });
   const [activeTab, setActiveTab] = useState<'diplomas' | 'enrollments'>('diplomas');
   const limit = 10;
 
@@ -28,14 +26,18 @@ export const useAdminDiplomaManagement = () => {
     isLoading: isLoadingDiplomas,
     error: diplomasError,
   } = useQuery<{ diplomas: Diploma[]; totalPages: number }, Error>({
-    queryKey: ['diplomas', page, filters, limit],
+    queryKey: ['diplomas', page, filters, limit, searchTerm],
     queryFn: async () => {
-      const result = await diplomaBackendService.getDiplomas(
+      const result = await diplomaBackendService.getDiplomas({
         page,
         limit,
-        filters.category !== 'All Categories' ? filters.category : undefined,
-        filters.status !== 'All' ? filters.status.toLowerCase() === 'active' : undefined
-      );
+        category: filters?.category !== 'All Categories' ? filters?.category : undefined,
+        status: filters?.status !== 'All' ? filters?.status : undefined,
+        search: searchTerm && searchTerm.trim() ? searchTerm : undefined,
+        dateRange: filters?.dateRange && filters?.dateRange !== 'All' ? filters?.dateRange : undefined,
+        startDate: filters?.dateRange === 'custom' ? filters?.startDate : undefined,
+        endDate: filters?.dateRange === 'custom' ? filters?.endDate : undefined,
+      });
       // Add videoCount for convenience
       const diplomas = result.diplomas.map((d) => ({
         ...d,
@@ -162,10 +164,10 @@ export const useAdminDiplomaManagement = () => {
   const handleTabChange = (tab: 'diplomas' | 'enrollments') => {
     setActiveTab(tab);
     setPage(1);
-    setFilters({
-      category: 'All Categories',
-      status: 'All',
-    });
+    // setFilters({ // This line is removed
+    //   category: 'All Categories',
+    //   status: 'All',
+    // });
     queryClient.invalidateQueries({
       queryKey: tab === 'diplomas' ? ['diplomas'] : ['diploma-enrollments'],
     });
@@ -188,8 +190,6 @@ export const useAdminDiplomaManagement = () => {
     totalPages: diplomasData?.totalPages || 0,
     page,
     setPage,
-    filters,
-    setFilters,
     isLoading: isLoadingDiplomas,
     error: diplomasError || enrollmentsError,
     createDiploma,

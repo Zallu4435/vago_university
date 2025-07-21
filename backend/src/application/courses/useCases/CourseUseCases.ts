@@ -40,7 +40,9 @@ export class GetCoursesUseCase implements IGetCoursesUseCase {
   constructor(private readonly courseRepository: ICoursesRepository) {}
 
   async execute(params: GetCoursesRequestDTO): Promise<{ success: boolean; data: GetCoursesResponseDTO }> {
+    console.log('[GetCoursesUseCase] execute called with params:', params);
     const { courses, totalItems, page, limit }: any = await this.courseRepository.getCourses(params);
+    console.log('[GetCoursesUseCase] repository result:', { courses, totalItems, page, limit });
     const mappedCourses: CourseSummaryDTO[] = courses.map((course: any) => ({
       id: course._id.toString(),
       title: course.title,

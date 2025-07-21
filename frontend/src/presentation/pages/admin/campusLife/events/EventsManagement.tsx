@@ -36,6 +36,7 @@ import {
   getEventRequestColumns,
 } from '../../../../../shared/constants/eventManagementConstants';
 import { formatDate } from '../../../../../shared/utils/dateUtils';
+import LoadingSpinner from '../../../../../shared/components/LoadingSpinner';
 
 const AdminEventsManagement: React.FC = () => {
   const {
@@ -255,14 +256,6 @@ const AdminEventsManagement: React.FC = () => {
     },
   ];
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -351,8 +344,9 @@ const AdminEventsManagement: React.FC = () => {
         />
 
         <div className="mt-8">
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20">
-            <div className="px-6 py-5">
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20 relative">
+            {isLoading && <LoadingSpinner />}
+            <div className={isLoading ? "opacity-50 pointer-events-none" : ""}>
               {activeTab === 'events' && (
                 <button
                   onClick={handleAddEvent}
@@ -489,22 +483,22 @@ const AdminEventsManagement: React.FC = () => {
           itemToAction?.type === 'event'
             ? 'Delete Event'
             : itemToAction?.action === 'approve'
-            ? 'Approve Event Request'
-            : 'Reject Event Request'
+              ? 'Approve Event Request'
+              : 'Reject Event Request'
         }
         message={
           itemToAction?.type === 'event'
             ? 'Are you sure you want to delete this event? This action cannot be undone.'
             : itemToAction?.action === 'approve'
-            ? 'Are you sure you want to approve this event request?'
-            : 'Are you sure you want to reject this event request?'
+              ? 'Are you sure you want to approve this event request?'
+              : 'Are you sure you want to reject this event request?'
         }
         confirmText={
           itemToAction?.type === 'event'
             ? 'Delete'
             : itemToAction?.action === 'approve'
-            ? 'Approve'
-            : 'Reject'
+              ? 'Approve'
+              : 'Reject'
         }
         cancelText="Cancel"
         type={itemToAction?.action === 'approve' ? 'info' : 'danger'}

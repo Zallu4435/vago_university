@@ -5,8 +5,17 @@ import httpClient from '../../frameworks/api/httpClient';
 
 
 export const diplomaBackendService = {
-    async getDiplomas(page: number, limit: number): Promise<{ diplomas: Diploma[]; totalPages: number }> {
-        const response = await httpClient.get('/admin/diploma-courses', { params: { page, limit } });
+    async getDiplomas(params: {
+        page: number;
+        limit: number;
+        category?: string;
+        status?: string;
+        search?: string;
+        dateRange?: string;
+        instructor?: string;
+        department?: string;
+    }): Promise<{ diplomas: Diploma[]; totalPages: number }> {
+        const response = await httpClient.get('/admin/diploma-courses', { params });
         return {
             diplomas: response.data.data.diplomas,
             totalPages: response.data.data.totalPages,

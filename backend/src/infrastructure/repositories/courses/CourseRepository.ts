@@ -93,30 +93,48 @@ export class CoursesRepository implements ICoursesRepository {
   }
 
   async getEnrollments(params: GetEnrollmentsRequestDTO) {
-    const { page, limit, status, specialization, term } = params;
+    const { page, limit, status, specialization, faculty, term, search } = params;
     const query: any = {};
     if (status && status.toLowerCase() !== "all") {
       query.status = {
-        $regex: `^${status.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+        $regex: `^${status.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}$`,
         $options: "i",
       };
     }
     let courseIds: string[] | undefined;
-    if ((specialization && specialization !== "all") || (term && term !== "all")) {
+    if ((specialization && specialization !== "all") || (faculty && faculty !== "all") || (term && term !== "all") || (search && search.trim())) {
       const courseQuery: any = {};
       if (specialization && specialization !== "all") {
         const formattedSpecialization = specialization.replace(/_/g, " ");
         courseQuery.specialization = {
-          $regex: `^${formattedSpecialization.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+          $regex: `^${formattedSpecialization.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}$`,
+          $options: "i",
+        };
+      }
+      if (faculty && faculty !== "all") {
+        const formattedFaculty = faculty
+          .split('_')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+        courseQuery.faculty = {
+          $regex: `^${formattedFaculty.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}$`,
           $options: "i",
         };
       }
       if (term && term !== "all") {
         const formattedTerm = term.replace(/_/g, " ");
         courseQuery.term = {
-          $regex: `^${formattedTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+          $regex: `^${formattedTerm.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}$`,
           $options: "i",
         };
+      }
+      if (search && search.trim()) {
+        const searchRegex = new RegExp(search.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&"), "i");
+        courseQuery.$or = [
+          { title: searchRegex },
+          { specialization: searchRegex },
+          { faculty: searchRegex },
+        ];
       }
       const courses = await CourseModel.find(courseQuery).select("_id").lean();
       courseIds = courses.map((course) => course._id.toString());
@@ -128,9 +146,9 @@ export class CoursesRepository implements ICoursesRepository {
     const totalItems = await EnrollmentModel.countDocuments(query);
     const skip = (page - 1) * limit;
     const enrollments = await EnrollmentModel.find(query)
-      .populate("studentId", "email")
-      .populate("courseId", "title specialization term")
-      .select("courseId status requestedAt")
+      .populate("studentId", "email firstName lastName")
+      .populate("courseId", "title specialization term faculty credits")
+      .select("courseId status requestedAt studentId reason createdAt updatedAt")
       .skip(skip)
       .limit(limit)
       .lean();

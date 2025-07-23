@@ -16,7 +16,6 @@ export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters
   const queryClient = useQueryClient();
   const [page, setPage] = useState<number>(1);
   const [selectedDiplomaId, setSelectedDiplomaId] = useState<string | null>(null);
-  const [selectedEnrollmentId, setSelectedEnrollmentId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'diplomas' | 'enrollments'>('diplomas');
   const limit = 10;
 
@@ -48,23 +47,6 @@ export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters
     enabled: activeTab === 'diplomas',
   });
 
-  // Enrollments Query
-  const {
-    data: enrollmentsData,
-    isLoading: isLoadingEnrollments,
-    error: enrollmentsError,
-  } = useQuery<{ enrollments: Enrollment[]; totalPages: number }, Error>({
-    queryKey: ['diploma-enrollments', page, filters, limit],
-    queryFn: () =>
-      diplomaBackendService.getEnrollments(
-        page,
-        limit,
-        filters.category !== 'All Categories' ? filters.category : undefined,
-        filters.status !== 'All' ? filters.status : undefined
-      ),
-    enabled: activeTab === 'enrollments',
-  });
-
   // Diploma Details Query
   const { data: diplomaDetails, isLoading: isLoadingDiplomaDetails } = useQuery<
     Diploma & { enrolledStudents: Enrollment[] },
@@ -73,16 +55,6 @@ export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters
     queryKey: ['diploma-details', selectedDiplomaId],
     queryFn: () => diplomaBackendService.getDiplomaDetails(selectedDiplomaId!),
     enabled: !!selectedDiplomaId,
-  });
-
-  // Enrollment Details Query
-  const { data: enrollmentDetails, isLoading: isLoadingEnrollmentDetails } = useQuery<
-    Enrollment,
-    Error
-  >({
-    queryKey: ['enrollment-details', selectedEnrollmentId],
-    queryFn: () => diplomaBackendService.getEnrollmentDetails(selectedEnrollmentId!),
-    enabled: !!selectedEnrollmentId,
   });
 
   // Mutations
@@ -115,7 +87,6 @@ export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters
     mutationFn: (id: string) => diplomaBackendService.deleteDiploma(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['diplomas'] });
-      queryClient.invalidateQueries({ queryKey: ['diploma-enrollments'] });
       toast.success('Diploma deleted successfully');
     },
     onError: (error: any) => {
@@ -123,53 +94,12 @@ export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters
     },
   });
 
-  const { mutateAsync: approveEnrollment } = useMutation({
-    mutationFn: (requestId: string) => diplomaBackendService.approveEnrollment(requestId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['diploma-enrollments'] });
-      queryClient.invalidateQueries({ queryKey: ['enrollment-details'] });
-      toast.success('Enrollment approved successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to approve enrollment');
-    },
-  });
-
-  const { mutateAsync: rejectEnrollment } = useMutation({
-    mutationFn: ({ requestId, reason }: { requestId: string; reason: string }) =>
-      diplomaBackendService.rejectEnrollment(requestId, reason),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['diploma-enrollments'] });
-      queryClient.invalidateQueries({ queryKey: ['enrollment-details'] });
-      toast.success('Enrollment rejected successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to reject enrollment');
-    },
-  });
-
-  const { mutateAsync: resetProgress } = useMutation({
-    mutationFn: (requestId: string) => diplomaBackendService.resetProgress(requestId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['diploma-enrollments'] });
-      queryClient.invalidateQueries({ queryKey: ['enrollment-details'] });
-      toast.success('Progress reset successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to reset progress');
-    },
-  });
-
   // Handlers
   const handleTabChange = (tab: 'diplomas' | 'enrollments') => {
     setActiveTab(tab);
     setPage(1);
-    // setFilters({ // This line is removed
-    //   category: 'All Categories',
-    //   status: 'All',
-    // });
     queryClient.invalidateQueries({
-      queryKey: tab === 'diplomas' ? ['diplomas'] : ['diploma-enrollments'],
+      queryKey: tab === 'diplomas' ? ['diplomas'] : [],
     });
   };
 
@@ -181,33 +111,20 @@ export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters
     setSelectedDiplomaId(diplomaId);
   };
 
-  const handleViewEnrollment = (enrollmentId: string) => {
-    setSelectedEnrollmentId(enrollmentId);
-  };
-
   return {
     diplomas: diplomasData?.diplomas || [],
     totalPages: diplomasData?.totalPages || 0,
     page,
     setPage,
     isLoading: isLoadingDiplomas,
-    error: diplomasError || enrollmentsError,
+    error: diplomasError,
     createDiploma,
     updateDiploma,
     deleteDiploma,
-    enrollments: enrollmentsData?.enrollments || [],
-    enrollmentTotalPages: enrollmentsData?.totalPages || 0, 
-    isLoadingEnrollments,
-    approveEnrollment,
-    rejectEnrollment,
-    resetProgress,
     diplomaDetails,
     isLoadingDiplomaDetails,
     handleViewDiploma,
     handleEditDiploma,
-    enrollmentDetails,
-    isLoadingEnrollmentDetails,
-    handleViewEnrollment,
     activeTab,
     handleTabChange,
   };

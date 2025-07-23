@@ -32,69 +32,14 @@ export interface DocumentDTO {
     razorpaySignature?: string;
   };
   
-  export interface GetFinancialAidApplicationsRequestDTO {
-    studentId: string;
-    status?: "Approved" | "Pending" | "Rejected";
-  }
-  
-  export interface GetAllFinancialAidApplicationsRequestDTO {
-    status?: string;
-    term?: string;
-    page: number;
-    limit: number;
-  }
-  
-  export interface ApplyForFinancialAidRequestDTO {
-    studentId: string;
-    term: string;
-    amount: number;
-    type: "Grant" | "Loan" | "Scholarship";
-    documents: Array<{ name: string; url: string }>;
-  }
-  
-  export interface GetAvailableScholarshipsRequestDTO {
-    status?: "Open" | "Closed";
-    term?: string;
-  }
-  
-  export interface GetScholarshipApplicationsRequestDTO {
-    studentId: string;
-    status?: "Approved" | "Pending" | "Rejected";
-  }
-  
-  export interface GetAllScholarshipApplicationsRequestDTO {
-    status?: string;
-    page: number;
-    limit: number;
-  }
-  
-  export interface ApplyForScholarshipRequestDTO {
-    studentId: string;
-    scholarshipId: string;
-    documents: Array<{ name: string; url: string }>;
-  }
-  
   export interface UploadDocumentRequestDTO {
     file: Express.Multer.File;
-    type: "financial-aid" | "scholarship";
+    type: string;
   }
   
   export interface GetPaymentReceiptRequestDTO {
     studentId: string;
     paymentId: string;
-  }
-  
-  export interface UpdateFinancialAidApplicationRequestDTO {
-    studentId: string;
-    applicationId: string;
-    status?: "Approved" | "Pending" | "Rejected";
-    amount?: number;
-  }
-  
-  export interface UpdateScholarshipApplicationRequestDTO {
-    studentId: string;
-    applicationId: string;
-    status?: "Approved" | "Pending" | "Rejected";
   }
   
   export type CreateChargeRequestDTO = Pick<ChargeProps, "title" | "description" | "amount" | "term" | "dueDate" | "applicableFor" | "createdBy">;
@@ -105,4 +50,21 @@ export interface DocumentDTO {
     search?: string;
     page: number;
     limit: number;
+  }
+
+  export interface UpdateChargeRequestDTO {
+    id: string;
+    data: {
+      title?: string;
+      description?: string;
+      amount?: number;
+      dueDate?: string;
+      term?: string;
+      applicableFor?: string;
+      status?: "Active" | "Inactive";
+    };
+  }
+
+  export interface DeleteChargeRequestDTO {
+    id: string;
   }

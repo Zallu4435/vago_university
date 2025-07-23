@@ -38,6 +38,7 @@ export class EnrollmentController implements ICourseEnrollmentController {
     if (!result.data) {
       return this.httpErrors.error_404("Enrollment not found");
     }
+    console.log(result.data, "result.data");
     return this.httpSuccess.success_200(result.data);
   }
 

@@ -5,38 +5,24 @@ import {
     GetAllPaymentsRequestDTO,
     GetOnePaymentRequestDTO,
     MakePaymentRequestDTO,
-    GetFinancialAidApplicationsRequestDTO,
-    GetAllFinancialAidApplicationsRequestDTO,
-    ApplyForFinancialAidRequestDTO,
-    GetAvailableScholarshipsRequestDTO,
-    GetScholarshipApplicationsRequestDTO,
-    GetAllScholarshipApplicationsRequestDTO,
-    ApplyForScholarshipRequestDTO,
     UploadDocumentRequestDTO,
     GetPaymentReceiptRequestDTO,
-    UpdateFinancialAidApplicationRequestDTO,
-    UpdateScholarshipApplicationRequestDTO,
     CreateChargeRequestDTO,
     GetAllChargesRequestDTO,
+    UpdateChargeRequestDTO,
+    DeleteChargeRequestDTO,
 } from "../../../domain/financial/dtos/FinancialRequestDTOs";
 import {
     GetStudentFinancialInfoResponseDTO,
     GetAllPaymentsResponseDTO,
     GetOnePaymentResponseDTO,
     MakePaymentResponseDTO,
-    GetFinancialAidApplicationsResponseDTO,
-    GetAllFinancialAidApplicationsResponseDTO,
-    ApplyForFinancialAidResponseDTO,
-    GetAvailableScholarshipsResponseDTO,
-    GetScholarshipApplicationsResponseDTO,
-    GetAllScholarshipApplicationsResponseDTO,
-    ApplyForScholarshipResponseDTO,
     UploadDocumentResponseDTO,
     GetPaymentReceiptResponseDTO,
-    UpdateFinancialAidApplicationResponseDTO,
-    UpdateScholarshipApplicationResponseDTO,
     CreateChargeResponseDTO,
     GetAllChargesResponseDTO,
+    UpdateChargeResponseDTO,
+    DeleteChargeResponseDTO,
 } from "../../../domain/financial/dtos/FinancialResponseDTOs";
 import { IFinancialRepository } from "../repositories/IFinancialRepository";
 
@@ -61,34 +47,6 @@ export interface IMakePaymentUseCase {
     execute(params: MakePaymentRequestDTO): Promise<ResponseDTO<MakePaymentResponseDTO>>;
 }
 
-export interface IGetFinancialAidApplicationsUseCase {
-    execute(params: GetFinancialAidApplicationsRequestDTO): Promise<ResponseDTO<GetFinancialAidApplicationsResponseDTO>>;
-}
-
-export interface IGetAllFinancialAidApplicationsUseCase {
-    execute(params: GetAllFinancialAidApplicationsRequestDTO): Promise<ResponseDTO<GetAllFinancialAidApplicationsResponseDTO>>;
-}
-
-export interface IApplyForFinancialAidUseCase {
-    execute(params: ApplyForFinancialAidRequestDTO): Promise<ResponseDTO<ApplyForFinancialAidResponseDTO>>;
-}
-
-export interface IGetAvailableScholarshipsUseCase {
-    execute(params: GetAvailableScholarshipsRequestDTO): Promise<ResponseDTO<GetAvailableScholarshipsResponseDTO>>;
-}
-
-export interface IGetScholarshipApplicationsUseCase {
-    execute(params: GetScholarshipApplicationsRequestDTO): Promise<ResponseDTO<GetScholarshipApplicationsResponseDTO>>;
-}
-
-export interface IGetAllScholarshipApplicationsUseCase {
-    execute(params: GetAllScholarshipApplicationsRequestDTO): Promise<ResponseDTO<GetAllScholarshipApplicationsResponseDTO>>;
-}
-
-export interface IApplyForScholarshipUseCase {
-    execute(params: ApplyForScholarshipRequestDTO): Promise<ResponseDTO<ApplyForScholarshipResponseDTO>>;
-}
-
 export interface IUploadDocumentUseCase {
     execute(params: UploadDocumentRequestDTO): Promise<ResponseDTO<UploadDocumentResponseDTO>>;
 }
@@ -97,20 +55,20 @@ export interface IGetPaymentReceiptUseCase {
     execute(params: GetPaymentReceiptRequestDTO): Promise<ResponseDTO<GetPaymentReceiptResponseDTO>>;
 }
 
-export interface IUpdateFinancialAidApplicationUseCase {
-    execute(params: UpdateFinancialAidApplicationRequestDTO): Promise<ResponseDTO<UpdateFinancialAidApplicationResponseDTO>>;
-}
-
-export interface IUpdateScholarshipApplicationUseCase {
-    execute(params: UpdateScholarshipApplicationRequestDTO): Promise<ResponseDTO<UpdateScholarshipApplicationResponseDTO>>;
-}
-
 export interface ICreateChargeUseCase {
     execute(params: CreateChargeRequestDTO): Promise<ResponseDTO<CreateChargeResponseDTO>>;
 }
 
 export interface IGetAllChargesUseCase {
     execute(params: GetAllChargesRequestDTO): Promise<ResponseDTO<GetAllChargesResponseDTO>>;
+}
+
+export interface IUpdateChargeUseCase {
+    execute(params: UpdateChargeRequestDTO): Promise<ResponseDTO<UpdateChargeResponseDTO>>;
+}
+
+export interface IDeleteChargeUseCase {
+    execute(params: DeleteChargeRequestDTO): Promise<ResponseDTO<DeleteChargeResponseDTO>>;
 }
 
 export class GetStudentFinancialInfoUseCase implements IGetStudentFinancialInfoUseCase {
@@ -185,132 +143,6 @@ export class MakePaymentUseCase implements IMakePaymentUseCase {
     }
 }
 
-export class GetFinancialAidApplicationsUseCase implements IGetFinancialAidApplicationsUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
-
-    async execute(params: GetFinancialAidApplicationsRequestDTO): Promise<ResponseDTO<GetFinancialAidApplicationsResponseDTO>> {
-        try {
-            console.log(`Executing getFinancialAidApplications use case with params:`, params);
-            if (!mongoose.Types.ObjectId.isValid(params.studentId)) {
-                return { data: { error: FinancialErrorType.InvalidStudentId }, success: false };
-            }
-            const result = await this.financialRepository.getFinancialAidApplications(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("GetFinancialAidApplicationsUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.ApplicationNotFound }, success: false };
-        }
-    }
-}
-
-export class GetAllFinancialAidApplicationsUseCase implements IGetAllFinancialAidApplicationsUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
-
-    async execute(params: GetAllFinancialAidApplicationsRequestDTO): Promise<ResponseDTO<GetAllFinancialAidApplicationsResponseDTO>> {
-        try {
-            console.log(`Executing getAllFinancialAidApplications use case with params:`, params);
-            const result = await this.financialRepository.getAllFinancialAidApplications(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("GetAllFinancialAidApplicationsUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.ApplicationNotFound }, success: false };
-        }
-    }
-}
-
-export class ApplyForFinancialAidUseCase implements IApplyForFinancialAidUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
-
-    async execute(params: ApplyForFinancialAidRequestDTO): Promise<ResponseDTO<ApplyForFinancialAidResponseDTO>> {
-        try {
-            console.log(`Executing applyForFinancialAid use case with params:`, params);
-            if (!mongoose.Types.ObjectId.isValid(params.studentId)) {
-                return { data: { error: FinancialErrorType.InvalidStudentId }, success: false };
-            }
-            if (params.amount <= 0) {
-                return { data: { error: FinancialErrorType.InvalidAmount }, success: false };
-            }
-            if (!params.documents.length) {
-                return { data: { error: FinancialErrorType.MissingDocuments }, success: false };
-            }
-            const result = await this.financialRepository.applyForFinancialAid(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("ApplyForFinancialAidUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.MissingRequiredFields }, success: false };
-        }
-    }
-}
-
-export class GetAvailableScholarshipsUseCase implements IGetAvailableScholarshipsUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
-
-    async execute(params: GetAvailableScholarshipsRequestDTO): Promise<ResponseDTO<GetAvailableScholarshipsResponseDTO>> {
-        try {
-            console.log(`Executing getAvailableScholarships use case with params:`, params);
-            const result = await this.financialRepository.getAvailableScholarships(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("GetAvailableScholarshipsUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.ScholarshipNotFound }, success: false };
-        }
-    }
-}
-
-export class GetScholarshipApplicationsUseCase implements IGetScholarshipApplicationsUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
-
-    async execute(params: GetScholarshipApplicationsRequestDTO): Promise<ResponseDTO<GetScholarshipApplicationsResponseDTO>> {
-        try {
-            console.log(`Executing getScholarshipApplications use case with params:`, params);
-            if (!mongoose.Types.ObjectId.isValid(params.studentId)) {
-                return { data: { error: FinancialErrorType.InvalidStudentId }, success: false };
-            }
-            const result = await this.financialRepository.getScholarshipApplications(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("GetScholarshipApplicationsUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.ApplicationNotFound }, success: false };
-        }
-    }
-}
-
-export class GetAllScholarshipApplicationsUseCase implements IGetAllScholarshipApplicationsUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
-
-    async execute(params: GetAllScholarshipApplicationsRequestDTO): Promise<ResponseDTO<GetAllScholarshipApplicationsResponseDTO>> {
-        try {
-            console.log(`Executing getAllScholarshipApplications use case with params:`, params);
-            const result = await this.financialRepository.getAllScholarshipApplications(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("GetAllScholarshipApplicationsUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.ApplicationNotFound }, success: false };
-        }
-    }
-}
-
-export class ApplyForScholarshipUseCase implements IApplyForScholarshipUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
-
-    async execute(params: ApplyForScholarshipRequestDTO): Promise<ResponseDTO<ApplyForScholarshipResponseDTO>> {
-        try {
-            console.log(`Executing applyForScholarship use case with params:`, params);
-            if (!mongoose.Types.ObjectId.isValid(params.studentId) || !mongoose.Types.ObjectId.isValid(params.scholarshipId)) {
-                return { data: { error: FinancialErrorType.InvalidId }, success: false };
-            }
-            if (!params.documents.length) {
-                return { data: { error: FinancialErrorType.MissingDocuments }, success: false };
-            }
-            const result = await this.financialRepository.applyForScholarship(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("ApplyForScholarshipUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.MissingRequiredFields }, success: false };
-        }
-    }
-}
-
 export class UploadDocumentUseCase implements IUploadDocumentUseCase {
     constructor(private financialRepository: IFinancialRepository) { }
 
@@ -347,45 +179,6 @@ export class GetPaymentReceiptUseCase implements IGetPaymentReceiptUseCase {
     }
 }
 
-export class UpdateFinancialAidApplicationUseCase implements IUpdateFinancialAidApplicationUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
-
-    async execute(params: UpdateFinancialAidApplicationRequestDTO): Promise<ResponseDTO<UpdateFinancialAidApplicationResponseDTO>> {
-        try {
-            console.log(`Executing updateFinancialAidApplication use case with params:`, params);
-            if (!mongoose.Types.ObjectId.isValid(params.studentId) || !mongoose.Types.ObjectId.isValid(params.applicationId)) {
-                return { data: { error: FinancialErrorType.InvalidId }, success: false };
-            }
-            if (params.amount !== undefined && params.amount <= 0) {
-                return { data: { error: FinancialErrorType.InvalidAmount }, success: false };
-            }
-            const result = await this.financialRepository.updateFinancialAidApplication(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("UpdateFinancialAidApplicationUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.ApplicationNotFound }, success: false };
-        }
-    }
-}
-
-export class UpdateScholarshipApplicationUseCase implements IUpdateScholarshipApplicationUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
-
-    async execute(params: UpdateScholarshipApplicationRequestDTO): Promise<ResponseDTO<UpdateScholarshipApplicationResponseDTO>> {
-        try {
-            console.log(`Executing updateScholarshipApplication use case with params:`, params);
-            if (!mongoose.Types.ObjectId.isValid(params.studentId) || !mongoose.Types.ObjectId.isValid(params.applicationId)) {
-                return { data: { error: FinancialErrorType.InvalidId }, success: false };
-            }
-            const result = await this.financialRepository.updateScholarshipApplication(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("UpdateScholarshipApplicationUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.ApplicationNotFound }, success: false };
-        }
-    }
-}
-
 export class CreateChargeUseCase implements ICreateChargeUseCase {
     constructor(private financialRepository: IFinancialRepository) { }
 
@@ -402,6 +195,48 @@ export class CreateChargeUseCase implements ICreateChargeUseCase {
             return { data: result, success: true };
         } catch (error: any) {
             console.error("CreateChargeUseCase: Error:", error);
+            return { data: { error: error.message || FinancialErrorType.MissingRequiredFields }, success: false };
+        }
+    }
+}
+
+export class UpdateChargeUseCase implements IUpdateChargeUseCase {
+    constructor(private financialRepository: IFinancialRepository) { }
+
+    async execute(params: UpdateChargeRequestDTO): Promise<ResponseDTO<UpdateChargeResponseDTO>> {
+        try {
+            console.log(`Executing updateCharge use case with params:`, params);
+            if (!mongoose.Types.ObjectId.isValid(params.id)) {
+                return { data: { error: FinancialErrorType.InvalidChargeId }, success: false };
+            }
+            if (params.amount <= 0) {
+                return { data: { error: FinancialErrorType.InvalidAmount }, success: false };
+            }
+            if (!params.title || !params.description || !params.term || !params.applicableFor) {
+                return { data: { error: FinancialErrorType.MissingRequiredFields }, success: false };
+            }
+            const result = await this.financialRepository.updateCharge(params);
+            return { data: result, success: true };
+        } catch (error: any) {
+            console.error("UpdateChargeUseCase: Error:", error);
+            return { data: { error: error.message || FinancialErrorType.MissingRequiredFields }, success: false };
+        }
+    }
+}
+
+export class DeleteChargeUseCase implements IDeleteChargeUseCase {
+    constructor(private financialRepository: IFinancialRepository) { }
+
+    async execute(params: DeleteChargeRequestDTO): Promise<ResponseDTO<DeleteChargeResponseDTO>> {
+        try {
+            console.log(`Executing deleteCharge use case with params:`, params);
+            if (!mongoose.Types.ObjectId.isValid(params.id)) {
+                return { data: { error: FinancialErrorType.InvalidChargeId }, success: false };
+            }
+            const result = await this.financialRepository.deleteCharge(params);
+            return { data: result, success: true };
+        } catch (error: any) {
+            console.error("DeleteChargeUseCase: Error:", error);
             return { data: { error: error.message || FinancialErrorType.MissingRequiredFields }, success: false };
         }
     }

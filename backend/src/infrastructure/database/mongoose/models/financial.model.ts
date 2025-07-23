@@ -31,45 +31,7 @@ interface Payment extends mongoose.Document {
   amount: number;
   status: "Completed" | "Pending" | "Failed";
   receiptUrl?: string;
-    metadata?: Record<string, any>; // For gateway-specific data
-}
-
-interface FinancialAidApplication extends mongoose.Document {
-  studentId: mongoose.Types.ObjectId;
-  term: string;
-  status: "Approved" | "Pending" | "Rejected";
-  amount: number;
-  type: "Grant" | "Loan" | "Scholarship";
-  applicationDate: Date;
-  documents: Array<{
-    id: string;
-    name: string;
-    url: string;
-    status: "Verified" | "Pending" | "Rejected";
-  }>;
-}
-
-interface Scholarship extends mongoose.Document {
-  name: string;
-  description: string;
-  amount: number;
-  deadline: Date;
-  requirements: string[];
-  status: "Open" | "Closed";
-  term: string;
-}
-
-interface ScholarshipApplication extends mongoose.Document {
-  scholarshipId: mongoose.Types.ObjectId;
-  studentId: mongoose.Types.ObjectId;
-  status: "Approved" | "Pending" | "Rejected";
-  applicationDate: Date;
-  documents: Array<{
-    id: string;
-    name: string;
-    url: string;
-    status: "Verified" | "Pending" | "Rejected";
-  }>;
+  metadata?: Record<string, any>; // For gateway-specific data
 }
 
 const StudentFinancialInfoSchema = new mongoose.Schema<StudentFinancialInfo>(
@@ -108,9 +70,9 @@ const ChargeSchema = new mongoose.Schema<Charge>(
     title: { type: String, required: true },
     description: { type: String, required: true },
     amount: { type: Number, required: true },
-    term: { type: String, required: true }, 
+    term: { type: String, required: true },
     dueDate: { type: Date, required: true },
-    applicableFor: { type: String, required: true }, 
+    applicableFor: { type: String, required: true },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
     status: { type: String, enum: ["Active", "Inactive"], default: "Active" },
   },
@@ -143,92 +105,6 @@ const PaymentSchema = new mongoose.Schema<Payment>(
   { timestamps: true }
 );
 
-
-const FinancialAidApplicationSchema =
-  new mongoose.Schema<FinancialAidApplication>(
-    {
-      studentId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-      },
-      term: { type: String, required: true },
-      status: {
-        type: String,
-        enum: ["Approved", "Pending", "Rejected"],
-        default: "Pending",
-      },
-      amount: { type: Number, required: true },
-      type: {
-        type: String,
-        enum: ["Grant", "Loan", "Scholarship"],
-        required: true,
-      },
-      applicationDate: { type: Date, required: true },
-      documents: [
-        {
-          id: { type: String, required: true },
-          name: { type: String, required: true },
-          url: { type: String, required: true },
-          status: {
-            type: String,
-            enum: ["Verified", "Pending", "Rejected"],
-            default: "Pending",
-          },
-        },
-      ],
-    },
-    { timestamps: true }
-  );
-
-const ScholarshipSchema = new mongoose.Schema<Scholarship>(
-  {
-    name: { type: String, required: true },
-    description: { type: String, required: true },
-    amount: { type: Number, required: true },
-    deadline: { type: Date, required: true },
-    requirements: [{ type: String }],
-    status: { type: String, enum: ["Open", "Closed"], default: "Open" },
-    term: { type: String, required: true },
-  },
-  { timestamps: true }
-);
-
-const ScholarshipApplicationSchema =
-  new mongoose.Schema<ScholarshipApplication>(
-    {
-      scholarshipId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Scholarship",
-        required: true,
-      },
-      studentId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-      },
-      status: {
-        type: String,
-        enum: ["Approved", "Pending", "Rejected"],
-        default: "Pending",
-      },
-      applicationDate: { type: Date, required: true },
-      documents: [
-        {
-          id: { type: String, required: true },
-          name: { type: String, required: true },
-          url: { type: String, required: true },
-          status: {
-            type: String,
-            enum: ["Verified", "Pending", "Rejected"],
-            default: "Pending",
-          },
-        },
-      ],
-    },
-    { timestamps: true }
-  );
-
 export const StudentFinancialInfoModel = mongoose.model<StudentFinancialInfo>(
   "StudentFinancialInfo",
   StudentFinancialInfoSchema
@@ -238,17 +114,3 @@ export const PaymentModel = mongoose.model<Payment>(
   "FinancialPayment",
   PaymentSchema
 );
-export const FinancialAidApplicationModel =
-  mongoose.model<FinancialAidApplication>(
-    "FinancialAidApplication",
-    FinancialAidApplicationSchema
-  );
-export const ScholarshipModel = mongoose.model<Scholarship>(
-  "Scholarship",
-  ScholarshipSchema
-);
-export const ScholarshipApplicationModel =
-  mongoose.model<ScholarshipApplication>(
-    "ScholarshipApplication",
-    ScholarshipApplicationSchema
-  );

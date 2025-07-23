@@ -20,31 +20,6 @@ router.post(
   authMiddleware,
   (req, res, next) => expressAdapter(req, res, next, financialController.makePayment.bind(financialController))
 );
-router.get(
-  "/financial-aid",
-  authMiddleware,
-  (req, res, next) => expressAdapter(req, res, next, financialController.getFinancialAidApplications.bind(financialController))
-);
-router.post(
-  "/financial-aid",
-  authMiddleware,
-  (req, res, next) => expressAdapter(req, res, next, financialController.applyForFinancialAid.bind(financialController))
-);
-router.get(
-  "/scholarships",
-  authMiddleware,
-  (req, res, next) => expressAdapter(req, res, next, financialController.getAvailableScholarships.bind(financialController))
-);
-router.get(
-  "/scholarship-applications",
-  authMiddleware,
-  (req, res, next) => expressAdapter(req, res, next, financialController.getScholarshipApplications.bind(financialController))
-);
-router.post(
-  "/scholarship-applications",
-  authMiddleware,
-  (req, res, next) => expressAdapter(req, res, next, financialController.applyForScholarship.bind(financialController))
-);
 router.post(
   "/upload",
   authMiddleware,
@@ -55,16 +30,6 @@ router.get(
   "/payments/:paymentId/receipt",
   authMiddleware,
   (req, res, next) => expressAdapter(req, res, next, financialController.getPaymentReceipt.bind(financialController))
-);
-router.patch(
-  "/financial-aid/:applicationId",
-  authMiddleware,
-  (req, res, next) => expressAdapter(req, res, next, financialController.updateFinancialAidApplication.bind(financialController))
-);
-router.patch(
-  "/scholarship-applications/:applicationId",
-  authMiddleware,
-  (req, res, next) => expressAdapter(req, res, next, financialController.updateScholarshipApplication.bind(financialController))
 );
 
 // Admin Routes
@@ -79,16 +44,6 @@ router.get(
   (req, res, next) => expressAdapter(req, res, next, financialController.getOnePayment.bind(financialController))
 );
 router.get(
-  "/admin/financial-aid",
-  authMiddleware,
-  (req, res, next) => expressAdapter(req, res, next, financialController.getAllFinancialAidApplications.bind(financialController))
-);
-router.get(
-  "/admin/scholarship-applications",
-  authMiddleware,
-  (req, res, next) => expressAdapter(req, res, next, financialController.getAllScholarshipApplications.bind(financialController))
-);
-router.get(
   "/admin/charges",
   authMiddleware,
   (req, res, next) => expressAdapter(req, res, next, financialController.getAllCharges.bind(financialController))
@@ -97,6 +52,16 @@ router.post(
   "/admin/charges",
   authMiddleware,
   (req, res, next) => expressAdapter(req, res, next, financialController.createCharge.bind(financialController))
+);
+router.patch(
+  '/admin/charges/:id',
+  authMiddleware,
+  (req, res, next) => expressAdapter(req, res, next, financialController.updateCharge.bind(financialController))
+);
+router.delete(
+  '/admin/charges/:id',
+  authMiddleware,
+  (req, res, next) => expressAdapter(req, res, next, financialController.deleteCharge.bind(financialController))
 );
 
 export default router;

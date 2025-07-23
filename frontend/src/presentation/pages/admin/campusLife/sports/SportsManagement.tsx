@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   IoAdd as Plus,
   IoEyeOutline as Eye,
@@ -22,8 +22,7 @@ import TeamRequestDetailsModal from './TeamRequestDetailsModal';
 import {
   Team,
   PlayerRequest,
-  Filters,
-  ItemToAction,
+  Filters as SportFilters,
 } from '../../../../../domain/types/management/sportmanagement';
 import { formatDate } from '../../../../../shared/utils/dateUtils';
 import {
@@ -55,6 +54,8 @@ const AdminSportsManagement: React.FC = () => {
     setPage,
     filters,
     setFilters,
+    searchTerm,
+    setSearchTerm,
     isLoading,
     error,
     createTeam,
@@ -69,13 +70,9 @@ const AdminSportsManagement: React.FC = () => {
     setSelectedTeamId,
     requestDetails,
     handleViewRequest,
-
   } = useSportsManagement();
 
-
-
   const [activeTab, setActiveTab] = useState<'teams' | 'requests'>('teams');
-  const [searchTerm, setSearchTerm] = useState('');
   const [showAddTeamModal, setShowAddTeamModal] = useState(false);
   const [showTeamDetailsModal, setShowTeamDetailsModal] = useState(false);
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
@@ -86,37 +83,43 @@ const AdminSportsManagement: React.FC = () => {
   const [selectedRequest, setSelectedRequest] = useState<PlayerRequest | null>(null);
   const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
 
+  // Debounced search
+  const [searchInput, setSearchInput] = useState(searchTerm);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearchTerm(searchInput);
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [searchInput]);
+
   const debouncedFilterChange = useCallback(
     debounce((field: string, value: string) => {
-      // Format date range value
       let formattedValue = value;
       if (field === 'dateRange') {
         formattedValue = formatDateRangeValue(value);
       }
-
       setFilters((prev) => {
         const newFilters = { ...prev, [field]: formattedValue || 'all' };
         return newFilters;
       });
+      setPage(1);
     }, 300),
     [setFilters]
   );
 
   const handleResetFilters = () => {
     setFilters(resetFilters());
-    setSearchTerm('');
+    setSearchInput('');
+    setPage(1);
   };
 
-  // Update the tab change handler
   const handleTabChangeWithFilters = (tab: 'teams' | 'requests') => {
     setActiveTab(tab);
     handleTabChange(tab);
     setFilters(resetFilters());
     setPage(1);
   };
-
-  const filteredTeams = filterTeams(teams || [], searchTerm, filters);
-  const filteredPlayerRequests = filterPlayerRequests(playerRequests || [], searchTerm, filters);
 
   const handleAddTeam = () => {
     setSelectedTeamId(null);
@@ -181,22 +184,6 @@ const AdminSportsManagement: React.FC = () => {
     if (selectedRequest) {
       try {
         await approvePlayerRequest(selectedRequest.requestId);
-        setPlayerRequests(prevRequests =>
-          prevRequests?.map(request =>
-            request.requestId === selectedRequest.requestId
-              ? { ...request, status: 'approved' }
-              : request
-          )
-        );
-        if (requestDetails?.sportRequest?.id === selectedRequest.requestId) {
-          setRequestDetails(prev => ({
-            ...prev,
-            sportRequest: {
-              ...prev.sportRequest,
-              status: 'approved'
-            }
-          }));
-        }
         setShowApproveWarning(false);
         setShowRequestDetailsModal(false);
         setSelectedRequest(null);
@@ -210,22 +197,6 @@ const AdminSportsManagement: React.FC = () => {
     if (selectedRequest) {
       try {
         await rejectPlayerRequest(selectedRequest.requestId);
-        setPlayerRequests(prevRequests =>
-          prevRequests?.map(request =>
-            request.requestId === selectedRequest.requestId
-              ? { ...request, status: 'rejected' }
-              : request
-          )
-        );
-        if (requestDetails?.sportRequest?.id === selectedRequest.requestId) {
-          setRequestDetails(prev => ({
-            ...prev,
-            sportRequest: {
-              ...prev.sportRequest,
-              status: 'rejected'
-            }
-          }));
-        }
         setShowRejectWarning(false);
         setShowRequestDetailsModal(false);
         setSelectedRequest(null);
@@ -326,21 +297,21 @@ const AdminSportsManagement: React.FC = () => {
             {
               icon: <Users />,
               title: 'Total Teams',
-              value: filteredTeams.length.toString(),
+              value: teams.length.toString(),
               change: '+10%',
               isPositive: true,
             },
             {
               icon: <CheckCircle />,
               title: 'Pending Requests',
-              value: filteredPlayerRequests.filter((r) => r.status === 'pending').length.toString(),
+              value: playerRequests.filter((r: PlayerRequest) => r.status === 'pending').length.toString(),
               change: '+8%',
               isPositive: true,
             },
             {
               icon: <Trophy />,
               title: 'Total Players',
-              value: filteredTeams.reduce((sum, team) => sum + team.playerCount, 0).toString(),
+              value: teams.reduce((sum: number, team: Team) => sum + (team.playerCount || 0), 0).toString(),
               change: '+15%',
               isPositive: true,
             },
@@ -349,11 +320,11 @@ const AdminSportsManagement: React.FC = () => {
             { label: 'Teams', icon: <Users size={16} />, active: activeTab === 'teams' },
             { label: 'Player Requests', icon: <CheckCircle size={16} />, active: activeTab === 'requests' },
           ]}
-          searchQuery={searchTerm}
-          setSearchQuery={setSearchTerm}
+          searchQuery={searchInput}
+          setSearchQuery={setSearchInput}
           searchPlaceholder="Search teams or player requests..."
-          filters={filters}
-          filterOptions={getFilterOptions(activeTab)}
+          filters={filters as unknown as { [key: string]: string }}
+          filterOptions={getFilterOptions(activeTab) as unknown as { [key: string]: string[] }}
           debouncedFilterChange={debouncedFilterChange}
           handleResetFilters={handleResetFilters}
           onTabClick={(index) => {
@@ -378,41 +349,33 @@ const AdminSportsManagement: React.FC = () => {
                 </button>
               )}
 
-              {activeTab === 'teams' && filteredTeams.length > 0 && (
+              {activeTab === 'teams' && teams.length > 0 && (
                 <>
-                  <ApplicationsTable data={filteredTeams} columns={getTeamColumns(Users, Trophy, formatDate)} actions={teamActions} />
+                  <ApplicationsTable data={teams} columns={getTeamColumns(Users, Trophy, formatDate)} actions={teamActions as any} />
                   <Pagination
                     page={page}
                     totalPages={totalPages}
-                    itemsCount={filteredTeams.length}
-                    itemName="teams"
-                    onPageChange={setPage}
-                    onFirstPage={() => setPage(1)}
-                    onLastPage={() => setPage(totalPages)}
+                    onPageChange={(page: number) => setPage(page)}
                   />
                 </>
               )}
 
-              {activeTab === 'requests' && filteredPlayerRequests.length > 0 && (
+              {activeTab === 'requests' && playerRequests.length > 0 && (
                 <>
                   <ApplicationsTable
-                    data={filteredPlayerRequests}
+                    data={playerRequests}
                     columns={getPlayerRequestColumns(Users, Trophy, formatDate)}
-                    actions={playerRequestActions}
+                    actions={playerRequestActions as any}
                   />
                   <Pagination
                     page={page}
                     totalPages={totalPages}
-                    itemsCount={filteredPlayerRequests.length}
-                    itemName="player requests"
-                    onPageChange={setPage}
-                    onFirstPage={() => setPage(1)}
-                    onLastPage={() => setPage(totalPages)}
+                    onPageChange={(page: number) => setPage(page)}
                   />
                 </>
               )}
 
-              {activeTab === 'teams' && filteredTeams.length === 0 && (
+              {activeTab === 'teams' && teams.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <Users size={32} className="text-purple-400" />
@@ -432,7 +395,7 @@ const AdminSportsManagement: React.FC = () => {
                 </div>
               )}
 
-              {activeTab === 'requests' && filteredPlayerRequests.length === 0 && (
+              {activeTab === 'requests' && playerRequests.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <CheckCircle size={32} className="text-purple-400" />
@@ -465,28 +428,13 @@ const AdminSportsManagement: React.FC = () => {
           setSelectedTeamId(null);
           setIsEditing(false);
         }}
-        onSubmit={handleSaveTeam}
-        initialData={isEditing && teamDetails ? {
-          title: teamDetails.title,
-          type: teamDetails.type,
-          category: teamDetails.category,
-          organizer: teamDetails.organizer,
-          organizerType: teamDetails.organizerType,
-          icon: teamDetails.icon,
-          color: teamDetails.color,
-          division: teamDetails.division,
-          headCoach: teamDetails.headCoach,
-          homeGames: teamDetails.homeGames,
-          record: teamDetails.record,
-          upcomingGames: teamDetails.upcomingGames || [{ date: '', description: '' }],
-          participants: teamDetails.playerCount,
-          status: teamDetails.status as 'Active' | 'Inactive',
-        } : undefined}
+        onSubmit={handleSaveTeam as any}
+        initialData={isEditing && teamDetails ? teamToFormData(teamDetails) : undefined}
         isEditing={isEditing}
-        sportTypes={SPORT_TYPES.filter(type => type !== 'All')}
-        coaches={COACHES.filter(coach => coach !== 'All')}
-        divisions={DIVISIONS}
-        teamCategories={TEAM_CATEGORIES}
+        sportTypes={[...SPORT_TYPES].filter(type => type !== 'All') as string[]}
+        coaches={[...COACHES].filter(coach => coach !== 'All') as string[]}
+        divisions={[...DIVISIONS] as string[]}
+        teamCategories={[...TEAM_CATEGORIES] as string[]}
       />
 
       <WarningModal
@@ -514,7 +462,7 @@ const AdminSportsManagement: React.FC = () => {
         message="Are you sure you want to approve this player request?"
         confirmText="Approve"
         cancelText="Cancel"
-        type="success"
+        type="danger"
       />
 
       <WarningModal
@@ -537,12 +485,12 @@ const AdminSportsManagement: React.FC = () => {
           setShowRequestDetailsModal(false);
           setSelectedRequest(null);
         }}
-        request={requestDetails?.data}
+        request={requestDetails}
         onApprove={handleConfirmApprove}
         onReject={handleConfirmReject}
       />
 
-      <style jsx>{`
+      <style>{`
         @keyframes floatingMist {
           0% {
             transform: translateY(0) translateX(0);
@@ -563,3 +511,22 @@ const AdminSportsManagement: React.FC = () => {
 };
 
 export { AdminSportsManagement as default };
+
+function teamToFormData(team: Team) {
+  return {
+    title: team.title,
+    type: team.type,
+    category: team.category,
+    organizer: team.organizer,
+    organizerType: team.organizerType,
+    icon: team.icon,
+    color: team.color,
+    division: team.division,
+    headCoach: team.headCoach,
+    homeGames: team.homeGames,
+    record: team.record,
+    upcomingGames: team.upcomingGames || [{ date: '', description: '' }],
+    participants: team.playerCount,
+    status: (team.status as 'Active' | 'Inactive'),
+  };
+}

@@ -14,7 +14,6 @@ import { SPECIALIZATIONS, FACULTIES, TERMS, REQUEST_STATUSES, courseColumns, enr
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import EmptyState from '../../../../shared/components/EmptyState';
-import { filterEnrollmentRequests } from '../../../../shared/filters/courseFilter';
 
 const AdminCourseManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -60,7 +59,6 @@ const AdminCourseManagement: React.FC = () => {
     isLoadingRequests,
     approveEnrollmentRequest,
     rejectEnrollmentRequest,
-    getEnrollmentRequestDetails,
     requestFilters,
     setRequestFilters,
     activeTab,
@@ -233,9 +231,6 @@ const AdminCourseManagement: React.FC = () => {
     return <ErrorMessage message={error.message || 'Failed to load courses.'} />;
   }
 
-  // Use courses directly from the hook
-  const filteredEnrollmentRequests = filterEnrollmentRequests(enrollmentRequests, searchTerm);
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 relative">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -294,15 +289,15 @@ const AdminCourseManagement: React.FC = () => {
           filterOptions={
             activeTab === 'courses'
               ? {
-                  specialization: SPECIALIZATIONS,
-                  faculty: FACULTIES,
-                  term: TERMS,
-                }
+                specialization: SPECIALIZATIONS,
+                faculty: FACULTIES,
+                term: TERMS,
+              }
               : {
-                  status: REQUEST_STATUSES,
-                  specialization: SPECIALIZATIONS,
-                  term: TERMS,
-                }
+                status: REQUEST_STATUSES,
+                specialization: SPECIALIZATIONS,
+                term: TERMS,
+              }
           }
           debouncedFilterChange={debouncedFilterChange}
           handleResetFilters={handleResetFilters}
@@ -361,17 +356,17 @@ const AdminCourseManagement: React.FC = () => {
                   <h3 className="text-lg font-medium text-white">Course Enrollment Requests</h3>
                   {isLoadingRequests ? (
                     <LoadingSpinner />
-                  ) : filteredEnrollmentRequests.length > 0 ? (
+                  ) : enrollmentRequests.length > 0 ? (
                     <>
                       <ApplicationsTable
-                        data={filteredEnrollmentRequests}
+                        data={enrollmentRequests}
                         columns={enrollmentRequestColumns}
                         actions={enrollmentRequestActions}
                       />
                       <Pagination
                         page={page}
                         totalPages={enrollmentRequestsTotalPages}
-                        itemsCount={filteredEnrollmentRequests.length}
+                        itemsCount={enrollmentRequests.length}
                         itemName="requests"
                         onPageChange={(newPage) => setPage(newPage)}
                         onFirstPage={() => setPage(1)}
@@ -430,7 +425,7 @@ const AdminCourseManagement: React.FC = () => {
           onClose={() => {
             setShowRequestDetails(false);
           }}
-          request={requestDetails?.data}
+          request={requestDetails?.courseRequest}
           isLoading={isLoadingRequestDetails}
         />
       )}

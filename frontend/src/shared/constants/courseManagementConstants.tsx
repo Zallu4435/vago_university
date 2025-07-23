@@ -127,16 +127,6 @@ export const enrollmentRequestColumns = [
     ),
   },
   {
-    header: 'Requested At',
-    key: 'requestedAt',
-    render: (request: EnrollmentRequest) => (
-      <div className="flex items-center text-gray-300">
-        <FiClock size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{new Date(request.requestedAt).toLocaleDateString()}</span>
-      </div>
-    ),
-  },
-  {
     header: 'Status',
     key: 'status',
     render: (request: EnrollmentRequest) => (

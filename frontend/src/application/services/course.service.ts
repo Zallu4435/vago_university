@@ -90,7 +90,7 @@ class CourseService {
         requests: EnrollmentRequest[];
         totalPages: number;
       }>("/admin/courses/course-enrollments", { params });
-      return response.data;
+      return response.data?.data;
     } catch (error: any) {
       throw new Error(
         error.response?.data?.error || "Failed to fetch enrollment requests"
@@ -133,7 +133,7 @@ class CourseService {
       const response = await httpClient.get<EnrollmentRequest>(
         `/admin/courses/course-enrollments/${requestId}/details`
       );
-      return response.data;
+      return response.data?.data;
     } catch (error: any) {
       console.error("Error fetching enrollment request details:", error);
       throw new Error(

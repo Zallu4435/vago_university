@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiDollarSign, FiCheckCircle, FiXCircle, FiEye, FiFileText, FiAward, FiPlus, FiList } from 'react-icons/fi';
+import { FiDollarSign, FiEye, FiFileText, FiAward, FiPlus, FiList } from 'react-icons/fi';
 import { debounce } from 'lodash';
 import { usePaymentsManagement } from '../../../../application/hooks/useFinancial';
 import { financialService } from '../../../../application/services/financialService';
@@ -11,7 +11,7 @@ import ActionModal from './ActionModal';
 import AddChargeModal from './AddChargeModal';
 import ViewChargesModal from './ViewChargesModal';
 import PaymentDetailsModal from './PaymentDetailsModal';
-import { Charge, Payment, FinancialAidApplication, ScholarshipApplication, Filters } from '../../../../domain/types/management/financialmanagement';
+import { Payment, FinancialAidApplication, ScholarshipApplication, Filters } from '../../../../domain/types/management/financialmanagement';
 import { STATUSES, TERMS, paymentColumns } from '../../../../shared/constants/paymentManagementConstants';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
@@ -30,7 +30,6 @@ const PaymentManagement: React.FC = () => {
   const [actionType, setActionType] = useState<'approve' | 'reject'>('approve');
   const [showAddChargeModal, setShowAddChargeModal] = useState(false);
   const [showViewChargesModal, setShowViewChargesModal] = useState(false);
-  const [charges, setCharges] = useState<Charge[]>([]);
   const [showPaymentDetailsModal, setShowPaymentDetailsModal] = useState(false);
   const [customDateRange, setCustomDateRange] = useState<{ startDate: string; endDate: string }>({ startDate: '', endDate: '' });
 
@@ -39,11 +38,9 @@ const PaymentManagement: React.FC = () => {
     totalPages,
     isLoading,
     error,
-    createPayment,
     paymentDetails,
     isLoadingPaymentDetails,
     handleViewPayment,
-    handleEditPayment,
   } = usePaymentsManagement(
     page,
     10,
@@ -85,12 +82,6 @@ const PaymentManagement: React.FC = () => {
     }
   }, [showPaymentDetailsModal, paymentDetails, isLoadingPaymentDetails]);
 
-
-  const handleAction = (app: FinancialAidApplication | ScholarshipApplication, type: 'approve' | 'reject') => {
-    setSelectedApplication(app);
-    setActionType(type);
-    setShowActionModal(true);
-  };
 
   const handleConfirmAction = async () => {
     if (!selectedApplication) return;
@@ -197,19 +188,6 @@ const PaymentManagement: React.FC = () => {
     setPage(1);
   };
 
-  const handleCustomDateChange = (field: 'startDate' | 'endDate', value: string) => {
-    setCustomDateRange((prev) => ({ ...prev, [field]: value }));
-    setFilters((prev) => {
-      const updated = { ...prev, [field]: value };
-      if (prev.dateRange === 'custom') {
-        updated.startDate = field === 'startDate' ? value : prev.startDate;
-        updated.endDate = field === 'endDate' ? value : prev.endDate;
-      }
-      return updated;
-    });
-    setPage(1);
-  };
-
   // Add a handler to open the payment details modal and fetch details
   const handleViewPaymentModal = (id: string) => {
     handleViewPayment(id);
@@ -222,21 +200,6 @@ const PaymentManagement: React.FC = () => {
       label: 'View Details',
       onClick: (payment: Payment) => handleViewPaymentModal(payment.id),
       color: 'blue' as const,
-    },
-  ];
-
-  const applicationActions = [
-    {
-      icon: <FiCheckCircle size={16} />,
-      label: 'Approve',
-      onClick: (app: FinancialAidApplication | ScholarshipApplication) => handleAction(app, 'approve'),
-      color: 'green' as const,
-    },
-    {
-      icon: <FiXCircle size={16} />,
-      label: 'Reject',
-      onClick: (app: FinancialAidApplication | ScholarshipApplication) => handleAction(app, 'reject'),
-      color: 'red' as const,
     },
   ];
 

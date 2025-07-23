@@ -1,14 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiDollarSign, FiX, FiFileText, FiSearch } from 'react-icons/fi';
-import { debounce } from 'lodash';
 import { useQuery } from '@tanstack/react-query';
 import { financialService } from '../../../../application/services/financialService';
 import { Charge, ViewChargesModalProps } from '../../../../domain/types/management/financialmanagement';
 import ReactDOM from 'react-dom';
+import ChargeDetailsModal from './ChargeDetailsModal';
+import { useChargesManagement } from '../../../../application/hooks/useFinancial';
+import WarningModal from '../../../components/common/WarningModal';
+import AddChargeModal from './AddChargeModal';
 
 const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [warningModalOpen, setWarningModalOpen] = useState(false);
+  const [chargeToDelete, setChargeToDelete] = useState<Charge | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [chargeToEdit, setChargeToEdit] = useState<Charge | null>(null);
 
   // Debounce search input
   useEffect(() => {
@@ -17,18 +26,12 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
   }, [searchQuery]);
 
   // Fetch charges using react-query
-  const { data: charges = [], isLoading } = useQuery<Charge[]>({
-    queryKey: ['charges', debouncedSearch, isOpen],
-    queryFn: async () => {
-      if (!isOpen) return [];
-      return await financialService.getCharges({
-        search: debouncedSearch,
-        page: 1,
-        limit: 50,
-      });
-    },
-    enabled: isOpen,
-  });
+  const {
+    charges,
+    isLoading,
+    updateCharge,
+    deleteCharge,
+  } = useChargesManagement(debouncedSearch, isOpen);
 
   // Reset search and scroll lock on open/close
   useEffect(() => {
@@ -43,11 +46,6 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
     };
   }, [isOpen]);
 
-  const formattedDate = (date: string) => {
-    const dateObj = new Date(date);
-    return `${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
-  };
-
   // Particle effect
   const ghostParticles = Array(30)
     .fill(0)
@@ -59,6 +57,41 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
       animDelay: Math.random() * 5,
     }));
 
+  const handleView = (charge: Charge) => {
+    setSelectedCharge(charge);
+    setIsDetailsModalOpen(true);
+  };
+  const handleEdit = (charge: Charge) => {
+    setChargeToEdit(charge);
+    setEditModalOpen(true);
+  };
+  const handleEditSubmit = (data: any) => {
+    if (chargeToEdit) {
+      updateCharge({ id: chargeToEdit.id, data });
+      setEditModalOpen(false);
+      setChargeToEdit(null);
+    }
+  };
+  const handleEditClose = () => {
+    setEditModalOpen(false);
+    setChargeToEdit(null);
+  };
+  const handleDelete = (charge: Charge) => {
+    setChargeToDelete(charge);
+    setWarningModalOpen(true);
+  };
+  const handleConfirmDelete = () => {
+    if (chargeToDelete) {
+      deleteCharge(chargeToDelete.id);
+      setChargeToDelete(null);
+      setWarningModalOpen(false);
+    }
+  };
+  const handleCancelDelete = () => {
+    setChargeToDelete(null);
+    setWarningModalOpen(false);
+  };
+
   const columns = [
     {
       header: 'Title',
@@ -67,16 +100,6 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
         <div className="flex items-center text-purple-100">
           <FiFileText size={14} className="text-purple-400 mr-2" />
           <span className="text-sm">{charge.title}</span>
-        </div>
-      ),
-    },
-    {
-      header: 'Description',
-      key: 'description',
-      render: (charge: Charge) => (
-        <div className="flex items-center text-purple-100">
-          <FiFileText size={14} className="text-purple-400 mr-2" />
-          <span className="text-sm">{charge.description}</span>
         </div>
       ),
     },
@@ -111,22 +134,19 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
       ),
     },
     {
-      header: 'Applicable For',
-      key: 'applicableFor',
+      header: 'Actions',
+      key: 'actions',
       render: (charge: Charge) => (
-        <div className="flex items-center text-purple-100">
-          <FiFileText size={14} className="text-purple-400 mr-2" />
-          <span className="text-sm">{charge.applicableFor}</span>
-        </div>
-      ),
-    },
-    {
-      header: 'Created At',
-      key: 'createdAt',
-      render: (charge: Charge) => (
-        <div className="flex items-center text-purple-100">
-          <FiFileText size={14} className="text-purple-400 mr-2" />
-          <span className="text-sm">{formattedDate(charge.createdAt)}</span>
+        <div className="flex items-center gap-3">
+          <button title="View" onClick={() => handleView(charge)} className="p-1 hover:bg-purple-500/20 rounded-full">
+            <FiSearch size={18} className="text-purple-400" />
+          </button>
+          <button title="Edit" onClick={() => handleEdit(charge)} className="p-1 hover:bg-purple-500/20 rounded-full">
+            <FiFileText size={18} className="text-purple-400" />
+          </button>
+          <button title="Delete" onClick={() => handleDelete(charge)} className="p-1 hover:bg-red-500/20 rounded-full">
+            <FiX size={18} className="text-red-400" />
+          </button>
         </div>
       ),
     },
@@ -253,6 +273,41 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
               </div>
             )}
           </div>
+          {/* Details Modal */}
+          {isDetailsModalOpen && selectedCharge && (
+            <ChargeDetailsModal
+              charge={selectedCharge}
+              isOpen={isDetailsModalOpen}
+              onClose={() => setIsDetailsModalOpen(false)}
+            />
+          )}
+          {/* Edit Modal for Charge */}
+          <AddChargeModal
+            isOpen={editModalOpen}
+            onClose={handleEditClose}
+            onSubmit={handleEditSubmit}
+            {...(chargeToEdit && {
+              initialValues: {
+                title: chargeToEdit.title,
+                description: chargeToEdit.description,
+                amount: chargeToEdit.amount,
+                term: chargeToEdit.term,
+                dueDate: chargeToEdit.dueDate,
+                applicableFor: chargeToEdit.applicableFor,
+              },
+            })}
+          />
+          {/* Warning Modal for Delete */}
+          <WarningModal
+            isOpen={warningModalOpen}
+            onClose={handleCancelDelete}
+            onConfirm={handleConfirmDelete}
+            title="Delete Charge"
+            message={`Are you sure you want to delete the charge "${chargeToDelete?.title}"? This action cannot be undone.`}
+            confirmText="Delete"
+            cancelText="Cancel"
+            type="danger"
+          />
         </div>
       </div>
 

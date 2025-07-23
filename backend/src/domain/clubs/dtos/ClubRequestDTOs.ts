@@ -23,6 +23,7 @@ export interface GetClubsRequestDTO {
   status?: string;
   startDate?: Date;
   endDate?: Date;
+  search?: string;
 }
 
 export interface GetClubByIdRequestDTO {
@@ -46,6 +47,7 @@ export interface GetClubRequestsRequestDTO {
   type: string;
   startDate?: string;
   endDate?: string;
+  search?: string;
 }
 
 export interface ApproveClubRequestRequestDTO {

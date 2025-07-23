@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   IoCloseOutline as X,
-  IoCalendarOutline as Calendar,
   IoPeopleOutline as Users,
   IoPersonOutline as User,
   IoInformationCircleOutline as Info,
@@ -16,7 +15,6 @@ import {
 import { 
   StatusType,
   ClubRequestDetailsModalProps,
-  ClubRequestDetails,
   ClubRequestDetailsStatusBadgeProps,
   ClubRequestDetailsInfoCardProps,
   ParticleConfig

@@ -23,7 +23,7 @@ export class SportsController implements ISportsController {
   }
 
   async getSports(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { page = "1", limit = "10", sportType = "all", status = "all", coach = "all" } = httpRequest.query;
+    const { page = "1", limit = "10", sportType = "all", status = "all", coach = "all", startDate, endDate, search } = httpRequest.query;
 
     if (
       isNaN(Number(page)) ||
@@ -40,6 +40,9 @@ export class SportsController implements ISportsController {
       sportType: String(sportType),
       status: String(status),
       coach: String(coach),
+      startDate: startDate ? String(startDate) : undefined,
+      endDate: endDate ? String(endDate) : undefined,
+      search: search ? String(search) : undefined,
     });
 
     return this.httpSuccess.success_200(result);

@@ -3,27 +3,65 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { chargeSchema, ChargeFormDataRaw } from '../../../../domain/validation/management/chargeSchema';
 import { FiX as X, FiDollarSign, FiCalendar, FiFileText } from 'react-icons/fi';
-import { AddChargeModalProps, ChargeFormData } from '../../../../domain/types/management/financialmanagement';
+import { ChargeFormData } from '../../../../domain/types/management/financialmanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
-const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubmit }) => {
+interface AddChargeModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (charge: ChargeFormData) => void;
+  initialValues?: Partial<ChargeFormData>;
+}
+
+const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubmit, initialValues }) => {
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<ChargeFormDataRaw>({
-    resolver: zodResolver(chargeSchema) as any, // Type assertion to bypass resolver type mismatch
-    defaultValues: {
-      title: '',
-      description: '',
-      amount: '',
-      term: '',
-      dueDate: '',
-      applicableFor: '',
-    },
+    resolver: zodResolver(chargeSchema) as any,
+    defaultValues: initialValues
+      ? {
+        title: initialValues.title || '',
+        description: initialValues.description || '',
+        amount: initialValues.amount !== undefined ? String(initialValues.amount) : '',
+        term: initialValues.term || '',
+        dueDate: initialValues.dueDate || '',
+        applicableFor: initialValues.applicableFor || '',
+      }
+      : {
+        title: '',
+        description: '',
+        amount: '',
+        term: '',
+        dueDate: '',
+        applicableFor: '',
+      },
     mode: 'onChange',
   });
+
+  useEffect(() => {
+    if (initialValues && isOpen) {
+      reset({
+        title: initialValues.title || '',
+        description: initialValues.description || '',
+        amount: initialValues.amount !== undefined ? String(initialValues.amount) : '',
+        term: initialValues.term || '',
+        dueDate: initialValues.dueDate || '',
+        applicableFor: initialValues.applicableFor || '',
+      });
+    } else if (isOpen) {
+      reset({
+        title: '',
+        description: '',
+        amount: '',
+        term: '',
+        dueDate: '',
+        applicableFor: '',
+      });
+    }
+  }, [initialValues, isOpen, reset]);
 
   const handleFormSubmit = (data: ChargeFormDataRaw) => {
     const transformed: ChargeFormData = {
@@ -85,8 +123,8 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
                 <FiDollarSign className="text-purple-300" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-purple-100">Add New Charge</h2>
-                <p className="text-purple-300 text-sm">Fill in the details to create a new charge</p>
+                <h2 className="text-2xl font-bold text-purple-100">{initialValues ? 'Edit Charge' : 'Add New Charge'}</h2>
+                <p className="text-purple-300 text-sm">{initialValues ? 'Update the details of the charge' : 'Fill in the details to create a new charge'}</p>
               </div>
             </div>
             <button
@@ -118,9 +156,8 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
                       <input
                         {...field}
                         type="text"
-                        className={`w-full pl-12 pr-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                          errors.title ? 'border-red-500' : 'border-purple-500/30'
-                        }`}
+                        className={`w-full pl-12 pr-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.title ? 'border-red-500' : 'border-purple-500/30'
+                          }`}
                         placeholder="Enter charge title"
                       />
                     </div>
@@ -139,9 +176,8 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
                     <textarea
                       {...field}
                       rows={4}
-                      className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                        errors.description ? 'border-red-500' : 'border-purple-500/30'
-                      }`}
+                      className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.description ? 'border-red-500' : 'border-purple-500/30'
+                        }`}
                       placeholder="Enter charge description"
                     />
                   )}
@@ -163,9 +199,8 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
                         type="number"
                         step="0.01"
                         min="0"
-                        className={`w-full pl-12 pr-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                          errors.amount ? 'border-red-500' : 'border-purple-500/30'
-                        }`}
+                        className={`w-full pl-12 pr-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.amount ? 'border-red-500' : 'border-purple-500/30'
+                          }`}
                         placeholder="Enter amount"
                       />
                     </div>
@@ -183,9 +218,8 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
                   render={({ field }) => (
                     <select
                       {...field}
-                      className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                        errors.term ? 'border-red-500' : 'border-purple-500/30'
-                      }`}
+                      className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.term ? 'border-red-500' : 'border-purple-500/30'
+                        }`}
                     >
                       <option value="">Select Term</option>
                       <option value="Fall 2024">Fall 2024</option>
@@ -209,9 +243,8 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
                       <input
                         {...field}
                         type="date"
-                        className={`w-full pl-12 pr-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                          errors.dueDate ? 'border-red-500' : 'border-purple-500/30'
-                        }`}
+                        className={`w-full pl-12 pr-4 py-3 bg-gray-900/60 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.dueDate ? 'border-red-500' : 'border-purple-500/30'
+                          }`}
                       />
                     </div>
                   )}
@@ -229,9 +262,8 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
                     <input
                       {...field}
                       type="text"
-                      className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${
-                        errors.applicableFor ? 'border-red-500' : 'border-purple-500/30'
-                      }`}
+                      className={`w-full px-4 py-3 bg-gray-900/60 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 ${errors.applicableFor ? 'border-red-500' : 'border-purple-500/30'
+                        }`}
                       placeholder="e.g., batch_2024, cs_department"
                     />
                   )}
@@ -260,10 +292,10 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
                 {isSubmitting ? (
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Creating...
+                    {initialValues ? 'Updating...' : 'Creating...'}
                   </div>
                 ) : (
-                  'Add Charge'
+                  initialValues ? 'Update Charge' : 'Add Charge'
                 )}
               </button>
             </div>

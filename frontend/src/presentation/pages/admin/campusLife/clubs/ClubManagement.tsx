@@ -16,9 +16,9 @@ import AddClubModal from './AddClubModal';
 import ClubDetailsModal from './ClubDetailsModal';
 import ClubRequestDetailsModal from './ClubRequestDetailsModal';
 import { useClubManagement } from '../../../../../application/hooks/useClubManagement';
-import { Club, ClubRequest, ClubActionConfig } from '../../../../../domain/types/management/clubmanagement';
+import { Club, ClubRequest } from '../../../../../domain/types/club';
+import { ClubActionConfig } from '../../../../../domain/types/management/clubmanagement';
 import { CATEGORIES, CLUB_STATUSES, REQUEST_STATUSES, DATE_RANGES, ICONS, COLORS, clubColumns, clubRequestColumns } from '../../../../../shared/constants/clubManagementConstants';
-import { filterClubs, filterClubRequests } from '../../../../../shared/filters/clubManagementFilter';
 import LoadingSpinner from '../../../../../shared/components/LoadingSpinner';
 
 
@@ -31,6 +31,8 @@ const AdminClubManagement: React.FC = () => {
     setPage,
     filters,
     setFilters,
+    searchQuery,
+    setSearchQuery,
     isLoading,
     error,
     createClub,
@@ -46,7 +48,6 @@ const AdminClubManagement: React.FC = () => {
 
 
   const [activeTab, setActiveTab] = useState<'clubs' | 'requests'>('clubs');
-  const [searchQuery, setSearchQuery] = useState('');
   const [showAddClubModal, setShowAddClubModal] = useState(false);
   const [showClubDetailsModal, setShowClubDetailsModal] = useState(false);
   const [selectedClub, setSelectedClub] = useState<Club | ClubRequest | null>(null);
@@ -59,66 +60,89 @@ const AdminClubManagement: React.FC = () => {
   const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<ClubRequest | null>(null);
 
-  const filteredClubs = filterClubs(clubs, searchQuery, filters);
-  const filteredClubRequests = filterClubRequests(clubRequests, searchQuery, filters);
+  // Debounced search
+  const [searchInput, setSearchInput] = useState(searchQuery);
+  React.useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearchQuery(searchInput);
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [searchInput]);
 
   const handleAddClub = () => {
     setSelectedClub(null);
     setShowAddClubModal(true);
   };
 
-  const handleEditClub = async (club: Club) => {
-    try {
-      const id = club.id || club._id;
-      const details = await getClubDetails(id);
-      setSelectedClub(details);
-      setShowAddClubModal(true);
-    } catch (error) {
-      console.error('Error fetching club details:', error);
-      toast.error('Failed to fetch club details');
-    }
-  };
+  // Type guard helpers
+  function isClub(item: Club | ClubRequest): item is Club {
+    return (item as Club).createdBy !== undefined;
+  }
+  function isClubRequest(item: Club | ClubRequest): item is ClubRequest {
+    return (item as ClubRequest).requestedId !== undefined;
+  }
 
-  const handleViewClub = async (club: Club | ClubRequest) => {
-    try {
-      if ('id' in club) {
-        const details = await getClubDetails(club.id);
+  const handleEditClub = (club: Club) => {
+    (async () => {
+      try {
+        const id = club.id;
+        const details = await getClubDetails(id);
         setSelectedClub(details);
-      } else {
-        setSelectedClub(club);
+        setShowAddClubModal(true);
+      } catch (error) {
+        console.error('Error fetching club details:', error);
+        toast.error('Failed to fetch club details');
       }
-      setShowClubDetailsModal(true);
-    } catch (error) {
-      console.error('Error fetching club details:', error);
-      toast.error('Failed to fetch club details');
-    }
+    })();
   };
 
-  const handleViewRequest = async (request: ClubRequest) => {
-    try {
-      const details = await getClubRequestDetails(request.requestedId);
-      setSelectedRequest(details);
-      setShowRequestDetailsModal(true);
-    } catch (error) {
-      console.error('Error fetching request details:', error);
-      toast.error('Failed to fetch request details');
-    }
+  const handleViewClub = (club: Club | ClubRequest) => {
+    (async () => {
+      try {
+        if (isClub(club)) {
+          const details = await getClubDetails(club.id);
+          setSelectedClub(details);
+        } else {
+          setSelectedClub(club);
+        }
+        setShowClubDetailsModal(true);
+      } catch (error) {
+        console.error('Error fetching club details:', error);
+        toast.error('Failed to fetch club details');
+      }
+    })();
   };
 
-  const handleSaveClub = async (data: Omit<Club, 'id' | 'createdAt'>) => {
-    try {
-      if (selectedClub && 'id' in selectedClub) {
-        await updateClub({ id: selectedClub.id, data });
-        toast.success('Club updated successfully');
-      } else {
-        await createClub(data);
-        toast.success('Club created successfully');
+  const handleViewRequest = (request: ClubRequest) => {
+    (async () => {
+      try {
+        const details = await getClubRequestDetails(request.requestedId);
+        setSelectedRequest(details);
+        setShowRequestDetailsModal(true);
+      } catch (error) {
+        console.error('Error fetching request details:', error);
+        toast.error('Failed to fetch request details');
       }
-      setShowAddClubModal(false);
-      setSelectedClub(null);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || error.message || 'Failed to save club');
-    }
+    })();
+  };
+
+  const handleSaveClub = (data: Omit<Club, 'id' | 'createdAt'>) => {
+    (async () => {
+      try {
+        if (selectedClub && isClub(selectedClub)) {
+          await updateClub({ id: selectedClub.id, data });
+          toast.success('Club updated successfully');
+        } else {
+          await createClub(data);
+          toast.success('Club created successfully');
+        }
+        setShowAddClubModal(false);
+        setSelectedClub(null);
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || error.message || 'Failed to save club');
+      }
+    })();
   };
 
   const handleDeleteClub = (id: string) => {
@@ -165,6 +189,7 @@ const AdminClubManagement: React.FC = () => {
   const debouncedFilterChange = useCallback(
     debounce((field: string, value: string) => {
       setFilters((prev) => ({ ...prev, [field]: value }));
+      setPage(1);
     }, 300),
     []
   );
@@ -175,7 +200,8 @@ const AdminClubManagement: React.FC = () => {
       status: 'All',
       dateRange: 'All',
     });
-    setSearchQuery('');
+    setSearchInput('');
+    setPage(1);
   };
 
   const clubActions: ClubActionConfig[] = [
@@ -196,7 +222,9 @@ const AdminClubManagement: React.FC = () => {
     {
       icon: <Trash2 />,
       label: 'Delete Club',
-      onClick: (club: Club) => handleDeleteClub(club.id),
+      onClick: (club: Club | ClubRequest) => {
+        if (isClub(club)) handleDeleteClub(club.id);
+      },
       color: 'red' as const,
     },
   ];
@@ -212,16 +240,20 @@ const AdminClubManagement: React.FC = () => {
     {
       icon: <Edit size={16} />,
       label: 'Approve Request',
-      onClick: (request: ClubRequest) => handleApproveRequest(request.requestedId),
+      onClick: (item: Club | ClubRequest) => {
+        if (isClubRequest(item)) handleApproveRequest(item.requestedId);
+      },
       color: 'green' as const,
-      disabled: (request: ClubRequest) => request.status !== 'pending' || isLoadingClubDetails,
+      disabled: (item: Club | ClubRequest) => isClubRequest(item) ? item.status !== 'pending' || isLoadingClubDetails : true,
     },
     {
       icon: <Trash2 size={16} />,
       label: 'Reject Request',
-      onClick: (request: ClubRequest) => handleRejectRequest(request.requestedId),
+      onClick: (item: Club | ClubRequest) => {
+        if (isClubRequest(item)) handleRejectRequest(item.requestedId);
+      },
       color: 'red' as const,
-      disabled: (request: ClubRequest) => request.status !== 'pending' || isLoadingClubDetails,
+      disabled: (item: Club | ClubRequest) => isClubRequest(item) ? item.status !== 'pending' || isLoadingClubDetails : true,
     },
   ];
 
@@ -261,21 +293,21 @@ const AdminClubManagement: React.FC = () => {
             {
               icon: <Building />,
               title: 'Total Clubs',
-              value: filteredClubs.length.toString(),
+              value: clubs.length.toString(),
               change: '+10%',
               isPositive: true,
             },
             {
               icon: <Edit />,
               title: 'Pending Requests',
-              value: filteredClubRequests.filter((r) => r.status.toLowerCase() === 'pending').length.toString(),
+              value: clubRequests.filter((r: ClubRequest) => r.status && r.status.toLowerCase() === 'pending').length.toString(),
               change: '+5%',
               isPositive: true,
             },
             {
               icon: <Building />,
               title: 'Active Clubs',
-              value: filteredClubs.filter((c) => c.status.toLowerCase() === 'active').length.toString(),
+              value: clubs.filter((c: Club) => c.status && c.status.toLowerCase() === 'active').length.toString(),
               change: '+8%',
               isPositive: true,
             },
@@ -284,8 +316,8 @@ const AdminClubManagement: React.FC = () => {
             { label: 'Clubs', icon: <Building size={16} />, active: activeTab === 'clubs' },
             { label: 'Club Requests', icon: <Edit size={16} />, active: activeTab === 'requests' },
           ]}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
+          searchQuery={searchInput}
+          setSearchQuery={setSearchInput}
           searchPlaceholder="Search clubs or requests..."
           filters={filters}
           filterOptions={{
@@ -305,7 +337,7 @@ const AdminClubManagement: React.FC = () => {
               status: 'All',
               dateRange: 'All',
             });
-            setSearchQuery('');
+            setSearchInput('');
           }}
         />
 
@@ -323,25 +355,23 @@ const AdminClubManagement: React.FC = () => {
                 </button>
               )}
 
-              {activeTab === 'clubs' && filteredClubs.length > 0 && (
+              {activeTab === 'clubs' && clubs.length > 0 && (
                 <>
                   {isLoading ? (
                     <LoadingSpinner />
                   ) : (
-                    <ApplicationsTable data={filteredClubs} columns={clubColumns} actions={clubActions} />
+                    <ApplicationsTable data={clubs} columns={clubColumns} actions={clubActions} />
                   )}
                   <Pagination
                     page={page}
                     totalPages={totalPages}
-                    itemsCount={filteredClubs.length}
-                    itemName="clubs"
                     onPageChange={setPage}
                     onFirstPage={() => setPage(1)}
                     onLastPage={() => setPage(totalPages)}
                   />
                 </>
               )}
-              {activeTab === 'requests' && filteredClubRequests.length > 0 && (
+              {activeTab === 'requests' && clubRequests.length > 0 && (
                 <>
                   {isLoading ? (
                     <div className="flex items-center justify-center py-12">
@@ -349,7 +379,7 @@ const AdminClubManagement: React.FC = () => {
                     </div>
                   ) : (
                     <ApplicationsTable
-                      data={filteredClubRequests}
+                      data={clubRequests}
                       columns={clubRequestColumns}
                       actions={clubRequestActions}
                     />
@@ -357,15 +387,13 @@ const AdminClubManagement: React.FC = () => {
                   <Pagination
                     page={page}
                     totalPages={totalPages}
-                    itemsCount={filteredClubRequests.length}
-                    itemName="club requests"
                     onPageChange={setPage}
                     onFirstPage={() => setPage(1)}
                     onLastPage={() => setPage(totalPages)}
                   />
                 </>
               )}
-              {activeTab === 'clubs' && filteredClubs.length === 0 && (
+              {activeTab === 'clubs' && clubs.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <Building size={32} className="text-purple-400" />
@@ -376,7 +404,7 @@ const AdminClubManagement: React.FC = () => {
                   </p>
                 </div>
               )}
-              {activeTab === 'requests' && filteredClubRequests.length === 0 && (
+              {activeTab === 'requests' && clubRequests.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-purple-900/30 rounded-full flex items-center justify-center mb-4 border border-purple-500/30">
                     <Edit size={32} className="text-purple-400" />
@@ -401,18 +429,18 @@ const AdminClubManagement: React.FC = () => {
         initialData={
           selectedClub
             ? {
-              name: selectedClub.name,
-              type: selectedClub.type,
-              members: selectedClub.members,
-              icon: selectedClub.icon,
-              color: selectedClub.color,
-              status: selectedClub.status,
-              role: selectedClub.role,
-              nextMeeting: selectedClub.nextMeeting,
-              about: selectedClub.about,
-              createdBy: selectedClub.createdBy,
-              upcomingEvents: selectedClub.upcomingEvents,
-            }
+                name: selectedClub.name,
+                type: selectedClub.type,
+                members: selectedClub.members,
+                icon: selectedClub.icon,
+                color: selectedClub.color,
+                status: selectedClub.status as 'active' | 'inactive',
+                role: selectedClub.role,
+                nextMeeting: selectedClub.nextMeeting,
+                about: selectedClub.about,
+                createdBy: selectedClub.createdBy || '',
+                upcomingEvents: selectedClub.upcomingEvents,
+              }
             : undefined
         }
         isEditing={!!selectedClub}

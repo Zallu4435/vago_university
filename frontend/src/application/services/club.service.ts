@@ -8,11 +8,12 @@ class ClubService {
     limit: number,
     category?: string,
     status?: string,
-    dateRange?: string
+    dateRange?: string,
+    search?: string
   ): Promise<ClubApiResponse> {
     try {
       const response = await httpClient.get<ClubApiResponse>('/admin/clubs', {
-        params: { page, limit, category, status, dateRange },
+        params: { page, limit, category, status, dateRange, search },
       });
       return response.data.data;
     } catch (error: any) {
@@ -60,11 +61,12 @@ class ClubService {
     limit: number,
     category?: string,
     status?: string,
-    dateRange?: string
+    dateRange?: string,
+    search?: string
   ): Promise<ClubApiResponse> {
     try {
       const response = await httpClient.get('/admin/club-requests', {
-        params: { page, limit, category, status, dateRange },
+        params: { page, limit, category, status, dateRange, search },
       });
       return response.data.data;
     } catch (error: any) {

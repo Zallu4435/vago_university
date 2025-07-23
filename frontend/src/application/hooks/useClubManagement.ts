@@ -18,6 +18,7 @@ export const useClubManagement = () => {
     status: 'All',
     dateRange: 'All',
   });
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'clubs' | 'requests' | 'members'>('clubs');
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
   const limit = 10;
@@ -60,36 +61,36 @@ export const useClubManagement = () => {
   };
 
   const { data: clubsData, isLoading: isLoadingClubs, error: clubsError } = useQuery({
-    queryKey: ['clubs', page, filters, limit],
+    queryKey: ['clubs', page, filters, searchQuery, limit],
     queryFn: () => {
       const dateRange = getDateRangeFilter(filters.dateRange);
       const category = filters.category !== 'All' ? filters.category.toLowerCase().replace(/\s+/g, '_') : undefined;
       const status = filters.status !== 'All' ? filters.status.toLowerCase().replace(/\s+/g, '_') : undefined;
-
       return clubService.getClubs(
         page,
         limit,
         category,
         status,
-        dateRange
+        dateRange,
+        searchQuery && searchQuery.trim() !== '' ? searchQuery : undefined
       );
     },
     enabled: activeTab === 'clubs',
   });
 
   const { data: clubRequestsData, isLoading: isLoadingRequests, error: requestsError } = useQuery({
-    queryKey: ['clubRequests', page, filters, limit],
+    queryKey: ['clubRequests', page, filters, searchQuery, limit],
     queryFn: () => {
       const dateRange = getDateRangeFilter(filters.dateRange);
       const category = filters.category !== 'All' ? filters.category.toLowerCase().replace(/\s+/g, '_') : undefined;
       const status = filters.status !== 'All' ? filters.status.toLowerCase().replace(/\s+/g, '_') : undefined;
-
       return clubService.getClubRequests(
         page,
         limit,
         category,
         status,
-        dateRange
+        dateRange,
+        searchQuery && searchQuery.trim() !== '' ? searchQuery : undefined
       );
     },
     enabled: activeTab === 'requests',
@@ -231,6 +232,8 @@ export const useClubManagement = () => {
     setPage,
     filters,
     setFilters,
+    searchQuery,
+    setSearchQuery,
     isLoading: isLoadingClubs || isLoadingRequests,
     error: clubsError || requestsError,
     createClub,

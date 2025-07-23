@@ -21,6 +21,9 @@ export interface GetSportsRequestDTO {
   sportType: string;
   status: string;
   coach: string;
+  startDate?: string;
+  endDate?: string;
+  search?: string;
 }
 
 export interface GetSportByIdRequestDTO {
@@ -44,6 +47,7 @@ export interface GetSportRequestsRequestDTO {
   type: string;
   startDate?: string;
   endDate?: string;
+  search?: string;
 }
 
 export interface ApproveSportRequestRequestDTO {

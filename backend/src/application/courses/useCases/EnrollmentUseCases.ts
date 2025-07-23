@@ -34,7 +34,8 @@ export class GetEnrollmentsUseCase implements IGetEnrollmentsUseCase {
   constructor(private readonly courseRepository: ICoursesRepository) {}
 
   async execute(params: GetEnrollmentsRequestDTO): Promise<{ success: boolean; data: GetEnrollmentsResponseDTO }> {
-    const { enrollments, totalItems, page, limit }: any = await this.courseRepository.getEnrollments(params);
+    // Pass all filter/search params to the repository
+    const { enrollments, totalItems, page, limit } = await this.courseRepository.getEnrollments(params);
     const mappedEnrollments: SimplifiedEnrollmentDTO[] = enrollments.map((enrollment: any) => ({
       id: enrollment._id.toString(),
       studentName: (enrollment.studentId as any)?.email || "Unknown",
@@ -43,6 +44,7 @@ export class GetEnrollmentsUseCase implements IGetEnrollmentsUseCase {
       requestedAt: enrollment.requestedAt?.toISOString() || "",
       status: enrollment.status,
       specialization: (enrollment.courseId as any)?.specialization || "N/A",
+      faculty: (enrollment.courseId as any)?.faculty || "N/A",
       term: (enrollment.courseId as any)?.term || "N/A",
     }));
     return {
@@ -97,6 +99,7 @@ export class GetCourseRequestDetailsUseCase implements IGetCourseRequestDetailsU
     if (!enrollment.courseId) {
       throw new CourseNotFoundError();
     }
+    console.log(enrollment, "enrollment");
     return {
       success: true,
       data: {

@@ -44,7 +44,7 @@ const CommunicationManagement: React.FC = () => {
     handleReplyMessage,
     handleDeleteMessage,
     handleArchiveMessage,
-    handleViewMessage,
+    handleViewMessage,  
     fetchSentMessages,
     fetchUsers,
   } = useCommunicationManagement({ isAdmin: true }); // Pass isAdmin flag

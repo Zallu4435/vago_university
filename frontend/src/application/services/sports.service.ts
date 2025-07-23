@@ -8,7 +8,8 @@ class SportsService {
     sportType?: string,
     status?: string,
     coach?: string,
-    dateRange?: string
+    dateRange?: string,
+    search?: string
   ): Promise<SportsApiResponse> {
     try {
       const params: Record<string, string | number> = { page, limit };
@@ -20,6 +21,7 @@ class SportsService {
         params.startDate = startDate;
         params.endDate = endDate;
       }
+      if (search && search.trim() !== '') params.search = search;
 
       const response = await httpClient.get<SportsApiResponse>('/admin/sports', { params });
       return response.data.data;
@@ -34,7 +36,8 @@ class SportsService {
     limit: number,
     sportType?: string,
     status?: string,
-    dateRange?: string
+    dateRange?: string,
+    search?: string
   ): Promise<SportsApiResponse> {
     try {
       const params: Record<string, string | number> = { page, limit };
@@ -45,6 +48,7 @@ class SportsService {
         params.startDate = startDate;
         params.endDate = endDate;
       }
+      if (search && search.trim() !== '') params.search = search;
 
       const response = await httpClient.get<SportsApiResponse>('/admin/sport-requests', { params });
       console.log(response.data, "hushuoshduohsu")
@@ -107,19 +111,10 @@ class SportsService {
     }
   }
 
-  async getESportRequestDetails(id: string): Promise<PlayerRequest> {
-    try {
-      const response = await httpClient.get<PlayerRequest>(`/admin/sport-requests/${id}`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch sports request details');
-    }
-  }
-
   async getRequestDetails(id: string): Promise<PlayerRequest> {
     try {
       const response = await httpClient.get(`/admin/sport-requests/${id}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching request details:', error);
       throw error;

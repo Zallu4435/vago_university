@@ -27,14 +27,15 @@ import {
     }
   
     async getClubRequests(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-      const { page = "1", limit = "10", status = "all", category = "all", startDate, endDate } = httpRequest.query || {};
+      const { page = "1", limit = "10", status = "all", category = "all", startDate, endDate, search } = httpRequest.query || {};
       const getClubRequestsRequestDTO: GetClubRequestsRequestDTO = {
         page: Number(page),
         limit: Number(limit),
         status: String(status),
-        category: String(category),
-        startDate: startDate ? new Date(String(startDate)) : undefined,
-        endDate: endDate ? new Date(String(endDate)) : undefined,
+        type: String(category),
+        startDate: startDate ? String(startDate) : undefined,
+        endDate: endDate ? String(endDate) : undefined,
+        search: search ? String(search) : undefined,
       };
       const response = await this.getClubRequestsUseCase.execute(getClubRequestsRequestDTO);
       return this.httpSuccess.success_200(response);

@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { IDashboardRepository } from '../../../application/admindashboard/repositories/IDashboardRepository';
 import {
   GetDashboardDataRequestDTO,
@@ -12,37 +11,14 @@ import {
   DismissAlertRequestDTO,
   MarkActivityAsReadRequestDTO,
 } from '../../../domain/admindashboard/dtos/DashboardRequestDTOs';
-import {
-  GetDashboardDataResponseDTO,
-  GetDashboardMetricsResponseDTO,
-  GetUserGrowthDataResponseDTO,
-  GetRevenueDataResponseDTO,
-  GetPerformanceDataResponseDTO,
-  GetRecentActivitiesResponseDTO,
-  GetSystemAlertsResponseDTO,
-  RefreshDashboardResponseDTO,
-  DismissAlertResponseDTO,
-  MarkActivityAsReadResponseDTO,
-  DashboardMetrics,
-  UserGrowthData,
-  RevenueData,
-  PerformanceData,
-  ActivityItem,
-  SystemAlert,
-  DashboardData,
-} from '../../../domain/admindashboard/dtos/DashboardResponseDTOs';
 
 // Import correct models
 import { User } from '../../database/mongoose/auth/user.model';
 import { CourseModel } from '../../database/mongoose/models/courses/CourseModel';
 import { Admission } from '../../database/mongoose/admission/AdmissionModel';
-import { Payment } from '../../database/mongoose/models/payment.model';
 import { Faculty } from '../../database/mongoose/auth/faculty.model';
 import { PaymentModel } from '../../database/mongoose/models/financial.model';
 import { StudentFinancialInfoModel } from '../../database/mongoose/models/financial.model';
-import { ChargeModel } from '../../database/mongoose/models/financial.model';
-import { FinancialAidApplicationModel } from '../../database/mongoose/models/financial.model';
-import { ScholarshipApplicationModel } from '../../database/mongoose/models/financial.model';
 import { Enquiry } from '../../database/mongoose/models/enquiry.model';
 import { NotificationModel } from '../../database/mongoose/models/notification.model';
 import { MessageModel } from '../../database/mongoose/models/communication.model';
@@ -80,7 +56,7 @@ export class DashboardRepository implements IDashboardRepository {
   }
 
   async getDashboardMetrics(params: GetDashboardMetricsRequestDTO): Promise<any> {
-    const [totalUsers, totalFaculty, totalCourses, pendingAdmissions, completedPayments, pendingFinancialAid] = await Promise.all([
+    const [totalUsers, totalFaculty, totalCourses, pendingAdmissions, completedPayments] = await Promise.all([
       User.countDocuments({}),
       Faculty.countDocuments({}),
       CourseModel.countDocuments({}),
@@ -89,15 +65,13 @@ export class DashboardRepository implements IDashboardRepository {
         { $match: { status: 'Completed' } },
         { $group: { _id: null, total: { $sum: '$amount' } } },
       ]),
-      FinancialAidApplicationModel.countDocuments({ status: 'Pending' }),
     ]);
     return {
       totalUsers,
       totalFaculty,
       totalCourses,
       pendingAdmissions,
-      completedPayments,
-      pendingFinancialAid
+      completedPayments
     };
   }
 
@@ -164,8 +138,6 @@ export class DashboardRepository implements IDashboardRepository {
       enquiryCount,
       notificationCount,
       communicationCount,
-      financialAidCount,
-      scholarshipCount,
       videoCount,
       sportsCount,
       diplomaCount,
@@ -180,8 +152,6 @@ export class DashboardRepository implements IDashboardRepository {
       Enquiry.countDocuments({}),
       NotificationModel.countDocuments({}),
       MessageModel.countDocuments({}),
-      FinancialAidApplicationModel.countDocuments({}),
-      ScholarshipApplicationModel.countDocuments({}),
       Video.countDocuments({}),
       TeamModel.countDocuments({}),
       Diploma.countDocuments({}),
@@ -197,8 +167,6 @@ export class DashboardRepository implements IDashboardRepository {
       enquiryCount,
       notificationCount,
       communicationCount,
-      financialAidCount,
-      scholarshipCount,
       videoCount,
       sportsCount,
       diplomaCount,
@@ -225,16 +193,14 @@ export class DashboardRepository implements IDashboardRepository {
 
   async getSystemAlerts(params: GetSystemAlertsRequestDTO): Promise<any> {
     // Only fetch raw counts for alerts
-    const [pendingAdmissions, pendingFinancialAid, failedPayments, overdueCharges, completedPayments] = await Promise.all([
+    const [pendingAdmissions, failedPayments, overdueCharges, completedPayments] = await Promise.all([
       Admission.countDocuments({ status: 'pending' }),
-      FinancialAidApplicationModel.countDocuments({ status: 'Pending' }),
       PaymentModel.countDocuments({ status: 'Failed' }),
       StudentFinancialInfoModel.countDocuments({ status: 'Pending', paymentDueDate: { $lt: new Date() } }),
       PaymentModel.countDocuments({ status: 'Completed' }),
     ]);
     return {
       pendingAdmissions,
-      pendingFinancialAid,
       failedPayments,
       overdueCharges,
       completedPayments

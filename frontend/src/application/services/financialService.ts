@@ -206,6 +206,23 @@ import {
       }
     }
 
+    async updateCharge(id: string, data: Partial<Charge>): Promise<Charge> {
+      try {
+        const response = await httpClient.patch(`${this.adminBaseUrl}/charges/${id}`, data);
+        return response.data.data;
+      } catch (error) {
+        throw new Error('Failed to update charge');
+      }
+    }
+
+    async deleteCharge(id: string): Promise<void> {
+      try {
+        await httpClient.delete(`${this.adminBaseUrl}/charges/${id}`);
+      } catch (error) {
+        throw new Error('Failed to delete charge');
+      }
+    }
+
     async getPaymentDetails(paymentId: string): Promise<Payment> {
       try {
         const response = await httpClient.get(`${this.adminBaseUrl}/payments/${paymentId}`);

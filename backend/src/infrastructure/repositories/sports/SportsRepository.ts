@@ -17,15 +17,29 @@ import mongoose from "mongoose";
 
 export class SportsRepository implements ISportsRepository {
   async getSports(params: GetSportsRequestDTO): Promise<any> {
-    const { page, limit, sportType, status, coach } = params;
+    const { page, limit, sportType, status, coach, startDate, endDate, search } = params;
     const query: any = {};
-    if (sportType !== "all") {
+    if (sportType && sportType !== "all") {
       query.type = { $regex: `^${sportType}$`, $options: "i" };
     }
-    if (status !== "all") {
+    if (status && status !== "all") {
       query.status = { $regex: `^${status}$`, $options: "i" };
     }
-    // Coach/date filtering logic can be handled in use case if needed
+    if (coach && coach !== "all") {
+      query.headCoach = { $regex: coach, $options: "i" };
+    }
+    if (startDate && endDate) {
+      query.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    }
+    if (search && search.trim() !== "") {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { type: { $regex: search, $options: "i" } },
+        { headCoach: { $regex: search, $options: "i" } },
+        { category: { $regex: search, $options: "i" } },
+        { division: { $regex: search, $options: "i" } },
+      ];
+    }
     const totalItems = await TeamModel.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
     const skip = (page - 1) * limit;
@@ -57,7 +71,7 @@ export class SportsRepository implements ISportsRepository {
   }
 
   async getSportRequests(params: GetSportRequestsRequestDTO): Promise<any> {
-    const { page, limit, status, type, startDate, endDate } = params;
+    const { page, limit, status, type, startDate, endDate, search } = params;
     const query: any = {};
     if (status && status.toLowerCase() !== "all") {
       query.status = status;
@@ -66,10 +80,32 @@ export class SportsRepository implements ISportsRepository {
     if (type && type.toLowerCase() !== "all") {
       sportQuery.type = { $regex: `^${type}$`, $options: "i" };
     }
-    const matchingSports = await TeamModel.find(sportQuery).select("_id title type").lean();
+    // Search logic for sport title/type or user email
+    let matchingSports = [];
+    let userIds: any[] = [];
+    if (search && search.trim() !== "") {
+      sportQuery.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { type: { $regex: search, $options: "i" } },
+      ];
+    }
+    matchingSports = await TeamModel.find(sportQuery).select("_id title type").lean();
     const sportIds = matchingSports.map((sport) => sport._id);
-    if (sportIds.length > 0) {
-      query.sportId = { $in: sportIds };
+    if (search && search.trim() !== "") {
+      const userMatches = await UserModel.find({ email: { $regex: search, $options: "i" } }).select("_id").lean();
+      userIds = userMatches.map((u) => u._id);
+      // If no matches in either, return empty result
+      if (sportIds.length === 0 && userIds.length === 0) {
+        return { requests: [], totalItems: 0, totalPages: 0, currentPage: page };
+      }
+      // If matches, build $or for sportId/userId
+      query.$or = [];
+      if (sportIds.length > 0) query.$or.push({ sportId: { $in: sportIds } });
+      if (userIds.length > 0) query.$or.push({ userId: { $in: userIds } });
+    } else {
+      if (sportIds.length > 0) {
+        query.sportId = { $in: sportIds };
+      }
     }
     if (startDate && endDate) {
       query.createdAt = {

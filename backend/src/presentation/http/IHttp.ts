@@ -348,21 +348,14 @@ export interface INotificationController extends IController {
 export interface IFinancialController extends IController {
   getStudentFinancialInfo(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getAllPayments(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getOnePayment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   makePayment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  getFinancialAidApplications(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  getAllFinancialAidApplications(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  applyForFinancialAid(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  getAvailableScholarships(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  getScholarshipApplications(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  getAllScholarshipApplications(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  applyForScholarship(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   uploadDocument(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getPaymentReceipt(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  updateFinancialAidApplication(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  updateScholarshipApplication(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   createCharge(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getAllCharges(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  getOnePayment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  updateCharge(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  deleteCharge(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface IEnquiryController extends IController {

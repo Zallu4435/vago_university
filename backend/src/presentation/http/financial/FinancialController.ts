@@ -4,19 +4,12 @@ import {
   IGetAllPaymentsUseCase,
   IGetOnePaymentUseCase,
   IMakePaymentUseCase,
-  IGetFinancialAidApplicationsUseCase,
-  IGetAllFinancialAidApplicationsUseCase,
-  IApplyForFinancialAidUseCase,
-  IGetAvailableScholarshipsUseCase,
-  IGetScholarshipApplicationsUseCase,
-  IGetAllScholarshipApplicationsUseCase,
-  IApplyForScholarshipUseCase,
   IUploadDocumentUseCase,
   IGetPaymentReceiptUseCase,
-  IUpdateFinancialAidApplicationUseCase,
-  IUpdateScholarshipApplicationUseCase,
   ICreateChargeUseCase,
   IGetAllChargesUseCase,
+  IUpdateChargeUseCase,
+  IDeleteChargeUseCase,
 } from "../../../application/financial/useCases/FinancialUseCases";
 
 export class FinancialController implements IFinancialController {
@@ -28,19 +21,12 @@ export class FinancialController implements IFinancialController {
     private readonly getAllPaymentsUseCase: IGetAllPaymentsUseCase,
     private readonly getOnePaymentUseCase: IGetOnePaymentUseCase,
     private readonly makePaymentUseCase: IMakePaymentUseCase,
-    private readonly getFinancialAidApplicationsUseCase: IGetFinancialAidApplicationsUseCase,
-    private readonly getAllFinancialAidApplicationsUseCase: IGetAllFinancialAidApplicationsUseCase,
-    private readonly applyForFinancialAidUseCase: IApplyForFinancialAidUseCase,
-    private readonly getAvailableScholarshipsUseCase: IGetAvailableScholarshipsUseCase,
-    private readonly getScholarshipApplicationsUseCase: IGetScholarshipApplicationsUseCase,
-    private readonly getAllScholarshipApplicationsUseCase: IGetAllScholarshipApplicationsUseCase,
-    private readonly applyForScholarshipUseCase: IApplyForScholarshipUseCase,
     private readonly uploadDocumentUseCase: IUploadDocumentUseCase,
     private readonly getPaymentReceiptUseCase: IGetPaymentReceiptUseCase,
-    private readonly updateFinancialAidApplicationUseCase: IUpdateFinancialAidApplicationUseCase,
-    private readonly updateScholarshipApplicationUseCase: IUpdateScholarshipApplicationUseCase,
     private readonly createChargeUseCase: ICreateChargeUseCase,
-    private readonly getAllChargesUseCase: IGetAllChargesUseCase
+    private readonly getAllChargesUseCase: IGetAllChargesUseCase,
+    private readonly updateChargeUseCase: IUpdateChargeUseCase,
+    private readonly deleteChargeUseCase: IDeleteChargeUseCase
   ) { }
 
   async getStudentFinancialInfo(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -104,106 +90,6 @@ export class FinancialController implements IFinancialController {
     return this.httpSuccess.success_201(response.data);
   }
 
-  async getFinancialAidApplications(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    if (!httpRequest.user?.userId) {
-      return this.httpErrors.error_401();
-    }
-    const { status } = httpRequest.query || {};
-    const response = await this.getFinancialAidApplicationsUseCase.execute({
-      studentId: httpRequest.user.userId,
-      status,
-    });
-    if (!response.success) {
-      return this.httpErrors.error_400();
-    }
-    return this.httpSuccess.success_200(response.data);
-  }
-
-  async getAllFinancialAidApplications(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { status, term, page = "1", limit = "10" } = httpRequest.query || {};
-    const response = await this.getAllFinancialAidApplicationsUseCase.execute({
-      status,
-      term,
-      page: parseInt(page as string),
-      limit: parseInt(limit as string),
-    });
-    if (!response.success) {
-      return this.httpErrors.error_400();
-    }
-    return this.httpSuccess.success_200(response.data);
-  }
-
-  async applyForFinancialAid(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    if (!httpRequest.user?.userId) {
-      return this.httpErrors.error_401();
-    }
-    const { term, amount, type, documents } = httpRequest.body || {};
-    const response = await this.applyForFinancialAidUseCase.execute({
-      studentId: httpRequest.user.userId,
-      term,
-      amount,
-      type,
-      documents,
-    });
-    if (!response.success) {
-      return this.httpErrors.error_400();
-    }
-    return this.httpSuccess.success_201(response.data);
-  }
-
-  async getAvailableScholarships(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { status, term } = httpRequest.query || {};
-    const response = await this.getAvailableScholarshipsUseCase.execute({ status, term });
-    if (!response.success) {
-      return this.httpErrors.error_400();
-    }
-    return this.httpSuccess.success_200(response.data);
-  }
-
-  async getScholarshipApplications(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    if (!httpRequest.user?.userId) {
-      return this.httpErrors.error_401();
-    }
-    const { status } = httpRequest.query || {};
-    const response = await this.getScholarshipApplicationsUseCase.execute({
-      studentId: httpRequest.user.userId,
-      status,
-    });
-    if (!response.success) {
-      return this.httpErrors.error_400();
-    }
-    return this.httpSuccess.success_200(response.data);
-  }
-
-  async getAllScholarshipApplications(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { status, page = "1", limit = "10" } = httpRequest.query || {};
-    const response = await this.getAllScholarshipApplicationsUseCase.execute({
-      status,
-      page: parseInt(page as string),
-      limit: parseInt(limit as string),
-    });
-    if (!response.success) {
-      return this.httpErrors.error_400();
-    }
-    return this.httpSuccess.success_200(response.data);
-  }
-
-  async applyForScholarship(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    if (!httpRequest.user?.userId) {
-      return this.httpErrors.error_401();
-    }
-    const { scholarshipId, documents } = httpRequest.body || {};
-    const response = await this.applyForScholarshipUseCase.execute({
-      studentId: httpRequest.user.userId,
-      scholarshipId,
-      documents,
-    });
-    if (!response.success) {
-      return this.httpErrors.error_400();
-    }
-    return this.httpSuccess.success_201(response.data);
-  }
-
   async uploadDocument(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const file = httpRequest.file;
     const { type } = httpRequest.body || {};
@@ -230,43 +116,10 @@ export class FinancialController implements IFinancialController {
     return this.httpSuccess.success_200(response.data);
   }
 
-  async updateFinancialAidApplication(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    if (!httpRequest.user?.userId) {
-      return this.httpErrors.error_401();
-    }
-    const { applicationId } = httpRequest.params || {};
-    const { status, amount } = httpRequest.body || {};
-    const response = await this.updateFinancialAidApplicationUseCase.execute({
-      studentId: httpRequest.user.userId,
-      applicationId,
-      status,
-      amount,
-    });
-    if (!response.success) {
-      return this.httpErrors.error_400();
-    }
-    return this.httpSuccess.success_200(response.data);
-  }
-
-  async updateScholarshipApplication(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    if (!httpRequest.user?.userId) {
-      return this.httpErrors.error_401();
-    }
-    const { applicationId } = httpRequest.params || {};
-    const { status } = httpRequest.body || {};
-    const response = await this.updateScholarshipApplicationUseCase.execute({
-      studentId: httpRequest.user.userId,
-      applicationId,
-      status,
-    });
-    if (!response.success) {
-      return this.httpErrors.error_400();
-    }
-    return this.httpSuccess.success_200(response.data);
-  }
 
   async createCharge(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { title, description, amount, term, dueDate, applicableFor } = httpRequest.body || {};
+    console.log(httpRequest.user);
     if (!httpRequest.user?.userId) {
       return this.httpErrors.error_401();
     }
@@ -296,6 +149,32 @@ export class FinancialController implements IFinancialController {
     });
     if (!response.success) {
       return this.httpErrors.error_400();
+    }
+    return this.httpSuccess.success_200(response.data);
+  }
+
+  async updateCharge(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    console.log(httpRequest.user);  
+    console.log(httpRequest.body) 
+    console.log(httpRequest.params);
+    const { id } = httpRequest.params || {};
+    // Instead of wrapping in { id, data }, spread the body fields directly
+    const response = await this.updateChargeUseCase.execute({ id, ...httpRequest.body });
+    if (!response.success) {
+      const errorMsg = typeof response.data === 'object' && response.data && 'error' in response.data ? (response.data as any).error : 'Bad Request';
+      return this.httpErrors.error_400(errorMsg);
+    }
+    return this.httpSuccess.success_200(response.data);
+  }
+
+  async deleteCharge(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    console.log(httpRequest.user, "user user");
+    console.log(httpRequest.body, "bidy, bidy");
+    console.log(httpRequest.params, "params params") 
+    const { id } = httpRequest.params || {};
+    const response = await this.deleteChargeUseCase.execute({ id });
+    if (!response.success) {
+      return this.httpErrors.error_400(response.data?.error || 'Bad Request');
     }
     return this.httpSuccess.success_200(response.data);
   }

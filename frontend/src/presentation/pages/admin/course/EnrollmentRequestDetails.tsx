@@ -63,6 +63,7 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
 
   if (!isOpen || !request) return null;
 
+  console.log(request, "request");
   const { course, user } = request;
 
   // Particle effect

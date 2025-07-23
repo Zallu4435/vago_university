@@ -26,37 +26,6 @@ export interface DocumentDTO {
   
   export type PaymentResponseDTO = Omit<PaymentProps, "_id" | "createdAt" | "updatedAt"> & { id: string; date: string };
   
-  export interface FinancialAidApplicationResponseDTO {
-    id: string;
-    studentId: string;
-    term: string;
-    status: "Approved" | "Pending" | "Rejected";
-    amount: number;
-    type: "Grant" | "Loan" | "Scholarship";
-    applicationDate: string;
-    documents: DocumentDTO[];
-  }
-  
-  export interface ScholarshipResponseDTO {
-    id: string;
-    name: string;
-    description: string;
-    amount: number;
-    deadline: string;
-    requirements: string[];
-    status: "Open" | "Closed";
-    term: string;
-  }
-  
-  export interface ScholarshipApplicationResponseDTO {
-    id: string;
-    scholarshipId: string;
-    studentId: string;
-    status: "Approved" | "Pending" | "Rejected";
-    applicationDate: string;
-    documents: DocumentDTO[];
-  }
-  
   export type ChargeResponseDTO = Omit<ChargeProps, "_id"> & { id: string };
   
   export interface GetStudentFinancialInfoResponseDTO {
@@ -93,50 +62,12 @@ export interface DocumentDTO {
     metadata?: Record<string, any>;
   }
   
-  export interface GetFinancialAidApplicationsResponseDTO {
-    data: FinancialAidApplicationResponseDTO[];
-  }
-  
-  export interface GetAllFinancialAidApplicationsResponseDTO {
-    data: FinancialAidApplicationResponseDTO[];
-    total: number;
-  }
-  
-  export interface ApplyForFinancialAidResponseDTO {
-    data: FinancialAidApplicationResponseDTO;
-  }
-  
-  export interface GetAvailableScholarshipsResponseDTO {
-    data: ScholarshipResponseDTO[];
-  }
-  
-  export interface GetScholarshipApplicationsResponseDTO {
-    data: ScholarshipApplicationResponseDTO[];
-  }
-  
-  export interface GetAllScholarshipApplicationsResponseDTO {
-    data: ScholarshipApplicationResponseDTO[];
-    total: number;
-  }
-  
-  export interface ApplyForScholarshipResponseDTO {
-    data: ScholarshipApplicationResponseDTO;
-  }
-  
   export interface UploadDocumentResponseDTO {
     url: string;
   }
   
   export interface GetPaymentReceiptResponseDTO {
     url: string;
-  }
-  
-  export interface UpdateFinancialAidApplicationResponseDTO {
-    data: FinancialAidApplicationResponseDTO;
-  }
-  
-  export interface UpdateScholarshipApplicationResponseDTO {
-    data: ScholarshipApplicationResponseDTO;
   }
   
   export interface CreateChargeResponseDTO {
@@ -147,4 +78,12 @@ export interface DocumentDTO {
   export interface GetAllChargesResponseDTO {
     data: ChargeResponseDTO[];
     total: number;
+  }
+
+  export interface UpdateChargeResponseDTO {
+    charge: ChargeResponseDTO;
+  }
+
+  export interface DeleteChargeResponseDTO {
+    success: boolean;
   }

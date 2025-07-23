@@ -30,6 +30,7 @@ export class SportRequestController implements ISportRequestController {
       type = "all",
       startDate,
       endDate,
+      search,
     } = httpRequest.query;
 
     if (
@@ -48,6 +49,7 @@ export class SportRequestController implements ISportRequestController {
       type: String(type),
       startDate: startDate ? String(startDate) : undefined,
       endDate: endDate ? String(endDate) : undefined,
+      search: search ? String(search) : undefined,
     });
 
     return this.httpSuccess.success_200({

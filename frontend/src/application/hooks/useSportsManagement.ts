@@ -18,6 +18,7 @@ export const useSportsManagement = () => {
     status: 'all',
     dateRange: 'all',
   });
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'teams' | 'requests'>('teams');
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
@@ -54,7 +55,7 @@ export const useSportsManagement = () => {
   };
 
   const { data: teamsData, isLoading: isLoadingTeams, error: teamsError } = useQuery({
-    queryKey: ['teams', page, filters, limit],
+    queryKey: ['teams', page, filters, searchTerm, limit],
     queryFn: () => {
       const dateRange = getDateRangeFilter(filters.dateRange);
       return sportsService.getTeams(
@@ -62,14 +63,16 @@ export const useSportsManagement = () => {
         limit,
         filters.sportType !== 'all' ? filters.sportType : undefined,
         filters.status !== 'all' ? filters.status : undefined,
-        dateRange
+        undefined, // coach
+        dateRange,
+        searchTerm && searchTerm.trim() !== '' ? searchTerm : undefined
       );
     },
     enabled: activeTab === 'teams',
   });
 
   const { data: playerRequestsData, isLoading: isLoadingPlayerRequests, error: playerRequestsError } = useQuery({
-    queryKey: ['playerRequests', page, filters, limit],
+    queryKey: ['playerRequests', page, filters, searchTerm, limit],
     queryFn: () => {
       const dateRange = getDateRangeFilter(filters.dateRange);
       return sportsService.getPlayerRequests(
@@ -77,7 +80,8 @@ export const useSportsManagement = () => {
         limit,
         filters.sportType !== 'all' ? filters.sportType : undefined,
         filters.status !== 'all' ? filters.status : undefined,
-        dateRange
+        dateRange,
+        searchTerm && searchTerm.trim() !== '' ? searchTerm : undefined
       );
     },
     enabled: activeTab === 'requests',
@@ -157,20 +161,13 @@ export const useSportsManagement = () => {
     },
   });
 
-  const { mutateAsync: getESportRequestDetails } = useMutation({
-    mutationFn: (id: string) => sportsService.getESportRequestDetails(id),
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to fetch event request details');
-    },
-  });
-
   const handleTabChange = (tab: 'teams' | 'requests') => {
     setActiveTab(tab);
     setPage(1);
 
     if (tab === 'teams') {
       queryClient.fetchQuery({
-        queryKey: ['teams', page, filters, limit],
+        queryKey: ['teams', page, filters, searchTerm, limit],
         queryFn: () => {
           const dateRange = getDateRangeFilter(filters.dateRange);
           return sportsService.getTeams(
@@ -178,13 +175,15 @@ export const useSportsManagement = () => {
             limit,
             filters.sportType !== 'all' ? filters.sportType : undefined,
             filters.status !== 'all' ? filters.status : undefined,
-            dateRange
+            undefined, // coach
+            dateRange,
+            searchTerm && searchTerm.trim() !== '' ? searchTerm : undefined
           );
         },
       });
     } else if (tab === 'requests') {
       queryClient.fetchQuery({
-        queryKey: ['playerRequests', page, filters, limit],
+        queryKey: ['playerRequests', page, filters, searchTerm, limit],
         queryFn: () => {
           const dateRange = getDateRangeFilter(filters.dateRange);
           return sportsService.getPlayerRequests(
@@ -192,7 +191,8 @@ export const useSportsManagement = () => {
             limit,
             filters.sportType !== 'all' ? filters.sportType : undefined,
             filters.status !== 'all' ? filters.status : undefined,
-            dateRange
+            dateRange,
+            searchTerm && searchTerm.trim() !== '' ? searchTerm : undefined
           );
         },
       });
@@ -211,7 +211,7 @@ export const useSportsManagement = () => {
     setSelectedRequestId(requestId);
   };
 
-
+console.log(teamsData, "teamsData")
   return {
     teams: teamsData?.sports || [],
     playerRequests: playerRequestsData?.data || [],
@@ -220,6 +220,8 @@ export const useSportsManagement = () => {
     setPage,
     filters,
     setFilters,
+    searchTerm,
+    setSearchTerm,
     isLoading: isLoadingTeams || isLoadingPlayerRequests || isLoadingTeamDetails || isLoadingRequestDetails,
     error: teamsError || playerRequestsError,
     createTeam,

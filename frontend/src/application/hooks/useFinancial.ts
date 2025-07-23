@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Payment } from '../../domain/types/management/financialmanagement';
 import { financialService } from '../services/financialService';
 import { toast } from 'react-hot-toast';
+import { Charge } from '../../domain/types/management/financialmanagement';
 
 export const usePaymentsManagement = (
   page: number = 1,
@@ -73,5 +74,54 @@ export const usePaymentsManagement = (
     // Exposing the student financial info method
     getStudentFinancialInfo: financialService.getStudentFinancialInfo,
     loading: isLoading, // Re-aliasing for component compatibility
+  };
+};
+
+export const useChargesManagement = (searchQuery: string = '', isOpen: boolean = false) => {
+  const queryClient = useQueryClient();
+  const [selectedChargeId, setSelectedChargeId] = useState<string | null>(null);
+
+  const { data: charges = [], isLoading } = useQuery<Charge[]>({
+    queryKey: ['charges', searchQuery, isOpen],
+    queryFn: async () => {
+      if (!isOpen) return [];
+      return await financialService.getCharges({
+        search: searchQuery,
+        page: 1,
+        limit: 50,
+      });
+    },
+    enabled: isOpen,
+  });
+
+  const updateChargeMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<Charge> }) => financialService.updateCharge(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['charges'] });
+      toast.success('Charge updated successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to update charge');
+    },
+  });
+
+  const deleteChargeMutation = useMutation({
+    mutationFn: (id: string) => financialService.deleteCharge(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['charges'] });
+      toast.success('Charge deleted successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to delete charge');
+    },
+  });
+
+  return {
+    charges,
+    isLoading,
+    updateCharge: updateChargeMutation.mutate,
+    deleteCharge: deleteChargeMutation.mutate,
+    setSelectedChargeId,
+    selectedChargeId,
   };
 };

@@ -31,7 +31,7 @@ export class ClubsController implements IClubsController {
   }
 
   async getClubs(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { page = "1", limit = "10", category = "all", status = "all", dateRange } = httpRequest.query || {};
+    const { page = "1", limit = "10", category = "all", status = "all", dateRange, search } = httpRequest.query || {};
     if (isNaN(Number(page)) || isNaN(Number(limit)) || Number(page) < 1 || Number(limit) < 1) {
       return this.httpErrors.error_400();
     }
@@ -51,6 +51,7 @@ export class ClubsController implements IClubsController {
       status: String(status),
       startDate,
       endDate,
+      search: search ? String(search) : undefined,
     };
     const response = await this.getClubsUseCase.execute(getClubsRequestDTO);
     return this.httpSuccess.success_200(response);

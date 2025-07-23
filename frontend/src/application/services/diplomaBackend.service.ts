@@ -1,4 +1,4 @@
-import { Diploma, Enrollment } from '../../domain/types/management/diplomamanagement';
+import { Diploma } from '../../domain/types/management/diplomamanagement';
 import { Video } from '../../domain/types/management/videomanagement';
 import httpClient from '../../frameworks/api/httpClient';
 
@@ -87,25 +87,9 @@ export const diplomaBackendService = {
         await httpClient.delete(`/admin/vedio/videos/${videoId}`);
     },
 
-    async getEnrollments(page: number, limit: number, category?: string, status?: string): Promise<{ enrollments: Enrollment[]; totalPages: number }> {
-        const params: any = { page, limit };
-        if (category && category !== 'All Categories') params.category = category;
-        if (status && status !== 'All') params.status = status;
-        const response = await httpClient.get('/admin/diploma-enrollments', { params });
-        return {
-            enrollments: response.data.enrollments,
-            totalPages: response.data.totalPages,
-        };
-    },
-
-    async getDiplomaDetails(diplomaId: string): Promise<Diploma & { enrolledStudents: Enrollment[] }> {
+    async getDiplomaDetails(diplomaId: string): Promise<Diploma> {
         const response = await httpClient.get(`/admin/diploma-courses/${diplomaId}`);
         return response.data.data.diploma;
-    },
-
-    async getEnrollmentDetails(enrollmentId: string): Promise<Enrollment> {
-        const response = await httpClient.get(`/admin/diploma-enrollments/${enrollmentId}`);
-        return response.data.enrollment;
     },
 
     async createDiploma(data: Omit<Diploma, '_id' | 'createdAt' | 'updatedAt'>): Promise<Diploma> {
@@ -120,17 +104,5 @@ export const diplomaBackendService = {
 
     async deleteDiploma(id: string): Promise<void> {
         await httpClient.delete(`/admin/diploma-courses/${id}`);
-    },
-
-    async approveEnrollment(requestId: string): Promise<void> {
-        await httpClient.post(`/admin/diploma-enrollments/${requestId}/approve`);
-    },
-
-    async rejectEnrollment(requestId: string, reason: string): Promise<void> {
-        await httpClient.post(`/admin/diploma-enrollments/${requestId}/reject`, { reason });
-    },
-
-    async resetProgress(requestId: string): Promise<void> {
-        await httpClient.post(`/admin/diploma-enrollments/${requestId}/reset-progress`);
     },
 }; 

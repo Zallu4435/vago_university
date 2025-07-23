@@ -16,9 +16,11 @@ export interface LoginResponse {
 // domain/types/user.ts (extend if needed)
 export interface User {
   id: string;
-  name: string;
   email: string;
   role: string; // e.g., 'admin', 'student'
+  firstName: string;
+  lastName: string;
+  profilePicture?: string;
 }
 
 export interface UserApiResponse {

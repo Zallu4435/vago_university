@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import testmonials1 from '../../../assets/images/ug-programs/testmonials/testmonials1.png'
-import testmonials2 from '../../../assets/images/ug-programs/testmonials/testmonials2.jpg';
-import testmonials3 from '../../../assets/images/ug-programs/testmonials/testmonials3.jpg'
+import testmonials1 from '../../../../assets/images/ug-programs/testmonials/testmonials1.png'
+import testmonials2 from '../../../../assets/images/ug-programs/testmonials/testmonials2.jpg';
+import testmonials3 from '../../../../assets/images/ug-programs/testmonials/testmonials3.jpg'
 
 const StudentTestimonials = () => {
   const [currentIndex, setCurrentIndex] = useState(0);

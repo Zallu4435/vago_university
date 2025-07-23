@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Navbar } from '../components/public/Navbar'; // Adjust the path as needed
-import DepartmentFooter from '../components/departments/DepartmentFooter';
+import DepartmentFooter from '../components/departments/common/DepartmentFooter';
 import { Header } from '../components/public/Header';
 
 // Change from named export to default export

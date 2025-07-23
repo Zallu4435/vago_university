@@ -88,7 +88,7 @@ class DocumentUploadService {
 
   async getAdminDocument(documentId: string, admissionId: string): Promise<any> {
     try {
-      const response = await httpClient.get(`/admin/admission/documents/${documentId}?admissionId=${admissionId}`);
+      const response = await httpClient.get(`/admin/admissions/documents/${documentId}?admissionId=${admissionId}`);
 
       return response.data.data;
     } catch (error: any) {

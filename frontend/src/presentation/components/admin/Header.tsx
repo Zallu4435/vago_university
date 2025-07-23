@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FiBell, FiLogOut, FiUser, FiChevronDown, FiSettings, FiHelpCircle } from 'react-icons/fi';
+import { FaUserGraduate } from 'react-icons/fa';
 
 interface AdminHeaderProps {
   adminName?: string;
@@ -23,7 +24,9 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <h1 className="text-xl font-bold text-purple-100 text-shadow-sm">Admin Dashboard</h1>
+            <h1 className="text-xl font-bold text-purple-100 text-shadow-sm flex items-center gap-2">
+              <img src="/images/university-logo.png" alt="VAGO Logo" className="w-7 h-7 object-contain" /> VAGO Admin
+            </h1>
           </div>
 
           <div className="flex items-center space-x-4">

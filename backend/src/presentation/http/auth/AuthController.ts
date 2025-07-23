@@ -10,7 +10,9 @@ import {
   IVerifyEmailOtpUseCase,
   IResetPasswordUseCase,
   IConfirmRegistrationUseCase,
+  LogoutAllUseCase,
 } from "../../../application/auth/useCases/AuthUseCases";
+import { AuthRepository } from '../../../infrastructure/repositories/auth/AuthRepository';
 import { facultyUpload } from "../../../config/cloudinary.config";
 
 export class AuthController implements IAuthController {
@@ -30,7 +32,9 @@ export class AuthController implements IAuthController {
     private sendEmailOtpUseCase: ISendEmailOtpUseCase,
     private verifyEmailOtpUseCase: IVerifyEmailOtpUseCase,
     private resetPasswordUseCase: IResetPasswordUseCase,
-    private confirmRegistrationUseCase: IConfirmRegistrationUseCase
+    private confirmRegistrationUseCase: IConfirmRegistrationUseCase,
+    private logoutAllUseCase: LogoutAllUseCase,
+    private authRepository: AuthRepository, // Add repository to controller
   ) {
     this.httpErrors = new HttpErrors();
     this.httpSuccess = new HttpSuccess();
@@ -53,122 +57,132 @@ export class AuthController implements IAuthController {
       return this.httpErrors.error_400("Email and password are required");
     }
 
+    // Get user-agent and IP address
+    const userAgent = (httpRequest.headers && httpRequest.headers['user-agent']) ? String(httpRequest.headers['user-agent']) : '';
+    // Get IP address from httpRequest.ip (set by ExpressAdapter)
+    const ipAddress = httpRequest.ip || '';
+    console.log('Login IP Address:', ipAddress);
+
     // Get tokens from login use case
-    const data = await this.loginUseCase.execute({ email, password });
-    console.log('✅ Login successful, setting tokens in cookies');
+    console.log('Login User Agent:', httpRequest.headers);
+    console.log('Login IP Address:', ipAddress);
+    const data = await this.loginUseCase.execute({ email, password, userAgent, ipAddress });
+    console.log('✅ Login successful, setting access and refresh tokens in httpOnly cookies');
     
-    // Create response with user data (excluding tokens)
+    // Create response with user data and sessionId
     const response = this.httpSuccess.success_200({
       user: data.user,
-      collection: data.collection
+      collection: data.collection,
+      sessionId: data.sessionId,
     });
 
-    // Set both tokens as cookies
+    // Set only the access token as httpOnly cookie (do NOT set refresh token)
     response.cookies = [
       {
-        name: 'refresh_token',
-        value: data.refreshToken,
+        name: 'access_token',
+        value: data.accessToken,
         options: {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
           path: '/',
-          maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-        }
-      },
-      {
-        name: 'access_token',
-        value: data.accessToken,
-        options: {
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-          path: '/',
-          maxAge: 3 * 60 * 60 * 1000 // 3 hours
+          maxAge: 10 * 60 * 1000 // 10 minutes
         }
       }
     ];
 
-    console.log('🔐 Tokens set in cookies with durations:');
-    console.log('   Access Token: 3 hours');
-    console.log('   Refresh Token: 7 days');
+    console.log('🔐 Access and Refresh Tokens set in httpOnly cookies');
 
     return response;
   }
 
   async refreshToken(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     console.log('👉 Token refresh attempt');
-    
-    // Get refresh token from httpOnly cookie
-    const refreshToken = httpRequest.cookies?.refresh_token;
-    
-    if (!refreshToken) {
-      console.log('❌ No refresh token found in cookies');
-      return this.httpErrors.error_401("No refresh token provided");
+    // Get userId from request body
+    const userId = httpRequest.body?.userId;
+    console.log('refreshToken endpoint received userId:', userId);
+    // Log all userIds with sessions in the database
+    const allSessions = await this.authRepository.getAllSessions();
+    console.log('All session userIds in DB:', allSessions.map(s => s.userId));
+    if (!userId) {
+      return this.httpErrors.error_400('No userId provided');
     }
-
-    console.log('✅ Refresh token found in cookies, validating...');
-    
-    // Get new access token only
-    const data = await this.refreshTokenUseCase.execute({ refreshToken });
-    
+    // Find the latest refresh session for this user
+    const session = await this.authRepository.findLatestSessionByUserId(userId);
+    if (!session) {
+      return this.httpErrors.error_401('No valid refresh session found');
+    }
+    // Validate the refresh token in the session
+    const data = await this.refreshTokenUseCase.execute({ refreshToken: session.refreshToken });
     // Create response
     const response = this.httpSuccess.success_200({
       user: data.user,
-      collection: data.collection
+      collection: data.collection,
     });
-
-    console.log('✅ Token refresh successful, setting new access token');
-
-    // Set new access token cookie only
+    // Set only the access token as httpOnly cookie
     response.cookies = [
       {
         name: 'access_token',
         value: data.accessToken,
         options: {
+          httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
           path: '/',
-          maxAge: 3 * 60 * 60 * 1000 // 3 hours
+          maxAge: 10 * 60 * 1000 // 10 minutes
         }
       }
     ];
-
-    console.log('🔐 New access token set with duration:');
-    console.log('   Access Token: 3 hours');
-
+    console.log('🔄 New access token set in cookies');
     return response;
   }
 
   async logout(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     console.log('👉 Logout attempt');
-    
-    // Clear both token cookies
-    const response = this.httpSuccess.success_200({ message: "Logged out successfully" });
+    const accessToken = httpRequest.cookies?.access_token;
+    // Always clear cookies
+    const response = this.httpSuccess.success_200({ message: 'Logged out successfully' });
     response.cookies = [
-      {
-        name: 'refresh_token',
-        value: '',
-        options: {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-          path: '/',
-          maxAge: 0
-        }
-      },
-      {
-        name: 'access_token',
-        value: '',
-        options: {
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-          path: '/',
-          maxAge: 0
-        }
-      }
+      { name: 'access_token', value: '', options: { httpOnly: true, path: '/', maxAge: 0 } }
     ];
+    if (!accessToken) {
+      // No access token, just return success
+      return response;
+    }
+    // Decode access token to get userId
+    let decoded: any;
+    try {
+      decoded = this.loginUseCase['jwtService'].verifyToken(accessToken);
+    } catch (err) {
+      // Invalid token, treat as already logged out
+      return response;
+    }
+    const userId = decoded.userId;
+    // Delete all refresh sessions for this user
+    await this.authRepository.deleteAllSessionsByUserId(userId);
+    return response;
+  }
 
-    console.log('✅ All tokens cleared from cookies');
+  async logoutAll(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    // Get access token from cookies
+    const accessToken = httpRequest.cookies?.access_token;
+    if (!accessToken) {
+      return this.httpErrors.error_401('No access token provided');
+    }
+    // Decode access token to get userId
+    let decoded: any;
+    try {
+      decoded = this.loginUseCase['jwtService'].verifyToken(accessToken);
+    } catch (err) {
+      return this.httpErrors.error_401('Invalid access token');
+    }
+    const userId = decoded.userId;
+    await this.logoutAllUseCase.execute({ userId });
+    // Clear cookies
+    const response = this.httpSuccess.success_200({ message: 'Logged out from all devices' });
+    response.cookies = [
+      { name: 'access_token', value: '', options: { httpOnly: true, path: '/', maxAge: 0 } }
+    ];
     return response;
   }
 
@@ -276,5 +290,16 @@ export class AuthController implements IAuthController {
     // Direct call, Use Case will throw error on failure
     const data = await this.confirmRegistrationUseCase.execute(token);
     return this.httpSuccess.success_200(data);
+  }
+
+  async me(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    if (!httpRequest.user) {
+      return this.httpErrors.error_401('Not authenticated');
+    }
+      // Return user info and collection as a flat response
+    return this.httpSuccess.success_200_flat({
+      user: httpRequest.user,
+      collection: httpRequest.user.collection,
+    });
   }
 }

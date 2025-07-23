@@ -62,6 +62,15 @@ class AuthService {
       throw new Error(error.response?.data?.error || 'Failed to confirm registration');
     }
   }
+
+  async logout(): Promise<void> {
+    try {
+      console.log('Calling backend logout API...');
+      await httpClient.post('/auth/logout');
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to logout');
+    }
+  }
 }
 
 export const authService = new AuthService();

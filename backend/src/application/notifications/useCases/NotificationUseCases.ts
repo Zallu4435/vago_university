@@ -102,11 +102,11 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
     }
 
     private async sendFCMNotification(params: CreateNotificationRequestDTO & { id: string }): Promise<void> {
-        console.log('[Backend] Starting to send FCM notification:', {
-            title: params.title,
-            recipientType: params.recipientType,
-            hasRecipientId: !!params.recipientId
-        });
+        // console.log('[Backend] Starting to send FCM notification:', {
+        //     title: params.title,
+        //     recipientType: params.recipientType,
+        //     hasRecipientId: !!params.recipientId
+        // });
 
         const { title, message, recipientType, recipientId, id } = params;
         const fcmMessage = {
@@ -114,7 +114,7 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
             data: { notificationId: id.toString() }
         };
 
-        console.log('[Backend] Constructed FCM message:', fcmMessage);
+        // console.log('[Backend] Constructed FCM message:', fcmMessage);
 
         if (recipientType === NotificationRecipientType.INDIVIDUAL && recipientId) {
             console.log('[Backend] Sending individual notification to token:', recipientId);
@@ -131,7 +131,7 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
                 throw error;
             }
         } else {
-            console.log('[Backend] Preparing to send bulk notifications');
+            // console.log('[Backend] Preparing to send bulk notifications');
             let students: any[] = [];
             let faculty: any[] = [];
 
@@ -223,9 +223,9 @@ export class GetAllNotificationsUseCase implements IGetAllNotificationsUseCase {
         const { userId, collection, page = 1, limit = 10, recipientType, status, dateRange, isRead, search } = params;
 
         // Debug log for incoming filter params
-        console.log('[Notification] Incoming filter params:', {
-            page, limit, recipientType, status, dateRange, search
-        });
+        // console.log('[Notification] Incoming filter params:', {
+        //     page, limit, recipientType, status, dateRange, search
+        // });
 
         // Build query/filter logic here (business logic)
         const filter: any = {};
@@ -288,7 +288,7 @@ export class GetAllNotificationsUseCase implements IGetAllNotificationsUseCase {
             } else if (dateRange.includes(",")) {
                 [start, end] = dateRange.split(",");
             }
-            console.log('[Notification] dateRange start:', start, 'end:', end);
+            // console.log('[Notification] dateRange start:', start, 'end:', end);
             const startDate = new Date(start);
             const endDate = new Date(end);
             if (start && end && !isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
@@ -304,7 +304,7 @@ export class GetAllNotificationsUseCase implements IGetAllNotificationsUseCase {
         }
 
         // Debug log for final filter object
-        console.log('[Notification] MongoDB filter:', filter);
+        // console.log('[Notification] MongoDB filter:', filter);
 
         const skip = (page - 1) * limit;
         const sort = { createdAt: -1 };

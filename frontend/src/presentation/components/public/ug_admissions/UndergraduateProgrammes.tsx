@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaGraduationCap, FaArrowRight, FaClock } from 'react-icons/fa';
-import computingImage from '../../../assets/images/ug-programs/programs/school-of-computing.jpg'
-import businessImage from '../../../assets/images/ug-programs/programs/school-of-business.jpg';
+import computingImage from '../../../../assets/images/ug-programs/programs/school-of-computing.jpg'
+import businessImage from '../../../../assets/images/ug-programs/programs/school-of-business.jpg';
 
 interface ProgramCardProps {
   title: string;

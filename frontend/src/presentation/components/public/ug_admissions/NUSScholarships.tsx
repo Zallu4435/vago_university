@@ -3,10 +3,10 @@ import { FaChevronRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 // Import scholarship category images from assets
-import citizensScholarshipImage from '../../../assets/images/ug-programs/scholarshipCategories/scholarships-singapore-citizens.jpg';
-import prScholarshipImage from '../../../assets/images/ug-programs/scholarshipCategories/scholarships-singapore-pr.jpg';
-import internationalScholarshipImage from '../../../assets/images/ug-programs/scholarshipCategories/scholarships-international-students.jpg';
-import currentStudentsScholarshipImage from '../../../assets/images/ug-programs/scholarshipCategories/current-nus-undergraduates.jpg';
+import citizensScholarshipImage from '../../../../assets/images/ug-programs/scholarshipCategories/scholarships-singapore-citizens.jpg';
+import prScholarshipImage from '../../../../assets/images/ug-programs/scholarshipCategories/scholarships-singapore-pr.jpg';
+import internationalScholarshipImage from '../../../../assets/images/ug-programs/scholarshipCategories/scholarships-international-students.jpg';
+import currentStudentsScholarshipImage from '../../../../assets/images/ug-programs/scholarshipCategories/current-nus-undergraduates.jpg';
 
 export default function NUSScholarships() {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);

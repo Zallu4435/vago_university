@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { FaMoneyCheckAlt } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
-import { useFinancial } from '../../../../application/hooks/useFinancial';
+import { usePaymentsManagement } from '../../../../application/hooks/useFinancial';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import PaymentReceiptModal from './PaymentReceiptModal';
 import type { Charge, Payment, FeesPaymentsSectionProps } from '../../../../domain/types/user/financial';
 
 export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPaymentSuccess }: FeesPaymentsSectionProps) {
-  const { makePayment, loading, error } = useFinancial();
+  const { makePayment, loading, error } = usePaymentsManagement();
   const { styles, theme } = usePreferences();
   const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'Razorpay'>('Razorpay');

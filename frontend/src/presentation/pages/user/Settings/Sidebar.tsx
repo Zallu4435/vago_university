@@ -15,7 +15,7 @@ import {
   } from 'react-icons/fi';
 
 // Sidebar Component
-export default function Sidebar({ activeTab, setActiveTab, onLogout, user }) {
+export default function Sidebar({ activeTab, setActiveTab, onLogout, onLogoutAll, user }) {
     const sidebarItems = [
         { id: 'profile', icon: FaUser, label: 'Profile', active: true },
         { id: 'academic', icon: FaGraduationCap, label: 'Academic Settings' },
@@ -92,6 +92,13 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, user }) {
           >
             <FiLogOut className="w-4 h-4 mr-2" />
             <span className="text-sm font-medium">Logout</span>
+          </button>
+          <button
+            onClick={onLogoutAll}
+            className="w-full flex items-center justify-center px-4 py-2.5 bg-orange-50 hover:bg-orange-100 text-orange-600 hover:text-orange-700 rounded-lg transition-all duration-200 border border-orange-200 hover:border-orange-300 mt-2"
+          >
+            <FiLogOut className="w-4 h-4 mr-2" />
+            <span className="text-sm font-medium">Logout All Devices</span>
           </button>
         </div>
       </div>

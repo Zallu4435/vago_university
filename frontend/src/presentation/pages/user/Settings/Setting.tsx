@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import { logout } from '../../../../appStore/authSlice';
 import PreferenceSettings from './PreferenceSettings';
 import { socketRef } from '../../canvas/chat/ChatComponent';
+import httpClient from '../../../../frameworks/api/httpClient';
 
 const UniversityDashboard = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -37,6 +38,16 @@ const UniversityDashboard = () => {
     }
     dispatch(logout());
     navigate('/login');
+  };
+
+  const handleLogoutAll = async () => {
+    try {
+      await httpClient.post('/auth/logout-all');
+      dispatch(logout());
+      navigate('/login');
+    } catch (err) {
+      console.error('Logout all error:', err);
+    }
   };
 
   const handleBackToDashboard = () => {
@@ -231,6 +242,7 @@ const UniversityDashboard = () => {
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 
           onLogout={handleLogout} 
+          onLogoutAll={handleLogoutAll}
           user={user} 
         />
         {renderContent()}

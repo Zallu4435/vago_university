@@ -1,5 +1,4 @@
-import React from 'react';
-import { FiFileText, FiVideo, FiUser, FiTag } from 'react-icons/fi';
+import { FiFileText, FiVideo, FiTag } from 'react-icons/fi';
 import { Material } from '../../domain/types/management/materialmanagement';
 
 // Material Filter Options
@@ -51,16 +50,6 @@ export const getMaterialColumns = () => [
     key: 'type',
     render: (material: Material) => (
       <span className="text-sm text-gray-300 capitalize">{material.type}</span>
-    ),
-  },
-  {
-    header: 'Uploaded By',
-    key: 'uploadedBy',
-    render: (material: Material) => (
-      <div className="flex items-center text-gray-300">
-        <FiUser size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{material.uploadedBy}</span>
-      </div>
     ),
   },
   {

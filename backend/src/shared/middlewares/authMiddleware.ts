@@ -28,6 +28,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
   try {
     // Get access token from cookie
     const accessToken = req.cookies?.access_token;
+    console.log('authMiddleware: access_token from cookies:', accessToken);
     if (!accessToken) {
       console.error('authMiddleware: No access token found in cookies');
       console.log('Available cookies:', req.cookies);

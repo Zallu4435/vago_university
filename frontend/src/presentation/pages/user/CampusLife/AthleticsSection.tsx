@@ -8,7 +8,7 @@ import ReactDOM from 'react-dom';
 import type { Sport, SportsData } from '../../../../domain/types/user/campus-life';
 
 export default function AthleticsSection({ sports }: { sports: SportsData }) {
-  const [selectedSport, setSelectedSport] = useState(sports.sports[0] || null);
+  const [selectedSport, setSelectedSport] = useState<Sport | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [showMobileDetails, setShowMobileDetails] = useState(false);
@@ -124,9 +124,6 @@ export default function AthleticsSection({ sports }: { sports: SportsData }) {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-              </div>
-              <div className={`bg-amber-100 px-4 py-2 font-medium ${styles.textPrimary} text-sm sm:text-base sticky top-0 z-10`}>
-                ALL SPORTS
               </div>
               <div className="max-h-96 overflow-y-auto divide-y divide-amber-100/50">
                 {normalizedSports.map((sport) => (

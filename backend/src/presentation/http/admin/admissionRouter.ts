@@ -47,6 +47,7 @@ admissionRouter.delete("/:id", authMiddleware, (req, res, next) => {
 
 // Admin document serve route
 admissionRouter.get("/documents/:documentId", authMiddleware, (req, res, next) => {
+    console.log('HIT /documents/:documentId', req.params, req.query);
     expressAdapter(req, res, next, admissionController.serveDocument.bind(admissionController));
 });
 

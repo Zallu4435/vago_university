@@ -45,9 +45,10 @@ router.use("/assignments", userAssignmentRoutes);
 
 router.use('/fcm', fcmTokenRoute)
 
+router.use("/admin/admissions", adminRoutes);
+
 router.use("/admission", admissionRoutes);
 
-router.use("/admin/admissions", adminRoutes);
 
 router.use("/admin/dashboard", dashboardRoutes);
 

@@ -8,7 +8,7 @@ export interface IJwtService {
     generateToken(payload: object, expiresIn: string): string;
     generateAccessToken(payload: object): string;
     generateRefreshToken(payload: object): string;
-    verifyToken<T>(token: string): T; // T will be the decoded payload type
+    verifyToken<T>(token: string, options?: { isRefreshToken?: boolean; ignoreExpiration?: boolean }): T; // T will be the decoded payload type
 }
 
 export class JwtService implements IJwtService {
@@ -36,12 +36,12 @@ export class JwtService implements IJwtService {
     }
 
     /**
-     * Generates a new access token with 3 hours expiry.
+     * Generates a new access token with a 10-minute expiry.
      * @param payload The data to encode in the token.
      * @returns The signed JWT string.
      */
     generateAccessToken(payload: object): string {
-        return jwt.sign(payload, this.secret, { expiresIn: '3h' });
+        return jwt.sign(payload, this.secret, { expiresIn: '10m' });
     }
 
     /**
@@ -60,10 +60,11 @@ export class JwtService implements IJwtService {
      * @returns The decoded payload.
      * @throws InvalidTokenError if the token is invalid or expired.
      */
-    verifyToken<T>(token: string, isRefreshToken: boolean = false): T {
+    verifyToken<T>(token: string, options: { isRefreshToken?: boolean; ignoreExpiration?: boolean } = {}): T {
         try {
-            const secret = isRefreshToken ? this.refreshSecret : this.secret;
-            return jwt.verify(token, secret) as T;
+            const secret = options.isRefreshToken ? this.refreshSecret : this.secret;
+            const decoded = jwt.verify(token, secret, { ignoreExpiration: options.ignoreExpiration }) as T;
+            return decoded;
         } catch (error) {
             // Re-throw as a domain-specific error
             throw new InvalidTokenError("Invalid or expired token.");

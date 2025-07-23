@@ -44,7 +44,6 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
   onDownloadDocument,
 }) => {
   const { approveAdmission, rejectAdmission } = useUserManagement();
-  const { token } = useAuth();
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showWarningModal, setShowWarningModal] = useState(false);

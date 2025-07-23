@@ -1,7 +1,7 @@
 // application/auth/useCases/AuthUseCases.ts (Updated: No try-catch, direct returns, throws errors)
 import bcrypt from "bcryptjs";
 import { config } from "../../../config/config";
-
+import { v4 as uuidv4 } from 'uuid';
 
 
 // DTOs
@@ -102,6 +102,7 @@ export class RegisterUseCase implements IRegisterUseCase {
         firstName: resultFromRepo.user.firstName,
         lastName: resultFromRepo.user.lastName,
         email: resultFromRepo.user.email,
+        id: resultFromRepo.user.id,
       },
     };
   }
@@ -114,7 +115,7 @@ export class LoginUseCase implements ILoginUseCase {
     private jwtService: IJwtService
   ) { }
 
-  async execute(params: LoginRequestDTO): Promise<LoginResponseDTO> {
+  async execute(params: LoginRequestDTO & { userAgent: string; ipAddress: string }): Promise<LoginResponseDTO & { sessionId: string }> {
     // Repository fetches user, including hashed password
     const resultFromRepo = await this.authRepository.login(params);
 
@@ -140,18 +141,49 @@ export class LoginUseCase implements ILoginUseCase {
 
     // Generate both access and refresh tokens
     const accessToken = this.jwtService.generateAccessToken(tokenPayload);
-    const refreshToken = this.jwtService.generateRefreshToken(tokenPayload);
+    let sessionId: string;
+    let refreshToken: string;
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+
+    // Check for existing session for this user/device
+    const existingSession = await this.authRepository.findSessionByUserIdAndDevice(user.id, params.userAgent, params.ipAddress);
+    if (existingSession) {
+      // Update the existing session
+      sessionId = existingSession.sessionId;
+      refreshToken = this.jwtService.generateRefreshToken({ ...tokenPayload, sessionId });
+      await this.authRepository.updateSessionRefreshToken(sessionId, refreshToken, expiresAt, now);
+      console.log('Reusing existing session:', sessionId);
+    } else {
+      // Create a new session document
+      sessionId = uuidv4();
+      refreshToken = this.jwtService.generateRefreshToken({ ...tokenPayload, sessionId });
+      await this.authRepository.createRefreshSession({
+        userId: user.id,
+        sessionId,
+        refreshToken,
+        userAgent: params.userAgent,
+        ipAddress: params.ipAddress,
+        createdAt: now,
+        lastUsedAt: now,
+        expiresAt,
+      });
+      console.log('Created new session:', sessionId);
+    }
 
     // Return the full DTO directly
     return {
       accessToken,
       refreshToken,
+      sessionId,
       user: {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
         id: user.id,
         profilePicture: user.profilePicture,
+        password: user.password,
+        blocked: user.blocked,
       },
       collection,
     };
@@ -165,40 +197,42 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
     private jwtService: IJwtService
   ) { }
 
-  async execute(params: RefreshTokenRequestDTO): Promise<RefreshTokenResponseDTO> {
-    // Verify the incoming refresh token
-    let decodedPayload: { userId: string; email: string; collection: "register" | "admin" | "user" | "faculty" };
+  async execute(params: { refreshToken: string }): Promise<RefreshTokenResponseDTO> {
+    // 1. Verify and decode the refresh token
+    let decoded: any;
     try {
-      decodedPayload = this.jwtService.verifyToken(params.refreshToken, true); // true indicates refresh token verification
-    } catch (error) {
-      throw new InvalidTokenError("Invalid or expired refresh token");
+      decoded = this.jwtService.verifyToken<{ userId: string; email: string; collection: string; sessionId: string }>(params.refreshToken, { isRefreshToken: true });
+    } catch (err) {
+      throw new InvalidTokenError('Invalid or expired refresh token');
     }
-
-    // Use repository to fetch user based on decoded ID and collection
-    const resultFromRepo = await this.authRepository.refreshToken({
-      ...params,
-      userId: decodedPayload.userId,
-      email: decodedPayload.email,
-      collection: decodedPayload.collection,
-    });
-
-    const tokenPayload = {
-      userId: resultFromRepo.user.id,
-      email: resultFromRepo.user.email,
-      collection: resultFromRepo.collection
-    };
-
-    // Generate only a new access token, keep the same refresh token
+    const { userId, email, collection, sessionId } = decoded;
+    // 2. Find session in DB
+    const session = await this.authRepository.findSessionBySessionIdAndUserId(sessionId, userId);
+    if (!session || session.refreshToken !== params.refreshToken) {
+      throw new InvalidTokenError('Session not found or refresh token mismatch');
+    }
+    // 3. Rotate refresh token
+    const newRefreshToken = this.jwtService.generateRefreshToken({ userId, email, collection, sessionId });
+    const newExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const newLastUsedAt = new Date();
+    await this.authRepository.updateSessionRefreshToken(sessionId, newRefreshToken, newExpiresAt, newLastUsedAt);
+    // 4. Generate new access token
+    const tokenPayload = { userId, email, collection };
     const accessToken = this.jwtService.generateAccessToken(tokenPayload);
-
+    // 5. Get user info for response
+    const resultFromRepo = await this.authRepository.refreshToken({
+      accessToken,
+      userId,
+      email,
+      collection,
+    });
     return {
       accessToken,
-      // Don't generate a new refresh token
       user: {
         firstName: resultFromRepo.user.firstName,
         lastName: resultFromRepo.user.lastName,
         email: resultFromRepo.user.email,
-        id: resultFromRepo.user.id,
+        id: resultFromRepo.user.id as string,
         profilePicture: resultFromRepo.user.profilePicture,
       },
       collection: resultFromRepo.collection,
@@ -210,10 +244,18 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
 export class LogoutUseCase implements ILogoutUseCase {
   constructor(private authRepository: IAuthRepository) { }
 
-  async execute(params: LogoutRequestDTO): Promise<LogoutResponseDTO> {
-    // Repository handles any logout logic (e.g., blacklisting tokens)
-    const result = await this.authRepository.logout(params);
-    return result;
+  async execute(params: { sessionId: string }): Promise<LogoutResponseDTO> {
+    await this.authRepository.deleteSessionBySessionId(params.sessionId);
+    return { message: 'Logged out successfully' };
+  }
+}
+
+export class LogoutAllUseCase {
+  constructor(private authRepository: IAuthRepository) { }
+
+  async execute(params: { userId: string }): Promise<{ message: string }> {
+    await this.authRepository.deleteAllSessionsByUserId(params.userId);
+    return { message: 'Logged out from all devices' };
   }
 }
 

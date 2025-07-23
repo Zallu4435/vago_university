@@ -55,7 +55,6 @@ export class NotificationRepository implements INotificationRepository {
             .skip(options.skip ?? 0)
             .limit(options.limit ?? 0)
             .lean();
-        console.log('[NotificationRepository] Query result:', result);
         return result;
     }
 

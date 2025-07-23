@@ -1,7 +1,7 @@
 // Import images from assets
-import entrepreneurshipImage from '../../../assets/images/ug-programs/graduation-support/entrepreneurship.jpg';
-import furtherEducationImage from '../../../assets/images/ug-programs/graduation-support/further-education.jpg';
-import lifelongLearningImage from '../../../assets/images/ug-programs/graduation-support/lifelong-learning.jpg';
+import entrepreneurshipImage from '../../../../assets/images/ug-programs/graduation-support/entrepreneurship.jpg';
+import furtherEducationImage from '../../../../assets/images/ug-programs/graduation-support/further-education.jpg';
+import lifelongLearningImage from '../../../../assets/images/ug-programs/graduation-support/lifelong-learning.jpg';
 
 const GraduationSupport = () => {
   const supportItems = [

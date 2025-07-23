@@ -57,9 +57,9 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Logo */}
         <Link to="/" className="flex items-center hover:opacity-90 transition-opacity">
           <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 mr-2 sm:mr-3 md:mr-4 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-cyan-300">
-            <SiGooglescholar className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-cyan-600" />
+            <img src="/images/university-logo.png" alt="VAGO Logo" className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 object-contain" />
           </div>
-          <span className="text-white text-xl sm:text-2xl md:text-3xl font-extrabold tracking-widest drop-shadow-lg">ACADEMIA</span>
+          <span className="text-white text-xl sm:text-2xl md:text-3xl font-extrabold tracking-widest drop-shadow-lg">VAGO</span>
         </Link>
 
         {/* Desktop Navigation */}

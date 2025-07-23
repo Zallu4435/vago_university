@@ -108,9 +108,6 @@ export default function ClubsSection({ clubs }: ClubsSectionProps) {
                   />
                 </div>
               </div>
-              <div className={`bg-amber-100 px-4 py-2 font-medium ${styles.textPrimary} text-sm sm:text-base sticky top-0 z-10`}>
-                MY CLUBS
-              </div>
               <div className="max-h-96 overflow-y-auto divide-y divide-amber-100/50">
                 {filteredClubs.map((club: ClubType) => (
                   <div

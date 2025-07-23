@@ -1,9 +1,9 @@
 import { FaBookOpen, FaAward, FaDollarSign } from 'react-icons/fa';
 
 // Import images from assets
-import viewbookImage from '../../../assets/images/ug-programs/publications/undergraduate-viewbook.jpg';
-import prospectusImage from '../../../assets/images/ug-programs/publications/international-prospectus.jpg';
-import brochureImage from '../../../assets/images/ug-programs/publications/scholarship-financial-aid.jpg';
+import viewbookImage from '../../../../assets/images/ug-programs/publications/undergraduate-viewbook.jpg';
+import prospectusImage from '../../../../assets/images/ug-programs/publications/international-prospectus.jpg';
+import brochureImage from '../../../../assets/images/ug-programs/publications/scholarship-financial-aid.jpg';
 
 const UndergraduatePublications: React.FC = () => {
   const publications = [

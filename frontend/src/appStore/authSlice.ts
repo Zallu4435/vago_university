@@ -1,15 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import httpClient from '../frameworks/api/httpClient';
+import { User } from '../domain/types/auth/Login';
+import { authService } from '../application/services/auth.service';
 
 interface AuthState {
   isAuthenticated: boolean;
-  user: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    id?: string;
-    profilePicture?: string;
-  } | null;
+  user: User | null;
   collection: 'register' | 'admin' | 'user' | 'faculty' | null;
 }
 
@@ -26,7 +21,7 @@ const authSlice = createSlice({
     setAuth: (
       state,
       action: PayloadAction<{
-        user: { firstName: string; lastName: string; email: string; id?: string; profilePicture?: string };
+        user: { firstName: string; lastName: string; email: string; id?: string; profilePicture?: string; role: string };
         collection: 'register' | 'admin' | 'user' | 'faculty';
       }>
     ) => {
@@ -35,10 +30,6 @@ const authSlice = createSlice({
       state.collection = action.payload.collection;
     },
     logout: (state) => {
-      // Call logout API to clear cookie
-      httpClient.post('/auth/logout', {}, { withCredentials: true })
-        .catch(err => console.error('Logout API error:', err));
-
       state.isAuthenticated = false;
       state.user = null;
       state.collection = null;

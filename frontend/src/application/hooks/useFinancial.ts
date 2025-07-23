@@ -43,8 +43,6 @@ export const usePaymentsManagement = (
     },
   });
 
-  // No updatePayment or deletePayment for payments in financialService
-
   const { data: paymentDetails, isLoading: isLoadingPaymentDetails } = useQuery<Payment, Error>({
     queryKey: ['paymentDetails', selectedPaymentId],
     queryFn: () => financialService.getPaymentDetails(selectedPaymentId || ''),
@@ -72,5 +70,8 @@ export const usePaymentsManagement = (
     isLoadingPaymentDetails,
     handleViewPayment,
     handleEditPayment,
+    // Exposing the student financial info method
+    getStudentFinancialInfo: financialService.getStudentFinancialInfo,
+    loading: isLoading, // Re-aliasing for component compatibility
   };
 };

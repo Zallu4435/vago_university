@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../appStore/store';
 import { usePreferences } from '../../application/context/PreferencesContext';
 import { socketRef } from '../pages/canvas/chat/ChatComponent';
+import { authService } from '../../application/services/auth.service';
 
 const UserLayout = () => {
   const location = useLocation();
@@ -24,13 +25,21 @@ const UserLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (socketRef.current) {
-      console.log('oooododododododo')
       socketRef.current.disconnect();
       socketRef.current = null;
     }
-    dispatch(logout());
+    console.log('logout ijsijijsijijijsqwouhuodniqsndninin');
+    try {
+      await authService.logout(); // Call backend API here
+    } catch (err: any) {
+      // Ignore 401 errors, log others
+      if (!err.message?.includes('401')) {
+        console.error('Logout API error:', err);
+      }
+    }
+    dispatch(logout()); // Just update Redux state
     navigate('/login');
   };
 

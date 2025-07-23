@@ -4,6 +4,7 @@ import {
     AdmissionExistsError, EmailNotFoundError,
     FacultyAlreadyExistsError, UserNotFoundError, AlreadyConfirmedError
 } from "../../../domain/auth/errors/AuthErrors";
+import { RefreshSession } from '../../database/mongoose/auth/refreshToken.model';
 
 import {
     RegisterRequestDTO, LoginRequestDTO, RefreshTokenRequestDTO, LogoutRequestDTO,
@@ -92,8 +93,7 @@ export class AuthRepository implements IAuthRepository {
                 id: user._id.toString(),
                 firstName: user.firstName,
                 lastName: user.lastName,
-                email: user.email,
-                pending: user.pending,
+                email: user.email
             },
         };
     }
@@ -118,7 +118,6 @@ export class AuthRepository implements IAuthRepository {
         }
 
         return {
-            token: "",
             user: {
                 firstName: user.firstName,
                 lastName: user.lastName,
@@ -145,7 +144,6 @@ export class AuthRepository implements IAuthRepository {
         const { user, collection } = userResult;
 
         return {
-            token: "",
             user: {
                 firstName: user.firstName,
                 lastName: user.lastName,
@@ -155,10 +153,6 @@ export class AuthRepository implements IAuthRepository {
             },
             collection,
         };
-    }
-
-    async logout(params: LogoutRequestDTO): Promise<LogoutResponseDTO> {
-        return { message: "Logged out successfully" };
     }
 
     async registerFaculty(params: RegisterFacultyRequestDTO): Promise<RegisterFacultyResponseDTO> {
@@ -182,7 +176,6 @@ export class AuthRepository implements IAuthRepository {
         await faculty.save();
 
         return {
-            token: "",
             user: {
                 fullName: faculty.fullName,
                 email: faculty.email,
@@ -232,7 +225,6 @@ export class AuthRepository implements IAuthRepository {
         await Model.updateOne({ email: params.email }, { password: params.newPassword });
 
         return {
-            token: "",
             user: {
                 firstName: user.firstName,
                 lastName: user.lastName,
@@ -258,5 +250,52 @@ export class AuthRepository implements IAuthRepository {
         await user.save();
 
         return { message: "Email confirmed successfully. You can now log in." };
+    }
+
+    // --- SESSION-BASED METHODS BELOW ---
+    async createRefreshSession(params: {
+        userId: string;
+        sessionId: string;
+        refreshToken: string;
+        userAgent: string;
+        ipAddress: string;
+        createdAt: Date;
+        lastUsedAt: Date;
+        expiresAt: Date;
+    }): Promise<void> {
+        await RefreshSession.create(params);
+    }
+
+    async findSessionBySessionIdAndUserId(sessionId: string, userId: string): Promise<any> {
+        return await RefreshSession.findOne({ sessionId, userId });
+    }
+    async updateSessionRefreshToken(sessionId: string, newRefreshToken: string, newExpiresAt: Date, newLastUsedAt: Date): Promise<void> {
+        await RefreshSession.updateOne(
+            { sessionId },
+            { $set: { refreshToken: newRefreshToken, expiresAt: newExpiresAt, lastUsedAt: newLastUsedAt } }
+        );
+    }
+    async deleteSessionBySessionId(sessionId: string): Promise<void> {
+        await RefreshSession.deleteOne({ sessionId });
+    }
+    async deleteAllSessionsByUserId(userId: string): Promise<void> {
+        await RefreshSession.deleteMany({ userId });
+    }
+
+    async findSessionByUserIdAndDevice(userId: string, userAgent: string, ipAddress: string): Promise<any> {
+        const session = await RefreshSession.findOne({ userId, userAgent, ipAddress });
+        if (session) {
+            console.log('Found existing session for user/device:', session.sessionId);
+        }
+        return session;
+    }
+
+    async findLatestSessionByUserId(userId: string): Promise<any> {
+        // Find the most recently used session for this user
+        return await RefreshSession.findOne({ userId }).sort({ lastUsedAt: -1 });
+    }
+
+    async getAllSessions(): Promise<any[]> {
+        return await RefreshSession.find({});
     }
 }

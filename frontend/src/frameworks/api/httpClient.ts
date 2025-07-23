@@ -1,6 +1,7 @@
 import axios from 'axios';
 import store from '../../appStore/store';
 import { logout, setAuth } from '../../appStore/authSlice';
+import { RootState } from '../../appStore/store';
 
 const httpClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'https://vago-university.onrender.com/api',
@@ -35,7 +36,7 @@ const processQueue = (error: any = null) => {
 };
 
 httpClient.interceptors.request.use(
-  (config) => {
+  async (config) => {
     // Handle video uploads with longer timeout
     if (config.data instanceof FormData && config.url?.includes('/videos')) {
       config.timeout = 60000; // 1 minute for video uploads
@@ -53,6 +54,24 @@ httpClient.interceptors.request.use(
       unauthorizedCount = 0;
       shouldAttemptRefresh = true;
     }
+
+    // --- NEW LOGIC: Ensure Redux is synced with backend user info ---
+    // Only run for non-auth endpoints and if user is missing
+    const state: RootState = store.getState();
+    const isAuthEndpoint = config.url?.includes('/auth/login') || config.url?.includes('/auth/register') || config.url?.includes('/auth/refresh-token') || config.url?.includes('/auth/me');
+    if (!isAuthEndpoint && !state.auth.user && !config._checkedAuth) {
+      try {
+        // Mark this request as checked to avoid infinite loop
+        config._checkedAuth = true;
+        const meResponse = await httpClient.get('/auth/me');
+        if (meResponse.data && meResponse.data.user && meResponse.data.collection) {
+          store.dispatch(setAuth({ user: meResponse.data.user, collection: meResponse.data.collection }));
+        }
+      } catch (err) {
+        // If /auth/me fails, let the response interceptor handle refresh/logout
+      }
+    }
+    // --- END NEW LOGIC ---
     
     return config;
   },
@@ -67,6 +86,10 @@ httpClient.interceptors.response.use(
     return response;
   },
   async (error) => {
+    // Log when a 401 is received
+    if (error.response?.status === 401) {
+      console.log('🔒 Received 401 Unauthorized from backend');
+    }
     // Handle network errors with exponential backoff
     if (error.message === 'Network Error') {
       const now = Date.now();
@@ -111,7 +134,7 @@ httpClient.interceptors.response.use(
       if (unauthorizedCount >= MAX_UNAUTHORIZED_COUNT) {
         console.log('🚫 Too many unauthorized errors - logging out');
         store.dispatch(logout());
-        shouldAttemptRefresh = false;
+        shouldAttemptRefresh = false; // Prevent further retries
         return Promise.reject(error);
       }
     }
@@ -150,7 +173,24 @@ httpClient.interceptors.response.use(
 
       try {
         console.log('📤 Sending refresh token request...');
-        const response = await httpClient.post('/auth/refresh-token');
+        // Get userId from Redux state
+        const state = store.getState();
+        const userId = state.auth.user?.id;
+        console.log('🔄 App.tsx: userId:', userId);
+        if (!userId) {
+          console.log('No userId found in Redux, logging out user.');
+          // Call backend logout API directly
+          try {
+            console.log('Calling backend logout API from httpClient...');
+            await httpClient.post('/auth/logout');
+          } catch (logoutErr) {
+            console.error('Logout API error (from httpClient):', logoutErr);
+          }
+          store.dispatch(logout());
+          shouldAttemptRefresh = false;
+          return Promise.reject(error);
+        }
+        const response = await httpClient.post('/auth/refresh-token', { userId });
         console.log('✅ Token refreshed, updating auth state');
         
         // Reset error counts on successful refresh

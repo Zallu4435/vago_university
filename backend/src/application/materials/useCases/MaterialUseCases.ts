@@ -29,39 +29,22 @@ function toMaterialProps(raw: any): MaterialProps {
 }
 
 export class GetMaterialsUseCase {
-  constructor(private repo: IMaterialsRepository) {}
+  constructor(private repo: IMaterialsRepository) { }
   async execute(params: GetMaterialsRequestDTO): Promise<GetMaterialsResponseDTO> {
-    console.log('=== GetMaterialsUseCase DEBUG ===');
-    console.log('Received params:', params);
-    
-    // Debug: Fetch some sample materials to see actual database values
     try {
       const sampleMaterials = await this.repo.find({}, { skip: 0, limit: 5, sort: { uploadedAt: -1 } });
-      console.log('=== SAMPLE MATERIALS FROM DATABASE ===');
-      sampleMaterials.forEach((material, index) => {
-        console.log(`Material ${index + 1}:`, {
-          title: material.title,
-          subject: material.subject,
-          course: material.course,
-          semester: material.semester
-        });
-      });
-      
+
+
       // Get all unique courses in database
       const allMaterials = await this.repo.find({}, { skip: 0, limit: 100, sort: { uploadedAt: -1 } });
       const uniqueCourses = [...new Set(allMaterials.map(m => m.course))];
-      console.log('=== ALL UNIQUE COURSES IN DATABASE ===');
-      console.log('Courses:', uniqueCourses);
-      console.log('=== END UNIQUE COURSES ===');
-      
-      console.log('=== END SAMPLE MATERIALS ===');
     } catch (error) {
       console.log('Error fetching sample materials:', error);
     }
-    
+
     // Build query/filter logic here (not in repository)
     const filter: any = {};
-    
+
     // Existing filters
     if (params.subject && params.subject !== 'All Subjects' && params.subject !== 'all' && params.subject !== 'All') {
       // Normalize subject filter: convert underscores to spaces and capitalize words
@@ -69,14 +52,13 @@ export class GetMaterialsUseCase {
         .split('_')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
-      
+
       filter.subject = normalizedSubject;
-      console.log('Subject filter applied:', params.subject, '-> normalized to:', normalizedSubject);
     }
     if (params.course && params.course !== 'All Courses' && params.course !== 'all') {
       // Normalize course filter: convert underscores to spaces and capitalize words
       let normalizedCourse = params.course;
-      
+
       // Handle special cases first
       if (normalizedCourse.toLowerCase().includes('b.tech')) {
         normalizedCourse = normalizedCourse.replace(/b\.tech/gi, 'B.Tech.');
@@ -85,7 +67,7 @@ export class GetMaterialsUseCase {
       } else if (normalizedCourse.toLowerCase().includes('m.sc')) {
         normalizedCourse = normalizedCourse.replace(/m\.sc/gi, 'M.Sc.');
       }
-      
+
       // Convert underscores to spaces and capitalize remaining words
       normalizedCourse = normalizedCourse
         .split('_')
@@ -101,16 +83,11 @@ export class GetMaterialsUseCase {
           return word.charAt(0).toUpperCase() + word.slice(1);
         })
         .join(' ');
-      
+
       // Clean up any double dots
       normalizedCourse = normalizedCourse.replace(/\.\./g, '.');
-      
+
       filter.course = normalizedCourse;
-      console.log('Course filter applied:', params.course, '-> normalized to:', normalizedCourse);
-      
-      // Debug: Show what we're searching for vs what's in database
-      console.log('Searching for course:', JSON.stringify(normalizedCourse));
-      console.log('Database has courses:', ['B.Sc. Mathematics', 'B.Tech. CS']);
     }
     if (
       params.semester !== undefined &&
@@ -122,9 +99,6 @@ export class GetMaterialsUseCase {
       const semesterValue = typeof params.semester === 'string' ? parseInt(params.semester, 10) : params.semester;
       if (!isNaN(semesterValue) && semesterValue > 0) {
         filter.semester = semesterValue;
-        console.log('Semester filter applied:', params.semester, '-> converted to:', semesterValue);
-      } else {
-        console.log('Invalid semester value:', params.semester);
       }
     }
 
@@ -138,7 +112,6 @@ export class GetMaterialsUseCase {
         { course: searchRegex },
         { tags: searchRegex }
       ];
-      console.log('Search filter applied:', params.search);
     }
 
     // Status filter (for restricted/unrestricted)
@@ -148,7 +121,6 @@ export class GetMaterialsUseCase {
       } else if (params.status === 'unrestricted') {
         filter.isRestricted = false;
       }
-      console.log('Status filter applied:', params.status);
     }
 
     // Date range filtering
@@ -190,26 +162,14 @@ export class GetMaterialsUseCase {
         $gte: startDate,
         $lte: endDate
       };
-      console.log('Date range filter applied:', params.dateRange, 'from', startDate, 'to', endDate);
     }
-
-    console.log('Final filter object:', filter);
-    console.log('=== GetMaterialsUseCase DEBUG END ===');
 
     const skip = (params.page - 1) * params.limit;
     const sort = { uploadedAt: -1 };
     const materials = await this.repo.find(filter, { skip, limit: params.limit, sort });
     const total = await this.repo.count(filter);
     const totalPages = Math.ceil(total / params.limit);
-    
-    console.log('Query results:', {
-      materialsFound: materials.length,
-      total,
-      totalPages,
-      page: params.page,
-      limit: params.limit
-    });
-    
+
     return {
       materials: materials.map(toMaterialProps),
       totalPages,
@@ -218,7 +178,7 @@ export class GetMaterialsUseCase {
 }
 
 export class GetMaterialByIdUseCase {
-  constructor(private repo: IMaterialsRepository) {}
+  constructor(private repo: IMaterialsRepository) { }
   async execute(params: GetMaterialByIdRequestDTO): Promise<GetMaterialByIdResponseDTO | null> {
     if (!params.id) throw new MaterialValidationError('Material ID is required');
     const material = await this.repo.findById(params.id);
@@ -228,7 +188,7 @@ export class GetMaterialByIdUseCase {
 }
 
 export class CreateMaterialUseCase {
-  constructor(private repo: IMaterialsRepository) {}
+  constructor(private repo: IMaterialsRepository) { }
   async execute(params: CreateMaterialRequestDTO): Promise<CreateMaterialResponseDTO> {
     // Business logic/validation
     const material = Material.create(params);
@@ -238,7 +198,7 @@ export class CreateMaterialUseCase {
 }
 
 export class UpdateMaterialUseCase {
-  constructor(private repo: IMaterialsRepository) {}
+  constructor(private repo: IMaterialsRepository) { }
   async execute(params: UpdateMaterialRequestDTO): Promise<UpdateMaterialResponseDTO | null> {
     if (!params.id) throw new MaterialValidationError('Material ID is required');
     
@@ -256,18 +216,19 @@ export class UpdateMaterialUseCase {
     const { id, ...updateData } = params;
     const updatedMaterial = Material.update(existingProps, updateData);
     console.log('Updated material props:', updatedMaterial.props);
-    console.log('=== UPDATE MATERIAL USE CASE DEBUG END ===');
-    
+    console.log('About to update in DB: id =', params.id, 'data =', updatedMaterial.props);
     // Update in database
     const dbResult = await this.repo.update(params.id, updatedMaterial.props);
+    console.log('DB update result:', dbResult);
     if (!dbResult) throw new MaterialNotFoundError(params.id);
     
+    console.log('=== UPDATE MATERIAL USE CASE DEBUG END ===');
     return { material: toMaterialProps(dbResult) };
   }
 }
 
 export class DeleteMaterialUseCase {
-  constructor(private repo: IMaterialsRepository) {}
+  constructor(private repo: IMaterialsRepository) { }
   async execute(params: DeleteMaterialRequestDTO): Promise<void> {
     if (!params.id) throw new MaterialValidationError('Material ID is required');
     const material = await this.repo.findById(params.id);

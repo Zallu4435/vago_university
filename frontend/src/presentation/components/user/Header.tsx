@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FaBell, FaBookOpen, FaSearch, FaBars, FaTimes, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserAlt, FaExchangeAlt, FaChalkboardTeacher, FaTachometerAlt } from 'react-icons/fa';
+import { FaBell, FaBookOpen, FaSearch, FaBars, FaTimes, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserAlt, FaExchangeAlt, FaChalkboardTeacher, FaTachometerAlt, FaUserGraduate } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePreferences } from '../../../application/context/PreferencesContext';
 import { useNotificationManagement } from '../../../application/hooks/useNotificationManagement';
@@ -34,7 +34,7 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
   // Determine which tabs to show based on URL
   const isCanvas = location.pathname.includes('/canvas');
   const tabs = isCanvas ? canvasTabs : dashboardTabs;
-  const portalName = isCanvas ? 'Student Canvas' : 'University Portal';
+  const portalName = 'VAGO';
 
   const toggleProfileDropdown = () => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
@@ -112,7 +112,7 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
             <div className="relative">
               <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${styles.accent} flex items-center justify-center shadow-xl transform group-hover:scale-105 transition-all duration-300`}>
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent"></div>
-                <FaBookOpen className="text-white relative z-10" size={20} />
+                <img src="/images/university-logo.png" alt="VAGO Logo" className="w-8 h-8 object-contain relative z-10" />
               </div>
               <div className={`absolute -inset-1 bg-gradient-to-br ${styles.orb.primary} rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300`}></div>
             </div>

@@ -1,4 +1,5 @@
 import { IAuthRepository } from '../../../application/auth/repositories/IAuthRepository';
+import { IEmailService } from '../../../application/auth/service/IEmailService';
 import {
     IRegisterUseCase, // Using interfaces for clarity and consistency
     ILoginUseCase,
@@ -9,6 +10,7 @@ import {
     IVerifyEmailOtpUseCase,
     IResetPasswordUseCase,
     IConfirmRegistrationUseCase,
+    LogoutAllUseCase,
     // Import concrete Use Case classes to instantiate them
     RegisterUseCase,
     LoginUseCase,
@@ -27,12 +29,12 @@ import { IAuthController } from '../../../presentation/http/IHttp'; // Make sure
 // Import new services and their interfaces
 import { IJwtService, JwtService } from '../../services/auth/JwtService';
 import { IOtpService, OtpService } from '../../services/auth/OtpService';
-import { IEmailService, emailService } from '../../services/email.service'; // Assuming emailService is a singleton export
+import { emailService } from '../../services/email.service'; // Assuming emailService is a singleton export
 import { otpStorage } from "../../services/otpStorage"; // otpStorage is a dependency for OtpService
 
 export function getAuthComposer(): IAuthController {
     // Instantiate the Repository
-    const repository: IAuthRepository = new AuthRepository();
+    const repository: AuthRepository = new AuthRepository();
 
     // Instantiate the new Services
     const jwtService: IJwtService = new JwtService();
@@ -49,6 +51,7 @@ export function getAuthComposer(): IAuthController {
     const verifyEmailOtpUseCase: IVerifyEmailOtpUseCase = new VerifyEmailOtpUseCase(otpService, jwtService);
     const resetPasswordUseCase: IResetPasswordUseCase = new ResetPasswordUseCase(repository, jwtService);
     const confirmRegistrationUseCase: IConfirmRegistrationUseCase = new ConfirmRegistrationUseCase(repository, jwtService);
+    const logoutAllUseCase: LogoutAllUseCase = new LogoutAllUseCase(repository);
 
     // Instantiate the Controller with all the Use Cases
     return new AuthController(
@@ -60,6 +63,8 @@ export function getAuthComposer(): IAuthController {
         sendEmailOtpUseCase,
         verifyEmailOtpUseCase,
         resetPasswordUseCase,
-        confirmRegistrationUseCase
+        confirmRegistrationUseCase,
+        logoutAllUseCase,
+        repository // Pass repository as last argument
     );
 }

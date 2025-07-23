@@ -9,11 +9,12 @@ export interface LoginRequestDTO {
 
 export interface RefreshTokenRequestDTO {
   refreshToken: string;
+  userId: string;
+  email: string;
+  collection: 'register' | 'admin' | 'user' | 'faculty';
 }
 
-export interface LogoutRequestDTO {
-  // No params needed
-}
+export type LogoutRequestDTO = { sessionId: string };
 
 export type RegisterFacultyRequestDTO = Pick<FacultyProps, "fullName" | "email" | "phone" | "department" | "qualification" | "experience" | "aboutMe" | "cvUrl" | "certificatesUrl">;
 

@@ -17,7 +17,8 @@ export async function expressAdapter(
     req.user,
     req.file,
     files,
-    req.cookies
+    req.cookies,
+    req.ip // Add IP address as the last argument
   );
 
   try {

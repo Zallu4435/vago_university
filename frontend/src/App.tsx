@@ -4,7 +4,10 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import store from './appStore/store';
 import './index.css';
 import { ProtectedRoute } from './frameworks/router/ProtectedRoute';
-import { AuthProvider } from './presentation/components/auth/AuthProvider';
+import { useEffect } from 'react';
+import httpClient from './frameworks/api/httpClient';
+import { useDispatch } from 'react-redux';
+import { setAuth } from './appStore/authSlice';
 
 // Layouts - Keep these loaded initially
 import PublicLayout from './presentation/Layout/PublicLayout';
@@ -23,6 +26,7 @@ import { About } from './presentation/pages/main/About';
 import ContactUs from './presentation/pages/static/ContactUs';
 import LoginPage from './presentation/pages/Auth/Login';
 import RegisterPage from './presentation/pages/Auth/Register';
+import LoadingSpinner from './presentation/components/common/LoadingSpinner';
 
 // Lazy load non-essential pages
 const HighlightsPage = lazy(() => import('./presentation/pages/main/HighlightsPage').then(module => ({ default: module.HighlightsPage })));
@@ -75,17 +79,25 @@ const EnquiryManagement = lazy(() => import('./presentation/pages/admin/enquiry/
 const SessionAttendancePage = lazy(() => import('./presentation/pages/faculty/attendance/SessionAttendancePage'));
 const AttendanceSummaryPage = lazy(() => import('./presentation/pages/faculty/attendance/AttendanceSummaryPage'));
 
-// Loading component
-const LoadingSpinner = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-cyan-50 via-white to-cyan-50">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600 mx-auto mb-4"></div>
-      <p className="text-cyan-600 font-medium">Loading...</p>
-    </div>
-  </div>
-);
 
 const App: React.FC = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    // On mount, try to fetch user info and update Redux
+    (async () => {
+      try {
+        const response = await httpClient.get('/auth/me');
+        console.log('🔄 App.tsx: response:', response);
+        if (response.data && response.data.user && response.data.collection) {
+          dispatch(setAuth({ user: response.data.user, collection: response.data.collection }));
+        }
+      } catch (err) {
+        // Not authenticated or error, do nothing
+      }
+    })();
+  }, [dispatch]);
+
   // Define departments array
   const departments = [
     { path: 'computer-science', component: ComputerScience },
@@ -106,40 +118,33 @@ const App: React.FC = () => {
     {
       path: 'login',
       element: <LoginPage />,
-      state: { fromLayout: 'department' },
     },
     {
       path: 'register',
       element: <RegisterPage />,
-      state: { fromLayout: 'department' },
     },
   ];
 
   return (
     <Provider store={store}>
-      <AuthProvider>
-        <Routes>
+      <Routes>
           {/* Login, Register, and Faculty Request Routes (unauthenticated only) */}
           <Route element={<ProtectedRoute allowedCollections={[]} isPublic={true} />}>
             <Route element={<PublicLayout />}>
-              <Route path="login" element={<LoginPage />} state={{ fromLayout: 'public' }} />
-              <Route path="register" element={<RegisterPage />} state={{ fromLayout: 'public' }} />
+              <Route path="login" element={<LoginPage />} />
+              <Route path="register" element={<RegisterPage />} />
               <Route
                 path="forgot-password"
                 element={
-                  <ForgotPasswordModal
-                    isOpen={true}
-                    onClose={() => navigate(-1) || navigate('/login')}
-                  />
+                  <ForgotPasswordModal />
                 }
-                state={{ fromLayout: 'public' }}
               />
-              <Route path="faculty/request" element={<FacultyRequestForm />} state={{ fromLayout: 'public' }} />
+              <Route path="faculty/request" element={<FacultyRequestForm />} />
             </Route>
 
             <Route element={<UGLayout />}>
-              <Route path="ug/login" element={<LoginPage />} state={{ fromLayout: 'ug' }} />
-              <Route path="ug/register" element={<RegisterPage />} state={{ fromLayout: 'ug' }} />
+              <Route path="ug/login" element={<LoginPage />} />
+              <Route path="ug/register" element={<RegisterPage />} />
             </Route>
           </Route>
 
@@ -390,7 +395,6 @@ const App: React.FC = () => {
                     key={index}
                     path={subRoute.path}
                     element={subRoute.element}
-                    {...(subRoute.state ? { state: subRoute.state } : {})}
                   />
                 ))}
               </Route>
@@ -416,7 +420,6 @@ const App: React.FC = () => {
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/register" replace />} />
         </Routes>
-      </AuthProvider>
     </Provider>
   );
 };

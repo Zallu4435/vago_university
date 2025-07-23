@@ -18,9 +18,6 @@ export class MaterialController implements IMaterialController {
 
   async getMaterials(httpRequest: IHttpRequest): Promise<IHttpResponse> {
       const { query } = httpRequest;
-      console.log('=== MaterialController getMaterials DEBUG ===');
-      console.log('Query parameters received:', query);
-      console.log('=== MaterialController getMaterials DEBUG END ===');
       
       const result = await this.getMaterialsUseCase.execute(query);
       return this.httpSuccess.success_200(result);
@@ -39,12 +36,6 @@ export class MaterialController implements IMaterialController {
   }
 
   async createMaterial(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log('=== MATERIAL CONTROLLER CREATE DEBUG ===');
-    console.log('Request body:', httpRequest.body);
-    console.log('Request file:', httpRequest.file);
-    console.log('Request files:', httpRequest.files);
-    console.log('=== MATERIAL CONTROLLER CREATE DEBUG END ===');
-    
     if (!httpRequest.body || !httpRequest.files) {
         return this.httpErrors.error_400();
       }
@@ -112,8 +103,8 @@ export class MaterialController implements IMaterialController {
       ...(httpRequest.body.isNew !== undefined && { isNewMaterial: httpRequest.body.isNew === 'true' }),
       // Convert tags from string to array if needed
       ...(httpRequest.body.tags && { tags: typeof httpRequest.body.tags === 'string' ? [httpRequest.body.tags] : httpRequest.body.tags }),
-      // Convert booleans from string to boolean
-      ...(httpRequest.body.isRestricted !== undefined && { isRestricted: httpRequest.body.isRestricted === 'true' })
+      // Convert booleans from string or boolean to boolean
+      ...(httpRequest.body.isRestricted !== undefined && { isRestricted: httpRequest.body.isRestricted === true || httpRequest.body.isRestricted === 'true' })
     };
     
     if (file?.path) {

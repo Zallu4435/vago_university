@@ -1,9 +1,9 @@
-import React from "react";
+import React from 'react';
 
-const LoadingSpinner: React.FC = () => {
-    return (
-        <div className="inline-block w-5 h-5 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
-    )
-}
+const LoadingSpinner: React.FC = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+  </div>
+);
 
-export default LoadingSpinner;
+export default LoadingSpinner; 

@@ -28,6 +28,7 @@ export interface IHttpRequest {
   cookies?: {
     [key: string]: string;
   };
+  ip?: string; // Add ip property
 }
 
 export interface IHttpResponse {
@@ -55,7 +56,8 @@ export class HttpRequest implements IHttpRequest {
     },
     public file?: Express.Multer.File,
     public files?: Express.Multer.File[],
-    public cookies?: { [key: string]: string }
+    public cookies?: { [key: string]: string },
+    public ip?: string // Add ip property
   ) { }
 }
 
@@ -96,6 +98,9 @@ export class HttpSuccess implements IHttpSuccess {
   }
   success_201(data: any): IHttpResponse {
     return { statusCode: 201, body: { data } };
+  }
+  success_200_flat(data: any): IHttpResponse {
+    return { statusCode: 200, body: data };
   }
 }
 
@@ -184,7 +189,7 @@ export interface IMaterialController extends IController {
   getMaterialById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   createMaterial(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   updateMaterial(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  deleteMaterial(httpRequest: IHttpResponse): Promise<IHttpResponse>;
+  deleteMaterial(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface IUserMaterialController extends IController {
@@ -290,11 +295,13 @@ export interface IAuthController extends IController {
   login(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   refreshToken(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   logout(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  logoutAll(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   registerFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   sendEmailOtp(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   verifyEmailOtp(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   resetPassword(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   confirmRegistration(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  me(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface IAdminAdmissionController extends IController {

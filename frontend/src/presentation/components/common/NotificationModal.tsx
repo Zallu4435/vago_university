@@ -2,6 +2,8 @@ import { useRef, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNotificationManagement } from '../../../application/hooks/useNotificationManagement';
 import { usePreferences } from '../../../application/context/PreferencesContext';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../appStore/store';
 
 interface NotificationModalProps {
     isOpen: boolean;
@@ -11,6 +13,7 @@ interface NotificationModalProps {
 type TabType = 'unread' | 'all';
 
 export default function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
+    const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
     const { styles } = usePreferences();
     const { notifications, markAsRead, markAllAsRead } = useNotificationManagement();
     const notificationDropdownRef = useRef<HTMLDivElement>(null);
@@ -108,6 +111,8 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
             document.removeEventListener('mousedown', handleOutsideClick);
         };
     }, [isOpen, onClose]);
+
+    if (!isAuthenticated) return null;
 
     if (!isOpen) return null;
 

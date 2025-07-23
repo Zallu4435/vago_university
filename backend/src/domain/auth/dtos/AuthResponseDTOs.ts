@@ -14,7 +14,6 @@ export interface LoginResponseDTO {
 
 export interface RefreshTokenResponseDTO {
   accessToken: string;
-  refreshToken: string;
   user: Pick<IUser, "firstName" | "lastName" | "email" | "id" | "profilePicture">;
   collection: "register" | "admin" | "user" | "faculty";
 }

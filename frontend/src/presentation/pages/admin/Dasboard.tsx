@@ -1,37 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAdminDashboard } from '../../../application/hooks/useAdminDashboard';
+import StatsCard from '../../components/admin/dashboard/StatsCard';
+import GlassPanel from '../../components/admin/dashboard/GlassPanel';
+import PerformanceMatrix from '../../components/admin/dashboard/PerformanceMatrix';
+import RecentActivities from '../../components/admin/dashboard/RecentActivities';
+import SystemAlerts from '../../components/admin/dashboard/SystemAlerts';
+import LoadingSpinner from '../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../shared/components/ErrorMessage';
 import {
-  HiUsers,
-  HiCurrencyDollar,
-  HiBookOpen,
-  HiClock,
-  HiUserAdd,
-  HiPlus,
-  HiBell,
-  HiDocumentText,
-  HiCreditCard,
-  HiCog,
-  HiTrendingUp,
-  HiTrendingDown,
-  HiCalendar,
-  HiHeart,
-  HiChat,
-  HiVideoCamera,
-  HiDatabase,
-  HiCheckCircle,
-  HiExclamationCircle,
-  HiLightningBolt,
-  HiSparkles,
-  HiStar,
-  HiXCircle
+  HiUsers as HiUsersIcon,
+  HiBookOpen as HiBookOpenIcon,
+  HiClock as HiClockIcon,
+  HiBell as HiBellIcon,
+  HiTrendingUp as HiTrendingUpIcon,
+  HiCheckCircle as HiCheckCircleIcon,
+  HiExclamationCircle as HiExclamationCircleIcon,
+  HiLightningBolt as HiLightningBoltIcon,
+  HiSparkles as HiSparklesIcon,
 } from 'react-icons/hi';
 import {
-  GiOnTarget,
-  GiTrophy,
-  GiLightningTear,
-  GiTwoCoins
+  GiOnTarget as GiOnTargetIcon,
+  GiTwoCoins as GiTwoCoinsIcon
 } from 'react-icons/gi';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Area, AreaChart } from 'recharts';
+import { Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Area, AreaChart } from 'recharts';
 
 const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -96,10 +87,10 @@ const AdminDashboard = () => {
   // Get alert icon based on type
   const getAlertIcon = (type: string) => {
     switch (type) {
-      case 'success': return <HiCheckCircle className="h-5 w-5 text-emerald-400 mt-0.5" />;
-      case 'warning': return <HiExclamationCircle className="h-5 w-5 text-amber-400 mt-0.5" />;
-      case 'error': return <HiExclamationCircle className="h-5 w-5 text-red-400 mt-0.5" />;
-      default: return <HiBell className="h-5 w-5 text-blue-400 mt-0.5" />;
+      case 'success': return <HiCheckCircleIcon className="h-5 w-5 text-emerald-400 mt-0.5" />;
+      case 'warning': return <HiExclamationCircleIcon className="h-5 w-5 text-amber-400 mt-0.5" />;
+      case 'error': return <HiExclamationCircleIcon className="h-5 w-5 text-red-400 mt-0.5" />;
+      default: return <HiBellIcon className="h-5 w-5 text-blue-400 mt-0.5" />;
     }
   };
 
@@ -171,173 +162,12 @@ const AdminDashboard = () => {
   };
 
 
-  const EnhancedMetricCard = ({ title, value, subtitle, trend, icon: Icon, bgGradient, trendUp, delay = 0 }: any) => (
-    <div
-      className="group relative"
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      {/* Ghost orb background */}
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-      <div className={`${bgGradient} rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden backdrop-blur-xl`}>
-        {/* Animated background orbs */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500 blur-xl"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-12 -translate-x-12 group-hover:scale-125 transition-transform duration-700 blur-xl"></div>
-          <div className="absolute top-1/2 left-1/2 w-16 h-16 bg-white rounded-full -translate-x-8 -translate-y-8 group-hover:scale-110 transition-transform duration-600 blur-lg"></div>
-        </div>
-
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <div className="bg-white bg-opacity-20 backdrop-blur-sm p-3 rounded-xl shadow-inner">
-                <Icon className="h-7 w-7 text-white drop-shadow-sm" />
-              </div>
-              <div className="ml-4">
-                <p className="text-white text-opacity-90 text-sm font-medium">{title}</p>
-                <p className="text-3xl font-bold text-white drop-shadow-sm">{loading ? '---' : value}</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <HiSparkles className="h-5 w-5 text-white opacity-70 animate-pulse" />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <p className="text-white text-opacity-80 text-sm">{subtitle}</p>
-            <div className="flex items-center bg-white bg-opacity-20 rounded-full px-3 py-1 backdrop-blur-sm">
-              {trendUp ? (
-                <HiTrendingUp className="h-4 w-4 text-white mr-1" />
-              ) : (
-                <HiTrendingDown className="h-4 w-4 text-white mr-1" />
-              )}
-              <span className="text-white text-sm font-semibold">{trend}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-
-  const GlassPanel = ({ title, children, icon: Icon }: any) => (
-    <div className="group relative">
-      {/* Ghost orb background */}
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-      <div className="relative bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-purple-500/20">
-        {/* Animated background patterns */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-4 left-4 w-8 h-8 border-purple-500/20 rotate-45 rounded-lg"></div>
-          <div className="absolute bottom-4 right-4 w-6 h-6 border-purple-500/20 rotate-12 rounded-full"></div>
-          <div className="absolute top-1/2 right-4 w-4 h-4 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rotate-45 rounded-sm"></div>
-        </div>
-
-        <div className="relative z-10">
-          <div className="flex items-center mb-6">
-            <div className="bg-gradient-to-br from-purple-500 to-blue-600 p-2 rounded-lg shadow-lg backdrop-blur-sm">
-              <Icon className="h-5 w-5 text-white" />
-            </div>
-            <h3 className="text-lg font-bold text-white ml-3">{title}</h3>
-          </div>
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-
-  const EnhancedActivityItem = ({ action, user, time, avatar, type = "default" }: any) => {
-    const getTypeColor = (type: string) => {
-      switch (type) {
-        case 'success': return 'from-emerald-400 to-emerald-600';
-        case 'warning': return 'from-amber-400 to-orange-500';
-        case 'info': return 'from-blue-400 to-blue-600';
-        default: return 'from-purple-400 to-purple-600';
-      }
-    };
-
-    return (
-      <div className="flex items-center space-x-4 py-4 border-b border-gray-700/50 last:border-b-0 hover:bg-gray-700/30 rounded-lg transition-colors duration-200 px-2 backdrop-blur-sm">
-        <div className="flex-shrink-0">
-          <div className={`w-10 h-10 bg-gradient-to-br ${getTypeColor(type)} rounded-full flex items-center justify-center shadow-lg backdrop-blur-sm`}>
-            <span className="text-sm font-bold text-white">{avatar}</span>
-          </div>
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-200">{action}</p>
-          <p className="text-xs text-gray-400 flex items-center">
-            <span className="mr-1">by</span>
-            <span className="font-medium">{user}</span>
-          </p>
-        </div>
-        <div className="flex-shrink-0">
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-900/30 text-purple-400 border border-purple-500/30 backdrop-blur-sm">
-            {time}
-          </span>
-        </div>
-      </div>
-    );
-  };
-
-  const StatCard = ({ icon: Icon, title, value, subtitle, color }: any) => (
-    <div className="text-center group">
-      <div className="flex items-center justify-center mb-3">
-        <div className={`p-3 rounded-full bg-gradient-to-br ${color} shadow-lg group-hover:scale-110 transition-transform duration-300 backdrop-blur-sm`}>
-          <Icon className="h-6 w-6 text-white" />
-        </div>
-      </div>
-      <div className="space-y-2">
-        <p className="text-sm font-semibold text-gray-300">{title}</p>
-        <p className="text-3xl font-bold text-white">{value}</p>
-        <p className="text-xs text-gray-400">{subtitle}</p>
-      </div>
-    </div>
-  );
-
   if (loading || hookLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 relative overflow-hidden">
-        {/* Ghost orbs for loading */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-0 w-96 h-96 bg-purple-900/10 rounded-full blur-3xl"></div>
-          <div className="absolute top-3/4 right-0 w-96 h-96 bg-blue-900/10 rounded-full blur-3xl"></div>
-          {[...Array(15)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute rounded-full bg-purple-500/10 blur-md"
-              style={{
-                width: `${Math.random() * 12 + 4}px`,
-                height: `${Math.random() * 12 + 4}px`,
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                animation: `floatingMist ${Math.random() * 15 + 20}s ease-in-out infinite ${Math.random() * 5
-                  }s`,
-              }}
-            />
-          ))}
-        </div>
-
-        <div className="space-y-6 relative z-10 flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-400 text-lg mb-4">Error loading dashboard</div>
-          <button
-            onClick={handleRefresh}
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={error.message || 'Error loading dashboard'} />;
   }
 
   return (
@@ -379,7 +209,7 @@ const AdminDashboard = () => {
               >
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative bg-gray-800/50 backdrop-blur-sm rounded-xl p-3 shadow-lg border border-purple-500/20 hover:bg-gray-700/50 transition-colors">
-                  <HiSparkles className="h-5 w-5 text-purple-400" />
+                  <HiSparklesIcon className="h-5 w-5 text-purple-400" />
                 </div>
               </button>
               <div className="group relative">
@@ -396,51 +226,59 @@ const AdminDashboard = () => {
 
         {/* Enhanced Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <EnhancedMetricCard
+          <StatsCard
             title="Total Users"
             value={metrics ? formatNumber(metrics.totalUsers) : '0'}
             subtitle="Students, Faculty & Staff"
             trend="+5%"
-            icon={HiUsers}
+            icon={HiUsersIcon}
             bgGradient="bg-gradient-to-br from-purple-600 to-purple-800"
+            iconBg="bg-gradient-to-br from-purple-600 to-purple-800"
             trendUp={true}
             delay={0}
+            loading={loading}
           />
-          <EnhancedMetricCard
+          <StatsCard
             title="Total Revenue"
             value={metrics ? formatCurrency(metrics.totalRevenue) : '₹0'}
             subtitle="This month"
             trend="+12%"
-            icon={GiTwoCoins}
+            icon={GiTwoCoinsIcon}
             bgGradient="bg-gradient-to-br from-emerald-600 to-emerald-800"
+            iconBg="bg-gradient-to-br from-emerald-600 to-emerald-800"
             trendUp={true}
             delay={100}
+            loading={loading}
           />
-          <EnhancedMetricCard
+          <StatsCard
             title="Active Courses"
             value={metrics ? formatNumber(metrics.activeCourses) : '0'}
             subtitle="Currently running"
             trend="+3"
-            icon={HiBookOpen}
+            icon={HiBookOpenIcon}
             bgGradient="bg-gradient-to-br from-blue-600 to-blue-800"
+            iconBg="bg-gradient-to-br from-blue-600 to-blue-800"
             trendUp={true}
             delay={200}
+            loading={loading}
           />
-          <EnhancedMetricCard
+          <StatsCard
             title="Pending Approvals"
             value={metrics ? formatNumber(metrics.pendingApprovals) : '0'}
             subtitle="Requires attention"
             trend="-2"
-            icon={HiClock}
+            icon={HiClockIcon}
             bgGradient="bg-gradient-to-br from-amber-600 to-orange-700"
+            iconBg="bg-gradient-to-br from-amber-600 to-orange-700"
             trendUp={false}
             delay={300}
+            loading={loading}
           />
         </div>
 
         {/* Enhanced Analytics Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <GlassPanel title="User Growth & Targets" icon={HiTrendingUp}>
+          <GlassPanel title="User Growth & Targets" icon={HiTrendingUpIcon}>
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={safeUserGrowthData}>
                 <defs>
@@ -481,7 +319,7 @@ const AdminDashboard = () => {
             </ResponsiveContainer>
           </GlassPanel>
 
-          <GlassPanel title="Revenue Breakdown" icon={GiTwoCoins}>
+          <GlassPanel title="Revenue Breakdown" icon={GiTwoCoinsIcon}>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={safeRevenueData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -507,95 +345,27 @@ const AdminDashboard = () => {
 
         {/* Performance Overview - Full Width */}
         <div className="mb-8">
-          <GlassPanel title="Module Performance Metrics" icon={GiOnTarget}>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 p-2">
-              {safePerformanceData?.map((item, index) => (
-                <div key={index} className="text-center group hover:scale-105 transition-transform duration-200 flex flex-col justify-center items-center h-32 bg-gray-700/30 backdrop-blur-sm rounded-lg p-3 hover:bg-gray-700/50 border border-gray-600/20 hover:border-purple-500/30">
-                  <div className="relative w-14 h-14 mx-auto mb-2">
-                    <svg className="w-14 h-14 transform -rotate-90" viewBox="0 0 36 36">
-                      <path
-                        d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="#374151"
-                        strokeWidth="2"
-                      />
-                      <path
-                        d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke={item.color}
-                        strokeWidth="2"
-                        strokeDasharray={`${item.value}, 100`}
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-sm font-bold text-white">{item.value}%</span>
-                    </div>
-                  </div>
-                  <p className="text-xs font-medium text-gray-300 leading-tight">{item.name}</p>
-                </div>
-              ))}
-            </div>
+          <GlassPanel title="Module Performance Metrics" icon={GiOnTargetIcon}>
+            <PerformanceMatrix performanceData={safePerformanceData} />
           </GlassPanel>
         </div>
 
         {/* Enhanced Activities & Alerts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <GlassPanel title="Recent Activities" icon={HiLightningBolt}>
-            <div className="space-y-2">
-              {safeActivitiesData.length > 0 ? (
-                safeActivitiesData.map((activity, index) => (
-                  <div key={activity.id} className="cursor-pointer" onClick={() => handleMarkActivityAsRead(activity.id)}>
-                    <EnhancedActivityItem
-                      action={activity.action}
-                      user={activity.user}
-                      time={activity.time}
-                      avatar={activity.avatar}
-                      type={activity.type}
-                    />
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <HiLightningBolt className="h-8 w-8 text-gray-500 mx-auto mb-2" />
-                  <p className="text-gray-400">No recent activities</p>
-                </div>
-              )}
-            </div>
+          <GlassPanel title="Recent Activities" icon={HiLightningBoltIcon}>
+            <RecentActivities activitiesData={safeActivitiesData} markActivityAsRead={handleMarkActivityAsRead} />
           </GlassPanel>
 
-          <GlassPanel title="System Alerts" icon={HiBell}>
-            <div className="space-y-4">
-              {safeAlertsData.length > 0 ? (
-                safeAlertsData.map((alert) => (
-                  <div
-                    key={alert.id}
-                    className={`flex items-start space-x-3 p-3 ${getAlertBgColor(alert.type)} backdrop-blur-sm rounded-lg border-l-4 ${getAlertBorderColor(alert.type)} hover:opacity-80 transition-opacity duration-200 cursor-pointer`}
-                    onClick={() => handleDismissAlert(alert.id)}
-                  >
-                    {getAlertIcon(alert.type)}
-                    <div className="flex-1">
-                      <p className={`text-sm font-medium ${getAlertTextColor(alert.type)}`}>{alert.title}</p>
-                      <p className={`text-xs ${getAlertSubtextColor(alert.type)}`}>{alert.message}</p>
-                    </div>
-                    <button
-                      className="text-gray-400 hover:text-white transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDismissAlert(alert.id);
-                      }}
-                    >
-                      <HiXCircle className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <HiBell className="h-8 w-8 text-gray-500 mx-auto mb-2" />
-                  <p className="text-gray-400">No system alerts</p>
-                </div>
-              )}
-            </div>
+          <GlassPanel title="System Alerts" icon={HiBellIcon}>
+            <SystemAlerts
+              alertsData={safeAlertsData}
+              getAlertIcon={getAlertIcon}
+              getAlertBgColor={getAlertBgColor}
+              getAlertBorderColor={getAlertBorderColor}
+              getAlertTextColor={getAlertTextColor}
+              getAlertSubtextColor={getAlertSubtextColor}
+              dismissAlert={handleDismissAlert}
+            />
           </GlassPanel>
         </div>
       </div>

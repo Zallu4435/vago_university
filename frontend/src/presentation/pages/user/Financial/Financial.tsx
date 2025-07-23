@@ -3,20 +3,19 @@ import { FaMoneyBillWave } from 'react-icons/fa';
 import FinancialTabs from './FinancialTabs';
 import FeesPaymentsSection from './FeesPaymentsSection';
 import FinancialAidSection from './FinancialAidSection';
-import ScholarshipsSection from './ScholarshipsSection';
-import { useFinancial } from '../../../../application/hooks/useFinancial';
+// import ScholarshipsSection from './ScholarshipsSection';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import { MdCurrencyRupee } from 'react-icons/md';
 import type { StudentFinancialInfo } from '../../../../domain/types/user/financial';
 import { formatDateTime } from '../../../../shared/utils/dateUtils';
-
+import { usePaymentsManagement } from '../../../../application/hooks/useFinancial';
 
 export default function Financial() {
   const {
     getStudentFinancialInfo,
     loading,
     error,
-  } = useFinancial();
+  } = usePaymentsManagement();
   const { styles, theme } = usePreferences();
 
   const [activeTab, setActiveTab] = useState('Fees and Payments');
@@ -58,7 +57,7 @@ export default function Financial() {
         <div className={`relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} p-4 sm:p-6 max-w-md w-full`}>
           <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
           <div className={`relative z-10 ${styles.status.error} text-sm sm:text-base text-center`}>
-            {error}
+            {error.message}
           </div>
         </div>
       </div>
@@ -129,7 +128,7 @@ export default function Financial() {
             />
           )}
           {activeTab === 'Financial Aid' && <FinancialAidSection />}
-          {activeTab === 'Scholarships' && <ScholarshipsSection />}
+          {/* {activeTab === 'Scholarships' && <ScholarshipsSection />} */}
         </div>
       </div>
     </div>

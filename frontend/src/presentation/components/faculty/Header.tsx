@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { LuBell, LuLogOut, LuSearch, LuMoon, LuSun, LuSettings, LuUser } from 'react-icons/lu';
+import { FaUserGraduate } from 'react-icons/fa';
 import NotificationModal from '../common/NotificationModal';
 import { useNotificationManagement } from '../../../application/hooks/useNotificationManagement';
 
@@ -40,8 +41,9 @@ export default function Header({ currentDate, facultyName, onLogout }: HeaderPro
       <div className="relative z-10 flex items-center space-x-6">
         <div className="relative">
           <div className="relative">
-            <h2 className="text-3xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Dashboard
+            <h2 className="text-3xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-3">
+              <img src="/images/university-logo.png" alt="VAGO Logo" className="w-8 h-8 object-contain" />
+              VAGO Faculty
             </h2>
             <div className="flex items-center space-x-4 mt-1">
               <p className="text-indigo-600 font-medium">{currentDate}</p>

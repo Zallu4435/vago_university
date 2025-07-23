@@ -2,6 +2,7 @@ import { Router } from "express";
 import { expressAdapter } from "../../adapters/ExpressAdapter";
 import { getAuthComposer } from "../../../infrastructure/services/auth/AuthComposers";
 import { facultyUpload } from "../../../config/cloudinary.config";
+import { authMiddleware } from "../../../shared/middlewares/authMiddleware";
 
 const authRouter = Router();
 const authController = getAuthComposer();
@@ -13,6 +14,8 @@ authRouter.post("/login", (req, res, next) => expressAdapter(req, res, next, aut
 authRouter.post("/refresh-token", (req, res, next) => expressAdapter(req, res, next, authController.refreshToken.bind(authController)));
 
 authRouter.post("/logout", (req, res, next) => expressAdapter(req, res, next, authController.logout.bind(authController)));
+
+authRouter.post("/logout-all", (req, res, next) => expressAdapter(req, res, next, authController.logoutAll.bind(authController)));
 
 authRouter.post(
   "/faculty/request",
@@ -30,5 +33,7 @@ authRouter.post("/verify-email-otp", (req, res, next) => expressAdapter(req, res
 authRouter.post("/reset-password", (req, res, next) => expressAdapter(req, res, next, authController.resetPassword.bind(authController)));
 
 authRouter.post("/confirm-registration", (req, res, next) => expressAdapter(req, res, next, authController.confirmRegistration.bind(authController)));
+
+authRouter.get("/me", authMiddleware, (req, res, next) => expressAdapter(req, res, next, authController.me.bind(authController)));
 
 export default authRouter;

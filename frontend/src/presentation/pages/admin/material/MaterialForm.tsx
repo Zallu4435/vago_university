@@ -421,7 +421,7 @@ const MaterialForm: React.FC<MaterialFormProps> = ({ isOpen, onClose, onSubmit, 
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .no-scroll {
           overflow: hidden;
         }

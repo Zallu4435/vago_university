@@ -12,7 +12,6 @@ router.post(
     authMiddleware as any,
     contentVideoUploadWithErrorHandling,
     (req: Request, res: Response, next: NextFunction) => {
-        console.log('🎬 [ROUTE] POST /categories/:category/videos - Video upload route hit');
         req.body.category = req.params.category;
         expressAdapter(req, res, next, videoController.createVideo.bind(videoController));
     }

@@ -78,7 +78,6 @@ export class ClubsRepository implements IClubsRepository {
     if (type && type.toLowerCase() !== "all") {
       clubQuery.type = { $regex: `^${type}$`, $options: "i" };
     }
-    // Search logic for club name/type or user email
     let matchingClubs = [];
     let userIds: any[] = [];
     if (search && search.trim() !== "") {
@@ -92,11 +91,9 @@ export class ClubsRepository implements IClubsRepository {
     if (search && search.trim() !== "") {
       const userMatches = await mongoose.model('User').find({ email: { $regex: search, $options: "i" } }).select("_id").lean();
       userIds = userMatches.map((u: any) => u._id);
-      // If no matches in either, return empty result
       if (clubIds.length === 0 && userIds.length === 0) {
         return { rawRequests: [], totalItems: 0, totalPages: 0, currentPage: page };
       }
-      // If matches, build $or for clubId/userId
       query.$or = [];
       if (clubIds.length > 0) query.$or.push({ clubId: { $in: clubIds } });
       if (userIds.length > 0) query.$or.push({ userId: { $in: userIds } });
@@ -125,16 +122,13 @@ export class ClubsRepository implements IClubsRepository {
   }
 
   async approveClubRequest(params: ApproveClubRequestRequestDTO): Promise<any> {
-    // Update club request status
     await ClubRequestModel.findByIdAndUpdate(
       params.id,
       { status: "approved", updatedAt: new Date() },
       { runValidators: true }
     );
-    // Get the club request to find the associated club
     const clubRequest = await ClubRequestModel.findById(params.id);
     if (clubRequest && clubRequest.clubId) {
-      // Increment enteredMembers count
       await ClubModel.findByIdAndUpdate(
         clubRequest.clubId,
         { $inc: { enteredMembers: 1 }, updatedAt: new Date() },

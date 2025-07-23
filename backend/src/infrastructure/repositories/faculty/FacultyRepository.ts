@@ -1,12 +1,6 @@
-import mongoose, { Types } from "mongoose";
-import axios from "axios";
-import { v2 as cloudinary } from "cloudinary";
-import { config } from "../../../config/config";
-import { emailService } from "../../services/email.service";
-import { generatePassword } from "../../services/passwordService";
+import mongoose from "mongoose";
 import { FacultyErrorType } from "../../../domain/faculty/enums/FacultyErrorType";
 import {
-    GetFacultyRequestDTO,
     GetFacultyByIdRequestDTO,
     GetFacultyByTokenRequestDTO,
     ApproveFacultyRequestDTO,
@@ -16,15 +10,11 @@ import {
     DownloadCertificateRequestDTO,
 } from "../../../domain/faculty/dtos/FacultyRequestDTOs";
 import {
-    GetFacultyResponseDTO,
-    GetFacultyByIdResponseDTO,
-    GetFacultyByTokenResponseDTO,
     ApproveFacultyResponseDTO,
     RejectFacultyResponseDTO,
     DeleteFacultyResponseDTO,
     ConfirmFacultyOfferResponseDTO,
     DownloadCertificateResponseDTO,
-    FacultyResponseDTO,
 } from "../../../domain/faculty/dtos/FacultyResponseDTOs";
 import { IFacultyRepository } from "../../../application/faculty/repositories/IFacultyRepository";
 import { Faculty as FacultyModel } from "../../database/mongoose/auth/faculty.model";
@@ -61,7 +51,6 @@ export class FacultyRepository implements IFacultyRepository {
     }
 
     async getFacultyByToken(params: GetFacultyByTokenRequestDTO): Promise<any> {
-        // Only perform DB fetch, no validation or business logic
         const faculty = await (FacultyRegister as any).findById(params.facultyId)
             .select("fullName email phone department qualification experience aboutMe cvUrl certificatesUrl createdAt status confirmationToken tokenExpiry")
             .lean();
@@ -72,13 +61,10 @@ export class FacultyRepository implements IFacultyRepository {
     }
 
     async approveFaculty(params: ApproveFacultyRequestDTO): Promise<ApproveFacultyResponseDTO> {
-        // Only perform DB update, no validation or business logic
         const faculty = await (FacultyRegister as any).findById(params.id);
         if (!faculty) {
-            // Still return null or throw, as the use case will handle the error
             return null;
         }
-        // Only update fields as requested (department, status, confirmationToken, tokenExpiry)
         faculty.department = params.additionalInfo.department;
         if ((params.additionalInfo as any).status) faculty.status = (params.additionalInfo as any).status;
         if ((params.additionalInfo as any).confirmationToken) faculty.confirmationToken = (params.additionalInfo as any).confirmationToken;
@@ -88,7 +74,6 @@ export class FacultyRepository implements IFacultyRepository {
     }
 
     async rejectFaculty(params: RejectFacultyRequestDTO): Promise<RejectFacultyResponseDTO> {
-        // Only perform DB update, no validation or business logic
         const faculty = await (FacultyRegister as any).findById(params.id);
         if (!faculty) {
             return null;
@@ -100,7 +85,6 @@ export class FacultyRepository implements IFacultyRepository {
     }
 
     async deleteFaculty(params: DeleteFacultyRequestDTO): Promise<DeleteFacultyResponseDTO> {
-        // Only perform DB delete, no validation or business logic
         const faculty = await (FacultyRegister as any).findById(params.id);
         if (!faculty) {
             return null;
@@ -110,7 +94,6 @@ export class FacultyRepository implements IFacultyRepository {
     }
 
     async confirmFacultyOffer(params: ConfirmFacultyOfferRequestDTO): Promise<ConfirmFacultyOfferResponseDTO> {
-        // Only perform DB update, no validation or business logic
         const facultyRegister = await (FacultyRegister as any).findById(params.facultyId);
         if (!facultyRegister) {
             return null;
@@ -133,26 +116,17 @@ export class FacultyRepository implements IFacultyRepository {
     }
 
     async downloadCertificate(params: DownloadCertificateRequestDTO): Promise<DownloadCertificateResponseDTO> {
-        // Only perform DB fetch, no validation or business logic
         const faculty = await (FacultyRegister as any).findById(params.facultyId);
         if (!faculty) {
             return null;
         }
-        // The rest of the logic (authorization, file fetch, etc) should be in the use case
         return null as any;
     }
 
     async blockFaculty(id: string): Promise<{ message: string }> {
-        console.log('Repository blockFaculty called with id:', id);
-        // Step 1: Find faculty in FacultyRegister by id
         const facultyRegister = await FacultyRegister.findById(id);
-        console.log('FacultyRegister found:', facultyRegister);
-        // Step 2: Get email if found
         const email = facultyRegister ? facultyRegister.email : undefined;
-        // Step 3: Find faculty in FacultyModel by email if email exists
         let facultyModel = email ? await FacultyModel.findOne({ email }) : null;
-        console.log('FacultyModel found by email:', facultyModel);
-        // Step 4: Toggle blocked in both if found
         let blockedStatus: boolean | undefined = undefined;
         if (facultyModel) {
             facultyModel.blocked = !facultyModel.blocked;
@@ -171,14 +145,5 @@ export class FacultyRepository implements IFacultyRepository {
 
     async saveFaculty(faculty: any) {
         return faculty.save();
-    }
-
-    private generateConfirmationToken(): string {
-        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    }
-
-    private async isAdmin(userId: string): Promise<boolean> {
-        // Placeholder: Implement actual admin role check
-        return false;
     }
 }

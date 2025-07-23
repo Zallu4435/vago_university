@@ -172,7 +172,7 @@ const DiplomaDetails: React.FC<DiplomaDetailsProps> = ({ isOpen, onClose, diplom
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .no-scroll {
           overflow: hidden;
         }

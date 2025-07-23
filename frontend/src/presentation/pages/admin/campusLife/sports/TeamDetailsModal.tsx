@@ -1,6 +1,6 @@
 import React from 'react';
 import { IoCloseOutline as X, IoCreateOutline as Edit, IoPeopleOutline as Users, IoPersonOutline as User, IoTrophyOutline as Trophy, IoCalendarOutline as Calendar, IoInformationCircleOutline as Info, IoBusinessOutline as Building } from 'react-icons/io5';
-import { TeamDetailsModalProps, StatusBadgeProps, InfoCardProps, UpcomingGame, TeamDetailsTeam } from '../../../../../domain/types/management/sportmanagement';
+import { TeamDetailsModalProps, StatusBadgeProps, InfoCardProps } from '../../../../../domain/types/management/sportmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 
 const StatusBadge = ({ status }: StatusBadgeProps) => {
@@ -37,7 +37,6 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
 
   if (!isOpen || !team) return null;
 
-  console.log(team);
 
   const getOrganizerIcon = (type: string) => {
     switch (type?.toLowerCase()) {
@@ -49,7 +48,6 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
 
   const OrganizerIcon = getOrganizerIcon(team.organizerType);
 
-  // Particle effect
   const ghostParticles = Array(30)
     .fill(0)
     .map((_, i) => ({
@@ -62,7 +60,6 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      {/* Background particles */}
       {ghostParticles.map((particle, i) => (
         <div
           key={i}
@@ -78,16 +75,12 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
         />
       ))}
 
-      {/* Main Modal Container */}
       <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-4xl max-h-[90vh] rounded-2xl border border-purple-600/30 shadow-2xl overflow-hidden relative">
-        {/* Inner glow effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
 
-        {/* Corner decorations */}
         <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
         <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
 
-        {/* Header Section */}
         <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -122,9 +115,7 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
           </div>
         </div>
 
-        {/* Content Section */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
-          {/* Status and Key Info Row */}
           <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
             <StatusBadge status={team.status} />
             <div className="flex items-center space-x-6 text-sm text-purple-300">
@@ -139,7 +130,6 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
             </div>
           </div>
 
-          {/* Main Info Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             <InfoCard icon={Trophy} label="Sport Type" value={team.type} />
             <InfoCard icon={User} label="Coach" value={team.headCoach} />
@@ -152,7 +142,6 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
             <InfoCard icon={Users} label="Home Games" value={team.homeGames} />
           </div>
 
-          {/* Description Section */}
           {team.description && (
             <div className="mb-8">
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg shadow-sm overflow-hidden">
@@ -167,7 +156,6 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
             </div>
           )}
 
-          {/* Upcoming Games Section */}
           {team?.upcomingGames?.length > 0 && (
             <div className="mb-8">
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg shadow-sm overflow-hidden">
@@ -189,7 +177,6 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
             </div>
           )}
 
-          {/* Action Buttons */}
           <div className="border-t border-purple-600/30 bg-gray-900/80 p-6">
             <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
               <button
@@ -212,7 +199,7 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .no-scroll {
           overflow: hidden;
         }

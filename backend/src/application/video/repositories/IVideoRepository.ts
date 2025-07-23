@@ -1,7 +1,6 @@
 import { GetVideosRequestDTO, GetVideoByIdRequestDTO, CreateVideoRequestDTO, UpdateVideoRequestDTO, DeleteVideoRequestDTO } from "../../../domain/video/dtos/VideoRequestDTOs";
 import { GetVideosResponseDTO, GetVideoByIdResponseDTO, CreateVideoResponseDTO, UpdateVideoResponseDTO } from "../../../domain/video/dtos/VideoResponseDTOs";
 
-// Define a minimal IDiploma interface for typing
 export interface IDiploma {
     _id: string;
     title: string;
@@ -15,7 +14,6 @@ export interface IVideoRepository {
     updateVideo(params: UpdateVideoRequestDTO): Promise<UpdateVideoResponseDTO | null>;
     deleteVideo(params: DeleteVideoRequestDTO): Promise<void>;
 
-    // Diploma-related methods
     findDiplomaByCategory(category: string): Promise<IDiploma | null>;
     findDiplomaById(id: string): Promise<IDiploma | null>;
     addVideoToDiploma(diplomaId: string, videoId: string): Promise<void>;

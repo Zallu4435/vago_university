@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiDollarSign, FiX, FiFileText, FiSearch } from 'react-icons/fi';
-import { useQuery } from '@tanstack/react-query';
-import { financialService } from '../../../../application/services/financialService';
 import { Charge, ViewChargesModalProps } from '../../../../domain/types/management/financialmanagement';
 import ReactDOM from 'react-dom';
 import ChargeDetailsModal from './ChargeDetailsModal';
 import { useChargesManagement } from '../../../../application/hooks/useFinancial';
 import WarningModal from '../../../components/common/WarningModal';
 import AddChargeModal from './AddChargeModal';
+import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) => {
+  usePreventBodyScroll(isOpen);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
@@ -19,13 +19,11 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [chargeToEdit, setChargeToEdit] = useState<Charge | null>(null);
 
-  // Debounce search input
   useEffect(() => {
     const handler = setTimeout(() => setDebouncedSearch(searchQuery), 400);
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  // Fetch charges using react-query
   const {
     charges,
     isLoading,
@@ -33,7 +31,6 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
     deleteCharge,
   } = useChargesManagement(debouncedSearch, isOpen);
 
-  // Reset search and scroll lock on open/close
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add('no-scroll');
@@ -156,7 +153,6 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-      {/* Background particles */}
       {ghostParticles.map((particle, i) => (
         <div
           key={i}
@@ -172,16 +168,12 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
         />
       ))}
 
-      {/* Main Container */}
       <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-5xl max-h-[90vh] rounded-2xl border border-purple-500/30 shadow-2xl overflow-hidden relative z-[10000]">
-        {/* Inner glow effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
 
-        {/* Corner decorations */}
         <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
         <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
 
-        {/* Header */}
         <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -202,9 +194,7 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
           </div>
         </div>
 
-        {/* Content */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
-          {/* Search Bar */}
           <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-6 shadow-sm">
             <div className="flex items-center gap-4">
               <div className="relative flex-1">
@@ -220,7 +210,6 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
             </div>
           </div>
 
-          {/* Charges Table */}
           <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-purple-100 mb-4 flex items-center gap-2">
               <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
@@ -273,7 +262,6 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
               </div>
             )}
           </div>
-          {/* Details Modal */}
           {isDetailsModalOpen && selectedCharge && (
             <ChargeDetailsModal
               charge={selectedCharge}
@@ -281,7 +269,6 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
               onClose={() => setIsDetailsModalOpen(false)}
             />
           )}
-          {/* Edit Modal for Charge */}
           <AddChargeModal
             isOpen={editModalOpen}
             onClose={handleEditClose}
@@ -297,7 +284,6 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
               },
             })}
           />
-          {/* Warning Modal for Delete */}
           <WarningModal
             isOpen={warningModalOpen}
             onClose={handleCancelDelete}

@@ -1,10 +1,7 @@
-// application/auth/useCases/AuthUseCases.ts (Updated: No try-catch, direct returns, throws errors)
 import bcrypt from "bcryptjs";
 import { config } from "../../../config/config";
 import { v4 as uuidv4 } from 'uuid';
 
-
-// DTOs
 import {
   RegisterRequestDTO, LoginRequestDTO, RefreshTokenRequestDTO, LogoutRequestDTO,
   RegisterFacultyRequestDTO, SendEmailOtpRequestDTO, VerifyEmailOtpRequestDTO, ResetPasswordRequestDTO,
@@ -14,16 +11,13 @@ import {
   RegisterFacultyResponseDTO, SendEmailOtpResponseDTO, VerifyEmailOtpResponseDTO, ResetPasswordResponseDTO,
 } from "../../../domain/auth/dtos/AuthResponseDTOs";
 
-// Repository Interface
 import { IAuthRepository } from '../repositories/IAuthRepository';
 
-// Services Interfaces
 import { IJwtService } from "../../../infrastructure/services/auth/JwtService";
 import { IOtpService } from '../../../infrastructure/services/auth/OtpService';
 import { IEmailService } from "../service/IEmailService";
 import { InvalidCredentialsError, InvalidTokenError, BlockedAccountError } from "../../../domain/auth/errors/AuthErrors";
 
-// --- Use Case Interfaces (UPDATED: No ResponseDTO wrapper) ---
 export interface IRegisterUseCase {
   execute(params: RegisterRequestDTO): Promise<RegisterResponseDTO>;
 }
@@ -57,7 +51,6 @@ export interface IResetPasswordUseCase {
 }
 
 export interface IConfirmRegistrationUseCase {
-  // This one was already returning { message: string } directly, we maintain this.
   execute(token: string): Promise<{ message: string }>;
 }
 
@@ -71,31 +64,26 @@ export class RegisterUseCase implements IRegisterUseCase {
   ) { }
 
   async execute(params: RegisterRequestDTO): Promise<RegisterResponseDTO> {
-    // Hash password before sending to repository
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(params.password, salt);
 
     const registerParamsWithHashedPassword = { ...params, password: hashedPassword };
 
-    // AuthRepository will throw UserAlreadyExistsError if email exists
     const resultFromRepo = await this.authRepository.register(registerParamsWithHashedPassword);
 
-    // Generate confirmation token after user is saved
     const confirmationToken = this.jwtService.generateToken(
-      { email: params.email }, // Use email for confirmation token
-      "1d" // Expires in 1 day
+      { email: params.email },
+      "1d"
     );
 
     const confirmationUrl = `${config.frontendUrl}/confirm-registration?token=${confirmationToken}`;
 
-    // Send confirmation email
     await this.emailService.sendRegistrationConfirmationEmail({
       to: params.email,
       name: params.firstName,
       confirmationUrl,
     });
 
-    // Return the direct response DTO
     return {
       message: "Registration successful. Please check your email to confirm your account.",
       user: {
@@ -108,7 +96,6 @@ export class RegisterUseCase implements IRegisterUseCase {
   }
 }
 
-// --- LoginUseCase ---
 export class LoginUseCase implements ILoginUseCase {
   constructor(
     private authRepository: IAuthRepository,
@@ -116,19 +103,16 @@ export class LoginUseCase implements ILoginUseCase {
   ) { }
 
   async execute(params: LoginRequestDTO & { userAgent: string; ipAddress: string }): Promise<LoginResponseDTO & { sessionId: string }> {
-    // Repository fetches user, including hashed password
     const resultFromRepo = await this.authRepository.login(params);
 
     const user = resultFromRepo.user;
     const collection = resultFromRepo.collection;
 
-    // Compare password (business logic)
     const isPasswordValid = await bcrypt.compare(params.password, user.password as string);
     if (!isPasswordValid) {
-      throw new InvalidCredentialsError(); // Throw domain error
+      throw new InvalidCredentialsError();
     }
 
-    // Blocked check
     if (user.blocked) {
       throw new BlockedAccountError();
     }
@@ -139,23 +123,18 @@ export class LoginUseCase implements ILoginUseCase {
       collection 
     };
 
-    // Generate both access and refresh tokens
     const accessToken = this.jwtService.generateAccessToken(tokenPayload);
     let sessionId: string;
     let refreshToken: string;
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
-    // Check for existing session for this user/device
     const existingSession = await this.authRepository.findSessionByUserIdAndDevice(user.id, params.userAgent, params.ipAddress);
     if (existingSession) {
-      // Update the existing session
       sessionId = existingSession.sessionId;
       refreshToken = this.jwtService.generateRefreshToken({ ...tokenPayload, sessionId });
       await this.authRepository.updateSessionRefreshToken(sessionId, refreshToken, expiresAt, now);
-      console.log('Reusing existing session:', sessionId);
     } else {
-      // Create a new session document
       sessionId = uuidv4();
       refreshToken = this.jwtService.generateRefreshToken({ ...tokenPayload, sessionId });
       await this.authRepository.createRefreshSession({
@@ -168,10 +147,8 @@ export class LoginUseCase implements ILoginUseCase {
         lastUsedAt: now,
         expiresAt,
       });
-      console.log('Created new session:', sessionId);
     }
 
-    // Return the full DTO directly
     return {
       accessToken,
       refreshToken,
@@ -190,7 +167,6 @@ export class LoginUseCase implements ILoginUseCase {
   }
 }
 
-// --- RefreshTokenUseCase ---
 export class RefreshTokenUseCase implements IRefreshTokenUseCase {
   constructor(
     private authRepository: IAuthRepository,
@@ -198,7 +174,6 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
   ) { }
 
   async execute(params: { refreshToken: string }): Promise<RefreshTokenResponseDTO> {
-    // 1. Verify and decode the refresh token
     let decoded: any;
     try {
       decoded = this.jwtService.verifyToken<{ userId: string; email: string; collection: string; sessionId: string }>(params.refreshToken, { isRefreshToken: true });
@@ -206,20 +181,16 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
       throw new InvalidTokenError('Invalid or expired refresh token');
     }
     const { userId, email, collection, sessionId } = decoded;
-    // 2. Find session in DB
     const session = await this.authRepository.findSessionBySessionIdAndUserId(sessionId, userId);
     if (!session || session.refreshToken !== params.refreshToken) {
       throw new InvalidTokenError('Session not found or refresh token mismatch');
     }
-    // 3. Rotate refresh token
     const newRefreshToken = this.jwtService.generateRefreshToken({ userId, email, collection, sessionId });
     const newExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     const newLastUsedAt = new Date();
     await this.authRepository.updateSessionRefreshToken(sessionId, newRefreshToken, newExpiresAt, newLastUsedAt);
-    // 4. Generate new access token
     const tokenPayload = { userId, email, collection };
     const accessToken = this.jwtService.generateAccessToken(tokenPayload);
-    // 5. Get user info for response
     const resultFromRepo = await this.authRepository.refreshToken({
       accessToken,
       userId,
@@ -240,7 +211,6 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
   }
 }
 
-// --- LogoutUseCase ---
 export class LogoutUseCase implements ILogoutUseCase {
   constructor(private authRepository: IAuthRepository) { }
 
@@ -259,7 +229,6 @@ export class LogoutAllUseCase {
   }
 }
 
-// --- RegisterFacultyUseCase ---
 export class RegisterFacultyUseCase implements IRegisterFacultyUseCase {
   constructor(
     private authRepository: IAuthRepository,
@@ -267,10 +236,8 @@ export class RegisterFacultyUseCase implements IRegisterFacultyUseCase {
   ) { }
 
   async execute(params: RegisterFacultyRequestDTO): Promise<RegisterFacultyResponseDTO> {
-    // Repository handles existence check and saves data
     const resultFromRepo = await this.authRepository.registerFaculty(params);
 
-    // Generate token
     const token = this.jwtService.generateToken(
       { userId: resultFromRepo.user.id, email: resultFromRepo.user.email, collection: resultFromRepo.collection },
       "1h"
@@ -284,7 +251,6 @@ export class RegisterFacultyUseCase implements IRegisterFacultyUseCase {
   }
 }
 
-// --- SendEmailOtpUseCase ---
 export class SendEmailOtpUseCase implements ISendEmailOtpUseCase {
   constructor(
     private authRepository: IAuthRepository,
@@ -293,17 +259,14 @@ export class SendEmailOtpUseCase implements ISendEmailOtpUseCase {
   ) { }
 
   async execute(params: SendEmailOtpRequestDTO): Promise<SendEmailOtpResponseDTO> {
-    // Repository confirms user exists (throws EmailNotFoundError if not)
     await this.authRepository.sendEmailOtp(params);
 
-    // Generate OTP and store it
     const otp = this.otpService.generateOtp();
     this.otpService.storeOtp(params.email, otp);
 
-    // Send OTP email
     await this.emailService.sendPasswordResetOtpEmail({
       to: params.email,
-      name: "User", // Placeholder: You might fetch user's name in a real scenario
+      name: "User",
       otp,
     });
 
@@ -311,7 +274,6 @@ export class SendEmailOtpUseCase implements ISendEmailOtpUseCase {
   }
 }
 
-// --- VerifyEmailOtpUseCase ---
 export class VerifyEmailOtpUseCase implements IVerifyEmailOtpUseCase {
   constructor(
     private otpService: IOtpService,
@@ -319,20 +281,17 @@ export class VerifyEmailOtpUseCase implements IVerifyEmailOtpUseCase {
   ) { }
 
   async execute(params: VerifyEmailOtpRequestDTO): Promise<VerifyEmailOtpResponseDTO> {
-    // Verify OTP using OtpService. This service will throw InvalidOtpError if failed.
     this.otpService.verifyOtp(params.email, params.otp);
 
-    // If OTP is valid, generate a reset token
     const resetToken = this.jwtService.generateToken(
       { email: params.email, type: "password-reset" },
-      "15m" // Expires in 15 minutes
+      "15m"
     );
 
     return { resetToken };
   }
 }
 
-// --- ResetPasswordUseCase ---
 export class ResetPasswordUseCase implements IResetPasswordUseCase {
   constructor(
     private authRepository: IAuthRepository,
@@ -340,21 +299,17 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
   ) { }
 
   async execute(params: ResetPasswordRequestDTO): Promise<ResetPasswordResponseDTO> {
-    // Verify the reset token first
     let payload: { email: string; type: string };
-    payload = this.jwtService.verifyToken(params.resetToken); // JwtService throws InvalidTokenError
+    payload = this.jwtService.verifyToken(params.resetToken);
     if (payload.type !== "password-reset") {
       throw new InvalidTokenError("Invalid token type for password reset.");
     }
 
-    // Hash the new password before sending to repository
     const hashedPassword = await bcrypt.hash(params.newPassword, 10);
 
-    // Update password via repository
     const resetPasswordParamsForRepo = { ...params, email: payload.email, newPassword: hashedPassword };
     const resultFromRepo = await this.authRepository.resetPassword(resetPasswordParamsForRepo);
 
-    // Generate a new login token after password reset for immediate login
     const token = this.jwtService.generateToken(
       { userId: resultFromRepo.user.id, email: resultFromRepo.user.email, collection: resultFromRepo.collection },
       "1h"
@@ -368,7 +323,6 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
   }
 }
 
-// --- ConfirmRegistrationUseCase ---
 export class ConfirmRegistrationUseCase implements IConfirmRegistrationUseCase {
   constructor(
     private authRepository: IAuthRepository,
@@ -376,11 +330,9 @@ export class ConfirmRegistrationUseCase implements IConfirmRegistrationUseCase {
   ) { }
 
   async execute(token: string): Promise<{ message: string }> {
-    // Verify confirmation token and extract email
     let payload: { email: string };
-    payload = this.jwtService.verifyToken(token); // JwtService throws InvalidTokenError
+    payload = this.jwtService.verifyToken(token);
 
-    // Call repository to update user status using the extracted email
     const result = await this.authRepository.confirmRegistration(payload.email);
 
     return { message: result.message };

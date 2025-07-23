@@ -83,7 +83,6 @@ export class SiteSectionController {
   async createSection(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     let params: CreateSiteSectionRequestDTO = httpRequest.body;
     if (httpRequest.file) {
-      // Only add image if sectionKey is not 'leadership'
       if (params.sectionKey !== 'leadership') {
         params = { ...params, image: httpRequest.file.path };
       }

@@ -1,12 +1,10 @@
 import { GetEventsRequestDTO, GetEventByIdRequestDTO, CreateEventRequestDTO, UpdateEventRequestDTO, DeleteEventRequestDTO } from "../../../domain/events/dtos/EventRequestDTOs";
 import { GetEventsResponseDTO, GetEventByIdResponseDTO, CreateEventResponseDTO, UpdateEventResponseDTO } from "../../../domain/events/dtos/EventResponseDTOs";
 import { IEventsRepository } from "../repositories/IEventsRepository";
-import { EventErrorType } from "../../../domain/events/enums/EventErrorType";
 import mongoose from "mongoose";
 import { Event } from "../../../domain/events/entities/Event";
 import { InvalidEventIdError, EventNotFoundError } from "../../../domain/events/errors/EventErrors";
 
-// --- Use Case Interfaces (UPDATED: No ResponseDTO wrapper, direct returns) ---
 export interface IGetEventsUseCase {
   execute(params: GetEventsRequestDTO): Promise<GetEventsResponseDTO>;
 }

@@ -43,7 +43,6 @@ const NotificationManagement: React.FC = () => {
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
-  // Debounce search query and send to backend
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
@@ -52,7 +51,6 @@ const NotificationManagement: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Update backend filters when debounced search or filters change
   React.useEffect(() => {
     setFilters(prev => ({
       ...prev,

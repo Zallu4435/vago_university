@@ -1,6 +1,5 @@
-import React from 'react';
 import { FiClock, FiCheckCircle, FiXCircle } from 'react-icons/fi';
-import { FaHandHoldingUsd } from 'react-icons/fa'; // optional: new icon for 'offered'
+import { FaHandHoldingUsd } from 'react-icons/fa'; 
 
 const StatusBadge = ({ status }) => {
   const statusConfig = {
@@ -23,7 +22,7 @@ const StatusBadge = ({ status }) => {
       label: 'Rejected',
     },
     offered: {
-      icon: <FaHandHoldingUsd size={14} className="mr-1" />, // optional, can use another if preferred
+      icon: <FaHandHoldingUsd size={14} className="mr-1" />,
       bgColor: 'bg-blue-100',
       textColor: 'text-blue-800',
       label: 'Offered',

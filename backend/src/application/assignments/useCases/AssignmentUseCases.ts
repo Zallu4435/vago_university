@@ -9,7 +9,6 @@ import {
   GetSubmissionByIdRequestDTO,
   ReviewSubmissionRequestDTO,
   DownloadSubmissionRequestDTO,
-  GetAnalyticsRequestDTO
 } from '../../../domain/assignments/dtos/AssignmentRequestDTOs';
 import {
   GetAssignmentsResponseDTO,
@@ -23,7 +22,6 @@ import {
 } from '../../../domain/assignments/dtos/AssignmentResponseDTOs';
 import { AssignmentErrorType } from "../../../domain/assignments/enums/AssignmentErrorType";
 import mongoose from "mongoose";
-import { Assignment } from "../../../domain/assignments/entities/Assignment";
 
 interface ResponseDTO<T> {
   data: T | { error: string };
@@ -278,7 +276,6 @@ export class DownloadSubmissionUseCase implements IDownloadSubmissionUseCase {
     if (!submission) {
       return { data: { error: 'Submission not found' }, success: false };
     }
-    // You may want to return the file buffer or file info here
     return { data: Buffer.from(''), success: true };
   }
 }
@@ -287,9 +284,7 @@ export class GetAnalyticsUseCase implements IGetAnalyticsUseCase {
   constructor(private readonly assignmentRepository: IAssignmentRepository) { }
 
   async execute(): Promise<ResponseDTO<AnalyticsResponseDTO>> {
-    // Fetch raw analytics data and process/massage it here if needed
       const analytics = await this.assignmentRepository.getAnalytics();
-    // You may want to map/format analytics data here
     return { data: analytics, success: true };
   }
 } 

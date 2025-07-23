@@ -3,7 +3,7 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { IoCloseOutline as X, IoAdd, IoTrash, IoSparklesOutline as Sparkles } from 'react-icons/io5';
-import { AddTeamModalProps, OrganizerTypeOption, UpcomingGame, ParticleConfig } from '../../../../../domain/types/management/sportmanagement';
+import { AddTeamModalProps } from '../../../../../domain/types/management/sportmanagement';
 import {
   ORGANIZER_TYPE_OPTIONS,
   ICON_OPTIONS,
@@ -98,7 +98,6 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      {/* Background particles */}
       {ghostParticles.map((particle, i) => (
         <div
           key={i}
@@ -114,16 +113,12 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
         />
       ))}
 
-      {/* Main Modal Container */}
       <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-5xl max-h-[90vh] rounded-2xl border border-purple-600/30 shadow-2xl overflow-hidden relative">
-        {/* Inner glow effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
 
-        {/* Corner decorations */}
         <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
         <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
 
-        {/* Header Section */}
         <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -151,19 +146,15 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
           </div>
         </div>
 
-        {/* Content Section */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-            {/* Left Column - Basic Info, Team Details, Upcoming Games */}
             <div className="xl:col-span-2 space-y-6">
-              {/* Basic Information */}
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg shadow-sm overflow-hidden">
                 <div className="p-4 bg-gray-900/60 flex items-center">
                   <Sparkles size={20} className="text-purple-300" />
                   <h3 className="ml-3 text-lg font-semibold text-purple-100">Basic Information</h3>
                 </div>
                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Team Title */}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Team Name *
@@ -186,7 +177,6 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
                       <p className="mt-1 text-sm text-red-400">{errors.title.message}</p>
                     )}
                   </div>
-                  {/* Sport Type */}
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Sport Type *
@@ -212,7 +202,6 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
                       <p className="mt-1 text-sm text-red-400">{errors.type.message}</p>
                     )}
                   </div>
-                  {/* Category */}
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Team Category *
@@ -238,7 +227,6 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
                       <p className="mt-1 text-sm text-red-400">{errors.category.message}</p>
                     )}
                   </div>
-                  {/* Organizer */}
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Organizer *
@@ -261,7 +249,6 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
                       <p className="mt-1 text-sm text-red-400">{errors.organizer.message}</p>
                     )}
                   </div>
-                  {/* Organizer Type */}
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Organizer Type *
@@ -291,14 +278,12 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
                 </div>
               </div>
 
-              {/* Team Details */}
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg shadow-sm overflow-hidden">
                 <div className="p-4 bg-gray-900/60 flex items-center">
                   <Sparkles size={20} className="text-purple-300" />
                   <h3 className="ml-3 text-lg font-semibold text-purple-100">Team Details</h3>
                 </div>
                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Division */}
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Division *
@@ -324,7 +309,6 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
                       <p className="mt-1 text-sm text-red-400">{errors.division.message}</p>
                     )}
                   </div>
-                  {/* Head Coach */}
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Head Coach *
@@ -350,7 +334,6 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
                       <p className="mt-1 text-sm text-red-400">{errors.headCoach.message}</p>
                     )}
                   </div>
-                  {/* Home Games */}
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Home Games *
@@ -374,7 +357,6 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
                       <p className="mt-1 text-sm text-red-400">{errors.homeGames.message}</p>
                     )}
                   </div>
-                  {/* Record */}
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Record (W-L-T) *
@@ -400,7 +382,6 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
                 </div>
               </div>
 
-              {/* Upcoming Games */}
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg shadow-sm overflow-hidden">
                 <div className="p-4 bg-gray-900/60 flex items-center justify-between">
                   <div className="flex items-center">
@@ -479,7 +460,6 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
               </div>
             </div>
 
-            {/* Right Column - Customization */}
             <div className="space-y-6">
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg shadow-sm overflow-hidden">
                 <div className="p-4 bg-gray-900/60 flex items-center">
@@ -487,7 +467,6 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
                   <h3 className="ml-3 text-lg font-semibold text-purple-100">Customization</h3>
                 </div>
                 <div className="p-6 space-y-6">
-                  {/* Icon Selection */}
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Team Icon
@@ -509,7 +488,6 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
                       ))}
                     </div>
                   </div>
-                  {/* Color Selection */}
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Team Color
@@ -555,7 +533,6 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="border-t border-purple-600/30 bg-gray-900/80 p-6">
             <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
               <button

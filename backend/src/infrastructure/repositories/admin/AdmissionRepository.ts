@@ -32,8 +32,6 @@ export class AdmissionRepository implements IAdmissionRepository {
 
         if (program && !program.startsWith("all")) {
             const normalizedProgram = program.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            console.log('Program filter:', { original: program, normalized: normalizedProgram });
-
             filter.choiceOfStudy = {
                 $elemMatch: {
                     programme: { $regex: `^${normalizedProgram}$`, $options: "i" },
@@ -56,16 +54,10 @@ export class AdmissionRepository implements IAdmissionRepository {
                     $gte: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000),
                 };
             } else if (dateRange === "custom" && startDate && endDate) {
-                console.log('Processing custom date range:', { startDate, endDate });
                 const startDateTime = new Date(startDate);
                 const endDateTime = new Date(endDate);
 
                 endDateTime.setHours(23, 59, 59, 999);
-
-                console.log('Processed dates:', {
-                    startDateTime: startDateTime.toISOString(),
-                    endDateTime: endDateTime.toISOString()
-                });
 
                 filter.createdAt = {
                     $gte: startDateTime,
@@ -98,8 +90,6 @@ export class AdmissionRepository implements IAdmissionRepository {
                 .map(admission => admission.choiceOfStudy?.[0]?.programme)
                 .filter(Boolean);
             const uniquePrograms = [...new Set(allPrograms)];
-            console.log('All programs in database:', uniquePrograms);
-            console.log('Exact query being executed:', JSON.stringify(filter, null, 2));
         }
 
         const admissions = await AdmissionModel.find(filter)
@@ -111,8 +101,6 @@ export class AdmissionRepository implements IAdmissionRepository {
 
         const totalAdmissions = await AdmissionModel.countDocuments(filter);
         const totalPages = Math.ceil(totalAdmissions / limit);
-
-        console.log('Backend query results:', { totalAdmissions, totalPages, admissionsCount: admissions.length });
 
         return {
             admissions,
@@ -269,9 +257,5 @@ export class AdmissionRepository implements IAdmissionRepository {
                 ? "Admission accepted and user account created"
                 : "Admission offer rejected",
         };
-    }
-
-    private generateConfirmationToken(): string {
-        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     }
 }

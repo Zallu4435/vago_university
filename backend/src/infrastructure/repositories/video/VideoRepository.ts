@@ -7,20 +7,15 @@ import { Diploma } from '../../database/mongoose/models/diploma.model';
 export class VideoRepository implements IVideoRepository {
     async getVideos(params: GetVideosRequestDTO): Promise<GetVideosResponseDTO> {
         const { category, page, limit, status, search, dateRange, startDate, endDate } = params;
-        
-        // Debug logging
-        console.log('Video backend received filter values:', { page, limit, status, category, search, dateRange, startDate, endDate });
-        
+
         let query: any = {};
         
-        // Handle category filter
         if (category && category !== 'all') {
             const diploma = await Diploma.findOne({ category });
             if (!diploma) throw new Error('Diploma not found for this category');
             query.diplomaId = diploma._id;
         }
         
-        // Handle status filter
         if (status && status !== 'all') {
             query.status = status;
         }
@@ -68,8 +63,6 @@ export class VideoRepository implements IVideoRepository {
             ];
         }
 
-        console.log('Video backend final query object:', query);
-        
         const [videos, totalItems] = await Promise.all([
             VideoModel.find(query)
                 .populate('diplomaId', 'title category')

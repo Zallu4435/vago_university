@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { IoCloseOutline as X, IoAdd, IoTrash } from 'react-icons/io5';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { AddClubModalProps, ClubFormData } from '../../../../../domain/types/management/clubmanagement';
@@ -93,7 +92,6 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
 
   usePreventBodyScroll(isOpen);
 
-  // Particle effect
   const ghostParticles = Array(30)
     .fill(0)
     .map((_, i) => ({
@@ -108,7 +106,6 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      {/* Background particles */}
       {ghostParticles.map((particle, i) => (
         <div
           key={i}
@@ -124,16 +121,12 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
         />
       ))}
 
-      {/* Main Container */}
       <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-5xl max-h-[90vh] rounded-2xl border border-purple-500/30 shadow-2xl overflow-hidden relative">
-        {/* Inner glow effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
 
-        {/* Corner decorations */}
         <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
         <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
 
-        {/* Header */}
         <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -161,12 +154,9 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
           </div>
         </div>
 
-        {/* Form Content */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            {/* Left Column - Basic Info and Club Details */}
             <div className="xl:col-span-2 space-y-6">
-              {/* Basic Information Section */}
               <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-purple-100 mb-4 flex items-center gap-2">
                   <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
@@ -195,7 +185,6 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                       <p className="mt-1 text-sm text-red-400">{errors.name.message}</p>
                     )}
                   </div>
-                  {/* Club Type */}
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Club Type *
@@ -222,7 +211,6 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                       <p className="mt-1 text-sm text-red-400">{errors.type.message}</p>
                     )}
                   </div>
-                  {/* Role */}
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Role *
@@ -249,7 +237,6 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                       <p className="mt-1 text-sm text-red-400">{errors.role.message}</p>
                     )}
                   </div>
-                  {/* Created By */}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Created By *
@@ -274,14 +261,12 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                 </div>
               </div>
 
-              {/* Club Details Section */}
               <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-purple-100 mb-4 flex items-center gap-2">
                   <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
                   Club Details
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Members */}
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Members
@@ -303,7 +288,6 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                       <p className="mt-1 text-sm text-red-400">{errors.members.message}</p>
                     )}
                   </div>
-                  {/* Status */}
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Status
@@ -326,7 +310,6 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                       <p className="mt-1 text-sm text-red-400">{errors.status.message}</p>
                     )}
                   </div>
-                  {/* Next Meeting */}
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       Next Meeting
@@ -347,7 +330,6 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                       <p className="mt-1 text-sm text-red-400">{errors.nextMeeting.message}</p>
                     )}
                   </div>
-                  {/* About */}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-purple-300 mb-2">
                       About
@@ -372,7 +354,6 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                 </div>
               </div>
 
-              {/* Upcoming Events Section */}
               <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-purple-100 mb-4 flex items-center gap-2">
                   <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
@@ -456,14 +437,12 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
               </div>
             </div>
 
-            {/* Right Column - Customization */}
             <div className="space-y-6">
               <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-purple-100 mb-4 flex items-center gap-2">
                   <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
                   Customization
                 </h3>
-                {/* Icon Selection */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-purple-300 mb-3">
                     Club Icon
@@ -475,8 +454,8 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                         type="button"
                         onClick={() => setValue('icon', icon)}
                         className={`w-10 h-10 text-xl rounded-lg transition-all duration-200 hover:scale-110 ${watchedIcon === icon
-                            ? 'bg-purple-600/30 border-purple-500/50 shadow-lg'
-                            : 'bg-gray-900/60 border-purple-500/30 hover:bg-purple-900/20'
+                          ? 'bg-purple-600/30 border-purple-500/50 shadow-lg'
+                          : 'bg-gray-900/60 border-purple-500/30 hover:bg-purple-900/20'
                           }`}
                       >
                         {icon}
@@ -484,7 +463,6 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                     ))}
                   </div>
                 </div>
-                {/* Color Selection */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-purple-300 mb-3">
                     Club Color
@@ -496,15 +474,14 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
                         type="button"
                         onClick={() => setValue('color', color)}
                         className={`w-12 h-12 rounded-lg transition-all duration-200 hover:scale-110 ${watchedColor === color
-                            ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-900'
-                            : ''
+                          ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-900'
+                          : ''
                           }`}
                         style={{ backgroundColor: color }}
                       />
                     ))}
                   </div>
                 </div>
-                {/* Preview */}
                 <div className="mt-6 p-4 bg-gray-900/60 rounded-lg border border-purple-500/30">
                   <div className="text-sm font-medium text-purple-300 mb-2">Preview</div>
                   <div
@@ -529,7 +506,6 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
             </div>
           </div>
 
-          {/* Footer Actions */}
           <div className="border-t border-purple-500/30 bg-gray-900/80 p-6">
             <div className="flex justify-end gap-4">
               <button

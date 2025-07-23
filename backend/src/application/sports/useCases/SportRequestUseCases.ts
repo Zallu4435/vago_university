@@ -20,7 +20,6 @@ export class GetSportRequestsUseCase {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
       throw new Error("Invalid page or limit parameters");
     }
-    // Additional filtering/validation can be added here as needed
     const { requests, totalItems, totalPages, currentPage } = await this.sportsRepository.getSportRequests(params);
     const mappedRequests = requests.map((request: any) => ({
       sportName: request.sportId?.title || "Unknown Sport",
@@ -47,7 +46,6 @@ export class ApproveSportRequestUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new Error("Invalid sport request ID");
     }
-    // Get the sport request to validate business rules
     const sportRequest: any = await this.sportsRepository.getSportRequestDetails({ id: params.id });
     if (!sportRequest) {
       throw new Error("Sport request not found");
@@ -67,7 +65,6 @@ export class RejectSportRequestUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new Error("Invalid sport request ID");
     }
-    // Get the sport request to validate business rules
     const sportRequest: any = await this.sportsRepository.getSportRequestDetails({ id: params.id });
     if (!sportRequest) {
       throw new Error("Sport request not found");
@@ -129,10 +126,6 @@ export class JoinSportUseCase {
     if (!mongoose.isValidObjectId(params.sportId)) {
       throw new Error("Invalid sport ID");
     }
-    if (!mongoose.isValidObjectId(params.studentId)) {
-      throw new Error("Invalid student ID");
-    }
-    // Check for existing join request, etc. can be handled here if needed
     const joinResult: any = await this.sportsRepository.joinSport(params);
     return {
       requestId: joinResult._id?.toString() || joinResult.requestId,

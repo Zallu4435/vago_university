@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FiX, FiSend } from 'react-icons/fi';
 import { ReplyModalProps } from '../../../../domain/types/management/enquirymanagement';
 import { useForm } from 'react-hook-form';
@@ -42,7 +42,6 @@ const ReplyModal: React.FC<ReplyModalProps> = ({ enquiry, onClose, onSend }) => 
         </div>
 
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
-          {/* Original Enquiry Info */}
           <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
             <h3 className="font-medium text-white mb-3 flex items-center">
               <span className="w-2 h-2 bg-purple-400 rounded-full mr-2"></span>
@@ -58,7 +57,6 @@ const ReplyModal: React.FC<ReplyModalProps> = ({ enquiry, onClose, onSend }) => 
             </div>
           </div>
 
-          {/* Reply Form */}
           <form onSubmit={handleSubmit(handleFormSubmit)}>
             <label htmlFor="replyMessage" className="block text-sm font-medium text-gray-300 mb-2">
               Your Reply

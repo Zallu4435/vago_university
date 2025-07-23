@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   IoAdd as Plus,
   IoEyeOutline as Eye,
@@ -23,7 +23,6 @@ import { useEventManagement } from '../../../../../application/hooks/useEventMan
 import {
   Event,
   EventRequest,
-  Filters,
   ItemToAction,
 } from '../../../../../domain/types/management/eventmanagement';
 import {
@@ -31,12 +30,12 @@ import {
   EVENT_STATUSES,
   REQUEST_STATUSES,
   DATE_RANGES,
-  ORGANIZERS,
   getEventColumns,
   getEventRequestColumns,
 } from '../../../../../shared/constants/eventManagementConstants';
 import { formatDate } from '../../../../../shared/utils/dateUtils';
 import LoadingSpinner from '../../../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../../../shared/components/ErrorMessage';
 
 const AdminEventsManagement: React.FC = () => {
   const {
@@ -45,7 +44,6 @@ const AdminEventsManagement: React.FC = () => {
     totalPages,
     page,
     setPage,
-    searchTerm,
     setSearchTerm,
     filters,
     setFilters,
@@ -71,20 +69,17 @@ const AdminEventsManagement: React.FC = () => {
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [itemToAction, setItemToAction] = useState<ItemToAction | null>(null);
 
-  // Get column definitions from constants
   const eventColumns = getEventColumns(Calendar, MapPin, Building, GraduationCap, User, formatDate);
   const eventRequestColumns = getEventRequestColumns(Calendar, Building, GraduationCap, User, formatDate);
 
-  // Debounced search function that updates the actual search term
   const debouncedSearchChange = useCallback(
     debounce((query: string) => {
       setSearchTerm(query);
-      setPage(1); // Reset to first page when searching
-    }, 500), // 500ms delay
+      setPage(1); 
+    }, 500), 
     [setSearchTerm, setPage]
   );
 
-  // Handle search input change
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
     debouncedSearchChange(query);
@@ -112,7 +107,6 @@ const AdminEventsManagement: React.FC = () => {
         const details = await getEventDetails(event.id);
         setSelectedEvent(details);
       } else {
-        // Handle EventRequest case
         setSelectedEvent(null);
       }
       setShowEventDetailsModal(true);
@@ -194,14 +188,13 @@ const AdminEventsManagement: React.FC = () => {
     setPage(1);
   };
 
-  // Debounced filter change that maintains focus
   const debouncedFilterChange = useCallback(
     debounce((field: string, value: string) => {
       setFilters((prev) => ({
         ...prev,
         [field]: value || 'All',
       }));
-      setPage(1); // Reset to first page when filtering
+      setPage(1); 
     }, 300),
     [setFilters, setPage]
   );
@@ -256,12 +249,11 @@ const AdminEventsManagement: React.FC = () => {
     },
   ];
 
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
   if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-500">Error: {error.message}</div>
-      </div>
-    );
+    return <ErrorMessage message={error.message} />;
   }
 
   return (

@@ -1,13 +1,7 @@
 import React from 'react';
 import { FiDollarSign, FiX, FiFileText } from 'react-icons/fi';
-import { Charge } from '../../../../domain/types/management/financialmanagement';
+import { ChargeDetailsModalProps } from '../../../../domain/types/management/financialmanagement';
 import ReactDOM from 'react-dom';
-
-interface ChargeDetailsModalProps {
-  charge: Charge;
-  isOpen: boolean;
-  onClose: () => void;
-}
 
 const ChargeDetailsModal: React.FC<ChargeDetailsModalProps> = ({ charge, isOpen, onClose }) => {
   if (!isOpen) return null;

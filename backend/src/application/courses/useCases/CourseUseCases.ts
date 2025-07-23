@@ -74,7 +74,6 @@ export class GetCourseByIdUseCase implements IGetCourseByIdUseCase {
     if (!course) {
       throw new CourseNotFoundError(params.id);
     }
-    // Flatten the course object instead of returning a Course instance
     return {
       success: true,
       data: {

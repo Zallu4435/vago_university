@@ -20,7 +20,6 @@ admissionRouter.get(
     }
 );
 
-// Protected routes (auth required)
 admissionRouter.get("/", authMiddleware, (req, res, next) => {
     expressAdapter(req, res, next, admissionController.getAdmissions.bind(admissionController));
 });
@@ -45,9 +44,7 @@ admissionRouter.delete("/:id", authMiddleware, (req, res, next) => {
     expressAdapter(req, res, next, admissionController.deleteAdmission.bind(admissionController));
 });
 
-// Admin document serve route
 admissionRouter.get("/documents/:documentId", authMiddleware, (req, res, next) => {
-    console.log('HIT /documents/:documentId', req.params, req.query);
     expressAdapter(req, res, next, admissionController.serveDocument.bind(admissionController));
 });
 

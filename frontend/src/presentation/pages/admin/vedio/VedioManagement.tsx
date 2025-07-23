@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { FiPlay, FiEdit, FiTrash2, FiUpload, FiEye, FiGrid, FiList, FiCalendar, FiClock, FiBookOpen, FiVideo, FiBriefcase } from 'react-icons/fi';
 import Header from '../../../components/admin/management/Header';
 import Pagination from '../../../components/admin/management/Pagination';
@@ -24,21 +24,19 @@ const VideoManagementPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [videoToDelete, setVideoToDelete] = useState<Video | null>(null);
 
-  // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-      setPage(1); // Reset to first page when search changes
-    }, 500); // 500ms delay
+      setPage(1); 
+    }, 500); 
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Debounce filters
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedFilters(filters);
-      setPage(1); // Reset to first page when filters change
+      setDebouncedFilters(filters); 
+      setPage(1); 
     }, 300);
 
     return () => clearTimeout(timer);
@@ -166,7 +164,6 @@ const VideoManagementPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 relative">
-      {/* Rest of the JSX remains unchanged */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-0 w-96 h-96 bg-purple-900/10 rounded-full blur-3xl"></div>
         <div className="absolute top-3/4 right-0 w-96 h-96 bg-blue-900/10 rounded-full blur-3xl"></div>
@@ -231,7 +228,6 @@ const VideoManagementPage = () => {
         </div>
 
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl border border-purple-500/30 min-h-[300px] relative">
-          {/* Loading overlay for video list/grid only */}
           {isLoadingDiplomas || isLoadingVideos ? (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-900/60 z-20 rounded-xl">
               <LoadingSpinner />
@@ -463,7 +459,7 @@ const VideoManagementPage = () => {
         video={selectedVideo}
       />
 
-      {/* Use the reusable WarningModal for delete confirmation */}
+
       <WarningModal
         isOpen={showDeleteModal && !!videoToDelete}
         onClose={() => setShowDeleteModal(false)}

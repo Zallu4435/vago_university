@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { FiPlus, FiEye, FiEdit, FiTrash2, FiBook, FiUsers, FiPercent, FiCheck, FiX } from 'react-icons/fi';
+import { FiPlus, FiEye, FiEdit, FiTrash2, FiBook } from 'react-icons/fi';
 import { useAdminDiplomaManagement } from '../../../../application/hooks/useAdminDiplomaManagement';
 import WarningModal from '../../../components/common/WarningModal';
 import Header from '../../../components/admin/management/Header';
@@ -46,8 +46,6 @@ const DiplomaManagement: React.FC = () => {
         isLoadingDiplomaDetails,
         handleViewDiploma,
         handleEditDiploma,
-        activeTab,
-        handleTabChange,
     } = useAdminDiplomaManagement(debouncedSearch, filters);
 
     const [showDiplomaModal, setShowDiplomaModal] = useState(false);
@@ -195,10 +193,9 @@ const DiplomaManagement: React.FC = () => {
                     }}
                     debouncedFilterChange={debouncedFilterChange}
                     handleResetFilters={handleResetFilters}
-                    onTabClick={() => {}}
+                    onTabClick={() => { }}
                 />
 
-                {/* Show custom date pickers if custom dateRange is selected */}
                 {filters.dateRange === 'custom' && (
                     <div className="flex gap-4 mb-4">
                         <div>
@@ -296,7 +293,7 @@ const DiplomaManagement: React.FC = () => {
                 type="danger"
             />
 
-            <style jsx>{`
+            <style>{`
         @keyframes floatingMist {
           0% {
             transform: translateY(0) translateX(0);

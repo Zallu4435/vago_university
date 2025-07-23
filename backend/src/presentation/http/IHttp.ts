@@ -19,7 +19,7 @@ export interface IHttpRequest {
   files?: Express.Multer.File[];
   user?: {
     id: string;
-    userId?: string; // Add userId field for compatibility
+    userId?: string;
     collection: 'register' | 'admin' | 'user' | 'faculty';
     firstName: string;
     lastName: string;
@@ -28,7 +28,7 @@ export interface IHttpRequest {
   cookies?: {
     [key: string]: string;
   };
-  ip?: string; // Add ip property
+  ip?: string;
 }
 
 export interface IHttpResponse {
@@ -57,7 +57,7 @@ export class HttpRequest implements IHttpRequest {
     public file?: Express.Multer.File,
     public files?: Express.Multer.File[],
     public cookies?: { [key: string]: string },
-    public ip?: string // Add ip property
+    public ip?: string
   ) { }
 }
 

@@ -93,10 +93,8 @@ export class GetEnquiriesUseCase implements IGetEnquiriesUseCase {
     const { page = 1, limit = 10, status, startDate, endDate, search } = params;
     const skip = (page - 1) * limit;
 
-    // Build query/filter logic here (business logic)
     const filter: any = {};
 
-    // Status filter - handle string values from frontend
     if (status && typeof status === 'string') {
       const statusStr = status.toLowerCase();
       if (statusStr !== "all" && statusStr !== "all statuses" && Object.values(EnquiryStatus).includes(statusStr as EnquiryStatus)) {
@@ -104,11 +102,9 @@ export class GetEnquiriesUseCase implements IGetEnquiriesUseCase {
       }
     }
 
-    // Custom date range
     if (startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
-      // Only add to filter if both are valid dates
       if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
         filter.createdAt = {
           $gte: start,
@@ -117,7 +113,6 @@ export class GetEnquiriesUseCase implements IGetEnquiriesUseCase {
       }
     }
 
-    // Search filter
     if (search) {
       filter.$or = [
         { name: { $regex: search, $options: "i" } },
@@ -169,17 +164,14 @@ export class UpdateEnquiryStatusUseCase implements IUpdateEnquiryStatusUseCase {
       throw new InvalidEnquiryIdError();
     }
 
-    // Get existing enquiry
     const existingEnquiry = await this.enquiryRepository.findById(params.id);
     if (!existingEnquiry) {
       throw new EnquiryNotFoundError(params.id);
     }
 
-    // Create updated enquiry using entity's update method
     const existingProps = toEnquiryProps(existingEnquiry);
     const updatedEnquiry = Enquiry.update(existingProps, { status: params.status });
     
-    // Update in database
     const dbResult = await this.enquiryRepository.update(params.id, updatedEnquiry.props);
     if (!dbResult) {
       throw new EnquiryNotFoundError(params.id);
@@ -199,13 +191,11 @@ export class DeleteEnquiryUseCase implements IDeleteEnquiryUseCase {
       throw new InvalidEnquiryIdError();
     }
 
-    // Check if enquiry exists
     const enquiry = await this.enquiryRepository.findById(params.id);
     if (!enquiry) {
       throw new EnquiryNotFoundError(params.id);
     }
 
-    // Delete from database
     await this.enquiryRepository.delete(params.id);
 
     return {
@@ -230,14 +220,12 @@ export class SendEnquiryReplyUseCase implements ISendEnquiryReplyUseCase {
       throw new EnquiryValidationError("replyMessage", "Reply message is required");
     }
 
-    // Get enquiry from database
     const enquiry = await this.enquiryRepository.findById(params.id);
     if (!enquiry) {
       throw new EnquiryNotFoundError(params.id);
     }
 
     try {
-      // Send email reply using injected email service
       await this.emailService.sendEnquiryReplyEmail({
         to: enquiry.email,
         name: enquiry.name,

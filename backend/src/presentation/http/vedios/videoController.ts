@@ -56,7 +56,6 @@ export class VideoController implements IVideoController {
         const requestDTO: GetVideoByIdRequestDTO = { id };
         const result = await this.getVideoByIdUseCase.execute(requestDTO);
         if (!result.success) {
-            // Pass through specific error message if available
             const errorMsg = (result.data as any)?.error || 'Bad request';
             if (errorMsg === 'InvalidVideoId') {
                 return this.httpErrors.error_400('Invalid video ID format');

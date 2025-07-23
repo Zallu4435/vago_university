@@ -59,7 +59,7 @@ export class AssignmentController implements IAssignmentController {
   async createAssignment(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const assignmentData = {
       ...httpRequest.body,
-      files: httpRequest.files // Pass the full file objects
+      files: httpRequest.files
     };
     const result = await this.createAssignmentUseCase.execute(assignmentData);
     if (!result.success) {

@@ -38,7 +38,7 @@ export class FacultyController implements IFacultyController {
     const response = await this.getFacultyUseCase.execute({
       page: Number(page),
       limit: Number(limit),
-      status: status as any, // Accept string or FacultyStatus
+      status: status as any,
       department: String(department),
       dateRange: String(dateRange),
       search: search ? String(search) : undefined,
@@ -173,33 +173,20 @@ export class FacultyController implements IFacultyController {
 
   async serveDocument(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
-      console.log('=== FACULTY SERVE DOCUMENT CONTROLLER START ===');
-      console.log('Request params:', httpRequest.params);
-      console.log('Request user:', httpRequest.user);
-
       if (!httpRequest.user) {
-        console.log('ERROR: No user found in request');
         return this.httpErrors.error_401();
       }
 
       const { facultyId } = httpRequest.params || {};
       const { type, documentUrl } = httpRequest.query || {};
 
-      console.log('Faculty ID:', facultyId);
-      console.log('Document type:', type);
-      console.log('Document URL:', documentUrl);
-
       if (!facultyId || !type || !documentUrl) {
-        console.log('ERROR: Missing required parameters');
         return this.httpErrors.error_400();
       }
 
-      // Extract public ID from the Cloudinary URL
       const urlParts = (documentUrl as string).split('/');
-      const publicId = urlParts.slice(-2).join('/').replace(/\.[^/.]+$/, ''); // Remove file extension
-      console.log('Extracted public ID:', publicId);
+      const publicId = urlParts.slice(-2).join('/').replace(/\.[^/.]+$/, '');
 
-      // Get the document stream from Cloudinary using signed URL
       const signedUrl = cloudinary.url(publicId, {
         resource_type: 'raw',
         type: 'upload',
@@ -207,19 +194,14 @@ export class FacultyController implements IFacultyController {
         secure: true
       });
 
-      console.log('Using signed URL:', signedUrl);
-
       const response = await fetch(signedUrl);
 
       if (!response.ok) {
-        console.log('ERROR: Failed to fetch from Cloudinary, status:', response.status);
         return this.httpErrors.error_404();
       }
 
       const pdfBuffer = await response.arrayBuffer();
-      console.log('PDF buffer size:', pdfBuffer.byteLength);
 
-      // Return the PDF with proper headers
       const result_response = {
         statusCode: 200,
         body: {
@@ -230,12 +212,8 @@ export class FacultyController implements IFacultyController {
           }
         }
       };
-
-      console.log('=== FACULTY SERVE DOCUMENT SUCCESS ===');
       return result_response;
     } catch (error: any) {
-      console.log('=== FACULTY SERVE DOCUMENT ERROR ===');
-      console.error('Controller error:', error);
       return this.httpErrors.error_500();
     }
   }

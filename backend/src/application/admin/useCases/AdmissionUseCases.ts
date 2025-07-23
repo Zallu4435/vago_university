@@ -18,14 +18,10 @@ import {
 } from "../../../domain/admin/dtos/AdmissionResponseDTOs";
 import { IAdmissionRepository } from "../repositories/IAdmissionRepository";
 import { IEmailService } from "../../auth/service/IEmailService";
-import { config } from '../../../config/config';
 import {
     AdminAdmissionNotFoundError,
     AdminAdmissionAlreadyProcessedError,
-    AdminInvalidTokenError,
-    AdminTokenExpiredError,
     AdminRegisterUserNotFoundError,
-    AdminInvalidActionError
 } from '../../../domain/admin/errors/AdminAdmissionErrors';
 
 interface ResponseDTO<T> {
@@ -69,18 +65,7 @@ export class GetAdmissionsUseCase implements IGetAdmissionsUseCase {
     constructor(private admissionRepository: IAdmissionRepository) { }
 
     async execute(params: GetAdmissionsRequestDTO): Promise<ResponseDTO<GetAdmissionsResponseDTO>> {
-        // Debug logging
-        console.log('Admission backend received filter values:', { 
-            page: params.page, 
-            limit: params.limit, 
-            status: params.status, 
-            program: params.program, 
-            dateRange: params.dateRange, 
-            startDate: params.startDate, 
-            endDate: params.endDate, 
-            search: params.search 
-        });
-        
+
         const result = await this.admissionRepository.getAdmissions(params);
         const admissions = await Promise.all(result.admissions.map(async (admission: any) => {
             let blocked = false;

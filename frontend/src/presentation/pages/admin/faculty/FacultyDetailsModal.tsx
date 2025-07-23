@@ -1,31 +1,25 @@
 import React from 'react';
 import { FiX, FiUser, FiMail, FiBook, FiAward, FiClock, FiFileText, FiDownload, FiEye, FiInfo } from 'react-icons/fi';
 import { facultyService } from '../../../../application/services/faculty.service';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../../appStore/store';
 import { FacultyDetailsModalProps } from '../../../../domain/types/management/facultyManagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClose, faculty, onBlockToggle }) => {
-  const { token } = useSelector((state: RootState) => state.auth);
   
   usePreventBodyScroll(isOpen);
 
   if (!isOpen || !faculty) return null;
 
-  const handleViewDocument = async (documentUrl: string, type: string, fileName: string) => {
+  const handleViewDocument = async (documentUrl: string, type: string) => {
     if (!documentUrl) {
       console.error('No document URL provided');
       return;
     }
     
     try {
-      console.log('Fetching faculty document from backend with URL:', documentUrl);
       const response = await facultyService.getFacultyDocument(faculty._id, type, documentUrl);
-      console.log('Document response:', response);
       
       if (response && response.pdfData) {
-        // Create blob URL from base64 PDF data
         const byteCharacters = atob(response.pdfData);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -35,16 +29,13 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
         const blob = new Blob([byteArray], { type: 'application/pdf' });
         const url = window.URL.createObjectURL(blob);
         window.open(url, '_blank', 'noopener,noreferrer');
-        // Clean up the blob URL after a delay
         setTimeout(() => window.URL.revokeObjectURL(url), 1000);
       } else {
         console.error('No PDF data received from backend');
-        // Fallback to direct URL
         window.open(documentUrl, '_blank', 'noopener,noreferrer');
       }
     } catch (error) {
       console.error('Error opening document:', error);
-      // Fallback to direct URL if there's an error
       try {
         window.open(documentUrl, '_blank', 'noopener,noreferrer');
       } catch (fallbackError) {
@@ -60,55 +51,36 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
     }
     
     try {
-      console.log('Fetching faculty document from backend for download with URL:', documentUrl);
       const response = await facultyService.getFacultyDocument(faculty._id, type, documentUrl);
-      console.log('Document response for download:', response);
       
       if (response && response.pdfData) {
-        console.log('PDF data received, length:', response.pdfData.length);
-        console.log('Creating download...');
-        
-        // Convert base64 to blob and download
         const byteCharacters = atob(response.pdfData);
-        console.log('Converted to byte characters, length:', byteCharacters.length);
         
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
         const byteArray = new Uint8Array(byteNumbers);
-        console.log('Created byte array, length:', byteArray.length);
         
         const blob = new Blob([byteArray], { type: 'application/pdf' });
-        console.log('Created blob, size:', blob.size);
         
         const url = window.URL.createObjectURL(blob);
-        console.log('Created blob URL:', url);
         
-        console.log('Download filename:', fileName);
-        
-        // Create and trigger download
         const link = document.createElement('a');
         link.href = url;
         link.download = fileName;
         link.style.display = 'none';
         
-        console.log('Adding link to DOM...');
         document.body.appendChild(link);
         
-        console.log('Clicking link...');
         link.click();
         
-        console.log('Removing link from DOM...');
         document.body.removeChild(link);
         
-        console.log('Cleaning up blob URL...');
         setTimeout(() => {
           window.URL.revokeObjectURL(url);
-          console.log('Blob URL cleaned up');
         }, 1000);
         
-        console.log('Download process completed');
       } else {
         console.error('No PDF data in response');
       }
@@ -117,7 +89,6 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
     }
   };
 
-  // Particle effect
   const ghostParticles = Array(30)
     .fill(0)
     .map((_, i) => ({
@@ -130,7 +101,6 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      {/* Background particles */}
       {ghostParticles.map((particle, i) => (
         <div
           key={i}
@@ -146,16 +116,12 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
         />
       ))}
 
-      {/* Main Container */}
       <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-5xl max-h-[90vh] rounded-2xl border border-purple-500/30 shadow-2xl overflow-hidden relative">
-        {/* Inner glow effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
 
-        {/* Corner decorations */}
         <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
         <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
 
-        {/* Header */}
         <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -181,7 +147,6 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              {/* Block/Unblock button */}
               {typeof faculty.blocked === 'boolean' && onBlockToggle && (
                 <button
                   onClick={() => onBlockToggle(faculty._id, faculty.blocked)}
@@ -209,9 +174,7 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
           </div>
         </div>
 
-        {/* Content */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
-          {/* Quick Info Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <QuickInfoCard
               icon={<FiBook className="text-purple-300" />}
@@ -230,7 +193,6 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
             />
           </div>
 
-          {/* Personal Information */}
           <SectionCard
             title="Personal Information"
             icon={<FiUser className="text-purple-300" />}
@@ -245,7 +207,6 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
             </div>
           </SectionCard>
 
-          {/* Professional Information */}
           <SectionCard
             title="Professional Information"
             icon={<FiBook className="text-purple-300" />}
@@ -261,7 +222,6 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
             </div>
           </SectionCard>
 
-          {/* Documents */}
           <SectionCard
             title="Uploaded Documents"
             icon={<FiFileText className="text-purple-300" />}
@@ -331,7 +291,6 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
             </div>
           </SectionCard>
 
-          {/* About Section */}
           {faculty.aboutMe && (
             <SectionCard
               title="About"
@@ -344,7 +303,6 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
           )}
         </div>
 
-        {/* Footer */}
         <div className="border-t border-purple-500/30 bg-gray-900/80 p-6">
           <div className="flex justify-end">
             <button
@@ -404,7 +362,6 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
   );
 };
 
-// Component definitions
 const QuickInfoCard = ({ icon, title, value }: { icon: React.ReactNode; title: string; value: string }) => (
   <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-4 shadow-sm">
     <div className="flex items-center mb-2">

@@ -8,7 +8,6 @@ import {
   IoCheckmarkCircleOutline as CheckCircle,
   IoCloseCircleOutline as XCircle,
   IoTrophyOutline as Trophy,
-  IoPersonOutline as User,
 } from 'react-icons/io5';
 import { debounce } from 'lodash';
 import Header from '../../../../components/admin/management/Header';
@@ -22,28 +21,23 @@ import TeamRequestDetailsModal from './TeamRequestDetailsModal';
 import {
   Team,
   PlayerRequest,
-  Filters as SportFilters,
 } from '../../../../../domain/types/management/sportmanagement';
 import { formatDate } from '../../../../../shared/utils/dateUtils';
 import {
   SPORT_TYPES,
-  TEAM_STATUSES,
-  REQUEST_STATUSES,
   COACHES,
-  DATE_RANGES,
   TEAM_CATEGORIES,
   DIVISIONS,
   getTeamColumns,
   getPlayerRequestColumns,
 } from '../../../../../shared/constants/sportManagementConstants';
 import {
-  filterTeams,
-  filterPlayerRequests,
   resetFilters,
   formatDateRangeValue,
   getFilterOptions,
 } from '../../../../../shared/filters/sportManagementFilter';
 import LoadingSpinner from '../../../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../../../shared/components/ErrorMessage';
 
 const AdminSportsManagement: React.FC = () => {
   const {
@@ -83,7 +77,6 @@ const AdminSportsManagement: React.FC = () => {
   const [selectedRequest, setSelectedRequest] = useState<PlayerRequest | null>(null);
   const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
 
-  // Debounced search
   const [searchInput, setSearchInput] = useState(searchTerm);
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -253,20 +246,11 @@ const AdminSportsManagement: React.FC = () => {
     },
   ];
 
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
   if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <div className="bg-red-900/30 text-red-400 p-6 rounded-lg border border-red-500/30">
-          Error: {error.message}
-          <button
-            onClick={handleResetFilters}
-            className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200"
-          >
-            Reset and Try Again
-          </button>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={error.message} />;
   }
 
   return (

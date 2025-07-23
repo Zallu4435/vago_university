@@ -22,16 +22,13 @@ import {
   GetEventRequestDetailsResponseDTO,
 } from "../../../domain/events/dtos/EventRequestResponseDTOs";
 
-// Repository Interface (UPDATED: Pure data access, no business logic)
 export interface IEventsRepository {
-  // Event CRUD operations
   getEvents(params: GetEventsRequestDTO): Promise<GetEventsResponseDTO>;
   getEventById(params: GetEventByIdRequestDTO): Promise<GetEventByIdResponseDTO | null>;
   createEvent(params: CreateEventRequestDTO): Promise<CreateEventResponseDTO>;
   updateEvent(params: UpdateEventRequestDTO): Promise<UpdateEventResponseDTO | null>;
   deleteEvent(params: DeleteEventRequestDTO): Promise<void>;
   
-  // Event Request operations
   getEventRequests(params: GetEventRequestsRequestDTO): Promise<GetEventRequestsResponseDTO>;
   approveEventRequest(params: ApproveEventRequestRequestDTO): Promise<void>;
   rejectEventRequest(params: RejectEventRequestRequestDTO): Promise<void>;

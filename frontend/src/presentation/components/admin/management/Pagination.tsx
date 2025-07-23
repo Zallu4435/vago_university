@@ -1,7 +1,24 @@
 import React from 'react';
 import { FiArrowLeft, FiArrowRight, FiChevronsLeft, FiChevronsRight } from 'react-icons/fi';
 
-const Pagination = ({
+type PaginationProps = {
+  page?: number;
+  totalPages?: number;
+  itemsCount?: number;
+  itemName?: string;
+  onPageChange?: (newPage: number) => void;
+  onFirstPage?: () => void;
+  onLastPage?: () => void;
+  maxDots?: number;
+  showMobileDots?: boolean;
+  containerClass?: string;
+  buttonClass?: string;
+  activeButtonClass?: string;
+  disabledButtonClass?: string;
+  defaultButtonClass?: string;
+};
+
+const Pagination: React.FC<PaginationProps> = ({
   page = 1, // Current page number
   totalPages = 1, // Total number of pages
   itemsCount = 0, // Number of items displayed (e.g., filtered count)

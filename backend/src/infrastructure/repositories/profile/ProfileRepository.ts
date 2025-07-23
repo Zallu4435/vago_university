@@ -1,19 +1,11 @@
-import bcrypt from "bcryptjs";
 import { User } from "../../database/mongoose/auth/user.model";
 import { Faculty } from "../../database/mongoose/auth/faculty.model";
-import { ProfileErrorType } from "../../../domain/profile/enums/ProfileErrorType";
 import {
     GetProfileRequestDTO,
     UpdateProfileRequestDTO,
     ChangePasswordRequestDTO,
     UpdateProfilePictureRequestDTO,
 } from "../../../domain/profile/dtos/ProfileRequestDTOs";
-import {
-    ProfileResponseDTO,
-    UpdateProfileResponseDTO,
-    ChangePasswordResponseDTO,
-    UpdateProfilePictureResponseDTO,
-} from "../../../domain/profile/dtos/ProfileResponseDTOs";
 import { IProfileRepository } from "../../../application/profile/repositories/IProfileRepository";
 
 export class ProfileRepository implements IProfileRepository {

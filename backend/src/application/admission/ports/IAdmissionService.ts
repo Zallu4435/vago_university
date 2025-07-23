@@ -1,6 +1,4 @@
-// src/application/admission/ports/IAdmissionService.ts
-
-import { IFile, IMultipleFiles } from "./IFile"; // Assuming IFile is in the same 'ports' folder
+import { IFile, IMultipleFiles } from "./IFile";
 
 export interface UploadDocumentResult {
     success: boolean;
@@ -25,9 +23,9 @@ export interface UploadMultipleDocumentsResult {
 }
 
 export interface RetrieveDocumentResult {
-    pdfData: string; // Base64 encoded PDF data
+    pdfData: string;
     fileName: string;
-    contentType: string; // e.g., 'application/pdf'
+    contentType: string;
 }
 
 export interface IAdmissionService {

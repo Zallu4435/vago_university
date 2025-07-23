@@ -58,18 +58,12 @@ const PaymentManagement: React.FC = () => {
   const fetchData = useCallback(async () => {
     try {
       if (activeTab === 'financialAid') {
-        // response = await getFinancialAidApplications(); // This line was removed as per edit hint
-        // setData(response ? response.map((item: any) => ({ ...item, _id: item.id })) : []);
-        // setTotalPages(Math.ceil((response?.length || 0) / 10));
       } else if (activeTab === 'scholarships') {
-        // response = await getScholarshipApplications(); // This line was removed as per edit hint
-        // setData(response ? response.map((item: any) => ({ ...item, _id: item.id })) : []);
-        // setTotalPages(Math.ceil((response?.length || 0) / 10));
       }
     } catch (err) {
       console.error('Failed to fetch data:', err);
     }
-  }, [activeTab]); // Removed getFinancialAidApplications, getScholarshipApplications from dependencies
+  }, [activeTab]); 
 
   useEffect(() => {
     fetchData();
@@ -77,8 +71,6 @@ const PaymentManagement: React.FC = () => {
 
   useEffect(() => {
     if (showPaymentDetailsModal) {
-      console.log('Payment Details:', paymentDetails);
-      console.log('Is Loading Payment Details:', isLoadingPaymentDetails);
     }
   }, [showPaymentDetailsModal, paymentDetails, isLoadingPaymentDetails]);
 
@@ -88,9 +80,7 @@ const PaymentManagement: React.FC = () => {
     try {
       const status = actionType === 'approve' ? 'Approved' : 'Rejected';
       if ('term' in selectedApplication) {
-        // await updateFinancialAidApplication(selectedApplication.id, { status }); // This line was removed as per edit hint
       } else {
-        // await updateScholarshipApplication(selectedApplication.id, { status }); // This line was removed as per edit hint
       }
       setShowActionModal(false);
       fetchData();
@@ -118,14 +108,12 @@ const PaymentManagement: React.FC = () => {
 
   const handleViewCharges = async () => {
     try {
-      // setCharges(chargesData);
       setShowViewChargesModal(true);
     } catch (err) {
       console.error('Failed to fetch charges:', err);
     }
   };
 
-  // Helper to compute date ranges
   const computeDateRange = (range: string) => {
     const today = new Date();
     let startDate = '';
@@ -188,7 +176,6 @@ const PaymentManagement: React.FC = () => {
     setPage(1);
   };
 
-  // Add a handler to open the payment details modal and fetch details
   const handleViewPaymentModal = (id: string) => {
     handleViewPayment(id);
     setShowPaymentDetailsModal(true);
@@ -247,7 +234,6 @@ const PaymentManagement: React.FC = () => {
                 change: '+1.2%',
                 isPositive: true,
               },
-              // Removed 'Approved Awards' stat for payments, as payment status does not include 'Approved'
             ]}
             tabs={[
               { label: 'Payments', icon: <FiDollarSign size={16} />, active: activeTab === 'payments' },
@@ -358,7 +344,6 @@ const PaymentManagement: React.FC = () => {
           <ViewChargesModal
             isOpen={showViewChargesModal}
             onClose={() => setShowViewChargesModal(false)}
-            // Remove or fix the ViewChargesModal 'charges' and 'loading' props if not used or not defined
           />
         )}
 

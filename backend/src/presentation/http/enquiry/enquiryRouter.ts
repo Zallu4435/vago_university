@@ -6,10 +6,8 @@ import { authMiddleware } from "../../../shared/middlewares/authMiddleware";
 const enquiryRouter = Router();
 const enquiryController = getEnquiryComposer();
 
-// Public routes (no auth required)
 enquiryRouter.post("/", (req, res, next) => expressAdapter(req, res, next, enquiryController.createEnquiry.bind(enquiryController)));
 
-// Protected routes (auth required)
 enquiryRouter.get("/", authMiddleware, (req, res, next) => expressAdapter(req, res, next, enquiryController.getEnquiries.bind(enquiryController)));
 
 enquiryRouter.get("/:id", authMiddleware, (req, res, next) => expressAdapter(req, res, next, enquiryController.getEnquiryById.bind(enquiryController)));

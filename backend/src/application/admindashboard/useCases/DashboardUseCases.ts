@@ -23,6 +23,7 @@ import {
   MarkActivityAsReadResponseDTO,
 } from "../../../domain/admindashboard/dtos/DashboardResponseDTOs";
 import { IDashboardRepository } from "../repositories/IDashboardRepository";
+import { PerformanceRawData, PerformanceData } from '../../../domain/admindashboard/entities/AdminDashboardTypes';
 import {
   DashboardDataNotFoundError,
   DashboardMetricsError,
@@ -57,7 +58,7 @@ export interface IGetRevenueDataUseCase {
 }
 
 export interface IGetPerformanceDataUseCase {
-  execute(params: GetPerformanceDataRequestDTO): Promise<ResponseDTO<GetPerformanceDataResponseDTO>>;
+  execute(params: GetPerformanceDataRequestDTO): Promise<ResponseDTO<PerformanceData[]>>;
 }
 
 export interface IGetRecentActivitiesUseCase {
@@ -171,11 +172,11 @@ export class GetRevenueDataUseCase implements IGetRevenueDataUseCase {
 export class GetPerformanceDataUseCase implements IGetPerformanceDataUseCase {
   constructor(private dashboardRepository: IDashboardRepository) {}
 
-  async execute(params: GetPerformanceDataRequestDTO): Promise<ResponseDTO<GetPerformanceDataResponseDTO>> {
-    const raw = await this.dashboardRepository.getPerformanceData(params);
+  async execute(params: GetPerformanceDataRequestDTO): Promise<ResponseDTO<PerformanceData[]>> {
+    const raw: PerformanceRawData = await this.dashboardRepository.getPerformanceData(params);
     if (!raw) {
       throw new DashboardPerformanceError();
-    }
+    } 
     const performance = [
       { name: 'User Management', value: Math.round(70 + (raw.userCount * 2)), color: '#6366F1' },
       { name: 'Faculty Management', value: Math.round(70 + (raw.facultyCount * 3)), color: '#10B981' },
@@ -254,8 +255,12 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
         isRead: false,
       });
     });
-    // Only send the 5 most recent activities
-    return { data: activities.slice(0, 5), success: true };
+    return { data: {
+      recentAdmissions: activities.slice(0, 5),
+      recentPayments: activities.slice(0, 5),
+      recentEnquiries: activities.slice(0, 5),
+      recentNotifications: activities.slice(0, 5),
+    }, success: true };
   }
 }
 

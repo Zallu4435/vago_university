@@ -50,7 +50,6 @@ const SiteManagement = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Reset page when filters change
   React.useEffect(() => {
     setPage(1);
   }, [debouncedSearchQuery, categoryFilter, dateRangeFilter, startDate, endDate]);
@@ -140,7 +139,6 @@ const SiteManagement = () => {
   };
 
   const handleDelete = (item: SiteSection & { _id: string }) => {
-    // Convert back to SiteSection format for delete
     const siteSection: SiteSection = {
       id: item._id,
       sectionKey: item.sectionKey,
@@ -155,10 +153,8 @@ const SiteManagement = () => {
     setShowDelete(true);
   };
 
-  // Unified form handling
   const handleFormSuccess = async (formData: any) => {
     try {
-      console.log('Form Data:', formData); // Debug log
       if (selectedId) {
         await updateSection.mutateAsync({ id: selectedId, data: { ...formData, sectionKey: activeTab } });
         toast.success('Section updated successfully!');
@@ -173,7 +169,6 @@ const SiteManagement = () => {
     }
   };
 
-  // Unified delete handling
   const confirmDelete = async () => {
     if (!selected) return;
     try {
@@ -184,7 +179,6 @@ const SiteManagement = () => {
     }
   };
 
-  // Action buttons for ApplicationsTable
   const tableActions = [
     {
       icon: <FiEye size={16} />, label: 'View', color: 'blue' as const, onClick: handleView,
@@ -197,7 +191,6 @@ const SiteManagement = () => {
     },
   ];
 
-  // Stats for the header
   const stats = [
     {
       icon: section.icon,

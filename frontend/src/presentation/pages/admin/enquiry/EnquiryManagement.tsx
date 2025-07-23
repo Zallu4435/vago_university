@@ -21,7 +21,6 @@ import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import EmptyState from '../../../../shared/components/EmptyState';
 
-// Utility to convert preset keywords to date ranges
 function getDateRangeFromKeyword(keyword: string): { startDate: string; endDate: string } {
   const now = new Date();
   let startDate = '';
@@ -100,7 +99,6 @@ const EnquiryManagement: React.FC = () => {
     [setFilters, setCustomDateRange, setPage]
   );
 
-  // Handle custom date range change
   const handleCustomDateChange = useCallback((field: 'startDate' | 'endDate', value: string) => {
     setCustomDateRange(prev => ({ ...prev, [field]: value }));
     setPage(1);
@@ -137,7 +135,6 @@ const EnquiryManagement: React.FC = () => {
       setShowReplyModal(false);
       setEnquiryToReply(null);
     } catch (error) {
-      // Error handling is done in the hook
     }
   };
 
@@ -250,7 +247,6 @@ const EnquiryManagement: React.FC = () => {
         />
       </div>
 
-      {/* Enquiry Details Modal - Rendered outside main div */}
       <EnquiryDetailsModal
         isOpen={showEnquiryDetails}
         onClose={() => {
@@ -261,7 +257,6 @@ const EnquiryManagement: React.FC = () => {
         onUpdateStatus={handleUpdateStatus}
       />
 
-      {/* Reply Modal - Rendered outside main div */}
       {showReplyModal && enquiryToReply && (
         <ReplyModal
           enquiry={enquiryToReply}

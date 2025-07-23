@@ -1,7 +1,6 @@
 import { IHttpRequest, IHttpResponse, ICourseController, HttpSuccess, HttpErrors } from "../IHttp";
 import { IGetCoursesUseCase, IGetCourseByIdUseCase, ICreateCourseUseCase, IUpdateCourseUseCase, IDeleteCourseUseCase } from "../../../application/courses/useCases/CourseUseCases";
 import { GetCoursesRequestDTO, GetCourseByIdRequestDTO, CreateCourseRequestDTO, UpdateCourseRequestDTO, DeleteCourseRequestDTO } from "../../../domain/courses/dtos/CourseRequestDTOs";
-import { DomainError } from "../../../domain/courses/errors/CourseErrors";
 
 export class CourseController implements ICourseController {
   private httpSuccess = new HttpSuccess();

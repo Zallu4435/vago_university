@@ -53,4 +53,21 @@ export interface DashboardData {
   performance: PerformanceData[];
   activities: ActivityItem[];
   alerts: SystemAlert[];
+}
+
+export interface PerformanceRawData {
+  userCount: number;
+  facultyCount: number;
+  courseCount: number;
+  admissionCount: number;
+  paymentCount: number;
+  enquiryCount: number;
+  notificationCount: number;
+  communicationCount: number;
+  financialAidCount: number;
+  videoCount: number;
+  sportsCount: number;
+  diplomaCount: number;
+  eventsCount: number;
+  clubsCount: number;
 } 

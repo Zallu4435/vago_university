@@ -1,5 +1,4 @@
 import {
-    GetFacultyRequestDTO,
     GetFacultyByIdRequestDTO,
     GetFacultyByTokenRequestDTO,
     ApproveFacultyRequestDTO,
@@ -9,9 +8,6 @@ import {
     DownloadCertificateRequestDTO,
 } from "../../../domain/faculty/dtos/FacultyRequestDTOs";
 import {
-    GetFacultyResponseDTO,
-    GetFacultyByIdResponseDTO,
-    GetFacultyByTokenResponseDTO,
     ApproveFacultyResponseDTO,
     RejectFacultyResponseDTO,
     DeleteFacultyResponseDTO,

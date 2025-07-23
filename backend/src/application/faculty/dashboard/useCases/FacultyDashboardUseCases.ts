@@ -51,12 +51,8 @@ export class GetFacultyDashboardStatsUseCase implements IGetFacultyDashboardStat
   constructor(private facultyDashboardRepository: IFacultyDashboardRepository) {}
 
   async execute(params: GetFacultyDashboardStatsRequestDTO): Promise<ResponseDTO<GetFacultyDashboardStatsResponseDTO>> {
-    try {
-      const result = await this.facultyDashboardRepository.getDashboardStats(params);
-      return { data: result, success: true };
-    } catch (error: any) {
-      return { data: { error: error.message || 'Failed to fetch dashboard stats' }, success: false };
-    }
+    const result = await this.facultyDashboardRepository.getDashboardStats(params);
+    return { data: result, success: true };
   }
 }
 
@@ -64,12 +60,8 @@ export class GetFacultyDashboardDataUseCase implements IGetFacultyDashboardDataU
   constructor(private facultyDashboardRepository: IFacultyDashboardRepository) {}
 
   async execute(params: GetFacultyDashboardDataRequestDTO): Promise<ResponseDTO<GetFacultyDashboardDataResponseDTO>> {
-    try {
-      const result = await this.facultyDashboardRepository.getDashboardData(params);
-      return { data: result, success: true };
-    } catch (error: any) {
-      return { data: { error: error.message || 'Failed to fetch dashboard data' }, success: false };
-    }
+    const result = await this.facultyDashboardRepository.getDashboardData(params);
+    return { data: result, success: true };
   }
 }
 
@@ -77,13 +69,8 @@ export class GetFacultyWeeklyAttendanceUseCase implements IGetFacultyWeeklyAtten
   constructor(private facultyDashboardRepository: IFacultyDashboardRepository) {}
 
   async execute(params: GetFacultyWeeklyAttendanceRequestDTO): Promise<ResponseDTO<GetFacultyWeeklyAttendanceResponseDTO>> {    
-    try {
-      const result = await this.facultyDashboardRepository.getWeeklyAttendance(params);
-      return { data: result, success: true };
-    } catch (error: any) {
-      console.error('❌ [GetFacultyWeeklyAttendanceUseCase] Error:', error);
-      return { data: { error: error.message || 'Failed to fetch weekly attendance' }, success: false };
-    }
+    const result = await this.facultyDashboardRepository.getWeeklyAttendance(params);
+    return { data: result, success: true };
   }
 }
 
@@ -91,12 +78,8 @@ export class GetFacultyCoursePerformanceUseCase implements IGetFacultyCoursePerf
   constructor(private facultyDashboardRepository: IFacultyDashboardRepository) {}
 
   async execute(params: GetFacultyCoursePerformanceRequestDTO): Promise<ResponseDTO<GetFacultyCoursePerformanceResponseDTO>> {
-    try {
-      const result = await this.facultyDashboardRepository.getAssignmentPerformance(params);
-      return { data: result, success: true };
-    } catch (error: any) {
-      return { data: { error: error.message || 'Failed to fetch assignment performance' }, success: false };
-    }
+    const result = await this.facultyDashboardRepository.getAssignmentPerformance(params);
+    return { data: result, success: true };
   }
 }
 
@@ -104,12 +87,8 @@ export class GetFacultySessionDistributionUseCase implements IGetFacultySessionD
   constructor(private facultyDashboardRepository: IFacultyDashboardRepository) {}
 
   async execute(params: GetFacultySessionDistributionRequestDTO): Promise<ResponseDTO<GetFacultySessionDistributionResponseDTO>> {
-    try {
-      const result = await this.facultyDashboardRepository.getSessionDistribution(params);
-      return { data: result, success: true };
-    } catch (error: any) {
-      return { data: { error: error.message || 'Failed to fetch session distribution' }, success: false };
-    }
+    const result = await this.facultyDashboardRepository.getSessionDistribution(params);
+    return { data: result, success: true };
   }
 }
 
@@ -117,12 +96,8 @@ export class GetFacultyRecentActivitiesUseCase implements IGetFacultyRecentActiv
   constructor(private facultyDashboardRepository: IFacultyDashboardRepository) {}
 
   async execute(params: GetFacultyRecentActivitiesRequestDTO): Promise<ResponseDTO<GetFacultyRecentActivitiesResponseDTO>> {
-    try {
-      const result = await this.facultyDashboardRepository.getRecentActivities(params);
-      return { data: result, success: true };
-    } catch (error: any) {
-      return { data: { error: error.message || 'Failed to fetch recent activities' }, success: false };
-    }
+    const result = await this.facultyDashboardRepository.getRecentActivities(params);
+    return { data: result, success: true };
   }
 }
 

@@ -19,10 +19,8 @@ export class SiteSectionRepository implements ISiteSectionRepository {
   }
 
   async createSection(params: CreateSiteSectionRequestDTO): Promise<any> {
-    // If params is a class instance, convert to plain object
     const createData = (params as any)?._props ? { ...(params as any)._props } : params;
     const { id, ...finalData } = createData;
-    console.log('[SiteSectionRepository] Final createData:', finalData);
     return SiteSectionModel.create(finalData);
   }
 

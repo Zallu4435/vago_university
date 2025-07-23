@@ -17,12 +17,26 @@ export interface ApplicantDetailsProps {
   deleteAdmission?: (id: string) => void;
   onViewDocument?: (document: { name: string; url: string }) => void;
   onDownloadDocument?: (document: { name: string; url: string }) => void;
+  expandedSections: {
+    personal: boolean;
+    programs: boolean;
+    education: boolean;
+    achievements: boolean;
+    otherInfo: boolean;
+    documents: boolean;
+    declaration: boolean;
+    application: boolean;
+  };
+  toggleSection: (section: "personal" | "programs" | "education" | "achievements" | "otherInfo" | "documents" | "declaration" | "application") => void;
+  formatDate: (dateString: string) => string;
 }
 
 export interface ApprovalModalProps {
   isOpen: boolean;
   onClose: () => void;
   onApprove: (data: any) => void;
+  onReject: (data: any) => void;
+  onDelete: () => void;
   applicantName: string;
 }
 

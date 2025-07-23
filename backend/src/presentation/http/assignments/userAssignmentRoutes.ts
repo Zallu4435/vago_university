@@ -4,7 +4,6 @@ import { assignmentSubmissionUpload, cloudinary } from '../../../config/cloudina
 import { authMiddleware } from '../../../shared/middlewares/authMiddleware';
 import { expressAdapter } from '../../adapters/ExpressAdapter';
 import multer from 'multer';
-import axios from 'axios';
 const fetch = require('node-fetch');
 
 const router = Router();
@@ -35,9 +34,6 @@ router.get('/download-file', authMiddleware, async (req: Request, res: Response)
     res.json(response);
 
   } catch (error: any) {
-    console.error('Error in download proxy:', error);
-    console.error('Error stack:', error.stack);
-    console.error('Error message:', error.message);
     res.status(500).json({
       error: 'Failed to process download request',
       details: error.message,
@@ -46,21 +42,9 @@ router.get('/download-file', authMiddleware, async (req: Request, res: Response)
   }
 });
 
-// New endpoint for downloading assignment reference files
 router.get('/download-reference-file', authMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
-    console.log('=== ASSIGNMENT REFERENCE FILE DOWNLOAD STARTED ===');
-    console.log('📥 Request received:', {
-      method: req.method,
-      url: req.url,
-      params: req.params,
-      query: req.query,
-      headers: req.headers
-    });
-
     const { fileUrl, fileName } = req.query;
-
-    console.log('🔍 Query parameters:', { fileUrl, fileName });
 
     if (!fileUrl || typeof fileUrl !== 'string') {
       console.error('❌ Error: File URL is missing or invalid');
@@ -74,30 +58,12 @@ router.get('/download-reference-file', authMiddleware, async (req: Request, res:
       return;
     }
 
-    console.log('✅ Parameters validation passed');
-
-    // Clean the filename
     let cleanFileName = fileName.replace(/\s+/g, '_');
     cleanFileName = cleanFileName.replace(/[^a-zA-Z0-9._-]/g, '');
     cleanFileName = cleanFileName.replace(/"/g, '');
 
-    console.log('📝 File name processing:', {
-      original: fileName,
-      cleaned: cleanFileName
-    });
-
-    console.log('🌐 Fetching file from URL:', fileUrl);
-
-    // Fetch the file from the URL
     const response = await fetch(fileUrl);
     
-    console.log('📡 Fetch response:', {
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok,
-      headers: Object.fromEntries(response.headers.entries())
-    });
-
     if (!response.ok) {
       console.error('❌ Error: Failed to fetch file from URL');
       console.error('Response status:', response.status);
@@ -106,35 +72,14 @@ router.get('/download-reference-file', authMiddleware, async (req: Request, res:
       return;
     }
 
-    console.log('✅ File fetched successfully');
-
-    // Set proper headers for download
     const contentType = response.headers.get('content-type') || 'application/octet-stream';
     const contentDisposition = `attachment; filename="${cleanFileName}"`;
-    
-    console.log('📋 Setting response headers:', {
-      'Content-Disposition': contentDisposition,
-      'Content-Type': contentType
-    });
 
     res.setHeader('Content-Disposition', contentDisposition);
     res.setHeader('Content-Type', contentType);
-    
-    console.log('📤 Starting file stream to client...');
-    
-    // Stream the file to the client
     response.body.pipe(res);
     
-    console.log('✅ File stream initiated successfully');
-    console.log('=== ASSIGNMENT REFERENCE FILE DOWNLOAD COMPLETED ===');
-
   } catch (err: any) {
-    console.error('=== ASSIGNMENT REFERENCE FILE DOWNLOAD ERROR ===');
-    console.error('❌ Error details:', err);
-    console.error('❌ Error message:', err.message);
-    console.error('❌ Error stack:', err.stack);
-    console.error('❌ Error type:', err.constructor.name);
-    
     if (err instanceof Error) {
       console.error('❌ Error name:', err.name);
     }
@@ -153,29 +98,8 @@ router.get('/:id', authMiddleware, (req, res, next) => {
 });
 
 router.post('/:id/submit', authMiddleware, (req: Request, res: Response, next: NextFunction) => {
-  console.log('=== ROUTE: ASSIGNMENT SUBMIT/RESUBMIT STARTED ===');
-  console.log('Route: Request method:', req.method);
-  console.log('Route: Request URL:', req.url);
-  console.log('Route: Assignment ID from params:', req.params.id);
-  console.log('Route: User from auth middleware:', req.user);
-  console.log('Route: Request headers:', req.headers);
-  console.log('Route: Request body keys:', Object.keys(req.body || {}));
-  
   assignmentSubmissionUpload.single('file')(req, res, (err) => {
-    console.log('Route: Multer middleware completed');
-    console.log('Route: Multer error:', err);
-    console.log('Route: File after multer:', req.file ? {
-      originalname: req.file.originalname,
-      size: req.file.size,
-      mimetype: req.file.mimetype,
-      path: req.file.path
-    } : 'No file');
-    
     if (err instanceof multer.MulterError) {
-      console.error('Route: Multer error occurred:', {
-        code: err.code,
-        message: err.message
-      });
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({
           success: false,
@@ -202,8 +126,6 @@ router.post('/:id/submit', authMiddleware, (req: Request, res: Response, next: N
       });
     }
 
-    console.log('Route: All validations passed, calling controller...');
-    console.log('=== ROUTE: ASSIGNMENT SUBMIT/RESUBMIT VALIDATION COMPLETED ===');
     expressAdapter(req, res, next, userAssignmentController.submitAssignment.bind(userAssignmentController));
   });
 });

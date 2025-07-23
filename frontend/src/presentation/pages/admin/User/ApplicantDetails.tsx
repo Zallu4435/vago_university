@@ -22,16 +22,9 @@ import RejectModal from '../../../components/admin/RejectModal';
 import WarningModal from '../../../components/common/WarningModal';
 import { useUserManagement } from '../../../../application/hooks/useUserManagement';
 import { documentUploadService } from '../../../../application/services/documentUploadService';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../../appStore/store';
 import { ApplicantDetailsProps } from '../../../../domain/types/management/usermanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate } from '../../../../shared/utils/dateUtils';
-
-const useAuth = () => {
-  const { token } = useSelector((state: RootState) => state.auth);
-  return { token };
-};
 
 const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
   selectedApplicant,
@@ -208,16 +201,12 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
         />
       ))}
 
-      {/* Main Container */}
       <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-5xl max-h-[90vh] rounded-2xl border border-purple-500/30 shadow-2xl overflow-hidden relative">
-        {/* Inner glow effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
 
-        {/* Corner decorations */}
         <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
         <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
 
-        {/* Header */}
         <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -275,7 +264,6 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             />
           </div>
 
-          {/* Personal Information */}
           <SectionCard
             title="Personal Information"
             icon={<FiUser className="text-purple-300" />}
@@ -833,7 +821,6 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
   );
 };
 
-// Component definitions
 const QuickInfoCard = ({ icon, title, value }: { icon: React.ReactNode; title: string; value: string }) => (
   <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-4 shadow-sm">
     <div className="flex items-center mb-2">

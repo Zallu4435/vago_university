@@ -8,7 +8,7 @@ import {
   IoDocumentTextOutline as FileText,
   IoDownloadOutline as Download,
 } from 'react-icons/io5';
-import { Payment, PaymentDetailsModalProps } from '../../../../domain/types/management/financialmanagement';
+import { PaymentDetailsModalProps } from '../../../../domain/types/management/financialmanagement';
 
 const StatusBadge = ({ status }: { status: string }) => {
   const statusConfig = {
@@ -64,7 +64,6 @@ const formatDate = (dateString: string): string => {
 
 const PaymentDetailsModal: React.FC<PaymentDetailsModalProps> = ({ isOpen, onClose, payment }) => {
 
-  console.log(payment, "pospdikpsojdoisahduishgd")
   if (!isOpen || !payment) return null;
 
   return (
@@ -145,7 +144,7 @@ const PaymentDetailsModal: React.FC<PaymentDetailsModalProps> = ({ isOpen, onClo
           </div>
         </div>
 
-        <style jsx>{`
+        <style>{`
           .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
           }

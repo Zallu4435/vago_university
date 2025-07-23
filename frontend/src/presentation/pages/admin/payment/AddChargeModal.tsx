@@ -3,15 +3,9 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { chargeSchema, ChargeFormDataRaw } from '../../../../domain/validation/management/chargeSchema';
 import { FiX as X, FiDollarSign, FiCalendar, FiFileText } from 'react-icons/fi';
-import { ChargeFormData } from '../../../../domain/types/management/financialmanagement';
+import { AddChargeModalProps, ChargeFormData } from '../../../../domain/types/management/financialmanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
-interface AddChargeModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (charge: ChargeFormData) => void;
-  initialValues?: Partial<ChargeFormData>;
-}
 
 const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubmit, initialValues }) => {
   const {
@@ -90,7 +84,6 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      {/* Background particles */}
       {ghostParticles.map((particle, i) => (
         <div
           key={i}
@@ -106,16 +99,12 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
         />
       ))}
 
-      {/* Main Container */}
       <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-2xl max-h-[90vh] rounded-2xl border border-purple-500/30 shadow-2xl overflow-hidden relative">
-        {/* Inner glow effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
 
-        {/* Corner decorations */}
         <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
         <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
 
-        {/* Header */}
         <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -136,7 +125,6 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
           </div>
         </div>
 
-        {/* Form Content */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-purple-100 mb-4 flex items-center gap-2">
@@ -144,7 +132,6 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
               Charge Details
             </h3>
             <div className="grid grid-cols-1 gap-6">
-              {/* Title */}
               <div>
                 <label className="block text-sm font-medium text-purple-300 mb-2">Title *</label>
                 <Controller
@@ -166,7 +153,6 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
                 {errors.title && <p className="mt-1 text-sm text-red-400">{errors.title.message}</p>}
               </div>
 
-              {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-purple-300 mb-2">Description *</label>
                 <Controller
@@ -185,7 +171,6 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
                 {errors.description && <p className="mt-1 text-sm text-red-400">{errors.description.message}</p>}
               </div>
 
-              {/* Amount */}
               <div>
                 <label className="block text-sm font-medium text-purple-300 mb-2">Amount ($)*</label>
                 <Controller
@@ -209,7 +194,6 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
                 {errors.amount && <p className="mt-1 text-sm text-red-400">{errors.amount.message}</p>}
               </div>
 
-              {/* Term */}
               <div>
                 <label className="block text-sm font-medium text-purple-300 mb-2">Term *</label>
                 <Controller
@@ -231,7 +215,6 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
                 {errors.term && <p className="mt-1 text-sm text-red-400">{errors.term.message}</p>}
               </div>
 
-              {/* Due Date */}
               <div>
                 <label className="block text-sm font-medium text-purple-300 mb-2">Due Date *</label>
                 <Controller
@@ -252,7 +235,6 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
                 {errors.dueDate && <p className="mt-1 text-sm text-red-400">{errors.dueDate.message}</p>}
               </div>
 
-              {/* Applicable For */}
               <div>
                 <label className="block text-sm font-medium text-purple-300 mb-2">Applicable For *</label>
                 <Controller
@@ -273,7 +255,6 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
             </div>
           </div>
 
-          {/* Footer Actions */}
           <div className="border-t border-purple-500/30 bg-gray-900/80 p-6">
             <div className="flex justify-end gap-4">
               <button
@@ -303,7 +284,7 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .no-scroll {
           overflow: hidden;
         }

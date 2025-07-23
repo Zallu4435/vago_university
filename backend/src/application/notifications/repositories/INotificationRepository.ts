@@ -17,7 +17,6 @@ import {
 } from "../../../domain/notifications/dtos/NotificationResponseDTOs";
 
 export interface INotificationRepository {
-    // Original DTO-based methods (for backward compatibility)
     createNotification(params: CreateNotificationRequestDTO): Promise<CreateNotificationResponseDTO>;
     getAllNotifications(params: GetAllNotificationsRequestDTO): Promise<GetAllNotificationsResponseDTO>;
     getIndividualNotification(params: GetIndividualNotificationRequestDTO): Promise<GetIndividualNotificationResponseDTO>;
@@ -25,7 +24,6 @@ export interface INotificationRepository {
     markNotificationAsRead(params: MarkNotificationAsReadRequestDTO): Promise<MarkNotificationAsReadResponseDTO>;
     markAllNotificationsAsRead(params: MarkAllNotificationsAsReadRequestDTO): Promise<MarkAllNotificationsAsReadResponseDTO>;
     
-    // New simple CRUD methods
     create(data: NotificationProps): Promise<any>;
     find(filter: any, options: { skip?: number; limit?: number; sort?: any }): Promise<any[]>;
     count(filter: any): Promise<number>;
@@ -33,7 +31,6 @@ export interface INotificationRepository {
     update(id: string, data: Partial<NotificationProps>): Promise<any | null>;
     delete(id: string): Promise<void>;
     
-    // User-specific methods
     findUsersByCollection(collection: string): Promise<any[]>;
     findFacultyByCollection(collection: string): Promise<any[]>;
     removeToken(token: string): Promise<void>;

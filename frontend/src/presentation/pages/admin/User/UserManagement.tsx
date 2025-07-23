@@ -86,7 +86,7 @@ const UserManagement: React.FC = () => {
     approveAdmission,
     rejectAdmission,
     deleteAdmission,
-    blockAdmission, // <-- add this
+    blockAdmission,
   } = useUserManagement();
 
   const debouncedFilterChange = useCallback(
@@ -96,22 +96,20 @@ const UserManagement: React.FC = () => {
     []
   );
 
-  // Handle search query changes with debouncing
   const debouncedSearchChange = useCallback(
     debounce((query: string) => {
       setFilters((prev) => ({ ...prev, search: query }));
-      setPage(1); // Reset to first page when searching
+      setPage(1); 
     }, 500),
     []
   );
 
   const handleCustomDateChange = (field: 'startDate' | 'endDate', value: string) => {
     setCustomDateRange((prev) => ({ ...prev, [field]: value }));
-    // Also update the filters state so the dates get sent to the backend
     setFilters((prev) => ({
       ...prev,
       [field]: value,
-      dateRange: 'custom' // Set dateRange to 'custom' when custom dates are selected
+      dateRange: 'custom' 
     }));
   };
 
@@ -186,7 +184,6 @@ const UserManagement: React.FC = () => {
       setShowBlockWarning(false);
       setAdmissionToBlock(null);
     } catch (error) {
-      // Optionally show error toast
       setShowBlockWarning(false);
       setAdmissionToBlock(null);
     }
@@ -197,12 +194,12 @@ const UserManagement: React.FC = () => {
       status: 'all',
       program: 'all',
       dateRange: 'all',
-      search: '', // Keep search empty
-      startDate: '', // Clear custom start date
-      endDate: '', // Clear custom end date
+      search: '', 
+      startDate: '', 
+      endDate: '', 
     });
     setCustomDateRange({ startDate: '', endDate: '' });
-    setPage(1); // Reset page to 1 when resetting filters
+    setPage(1); 
   };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -248,9 +245,6 @@ const UserManagement: React.FC = () => {
       disabled: (user: User) => user.status !== 'approved',
     },
   ];
-
-  // Remove frontend filtering since we're using backend search
-  // const filteredAdmissions = filterAdmissions(users, searchQuery, filters, customDateRange);
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -424,7 +418,7 @@ const UserManagement: React.FC = () => {
         />
       )}
 
-      <style jsx>{`
+      <style>{`
         @keyframes floatingMist {
           0% {
             transform: translateY(0) translateX(0);

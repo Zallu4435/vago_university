@@ -59,13 +59,10 @@ export class UserAssignmentController implements IUserAssignmentController {
     if (!fileName || typeof fileName !== 'string') {
       return this.httpErrors.error_400();
     }
-    // Check if it's a Cloudinary URL
     if (fileUrl.includes('cloudinary.com')) {
-      // Extract public ID from URL
       const publicId = fileUrl
         .replace(/^https:\/\/res\.cloudinary\.com\/vago-university\/[^\/]+\/upload\/v[0-9]+\//, '')
-        .replace(/\.[^/.]+$/, ''); // Remove file extension
-      // Generate signed URL
+        .replace(/\.[^/.]+$/, '');
       const signedUrl = cloudinary.url(publicId, {
         resource_type: 'auto',
         secure: true,
@@ -78,7 +75,6 @@ export class UserAssignmentController implements IUserAssignmentController {
         fileName: fileName
       });
     } else {
-      // For non-Cloudinary URLs, return as is
       return this.httpSuccess.success_200({
         downloadUrl: fileUrl,
         fileName: fileName

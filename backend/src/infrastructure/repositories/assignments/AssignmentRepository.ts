@@ -108,8 +108,6 @@ export class AssignmentRepository implements IAssignmentRepository {
   }
 
   async getAnalytics(): Promise<any> {
-    // Only fetch and return raw analytics data, no mapping or calculations
-    // (You may want to return the raw aggregation results here)
     return {};
   }
 } 

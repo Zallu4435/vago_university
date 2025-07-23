@@ -33,8 +33,8 @@ import {
         limit: Number(limit),
         status: String(status),
         type: String(category),
-        startDate: startDate ? String(startDate) : undefined,
-        endDate: endDate ? String(endDate) : undefined,
+        startDate: startDate ? new Date(startDate) : undefined,
+        endDate: endDate ? new Date(endDate) : undefined,
         search: search ? String(search) : undefined,
       };
       const response = await this.getClubRequestsUseCase.execute(getClubRequestsRequestDTO);
@@ -73,7 +73,6 @@ import {
   }
   
   export const clubRequestController = new ClubRequestController(
-    // Dependency injection placeholders
     {} as GetClubRequestsUseCase,
     {} as ApproveClubRequestUseCase,
     {} as RejectClubRequestUseCase,

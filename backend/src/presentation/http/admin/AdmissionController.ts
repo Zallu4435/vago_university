@@ -135,7 +135,6 @@ export class AdminAdmissionController implements IAdminAdmissionController {
   }
 
   async serveDocument(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log(httpRequest.user, "jsojiojoj");
     if (!httpRequest.user) {
       return this.httpErrors.error_401();
     }
@@ -147,7 +146,6 @@ export class AdminAdmissionController implements IAdminAdmissionController {
     const { documentId } = httpRequest.params || {};
     const { admissionId } = httpRequest.query || {};
 
-    console.log(documentId, admissionId);
     if (!documentId) {
       return this.httpErrors.error_400();
     }
@@ -204,7 +202,6 @@ export class AdminAdmissionController implements IAdminAdmissionController {
     if (!id) {
       return this.httpErrors.error_400();
     }
-    // The use case will toggle block/unblock and return a message
     const response = await this.blockAdmissionUseCase.execute({ id });
     if (!response.success) {
       return this.httpErrors.error_400();

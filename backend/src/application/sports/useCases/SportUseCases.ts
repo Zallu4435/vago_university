@@ -24,7 +24,6 @@ export class GetSportsUseCase {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
       throw new Error("Invalid page or limit parameters");
     }
-    // Additional filtering/validation can be added here as needed
     const { sports, totalItems, totalPages, currentPage } = await this.sportsRepository.getSports(params);
     const mappedSports: SportSummaryDTO[] = sports.map((sport: any) => ({
       id: sport._id?.toString() || sport.id,
@@ -62,7 +61,6 @@ export class GetSportByIdUseCase {
     if (!sport) {
       throw new Error("Sport not found");
     }
-    // Return the full sport document as is
     return {
       sport: sport
     };

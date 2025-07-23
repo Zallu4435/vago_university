@@ -106,20 +106,15 @@ export class AdmissionController implements IAdmissionController {
   }
 
   async serveDocument(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log('[serveDocument] user:', httpRequest.user);
-    console.log('[serveDocument] params:', httpRequest.params);
     if (!httpRequest.user) return this.httpErrors.error_401();
     const { userId } = httpRequest.user;
     const { documentId } = httpRequest.params || {};
     if (!documentId) {
-      console.log('[serveDocument] Missing documentId');
       return this.httpErrors.error_400();
     }
     const document = await this.getDocumentByKeyUseCase.execute({ userId, documentKey: documentId });
-    console.log('[serveDocument] Fetched document:', document);
     if (!document) return this.httpErrors.error_404();
     if (!document.cloudinaryUrl) return this.httpErrors.error_404();
-    // Fetch the file from Cloudinary and return as base64
     const response = await axios.get(document.cloudinaryUrl, { responseType: 'arraybuffer' });
     const base64 = Buffer.from(response.data, 'binary').toString('base64');
     return this.httpSuccess.success_200({

@@ -15,6 +15,7 @@ import {
   getMaterialColumns,
 } from '../../../../shared/constants/materialManagementConstants';
 import LoadingSpinner from '../../../components/common/LoadingSpinner';
+import ErrorMessage from '../../../../shared/components/ErrorMessage';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -196,26 +197,24 @@ const MaterialManagement: React.FC = () => {
       color: 'red' as const,
     },
     {
-      icon: <FiLock size={16} />, // Will be replaced below
-      label: 'Restrict/Unrestrict', // Will be replaced below
+      icon: <FiLock size={16} />, 
+      label: 'Restrict/Unrestrict', 
       onClick: (material: MaterialWithId) => {
         setMaterialToToggle({ material, isRestricted: !material.isRestricted });
         setShowToggleWarning(true);
       },
       color: 'yellow' as const,
-      // Custom render for icon/label in ApplicationsTable
       customIcon: (material: MaterialWithId) => (material.isRestricted ? <FiUnlock size={16} /> : <FiLock size={16} />),
       customLabel: (material: MaterialWithId) => (material.isRestricted ? 'Unrestrict Material' : 'Restrict Material'),
     },
   ];
 
 
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
   if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-500">Error: {error.message}</div>
-      </div>
-    );
+    return <ErrorMessage message={error.message} />;
   }
 
   return (
@@ -286,7 +285,6 @@ const MaterialManagement: React.FC = () => {
 
         <div className="mt-8">
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden border border-purple-500/20 min-h-[300px] relative">
-            {/* Loading overlay for material table/grid only */}
             {isLoading ? (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-900/60 z-20 rounded-xl">
                 <LoadingSpinner />

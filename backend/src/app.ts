@@ -31,13 +31,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Add cookie-parser middleware
 app.use(cookieParser());
 
-// Add logger middleware
 app.use(loggerMiddleware);
 
-// Create a single Socket.IO server instance
 const io = new SocketIOServer(httpServer, {
   cors: corsOptions,
   transports: ["websocket", "polling"],
@@ -46,25 +43,20 @@ const io = new SocketIOServer(httpServer, {
   pingInterval: 25000,
 });
 
-// Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Serve uploaded files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Initialize Socket.IO services
 Logger.info('Initializing Socket.IO services...');
 import { SocketService } from "./infrastructure/services/socket/SocketService";
 const socketService = new SocketService(io);
 setupSessionSocketHandlers(io);
 Logger.info('Socket.IO services initialized');
 
-// Routes
 app.use("/api/chats", chatRouter);
 app.use("/api", indexRoute);
 
-// Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   Logger.error(`Error: ${err.message}`);
   Logger.error(`Stack: ${err.stack}`);
@@ -79,7 +71,6 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-// MongoDB connection
 mongoose
   .connect(config.database.mongoUri, {
     serverSelectionTimeoutMS: 30000,

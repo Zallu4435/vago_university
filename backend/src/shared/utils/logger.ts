@@ -2,13 +2,11 @@ import winston from 'winston';
 import path from 'path';
 import fs from 'fs';
 
-// Create logs directory if it doesn't exist
 const logsDir = path.join(process.cwd(), 'logs');
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
-// Define log levels
 const levels = {
   error: 0,
   warn: 1,
@@ -17,13 +15,11 @@ const levels = {
   debug: 4,
 };
 
-// Define log level based on environment
 const level = () => {
   const env = process.env.NODE_ENV || 'development';
   return env === 'development' ? 'debug' : 'warn';
 };
 
-// Define colors for each level
 const colors = {
   error: 'red',
   warn: 'yellow',
@@ -32,10 +28,8 @@ const colors = {
   debug: 'white',
 };
 
-// Add colors to winston
 winston.addColors(colors);
 
-// Custom format for console output (with colors)
 const consoleFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
   winston.format.colorize({ all: true }),
@@ -46,30 +40,25 @@ const consoleFormat = winston.format.combine(
   })
 );
 
-// Format for file output (without colors)
 const fileFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
   winston.format.json()
 );
 
-// Create the logger
 const Logger = winston.createLogger({
   level: level(),
   levels,
   transports: [
-    // Console transport
     new winston.transports.Console({
       format: consoleFormat
     }),
     
-    // Error log file
     new winston.transports.File({
       filename: path.join(logsDir, 'error.log'),
       level: 'error',
       format: fileFormat
     }),
     
-    // Combined log file
     new winston.transports.File({
       filename: path.join(logsDir, 'combined.log'),
       format: fileFormat

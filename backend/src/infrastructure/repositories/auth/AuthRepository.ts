@@ -1,4 +1,4 @@
-// infrastructure/repositories/auth/AuthRepository.ts (Updated)
+
 import {
     UserAlreadyExistsError, InvalidCredentialsError, EmailNotConfirmedError,
     AdmissionExistsError, EmailNotFoundError,
@@ -196,13 +196,6 @@ export class AuthRepository implements IAuthRepository {
         return { message: "User found for OTP." };
     }
 
-    // --- VERIFY EMAIL OTP (REMOVED from repo logic) ---
-    // This method is now entirely handled by OtpService and JwtService within the Use Case.
-    // async verifyEmailOtp(params: VerifyEmailOtpRequestDTO): Promise<VerifyEmailOtpResponseDTO> {
-    //     // This method should be removed from here.
-    //     // Its logic is now in VerifyEmailOtpUseCase.
-    //     throw new Error("VerifyEmailOtp logic moved to Use Case and OtpService.");
-    // }
 
     async resetPassword(params: ResetPasswordRequestDTO): Promise<ResetPasswordResponseDTO> {
         const userResult = await this.findUserByEmailAcrossCollections(params.email); // `email` comes from verified token in Use Case
@@ -252,7 +245,6 @@ export class AuthRepository implements IAuthRepository {
         return { message: "Email confirmed successfully. You can now log in." };
     }
 
-    // --- SESSION-BASED METHODS BELOW ---
     async createRefreshSession(params: {
         userId: string;
         sessionId: string;
@@ -284,14 +276,10 @@ export class AuthRepository implements IAuthRepository {
 
     async findSessionByUserIdAndDevice(userId: string, userAgent: string, ipAddress: string): Promise<any> {
         const session = await RefreshSession.findOne({ userId, userAgent, ipAddress });
-        if (session) {
-            console.log('Found existing session for user/device:', session.sessionId);
-        }
         return session;
     }
 
     async findLatestSessionByUserId(userId: string): Promise<any> {
-        // Find the most recently used session for this user
         return await RefreshSession.findOne({ userId }).sort({ lastUsedAt: -1 });
     }
 

@@ -27,6 +27,7 @@ import { TeamModel } from '../../database/mongoose/models/sports.model';
 import { Diploma } from '../../database/mongoose/models/diploma.model';
 import { CampusEventModel } from '../../database/mongoose/models/events/CampusEventModel';
 import { ClubModel } from '../../database/mongoose/models/clubs/ClubModel';
+import { PerformanceRawData } from '../../../domain/admindashboard/entities/AdminDashboardTypes';
 
 export class DashboardRepository implements IDashboardRepository {
   async getDashboardData(params: GetDashboardDataRequestDTO): Promise<any> {
@@ -128,7 +129,7 @@ export class DashboardRepository implements IDashboardRepository {
     return revenueRaw;
   }
 
-  async getPerformanceData(params: GetPerformanceDataRequestDTO): Promise<any> {
+  async getPerformanceData(params: GetPerformanceDataRequestDTO): Promise<PerformanceRawData> {
     const [
       userCount,
       facultyCount,
@@ -192,7 +193,6 @@ export class DashboardRepository implements IDashboardRepository {
   }
 
   async getSystemAlerts(params: GetSystemAlertsRequestDTO): Promise<any> {
-    // Only fetch raw counts for alerts
     const [pendingAdmissions, failedPayments, overdueCharges, completedPayments] = await Promise.all([
       Admission.countDocuments({ status: 'pending' }),
       PaymentModel.countDocuments({ status: 'Failed' }),
@@ -208,21 +208,17 @@ export class DashboardRepository implements IDashboardRepository {
   }
 
   async refreshDashboard(params: RefreshDashboardRequestDTO): Promise<any> {
-    // Just call getDashboardData for fresh raw data
     return await this.getDashboardData({});
   }
 
   async dismissAlert(params: DismissAlertRequestDTO): Promise<any> {
-    // Just return the alertId for now
     return { alertId: params.alertId };
   }
 
   async markActivityAsRead(params: MarkActivityAsReadRequestDTO): Promise<any> {
-    // Just return the activityId for now
     return { activityId: params.activityId };
   }
 
-  // Helper methods
   private getTimeAgo(date: Date | string): string {
     const now = new Date();
     const dateObj = typeof date === 'string' ? new Date(date) : date;

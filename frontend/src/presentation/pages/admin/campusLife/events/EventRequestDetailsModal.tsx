@@ -15,7 +15,6 @@ import {
   IoCloseCircleOutline as Reject
 } from 'react-icons/io5';
 import { 
-  EventRequest,
   EventRequestDetailsModalProps,
   EventRequestDetailsStatusBadgeProps,
   EventRequestDetailsInfoCardProps,
@@ -59,26 +58,13 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
   onApprove,
   onReject,
 }) => {
-  // Use the shared prevent body scroll hook
   usePreventBodyScroll(isOpen);
 
   if (!isOpen || !request) return null;
 
-  // Particle effect
-  const ghostParticles: ParticleConfig[] = Array(30)
-    .fill(0)
-    .map((_, i) => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
-
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
       <div className="relative bg-gray-800 rounded-lg shadow-xl border border-purple-500/30 w-full max-w-2xl mx-auto my-8 overflow-hidden">
-        {/* Header Section */}
         <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg border border-purple-500/30">
@@ -99,7 +85,6 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
             <X size={22} className="text-purple-300" />
           </button>
         </div>
-        {/* Scrollable Content Section */}
         <div className="p-6 max-h-[70vh] overflow-y-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <InfoCard icon={User} label="Requested By" value={request.user?.name || request.requestedBy} />
@@ -150,7 +135,6 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
             </div>
           )}
 
-          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4 mt-4">
             <button
               onClick={onClose}

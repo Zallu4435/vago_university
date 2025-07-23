@@ -4,12 +4,6 @@ import {
     ChangePasswordRequestDTO,
     UpdateProfilePictureRequestDTO,
 } from "../../../domain/profile/dtos/ProfileRequestDTOs";
-import {
-    ProfileResponseDTO,
-    UpdateProfileResponseDTO,
-    ChangePasswordResponseDTO,
-    UpdateProfilePictureResponseDTO,
-} from "../../../domain/profile/dtos/ProfileResponseDTOs";
 
 export interface IProfileRepository {
     getProfile(params: GetProfileRequestDTO): Promise<any>;

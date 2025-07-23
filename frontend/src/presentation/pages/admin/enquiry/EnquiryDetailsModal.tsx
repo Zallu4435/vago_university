@@ -120,7 +120,6 @@ const EnquiryDetailsModal: React.FC<EnquiryDetailsModalProps> = ({ isOpen, onClo
               </div>
               <div>
                 <h2 className="text-xl font-bold text-purple-100">Enquiry Details</h2>
-                {/* <p className="text-sm text-purple-300">Enquiry ID: {enquiry.id}</p> */}
                 <div className="flex items-center mt-2">
                   <StatusBadge status={enquiry.status} />
                 </div>
@@ -155,7 +154,6 @@ const EnquiryDetailsModal: React.FC<EnquiryDetailsModalProps> = ({ isOpen, onClo
             <InfoCard icon={Calendar} label="Updated At" value={formatDate(enquiry.updatedAt)} />
           </div>
 
-          {/* Status Section */}
           <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">

@@ -19,9 +19,6 @@ import { IDiploma } from '../repositories/IVideoRepository';
 import {
     InvalidVideoIdError,
     VideoNotFoundError,
-    InvalidModuleNumberError,
-    InvalidStatusError,
-    InvalidDurationError,
     InvalidDiplomaIdError,
     DomainError
 } from '../../../domain/video/errors/VideoErrors';
@@ -184,7 +181,6 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
                         await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
                     }
                 } catch (deleteError: any) {
-                    // Log and continue
                 }
             }
             try {
@@ -247,7 +243,6 @@ export class DeleteVideoUseCase implements IDeleteVideoUseCase {
                     await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
                 }
             } catch (error: any) {
-                // Log and continue
             }
         }
         await this.videoRepository.removeVideoFromDiploma(video.diplomaId, video.id);

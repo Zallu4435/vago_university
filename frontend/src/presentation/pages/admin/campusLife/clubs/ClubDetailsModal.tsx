@@ -8,13 +8,12 @@ import {
   IoInformationCircleOutline as Info,
   IoSparklesOutline as Sparkles,
 } from 'react-icons/io5';
-import { 
-  Club, 
-  ClubRequest, 
-  StatusBadgeProps, 
-  InfoCardProps, 
+import {
+  Club,
+  StatusBadgeProps,
+  InfoCardProps,
   ClubDetailsModalProps,
-  ParticleConfig 
+  ParticleConfig
 } from '../../../../../domain/types/management/clubmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate } from '../../../../../shared/utils/dateUtils';
@@ -70,7 +69,6 @@ const InfoCard: React.FC<InfoCardProps> = ({ icon: Icon, label, value }) => (
 );
 
 const ClubDetailsModal: React.FC<ClubDetailsModalProps> = ({ isOpen, onClose, club, onEdit }) => {
-  // Use the shared prevent body scroll hook
   usePreventBodyScroll(isOpen);
 
   if (!isOpen || !club) return null;
@@ -80,7 +78,6 @@ const ClubDetailsModal: React.FC<ClubDetailsModalProps> = ({ isOpen, onClose, cl
   const createdBy = isClub ? club.createdBy : club.requestedBy;
   const OrganizerIcon = createdBy?.includes('Admin') ? Building : User;
 
-  // Particle effect
   const ghostParticles: ParticleConfig[] = Array(30)
     .fill(0)
     .map((_, i) => ({
@@ -91,9 +88,8 @@ const ClubDetailsModal: React.FC<ClubDetailsModalProps> = ({ isOpen, onClose, cl
       animDelay: Math.random() * 5,
     }));
 
-    return (
+  return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      {/* Background particles */}
       {ghostParticles.map((particle, i) => (
         <div
           key={i}
@@ -109,16 +105,12 @@ const ClubDetailsModal: React.FC<ClubDetailsModalProps> = ({ isOpen, onClose, cl
         />
       ))}
 
-      {/* Main Modal Container */}
       <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-4xl max-h-[90vh] rounded-2xl border border-purple-600/30 shadow-2xl overflow-hidden relative">
-        {/* Inner glow effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
 
-        {/* Corner decorations */}
         <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
         <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
 
-        {/* Header Section */}
         <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -145,9 +137,7 @@ const ClubDetailsModal: React.FC<ClubDetailsModalProps> = ({ isOpen, onClose, cl
           </div>
         </div>
 
-        {/* Content Section */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
-          {/* Status and Key Info Row */}
           <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
             <StatusBadge status={club.status} />
             <div className="flex items-center space-x-6 text-sm text-purple-300">
@@ -170,7 +160,6 @@ const ClubDetailsModal: React.FC<ClubDetailsModalProps> = ({ isOpen, onClose, cl
             </div>
           </div>
 
-          {/* Main Info Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             <InfoCard
               icon={OrganizerIcon}
@@ -196,7 +185,6 @@ const ClubDetailsModal: React.FC<ClubDetailsModalProps> = ({ isOpen, onClose, cl
             )}
           </div>
 
-          {/* Description Section */}
           <div className="mb-8">
             <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg shadow-sm overflow-hidden">
               <div className="p-4 bg-gray-900/60 flex items-center">
@@ -233,7 +221,6 @@ const ClubDetailsModal: React.FC<ClubDetailsModalProps> = ({ isOpen, onClose, cl
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="border-t border-purple-600/30 bg-gray-900/80 p-6">
             <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
               <button

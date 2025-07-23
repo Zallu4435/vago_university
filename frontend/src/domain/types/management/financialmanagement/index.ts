@@ -132,3 +132,26 @@ export interface ReceiptModalProps {
   onClose: () => void;
   receiptUrl: string;
 }
+
+
+export interface ActionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
+  type: 'success' | 'danger';
+}
+
+export interface AddChargeModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (charge: ChargeFormData) => void;
+  initialValues?: Partial<ChargeFormData>;
+}
+
+export interface ChargeDetailsModalProps {
+  charge: Charge;
+  isOpen: boolean;
+  onClose: () => void;
+}

@@ -3,8 +3,6 @@ import Stripe from "stripe";
 import { AdmissionErrorType } from "../../../domain/admission/enums/AdmissionErrorType";
 import {
     CreateApplicationRequestDTO,
-    GetApplicationRequestDTO,
-    SaveSectionRequestDTO,
     ProcessPaymentRequestDTO,
     ConfirmPaymentRequestDTO,
     FinalizeAdmissionRequestDTO,
@@ -13,8 +11,6 @@ import {
 } from "../../../domain/admission/dtos/AdmissionRequestDTOs";
 import {
     CreateApplicationResponseDTO,
-    GetApplicationResponseDTO,
-    SaveSectionResponseDTO,
     ProcessPaymentResponseDTO,
     ConfirmPaymentResponseDTO,
     FinalizeAdmissionResponseDTO,

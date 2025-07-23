@@ -6,10 +6,8 @@ import { authMiddleware } from '../../../shared/middlewares/authMiddleware';
 const router = Router();
 const adminDashboardController = getAdminDashboardComposer();
 
-// Apply authentication middleware to all routes
 router.use(authMiddleware);
 
-// Dashboard routes
 router.get('/', (req, res, next) => 
   expressAdapter(req, res, next, adminDashboardController.adminDashboardController.getDashboardData.bind(adminDashboardController.adminDashboardController))
 );

@@ -1,4 +1,3 @@
-// application/auth/services/IEmailService.ts (Updated)
 
 import {
     AdmissionOfferEmailParams,
@@ -7,7 +6,7 @@ import {
     PasswordResetOtpEmailParams,
     RegistrationConfirmationEmailParams,
     EnquiryReplyEmailParams,
-} from './EmailServiceParams'; // Import from the new file
+} from './EmailServiceParams';
 
 export interface IEmailService {
     sendAdmissionOfferEmail(params: AdmissionOfferEmailParams): Promise<void>;

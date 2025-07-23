@@ -6,13 +6,11 @@ import { z } from 'zod';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 import { SiteSectionFormProps, SectionField } from '../../../../domain/types/management/sitemanagement';
 
-// Create dynamic Zod schema based on fields
 const createSchema = (fields: SectionField[]) => {
   const schemaObject: Record<string, any> = {};
   
   fields.forEach(field => {
     if (field.type === 'image') {
-      // Accept string (for existing image URL) or File (for new upload)
       schemaObject[field.name] = z.union([z.string(), z.instanceof(File)]).optional();
     } else if (field.required) {
       schemaObject[field.name] = z.string().min(1, `${field.label} is required`);
@@ -51,10 +49,8 @@ const SiteSectionForm: React.FC<SiteSectionFormProps> = ({ fields, initialData, 
   const onSubmit = async (data: FormData) => {
     try {
       if (initialData?.id) {
-        // Only include id if editing
         await onSuccess({ ...data, id: initialData.id });
       } else {
-        // Do not include id when creating
         await onSuccess(data);
       }
     } catch (error) {
@@ -62,7 +58,6 @@ const SiteSectionForm: React.FC<SiteSectionFormProps> = ({ fields, initialData, 
     }
   };
 
-  // Particle effect
   const ghostParticles = Array(30)
     .fill(0)
     .map((_, i) => ({
@@ -75,7 +70,6 @@ const SiteSectionForm: React.FC<SiteSectionFormProps> = ({ fields, initialData, 
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      {/* Background particles */}
       {ghostParticles.map((particle, i) => (
         <div
           key={i}
@@ -90,14 +84,10 @@ const SiteSectionForm: React.FC<SiteSectionFormProps> = ({ fields, initialData, 
           }}
         />
       ))}
-      {/* Main Modal Container */}
       <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-4xl max-h-[90vh] rounded-2xl border border-purple-600/30 shadow-2xl overflow-hidden relative">
-        {/* Inner glow effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
-        {/* Corner decorations */}
         <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
         <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
-        {/* Header Section */}
         <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -121,7 +111,6 @@ const SiteSectionForm: React.FC<SiteSectionFormProps> = ({ fields, initialData, 
             </button>
           </div>
         </div>
-        {/* Content Section */}
         <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {fields.map((field: SectionField) => (

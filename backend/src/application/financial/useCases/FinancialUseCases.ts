@@ -75,17 +75,11 @@ export class GetStudentFinancialInfoUseCase implements IGetStudentFinancialInfoU
     constructor(private financialRepository: IFinancialRepository) { }
 
     async execute(params: GetStudentFinancialInfoRequestDTO): Promise<ResponseDTO<GetStudentFinancialInfoResponseDTO>> {
-        try {
-            console.log(`Executing getStudentFinancialInfo use case with params:`, params);
-            if (!mongoose.Types.ObjectId.isValid(params.studentId)) {
-                return { data: { error: FinancialErrorType.InvalidStudentId }, success: false };
-            }
-            const result = await this.financialRepository.getStudentFinancialInfo(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("GetStudentFinancialInfoUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.MissingRequiredFields }, success: false };
+        if (!mongoose.Types.ObjectId.isValid(params.studentId)) {
+            return { data: { error: FinancialErrorType.InvalidStudentId }, success: false };
         }
+        const result = await this.financialRepository.getStudentFinancialInfo(params);
+        return { data: result, success: true };
     }
 }
 
@@ -93,14 +87,8 @@ export class GetAllPaymentsUseCase implements IGetAllPaymentsUseCase {
     constructor(private financialRepository: IFinancialRepository) { }
 
     async execute(params: GetAllPaymentsRequestDTO): Promise<ResponseDTO<GetAllPaymentsResponseDTO>> {
-        try {
-            console.log(`Executing getAllPayments use case with params:`, params);
-            const result = await this.financialRepository.getAllPayments(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("GetAllPaymentsUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.PaymentNotFound }, success: false };
-        }
+        const result = await this.financialRepository.getAllPayments(params);
+        return { data: result, success: true };
     }
 }
 
@@ -108,17 +96,11 @@ export class GetOnePaymentUseCase implements IGetOnePaymentUseCase {
     constructor(private financialRepository: IFinancialRepository) { }
 
     async execute(params: GetOnePaymentRequestDTO): Promise<ResponseDTO<GetOnePaymentResponseDTO>> {
-        try {
-            console.log(`Executing getOnePayment use case with params:`, params);
-            if (!mongoose.Types.ObjectId.isValid(params.paymentId)) {
-                return { data: { error: FinancialErrorType.InvalidPaymentId }, success: false };
-            }
-            const result = await this.financialRepository.getOnePayment(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("GetOnePaymentUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.PaymentNotFound }, success: false };
+        if (!mongoose.Types.ObjectId.isValid(params.paymentId)) {
+            return { data: { error: FinancialErrorType.InvalidPaymentId }, success: false };
         }
+        const result = await this.financialRepository.getOnePayment(params);
+        return { data: result, success: true };
     }
 }
 
@@ -126,20 +108,14 @@ export class MakePaymentUseCase implements IMakePaymentUseCase {
     constructor(private financialRepository: IFinancialRepository) { }
 
     async execute(params: MakePaymentRequestDTO): Promise<ResponseDTO<MakePaymentResponseDTO>> {
-        try {
-            console.log(`Executing makePayment use case with params:`, params);
-            if (!mongoose.Types.ObjectId.isValid(params.studentId)) {
-                return { data: { error: FinancialErrorType.InvalidStudentId }, success: false };
-            }
-            if (params.amount <= 0) {
-                return { data: { error: FinancialErrorType.InvalidAmount }, success: false };
-            }
-            const result = await this.financialRepository.makePayment(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("MakePaymentUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.MissingRequiredFields }, success: false };
+        if (!mongoose.Types.ObjectId.isValid(params.studentId)) {
+            return { data: { error: FinancialErrorType.InvalidStudentId }, success: false };
         }
+        if (params.amount <= 0) {
+            return { data: { error: FinancialErrorType.InvalidAmount }, success: false };
+        }
+        const result = await this.financialRepository.makePayment(params);
+        return { data: result, success: true };
     }
 }
 
@@ -147,17 +123,11 @@ export class UploadDocumentUseCase implements IUploadDocumentUseCase {
     constructor(private financialRepository: IFinancialRepository) { }
 
     async execute(params: UploadDocumentRequestDTO): Promise<ResponseDTO<UploadDocumentResponseDTO>> {
-        try {
-            console.log(`Executing uploadDocument use case with params:`, params);
-            if (!params.file) {
-                return { data: { error: FinancialErrorType.FileRequired }, success: false };
-            }
-            const result = await this.financialRepository.uploadDocument(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("UploadDocumentUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.FileRequired }, success: false };
+        if (!params.file) {
+            return { data: { error: FinancialErrorType.FileRequired }, success: false };
         }
+        const result = await this.financialRepository.uploadDocument(params);
+        return { data: result, success: true };
     }
 }
 
@@ -165,17 +135,11 @@ export class GetPaymentReceiptUseCase implements IGetPaymentReceiptUseCase {
     constructor(private financialRepository: IFinancialRepository) { }
 
     async execute(params: GetPaymentReceiptRequestDTO): Promise<ResponseDTO<GetPaymentReceiptResponseDTO>> {
-        try {
-            console.log(`Executing getPaymentReceipt use case with params:`, params);
-            if (!mongoose.Types.ObjectId.isValid(params.studentId) || !mongoose.Types.ObjectId.isValid(params.paymentId)) {
-                return { data: { error: FinancialErrorType.InvalidId }, success: false };
-            }
-            const result = await this.financialRepository.getPaymentReceipt(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("GetPaymentReceiptUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.ReceiptNotFound }, success: false };
+        if (!mongoose.Types.ObjectId.isValid(params.studentId) || !mongoose.Types.ObjectId.isValid(params.paymentId)) {
+            return { data: { error: FinancialErrorType.InvalidId }, success: false };
         }
+        const result = await this.financialRepository.getPaymentReceipt(params);
+        return { data: result, success: true };
     }
 }
 
@@ -183,20 +147,14 @@ export class CreateChargeUseCase implements ICreateChargeUseCase {
     constructor(private financialRepository: IFinancialRepository) { }
 
     async execute(params: CreateChargeRequestDTO): Promise<ResponseDTO<CreateChargeResponseDTO>> {
-        try {
-            console.log(`Executing createCharge use case with params:`, params);
-            if (params.amount <= 0) {
-                return { data: { error: FinancialErrorType.InvalidAmount }, success: false };
-            }
-            if (!params.title || !params.description || !params.term || !params.applicableFor) {
-                return { data: { error: FinancialErrorType.MissingRequiredFields }, success: false };
-            }
-            const result = await this.financialRepository.createCharge(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("CreateChargeUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.MissingRequiredFields }, success: false };
+        if (params.amount <= 0) {
+            return { data: { error: FinancialErrorType.InvalidAmount }, success: false };
         }
+        if (!params.title || !params.description || !params.term || !params.applicableFor) {
+            return { data: { error: FinancialErrorType.MissingRequiredFields }, success: false };
+        }
+        const result = await this.financialRepository.createCharge(params);
+        return { data: result, success: true };
     }
 }
 
@@ -204,23 +162,17 @@ export class UpdateChargeUseCase implements IUpdateChargeUseCase {
     constructor(private financialRepository: IFinancialRepository) { }
 
     async execute(params: UpdateChargeRequestDTO): Promise<ResponseDTO<UpdateChargeResponseDTO>> {
-        try {
-            console.log(`Executing updateCharge use case with params:`, params);
-            if (!mongoose.Types.ObjectId.isValid(params.id)) {
-                return { data: { error: FinancialErrorType.InvalidChargeId }, success: false };
-            }
-            if (params.amount <= 0) {
-                return { data: { error: FinancialErrorType.InvalidAmount }, success: false };
-            }
-            if (!params.title || !params.description || !params.term || !params.applicableFor) {
-                return { data: { error: FinancialErrorType.MissingRequiredFields }, success: false };
-            }
-            const result = await this.financialRepository.updateCharge(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("UpdateChargeUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.MissingRequiredFields }, success: false };
+        if (!mongoose.Types.ObjectId.isValid(params.id)) {
+            return { data: { error: FinancialErrorType.InvalidChargeId }, success: false };
         }
+        if (params.amount <= 0) {
+            return { data: { error: FinancialErrorType.InvalidAmount }, success: false };
+        }
+        if (!params.title || !params.description || !params.term || !params.applicableFor) {
+            return { data: { error: FinancialErrorType.MissingRequiredFields }, success: false };
+        }
+        const result = await this.financialRepository.updateCharge(params);
+        return { data: result, success: true };
     }
 }
 
@@ -228,17 +180,11 @@ export class DeleteChargeUseCase implements IDeleteChargeUseCase {
     constructor(private financialRepository: IFinancialRepository) { }
 
     async execute(params: DeleteChargeRequestDTO): Promise<ResponseDTO<DeleteChargeResponseDTO>> {
-        try {
-            console.log(`Executing deleteCharge use case with params:`, params);
-            if (!mongoose.Types.ObjectId.isValid(params.id)) {
-                return { data: { error: FinancialErrorType.InvalidChargeId }, success: false };
-            }
-            const result = await this.financialRepository.deleteCharge(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("DeleteChargeUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.MissingRequiredFields }, success: false };
+        if (!mongoose.Types.ObjectId.isValid(params.id)) {
+            return { data: { error: FinancialErrorType.InvalidChargeId }, success: false };
         }
+        const result = await this.financialRepository.deleteCharge(params);
+        return { data: result, success: true };
     }
 }
 
@@ -246,13 +192,7 @@ export class GetAllChargesUseCase implements IGetAllChargesUseCase {
     constructor(private financialRepository: IFinancialRepository) { }
 
     async execute(params: GetAllChargesRequestDTO): Promise<ResponseDTO<GetAllChargesResponseDTO>> {
-        try {
-            console.log(`Executing getAllCharges use case with params:`, params);
-            const result = await this.financialRepository.getAllCharges(params);
-            return { data: result, success: true };
-        } catch (error: any) {
-            console.error("GetAllChargesUseCase: Error:", error);
-            return { data: { error: error.message || FinancialErrorType.MissingRequiredFields }, success: false };
-        }
+        const result = await this.financialRepository.getAllCharges(params);
+        return { data: result, success: true };
     }
 }

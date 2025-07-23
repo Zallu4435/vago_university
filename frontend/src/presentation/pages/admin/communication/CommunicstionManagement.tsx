@@ -8,11 +8,6 @@ import {
   IoEyeOutline as Eye,
   IoReturnUpBackOutline as Reply,
   IoArchiveOutline as Archive,
-  IoTimeOutline as Clock,
-  IoCheckmarkCircleOutline as CheckCircle,
-  IoEllipseOutline as Circle,
-  IoAttachOutline as Paperclip,
-  IoCloseOutline as X,
   IoPersonOutline as Users,
 } from 'react-icons/io5';
 import { useCommunicationManagement } from '../../../../application/hooks/useCommunication';
@@ -23,7 +18,7 @@ import WarningModal from '../../../components/common/WarningModal';
 import ComposeMessageModal from './ComposeMessageModal'; // Shared with user side
 import MessageDetailsModal from './MessageDetailsModal'; // Shared with user side
 import debounce from 'lodash/debounce';
-import { Message, MessageStatus, MessageTab, UserGroup, MessageAction, MessageColumn } from '../../../../domain/types/management/communicationmanagement';
+import { Message } from '../../../../domain/types/management/communicationmanagement';
 import { STATUSES, USER_GROUPS, ITEMS_PER_PAGE, inboxColumns, sentColumns } from '../../../../shared/constants/communicationManagementConstants';
 
 const CommunicationManagement: React.FC = () => {

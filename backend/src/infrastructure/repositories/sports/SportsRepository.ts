@@ -80,7 +80,6 @@ export class SportsRepository implements ISportsRepository {
     if (type && type.toLowerCase() !== "all") {
       sportQuery.type = { $regex: `^${type}$`, $options: "i" };
     }
-    // Search logic for sport title/type or user email
     let matchingSports = [];
     let userIds: any[] = [];
     if (search && search.trim() !== "") {
@@ -132,7 +131,6 @@ export class SportsRepository implements ISportsRepository {
       { status: "approved", updatedAt: new Date() },
       { runValidators: true }
     );
-    // Increment participants in TeamModel can be handled in use case if needed
   }
 
   async rejectSportRequest(params: RejectSportRequestRequestDTO): Promise<void> {
@@ -151,7 +149,6 @@ export class SportsRepository implements ISportsRepository {
   }
 
   async joinSport(params: JoinSportRequestDTO): Promise<any> {
-    // Only create the join request, do not check for existence or throw errors
     const sportRequest = new SportRequestModel({
       sportId: params.sportId,
       userId: params.studentId,

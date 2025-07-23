@@ -20,6 +20,7 @@ import { Club, ClubRequest } from '../../../../../domain/types/club';
 import { ClubActionConfig } from '../../../../../domain/types/management/clubmanagement';
 import { CATEGORIES, CLUB_STATUSES, REQUEST_STATUSES, DATE_RANGES, ICONS, COLORS, clubColumns, clubRequestColumns } from '../../../../../shared/constants/clubManagementConstants';
 import LoadingSpinner from '../../../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../../../shared/components/ErrorMessage';
 
 
 const AdminClubManagement: React.FC = () => {
@@ -60,7 +61,6 @@ const AdminClubManagement: React.FC = () => {
   const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<ClubRequest | null>(null);
 
-  // Debounced search
   const [searchInput, setSearchInput] = useState(searchQuery);
   React.useEffect(() => {
     const handler = setTimeout(() => {
@@ -75,7 +75,6 @@ const AdminClubManagement: React.FC = () => {
     setShowAddClubModal(true);
   };
 
-  // Type guard helpers
   function isClub(item: Club | ClubRequest): item is Club {
     return (item as Club).createdBy !== undefined;
   }
@@ -257,12 +256,11 @@ const AdminClubManagement: React.FC = () => {
     },
   ];
 
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
   if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-red-500">Error: {error.message}</div>
-      </div>
-    );
+    return <ErrorMessage message={error.message} />;
   }
 
   return (

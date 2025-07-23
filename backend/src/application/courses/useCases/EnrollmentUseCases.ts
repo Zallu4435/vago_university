@@ -67,7 +67,6 @@ export class ApproveEnrollmentUseCase implements IApproveEnrollmentUseCase {
     if (!enrollment) {
       throw new EnrollmentNotFoundError(params.enrollmentId);
     }
-    // Additional business logic for approval can be added here
     return { success: true, data: undefined };
   }
 }
@@ -80,7 +79,6 @@ export class RejectEnrollmentUseCase implements IRejectEnrollmentUseCase {
     if (!enrollment) {
       throw new EnrollmentNotFoundError(params.enrollmentId);
     }
-    // Additional business logic for rejection can be added here
     return { success: true, data: undefined };
   }
 }
@@ -99,7 +97,6 @@ export class GetCourseRequestDetailsUseCase implements IGetCourseRequestDetailsU
     if (!enrollment.courseId) {
       throw new CourseNotFoundError();
     }
-    console.log(enrollment, "enrollment");
     return {
       success: true,
       data: {

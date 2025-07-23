@@ -26,12 +26,8 @@ declare global {
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Get access token from cookie
     const accessToken = req.cookies?.access_token;
-    console.log('authMiddleware: access_token from cookies:', accessToken);
     if (!accessToken) {
-      console.error('authMiddleware: No access token found in cookies');
-      console.log('Available cookies:', req.cookies);
       res.status(401).json({ 
         error: 'Access token missing',
         message: 'Please log in again to continue.',
@@ -40,7 +36,6 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
       return;
     }
 
-    // Verify access token
     let decoded;
     try {
       decoded = jwt.verify(accessToken, config.jwt.secret) as JwtPayload;
@@ -112,7 +107,6 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
       return;
     }
 
-    // Add user info to request with all necessary fields
     req.user = {
       userId: decoded.userId,
       collection: decoded.collection,

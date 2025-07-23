@@ -14,7 +14,6 @@ import {
 } from 'react-icons/io5';
 import { 
   Event, 
-  EventRequest, 
   EventDetailsModalProps,
   EventDetailsStatusBadgeProps,
   EventDetailsInfoCardProps,
@@ -59,7 +58,6 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
   event,
   onEdit,
 }) => {
-  // Use the shared prevent body scroll hook
   usePreventBodyScroll(isOpen);
 
   if (!isOpen || !event) return null;
@@ -74,7 +72,6 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
 
   const OrganizerIcon = getOrganizerIcon('_organizerType' in event ? event._organizerType : 'default');
 
-  // Particle effect
   const ghostParticles: ParticleConfig[] = Array(30)
     .fill(0)
     .map((_, i) => ({
@@ -88,7 +85,6 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
     console.log(event, "plpopopopopopo")
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      {/* Background particles */}
       {ghostParticles.map((particle, i) => (
         <div
           key={i}
@@ -104,16 +100,12 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
         />
       ))}
 
-      {/* Main Container */}
       <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-5xl max-h-[90vh] rounded-2xl border border-purple-500/30 shadow-2xl overflow-hidden relative">
-        {/* Inner glow effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
 
-        {/* Corner decorations */}
         <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
         <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
 
-        {/* Header Section */}
         <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -137,9 +129,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
           </div>
         </div>
 
-        {/* Content Section */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
-          {/* Key Info Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <InfoCard icon={OrganizerIcon} label="Organizer" value={event._organizer || event.organizer || 'Unknown'} />
             <InfoCard icon={Ticket} label="Event Type" value={event._eventType || event.type || 'Unknown'} />
@@ -149,7 +139,6 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
             <InfoCard icon={Calendar} label="Registration" value={event._registrationRequired !== undefined ? (event._registrationRequired ? "Required" : "Not Required") : (event.registrationRequired ? "Required" : "Not Required")} />
           </div>
 
-          {/* Description Section */}
           <div className="mb-8">
             <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg shadow-sm overflow-hidden">
               <div className="p-4 bg-gray-900/60 flex items-center">
@@ -180,7 +169,6 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="border-t border-purple-500/30 bg-gray-900/80 p-6">
             <div className="flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4">
               <button

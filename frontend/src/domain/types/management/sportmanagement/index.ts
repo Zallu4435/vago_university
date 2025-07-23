@@ -369,3 +369,20 @@ export interface PlayerRequest {
   requestedDate: string;
   status: string;
 }
+
+
+export interface EventModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: () => void;
+  form: {
+    title: string;
+    sportType: string;
+    teams: string[];
+    dateTime: string;
+    venue: string;
+    status: string;
+  };
+  setForm: (form: any) => void;
+  sportTypes: string[];
+}

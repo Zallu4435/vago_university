@@ -45,9 +45,7 @@ export class EventController implements IEventController {
       organizerType: String(organizerType),
       dateRange: String(dateRange),
     };
-    
-    console.log('Event controller received parameters:', getEventsRequestDTO);
-    
+        
     const response = await this.getEventsUseCase.execute(getEventsRequestDTO);
     return this.httpSuccess.success_200(response);
   }

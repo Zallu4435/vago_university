@@ -15,8 +15,6 @@ import {
 } from '../../../domain/assignments/dtos/UserAssignmentResponseDTOs';
 import { AssignmentErrorType } from '../../../domain/assignments/enums/AssignmentErrorType';
 import mongoose from 'mongoose';
-import { Assignment } from '../../../domain/assignments/entities/Assignment';
-import { Submission } from '../../../domain/assignments/entities/Submission';
 
 interface ResponseDTO<T> {
   data: T | { error: string };
@@ -54,7 +52,6 @@ export class GetUserAssignmentsUseCase implements IGetUserAssignmentsUseCase {
         return { data: { error: AssignmentErrorType.InvalidPageOrLimit }, success: false };
       }
     const { assignments, page, limit, status, studentId } = await this.userAssignmentRepository.getAssignments(params, params.studentId);
-    // Fetch submissions for all assignments for the student
     const assignmentIds = assignments.map((assignment: any) => assignment._id);
     const submissions = await (require('../../../infrastructure/database/mongoose/assignment/SubmissionModel').SubmissionModel).find({
       assignmentId: { $in: assignmentIds },
@@ -64,7 +61,6 @@ export class GetUserAssignmentsUseCase implements IGetUserAssignmentsUseCase {
     submissions.forEach((submission: any) => {
       submissionMap.set(submission.assignmentId.toString(), submission);
     });
-    // Filtering by status (graded/submitted) if needed
     let filteredAssignments = assignments;
     if (status && status !== 'all') {
       if (status === 'graded') {

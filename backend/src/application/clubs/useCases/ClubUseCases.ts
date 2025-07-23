@@ -13,7 +13,6 @@ import {
   ClubSummaryDTO,
 } from "../../../domain/clubs/dtos/ClubResponseDTOs";
 import { IClubsRepository } from "../repositories/IClubsRepository";
-import { Club, ClubStatus } from "../../../domain/clubs/entities/ClubTypes";
 import mongoose from "mongoose";
 
 export class GetClubsUseCase {
@@ -61,7 +60,6 @@ export class GetClubByIdUseCase {
     if (!club) {
       throw new Error("Club not found!");
     }
-    // Return the full club document as is
     return {
       club: club
     };
@@ -73,7 +71,6 @@ export class CreateClubUseCase {
 
   async execute(dto: CreateClubRequestDTO): Promise<CreateClubResponseDTO> {
     const newClub: any = await this.clubsRepository.createClub(dto);
-    // Return the full club document as is
     return {
       club: newClub
     };
@@ -91,7 +88,6 @@ export class UpdateClubUseCase {
     if (!updatedClub) {
       throw new Error("Club not found!");
     }
-    // Return the full club document as is
     return {
       club: updatedClub
     };

@@ -44,7 +44,6 @@ export class ApproveClubRequestUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new Error("Invalid club request ID");
     }
-    // Get the club request to validate business rules
     const clubRequest: any = await this.clubsRepository.getClubRequestDetails({ id: params.id });
     if (!clubRequest) {
       throw new Error("Club request not found");
@@ -64,7 +63,6 @@ export class RejectClubRequestUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new Error("Invalid club request ID");
     }
-    // Get the club request to validate business rules
     const clubRequest: any = await this.clubsRepository.getClubRequestDetails({ id: params.id });
     if (!clubRequest) {
       throw new Error("Club request not found");

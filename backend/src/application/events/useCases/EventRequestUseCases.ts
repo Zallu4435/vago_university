@@ -1,12 +1,9 @@
 import { GetEventRequestsRequestDTO, ApproveEventRequestRequestDTO, RejectEventRequestRequestDTO, GetEventRequestDetailsRequestDTO } from "../../../domain/events/dtos/EventRequestRequestDTOs";
 import { GetEventRequestsResponseDTO, GetEventRequestDetailsResponseDTO } from "../../../domain/events/dtos/EventRequestResponseDTOs";
 import { IEventsRepository } from "../repositories/IEventsRepository";
-import { EventErrorType } from "../../../domain/events/enums/EventErrorType";
 import mongoose from "mongoose";
-import { EventRequestStatus } from "../../../domain/events/entities/EventTypes";
 import { InvalidEventRequestIdError, EventRequestNotFoundError, AssociatedEventNotFoundError, InvalidEventStatusError } from "../../../domain/events/errors/EventErrors";
 
-// --- Use Case Interfaces (UPDATED: No ResponseDTO wrapper, direct returns) ---
 export interface IGetEventRequestsUseCase {
   execute(params: GetEventRequestsRequestDTO): Promise<GetEventRequestsResponseDTO>;
 }
@@ -27,7 +24,6 @@ export class GetEventRequestsUseCase implements IGetEventRequestsUseCase {
   constructor(private eventsRepository: IEventsRepository) { }
 
   async execute(params: GetEventRequestsRequestDTO): Promise<GetEventRequestsResponseDTO> {
-    // Business logic validation
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
       throw new Error("Invalid page or limit parameters");
     }
@@ -38,10 +34,8 @@ export class GetEventRequestsUseCase implements IGetEventRequestsUseCase {
       throw new Error("Invalid endDate format");
     }
 
-    // Get raw DB results from repository
     const result: any = await this.eventsRepository.getEventRequests(params);
 
-    // Business logic: Filter and map results
     const filteredRequests = result.rawRequests.filter((req: any) => req.eventId);
     const mappedRequests = filteredRequests.map((req: any) => ({
       eventName: req.eventId?.title || "Unknown Event",

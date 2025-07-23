@@ -21,10 +21,8 @@ export class GetSiteSectionsUseCase {
     const { sectionKey, page = 1, limit = 10, search, category, dateRange, startDate, endDate, status } = params;
     const query: any = {};
     
-    // Section key filter
     if (sectionKey) query.sectionKey = sectionKey;
     
-    // Search functionality
     if (search && search.trim()) {
       const searchRegex = new RegExp(search.trim(), 'i');
       query.$or = [
@@ -34,12 +32,10 @@ export class GetSiteSectionsUseCase {
       ];
     }
     
-    // Category filter (case-insensitive)
     if (category && category !== 'all' && category !== 'All Categories') {
       query.category = { $regex: `^${category}$`, $options: 'i' };
     }
     
-    // Status filter (for active/inactive sections)
     if (status && status !== 'all') {
       if (status === 'active') {
         query.isActive = true;
@@ -48,7 +44,6 @@ export class GetSiteSectionsUseCase {
       }
     }
     
-    // Date range filtering
     if (dateRange && dateRange !== 'all') {
       const now = new Date();
       let startDateFilter: Date;
@@ -89,20 +84,10 @@ export class GetSiteSectionsUseCase {
       };
     }
     
-    // Debug: Log the query object
-    console.log('[SiteSectionUseCase] Query:', JSON.stringify(query, null, 2));
     const skip = (page - 1) * limit;
     const allDocs: any[] = await this.siteSectionRepository.getSections(query);
-    // Debug: Log the number of results and a sample of the data
-    console.log(`[SiteSectionUseCase] Results: ${allDocs.length}`);
-    if (allDocs.length > 0) {
-      console.log('[SiteSectionUseCase] Sample result:', allDocs[0]);
-    }
-    // Debug: Log all unique categories
     const allCategories = Array.from(new Set(allDocs.map(doc => doc.category).filter(Boolean)));
-    console.log('[SiteSectionUseCase] Unique categories in DB:', allCategories);
     
-    // Sort by createdAt in descending order (newest first)
     const sortedDocs = allDocs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     
     const total = sortedDocs.length;
@@ -133,7 +118,6 @@ export class CreateSiteSectionUseCase {
   constructor(private readonly siteSectionRepository: ISiteSectionRepository) {}
 
   async execute(params: CreateSiteSectionRequestDTO): Promise<{ success: boolean; data: CreateSiteSectionResponseDTO }> {
-    // Validation and entity creation using domain errors
     if (!params.sectionKey) throw new InvalidSectionKeyError();
     if (params.sectionKey === 'highlights' && (!('title' in params) || !params.title || !('description' in params) || !params.description)) {
       throw new InvalidHighlightError();
@@ -154,7 +138,6 @@ export class UpdateSiteSectionUseCase {
   constructor(private readonly siteSectionRepository: ISiteSectionRepository) {}
 
   async execute(params: UpdateSiteSectionRequestDTO): Promise<{ success: boolean; data: UpdateSiteSectionResponseDTO | null }> {
-    // Optionally validate update fields here
     const doc = await this.siteSectionRepository.updateSection(params);
     return doc ? { success: true, data: { section: SiteSectionUseCaseMapper.toDTO(doc) } } : { success: false, data: null };
   }
@@ -169,7 +152,6 @@ export class DeleteSiteSectionUseCase {
   }
 }
 
-// Mapper for entity <-> DTO
 class SiteSectionUseCaseMapper {
   static toDTO(doc: any): SiteSectionDTO {
     return {

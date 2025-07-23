@@ -1,15 +1,8 @@
 import {
-  GetSiteSectionsRequestDTO,
   GetSiteSectionByIdRequestDTO,
   CreateSiteSectionRequestDTO,
   UpdateSiteSectionRequestDTO,
   DeleteSiteSectionRequestDTO,
-} from '../../../domain/site-management/dtos/SiteSectionDTOs';
-import {
-  GetSiteSectionsResponseDTO,
-  GetSiteSectionByIdResponseDTO,
-  CreateSiteSectionResponseDTO,
-  UpdateSiteSectionResponseDTO,
 } from '../../../domain/site-management/dtos/SiteSectionDTOs';
 
 export interface ISiteSectionRepository {

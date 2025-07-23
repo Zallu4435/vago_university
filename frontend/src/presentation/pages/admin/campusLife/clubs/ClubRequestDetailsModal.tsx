@@ -20,7 +20,7 @@ import {
   ParticleConfig
 } from '../../../../../domain/types/management/clubmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
-import { formatDate, formatDateTime } from '../../../../../shared/utils/dateUtils';
+import { formatDateTime } from '../../../../../shared/utils/dateUtils';
 
 const StatusBadge: React.FC<ClubRequestDetailsStatusBadgeProps> = ({ status }) => {
   const statusConfig: Record<StatusType, { bg: string; text: string; border: string }> = {
@@ -76,7 +76,6 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
   onApprove,
   onReject,
 }) => {
-  // Use the shared prevent body scroll hook
   usePreventBodyScroll(isOpen);
 
   if (!isOpen || !request) return null;
@@ -84,7 +83,6 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
   const { clubRequest } = request;
   const { club, user } = clubRequest;
 
-  // Particle effect
   const ghostParticles: ParticleConfig[] = Array(30)
     .fill(0)
     .map((_, i) => ({
@@ -97,7 +95,6 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      {/* Background particles */}
       {ghostParticles.map((particle, i) => (
         <div
           key={i}
@@ -113,16 +110,12 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
         />
       ))}
 
-      {/* Main Modal Container */}
       <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-4xl max-h-[90vh] rounded-2xl border border-purple-500/30 shadow-2xl overflow-hidden relative">
-        {/* Inner glow effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
 
-        {/* Corner decorations */}
         <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
         <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
 
-        {/* Header Section */}
         <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -149,9 +142,7 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
           </div>
         </div>
 
-        {/* Content Section */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
-          {/* Key Info Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             <InfoCard
               icon={User}
@@ -174,7 +165,6 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
             />
           </div>
 
-          {/* Description Section */}
           <div className="mb-8">
             <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg shadow-sm overflow-hidden">
               <div className="p-4 bg-gray-900/60 flex items-center">
@@ -187,7 +177,6 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
             </div>
           </div>
 
-          {/* Why Join Section */}
           <div className="mb-8">
             <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg shadow-sm overflow-hidden">
               <div className="p-4 bg-gray-900/60 flex items-center">
@@ -200,7 +189,6 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
             </div>
           </div>
 
-          {/* Additional Info Section */}
           {clubRequest.additionalInfo && (
             <div className="mb-8">
               <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg shadow-sm overflow-hidden">
@@ -215,7 +203,6 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
             </div>
           )}
 
-          {/* User Details Section */}
           {user && (
             <div className="mb-8">
               <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg shadow-sm overflow-hidden">
@@ -239,7 +226,6 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
             </div>
           )}
 
-          {/* Action Buttons */}
           <div className="border-t border-purple-500/30 bg-gray-900/80 p-6">
             <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
               <button

@@ -1,7 +1,5 @@
 import { SiteSectionModel } from '../../database/mongoose/models/site-management/SiteSectionModel';
 import { IUserSiteSectionRepository } from '../../../application/site-management/repositories/IUserSiteSectionRepository';
-import { GetUserSiteSectionsRequestDTO, GetUserSiteSectionsResponseDTO, UserSiteSectionDTO } from '../../../domain/site-management/dtos/UserSiteSectionDTOs';
-
 
 export class UserSiteSectionRepository implements IUserSiteSectionRepository {
   async findSectionsRaw(query: any, skip: number, limit: number): Promise<any[]> {

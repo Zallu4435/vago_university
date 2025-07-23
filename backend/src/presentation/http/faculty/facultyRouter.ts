@@ -6,7 +6,6 @@ import { authMiddleware } from "../../../shared/middlewares/authMiddleware";
 const facultyRouter = Router();
 const facultyController = getFacultyComposer();
 
-// Public routes (no auth required)
 facultyRouter.post(
   "/:id/confirm/:action",
   async (req, res, next) => {
@@ -21,7 +20,6 @@ facultyRouter.get(
   }
 );
 
-// Protected routes (auth required)
 facultyRouter.get("/", authMiddleware, async (req, res, next) => {
   await expressAdapter(req, res, next, facultyController.getFaculty.bind(facultyController));
 });
@@ -54,7 +52,6 @@ facultyRouter.get(
   }
 );
 
-// Faculty document serve route
 facultyRouter.get(
   "/:facultyId/documents",
   authMiddleware,

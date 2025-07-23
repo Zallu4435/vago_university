@@ -1,5 +1,4 @@
-// application/auth/services/EmailServiceParams.ts
-
+    
 export interface AdmissionOfferEmailParams {
     to: string;
     name: string;

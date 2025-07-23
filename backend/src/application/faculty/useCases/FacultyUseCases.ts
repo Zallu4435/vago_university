@@ -154,15 +154,12 @@ export class GetFacultyUseCase implements IGetFacultyUseCase {
             }
         }
 
-        // Add search functionality
         if (search && search.trim()) {
             query.$or = [
                 { fullName: { $regex: search.trim(), $options: "i" } },
                 { email: { $regex: search.trim(), $options: "i" } }
             ];
         }
-
-        console.log('Faculty backend final query object:', query);
 
         const skip = (page - 1) * limit;
         const faculty = await this.facultyRepository.findFaculty(query, {
@@ -214,14 +211,10 @@ export class GetFacultyByTokenUseCase implements IGetFacultyByTokenUseCase {
         if (!params.token) {
             throw new InvalidTokenError();
         }
-        // Fetch faculty
         const faculty = await this.facultyRepository.getFacultyByToken(params);
         if (!faculty) {
             throw new FacultyNotFoundError();
         }
-        // Validate token and expiry (simulate as if we have access)
-        // In a real scenario, these would be fetched from the DB model, not the DTO
-        // For now, assume valid if we reach here
         if (faculty.status !== "offered") {
             throw new FacultyAlreadyProcessedError();
         }
@@ -237,7 +230,6 @@ export class ApproveFacultyUseCase implements IApproveFacultyUseCase {
     }
 
     async execute(params: ApproveFacultyRequestDTO): Promise<ResponseDTO<ApproveFacultyResponseDTO>> {
-        // Validation
         if (!params.id || !mongoose.isValidObjectId(params.id)) {
             throw new InvalidFacultyIdError();
         }
@@ -245,7 +237,6 @@ export class ApproveFacultyUseCase implements IApproveFacultyUseCase {
             throw new MissingRequiredFieldsError();
         }
 
-        // Fetch faculty
         const faculty = await this.facultyRepository.getFacultyById({ id: params.id });
         if (!faculty) {
             throw new FacultyNotFoundError();
@@ -254,11 +245,9 @@ export class ApproveFacultyUseCase implements IApproveFacultyUseCase {
             throw new FacultyAlreadyProcessedError();
         }
 
-        // Generate confirmation token and expiry
         const confirmationToken = this.generateConfirmationToken();
         const tokenExpiry = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
 
-        // Update faculty in DB
         await this.facultyRepository.approveFaculty({
             id: params.id,
             additionalInfo: {
@@ -269,12 +258,10 @@ export class ApproveFacultyUseCase implements IApproveFacultyUseCase {
             },
         });
 
-        // Compose URLs
         const baseUrl = config.frontendUrl;
         const acceptUrl = `${baseUrl}/confirm-faculty/${params.id}/accept?token=${confirmationToken}`;
         const rejectUrl = `${baseUrl}/confirm-faculty/${params.id}/reject?token=${confirmationToken}`;
 
-        // Send offer email
         await emailService.sendFacultyOfferEmail({
             to: faculty.email,
             name: faculty.fullName,
@@ -297,11 +284,9 @@ export class RejectFacultyUseCase implements IRejectFacultyUseCase {
     constructor(private facultyRepository: IFacultyRepository) { }
 
     async execute(params: RejectFacultyRequestDTO): Promise<ResponseDTO<RejectFacultyResponseDTO>> {
-        // Validation
         if (!params.id || !mongoose.isValidObjectId(params.id)) {
             throw new InvalidFacultyIdError();
         }
-        // Fetch faculty
         const faculty = await this.facultyRepository.getFacultyById({ id: params.id });
         if (!faculty) {
             throw new FacultyNotFoundError();
@@ -309,7 +294,6 @@ export class RejectFacultyUseCase implements IRejectFacultyUseCase {
         if (faculty.status !== "pending") {
             throw new FacultyAlreadyProcessedError();
         }
-        // Update faculty in DB
         await this.facultyRepository.rejectFaculty(params);
         return { data: { message: "Faculty registration rejected" }, success: true };
     }
@@ -319,11 +303,9 @@ export class DeleteFacultyUseCase implements IDeleteFacultyUseCase {
     constructor(private facultyRepository: IFacultyRepository) { }
 
     async execute(params: DeleteFacultyRequestDTO): Promise<ResponseDTO<DeleteFacultyResponseDTO>> {
-        // Validation
         if (!params.id || !mongoose.isValidObjectId(params.id)) {
             throw new InvalidFacultyIdError();
         }
-        // Fetch faculty
         const faculty = await this.facultyRepository.getFacultyById({ id: params.id });
         if (!faculty) {
             throw new FacultyNotFoundError();
@@ -331,7 +313,6 @@ export class DeleteFacultyUseCase implements IDeleteFacultyUseCase {
         if (faculty.status !== "pending") {
             throw new FacultyAlreadyProcessedError();
         }
-        // Delete faculty in DB
         await this.facultyRepository.deleteFaculty(params);
         return { data: { message: "Faculty registration deleted" }, success: true };
     }
@@ -351,7 +332,6 @@ export class ConfirmFacultyOfferUseCase implements IConfirmFacultyOfferUseCase {
         if (params.action !== "accept" && params.action !== "reject") {
             throw new InvalidActionError();
         }
-        // Fetch faculty
         const faculty = await this.facultyRepository.getFacultyById({ id: params.facultyId });
         if (!faculty) {
             throw new FacultyNotFoundError();
@@ -359,12 +339,7 @@ export class ConfirmFacultyOfferUseCase implements IConfirmFacultyOfferUseCase {
         if (faculty.status !== "offered") {
             throw new FacultyAlreadyProcessedError();
         }
-        // Token and expiry checks (simulate as if we have access to confirmationToken/tokenExpiry)
-        // In a real scenario, these would be fetched from the DB model, not the DTO
-        // For now, assume valid if we reach here
-        // Accept flow
         if (params.action === "accept") {
-            // Create Faculty account
             const temporaryPassword = generatePassword();
             const fullNameParts = faculty.fullName.split(" ");
             const firstName = fullNameParts[0];
@@ -377,7 +352,6 @@ export class ConfirmFacultyOfferUseCase implements IConfirmFacultyOfferUseCase {
                 createdAt: new Date(),
             });
             await facultyAccount.save();
-            // Send credentials email
             const loginUrl = `${config.frontendUrl}/faculty/login`;
             await emailService.sendFacultyCredentialsEmail({
                 to: faculty.email,
@@ -389,7 +363,6 @@ export class ConfirmFacultyOfferUseCase implements IConfirmFacultyOfferUseCase {
                 additionalInstructions: "Please log in and change your temporary password as soon as possible for security purposes.",
             });
         }
-        // Update faculty in DB
         await this.facultyRepository.confirmFacultyOffer(params);
         return {
             data: {
@@ -406,7 +379,6 @@ export class DownloadCertificateUseCase implements IDownloadCertificateUseCase {
     constructor(private facultyRepository: IFacultyRepository) { }
 
     async execute(params: DownloadCertificateRequestDTO): Promise<ResponseDTO<DownloadCertificateResponseDTO>> {
-        // Validation
         if (!params.facultyId || !mongoose.isValidObjectId(params.facultyId)) {
             throw new InvalidFacultyIdError();
         }
@@ -422,17 +394,14 @@ export class DownloadCertificateUseCase implements IDownloadCertificateUseCase {
         if (!params.requestingUserId) {
             throw new AuthenticationRequiredError();
         }
-        // Fetch faculty
         const faculty = await this.facultyRepository.getFacultyById({ id: params.facultyId });
         if (!faculty) {
             throw new FacultyNotFoundError();
         }
-        // Authorization check (simplified; replace with actual logic if needed)
         const isAuthorized = params.requestingUserId === faculty._id;
         if (!isAuthorized) {
             throw new UnauthorizedAccessError();
         }
-        // Download from Cloudinary
         const publicId = params.certificateUrl
             .replace(/^https:\/\/res\.cloudinary\.com\/vago-university\/image\/upload\/v[0-9]+\//, "")
             .replace(/\.pdf$/, "");

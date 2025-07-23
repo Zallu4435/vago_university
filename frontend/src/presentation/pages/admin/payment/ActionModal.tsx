@@ -1,14 +1,6 @@
 import React from 'react';
 import { FiCheckCircle, FiXCircle } from 'react-icons/fi';
-
-interface ActionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title: string;
-  message: string;
-  type: 'success' | 'danger';
-}
+import { ActionModalProps } from '../../../../domain/types/management/financialmanagement';
 
 const ActionModal: React.FC<ActionModalProps> = ({ isOpen, onClose, onConfirm, title, message, type }) => {
   if (!isOpen) return null;

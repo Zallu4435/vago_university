@@ -31,7 +31,6 @@ admissionRouter.post("/finalize", authMiddleware, (req, res, next) =>
   expressAdapter(req, res, next, admissionController.handleFinalSubmit.bind(admissionController))
 );
 
-// Document upload routes
 admissionRouter.post("/documents/upload", authMiddleware, admissionDocumentUpload.single('file'), (req, res, next) =>
   expressAdapter(req, res, next, admissionController.uploadDocument.bind(admissionController))
 );
@@ -40,7 +39,6 @@ admissionRouter.post("/documents/upload-multiple", authMiddleware, admissionDocu
   expressAdapter(req, res, next, admissionController.uploadMultipleDocuments.bind(admissionController))
 );
 
-// Document serve route
 admissionRouter.get("/documents/:documentId", authMiddleware, (req, res, next) =>
   expressAdapter(req, res, next, admissionController.serveDocument.bind(admissionController))
 );

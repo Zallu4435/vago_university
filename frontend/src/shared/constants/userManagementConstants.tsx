@@ -62,12 +62,12 @@ export const userColumns = [
   {
     header: 'Applied On',
     key: 'createdAt',
-    render: null, // Replace in component with a function using formatDate
+    render: undefined, // Replace in component with a function using formatDate
   },
   {
     header: 'Status',
     key: 'status',
-    render: null, // Replace in component with a function rendering status
+    render: undefined, // Replace in component with a function rendering status
   },
 ];
 

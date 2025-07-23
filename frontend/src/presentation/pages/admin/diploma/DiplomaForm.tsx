@@ -260,7 +260,7 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
         </form>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .no-scroll {
           overflow: hidden;
         }

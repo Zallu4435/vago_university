@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   IoCloseOutline as X,
   IoCalendarOutline as Calendar,
-  IoPeopleOutline as Users,
   IoBookOutline as Book,
   IoPersonOutline as User,
   IoInformationCircleOutline as Info,
@@ -63,10 +62,8 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
 
   if (!isOpen || !request) return null;
 
-  console.log(request, "request");
   const { course, user } = request;
 
-  // Particle effect
   const ghostParticles = Array(30)
     .fill(0)
     .map((_, i) => ({
@@ -79,7 +76,6 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      {/* Background particles */}
       {ghostParticles.map((particle, i) => (
         <div
           key={i}
@@ -95,16 +91,12 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
         />
       ))}
 
-      {/* Main Modal Container */}
       <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-4xl max-h-[90vh] rounded-2xl border border-purple-600/30 shadow-2xl overflow-hidden relative">
-        {/* Inner glow effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
 
-        {/* Corner decorations */}
         <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
         <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
 
-        {/* Header Section */}
         <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -131,9 +123,7 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
           </div>
         </div>
 
-        {/* Content Section */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
-          {/* Status and Key Info Row */}
           <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
             <StatusBadge status={request?.status} />
             <div className="flex items-center space-x-6 text-sm text-purple-300">
@@ -148,7 +138,6 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
             </div>
           </div>
 
-          {/* Main Info Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             <InfoCard icon={User} label="Requested By" value={user?.name || 'Unknown'} />
             <InfoCard icon={Mail} label="Contact Email" value={user?.email || 'N/A'} />
@@ -160,7 +149,6 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
             <InfoCard icon={Info} label="Course ID" value={course?.id} />
           </div>
 
-          {/* Reason Section */}
           <div className="mb-8">
             <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg shadow-sm overflow-hidden">
               <div className="p-4 bg-gray-900/60 flex items-center">
@@ -173,7 +161,6 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
             </div>
           </div>
 
-          {/* Additional Info Section */}
           {request.additionalInfo && (
             <div className="mb-8">
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg shadow-sm overflow-hidden">
@@ -188,7 +175,6 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
             </div>
           )}
 
-          {/* Requester Information Section */}
           {user && (
             <div className="mb-8">
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg shadow-sm overflow-hidden">
@@ -216,7 +202,6 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
             </div>
           )}
 
-          {/* Action Buttons */}
           <div className="border-t border-purple-600/30 bg-gray-900/80 p-6">
             <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
               <button

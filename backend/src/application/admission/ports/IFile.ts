@@ -1,6 +1,4 @@
-// src/application/admission/ports/IFile.ts
 
-// Basic interface for a single file upload
 export interface IFile {
     fieldname: string;
     originalname: string;
@@ -10,9 +8,7 @@ export interface IFile {
     destination: string;
     filename: string;
     path: string;
-    buffer: Buffer; // Key difference: Multer's in-memory storage uses buffer
-    // Add any other properties you rely on from Multer's file object
+    buffer: Buffer;
 }
 
-// Interface for multiple files
 export interface IMultipleFiles extends Array<IFile> { }

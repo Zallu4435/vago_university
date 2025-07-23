@@ -18,21 +18,12 @@ export class MaterialsRepository implements IMaterialsRepository {
   }
 
   async create(data: any): Promise<any> {
-    console.log('=== MATERIAL REPOSITORY CREATE DEBUG ===');
-    console.log('Creating material with data:', data);
-    console.log('=== MATERIAL REPOSITORY CREATE DEBUG END ===');
-    
     const material = new MaterialModel(data);
     await material.save();
     return material;
   }
 
   async update(id: string, data: any): Promise<any | null> {
-    console.log('=== MATERIAL REPOSITORY UPDATE DEBUG ===');
-    console.log('Updating material with id:', id);
-    console.log('Update data:', data);
-    console.log('=== MATERIAL REPOSITORY UPDATE DEBUG END ===');
-    
     return MaterialModel.findByIdAndUpdate(id, data, { new: true });
   }
 

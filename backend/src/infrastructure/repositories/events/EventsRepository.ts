@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import {
   GetEventByIdRequestDTO,
   CreateEventRequestDTO,
@@ -7,56 +6,35 @@ import {
   GetEventsRequestDTO,
 } from "../../../domain/events/dtos/EventRequestDTOs";
 import {
-  GetEventsResponseDTO,
-  GetEventByIdResponseDTO,
-  CreateEventResponseDTO,
-  UpdateEventResponseDTO,
-  EventSummaryDTO,
-} from "../../../domain/events/dtos/EventResponseDTOs";
-import {
   GetEventRequestsRequestDTO,
   RejectEventRequestRequestDTO,
   GetEventRequestDetailsRequestDTO,
   ApproveEventRequestRequestDTO,
 } from "../../../domain/events/dtos/EventRequestRequestDTOs";
-import {
-  GetEventRequestsResponseDTO,
-  GetEventRequestDetailsResponseDTO,
-  SimplifiedEventRequestDTO,
-} from "../../../domain/events/dtos/EventRequestResponseDTOs";
 import { IEventsRepository } from "../../../application/events/repositories/IEventsRepository";
 import {
   CampusEventModel,
   EventRequestModel,
 } from "../../../infrastructure/database/mongoose/models/events/CampusEventModel";
-import { Event } from "../../../domain/events/entities/Event";
-import {
-  EventRequest,
-} from "../../../domain/events/entities/EventRequest";
 import { EventRequestStatus } from "../../../domain/events/entities/EventTypes";
 
-// Repository Implementation (UPDATED: Pure data access, no business logic)
 export class EventsRepository implements IEventsRepository {
   async getEvents(params: GetEventsRequestDTO): Promise<any> {
     const { page, limit, type, status, startDate, endDate, search, organizerType, dateRange } = params;
     const query: any = {};
     
-    // Type filter
     if (type && type !== "all") {
       query.eventType = { $regex: `^${type}$`, $options: "i" };
     }
     
-    // Status filter
     if (status && status !== "all") {
       query.status = { $regex: `^${status}$`, $options: "i" };
     }
     
-    // Organizer type filter
     if (organizerType && organizerType !== "all") {
       query.organizerType = { $regex: `^${organizerType}$`, $options: "i" };
     }
 
-    // Date range filter
     if (dateRange && dateRange !== "all") {
       const now = new Date();
       let calculatedStartDate: Date;
@@ -100,8 +78,6 @@ export class EventsRepository implements IEventsRepository {
       ];
     }
 
-    console.log('Events backend final query object:', query);
-
     const skip = (page - 1) * limit;
     const events = await (CampusEventModel as any).find(query)
       .sort({ createdAt: -1 })
@@ -139,24 +115,20 @@ export class EventsRepository implements IEventsRepository {
     const { page, limit, status, startDate, endDate, type, search, organizerType, dateRange } = params;
     const query: any = {};
     
-    // Status filter
     if (status && status !== "all") {
       query.status = { $regex: `^${status}$`, $options: "i" };
     }
     
     const eventQuery: any = {};
     
-    // Type filter
     if (type && type.toLowerCase() !== "all") {
       eventQuery.eventType = { $regex: `^${type}$`, $options: "i" };
     }
     
-    // Organizer type filter
     if (organizerType && organizerType !== "all") {
       eventQuery.organizerType = { $regex: `^${organizerType}$`, $options: "i" };
     }
 
-    // Date range filter
     if (dateRange && dateRange !== "all") {
       const now = new Date();
       let calculatedStartDate: Date;
@@ -183,7 +155,6 @@ export class EventsRepository implements IEventsRepository {
       
       eventQuery.date = { $gte: calculatedStartDate.toISOString().split('T')[0] };
     } else if (startDate || endDate) {
-      // Custom date range
       eventQuery.date = {};
       if (startDate) {
         const start = new Date(startDate);
@@ -197,7 +168,6 @@ export class EventsRepository implements IEventsRepository {
       }
     }
 
-    // Search functionality for events
     if (search && search.trim()) {
       eventQuery.$or = [
         { title: { $regex: search.trim(), $options: "i" } },
@@ -207,8 +177,6 @@ export class EventsRepository implements IEventsRepository {
         { additionalInfo: { $regex: search.trim(), $options: "i" } }
       ];
     }
-
-    console.log('Event requests backend final event query object:', eventQuery);
 
     const matchingEvents = await (CampusEventModel as any).find(eventQuery)
       .select("_id")
@@ -243,17 +211,14 @@ export class EventsRepository implements IEventsRepository {
   async approveEventRequest(
     params: ApproveEventRequestRequestDTO
   ): Promise<void> {
-    // Update event request status
     await (EventRequestModel as any).findByIdAndUpdate(
       params.id,
       { status: EventRequestStatus.Approved, updatedAt: new Date() },
       { runValidators: true }
     );
 
-    // Get the event request to find the associated event
     const eventRequest = await (EventRequestModel as any).findById(params.id);
     if (eventRequest && eventRequest.eventId) {
-      // Increment participants count
       await (CampusEventModel as any).findByIdAndUpdate(
         eventRequest.eventId,
         { $inc: { participantsCount: 1 } },

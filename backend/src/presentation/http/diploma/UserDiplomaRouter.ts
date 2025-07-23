@@ -6,7 +6,6 @@ import { authMiddleware } from "../../../shared/middlewares/authMiddleware";
 const userDiplomaRouter = Router();
 const userDiplomaController = getUserDiplomaComposer();
 
-// Apply authentication middleware to all routes
 userDiplomaRouter.use(authMiddleware);
 
 userDiplomaRouter.get("/", (req, res, next) => {

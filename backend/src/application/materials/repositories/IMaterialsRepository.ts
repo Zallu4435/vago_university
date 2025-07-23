@@ -1,5 +1,4 @@
-import { GetMaterialsRequestDTO, GetMaterialByIdRequestDTO, CreateMaterialRequestDTO, UpdateMaterialRequestDTO, DeleteMaterialRequestDTO } from '../../../domain/materials/dtos/MaterialRequestDTOs';
-import { GetMaterialsResponseDTO, GetMaterialByIdResponseDTO, CreateMaterialResponseDTO, UpdateMaterialResponseDTO } from '../../../domain/materials/dtos/MaterialResponseDTOs';
+import { CreateMaterialRequestDTO, UpdateMaterialRequestDTO } from '../../../domain/materials/dtos/MaterialRequestDTOs';
 import { MaterialProps } from '../../../domain/materials/entities/MaterialTypes';
 
 export interface IMaterialsRepository {

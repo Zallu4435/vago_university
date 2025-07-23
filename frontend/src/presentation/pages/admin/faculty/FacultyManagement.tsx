@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useFacultyManagement } from '../../../../application/hooks/useFacultyManagement';
-import { FiFileText, FiUsers, FiClipboard, FiBarChart2, FiUser, FiMail, FiCalendar, FiBriefcase, FiEye, FiCheckCircle, FiXCircle, FiLock, FiUnlock } from 'react-icons/fi';
+import { FiFileText, FiUsers, FiClipboard, FiBarChart2, FiCalendar, FiEye, FiCheckCircle, FiXCircle, FiLock } from 'react-icons/fi';
 import { debounce } from 'lodash';
 import WarningModal from '../../../components/common/WarningModal';
 import FacultyDetailsModal from './FacultyDetailsModal';
@@ -73,7 +73,6 @@ const FacultyManagement: React.FC = () => {
     approveFaculty,
     rejectFaculty,
     deleteFaculty,
-    updateFacultyStatus,
     blockFaculty,
   } = useFacultyManagement();
 
@@ -101,11 +100,10 @@ const FacultyManagement: React.FC = () => {
     []
   );
 
-  // Handle search query changes with debouncing
   const debouncedSearchChange = useCallback(
     debounce((query: string) => {
       setFilters((prev) => ({ ...prev, search: query }));
-      setPage(1); // Reset to first page when searching
+      setPage(1);
     }, 500),
     []
   );
@@ -116,7 +114,7 @@ const FacultyManagement: React.FC = () => {
     setFilters((prev) => ({ 
       ...prev, 
       [field]: value,
-      dateRange: 'custom' // Set dateRange to 'custom' when custom dates are selected
+      dateRange: 'custom' 
     }));
   };
 
@@ -126,7 +124,6 @@ const FacultyManagement: React.FC = () => {
       setSelectedFaculty(details);
       setIsDetailsModalOpen(true);
     } catch (error) {
-      // Error toast is handled in the mutation
     }
   };
 
@@ -182,12 +179,12 @@ const FacultyManagement: React.FC = () => {
       status: 'all',
       department: 'all_departments',
       dateRange: 'all',
-      search: '', // Clear search
-      startDate: '', // Clear custom start date
-      endDate: '', // Clear custom end date
+      search: '', 
+      startDate: '', 
+      endDate: '', 
     });
     setCustomDateRange({ startDate: '', endDate: '' });
-    setPage(1); // Reset page to 1 when resetting filters
+    setPage(1); 
   };
 
   const facultyActions = [
@@ -226,10 +223,7 @@ const FacultyManagement: React.FC = () => {
     },
   ];
 
-  // Remove frontend filtering since we're using backend search
-  // const filteredFaculty = filterFaculty(faculty, searchQuery, filters, customDateRange);
 
-  // Block/unblock handler for modal
   const handleBlock = (faculty: Faculty) => {
     blockFaculty.mutate(faculty._id);
     setShowBlockWarning(false);

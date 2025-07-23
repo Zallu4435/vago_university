@@ -1,11 +1,3 @@
-import { 
-  GetUserMaterialsRequestDTO, 
-  GetUserMaterialByIdRequestDTO,
-  ToggleBookmarkRequestDTO, 
-  ToggleLikeRequestDTO, 
-  DownloadMaterialRequestDTO
-} from '../../../domain/materials/dtos/UserMaterialRequestDTOs';
-import { GetUserMaterialsResponseDTO } from '../../../domain/materials/dtos/UserMaterialResponseDTOs';
 import { MaterialProps } from '../../../domain/materials/entities/MaterialTypes';
 
 export interface IUserMaterialsRepository {

@@ -22,7 +22,6 @@ import {
 } from "../../../domain/notifications/dtos/NotificationResponseDTOs";
 
 export class NotificationRepository implements INotificationRepository {
-    // Simple CRUD operations
     async create(data: NotificationProps): Promise<any> {
         const notification = new NotificationModel({
             title: data.title,
@@ -59,7 +58,6 @@ export class NotificationRepository implements INotificationRepository {
     }
 
     async count(filter: any): Promise<number> {
-        // Add search support
         if (filter.search) {
             const searchRegex = new RegExp(filter.search, 'i');
             filter.$or = [
@@ -84,7 +82,6 @@ export class NotificationRepository implements INotificationRepository {
         await NotificationModel.findByIdAndDelete(id);
     }
 
-    // User-specific methods
     async findUsersByCollection(collection: string): Promise<any[]> {
         return UserModel.find().select("fcmTokens").lean();
     }
@@ -94,7 +91,6 @@ export class NotificationRepository implements INotificationRepository {
     }
 
     async removeToken(token: string): Promise<void> {
-        // Remove token from all users and faculty
         await UserModel.updateMany(
             { fcmTokens: token },
             { $pull: { fcmTokens: token } }
@@ -105,7 +101,6 @@ export class NotificationRepository implements INotificationRepository {
         );
     }
 
-    // Original DTO-based methods (for backward compatibility)
     async createNotification(params: CreateNotificationRequestDTO): Promise<CreateNotificationResponseDTO> {
         const notification = new NotificationModel({
             title: params.title,
@@ -128,7 +123,6 @@ export class NotificationRepository implements INotificationRepository {
 
         const query: any = {};
 
-        // Build query based on user's collection and what notifications they should see
         if (userId && collection !== "admin") {
             const validRecipientTypes = ["all", "all_students_and_faculty"];
             
@@ -144,7 +138,6 @@ export class NotificationRepository implements INotificationRepository {
             ];
         }
 
-        // Add isRead filter if provided
         if (isRead !== undefined && userId) {
             if (isRead) {
                 query.readBy = userId;
@@ -166,7 +159,6 @@ export class NotificationRepository implements INotificationRepository {
             query.createdAt = { $gte: new Date(start), $lte: new Date(end) };
         }
 
-        // Add search support
         if (search) {
             const searchRegex = new RegExp(search, 'i');
             query.$or = [

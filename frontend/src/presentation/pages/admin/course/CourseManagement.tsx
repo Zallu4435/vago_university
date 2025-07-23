@@ -29,12 +29,10 @@ const AdminCourseManagement: React.FC = () => {
   const [rejectReason, setRejectReason] = useState('');
   const [showRequestDetails, setShowRequestDetails] = useState(false);
 
-  // Debounce search term updates
   const debouncedSetSearchTerm = useMemo(() => debounce((value: string) => {
     setDebouncedSearchTerm(value);
   }, 300), []);
 
-  // Update debounced search term when searchTerm changes
   React.useEffect(() => {
     debouncedSetSearchTerm(searchTerm);
     return () => {
@@ -163,7 +161,7 @@ const AdminCourseManagement: React.FC = () => {
           [field]: value,
         }));
       }
-      setPage(1); // Reset to first page on filter change
+      setPage(1); 
     }, 300),
     [setFilters, setRequestFilters, activeTab]
   );
@@ -492,7 +490,7 @@ const AdminCourseManagement: React.FC = () => {
         disabled={!rejectReason.trim()}
       />
 
-      <style jsx>{`
+      <style>{`
         @keyframes floatingMist {
           0% {
             transform: translateY(0) translateX(0);

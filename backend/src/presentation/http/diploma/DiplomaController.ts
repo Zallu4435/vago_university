@@ -48,11 +48,6 @@ export class DiplomaController implements IDiplomaController {
       return this.httpErrors.error_400();
     }
 
-    // Debug: Log all params
-    console.log('[DiplomaController] getDiplomas params:', {
-      page, limit, department, category, status, instructor, dateRange, startDate, endDate, search
-    });
-
     const result = await this.getDiplomasUseCase.execute({
       page: Number(page),
       limit: Number(limit),

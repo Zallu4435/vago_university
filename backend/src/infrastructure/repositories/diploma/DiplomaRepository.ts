@@ -18,17 +18,8 @@ export class DiplomaRepository implements IDiplomaRepository {
 
     const filter: any = {};
 
-    // Debug: Log all diplomas in the database before filtering
-    const allDiplomas = await DiplomaModel.find({}).lean();
-    console.log('[DiplomaRepository] ALL diplomas in DB:', allDiplomas);
-
-    // Debug: Log incoming params
-    console.log('[DiplomaRepository] getDiplomas called with params:', params);
-
-    // Category/department filter: use category if present and not 'all', else department
     let dept = undefined;
     if (params.category && params.category !== 'all' && params.category !== 'All' && params.category !== 'All Categories') {
-      // Normalize: replace underscores with spaces and capitalize each word
       dept = params.category
         .split('_')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -40,18 +31,15 @@ export class DiplomaRepository implements IDiplomaRepository {
       filter.category = dept;
     }
 
-    // Status filter (active/inactive, case-insensitive)
     if (status && status !== 'All' && status !== 'all') {
       if (status.toLowerCase() === 'active') filter.status = true;
       else if (status.toLowerCase() === 'inactive') filter.status = false;
     }
 
-    // Instructor filter (if you have instructor field)
     if (instructor && instructor !== 'All' && instructor !== 'all') {
       filter.instructor = instructor;
     }
 
-    // Date range filter (createdAt)
     if (dateRange && dateRange !== 'All' && dateRange !== 'all') {
       let startDate: Date | undefined;
       let endDate: Date | undefined;
@@ -82,7 +70,6 @@ export class DiplomaRepository implements IDiplomaRepository {
       }
     }
 
-    // Search filter (title or description)
     if (search && search.trim()) {
       const searchRegex = new RegExp(search.trim(), 'i');
       filter.$or = [
@@ -90,9 +77,6 @@ export class DiplomaRepository implements IDiplomaRepository {
         { description: searchRegex },
       ];
     }
-
-    // Debug: Log the final filter object
-    console.log('[DiplomaRepository] MongoDB filter:', JSON.stringify(filter, null, 2));
 
     const [diplomas, totalItems] = await Promise.all([
       DiplomaModel.find(filter)
@@ -102,9 +86,6 @@ export class DiplomaRepository implements IDiplomaRepository {
         .lean(),
       DiplomaModel.countDocuments(filter),
     ]);
-
-    // Debug: Log the number of diplomas returned
-    console.log(`[DiplomaRepository] diplomas found: ${diplomas.length}, totalItems: ${totalItems}`);
 
     return { diplomas, totalItems };
   }

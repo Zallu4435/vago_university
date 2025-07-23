@@ -28,7 +28,6 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Use the actual hook data
   const {
     metrics,
     userGrowth,
@@ -44,10 +43,8 @@ const AdminDashboard = () => {
   } = useAdminDashboard();
 
   useEffect(() => {
-    // Simulate loading with staggered animations
     setTimeout(() => setLoading(false), 1200);
 
-    // Update time every second
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
@@ -55,21 +52,18 @@ const AdminDashboard = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Use actual data or fallback to empty arrays/objects
   const userGrowthData = userGrowth || [];
   const revenueData = revenue || [];
   const performanceData = performance || [];
   const activitiesData = activities || [];
   const alertsData = alerts || [];
 
-  // Ensure chart data is always an array and has the required structure
   const safeUserGrowthData = Array.isArray(userGrowthData) ? userGrowthData : [];
   const safeRevenueData = Array.isArray(revenueData) ? revenueData : [];
   const safePerformanceData = Array.isArray(performanceData) ? performanceData : [];
   const safeActivitiesData = Array.isArray(activitiesData) ? activitiesData : [];
   const safeAlertsData = Array.isArray(alertsData) ? alertsData : [];
 
-  // Format currency
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -79,12 +73,10 @@ const AdminDashboard = () => {
     }).format(amount);
   };
 
-  // Format numbers with commas
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat('en-US').format(num);
   };
 
-  // Get alert icon based on type
   const getAlertIcon = (type: string) => {
     switch (type) {
       case 'success': return <HiCheckCircleIcon className="h-5 w-5 text-emerald-400 mt-0.5" />;
@@ -94,7 +86,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Get alert background color based on type
   const getAlertBgColor = (type: string) => {
     switch (type) {
       case 'success': return 'bg-emerald-900/30';
@@ -104,7 +95,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Get alert border color based on type
   const getAlertBorderColor = (type: string) => {
     switch (type) {
       case 'success': return 'border-emerald-400';
@@ -114,7 +104,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Get alert text color based on type
   const getAlertTextColor = (type: string) => {
     switch (type) {
       case 'success': return 'text-emerald-200';
@@ -124,7 +113,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Get alert subtext color based on type
   const getAlertSubtextColor = (type: string) => {
     switch (type) {
       case 'success': return 'text-emerald-300';
@@ -134,7 +122,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Handle alert dismissal
   const handleDismissAlert = async (alertId: string) => {
     try {
       await dismissAlert(alertId);
@@ -143,7 +130,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Handle activity read
   const handleMarkActivityAsRead = async (activityId: string) => {
     try {
       await markActivityAsRead(activityId);
@@ -152,7 +138,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Handle refresh
   const handleRefresh = async () => {
     try {
       await refreshDashboard();
@@ -172,7 +157,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 relative">
-      {/* Ghost orbs background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-0 w-96 h-96 bg-purple-900/10 rounded-full blur-3xl"></div>
         <div className="absolute top-3/4 right-0 w-96 h-96 bg-blue-900/10 rounded-full blur-3xl"></div>
@@ -193,7 +177,6 @@ const AdminDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
@@ -224,7 +207,6 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Enhanced Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatsCard
             title="Total Users"
@@ -276,7 +258,6 @@ const AdminDashboard = () => {
           />
         </div>
 
-        {/* Enhanced Analytics Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <GlassPanel title="User Growth & Targets" icon={HiTrendingUpIcon}>
             <ResponsiveContainer width="100%" height={300}>
@@ -343,14 +324,12 @@ const AdminDashboard = () => {
           </GlassPanel>
         </div>
 
-        {/* Performance Overview - Full Width */}
         <div className="mb-8">
           <GlassPanel title="Module Performance Metrics" icon={GiOnTargetIcon}>
             <PerformanceMatrix performanceData={safePerformanceData} />
           </GlassPanel>
         </div>
 
-        {/* Enhanced Activities & Alerts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <GlassPanel title="Recent Activities" icon={HiLightningBoltIcon}>
             <RecentActivities activitiesData={safeActivitiesData} markActivityAsRead={handleMarkActivityAsRead} />
@@ -370,7 +349,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes floatingMist {
           0% {
             transform: translateY(0) translateX(0);

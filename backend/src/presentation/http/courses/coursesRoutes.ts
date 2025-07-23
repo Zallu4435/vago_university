@@ -8,7 +8,6 @@ const courseRouter = Router();
 const courseController = getCoursesComposer();
 const courseEnrollmentController = getCourseEnrollmentsComposer();
 
-// Course enrollment routes
 courseRouter.get("/course-enrollments", authMiddleware, (req, res, next) =>
   expressAdapter(
     req,
@@ -42,7 +41,6 @@ courseRouter.post("/course-enrollments/:id/reject", authMiddleware, (req, res, n
   )
 );
 
-// Course routes
 courseRouter.get("/", authMiddleware, (req, res, next) =>
   expressAdapter(req, res, next, courseController.getCourses.bind(courseController))
 );

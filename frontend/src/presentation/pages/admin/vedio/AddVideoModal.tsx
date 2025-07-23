@@ -15,7 +15,6 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
   categories,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
 
   const {
     control,
@@ -37,10 +36,8 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
     mode: 'onChange',
   });
 
-  // Watch the current form values
   const currentCategory = watch('category');
 
-  // Reset form when selectedVideo changes (for editing)
   useEffect(() => {
 
     if (selectedVideo) {
@@ -55,7 +52,6 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
       
       reset(formData);
     } else {
-      // Reset to default values for new video
       const defaultData = {
         title: '',
         category: '',
@@ -67,7 +63,6 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
       
       reset(defaultData);
     }
-    // Clear selected file when modal opens/closes
     setSelectedFile(null);
   }, [selectedVideo, reset]);
 
@@ -76,15 +71,13 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Validate file type
       const validTypes = ['video/mp4', 'video/avi', 'video/quicktime'];
       if (!validTypes.includes(file.type)) {
         alert('Please upload a valid video file (MP4, AVI, or MOV)');
         return;
       }
 
-      // Validate file size (500MB limit)
-      const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+      const maxSize = 500 * 1024 * 1024; 
       if (file.size > maxSize) {
         alert('File size must be less than 500MB');
         return;
@@ -95,9 +88,7 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
   };
 
   const handleFormSubmit = async (data: VideoFormInputs) => {
-    // For new videos, require a file
     if (!selectedVideo && !selectedFile) {
-      // Set a custom error for file validation
       setError('root', {
         type: 'manual',
         message: 'Please select a video file'
@@ -105,11 +96,8 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
       return;
     }
 
-    // Convert string values to numbers for backend
     const moduleNumber = parseInt(data.module, 10);
-    const orderNumber = parseInt(data.order || '1', 10);
 
-    // Create FormData object
     const formData = new FormData();
     formData.append('title', data.title);
     formData.append('category', data.category);
@@ -118,24 +106,21 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
     formData.append('description', data.description);
     formData.append('duration', '0:00');
     
-    // Only append video file if a new one is selected
     if (selectedFile) {
       formData.append('videoFile', selectedFile);
     }
 
-    // For updates, if no new file is selected, we need to handle it differently
     if (selectedVideo && !selectedFile) {
 
       const updateData = {
         id: selectedVideo.id,
         title: data.title,
         category: data.category,
-        module: moduleNumber, // Convert to number
+        module: moduleNumber, 
         status: data.status,
         description: data.description,
         duration: '0:00',
-        videoUrl: selectedVideo.videoUrl, // Pass existing video URL
-        // No videoFile property - backend will keep existing
+        videoUrl: selectedVideo.videoUrl, 
       };
       
       try {
@@ -151,7 +136,6 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
       return;
     }
 
-    // For updates with new file, include the video ID
     if (selectedVideo && selectedFile) {
       formData.append('id', selectedVideo.id);
     }

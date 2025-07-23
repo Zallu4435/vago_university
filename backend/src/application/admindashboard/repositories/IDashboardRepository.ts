@@ -22,13 +22,14 @@ import {
   DismissAlertResponseDTO,
   MarkActivityAsReadResponseDTO,
 } from "../../../domain/admindashboard/dtos/DashboardResponseDTOs";
+import { PerformanceRawData } from "../../../domain/admindashboard/entities/AdminDashboardTypes";
 
 export interface IDashboardRepository {
   getDashboardData(params: GetDashboardDataRequestDTO): Promise<GetDashboardDataResponseDTO>;
   getDashboardMetrics(params: GetDashboardMetricsRequestDTO): Promise<GetDashboardMetricsResponseDTO>;
   getUserGrowthData(params: GetUserGrowthDataRequestDTO): Promise<GetUserGrowthDataResponseDTO>;
   getRevenueData(params: GetRevenueDataRequestDTO): Promise<GetRevenueDataResponseDTO>;
-  getPerformanceData(params: GetPerformanceDataRequestDTO): Promise<GetPerformanceDataResponseDTO>;
+  getPerformanceData(params: GetPerformanceDataRequestDTO): Promise<PerformanceRawData>;
   getRecentActivities(params: GetRecentActivitiesRequestDTO): Promise<GetRecentActivitiesResponseDTO>;
   getSystemAlerts(params: GetSystemAlertsRequestDTO): Promise<GetSystemAlertsResponseDTO>;
   refreshDashboard(params: RefreshDashboardRequestDTO): Promise<RefreshDashboardResponseDTO>;

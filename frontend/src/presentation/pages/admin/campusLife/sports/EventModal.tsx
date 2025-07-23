@@ -1,21 +1,6 @@
 import React from 'react';
 import { IoCloseOutline as X } from 'react-icons/io5';
-
-interface EventModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: () => void;
-  form: {
-    title: string;
-    sportType: string;
-    teams: string[];
-    dateTime: string;
-    venue: string;
-    status: string;
-  };
-  setForm: (form: any) => void;
-  sportTypes: string[];
-}
+import { EventModalProps } from '../../../../../domain/types/management/sportmanagement';
 
 const EventModal: React.FC<EventModalProps> = ({
   isOpen,

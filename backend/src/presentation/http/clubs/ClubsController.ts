@@ -1,9 +1,9 @@
 import {
-  IGetClubsUseCase,
-  IGetClubByIdUseCase,
-  ICreateClubUseCase,
-  IUpdateClubUseCase,
-  IDeleteClubUseCase,
+  GetClubsUseCase,
+  GetClubByIdUseCase,
+  CreateClubUseCase,
+  UpdateClubUseCase,
+  DeleteClubUseCase,
 } from "../../../application/clubs/useCases/ClubUseCases";
 import {
   GetClubsRequestDTO,
@@ -20,11 +20,11 @@ export class ClubsController implements IClubsController {
   private httpSuccess: HttpSuccess;
 
   constructor(
-    private getClubsUseCase: IGetClubsUseCase,
-    private getClubByIdUseCase: IGetClubByIdUseCase,
-    private createClubUseCase: ICreateClubUseCase,
-    private updateClubUseCase: IUpdateClubUseCase,
-    private deleteClubUseCase: IDeleteClubUseCase
+    private getClubsUseCase: GetClubsUseCase,
+    private getClubByIdUseCase: GetClubByIdUseCase,
+    private createClubUseCase: CreateClubUseCase,
+    private updateClubUseCase: UpdateClubUseCase,
+    private deleteClubUseCase: DeleteClubUseCase
   ) {
     this.httpErrors = new HttpErrors();
     this.httpSuccess = new HttpSuccess();
@@ -98,9 +98,9 @@ export class ClubsController implements IClubsController {
 
 export const clubsController = new ClubsController(
   // Dependency injection placeholders
-  {} as IGetClubsUseCase,
-  {} as IGetClubByIdUseCase,
-  {} as ICreateClubUseCase,
-  {} as IUpdateClubUseCase,
-  {} as IDeleteClubUseCase
+  {} as GetClubsUseCase,
+  {} as GetClubByIdUseCase,
+  {} as CreateClubUseCase,
+  {} as UpdateClubUseCase,
+  {} as DeleteClubUseCase
 ); 

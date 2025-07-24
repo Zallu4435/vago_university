@@ -1,11 +1,3 @@
-import {
-  StudentDashboardData,
-  Announcement,
-  Deadline,
-  ClassInfo,
-  OnlineTopic,
-  SpecialDate
-} from '../entities/StudentDashboardTypes';
 
 export interface AnnouncementDTO {
   id: string;
@@ -36,40 +28,12 @@ export interface ClassInfoDTO {
   maxEnrollment: number;
 }
 
-export interface OnlineTopicDTO {
+
+export interface NewEventDTO {
   id: string;
   title: string;
-  courseId?: string;
-  votes: number;
-  voted: boolean;
-  createdAt: Date;
-}
-
-export interface SpecialDateDTO {
-  day: number;
-  type: 'event' | 'sports' | 'club';
-  title: string;
-  isPublic: boolean;
-  sportType?: string;
-  division?: string;
-  clubType?: string;
-  icon?: string;
-}
-
-export interface StudentDashboardDataDTO {
-  announcements: AnnouncementDTO[];
-  deadlines: DeadlineDTO[];
-  classes: ClassInfoDTO[];
-  onlineTopics: OnlineTopicDTO[];
-  calendarDays: number[];
-  specialDates: SpecialDateDTO[];
-}
-
-export interface GetStudentDashboardDataResponseDTO {
-  success: boolean;
-  data: StudentDashboardDataDTO;
-  message?: string;
-  error?: string;
+  date: Date;
+  location: string;
 }
 
 export interface GetAnnouncementsResponseDTO {
@@ -93,13 +57,6 @@ export interface GetClassesResponseDTO {
   error?: string;
 }
 
-export interface GetOnlineTopicsResponseDTO {
-  success: boolean;
-  data: OnlineTopicDTO[];
-  message?: string;
-  error?: string;
-}
-
 export interface GetCalendarDaysResponseDTO {
   success: boolean;
   data: number[];
@@ -107,9 +64,11 @@ export interface GetCalendarDaysResponseDTO {
   error?: string;
 }
 
-export interface GetSpecialDatesResponseDTO {
-  success: boolean;
-  data: SpecialDateDTO[];
-  message?: string;
-  error?: string;
-} 
+export interface GetUserInfoResponseDTO {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  profilePicture?: string;
+  course?: string;
+}

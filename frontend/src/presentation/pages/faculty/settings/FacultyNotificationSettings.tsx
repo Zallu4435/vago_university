@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { FaBell, FaCog, FaEye, FaEyeSlash, FaCheck, FaTimes } from 'react-icons/fa';
 import { useNotificationManagement } from '../../../../application/hooks/useNotificationManagement';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 export default function FacultyNotificationSettings() {
   const { styles } = usePreferences();
-  const { notifications, markAsRead, markAllAsRead } = useNotificationManagement();
+  const { notifications, markAsRead, markAllAsRead, fetchNextPage, hasMore, isLoadingMore } = useNotificationManagement();
   const [activeTab, setActiveTab] = useState<'preferences' | 'notifications'>('preferences');
   const [preferences, setPreferences] = useState({
     emailNotifications: true,
@@ -88,6 +88,18 @@ export default function FacultyNotificationSettings() {
         );
     }
   };
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Infinite scroll handler
+  const handleScroll = useCallback(() => {
+    const container = scrollRef.current;
+    if (!container || isLoadingMore || !hasMore) return;
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    if (scrollHeight - scrollTop - clientHeight < 100) {
+      fetchNextPage();
+    }
+  }, [isLoadingMore, hasMore, fetchNextPage]);
 
   return (
     <div className="flex-1 p-8">
@@ -346,7 +358,11 @@ export default function FacultyNotificationSettings() {
               </div>
 
               {/* Notifications List */}
-              <div className="space-y-3 max-h-96 overflow-y-auto">
+              <div
+                className="space-y-3 max-h-96 overflow-y-auto"
+                ref={scrollRef}
+                onScroll={handleScroll}
+              >
                 {notifications.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -356,48 +372,61 @@ export default function FacultyNotificationSettings() {
                     <p className="text-sm text-slate-400">You'll see notifications here when they arrive</p>
                   </div>
                 ) : (
-                  notifications.map((notification) => (
-                    <div
-                      key={notification._id}
-                      className={`p-4 rounded-lg border transition-all duration-200 ${
-                        !notification.isRead
-                          ? 'bg-purple-50 border-purple-200'
-                          : 'bg-slate-50 border-slate-200'
-                      }`}
-                    >
-                      <div className="flex items-start space-x-3">
-                        <div className={`flex-shrink-0 w-10 h-10 rounded-lg ${
-                          !notification.isRead ? 'bg-purple-100' : 'bg-slate-100'
-                        } flex items-center justify-center`}>
-                          <div className={!notification.isRead ? 'text-purple-600' : 'text-slate-500'}>
-                            {getNotificationIcon(notification.type || 'default')}
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h4 className={`font-medium ${!notification.isRead ? 'text-slate-800' : 'text-slate-600'}`}>
-                                {notification.title}
-                              </h4>
-                              <p className="text-sm text-slate-500 mt-1">{notification.message}</p>
-                              <p className="text-xs text-slate-400 mt-2">
-                                {formatRelativeTime(notification.createdAt)}
-                              </p>
+                  <>
+                    {notifications.map((notification) => (
+                      <div
+                        key={notification._id}
+                        className={`p-4 rounded-lg border transition-all duration-200 ${
+                          !notification.isRead
+                            ? 'bg-purple-50 border-purple-200'
+                            : 'bg-slate-50 border-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div className={`flex-shrink-0 w-10 h-10 rounded-lg ${
+                            !notification.isRead ? 'bg-purple-100' : 'bg-slate-100'
+                          } flex items-center justify-center`}>
+                            <div className={!notification.isRead ? 'text-purple-600' : 'text-slate-500'}>
+                              {getNotificationIcon(notification.type || 'default')}
                             </div>
-                            {!notification.isRead && (
-                              <button
-                                onClick={() => handleMarkAsRead(notification._id)}
-                                className="ml-2 p-1 text-purple-600 hover:bg-purple-100 rounded transition-colors"
-                                title="Mark as read"
-                              >
-                                <FaCheck className="w-3 h-3" />
-                              </button>
-                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <h4 className={`font-medium ${!notification.isRead ? 'text-slate-800' : 'text-slate-600'}`}>
+                                  {notification.title}
+                                </h4>
+                                <p className="text-sm text-slate-500 mt-1">{notification.message}</p>
+                                <p className="text-xs text-slate-400 mt-2">
+                                  {formatRelativeTime(notification.createdAt)}
+                                </p>
+                              </div>
+                              {!notification.isRead && (
+                                <button
+                                  onClick={() => handleMarkAsRead(notification._id)}
+                                  className="ml-2 p-1 text-purple-600 hover:bg-purple-100 rounded transition-colors"
+                                  title="Mark as read"
+                                >
+                                  <FaCheck className="w-3 h-3" />
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    ))}
+                    {isLoadingMore && (
+                      <div className="flex justify-center py-2">
+                        <svg className="animate-spin h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      </div>
+                    )}
+                    {!hasMore && notifications.length > 0 && (
+                      <div className="text-center text-xs text-gray-400 py-2">All notifications loaded.</div>
+                    )}
+                  </>
                 )}
               </div>
             </div>

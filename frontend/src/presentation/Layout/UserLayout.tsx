@@ -30,20 +30,17 @@ const UserLayout = () => {
       socketRef.current.disconnect();
       socketRef.current = null;
     }
-    console.log('logout ijsijijsijijijsqwouhuodniqsndninin');
     try {
-      await authService.logout(); // Call backend API here
+      await authService.logout();
     } catch (err: any) {
-      // Ignore 401 errors, log others
       if (!err.message?.includes('401')) {
         console.error('Logout API error:', err);
       }
     }
-    dispatch(logout()); // Just update Redux state
+    dispatch(logout());
     navigate('/login');
   };
 
-  // Update activeTab when URL changes
   useEffect(() => {
     const path = location.pathname;
     if (path.includes('/canvas')) {

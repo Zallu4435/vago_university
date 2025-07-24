@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNotificationManagement } from '../../../application/hooks/useNotificationManagement';
 import { usePreferences } from '../../../application/context/PreferencesContext';
@@ -15,12 +15,11 @@ type TabType = 'unread' | 'all';
 export default function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
     const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
     const { styles } = usePreferences();
-    const { notifications, markAsRead, markAllAsRead } = useNotificationManagement();
+    const { notifications, markAsRead, markAllAsRead, fetchNextPage, hasMore, isLoadingMore } = useNotificationManagement();
     const notificationDropdownRef = useRef<HTMLDivElement>(null);
     const [activeTab, setActiveTab] = useState<TabType>('unread');
     const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
 
-    // Filter notifications based on active tab
     const filteredNotifications = activeTab === 'unread'
         ? notifications.filter(n => !n.isRead)
         : notifications;
@@ -28,7 +27,7 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
     const handleMarkAsRead = async (e: React.MouseEvent, notificationId: string) => {
-        e.stopPropagation(); // Prevent triggering the notification click
+        e.stopPropagation();
         try {
             await markAsRead(notificationId);
         } catch (error) {
@@ -92,6 +91,18 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
             return `${days}d ago`;
         }
     };
+
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    // Infinite scroll handler
+    const handleScroll = useCallback(() => {
+        const container = scrollRef.current;
+        if (!container || isLoadingMore || !hasMore) return;
+        const { scrollTop, scrollHeight, clientHeight } = container;
+        if (scrollHeight - scrollTop - clientHeight < 100) {
+            fetchNextPage();
+        }
+    }, [isLoadingMore, hasMore, fetchNextPage]);
 
     useEffect(() => {
         const handleOutsideClick = (event: MouseEvent) => {
@@ -192,7 +203,11 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
                 </div>
 
                 {/* Notifications list */}
-                <div className="h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent hover:scrollbar-thumb-gray-500">
+                <div
+                    className="h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent hover:scrollbar-thumb-gray-500"
+                    ref={scrollRef}
+                    onScroll={handleScroll}
+                >
                     {filteredNotifications.length === 0 ? (
                         <div className={`px-6 py-12 text-center ${styles.textSecondary}`}>
                             <div className={`w-20 h-20 mx-auto mb-6 rounded-2xl ${styles.status.primary} bg-opacity-10 flex items-center justify-center`}>
@@ -276,6 +291,17 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
                                     </div>
                                 </div>
                             ))}
+                            {isLoadingMore && (
+                                <div className="flex justify-center py-2">
+                                    <svg className="animate-spin h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </div>
+                            )}
+                            {!hasMore && filteredNotifications.length > 0 && (
+                                <div className="text-center text-xs text-gray-400 py-2">All notifications loaded.</div>
+                            )}
                         </div>
                     )}
                 </div>

@@ -1,4 +1,4 @@
-import { useOutletContext } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { usePreferences } from '../../../application/context/PreferencesContext';
 import DiplomaCoursesSection from './diploma/DiplomaCoursesSection';
 import AssignmentsSection from './assignments/AssignmentsSection';
@@ -9,34 +9,20 @@ import { ChatComponent } from './chat/ChatComponent';
 import StudentDashboard from '../user/Dashboard/StudentDashboard';
 
 export default function StudentCanvas() {
-  const [activeTab, setActiveTab] = useOutletContext<[string, (tab: string) => void]>();
   const { styles } = usePreferences();
-
-  
-  const renderContent = () => {
-    switch (activeTab) {  
-      case 'Dashboard':
-        return <StudentDashboard />;
-      case 'Diploma Course':
-        return <DiplomaCoursesSection />;
-      case 'Chat':
-        return <ChatComponent />;
-      case 'Video Class':
-        return <VideoClassPage />;
-      case 'Materials':
-        return <StudyMaterialsPage />;
-      case 'Assignments':
-        return <AssignmentsSection />;
-      case 'Sessions':
-        return <UniversitySessionsDashboard />;
-      default:
-        return <div>Select a tab</div>;
-    }
-  };
 
   return (
     <div className={`min-h-screen ${styles.background}`}>
-      {renderContent()}
+      <Routes>
+        <Route path="/" element={<StudentDashboard />} />
+        <Route path="diploma-course" element={<DiplomaCoursesSection />} />
+        <Route path="chat" element={<ChatComponent />} />
+        <Route path="video-class" element={<VideoClassPage />} />
+        <Route path="materials" element={<StudyMaterialsPage />} />
+        <Route path="assignments" element={<AssignmentsSection />} />
+        <Route path="sessions" element={<UniversitySessionsDashboard />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </div>
   );
 }

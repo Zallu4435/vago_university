@@ -1,121 +1,89 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { studentDashboardService } from '../services/studentDashboardService';
 
-// Dummy data
-const dummyData = {
-  announcements: [
-    {
-      id: '1',
-      title: 'Welcome to Spring Semester 2024',
-      content: 'We hope you have a great learning experience!',
-      date: new Date().toISOString(),
-      sender: 'Admin',
-      hasAttachments: false
-    },
-    {
-      id: '2',
-      title: 'Library Hours Extended',
-      content: 'Library will now be open until 11 PM',
-      date: new Date().toISOString(),
-      sender: 'Library Staff',
-      hasAttachments: false
-    }
-  ],
-  deadlines: [
-    {
-      id: '1',
-      title: 'Assignment 1 Due',
-      date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      urgent: true
-    },
-    {
-      id: '2',
-      title: 'Mid-term Exam',
-      date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-      urgent: false
-    }
-  ],
-  classes: [
-    {
-      id: '1',
-      code: 'WD101',
-      name: 'Web Development',
-      instructor: 'Dr. Smith',
-      time: '09:00 AM - 10:30 AM',
-      room: 'Room 101',
-      building: 'Tech Building',
-      status: 'scheduled'
-    },
-    {
-      id: '2',
-      code: 'DB201',
-      name: 'Database Management',
-      instructor: 'Prof. Johnson',
-      time: '11:00 AM - 12:30 PM',
-      room: 'Room 203',
-      building: 'Science Center',
-      status: 'scheduled'
-    }
-  ],
-  onlineTopics: [
-    {
-      id: '1',
-      title: 'React Hooks Deep Dive',
-      votes: 15,
-      voted: false
-    },
-    {
-      id: '2',
-      title: 'MongoDB Best Practices',
-      votes: 12,
-      voted: false
-    }
-  ],
-  calendarDays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-  specialDates: {
-    14: { type: 'exam' as const },
-    7: { type: 'deadline' as const },
-    10: { type: 'event' as const }
-  }
+type EventItem = {
+  id: string;
+  title: string;
+  date: string;
+  location: string;
 };
 
-export const useStudentDashboard = () => {
-  // Return dummy data directly
+type StudentDashboardData = {
+  announcements: any[];
+  deadlines: any[];
+  classes: any[];
+  newEvents: EventItem[];
+  calendarDays: number[];
+  isLoading: boolean;
+  isLoadingAnnouncements: boolean;
+  isLoadingDeadlines: boolean;
+  isLoadingClasses: boolean;
+  isLoadingNewEvents: boolean;
+  isLoadingCalendarDays: boolean;
+  hasError: boolean;
+  dashboardError: any;
+  announcementsError: any;
+  deadlinesError: any;
+  classesError: any;
+  newEventsError: any;
+  calendarDaysError: any;
+  refetchDashboard: () => Promise<void>;
+  refetchAnnouncements: () => Promise<void>;
+  refetchDeadlines: () => Promise<void>;
+  refetchClasses: () => Promise<void>;
+  refetchNewEvents: () => Promise<void>;
+  refetchCalendarDays: () => Promise<void>;
+};
+
+export const useStudentDashboard = (): StudentDashboardData & {
+  studentInfo?: any;
+  studentInfoLoading: boolean;
+  studentInfoError: any;
+} => {
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['student-dashboard'],
+    queryFn: () => studentDashboardService.getAllDashboardData(),
+    retry: 1,
+  });
+
+  const { data: studentInfo, isLoading: studentInfoLoading, error: studentInfoError } = useQuery({
+    queryKey: ['student-dashboard-student-info'],
+    queryFn: () => studentDashboardService.getStudentInfo(),
+    retry: 1,
+  });
+
+  const dashboard: Partial<StudentDashboardData> = data || {};
+
+  // Helper to wrap refetch to always return Promise<void>
+  const safeRefetch = () => refetch().then(() => {});
+
   return {
-    // Data
-    announcements: dummyData.announcements,
-    deadlines: dummyData.deadlines,
-    classes: dummyData.classes,
-    onlineTopics: dummyData.onlineTopics,
-    calendarDays: dummyData.calendarDays,
-    specialDates: dummyData.specialDates,
-
-    // Loading states
-    isLoading: false,
-    isLoadingAnnouncements: false,
-    isLoadingDeadlines: false,
-    isLoadingClasses: false,
-    isLoadingOnlineTopics: false,
-    isLoadingCalendarDays: false,
-    isLoadingSpecialDates: false,
-
-    // Error states
-    hasError: false,
-    dashboardError: null,
-    announcementsError: null,
-    deadlinesError: null,
-    classesError: null,
-    onlineTopicsError: null,
-    calendarDaysError: null,
-    specialDatesError: null,
-
-    // Utilities
-    refetchDashboard: () => Promise.resolve(),
-    refetchAnnouncements: () => Promise.resolve(),
-    refetchDeadlines: () => Promise.resolve(),
-    refetchClasses: () => Promise.resolve(),
-    refetchOnlineTopics: () => Promise.resolve(),
-    refetchCalendarDays: () => Promise.resolve(),
-    refetchSpecialDates: () => Promise.resolve(),
+    announcements: dashboard?.announcements || [],
+    deadlines: dashboard?.deadlines || [],
+    classes: dashboard?.classes || [],
+    newEvents: dashboard?.newEvents || [],
+    calendarDays: dashboard?.calendarDays || [],
+    isLoading,
+    isLoadingAnnouncements: isLoading,
+    isLoadingDeadlines: isLoading,
+    isLoadingClasses: isLoading,
+    isLoadingNewEvents: isLoading,
+    isLoadingCalendarDays: isLoading,
+    hasError: isError,
+    dashboardError: error,
+    announcementsError: error,
+    deadlinesError: error,
+    classesError: error,
+    newEventsError: error,
+    calendarDaysError: error,
+    refetchDashboard: safeRefetch,
+    refetchAnnouncements: safeRefetch,
+    refetchDeadlines: safeRefetch,
+    refetchClasses: safeRefetch,
+    refetchNewEvents: safeRefetch,
+    refetchCalendarDays: safeRefetch,
+    studentInfo: studentInfo?.data,
+    studentInfoLoading,
+    studentInfoError,
   };
 }; 

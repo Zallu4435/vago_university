@@ -1,22 +1,45 @@
-import { useEffect } from 'react';
-import { FaThLarge, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 
-interface Class {
+interface EventItem {
   id: string;
   title: string;
-  faculty: string;
-  schedule: string;
-  cousre: string;
+  date: string;
+  location: string;
   description: string;
 }
 
-interface ScheduledClassesProps {
-  classes: Class[];
+interface NewEventsProps {
+  events?: EventItem[];
 }
 
-export default function ScheduledClasses({ classes }: ScheduledClassesProps) {
+const mockEvents: EventItem[] = [
+  {
+    id: '1',
+    title: 'Spring Fest 2024',
+    date: '2024-04-20',
+    location: 'Main Auditorium',
+    description: 'Join us for music, food, and fun at the annual Spring Fest!'
+  },
+  {
+    id: '2',
+    title: 'Tech Symposium',
+    date: '2024-05-05',
+    location: 'Innovation Hall',
+    description: 'A showcase of student tech projects and guest speakers.'
+  },
+  {
+    id: '3',
+    title: 'Sports Day',
+    date: '2024-06-01',
+    location: 'Sports Complex',
+    description: 'Compete or cheer for your friends in a day full of sports!'
+  }
+];
+
+export default function NewEvents({ events }: NewEventsProps) {
   const { styles, theme } = usePreferences();
+  const displayEvents = events || mockEvents;
 
   return (
     <div className={`relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-xl ${styles.backgroundSecondary} group hover:shadow-2xl transition-all duration-500`}>
@@ -31,56 +54,38 @@ export default function ScheduledClasses({ classes }: ScheduledClassesProps) {
           <div className="relative">
             <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br ${styles.accent} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
               <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/20 to-transparent"></div>
-              <FaThLarge size={16} className="sm:w-5 sm:h-5 text-white relative z-10" />
+              <FaCalendarAlt size={18} className="sm:w-5 sm:h-5 text-white relative z-10" />
             </div>
             <div className={`absolute -inset-1 bg-gradient-to-br ${styles.orb.primary} rounded-xl sm:rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300`}></div>
           </div>
           <div>
             <h2 className={`text-lg sm:text-xl md:text-2xl font-bold ${theme == 'dark' ? 'text-white' : 'text-gray-800'} bg-clip-text`}>
-              Scheduled Classes
+              New Events
             </h2>
             <div className={`h-0.5 sm:h-1 w-12 sm:w-16 bg-gradient-to-r ${styles.accent} rounded-full mt-1 group-hover:w-16 sm:group-hover:w-24 transition-all duration-300`}></div>
           </div>
         </div>
         <div className="space-y-3 sm:space-y-4">
-          {classes.map((cls: Class, index: number) => (
+          {displayEvents.map((event) => (
             <div
-              key={index}
+              key={event.id}
               className={`group/item relative overflow-hidden ${styles.card.background} ${styles.card.border} ${styles.card.hover} rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 transition-all duration-300 shadow-sm hover:shadow-lg transform hover:scale-[1.02] backdrop-blur-md`}
             >
-              <div
-                className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-xl sm:rounded-2xl blur transition-all duration-300 group-hover/item:opacity-20`}
-              ></div>
-              <div className="flex-1">
-                <div className="flex items-center space-x-2 sm:space-x-3 mb-1 sm:mb-2">
-                  <div className={`w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-gradient-to-br ${styles.accent}`}></div>
-                  <h3 className={`text-sm sm:text-base font-semibold ${styles.textPrimary} group-hover/item:text-gray-900 transition-colors duration-200`}>
-                    {cls.title}
-                  </h3>
+              <div className="relative z-10 flex flex-col gap-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <FaCalendarAlt className={`${styles.icon.secondary}`} size={14} />
+                  <span className={`text-xs sm:text-sm font-semibold ${styles.textPrimary}`}>{event.date}</span>
+                  <FaMapMarkerAlt className={`ml-2 ${styles.icon.secondary}`} size={13} />
+                  <span className={`text-xs sm:text-sm ${styles.textSecondary}`}>{event.location}</span>
                 </div>
-                <div className="ml-3 sm:ml-5 text-xs sm:text-sm flex flex-col gap-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">Faculty:</span>
-                    <span>{cls.faculty}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">Schedule:</span>
-                    <span>{cls.schedule ? new Date(cls.schedule).toLocaleString() : '-'}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">Course:</span>
-                    <span>{cls.cousre}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">Description:</span>
-                    <span>{cls.description}</span>
-                  </div>
-                </div>
+                <h3 className={`text-sm sm:text-base font-semibold ${styles.textPrimary}`}>{event.title}</h3>
+                <p className={`text-xs sm:text-sm ${styles.textSecondary}`}>{event.description}</p>
               </div>
+              <div className={`absolute bottom-0 left-0 h-0.5 sm:h-1 w-0 bg-gradient-to-r ${styles.accent} group-hover/item:w-full transition-all duration-300 rounded-full`}></div>
             </div>
           ))}
         </div>
       </div>
     </div>
   );
-}
+} 

@@ -312,12 +312,12 @@ const App: React.FC = () => {
           {/* User Routes (user only) */}
           <Route element={<ProtectedRoute allowedCollections={['user']} />}>
             <Route element={<UserLayout />}>
-              <Route path="dashboard" element={
+              <Route path="dashboard/*" element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <DashboardPage />
                 </Suspense>
               } />
-              <Route path="canvas" element={
+              <Route path="canvas/*" element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <StudentCanvas />
                 </Suspense>

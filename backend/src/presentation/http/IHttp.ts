@@ -407,8 +407,7 @@ export interface IStudentDashboardController extends IController {
   getAnnouncements(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getDeadlines(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getClasses(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  getOnlineTopics(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getNewEvents(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getCalendarDays(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  getSpecialDates(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  getDashboardData(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  getUserInfo(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }

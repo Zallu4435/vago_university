@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { FaBell, FaBookOpen, FaSearch, FaBars, FaTimes, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserAlt, FaExchangeAlt, FaChalkboardTeacher, FaTachometerAlt, FaUserGraduate } from 'react-icons/fa';
+import { FaBell, FaSearch, FaBars, FaTimes, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserAlt, FaExchangeAlt, FaChalkboardTeacher, FaTachometerAlt, FaUserGraduate } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePreferences } from '../../../application/context/PreferencesContext';
 import { useNotificationManagement } from '../../../application/hooks/useNotificationManagement';
 import NotificationModal from '../common/NotificationModal';
 
 interface HeaderProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
   mobileMenuOpen: boolean;
   setMobileMenuOpen: (open: boolean) => void;
   onLogout: () => void;
@@ -17,7 +15,7 @@ interface HeaderProps {
 
 type DropdownAction = 'settings' | 'help' | 'logout';
 
-export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMobileMenuOpen, onLogout, userName, profilePicture }: HeaderProps) {
+export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, userName, profilePicture }: HeaderProps) {
   const dashboardTabs = ['Dashboard', 'Academics', 'Financial', 'Communication', 'Campus Life'];
   const canvasTabs = ['Dashboard', 'Diploma Course', 'Chat', 'Video Class', 'Materials', 'Assignments'];
   const location = useLocation();
@@ -35,6 +33,31 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
   const isCanvas = location.pathname.includes('/canvas');
   const tabs = isCanvas ? canvasTabs : dashboardTabs;
   const portalName = 'VAGO';
+
+  // Helper to get the exact path for each tab
+  const getTabPath = (tab: string) => {
+    if (!isCanvas) {
+      switch (tab) {
+        case 'Dashboard': return '/dashboard';
+        case 'Academics': return '/dashboard/academics';
+        case 'Financial': return '/dashboard/financial';
+        case 'Communication': return '/dashboard/communication';
+        case 'Campus Life': return '/dashboard/campus-life';
+        default: return '';
+      }
+    } else {
+      switch (tab) {
+        case 'Dashboard': return '/canvas';
+        case 'Diploma Course': return '/canvas/diploma-course';
+        case 'Chat': return '/canvas/chat';
+        case 'Video Class': return '/canvas/video-class';
+        case 'Materials': return '/canvas/materials';
+        case 'Assignments': return '/canvas/assignments';
+        case 'Sessions': return '/canvas/sessions';
+        default: return '';
+      }
+    }
+  };
 
   const toggleProfileDropdown = () => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
@@ -224,7 +247,6 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
               <NotificationModal 
                 isOpen={isNotificationOpen}
                 onClose={() => setIsNotificationOpen(false)}
-                styles={styles}
               />
             </div>
 
@@ -373,23 +395,74 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
           <div className="relative">
             <div className={`absolute inset-0 bg-gradient-to-r ${styles.accent} opacity-20 rounded-2xl blur-sm`}></div>
             <ul className={`relative flex space-x-8 ${styles.card.background} backdrop-blur-md rounded-2xl px-6 py-3 shadow-lg border ${styles.border}`}>
-              {tabs.map((tab) => (
-                <li key={tab} className="relative">
-                  <button
-                    onClick={() => setActiveTab(tab)}
-                    className={`relative px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
-                      activeTab === tab
-                        ? `${styles.button.primary} shadow-lg transform scale-105`
-                        : `${styles.textPrimary} ${styles.card.hover}`
-                    }`}
-                  >
-                    {activeTab === tab && (
-                      <div className={`absolute -inset-1 bg-gradient-to-r ${styles.orb.primary} rounded-xl blur opacity-75`}></div>
-                    )}
-                    <span className="relative z-10">{tab}</span>
-                  </button>
-                </li>
-              ))}
+              {tabs.map((tab) => {
+                const isActive = location.pathname === getTabPath(tab);
+                return (
+                  <li key={tab} className="relative">
+                    <button
+                      onClick={() => {
+                        if (!isCanvas) {
+                          switch (tab) {
+                            case 'Dashboard':
+                              navigate('/dashboard');
+                              break;
+                            case 'Academics':
+                              navigate('/dashboard/academics');
+                              break;
+                            case 'Financial':
+                              navigate('/dashboard/financial');
+                              break;
+                            case 'Communication':
+                              navigate('/dashboard/communication');
+                              break;
+                            case 'Campus Life':
+                              navigate('/dashboard/campus-life');
+                              break;
+                            default:
+                              break;
+                          }
+                        } else {
+                          switch (tab) {
+                            case 'Dashboard':
+                              navigate('/canvas');
+                              break;
+                            case 'Diploma Course':
+                              navigate('/canvas/diploma-course');
+                              break;
+                            case 'Chat':
+                              navigate('/canvas/chat');
+                              break;
+                            case 'Video Class':
+                              navigate('/canvas/video-class');
+                              break;
+                            case 'Materials':
+                              navigate('/canvas/materials');
+                              break;
+                            case 'Assignments':
+                              navigate('/canvas/assignments');
+                              break;
+                            case 'Sessions':
+                              navigate('/canvas/sessions');
+                              break;
+                            default:
+                              break;
+                          }
+                        }
+                      }}
+                      className={`relative px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
+                        isActive
+                          ? `${styles.button.primary} shadow-lg transform scale-105`
+                          : `${styles.textPrimary} ${styles.card.hover}`
+                      }`}
+                    >
+                      {isActive && (
+                        <div className={`absolute -inset-1 bg-gradient-to-r ${styles.orb.primary} rounded-xl blur opacity-75`}></div>
+                      )}
+                      <span className="relative z-10">{tab}</span>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </nav>
@@ -418,22 +491,74 @@ export default function Header({ activeTab, setActiveTab, mobileMenuOpen, setMob
               </div>
 
               <div className="space-y-3">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => {
-                      setActiveTab(tab);
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`w-full text-left px-5 py-3 rounded-xl font-medium transition-all duration-300 ${
-                      activeTab === tab
-                        ? `${styles.button.primary} shadow-lg transform scale-105`
-                        : `${styles.textPrimary} ${styles.card.hover}`
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
+                {tabs.map((tab) => {
+                  const isActive = location.pathname === getTabPath(tab);
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        if (!isCanvas) {
+                          switch (tab) {
+                            case 'Dashboard':
+                              navigate('/dashboard');
+                              break;
+                            case 'Academics':
+                              navigate('/dashboard/academics');
+                              break;
+                            case 'Financial':
+                              navigate('/dashboard/financial');
+                              break;
+                            case 'Communication':
+                              navigate('/dashboard/communication');
+                              break;
+                            case 'Campus Life':
+                              navigate('/dashboard/campus-life');
+                              break;
+                            default:
+                              break;
+                          }
+                        } else {
+                          switch (tab) {
+                            case 'Dashboard':
+                              navigate('/canvas');
+                              break;
+                            case 'Diploma Course':
+                              navigate('/canvas/diploma-course');
+                              break;
+                            case 'Chat':
+                              navigate('/canvas/chat');
+                              break;
+                            case 'Video Class':
+                              navigate('/canvas/video-class');
+                              break;
+                            case 'Materials':
+                              navigate('/canvas/materials');
+                              break;
+                            case 'Assignments':
+                              navigate('/canvas/assignments');
+                              break;
+                            case 'Sessions':
+                              navigate('/canvas/sessions');
+                              break;
+                            default:
+                              break;
+                          }
+                        }
+                      }}
+                      className={`w-full text-left px-5 py-3 rounded-xl font-medium transition-all duration-300 ${
+                        isActive
+                          ? `${styles.button.primary} shadow-lg transform scale-105`
+                          : `${styles.textPrimary} ${styles.card.hover}`
+                      }`}
+                    >
+                      {isActive && (
+                        <div className={`absolute -inset-1 bg-gradient-to-r ${styles.orb.primary} rounded-xl blur opacity-75`}></div>
+                      )}
+                      <span className="relative z-10">{tab}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>

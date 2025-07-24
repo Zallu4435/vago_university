@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { notificationService } from '../services/notification.service';
@@ -24,11 +24,15 @@ export const useNotificationManagement = () => {
     dateRange: 'All',
   });
   const [selectedNotificationId, setSelectedNotificationId] = useState<string | null>(null);
+  const [allNotifications, setAllNotifications] = useState<Notification[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const limit = 10;
 
   const isAdmin = user?.role === 'admin';
 
-  const { data: notificationsData, isLoading, error } = useQuery({
+  // Fetch notifications for the current page and filters
+  const { data: notificationsData, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['notifications', page, filters, limit, isAdmin],
     queryFn: () => {
       return notificationService.getNotifications({
@@ -44,6 +48,60 @@ export const useNotificationManagement = () => {
     enabled: !!user,
   });
 
+  // Reset notifications when filters or user change
+  useEffect(() => {
+    setAllNotifications([]);
+    setPage(1);
+    setHasMore(true);
+  }, [filters, user]);
+
+  // When notificationsData changes, update allNotifications
+  useEffect(() => {
+    if (notificationsData && notificationsData.notifications) {
+      setAllNotifications((prev) => {
+        // Avoid duplicates
+        const ids = new Set(prev.map((n) => n._id));
+        const newOnes = notificationsData.notifications.filter((n) => !ids.has(n._id));
+        return page === 1 ? notificationsData.notifications : [...prev, ...newOnes];
+      });
+      setHasMore(page < (notificationsData.totalPages || 1));
+    }
+  }, [notificationsData, page]);
+
+  // Fetch next page for infinite scroll
+  const fetchNextPage = useCallback(async () => {
+    if (isLoadingMore || !hasMore) return;
+    setIsLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const data = await notificationService.getNotifications({
+        isAdmin,
+        page: nextPage,
+        limit,
+        recipientType: filters.recipientType !== 'All' ? filters.recipientType.toLowerCase().replace(/\s+/g, '_') : undefined,
+        status: filters.status !== 'All' ? filters.status.toLowerCase() : undefined,
+        dateRange: filters.dateRange !== 'All' ? filters.dateRange : undefined,
+        search: filters.search ? filters.search : undefined,
+      });
+      if (data && data.notifications && data.notifications.length > 0) {
+        setAllNotifications((prev) => {
+          const ids = new Set(prev.map((n) => n._id));
+          const newOnes = data.notifications.filter((n) => !ids.has(n._id));
+          return [...prev, ...newOnes];
+        });
+        setPage(nextPage);
+        setHasMore(nextPage < (data.totalPages || 1));
+      } else {
+        setHasMore(false);
+      }
+    } catch (err) {
+      setHasMore(false);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [isLoadingMore, hasMore, page, filters, isAdmin]);
+
+  // Notification details (single fetch)
   const { data: selectedNotification, isLoading: isLoadingNotificationDetails } = useQuery({
     queryKey: ['notificationDetails', selectedNotificationId],
     queryFn: () => {
@@ -105,13 +163,13 @@ export const useNotificationManagement = () => {
   });
 
   return {
-    notifications: notificationsData?.notifications || [],
+    notifications: allNotifications,
     totalPages: notificationsData?.totalPages || 0,
     page,
     setPage,
     filters,
     setFilters,
-    isLoading,
+    isLoading: isLoading || isFetching,
     error,
     createNotification,
     deleteNotification,
@@ -120,5 +178,9 @@ export const useNotificationManagement = () => {
     getNotificationDetails,
     selectedNotification,
     isLoadingNotificationDetails,
+    fetchNextPage,
+    hasMore,
+    isLoadingMore,
+    setSelectedNotificationId,
   };
 };

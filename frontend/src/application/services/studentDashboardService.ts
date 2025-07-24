@@ -25,13 +25,19 @@ export interface OnlineTopic {
   voted: boolean;
 }
 
+export interface NewEvent {
+  id: string;
+  title: string;
+  date: string;
+  location: string;
+}
+
 export interface StudentDashboardData {
   announcements: Announcement[];
   deadlines: Deadline[];
   classes: ClassInfo[];
-  onlineTopics: OnlineTopic[];
+  newEvents: NewEvent[];
   calendarDays: number[];
-  specialDates: Record<number, { type: 'exam' | 'deadline' | 'event' }>;
 }
 
 class StudentDashboardService {
@@ -50,8 +56,8 @@ class StudentDashboardService {
     return response.data.data;
   }
 
-  async getOnlineTopics(): Promise<OnlineTopic[]> {
-    const response = await httpClient.get('/student/dashboard/online-topics');
+  async getNewEvents(): Promise<NewEvent[]> {
+    const response = await httpClient.get('/student/dashboard/new-events');
     return response.data.data;
   }
 
@@ -60,9 +66,9 @@ class StudentDashboardService {
     return response.data.data;
   }
 
-  async getSpecialDates(): Promise<Record<number, { type: 'exam' | 'deadline' | 'event' }>> {
-    const response = await httpClient.get('/student/dashboard/special-dates');
-    return response.data.data;
+  async getStudentInfo() {
+    const response = await httpClient.get('/student/dashboard/user-info');
+    return response.data;
   }
 
   async getAllDashboardData(): Promise<StudentDashboardData> {
@@ -70,24 +76,21 @@ class StudentDashboardService {
       announcements,
       deadlines,
       classes,
-      onlineTopics,
-      calendarDays,
-      specialDates
+      newEvents,
+      calendarDays
     ] = await Promise.all([
       this.getAnnouncements(),
       this.getDeadlines(),
       this.getClasses(),
-      this.getOnlineTopics(),
-      this.getCalendarDays(),
-      this.getSpecialDates()
+      this.getNewEvents(),
+      this.getCalendarDays()
     ]);
     return {
       announcements,
       deadlines,
       classes,
-      onlineTopics,
-      calendarDays,
-      specialDates
+      newEvents,
+      calendarDays
     };
   }
 }

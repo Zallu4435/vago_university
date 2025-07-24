@@ -1,39 +1,45 @@
 import { useEffect } from 'react';
-import { FaBookmark, FaBookOpen, FaCalendarAlt, FaDollarSign, FaThLarge, FaArrowRight } from 'react-icons/fa';
+import { FaBookmark, FaBookOpen, FaDollarSign, FaArrowRight, FaCalendarAlt } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function QuickLinks() {
   const { styles, theme } = usePreferences();
+  const navigate = useNavigate();
 
   const links = [
-    { 
-      icon: <FaBookOpen size={16} className="sm:w-5 sm:h-5" />, 
+    {
+      icon: <FaBookOpen size={16} className="sm:w-5 sm:h-5" />,
       text: 'Course Registration',
       color: 'from-blue-400 to-blue-600',
       bgColor: 'from-blue-50 to-blue-100',
-      emoji: '📚'
+      emoji: '📚',
+      to: '/dashboard/academics',
     },
-    { 
-      icon: <FaCalendarAlt size={16} className="sm:w-5 sm:h-5" />, 
-      text: 'Timetable',
+    {
+      icon: <FaCalendarAlt size={16} className="sm:w-5 sm:h-5" />,
+      text: 'Sessions',
       color: 'from-green-400 to-green-600',
       bgColor: 'from-green-50 to-green-100',
-      emoji: '📅'
+      emoji: '🗓️',
+      to: '/canvas/sessions',
     },
-    { 
-      icon: <FaDollarSign size={16} className="sm:w-5 sm:h-5" />, 
+    {
+      icon: <FaBookOpen size={16} className="sm:w-5 sm:h-5" />,
+      text: 'Assignments',
+      color: 'from-purple-400 to-purple-600',
+      bgColor: 'from-purple-50 to-purple-100',
+      emoji: '📝',
+      to: '/canvas/assignments',
+    },
+    {
+      icon: <FaDollarSign size={16} className="sm:w-5 sm:h-5" />,
       text: 'Fee Payment',
       color: 'from-yellow-400 to-yellow-600',
       bgColor: 'from-yellow-50 to-yellow-100',
-      emoji: '💳'
+      emoji: '💳',
+      to: '/dashboard/financial',
     },
-    { 
-      icon: <FaThLarge size={16} className="sm:w-5 sm:h-5" />, 
-      text: 'Learning Portal',
-      color: 'from-purple-400 to-purple-600',
-      bgColor: 'from-purple-50 to-purple-100',
-      emoji: '🎓'
-    }
   ];
 
   return (
@@ -62,9 +68,10 @@ export default function QuickLinks() {
         </div>
         <div className="grid grid-cols-1 gap-3 sm:gap-4">
           {links.map((link, index) => (
-            <button 
-              key={index} 
+            <button
+              key={index}
               className={`group/link relative overflow-hidden ${styles.card.background} ${styles.card.border} ${styles.card.hover} rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 transition-all duration-300 shadow-sm hover:shadow-lg transform hover:scale-[1.02] backdrop-blur-md`}
+              onClick={() => navigate(link.to)}
             >
               <div className={`absolute -inset-0.5 bg-gradient-to-r ${link.bgColor} opacity-0 group-hover/link:opacity-20 rounded-xl sm:rounded-2xl blur transition-all duration-300`}></div>
               <div className="relative z-10 flex items-center justify-between">
@@ -85,9 +92,9 @@ export default function QuickLinks() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full ${styles.button.secondary} flex items-center justify-center transition-all duration-300`}>
-                    <FaArrowRight 
-                      className={`${styles.icon.primary} group-hover/link:translate-x-0.5 transition-all duration-300`} 
-                      size={10} 
+                    <FaArrowRight
+                      className={`${styles.icon.primary} group-hover/link:translate-x-0.5 transition-all duration-300`}
+                      size={10}
                     />
                   </div>
                 </div>

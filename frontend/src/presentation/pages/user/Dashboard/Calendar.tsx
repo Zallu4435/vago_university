@@ -1,14 +1,14 @@
-import { useEffect } from 'react';
 import { FaCalendarAlt, FaArrowRight } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 
-interface SpecialDate {
-  type: 'exam' | 'deadline' | 'event';
+interface CalendarDayEntry {
+  type: string;
+  title: string;
+  date: string;
 }
 
 interface CalendarProps {
-  calendarDays: number[];
-  specialDates: Record<number, SpecialDate>;
+  calendarDays: Record<number, CalendarDayEntry[]>;
 }
 
 interface LegendProps {
@@ -17,8 +17,27 @@ interface LegendProps {
   styles: any;
 }
 
-export default function Calendar({ calendarDays, specialDates }: CalendarProps) {
+export default function Calendar({ calendarDays }: CalendarProps) {
   const { styles, theme } = usePreferences();
+
+  // Get current month/year
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDayOfWeek = new Date(year, month, 1).getDay();
+
+  // Build days array for grid
+  const days: (number | null)[] = [];
+  for (let i = 0; i < firstDayOfWeek; i++) days.push(null);
+  for (let d = 1; d <= daysInMonth; d++) days.push(d);
+
+  // Color map for types
+  const typeColor: Record<string, string> = {
+    event: styles.status.info,
+    sport: styles.status.warning,
+    club: styles.status.success,
+  };
 
   return (
     <div className={`relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-xl ${styles.backgroundSecondary} group hover:shadow-2xl transition-all duration-500`}>
@@ -48,10 +67,10 @@ export default function Calendar({ calendarDays, specialDates }: CalendarProps) 
           <div
             className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${styles.button.secondary} border ${styles.borderSecondary}`}
           >
-            May 2025
+            {now.toLocaleString('default', { month: 'long', year: 'numeric' })}
           </div>
         </div>
-        <div className="grid grid-cols-7 gap-1 text-center text-xs mb-3 sm:mb-4">
+        <div className="grid grid-cols-7 gap-1 text-center mb-2">
           {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
             <div
               key={day}
@@ -62,59 +81,45 @@ export default function Calendar({ calendarDays, specialDates }: CalendarProps) 
           ))}
         </div>
         <div className="grid grid-cols-7 gap-1 text-center">
-          {calendarDays.map((day) => {
-            const special = specialDates[day];
-            let bgClass = `${styles.card.background} ${styles.card.hover}`;
-            let textClass = styles.textPrimary;
-            let borderClass = styles.card.border;
-
-            if (special) {
-              if (special.type === 'exam') {
-                bgClass = `${styles.status.error}/10 hover:${styles.status.error}/20`;
-                textClass = styles.status.error;
-                borderClass = `border-${styles.status.error.replace('text-', '')}/20`;
-              } else if (special.type === 'deadline') {
-                bgClass = `${styles.status.warning}/10 hover:${styles.status.warning}/20`;
-                textClass = styles.status.warning;
-                borderClass = `border-${styles.status.warning.replace('text-', '')}/20`;
-              } else if (special.type === 'event') {
-                bgClass = `${styles.status.info}/10 hover:${styles.status.info}/20`;
-                textClass = styles.status.info;
-                borderClass = `border-${styles.status.info.replace('text-', '')}/20`;
-              }
-            }
-
-            const isToday = day === 31;
-
+          {days.map((day, idx) => {
+            if (!day) return <div key={`empty-${idx}`} className="py-1.5 sm:py-2" />;
+            const entries = calendarDays[day] || [];
+            const isToday = day === now.getDate();
             return (
               <div
-                key={day}
-                className={`group/day relative py-1.5 sm:py-2 rounded-lg ${bgClass} cursor-pointer transition-all duration-300 border ${borderClass} shadow-sm hover:shadow-md transform hover:scale-105 ${
-                  isToday ? `ring-2 ring-${styles.icon.primary.replace('text-', '')}` : ''
-                }`}
+                key={`day-${idx}`}
+                className={`group/day relative py-1.5 sm:py-2 rounded-lg ${styles.card.background} cursor-pointer transition-all duration-300 border ${styles.card.border} shadow-sm hover:shadow-md transform hover:scale-105 ${isToday ? `ring-2 ring-${styles.icon.primary.replace('text-', '')}` : ''}`}
               >
-                <div
-                  className={`absolute -inset-0.5 rounded-lg blur transition-all duration-300 ${
-                    special
-                      ? `bg-gradient-to-r ${
-                          special.type === 'exam'
-                            ? `${styles.status.error}/10 group-hover/day:${styles.status.error}/20`
-                            : special.type === 'deadline'
-                            ? `${styles.status.warning}/10 group-hover/day:${styles.status.warning}/20`
-                            : `${styles.status.info}/10 group-hover/day:${styles.status.info}/20`
-                        }`
-                      : `bg-gradient-to-r ${styles.orb.secondary} group-hover/day:opacity-20`
-                  }`}
-                ></div>
-                <span className={`text-xs sm:text-sm ${textClass} ${isToday ? 'font-bold' : ''} relative z-10`}>{day}</span>
+                <span className={`text-xs sm:text-sm ${styles.textPrimary} ${isToday ? 'font-bold' : ''} relative z-10`}>{day}</span>
+                {/* Markers for each type */}
+                <div className="flex justify-center gap-0.5 mt-1">
+                  {entries.map((entry, i) => (
+                    <span
+                      key={`${entry.type}-${entry.title}-${i}`}
+                      title={`${entry.type}: ${entry.title}`}
+                      className={`inline-block w-2 h-2 rounded-full ${typeColor[entry.type] || styles.status.info}`}
+                    ></span>
+                  ))}
+                </div>
+                {/* Tooltip with event/sport/club titles */}
+                {entries.length > 0 && (
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 hidden group-hover/day:block z-20 bg-white dark:bg-gray-900 text-xs rounded shadow-lg px-2 py-1 border border-gray-200 dark:border-gray-700">
+                    {entries.map((entry, i) => (
+                      <div key={`${entry.type}-${entry.title}-tooltip-${i}`} className="flex items-center gap-1">
+                        <span className={`w-2 h-2 rounded-full inline-block ${typeColor[entry.type] || styles.status.info}`}></span>
+                        <span>{entry.title}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
         <div className="mt-4 sm:mt-6 flex flex-wrap gap-2 sm:gap-3 text-xs">
-          <Legend color={styles.status.error} label="Exam" styles={styles} />
-          <Legend color={styles.status.warning} label="Deadline" styles={styles} />
           <Legend color={styles.status.info} label="Event" styles={styles} />
+          <Legend color={styles.status.warning} label="Sport" styles={styles} />
+          <Legend color={styles.status.success} label="Club" styles={styles} />
         </div>
         <button className={`group/btn w-full mt-4 sm:mt-6 px-4 sm:px-6 py-3 sm:py-4 ${styles.button.primary} rounded-xl sm:rounded-2xl text-sm sm:text-base font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 backdrop-blur-md ${styles.border}`}>
           <span className="flex items-center justify-center space-x-2">

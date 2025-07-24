@@ -1,15 +1,3 @@
-// StudentDashboardRequestDTOs.ts
-
-export interface GetStudentDashboardDataRequestDTO {
-  studentId: string;
-  includeAnnouncements?: boolean;
-  includeDeadlines?: boolean;
-  includeClasses?: boolean;
-  includeOnlineTopics?: boolean;
-  includeCalendarDays?: boolean;
-  includeSpecialDates?: boolean;
-}
-
 export interface GetAnnouncementsRequestDTO {
   studentId: string;
   limit?: number;
@@ -31,13 +19,6 @@ export interface GetClassesRequestDTO {
   status?: 'upcoming' | 'ongoing' | 'completed';
 }
 
-export interface GetOnlineTopicsRequestDTO {
-  studentId: string;
-  courseId?: string;
-  limit?: number;
-  includeVoted?: boolean;
-}
-
 export interface GetCalendarDaysRequestDTO {
   studentId: string;
   month?: number;
@@ -45,9 +26,6 @@ export interface GetCalendarDaysRequestDTO {
   includeTypes?: ('class' | 'event' | 'sports' | 'club')[];
 }
 
-export interface GetSpecialDatesRequestDTO {
+export interface GetUserInfoRequestDTO {
   studentId: string;
-  month?: number;
-  year?: number;
-  types?: ('event' | 'sports' | 'club')[];
-} 
+}

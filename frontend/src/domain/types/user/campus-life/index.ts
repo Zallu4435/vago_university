@@ -70,6 +70,8 @@ export interface ClubType {
   about?: string;
   upcomingEvents?: (string | ClubUpcomingEvent)[];
   userRequestStatus?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ClubsSectionProps {

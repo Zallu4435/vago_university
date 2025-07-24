@@ -59,7 +59,7 @@ const WhatMakesNUSDifferent = () => {
       icon: FaGlobeAmericas,
       stats: [
         { number: "> 300", description: "Partner Universities in over 40 Countries" },
-        { number: "> 25", description: "NUS Overseas College Locations" }
+        { number: "> 25", description: "VAGO Overseas College Locations" }
       ]
     },
     {
@@ -67,7 +67,7 @@ const WhatMakesNUSDifferent = () => {
       icon: FaBriefcase,
       stats: [
         { number: "9th", description: "Most Employable Graduates In the World**" },
-        { number: "> 9 in 10", description: "NUS Fresh Graduates Employed within 6 Months after Final Exams***" }
+        { number: "> 9 in 10", description: "VAGO Fresh Graduates Employed within 6 Months after Final Exams***" }
       ]
     }
   ];

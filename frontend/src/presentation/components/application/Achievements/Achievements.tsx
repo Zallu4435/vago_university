@@ -24,9 +24,7 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getVal
 
   const { setValue, watch, formState: { errors }, trigger, reset } = methods;
   const achievementData = watch();
-  const previousDataRef = useRef<AchievementSection | null>(null);
 
-  // Local UI state
   const [showModal, setShowModal] = useState(false);
   const [newAchievement, setNewAchievement] = useState({
     activity: '',

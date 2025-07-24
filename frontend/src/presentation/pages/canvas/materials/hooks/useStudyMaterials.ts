@@ -47,7 +47,6 @@ export const useStudyMaterials = (filters: GetMaterialsFilters = {}) => {
       return { blob, materialId };
     },
     onSuccess: async ({ blob, materialId }) => {
-      // Fetch material details to get the filename
       let fileName = 'material.pdf';
       try {
         const material = materialsData?.materials?.find((m: any) => m._id === materialId);
@@ -55,8 +54,7 @@ export const useStudyMaterials = (filters: GetMaterialsFilters = {}) => {
           const ext = material.fileUrl?.split('.').pop().split('?')[0] || 'pdf';
           fileName = (material.title || 'material').replace(/\s+/g, '_') + '.' + ext;
         }
-      } catch {}
-      // Trigger file download in browser
+      } catch { }
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -65,7 +63,6 @@ export const useStudyMaterials = (filters: GetMaterialsFilters = {}) => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      // Invalidate materials query to refresh download count
       queryClient.invalidateQueries({ queryKey: ['materials'] });
     },
   });

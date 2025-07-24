@@ -19,7 +19,6 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Use the reusable prevent body scroll hook
   usePreventBodyScroll(isOpen);
 
   useEffect(() => {

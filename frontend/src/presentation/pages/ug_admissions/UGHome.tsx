@@ -8,10 +8,8 @@ export const UGHome: React.FC = () => {
   const isVisible = useSectionAnimation();
   return (
     <div className="min-h-screen flex flex-col pt-16">
-      {/* Main content container */}
       <main className="flex-1 relative pb-8 sm:pb-12 lg:pb-20 bg-gradient-to-b from-cyan-50 via-white to-cyan-50">
         <div className="relative space-y-4 sm:space-y-6 lg:space-y-8">
-          {/* Section 1 */}
           <section
             id="what-makes-nus-different"
             data-animate
@@ -24,7 +22,6 @@ export const UGHome: React.FC = () => {
             </div>
           </section>
 
-          {/* Section 2 */}
           <section
             id="undergraduate-programmes"
             data-animate
@@ -37,7 +34,6 @@ export const UGHome: React.FC = () => {
             </div>
           </section>
 
-          {/* Section 3 */}
           <section
             id="undergraduate-publications"
             data-animate

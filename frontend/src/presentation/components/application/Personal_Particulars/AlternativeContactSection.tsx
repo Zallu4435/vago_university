@@ -60,7 +60,6 @@ export const AlternativeContactSection: React.FC = () => {
         )
       )}
 
-      {/* Alternative Mobile Group */}
       <div className="flex flex-col">
         <PhoneInput
           countryName="altMobileCountry"
@@ -86,7 +85,7 @@ export const AlternativeContactSection: React.FC = () => {
         )}
       </div>
 
-      {/* Alternative Home Telephone Group */}
+
       <div className="flex flex-col">
         <PhoneInput
           countryName="altPhoneCountry"

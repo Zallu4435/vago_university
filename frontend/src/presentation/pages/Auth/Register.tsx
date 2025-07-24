@@ -68,8 +68,8 @@ const RegisterPage = () => {
         <div className="w-full lg:w-1/2 bg-white p-4 sm:p-6 lg:p-8 xl:p-12" style={formAnimation}>
           <div className="max-w-md mx-auto">
             <div className="text-center mb-4 sm:mb-6 lg:mb-8">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-cyan-800 mb-2 sm:mb-4">University Registration</h2>
-              <p className="text-sm sm:text-base text-cyan-600">Begin your journey at Horizon University</p>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-cyan-800 mb-2 sm:mb-4">Academy Registration</h2>
+              <p className="text-sm sm:text-base text-cyan-600">Begin your journey at VAGO Academy</p>
               <div className="w-16 sm:w-20 lg:w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto mt-3 sm:mt-4" />
             </div>
 
@@ -232,14 +232,14 @@ const RegisterPage = () => {
               className="text-4xl sm:text-5xl lg:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400 opacity-20 transform -rotate-45"
               style={{ textShadow: '0 0 20px rgba(0, 255, 255, 0.3)' }}
             >
-              HORIZON
+              VAGO
             </span>
           </div>
           <div className="relative h-full flex flex-col justify-between p-4 sm:p-6 rounded-lg">
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6">Welcome to Horizon University</h1>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6">Welcome to VAGO Academy</h1>
               <p className="text-sm sm:text-base text-white mb-6 sm:mb-8">
-                Register now to embark on your academic journey with Horizon University and discover our
+                Register now to embark on your academic journey with VAGO Academy and discover our
                 diverse programs and vibrant campus life.
               </p>
               <div className="space-y-4 sm:space-y-6 mt-8 sm:mt-12">
@@ -272,7 +272,7 @@ const RegisterPage = () => {
                 </div>
               </div>
             </div>
-            <div className="text-xs sm:text-sm text-white">© 2025 Horizon University. All rights reserved.</div>
+            <div className="text-xs sm:text-sm text-white">© 2025 VAGO Academy. All rights reserved.</div>
           </div>
         </div>
       </div>

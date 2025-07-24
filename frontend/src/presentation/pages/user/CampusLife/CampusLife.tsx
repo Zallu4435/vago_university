@@ -6,21 +6,46 @@ import AthleticsSection from './AthleticsSection';
 import { useCampusLife } from '../../../../application/hooks/useCampusLife';
 import { FaUsers } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
+import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../../shared/components/ErrorMessage';
 
 export default function CampusLife() {
   const [activeTab, setActiveTab] = useState('Events');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [eventSearchTerm, setEventSearchTerm] = useState('');
+  const [athleticsStatusFilter, setAthleticsStatusFilter] = useState('');
+  const [athleticsSearchTerm, setAthleticsSearchTerm] = useState('');
+  // Debug: log all values passed to useCampusLife
+  console.log('CampusLife useCampusLife args', {
+    activeTab,
+    searchTerm,
+    typeFilter,
+    statusFilter,
+    eventSearchTerm,
+    athleticsSearchTerm,
+    athleticsStatusFilter
+  });
   const { styles, theme } = usePreferences();
   const {
     events,
     sports,
-    clubs,
     isLoadingEvents,
     isLoadingSports,
-    isLoadingClubs,
     eventsError,
     sportsError,
+    clubs,
+    isLoadingClubs,
     clubsError,
-  } = useCampusLife(activeTab);
+  } = useCampusLife(
+    activeTab,
+    searchTerm,
+    typeFilter,
+    statusFilter,
+    eventSearchTerm,
+    athleticsSearchTerm
+  );
 
   const isLoading =
     (activeTab === 'Events' && isLoadingEvents) ||
@@ -28,11 +53,7 @@ export default function CampusLife() {
     (activeTab === 'Athletics' && isLoadingSports);
 
   if (isLoading) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${styles.background}`}>
-        <div className={`animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 ${styles.button.primary.split(' ')[0]}`}></div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   const error =
@@ -41,16 +62,7 @@ export default function CampusLife() {
     (activeTab === 'Athletics' && sportsError);
 
   if (error) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${styles.background}`}>
-        <div className={`relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} p-4 sm:p-6 max-w-md w-full`}>
-          <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
-          <div className={`relative z-10 ${styles.status.error} text-sm sm:text-base text-center`}>
-            Error loading {activeTab.toLowerCase()} data. Please try again later.
-          </div>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={`Error loading ${activeTab.toLowerCase()} data. Please try again later.`} />;
   }
 
   return (
@@ -75,9 +87,9 @@ export default function CampusLife() {
               </div>
             </div>
             <p className={`mt-2 text-sm ${styles.textSecondary}`}>
-              {activeTab === 'Events' && `${(events || events || []).length} Upcoming Events`}
-              {activeTab === 'Clubs' && `${(clubs?.data || clubs || []).length} Clubs Available`}
-              {activeTab === 'Athletics' && `${(sports?.data || sports || []).length} Sports Teams`}
+              {activeTab === 'Events' && `${(events || []).length} Upcoming Events`}
+              {activeTab === 'Clubs' && `${(clubs || []).length} Clubs Available`}
+              {activeTab === 'Athletics' && `${(sports || []).length} Sports Teams`}
             </p>
           </div>
         </div>
@@ -86,9 +98,43 @@ export default function CampusLife() {
           <CampusLifeTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
         <div className="mt-6">
-          {activeTab === 'Events' && <EventsSection events={events?.data || events || []} />}
-          {activeTab === 'Clubs' && <ClubsSection clubs={clubs?.data || clubs || []} />}
-          {activeTab === 'Athletics' && <AthleticsSection sports={sports?.data || sports || []} />}
+          {activeTab === 'Events' && (
+            <EventsSection
+              events={Array.isArray(events) ? events : []}
+              searchTerm={eventSearchTerm}
+              statusFilter={statusFilter}
+              onFilterChange={({ search, status }) => {
+                setEventSearchTerm(search);
+                setStatusFilter(status);
+              }}
+            />
+          )}
+          {activeTab === 'Clubs' && (
+            <ClubsSection
+              clubs={Array.isArray(clubs) ? clubs : []}
+              searchTerm={searchTerm}
+              typeFilter={typeFilter}
+              statusFilter={statusFilter}
+              onFilterChange={({ search, type, status }) => {
+                setSearchTerm(search);
+                setTypeFilter(type);
+                setStatusFilter(status);
+              }}
+              isLoading={isLoadingClubs}
+              error={clubsError}
+            />
+          )}
+          {activeTab === 'Athletics' && (
+            <AthleticsSection
+              sports={Array.isArray(sports) ? sports : []}
+              statusFilter={athleticsStatusFilter}
+              searchTerm={athleticsSearchTerm}
+              onFilterChange={({ search, status }) => {
+                setAthleticsSearchTerm(search);
+                setAthleticsStatusFilter(status);
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

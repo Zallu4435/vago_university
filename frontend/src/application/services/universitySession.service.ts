@@ -20,8 +20,8 @@ export interface UniversitySession {
 }
 
 class UniversitySessionService {
-  async getSessions() {
-    const response = await httpClient.get('/faculty/sessions/video-sessions');
+  async getSessions(params = {}) {
+    const response = await httpClient.get('/faculty/sessions/video-sessions', { params });
     return response.data.data;
   }
 

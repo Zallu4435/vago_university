@@ -24,7 +24,6 @@ export const ProgrammeModal: React.FC<ProgrammeModalProps> = ({
 
   const selectedProgramme = watch('programme');
 
-  // Reset form when modal opens
   useEffect(() => {
     if (showModal) {
       reset({ programme: '', preferredMajor: '' });

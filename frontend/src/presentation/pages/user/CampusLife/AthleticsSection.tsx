@@ -1,43 +1,47 @@
-import React, { useState, useMemo } from 'react';
-import { FaSearch, FaTrophy, FaUsers, FaArrowRight } from 'react-icons/fa';
-import PropTypes from 'prop-types';
+import React, { useState, useEffect, useRef } from 'react';
+import { FaSearch, FaTrophy, FaUsers, FaArrowRight, FaFilter } from 'react-icons/fa';
 import { useCampusLife } from '../../../../application/hooks/useCampusLife';
 import JoinRequestForm from './JoinRequestForm';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import ReactDOM from 'react-dom';
 import type { Sport, SportsData } from '../../../../domain/types/user/campus-life';
 
-export default function AthleticsSection({ sports }: { sports: SportsData }) {
+interface AthleticsSectionProps {
+  sports: Sport[];
+  statusFilter: string;
+  searchTerm: string;
+  onFilterChange: (filters: { search: string; status: string }) => void;
+}
+
+export default function AthleticsSection({ sports, statusFilter, searchTerm, onFilterChange }: AthleticsSectionProps) {
+  console.log('AthleticsSection filter state', { searchTerm, statusFilter });
   const [selectedSport, setSelectedSport] = useState<Sport | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [showMobileDetails, setShowMobileDetails] = useState(false);
   const { requestToJoinSport, isJoiningSport, joinSportError } = useCampusLife();
   const { styles, theme } = usePreferences();
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState(searchTerm);
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  console.log('sports', sports);
 
-  const normalizedSports = useMemo(() => {
-    return sports?.sports
-      ?.map((sport) => ({
-        id: sport.id,
-        title: sport.title || 'Unknown Team',
-        type: sport.type || 'Unknown',
-        icon: sport.icon || '⚽',
-        color: sport.color || '#8B5CF6',
-        division: sport.division || 'Unknown',
-        headCoach: sport.headCoach || 'TBD',
-        homeGames: sport.homeGames || 0,
-        record: sport.record || '0-0-0',
-        upcomingGames: sport.upcomingGames || [],
-        participants: sport.participants || 0,
-        createdAt: sport.createdAt || new Date().toISOString(),
-        updatedAt: sport.updatedAt || new Date().toISOString(),
-        userRequestStatus: sport.userRequestStatus || null,
-      }))
-      .filter((sport) =>
-        sport.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        sport.type.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-  }, [sports, searchTerm]);
+  // Keep searchInput in sync with searchTerm prop
+  useEffect(() => {
+    setSearchInput(searchTerm);
+  }, [searchTerm]);
+
+  // Debounce search
+  useEffect(() => {
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    debounceTimeout.current = setTimeout(() => {
+      if (searchInput !== searchTerm) {
+        onFilterChange({ search: searchInput, status: statusFilter });
+      }
+    }, 400);
+    return () => {
+      if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    };
+  }, [searchInput]);
 
   const handleJoinRequest = async (request: any) => {
     if (!selectedSport) return;
@@ -95,7 +99,7 @@ export default function AthleticsSection({ sports }: { sports: SportsData }) {
         </div>
       </div>
 
-      {normalizedSports.length === 0 ? (
+      {(sports?.length ?? 0) === 0 ? (
         <div className={`relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
           <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
           <div className="relative z-10 p-8 text-center">
@@ -114,19 +118,44 @@ export default function AthleticsSection({ sports }: { sports: SportsData }) {
             <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
             <div className="relative z-10">
               <div className="p-4">
-                <div className="relative">
+                <div className="relative flex items-center">
                   <FaSearch className={`absolute left-3 top-3 ${styles.icon.secondary}`} size={16} />
                   <input
                     type="text"
                     placeholder="Search sports..."
-                    className={`w-full pl-10 pr-4 py-2 ${styles.input.background} border ${styles.input.border} rounded-full focus:${styles.input.focus} transition-all duration-300 text-sm`}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className={`w-full pl-10 pr-10 py-2 ${styles.input.background} border ${styles.input.border} rounded-full focus:${styles.input.focus} transition-all duration-300 text-sm`}
+                    value={searchInput}
+                    onChange={e => setSearchInput(e.target.value)}
                   />
+                  <button
+                    type="button"
+                    aria-label="Filter sports"
+                    className="absolute right-2 top-2 p-2 rounded-full hover:bg-slate-100 transition-colors"
+                    onClick={() => setFilterOpen((v) => !v)}
+                  >
+                    <FaFilter className="text-slate-500" size={16} />
+                  </button>
+                  {filterOpen && (
+                    <div className="absolute right-0 mt-2 z-20 bg-white border rounded-lg shadow-lg p-3 min-w-[160px]">
+                      <label className="block text-xs font-semibold mb-1 text-gray-700">Status</label>
+                      <select
+                        className="w-full border rounded p-2 text-sm mb-2"
+                        value={statusFilter}
+                        onChange={e => {
+                          onFilterChange({ search: searchTerm, status: e.target.value });
+                          setFilterOpen(false);
+                        }}
+                      >
+                        <option value="">All Statuses</option>
+                        <option value="active">Active</option>
+                        <option value="past">Past</option>
+                      </select>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="max-h-96 overflow-y-auto divide-y divide-amber-100/50">
-                {normalizedSports.map((sport) => (
+                {sports?.map((sport: Sport) => (
                   <div
                     key={sport.id}
                     className={`p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${selectedSport?.id === sport.id ? 'bg-orange-50/70' : ''}`}
@@ -149,7 +178,7 @@ export default function AthleticsSection({ sports }: { sports: SportsData }) {
                     </div>
                   </div>
                 ))}
-                {normalizedSports.length === 0 && (
+                {(sports?.length ?? 0) === 0 && (
                   <div className={`p-4 text-center ${styles.textSecondary} text-sm`}>No sports found</div>
                 )}
               </div>
@@ -210,29 +239,38 @@ export default function AthleticsSection({ sports }: { sports: SportsData }) {
                         </div>
                       </div>
                     </div>
-                    {selectedSport.upcomingGames?.length > 0 ? (
+                    {(selectedSport?.upcomingGames?.length ?? 0) > 0 ? (
                       <>
                         <h4 className={`text-base sm:text-lg font-bold ${styles.status.warning} mb-2`}>Upcoming Games</h4>
                         <ul className={`relative overflow-hidden rounded-lg p-4 mb-4 border ${styles.border} group/item hover:${styles.card.hover} transition-all duration-300`}>
                           <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-lg blur transition-all duration-300`}></div>
                           <div className="relative z-10">
-                            {selectedSport.upcomingGames.map((game, index) => (
-                              <li key={index} className={`mb-2 flex text-sm sm:text-base ${styles.textPrimary}`}>
-                                <span className={`${styles.status.warning} mr-2`}>•</span>
-                                <span>
-                                  {typeof game === 'string' 
-                                    ? game
-                                    : game?.date
-                                      ? `${new Date(game.date).toLocaleDateString('en-US', {
-                                          month: 'short',
-                                          day: 'numeric',
-                                          year: 'numeric',
-                                        })}: ${game.description || ''}`
-                                      : game?.description || game
-                                  }
-                                </span>
-                              </li>
-                            ))}
+                            {selectedSport?.upcomingGames?.map((game, index) => {
+                              if (typeof game === 'string') {
+                                return (
+                                  <li key={index} className={`mb-2 flex text-sm sm:text-base ${styles.textPrimary}`}>
+                                    <span className={`${styles.status.warning} mr-2`}>•</span>
+                                    <span>{game}</span>
+                                  </li>
+                                );
+                              } else if (game && typeof game === 'object' && ('date' in game || 'description' in game)) {
+                                return (
+                                  <li key={index} className={`mb-2 flex text-sm sm:text-base ${styles.textPrimary}`}>
+                                    <span className={`${styles.status.warning} mr-2`}>•</span>
+                                    <span>
+                                      {game.date
+                                        ? `${new Date(game.date).toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric',
+                                          })}: ${game.description || ''}`
+                                        : game.description || ''}
+                                    </span>
+                                  </li>
+                                );
+                              }
+                              return null;
+                            })}
                           </div>
                         </ul>
                         <div className="flex flex-col sm:flex-row gap-3 mt-4">
@@ -340,29 +378,38 @@ export default function AthleticsSection({ sports }: { sports: SportsData }) {
                       </div>
                     </div>
                   </div>
-                  {selectedSport.upcomingGames?.length > 0 ? (
+                  {(selectedSport?.upcomingGames?.length ?? 0) > 0 ? (
                     <>
                       <h4 className={`text-base font-bold ${styles.status.warning} mb-2`}>Upcoming Games</h4>
                       <ul className={`relative overflow-hidden rounded-lg p-4 mb-4 border ${styles.border} group/item hover:${styles.card.hover} transition-all duration-300`}>
                         <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-lg blur transition-all duration-300`}></div>
                         <div className="relative z-10">
-                          {selectedSport.upcomingGames.map((game, index) => (
-                            <li key={index} className={`mb-2 flex text-sm sm:text-base ${styles.textPrimary}`}>
-                              <span className={`${styles.status.warning} mr-2`}>•</span>
-                              <span>
-                                {typeof game === 'string' 
-                                  ? game
-                                  : game?.date
-                                    ? `${new Date(game.date).toLocaleDateString('en-US', {
-                                        month: 'short',
-                                        day: 'numeric',
-                                        year: 'numeric',
-                                      })}: ${game.description || ''}`
-                                    : game?.description || game
-                                }
-                              </span>
-                            </li>
-                          ))}
+                          {selectedSport?.upcomingGames?.map((game, index) => {
+                            if (typeof game === 'string') {
+                              return (
+                                <li key={index} className={`mb-2 flex text-sm sm:text-base ${styles.textPrimary}`}>
+                                  <span className={`${styles.status.warning} mr-2`}>•</span>
+                                  <span>{game}</span>
+                                </li>
+                              );
+                            } else if (game && typeof game === 'object' && ('date' in game || 'description' in game)) {
+                              return (
+                                <li key={index} className={`mb-2 flex text-sm sm:text-base ${styles.textPrimary}`}>
+                                  <span className={`${styles.status.warning} mr-2`}>•</span>
+                                  <span>
+                                    {game.date
+                                      ? `${new Date(game.date).toLocaleDateString('en-US', {
+                                          month: 'short',
+                                          day: 'numeric',
+                                          year: 'numeric',
+                                        })}: ${game.description || ''}`
+                                      : game.description || ''}
+                                  </span>
+                                </li>
+                              );
+                            }
+                            return null;
+                          })}
                         </div>
                       </ul>
                       <div className="flex flex-col gap-3 mt-4">
@@ -423,35 +470,3 @@ export default function AthleticsSection({ sports }: { sports: SportsData }) {
     </div>
   );
 }
-
-AthleticsSection.propTypes = {
-  sports: PropTypes.shape({
-    sports: PropTypes.arrayOf(
-      PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        title: PropTypes.string.isRequired,
-        type: PropTypes.string.isRequired,
-        icon: PropTypes.string,
-        color: PropTypes.string,
-        division: PropTypes.string,
-        headCoach: PropTypes.string,
-        homeGames: PropTypes.oneOfType([PropTypes.number, PropTypes.array]),
-        record: PropTypes.string,
-        upcomingGames: PropTypes.arrayOf(
-          PropTypes.oneOfType([
-            PropTypes.string,
-            PropTypes.shape({
-              date: PropTypes.string,
-              description: PropTypes.string,
-            })
-          ])
-        ),
-        participants: PropTypes.number,
-        createdAt: PropTypes.string,
-        updatedAt: PropTypes.string,
-        userRequestStatus: PropTypes.string,
-      })
-    ),
-    totalItems: PropTypes.number,
-  }).isRequired,
-};

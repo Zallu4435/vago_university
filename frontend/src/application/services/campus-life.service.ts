@@ -12,28 +12,45 @@ class CampusLifeService {
     }
   }
 
-  async getEvents(): Promise<Event[]> {
+  async getEvents(params?: { search?: string; status?: string; type?: string }): Promise<Event[]> {
+    console.log('campusLifeService.getEvents params', params);
     try {
-      const response = await httpClient.get('/campus-life/events');
-      return response.data.data;
+      const response = await httpClient.get('/campus-life/events', { params });
+      // Print the final URL if possible
+      if (response?.config?.url) {
+        console.log('campusLifeService.getEvents final URL', response.config.url);
+      }
+      console.log('campusLifeService.getEvents request', '/campus-life/events', params);
+      return response.data.data.events;
     } catch (error) {
       throw error;
     }
   }
 
-  async getSports(): Promise<Sport[]> {
+  async getSports(params?: { search?: string; status?: string }): Promise<Sport[]> {
+    console.log('campusLifeService.getSports params', params);
     try {
-      const response = await httpClient.get('/campus-life/sports');
-      return response.data.data;
+      const response = await httpClient.get('/campus-life/sports', { params });
+      if (response?.config?.url) {
+        console.log('campusLifeService.getSports final URL', response.config.url);
+      }
+      console.log('campusLifeService.getSports request', '/campus-life/sports', params);
+      return response.data.data.sports;
     } catch (error) {
       throw error;
     }
   }
 
-  async getClubs(): Promise<Club[]> {
+  async getClubs(params?: { search?: string; type?: string; status?: string }): Promise<Club[]> {
+    console.log('campusLifeService.getClubs params', params);
     try {
-      const response = await httpClient.get('/campus-life/clubs');
-      return response.data;
+      const response = await httpClient.get('/campus-life/clubs', { params });
+      // Print the final URL if possible
+      if (response?.config?.url) {
+        console.log('campusLifeService.getClubs final URL', response.config.url);
+      }
+      console.log('campusLifeService.getClubs request', '/campus-life/clubs', params);
+      return response.data.data.clubs;
     } catch (error) {
       throw error;
     }

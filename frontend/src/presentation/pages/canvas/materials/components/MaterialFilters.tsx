@@ -24,29 +24,25 @@ const MaterialFilters: React.FC<MaterialFiltersProps> = ({
     const { styles } = usePreferences();
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
-    // Debounce search term
     useEffect(() => {
         const timer = setTimeout(() => {
             setSearchTerm(debouncedSearchTerm);
-        }, 500); // 500ms delay
+        }, 500);
 
         return () => clearTimeout(timer);
     }, [debouncedSearchTerm, setSearchTerm]);
 
-    // Update debounced term when searchTerm changes externally
     useEffect(() => {
         setDebouncedSearchTerm(searchTerm);
     }, [searchTerm]);
 
-    // Extract materials from props structure and get unique values
     const extractedMaterials = materials.map(item => item.props || item);
-    
+
     const courses = [...new Set(extractedMaterials.map(m => m.course))];
     const types = [...new Set(extractedMaterials.map(m => m.type))];
     const semesters = [...new Set(extractedMaterials.map(m => m.semester))];
     const difficulties = [...new Set(extractedMaterials.map(m => m.difficulty))];
 
-    // Function to convert semester number to readable name
     const getSemesterName = (semester: number) => {
         const currentYear = new Date().getFullYear();
         const semesterNames = {

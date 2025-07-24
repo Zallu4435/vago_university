@@ -13,7 +13,7 @@ export const PresidentsWelcome: React.FC = () => {
             President's Welcome
           </h2>
           <p className="text-cyan-600 text-base sm:text-lg mb-4 sm:mb-6 max-w-2xl mx-auto px-4">
-            We are Singapore's flagship university. We hope you will be inspired by the many fascinating facets that make NUS a leading global university centred in Asia.
+            We are Singapore's flagship university. We hope you will be inspired by the many fascinating facets that make VAGO a leading global university centred in Asia.
           </p>
           <div className="w-16 sm:w-20 h-1 bg-gradient-to-r from-cyan-400 to-blue-400 mx-auto mb-6 sm:mb-8 md:mb-10" />
         </div>
@@ -23,7 +23,7 @@ export const PresidentsWelcome: React.FC = () => {
           <div className="bg-gradient-to-r from-cyan-700 via-blue-600 to-cyan-600 text-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg transform hover:-translate-y-1 transition-all duration-300">
             <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4">Shaping the Future</h3>
             <blockquote className="text-base sm:text-lg mb-4 sm:mb-6 italic">
-              "At NUS, we are moving boldly — and concertedly — to expand tomorrow's frontiers. We believe that we have the power to shape the future, for the better."
+              "At VAGO, we are moving boldly — and concertedly — to expand tomorrow's frontiers. We believe that we have the power to shape the future, for the better."
             </blockquote>
             <button
               onClick={() => setModalOpen(true)}

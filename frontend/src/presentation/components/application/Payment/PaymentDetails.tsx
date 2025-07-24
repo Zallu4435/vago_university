@@ -12,7 +12,6 @@ import {
 } from 'react-icons/fa';
 import type { PaymentDetailsProps } from '../../../../domain/types/application';
 
-// Ensure you're using the test publishable key from Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const StripePaymentForm: React.FC<PaymentDetailsProps> = ({ 
@@ -29,13 +28,11 @@ const StripePaymentForm: React.FC<PaymentDetailsProps> = ({
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     
-    // Validate inputs
     if (!stripe || !elements) {
       setError('Stripe has not loaded. Please try again.');
       return;
     }
 
-    // Get a reference to a mounted CardElement
     const cardElement = elements.getElement(CardElement);
     
     if (!cardElement) {
@@ -43,7 +40,6 @@ const StripePaymentForm: React.FC<PaymentDetailsProps> = ({
       return;
     }
 
-    // Validate name
     if (!name.trim()) {
       setError('Cardholder name is required');
       return;
@@ -53,7 +49,6 @@ const StripePaymentForm: React.FC<PaymentDetailsProps> = ({
     setError(null);
 
     try {
-      // Create Payment Method using Stripe Elements
       const { error, paymentMethod } = await stripe.createPaymentMethod({
         type: 'card',
         card: cardElement,
@@ -68,7 +63,6 @@ const StripePaymentForm: React.FC<PaymentDetailsProps> = ({
         return;
       }
 
-      // Call the onSubmit prop with the payment method ID
       if (paymentMethod) {
         onSubmit({ paymentMethodId: paymentMethod.id });
       }
@@ -81,7 +75,6 @@ const StripePaymentForm: React.FC<PaymentDetailsProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Cardholder Name */}
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
           <FaCreditCard className="text-gray-500" />
@@ -98,7 +91,6 @@ const StripePaymentForm: React.FC<PaymentDetailsProps> = ({
         />
       </div>
 
-      {/* Card Details */}
       <div className="border rounded-lg p-4 bg-gray-50">
         <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
           <FaLock className="text-green-600" />
@@ -122,14 +114,12 @@ const StripePaymentForm: React.FC<PaymentDetailsProps> = ({
         />
       </div>
 
-      {/* Error Display */}
       {error && (
         <div className="bg-red-50 border-l-4 border-red-400 p-3 rounded text-sm text-red-800">
           {error}
         </div>
       )}
 
-      {/* Payment Summary */}
       <div className="bg-cyan-50 border-l-4 border-cyan-400 p-3 rounded text-sm text-cyan-800">
         <strong>Total Payment:</strong> {new Intl.NumberFormat('en-IN', { 
           style: 'currency', 
@@ -137,7 +127,6 @@ const StripePaymentForm: React.FC<PaymentDetailsProps> = ({
         }).format(amount)}
       </div>
 
-      {/* Submit Button */}
       <button
         type="submit"
         disabled={!stripe || processing}
@@ -155,7 +144,6 @@ const StripePaymentForm: React.FC<PaymentDetailsProps> = ({
         }).format(amount)}`}
       </button>
 
-      {/* Security Notice */}
       <div className="text-center mt-4 text-xs text-gray-500 flex items-center justify-center gap-2">
         <FaLock />
         Secure payment powered by Stripe. Your card details are encrypted.
@@ -164,7 +152,6 @@ const StripePaymentForm: React.FC<PaymentDetailsProps> = ({
   );
 };
 
-// Wrapper component to provide Stripe Elements
 const PaymentDetails: React.FC<PaymentDetailsProps> = (props) => (
   <Elements stripe={stripePromise}>
     <StripePaymentForm {...props} />

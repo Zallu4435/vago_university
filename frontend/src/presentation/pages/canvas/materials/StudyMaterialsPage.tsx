@@ -47,10 +47,6 @@ const StudyMaterialsPage: React.FC = () => {
     }
   }, [shouldFetch, getMaterials]);
 
-  const handleSync = () => {
-    setShouldFetch(true);
-  };
-
   const handleDownload = async (material: any): Promise<void> => {
     try {
       const materialData = material.props || material;
@@ -80,7 +76,6 @@ const StudyMaterialsPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-      {/* Header Section */}
       <div className={`hidden sm:block relative overflow-hidden rounded-xl sm:rounded-2xl shadow-xl bg-gradient-to-r ${styles.accent} group mb-4 sm:mb-6`}>
         <div className={`absolute inset-0 bg-gradient-to-r ${styles.orb.primary}`}></div>
         <div className={`absolute -top-4 sm:-top-8 -left-4 sm:-left-8 w-24 h-24 sm:w-48 sm:h-48 rounded-full bg-gradient-to-br ${styles.orb.primary} blur-2xl sm:blur-3xl animate-pulse`}></div>
@@ -106,7 +101,6 @@ const StudyMaterialsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Filters Section */}
       <div className="mb-4 sm:mb-6">
         <MaterialFilters
           searchTerm={searchTerm}
@@ -127,7 +121,6 @@ const StudyMaterialsPage: React.FC = () => {
         />
       </div>
 
-      {/* View Toggle */}
       <div className="hidden sm:flex justify-end mb-4 sm:mb-6">
         <div className={`${styles.card.background} rounded-lg p-1 flex space-x-1 ${styles.card.border} shadow-sm hover:shadow-md transition-shadow duration-300`}>
           <button

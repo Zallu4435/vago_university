@@ -39,7 +39,7 @@ class AuthService {
   async verifyEmailOtp(email: string, otp: string): Promise<{ resetToken: string }> {
     try {
       const response = await httpClient.post('/auth/verify-email-otp', { email, otp });
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to verify OTP');
     }
@@ -65,7 +65,6 @@ class AuthService {
 
   async logout(): Promise<void> {
     try {
-      console.log('Calling backend logout API...');
       await httpClient.post('/auth/logout');
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to logout');

@@ -4,7 +4,7 @@ import { PersonalParticularsForm } from '../../components/application/Personal_P
 import { ChoiceOfStudy } from '../../components/application/Choice_of_Studies/ChoiceOfStudy';
 import { Education } from '../../components/application/Education/Education';
 import { Achievements } from '../../components/application/Achievements/Achievements';
-import { Documents, DocumentUploadSection } from '../../components/application/Documents/Documents';
+import { Documents } from '../../components/application/Documents/Documents';
 import { Declaration } from '../../components/application/Declaration';
 import type { 
   FormData, 
@@ -14,7 +14,8 @@ import type {
   EducationData,
   AchievementSection,
   OtherInformationSection,
-  DeclarationSection
+  DeclarationSection,
+  DocumentUploadSection
 } from '../../../domain/types/application';
 import Other_Info from '../../components/application/Other_Information/Other_Info';
 import { FormSubmissionFlow } from '../../components/application/FormSubmissionFlow';
@@ -26,6 +27,8 @@ import { RootState } from '../../../appStore/store';
 import { logout } from '../../../appStore/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import LoadingSpinner from '../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../shared/components/ErrorMessage';
 
 const useAuth = () => {
   const { user, collection } = useSelector((state: RootState) => state.auth);
@@ -66,7 +69,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
       otherInformation: undefined,
       documents: undefined,
       declaration: { privacyPolicy: false, marketingEmail: false, marketingCall: false },
-      registerId: user?.id,
+      registerId: user?.userId,
     },
     mode: 'onSubmit',
   });
@@ -86,7 +89,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
     isLoading: isSaving,
   } = useApplicationForm();
 
-  const { data: fetchedData, isLoading: isFetching, error: fetchError } = useApplicationData(user?.id);
+  const { data: fetchedData, isLoading: isFetching, error: fetchError } = useApplicationData(user?.userId);
 
   const navigate = useNavigate();
 
@@ -124,12 +127,12 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
       }
 
       if (fetchedData && (fetchedData as any).applicationId) {
-        // Existing application found
         setApplicationId((fetchedData as any).applicationId);
         setValue('applicationId', (fetchedData as any).applicationId, { shouldValidate: false });
       } else {
         try {
-          const response = await createApplication(user?.id || '');
+          console.log(user?.userId, "user?.userId");
+          const response = await createApplication(user?.userId || '');
           setApplicationId(response.applicationId);
           setValue('applicationId', response.applicationId, { shouldValidate: false });
         } catch (error) {
@@ -140,7 +143,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
       setIsInitializing(false);
     };
     initializeApplication();
-  }, [fetchedData, isFetching, fetchError, user?.id, createApplication, setValue]);
+  }, [fetchedData, isFetching, fetchError, user?.userId, createApplication, setValue]);
 
   useEffect(() => {
     if (fetchedData) {
@@ -515,35 +518,11 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
   const handleLogout = onLogout || (() => dispatch(logout()));
 
   if (isInitializing || isFetching) {
-    return (
-      <div className="container mx-auto py-8 px-4 max-w-6xl flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="w-16 h-16 border-t-4 border-cyan-500 border-solid rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-cyan-700 text-lg">Loading application...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (fetchError || (saveError && validationAttempted)) {
-    return (
-      <div className="container mx-auto py-8 px-4 max-w-6xl">
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-red-700">
-                {fetchError ? 'Error loading your application. Please refresh the page or try again later.' : saveError}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={fetchError ? 'Error loading your application. Please refresh the page or try again later.' : saveError || ''} />;
   }
 
   if (!user) {
@@ -590,7 +569,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
       <FormSubmissionFlow
         formData={{
           ...formData,
-          registerId: user?.id
+          registerId: user?.userId
         }}
         onPaymentComplete={() => {
           setShowPayment(false);

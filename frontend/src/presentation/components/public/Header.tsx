@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 import { MdDashboard } from 'react-icons/md';
 import { IoSchool } from 'react-icons/io5';
 import { FaUserGraduate, FaUserCircle, FaCog, FaSignOutAlt, FaBars, FaTimes } from 'react-icons/fa';
-import { SiGooglescholar } from 'react-icons/si';
-import { FiLogOut, FiLogIn } from 'react-icons/fi';
+import { FiLogIn } from 'react-icons/fi';
 import { IoMdArrowDropdown } from 'react-icons/io';
 
 interface HeaderProps {
@@ -43,18 +42,15 @@ export const Header: React.FC<HeaderProps> = ({
     };
   }, []);
 
-  // Close mobile menu when clicking on a link
   const handleMobileLinkClick = () => {
     setMobileMenuOpen(false);
   };
 
-  // Determine the login route based on layoutType
   const loginRoute = layoutType === 'ug' ? '/ug/login' : layoutType === 'department' ? `/departments/computer-science/login` : '/login';
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-cyan-700 via-blue-600 to-cyan-400 shadow-lg border-b-4 border-cyan-300">
       <div className="flex justify-between items-center px-4 sm:px-6 md:px-8 lg:px-10 py-3 md:py-4">
-        {/* Logo */}
         <Link to="/" className="flex items-center hover:opacity-90 transition-opacity">
           <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 mr-2 sm:mr-3 md:mr-4 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-cyan-300">
             <img src="/images/university-logo.png" alt="VAGO Logo" className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 object-contain" />
@@ -62,7 +58,6 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="text-white text-xl sm:text-2xl md:text-3xl font-extrabold tracking-widest drop-shadow-lg">VAGO</span>
         </Link>
 
-        {/* Desktop Navigation */}
         <div className="hidden md:flex gap-2 lg:gap-4 items-center">
           {!hideNavLinks && (
             <>

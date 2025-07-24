@@ -10,7 +10,6 @@ import { MaterialTableProps } from '../../../../../domain/types/canvas/materials
 const MaterialTable: React.FC<MaterialTableProps> = ({ materials, onDownload, onBookmark, onLike }) => {
     const { styles } = usePreferences();
 
-    // Function to convert semester number to readable name
     const getSemesterName = (semester: number) => {
         const currentYear = new Date().getFullYear();
         const semesterNames = {
@@ -47,9 +46,8 @@ const MaterialTable: React.FC<MaterialTableProps> = ({ materials, onDownload, on
                             </tr>
                         ) : (
                             materials.map(material => {
-                                // Extract material data from props structure
                                 const materialData = material.props || material;
-                                
+
                                 return (
                                     <tr key={materialData.id} className={`hover:bg-gray-50/50 transition-colors duration-150`}>
                                         <td className="py-4 sm:py-6 px-3 sm:px-6 w-[60%] sm:w-[30%]">

@@ -3,12 +3,13 @@ import { FaMoneyBillWave } from 'react-icons/fa';
 import FinancialTabs from './FinancialTabs';
 import FeesPaymentsSection from './FeesPaymentsSection';
 import FinancialAidSection from './FinancialAidSection';
-// import ScholarshipsSection from './ScholarshipsSection';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import { MdCurrencyRupee } from 'react-icons/md';
 import type { StudentFinancialInfo } from '../../../../domain/types/user/financial';
 import { formatDateTime } from '../../../../shared/utils/dateUtils';
 import { usePaymentsManagement } from '../../../../application/hooks/useFinancial';
+import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../../shared/components/ErrorMessage';
 
 export default function Financial() {
   const {
@@ -44,24 +45,11 @@ export default function Financial() {
 
 
   if (loading) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${styles.background}`}>
-        <div className={`animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 ${styles.button.primary.split(' ')[0]}`}></div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${styles.background}`}>
-        <div className={`relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} p-4 sm:p-6 max-w-md w-full`}>
-          <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
-          <div className={`relative z-10 ${styles.status.error} text-sm sm:text-base text-center`}>
-            {error.message}
-          </div>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={error.message || 'An error occurred while loading financial data.'} />;
   }
 
   return (
@@ -117,7 +105,7 @@ export default function Financial() {
         </div>
 
         <div className='mt-6'>
-          <FinancialTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+          <FinancialTabs activeTab={activeTab} setActiveTab={setActiveTab} disabledTabs={['Financial Aid', 'Scholarships']} />
         </div>
         <div className="mt-6">
           {activeTab === 'Fees and Payments' && (

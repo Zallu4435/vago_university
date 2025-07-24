@@ -101,8 +101,8 @@ export const useCourseRegistration = () => {
   });
 
   return {
-    registerForCourse: registerMutation.mutate,
-    dropCourse: dropMutation.mutate,
+    registerForCourse: registerMutation.mutateAsync,
+    dropCourse: dropMutation.mutateAsync,
     isRegistering: registerMutation.isPending,
     isDropping: dropMutation.isPending
   };

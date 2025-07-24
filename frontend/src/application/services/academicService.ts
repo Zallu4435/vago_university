@@ -5,7 +5,7 @@ export const academicService = {
   // Get student information
   getStudentInfo: async (): Promise<StudentInfo> => {
     const response = await httpClient.get('/academic/student-info');
-    return response.data;
+    return response.data.data;
   },
 
   // Get grade information

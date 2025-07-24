@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FiSearch, FiRefreshCw, FiBell, FiArrowLeft } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import { FiSearch, FiArrowLeft } from 'react-icons/fi';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import { Assignment, SortOption, FilterStatus } from '../../../../domain/types/canvas/assignment';
 import { AssignmentCard } from './components/AssignmentCard';
@@ -11,12 +11,8 @@ const AssignmentsSection = () => {
   const {
     assignments,
     selectedFile,
-    error,
-    isLoading,
     handleFileSelect,
     handleSubmit,
-    getAssignmentStatus,
-    getAssignmentFeedback,
     searchTerm,
     setSearchTerm,
     filterStatus,
@@ -25,28 +21,24 @@ const AssignmentsSection = () => {
     setSortBy,
     currentPage,
     setCurrentPage,
-    itemsPerPage
   } = useUserAssignments();
 
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [currentAssignment, setCurrentAssignment] = useState<Assignment | null>(null);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
-  // Debounce search term
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearchTerm(debouncedSearchTerm);
-    }, 500); // 500ms delay
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [debouncedSearchTerm, setSearchTerm]);
 
-  // Update debounced term when searchTerm changes externally
   useEffect(() => {
     setDebouncedSearchTerm(searchTerm);
   }, [searchTerm]);
 
-  // No local filtering/sorting, use backend-driven assignments
   const currentAssignments = assignments;
 
   const renderAssignmentList = () => (
@@ -62,9 +54,8 @@ const AssignmentsSection = () => {
             </div>
           </div>
 
-          {/* Search and Filter Controls */}
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-6 sm:mb-8">
-            <div className="flex-1">
+            <div className="w-full sm:w-1/2">
               <div className="relative">
                 <FiSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 ${styles.icon.secondary}`} />
                 <input
@@ -73,20 +64,19 @@ const AssignmentsSection = () => {
                   value={debouncedSearchTerm}
                   onChange={(e) => {
                     setDebouncedSearchTerm(e.target.value);
-                    setCurrentPage(1);
                   }}
-                  className={`w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 rounded-lg sm:rounded-xl ${styles.input.background} ${styles.input.border} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base`}
+                  className={`w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 rounded-lg sm:rounded-xl ${styles.input.background} ${styles.input.border} ${styles.textPrimary} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base`}
                 />
               </div>
             </div>
-            <div className="flex gap-2 sm:gap-3">
+            <div className="w-full sm:w-1/2 flex gap-2 sm:gap-3">
               <select
                 value={filterStatus}
                 onChange={(e) => {
                   setFilterStatus(e.target.value as FilterStatus);
-                  setCurrentPage(1);
                 }}
-                className={`px-2 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl ${styles.input.background} ${styles.input.border} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-base`}
+                className={`w-1/2 px-2 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl ${styles.input.background} ${styles.input.border} ${styles.textPrimary} focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-base`}
+                style={{ background: styles.input.background, color: styles.textPrimary }}
               >
                 <option value="all">All Status</option>
                 <option value="published">Published</option>
@@ -97,9 +87,9 @@ const AssignmentsSection = () => {
                 value={sortBy}
                 onChange={(e) => {
                   setSortBy(e.target.value as SortOption);
-                  setCurrentPage(1);
                 }}
-                className={`px-2 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl ${styles.input.background} ${styles.input.border} ${styles.input.text} focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-base`}
+                className={`w-1/2 px-2 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl ${styles.input.background} ${styles.input.border} ${styles.textPrimary} focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-base`}
+                style={{ background: styles.input.background, color: styles.textPrimary }}
               >
                 <option value="dueDate">Due Date</option>
                 <option value="priority">Priority</option>
@@ -128,7 +118,6 @@ const AssignmentsSection = () => {
                       setShowUploadModal(true);
                     }}
                     onViewGrade={(assignment) => {
-                      // This is now handled by the GradeModal in AssignmentCard
                     }}
                   />
                 ))}
@@ -142,31 +131,32 @@ const AssignmentsSection = () => {
   );
 
   const renderPagination = () => {
-    // Assume backend returns total count in future, for now just use currentPage and itemsPerPage
-    // You may want to update this to use total pages from backend if available
-    // For now, just show next/prev buttons
+    const disableAll = currentAssignments.length < 10;
     return (
-      <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+      <div className={`flex items-center justify-between border-t ${styles.input.border} ${styles.input.background} px-4 py-3 sm:px-6`}>
         <div className="flex flex-1 justify-between sm:hidden">
           <button
             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className={`relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 ${
-              currentPage === 1 ? 'cursor-not-allowed opacity-50' : ''
+            disabled={disableAll || currentPage === 1}
+            className={`relative inline-flex items-center rounded-md ${styles.input.background} ${styles.input.border} ${styles.textPrimary} px-4 py-2 text-sm font-medium hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              disableAll || currentPage === 1 ? 'cursor-not-allowed opacity-50' : ''
             }`}
           >
             Previous
           </button>
           <button
             onClick={() => setCurrentPage(prev => prev + 1)}
-            className={`relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50`}
+            disabled={disableAll}
+            className={`relative ml-3 inline-flex items-center rounded-md ${styles.input.background} ${styles.input.border} ${styles.textPrimary} px-4 py-2 text-sm font-medium hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              disableAll ? 'cursor-not-allowed opacity-50' : ''
+            }`}
           >
             Next
           </button>
         </div>
         <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm text-gray-700">
+            <p className={`${styles.textPrimary} text-sm`}>
               Page <span className="font-medium">{currentPage}</span>
             </p>
           </div>
@@ -174,9 +164,9 @@ const AssignmentsSection = () => {
             <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
               <button
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className={`relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${
-                  currentPage === 1 ? 'cursor-not-allowed opacity-50' : ''
+                disabled={disableAll || currentPage === 1}
+                className={`relative inline-flex items-center rounded-l-md ${styles.input.background} ${styles.input.border} ${styles.textPrimary} px-2 py-2 ring-1 ring-inset focus:z-20 focus:outline-offset-0 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  disableAll || currentPage === 1 ? 'cursor-not-allowed opacity-50' : ''
                 }`}
               >
                 <span className="sr-only">Previous</span>
@@ -184,7 +174,10 @@ const AssignmentsSection = () => {
               </button>
               <button
                 onClick={() => setCurrentPage(prev => prev + 1)}
-                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0`}
+                disabled={disableAll}
+                className={`relative inline-flex items-center ${styles.input.background} ${styles.input.border} ${styles.textPrimary} px-4 py-2 text-sm font-semibold ring-1 ring-inset focus:z-20 focus:outline-offset-0 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  disableAll ? 'cursor-not-allowed opacity-50' : ''
+                }`}
               >
                 Next
               </button>

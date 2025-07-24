@@ -4,6 +4,7 @@ import { useCourseRegistration, useCourseSearch } from '../../../../application/
 import CourseDetailsModal from './CourseDetailsModal';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import { Course, CourseRegistrationProps } from '../../../../domain/types/user/academics';
+import { toast } from 'react-hot-toast';
 
 
 export default function CourseRegistration({ studentInfo, courses, enrolledCredits, waitlistedCredits }: CourseRegistrationProps) {
@@ -13,10 +14,8 @@ export default function CourseRegistration({ studentInfo, courses, enrolledCredi
   const { registerForCourse, isRegistering } = useCourseRegistration();
   const { styles, theme } = usePreferences();
 
-  // Use debounced search hook that handles both search and default courses
   const { data: searchResults, isLoading: isSearching, error: searchError } = useCourseSearch(searchQuery, 500);
 
-  // Determine which courses to display
   const displayCourses = useMemo(() => {
     if (searchQuery.trim()) {
       return searchResults || [];
@@ -34,13 +33,13 @@ export default function CourseRegistration({ studentInfo, courses, enrolledCredi
       try {
         await registerForCourse({
           courseId: selectedCourse.id,
-          term: 'Fall 2025', // Default term
-          section: '001', // Default section
+          term: 'Fall 2025',
+          section: '001',
           reason: enrollmentData.reason,
         });
-        setIsModalOpen(false);
-        setSelectedCourse(null);
-      } catch (error) {
+      } catch (error: any) {
+        const errorMsg = error?.response?.data?.error || error?.response?.data?.data?.error || error?.message || 'Failed to enroll';
+        toast.error(errorMsg);
         console.error('Failed to enroll in course:', error);
       }
     }
@@ -52,7 +51,6 @@ export default function CourseRegistration({ studentInfo, courses, enrolledCredi
 
   return (
     <div className="w-full sm:px-4 md:px-4 mt-4 sm:mt-6">
-      {/* Header Section */}
       <div className={`relative overflow-hidden rounded-t-xl sm:rounded-t-2xl shadow-xl bg-gradient-to-r ${styles.accent} group`}>
         <div className={`absolute inset-0 bg-gradient-to-r ${styles.orb.primary}`}></div>
         <div className={`absolute -top-4 sm:-top-8 -left-4 sm:-left-8 w-24 h-24 sm:w-48 sm:h-48 rounded-full bg-gradient-to-br ${styles.orb.primary} blur-2xl sm:blur-3xl animate-pulse`}></div>
@@ -79,7 +77,6 @@ export default function CourseRegistration({ studentInfo, courses, enrolledCredi
         </div>
       </div>
 
-      {/* Status and Actions */}
       <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 ${styles.card.background} p-4 sm:p-5 md:p-6 shadow-xl rounded-b-xl sm:rounded-b-2xl mb-4 sm:mb-6 border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
         <div className={`relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br ${styles.accentSecondary} p-3 sm:p-4 border ${styles.border} hover:${styles.card.hover} transition-all duration-300 group/item`}>
           <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-xl sm:rounded-2xl blur transition-all duration-300`}></div>
@@ -115,17 +112,14 @@ export default function CourseRegistration({ studentInfo, courses, enrolledCredi
         </div>
       </div>
 
-      {/* Course Table */}
       <div className={`relative overflow-hidden rounded-xl sm:rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
         <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-xl sm:rounded-2xl blur transition-all duration-300`}></div>
         <div className="relative z-10 p-3 sm:p-4 md:p-6">
           <div className="flex flex-col space-y-3 mb-4 sm:mb-6">
-            {/* Search Label */}
             <div className="flex justify-center">
               <label htmlFor="search" className={`text-gray-800 font-medium text-sm sm:text-base`}>Search Courses:</label>
             </div>
             
-            {/* Centered Search Input with Results Count */}
             <div className="flex justify-center items-center space-x-3">
               <div className="flex w-full max-w-md sm:max-w-lg lg:max-w-xl">
               <div className="relative flex-grow">
@@ -164,7 +158,6 @@ export default function CourseRegistration({ studentInfo, courses, enrolledCredi
               </button>
             </div>
             
-            {/* Results Count */}
             {searchQuery.trim() && !isSearching && (
               <span className={`text-xs sm:text-sm ${styles.textSecondary} whitespace-nowrap`}>
                 {displayCourses.length} result{displayCourses.length !== 1 ? 's' : ''} found

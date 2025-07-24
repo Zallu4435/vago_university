@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaArrowRight, FaUsers, FaLaptopCode, FaHandshake, FaGraduationCap, FaMoneyBillWave } from 'react-icons/fa';
+import { FaUsers, FaLaptopCode, FaHandshake, FaGraduationCap, FaMoneyBillWave } from 'react-icons/fa';
 import { useSectionAnimation } from '../../../shared/hooks/useSectionAnimation';
 import DepartmentPoster from '../../components/departments/common/DepartmentPoster';
 import DepartmentEntrepreneurWhatWeDo from '../../components/departments/entrepreneur/DepartmentEntrepreneurWhatWeDo';
@@ -49,13 +49,13 @@ const Entrepreneurship: React.FC = () => {
   const entrepreneurshipData: EntrepreneurshipDataMap = {
     'computer-science': {
       poster: {
-        title: 'Entrepreneurship at NUS Computing',
+        title: 'Entrepreneurship at VAGO Computing',
         subtitle: 'Empowering the Next Generation of Tech Innovators',
       },
       whatWeDo: {
         title: 'What We Do',
         description:
-          'Empower and equip NUS Computing students with the essential entrepreneurial skills necessary to thrive within tech startups. Encourage and ensure NUS Computing students are well-prepared to navigate and contribute to the vibrant local startup ecosystem as they embark on their entrepreneurial journey.',
+          'Empower and equip VAGO Computing students with the essential entrepreneurial skills necessary to thrive within tech startups. Encourage and ensure VAGO Computing students are well-prepared to navigate and contribute to the vibrant local startup ecosystem as they embark on their entrepreneurial journey.',
       },
       howWeDoIt: {
         title: 'How We Do It',
@@ -111,13 +111,13 @@ const Entrepreneurship: React.FC = () => {
     },
     'business': {
       poster: {
-        title: 'Entrepreneurship at NUS Business',
+        title: 'Entrepreneurship at VAGO Business',
         subtitle: 'Building the Future of Business Innovation',
       },
       whatWeDo: {
         title: 'What We Do',
         description:
-          'Inspire and empower NUS Business students with the entrepreneurial mindset and skills needed to excel in the dynamic world of startups. We ensure our students are equipped to lead, innovate, and contribute to the global startup ecosystem.',
+          'Inspire and empower VAGO Business students with the entrepreneurial mindset and skills needed to excel in the dynamic world of startups. We ensure our students are equipped to lead, innovate, and contribute to the global startup ecosystem.',
       },
       howWeDoIt: {
         title: 'How We Do It',
@@ -152,21 +152,21 @@ const Entrepreneurship: React.FC = () => {
             title: 'Founder',
             company: 'GrowEasy',
             testimonial:
-              'The mentorship I received through NUS Business was invaluable. It helped me refine my business idea and connect with investors who believed in my vision.',
+              'The mentorship I received through VAGO Business was invaluable. It helped me refine my business idea and connect with investors who believed in my vision.',
           },
           {
             name: 'Michael Tan',
             title: 'CEO & Co-Founder',
             company: 'FinTech Innovate',
             testimonial:
-              'The entrepreneurship programs at NUS Business gave me the confidence and skills to launch my startup. The networking events were a game-changer for me.',
+              'The entrepreneurship programs at VAGO Business gave me the confidence and skills to launch my startup. The networking events were a game-changer for me.',
           },
           {
             name: 'Emily Ng',
             title: 'Co-Founder',
             company: 'EcoSolutions',
             testimonial:
-              'NUS Business provided a supportive environment to test my ideas. The funding opportunities allowed me to take my startup from concept to reality.',
+              'VAGO Business provided a supportive environment to test my ideas. The funding opportunities allowed me to take my startup from concept to reality.',
           },
         ],
       },

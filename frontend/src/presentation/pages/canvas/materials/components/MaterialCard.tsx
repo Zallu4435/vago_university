@@ -18,10 +18,8 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
 }) => {
     const { styles } = usePreferences();
 
-    // Extract material data from props structure
     const materialData = material.props || material;
 
-    // Function to convert semester string to readable name
     const getSemesterName = (semester: string) => {
         const currentYear = new Date().getFullYear();
         const semesterNames: { [key: string]: string } = {
@@ -61,8 +59,8 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
                     <button
                         onClick={() => onBookmark(materialData.id)}
                         className={`p-1.5 sm:p-2 rounded-full backdrop-blur-sm transition-all duration-200 ${isBookmarked || materialData.isBookmarked
-                                ? styles.button.primary
-                                : 'bg-black/20 text-white hover:bg-black/40'
+                            ? styles.button.primary
+                            : 'bg-black/20 text-white hover:bg-black/40'
                             }`}
                         aria-label={`Bookmark ${materialData.title}`}
                     >
@@ -169,8 +167,8 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
                     <button
                         onClick={() => onLike(materialData.id)}
                         className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl transition-all duration-200 ${isLiked || materialData.isLiked
-                                ? `${styles.status.error} ${styles.button.primary}`
-                                : styles.button.secondary
+                            ? `${styles.status.error} ${styles.button.primary}`
+                            : styles.button.secondary
                             }`}
                         aria-label={`Like ${materialData.title}`}
                     >
@@ -179,18 +177,12 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
                     <button
                         onClick={() => onBookmark(materialData.id)}
                         className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl transition-all duration-200 ${isBookmarked || materialData.isBookmarked
-                                ? styles.button.primary
-                                : styles.button.secondary
+                            ? styles.button.primary
+                            : styles.button.secondary
                             }`}
                         aria-label={`Bookmark ${materialData.title}`}
                     >
                         <FiBookmark className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill={isBookmarked || materialData.isBookmarked ? "currentColor" : "none"} />
-                    </button>
-                    <button
-                        className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl ${styles.button.secondary} transition-all duration-200`}
-                        aria-label={`View details for ${materialData.title}`}
-                    >
-                        <FiInfo className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
                 </div>
             </div>

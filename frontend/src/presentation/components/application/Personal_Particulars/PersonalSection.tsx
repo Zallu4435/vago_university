@@ -61,7 +61,6 @@ export const PersonalSection: React.FC = () => {
         )
       )}
 
-      {/* Mobile Number Group */}
       <div className="flex flex-col">
         <PhoneInput
           countryName="mobileCountry"
@@ -87,7 +86,6 @@ export const PersonalSection: React.FC = () => {
         )}
       </div>
 
-      {/* Home Telephone Group */}
       <div className="flex flex-col">
         <PhoneInput
           countryName="phoneCountry"

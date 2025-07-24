@@ -62,7 +62,6 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
 
   const { reset, formState: { errors, isDirty }, watch, trigger } = methods;
 
-  // Expose triggerValidation to parent
   React.useImperativeHandle(triggerValidation, () => ({
     trigger: async () => {
       const isValid = await trigger();
@@ -72,29 +71,19 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
     getValues: () => methods.getValues(),
   }));
 
-  // Reset form with initialData or defaultValues
   useEffect(() => {
     console.log('PersonalParticularsForm: Received initialData:', initialData);
     reset(initialData || defaultValues, {
-      keepDirty: false, // Reset dirty state to avoid triggering onChange unnecessarily
-      keepErrors: false, // Clear existing errors
-      keepValues: false, // Fully replace form values
+      keepDirty: false, 
+      keepErrors: false, 
+      keepValues: false, 
     });
   }, [initialData, reset]);
 
-  // Watch form data and call onChange when form is dirty
   useEffect(() => {
-    const subscription = watch((formData, { name, type }) => {
-      console.log('PersonalParticularsForm watch triggered', {
-        changedField: name,
-        type,
-        isDirty,
-        errors: Object.keys(errors).length > 0 ? errors : 'No errors',
-      });
+    const subscription = watch((formData) => {
       
-      console.log(formData, 'kokokokokokkookokkkko');
       if (isDirty && onChange) {
-        console.log('Calling onChange with formData:', formData);
         onChange(formData);
       }
     });
@@ -117,7 +106,6 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
               <PersonalSection />
             </div>
             
-            {/* Emergency / Next of Kin Section */}
             <div className="mt-8 rounded-xl border border-cyan-100 shadow-sm bg-white">
               <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 border-b border-cyan-100 rounded-t-xl flex items-center gap-2">
                 <svg className="w-6 h-6 text-cyan-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">

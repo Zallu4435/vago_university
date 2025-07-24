@@ -5,7 +5,6 @@ import { PaymentSummary } from './PaymentSummary';
 import { Button } from '../../base/Button';
 import { 
   FaExclamationCircle, 
-  FaArrowLeft, 
   FaCheckCircle 
 } from 'react-icons/fa';
 import { useApplicationForm } from '../../../../application/hooks/useApplicationForm';
@@ -48,24 +47,13 @@ export const Payment: React.FC<PaymentProps> = ({
           paymentMethodId: paymentDetails?.paymentMethodId,
         },
       };
-
-      console.log('Payment Payload:', paymentPayload);
       
-      // Step 1: Process payment (create payment record and Stripe PaymentIntent)
       const paymentResult = await processPayment(paymentPayload);
-      console.log('Payment Result:', paymentResult);
-      console.log('Payment Result stripePaymentIntentId:', paymentResult.stripePaymentIntentId);
 
       if (paymentResult.status !== 'pending') {
         throw new Error(paymentResult.message || 'Payment processing failed');
       }
 
-      // Step 2: Confirm payment (check Stripe status and update payment record)
-      console.log('Confirming payment with:', {
-        paymentId: paymentResult.paymentId,
-        stripePaymentIntentId: paymentResult.stripePaymentIntentId
-      });
-      
       if (!paymentResult.stripePaymentIntentId) {
         throw new Error('Missing stripePaymentIntentId from payment result');
       }
@@ -74,7 +62,6 @@ export const Payment: React.FC<PaymentProps> = ({
         paymentId: paymentResult.paymentId,
         stripePaymentIntentId: paymentResult.stripePaymentIntentId,
       });
-      console.log('Confirm Result:', confirmResult);
 
       if (confirmResult.status !== 'completed') {
         let errorMessage = confirmResult.message || 'Payment confirmation failed';
@@ -86,12 +73,10 @@ export const Payment: React.FC<PaymentProps> = ({
         throw new Error(errorMessage);
       }
 
-      // Step 3: Submit application
       const submissionResult = await submitApplication({
         applicationId: formData.applicationId,
         paymentId: confirmResult.paymentId,
       });
-      console.log('Submission Result:', submissionResult);
 
       setSubmissionStatus({
         success: true,
@@ -114,7 +99,6 @@ export const Payment: React.FC<PaymentProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-md rounded-xl border border-cyan-100">
-      {/* Header */}
       <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-5 border-b border-cyan-100 flex items-center justify-between">
         <h2 className="text-xl font-semibold text-cyan-900 flex items-center gap-3">
           <FaCheckCircle className="text-cyan-600" />
@@ -123,7 +107,6 @@ export const Payment: React.FC<PaymentProps> = ({
       </div>
 
       <div className="p-6 space-y-6">
-        {/* Error Messages */}
         {paymentError && (
           <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-lg flex items-start gap-3">
             <FaExclamationCircle className="text-red-500 mt-0.5 flex-shrink-0" size={20} />
@@ -131,7 +114,6 @@ export const Payment: React.FC<PaymentProps> = ({
           </div>
         )}
 
-        {/* Status Notification */}
         {submissionStatus.message && (
           <div className={`
             mb-4 p-4 flex items-start gap-3 rounded-lg border-l-4 
@@ -157,7 +139,6 @@ export const Payment: React.FC<PaymentProps> = ({
           </div>
         )}
 
-        {/* Payment Info Banner */}
         <div className="bg-cyan-50 border-l-4 border-cyan-400 p-4 rounded-lg flex items-center gap-3">
           <FaExclamationCircle className="text-cyan-500 flex-shrink-0" size={20} />
           <p className="text-sm text-cyan-800">
@@ -166,20 +147,17 @@ export const Payment: React.FC<PaymentProps> = ({
           </p>
         </div>
 
-        {/* Payment Summary */}
         <PaymentSummary 
           amount={1000.00}
           currency="INR"
           description="Application Processing Fee"
         />
 
-        {/* Payment Methods */}
         <PaymentMethods 
           selectedMethod={selectedMethod}
           onMethodSelect={setSelectedMethod}
         />
 
-        {/* Payment Details */}
         {selectedMethod === 'stripe' && (
           <PaymentDetails 
             method={selectedMethod}
@@ -190,7 +168,6 @@ export const Payment: React.FC<PaymentProps> = ({
         )}
       </div>
 
-      {/* Navigation Buttons */}
       <div className="flex justify-between p-6 border-t border-cyan-100">
         <Button 
           label="Previous"

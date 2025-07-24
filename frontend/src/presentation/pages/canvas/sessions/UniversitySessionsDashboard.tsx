@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { FaFilter } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
-import { UserAccess, Filters } from '../../../../domain/types/canvas/session';
+import { UserAccess } from '../../../../domain/types/canvas/session';
 import { SessionStats } from './components/SessionStats';
 import { SessionFilters } from './components/SessionFilters';
 import { SessionCard } from './components/SessionCard';
@@ -12,20 +12,12 @@ const UniversitySessionsDashboard = () => {
   const { styles } = usePreferences();
   const {
     sessions,
-    isLoading,
-    error,
-    selectedSession,
-    setSelectedSession,
-    handleJoinSession,
-    isJoining
-  } = useUniversitySessionManagement();
-  const [filteredSessions, setFilteredSessions] = useState<any[]>(sessions as any[]);
+    filters,
+    setFilters,
+    searchTerm,
+    setSearchTerm
+  } = useUniversitySessionManagement({ status: 'all', instructor: 'all' }, '');
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [filters, setFilters] = useState<Filters>({
-    status: 'all',
-    instructor: 'all',
-    dateRange: 'all'
-  });
   const [userAccess, setUserAccess] = useState<UserAccess>({
     isEnrolled: true,
     watchedSessions: [] as string[],
@@ -40,25 +32,6 @@ const UniversitySessionsDashboard = () => {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
-
-  useEffect(() => {
-    let filtered = sessions;
-    if (filters.status !== 'all') {
-      filtered = filtered.filter((session: any) => session.status === filters.status);
-    }
-    if (filters.instructor !== 'all') {
-      filtered = filtered.filter((session: any) => session.instructor === filters.instructor);
-    }
-    setFilteredSessions(filtered);
-  }, [filters, sessions]);
-
-  const handleFilterChange = (newFilters: Filters) => {
-    setFilters(newFilters);
-  };
-
-  const handleClearFilters = () => {
-    setFilters({ status: 'all', instructor: 'all', dateRange: 'all' });
-  };
 
   const handleToggleEnrollment = (isEnrolled: boolean) => {
     setUserAccess(prev => ({ ...prev, isEnrolled }));
@@ -87,29 +60,25 @@ const UniversitySessionsDashboard = () => {
 
   return (
     <div className={`min-h-screen ${styles.background}`}>
-      {/* <SessionHeader
-        userName={userAccess.userName}
-        currentTime={currentTime}
-        isEnrolled={userAccess.isEnrolled}
-        sessionCount={filteredSessions.length}
-        styles={styles}
-      /> */}
+
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         <SessionStats stats={sessionStats} styles={styles} />
 
         <SessionFilters
           filters={filters}
-          onFilterChange={handleFilterChange}
-          onClearFilters={handleClearFilters}
+          onFilterChange={setFilters}
+          onClearFilters={() => setFilters({ status: 'all', instructor: 'all' })}
           uniqueInstructors={uniqueInstructors}
           userAccess={userAccess}
           onToggleEnrollment={handleToggleEnrollment}
           styles={styles}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
         />
 
         <div className="space-y-6">
-          {filteredSessions.length === 0 ? (
+          {sessions.length === 0 ? (
             <div className={`${styles.card.background} rounded-2xl ${styles.cardShadow} ${styles.cardBorder} text-center py-16`}>
               <div className={`w-16 h-16 ${styles.backgroundSecondary} rounded-full flex items-center justify-center mx-auto mb-4`}>
                 <FaFilter className={`w-8 h-8 ${styles.icon.secondary}`} />
@@ -118,8 +87,7 @@ const UniversitySessionsDashboard = () => {
               <p className={`${styles.textSecondary}`}>Try adjusting your filters to see more sessions.</p>
             </div>
           ) : (
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            filteredSessions.map((session: any, index: number) => (
+            sessions.map((session: any, index: number) => (
               <SessionCard
                 key={session.id}
                 session={session}

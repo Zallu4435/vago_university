@@ -7,7 +7,6 @@ export const PaymentSummary: React.FC<PaymentSummaryProps> = ({
   currency,
   description,
 }) => {
-  // Format currency based on locale
   const formattedAmount = new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: currency,

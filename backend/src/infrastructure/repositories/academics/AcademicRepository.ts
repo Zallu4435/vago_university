@@ -25,23 +25,20 @@ import { TranscriptRequestModel } from '../../../infrastructure/database/mongoos
 import { MeetingModel } from '../../../infrastructure/database/mongoose/models/meeting.model';
 
 export class AcademicRepository implements IAcademicRepository {
-  async findStudentById(userId: string): Promise<any> {
-    if (!mongoose.isValidObjectId(userId)) {
-      return null;
-    }
-    const user = await UserModel.findById(userId)
+  async getUserById(userId: string): Promise<any> {
+    return await UserModel.findById(userId)
       .select('firstName lastName email phone profilePicture')
       .lean();
-    if (!user) {
-      return null;
-    }
-    const program = await ProgramModel.findOne({ studentId: userId })
+  }
+
+  async getProgramByStudentId(userId: string): Promise<any> {
+    return await ProgramModel.findOne({ studentId: userId })
       .select('degree catalogYear credits')
       .lean();
-    if (!program) {
-      return null;
-    }
-    const pendingEnrollments = await EnrollmentModel.find({
+  }
+
+  async getPendingEnrollmentsByStudentId(userId: string): Promise<any[]> {
+    return await EnrollmentModel.find({
       studentId: userId,
       status: { $regex: /^pending$/, $options: 'i' },
     })
@@ -50,6 +47,21 @@ export class AcademicRepository implements IAcademicRepository {
         select: 'credits',
       })
       .lean();
+  }
+
+  async findStudentById(userId: string): Promise<any> {
+    if (!mongoose.isValidObjectId(userId)) {
+      return null;
+    }
+    const user = await this.getUserById(userId);
+    if (!user) {
+      return null;
+    }
+    const program = await this.getProgramByStudentId(userId);
+    if (!program) {
+      return null;
+    }
+    const pendingEnrollments = await this.getPendingEnrollmentsByStudentId(userId);
     return { user, program, pendingEnrollments };
   }
 

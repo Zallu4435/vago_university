@@ -56,8 +56,24 @@ export class SessionRepository implements ISessionRepository {
     await VideoSessionModel.findByIdAndDelete(sessionId);
   }
 
-  async getAll(): Promise<VideoSession[]> {
-    const sessions = await VideoSessionModel.find().sort({ createdAt: -1 });
+  async getAll(params: { search?: string; status?: string; instructor?: string } = {}): Promise<VideoSession[]> {
+    const query: any = {};
+    if (params.status && params.status !== 'all') {
+      query.status = { $regex: `^${params.status}$`, $options: 'i' };
+    }
+    if (params.instructor && params.instructor !== 'all') {
+      query.instructor = params.instructor;
+    }
+    if (params.search && params.search.trim()) {
+      const searchRegex = new RegExp(params.search.trim(), 'i');
+      query.$or = [
+        { title: searchRegex },
+        { description: searchRegex },
+        { instructor: searchRegex },
+        { course: searchRegex }
+      ];
+    }
+    const sessions = await VideoSessionModel.find(query).sort({ createdAt: -1 });
     return sessions.map(doc => doc.toObject() as VideoSession);
   }
 

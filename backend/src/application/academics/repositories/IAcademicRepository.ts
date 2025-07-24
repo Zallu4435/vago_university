@@ -11,8 +11,10 @@ import {
     Meeting,
   } from "../../../domain/academics/entities/Academic";
   
+  export type StudentInfoResult = { user: any; program: any; pendingEnrollments: any[] };
+
   export interface IAcademicRepository {
-    findStudentById(userId: string): Promise<Student | null>;
+    findStudentById(userId: string): Promise<StudentInfoResult | null>;
     findGradeByUserId(userId: string): Promise<Grade | null>;
     findAllCourses(search?: string, page?: number, limit?: number): Promise<Course[]>;
     findAcademicHistory(userId: string, startTerm?: string, endTerm?: string): Promise<AcademicHistory[]>;

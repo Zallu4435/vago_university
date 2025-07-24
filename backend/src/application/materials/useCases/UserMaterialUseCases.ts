@@ -1,9 +1,9 @@
 import { IUserMaterialsRepository } from '../repositories/IUserMaterialsRepository';
-import { 
-  GetUserMaterialsRequestDTO, 
+import {
+  GetUserMaterialsRequestDTO,
   GetUserMaterialByIdRequestDTO,
-  ToggleBookmarkRequestDTO, 
-  ToggleLikeRequestDTO, 
+  ToggleBookmarkRequestDTO,
+  ToggleLikeRequestDTO,
   DownloadMaterialRequestDTO,
 } from '../../../domain/materials/dtos/UserMaterialRequestDTOs';
 import { GetUserMaterialsResponseDTO } from '../../../domain/materials/dtos/UserMaterialResponseDTOs';
@@ -38,7 +38,7 @@ function toUserMaterialProps(obj: any, userId: string) {
 }
 
 export class GetUserMaterialsUseCase {
-  constructor(private repo: IUserMaterialsRepository) {}
+  constructor(private repo: IUserMaterialsRepository) { }
   async execute(params: GetUserMaterialsRequestDTO): Promise<GetUserMaterialsResponseDTO> {
     const { userId, subject, course, semester, type, difficulty, search, sortBy = 'createdAt', sortOrder = 'desc', page = 1, limit = 10 } = params;
     const skip = (page - 1) * limit;
@@ -96,7 +96,7 @@ export class GetUserMaterialsUseCase {
 }
 
 export class GetUserMaterialByIdUseCase {
-  constructor(private repo: IUserMaterialsRepository) {}
+  constructor(private repo: IUserMaterialsRepository) { }
   async execute(params: GetUserMaterialByIdRequestDTO): Promise<GetUserMaterialsResponseDTO> {
     const { userId, id } = params;
     const material = await this.repo.findById(id);
@@ -111,7 +111,7 @@ export class GetUserMaterialByIdUseCase {
 }
 
 export class ToggleBookmarkUseCase {
-  constructor(private repo: IUserMaterialsRepository) {}
+  constructor(private repo: IUserMaterialsRepository) { }
   async execute(params: ToggleBookmarkRequestDTO): Promise<void> {
     if (!params.id || !params.userId) throw new MaterialValidationError('Material ID and User ID are required');
     await this.repo.toggleBookmark(params.id, params.userId);
@@ -119,7 +119,7 @@ export class ToggleBookmarkUseCase {
 }
 
 export class ToggleLikeUseCase {
-  constructor(private repo: IUserMaterialsRepository) {}
+  constructor(private repo: IUserMaterialsRepository) { }
   async execute(params: ToggleLikeRequestDTO): Promise<void> {
     if (!params.id || !params.userId) throw new MaterialValidationError('Material ID and User ID are required');
     await this.repo.toggleLike(params.id, params.userId);
@@ -127,7 +127,7 @@ export class ToggleLikeUseCase {
 }
 
 export class DownloadMaterialUseCase {
-  constructor(private repo: IUserMaterialsRepository) {}
+  constructor(private repo: IUserMaterialsRepository) { }
   async execute(params: DownloadMaterialRequestDTO): Promise<string> {
     if (!params.id) throw new MaterialValidationError('Material ID is required');
     return this.repo.incrementDownloads(params.id);

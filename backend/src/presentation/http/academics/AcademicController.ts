@@ -143,7 +143,8 @@ export class AcademicController implements IAcademicController {
             reason,
         });
         if (!result.success) {
-            return this.httpErrors.error_400();
+            const errorMsg = (result.data as any).error || "Failed to register course";
+            return this.httpErrors.error_400(errorMsg);
         }
         return this.httpSuccess.success_200(result.data);
     }

@@ -21,7 +21,7 @@ export class UserMaterialController {
     if (!user) return { statusCode: 401, body: { error: 'Unauthorized' } };
 
     const params = {
-      userId: user.id,
+      userId: user.userId,
       subject: query.subject,
       course: query.course,
       semester: query.semester ? Number(query.semester) : undefined,
@@ -42,7 +42,7 @@ export class UserMaterialController {
     const { id } = req.params;
     const { user } = req;
     if (!user) return { statusCode: 401, body: { error: 'Unauthorized' } };
-    const result = await this.getMaterialByIdUseCase.execute({ id, userId: user.id });
+    const result = await this.getMaterialByIdUseCase.execute({ id, userId: user.userId });
     return { statusCode: 200, body: { data: result } };
   }
 
@@ -50,7 +50,7 @@ export class UserMaterialController {
     const { id } = req.params;
     const { user } = req;
     if (!user) return { statusCode: 401, body: { error: 'Unauthorized' } };
-    await this.toggleBookmarkUseCase.execute({ materialId: id, userId: user.id });
+    await this.toggleBookmarkUseCase.execute({ id, userId: user.userId });
     return { statusCode: 200, body: { data: { message: 'Bookmark toggled' } } };
   }
 
@@ -58,7 +58,7 @@ export class UserMaterialController {
     const { id } = req.params;
     const { user } = req;
     if (!user) return { statusCode: 401, body: { error: 'Unauthorized' } };
-    await this.toggleLikeUseCase.execute({ materialId: id, userId: user.id });
+    await this.toggleLikeUseCase.execute({ id, userId: user.userId });
     return { statusCode: 200, body: { data: { message: 'Like toggled' } } };
   }
 
@@ -66,7 +66,7 @@ export class UserMaterialController {
     const { id } = req.params;
     const { user } = req;
     if (!user) return { statusCode: 401, body: { error: 'Unauthorized' } };
-    const url = await this.downloadMaterialUseCase.execute({ materialId: id, userId: user.id });
+    const url = await this.downloadMaterialUseCase.execute({ id, userId: user.userId });
     return { statusCode: 200, body: { data: { url } } };
   }
 } 

@@ -108,22 +108,29 @@ export class CampusLifeRepository implements ICampusLifeRepository {
 
   async getEvents(params: GetEventsRequestDTO): Promise<any> {
     const query: any = {};
+    const hasFilter = !!(params.search || (params.status && params.status !== 'all'));
     if (params.search) {
       query.title = { $regex: params.search, $options: "i" };
     }
-    if (params.status !== "all") {
+    if (params.status && params.status !== "all") {
       const today = new Date().toISOString().split("T")[0];
       query.date = params.status === "upcoming" ? { $gte: today } : { $lt: today };
     }
+    let events;
+    if (!hasFilter) {
+      events = await (CampusEventModel as any).find()
+        .select("title date time location organizer timeframe icon color description fullTime additionalInfo requirements createdAt updatedAt")
+        .limit(5)
+        .lean();
+    } else {
+      events = await this.findEvents(query, 0, 1000); // 1000 = arbitrary large limit for all matches
+    }
     const totalItems = await this.countEvents(query);
-    const totalPages = Math.ceil(totalItems / params.limit);
-    const skip = (params.page - 1) * params.limit;
-    const events = await this.findEvents(query, skip, params.limit);
     let requests: any[] = [];
     if (params.userId) {
       requests = await this.findEventRequestsByUser(params.userId);
     }
-    return { events, requests, totalItems, totalPages, currentPage: params.page };
+    return { events, requests, totalItems };
   }
 
   async getEventById(params: GetEventByIdRequestDTO): Promise<any> {
@@ -153,17 +160,26 @@ export class CampusLifeRepository implements ICampusLifeRepository {
 
   async getClubs(params: GetClubsRequestDTO): Promise<any> {
     const query: any = {};
+    const hasFilter = !!(params.search || params.type || (params.status && params.status !== 'all'));
     if (params.search) {
       query.name = { $regex: params.search, $options: "i" };
     }
     if (params.type) {
       query.type = { $regex: params.type, $options: "i" };
     }
-    if (params.status !== "all") {
+    if (params.status && params.status !== "all") {
       query.status = params.status;
     }
+    let clubs;
+    if (!hasFilter) {
+      clubs = await (ClubModel as any).find()
+        .select("name type members icon color status role nextMeeting about upcomingEvents createdAt updatedAt")
+        .limit(5)
+        .lean();
+    } else {
+      clubs = await this.findClubs(query);
+    }
     const totalItems = await this.countClubs(query);
-    const clubs = await this.findClubs(query);
     let requests: any[] = [];
     if (params.userId) {
       requests = await this.findClubRequestsByUser(params.userId);

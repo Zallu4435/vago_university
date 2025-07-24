@@ -11,10 +11,8 @@ import {
 import { StudentDashboardRepository } from '../../repositories/student/StudentDashboardRepositoryImpl';
 
 export function getStudentDashboardComposer() {
-  // Create repository
   const dashboardRepository = new StudentDashboardRepository();
 
-  // Create use cases
   const getDashboardDataUseCase = new GetStudentDashboardDataUseCase(dashboardRepository);
   const getAnnouncementsUseCase = new GetAnnouncementsUseCase(dashboardRepository);
   const getDeadlinesUseCase = new GetDeadlinesUseCase(dashboardRepository);
@@ -23,7 +21,6 @@ export function getStudentDashboardComposer() {
   const getCalendarDaysUseCase = new GetCalendarDaysUseCase(dashboardRepository);
   const getSpecialDatesUseCase = new GetSpecialDatesUseCase(dashboardRepository);
 
-  // Create controller
   const studentDashboardController = new StudentDashboardController(
     getDashboardDataUseCase,
     getAnnouncementsUseCase,

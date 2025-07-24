@@ -1,7 +1,6 @@
-import { IAuthRepository } from '../../../application/auth/repositories/IAuthRepository';
 import { IEmailService } from '../../../application/auth/service/IEmailService';
 import {
-    IRegisterUseCase, // Using interfaces for clarity and consistency
+    IRegisterUseCase,
     ILoginUseCase,
     IRefreshTokenUseCase,
     ILogoutUseCase,
@@ -11,7 +10,6 @@ import {
     IResetPasswordUseCase,
     IConfirmRegistrationUseCase,
     LogoutAllUseCase,
-    // Import concrete Use Case classes to instantiate them
     RegisterUseCase,
     LoginUseCase,
     RefreshTokenUseCase,
@@ -21,31 +19,27 @@ import {
     VerifyEmailOtpUseCase,
     ResetPasswordUseCase,
     ConfirmRegistrationUseCase,
-} from '../../../application/auth/useCases/AuthUseCases'; // Make sure this path is correct
-import { AuthRepository } from '../../../infrastructure/repositories/auth/AuthRepository'; // Make sure this path is correct
-import { AuthController } from '../../../presentation/http/auth/AuthController'; // Make sure this path is correct
-import { IAuthController } from '../../../presentation/http/IHttp'; // Make sure this path is correct
+} from '../../../application/auth/useCases/AuthUseCases';
+import { AuthRepository } from '../../../infrastructure/repositories/auth/AuthRepository';
+import { AuthController } from '../../../presentation/http/auth/AuthController';
+import { IAuthController } from '../../../presentation/http/IHttp';
 
-// Import new services and their interfaces
 import { IJwtService, JwtService } from '../../services/auth/JwtService';
 import { IOtpService, OtpService } from '../../services/auth/OtpService';
-import { emailService } from '../../services/email.service'; // Assuming emailService is a singleton export
-import { otpStorage } from "../../services/otpStorage"; // otpStorage is a dependency for OtpService
+import { emailService } from '../../services/email.service';
+import { otpStorage } from "../../services/otpStorage";
 
 export function getAuthComposer(): IAuthController {
-    // Instantiate the Repository
     const repository: AuthRepository = new AuthRepository();
 
-    // Instantiate the new Services
     const jwtService: IJwtService = new JwtService();
-    const otpService: IOtpService = new OtpService(otpStorage); // otpStorage is injected into OtpService
-    const emailsvc: IEmailService = emailService; // Using the singleton instance of emailService
+    const otpService: IOtpService = new OtpService(otpStorage);
+    const emailsvc: IEmailService = emailService;
 
-    // Instantiate Use Cases, injecting their respective dependencies
     const registerUseCase: IRegisterUseCase = new RegisterUseCase(repository, jwtService, emailsvc);
     const loginUseCase: ILoginUseCase = new LoginUseCase(repository, jwtService);
     const refreshTokenUseCase: IRefreshTokenUseCase = new RefreshTokenUseCase(repository, jwtService);
-    const logoutUseCase: ILogoutUseCase = new LogoutUseCase(repository); // LogoutUseCase has no new dependencies
+    const logoutUseCase: ILogoutUseCase = new LogoutUseCase(repository);
     const registerFacultyUseCase: IRegisterFacultyUseCase = new RegisterFacultyUseCase(repository, jwtService);
     const sendEmailOtpUseCase: ISendEmailOtpUseCase = new SendEmailOtpUseCase(repository, otpService, emailsvc);
     const verifyEmailOtpUseCase: IVerifyEmailOtpUseCase = new VerifyEmailOtpUseCase(otpService, jwtService);
@@ -53,7 +47,6 @@ export function getAuthComposer(): IAuthController {
     const confirmRegistrationUseCase: IConfirmRegistrationUseCase = new ConfirmRegistrationUseCase(repository, jwtService);
     const logoutAllUseCase: LogoutAllUseCase = new LogoutAllUseCase(repository);
 
-    // Instantiate the Controller with all the Use Cases
     return new AuthController(
         registerUseCase,
         loginUseCase,
@@ -65,6 +58,6 @@ export function getAuthComposer(): IAuthController {
         resetPasswordUseCase,
         confirmRegistrationUseCase,
         logoutAllUseCase,
-        repository // Pass repository as last argument
+        repository
     );
 }

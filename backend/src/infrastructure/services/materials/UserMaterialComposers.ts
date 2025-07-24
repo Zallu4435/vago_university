@@ -8,7 +8,6 @@ import {
   DownloadMaterialUseCase,
 } from '../../../application/materials/useCases/UserMaterialUseCases';
 
-// Placeholder use cases for unused dependencies
 class GetUserBookmarkedMaterialsUseCase {
   constructor(private repo: any) {}
   async execute(params: any): Promise<any> {

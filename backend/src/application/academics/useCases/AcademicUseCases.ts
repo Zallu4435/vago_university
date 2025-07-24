@@ -22,7 +22,7 @@ import {
   ScheduleMeetingRequestDTO,
   ScheduleMeetingResponseDTO,
 } from "../../../domain/academics/dtos/AcademicDTOs";
-import { IAcademicRepository } from "../repositories/IAcademicRepository";
+import { IAcademicRepository, StudentInfoResult } from "../repositories/IAcademicRepository";
 import mongoose from "mongoose";
 import { EnrollmentStatus } from "../../../domain/academics/entities/Academic";
 
@@ -79,11 +79,12 @@ export class GetStudentInfoUseCase implements IGetStudentInfoUseCase {
   constructor(private academicRepository: IAcademicRepository) { }
 
   async execute(input: GetStudentInfoRequestDTO): Promise<ResponseDTO<GetStudentInfoResponseDTO>> {
-    const result = await this.academicRepository.findStudentById(input.userId);
+    const result: StudentInfoResult | null = await this.academicRepository.findStudentById(input.userId);
     if (!result) {
       return { data: { error: "Student not found" }, success: false };
     }
     const { user, program, pendingEnrollments } = result;
+    // Business logic only below
     const pendingCredits = pendingEnrollments
       .filter((enrollment: any) => enrollment.courseId)
       .reduce((sum: number, enrollment: any) => sum + ((enrollment.courseId as any).credits || 0), 0);
@@ -235,7 +236,10 @@ export class RegisterCourseUseCase implements IRegisterCourseUseCase {
 
     const existingEnrollment = await this.academicRepository.findEnrollment(input.studentId, input.courseId);
     if (existingEnrollment) {
-      return { data: { error: "Already enrolled in this course" }, success: false };
+      return {
+        data: { error: "Already enrolled in this course" },
+        success: false
+      };
     }
 
     const enrollment = await this.academicRepository.createEnrollment({

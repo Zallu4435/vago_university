@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 import { config } from "../../../config/config";
 import { InvalidTokenError } from "../../../domain/auth/errors/AuthErrors";
 
-// Define a simple interface for the JWT Service for dependency injection
 export interface IJwtService {
     generateToken(payload: object, expiresIn: string): string;
     generateAccessToken(payload: object): string;
@@ -16,7 +15,6 @@ export class JwtService implements IJwtService {
     private readonly refreshSecret: jwt.Secret;
 
     constructor() {
-        // Use a more robust way to handle secret, like environment variables
         if (!config.jwt.secret || !config.jwt.refreshSecret) {
             throw new Error("JWT secrets are not defined in config.");
         }
@@ -24,49 +22,24 @@ export class JwtService implements IJwtService {
         this.refreshSecret = config.jwt.refreshSecret as jwt.Secret;
     }
 
-    /**
-     * Generates a new JWT token.
-     * @param payload The data to encode in the token.
-     * @param expiresIn The duration until the token expires (e.g., '1h', '7d').
-     * @returns The signed JWT string.
-     * @deprecated Use generateAccessToken or generateRefreshToken instead
-     */
     generateToken(payload: object, expiresIn: string): string {
         return jwt.sign(payload, this.secret, { expiresIn: expiresIn as jwt.SignOptions['expiresIn'] });
     }
 
-    /**
-     * Generates a new access token with a 10-minute expiry.
-     * @param payload The data to encode in the token.
-     * @returns The signed JWT string.
-     */
     generateAccessToken(payload: object): string {
         return jwt.sign(payload, this.secret, { expiresIn: '10m' });
     }
 
-    /**
-     * Generates a new refresh token with 7 days expiry.
-     * @param payload The data to encode in the token.
-     * @returns The signed JWT string.
-     */
     generateRefreshToken(payload: object): string {
         return jwt.sign(payload, this.refreshSecret, { expiresIn: '7d' });
     }
 
-    /**
-     * Verifies a JWT token and returns its decoded payload.
-     * @param token The JWT string to verify.
-     * @param isRefreshToken Whether this is a refresh token verification
-     * @returns The decoded payload.
-     * @throws InvalidTokenError if the token is invalid or expired.
-     */
     verifyToken<T>(token: string, options: { isRefreshToken?: boolean; ignoreExpiration?: boolean } = {}): T {
         try {
             const secret = options.isRefreshToken ? this.refreshSecret : this.secret;
             const decoded = jwt.verify(token, secret, { ignoreExpiration: options.ignoreExpiration }) as T;
             return decoded;
         } catch (error) {
-            // Re-throw as a domain-specific error
             throw new InvalidTokenError("Invalid or expired token.");
         }
     }

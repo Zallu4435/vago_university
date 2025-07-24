@@ -14,10 +14,8 @@ import {
 import { DashboardRepository } from '../../repositories/admindashboard/DashboardRepository';
 
 export function getAdminDashboardComposer() {
-  // Create repository
   const dashboardRepository = new DashboardRepository();
 
-  // Create use cases
   const getDashboardDataUseCase = new GetDashboardDataUseCase(dashboardRepository);
   const getDashboardMetricsUseCase = new GetDashboardMetricsUseCase(dashboardRepository);
   const getUserGrowthDataUseCase = new GetUserGrowthDataUseCase(dashboardRepository);
@@ -29,7 +27,6 @@ export function getAdminDashboardComposer() {
   const dismissAlertUseCase = new DismissAlertUseCase(dashboardRepository);
   const markActivityAsReadUseCase = new MarkActivityAsReadUseCase(dashboardRepository);
 
-  // Create controller
   const adminDashboardController = new AdminDashboardController(
     getDashboardDataUseCase,
     getDashboardMetricsUseCase,

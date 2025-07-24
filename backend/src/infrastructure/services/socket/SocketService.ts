@@ -84,14 +84,12 @@ export class SocketService {
   }
 
   private extractToken(socket: any): string | null {
-    // Try auth token first
     let token = socket.handshake.auth.token;
     
     if (typeof token === 'string' && token) {
       return token;
     }
 
-    // Try cookie if auth token is not available
     if (socket.handshake.headers.cookie) {
       const match = socket.handshake.headers.cookie.match(/auth_token=([^;]+)/);
       if (match) {
@@ -106,18 +104,12 @@ export class SocketService {
     const userId = socket.data.user.userId;
     this.userSockets.set(userId, socket.id);
     
-    console.log(`[Socket.IO] User connected: ${userId}, socket id: ${socket.id}`);
-
-    // Send online users list to the newly connected user
     socket.emit("onlineUsers", Array.from(this.userSockets.keys()));
     
-    // Join user to their existing chats
     this.joinUserChats(userId);
 
-    // Broadcast user status
     this.broadcastUserStatus(userId, "online");
 
-    // Setup event listeners
     this.setupEventListeners(socket, userId);
   }
 
@@ -183,7 +175,6 @@ export class SocketService {
     if (userId) {
       this.userSockets.delete(userId);
       this.broadcastUserStatus(userId, "offline");
-      console.log(`[Socket.IO] User disconnected: ${userId}, reason: ${reason}`);
     }
   }
 
@@ -216,10 +207,8 @@ export class SocketService {
   public async handleNewMessage(message: SocketMessage) {
     const chatId = message.chatId;
     
-    // Broadcast message to chat room
     this.chatNamespace.to(chatId).emit("message", message);
     
-    // Update message status for other participants
     try {
       const chat = await this.chatRepository.getChatDetails(chatId, message.senderId);
       if (chat) {

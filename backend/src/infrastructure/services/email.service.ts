@@ -2,8 +2,8 @@
 
 import nodemailer from "nodemailer";
 import { config } from "../../config/config";
-import { IEmailService } from "../../application/auth/service/IEmailService"; // Import the interface
-import { // Import all parameter interfaces
+import { IEmailService } from "../../application/auth/service/IEmailService";
+import {
   AdmissionOfferEmailParams,
   FacultyOfferEmailParams,
   FacultyCredentialsEmailParams,
@@ -13,7 +13,7 @@ import { // Import all parameter interfaces
 } from "../../application/auth/service/EmailServiceParams";
 
 
-class EmailService implements IEmailService { // Implement the interface
+class EmailService implements IEmailService { 
   private transporter: nodemailer.Transporter;
 
   constructor() {

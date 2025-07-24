@@ -5,7 +5,6 @@ import { v4 as uuidv4 } from "uuid";
 
 const UPLOAD_DIR = path.join(__dirname, "../../../uploads");
 
-// Ensure upload directory exists
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
@@ -21,7 +20,6 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  // Allow images and documents
   const allowedTypes = [
     "image/jpeg",
     "image/png",
@@ -44,7 +42,7 @@ export const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 5 * 1024 * 1024,
   },
 });
 

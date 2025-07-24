@@ -8,7 +8,7 @@ class OtpStorage {
   private otps: Map<string, OtpEntry> = new Map();
 
   storeOtp(email: string, otp: string): void {
-    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+    const expiresAt = Date.now() + 10 * 60 * 1000;
     this.otps.set(email, { otp, email, expiresAt });
   }
 

@@ -7,11 +7,9 @@ const router = Router();
 
 router.post('/:type/:id/fcm-token', authMiddleware, async (req: Request, res: Response) => {
   try {
-    console.log("reached here ");
     const { type, id } = req.params; 
     const { token } = req.body; 
 
-    console.log( type, id, token)
     if (!token || typeof token !== 'string') {
       res.status(400).json({ error: 'Invalid FCM token' });
       return;

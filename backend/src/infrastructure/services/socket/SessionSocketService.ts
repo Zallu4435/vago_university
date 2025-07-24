@@ -2,10 +2,8 @@ import { Server } from 'socket.io';
 import { VideoSessionModel } from '../../database/mongoose/models/session.model';
 import type { Socket as IOSocket } from 'socket.io';
 
-// In-memory participant tracking per session
 const sessionParticipants: Record<string, any[]> = {};
 
-// Extend the Socket type to allow userId property
 declare module 'socket.io' {
   interface Socket {
     userId?: string;
@@ -59,15 +57,12 @@ export const setupSessionSocketHandlers = (io: Server) => {
         currentSessionId = sessionId;
         socket.userId = currentUserId;
         
-        // Join the socket room
         socket.join(sessionId);
 
-        // Initialize session participants if not exists
         if (!sessionParticipants[sessionId]) {
           sessionParticipants[sessionId] = [];
         }
         
-        // Add or update participant
         const existingParticipantIndex = sessionParticipants[sessionId].findIndex(p => p.userId === user.userId);
         if (existingParticipantIndex === -1) {
           sessionParticipants[sessionId].push({
@@ -80,14 +75,11 @@ export const setupSessionSocketHandlers = (io: Server) => {
             handRaised: false
           });
         } else {
-          // Update socket ID if user reconnects
           sessionParticipants[sessionId][existingParticipantIndex].socketId = socket.id;
         }
 
-        // Send participant list to the joining user
         socket.emit('participant-list', sessionParticipants[sessionId]);
         
-        // Broadcast to others that a new user joined
         socket.to(sessionId).emit('user-joined', {
           id: user.userId,
           name: user.username,
@@ -97,7 +89,6 @@ export const setupSessionSocketHandlers = (io: Server) => {
           handRaised: false
         });
 
-        // Update database
         await updateSessionInDatabase(sessionId, user.userId);
 
       } catch (error) {
@@ -106,7 +97,6 @@ export const setupSessionSocketHandlers = (io: Server) => {
       }
     });
 
-    // WebRTC signaling handlers
     socket.on('video-offer', (data) => {
       relayToTargetUser(io, data, 'video-offer');
     });
@@ -119,19 +109,16 @@ export const setupSessionSocketHandlers = (io: Server) => {
       relayToTargetUser(io, data, 'ice-candidate');
     });
 
-    // Media state changes
     socket.on('media-state-changed', (data: MediaStateData) => {
       updateParticipantMediaState(data);
       socket.to(data.sessionId).emit('media-state-changed', data);
     });
 
-    // Hand raise/lower
     socket.on('hand-raise-changed', (data: HandRaiseData) => {
       updateParticipantHandRaise(data);
       socket.to(data.sessionId).emit('hand-raise-changed', data);
     });
 
-    // Emoji reactions
     socket.on('send-reaction', (data: ReactionData) => {
       io.to(data.sessionId).emit('reaction-received', {
         id: Date.now().toString() + Math.random(),
@@ -142,7 +129,6 @@ export const setupSessionSocketHandlers = (io: Server) => {
       });
     });
 
-    // Chat messages
     socket.on('send-message', (data: MessageData) => {
       io.to(data.sessionId).emit('message-received', {
         id: Date.now().toString() + Math.random(),
@@ -153,7 +139,6 @@ export const setupSessionSocketHandlers = (io: Server) => {
       });
     });
 
-    // Screen sharing
     socket.on('screen-share-started', (data) => {
       socket.to(data.sessionId).emit('screen-share-started', {
         userId: data.userId,
@@ -168,7 +153,6 @@ export const setupSessionSocketHandlers = (io: Server) => {
       });
     });
 
-    // Disconnect handling
     socket.on('disconnect', (reason: string) => {
       if (currentUserId && currentSessionId) {
         removeParticipantFromSession(currentSessionId, currentUserId);
@@ -180,7 +164,6 @@ export const setupSessionSocketHandlers = (io: Server) => {
   });
 };
 
-// Helper functions
 async function updateSessionInDatabase(sessionId: string, userId: string) {
   try {
     const session = await VideoSessionModel.findById(sessionId);
@@ -231,7 +214,6 @@ function removeParticipantFromSession(sessionId: string, userId: string) {
   if (sessionParticipants[sessionId]) {
     sessionParticipants[sessionId] = sessionParticipants[sessionId].filter(p => p.userId !== userId);
     
-    // Clean up empty sessions
     if (sessionParticipants[sessionId].length === 0) {
       delete sessionParticipants[sessionId];
     }

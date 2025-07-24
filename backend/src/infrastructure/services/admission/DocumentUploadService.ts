@@ -4,14 +4,12 @@ import multer from 'multer';
 import { IDocument } from '../../../domain/admission/entities/AdmissionTypes';
 import { DocumentUploadFailedException } from '../../../domain/admission/errors/AdmissionErrors';
 
-// Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Create Cloudinary storage engine
 const cloudinaryStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -21,7 +19,6 @@ const cloudinaryStorage = new CloudinaryStorage({
   } as any,
 });
 
-// Create multer instance for document uploads
 export const admissionDocumentUpload = multer({
   storage: cloudinaryStorage,
   limits: {
@@ -41,7 +38,6 @@ export class DocumentUploadService {
     if (!file) {
       throw new DocumentUploadFailedException('No file provided');
     }
-    // The file is already uploaded to Cloudinary by multer
     return {
       url: file.path,
       publicId: file.filename,

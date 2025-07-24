@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useCommunicationManagement } from '../../../../application/hooks/useCommunication';
-import { Message } from '../../../../domain/types/communication';
 import ComposeMessageModal from './ComposeMessageModal';
 import WarningModal from '../../../components/common/WarningModal';
 import { FaPaperPlane, FaTrash, FaPlus } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
+import { Message } from '../../../../domain/types/user/communication';
 
 export default function SentSection() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);

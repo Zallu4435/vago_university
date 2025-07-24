@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { FaSearch, FaFilter, FaCalendar, FaPlus, FaUsers, FaCheckCircle, FaTrash, FaEdit } from 'react-icons/fa';
+import { FaSearch, FaCalendar, FaUsers, FaCheckCircle, FaTrash, FaEdit } from 'react-icons/fa';
 import { Assignment } from './types/index';
 import WarningModal from '../../../components/common/WarningModal';
 import { assignmentService } from './services/assignmentService';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
+import ErrorMessage from '../../../../shared/components/ErrorMessage';
 
 interface AssignmentListProps {
   assignments: Assignment[];
@@ -15,6 +17,13 @@ interface AssignmentListProps {
   isDeleting: boolean;
   onUpdate: (id: string, data: Partial<Assignment>) => Promise<{ success: boolean; error?: string }>;
   isUpdating: boolean;
+  searchTerm: string;
+  setSearchTerm: (v: string) => void;
+  filterStatus: string;
+  setFilterStatus: (v: string) => void;
+  filterSubject: string;
+  setFilterSubject: (v: string) => void;
+  debouncedSearchTerm: string;
 }
 
 export default function AssignmentList({
@@ -26,9 +35,14 @@ export default function AssignmentList({
   setShowCreateModal,
   onDelete,
   isDeleting,
-  isUpdating
+  isUpdating,
+  searchTerm,
+  setSearchTerm,
+  filterStatus,
+  setFilterStatus,
+  filterSubject,
+  setFilterSubject,
 }: AssignmentListProps) {
-  const [searchTerm, setSearchTerm] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [assignmentToDelete, setAssignmentToDelete] = useState<Assignment | null>(null);
   const [isFetchingAssignment, setIsFetchingAssignment] = useState(false);
@@ -63,11 +77,6 @@ export default function AssignmentList({
     }
   };
 
-  const filteredAssignments = assignments?.filter(assignment =>
-    assignment.title?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
-    assignment.subject?.toLowerCase().includes(searchTerm?.toLowerCase())
-  );
-
   const getSubjectIcon = (subject: string) => {
     if (subject?.toLowerCase().includes('database')) return '🗄️';
     if (subject?.toLowerCase().includes('web')) return '🌐';
@@ -86,85 +95,73 @@ export default function AssignmentList({
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"></div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
-    return (
-      <div className="text-center py-16">
-        <div className="w-32 h-32 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="text-6xl">⚠️</span>
-        </div>
-        <h3 className="text-2xl font-bold text-gray-600 mb-2">Error loading assignments</h3>
-        <p className="text-gray-500 mb-6">{error.message || 'Please try again later'}</p>
-      </div>
-    );
+    return <ErrorMessage message={error.message || 'Please try again later'} />;
   }
 
   return (
     <div className="space-y-8">
-      {/* Enhanced Search and Filter Section */}
-      <div className="relative">
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6 md:p-8">
-          <div className="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
-            {/* Search Input */}
-            <div className="flex-1 relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-              <div className="relative bg-white rounded-2xl border-2 border-gray-100 focus-within:border-pink-300 transition-all">
-                <FaSearch size={20} className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-pink-500 transition-colors" />
-                <input
-                  type="text"
-                  placeholder="Search assignments by title or subject..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-14 pr-6 py-4 bg-transparent border-none focus:outline-none text-gray-700 placeholder-gray-400 text-lg rounded-2xl"
-                />
-              </div>
-            </div>
-
-            {/* Filter Button */}
-            <button className="px-6 py-4 bg-white border-2 border-gray-200 rounded-2xl hover:border-pink-300 hover:bg-pink-50 transition-all group">
-              <FaFilter size={20} className="text-gray-500 group-hover:text-pink-600 transition-colors" />
-            </button>
-
-            {/* Create Assignment Button */}
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="relative px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 shadow-xl hover:shadow-2xl flex items-center space-x-3 group"
+      {/* Improved Search and Filter Section */}
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6 md:p-8 mb-6">
+        <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-6">
+          {/* Search */}
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              placeholder="Search assignments by title or subject..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-3 rounded-2xl border-2 border-pink-100 focus:border-pink-300 focus:outline-none text-lg shadow-sm bg-white"
+            />
+            <FaSearch className="absolute right-4 top-1/2 -translate-y-1/2 text-pink-400" />
+          </div>
+          {/* Status Filter */}
+          <div className="w-full md:w-56">
+            <label className="block text-sm font-semibold text-pink-700 mb-1">Status</label>
+            <select
+              value={filterStatus}
+              onChange={e => setFilterStatus(e.target.value)}
+              className="w-full px-4 py-3 rounded-2xl border-2 border-pink-100 focus:border-pink-300 focus:outline-none text-base bg-white"
             >
-              <div className="absolute inset-0 bg-white rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity"></div>
-              <FaPlus size={20} className="relative z-10" />
-              <span className="relative z-10">Create Assignment</span>
-            </button>
+              <option value="all">All Statuses</option>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+          {/* Subject Filter */}
+          <div className="w-full md:w-56">
+            <label className="block text-sm font-semibold text-pink-700 mb-1">Subject</label>
+            <select
+              value={filterSubject}
+              onChange={e => setFilterSubject(e.target.value)}
+              className="w-full px-4 py-3 rounded-2xl border-2 border-pink-100 focus:border-pink-300 focus:outline-none text-base bg-white"
+            >
+              <option value="all">All Subjects</option>
+              <option value="Database Systems">Database Systems</option>
+              <option value="Web Development">Web Development</option>
+              <option value="Data Structures">Data Structures</option>
+              <option value="Algorithms">Algorithms</option>
+              <option value="AI">AI</option>
+              <option value="Mobile Development">Mobile Development</option>
+            </select>
           </div>
         </div>
-
-        {/* Floating Search Results Count */}
-        {searchTerm && (
-          <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-pink-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg animate-bounce">
-            {filteredAssignments.length} result{filteredAssignments.length !== 1 ? 's' : ''} found
-          </div>
-        )}
       </div>
 
-      {/* Enhanced Assignments Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        {filteredAssignments.map((assignment, index) => (
+        {assignments.map((assignment, index) => (
           <div
             key={assignment._id}
             className="group relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl border border-pink-100 p-8 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 animate-fadeInUp"
             style={{ animationDelay: `${index * 0.1}s` }}
           >
-            {/* Gradient Border Effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-pink-400 rounded-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-xl"></div>
 
-            {/* Card Content */}
             <div className="relative z-10">
-              {/* Header */}
               <div className="flex items-start justify-between mb-6">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
@@ -196,7 +193,6 @@ export default function AssignmentList({
                 </div>
               </div>
 
-              {/* Description */}
               <p className="text-gray-700 text-sm mb-6 line-clamp-3 leading-relaxed">
                 {assignment.description}
               </p>
@@ -206,20 +202,19 @@ export default function AssignmentList({
                 <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-4 text-center border border-pink-100">
                   <div className="flex items-center justify-center space-x-2 mb-1">
                     <FaUsers className="text-pink-600" size={16} />
-                    <p className="text-2xl font-bold text-pink-600">{assignment.submissionCount ?? 0}</p>
+                    <p className="text-2xl font-bold text-pink-600">{assignment.totalSubmissions ?? 0}</p>
                   </div>
                   <p className="text-xs text-pink-600 font-medium">Submissions</p>
                 </div>
                 <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-4 text-center border border-green-200">
                   <div className="flex items-center justify-center space-x-2 mb-1">
                     <FaCheckCircle className="text-green-600" size={16} />
-                    <p className="text-2xl font-bold text-green-600">{assignment.averageMark ?? 0}</p>
+                    <p className="text-2xl font-bold text-green-600">{assignment.averageMarks ?? 0}</p>
                   </div>
                   <p className="text-xs text-green-600 font-medium">Average Mark</p>
                 </div>
               </div>
 
-              {/* Due Date */}
               <div className="flex items-center justify-between text-sm mb-6">
                 <div className="flex items-center space-x-2 text-gray-600">
                   <FaCalendar size={14} className="text-pink-500" />
@@ -227,7 +222,6 @@ export default function AssignmentList({
                 </div>
               </div>
 
-              {/* Action Button */}
               <button
                 onClick={() => {
                   setSelectedAssignment(assignment);
@@ -245,8 +239,7 @@ export default function AssignmentList({
         ))}
       </div>
 
-      {/* Empty State */}
-      {filteredAssignments.length === 0 && (
+      {assignments.length === 0 && (
         <div className="text-center py-16">
           <div className="w-32 h-32 bg-gradient-to-br from-purple-50 to-pink-50 rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="text-6xl">📝</span>
@@ -262,7 +255,6 @@ export default function AssignmentList({
         </div>
       )}
 
-      {/* Delete Warning Modal */}
       <div className="relative z-[9999]">
         <WarningModal
           isOpen={showDeleteModal}
@@ -279,8 +271,8 @@ export default function AssignmentList({
         />
       </div>
 
-      {/* Custom Styles */}
-      <style>{`        @keyframes fadeInUp {
+      <style>{`        
+      @keyframes fadeInUp {
           from {
             opacity: 0;
             transform: translateY(30px);

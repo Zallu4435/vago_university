@@ -5,8 +5,9 @@ import { FiX, FiEdit, FiSave } from 'react-icons/fi';
 import { ProfilePictureModal } from './ProfilePictureModal';
 import { PasswordChangeModal } from './PasswordChangeModal';
 import { ProfileData, PasswordChangeData } from '../../../../domain/types/profile';
+import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../../shared/components/ErrorMessage';
 
-// Helper function to format password changed date
 const formatPasswordChangedDate = (passwordChangedAt?: string): string => {
   if (!passwordChangedAt) {
     return 'Never changed';
@@ -55,7 +56,6 @@ export default function ProfileSettings() {
     profilePicture: '',
   });
 
-  // Initialize formData when profile data loads
   useEffect(() => {
     if (profile) {
       setFormData({
@@ -99,44 +99,18 @@ export default function ProfileSettings() {
     setShowProfileModal(false);
   };
 
-  // Loading state
   if (isLoading) {
-    return (
-      <div className="flex-1 p-8">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm h-full flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-12 h-12 border-3 border-slate-200 border-t-sky-500 rounded-full animate-spin mx-auto mb-4"></div>
-            <h2 className="text-xl font-bold text-slate-800 mb-2">Loading Profile</h2>
-            <p className="text-slate-600">Please wait...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
-  // Error state
   if (error) {
-    return (
-      <div className="flex-1 p-8">
-        <div className="bg-white rounded-2xl border border-red-200 shadow-sm h-full flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FiX className="w-6 h-6 text-red-600" />
-            </div>
-            <h2 className="text-xl font-bold text-slate-800 mb-2">Error Loading Profile</h2>
-            <p className="text-red-600">{error.message}</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={error.message} />;
   }
 
-  // Fallback UI when no profile data is available
   if (!profile && !isLoading && !error) {
     return (
       <div className="flex-1 p-8">
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm h-full overflow-hidden">
-          {/* Header */}
           <div className="bg-gradient-to-r from-sky-50 to-slate-50 p-6 border-b border-slate-200">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-sky-500 rounded-xl flex items-center justify-center shadow-sm">
@@ -151,7 +125,6 @@ export default function ProfileSettings() {
 
           <div className="p-6">
             <div className="bg-slate-50 rounded-xl border border-slate-200 p-6">
-              {/* Profile Header */}
               <div className="flex items-center mb-6">
                 <div className="relative group">
                   <div className="w-20 h-20 rounded-xl bg-sky-100 border-2 border-sky-200 flex items-center justify-center shadow-sm">
@@ -173,7 +146,6 @@ export default function ProfileSettings() {
                 </div>
               </div>
 
-              {/* Form Section */}
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
                   <div className="w-6 h-6 bg-sky-500 rounded-lg flex items-center justify-center mr-3">
@@ -240,7 +212,6 @@ export default function ProfileSettings() {
                   </div>
                 </div>
 
-                {/* Save Button */}
                 <div className="flex justify-end pt-4">
                   <button
                     onClick={handleSaveChanges}

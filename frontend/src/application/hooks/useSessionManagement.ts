@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { sessionService, CreateVideoSessionPayload, UpdateVideoSessionPayload, Attendee } from '../services/session.service';
 
@@ -29,11 +29,28 @@ export type { UpdateVideoSessionPayload };
 export const useSessionManagement = () => {
   const queryClient = useQueryClient();
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterCourse, setFilterCourse] = useState('all');
 
-  // Fetch all sessions
+  // Debounce searchTerm
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // Fetch all sessions with backend filtering
+  const backendStatus = filterStatus === 'completed' ? 'Ended' : filterStatus;
   const { data: sessions, isLoading: isLoadingSessions, error: sessionsError } = useQuery({
-    queryKey: ['sessions'],
-    queryFn: sessionService.getSessions
+    queryKey: ['sessions', debouncedSearchTerm, backendStatus, filterCourse],
+    queryFn: () => sessionService.getSessions({
+      search: debouncedSearchTerm,
+      status: backendStatus,
+      course: filterCourse,
+    }),
   });
 
   // Create session mutation
@@ -178,5 +195,12 @@ export const useSessionManagement = () => {
     useSessionAttendance,
     getSessionAttendance,
     updateAttendanceStatus,
+    // Add filter state and setters
+    searchTerm,
+    setSearchTerm,
+    filterStatus,
+    setFilterStatus,
+    filterCourse,
+    setFilterCourse,
   };
 }; 

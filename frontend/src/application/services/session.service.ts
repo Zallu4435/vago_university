@@ -34,8 +34,15 @@ class SessionService {
     return response.data;
   }
 
-  async getSessions() {
-    const response = await httpClient.get('/faculty/sessions/video-sessions');
+  async getSessions(params = {}) {
+    // Filter out empty or 'all' values
+    const filteredParams = Object.fromEntries(
+      Object.entries(params).filter(([_, value]) => value !== undefined && value !== null && value !== '' && value !== 'all')
+    );
+    const queryString = Object.keys(filteredParams).length
+      ? '?' + new URLSearchParams(filteredParams).toString()
+      : '';
+    const response = await httpClient.get(`/faculty/sessions/video-sessions${queryString}`);
     return response.data.data;
   }
 

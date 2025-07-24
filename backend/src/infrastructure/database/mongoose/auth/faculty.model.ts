@@ -29,17 +29,14 @@ const facultySchema = new Schema<IFaculty>({
   blocked: { type: Boolean, default: false },
 });
 
-// Pre-save middleware to hash password
 facultySchema.pre("save", async function (next) {
   const faculty = this as any;
 
-  // Only hash the password if it has been modified (or is new)
   if (!faculty.isModified("password")) return next();
 
   try {
     const salt = await bcrypt.genSalt(10);
     faculty.password = await bcrypt.hash(faculty.password, salt);
-    // Set passwordChangedAt when password is modified
     faculty.passwordChangedAt = new Date();
     next();
   } catch (err) {

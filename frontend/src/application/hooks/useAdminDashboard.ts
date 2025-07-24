@@ -1,107 +1,98 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
-import { 
-  adminDashboardService, 
-  DashboardData, 
-  DashboardMetrics, 
-  UserGrowthData, 
-  RevenueData, 
-  PerformanceData, 
-  ActivityItem, 
-  SystemAlert 
+import {
+  adminDashboardService,
+  DashboardData,
+  DashboardMetrics,
+  UserGrowthData,
+  RevenueData,
+  PerformanceData,
+  ActivityItem,
+  SystemAlert
 } from '../services/adminDashboard.service';
 
 export const useAdminDashboard = () => {
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Main dashboard data query
-  const { 
-    data: dashboardData, 
-    isLoading: isDashboardLoading, 
+  const {
+    data: dashboardData,
+    isLoading: isDashboardLoading,
     error: dashboardError,
-    refetch: refetchDashboard 
+    refetch: refetchDashboard
   } = useQuery<DashboardData, Error>({
     queryKey: ['admin-dashboard'],
     queryFn: () => adminDashboardService.getDashboardData(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
-  // Individual metrics query
-  const { 
-    data: metrics, 
-    isLoading: isMetricsLoading, 
-    error: metricsError 
+  const {
+    data: metrics,
+    isLoading: isMetricsLoading,
+    error: metricsError
   } = useQuery<DashboardMetrics, Error>({
     queryKey: ['admin-dashboard-metrics'],
     queryFn: () => adminDashboardService.getMetrics(),
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    enabled: !dashboardData, // Only fetch if main dashboard data is not available
+    staleTime: 2 * 60 * 1000,
+    enabled: !dashboardData,
   });
 
-  // User growth data query
-  const { 
-    data: userGrowthData, 
-    isLoading: isUserGrowthLoading, 
-    error: userGrowthError 
+  const {
+    data: userGrowthData,
+    isLoading: isUserGrowthLoading,
+    error: userGrowthError
   } = useQuery<UserGrowthData[], Error>({
     queryKey: ['admin-dashboard-user-growth'],
     queryFn: () => adminDashboardService.getUserGrowthData(),
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    enabled: !dashboardData, // Only fetch if main dashboard data is not available
+    staleTime: 10 * 60 * 1000,
+    enabled: !dashboardData,
   });
 
-  // Revenue data query
-  const { 
-    data: revenueData, 
-    isLoading: isRevenueLoading, 
-    error: revenueError 
+  const {
+    data: revenueData,
+    isLoading: isRevenueLoading,
+    error: revenueError
   } = useQuery<RevenueData[], Error>({
     queryKey: ['admin-dashboard-revenue'],
     queryFn: () => adminDashboardService.getRevenueData(),
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    enabled: !dashboardData, // Only fetch if main dashboard data is not available
+    staleTime: 10 * 60 * 1000,
+    enabled: !dashboardData,
   });
 
-  // Performance data query
-  const { 
-    data: performanceData, 
-    isLoading: isPerformanceLoading, 
-    error: performanceError 
+  const {
+    data: performanceData,
+    isLoading: isPerformanceLoading,
+    error: performanceError
   } = useQuery<PerformanceData[], Error>({
     queryKey: ['admin-dashboard-performance'],
     queryFn: () => adminDashboardService.getPerformanceData(),
-    staleTime: 15 * 60 * 1000, // 15 minutes
-    enabled: !dashboardData, // Only fetch if main dashboard data is not available
+    staleTime: 15 * 60 * 1000,
+    enabled: !dashboardData,
   });
 
-  // Recent activities query
-  const { 
-    data: activities, 
-    isLoading: isActivitiesLoading, 
-    error: activitiesError 
+  const {
+    data: activities,
+    isLoading: isActivitiesLoading,
+    error: activitiesError
   } = useQuery<ActivityItem[], Error>({
     queryKey: ['admin-dashboard-activities'],
     queryFn: () => adminDashboardService.getRecentActivities(),
-    staleTime: 1 * 60 * 1000, // 1 minute
-    enabled: !dashboardData, // Only fetch if main dashboard data is not available
+    staleTime: 1 * 60 * 1000,
+    enabled: !dashboardData,
   });
 
-  // System alerts query
-  const { 
-    data: alerts, 
-    isLoading: isAlertsLoading, 
-    error: alertsError 
+  const {
+    data: alerts,
+    isLoading: isAlertsLoading,
+    error: alertsError
   } = useQuery<SystemAlert[], Error>({
     queryKey: ['admin-dashboard-alerts'],
     queryFn: () => adminDashboardService.getSystemAlerts(),
-    staleTime: 30 * 1000, // 30 seconds
-    enabled: !dashboardData, // Only fetch if main dashboard data is not available
+    staleTime: 30 * 1000,
+    enabled: !dashboardData,
   });
 
-  // Refresh dashboard mutation
   const { mutateAsync: refreshDashboard } = useMutation({
     mutationFn: () => adminDashboardService.refreshDashboard(),
     onSuccess: (data) => {
@@ -113,7 +104,6 @@ export const useAdminDashboard = () => {
     },
   });
 
-  // Dismiss alert mutation
   const { mutateAsync: dismissAlert } = useMutation({
     mutationFn: (alertId: string) => adminDashboardService.dismissAlert(alertId),
     onSuccess: () => {
@@ -126,7 +116,6 @@ export const useAdminDashboard = () => {
     },
   });
 
-  // Mark activity as read mutation
   const { mutateAsync: markActivityAsRead } = useMutation({
     mutationFn: (activityId: string) => adminDashboardService.markActivityAsRead(activityId),
     onSuccess: () => {
@@ -138,7 +127,6 @@ export const useAdminDashboard = () => {
     },
   });
 
-  // Manual refresh function
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
@@ -149,33 +137,22 @@ export const useAdminDashboard = () => {
     }
   };
 
-  // Get the best available data (prioritize main dashboard data, fallback to individual queries)
-  const getMetrics = () => dashboardData?.metrics || metrics;
-  const getUserGrowth = () => dashboardData?.userGrowth || userGrowthData;
-  const getRevenue = () => dashboardData?.revenue || revenueData;
-  const getPerformance = () => dashboardData?.performance || performanceData;
-  const getActivities = () => dashboardData?.activities || activities;
-  const getAlerts = () => dashboardData?.alerts || alerts;
+  const isLoading = isDashboardLoading || isMetricsLoading || isUserGrowthLoading ||
+    isRevenueLoading || isPerformanceLoading || isActivitiesLoading ||
+    isAlertsLoading || isRefreshing;
 
-  // Loading states
-  const isLoading = isDashboardLoading || isMetricsLoading || isUserGrowthLoading || 
-                   isRevenueLoading || isPerformanceLoading || isActivitiesLoading || 
-                   isAlertsLoading || isRefreshing;
-
-  // Error handling
-  const error = dashboardError || metricsError || userGrowthError || revenueError || 
-                performanceError || activitiesError || alertsError;
+  const error = dashboardError || metricsError || userGrowthError || revenueError ||
+    performanceError || activitiesError || alertsError;
 
   return {
     // Data
-    metrics: getMetrics(),
-    userGrowth: getUserGrowth(),
-    revenue: getRevenue(),
-    performance: getPerformance(),
-    activities: getActivities(),
-    alerts: getAlerts(),
-    
-    // Loading states
+    metrics,
+    userGrowth: userGrowthData,
+    revenue: revenueData,
+    performance: performanceData,
+    activities,
+    alerts,
+
     isLoading,
     isRefreshing,
     isDashboardLoading,
@@ -185,11 +162,9 @@ export const useAdminDashboard = () => {
     isPerformanceLoading,
     isActivitiesLoading,
     isAlertsLoading,
-    
-    // Error handling
+
     error,
-    
-    // Actions
+
     refreshDashboard: handleRefresh,
     dismissAlert,
     markActivityAsRead,

@@ -39,14 +39,12 @@ export default function Submissions({
   assignment, 
   submissions, 
   onReview, 
-  onDownload, 
   setShowReviewModal,
-  isLoading,
   isReviewing
 }: SubmissionsProps) {
+  console.log(submissions, 'submissions');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [selectedSubmissions, setSelectedSubmissions] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
 
@@ -71,11 +69,6 @@ export default function Submissions({
     setShowReviewModal(false);
   };
 
-  const handleBulkDownload = () => {
-    selectedSubmissions.forEach(submissionId => {
-      onDownload(submissionId);
-    });
-  };
 
   const getStatusConfig = (status: 'submitted' | 'graded' | 'late') => {
     switch (status) {
@@ -135,28 +128,14 @@ export default function Submissions({
         }
       }
 
-      // Use the same pattern as canvas assignment download - get file blob first
-      const blob = await assignmentService.downloadSubmissionFile(fileUrl, actualFileName);
+      // Always call backend for download
+      await assignmentService.downloadSubmissionFile(fileUrl, actualFileName);
       
       console.log('✅ Faculty submission download triggered successfully');
       console.log('=== FACULTY SUBMISSION DOWNLOAD COMPLETED ===');
     } catch (error) {
       console.error('❌ Error downloading faculty submission:', error);
-      console.log('🔄 Falling back to direct download...');
-      // Fallback: try direct download (same as canvas)
-      try {
-        const link = document.createElement('a');
-        link.href = fileUrl;
-        link.download = fileName;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } catch (fallbackError) {
-        console.error('❌ Fallback download also failed:', fallbackError);
-        // Last resort: open in new tab
-        window.open(fileUrl, '_blank');
-      }
+      alert('Failed to download the submission. Please try again or contact support.');
       console.log('=== FACULTY SUBMISSION DOWNLOAD FAILED ===');
     }
   };
@@ -183,16 +162,7 @@ export default function Submissions({
                 </div>
               </div>
               
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={handleBulkDownload}
-                  disabled={selectedSubmissions.length === 0}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2"
-                >
-                  <FaDownload size={16} />
-                  <span>Download Selected ({selectedSubmissions.length})</span>
-                </button>
-              </div>
+              {/* No bulk download button */}
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -298,7 +268,7 @@ export default function Submissions({
 
             return (
               <div 
-                key={submission._id} 
+                key={submission.id} 
                 className="group relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl border border-pink-100 p-8 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 animate-fadeInUp"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
@@ -307,18 +277,7 @@ export default function Submissions({
                 <div className="relative z-10">
                   <div className="flex items-start justify-between mb-6">
                     <div className="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        className="w-5 h-5 rounded border-2 border-indigo-300 text-indigo-600 focus:ring-indigo-500"
-                        checked={selectedSubmissions.includes(submission._id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedSubmissions([...selectedSubmissions, submission._id]);
-                          } else {
-                            setSelectedSubmissions(selectedSubmissions.filter(id => id !== submission._id));
-                          }
-                        }}
-                      />
+                      {/* No selection checkbox */}
                       <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-12 w-12 rounded-2xl flex items-center justify-center text-white text-lg font-bold shadow-lg">
                         {submission.studentName.split(' ').map(n => n[0]).join('')}
                       </div>
@@ -375,9 +334,9 @@ export default function Submissions({
                       </div>
                       <button
                         onClick={() => {
-                          console.log('🔍 Download button clicked for submission:', submission._id);
-                          console.log('📁 Submission files:', submission.files);
-                          console.log('📄 Submission fileName:', submission.fileName);
+                          console.log('Download button clicked for submission:', submission.id);
+                          console.log('Submission files:', submission.files);
+                          console.log('Submission fileName:', submission.fileName);
                           
                           if (!submission.files || submission.files.length === 0) {
                             console.error('❌ No files found in submission');
@@ -385,12 +344,19 @@ export default function Submissions({
                             return;
                           }
                           
-                          // Extract filename from URL if fileName is not available
                           let fileName = submission.fileName;
-                          if (!fileName && submission.files[0]) {
-                            const urlParts = submission.files[0].split('/');
-                            fileName = urlParts[urlParts.length - 1].split('?')[0]; // Remove query parameters
-                            console.log('📄 Extracted fileName from URL:', fileName);
+                          const fileObj = submission.files[0];
+                          if (!fileName && fileObj) {
+                            if (typeof fileObj === 'string') {
+                              const urlParts = fileObj.split('/');
+                              fileName = urlParts[urlParts.length - 1].split('?')[0];
+                              console.log('Extracted fileName from string URL:', fileName);
+                            } else if (typeof fileObj === 'object' && fileObj.fileName) {
+                              fileName = fileObj.fileName;
+                              console.log('Extracted fileName from object:', fileName);
+                            } else {
+                              console.error('❌ Unable to extract fileName from fileObj:', fileObj);
+                            }
                           }
                           
                           if (!fileName) {
@@ -399,7 +365,11 @@ export default function Submissions({
                             return;
                           }
                           
-                          handleDownloadSubmission(submission.files[0], fileName);
+                          console.log('Calling handleDownloadSubmission with:', fileObj, fileName);
+                          handleDownloadSubmission(
+                            typeof fileObj === 'string' ? fileObj : fileObj.fileUrl,
+                            fileName
+                          );
                         }}
                         className="p-2 text-gray-500 hover:text-indigo-600 transition-colors"
                       >
@@ -428,19 +398,7 @@ export default function Submissions({
             <table className="w-full">
               <thead className="bg-gradient-to-r from-purple-50 to-pink-50">
                 <tr>
-                  <th className="px-8 py-6 text-left">
-                    <input
-                      type="checkbox"
-                      className="w-5 h-5 rounded border-2 border-indigo-300 text-indigo-600 focus:ring-indigo-500"
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedSubmissions(filteredSubmissions.map(s => s._id));
-                        } else {
-                          setSelectedSubmissions([]);
-                        }
-                      }}
-                    />
-                  </th>
+                  {/* No select all checkbox */}
                   <th className="px-8 py-6 text-left text-sm font-bold text-gray-900 uppercase tracking-wider">Student</th>
                   <th className="px-8 py-6 text-left text-sm font-bold text-gray-900 uppercase tracking-wider">Submitted</th>
                   <th className="px-8 py-6 text-left text-sm font-bold text-gray-900 uppercase tracking-wider">Status</th>
@@ -453,21 +411,8 @@ export default function Submissions({
                   const fileUrl = submission.files?.[0]; // Get the first file URL
 
                   return (
-                    <tr key={submission._id} className="hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all animate-fadeInUp" style={{ animationDelay: `${index * 0.05}s` }}>
-                      <td className="px-8 py-6">
-                        <input
-                          type="checkbox"
-                          className="w-5 h-5 rounded border-2 border-indigo-300 text-indigo-600 focus:ring-indigo-500"
-                          checked={selectedSubmissions.includes(submission._id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedSubmissions([...selectedSubmissions, submission._id]);
-                            } else {
-                              setSelectedSubmissions(selectedSubmissions.filter(id => id !== submission._id));
-                            }
-                          }}
-                        />
-                      </td>
+                    <tr key={submission.id} className="hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all animate-fadeInUp" style={{ animationDelay: `${index * 0.05}s` }}>
+                      {/* No per-row selection checkbox */}
                       <td className="px-8 py-6">
                         <div className="flex items-center space-x-4">
                           <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-12 w-12 rounded-2xl flex items-center justify-center text-white text-sm font-bold shadow-lg">
@@ -519,7 +464,7 @@ export default function Submissions({
                           </button>
                           <button
                             onClick={() => {
-                              console.log('🔍 Download button clicked for submission:', submission._id);
+                              console.log('🔍 Download button clicked for submission:', submission.id);
                               console.log('📁 Submission files:', submission.files);
                               console.log('📄 Submission fileName:', submission.fileName);
                               
@@ -529,12 +474,19 @@ export default function Submissions({
                                 return;
                               }
                               
-                              // Extract filename from URL if fileName is not available
                               let fileName = submission.fileName;
-                              if (!fileName && submission.files[0]) {
-                                const urlParts = submission.files[0].split('/');
-                                fileName = urlParts[urlParts.length - 1].split('?')[0]; // Remove query parameters
-                                console.log('📄 Extracted fileName from URL:', fileName);
+                              const fileObj = submission.files[0];
+                              if (!fileName && fileObj) {
+                                if (typeof fileObj === 'string') {
+                                  const urlParts = fileObj.split('/');
+                                  fileName = urlParts[urlParts.length - 1].split('?')[0];
+                                  console.log('Extracted fileName from string URL:', fileName);
+                                } else if (typeof fileObj === 'object' && fileObj.fileName) {
+                                  fileName = fileObj.fileName;
+                                  console.log('Extracted fileName from object:', fileName);
+                                } else {
+                                  console.error('❌ Unable to extract fileName from fileObj:', fileObj);
+                                }
                               }
                               
                               if (!fileName) {
@@ -543,7 +495,11 @@ export default function Submissions({
                                 return;
                               }
                               
-                              handleDownloadSubmission(submission.files[0], fileName);
+                              console.log('Calling handleDownloadSubmission with:', fileObj, fileName);
+                              handleDownloadSubmission(
+                                typeof fileObj === 'string' ? fileObj : fileObj.fileUrl,
+                                fileName
+                              );
                             }}
                             className="p-3 bg-green-50 text-green-600 hover:bg-green-100 rounded-xl transition-all border border-green-200 hover:border-green-300 hover:scale-110 transform shadow-lg"
                             title="Download"
@@ -577,12 +533,11 @@ export default function Submissions({
       {selectedSubmission && ReactDOM.createPortal(
         <ReviewModal
           submission={{
-            id: selectedSubmission._id,
+            id: selectedSubmission.id,
             studentName: selectedSubmission.studentName,
             studentId: selectedSubmission.studentId,
             submittedDate: selectedSubmission.submittedDate,
-            status: selectedSubmission.status === 'graded' ? 'reviewed' : 
-                   selectedSubmission.status === 'submitted' ? 'pending' : 'needs_correction',
+            status: selectedSubmission.status,
             marks: selectedSubmission.marks ?? 0,
             feedback: selectedSubmission.feedback ?? '',
             isLate: selectedSubmission.isLate,

@@ -58,8 +58,8 @@ export class VideoSessionController implements IVideoSessionController {
   }
 
   async getAllSessions(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { search, status, instructor } = httpRequest.query;
-    const sessions = await this.getAllUseCase.execute({ search, status, instructor });
+    const { search, status, instructor, course } = httpRequest.query;
+    const sessions = await this.getAllUseCase.execute({ search, status, instructor, course });
     return httpSuccess.success_200(sessions);
   }
 

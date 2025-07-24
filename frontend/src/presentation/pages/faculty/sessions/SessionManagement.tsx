@@ -10,31 +10,24 @@ import WarningModal from '../../../components/common/WarningModal';
 export default function SessionManagement() {
   const {
     sessions,
-    isLoading,
     handleCreateSession,
     handleUpdateSession, 
     handleDeleteSession,
     markSessionAsOver,
     isMarkingAsOver,
+    searchTerm,
+    setSearchTerm,
+    filterStatus,
+    setFilterStatus,
+    filterCourse,
+    setFilterCourse,
   } = useSessionManagement();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [filterCourse, setFilterCourse] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showRecordingModal, setShowRecordingModal] = useState(false);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<any>(null);
-
-  const filteredSessions = sessions.filter((session: Session) => {
-    const matchesSearch = session.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         session.instructor.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || session.status === filterStatus;
-    const matchesCourse = filterCourse === 'all' || session.course === filterCourse;
-    return matchesSearch && matchesStatus && matchesCourse;
-  });
 
   const onCreateSession = async (newSession: any) => {
     await handleCreateSession(newSession);
@@ -149,7 +142,7 @@ export default function SessionManagement() {
                     </tr>
                   </thead>
             <tbody className="divide-y divide-pink-50">
-                    {filteredSessions.map((session: any, index: number) => {
+                    {sessions.map((session: any, index: number) => {
                       const statusConfig = getStatusConfig(session.status);
                       return (
                   <tr key={session._id || session.id} className={`hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-pink-50/50 transition-all ${index % 2 === 0 ? 'bg-white' : 'bg-pink-50'} animate-fadeInUp`} style={{ animationDelay: `${index * 0.05}s` }}>
@@ -211,7 +204,7 @@ export default function SessionManagement() {
       </div>
 
       {/* Empty State */}
-      {filteredSessions.length === 0 && (
+      {sessions.length === 0 && (
         <div className="text-center py-16 animate-fadeIn">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-pink-50 rounded-full mb-4">
               <FaSearch size={32} className="text-pink-400" />

@@ -15,7 +15,6 @@ import {
   GetDashboardMetricsResponseDTO,
   GetUserGrowthDataResponseDTO,
   GetRevenueDataResponseDTO,
-  GetPerformanceDataResponseDTO,
   GetRecentActivitiesResponseDTO,
   GetSystemAlertsResponseDTO,
   RefreshDashboardResponseDTO,
@@ -212,7 +211,7 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
         id: admission._id.toString(),
         action: `Admission ${admission.status || 'pending'}: ${fullName}`,
         user: fullName,
-        time: '',
+        time: admission.createdAt || '',
         avatar: '',
         type: admission.status === 'approved' ? 'success' : admission.status === 'rejected' ? 'warning' : 'info',
         isRead: false,
@@ -226,7 +225,7 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
         id: payment._id.toString(),
         action: `Payment received: $${payment.amount || 0} via ${payment.method || 'Unknown method'}`,
         user: studentName,
-        time: '',
+        time: payment.createdAt || '',
         avatar: '',
         type: 'success',
         isRead: false,
@@ -238,7 +237,7 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
         id: enquiry._id.toString(),
         action: `New enquiry: ${enquiry.subject || 'General enquiry'}`,
         user: enquiryName,
-        time: '',
+        time: enquiry.createdAt || '',
         avatar: '',
         type: 'info',
         isRead: false,
@@ -249,18 +248,20 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
         id: notification._id.toString(),
         action: `Notification sent: ${notification.title || 'System notification'}`,
         user: 'System',
-        time: '',
+        time: notification.createdAt || '',
         avatar: 'SY',
         type: 'info',
         isRead: false,
       });
     });
-    return { data: {
-      recentAdmissions: activities.slice(0, 5),
-      recentPayments: activities.slice(0, 5),
-      recentEnquiries: activities.slice(0, 5),
-      recentNotifications: activities.slice(0, 5),
-    }, success: true };
+    // Sort by time descending if time is available
+    activities.sort((a, b) => {
+      if (a.time && b.time) {
+        return new Date(b.time).getTime() - new Date(a.time).getTime();
+      }
+      return 0;
+    });
+    return { data: activities.slice(0, 5), success: true };
   }
 }
 

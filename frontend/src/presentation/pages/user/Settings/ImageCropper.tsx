@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react';
 import { FaTimes, FaCrop, FaUpload, FaCheck, FaSearchPlus, FaSearchMinus, FaUndo, FaRedo } from 'react-icons/fa';
 
-// Image Cropper Component
 export const ImageCropper = ({
   selectedImage,
   cropData,
@@ -23,40 +22,32 @@ export const ImageCropper = ({
     const ctx = canvas.getContext('2d');
     const img = imageRef.current;
 
-    // Set canvas size for square crop
     const outputSize = 200;
     canvas.width = outputSize;
     canvas.height = outputSize;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Get the container dimensions
     const containerSize = 300;
-    
-    // Calculate the actual displayed image dimensions
+
     const imgDisplayWidth = containerSize * cropData.scale;
     const imgDisplayHeight = containerSize * cropData.scale;
-    
-    // Calculate the ratio between natural image size and displayed size
+
     const scaleX = img.naturalWidth / imgDisplayWidth;
     const scaleY = img.naturalHeight / imgDisplayHeight;
-    
-    // Calculate crop coordinates relative to the natural image size
+
     const cropX = cropData.x * scaleX;
     const cropY = cropData.y * scaleY;
     const cropSize = cropData.size * Math.min(scaleX, scaleY);
 
-    // Save context state
     ctx.save();
 
-    // Apply rotation around center if needed
     if (cropData.rotate !== 0) {
       ctx.translate(outputSize / 2, outputSize / 2);
       ctx.rotate((cropData.rotate * Math.PI) / 180);
       ctx.translate(-outputSize / 2, -outputSize / 2);
     }
 
-    // Draw the cropped portion
     ctx.drawImage(
       img,
       cropX,
@@ -69,7 +60,6 @@ export const ImageCropper = ({
       outputSize
     );
 
-    // Restore context state
     ctx.restore();
 
     return canvas;
@@ -179,7 +169,6 @@ export const ImageCropper = ({
         const deltaX = e.clientX - startX;
         const newSize = Math.max(80, Math.min(startSize + deltaX, 280));
 
-        // Adjust position if crop area goes out of bounds
         const maxX = 300 - newSize;
         const maxY = 300 - newSize;
 
@@ -207,9 +196,8 @@ export const ImageCropper = ({
     return {
       backgroundImage: `url(${selectedImage})`,
       backgroundSize: `${300 * cropData.scale * scale}px ${300 * cropData.scale * scale}px`,
-      backgroundPosition: `-${cropData.x * scale * cropData.scale}px -${
-        cropData.y * scale * cropData.scale
-      }px`,
+      backgroundPosition: `-${cropData.x * scale * cropData.scale}px -${cropData.y * scale * cropData.scale
+        }px`,
       backgroundRepeat: 'no-repeat',
       transform: `rotate(${cropData.rotate}deg)`,
       transformOrigin: 'center',
@@ -280,11 +268,9 @@ export const ImageCropper = ({
               <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
-                  background: `radial-gradient(circle at ${
-                    cropData.x + cropData.size / 2
-                  }px ${cropData.y + cropData.size / 2}px, transparent ${
-                    cropData.size / 2
-                  }px, rgba(0,0,0,0.5) ${cropData.size / 2 + 1}px)`,
+                  background: `radial-gradient(circle at ${cropData.x + cropData.size / 2
+                    }px ${cropData.y + cropData.size / 2}px, transparent ${cropData.size / 2
+                    }px, rgba(0,0,0,0.5) ${cropData.size / 2 + 1}px)`,
                 }}
               />
             </div>
@@ -297,17 +283,14 @@ export const ImageCropper = ({
           </div>
         </div>
 
-        {/* Preview Panel */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
             <h4 className="text-lg font-semibold text-gray-800 text-center mb-4">Preview</h4>
 
-            {/* Large Preview */}
             <div className="w-32 h-32 rounded-full bg-gray-100 border-2 border-gray-200 shadow-md mx-auto mb-6 overflow-hidden">
               <div className="w-full h-full" style={getPreviewStyle(128)} />
             </div>
 
-            {/* Size Previews */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-gray-600 text-sm font-medium">Large (128px)</span>
@@ -332,7 +315,6 @@ export const ImageCropper = ({
         </div>
       </div>
 
-      {/* Controls */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
         <div className="flex flex-wrap gap-3 justify-center">
           <button
@@ -366,7 +348,6 @@ export const ImageCropper = ({
         </div>
       </div>
 
-      {/* Action Buttons */}
       <div className="flex gap-4 justify-center pt-2">
         <button
           onClick={handleApply}

@@ -71,7 +71,7 @@ export interface IGetAnalyticsUseCase {
 export class GetAssignmentsUseCase implements IGetAssignmentsUseCase {
   constructor(private assignmentRepository: IAssignmentRepository) { }
 
-  async execute(params: GetAssignmentsRequestDTO): Promise<ResponseDTO<GetAssignmentsResponseDTO>> {
+  async execute(params: GetAssignmentsRequestDTO & { search?: string }): Promise<ResponseDTO<GetAssignmentsResponseDTO>> {
       if (params.page && (isNaN(params.page) || params.page < 1)) {
         return { data: { error: AssignmentErrorType.InvalidPageOrLimit }, success: false };
       }

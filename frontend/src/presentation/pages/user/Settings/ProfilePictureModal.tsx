@@ -19,7 +19,6 @@ export const ProfilePictureModal = ({
   });
   const fileInputRef = useRef(null);
 
-  // Prevent background scrolling when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -108,7 +107,6 @@ export const ProfilePictureModal = ({
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="bg-gradient-to-r from-sky-50 to-slate-50 -m-6 mb-4 p-4 rounded-t-2xl border-b border-slate-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -131,7 +129,6 @@ export const ProfilePictureModal = ({
 
         {!showCropper ? (
           <div className="text-center">
-            {/* Current Image Display */}
             <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 mb-4">
               <div className="w-24 h-24 rounded-xl bg-sky-100 border-2 border-sky-200 shadow-sm mx-auto mb-4 overflow-hidden">
                 {currentImage ? (
@@ -155,10 +152,8 @@ export const ProfilePictureModal = ({
               </p>
             </div>
 
-            {/* Action Buttons */}
             <div className="space-y-3 mb-4">
               <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-                {/* Edit Current Image Button */}
                 {currentImage && (
                   <button
                     onClick={handleEditCurrent}
@@ -169,7 +164,6 @@ export const ProfilePictureModal = ({
                   </button>
                 )}
 
-                {/* Choose New Image Button */}
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-lg flex items-center transition-all duration-200 shadow-sm hover:shadow-md text-sm font-medium"
@@ -180,7 +174,6 @@ export const ProfilePictureModal = ({
               </div>
             </div>
 
-            {/* Helper Text */}
             <div className="bg-slate-50 rounded-xl border border-slate-200 p-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-center gap-2 text-slate-700">
@@ -194,7 +187,6 @@ export const ProfilePictureModal = ({
                 </div>
               </div>
 
-              {/* Additional Info for existing image */}
               {currentImage && (
                 <div className="mt-3 pt-3 border-t border-slate-200">
                   <div className="flex items-center justify-center gap-2 text-sky-600 text-xs">

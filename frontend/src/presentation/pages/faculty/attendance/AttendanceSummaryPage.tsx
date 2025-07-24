@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   FaClock, 
   FaUsers, 
@@ -6,12 +6,7 @@ import {
   FaFileAlt, 
   FaCalendarAlt, 
   FaStopwatch, 
-  FaFilter, 
   FaSearch, 
-  FaChevronDown, 
-  FaTimes, 
-  FaDownload, 
-  FaChartBar, 
   FaCheckCircle,
   FaPercentage,
   FaUserGraduate,
@@ -68,13 +63,23 @@ const AttendanceSummaryPage = () => {
   // State for filters
   const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'students' | 'details'>('students');
   const [selectedStudent, setSelectedStudent] = useState<StudentAttendanceData | null>(null);
   const [selectedSessionForIntervals, setSelectedSessionForIntervals] = useState<any>(null);
 
-  // Set default sessionId when sessions load
+  // Debounce searchTerm
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 400);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
+
   React.useEffect(() => {
     if (!selectedSessionId && sessions && sessions.length > 0) {
       setSelectedSessionId(sessions[1]._id);
@@ -82,18 +87,18 @@ const AttendanceSummaryPage = () => {
   }, [sessions, selectedSessionId]);
 
   // Fetch attendance for selected session
-  const { data: currentAttendanceData = [], isLoading: isLoadingAttendance } = useSessionAttendance(selectedSessionId);
+  const { data: currentAttendanceData = [], isLoading: isLoadingAttendance } = useSessionAttendance(selectedSessionId, { search: debouncedSearchTerm });
 
   // Get current session data
   const currentSession = sessions.find((s: any) => s._id === selectedSessionId);
 
-  // Fetch attendance for all sessions
-  const sessionAttendanceQueries = sessions.map(session => ({
+  // Fetch attendance for all sessions (pass debouncedSearchTerm as filter)
+  const sessionAttendanceQueries = sessions.map((session: any) => ({
     sessionId: session._id,
-    query: useSessionAttendance(session._id)
+    query: useSessionAttendance(session._id, { search: debouncedSearchTerm })
   }));
 
-  const isLoadingAttendanceAllSessions = sessionAttendanceQueries.some(q => q.query.isLoading);
+  const isLoadingAttendanceAllSessions = sessionAttendanceQueries.some((q: any) => q.query.isLoading);
 
   // Calculate total time spent for a user
   const calculateTotalTime = (
@@ -158,7 +163,6 @@ const AttendanceSummaryPage = () => {
   // Process attendance data - only approved users
   const processedAttendance = useMemo(() => {
     if (!currentSession) return [];
-    
     // Filter only approved users
     let data = (currentAttendanceData || [])
       .filter((user: AttendanceUser) => 
@@ -175,17 +179,9 @@ const AttendanceSummaryPage = () => {
           sessionData: currentSession
         };
       });
-
-    // Apply filters
-    if (searchTerm) {
-      data = data.filter((user: AttendanceUser) =>
-        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
+    // Remove local search filter here (now handled by backend)
     return data;
-  }, [currentAttendanceData, currentSession, searchTerm]);
+  }, [currentAttendanceData, currentSession]);
 
   // Calculate summary statistics
   const summaryStats = useMemo(() => {
@@ -342,19 +338,10 @@ const AttendanceSummaryPage = () => {
     return Array.from(studentMap.values());
   }, [sessionAttendanceQueries, sessions]);
 
-  // Filter students
+  // Filter students (remove local search filter, now handled by backend)
   const filteredStudents = useMemo(() => {
-    let data = studentsAttendanceData;
-
-    if (searchTerm) {
-      data = data.filter(student =>
-        student.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.studentEmail.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    return data;
-  }, [studentsAttendanceData, searchTerm]);
+    return studentsAttendanceData;
+  }, [studentsAttendanceData]);
 
   const handleStudentClick = (student: StudentAttendanceData) => {
     setSelectedStudent(student);

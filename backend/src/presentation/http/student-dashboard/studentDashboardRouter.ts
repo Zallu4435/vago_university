@@ -6,7 +6,6 @@ import { authMiddleware } from '../../../shared/middlewares/authMiddleware';
 const router = Router();
 const studentDashboardController = getStudentDashboardComposer();
 
-// Apply authentication middleware to all routes
 router.use(authMiddleware);
 
 

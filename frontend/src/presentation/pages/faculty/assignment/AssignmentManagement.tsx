@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AssignmentList from './AssignmentList';
 import Submissions from './Submissions';
 import Analytics from './components/Analytics';
@@ -17,6 +17,17 @@ export default function AssignmentManagement() {
         description: '',
         files: []
     });
+    const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+    const [filterStatus, setFilterStatus] = useState('all');
+    const [filterSubject, setFilterSubject] = useState('all');
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 400);
+        return () => clearTimeout(handler);
+    }, [searchTerm]);
 
     const {
         assignments,
@@ -31,16 +42,15 @@ export default function AssignmentManagement() {
         handleUpdateAssignment,
         handleDeleteAssignment,
         handleReviewSubmission,
-        handleDownloadSubmission,
         isCreating,
         isUpdating,
         isDeleting,
         isReviewing
-    } = useAssignmentManagement();
+    } = useAssignmentManagement({ searchTerm: debouncedSearchTerm, filterStatus, filterSubject });
 
-    const handleReview = async (submissionId: string, reviewData: { 
-        marks: number; 
-        feedback: string; 
+    const handleReview = async (submissionId: string, reviewData: {
+        marks: number;
+        feedback: string;
         status: 'reviewed' | 'pending' | 'needs_correction';
         isLate: boolean;
     }) => {
@@ -76,30 +86,29 @@ export default function AssignmentManagement() {
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header Section */}
                 <div className="flex flex-col items-center justify-center gap-4">
-                  <div className="inline-flex items-center space-x-3 bg-white/95 backdrop-blur-xl rounded-3xl px-8 py-6 shadow-2xl border border-pink-100">
-                    <div className="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                      <span className="text-white text-3xl">📋</span>
+                    <div className="inline-flex items-center space-x-3 bg-white/95 backdrop-blur-xl rounded-3xl px-8 py-6 shadow-2xl border border-pink-100">
+                        <div className="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                            <span className="text-white text-3xl">📋</span>
                         </div>
                         <div className="text-left">
-                      <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+                            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
                                 Assignment Management
                             </h1>
-                      <p className="text-pink-600 text-sm">Manage and track student assignments efficiently</p>
+                            <p className="text-pink-600 text-sm">Manage and track student assignments efficiently</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Enhanced Navigation Tabs */}
                 <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 overflow-hidden">
-                  <div className="flex items-center justify-between p-4 border-b border-pink-100">
+                    <div className="flex items-center justify-between p-4 border-b border-pink-100">
                         <div className="flex space-x-2">
                             {tabs.map(tab => (
                                 <button
                                     key={tab.id}
                                     onClick={() => handleTabChange(tab.id)}
-                          className={`px-5 py-2 rounded-2xl text-base font-semibold transition-all duration-300 ${activeTab === tab.id
-                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                            : 'text-pink-700 hover:bg-pink-50 hover:text-pink-600'}
+                                    className={`px-5 py-2 rounded-2xl text-base font-semibold transition-all duration-300 ${activeTab === tab.id
+                                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                                        : 'text-pink-700 hover:bg-pink-50 hover:text-pink-600'}
                           `}
                                 >
                                     <span className="mr-2">{tab.icon}</span>
@@ -107,6 +116,13 @@ export default function AssignmentManagement() {
                                 </button>
                             ))}
                         </div>
+                        <button
+                            onClick={() => setShowCreateModal(true)}
+                            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                        >
+                            <span className="text-lg">+</span>
+                            <span>Create Assignment</span>
+                        </button>
                     </div>
 
                     <div className="p-8">
@@ -124,6 +140,13 @@ export default function AssignmentManagement() {
                                         isDeleting={isDeleting}
                                         onUpdate={handleUpdateAssignment}
                                         isUpdating={isUpdating}
+                                        searchTerm={searchTerm}
+                                        setSearchTerm={setSearchTerm}
+                                        filterStatus={filterStatus}
+                                        setFilterStatus={setFilterStatus}
+                                        filterSubject={filterSubject}
+                                        setFilterSubject={setFilterSubject}
+                                        debouncedSearchTerm={debouncedSearchTerm}
                                     />
                                 </div>
                             )}
@@ -134,7 +157,7 @@ export default function AssignmentManagement() {
                                         submissions={submissions}
                                         onReview={handleReview}
                                         onDownload={handleDownload}
-                                        setShowReviewModal={() => {}}
+                                        setShowReviewModal={() => { }}
                                         isLoading={isLoading}
                                         isReviewing={isReviewing}
                                     />
@@ -154,16 +177,6 @@ export default function AssignmentManagement() {
                     </div>
                 </div>
 
-                {/* Floating Action Indicator */}
-                {activeTab === 'all-assignments' && (
-                    <div className="fixed bottom-8 right-8 z-50">
-                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-full p-1 shadow-2xl animate-pulse">
-                            <div className="bg-white rounded-full p-3">
-                                <span className="text-2xl">✨</span>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
 
             {/* Create Assignment Modal */}

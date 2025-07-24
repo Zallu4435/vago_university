@@ -32,7 +32,6 @@ import {
     FacultyAlreadyProcessedError,
     InvalidFacultyIdError,
     InvalidTokenError,
-    TokenExpiredError,
     InvalidActionError,
     MissingRequiredFieldsError,
     InvalidCertificateUrlError,

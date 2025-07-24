@@ -29,13 +29,11 @@ interface Theme {
 export default function PreferenceSettings() {
   const { theme: currentTheme, fontSize: currentFontSize, setTheme, setFontSize, resetPreferences } = usePreferences();
   
-  // Local state for preview
   const [previewTheme, setPreviewTheme] = useState(currentTheme);
   const [previewFontSize, setPreviewFontSize] = useState(currentFontSize);
   const [language, setLanguage] = useState('english');
   const [previewMode, setPreviewMode] = useState(false);
 
-  // Sync preview states with current preferences when they change
   useEffect(() => {
     setPreviewTheme(currentTheme);
     setPreviewFontSize(currentFontSize);
@@ -139,7 +137,6 @@ export default function PreferenceSettings() {
   return (
     <div className="flex-1 p-8">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm h-full overflow-hidden">
-        {/* Header */}
         <div className="bg-gradient-to-r from-sky-50 to-slate-50 p-6 border-b border-slate-200">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-sky-500 rounded-xl flex items-center justify-center shadow-sm">
@@ -153,7 +150,6 @@ export default function PreferenceSettings() {
         </div>
 
         <div className="p-6 space-y-6">
-          {/* Theme Settings */}
           <div className="bg-slate-50 rounded-xl border border-slate-200 p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
@@ -211,7 +207,6 @@ export default function PreferenceSettings() {
             </div>
           </div>
 
-          {/* Language Settings */}
           <div className="bg-slate-50 rounded-xl border border-slate-200 p-6">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center">
@@ -251,7 +246,6 @@ export default function PreferenceSettings() {
             </div>
           </div>
 
-          {/* Display Settings */}
           <div className="bg-slate-50 rounded-xl border border-slate-200 p-6">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-6 h-6 bg-purple-500 rounded-lg flex items-center justify-center">
@@ -293,7 +287,6 @@ export default function PreferenceSettings() {
             </div>
           </div>
 
-          {/* Save and Reset Buttons */}
           <div className="flex justify-end space-x-4 pt-6 border-t border-slate-200">
             <button 
               onClick={handleReset}

@@ -126,7 +126,7 @@ export class DeleteVideoSessionUseCase {
 
 export class GetAllVideoSessionsUseCase {
     constructor(private sessionRepository: ISessionRepository) {}
-    async execute(params: { search?: string; status?: string; instructor?: string } = {}): Promise<VideoSessionResponseDTO[]> {
+    async execute(params: { search?: string; status?: string; instructor?: string; course?: string } = {}): Promise<VideoSessionResponseDTO[]> {
         const sessions = await this.sessionRepository.getAll(params);
         return sessions as VideoSessionResponseDTO[];
     }

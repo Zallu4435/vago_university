@@ -3,7 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { assignmentService } from '../services/assignmentService';
 import { Assignment, NewAssignment, Submission } from '../types';
 
-export const useAssignmentManagement = () => {
+// Accept search/filter as arguments
+export const useAssignmentManagement = ({ searchTerm, filterStatus, filterSubject }: { searchTerm: string, filterStatus: string, filterSubject: string }) => {
     const queryClient = useQueryClient();
     const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
     const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
@@ -11,8 +12,12 @@ export const useAssignmentManagement = () => {
 
     // Queries
     const { data: assignments, isLoading: isLoadingAssignments, error: assignmentsError } = useQuery({
-        queryKey: ['assignments'],
-        queryFn: assignmentService.getAssignments
+        queryKey: ['assignments', searchTerm, filterStatus, filterSubject],
+        queryFn: () => assignmentService.getAssignments({
+            search: searchTerm,
+            status: filterStatus,
+            subject: filterSubject,
+        })
     });
 
     const { data: submissions, isLoading: isLoadingSubmissions } = useQuery({
@@ -118,11 +123,11 @@ export const useAssignmentManagement = () => {
         showAnalytics,
         isLoading: isLoadingAssignments || isLoadingSubmissions || (showAnalytics && isLoadingAnalytics),
         error: assignmentsError,
-
         // Setters
         setSelectedAssignment,
         setSelectedSubmission,
         setShowAnalytics,
+        // Remove search/filter state from here
 
         // Handlers
         handleCreateAssignment,

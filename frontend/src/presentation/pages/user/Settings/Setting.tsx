@@ -5,7 +5,6 @@ import {
   FaShieldAlt,
   FaArrowLeft,
   FaHome,
-  FaSlidersH,
 } from 'react-icons/fa';
 import {
   FiDownload,

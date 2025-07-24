@@ -3,8 +3,14 @@ import { Assignment, NewAssignment, Submission } from '../types';
 
 export const assignmentService = {
   // Assignment CRUD operations
-  getAssignments: async () => {
-    const response = await httpClient.get('/faculty/assignments');
+  getAssignments: async (params = {}) => {
+    const filteredParams = Object.fromEntries(
+      Object.entries(params).filter(([_, value]) => value !== undefined && value !== null && value !== '' && value !== 'all')
+    );
+    const queryString = Object.keys(filteredParams).length
+      ? '?' + new URLSearchParams(filteredParams).toString()
+      : '';
+    const response = await httpClient.get(`/faculty/assignments${queryString}`);
     return response.data.data;
   },
 

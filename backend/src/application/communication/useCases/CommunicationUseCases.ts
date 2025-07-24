@@ -22,7 +22,6 @@ import {
   GetUserGroupsResponseDTO,
   FetchUsersResponseDTO,
 } from "../../../domain/communication/dtos/CommunicationResponseDTOs";
-import { Message, MessageStatus, UserRole, UserInfo } from "../../../domain/communication/entities/Communication";
 
 export interface ResponseDTO<T> {
   success: boolean;
@@ -171,12 +170,14 @@ export class SendMessageUseCase implements ISendMessageUseCase {
   constructor(private readonly repository: ICommunicationRepository) { }
 
   async execute(params: SendMessageRequestDTO): Promise<ResponseDTO<SendMessageResponseDTO>> {
+    console.log('[SendMessageUseCase] execute called with params:', params);
     if (!mongoose.isValidObjectId(params.senderId)) {
       return { success: false, data: { error: "Invalid sender ID" } };
     }
     if (!params.subject || !params.content || !params.to.length) {
       return { success: false, data: { error: "Missing required fields" } };
     }
+    console.log('[SendMessageUseCase] calling repository.sendMessage with params:', params);
     const message = await this.repository.sendMessage(params);
     return { success: true, data: message };
   }

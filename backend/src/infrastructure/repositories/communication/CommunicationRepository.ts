@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { ICommunicationRepository } from '../../../application/communication/repositories/ICommunicationRepository';
 import { Message, UserInfo, MessageStatus, UserRole } from "../../../domain/communication/entities/Communication";
 import { MessageModel } from '../../../infrastructure/database/mongoose/models/communication.model';
@@ -77,7 +76,40 @@ export class CommunicationRepository implements ICommunicationRepository {
   }
 
   async sendMessage(params: SendMessageRequestDTO): Promise<any> {
-    const message = await (MessageModel as any).create(params);
+    console.log('[CommunicationRepository] sendMessage called with params:', params);
+    // Construct sender UserInfo
+    const sender = await this.findUserById(params.senderId, params.senderRole);
+    if (!sender) {
+      throw new Error('Sender not found');
+    }
+
+    // Determine recipients
+    let recipients: UserInfo[] = [];
+    for (const recipient of params.to) {
+      if (recipient.value.startsWith('all_') || recipient.value.startsWith('all-')) {
+        // Group recipient
+        const groupUsers = await this.findUsersByGroup(recipient.value.replace('_', '-'));
+        recipients = recipients.concat(groupUsers);
+      } else {
+        // Individual recipient (assume value is userId)
+        const user = await this.findUserById(recipient.value, 'student'); // Default to student, adjust as needed
+        if (user) recipients.push(user);
+      }
+    }
+    // Remove duplicates
+    recipients = recipients.filter((v,i,a)=>a.findIndex(t=>(t._id===v._id))===i);
+
+    // Prepare message object for saving
+    const messageData = {
+      subject: params.subject,
+      content: params.content,
+      sender,
+      recipients,
+      isBroadcast: params.to.some(r => r.value.startsWith('all_') || r.value.startsWith('all-')),
+      attachments: params.attachments || []
+    };
+    const message = await (MessageModel as any).create(messageData);
+    console.log('[CommunicationRepository] message created:', message);
     return message.toObject ? message.toObject() : message;
   }
 
@@ -160,21 +192,12 @@ export class CommunicationRepository implements ICommunicationRepository {
 
   async findUserById(userId: string, role: string): Promise<UserInfo | null> {
     console.log('Finding user by ID:', userId, 'with role:', role);
-    
-    let user;
-    if (role === 'admin') {
-      user = await AdminModel.findById(userId).lean();
-      console.log('Found admin user:', user);
-    } else {
-      user = await UserModel.findOne({ _id: userId, role }).lean();
-      console.log('Found regular user:', user);
-    }
-
+    const user = await UserModel.findOne({ _id: userId, role }).lean();
+    console.log('Found user:', user);
     if (!user) {
       console.log('No user found');
       return null;
     }
-
     const userInfo = {
       _id: user._id.toString(),
       name: `${user.firstName} ${user.lastName}`,

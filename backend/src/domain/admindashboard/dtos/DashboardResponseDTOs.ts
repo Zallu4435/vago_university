@@ -14,10 +14,7 @@ export type GetUserGrowthDataResponseDTO = UserGrowthData[];
 export type GetRevenueDataResponseDTO = RevenueData[];
 export type GetPerformanceDataResponseDTO = PerformanceData[];
 export interface GetRecentActivitiesResponseDTO {
-  recentAdmissions: any[];
-  recentPayments: any[];
-  recentEnquiries: any[];
-  recentNotifications: any[];
+  activities: any[];
 }
 export interface GetSystemAlertsResponseDTO {
   pendingAdmissions: number;

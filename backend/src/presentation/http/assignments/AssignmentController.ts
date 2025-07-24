@@ -34,12 +34,13 @@ export class AssignmentController implements IAssignmentController {
   }
 
   async getAssignments(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { subject, status, page, limit } = httpRequest.query;
+    const { subject, status, page, limit, search } = httpRequest.query;
     const result = await this.getAssignmentsUseCase.execute({
       subject: subject as string,
       status: status as 'draft' | 'published' | 'closed',
       page: page ? parseInt(page as string) : undefined,
-      limit: limit ? parseInt(limit as string) : undefined
+      limit: limit ? parseInt(limit as string) : undefined,
+      search: search as string,
     });
     if (!result.success) {
       return this.httpErrors.error_400();
@@ -122,6 +123,9 @@ export class AssignmentController implements IAssignmentController {
 
   async reviewSubmission(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { assignmentId, submissionId } = httpRequest.params;
+    console.log(httpRequest.body, 'httpRequest.body');  
+    console.log(assignmentId, 'assignmentId');
+    console.log(submissionId, 'submissionId');
     const { marks, feedback, status, isLate } = httpRequest.body;
     if (!submissionId || submissionId === 'undefined') {
       return this.httpErrors.error_400();

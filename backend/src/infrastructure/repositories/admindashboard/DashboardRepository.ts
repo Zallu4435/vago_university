@@ -12,7 +12,6 @@ import {
   MarkActivityAsReadRequestDTO,
 } from '../../../domain/admindashboard/dtos/DashboardRequestDTOs';
 
-// Import correct models
 import { User } from '../../database/mongoose/auth/user.model';
 import { CourseModel } from '../../database/mongoose/models/courses/CourseModel';
 import { Admission } from '../../database/mongoose/admission/AdmissionModel';

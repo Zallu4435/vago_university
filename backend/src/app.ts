@@ -40,8 +40,8 @@ const io = new SocketIOServer(httpServer, {
   path: '/socket.io',
   pingTimeout: 60000,
   pingInterval: 25000,
-  cookie: true, // Enable cookies for Socket.IO
-  allowEIO3: true // Allow Engine.IO version 3 clients
+  cookie: true,
+  allowEIO3: true
 });
 
 app.use(express.urlencoded({ extended: true }));
@@ -64,7 +64,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   Logger.debug(`Error object: ${JSON.stringify(err)}`);
   Logger.debug(`Error statusCode: ${err.statusCode}`);
   Logger.debug(`Error code: ${err.code}`);
-  
+
   const status = err.statusCode || 500;
   res.status(status).json({
     error: err.message || "Something went wrong",

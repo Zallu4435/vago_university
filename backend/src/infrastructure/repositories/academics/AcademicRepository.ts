@@ -1,16 +1,6 @@
 import mongoose from 'mongoose';
 import { IAcademicRepository } from '../../../application/academics/repositories/IAcademicRepository';
 import {
-  Student,
-  Grade,
-  Course,
-  AcademicHistory,
-  Program,
-  Progress,
-  Requirement,
-  Enrollment,
-  TranscriptRequest,
-  Meeting,
   EnrollmentStatus,
 } from "../../../domain/academics/entities/Academic";
 import { User as UserModel } from '../../database/mongoose/auth/user.model';

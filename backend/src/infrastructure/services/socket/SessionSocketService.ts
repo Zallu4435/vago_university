@@ -44,7 +44,6 @@ interface MessageData {
 }
 
 export const setupSessionSocketHandlers = (io: Server) => {
-  console.log('[SessionSocketService] Initializing session socket handlers...');
 
   io.on('connection', (socket) => {
     let currentUserId: string | null = null;

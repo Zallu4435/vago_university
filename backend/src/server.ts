@@ -4,11 +4,24 @@ import Logger from './shared/utils/logger';
 
 const port = config.app.port || 5000;
 
-// Log environment information
-Logger.info(`Starting server in ${process.env.NODE_ENV || 'development'} mode`);
-Logger.info(`JWT Secret: ${process.env.JWT_SECRET ? 'Set' : 'Not set (using default)'}`);
-// Log CORS information without accessing non-existent property
-Logger.info(`CORS configuration is set up for Socket.IO and Express`);
+process.on('uncaughtException', (error) => {
+    if (error.message === 'write EPIPE' &&
+        error.stack && error.stack.includes('ts-node-dev')) {
+        Logger.debug(`Development server EPIPE error (safe to ignore)`);
+        return;
+    }
+
+    Logger.error(`Uncaught Exception: ${error.message}`);
+    Logger.error(error.stack);
+    setTimeout(() => {
+        process.exit(1);
+    }, 1000);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    Logger.error(`Unhandled Promise Rejection at: ${promise}`);
+    Logger.error(`Reason: ${reason}`);
+});
 
 httpServer.listen(port, () => {
     Logger.info(`Server running on http://localhost:${port}`);

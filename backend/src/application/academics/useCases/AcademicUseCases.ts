@@ -84,7 +84,6 @@ export class GetStudentInfoUseCase implements IGetStudentInfoUseCase {
       return { data: { error: "Student not found" }, success: false };
     }
     const { user, program, pendingEnrollments } = result;
-    // Business logic only below
     const pendingCredits = pendingEnrollments
       .filter((enrollment: any) => enrollment.courseId)
       .reduce((sum: number, enrollment: any) => sum + ((enrollment.courseId as any).credits || 0), 0);
@@ -297,7 +296,7 @@ export class RequestTranscriptUseCase implements IRequestTranscriptUseCase {
       userId: input.studentId,
       deliveryMethod: input.deliveryMethod,
       requestedAt: new Date().toISOString(),
-      estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+      estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       address: input.address,
       email: input.email
     });

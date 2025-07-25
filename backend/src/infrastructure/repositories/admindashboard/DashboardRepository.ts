@@ -60,7 +60,7 @@ export class DashboardRepository implements IDashboardRepository {
       User.countDocuments({}),
       Faculty.countDocuments({}),
       CourseModel.countDocuments({}),
-      Admission.countDocuments({ status: 'pending' }),
+      Admission.countDocuments({ status: { $regex: '^pending$', $options: 'i' } }),
       PaymentModel.aggregate([
         { $match: { status: 'Completed' } },
         { $group: { _id: null, total: { $sum: '$amount' } } },

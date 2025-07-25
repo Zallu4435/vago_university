@@ -27,13 +27,21 @@ export default function CreateSessionModal({ setShowCreateModal, createSession, 
 
   useEffect(() => {
     if (isEditMode && sessionToEdit) {
+      // Split startTime into date and time
+      let date = '';
+      let time = '';
+      if (sessionToEdit.startTime) {
+        const dt = new Date(sessionToEdit.startTime);
+        date = dt.toISOString().slice(0, 10); // yyyy-mm-dd
+        time = dt.toTimeString().slice(0, 5); // hh:mm
+      }
       setNewSession({
         title: sessionToEdit.title || '',
         instructor: sessionToEdit.instructor || '',
         course: sessionToEdit.course || '',
-        date: sessionToEdit.date || '',
-        time: sessionToEdit.time || '',
-        duration: sessionToEdit.duration || '',
+        date,
+        time,
+        duration: sessionToEdit.duration ? String(sessionToEdit.duration) : '',
         maxAttendees: sessionToEdit.maxAttendees ? String(sessionToEdit.maxAttendees) : '',
         description: sessionToEdit.description || '',
         tags: Array.isArray(sessionToEdit.tags) ? sessionToEdit.tags.join(', ') : '',
@@ -89,17 +97,19 @@ export default function CreateSessionModal({ setShowCreateModal, createSession, 
       return;
     }
 
+    // Combine date and time into ISO string for startTime
+    const startTime = new Date(`${newSession.date}T${newSession.time}`).toISOString();
+
     const sessionPayload: Session = {
       id: sessionToEdit?.id || Date.now(),
       title: newSession.title,
       instructor: newSession.instructor,
       course: newSession.course,
-      date: newSession.date,
-      time: newSession.time,
+      startTime, // use ISO string
       duration: newSession.duration,
       maxAttendees: maxAttendeesNum,
       description: newSession.description,
-      tags: newSession.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+      tags: newSession.tags.split(',').map(t => t.trim()).filter(Boolean),
       difficulty: newSession.difficulty,
       status: sessionToEdit?.status || 'upcoming',
       isLive: sessionToEdit?.isLive || false,

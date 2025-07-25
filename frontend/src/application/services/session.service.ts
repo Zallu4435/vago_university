@@ -38,12 +38,19 @@ class SessionService {
     // Filter out empty or 'all' values
     const filteredParams = Object.fromEntries(
       Object.entries(params).filter(([_, value]) => value !== undefined && value !== null && value !== '' && value !== 'all')
-    );
+    ) as Record<string, string>;
     const queryString = Object.keys(filteredParams).length
       ? '?' + new URLSearchParams(filteredParams).toString()
       : '';
     const response = await httpClient.get(`/faculty/sessions/video-sessions${queryString}`);
-    return response.data.data;
+    // Map _id to id for all sessions
+    return response.data.data.map((s: any) => ({ ...s, id: s._id }));
+  }
+
+  async getSessionById(id: string) {
+    const response = await httpClient.get(`/faculty/sessions/video-sessions/${id}`);
+    const s = response.data.data;
+    return { ...s, id: s._id };
   }
 
   async updateSession(id: string, data: any) {

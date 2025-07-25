@@ -16,6 +16,7 @@ export interface Session {
   recordingUrl?: string;
   attendees: number;
   attendeeList?: { id: string; name: string }[];
+  startTime?: string;
 }
 
 export interface NewSession {

@@ -58,45 +58,72 @@ export class SocketService {
   }
 
   private setupSocketHandlers() {
+    console.log('[Socket.IO] Setting up socket handlers for chat namespace');
     this.chatNamespace.use(this.authenticateSocket.bind(this));
+    
+    // Add connection attempt listener
+    this.chatNamespace.on("connection_error", (err) => {
+      console.error('[Socket.IO] Namespace connection error:', err);
+    });
+    
+    this.chatNamespace.on("connect_error", (err) => {
+      console.error('[Socket.IO] Namespace connect error:', err);
+    });
+    
     this.chatNamespace.on("connection", this.handleConnection.bind(this));
+    
+    console.log('[Socket.IO] Socket handlers setup complete');
   }
 
   private authenticateSocket(socket: any, next: (err?: Error) => void) {
     try {
+      console.log('[Socket.IO] Authenticating socket connection attempt...');
       const token = this.extractToken(socket);
       
       if (!token) {
-        return next(new Error("Authentication error: No token provided"));
+        console.error('[Socket.IO] Authentication failed: No access_token cookie provided');
+        return next(new Error("Authentication error: No access_token cookie provided"));
       }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret") as any;
-      socket.data.user = {
-        userId: decoded.userId,
-        collection: decoded.collection,
-      } as AuthenticatedSocket;
-
-      next();
+      console.log('[Socket.IO] access_token cookie found, verifying JWT...');
+      const jwtSecret = process.env.JWT_SECRET || "your_jwt_secret";
+      
+      try {
+        const decoded = jwt.verify(token, jwtSecret) as any;
+        socket.data.user = {
+          userId: decoded.userId,
+          collection: decoded.collection,
+        } as AuthenticatedSocket;
+        
+        console.log(`[Socket.IO] Socket authenticated for user: ${decoded.userId}`);
+        next();
+      } catch (jwtError) {
+        console.error('[Socket.IO] JWT verification failed:', jwtError);
+        next(new Error("Authentication error: Invalid access_token"));
+      }
     } catch (err) {
-      console.error('[Socket.IO] Authentication failed:', err);
-      next(new Error("Authentication error: Invalid token"));
+      console.error('[Socket.IO] Authentication process failed:', err);
+      next(new Error("Authentication error: " + (err instanceof Error ? err.message : "Unknown error")));
     }
   }
 
   private extractToken(socket: any): string | null {
-    let token = socket.handshake.auth.token;
+    console.log('[Socket.IO] Extracting token from socket handshake...');
     
-    if (typeof token === 'string' && token) {
-      return token;
-    }
-
-    if (socket.handshake.headers.cookie) {
-      const match = socket.handshake.headers.cookie.match(/auth_token=([^;]+)/);
-      if (match) {
-        return match[1];
+    // Try cookie - this is the primary method when using withCredentials
+    if (socket.handshake.headers?.cookie) {
+      const cookieStr = socket.handshake.headers.cookie;
+      console.log('[Socket.IO] Checking cookies for access_token. Raw cookie string:', cookieStr);
+      
+      // Try access_token cookie (primary cookie used in the app)
+      const accessTokenMatch = cookieStr.match(/access_token=([^;]+)/);
+      if (accessTokenMatch) {
+        console.log('[Socket.IO] Token found in access_token cookie');
+        return decodeURIComponent(accessTokenMatch[1]);
       }
     }
 
+    console.log('[Socket.IO] No access_token cookie found in request');
     return null;
   }
 
@@ -104,25 +131,36 @@ export class SocketService {
     const userId = socket.data.user.userId;
     this.userSockets.set(userId, socket.id);
     
-    socket.emit("onlineUsers", Array.from(this.userSockets.keys()));
+    console.log(`[Socket.IO] User connected: ${userId}, socketId: ${socket.id}`);
+    console.log(`[Socket.IO] Total connected users: ${this.userSockets.size}`);
     
+    // Emit the list of online users to the newly connected user
+    socket.emit("onlineUsers", Array.from(this.userSockets.keys()));
+    console.log(`[Socket.IO] Sent online users list to ${userId}: ${Array.from(this.userSockets.keys()).join(', ')}`);
+    
+    // Join user to their chat rooms
     this.joinUserChats(userId);
 
+    // Broadcast user's online status to all connected clients
     this.broadcastUserStatus(userId, "online");
 
+    // Set up event listeners for this socket
     this.setupEventListeners(socket, userId);
   }
 
   private setupEventListeners(socket: any, userId: string) {
     socket.on("joinChat", (data: { chatId: string }) => {
+      console.log(`[Socket.IO] User ${userId} joined chat ${data.chatId}`);
       socket.join(data.chatId);
     });
 
     socket.on("leaveChat", (data: { chatId: string }) => {
+      console.log(`[Socket.IO] User ${userId} left chat ${data.chatId}`);
       socket.leave(data.chatId);
     });
 
     socket.on("typing", (data: { chatId: string; isTyping: boolean }) => {
+      console.log(`[Socket.IO] User ${userId} typing in chat ${data.chatId}: ${data.isTyping}`);
       socket.to(data.chatId).emit("typing", {
         userId,
         chatId: data.chatId,
@@ -135,6 +173,7 @@ export class SocketService {
         console.error('[Socket.IO] Received message with undefined chatId:', message);
         return;
       }
+      console.log(`[Socket.IO] Received message from user ${userId} in chat ${message.chatId}:`, message);
       try {
         await this.handleNewMessage(message);
       } catch (error) {
@@ -143,6 +182,7 @@ export class SocketService {
     });
 
     socket.on("messageStatus", async (data: MessageStatusData) => {
+      console.log(`[Socket.IO] Message status update from user ${userId}:`, data);
       try {
         await this.chatRepository.updateMessageStatus(data.messageId, data.status);
         socket.to(data.messageId).emit("messageStatus", data);
@@ -152,6 +192,7 @@ export class SocketService {
     });
 
     socket.on("removeReaction", (data: ReactionData) => {
+      console.log(`[Socket.IO] User ${userId} removed reaction in chat ${data.chatId}:`, data);
       this.chatNamespace.to(data.chatId).emit("messageReactionRemoved", {
         messageId: data.messageId,
         userId: data.userId,
@@ -159,6 +200,7 @@ export class SocketService {
     });
 
     socket.on("deleteMessage", (data: DeleteMessageData) => {
+      console.log(`[Socket.IO] User ${userId} deleted message in chat ${data.chatId}:`, data);
       this.chatNamespace.to(data.chatId).emit("messageDeleted", {
         messageId: data.messageId,
         chatId: data.chatId,
@@ -166,6 +208,7 @@ export class SocketService {
     });
 
     socket.on("disconnect", (reason: string) => {
+      console.log(`[Socket.IO] User disconnected: ${userId}, socketId: ${socket.id}, reason: ${reason}`);
       this.handleDisconnect(socket, reason);
     });
   }

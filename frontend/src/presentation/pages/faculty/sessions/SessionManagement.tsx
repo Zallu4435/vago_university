@@ -6,6 +6,7 @@ import { Session } from './types';
 import { useSessionManagement } from '../../../../application/hooks/useSessionManagement';
 import SessionDetailsModal from './SessionDetailsModal';
 import WarningModal from '../../../components/common/WarningModal';
+import { sessionService } from '../../../../application/services/session.service';
 
 export default function SessionManagement() {
   const {
@@ -28,6 +29,7 @@ export default function SessionManagement() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<any>(null);
+  const [editLoading, setEditLoading] = useState(false);
 
   const onCreateSession = async (newSession: any) => {
     await handleCreateSession(newSession);
@@ -56,6 +58,17 @@ export default function SessionManagement() {
         return { color: 'from-blue-500 to-indigo-600', text: 'text-blue-700', icon: <FaCheck size={14} /> };
       default:
         return { color: 'from-gray-500 to-slate-600', text: 'text-gray-700', icon: null };
+    }
+  };
+
+  const onEditIconClick = async (sessionId: string) => {
+    setEditLoading(true);
+    try {
+      const session = await sessionService.getSessionById(sessionId);
+      setSelectedSession(session);
+      setShowEditModal(true);
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -166,7 +179,7 @@ export default function SessionManagement() {
                                 View
                               </button>
                               <button
-                                onClick={() => { setSelectedSession(session); setShowEditModal(true); }}
+                                onClick={() => onEditIconClick(session._id || session.id)}
                           className="p-3 bg-pink-50 text-pink-600 hover:bg-pink-100 rounded-xl transition-all border border-pink-200 hover:border-pink-300 hover:scale-110 transform min-w-[40px]"
                                 title="Edit"
                               >
@@ -224,8 +237,8 @@ export default function SessionManagement() {
           createSession={onCreateSession}
         />
       )}
-      {/* Use CreateSessionModal for edit as well */}
-      {selectedSession && showEditModal && (
+      {editLoading && <div className="flex justify-center items-center p-8"><FaSpinner className="animate-spin text-pink-500" size={32} /></div>}
+      {selectedSession && showEditModal && !editLoading && (
         <CreateSessionModal
           setShowCreateModal={(show) => { setShowEditModal(show); if (!show) setSelectedSession(null); }}
           editSession={onEditSession}

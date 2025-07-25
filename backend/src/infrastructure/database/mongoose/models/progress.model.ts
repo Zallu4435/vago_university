@@ -25,6 +25,4 @@ import mongoose, { Schema, Document } from 'mongoose';
        estimatedGraduation: { type: String, required: true, trim: true, default: '' },
      }, { timestamps: true });
 
-     ProgressSchema.index({ studentId: 1 });
-
      export const ProgressModel = mongoose.model<IProgress>('Progress', ProgressSchema);

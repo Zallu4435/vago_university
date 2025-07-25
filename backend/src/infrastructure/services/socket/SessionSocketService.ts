@@ -1,6 +1,5 @@
 import { Server } from 'socket.io';
 import { VideoSessionModel } from '../../database/mongoose/models/session.model';
-import type { Socket as IOSocket } from 'socket.io';
 
 const sessionParticipants: Record<string, any[]> = {};
 
@@ -46,7 +45,7 @@ interface MessageData {
 
 export const setupSessionSocketHandlers = (io: Server) => {
   console.log('[SessionSocketService] Initializing session socket handlers...');
-  
+
   io.on('connection', (socket) => {
     let currentUserId: string | null = null;
     let currentSessionId: string | null = null;
@@ -56,13 +55,13 @@ export const setupSessionSocketHandlers = (io: Server) => {
         currentUserId = user.userId;
         currentSessionId = sessionId;
         socket.userId = currentUserId;
-        
+
         socket.join(sessionId);
 
         if (!sessionParticipants[sessionId]) {
           sessionParticipants[sessionId] = [];
         }
-        
+
         const existingParticipantIndex = sessionParticipants[sessionId].findIndex(p => p.userId === user.userId);
         if (existingParticipantIndex === -1) {
           sessionParticipants[sessionId].push({
@@ -79,7 +78,7 @@ export const setupSessionSocketHandlers = (io: Server) => {
         }
 
         socket.emit('participant-list', sessionParticipants[sessionId]);
-        
+
         socket.to(sessionId).emit('user-joined', {
           id: user.userId,
           name: user.username,
@@ -170,7 +169,7 @@ async function updateSessionInDatabase(sessionId: string, userId: string) {
     if (!session) {
       throw new Error(`Session not found: ${sessionId}`);
     }
-    
+
     if (!session.participants.includes(userId)) {
       session.participants.push(userId);
       await session.save();
@@ -213,7 +212,7 @@ function updateParticipantHandRaise(data: HandRaiseData) {
 function removeParticipantFromSession(sessionId: string, userId: string) {
   if (sessionParticipants[sessionId]) {
     sessionParticipants[sessionId] = sessionParticipants[sessionId].filter(p => p.userId !== userId);
-    
+
     if (sessionParticipants[sessionId].length === 0) {
       delete sessionParticipants[sessionId];
     }

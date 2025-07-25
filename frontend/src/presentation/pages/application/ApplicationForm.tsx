@@ -55,6 +55,11 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
   const dispatch = useDispatch();
   const [applicationId, setApplicationId] = useState<string | undefined>(undefined);
 
+  // Guard: Wait for user and userId to be available
+  if (!user || !user.id) {
+    return <LoadingSpinner />;
+  }
+
   const methods = useForm<FormData>({
     defaultValues: {
       applicationId: '',
@@ -69,7 +74,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
       otherInformation: undefined,
       documents: undefined,
       declaration: { privacyPolicy: false, marketingEmail: false, marketingCall: false },
-      registerId: user?.userId,
+      registerId: user?.id,
     },
     mode: 'onSubmit',
   });
@@ -89,7 +94,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
     isLoading: isSaving,
   } = useApplicationForm();
 
-  const { data: fetchedData, isLoading: isFetching, error: fetchError } = useApplicationData(user?.userId);
+  const { data: fetchedData, isLoading: isFetching, error: fetchError } = useApplicationData(user?.id);
 
   const navigate = useNavigate();
 
@@ -131,8 +136,8 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
         setValue('applicationId', (fetchedData as any).applicationId, { shouldValidate: false });
       } else {
         try {
-          console.log(user?.userId, "user?.userId");
-          const response = await createApplication(user?.userId || '');
+          console.log(user?.id, "user?.id");
+          const response = await createApplication(user?.id || '');
           setApplicationId(response.applicationId);
           setValue('applicationId', response.applicationId, { shouldValidate: false });
         } catch (error) {
@@ -143,7 +148,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
       setIsInitializing(false);
     };
     initializeApplication();
-  }, [fetchedData, isFetching, fetchError, user?.userId, createApplication, setValue]);
+  }, [fetchedData, isFetching, fetchError, user?.id, createApplication, setValue]);
 
   useEffect(() => {
     if (fetchedData) {
@@ -569,7 +574,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
       <FormSubmissionFlow
         formData={{
           ...formData,
-          registerId: user?.userId
+          registerId: user?.id
         }}
         onPaymentComplete={() => {
           setShowPayment(false);

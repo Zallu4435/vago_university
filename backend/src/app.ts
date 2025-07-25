@@ -15,7 +15,6 @@ import { loggerMiddleware } from "./shared/middlewares/loggerMiddleware";
 const app = express();
 const httpServer = createServer(app);
 
-// CORS configuration
 const corsOptions = {
   origin: [
     "http://localhost:5173",
@@ -25,7 +24,7 @@ const corsOptions = {
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie", "X-Requested-With"],
   exposedHeaders: ["Set-Cookie"]
 };
 
@@ -41,6 +40,8 @@ const io = new SocketIOServer(httpServer, {
   path: '/socket.io',
   pingTimeout: 60000,
   pingInterval: 25000,
+  cookie: true, // Enable cookies for Socket.IO
+  allowEIO3: true // Allow Engine.IO version 3 clients
 });
 
 app.use(express.urlencoded({ extended: true }));

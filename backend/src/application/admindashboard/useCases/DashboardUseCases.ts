@@ -108,12 +108,13 @@ export class GetDashboardMetricsUseCase implements IGetDashboardMetricsUseCase {
     if (!raw || !Array.isArray(raw.completedPayments)) {
       throw new DashboardMetricsError();
     }
+    console.log(raw);
     const totalRevenue = raw.completedPayments[0]?.total || 0;
     const metrics = {
       totalUsers: raw.totalUsers + raw.totalFaculty,
       totalRevenue,
       activeCourses: raw.totalCourses,
-      pendingApprovals: raw.pendingAdmissions + raw.pendingFinancialAid,
+      pendingApprovals: raw.pendingAdmissions,
     };
     return { data: metrics, success: true };
   }

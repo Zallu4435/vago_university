@@ -2,7 +2,6 @@ import httpClient from '../../../../../frameworks/api/httpClient';
 import { Chat, Message, User, PaginatedResponse } from '../types/ChatTypes';
 
 class ChatService {
-  // Core chat operations
   async getChats(page = 1, limit = 20): Promise<PaginatedResponse<Chat>> {
     try {
       const response = await httpClient.get(`/chats?page=${page}&limit=${limit}`);
@@ -53,7 +52,6 @@ class ChatService {
     }
   }
 
-  // Message operations
   async getMessages(chatId: string, page = 1, limit = 20, before?: string): Promise<PaginatedResponse<Message>> {
     try {
       const response = await httpClient.get(`/chats/${chatId}/messages?page=${page}&limit=${limit}${before ? `&before=${before}` : ''}`);
@@ -124,7 +122,6 @@ class ChatService {
     }
   }
 
-  // Reaction operations
   async addReaction(messageId: string, emoji: string, userId: string): Promise<void> {
     try {
       await httpClient.post(`/chats/messages/${messageId}/reactions`, { userId, emoji });
@@ -141,7 +138,6 @@ class ChatService {
     }
   }
 
-  // Group operations
   async createGroupChat(params: any): Promise<Chat> {
     try {
       const response = await httpClient.post('/chats/group', params);
@@ -209,17 +205,15 @@ class ChatService {
     }
   }
 
-  // User operations
   async searchUsers(query: string, page = 1, limit = 20): Promise<PaginatedResponse<User>> {
     try {
       const response = await httpClient.get(`/chats/users/search?query=${query}&page=${page}&limit=${limit}`);
-      return response.data;
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to search users');
     }
   }
 
-  // Chat management
   async deleteChat(chatId: string): Promise<void> {
     try {
       await httpClient.delete(`/chats/${chatId}`);

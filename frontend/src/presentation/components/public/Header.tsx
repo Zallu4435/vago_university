@@ -36,9 +36,9 @@ export const Header: React.FC<HeaderProps> = ({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mouseup', handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('mouseup', handleClickOutside);
     };
   }, []);
 
@@ -105,7 +105,9 @@ export const Header: React.FC<HeaderProps> = ({
                     <span className="font-medium">Settings</span>
                   </Link>
                   <button
-                    onClick={onLogout}
+                    onMouseDown={() => {
+                      onLogout && onLogout();
+                    }}
                     className="flex items-center w-full px-4 py-3 text-white hover:bg-white/20 transition-colors"
                   >
                     <FaSignOutAlt className="w-4 h-4 lg:w-5 lg:h-5 mr-3 text-cyan-200" />
@@ -148,7 +150,9 @@ export const Header: React.FC<HeaderProps> = ({
                     <span className="font-medium">Settings</span>
                   </Link>
                   <button
-                    onClick={onLogout}
+                    onMouseDown={() => {
+                      onLogout && onLogout();
+                    }}
                     className="flex items-center w-full px-4 py-3 text-white hover:bg-white/20 transition-colors"
                   >
                     <FaSignOutAlt className="w-4 h-4 mr-3 text-cyan-200" />

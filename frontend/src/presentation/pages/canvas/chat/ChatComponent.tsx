@@ -55,7 +55,7 @@ export const ChatComponent: React.FC = () => {
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const currentUserId = currentUser?.id;
-  const token = useSelector((state: RootState) => state.auth.token);
+  // Remove token from Redux
   const queryClient = useQueryClient();
 
   const {
@@ -100,7 +100,6 @@ export const ChatComponent: React.FC = () => {
     if (messagesPage === 1 && messages.length > 0) {
       setAllMessages(messages);
       setHasMoreMessages(true);
-      // Scroll to bottom when initial messages are loaded
       setTimeout(() => {
         scrollToBottom();
       }, 150);
@@ -144,7 +143,6 @@ export const ChatComponent: React.FC = () => {
   }, [isLoadingChats]);
 
   const handleChatSelect = async (chatId: string) => {
-    // Only reset messages if selecting a different chat
     if (selectedChatId !== chatId) {
       setAllMessages([]);
       setMessagesPage(1);
@@ -267,14 +265,13 @@ export const ChatComponent: React.FC = () => {
         files.forEach(file => formData.append('files', file));
         if (message.trim()) formData.append('content', message.trim());
         if (replyTo) formData.append('replyTo', JSON.stringify(replyTo));
-        // Only pass the first file for optimistic preview, but all files are sent
+        console.log('[ChatComponent] Sending file message:', { chatId: selectedChatId, files, message, replyTo });
         await chatMutations.sendFile.mutateAsync({ chatId: selectedChatId, formData, file: files[0] });
       } else {
+        console.log('[ChatComponent] Sending text message:', { chatId: selectedChatId, content: message });
         await chatMutations.sendMessage.mutateAsync({ chatId: selectedChatId, content: message, type: 'text' });
-        // Do NOT emit the message via socket.io from the frontend.
       }
       setReplyToMessage(null);
-      // Ensure scroll to bottom after sending message
       setTimeout(() => {
         scrollToBottom();
       }, 100);
@@ -413,21 +410,17 @@ export const ChatComponent: React.FC = () => {
     }
   };
 
-  // Auto-scroll to bottom when chat is selected
   useEffect(() => {
     if (selectedChatId) {
-      // Force scroll to bottom when chat is selected, regardless of message count
       setTimeout(() => {
         scrollToBottom();
-      }, 200); // Increased timeout to ensure messages are loaded
+      }, 200); 
     }
   }, [selectedChatId]);
 
-  // Auto-scroll to bottom when messages are loaded or updated
   useEffect(() => {
     if (allMessages.length > 0) {
       if (scrollState.shouldScrollToBottom) {
-        // Use setTimeout to ensure DOM is updated
         setTimeout(() => {
           scrollToBottom();
         }, 100);
@@ -436,6 +429,8 @@ export const ChatComponent: React.FC = () => {
         scrollRef.current.scrollTop = newScrollHeight - scrollState.oldScrollHeight;
         scrollState.oldScrollHeight = 0;
       }
+      // Log when chat UI updates with new messages
+      console.log('[ChatComponent] UI updated with messages:', allMessages);
     }
   }, [allMessages]);
 
@@ -484,22 +479,18 @@ export const ChatComponent: React.FC = () => {
     if (!socketRef.current || !currentUser?.id) return;
 
     const handleNewMessage = (message: any) => {
-      // Normalize id for MongoDB (_id -> id)
       const normalizedMessage = { ...message, id: message.id || message._id };
       console.log('[Socket.IO] Received real-time message:', normalizedMessage);
       
-      // Update messages in current chat if it matches
       if (normalizedMessage.chatId === selectedChatId) {
         setAllMessages(prev => {
           const idx = prev.findIndex(m => m.id === normalizedMessage.id);
           if (idx !== -1) {
-            // Replace the existing message
             const updated = [...prev];
             updated[idx] = normalizedMessage;
             console.log('[Socket.IO] Updated allMessages (replaced):', updated);
             return updated;
           }
-          // Otherwise, append as new
           const updated = [...prev, normalizedMessage];
           console.log('[Socket.IO] Updated allMessages (appended):', updated);
           return updated;
@@ -509,36 +500,37 @@ export const ChatComponent: React.FC = () => {
         }
       }
       
-      // Always update chat list when a new message is received (for both sender and receiver)
       queryClient.invalidateQueries({ queryKey: ['chats'] });
     };
 
     const handleChatUpdate = (updatedChat: any) => {
       console.log('[Socket.IO] Received chat update:', updatedChat);
-      // Force re-render of chat list by invalidating the query
       queryClient.invalidateQueries({ queryKey: ['chats'] });
     };
 
     socketRef.current.on('message', handleNewMessage);
     socketRef.current.on('chat', handleChatUpdate);
 
+    // Log join/leave events
+    console.log('[Socket.IO] Joining chat room:', selectedChatId);
+    socketRef.current.emit('joinChat', { chatId: selectedChatId });
+
     return () => {
       socketRef.current?.off('message', handleNewMessage);
       socketRef.current?.off('chat', handleChatUpdate);
+      console.log('[Socket.IO] Leaving chat room:', selectedChatId);
+      socketRef.current?.emit('leaveChat', { chatId: selectedChatId });
     };
   }, [selectedChatId, currentUser?.id, socketRef.current]);
 
-  // New state to control mobile view
   const [showMobileChat, setShowMobileChat] = useState(false);
 
-  // When a chat is selected, show chat view on mobile
   useEffect(() => {
     if (selectedChatId) {
       setShowMobileChat(true);
     }
   }, [selectedChatId]);
 
-  // When going back to chat list on mobile
   const handleMobileBack = () => {
     setShowMobileChat(false);
     setSelectedChatId(null);
@@ -548,15 +540,21 @@ export const ChatComponent: React.FC = () => {
     setHasMoreMessages(true);
   };
 
-  // Add this useEffect for socket.io connection
   useEffect(() => {
-    if (!token) return;
-    // Connect to the /chat namespace with the correct backend URL and port
-    const socket = io('http://localhost:5000/chat', {
+    // Don't check for token existence since we're using cookies
+    console.log('[Socket.IO] Attempting to connect with cookies');
+    
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+    const socketUrl = apiBaseUrl.replace('/api', '') + '/chat';
+    console.log('[Socket.IO] Attempting to connect to:', socketUrl);
+    
+    // Log document cookie for debugging
+    console.log('[Socket.IO] Document cookies:', document.cookie);
+    
+    const socket = io(socketUrl, {
       path: '/socket.io',
-      transports: ['websocket'],
-      auth: { token },
-      withCredentials: true,
+      transports: ['websocket', 'polling'],
+      withCredentials: true, // This ensures cookies are sent with the request
     });
     socketRef.current = socket;
 
@@ -577,16 +575,18 @@ export const ChatComponent: React.FC = () => {
         console.log('Socket is NOT connected (checked in code)!');
       }
     });
-    // Optionally, add more event listeners here (e.g., for user status, typing, etc.)
+    // Log all socket events for debugging
+    socket.onAny((event, ...args) => {
+      console.log(`[Socket.IO] Event: ${event}`, ...args);
+    });
 
     return () => {
       socket.disconnect();
       socketRef.current = null;
       console.log('[Socket.IO] Disconnected and cleaned up');
     };
-  }, [token]);
+  }, []); // Remove token dependency
 
-  console.log('ChatComponent mounted for user', currentUserId);
 
   useEffect(() => {
     if (!socketRef.current) return;
@@ -640,7 +640,6 @@ export const ChatComponent: React.FC = () => {
 
   return (
     <div className={`flex h-screen ${styles.background} font-sans overflow-hidden`}>
-      {/* Chat List (Sidebar) */}
       <div
         className={`
           transition-all duration-300 border-r border-gray-200 dark:border-[#2a3942] flex flex-col relative overflow-hidden

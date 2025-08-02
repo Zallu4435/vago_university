@@ -62,9 +62,18 @@ pipeline {
             parallel {
                 stage('Backend Validation') {
                     agent {
-                        docker {
-                            image 'node:18-alpine'
-                            args '-v /var/run/docker.sock:/var/run/docker.sock'
+                        kubernetes {
+                            yaml '''
+                                apiVersion: v1
+                                kind: Pod
+                                spec:
+                                  containers:
+                                  - name: node
+                                    image: node:18-alpine
+                                    command:
+                                    - cat
+                                    tty: true
+                            '''
                         }
                     }
                     steps {
@@ -97,9 +106,18 @@ pipeline {
                 
                 stage('Frontend Validation') {
                     agent {
-                        docker {
-                            image "node:${NODE_VERSION}-alpine"
-                            args '-v /var/run/docker.sock:/var/run/docker.sock'
+                        kubernetes {
+                            yaml '''
+                                apiVersion: v1
+                                kind: Pod
+                                spec:
+                                  containers:
+                                  - name: node
+                                    image: node:18-alpine
+                                    command:
+                                    - cat
+                                    tty: true
+                            '''
                         }
                     }
                     steps {

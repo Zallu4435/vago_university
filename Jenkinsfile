@@ -138,23 +138,23 @@ pipeline {
                             def backendImage = "${DOCKER_REGISTRY}/${DOCKER_NAMESPACE}/${BACKEND_APP}"
                             
                             dir('backend') {
-                                echo "Backend build & push completed (Docker not available)"
-                                // Build Docker image
-                                // sh """
-                                //     echo "Building backend Docker image..."
-                                //     docker build -t ${backendImage}:${IMAGE_TAG} .
-                                //     docker tag ${backendImage}:${IMAGE_TAG} ${backendImage}:${LATEST_TAG}
-                                // """
+                                echo "Building backend Docker image..."
                                 
-                                // Push to registry
-                                // withCredentials([usernamePassword(credentialsId: 'docker-registry-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                                //     sh """
-                                //         echo "Pushing backend image to registry..."
-                                //         docker login ${DOCKER_REGISTRY} -u ${DOCKER_USER} -p ${DOCKER_PASS}
-                                //         docker push ${backendImage}:${IMAGE_TAG}
-                                //         docker push ${backendImage}:${LATEST_TAG}
-                                //     """
-                                // }
+                                // Check if Dockerfile exists
+                                sh """
+                                    if [ -f Dockerfile ]; then
+                                        echo "Dockerfile found, but Docker not available in Jenkins agents"
+                                        echo "Image would be: ${backendImage}:${IMAGE_TAG}"
+                                        echo "To build manually: docker build -t ${backendImage}:${IMAGE_TAG} ."
+                                        echo "To push manually: docker push ${backendImage}:${IMAGE_TAG}"
+                                    else
+                                        echo "No Dockerfile found in backend directory"
+                                    fi
+                                """
+                                
+                                // For now, we'll use placeholder images
+                                // In production, you would build and push here
+                                echo "Backend image: ${backendImage}:${IMAGE_TAG}"
                             }
                         }
                     }
@@ -166,23 +166,23 @@ pipeline {
                             def frontendImage = "${DOCKER_REGISTRY}/${DOCKER_NAMESPACE}/${FRONTEND_APP}"
                             
                             dir('frontend') {
-                                echo "Frontend build & push completed (Docker not available)"
-                                // Build Docker image
-                                // sh """
-                                //     echo "Building frontend Docker image..."
-                                //     docker build -t ${frontendImage}:${IMAGE_TAG} .
-                                //     docker tag ${frontendImage}:${IMAGE_TAG} ${frontendImage}:${LATEST_TAG}
-                                // """
+                                echo "Building frontend Docker image..."
                                 
-                                // Push to registry
-                                // withCredentials([usernamePassword(credentialsId: 'docker-registry-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                                //     sh """
-                                //         echo "Pushing frontend image to registry..."
-                                //         docker login ${DOCKER_REGISTRY} -u ${DOCKER_USER} -p ${DOCKER_PASS}
-                                //         docker push ${frontendImage}:${IMAGE_TAG}
-                                //         docker push ${frontendImage}:${LATEST_TAG}
-                                //     """
-                                // }
+                                // Check if Dockerfile exists
+                                sh """
+                                    if [ -f Dockerfile ]; then
+                                        echo "Dockerfile found, but Docker not available in Jenkins agents"
+                                        echo "Image would be: ${frontendImage}:${IMAGE_TAG}"
+                                        echo "To build manually: docker build -t ${frontendImage}:${IMAGE_TAG} ."
+                                        echo "To push manually: docker push ${frontendImage}:${IMAGE_TAG}"
+                                    else
+                                        echo "No Dockerfile found in frontend directory"
+                                    fi
+                                """
+                                
+                                // For now, we'll use placeholder images
+                                // In production, you would build and push here
+                                echo "Frontend image: ${frontendImage}:${IMAGE_TAG}"
                             }
                         }
                     }
@@ -233,6 +233,11 @@ pipeline {
                     sh """
                         git config user.email "jenkins@university-platform.com"
                         git config user.name "Jenkins CI"
+                    """
+                    
+                    // Checkout the correct branch
+                    sh """
+                        git checkout ${GIT_BRANCH} || git checkout -b ${GIT_BRANCH}
                     """
                     
                     // Add changes

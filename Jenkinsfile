@@ -40,9 +40,6 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    // Clean workspace
-                    cleanWs()
-                    
                     // Checkout code using SSH
                     checkout([$class: 'GitSCM', 
                         branches: [[name: "*/${GIT_BRANCH}"]], 

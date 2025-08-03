@@ -202,6 +202,8 @@ pipeline {
                     // Update backend values.yaml
                     sh """
                         echo "Updating backend Helm chart..."
+                        pwd
+                        ls -la helm-charts/
                         sed -i 's|repository:.*|repository: ${backendImage}|g' helm-charts/backend/values.yaml
                         sed -i 's|tag:.*|tag: "${IMAGE_TAG}"|g' helm-charts/backend/values.yaml
                     """

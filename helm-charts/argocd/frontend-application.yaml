@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: university-management-frontend
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Zallu4435/vago_university.git
+    targetRevision: HEAD
+    path: helm-charts/frontend
+    helm:
+      valueFiles:
+        - values.yaml
+      parameters:
+        - name: image.repository
+          value: zallu/university-management-platform-frontend
+        - name: image.tag
+          value: latest
+        - name: ingress.hosts[0].host
+          value: university-platform.your-domain.com
+        - name: env.REACT_APP_API_URL
+          value: https://api.university-platform.your-domain.com
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: university-management
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 10 

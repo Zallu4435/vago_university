@@ -384,66 +384,34 @@ pipeline {
                 archiveArtifacts artifacts: '**/dist/**/*, **/build/**/*', allowEmptyArchive: true
                 
                 // Publish test results if any
-                publishTestResults testResultsPattern: '**/test-results/**/*.xml', allowEmptyResults: true
+                // publishTestResults testResultsPattern: '**/test-results/**/*.xml', allowEmptyResults: true
             }
         }
         
         success {
             script {
                 // Send success notification
-                if (env.GIT_BRANCH == 'main') {
-                    emailext (
-                        subject: "✅ Production Deployment Successful - University Management Platform",
-                        body: """
-                            <h2>Production Deployment Successful</h2>
-                            <p><strong>Build:</strong> ${env.BUILD_NUMBER}</p>
-                            <p><strong>Branch:</strong> ${env.GIT_BRANCH}</p>
-                            <p><strong>Commit:</strong> ${env.GIT_COMMIT_SHORT}</p>
-                            <p><strong>Image Tag:</strong> ${env.IMAGE_TAG}</p>
-                            <p><strong>Build URL:</strong> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
-                            <p><strong>ArgoCD URL:</strong> <a href="https://localhost:8080">https://localhost:8080</a></p>
-                        """,
-                        recipientProviders: [[$class: 'DevelopersRecipientProvider']]
-                    )
-                } else {
-                    emailext (
-                        subject: "✅ Development Deployment Successful - University Management Platform",
-                        body: """
-                            <h2>Development Deployment Successful</h2>
-                            <p><strong>Build:</strong> ${env.BUILD_NUMBER}</p>
-                            <p><strong>Branch:</strong> ${env.GIT_BRANCH}</p>
-                            <p><strong>Commit:</strong> ${env.GIT_COMMIT_SHORT}</p>
-                            <p><strong>Image Tag:</strong> ${env.IMAGE_TAG}</p>
-                            <p><strong>Build URL:</strong> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
-                        """,
-                        recipientProviders: [[$class: 'DevelopersRecipientProvider']]
-                    )
-                }
+                echo "✅ Build successful for branch: ${env.GIT_BRANCH}"
+                echo "✅ Build number: ${env.BUILD_NUMBER}"
+                echo "✅ Commit: ${env.GIT_COMMIT_SHORT}"
+                echo "✅ Build URL: ${env.BUILD_URL}"
             }
         }
         
         failure {
             script {
                 // Send failure notification
-                emailext (
-                    subject: "❌ Build Failed - University Management Platform",
-                    body: """
-                        <h2>Build Failed</h2>
-                        <p><strong>Build:</strong> ${env.BUILD_NUMBER}</p>
-                        <p><strong>Branch:</strong> ${env.GIT_BRANCH}</p>
-                        <p><strong>Commit:</strong> ${env.GIT_COMMIT_SHORT}</p>
-                        <p><strong>Build URL:</strong> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
-                        <p><strong>Console Output:</strong> <a href="${env.BUILD_URL}console">Console</a></p>
-                    """,
-                    recipientProviders: [[$class: 'DevelopersRecipientProvider']]
-                )
+                echo "❌ Build failed for branch: ${env.GIT_BRANCH}"
+                echo "❌ Build number: ${env.BUILD_NUMBER}"
+                echo "❌ Commit: ${env.GIT_COMMIT_SHORT}"
+                echo "❌ Build URL: ${env.BUILD_URL}"
             }
         }
         
         cleanup {
             script {
                 // Clean workspace
-                cleanWs()
+                echo "🧹 Cleaning up workspace..."
             }
         }
     }

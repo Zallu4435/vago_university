@@ -5,22 +5,24 @@ import FeesPaymentsSection from './FeesPaymentsSection';
 import FinancialAidSection from './FinancialAidSection';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import { MdCurrencyRupee } from 'react-icons/md';
-import type { StudentFinancialInfo } from '../../../../domain/types/user/financial';
 import { formatDateTime } from '../../../../shared/utils/dateUtils';
-import { usePaymentsManagement } from '../../../../application/hooks/useFinancial';
+import { financialService } from '../../../../application/services/financialService';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 
+interface FinancialState {
+  info: any[];
+  history: any[];
+  financialAidStatus: string;
+}
+
 export default function Financial() {
-  const {
-    getStudentFinancialInfo,
-    loading,
-    error,
-  } = usePaymentsManagement();
   const { styles, theme } = usePreferences();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   const [activeTab, setActiveTab] = useState('Fees and Payments');
-  const [studentInfo, setStudentInfo] = useState<StudentFinancialInfo>({
+  const [studentInfo, setStudentInfo] = useState<FinancialState>({
     info: [],
     history: [],
     financialAidStatus: '',
@@ -28,21 +30,26 @@ export default function Financial() {
 
   const fetchFinancialData = async () => {
     try {
-      const info: any = await getStudentFinancialInfo();
+      setLoading(true);
+      const response = await financialService.getStudentFinancialInfo();
+
       setStudentInfo({
-        info: Array.isArray(info?.info) ? info.info : [],
-        history: Array.isArray(info?.history) ? info.history : [],
-        financialAidStatus: typeof info?.financialAidStatus === 'string' ? info.financialAidStatus : '',
+        info: Array.isArray(response?.info) ? response.info : [],
+        history: Array.isArray(response?.history) ? response.history : [],
+        financialAidStatus: response?.financialAidStatus || '',
       });
-    } catch (err) {
+      setError(null);
+    } catch (err: any) {
       console.error('Error fetching financial data:', err);
+      setError(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchFinancialData();
-  }, [getStudentFinancialInfo]);
-
+  }, []);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -73,7 +80,7 @@ export default function Financial() {
                 <div className={`h-0.5 sm:h-1 w-12 sm:w-16 bg-gradient-to-r ${styles.accent} rounded-full mt-1 group-hover:w-16 sm:group-hover:w-24 transition-all duration-300`}></div>
               </div>
             </div>
-            <div className={`mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm ${styles.textSecondary}`}> 
+            <div className={`mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm ${styles.textSecondary}`}>
               <div className="flex items-center gap-1">
                 <span className="font-medium">Account Balance:</span>
                 <MdCurrencyRupee />
@@ -116,7 +123,6 @@ export default function Financial() {
             />
           )}
           {activeTab === 'Financial Aid' && <FinancialAidSection />}
-          {/* {activeTab === 'Scholarships' && <ScholarshipsSection />} */}
         </div>
       </div>
     </div>

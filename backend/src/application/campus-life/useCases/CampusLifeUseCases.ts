@@ -366,8 +366,6 @@ export class JoinClubUseCase implements IJoinClubUseCase {
     if (!params.reason) {
       return { success: false, data: { error: "Reason is required" } };
     }
-    // Check for existing request, club, and user in the use case if needed
-    // For now, just create the request
     const newRequest = await this.campusLifeRepository.joinClub(params);
     return {
       success: true,
@@ -390,8 +388,6 @@ export class JoinSportUseCase implements IJoinSportUseCase {
     if (!params.reason) {
       return { success: false, data: { error: "Reason is required" } };
     }
-    // Check for existing request, sport, and user in the use case if needed
-    // For now, just create the request
     const newRequest = await this.campusLifeRepository.joinSport(params);
     return {
       success: true,
@@ -414,8 +410,6 @@ export class JoinEventUseCase implements IJoinEventUseCase {
     if (!params.reason) {
       return { success: false, data: { error: "Reason is required" } };
     }
-    // Check for existing request, event, and user in the use case if needed
-    // For now, just create the request
     const newRequest = await this.campusLifeRepository.joinEvent(params);
     return {
       success: true,

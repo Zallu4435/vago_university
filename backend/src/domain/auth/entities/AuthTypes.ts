@@ -17,6 +17,7 @@ export interface UserProps {
   email: string;
   password: string;
   profilePicture?: string;
+  blocked?: boolean;
 }
 
 export interface FacultyProps {

@@ -11,18 +11,7 @@ import {
   JoinClubRequestDTO,
   JoinSportRequestDTO,
   JoinEventRequestDTO,
-  CampusLifeOverviewResponseDTO,
-  GetEventsResponseDTO,
-  GetEventByIdResponseDTO,
-  GetSportsResponseDTO,
-  GetSportByIdResponseDTO,
-  GetClubsResponseDTO,
-  GetClubByIdResponseDTO,
-  JoinClubResponseDTO,
-  JoinSportResponseDTO,
-  JoinEventResponseDTO,
 } from "../../../domain/campus-life/dtos/CampusLifeDTOs";
-import { CampusEvent, Sport, Club, JoinRequest, SportType } from "../../../domain/campus-life/entities/CampusLife";
 import { CampusEventModel, EventRequestModel } from "../../../infrastructure/database/mongoose/models/events/CampusEventModel";
 import { TeamModel, SportRequestModel } from "../../../infrastructure/database/mongoose/models/sports.model";
 import { ClubModel, ClubRequestModel } from "../../../infrastructure/database/mongoose/models/clubs/ClubModel";
@@ -123,7 +112,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
         .limit(5)
         .lean();
     } else {
-      events = await this.findEvents(query, 0, 1000); // 1000 = arbitrary large limit for all matches
+      events = await this.findEvents(query, 0, 1000); 
     }
     const totalItems = await this.countEvents(query);
     let requests: any[] = [];

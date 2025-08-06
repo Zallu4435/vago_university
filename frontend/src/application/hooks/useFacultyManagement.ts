@@ -17,9 +17,8 @@ export const useFacultyManagement = () => {
   });
 
   const queryClient = useQueryClient();
-  const limit = 10; // Number of items per page
+  const limit = 10; 
 
-  // Fetch faculty list
   const {
     data: facultyData,
     isLoading,
@@ -27,7 +26,6 @@ export const useFacultyManagement = () => {
   } = useQuery({
     queryKey: ['faculty', page, filters],
     queryFn: () => {
-      // Clean up filter values before sending to API
       const cleanFilters = {
         status: filters.status === 'all' ? undefined : filters.status,
         department: filters.department === 'all_departments' ? undefined : filters.department,
@@ -51,7 +49,6 @@ export const useFacultyManagement = () => {
     placeholderData: (previousData) => previousData,
   });
 
-  // Get faculty details
   const getFacultyDetails = async (id: string) => {
     try {
       const response = await facultyService.getFacultyDetails(id);
@@ -62,7 +59,6 @@ export const useFacultyManagement = () => {
     }
   };
 
-  // Approve faculty mutation
   const approveFaculty = useMutation({
     mutationFn: (data: { id: string; approvalData: FacultyApprovalData }) => 
       facultyService.approveFaculty(data.id, data.approvalData),
@@ -75,7 +71,6 @@ export const useFacultyManagement = () => {
     }
   });
 
-  // Reject faculty mutation
   const rejectFaculty = useMutation({
     mutationFn: (data: { id: string; reason: string }) => 
       facultyService.rejectFaculty(data.id, data.reason),
@@ -88,7 +83,6 @@ export const useFacultyManagement = () => {
     }
   });
 
-  // Delete faculty mutation
   const deleteFaculty = useMutation({
     mutationFn: (id: string) => facultyService.deleteFaculty(id),
     onSuccess: () => {
@@ -100,7 +94,6 @@ export const useFacultyManagement = () => {
     }
   });
 
-  // Update faculty status mutation
   const updateFacultyStatus = useMutation({
     mutationFn: (data: { id: string; status: string }) => 
       facultyService.updateFacultyStatus(data.id, data.status),
@@ -113,7 +106,6 @@ export const useFacultyManagement = () => {
     }
   });
 
-  // Block/unblock faculty mutation
   const blockFaculty = useMutation({
     mutationFn: (id: string) => facultyService.blockFaculty(id),
     onSuccess: () => {
@@ -139,6 +131,6 @@ export const useFacultyManagement = () => {
     rejectFaculty,
     deleteFaculty,
     updateFacultyStatus,
-    blockFaculty // <-- expose blockFaculty
+    blockFaculty 
   };
 };

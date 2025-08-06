@@ -22,7 +22,11 @@ import {
     AdminAdmissionNotFoundError,
     AdminAdmissionAlreadyProcessedError,
     AdminRegisterUserNotFoundError,
+    AdminTokenExpiredError,
+    AdminInvalidTokenError,
+
 } from '../../../domain/admin/errors/AdminAdmissionErrors';
+import { AdminAdmissionStatus } from "../../../domain/admin/entities/AdminAdmissionTypes";
 
 interface ResponseDTO<T> {
     data: T | { error: string };
@@ -62,51 +66,115 @@ export interface IBlockAdmissionUseCase {
 }
 
 export class GetAdmissionsUseCase implements IGetAdmissionsUseCase {
-    constructor(private admissionRepository: IAdmissionRepository) { }
+    constructor(private repo: IAdmissionRepository) { }
 
-    async execute(params: GetAdmissionsRequestDTO): Promise<ResponseDTO<GetAdmissionsResponseDTO>> {
+    async execute(p: GetAdmissionsRequestDTO): Promise<ResponseDTO<GetAdmissionsResponseDTO>> {
+        /* ---------- build filter ---------- */
+        const filter: Record<string, any> = {};
 
-        const result = await this.admissionRepository.getAdmissions(params);
-        const admissions = await Promise.all(result.admissions.map(async (admission: any) => {
-            let blocked = false;
-            if (admission.personal?.emailAddress) {
-                const user = await this.admissionRepository.findUserByEmail(admission.personal.emailAddress);
-                blocked = user?.blocked ?? false;
-            }
-            return {
-                _id: admission._id.toString(),
-                fullName: admission.personal?.fullName || "N/A",
-                email: admission.personal?.emailAddress || "N/A",
-                createdAt: admission.createdAt instanceof Date ? admission.createdAt.toISOString() : new Date(admission.createdAt).toISOString(),
-                status: (admission.status || "pending") as "pending" | "approved" | "rejected" | "offered",
-                program: admission.choiceOfStudy?.[0]?.programme || "N/A",
-                blocked,
+        // status
+        if (p.status && !p.status.startsWith("all")) {
+            filter.status = p.status === "approved"
+                ? { $in: ["approved", "offered"] }
+                : p.status;
+        }
+
+        // program
+        if (p.program && !p.program.startsWith("all")) {
+            const prog = p.program
+                .toLowerCase()
+                .replace(/_/g, " ")
+                .replace(/\b\w/g, l => l.toUpperCase());
+
+            filter.choiceOfStudy = {
+                $elemMatch: { programme: { $regex: `^${prog}$`, $options: "i" } },
             };
-        }));
+        }
+
+        // date range
+        if (p.dateRange && !p.dateRange.startsWith("all")) {
+            const now = new Date();
+            const days = { last_week: 7, last_month: 30, last_3_months: 90 }[p.dateRange];
+            if (days) {
+                filter.createdAt = { $gte: new Date(now.getTime() - days * 86_400_000) };
+            } else if (p.dateRange === "custom" && p.startDate && p.endDate) {
+                const from = new Date(p.startDate);
+                const to = new Date(p.endDate);
+                to.setHours(23, 59, 59, 999);
+                filter.createdAt = { $gte: from, $lte: to };
+            }
+        }
+
+        // text search
+        if (p.search?.trim()) {
+            const q = p.search.trim();
+            filter.$or = [
+                { "personal.fullName": { $regex: q, $options: "i" } },
+                { "personal.emailAddress": { $regex: q, $options: "i" } },
+            ];
+        }
+
+        /* ---------- paging ---------- */
+        const skip = (p.page - 1) * p.limit;
+        const proj = {
+            _id: 1,
+            "personal.fullName": 1,
+            "personal.emailAddress": 1,
+            createdAt: 1,
+            status: 1,
+            choiceOfStudy: 1,
+        };
+
+        /* ---------- query db ---------- */
+        const [rawAdmissions, total] = await Promise.all([
+            this.repo.find(filter, proj, skip, p.limit),
+            this.repo.count(filter),
+        ]);
+
+        /* ---------- enrich & map ---------- */
+        const admissions = await Promise.all(
+            rawAdmissions.map(async (a) => {
+                const email = a.personal?.emailAddress;
+                const user = email ? await this.repo.findUserByEmail(email) : null;
+                return {
+                    _id: a._id.toString(),
+                    fullName: a.personal?.fullName ?? "N/A",
+                    email: email ?? "N/A",
+                    createdAt: new Date(a.createdAt).toISOString(),
+                    status: (a.status ?? "pending") as AdminAdmissionStatus,
+                    program: a.choiceOfStudy?.[0]?.programme ?? "N/A",
+                    blocked: (user as any)?.blocked ?? false,
+                };
+            })
+        );
+
         return {
             data: {
-                ...result,
                 admissions,
+                totalAdmissions: total,
+                totalPages: Math.ceil(total / p.limit),
+                currentPage: p.page,
             },
             success: true,
         };
     }
 }
 
+
 export class GetAdmissionByIdUseCase implements IGetAdmissionByIdUseCase {
     constructor(private admissionRepository: IAdmissionRepository) { }
 
     async execute(params: GetAdmissionByIdRequestDTO): Promise<ResponseDTO<GetAdmissionByIdResponseDTO>> {
-        const result = await this.admissionRepository.getAdmissionById(params);
-        if (!result || !result.admission) {
+        const admission = await this.admissionRepository.getAdmissionById(params.id);
+        if (!admission) {
             throw new AdminAdmissionNotFoundError();
         }
         let blocked = false;
-        if (result.admission.personal?.emailAddress) {
-            const user = await this.admissionRepository.findUserByEmail(result.admission.personal.emailAddress);
+        if (admission.personal?.emailAddress) {
+            const user = await this.admissionRepository.findUserByEmail(admission.personal.emailAddress);
             blocked = user?.blocked ?? false;
         }
-        return { data: { ...result, admission: { ...result.admission, blocked } }, success: true };
+        return { data: { ...admission, blocked }, success: true };
     }
 }
 
@@ -114,11 +182,20 @@ export class GetAdmissionByTokenUseCase implements IGetAdmissionByTokenUseCase {
     constructor(private admissionRepository: IAdmissionRepository) { }
 
     async execute(params: GetAdmissionByTokenRequestDTO): Promise<ResponseDTO<GetAdmissionByTokenResponseDTO>> {
-        const result = await this.admissionRepository.getAdmissionByToken(params);
-        if (!result || !result.admission) {
+        const admission = await this.admissionRepository.getAdmissionByToken(params.admissionId, params.token);
+        if (!admission) {
             throw new AdminAdmissionNotFoundError();
         }
-        return { data: result, success: true };
+        if (admission.status !== "offered") {
+            throw new AdminAdmissionAlreadyProcessedError();
+        }
+        if (!admission.confirmationToken || admission.confirmationToken !== params.token) {
+            throw new AdminInvalidTokenError();
+        }
+        if (!admission.tokenExpiry || new Date() > admission.tokenExpiry) {
+            throw new AdminTokenExpiredError();
+        }
+        return { data: { admission }, success: true };
     }
 }
 
@@ -185,11 +262,11 @@ export class DeleteAdmissionUseCase implements IDeleteAdmissionUseCase {
     constructor(private admissionRepository: IAdmissionRepository) { }
 
     async execute(params: DeleteAdmissionRequestDTO): Promise<ResponseDTO<DeleteAdmissionResponseDTO>> {
-        const result = await this.admissionRepository.deleteAdmission(params);
-        if (!result) {
+        const success = await this.admissionRepository.deleteAdmission(params.id);
+        if (!success) {
             throw new AdminAdmissionNotFoundError();
         }
-        return { data: result, success: true };
+        return { data: { message: "Admission deleted successfully" }, success: true };
     }
 }
 
@@ -197,7 +274,7 @@ export class ConfirmAdmissionOfferUseCase implements IConfirmAdmissionOfferUseCa
     constructor(private admissionRepository: IAdmissionRepository) { }
 
     async execute(params: ConfirmAdmissionOfferRequestDTO): Promise<ResponseDTO<ConfirmAdmissionOfferResponseDTO>> {
-        const result = await this.admissionRepository.confirmAdmissionOffer(params);
+        const result = await this.admissionRepository.confirmAdmissionOffer(params.admissionId, params.token, params.action);
         if (!result) {
             throw new AdminAdmissionNotFoundError();
         }

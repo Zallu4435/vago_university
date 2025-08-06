@@ -25,4 +25,25 @@ export interface AdminAdmission {
   rejectedBy?: string;
   createdAt?: Date;
   blocked?: boolean;
+}
+
+export interface FullAdmissionDetails {
+  _id?: string;
+  registerId: string;
+  applicationId: string;
+  personal: AdminAdmissionPersonal;
+  choiceOfStudy: AdminAdmissionChoiceOfStudy[];
+  education: Record<string, unknown>;
+  achievements: Record<string, unknown>;
+  otherInformation: Record<string, unknown>;
+  documents: Record<string, unknown>;
+  declaration: Record<string, unknown>;
+  paymentId: string;
+  status: AdminAdmissionStatus;
+  confirmationToken?: string;
+  tokenExpiry?: Date;
+  rejectedBy?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 } 
+

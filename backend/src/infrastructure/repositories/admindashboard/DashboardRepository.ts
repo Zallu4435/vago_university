@@ -1,17 +1,4 @@
 import { IDashboardRepository } from '../../../application/admindashboard/repositories/IDashboardRepository';
-import {
-  GetDashboardDataRequestDTO,
-  GetDashboardMetricsRequestDTO,
-  GetUserGrowthDataRequestDTO,
-  GetRevenueDataRequestDTO,
-  GetPerformanceDataRequestDTO,
-  GetRecentActivitiesRequestDTO,
-  GetSystemAlertsRequestDTO,
-  RefreshDashboardRequestDTO,
-  DismissAlertRequestDTO,
-  MarkActivityAsReadRequestDTO,
-} from '../../../domain/admindashboard/dtos/DashboardRequestDTOs';
-
 import { User } from '../../database/mongoose/auth/user.model';
 import { CourseModel } from '../../database/mongoose/models/courses/CourseModel';
 import { Admission } from '../../database/mongoose/admission/AdmissionModel';
@@ -29,7 +16,7 @@ import { ClubModel } from '../../database/mongoose/models/clubs/ClubModel';
 import { PerformanceRawData } from '../../../domain/admindashboard/entities/AdminDashboardTypes';
 
 export class DashboardRepository implements IDashboardRepository {
-  async getDashboardData(params: GetDashboardDataRequestDTO): Promise<any> {
+  async getDashboardData() {
     const [
       metricsRaw,
       userGrowthRaw,
@@ -38,12 +25,12 @@ export class DashboardRepository implements IDashboardRepository {
       activitiesRaw,
       alertsRaw
     ] = await Promise.all([
-      this.getDashboardMetrics({}),
-      this.getUserGrowthData({}),
-      this.getRevenueData({}),
-      this.getPerformanceData({}),
-      this.getRecentActivities({}),
-      this.getSystemAlerts({}),
+      this.getDashboardMetrics(),
+      this.getUserGrowthData(),
+      this.getRevenueData(),
+      this.getPerformanceData(),
+      this.getRecentActivities(),
+      this.getSystemAlerts(),
     ]);
     return {
       metricsRaw,
@@ -55,7 +42,7 @@ export class DashboardRepository implements IDashboardRepository {
     };
   }
 
-  async getDashboardMetrics(params: GetDashboardMetricsRequestDTO): Promise<any> {
+  async getDashboardMetrics() {
     const [totalUsers, totalFaculty, totalCourses, pendingAdmissions, completedPayments] = await Promise.all([
       User.countDocuments({}),
       Faculty.countDocuments({}),
@@ -75,10 +62,9 @@ export class DashboardRepository implements IDashboardRepository {
     };
   }
 
-  async getUserGrowthData(params: GetUserGrowthDataRequestDTO): Promise<any> {
-    const { period = 'monthly', startDate, endDate } = params;
-    const end = endDate ? new Date(endDate) : new Date();
-    const start = startDate ? new Date(startDate) : new Date(end.getTime() - 6 * 30 * 24 * 60 * 60 * 1000);
+  async getUserGrowthData() {
+    const end = new Date();
+    const start = new Date(end.getTime() - 6 * 30 * 24 * 60 * 60 * 1000);
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const userGrowthRaw: any[] = [];
     for (let i = 0; i < 6; i++) {
@@ -94,12 +80,11 @@ export class DashboardRepository implements IDashboardRepository {
       });
     }
     return userGrowthRaw;
-  }
+  } 
 
-  async getRevenueData(params: GetRevenueDataRequestDTO): Promise<any> {
-    const { period = 'monthly', startDate, endDate } = params;
-    const end = endDate ? new Date(endDate) : new Date();
-    const start = startDate ? new Date(startDate) : new Date(end.getTime() - 6 * 30 * 24 * 60 * 60 * 1000);
+  async getRevenueData() {
+    const end = new Date();
+    const start = new Date(end.getTime() - 6 * 30 * 24 * 60 * 60 * 1000);
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const revenueRaw: any[] = [];
     for (let i = 0; i < 6; i++) {
@@ -128,7 +113,7 @@ export class DashboardRepository implements IDashboardRepository {
     return revenueRaw;
   }
 
-  async getPerformanceData(params: GetPerformanceDataRequestDTO): Promise<PerformanceRawData> {
+  async getPerformanceData(): Promise<PerformanceRawData> {
     const [
       userCount,
       facultyCount,
@@ -175,7 +160,7 @@ export class DashboardRepository implements IDashboardRepository {
     };
   }
 
-  async getRecentActivities(params: GetRecentActivitiesRequestDTO): Promise<any> {
+  async getRecentActivities() {
     // Only fetch raw recent admissions, payments, enquiries, notifications
     const [recentAdmissions, recentPayments, recentEnquiries, recentNotifications] = await Promise.all([
       Admission.find({}).sort({ createdAt: -1 }).limit(3).populate('registerId', 'firstName lastName email'),
@@ -191,7 +176,7 @@ export class DashboardRepository implements IDashboardRepository {
     };
   }
 
-  async getSystemAlerts(params: GetSystemAlertsRequestDTO): Promise<any> {
+  async getSystemAlerts() {
     const [pendingAdmissions, failedPayments, overdueCharges, completedPayments] = await Promise.all([
       Admission.countDocuments({ status: 'pending' }),
       PaymentModel.countDocuments({ status: 'Failed' }),
@@ -206,35 +191,9 @@ export class DashboardRepository implements IDashboardRepository {
     };
   }
 
-  async refreshDashboard(params: RefreshDashboardRequestDTO): Promise<any> {
-    return await this.getDashboardData({});
+  async refreshDashboard() {
+    return await this.getDashboardData();
   }
+ 
 
-  async dismissAlert(params: DismissAlertRequestDTO): Promise<any> {
-    return { alertId: params.alertId };
-  }
-
-  async markActivityAsRead(params: MarkActivityAsReadRequestDTO): Promise<any> {
-    return { activityId: params.activityId };
-  }
-
-  private getTimeAgo(date: Date | string): string {
-    const now = new Date();
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000);
-
-    if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-    return `${Math.floor(diffInSeconds / 86400)} days ago`;
-  }
-
-  private getInitials(name: string): string {
-    return name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  }
 } 

@@ -1,69 +1,87 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-// Firebase messaging temporarily disabled for mobile access
-// import { getToken } from 'firebase/messaging';
-import axios from 'axios';
+import { getToken, Messaging } from 'firebase/messaging';
 import { RootState } from '../../../appStore/store';
 import { IoNotificationsOutline as NotificationIcon } from 'react-icons/io5';
-// import { messaging, VAPID_KEY } from '../firebase/setup';
+import { messaging as firebaseMessaging, VAPID_KEY } from '../../../firebase/setup';
+
 import httpClient from '../../../frameworks/api/httpClient';
 
-// Constants
 const NOTIFICATION_PERMISSION_KEY = 'notificationPermission';
 
-// Types
 interface User {
   id: string;
+  role?: string;
 }
 
 const NotificationPermissionModal: React.FC = () => {
-  // Get user from Redux store
   const user = useSelector((state: RootState) => state.auth.user) as User | null;
   const collection = useSelector((state: RootState) => state.auth.collection)
-  
-  // Local state
+
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Check if modal should be shown on mount and user login
   useEffect(() => {
     const checkPermission = () => {
       const permission = localStorage.getItem(NOTIFICATION_PERMISSION_KEY);
-      if (user && !permission) {
+      // Skip showing for admin users
+      if (user && !permission && collection !== 'admin' && user.role !== 'admin') {
         setIsOpen(true);
       }
     };
 
     checkPermission();
-  }, [user]);
+  }, [user, collection]);
 
-  // Handle enabling notifications
   const handleEnableNotifications = async () => {
     try {
       setIsLoading(true);
 
-      // Request browser notification permission
       const permission = await Notification.requestPermission();
-      
+
       if (permission === 'granted') {
-        // Firebase messaging temporarily disabled
-        // Get FCM token
-        // const token = await getToken(messaging, {
-        //   vapidKey: VAPID_KEY,
-        // });
+        try {
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            let serviceWorkerRegistration;
 
-        // Send token to backend
-        // await httpClient.post(`/fcm/${collection}/${user?.id}/fcm-token`, {
-        //   token,
-        // });
+            const existingFCMWorker = registrations.find(reg =>
+              reg.active && reg.active.scriptURL.includes('firebase-messaging-sw.js')
+            );
 
-        // Store permission in localStorage
+            if (existingFCMWorker) {
+              serviceWorkerRegistration = existingFCMWorker;
+            } else {
+              serviceWorkerRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+                scope: '/'
+              });
+            }
+
+            const messaging = firebaseMessaging as Messaging;
+            const token = await getToken(messaging, {
+              vapidKey: VAPID_KEY,
+              serviceWorkerRegistration
+            });
+
+
+            if (user?.id && collection) {
+              await httpClient.post(`/fcm/${collection}/${user.id}/fcm-token`, {
+                token,
+              });
+            } else {
+              console.error('[NotificationModal] Missing user ID or collection');
+            }
+          } else {
+            console.error('[NotificationModal] Service workers not supported');
+          }
+        } catch (fcmError) {
+          console.error('[NotificationModal] Error setting up FCM:', fcmError);
+        }
+
         localStorage.setItem(NOTIFICATION_PERMISSION_KEY, 'granted');
-        
-        // Close modal
+
         setIsOpen(false);
       } else {
-        console.log('Notification permission denied');
         localStorage.setItem(NOTIFICATION_PERMISSION_KEY, 'denied');
         setIsOpen(false);
       }
@@ -74,7 +92,6 @@ const NotificationPermissionModal: React.FC = () => {
     }
   };
 
-  // Handle disabling notifications
   const handleDisableNotifications = () => {
     localStorage.setItem(NOTIFICATION_PERMISSION_KEY, 'denied');
     setIsOpen(false);
@@ -85,7 +102,6 @@ const NotificationPermissionModal: React.FC = () => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-gray-800 rounded-xl p-6 w-full max-w-md mx-4">
-        {/* Header */}
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
             <NotificationIcon className="text-2xl text-purple-400" />
@@ -93,7 +109,6 @@ const NotificationPermissionModal: React.FC = () => {
           <h2 className="text-xl font-semibold text-white">Enable Notifications</h2>
         </div>
 
-        {/* Content */}
         <div className="space-y-4">
           <p className="text-gray-300">
             Stay updated with important announcements, deadlines, and updates by enabling notifications.
@@ -103,7 +118,6 @@ const NotificationPermissionModal: React.FC = () => {
           </p>
         </div>
 
-        {/* Actions */}
         <div className="flex gap-3 mt-6">
           <button
             onClick={handleEnableNotifications}

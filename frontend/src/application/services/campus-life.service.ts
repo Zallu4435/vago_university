@@ -1,4 +1,3 @@
-// src/application/services/campus-life.service.ts
 import { CampusLifeResponse, Event, Sport, Club, JoinRequest } from '../../domain/types/user/campus-life';
 import httpClient from '../../frameworks/api/httpClient';
 
@@ -16,7 +15,6 @@ class CampusLifeService {
     console.log('campusLifeService.getEvents params', params);
     try {
       const response = await httpClient.get('/campus-life/events', { params });
-      // Print the final URL if possible
       if (response?.config?.url) {
         console.log('campusLifeService.getEvents final URL', response.config.url);
       }
@@ -45,7 +43,6 @@ class CampusLifeService {
     console.log('campusLifeService.getClubs params', params);
     try {
       const response = await httpClient.get('/campus-life/clubs', { params });
-      // Print the final URL if possible
       if (response?.config?.url) {
         console.log('campusLifeService.getClubs final URL', response.config.url);
       }

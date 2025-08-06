@@ -1,32 +1,15 @@
-import {
-    GetAdmissionsRequestDTO,
-    GetAdmissionByIdRequestDTO,
-    GetAdmissionByTokenRequestDTO,
-    ApproveAdmissionRequestDTO,
-    RejectAdmissionRequestDTO,
-    DeleteAdmissionRequestDTO,
-    ConfirmAdmissionOfferRequestDTO,
-  } from "../../../domain/admin/dtos/AdmissionRequestDTOs";
-  import {
-    GetAdmissionsResponseDTO,
-    GetAdmissionByIdResponseDTO,
-    GetAdmissionByTokenResponseDTO,
-    ApproveAdmissionResponseDTO,
-    RejectAdmissionResponseDTO,
-    DeleteAdmissionResponseDTO,
-    ConfirmAdmissionOfferResponseDTO,
-  } from "../../../domain/admin/dtos/AdmissionResponseDTOs";
-  
-  export interface IAdmissionRepository {
-    getAdmissions(params: GetAdmissionsRequestDTO): Promise<GetAdmissionsResponseDTO>;
-    getAdmissionById(params: GetAdmissionByIdRequestDTO): Promise<GetAdmissionByIdResponseDTO>;
-    getAdmissionByToken(params: GetAdmissionByTokenRequestDTO): Promise<GetAdmissionByTokenResponseDTO>;
-    approveAdmission(params: ApproveAdmissionRequestDTO): Promise<ApproveAdmissionResponseDTO>;
-    rejectAdmission(params: RejectAdmissionRequestDTO): Promise<RejectAdmissionResponseDTO>;
-    deleteAdmission(params: DeleteAdmissionRequestDTO): Promise<DeleteAdmissionResponseDTO>;
-    confirmAdmissionOffer(params: ConfirmAdmissionOfferRequestDTO): Promise<ConfirmAdmissionOfferResponseDTO>;
-    findAdmissionById(id: string): Promise<any>;
-    saveAdmission(admission: any): Promise<any>;
-    findUserByEmail(email: string): Promise<any>;
-    saveUser(user: any): Promise<any>;
-  }
+import { AdminAdmission, FullAdmissionDetails } from "../../../domain/admin/entities/AdminAdmissionTypes";
+import { User } from "../../../domain/auth/entities/Auth";
+
+export interface IAdmissionRepository {
+  find(filter: any, projection: any, skip: number, limit: number): Promise<AdminAdmission[]>;
+  count(filter: any): Promise<number>;  
+  getAdmissionById(id: string): Promise<FullAdmissionDetails>;
+  getAdmissionByToken(admissionId: string, token: string): Promise<FullAdmissionDetails>;
+  deleteAdmission(id: string): Promise<FullAdmissionDetails>;
+  confirmAdmissionOffer(admissionId: string, token: string, action: string);
+  findAdmissionById(id: string): Promise<FullAdmissionDetails | null>;
+  saveAdmission(admission: AdminAdmission): Promise<AdminAdmission>;
+  findUserByEmail(email: string): Promise<User | null>;
+  saveUser(user: User): Promise<User>;
+}

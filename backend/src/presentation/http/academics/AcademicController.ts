@@ -9,7 +9,6 @@ import {
     IRegisterCourseUseCase,
     IDropCourseUseCase,
     IRequestTranscriptUseCase,
-    IScheduleMeetingUseCase,
 } from "../../../application/academics/useCases/AcademicUseCases";
 import { IHttpRequest, IHttpResponse, HttpSuccess, HttpErrors } from "../IHttp";
 import { IAcademicController } from "../IHttp"
@@ -30,7 +29,6 @@ export class AcademicController implements IAcademicController {
         private readonly registerCourseUseCase: IRegisterCourseUseCase,
         private readonly dropCourseUseCase: IDropCourseUseCase,
         private readonly requestTranscriptUseCase: IRequestTranscriptUseCase,
-        private readonly scheduleMeetingUseCase: IScheduleMeetingUseCase
     ) {
         this.httpSuccess = new HttpSuccess();
         this.httpErrors = new HttpErrors();
@@ -143,7 +141,7 @@ export class AcademicController implements IAcademicController {
             reason,
         });
         if (!result.success) {
-            const errorMsg = (result.data as any).error || "Failed to register course";
+            const errorMsg = (result.data as { error: string }).error || "Failed to register course";
             return this.httpErrors.error_400(errorMsg);
         }
         return this.httpSuccess.success_200(result.data);
@@ -186,33 +184,6 @@ export class AcademicController implements IAcademicController {
             deliveryMethod,
             address,
             email,
-        });
-        if (!result.success) {
-            return this.httpErrors.error_400();
-        }
-        return this.httpSuccess.success_200(result.data);
-    }
-
-    async scheduleMeeting(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-        const { date, reason, preferredTime, notes } = httpRequest.body;
-        if (!httpRequest.user) {
-            return this.httpErrors.error_401();
-        }
-        if (!date || !reason) {
-            return this.httpErrors.error_400();
-        }
-        if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z$/.test(date)) {
-            return this.httpErrors.error_400();
-        }
-        if (preferredTime && !['morning', 'afternoon'].includes(preferredTime)) {
-            return this.httpErrors.error_400();
-        }
-        const result = await this.scheduleMeetingUseCase.execute({
-            studentId: httpRequest.user.userId,
-            date,
-            reason,
-            preferredTime,
-            notes,
         });
         if (!result.success) {
             return this.httpErrors.error_400();

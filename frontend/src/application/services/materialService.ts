@@ -18,7 +18,6 @@ export const materialService = {
   ): Promise<{ materials: Material[]; totalPages: number }> {
     const params: any = { page, limit };
     
-    // Add filters only if they have meaningful values
     if (filters.subject && filters.subject !== 'All Subjects') params.subject = filters.subject;
     if (filters.course && filters.course !== 'All Courses') params.course = filters.course;
     if (filters.semester && filters.semester !== 'All Semesters') params.semester = filters.semester;
@@ -28,7 +27,6 @@ export const materialService = {
     if (filters.startDate) params.startDate = filters.startDate;
     if (filters.endDate) params.endDate = filters.endDate;
 
-    console.log('getMaterials params:', params); // Debugging log
 
     const response = await httpClient.get('/admin/materials', { params });
     return response.data.data;

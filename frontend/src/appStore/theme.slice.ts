@@ -13,7 +13,7 @@ interface ThemeState {
 }
 
 const initialState: ThemeState = {
-    theme: getInitialTheme() // <-- Use parentheses, not semicolon
+    theme: getInitialTheme() 
 };
 
 const themeSlice = createSlice({

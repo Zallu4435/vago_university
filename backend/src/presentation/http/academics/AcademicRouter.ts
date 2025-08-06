@@ -38,8 +38,5 @@ router.delete('/register/:courseId', (req, res, next) =>
 router.post('/request-transcript', (req, res, next) => 
   expressAdapter(req, res, next, academicController.requestTranscript.bind(academicController))
 );
-router.post('/schedule-meeting', (req, res, next) => 
-  expressAdapter(req, res, next, academicController.scheduleMeeting.bind(academicController))
-);
 
 export default router;

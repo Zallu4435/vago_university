@@ -1,5 +1,15 @@
 import { IAcademicRepository } from "../../../application/academics/repositories/IAcademicRepository";
 import {
+  IGetStudentInfoUseCase,
+  IGetGradeInfoUseCase,
+  IGetCoursesUseCase,
+  IGetAcademicHistoryUseCase,
+  IGetProgramInfoUseCase,
+  IGetProgressInfoUseCase,
+  IGetRequirementsInfoUseCase,
+  IRegisterCourseUseCase,
+  IDropCourseUseCase,
+  IRequestTranscriptUseCase,
   GetStudentInfoUseCase,
   GetGradeInfoUseCase,
   GetCoursesUseCase,
@@ -10,7 +20,6 @@ import {
   RegisterCourseUseCase,
   DropCourseUseCase,
   RequestTranscriptUseCase,
-  ScheduleMeetingUseCase,
 } from "../../../application/academics/useCases/AcademicUseCases";
 import { AcademicRepository } from "../../repositories/academics/AcademicRepository";
 import { IAcademicController } from "../../../presentation/http/IHttp";
@@ -19,17 +28,16 @@ import { AcademicController } from "../../../presentation/http/academics/Academi
 export function getAcademicComposer(): IAcademicController {
   const repository: IAcademicRepository = new AcademicRepository();
   
-  const getStudentInfoUseCase: GetStudentInfoUseCase = new GetStudentInfoUseCase(repository);
-  const getGradeInfoUseCase: GetGradeInfoUseCase = new GetGradeInfoUseCase(repository);
-  const getCoursesUseCase: GetCoursesUseCase = new GetCoursesUseCase(repository);
-  const getAcademicHistoryUseCase: GetAcademicHistoryUseCase = new GetAcademicHistoryUseCase(repository);
-  const getProgramInfoUseCase: GetProgramInfoUseCase = new GetProgramInfoUseCase(repository);
-  const getProgressInfoUseCase: GetProgressInfoUseCase = new GetProgressInfoUseCase(repository);
-  const getRequirementsInfoUseCase: GetRequirementsInfoUseCase = new GetRequirementsInfoUseCase(repository);
-  const registerCourseUseCase: RegisterCourseUseCase = new RegisterCourseUseCase(repository);
-  const dropCourseUseCase: DropCourseUseCase = new DropCourseUseCase(repository);
-  const requestTranscriptUseCase: RequestTranscriptUseCase = new RequestTranscriptUseCase(repository);
-  const scheduleMeetingUseCase: ScheduleMeetingUseCase = new ScheduleMeetingUseCase(repository);
+  const getStudentInfoUseCase: IGetStudentInfoUseCase = new GetStudentInfoUseCase(repository);
+  const getGradeInfoUseCase: IGetGradeInfoUseCase = new GetGradeInfoUseCase(repository);
+  const getCoursesUseCase: IGetCoursesUseCase = new GetCoursesUseCase(repository);
+  const getAcademicHistoryUseCase: IGetAcademicHistoryUseCase = new GetAcademicHistoryUseCase(repository);
+  const getProgramInfoUseCase: IGetProgramInfoUseCase = new GetProgramInfoUseCase(repository);
+  const getProgressInfoUseCase: IGetProgressInfoUseCase = new GetProgressInfoUseCase(repository);
+  const getRequirementsInfoUseCase: IGetRequirementsInfoUseCase = new GetRequirementsInfoUseCase(repository);
+  const registerCourseUseCase: IRegisterCourseUseCase = new RegisterCourseUseCase(repository);
+  const dropCourseUseCase: IDropCourseUseCase = new DropCourseUseCase(repository);
+  const requestTranscriptUseCase: IRequestTranscriptUseCase = new RequestTranscriptUseCase(repository);
 
   return new AcademicController(
     getStudentInfoUseCase,
@@ -42,6 +50,5 @@ export function getAcademicComposer(): IAcademicController {
     registerCourseUseCase,
     dropCourseUseCase,
     requestTranscriptUseCase,
-    scheduleMeetingUseCase
   );
 }

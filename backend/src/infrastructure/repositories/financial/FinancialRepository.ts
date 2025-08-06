@@ -42,7 +42,6 @@ export class FinancialRepository implements IFinancialRepository {
             const studentProgram = await ProgramModel.findOne({ studentId: params.studentId }).lean();
 
             if (!studentProgram) {
-                console.log('[FinancialRepository] No program found for student');
                 return {
                     info: [],
                     history: [],
@@ -50,9 +49,7 @@ export class FinancialRepository implements IFinancialRepository {
             }
 
             const currentDate = new Date();
-            const allCharges = await (ChargeModel as any).find({
-                dueDate: { $gte: currentDate }
-            }).lean();
+            const allCharges = await (ChargeModel as any).find({}).lean();
 
             const applicableCharges = allCharges.filter((charge: any) => {
                 if (charge.applicableFor === "All Students") {
@@ -106,8 +103,10 @@ export class FinancialRepository implements IFinancialRepository {
                     amount: info.amount,
                 }));
 
+            const unpaidCharges = formattedCharges.filter(charge => charge.status === "Pending");
+            
             return {
-                info: formattedCharges,
+                info: unpaidCharges,
                 history: formattedHistory,
             };
         } catch (error) {
@@ -209,7 +208,6 @@ export class FinancialRepository implements IFinancialRepository {
                 await (StudentFinancialInfoModel as any).deleteOne({
                     _id: existingPending._id
                 });
-                console.log(`[FinancialRepository] Deleted stale transaction for student ${params.studentId}, charge ${params.chargeId}`);
             }
         }
 
@@ -286,7 +284,6 @@ export class FinancialRepository implements IFinancialRepository {
                         metadata: payment.metadata,
                     };
                 } else {
-                    // Create Razorpay order
                     const shortStudentId = params.studentId.slice(-6);
                     const shortReceipt = `r_${shortStudentId}_${Date.now()}`;
                     const order = await razorpay.orders.create({
@@ -421,11 +418,9 @@ export class FinancialRepository implements IFinancialRepository {
     async getAllCharges(params: GetAllChargesRequestDTO): Promise<GetAllChargesResponseDTO> {
         const query: any = {};
 
-        // Add filters
         if (params.term && params.term !== 'All Terms') query.term = params.term;
         if (params.status && params.status !== 'All Statuses') query.status = params.status;
 
-        // Add search functionality
         if (params.search && params.search.trim()) {
             const searchRegex = new RegExp(params.search.trim(), 'i');
             query.$or = [
@@ -438,7 +433,7 @@ export class FinancialRepository implements IFinancialRepository {
 
         const total = await (ChargeModel as any).countDocuments(query);
         const charges = await (ChargeModel as any).find(query)
-            .sort({ createdAt: -1 }) // Sort by newest first
+            .sort({ createdAt: -1 }) 
             .skip((params.page - 1) * params.limit)
             .limit(params.limit)
             .lean();

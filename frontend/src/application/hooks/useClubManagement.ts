@@ -122,9 +122,8 @@ export const useClubManagement = () => {
 
   const handleTabChange = (tab: 'clubs' | 'requests' | 'members') => {
     setActiveTab(tab);
-    setPage(1); // Reset page when changing tabs
+    setPage(1);
 
-    // Trigger the appropriate query based on the active tab
     if (tab === 'clubs') {
       queryClient.fetchQuery({
         queryKey: ['clubs', page, filters, limit],

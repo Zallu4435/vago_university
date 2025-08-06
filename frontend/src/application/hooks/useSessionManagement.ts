@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { sessionService, CreateVideoSessionPayload, UpdateVideoSessionPayload, Attendee } from '../services/session.service';
 
-// Placeholder types for session, update, and delete. Adjust as needed.
 export interface Session {
   id: string;
   title: string;
@@ -34,7 +33,6 @@ export const useSessionManagement = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterCourse, setFilterCourse] = useState('all');
 
-  // Debounce searchTerm
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -42,7 +40,6 @@ export const useSessionManagement = () => {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // Fetch all sessions with backend filtering
   const backendStatus = filterStatus === 'completed' ? 'Ended' : filterStatus;
   const { data: sessions, isLoading: isLoadingSessions, error: sessionsError } = useQuery({
     queryKey: ['sessions', debouncedSearchTerm, backendStatus, filterCourse],
@@ -53,7 +50,6 @@ export const useSessionManagement = () => {
     }),
   });
 
-  // Create session mutation
   const createSessionMutation = useMutation({
     mutationFn: sessionService.createVideoSession,
     onSuccess: () => {
@@ -61,7 +57,6 @@ export const useSessionManagement = () => {
     }
   });
 
-  // Update session mutation
   const updateSessionMutation = useMutation({
     mutationFn: ({ id, data }: UpdateVideoSessionPayload) => sessionService.updateSession(id, data),
     onSuccess: () => {
@@ -69,7 +64,6 @@ export const useSessionManagement = () => {
     }
   });
 
-  // Delete session mutation
   const deleteSessionMutation = useMutation({
     mutationFn: (id: string) => sessionService.deleteSession(id),
     onSuccess: () => {
@@ -77,7 +71,6 @@ export const useSessionManagement = () => {
     }
   });
 
-  // Mark session as over mutation
   const markSessionAsOverMutation = useMutation({
     mutationFn: (id: string) => sessionService.updateSessionStatus(id, 'Ended'),
     onSuccess: () => {
@@ -85,7 +78,6 @@ export const useSessionManagement = () => {
     }
   });
 
-  // Handlers
   const handleCreateSession = useCallback(async (data: CreateVideoSessionPayload) => {
     try {
       await createSessionMutation.mutateAsync(data);

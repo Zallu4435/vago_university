@@ -47,9 +47,6 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
-
 # IDE files
 .vscode/
 .idea/
@@ -64,3 +61,34 @@ jspm_packages/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+test-results/
+coverage/
+
+# Docker
+.dockerignore
+Dockerfile
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+*.cert
+
+# Uploads
+uploads/
+temp/
+*.tmp
+
+# Misc
+*.tgz
+*.tar.gz

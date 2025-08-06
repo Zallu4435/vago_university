@@ -1,5 +1,3 @@
-// AdminDashboardTypes.ts
-
 export interface DashboardMetrics {
   totalUsers: number;
   totalRevenue: number;
@@ -64,10 +62,52 @@ export interface PerformanceRawData {
   enquiryCount: number;
   notificationCount: number;
   communicationCount: number;
-  financialAidCount: number;
   videoCount: number;
   sportsCount: number;
   diplomaCount: number;
   eventsCount: number;
   clubsCount: number;
+}
+
+// Repository-specific types that match actual return data
+export interface DashboardMetricsRaw {
+  totalUsers: number;
+  totalFaculty: number;
+  totalCourses: number;
+  pendingAdmissions: number;
+  completedPayments: any[];
+}
+
+export interface UserGrowthDataRaw {
+  month: string;
+  usersCount: number;
+  facultyCount: number;
+}
+
+export interface RevenueDataRaw {
+  month: string;
+  payments: any[];
+}
+
+export interface ActivityItemRaw {
+  recentAdmissions: any[];
+  recentPayments: any[];
+  recentEnquiries: any[];
+  recentNotifications: any[];
+}
+
+export interface SystemAlertRaw {
+  pendingAdmissions: number;
+  failedPayments: number;
+  overdueCharges: number;
+  completedPayments: number;
+}
+
+export interface DashboardDataRaw {
+  metricsRaw: DashboardMetricsRaw;
+  userGrowthRaw: UserGrowthDataRaw[];
+  revenueRaw: RevenueDataRaw[];
+  performanceRaw: PerformanceRawData;
+  activitiesRaw: ActivityItemRaw;
+  alertsRaw: SystemAlertRaw;
 } 

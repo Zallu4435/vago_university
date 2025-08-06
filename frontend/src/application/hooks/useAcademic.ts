@@ -34,7 +34,6 @@ export const useCourses = (options?: QueryOptions) => {
 export const useCourseSearch = (searchQuery: string, debounceMs: number = 500) => {
   const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
 
-  // Debounce the search query
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(searchQuery);
@@ -46,8 +45,8 @@ export const useCourseSearch = (searchQuery: string, debounceMs: number = 500) =
   return useQuery<Course[]>({
     queryKey: ['courses', debouncedQuery],
     queryFn: () => academicService.getCourses(debouncedQuery),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000, 
+    gcTime: 10 * 60 * 1000, 
   });
 };
 

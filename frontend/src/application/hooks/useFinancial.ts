@@ -25,7 +25,6 @@ export const usePaymentsManagement = (
     queryFn: () => financialService.getAllPayments({
       ...filters,
       studentId: searchQuery || filters.studentId || undefined,
-      // Only send status if it is a real payment status
       status: (filters.status && filters.status !== 'All Statuses' && filters.status !== 'payments' && filters.status !== 'financialAid' && filters.status !== 'scholarships') ? filters.status : undefined,
       page,
       limit: itemsPerPage,
@@ -71,9 +70,8 @@ export const usePaymentsManagement = (
     isLoadingPaymentDetails,
     handleViewPayment,
     handleEditPayment,
-    // Exposing the student financial info method
     getStudentFinancialInfo: financialService.getStudentFinancialInfo,
-    loading: isLoading, // Re-aliasing for component compatibility
+    loading: isLoading,
   };
 };
 

@@ -259,7 +259,6 @@ export interface IAcademicController extends IController {
   registerCourse(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   dropCourse(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   requestTranscript(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  scheduleMeeting(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface ICommunicationController extends IController {
@@ -399,8 +398,6 @@ export interface IAdminDashboardController extends IController {
   getRecentActivities(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getSystemAlerts(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   refreshDashboard(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  dismissAlert(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  markActivityAsRead(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface IStudentDashboardController extends IController {

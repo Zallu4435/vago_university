@@ -13,7 +13,6 @@ import {
 } from "../../../domain/sports/dtos/SportRequestDTOs";
 import { TeamModel, SportRequestModel } from "../../../infrastructure/database/mongoose/models/sports.model";
 import { User as UserModel } from "../../database/mongoose/auth/user.model";
-import mongoose from "mongoose";
 
 export class SportsRepository implements ISportsRepository {
   async getSports(params: GetSportsRequestDTO): Promise<any> {
@@ -93,11 +92,9 @@ export class SportsRepository implements ISportsRepository {
     if (search && search.trim() !== "") {
       const userMatches = await UserModel.find({ email: { $regex: search, $options: "i" } }).select("_id").lean();
       userIds = userMatches.map((u) => u._id);
-      // If no matches in either, return empty result
       if (sportIds.length === 0 && userIds.length === 0) {
         return { requests: [], totalItems: 0, totalPages: 0, currentPage: page };
       }
-      // If matches, build $or for sportId/userId
       query.$or = [];
       if (sportIds.length > 0) query.$or.push({ sportId: { $in: sportIds } });
       if (userIds.length > 0) query.$or.push({ userId: { $in: userIds } });

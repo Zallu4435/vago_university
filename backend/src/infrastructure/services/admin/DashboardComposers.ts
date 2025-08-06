@@ -8,8 +8,6 @@ import {
   GetRecentActivitiesUseCase,
   GetSystemAlertsUseCase,
   RefreshDashboardUseCase,
-  DismissAlertUseCase,
-  MarkActivityAsReadUseCase,
 } from '../../../application/admindashboard/useCases/DashboardUseCases';
 import { DashboardRepository } from '../../repositories/admindashboard/DashboardRepository';
 
@@ -24,8 +22,6 @@ export function getAdminDashboardComposer() {
   const getRecentActivitiesUseCase = new GetRecentActivitiesUseCase(dashboardRepository);
   const getSystemAlertsUseCase = new GetSystemAlertsUseCase(dashboardRepository);
   const refreshDashboardUseCase = new RefreshDashboardUseCase(dashboardRepository);
-  const dismissAlertUseCase = new DismissAlertUseCase(dashboardRepository);
-  const markActivityAsReadUseCase = new MarkActivityAsReadUseCase(dashboardRepository);
 
   const adminDashboardController = new AdminDashboardController(
     getDashboardDataUseCase,
@@ -36,8 +32,6 @@ export function getAdminDashboardComposer() {
     getRecentActivitiesUseCase,
     getSystemAlertsUseCase,
     refreshDashboardUseCase,
-    dismissAlertUseCase,
-    markActivityAsReadUseCase
   );
 
   return {

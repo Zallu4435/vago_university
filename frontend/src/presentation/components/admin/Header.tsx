@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { FiBell, FiLogOut, FiUser, FiChevronDown, FiSettings, FiHelpCircle } from 'react-icons/fi';
-import { FaUserGraduate } from 'react-icons/fa';
 
 interface AdminHeaderProps {
   adminName?: string;
@@ -30,21 +29,6 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Notification Badge */}
-            <div className="relative">
-              <button
-                className="p-2 rounded-full hover:bg-purple-900/30 transition-colors relative"
-                aria-label="Notifications"
-              >
-                <FiBell className="text-purple-300 w-5 h-5" />
-                {notificationCount > 0 && (
-                  <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-[0_0_8px_rgba(239,68,68,0.5)]">
-                    {notificationCount}
-                  </span>
-                )}
-              </button>
-            </div>
-
             {/* Admin Profile */}
             <div className="relative">
               <button
@@ -65,10 +49,6 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
               {profileDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-gray-800/90 rounded-lg shadow-2xl border border-purple-600/30 backdrop-blur-lg z-50">
                   <div className="py-1">
-                    <button className="flex items-center w-full px-4 py-2 text-sm text-purple-200 hover:bg-purple-900/30 hover:text-purple-100 transition-colors">
-                      <FiSettings className="mr-2 text-purple-400" />
-                      Settings
-                    </button>
                     <button className="flex items-center w-full px-4 py-2 text-sm text-purple-200 hover:bg-purple-900/30 hover:text-purple-100 transition-colors">
                       <FiHelpCircle className="mr-2 text-purple-400" />
                       Help

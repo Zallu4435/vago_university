@@ -19,7 +19,6 @@ class FacultyService {
         limit
       };
 
-      // Only add filter parameters if they have values
       if (status) params.status = status;
       if (department) params.department = department;
       if (dateRange) params.dateRange = dateRange;

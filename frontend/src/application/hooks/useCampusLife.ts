@@ -4,9 +4,6 @@ import { campusLifeService } from '../services/campus-life.service';
 import { JoinRequest } from '../../domain/types/user/campus-life';
 
 export const useCampusLife = (activeTab?: string, searchTerm?: string, typeFilter?: string, statusFilter?: string, eventSearchTerm?: string, sportsSearchTerm?: string, sportsStatusFilter?: string) => {
-  // Debug: log received arguments
-  console.log('useCampusLife hook args', { activeTab, searchTerm, typeFilter, statusFilter, eventSearchTerm, sportsSearchTerm });
-  // Fetch events
   const {
     data: events,
     isLoading: isLoadingEvents,
@@ -26,7 +23,6 @@ export const useCampusLife = (activeTab?: string, searchTerm?: string, typeFilte
     staleTime: 0,
   });
 
-  // Fetch sports
   const {
     data: sports,
     isLoading: isLoadingSports,
@@ -41,7 +37,6 @@ export const useCampusLife = (activeTab?: string, searchTerm?: string, typeFilte
     enabled: activeTab === 'Athletics',
   });
 
-  // Fetch clubs
   const {
     data: clubs,
     isLoading: isLoadingClubs,
@@ -53,7 +48,6 @@ export const useCampusLife = (activeTab?: string, searchTerm?: string, typeFilte
     staleTime: 0,
   });
 
-  // Join request mutations
   const {
     mutate: requestToJoinClub,
     isPending: isJoiningClub,
@@ -82,32 +76,26 @@ export const useCampusLife = (activeTab?: string, searchTerm?: string, typeFilte
   });
 
   return {
-    // Data
     events: events || [],
     sports: sports || [],
     clubs: clubs || [],
     
-    // Loading states
     isLoadingEvents,
     isLoadingSports,
     isLoadingClubs,
     
-    // Errors
     eventsError,
     sportsError,
     clubsError,
     
-    // Join request methods
     requestToJoinClub,
     requestToJoinSport,
     requestToJoinEvent,
     
-    // Join request loading states
     isJoiningClub,
     isJoiningSport,
     isJoiningEvent,
     
-    // Join request errors
     joinClubError,
     joinSportError,
     joinEventError

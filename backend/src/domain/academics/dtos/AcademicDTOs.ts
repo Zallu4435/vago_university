@@ -125,18 +125,3 @@ export interface GetStudentInfoRequestDTO {
     estimatedDelivery: string;
   }
   
-  export interface ScheduleMeetingRequestDTO {
-    studentId: string;
-    date: string;
-    reason: string;
-    preferredTime?: string;
-    notes?: string;
-  }
-  
-  export interface ScheduleMeetingResponseDTO {
-    success: boolean;
-    message: string;
-    meetingId: string;
-    meetingTime: string;
-    location: string;
-  }

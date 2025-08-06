@@ -2,13 +2,24 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ITranscriptRequest extends Document {
   studentId: mongoose.Types.ObjectId;
+  userId?: string;
   deliveryMethod: string;
   address?: string;
   email?: string;
   requestId: string;
+  requestedAt?: string;
   estimatedDelivery: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface ITranscriptRequestInput {
+  userId?: string;
+  deliveryMethod: string;
+  address?: string;
+  email?: string;
+  requestedAt?: string;
+  estimatedDelivery: string;
 }
 
 const TranscriptRequestSchema = new Schema<ITranscriptRequest>({

@@ -49,7 +49,6 @@ router.use("/admin/admissions", adminRoutes);
 
 router.use("/admission", admissionRoutes);
 
-
 router.use("/admin/dashboard", dashboardRoutes);
 
 router.use("/admin/faculty", facultyRoutes);
@@ -64,9 +63,9 @@ router.use("/admin/clubs", clubRouter);
 
 router.use("/admin/club-requests", clubRequestRouter);
 
-router.use("/admin/sports", sportRouter);
-
 router.use("/admin/sport-requests", sportRequestRouter);
+
+router.use("/admin/sports", sportRouter);
 
 router.use("/admin/events", eventRouter);
 

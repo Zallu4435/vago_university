@@ -13,16 +13,8 @@ export type GetDashboardMetricsResponseDTO = DashboardMetrics;
 export type GetUserGrowthDataResponseDTO = UserGrowthData[];
 export type GetRevenueDataResponseDTO = RevenueData[];
 export type GetPerformanceDataResponseDTO = PerformanceData[];
-export interface GetRecentActivitiesResponseDTO {
-  activities: any[];
-}
-export interface GetSystemAlertsResponseDTO {
-  pendingAdmissions: number;
-  pendingFinancialAid: number;
-  failedPayments: number;
-  overdueCharges: number;
-  completedPayments: number;
-}
+export type GetRecentActivitiesResponseDTO = ActivityItem[];
+export type GetSystemAlertsResponseDTO = SystemAlert[];
 export type RefreshDashboardResponseDTO = DashboardData;
 
 export interface DismissAlertResponseDTO {

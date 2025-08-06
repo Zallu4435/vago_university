@@ -19,7 +19,6 @@ export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters
   const [activeTab, setActiveTab] = useState<'diplomas' | 'enrollments'>('diplomas');
   const limit = 10;
 
-  // Diplomas Query
   const {
     data: diplomasData,
     isLoading: isLoadingDiplomas,
@@ -37,7 +36,6 @@ export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters
         startDate: filters?.dateRange === 'custom' ? filters?.startDate : undefined,
         endDate: filters?.dateRange === 'custom' ? filters?.endDate : undefined,
       });
-      // Add videoCount for convenience
       const diplomas = result.diplomas.map((d) => ({
         ...d,
         videoCount: d.videoIds.length,
@@ -47,7 +45,6 @@ export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters
     enabled: activeTab === 'diplomas',
   });
 
-  // Diploma Details Query
   const { data: diplomaDetails, isLoading: isLoadingDiplomaDetails } = useQuery<
     Diploma & { enrolledStudents: Enrollment[] },
     Error
@@ -57,7 +54,6 @@ export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters
     enabled: !!selectedDiplomaId,
   });
 
-  // Mutations
   const { mutateAsync: createDiploma } = useMutation({
     mutationFn: (data: Omit<Diploma, '_id' | 'createdAt' | 'updatedAt'>) =>
       diplomaBackendService.createDiploma(data),
@@ -94,7 +90,6 @@ export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters
     },
   });
 
-  // Handlers
   const handleTabChange = (tab: 'diplomas' | 'enrollments') => {
     setActiveTab(tab);
     setPage(1);

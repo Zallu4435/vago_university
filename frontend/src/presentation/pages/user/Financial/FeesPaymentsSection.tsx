@@ -6,32 +6,39 @@ import { usePreferences } from '../../../../application/context/PreferencesConte
 import PaymentReceiptModal from './PaymentReceiptModal';
 import type { Charge, Payment, FeesPaymentsSectionProps } from '../../../../domain/types/user/financial';
 
+interface ExtendedCharge extends Charge {
+  paidAt?: string;
+  method?: string;
+}
+
 export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPaymentSuccess }: FeesPaymentsSectionProps) {
-  const { makePayment, loading, error } = usePaymentsManagement();
+  const { createPayment, loading, error } = usePaymentsManagement();
   const { styles, theme } = usePreferences();
-  const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
+  const [selectedCharge, setSelectedCharge] = useState<ExtendedCharge | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'Razorpay'>('Razorpay');
   const [amountError, setAmountError] = useState<string | null>(null);
   const [showFullHistory, setShowFullHistory] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [showPaidCharges, setShowPaidCharges] = useState(false);
 
-  // Get pending charges only
-  const pendingCharges = studentInfo.filter((charge: Charge) =>
+  const pendingCharges = studentInfo.filter((charge: ExtendedCharge) =>
     charge.status === 'Pending' || !charge.status
   );
 
-  // Get payment history - show 3 initially, all when expanded
+  const paidCharges = studentInfo.filter((charge: ExtendedCharge) =>
+    charge.status === 'Paid'
+  );
+
   const getDisplayedHistory = () => {
     if (showFullHistory) {
-      return paymentHistory; // Show all payments in scrollable container
+      return paymentHistory;
     }
-    return paymentHistory.slice(0, 3); // Show only last 3 payments
+    return paymentHistory.slice(0, 3);
   };
 
   const displayedHistory = getDisplayedHistory();
 
-  // Calculate payment amount based on selected charge
   const getPaymentAmount = (): number => {
     return selectedCharge?.amount || 0;
   };
@@ -42,7 +49,11 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
     setShowFullHistory(!showFullHistory);
   };
 
-    const handleViewReceipt = (payment: Payment) => {
+  const togglePaidCharges = () => {
+    setShowPaidCharges(!showPaidCharges);
+  };
+
+  const handleViewReceipt = (payment: Payment) => {
     setSelectedPayment(payment);
     setShowReceiptModal(true);
   };
@@ -51,8 +62,6 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
     setShowReceiptModal(false);
     setSelectedPayment(null);
   };
-
-  // Load Razorpay SDK dynamically
   useEffect(() => {
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
@@ -80,82 +89,77 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
         amount: paymentAmount,
         method: paymentMethod,
         term: selectedCharge.term || 'Spring 2025',
-        chargeId: selectedCharge.id, // Pass the selected charge ID
+        chargeId: selectedCharge.id,
       };
 
       console.log('Initiating payment:', payment);
-      const response = await makePayment(payment);
 
-      if (!response) {
-        setAmountError('Failed to initiate payment.');
-        return;
-      }
+      createPayment(payment, {
+        onSuccess: (response) => {
+          if (response && typeof response === 'object' && 'error' in response) {
+            setAmountError((response as any).error || 'Payment validation failed.');
+            return;
+          }
 
-      // Check if this is a validation error response
-      if (response && typeof response === 'object' && 'error' in response) {
-        setAmountError((response as any).error || 'Payment validation failed.');
-        return;
-      }
+          if ('orderId' in response) {
+            const options = {
+              key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+              amount: paymentAmount * 100,
+              currency: 'INR',
+              name: 'Your Institution Name',
+              description: `Payment for ${studentInfo[0]?.term || 'Spring 2025'} Fees`,
+              order_id: response.orderId,
+              handler: (rzpResponse: any) => {
+                createPayment({
+                  ...payment,
+                  chargeId: selectedCharge.id,
+                  razorpayPaymentId: rzpResponse.razorpay_payment_id,
+                  razorpayOrderId: rzpResponse.razorpay_order_id,
+                  razorpaySignature: rzpResponse.razorpay_signature,
+                }, {
+                  onSuccess: (verificationResponse) => {
+                    if (verificationResponse && !('error' in verificationResponse)) {
+                      toast.success('Payment successful! Your payment has been processed.');
+                      if (onPaymentSuccess) {
+                        onPaymentSuccess();
+                      }
+                    } else {
+                      setAmountError('Payment verification failed. Please contact support.');
+                    }
+                  },
+                  onError: (err) => {
+                    console.error('Payment verification error:', err);
+                    setAmountError('Payment verification failed. Please contact support.');
+                  }
+                });
+              },
+              prefill: {
+                name: studentInfo[0]?.name || 'Student Name',
+                email: studentInfo[0]?.email || '',
+                contact: studentInfo[0]?.contact || '',
+              },
+              theme: {
+                color: '#F59E0B',
+              },
+            };
 
-      // Check if we have an orderId (Razorpay payment)
-      if ('orderId' in response) {
-        // Initialize Razorpay checkout
-        const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-          amount: paymentAmount * 100, // Razorpay expects amount in paise
-          currency: 'INR',
-          name: 'Your Institution Name',
-          description: `Payment for ${studentInfo[0]?.term || 'Spring 2025'} Fees`,
-          order_id: response.orderId,
-          handler: async (rzpResponse: any) => {
-            // Handle successful payment
-            try {
-              console.log('Payment successful, verifying with backend...');
-              const verificationResponse = await makePayment({
-                ...payment,
-                chargeId: selectedCharge.id, // Ensure chargeId is passed in verification
-                razorpayPaymentId: rzpResponse.razorpay_payment_id,
-                razorpayOrderId: rzpResponse.razorpay_order_id,
-                razorpaySignature: rzpResponse.razorpay_signature,
-              });
-
-              if (verificationResponse && !('error' in verificationResponse)) {
-                toast.success('Payment successful! Your payment has been processed.');
-                // Refresh financial data after successful payment
-                if (onPaymentSuccess) {
-                  onPaymentSuccess();
-                }
-              } else {
-                setAmountError('Payment verification failed. Please contact support.');
-              }
-            } catch (err) {
-              console.error('Payment verification error:', err);
-              setAmountError('Payment verification failed. Please contact support.');
+            const rzp = new (window as any).Razorpay(options);
+            rzp.on('payment.failed', (rzpResponse: any) => {
+              setAmountError(`Payment failed: ${rzpResponse.error.description}`);
+            });
+            rzp.open();
+          } else {
+            toast.success('Payment successful! Your payment has been processed.');
+            if (onPaymentSuccess) {
+              onPaymentSuccess();
             }
-          },
-          prefill: {
-            name: studentInfo[0]?.name || 'Student Name',
-            email: studentInfo[0]?.email || '',
-            contact: studentInfo[0]?.contact || '',
-          },
-          theme: {
-            color: '#F59E0B', // Amber color to match theme
-          },
-        };
-
-        const rzp = new (window as any).Razorpay(options);
-        rzp.on('payment.failed', (rzpResponse: any) => {
-          setAmountError(`Payment failed: ${rzpResponse.error.description}`);
-        });
-        rzp.open();
-      } else {
-        // Non-Razorpay payment (immediate completion)
-        toast.success('Payment successful! Your payment has been processed.');
-        // Refresh financial data after successful payment
-        if (onPaymentSuccess) {
-          onPaymentSuccess();
+          }
+        },
+        onError: (err: Error) => {
+          console.error('Payment error:', err);
+          setAmountError(err.message || 'Failed to initiate payment.');
         }
-      }
+      });
     } catch (err: any) {
       console.error('Payment error:', err);
       setAmountError(err.message || 'Failed to initiate payment.');
@@ -195,9 +199,19 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
         <div className="relative z-10 p-3 sm:p-5 md:p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 items-stretch">
             <div className="flex flex-col">
-              <h4 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} mb-4 border-b ${styles.border} pb-2`}>
-                Pending Charges
-              </h4>
+              <div className="flex justify-between items-center mb-4 border-b ${styles.border} pb-2">
+                <h4 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                  Pending Charges
+                </h4>
+                {paidCharges.length > 0 && (
+                  <button
+                    onClick={togglePaidCharges}
+                    className={`text-sm font-medium text-amber-600 hover:text-amber-800 transition-colors`}
+                  >
+                    {showPaidCharges ? 'Hide Paid Charges' : 'Show Paid Charges'}
+                  </button>
+                )}
+              </div>
               <div className={`relative overflow-hidden rounded-lg ${styles.card.background} p-4 border ${styles.border} group/item hover:${styles.card.hover} transition-all duration-300 flex-1 min-h-[200px] flex flex-col justify-between`}>
                 <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-lg blur transition-all duration-300`}></div>
                 <div className="relative z-10">
@@ -248,8 +262,67 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
                         <div className="flex justify-between items-center">
                           <span className="font-semibold text-base">Total Pending</span>
                           <span className="font-bold text-base">
-                            ${pendingCharges.reduce((sum: number, charge: Charge) => sum + (charge.amount || 0), 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                            ${pendingCharges.reduce((sum: number, charge: ExtendedCharge) => sum + (charge.amount || 0), 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                           </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Paid Charges Section */}
+                  {showPaidCharges && paidCharges.length > 0 && (
+                    <div className="mt-6">
+                      <h5 className={`text-base font-semibold ${styles.textPrimary} mb-3 pb-2 border-b ${styles.border}`}>
+                        Paid Charges
+                      </h5>
+                      <div className="space-y-4">
+                        {paidCharges.map((charge) => (
+                          <div
+                            key={charge.id}
+                            className={`p-4 rounded-lg border ${styles.border} bg-gradient-to-r ${styles.card.background} transition-all duration-300 shadow-sm`}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <div className="flex items-center">
+                                  <h5 className={`text-base font-semibold ${styles.textPrimary}`}>
+                                    {charge.chargeTitle || 'N/A'}
+                                  </h5>
+                                  <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">Paid</span>
+                                </div>
+                                {charge.chargeDescription && (
+                                  <p className={`text-sm ${styles.textSecondary} mt-1`}>
+                                    {charge.chargeDescription}
+                                  </p>
+                                )}
+                                {charge.term && (
+                                  <p className={`text-sm ${styles.textSecondary} mt-1`}>
+                                    <span className="font-medium">Term:</span> {charge.term}
+                                  </p>
+                                )}
+                                <p className={`text-sm ${styles.textSecondary} mt-1`}>
+                                  <span className="font-medium">Paid Date:</span>{' '}
+                                  {(charge as ExtendedCharge).paidAt
+                                    ? new Date((charge as ExtendedCharge).paidAt!).toLocaleDateString('en-US', {
+                                      month: '2-digit',
+                                      day: '2-digit',
+                                      year: 'numeric',
+                                    })
+                                    : 'N/A'}
+                                </p>
+                              </div>
+                              <div className={`text-right ${styles.textPrimary} font-bold text-base`}>
+                                ${charge.amount?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        <div className={`p-4 rounded-lg border ${styles.border} bg-gradient-to-r ${styles.accent} ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                          <div className="flex justify-between items-center">
+                            <span className="font-semibold text-base">Total Paid</span>
+                            <span className="font-bold text-base">
+                              ${paidCharges.reduce((sum: number, charge: ExtendedCharge) => sum + (charge.amount || 0), 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -267,7 +340,7 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
                 <div className="relative z-10 flex flex-col h-full">
                   {error && (
                     <div className={`mb-4 p-3 ${styles.status.error} rounded-lg text-sm`}>
-                      {error}
+                      {error.toString()}
                     </div>
                   )}
                   {amountError && (
@@ -404,7 +477,6 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
                       </div>
                     </div>
 
-                    {/* Fixed payment count and toggle button - outside scrollable container */}
                     <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
                       <div className={`text-sm ${styles.textSecondary} bg-gray-100 px-3 py-1 rounded-full`}>
                         {showFullHistory ? `${paymentHistory.length} payments total` : `Showing ${displayedHistory.length} of ${paymentHistory.length} payments`}
@@ -427,7 +499,6 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
         </div>
       </div>
 
-            {/* Payment Receipt Modal */}
       <PaymentReceiptModal
         payment={selectedPayment}
         isOpen={showReceiptModal}

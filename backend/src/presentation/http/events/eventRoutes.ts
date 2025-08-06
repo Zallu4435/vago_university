@@ -31,10 +31,10 @@ const eventRequestController = getEventRequestsComposer();
 eventRequestRouter.get("/", authMiddleware, (req, res, next) =>
   expressAdapter(req, res, next, eventRequestController.getEventRequests.bind(eventRequestController))
 );
-eventRequestRouter.patch("/:id/approve", authMiddleware, (req, res, next) =>
+eventRequestRouter.post("/:id/approve", authMiddleware, (req, res, next) =>
   expressAdapter(req, res, next, eventRequestController.approveEventRequest.bind(eventRequestController))
 );
-eventRequestRouter.patch("/:id/reject", authMiddleware, (req, res, next) =>
+eventRequestRouter.post("/:id/reject", authMiddleware, (req, res, next) =>
   expressAdapter(req, res, next, eventRequestController.rejectEventRequest.bind(eventRequestController))
 );
 eventRequestRouter.get("/:id", authMiddleware, (req, res, next) =>

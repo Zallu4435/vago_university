@@ -35,11 +35,3 @@ export interface GetSystemAlertsRequestDTO {
 export interface RefreshDashboardRequestDTO {
   // No specific parameters needed for refresh
 }
-
-export interface DismissAlertRequestDTO {
-  alertId: string;
-}
-
-export interface MarkActivityAsReadRequestDTO {
-  activityId: string;
-} 

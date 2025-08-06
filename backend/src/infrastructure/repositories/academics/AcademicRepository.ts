@@ -1,7 +1,17 @@
 import mongoose from 'mongoose';
 import { IAcademicRepository } from '../../../application/academics/repositories/IAcademicRepository';
 import {
+  Enrollment,
   EnrollmentStatus,
+  IAcademicHistoryDocument,
+  ICourseDocument,
+  IEnrollmentDocument,
+  IGradeDocument,
+  IProgramDocument,
+  IProgressDocument,
+  IRequirementDocument,
+  ITranscriptRequestDocument,
+  IUserDocument,
 } from "../../../domain/academics/entities/Academic";
 import { User as UserModel } from '../../database/mongoose/auth/user.model';
 import { ProgramModel } from '../../../infrastructure/database/mongoose/models/studentProgram.model';
@@ -12,34 +22,34 @@ import { AcademicHistoryModel } from '../../../infrastructure/database/mongoose/
 import { ProgressModel } from '../../../infrastructure/database/mongoose/models/progress.model';
 import { RequirementsModel } from '../../../infrastructure/database/mongoose/models/requirement.model';
 import { TranscriptRequestModel } from '../../../infrastructure/database/mongoose/models/transcript.model';
-import { MeetingModel } from '../../../infrastructure/database/mongoose/models/meeting.model';
+type WithStringId<T> = Omit<T, "_id"> & { _id: string };
+
 
 export class AcademicRepository implements IAcademicRepository {
-  async getUserById(userId: string): Promise<any> {
-    return await UserModel.findById(userId)
-      .select('firstName lastName email phone profilePicture')
-      .lean();
+  private async getUserById(id: string) {
+    return UserModel
+      .findById(id)
+      .select("_id firstName lastName email phone profilePicture")
+      .lean<WithStringId<IUserDocument>>({ getters: true });   // 👈 generic added
   }
 
-  async getProgramByStudentId(userId: string): Promise<any> {
-    return await ProgramModel.findOne({ studentId: userId })
-      .select('degree catalogYear credits')
-      .lean();
+  private async getProgramByStudentId(id: string) {
+    return ProgramModel
+      .findOne({ studentId: id })
+      .select("_id degree catalogYear credits")
+      .lean<WithStringId<IProgramDocument>>({ getters: true });
   }
 
-  async getPendingEnrollmentsByStudentId(userId: string): Promise<any[]> {
-    return await EnrollmentModel.find({
-      studentId: userId,
-      status: { $regex: /^pending$/, $options: 'i' },
-    })
-      .populate({
-        path: 'courseId',
-        select: 'credits',
-      })
-      .lean();
+  private async getPendingEnrollmentsByStudentId(
+    id: string
+  ): Promise<WithStringId<IEnrollmentDocument>[]> {           // 👈 note the [] here
+    return EnrollmentModel
+      .find({ studentId: id, status: /^pending/i })
+      .populate({ path: "courseId", select: "credits" })
+      .lean<WithStringId<IEnrollmentDocument>[]>({ getters: true }); // 👈 and here
   }
 
-  async findStudentById(userId: string): Promise<any> {
+  async findStudentById(userId: string) {
     if (!mongoose.isValidObjectId(userId)) {
       return null;
     }
@@ -55,13 +65,13 @@ export class AcademicRepository implements IAcademicRepository {
     return { user, program, pendingEnrollments };
   }
 
-  async findGradeByUserId(userId: string): Promise<any> {
+  async findGradeByUserId(userId: string) {
     return await GradeModel.findOne({ studentId: userId })
       .select('cumulativeGPA termGPA termName creditsEarned creditsInProgress')
-      .lean();
+      .lean<WithStringId<IGradeDocument>>({ getters: true });
   }
 
-  async findAllCourses(search?: string, page: number = 1, limit: number = 5): Promise<any[]> {
+  async findAllCourses(search?: string, page: number = 1, limit: number = 5) {
     const query: any = {};
     if (search && search.trim()) {
       const searchRegex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
@@ -78,46 +88,46 @@ export class AcademicRepository implements IAcademicRepository {
       .sort(search ? {} : { createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .lean();
+      .lean<WithStringId<ICourseDocument>[]>({ getters: true });
   }
 
-  async findAcademicHistory(userId: string, startTerm?: string, endTerm?: string): Promise<any[]> {
+  async findAcademicHistory(userId: string, startTerm?: string, endTerm?: string) {
     const query: any = { userId };
     if (startTerm) query.term = { $gte: startTerm };
     if (endTerm) query.term = { ...query.term, $lte: endTerm };
     return await AcademicHistoryModel.find(query)
       .select('term credits gpa id')
-      .lean();
+      .lean<WithStringId<IAcademicHistoryDocument>[]>({ getters: true });
   }
 
-  async findProgramByUserId(userId: string): Promise<any> {
+  async findProgramByUserId(userId: string) {
     return await ProgramModel.findOne({ studentId: userId })
       .select('degree catalogYear')
-      .lean();
+      .lean<WithStringId<IProgramDocument>>({ getters: true });
   }
 
-  async findProgressByUserId(userId: string): Promise<any> {
+  async findProgressByUserId(userId: string) {
     return await ProgressModel.findOne({ userId })
       .select('overallProgress totalCredits completedCredits remainingCredits estimatedGraduation')
-      .lean();
+      .lean<WithStringId<IProgressDocument>>({ getters: true });
   }
 
-  async findRequirementsByUserId(userId: string): Promise<any> {
+  async findRequirementsByUserId(userId: string) {
     return await RequirementsModel.findOne({ userId })
       .select('core elective general')
-      .lean();
+      .lean<WithStringId<IRequirementDocument>>({ getters: true });
   }
 
-  async findCourseById(courseId: string): Promise<any> {
+  async findCourseById(courseId: string) {
     if (!mongoose.isValidObjectId(courseId)) {
       return null;
     }
     return await CourseModel.findById(courseId)
       .select('title specialization faculty credits schedule term maxEnrollment currentEnrollment description prerequisites')
-      .lean();
+      .lean<WithStringId<ICourseDocument>>({ getters: true });
   }
 
-  async findEnrollment(studentId: string, courseId: string): Promise<any> {
+  async findEnrollment(studentId: string, courseId: string) {
     if (!mongoose.isValidObjectId(studentId) || !mongoose.isValidObjectId(courseId)) {
       return null;
     }
@@ -125,23 +135,28 @@ export class AcademicRepository implements IAcademicRepository {
       studentId,
       courseId,
       status: { $in: ['Pending', 'Approved'] },
-    }).lean();
+    }).lean<WithStringId<IEnrollmentDocument>>({ getters: true });
   }
 
-  async createEnrollment(enrollment: any): Promise<any> {
-    const newEnrollment = new EnrollmentModel({
-      _id: new mongoose.Types.ObjectId(enrollment.id),
+  async createEnrollment(enrollment: Enrollment): Promise<WithStringId<IEnrollmentDocument>> {
+    const doc = await new EnrollmentModel({
+      _id: new mongoose.Types.ObjectId(),
       studentId: enrollment.studentId,
       courseId: enrollment.courseId,
       status: EnrollmentStatus.Pending,
       reason: enrollment.reason,
-      requestedAt: new Date(),
-    });
-    await newEnrollment.save();
-    return newEnrollment.toObject();
+      requestedAt: new Date()
+    }).save();
+
+    // plugin runs here → every ObjectId already stringified
+    const o = doc.toObject({ getters: true });
+    return {
+      ...o,
+      requestedAt: (o.requestedAt as Date).toISOString()   // fix the Date → string mismatch
+    } as WithStringId<IEnrollmentDocument>;
   }
 
-  async updateCourseEnrollment(courseId: string, increment: number): Promise<any> {
+  async updateCourseEnrollment(courseId: string, increment: number) {
     if (!mongoose.isValidObjectId(courseId)) {
       return null;
     }
@@ -149,7 +164,7 @@ export class AcademicRepository implements IAcademicRepository {
       { _id: courseId, currentEnrollment: { $lt: (await CourseModel.findById(courseId)).maxEnrollment } },
       { $inc: { currentEnrollment: increment } },
       { new: true }
-    ).lean();
+    ).lean<WithStringId<ICourseDocument>>({ getters: true });
     return course;
   }
 
@@ -165,33 +180,25 @@ export class AcademicRepository implements IAcademicRepository {
     return !!result;
   }
 
-  async createTranscriptRequest(request: any): Promise<any> {
-    const newRequest = new TranscriptRequestModel({
-      _id: new mongoose.Types.ObjectId(request.id),
+  async createTranscriptRequest(
+    request: ITranscriptRequestDocument
+  ): Promise<WithStringId<ITranscriptRequestDocument>> {
+    const doc = await new TranscriptRequestModel({
+      _id: new mongoose.Types.ObjectId(),
       userId: request.userId,
       deliveryMethod: request.deliveryMethod,
       address: request.address,
       email: request.email,
-      requestId: request.id,
-      estimatedDelivery: request.estimatedDelivery,
-    });
-    await newRequest.save();
-    return newRequest.toObject();
-  }
+      requestedAt: new Date(),                     // store as Date
+      estimatedDelivery: request.estimatedDelivery
+    }).save();
 
-  async createMeeting(meeting: any): Promise<any> {
-    const newMeeting = new MeetingModel({
-      _id: new mongoose.Types.ObjectId(meeting.id),
-      userId: meeting.userId,
-      date: meeting.date,
-      reason: meeting.reason,
-      preferredTime: meeting.preferredTime,
-      notes: meeting.notes,
-      meetingId: meeting.id,
-      meetingTime: meeting.meetingTime,
-      location: meeting.location,
-    });
-    await newMeeting.save();
-    return newMeeting.toObject();
+    // plugin turns every ObjectId into string
+    const o = doc.toObject({ getters: true });
+
+    return {
+      ...o,
+      requestedAt: (o.requestedAt as unknown as Date).toISOString()  // Date ➝ ISO string
+    } as WithStringId<ITranscriptRequestDocument>;
   }
 }

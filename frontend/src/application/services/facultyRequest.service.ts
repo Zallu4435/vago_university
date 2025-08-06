@@ -1,4 +1,3 @@
-// src/application/services/facultyRequest.service.ts
 import httpClient from '../../frameworks/api/httpClient';
 import { FacultyRequestFormData } from '../../domain/validation/facultyRequestSchema';
 
@@ -12,7 +11,6 @@ class FacultyRequestService {
     try {
       const formData = new FormData();
       
-      // Append text fields
       formData.append('fullName', data.fullName);
       formData.append('email', data.email);
       formData.append('phone', data.phone);
@@ -23,7 +21,6 @@ class FacultyRequestService {
         formData.append('aboutMe', data.aboutMe);
       }
       
-      // Append files
       if (data.cv && data.cv[0]) {
         formData.append('cv', data.cv[0]);
       }

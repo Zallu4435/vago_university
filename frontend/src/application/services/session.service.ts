@@ -35,7 +35,6 @@ class SessionService {
   }
 
   async getSessions(params = {}) {
-    // Filter out empty or 'all' values
     const filteredParams = Object.fromEntries(
       Object.entries(params).filter(([_, value]) => value !== undefined && value !== null && value !== '' && value !== 'all')
     ) as Record<string, string>;
@@ -43,7 +42,6 @@ class SessionService {
       ? '?' + new URLSearchParams(filteredParams).toString()
       : '';
     const response = await httpClient.get(`/faculty/sessions/video-sessions${queryString}`);
-    // Map _id to id for all sessions
     return response.data.data.map((s: any) => ({ ...s, id: s._id }));
   }
 
@@ -79,14 +77,12 @@ class SessionService {
   }
 
   async getSessionAttendance(sessionId: string, filters: any = {}) {
-    // Filter out empty values before creating query params
     const filteredParams = Object.fromEntries(
       Object.entries(filters).filter(([_, value]) => 
         value !== undefined && value !== null && value !== '' && value !== 'all'
       )
     ) as Record<string, string>;
     
-    // Convert date objects to ISO strings if they exist
     if (filteredParams.startDate) {
       filteredParams.startDate = new Date(filteredParams.startDate).toISOString();
     }

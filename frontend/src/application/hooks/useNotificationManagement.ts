@@ -31,7 +31,6 @@ export const useNotificationManagement = () => {
 
   const isAdmin = user?.role === 'admin';
 
-  // Fetch notifications for the current page and filters
   const { data: notificationsData, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['notifications', page, filters, limit, isAdmin],
     queryFn: () => {
@@ -48,18 +47,15 @@ export const useNotificationManagement = () => {
     enabled: !!user,
   });
 
-  // Reset notifications when filters or user change
   useEffect(() => {
     setAllNotifications([]);
     setPage(1);
     setHasMore(true);
   }, [filters, user]);
 
-  // When notificationsData changes, update allNotifications
   useEffect(() => {
     if (notificationsData && notificationsData.notifications) {
       setAllNotifications((prev) => {
-        // Avoid duplicates
         const ids = new Set(prev.map((n) => n._id));
         const newOnes = notificationsData.notifications.filter((n) => !ids.has(n._id));
         return page === 1 ? notificationsData.notifications : [...prev, ...newOnes];
@@ -68,7 +64,6 @@ export const useNotificationManagement = () => {
     }
   }, [notificationsData, page]);
 
-  // Fetch next page for infinite scroll
   const fetchNextPage = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
     setIsLoadingMore(true);
@@ -101,7 +96,6 @@ export const useNotificationManagement = () => {
     }
   }, [isLoadingMore, hasMore, page, filters, isAdmin]);
 
-  // Notification details (single fetch)
   const { data: selectedNotification, isLoading: isLoadingNotificationDetails } = useQuery({
     queryKey: ['notificationDetails', selectedNotificationId],
     queryFn: () => {

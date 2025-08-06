@@ -31,14 +31,14 @@ const sportRequestController = getSportRequestsComposer();
 sportRequestRouter.get("/", authMiddleware, (req, res, next) =>
   expressAdapter(req, res, next, sportRequestController.getSportRequests.bind(sportRequestController))
 );
-sportRequestRouter.get("/:id", authMiddleware, (req, res, next) =>
-  expressAdapter(req, res, next, sportRequestController.getSportRequestDetails.bind(sportRequestController))
-);
-sportRequestRouter.patch("/:id/approve", authMiddleware, (req, res, next) =>
+sportRequestRouter.post("/:id/approve", authMiddleware, (req, res, next) =>
   expressAdapter(req, res, next, sportRequestController.approveSportRequest.bind(sportRequestController))
 );
-sportRequestRouter.patch("/:id/reject", authMiddleware, (req, res, next) =>
+sportRequestRouter.post("/:id/reject", authMiddleware, (req, res, next) =>
   expressAdapter(req, res, next, sportRequestController.rejectSportRequest.bind(sportRequestController))
+);
+sportRequestRouter.get("/:id", authMiddleware, (req, res, next) =>
+  expressAdapter(req, res, next, sportRequestController.getSportRequestDetails.bind(sportRequestController))
 );
 sportRequestRouter.post("/join", authMiddleware, (req, res, next) =>
   expressAdapter(req, res, next, sportRequestController.joinSport.bind(sportRequestController))

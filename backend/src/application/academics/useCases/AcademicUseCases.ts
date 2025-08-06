@@ -19,12 +19,14 @@ import {
   DropCourseResponseDTO,
   RequestTranscriptRequestDTO,
   RequestTranscriptResponseDTO,
-  ScheduleMeetingRequestDTO,
-  ScheduleMeetingResponseDTO,
 } from "../../../domain/academics/dtos/AcademicDTOs";
-import { IAcademicRepository, StudentInfoResult } from "../repositories/IAcademicRepository";
-import mongoose from "mongoose";
-import { EnrollmentStatus } from "../../../domain/academics/entities/Academic";
+import { IAcademicRepository } from "../repositories/IAcademicRepository";
+import {
+  EnrollmentStatus,
+  ICourseDocument,
+  IEnrollmentDocument,
+  StudentInfoResult,
+} from "../../../domain/academics/entities/Academic";
 
 interface ResponseDTO<T> {
   data: T | { error: string };
@@ -71,10 +73,6 @@ export interface IRequestTranscriptUseCase {
   execute(input: RequestTranscriptRequestDTO): Promise<ResponseDTO<RequestTranscriptResponseDTO>>;
 }
 
-export interface IScheduleMeetingUseCase {
-  execute(input: ScheduleMeetingRequestDTO): Promise<ResponseDTO<ScheduleMeetingResponseDTO>>;
-}
-
 export class GetStudentInfoUseCase implements IGetStudentInfoUseCase {
   constructor(private academicRepository: IAcademicRepository) { }
 
@@ -85,8 +83,8 @@ export class GetStudentInfoUseCase implements IGetStudentInfoUseCase {
     }
     const { user, program, pendingEnrollments } = result;
     const pendingCredits = pendingEnrollments
-      .filter((enrollment: any) => enrollment.courseId)
-      .reduce((sum: number, enrollment: any) => sum + ((enrollment.courseId as any).credits || 0), 0);
+      .filter((enrollment: IEnrollmentDocument) => enrollment.courseId)
+      .reduce((sum: number, enrollment: IEnrollmentDocument) => sum + ((enrollment.courseId as any)?.credits || 0), 0);
     const academicStanding = 'Good';
     const advisor = 'Unknown';
     const response: GetStudentInfoResponseDTO = {
@@ -131,8 +129,8 @@ export class GetCoursesUseCase implements IGetCoursesUseCase {
   async execute(input: GetCoursesRequestDTO): Promise<ResponseDTO<GetCoursesResponseDTO>> {
     const { search, page = 1, limit = 5 } = input;
     const courses = await this.academicRepository.findAllCourses(search, page, limit);
-    const mappedCourses = courses.map((course: any) => ({
-      id: course._id.toString(),
+    const mappedCourses = courses.map((course: ICourseDocument) => ({
+      id: course._id?.toString() || '',
       title: course.title,
       specialization: course.specialization,
       faculty: course.faculty,
@@ -161,7 +159,7 @@ export class GetAcademicHistoryUseCase implements IGetAcademicHistoryUseCase {
   async execute(input: GetAcademicHistoryRequestDTO): Promise<ResponseDTO<GetAcademicHistoryResponseDTO>> {
     const history = await this.academicRepository.findAcademicHistory(input.userId, input.startTerm, input.endTerm);
     const response: GetAcademicHistoryResponseDTO = {
-      history: history.map((record: any) => ({
+      history: history.map((record) => ({
         term: record.term,
         credits: record.credits,
         gpa: record.gpa,
@@ -242,7 +240,7 @@ export class RegisterCourseUseCase implements IRegisterCourseUseCase {
     }
 
     const enrollment = await this.academicRepository.createEnrollment({
-      id: new mongoose.Types.ObjectId().toString(),
+      id: '',
       studentId: input.studentId,
       courseId: input.courseId,
       status: EnrollmentStatus.Pending,
@@ -255,7 +253,7 @@ export class RegisterCourseUseCase implements IRegisterCourseUseCase {
     const response: RegisterCourseResponseDTO = {
       success: true,
       message: "Course registered successfully",
-      enrollmentId: enrollment.id
+      enrollmentId: enrollment._id?.toString() || ''
     };
 
     return { data: response, success: true };
@@ -292,7 +290,6 @@ export class RequestTranscriptUseCase implements IRequestTranscriptUseCase {
 
   async execute(input: RequestTranscriptRequestDTO): Promise<ResponseDTO<RequestTranscriptResponseDTO>> {
     const request = await this.academicRepository.createTranscriptRequest({
-      id: new mongoose.Types.ObjectId().toString(),
       userId: input.studentId,
       deliveryMethod: input.deliveryMethod,
       requestedAt: new Date().toISOString(),
@@ -304,36 +301,8 @@ export class RequestTranscriptUseCase implements IRequestTranscriptUseCase {
     const response: RequestTranscriptResponseDTO = {
       success: true,
       message: "Transcript request submitted successfully",
-      requestId: request.id,
+      requestId: request._id?.toString() || '',
       estimatedDelivery: request.estimatedDelivery
-    };
-
-    return { data: response, success: true };
-  }
-}
-
-export class ScheduleMeetingUseCase implements IScheduleMeetingUseCase {
-  constructor(private academicRepository: IAcademicRepository) { }
-
-  async execute(input: ScheduleMeetingRequestDTO): Promise<ResponseDTO<ScheduleMeetingResponseDTO>> {
-    const meeting = await this.academicRepository.createMeeting({
-      id: new mongoose.Types.ObjectId().toString(),
-      userId: input.studentId,
-      date: input.date,
-      reason: input.reason,
-      preferredTime: input.preferredTime,
-      notes: input.notes,
-      meetingTime: input.date,
-      location: "Academic Advisor Office",
-      createdAt: new Date().toISOString()
-    });
-
-    const response: ScheduleMeetingResponseDTO = {
-      success: true,
-      message: "Meeting scheduled successfully",
-      meetingId: meeting.id,
-      meetingTime: meeting.meetingTime,
-      location: meeting.location
     };
 
     return { data: response, success: true };

@@ -1,5 +1,3 @@
-import mongoose from "mongoose";
-import { AuthErrorType } from "../enums/AuthErrorType";
 import { UserProps, FacultyProps } from "./AuthTypes";
 
 export class User {
@@ -9,6 +7,7 @@ export class User {
   private _email: string;
   private _password: string;
   private _profilePicture?: string;
+  private _blocked?: boolean;
 
   constructor(props: UserProps) {
     this._id = props.id;
@@ -17,6 +16,7 @@ export class User {
     this._email = props.email;
     this._password = props.password;
     this._profilePicture = props.profilePicture;
+    this._blocked = props.blocked;
   }
 
   static create(props: UserProps): User {
@@ -32,6 +32,8 @@ export class User {
   get email(): string { return this._email; }
   get password(): string { return this._password; }
   get profilePicture(): string | undefined { return this._profilePicture; }
+  get blocked(): boolean | undefined { return this._blocked; }
+  set blocked(value: boolean | undefined) { this._blocked = value; }
 }
 
 export class Faculty {

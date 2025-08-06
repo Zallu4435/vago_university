@@ -4,7 +4,6 @@ import { facultyDashboardService } from '../services/facultyDashboardService';
 export const useFacultyDashboard = () => {
   const queryClient = useQueryClient();
 
-  // Query keys
   const dashboardKeys = {
     all: ['faculty', 'dashboard'] as const,
     stats: () => [...dashboardKeys.all, 'stats'] as const,
@@ -14,7 +13,6 @@ export const useFacultyDashboard = () => {
     recentActivities: () => [...dashboardKeys.all, 'recent-activities'] as const,
   };
 
-  // Fetch all dashboard data
   const {
     data: dashboardData,
     isLoading: isLoadingDashboard,
@@ -23,11 +21,10 @@ export const useFacultyDashboard = () => {
   } = useQuery({
     queryKey: dashboardKeys.all,
     queryFn: facultyDashboardService.getAllDashboardData,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000, 
+    gcTime: 10 * 60 * 1000, 
   });
 
-  // Individual data queries for more granular control
   const {
     data: stats,
     isLoading: isLoadingStats,
@@ -35,8 +32,8 @@ export const useFacultyDashboard = () => {
   } = useQuery({
     queryKey: dashboardKeys.stats(),
     queryFn: facultyDashboardService.getDashboardStats,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    enabled: !dashboardData, // Only fetch if not already available
+    staleTime: 2 * 60 * 1000, 
+    enabled: !dashboardData, 
   });
 
   const {
@@ -46,8 +43,8 @@ export const useFacultyDashboard = () => {
   } = useQuery({
     queryKey: dashboardKeys.weeklyAttendance(),
     queryFn: facultyDashboardService.getWeeklyAttendance,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    enabled: !dashboardData, // Only fetch if not already available
+    staleTime: 5 * 60 * 1000, 
+    enabled: !dashboardData, 
   });
 
   const {
@@ -57,8 +54,8 @@ export const useFacultyDashboard = () => {
   } = useQuery({
     queryKey: dashboardKeys.assignmentPerformance(),
     queryFn: facultyDashboardService.getAssignmentPerformance,
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    enabled: !dashboardData, // Only fetch if not already available
+    staleTime: 10 * 60 * 1000, 
+    enabled: !dashboardData, 
   });
 
   const {
@@ -68,8 +65,8 @@ export const useFacultyDashboard = () => {
   } = useQuery({
     queryKey: dashboardKeys.sessionDistribution(),
     queryFn: facultyDashboardService.getSessionDistribution,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    enabled: !dashboardData, // Only fetch if not already available
+    staleTime: 5 * 60 * 1000, 
+    enabled: !dashboardData, 
   });
 
   const {
@@ -79,35 +76,31 @@ export const useFacultyDashboard = () => {
   } = useQuery({
     queryKey: dashboardKeys.recentActivities(),
     queryFn: facultyDashboardService.getRecentActivities,
-    staleTime: 1 * 60 * 1000, // 1 minute
-    enabled: !dashboardData, // Only fetch if not already available
+    staleTime: 1 * 60 * 1000, 
+    enabled: !dashboardData, 
   });
 
-  // Computed values - use dashboard data if available, otherwise use individual queries
   const finalStats = dashboardData?.stats || stats;
   const finalWeeklyAttendance = dashboardData?.weeklyAttendance || weeklyAttendance;
   const finalAssignmentPerformance = dashboardData?.assignmentPerformance || assignmentPerformance;
   const finalSessionDistribution = dashboardData?.sessionDistribution || sessionDistribution;
   const finalRecentActivities = dashboardData?.recentActivities || recentActivities;
 
-  // Loading states
   const isLoading = isLoadingDashboard || 
     (!dashboardData && (isLoadingStats || isLoadingWeeklyAttendance || isLoadingAssignmentPerformance || 
      isLoadingSessionDistribution || isLoadingRecentActivities));
 
-  // Error states
   const hasError = dashboardError || statsError || weeklyAttendanceError || assignmentPerformanceError || 
     sessionDistributionError || recentActivitiesError;
 
   return {
-    // Data
+  
     stats: finalStats,
     weeklyAttendance: finalWeeklyAttendance,
     assignmentPerformance: finalAssignmentPerformance,
     sessionDistribution: finalSessionDistribution,
     recentActivities: finalRecentActivities,
     
-    // Loading states
     isLoading,
     isLoadingStats,
     isLoadingWeeklyAttendance,
@@ -115,7 +108,6 @@ export const useFacultyDashboard = () => {
     isLoadingSessionDistribution,
     isLoadingRecentActivities,
     
-    // Error states
     hasError,
     dashboardError,
     statsError,
@@ -124,7 +116,6 @@ export const useFacultyDashboard = () => {
     sessionDistributionError,
     recentActivitiesError,
     
-    // Utilities
     refetchDashboard,
     refetchStats: () => queryClient.invalidateQueries({ queryKey: dashboardKeys.stats() }),
     refetchRecentActivities: () => queryClient.invalidateQueries({ queryKey: dashboardKeys.recentActivities() }),

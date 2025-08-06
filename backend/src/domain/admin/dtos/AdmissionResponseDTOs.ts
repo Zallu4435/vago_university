@@ -1,4 +1,4 @@
-import { AdminAdmission, AdminAdmissionStatus } from '../entities/AdminAdmissionTypes';
+import { AdminAdmission, AdminAdmissionStatus, FullAdmissionDetails } from '../entities/AdminAdmissionTypes';
 
 export interface AdmissionResponseDTO {
     _id: string;
@@ -16,12 +16,12 @@ export interface GetAdmissionsResponseDTO {
     currentPage: number;
 }
   
-export interface GetAdmissionByIdResponseDTO {
-    admission: AdminAdmission; // includes 'blocked' property
+export interface GetAdmissionByIdResponseDTO extends FullAdmissionDetails {
+    blocked?: boolean;
 }
   
 export interface GetAdmissionByTokenResponseDTO {
-    admission: AdminAdmission; // includes 'blocked' property
+    admission: AdminAdmission;
 }
   
 export interface ApproveAdmissionResponseDTO {

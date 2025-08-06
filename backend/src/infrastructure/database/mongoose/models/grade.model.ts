@@ -7,7 +7,7 @@ export interface IGrade extends Document {
   termName: string;
   creditsEarned: string;
   creditsInProgress: string;
-  createdAt: Date;  
+  createdAt: Date;    
   updatedAt: Date;
 }
 

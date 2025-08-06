@@ -8,7 +8,6 @@ import {
   GetSubmissionByIdRequestDTO,
   ReviewSubmissionRequestDTO,
   DownloadSubmissionRequestDTO,
-  GetAnalyticsRequestDTO
 } from "../../../domain/assignments/dtos/AssignmentRequestDTOs";
 import {
   GetAssignmentsResponseDTO,

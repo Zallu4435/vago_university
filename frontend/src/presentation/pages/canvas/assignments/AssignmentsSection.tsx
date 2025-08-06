@@ -195,14 +195,14 @@ const AssignmentsSection = () => {
         <UploadModal
           assignment={currentAssignment}
           styles={styles}
-          selectedFile={selectedFile[currentAssignment.id]}
+          selectedFile={selectedFile[currentAssignment._id]}
           onClose={() => {
             setShowUploadModal(false);
             setCurrentAssignment(null);
           }}
-          onFileSelect={(file) => handleFileSelect(currentAssignment.id, file)}
+          onFileSelect={(file) => handleFileSelect(currentAssignment._id, file)}
           onSubmit={() => {
-            handleSubmit(currentAssignment.id);
+            handleSubmit(currentAssignment._id);
             setShowUploadModal(false);
             setCurrentAssignment(null);
           }}

@@ -1,152 +1,45 @@
-import {
-    GetAdmissionsRequestDTO,
-    GetAdmissionByIdRequestDTO,
-    GetAdmissionByTokenRequestDTO,
-    ApproveAdmissionRequestDTO,
-    RejectAdmissionRequestDTO,
-    DeleteAdmissionRequestDTO,
-    ConfirmAdmissionOfferRequestDTO,
-} from "../../../domain/admin/dtos/AdmissionRequestDTOs";
-import {
-    ApproveAdmissionResponseDTO,
-    RejectAdmissionResponseDTO,
-    DeleteAdmissionResponseDTO,
-    ConfirmAdmissionOfferResponseDTO,
-} from "../../../domain/admin/dtos/AdmissionResponseDTOs";
 import { IAdmissionRepository } from "../../../application/admin/repositories/IAdmissionRepository";
 import { Admission as AdmissionModel } from '../../database/mongoose/admission/AdmissionModel'
 import { Register } from "../../database/mongoose/auth/register.model";
-import { User } from "../../database/mongoose/auth/user.model";
+import { User as UserModel } from "../../database/mongoose/auth/user.model";
 import { ProgramModel } from "../../database/mongoose/models/studentProgram.model";
+import { AdminAdmission, FullAdmissionDetails } from "../../../domain/admin/entities/AdminAdmissionTypes";
+import { AdmissionErrorType } from "../../../domain/admin/enums/AdmissionErrorType";
+import { User } from "../../../domain/auth/entities/Auth";
 
 
 export class AdmissionRepository implements IAdmissionRepository {
-    async getAdmissions(params: GetAdmissionsRequestDTO): Promise<any> {
-        const { page = 1, limit = 5, status = "all", program = "all", dateRange = "all", startDate, endDate, search } = params;
-
-        const filter: Record<string, any> = {};
-
-        if (status && !status.startsWith("all")) {
-            filter.status = status === "approved" ? { $in: ["approved", "offered"] } : status;
-        }
-
-        if (program && !program.startsWith("all")) {
-            const normalizedProgram = program.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            filter.choiceOfStudy = {
-                $elemMatch: {
-                    programme: { $regex: `^${normalizedProgram}$`, $options: "i" },
-                },
-            };
-        }
-
-        if (dateRange && !dateRange.startsWith("all")) {
-            const now = new Date();
-            if (dateRange === "last_week") {
-                filter.createdAt = {
-                    $gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
-                };
-            } else if (dateRange === "last_month") {
-                filter.createdAt = {
-                    $gte: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
-                };
-            } else if (dateRange === "last_3_months") {
-                filter.createdAt = {
-                    $gte: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000),
-                };
-            } else if (dateRange === "custom" && startDate && endDate) {
-                const startDateTime = new Date(startDate);
-                const endDateTime = new Date(endDate);
-
-                endDateTime.setHours(23, 59, 59, 999);
-
-                filter.createdAt = {
-                    $gte: startDateTime,
-                    $lte: endDateTime,
-                };
-            }
-        }
-
-        if (search && search.trim()) {
-            filter.$or = [
-                { "personal.fullName": { $regex: search.trim(), $options: "i" } },
-                { "personal.emailAddress": { $regex: search.trim(), $options: "i" } }
-            ];
-        }
-
-
-        const skip = (page - 1) * limit;
-        const projection = {
-            _id: 1,
-            "personal.fullName": 1,
-            "personal.emailAddress": 1,
-            createdAt: 1,
-            status: 1,
-            choiceOfStudy: 1,
-        };
-
-        if (program && !program.startsWith("all")) {
-            const allAdmissions = await AdmissionModel.find({}).select('choiceOfStudy').lean();
-            const allPrograms = allAdmissions
-                .map(admission => admission.choiceOfStudy?.[0]?.programme)
-                .filter(Boolean);
-            const uniquePrograms = [...new Set(allPrograms)];
-        }
-
-        const admissions = await AdmissionModel.find(filter)
+    async find(filter: any, projection: any, skip: number, limit: number) {
+        const results = await AdmissionModel.find(filter)
             .select(projection)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .lean();
-
-        const totalAdmissions = await AdmissionModel.countDocuments(filter);
-        const totalPages = Math.ceil(totalAdmissions / limit);
-
-        return {
-            admissions,
-            totalAdmissions,
-            totalPages,
-            currentPage: page,
-        };
+            .lean({ getters: true });
+        return results as unknown as AdminAdmission[];
     }
 
-    async getAdmissionById(params: GetAdmissionByIdRequestDTO): Promise<any> {
-        const admission = await AdmissionModel.findById(params.id).lean();
-        if (!admission) {
-            throw new Error(AdmissionErrorType.AdmissionNotFound);
-        }
-        return { admission };
+    async count(filter: any) {
+        return AdmissionModel.countDocuments(filter);
     }
 
-    async getAdmissionByToken(params: GetAdmissionByTokenRequestDTO): Promise<any> {
 
-        const admission = await AdmissionModel.findById(params.admissionId)
+    async getAdmissionById(id: string) {
+        const admission = await AdmissionModel.findById(id).lean({ getters: true });
+        return { admission } as unknown as FullAdmissionDetails;
+    }
+
+    async getAdmissionByToken(admissionId: string, token: string) {
+
+        const admission = await AdmissionModel.findById(admissionId)
             .select("personal choiceOfStudy status confirmationToken tokenExpiry")
-            .lean();
+            .lean({ getters: true });
 
-
-        if (!admission) {
-            throw new Error(AdmissionErrorType.AdmissionNotFound);
-        }
-
-
-        if (!admission.confirmationToken || admission.confirmationToken !== params.token) {
-            throw new Error(AdmissionErrorType.InvalidToken);
-        }
-
-        if (!admission.tokenExpiry || new Date() > admission.tokenExpiry) {
-            throw new Error(AdmissionErrorType.TokenExpired);
-        }
-
-        if (admission.status !== "offered") {
-            throw new Error(AdmissionErrorType.AdmissionAlreadyProcessed);
-        }
-
-        return { admission };
+        return admission as unknown as FullAdmissionDetails;
     }
 
     async findAdmissionById(id: string) {
-        return AdmissionModel.findById(id);
+        return AdmissionModel.findById(id).lean({ getters: true }) as unknown as FullAdmissionDetails;
     }
 
     async saveAdmission(admission: any) {
@@ -154,23 +47,16 @@ export class AdmissionRepository implements IAdmissionRepository {
     }
 
     async findUserByEmail(email: string) {
-        return User.findOne({ email });
+        return UserModel.findOne({ email }).lean({ getters: true }) as unknown as User;
     }
 
     async saveUser(user: any) {
         return user.save();
     }
 
-    async approveAdmission(params: ApproveAdmissionRequestDTO): Promise<ApproveAdmissionResponseDTO> {
-        throw new Error('Business logic moved to use case layer. Use findAdmissionById and saveAdmission instead.');
-    }
 
-    async rejectAdmission(params: RejectAdmissionRequestDTO): Promise<RejectAdmissionResponseDTO> {
-        throw new Error('Business logic moved to use case layer. Use findAdmissionById and saveAdmission instead.');
-    }
-
-    async deleteAdmission(params: DeleteAdmissionRequestDTO): Promise<DeleteAdmissionResponseDTO> {
-        const admission = await AdmissionModel.findById(params.id);
+    async deleteAdmission(id: string) {
+        const admission = await AdmissionModel.findById(id);
         if (!admission) {
             throw new Error(AdmissionErrorType.AdmissionNotFound);
         }
@@ -178,30 +64,30 @@ export class AdmissionRepository implements IAdmissionRepository {
             throw new Error(AdmissionErrorType.AdmissionAlreadyProcessed);
         }
 
-        await AdmissionModel.deleteOne({ _id: params.id });
+        await AdmissionModel.deleteOne({ _id: id });
 
-        return { message: "Admission deleted" };
+        return admission as unknown as FullAdmissionDetails;
     }
 
-    async confirmAdmissionOffer(params: ConfirmAdmissionOfferRequestDTO): Promise<ConfirmAdmissionOfferResponseDTO> {
-        const admission = await AdmissionModel.findById(params.admissionId);
+    async confirmAdmissionOffer(admissionId: string, token: string, action: string) {
+        const admission = await AdmissionModel.findById(admissionId);
         if (!admission) {
             throw new Error(AdmissionErrorType.AdmissionNotFound);
         }
         if (admission.status !== "offered") {
             throw new Error(AdmissionErrorType.AdmissionAlreadyProcessed);
         }
-        if (!admission.confirmationToken || admission.confirmationToken !== params.token) {
+        if (!admission.confirmationToken || admission.confirmationToken !== token) {
             throw new Error(AdmissionErrorType.InvalidToken);
         }
         if (!admission.tokenExpiry || new Date() > admission.tokenExpiry) {
             throw new Error(AdmissionErrorType.TokenExpired);
         }
-        if (params.action !== "accept" && params.action !== "reject") {
+        if (action !== "accept" && action !== "reject") {
             throw new Error(AdmissionErrorType.InvalidAction);
         }
 
-        if (params.action === "accept") {
+        if (action === "accept") {
             admission.status = "approved" as any;
             admission.rejectedBy = undefined;
             const registerUser = await Register.findById(admission.registerId);
@@ -213,7 +99,7 @@ export class AdmissionRepository implements IAdmissionRepository {
             const firstName = fullNameParts[0];
             const lastName = fullNameParts.slice(1).join(" ") || "";
 
-            const user = new User({
+            const user = new UserModel({
                 firstName,
                 lastName,
                 email: admission.personal.emailAddress,
@@ -253,7 +139,7 @@ export class AdmissionRepository implements IAdmissionRepository {
         await admission.save();
 
         return {
-            message: params.action === "accept"
+            message: action === "accept"
                 ? "Admission accepted and user account created"
                 : "Admission offer rejected",
         };

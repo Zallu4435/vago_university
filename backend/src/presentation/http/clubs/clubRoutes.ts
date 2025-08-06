@@ -61,14 +61,14 @@ clubRequestRouter.get(
     expressAdapter(req, res, next, clubRequestController.getClubRequestDetails.bind(clubRequestController))
 );
 
-clubRequestRouter.patch(
+clubRequestRouter.post(
   "/:id/approve",
   authMiddleware,
   (req, res, next) =>
     expressAdapter(req, res, next, clubRequestController.approveClubRequest.bind(clubRequestController))
 );
 
-clubRequestRouter.patch(
+clubRequestRouter.post(
   "/:id/reject",
   authMiddleware,
   (req, res, next) =>

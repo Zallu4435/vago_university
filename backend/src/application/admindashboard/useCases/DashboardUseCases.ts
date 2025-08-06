@@ -7,8 +7,6 @@ import {
   GetRecentActivitiesRequestDTO,
   GetSystemAlertsRequestDTO,
   RefreshDashboardRequestDTO,
-  DismissAlertRequestDTO,
-  MarkActivityAsReadRequestDTO,
 } from "../../../domain/admindashboard/dtos/DashboardRequestDTOs";
 import {
   GetDashboardDataResponseDTO,
@@ -17,12 +15,13 @@ import {
   GetRevenueDataResponseDTO,
   GetRecentActivitiesResponseDTO,
   GetSystemAlertsResponseDTO,
-  RefreshDashboardResponseDTO,
-  DismissAlertResponseDTO,
-  MarkActivityAsReadResponseDTO,
 } from "../../../domain/admindashboard/dtos/DashboardResponseDTOs";
 import { IDashboardRepository } from "../repositories/IDashboardRepository";
-import { PerformanceRawData, PerformanceData } from '../../../domain/admindashboard/entities/AdminDashboardTypes';
+import { 
+  PerformanceRawData, 
+  PerformanceData,
+  DashboardDataRaw,
+} from '../../../domain/admindashboard/entities/AdminDashboardTypes';
 import {
   DashboardDataNotFoundError,
   DashboardMetricsError,
@@ -31,8 +30,6 @@ import {
   DashboardPerformanceError,
   DashboardActivitiesError,
   DashboardAlertsError,
-  DashboardDismissAlertError,
-  DashboardMarkActivityError
 } from '../../../domain/admindashboard/errors/DashboardErrors';
 
 interface ResponseDTO<T> {
@@ -69,25 +66,18 @@ export interface IGetSystemAlertsUseCase {
 }
 
 export interface IRefreshDashboardUseCase {
-  execute(params: RefreshDashboardRequestDTO): Promise<ResponseDTO<RefreshDashboardResponseDTO>>;
+  execute(params: RefreshDashboardRequestDTO): Promise<ResponseDTO<DashboardDataRaw>>;
 }
 
-export interface IDismissAlertUseCase {
-  execute(params: DismissAlertRequestDTO): Promise<ResponseDTO<DismissAlertResponseDTO>>;
-}
-
-export interface IMarkActivityAsReadUseCase {
-  execute(params: MarkActivityAsReadRequestDTO): Promise<ResponseDTO<MarkActivityAsReadResponseDTO>>;
-}
 
 export class GetDashboardDataUseCase implements IGetDashboardDataUseCase {
   constructor(private dashboardRepository: IDashboardRepository) {}
 
-  async execute(params: GetDashboardDataRequestDTO): Promise<ResponseDTO<GetDashboardDataResponseDTO>> {
-    const raw: any = await this.dashboardRepository.getDashboardData(params);
+  async execute(): Promise<ResponseDTO<GetDashboardDataResponseDTO>> {
+    const raw: any = await this.dashboardRepository.getDashboardData();
     if (!raw || !raw.metricsRaw || !raw.userGrowthRaw || !raw.revenueRaw || !raw.performanceRaw || !raw.activitiesRaw || !raw.alertsRaw) {
       throw new DashboardDataNotFoundError();
-    }
+    } 
     const dashboardData = {
       metrics: raw.metricsRaw.data,
       userGrowth: raw.userGrowthRaw.data,
@@ -97,14 +87,14 @@ export class GetDashboardDataUseCase implements IGetDashboardDataUseCase {
       alerts: raw.alertsRaw.data,
     };
     return { data: dashboardData, success: true };
-  }
-}
+  } 
+} 
 
 export class GetDashboardMetricsUseCase implements IGetDashboardMetricsUseCase {
   constructor(private dashboardRepository: IDashboardRepository) {}
 
-  async execute(params: GetDashboardMetricsRequestDTO): Promise<ResponseDTO<GetDashboardMetricsResponseDTO>> {
-    const raw: any = await this.dashboardRepository.getDashboardMetrics(params);
+  async execute(): Promise<ResponseDTO<GetDashboardMetricsResponseDTO>> {
+    const raw: any = await this.dashboardRepository.getDashboardMetrics();
     if (!raw || !Array.isArray(raw.completedPayments)) {
       throw new DashboardMetricsError();
     }
@@ -123,8 +113,8 @@ export class GetDashboardMetricsUseCase implements IGetDashboardMetricsUseCase {
 export class GetUserGrowthDataUseCase implements IGetUserGrowthDataUseCase {
   constructor(private dashboardRepository: IDashboardRepository) {}
 
-  async execute(params: GetUserGrowthDataRequestDTO): Promise<ResponseDTO<GetUserGrowthDataResponseDTO>> {
-    const raw: any = await this.dashboardRepository.getUserGrowthData(params);
+  async execute(): Promise<ResponseDTO<GetUserGrowthDataResponseDTO>> {
+    const raw: any = await this.dashboardRepository.getUserGrowthData();
     if (!raw || !Array.isArray(raw) || raw.length === 0) {
       throw new DashboardUserGrowthError();
     }
@@ -146,8 +136,8 @@ export class GetUserGrowthDataUseCase implements IGetUserGrowthDataUseCase {
 export class GetRevenueDataUseCase implements IGetRevenueDataUseCase {
   constructor(private dashboardRepository: IDashboardRepository) {}
 
-  async execute(params: GetRevenueDataRequestDTO): Promise<ResponseDTO<GetRevenueDataResponseDTO>> {
-    const raw = await this.dashboardRepository.getRevenueData(params);
+  async execute(): Promise<ResponseDTO<GetRevenueDataResponseDTO>> {
+    const raw = await this.dashboardRepository.getRevenueData();
     if (!raw || !Array.isArray(raw) || raw.length === 0) {
       throw new DashboardRevenueError();
     }
@@ -172,8 +162,8 @@ export class GetRevenueDataUseCase implements IGetRevenueDataUseCase {
 export class GetPerformanceDataUseCase implements IGetPerformanceDataUseCase {
   constructor(private dashboardRepository: IDashboardRepository) {}
 
-  async execute(params: GetPerformanceDataRequestDTO): Promise<ResponseDTO<PerformanceData[]>> {
-    const raw: PerformanceRawData = await this.dashboardRepository.getPerformanceData(params);
+  async execute(): Promise<ResponseDTO<PerformanceData[]>> {
+    const raw: PerformanceRawData = await this.dashboardRepository.getPerformanceData();
     if (!raw) {
       throw new DashboardPerformanceError();
     } 
@@ -186,7 +176,6 @@ export class GetPerformanceDataUseCase implements IGetPerformanceDataUseCase {
       { name: 'Enquiry Management', value: Math.round(70 + (raw.enquiryCount * 2)), color: '#06B6D4' },
       { name: 'Notification Management', value: Math.round(70 + (raw.notificationCount * 3)), color: '#EC4899' },
       { name: 'Communication Management', value: Math.round(70 + (raw.communicationCount * 4)), color: '#F97316' },
-      { name: 'Financial Aid Management', value: Math.round(70 + (raw.financialAidCount * 2.5)), color: '#84CC16' },
       { name: 'Video Management', value: Math.round(70 + (raw.videoCount * 4)), color: '#F472B6' },
       { name: 'Sports Management', value: Math.round(70 + (raw.sportsCount * 5)), color: '#22D3EE' },
       { name: 'Diploma Management', value: Math.round(70 + (raw.diplomaCount * 6)), color: '#A78BFA' },
@@ -200,8 +189,8 @@ export class GetPerformanceDataUseCase implements IGetPerformanceDataUseCase {
 export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
   constructor(private dashboardRepository: IDashboardRepository) {}
 
-  async execute(params: GetRecentActivitiesRequestDTO): Promise<ResponseDTO<GetRecentActivitiesResponseDTO>> {
-    const raw = await this.dashboardRepository.getRecentActivities(params);
+  async execute(): Promise<ResponseDTO<GetRecentActivitiesResponseDTO>> {
+    const raw = await this.dashboardRepository.getRecentActivities();
     if (!raw || !raw.recentAdmissions || !raw.recentPayments || !raw.recentEnquiries || !raw.recentNotifications) {
       throw new DashboardActivitiesError();
     }
@@ -255,7 +244,6 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
         isRead: false,
       });
     });
-    // Sort by time descending if time is available
     activities.sort((a, b) => {
       if (a.time && b.time) {
         return new Date(b.time).getTime() - new Date(a.time).getTime();
@@ -269,8 +257,8 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
 export class GetSystemAlertsUseCase implements IGetSystemAlertsUseCase {
   constructor(private dashboardRepository: IDashboardRepository) {}
 
-  async execute(params: GetSystemAlertsRequestDTO): Promise<ResponseDTO<GetSystemAlertsResponseDTO>> {
-    const raw = await this.dashboardRepository.getSystemAlerts(params);
+  async execute(): Promise<ResponseDTO<GetSystemAlertsResponseDTO>> {
+    const raw = await this.dashboardRepository.getSystemAlerts();
     if (!raw) {
       throw new DashboardAlertsError();
     }
@@ -286,17 +274,7 @@ export class GetSystemAlertsUseCase implements IGetSystemAlertsUseCase {
         isDismissed: false,
       });
     }
-    if (raw.pendingFinancialAid > 0) {
-      alerts.push({
-        id: '2',
-        title: `${raw.pendingFinancialAid} financial aid applications pending`,
-        message: 'Review required',
-        type: 'info',
-        priority: 'medium',
-        timestamp: new Date().toISOString(),
-        isDismissed: false,
-      });
-    }
+
     if (raw.failedPayments > 0) {
       alerts.push({
         id: '3',
@@ -337,35 +315,11 @@ export class GetSystemAlertsUseCase implements IGetSystemAlertsUseCase {
 export class RefreshDashboardUseCase implements IRefreshDashboardUseCase {
   constructor(private dashboardRepository: IDashboardRepository) {}
 
-  async execute(params: RefreshDashboardRequestDTO): Promise<ResponseDTO<RefreshDashboardResponseDTO>> {
-    const raw = await this.dashboardRepository.refreshDashboard(params);
+  async execute(): Promise<ResponseDTO<DashboardDataRaw>> {
+    const raw = await this.dashboardRepository.refreshDashboard();
     if (!raw) {
       throw new DashboardDataNotFoundError();
     }
     return { data: raw, success: true };
   }
 }
-
-export class DismissAlertUseCase implements IDismissAlertUseCase {
-  constructor(private dashboardRepository: IDashboardRepository) {}
-
-  async execute(params: DismissAlertRequestDTO): Promise<ResponseDTO<DismissAlertResponseDTO>> {
-    const raw = await this.dashboardRepository.dismissAlert(params);
-    if (!raw || !raw.alertId) {
-      throw new DashboardDismissAlertError();
-    }
-    return { data: { success: true, message: `Alert ${raw.alertId} dismissed successfully` }, success: true };
-  }
-}
-
-export class MarkActivityAsReadUseCase implements IMarkActivityAsReadUseCase {
-  constructor(private dashboardRepository: IDashboardRepository) {}
-
-  async execute(params: MarkActivityAsReadRequestDTO): Promise<ResponseDTO<MarkActivityAsReadResponseDTO>> {
-    const raw = await this.dashboardRepository.markActivityAsRead(params);
-    if (!raw || !raw.activityId) {
-      throw new DashboardMarkActivityError();
-    }
-    return { data: { success: true, message: `Activity ${raw.activityId} marked as read successfully` }, success: true };
-  }
-} 

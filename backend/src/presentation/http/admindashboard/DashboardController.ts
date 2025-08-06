@@ -8,8 +8,6 @@ import {
   GetRecentActivitiesUseCase,
   GetSystemAlertsUseCase,
   RefreshDashboardUseCase,
-  DismissAlertUseCase,
-  MarkActivityAsReadUseCase,
 } from "../../../application/admindashboard/useCases/DashboardUseCases";
 
 export class AdminDashboardController implements IAdminDashboardController {
@@ -25,8 +23,6 @@ export class AdminDashboardController implements IAdminDashboardController {
     private getRecentActivitiesUseCase: GetRecentActivitiesUseCase,
     private getSystemAlertsUseCase: GetSystemAlertsUseCase,
     private refreshDashboardUseCase: RefreshDashboardUseCase,
-    private dismissAlertUseCase: DismissAlertUseCase,
-    private markActivityAsReadUseCase: MarkActivityAsReadUseCase
   ) {
     this.httpErrors = new HttpErrors();
     this.httpSuccess = new HttpSuccess();
@@ -114,27 +110,4 @@ export class AdminDashboardController implements IAdminDashboardController {
     return this.httpSuccess.success_200(response.data);
   }
 
-  async dismissAlert(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { alertId } = httpRequest.params || {};
-    if (!alertId) {
-      return this.httpErrors.error_400();
-    }
-    const response = await this.dismissAlertUseCase.execute({ alertId });
-    if (!response.success) {
-      return this.httpErrors.error_400();
-    }
-    return this.httpSuccess.success_200(response.data);
-  }
-
-  async markActivityAsRead(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { activityId } = httpRequest.params || {};
-    if (!activityId) {
-      return this.httpErrors.error_400();
-    }
-    const response = await this.markActivityAsReadUseCase.execute({ activityId });
-    if (!response.success) {
-      return this.httpErrors.error_400();
-    }
-    return this.httpSuccess.success_200(response.data);
-  }
 } 

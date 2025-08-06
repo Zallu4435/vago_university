@@ -96,7 +96,7 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
   };
 
   const handleArchiveMessage = (message: Message) => {
-    console.log('Archiving message:', message); // Placeholder for archive functionality
+    console.log('Archiving message:', message); 
   };
 
   const handleViewMessage = (message: Message) => {
@@ -125,7 +125,6 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
     []
   );
 
-  // Map backend messages to frontend format
   const mapMessage = (msg: any): Message => {
     const mappedMessage = {
       id: msg._id,

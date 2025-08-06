@@ -47,10 +47,20 @@ const io = new SocketIOServer(httpServer, {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Health check endpoint for Docker
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 Logger.info('Initializing Socket.IO services...');
 import { SocketService } from "./infrastructure/services/socket/SocketService";
+import { stringIdPlugin } from "./infrastructure/database/mongoose/plugins/stringId.plugin";
 const socketService = new SocketService(io);
 setupSessionSocketHandlers(io);
 Logger.info('Socket.IO services initialized');
@@ -71,6 +81,8 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
     code: err.code || "INTERNAL_SERVER_ERROR"
   });
 });
+
+mongoose.plugin(stringIdPlugin);
 
 mongoose
   .connect(config.database.mongoUri, {

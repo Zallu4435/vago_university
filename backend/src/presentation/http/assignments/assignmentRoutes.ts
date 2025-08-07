@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { expressAdapter } from '../../adapters/ExpressAdapter';
-import { AssignmentComposers } from '../../../infrastructure/services/assignments/AssignmentComposers';
+import { getAssignmentComposer } from '../../../infrastructure/services/assignments/AssignmentComposers';
 import { authMiddleware } from '../../../shared/middlewares/authMiddleware';
 import { assignmentUpload } from '../../../config/cloudinary.config';
 const fetch = require('node-fetch');
 
-const assignmentController = AssignmentComposers.composeAssignmentController();
+const assignmentController = getAssignmentComposer();
 const router = Router();
 
 router.get('/download-submission-file', authMiddleware, async (req: any, res: any) => {

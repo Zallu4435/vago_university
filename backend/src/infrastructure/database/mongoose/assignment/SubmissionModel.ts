@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { Submission } from '../../../../domain/assignments/entities/Submission';
 
 export interface ISubmissionDocument extends Document {
   assignmentId: mongoose.Types.ObjectId;

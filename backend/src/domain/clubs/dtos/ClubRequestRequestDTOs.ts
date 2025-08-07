@@ -2,9 +2,11 @@ export interface GetClubRequestsRequestDTO {
     page: number;
     limit: number;
     status?: string;
+    type?: string;
     category?: string;
     startDate?: Date;
     endDate?: Date;
+    search?: string;
   }
   
   export interface ApproveClubRequestRequestDTO {

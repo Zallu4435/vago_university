@@ -4,7 +4,6 @@ import { Submission } from './entities/Submission';
 export interface AssignmentFile {
   fileName: string;
   fileUrl: string;
-  fileSize: number;
 }
 
 export enum SubmissionStatus {

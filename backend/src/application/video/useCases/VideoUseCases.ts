@@ -15,7 +15,6 @@ import {
 } from '../../../domain/video/dtos/VideoResponseDTOs';
 import mongoose from "mongoose";
 import { cloudinary } from '../../../config/cloudinary.config';
-import { IDiploma } from '../repositories/IVideoRepository';
 import {
     InvalidVideoIdError,
     VideoNotFoundError,
@@ -52,20 +51,127 @@ export class GetVideosUseCase implements IGetVideosUseCase {
     constructor(private videoRepository: IVideoRepository) { }
 
     async execute(params: GetVideosRequestDTO): Promise<ResponseDTO<GetVideosResponseDTO>> {
+        // Validation
         if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
             throw new DomainError("Invalid page or limit parameters");
         }
-        let diploma: IDiploma | null = null;
-        if (params.category && params.category !== 'all') {
-            diploma = await this.videoRepository.findDiplomaByCategory(params.category);
+
+        // Build query object
+        const query = await this.buildQuery(params);
+
+        // Get data from repository
+        const [videos, totalItems] = await Promise.all([
+            this.videoRepository.findVideos(query, params.page, params.limit),
+            this.videoRepository.countVideos(query)
+        ]);
+
+        // Map and transform data
+        const mappedVideos = this.mapVideosToDTO(videos);
+        const totalPages = Math.ceil(totalItems / params.limit);
+
+        const result: GetVideosResponseDTO = {
+            data: mappedVideos,
+            totalItems,
+            totalPages,
+            currentPage: params.page,
+        };
+
+        return { data: result, success: true };
+    }
+
+    private async buildQuery(params: GetVideosRequestDTO) {
+        const { category, status, dateRange, startDate, endDate, search } = params;
+        let query: any = {};
+
+        // Handle category filter
+        if (category && category !== 'all') {
+            const diploma = await this.videoRepository.findDiplomaByCategory(category);
             if (!diploma) {
                 throw new InvalidDiplomaIdError();
             }
+            query.diplomaId = diploma._id;
         }
-        const result = await this.videoRepository.getVideos(params);
-        return { data: result, success: true };
+
+        // Handle status filter
+        if (status && status !== 'all') {
+            query.status = status;
+        }
+
+        // Handle date range filter
+        if (dateRange && dateRange !== 'all') {
+            query.uploadedAt = this.buildDateRangeQuery(dateRange, startDate, endDate);
+        }
+
+        // Handle search filter
+        if (search && search.trim()) {
+            query.$or = [
+                { title: { $regex: search.trim(), $options: 'i' } },
+                { description: { $regex: search.trim(), $options: 'i' } }
+            ];
+        }
+
+        return query;
+    }
+
+    private buildDateRangeQuery(dateRange: string, startDate?: string, endDate?: string) {
+        const now = new Date();
+
+        switch (dateRange) {
+            case 'last_week':
+                return {
+                    $gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
+                };
+            case 'last_month':
+                return {
+                    $gte: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
+                };
+            case 'last_3_months':
+                return {
+                    $gte: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000),
+                };
+            case 'custom':
+                if (startDate && endDate) {
+                    const startDateTime = new Date(startDate);
+                    const endDateTime = new Date(endDate);
+                    endDateTime.setHours(23, 59, 59, 999);
+
+                    return {
+                        $gte: startDateTime,
+                        $lte: endDateTime,
+                    };
+                }
+                break;
+        }
+        return undefined;
+    }
+
+    private mapVideosToDTO(videos) {
+        return videos.map(video => ({
+            id: video._id?.toString() || video.id,
+            title: video.title,
+            duration: video.duration,
+            module: video.module,
+            status: video.status,
+            uploadedAt: video.uploadedAt,
+            videoUrl: video.videoUrl,
+            description: video.description,
+            diplomaId: video.diplomaId?._id?.toString() || video.diplomaId?.toString() || '',
+            diploma: this.mapDiplomaToDTO(video.diplomaId)
+        }));
+    }
+
+    private mapDiplomaToDTO(diplomaId) {
+        if (diplomaId && typeof diplomaId === 'object' && 'title' in diplomaId) {
+            return {
+                id: diplomaId._id?.toString() || diplomaId.toString(),
+                title: diplomaId.title,
+                category: diplomaId.category
+            };
+        }
+        return undefined;
     }
 }
+
 
 export class GetVideoByIdUseCase implements IGetVideoByIdUseCase {
     constructor(private videoRepository: IVideoRepository) { }
@@ -74,17 +180,18 @@ export class GetVideoByIdUseCase implements IGetVideoByIdUseCase {
         if (!mongoose.isValidObjectId(params.id)) {
             throw new InvalidVideoIdError();
         }
-        const result = await this.videoRepository.getVideoById(params);
-        if (!result || !result.video) {
+        const video = await this.videoRepository.getVideoById(params.id);
+        if (!video) {
             throw new VideoNotFoundError();
         }
-        const video = result.video as any;
         let diplomaInfo = undefined;
         let diplomaId = video.diplomaId;
-        if (typeof diplomaId === 'object' && diplomaId !== null) {
-            diplomaId = diplomaId.id || diplomaId._id || '';
+        if (diplomaId && typeof diplomaId === 'object') {
+            diplomaId = (diplomaId as { id?: string | null; _id?: string | null })?.id
+                ?? (diplomaId as { id?: string | null; _id?: string | null })?._id
+                ?? '';
         }
-        if (diplomaId) {
+        if (diplomaId != null && diplomaId !== '') {
             const diploma = await this.videoRepository.findDiplomaById(String(diplomaId));
             if (diploma) {
                 diplomaInfo = {
@@ -144,17 +251,17 @@ export class CreateVideoUseCase implements ICreateVideoUseCase {
             videoUrl
         };
         const created = await this.videoRepository.createVideo(videoData as any);
-        await this.videoRepository.addVideoToDiploma(diploma._id, (created.video as any)._id);
+        await this.videoRepository.addVideoToDiploma(diploma._id, created._id);
         const videoEntity = new Video({
-            id: (created.video as any)._id?.toString() || (created.video as any).id,
-            title: (created.video as any).title,
-            duration: (created.video as any).duration,
-            uploadedAt: (created.video as any).uploadedAt,
-            module: (created.video as any).module,
-            status: (created.video as any).status,
-            diplomaId: (created.video as any).diplomaId?.toString() || '',
-            description: (created.video as any).description,
-            videoUrl: (created.video as any).videoUrl
+            id: created._id?.toString() || created.id,
+            title: created.title,
+            duration: created.duration,
+            uploadedAt: created.uploadedAt,
+            module: created.module,
+            status: created.status,
+            diplomaId: created.diplomaId?.toString() || '',
+            description: created.description,
+            videoUrl: created.videoUrl
         });
         return { data: { video: videoEntity }, success: true };
     }
@@ -167,8 +274,7 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
         if (!mongoose.isValidObjectId(params.id)) {
             throw new InvalidVideoIdError();
         }
-        const result = await this.videoRepository.getVideoById({ id: params.id });
-        const existingVideo = result?.video;
+        const existingVideo = await this.videoRepository.getVideoById(params.id);
         if (!existingVideo) {
             throw new VideoNotFoundError();
         }
@@ -205,20 +311,20 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
                 updateData.videoUrl = existingVideo.videoUrl;
             }
         }
-        const updated = await this.videoRepository.updateVideo({ ...updateData, id: params.id });
-        if (!updated || !updated.video) {
+        const updated = await this.videoRepository.updateVideo(params.id, { ...updateData });
+        if (!updated) {
             throw new VideoNotFoundError();
         }
         const videoEntity = new Video({
-            id: (updated.video as any)._id?.toString() || (updated.video as any).id,
-            title: (updated.video as any).title,
-            duration: (updated.video as any).duration,
-            uploadedAt: (updated.video as any).uploadedAt,
-            module: (updated.video as any).module,
-            status: (updated.video as any).status,
-            diplomaId: (updated.video as any).diplomaId?.toString() || '',
-            description: (updated.video as any).description,
-            videoUrl: (updated.video as any).videoUrl
+            id: updated._id?.toString() || updated.id,
+            title: updated.title,
+            duration: updated.duration,
+            uploadedAt: updated.uploadedAt,
+            module: updated.module,
+            status: updated.status,
+            diplomaId: updated.diplomaId?.toString() || '',
+            description: updated.description,
+            videoUrl: updated.videoUrl
         });
         return { data: { video: videoEntity }, success: true };
     }
@@ -231,8 +337,7 @@ export class DeleteVideoUseCase implements IDeleteVideoUseCase {
         if (!mongoose.isValidObjectId(params.id)) {
             throw new InvalidVideoIdError();
         }
-        const result = await this.videoRepository.getVideoById({ id: params.id });
-        const video = result?.video;
+        const video = await this.videoRepository.getVideoById(params.id);
         if (!video) {
             throw new VideoNotFoundError();
         }
@@ -246,7 +351,7 @@ export class DeleteVideoUseCase implements IDeleteVideoUseCase {
             }
         }
         await this.videoRepository.removeVideoFromDiploma(video.diplomaId, video.id);
-        await this.videoRepository.deleteVideo(params);
+        await this.videoRepository.deleteVideo(params.id);
         return { data: { message: "Video deleted successfully" }, success: true };
     }
 } 

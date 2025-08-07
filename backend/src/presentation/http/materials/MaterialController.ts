@@ -1,16 +1,16 @@
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IMaterialController } from '../IHttp';
-import { GetMaterialsUseCase, GetMaterialByIdUseCase, CreateMaterialUseCase, UpdateMaterialUseCase, DeleteMaterialUseCase } from '../../../application/materials/useCases/MaterialUseCases';
+import { IGetMaterialByIdUseCase, ICreateMaterialUseCase, IUpdateMaterialUseCase, IDeleteMaterialUseCase, IGetMaterialsUseCase } from '../../../application/materials/useCases/MaterialUseCases';
 
 export class MaterialController implements IMaterialController {
   private httpErrors: HttpErrors;
   private httpSuccess: HttpSuccess;
 
   constructor(
-    private getMaterialsUseCase: GetMaterialsUseCase,
-    private getMaterialByIdUseCase: GetMaterialByIdUseCase,
-    private createMaterialUseCase: CreateMaterialUseCase,
-    private updateMaterialUseCase: UpdateMaterialUseCase,
-    private deleteMaterialUseCase: DeleteMaterialUseCase
+    private getMaterialsUseCase: IGetMaterialsUseCase,
+    private getMaterialByIdUseCase: IGetMaterialByIdUseCase,
+    private createMaterialUseCase: ICreateMaterialUseCase,
+    private updateMaterialUseCase: IUpdateMaterialUseCase,
+    private deleteMaterialUseCase: IDeleteMaterialUseCase
   ) {
     this.httpErrors = new HttpErrors();
     this.httpSuccess = new HttpSuccess();

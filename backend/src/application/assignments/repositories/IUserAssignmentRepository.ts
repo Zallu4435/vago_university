@@ -1,22 +1,10 @@
-import {
-  GetUserAssignmentsRequestDTO,
-  GetUserAssignmentByIdRequestDTO,
-  SubmitUserAssignmentRequestDTO,
-  GetUserAssignmentStatusRequestDTO,
-  GetUserAssignmentFeedbackRequestDTO
-} from '../../../domain/assignments/dtos/UserAssignmentRequestDTOs';
-import {
-  GetUserAssignmentsResponseDTO,
-  GetUserAssignmentResponseDTO,
-  SubmitUserAssignmentResponseDTO,
-  GetUserAssignmentStatusResponseDTO,
-  GetUserAssignmentFeedbackResponseDTO
-} from '../../../domain/assignments/dtos/UserAssignmentResponseDTOs';
+import { IAssignmentDocument } from '../../../infrastructure/database/mongoose/assignment/AssignmentModel';
+import { ISubmissionDocument } from '../../../infrastructure/database/mongoose/assignment/SubmissionModel';
 
 export interface IUserAssignmentRepository {
-  getAssignments(params: GetUserAssignmentsRequestDTO, studentId: string): Promise<GetUserAssignmentsResponseDTO>;
-  getAssignmentById(params: GetUserAssignmentByIdRequestDTO, studentId: string): Promise<GetUserAssignmentResponseDTO>;
-  submitAssignment(params: SubmitUserAssignmentRequestDTO, studentId: string): Promise<SubmitUserAssignmentResponseDTO>;
-  getAssignmentStatus(params: GetUserAssignmentStatusRequestDTO, studentId: string): Promise<GetUserAssignmentStatusResponseDTO>;
-  getAssignmentFeedback(params: GetUserAssignmentFeedbackRequestDTO, studentId: string): Promise<GetUserAssignmentFeedbackResponseDTO>;
-} 
+  getAssignments(subject: string, status: string, page: number, limit: number, search: string, studentId: string, sortBy: string): Promise<{ assignments: IAssignmentDocument[]; page: number; limit: number; status: string; studentId: string }>;
+  getAssignmentById(id: string, studentId: string): Promise<{ assignment: IAssignmentDocument | null; submission: ISubmissionDocument | null }>;
+  submitAssignment(assignmentId: string, files: any[], studentId: string): Promise<{ submission: ISubmissionDocument }>;
+  getAssignmentStatus(assignmentId: string, studentId: string): Promise<{ submission: ISubmissionDocument | null }>;
+  getAssignmentFeedback(assignmentId: string, studentId: string): Promise<{ submission: ISubmissionDocument | null }>;
+}  

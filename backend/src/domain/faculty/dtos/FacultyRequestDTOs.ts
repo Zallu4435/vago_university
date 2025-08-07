@@ -26,9 +26,12 @@ export interface GetFacultyRequestDTO {
       department: string;
       position: string;
       startDate: string;
+      status?: string;
       salary?: string;
       benefits?: string;
       additionalNotes?: string;
+      confirmationToken?: string;
+      tokenExpiry?: Date
     };
   }
   

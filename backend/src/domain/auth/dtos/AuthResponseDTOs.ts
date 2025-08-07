@@ -10,6 +10,7 @@ export interface LoginResponseDTO {
   refreshToken: string;
   user: Pick<IUser, "firstName" | "lastName" | "email" | "id" | "profilePicture"> & { password: string; blocked?: boolean };
   collection: "register" | "admin" | "user" | "faculty";
+  sessionId: string;
 }
 
 export interface RefreshTokenResponseDTO {

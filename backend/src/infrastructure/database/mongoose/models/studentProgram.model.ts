@@ -1,9 +1,11 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import { IProgram } from '../../../../domain/student/entities/Program';
 
-export interface IProgramDocument extends Document, Omit<IProgram, '_id' | 'studentId'> {
+export type IProgramDocument = Document & {
   studentId: Types.ObjectId;
-}
+  degree: string;
+  catalogYear: string;
+  credits: number;
+};
 
 const ProgramSchema = new Schema<IProgramDocument>({
   studentId: { 

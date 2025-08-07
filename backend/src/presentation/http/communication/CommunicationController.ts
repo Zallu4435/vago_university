@@ -88,11 +88,17 @@ export class CommunicationController implements ICommunicationController {
   }
 
   async sendMessage(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { subject, message, to, attachments } = httpRequest.body || {};
+    const { subject, message, to } = httpRequest.body || {};
     const { userId, collection: role } = httpRequest.user || {};
     if (!userId || !role) {
       return this.httpErrors.error_401();
     }
+    const attachments = (httpRequest.files || []).map((file: any) => ({
+      filename: file.filename,
+      path: file.path,
+      contentType: file.mimetype,
+      size: file.size,
+    }));
     const sendMessageRequestDTO: SendMessageRequestDTO = {
       senderId: userId,
       senderRole: role,
@@ -294,7 +300,12 @@ export class CommunicationController implements ICommunicationController {
     // Parse the to parameter if it's a string
     const recipients = typeof to === 'string' ? JSON.parse(to) : to;
     // Get attachments from files
-    const attachments = httpRequest.files || [];
+    const attachments = (httpRequest.files || []).map((file: any) => ({
+      filename: file.filename,
+      path: file.path,
+      contentType: file.mimetype,
+      size: file.size,
+    }));
     const sendMessageRequestDTO: SendMessageRequestDTO = {
       senderId: userId,
       senderRole: role,

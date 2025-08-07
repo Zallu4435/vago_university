@@ -1,13 +1,13 @@
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IAdminDashboardController } from "../IHttp";
 import {
-  GetDashboardDataUseCase,
-  GetDashboardMetricsUseCase,
-  GetUserGrowthDataUseCase,
-  GetRevenueDataUseCase,
-  GetPerformanceDataUseCase,
-  GetRecentActivitiesUseCase,
-  GetSystemAlertsUseCase,
-  RefreshDashboardUseCase,
+  IGetDashboardDataUseCase,
+  IGetDashboardMetricsUseCase,
+  IGetUserGrowthDataUseCase,
+  IGetRevenueDataUseCase,
+  IGetPerformanceDataUseCase,
+  IGetRecentActivitiesUseCase,
+  IGetSystemAlertsUseCase,
+  IRefreshDashboardUseCase,
 } from "../../../application/admindashboard/useCases/DashboardUseCases";
 
 export class AdminDashboardController implements IAdminDashboardController {
@@ -15,14 +15,15 @@ export class AdminDashboardController implements IAdminDashboardController {
   private httpSuccess: HttpSuccess;
 
   constructor(
-    private getDashboardDataUseCase: GetDashboardDataUseCase,
-    private getDashboardMetricsUseCase: GetDashboardMetricsUseCase,
-    private getUserGrowthDataUseCase: GetUserGrowthDataUseCase,
-    private getRevenueDataUseCase: GetRevenueDataUseCase,
-    private getPerformanceDataUseCase: GetPerformanceDataUseCase,
-    private getRecentActivitiesUseCase: GetRecentActivitiesUseCase,
-    private getSystemAlertsUseCase: GetSystemAlertsUseCase,
-    private refreshDashboardUseCase: RefreshDashboardUseCase,
+    private getDashboardDataUseCase: IGetDashboardDataUseCase,
+    private getDashboardMetricsUseCase: IGetDashboardMetricsUseCase,
+    private getUserGrowthDataUseCase: IGetUserGrowthDataUseCase,
+    private getRevenueDataUseCase: IGetRevenueDataUseCase,
+    private getPerformanceDataUseCase: IGetPerformanceDataUseCase,
+    private getRecentActivitiesUseCase: IGetRecentActivitiesUseCase,
+    private getSystemAlertsUseCase: IGetSystemAlertsUseCase,
+    private refreshDashboardUseCase: IRefreshDashboardUseCase,
+
   ) {
     this.httpErrors = new HttpErrors();
     this.httpSuccess = new HttpSuccess();

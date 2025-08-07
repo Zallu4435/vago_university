@@ -1,15 +1,15 @@
 import { IHttpRequest, IHttpResponse, IAssignmentController, HttpSuccess, HttpErrors } from '../../http/IHttp';
 import {
-  GetAssignmentsUseCase,
-  GetAssignmentByIdUseCase,
-  CreateAssignmentUseCase,
-  UpdateAssignmentUseCase,
-  DeleteAssignmentUseCase,
-  GetSubmissionsUseCase,
-  GetSubmissionByIdUseCase,
-  ReviewSubmissionUseCase,
-  DownloadSubmissionUseCase,
-  GetAnalyticsUseCase
+  IGetAssignmentsUseCase,
+  IGetAssignmentByIdUseCase,
+  ICreateAssignmentUseCase,
+  IUpdateAssignmentUseCase,
+  IDeleteAssignmentUseCase,
+  IGetSubmissionsUseCase,
+  IGetSubmissionByIdUseCase,
+  IReviewSubmissionUseCase,
+  IDownloadSubmissionUseCase,
+  IGetAnalyticsUseCase
 } from '../../../application/assignments/useCases/AssignmentUseCases';
 
 
@@ -18,16 +18,16 @@ export class AssignmentController implements IAssignmentController {
   private httpErrors: HttpErrors;
 
   constructor(
-    private getAssignmentsUseCase: GetAssignmentsUseCase,
-    private getAssignmentByIdUseCase: GetAssignmentByIdUseCase,
-    private createAssignmentUseCase: CreateAssignmentUseCase,
-    private updateAssignmentUseCase: UpdateAssignmentUseCase,
-    private deleteAssignmentUseCase: DeleteAssignmentUseCase,
-    private getSubmissionsUseCase: GetSubmissionsUseCase,
-    private getSubmissionByIdUseCase: GetSubmissionByIdUseCase,
-    private reviewSubmissionUseCase: ReviewSubmissionUseCase,
-    private downloadSubmissionUseCase: DownloadSubmissionUseCase,
-    private getAnalyticsUseCase: GetAnalyticsUseCase
+    private getAssignmentsUseCase: IGetAssignmentsUseCase,
+    private getAssignmentByIdUseCase: IGetAssignmentByIdUseCase,
+    private createAssignmentUseCase: ICreateAssignmentUseCase,
+    private updateAssignmentUseCase: IUpdateAssignmentUseCase,
+    private deleteAssignmentUseCase: IDeleteAssignmentUseCase,
+    private getSubmissionsUseCase: IGetSubmissionsUseCase,
+    private getSubmissionByIdUseCase: IGetSubmissionByIdUseCase,
+    private reviewSubmissionUseCase: IReviewSubmissionUseCase,
+    private downloadSubmissionUseCase: IDownloadSubmissionUseCase,
+    private getAnalyticsUseCase: IGetAnalyticsUseCase
   ) {
     this.httpSuccess = new HttpSuccess();
     this.httpErrors = new HttpErrors();
@@ -166,7 +166,7 @@ export class AssignmentController implements IAssignmentController {
         'Content-Type': 'application/octet-stream',
         'Content-Disposition': 'attachment'
       }
-    } as any;
+    } as IHttpResponse;
   }
 
   async getAnalytics(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -181,10 +181,13 @@ export class AssignmentController implements IAssignmentController {
     const { id } = httpRequest.params;
     const { fileName } = httpRequest.query;
     const result = await this.getAssignmentByIdUseCase.execute({ id });
-    if (!result.success || !(result.data as any).assignment) {
+    if (!result.success || 'error' in result.data) {
       return this.httpErrors.error_404('Assignment not found');
     }
-    const assignment = (result.data as any).assignment;
+    const assignment = result.data.assignment;
+    if (!assignment) {
+      return this.httpErrors.error_404('Assignment not found');
+    }
     const file = assignment.files.find((f: any) => f.fileName === fileName);
     if (!file) {
       return this.httpErrors.error_404('File not found');

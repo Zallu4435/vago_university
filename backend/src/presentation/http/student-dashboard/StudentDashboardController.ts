@@ -1,12 +1,11 @@
-// StudentDashboardController.ts
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IStudentDashboardController } from "../IHttp";
 import {
-  GetAnnouncementsUseCase,
-  GetDeadlinesUseCase,
-  GetClassesUseCase,
-  GetCalendarDaysUseCase,
-  GetNewEventsUseCase,
-  GetUserInfoForDashboardUseCase
+  IGetAnnouncementsUseCase,
+  IGetDeadlinesUseCase,
+  IGetCalendarDaysUseCase,
+  IGetClassesUseCase,
+  IGetNewEventsUseCase,
+  IGetUserInfoForDashboardUseCase
 } from '../../../application/student/useCases/StudentDashboardUseCases';
 
 export class StudentDashboardController implements IStudentDashboardController {
@@ -14,12 +13,12 @@ export class StudentDashboardController implements IStudentDashboardController {
   private httpSuccess: HttpSuccess;
 
   constructor(
-    private getAnnouncementsUseCase: GetAnnouncementsUseCase,
-    private getDeadlinesUseCase: GetDeadlinesUseCase,
-    private getClassesUseCase: GetClassesUseCase,
-    private getCalendarDaysUseCase: GetCalendarDaysUseCase,
-    private getNewEventsUseCase: GetNewEventsUseCase,
-    private getUserInfoForDashboardUseCase: GetUserInfoForDashboardUseCase
+    private getAnnouncementsUseCase: IGetAnnouncementsUseCase,
+    private getDeadlinesUseCase: IGetDeadlinesUseCase,
+    private getClassesUseCase: IGetClassesUseCase,
+    private getCalendarDaysUseCase: IGetCalendarDaysUseCase,
+    private getNewEventsUseCase: IGetNewEventsUseCase,
+    private getUserInfoForDashboardUseCase: IGetUserInfoForDashboardUseCase
   ) {
     this.httpErrors = new HttpErrors();
     this.httpSuccess = new HttpSuccess();
@@ -96,7 +95,9 @@ export class StudentDashboardController implements IStudentDashboardController {
 
 
   async getUserInfo(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    console.log(httpRequest, "sknsksndkspkdnp")
     const studentId = httpRequest.user?.userId;
+    
     if (!studentId) {
       return this.httpErrors.error_401();
     }

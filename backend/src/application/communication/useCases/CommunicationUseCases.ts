@@ -22,6 +22,7 @@ import {
   GetUserGroupsResponseDTO,
   FetchUsersResponseDTO,
 } from "../../../domain/communication/dtos/CommunicationResponseDTOs";
+import { UserRole } from '../../../domain/communication/entities/Communication';
 
 export interface ResponseDTO<T> {
   success: boolean;
@@ -63,7 +64,7 @@ export interface IGetUserGroupsUseCase {
 export interface IFetchUsersUseCase {
   execute(params: FetchUsersRequestDTO): Promise<ResponseDTO<FetchUsersResponseDTO>>;
 }
-
+ 
 export class GetInboxMessagesUseCase implements IGetInboxMessagesUseCase {
   constructor(private readonly repository: ICommunicationRepository) { }
 
@@ -170,14 +171,12 @@ export class SendMessageUseCase implements ISendMessageUseCase {
   constructor(private readonly repository: ICommunicationRepository) { }
 
   async execute(params: SendMessageRequestDTO): Promise<ResponseDTO<SendMessageResponseDTO>> {
-    console.log('[SendMessageUseCase] execute called with params:', params);
     if (!mongoose.isValidObjectId(params.senderId)) {
       return { success: false, data: { error: "Invalid sender ID" } };
     }
     if (!params.subject || !params.content || !params.to.length) {
       return { success: false, data: { error: "Missing required fields" } };
     }
-    console.log('[SendMessageUseCase] calling repository.sendMessage with params:', params);
     const message = await this.repository.sendMessage(params);
     return { success: true, data: message };
   }
@@ -231,7 +230,7 @@ export class GetAllAdminsUseCase implements IGetAllAdminsUseCase {
       _id: admin._id.toString(),
       name: `${admin.firstName} ${admin.lastName}`,
       email: admin.email,
-      role: 'admin'
+      role: 'admin' as UserRole
     }));
     return { success: true, data: { admins: mappedAdmins } };
   }

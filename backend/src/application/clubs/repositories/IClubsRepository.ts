@@ -1,35 +1,29 @@
 import {
-    GetClubsRequestDTO,
-    GetClubByIdRequestDTO,
-    CreateClubRequestDTO,
-    UpdateClubRequestDTO,
-    DeleteClubRequestDTO,
-  } from "../../../domain/clubs/dtos/ClubRequestDTOs";
-  import {
-    GetClubsResponseDTO,
-    GetClubByIdResponseDTO,
-    CreateClubResponseDTO,
-    UpdateClubResponseDTO,
-  } from "../../../domain/clubs/dtos/ClubResponseDTOs";
-  import {
-    GetClubRequestsRequestDTO,
-    ApproveClubRequestRequestDTO,
-    RejectClubRequestRequestDTO,
-    GetClubRequestDetailsRequestDTO,
-  } from "../../../domain/clubs/dtos/ClubRequestRequestDTOs";
-  import {
-    GetClubRequestsResponseDTO,
-    GetClubRequestDetailsResponseDTO,
-  } from "../../../domain/clubs/dtos/ClubRequestResponseDTOs";
-  
-  export interface IClubsRepository {
-    getClubs(params: GetClubsRequestDTO): Promise<GetClubsResponseDTO>;
-    getClubById(params: GetClubByIdRequestDTO): Promise<GetClubByIdResponseDTO | null>;
-    createClub(params: CreateClubRequestDTO): Promise<CreateClubResponseDTO>;
-    updateClub(params: UpdateClubRequestDTO): Promise<UpdateClubResponseDTO | null>;
-    deleteClub(params: DeleteClubRequestDTO): Promise<void>;
-    getClubRequests(params: GetClubRequestsRequestDTO): Promise<GetClubRequestsResponseDTO>;
-    approveClubRequest(params: ApproveClubRequestRequestDTO): Promise<void>;
-    rejectClubRequest(params: RejectClubRequestRequestDTO): Promise<void>;
-    getClubRequestDetails(params: GetClubRequestDetailsRequestDTO): Promise<GetClubRequestDetailsResponseDTO | null>;
-  }
+  GetClubsRequest,
+  GetClubByIdRequest,
+  CreateClubRequest,
+  UpdateClubRequest,
+  DeleteClubRequest,
+  GetClubRequestsRequest,
+  ApproveClubRequestRequest,
+  RejectClubRequestRequest,
+  GetClubRequestDetailsRequest,
+  GetClubsResponse,
+  GetClubByIdResponse,
+  CreateClubResponse,
+  UpdateClubResponse,
+  GetClubRequestsResponse,
+  GetClubRequestDetailsResponse,
+} from "../../../domain/clubs/entities/Club";
+   
+export interface IClubsRepository {
+  getClubs(params: GetClubsRequest): Promise<GetClubsResponse>;
+  getClubById(id: string): Promise<GetClubByIdResponse | null>;
+  createClub(params: CreateClubRequest): Promise<CreateClubResponse>;
+  updateClub(params: UpdateClubRequest): Promise<UpdateClubResponse | null>;
+  deleteClub(params: DeleteClubRequest): Promise<void>;
+  getClubRequests(params: GetClubRequestsRequest): Promise<GetClubRequestsResponse>;
+  approveClubRequest(params: ApproveClubRequestRequest): Promise<void>;
+  rejectClubRequest(params: RejectClubRequestRequest): Promise<void>;
+  getClubRequestDetails(params: GetClubRequestDetailsRequest): Promise<GetClubRequestDetailsResponse | null>;
+}

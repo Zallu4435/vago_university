@@ -20,8 +20,9 @@ export interface NotificationProps {
   recipientId?: string;
   recipientName?: string;
   createdBy: string;
-  createdAt?: Date;
+  createdAt?: Date; 
   status: NotificationStatus;
+  readBy?: string[]; 
 }
 
 // Interface for Mongoose model

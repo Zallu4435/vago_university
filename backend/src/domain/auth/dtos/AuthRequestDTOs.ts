@@ -5,13 +5,15 @@ export type RegisterRequestDTO = Pick<IUser, "firstName" | "lastName" | "email" 
 export interface LoginRequestDTO {
   email: string;
   password: string;
+  userAgent?: string;
+  ipAddress?: string;
 }
 
 export interface RefreshTokenRequestDTO {
   refreshToken: string;
-  userId: string;
-  email: string;
-  collection: 'register' | 'admin' | 'user' | 'faculty';
+  userId?: string;
+  email?: string;
+  collection?: 'register' | 'admin' | 'user' | 'faculty';
 }
 
 export type LogoutRequestDTO = { sessionId: string };
@@ -30,5 +32,5 @@ export interface VerifyEmailOtpRequestDTO {
 export interface ResetPasswordRequestDTO {
   resetToken: string;
   newPassword: string;
-  email: string;
+  email?: string;
 }

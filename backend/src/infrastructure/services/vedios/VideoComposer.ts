@@ -1,27 +1,34 @@
 import { VideoController } from '../../../presentation/http/vedios/videoController';
 import { VideoRepository } from '../../repositories/video/VideoRepository';
-import { GetVideosUseCase, GetVideoByIdUseCase, CreateVideoUseCase, UpdateVideoUseCase, DeleteVideoUseCase } from '../../../application/video/useCases/VideoUseCases';
+import { IVideoRepository } from '../../../application/video/repositories/IVideoRepository';
+import { 
+  IGetVideosUseCase,
+  IGetVideoByIdUseCase,
+  ICreateVideoUseCase,
+  IUpdateVideoUseCase,
+  IDeleteVideoUseCase,
+  GetVideosUseCase, 
+  GetVideoByIdUseCase, 
+  CreateVideoUseCase, 
+  UpdateVideoUseCase, 
+  DeleteVideoUseCase 
+} from '../../../application/video/useCases/VideoUseCases';
+import { IVideoController } from '../../../presentation/http/IHttp';
 
-export class VideoComposer {
-    static compose() {
-        const videoRepository = new VideoRepository();
+export function getVideoComposer(): IVideoController {
+  const repository: IVideoRepository = new VideoRepository();
+  
+  const getVideosUseCase: IGetVideosUseCase = new GetVideosUseCase(repository);
+  const getVideoByIdUseCase: IGetVideoByIdUseCase = new GetVideoByIdUseCase(repository);
+  const createVideoUseCase: ICreateVideoUseCase = new CreateVideoUseCase(repository);
+  const updateVideoUseCase: IUpdateVideoUseCase = new UpdateVideoUseCase(repository);
+  const deleteVideoUseCase: IDeleteVideoUseCase = new DeleteVideoUseCase(repository);
 
-        const getVideosUseCase = new GetVideosUseCase(videoRepository);
-        const getVideoByIdUseCase = new GetVideoByIdUseCase(videoRepository);
-        const createVideoUseCase = new CreateVideoUseCase(videoRepository);
-        const updateVideoUseCase = new UpdateVideoUseCase(videoRepository);
-        const deleteVideoUseCase = new DeleteVideoUseCase(videoRepository);
-
-        return {
-            getVideosUseCase,
-            getVideoByIdUseCase,
-            createVideoUseCase,
-            updateVideoUseCase,
-            deleteVideoUseCase,
-        };
-    }
-
-    static composeVideoController(): VideoController {
-        return new VideoController();
-    }
-} 
+  return new VideoController(
+    getVideosUseCase,
+    getVideoByIdUseCase,
+    createVideoUseCase,
+    updateVideoUseCase,
+    deleteVideoUseCase
+  );
+}

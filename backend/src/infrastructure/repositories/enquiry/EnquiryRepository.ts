@@ -3,7 +3,7 @@ import { IEnquiryRepository } from "../../../application/enquiry/repositories/IE
 import { Enquiry as EnquiryModel } from "../../database/mongoose/models/enquiry.model";
 
 export class EnquiryRepository implements IEnquiryRepository {
-  async create(data: EnquiryProps): Promise<any> {
+  async create(data: EnquiryProps) {
     const enquiry = new EnquiryModel({
       name: data.name,
       email: data.email,
@@ -15,7 +15,7 @@ export class EnquiryRepository implements IEnquiryRepository {
     return await enquiry.save();
   }
 
-  async find(filter: any, options: { skip?: number; limit?: number; sort?: any } = {}): Promise<any[]> {
+  async find(filter, options: { skip?: number; limit?: number; sort? } = {}) {
     return EnquiryModel.find(filter)
       .sort(options.sort ?? {})
       .skip(options.skip ?? 0)
@@ -23,19 +23,19 @@ export class EnquiryRepository implements IEnquiryRepository {
       .lean();
   }
 
-  async count(filter: any): Promise<number> {
+  async count(filter) {
     return EnquiryModel.countDocuments(filter);
   }
 
-  async findById(id: string): Promise<any | null> {
+  async findById(id: string) {
     return EnquiryModel.findById(id).lean();
   }
 
-  async update(id: string, data: EnquiryProps): Promise<any | null> {
+  async update(id: string, data: EnquiryProps) {
     return EnquiryModel.findByIdAndUpdate(id, data, { new: true });
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string) {
     await EnquiryModel.findByIdAndDelete(id);
   }
 } 

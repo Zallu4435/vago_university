@@ -1,144 +1,89 @@
-import { IVideoRepository } from '../../../application/video/repositories/IVideoRepository';
-import { GetVideosRequestDTO, GetVideoByIdRequestDTO, CreateVideoRequestDTO, UpdateVideoRequestDTO, DeleteVideoRequestDTO } from '../../../domain/video/dtos/VideoRequestDTOs';
-import { GetVideosResponseDTO, GetVideoByIdResponseDTO, CreateVideoResponseDTO, UpdateVideoResponseDTO } from '../../../domain/video/dtos/VideoResponseDTOs';
+import { IRepoDiploma, IRepoVideo, IVideoRepository } from '../../../application/video/repositories/IVideoRepository';
 import { Video as VideoModel } from '../../database/mongoose/models/video.model';
-import { Diploma } from '../../database/mongoose/models/diploma.model';
+import { Diploma as DiplomaModel } from '../../database/mongoose/models/diploma.model';
+type WithStringId<T> = Omit<T, "_id"> & { _id: string };
+
 
 export class VideoRepository implements IVideoRepository {
-    async getVideos(params: GetVideosRequestDTO): Promise<GetVideosResponseDTO> {
-        const { category, page, limit, status, search, dateRange, startDate, endDate } = params;
-
-        let query: any = {};
-        
-        if (category && category !== 'all') {
-            const diploma = await Diploma.findOne({ category });
-            if (!diploma) throw new Error('Diploma not found for this category');
-            query.diplomaId = diploma._id;
-        }
-        
-        if (status && status !== 'all') {
-            query.status = status;
-        }
-        
-        // Handle date range filter
-        if (dateRange && dateRange !== 'all') {
-            const now = new Date();
-            if (dateRange === 'last_week') {
-                query.uploadedAt = {
-                    $gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
-                };
-            } else if (dateRange === 'last_month') {
-                query.uploadedAt = {
-                    $gte: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
-                };
-            } else if (dateRange === 'last_3_months') {
-                query.uploadedAt = {
-                    $gte: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000),
-                };
-            } else if (dateRange === 'custom' && startDate && endDate) {
-                console.log('Processing custom date range:', { startDate, endDate });
-                const startDateTime = new Date(startDate);
-                const endDateTime = new Date(endDate);
-                
-                // Set end date to end of day (23:59:59.999)
-                endDateTime.setHours(23, 59, 59, 999);
-                
-                console.log('Processed dates:', { 
-                    startDateTime: startDateTime.toISOString(), 
-                    endDateTime: endDateTime.toISOString() 
-                });
-                
-                query.uploadedAt = {
-                    $gte: startDateTime,
-                    $lte: endDateTime,
-                };
-            }
-        }
-        
-        // Add search functionality
-        if (search && search.trim()) {
-            query.$or = [
-                { title: { $regex: search.trim(), $options: 'i' } },
-                { description: { $regex: search.trim(), $options: 'i' } }
-            ];
-        }
-
-        const [videos, totalItems] = await Promise.all([
-            VideoModel.find(query)
-                .populate('diplomaId', 'title category')
-                .skip((page - 1) * limit)
-                .limit(limit)
-                .sort({ module: 1, uploadedAt: -1 })
-                .lean(),
-            VideoModel.countDocuments(query),
-        ]);
-        const totalPages = Math.ceil(totalItems / limit);
-        return {
-            data: videos.map(video => ({
-                id: video._id.toString(),
-                title: video.title,
-                duration: video.duration,
-                module: video.module,
-                status: video.status,
-                uploadedAt: video.uploadedAt,
-                videoUrl: video.videoUrl,
-                description: video.description,
-                diplomaId: video.diplomaId?._id?.toString() || video.diplomaId?.toString() || '',
-                diploma: video.diplomaId ? {
-                    id: video.diplomaId._id?.toString() || video.diplomaId.toString(),
-                    title: video.diplomaId.title,
-                    category: video.diplomaId.category
-                } : undefined
-            })),
-            totalItems,
-            totalPages,
-            currentPage: page,
-        };
-    }
-
-    async getVideoById(params: GetVideoByIdRequestDTO): Promise<GetVideoByIdResponseDTO | null> {
-        const { id } = params;
-        const video = await (VideoModel as any).findById(id)
+    async findVideos(query: any, page: number, limit: number) {
+        const videos = await VideoModel.find(query)
             .populate('diplomaId', 'title category')
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .sort({ module: 1, uploadedAt: -1 })
             .lean();
-        if (!video) return null;
-        return { video };
+
+        return videos.map((video: any) => ({
+            ...video,
+            _id: video._id.toString(),
+            diplomaId: video.diplomaId?.toString?.() ?? video.diplomaId,
+        }));
     }
 
-    async createVideo(params: CreateVideoRequestDTO): Promise<CreateVideoResponseDTO> {
-        const video = await VideoModel.create({
-            ...params,
-            uploadedAt: new Date(),
-        });
-        return { video };
-    }
-
-    async updateVideo(params: UpdateVideoRequestDTO): Promise<UpdateVideoResponseDTO | null> {
-        const { id, ...updateData } = params;
-        const video = await VideoModel.findByIdAndUpdate(
-            id,
-            { $set: { ...updateData, updatedAt: new Date() } },
-            { new: true, upsert: false }
-        ).lean();
-        if (!video) return null;
-        return { video };
-    }
-
-    async deleteVideo(params: DeleteVideoRequestDTO): Promise<void> {
-        const { id } = params;
-        await VideoModel.findByIdAndDelete(id);
+    async countVideos(query: any) {
+        return VideoModel.countDocuments(query);
     }
 
     async findDiplomaByCategory(category: string) {
-        return Diploma.findOne({ category });
+        return DiplomaModel.findOne({ category })
+        .lean<WithStringId<IRepoDiploma>>({ getters: true });   // 👈 generic added
     }
+
+    async getVideoById(id: string): Promise<IRepoVideo | null> {
+        const video = await VideoModel.findById(id)
+            .populate('diplomaId', 'title category')
+            .lean();
+        return video
+            ? {
+                ...video,
+                _id: video._id.toString(),
+                diplomaId: video.diplomaId ? video.diplomaId.toString() : "",
+            }
+            : null;
+    }
+
+    async createVideo(video: any): Promise<IRepoVideo> {
+        const created = await VideoModel.create({
+            ...video,
+            uploadedAt: new Date(),
+        });
+        const obj = created.toObject();
+        return {
+            ...obj,
+            _id: obj._id.toString(),
+            diplomaId: obj.diplomaId ? obj.diplomaId.toString() : "",
+        };
+    }
+
+    async updateVideo(id: string, video: any): Promise<IRepoVideo | null> {
+        const updated = await VideoModel.findByIdAndUpdate(
+            id,
+            { $set: { ...video, updatedAt: new Date() } },
+            { new: true, upsert: false }
+        ).lean();
+        return updated
+            ? {
+                ...updated,
+                _id: updated._id.toString(),
+                diplomaId: updated.diplomaId ? updated.diplomaId.toString() : "",
+            }
+            : null;
+    }
+
+    async deleteVideo(id: string) {
+        await VideoModel.findByIdAndDelete(id);
+    }
+
+
     async findDiplomaById(id: string) {
-        return Diploma.findById(id);
+        return DiplomaModel.findById(id)
+        .lean<WithStringId<IRepoDiploma>>({ getters: true });   // 👈 generic added
     }
+    
     async addVideoToDiploma(diplomaId: string, videoId: string) {
-        await Diploma.findByIdAndUpdate(diplomaId, { $push: { videoIds: videoId } });
+        await DiplomaModel.findByIdAndUpdate(diplomaId, { $push: { videoIds: videoId } });
     }
     async removeVideoFromDiploma(diplomaId: string, videoId: string) {
-        await Diploma.findByIdAndUpdate(diplomaId, { $pull: { videoIds: videoId } });
+        await DiplomaModel.findByIdAndUpdate(diplomaId, { $pull: { videoIds: videoId } });
     }
 } 

@@ -205,7 +205,7 @@ export class ChatController {
         for (const file of req.files) {
           try {
             let attachmentType = 'file';
-            let url = file.url || FileUploadService.getFileUrl(file.filename);
+            let url = FileUploadService.getFileUrl(file.filename);
 
             if (file.mimetype.startsWith('image/')) {
               attachmentType = 'image';

@@ -1,35 +1,27 @@
 import { SiteSectionModel } from '../../database/mongoose/models/site-management/SiteSectionModel';
 import { ISiteSectionRepository } from '../../../application/site-management/repositories/ISiteSectionRepository';
-import {
-  GetSiteSectionsRequestDTO,
-  GetSiteSectionByIdRequestDTO,
-  CreateSiteSectionRequestDTO,
-  UpdateSiteSectionRequestDTO,
-  DeleteSiteSectionRequestDTO,
-} from '../../../domain/site-management/dtos/SiteSectionDTOs';
+import { CreateSiteSectionRequest, DeleteSiteSectionRequest, UpdateSiteSectionRequest } from '../../../domain/site-management/entities/SiteSection';
 
 
 export class SiteSectionRepository implements ISiteSectionRepository {
-  async getSections(query: any): Promise<any[]> {
+  async getSections(query: any) {
     return SiteSectionModel.find(query).lean();
   }
 
-  async getSectionById(params: GetSiteSectionByIdRequestDTO): Promise<any | null> {
-    return SiteSectionModel.findById(params.id).lean();
+  async getSectionById(id: string) {
+    return SiteSectionModel.findById(id).lean();
   }
 
-  async createSection(params: CreateSiteSectionRequestDTO): Promise<any> {
-    const createData = (params as any)?._props ? { ...(params as any)._props } : params;
-    const { id, ...finalData } = createData;
-    return SiteSectionModel.create(finalData);
+  async createSection(params: CreateSiteSectionRequest) {
+    return SiteSectionModel.create(params);
   }
 
-  async updateSection(params: UpdateSiteSectionRequestDTO): Promise<any | null> {
+  async updateSection(params: UpdateSiteSectionRequest) {
     const { id, ...updateData } = params;
     return SiteSectionModel.findByIdAndUpdate(id, updateData, { new: true }).lean();
   }
 
-  async deleteSection(params: DeleteSiteSectionRequestDTO): Promise<void> {
+  async deleteSection(params: DeleteSiteSectionRequest) {
     await SiteSectionModel.findByIdAndDelete(params.id);
   }
 }

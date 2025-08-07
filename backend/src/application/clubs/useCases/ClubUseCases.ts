@@ -15,7 +15,28 @@ import {
 import { IClubsRepository } from "../repositories/IClubsRepository";
 import mongoose from "mongoose";
 
-export class GetClubsUseCase {
+export interface IGetClubsUseCase {
+  execute(dto: GetClubsRequestDTO): Promise<GetClubsResponseDTO>;
+}
+
+export interface IGetClubByIdUseCase {
+  execute(dto: GetClubByIdRequestDTO): Promise<GetClubByIdResponseDTO>;
+}
+
+export interface ICreateClubUseCase {
+  execute(dto: CreateClubRequestDTO): Promise<CreateClubResponseDTO>;
+}
+
+export interface IUpdateClubUseCase {
+  execute(dto: UpdateClubRequestDTO): Promise<UpdateClubResponseDTO>;
+}
+
+export interface IDeleteClubUseCase {
+  execute(dto: DeleteClubRequestDTO): Promise<{ message: string }>;
+}
+
+
+export class GetClubsUseCase implements IGetClubsUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(dto: GetClubsRequestDTO): Promise<GetClubsResponseDTO> {
@@ -49,14 +70,14 @@ export class GetClubsUseCase {
   }
 }
 
-export class GetClubByIdUseCase {
+export class GetClubByIdUseCase implements IGetClubByIdUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(dto: GetClubByIdRequestDTO): Promise<GetClubByIdResponseDTO> {
     if (!mongoose.isValidObjectId(dto.id)) {
       throw new Error("Invalid club ID");
     }
-    const club: any = await this.clubsRepository.getClubById(dto);
+    const club: any = await this.clubsRepository.getClubById(dto.id);
     if (!club) {
       throw new Error("Club not found!");
     }
@@ -66,7 +87,7 @@ export class GetClubByIdUseCase {
   }
 }
 
-export class CreateClubUseCase {
+export class CreateClubUseCase implements ICreateClubUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(dto: CreateClubRequestDTO): Promise<CreateClubResponseDTO> {
@@ -77,7 +98,7 @@ export class CreateClubUseCase {
   }
 }
 
-export class UpdateClubUseCase {
+export class UpdateClubUseCase implements IUpdateClubUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(dto: UpdateClubRequestDTO): Promise<UpdateClubResponseDTO> {
@@ -94,7 +115,7 @@ export class UpdateClubUseCase {
   }
 }
 
-export class DeleteClubUseCase {
+export class DeleteClubUseCase implements IDeleteClubUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(dto: DeleteClubRequestDTO): Promise<{ message: string }> {

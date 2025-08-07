@@ -66,7 +66,6 @@ const diplomaSchema = new Schema<IDiploma>(
   }
 );
 
-// Add indexes for better query performance
 diplomaSchema.index({ title: 1 });
 diplomaSchema.index({ category: 1 });
 diplomaSchema.index({ status: 1 });

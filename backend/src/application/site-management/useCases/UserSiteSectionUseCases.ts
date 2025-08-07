@@ -5,7 +5,7 @@ export interface IGetUserSiteSectionsUseCase {
   execute(params: GetUserSiteSectionsRequestDTO): Promise<{ success: boolean; data: GetUserSiteSectionsResponseDTO }>;
 }
 
-function toUserDTO(doc: any): UserSiteSectionDTO {
+function toUserDTO(doc): UserSiteSectionDTO {
   return {
     id: doc._id.toString(),
     sectionKey: doc.sectionKey,
@@ -20,7 +20,7 @@ function toUserDTO(doc: any): UserSiteSectionDTO {
 }
 
 export class GetUserSiteSectionsUseCase implements IGetUserSiteSectionsUseCase {
-  constructor(private readonly userSiteSectionRepository: IUserSiteSectionRepository) {}
+  constructor(private readonly userSiteSectionRepository: IUserSiteSectionRepository) { }
 
   async execute(params: GetUserSiteSectionsRequestDTO): Promise<{ success: boolean; data: GetUserSiteSectionsResponseDTO }> {
     const { sectionKey, page = 1, limit = 10, search, category } = params;

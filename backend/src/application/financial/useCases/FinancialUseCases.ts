@@ -165,10 +165,10 @@ export class UpdateChargeUseCase implements IUpdateChargeUseCase {
         if (!mongoose.Types.ObjectId.isValid(params.id)) {
             return { data: { error: FinancialErrorType.InvalidChargeId }, success: false };
         }
-        if (params.amount <= 0) {
+        if (params.data.amount <= 0) {
             return { data: { error: FinancialErrorType.InvalidAmount }, success: false };
         }
-        if (!params.title || !params.description || !params.term || !params.applicableFor) {
+        if (!params.data.title || !params.data.description || !params.data.term || !params.data.applicableFor) {
             return { data: { error: FinancialErrorType.MissingRequiredFields }, success: false };
         }
         const result = await this.financialRepository.updateCharge(params);

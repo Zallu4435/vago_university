@@ -32,4 +32,4 @@ export interface MaterialProps {
 }
 
 export type CreateMaterialProps = Omit<MaterialProps, 'id' | 'uploadedAt' | 'views' | 'downloads' | 'rating'>;
-export type UpdateMaterialProps = Partial<Omit<MaterialProps, 'uploadedAt' | 'views' | 'downloads' | 'rating'>> & { id: string }; 
+export type UpdateMaterialProps = Partial<Omit<MaterialProps, 'uploadedAt' | 'views' | 'downloads' | 'rating'>> & { id?: string }; 

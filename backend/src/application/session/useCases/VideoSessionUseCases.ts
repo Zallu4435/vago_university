@@ -5,7 +5,51 @@ import { VideoSession } from '../../../domain/session/entities/VideoSession';
 import { VideoSessionStatus } from '../../../domain/session/enums/VideoSessionStatus';
 import { config } from '../../../config/config';
 
-export class CreateVideoSessionUseCase {
+export interface ICreateVideoSessionUseCase {
+    execute(params: CreateVideoSessionRequestDTO): Promise<CreateVideoSessionResponseDTO>;
+}
+
+export interface IJoinVideoSessionUseCase {
+    execute(params: JoinVideoSessionRequestDTO): Promise<JoinVideoSessionResponseDTO>;
+}
+
+export interface IGetVideoSessionUseCase {
+    execute(sessionId: string): Promise<VideoSessionResponseDTO | null>;
+}
+
+export interface IUpdateVideoSessionUseCase {
+    execute(params: UpdateVideoSessionRequestDTO): Promise<UpdateVideoSessionResponseDTO | null>;
+}
+
+export interface IDeleteVideoSessionUseCase {
+    execute(params: DeleteVideoSessionRequestDTO): Promise<DeleteVideoSessionResponseDTO>;
+}
+
+export interface IGetAllVideoSessionsUseCase {
+    execute(params: { search?: string; status?: string; instructor?: string; course?: string }): Promise<VideoSessionResponseDTO[]>;
+}
+
+export interface IUpdateVideoSessionStatusUseCase {
+    execute(sessionId: string, status: VideoSessionStatus): Promise<UpdateVideoSessionResponseDTO | null>;
+}
+
+export interface IGetSessionAttendanceUseCase {
+    execute(sessionId: string, filters: any): Promise<any[]>;
+}
+
+export interface IUpdateAttendanceStatusUseCase {
+    execute(sessionId: string, userId: string, status: string, name: string): Promise<void>;
+}
+
+export interface IRecordAttendanceJoinUseCase {
+    execute(sessionId: string, userId: string): Promise<void>;
+}
+
+export interface IRecordAttendanceLeaveUseCase {
+    execute(sessionId: string, userId: string): Promise<void>;
+}
+
+export class CreateVideoSessionUseCase implements ICreateVideoSessionUseCase {
     constructor(private sessionRepository: ISessionRepository) {}
     async execute(params: CreateVideoSessionRequestDTO): Promise<CreateVideoSessionResponseDTO> {
         // Combine date and time if present

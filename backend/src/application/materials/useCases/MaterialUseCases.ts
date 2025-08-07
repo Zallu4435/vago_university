@@ -4,6 +4,26 @@ import { GetMaterialsResponseDTO, GetMaterialByIdResponseDTO, CreateMaterialResp
 import { Material, MaterialProps } from '../../../domain/materials/entities/Material';
 import { MaterialNotFoundError, MaterialValidationError } from '../../../domain/materials/errors/MaterialErrors';
 
+export interface IGetMaterialsUseCase {
+  execute(params: GetMaterialsRequestDTO): Promise<GetMaterialsResponseDTO>;
+}
+
+export interface IGetMaterialByIdUseCase {
+  execute(params: GetMaterialByIdRequestDTO): Promise<GetMaterialByIdResponseDTO>;
+}
+
+export interface ICreateMaterialUseCase {
+  execute(params: CreateMaterialRequestDTO): Promise<CreateMaterialResponseDTO>;
+}
+
+export interface IUpdateMaterialUseCase {
+  execute(params: UpdateMaterialRequestDTO): Promise<UpdateMaterialResponseDTO>;
+}
+
+export interface IDeleteMaterialUseCase {
+  execute(params: DeleteMaterialRequestDTO): Promise<void>;
+}
+
 function toMaterialProps(raw: any): MaterialProps {
   return {
     id: raw._id?.toString() ?? raw.id,
@@ -92,8 +112,8 @@ export class GetMaterialsUseCase {
     if (
       params.semester !== undefined &&
       params.semester !== null &&
-      params.semester !== 'All Semesters' &&
-      params.semester !== 'all'
+      params.semester.toString() !== 'All Semesters' &&
+      params.semester.toString() !== 'all'
     ) {
       // Convert string to number if needed
       const semesterValue = typeof params.semester === 'string' ? parseInt(params.semester, 10) : params.semester;
@@ -201,17 +221,17 @@ export class UpdateMaterialUseCase {
   constructor(private repo: IMaterialsRepository) { }
   async execute(params: UpdateMaterialRequestDTO): Promise<UpdateMaterialResponseDTO | null> {
     if (!params.id) throw new MaterialValidationError('Material ID is required');
-    
+
     // First, get the existing material
     const existingMaterial = await this.repo.findById(params.id);
     if (!existingMaterial) throw new MaterialNotFoundError(params.id);
-    
+
     // Create updated material using the entity's update method
     const existingProps = toMaterialProps(existingMaterial);
     console.log('=== UPDATE MATERIAL USE CASE DEBUG ===');
     console.log('Existing props:', existingProps);
     console.log('Update params:', params);
-    
+
     // Create updated material using the entity's update method
     const { id, ...updateData } = params;
     const updatedMaterial = Material.update(existingProps, updateData);
@@ -221,7 +241,7 @@ export class UpdateMaterialUseCase {
     const dbResult = await this.repo.update(params.id, updatedMaterial.props);
     console.log('DB update result:', dbResult);
     if (!dbResult) throw new MaterialNotFoundError(params.id);
-    
+
     console.log('=== UPDATE MATERIAL USE CASE DEBUG END ===');
     return { material: toMaterialProps(dbResult) };
   }

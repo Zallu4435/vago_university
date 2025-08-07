@@ -1,8 +1,12 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { VideoStatus } from '../../../../domain/video/enums/VideoStatus';
-import { IVideo } from '../../../../domain/video/entities/VideoTypes';
+import { IVideoBase } from '../../../../domain/video/entities/VideoTypes';
 
-const videoSchema = new Schema<IVideo>(
+interface IVideoDocument extends IVideoBase{
+    diplomaId: mongoose.Types.ObjectId
+}
+
+const videoSchema = new Schema<IVideoDocument>(
     {
         title: {
             type: String,
@@ -63,4 +67,4 @@ videoSchema.pre('save', function(next) {
     next();
 });
 
-export const Video = mongoose.model<IVideo>('Video', videoSchema); 
+export const Video = mongoose.model<IVideoDocument>('Video', videoSchema); 

@@ -1,22 +1,21 @@
-import {
-  GetCoursesRequestDTO,
-  GetCourseByIdRequestDTO,
-  CreateCourseRequestDTO,
-  UpdateCourseRequestDTO,
-  DeleteCourseRequestDTO,
-} from "../../../domain/courses/dtos/CourseRequestDTOs";
-import {
-  GetEnrollmentsRequestDTO,
-  ApproveEnrollmentRequestDTO,
-  RejectEnrollmentRequestDTO,
-  GetCourseRequestDetailsRequestDTO,
-} from "../../../domain/courses/dtos/EnrollmentRequestDTOs";
 import { ICoursesRepository } from "../../../application/courses/repositories/ICoursesRepository";
 import { CourseModel, EnrollmentModel } from "../../../infrastructure/database/mongoose/models/courses/CourseModel";
 import mongoose from "mongoose";
+import {
+  GetEnrollmentsRequest,
+  ApproveEnrollmentRequest,
+  RejectEnrollmentRequest,
+  GetCourseRequestDetailsRequest,
+} from "../../../domain/courses/entities/EnrollmentRequestEntities";
+import {
+  GetCoursesRequest,
+  CreateCourseRequest,
+  UpdateCourseRequest,
+  DeleteCourseRequest,
+} from "../../../domain/courses/entities/CourseRequestEntities";
 
 export class CoursesRepository implements ICoursesRepository {
-  async getCourses(params: GetCoursesRequestDTO) {
+  async getCourses(params: GetCoursesRequest) {
     const { page, limit, specialization, faculty, term, search } = params;
     const query: any = {};
     if (specialization && specialization !== "all") {
@@ -27,7 +26,7 @@ export class CoursesRepository implements ICoursesRepository {
       };
     }
     if (faculty && faculty !== "all") {
-       const formattedFaculty = faculty
+      const formattedFaculty = faculty
         .split('_')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
@@ -66,15 +65,15 @@ export class CoursesRepository implements ICoursesRepository {
     return { courses, totalItems, page, limit };
   }
 
-  async getCourseById(params: GetCourseByIdRequestDTO) {
-    return CourseModel.findById(params.id).lean();
+  async getCourseById(id: string) {
+    return CourseModel.findById(id).lean();
   }
 
-  async createCourse(params: CreateCourseRequestDTO) {
+  async createCourse(params: CreateCourseRequest) {
     return CourseModel.create(params);
   }
 
-  async updateCourse(params: UpdateCourseRequestDTO) {
+  async updateCourse(params: UpdateCourseRequest) {
     return CourseModel.findByIdAndUpdate(
       params.id,
       { $set: { ...params, updatedAt: new Date() } },
@@ -82,11 +81,11 @@ export class CoursesRepository implements ICoursesRepository {
     ).lean();
   }
 
-  async deleteCourse(params: DeleteCourseRequestDTO) {
+  async deleteCourse(params: DeleteCourseRequest) {
     await CourseModel.findByIdAndDelete(params.id);
   }
 
-  async getEnrollments(params: GetEnrollmentsRequestDTO) {
+  async getEnrollments(params: GetEnrollmentsRequest) {
     const { page, limit, status, specialization, faculty, term, search } = params;
     const query: any = {};
     if (status && status.toLowerCase() !== "all") {
@@ -149,15 +148,15 @@ export class CoursesRepository implements ICoursesRepository {
     return { enrollments, totalItems, page, limit };
   }
 
-  async approveEnrollment(params: ApproveEnrollmentRequestDTO) {
-    return EnrollmentModel.findById(params.enrollmentId).lean();
+  async approveEnrollment(params: ApproveEnrollmentRequest) {
+    await EnrollmentModel.findByIdAndUpdate(params.enrollmentId, { status: "Approved" });
   }
 
-  async rejectEnrollment(params: RejectEnrollmentRequestDTO) {
-    return EnrollmentModel.findById(params.enrollmentId).lean();
+  async rejectEnrollment(params: RejectEnrollmentRequest) {
+    await EnrollmentModel.findByIdAndUpdate(params.enrollmentId, { status: "Rejected" });
   }
 
-  async getCourseRequestDetails(params: GetCourseRequestDetailsRequestDTO) {
+  async getCourseRequestDetails(params: GetCourseRequestDetailsRequest) {
     if (!mongoose.isValidObjectId(params.id)) {
       return null;
     }

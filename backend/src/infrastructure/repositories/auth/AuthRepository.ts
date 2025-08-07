@@ -6,16 +6,8 @@ import {
 } from "../../../domain/auth/errors/AuthErrors";
 import { RefreshSession } from '../../database/mongoose/auth/refreshToken.model';
 
-import {
-    RegisterRequestDTO, LoginRequestDTO, RefreshTokenRequestDTO, LogoutRequestDTO,
-    RegisterFacultyRequestDTO, SendEmailOtpRequestDTO, ResetPasswordRequestDTO,
-} from "../../../domain/auth/dtos/AuthRequestDTOs";
-import {
-    RegisterResponseDTO, LoginResponseDTO, RefreshTokenResponseDTO, LogoutResponseDTO,
-    RegisterFacultyResponseDTO, SendEmailOtpResponseDTO, ResetPasswordResponseDTO,
-} from "../../../domain/auth/dtos/AuthResponseDTOs";
-
 import { IAuthRepository } from "../../../application/auth/repositories/IAuthRepository";
+import { RegisterRequest, RegisterFacultyRequest, User } from "../../../domain/auth/entities/Auth";
 
 import { Register } from "../../database/mongoose/auth/register.model";
 import { Admin } from "../../database/mongoose/auth/admin.model";
@@ -28,7 +20,7 @@ export class AuthRepository implements IAuthRepository {
 
     private async findUserByEmailAcrossCollections(
         email: string
-    ): Promise<{ user: any; collection: "register" | "admin" | "user" | "faculty" } | null> {
+    ): Promise<{ user; collection: "register" | "admin" | "user" | "faculty" } | null> {
         let user;
 
         user = await Admin.findOne({ email });
@@ -49,7 +41,7 @@ export class AuthRepository implements IAuthRepository {
     private async findUserByIdAcrossCollections(
         userId: string,
         collectionType: "register" | "admin" | "user" | "faculty"
-    ): Promise<{ user: any; collection: "register" | "admin" | "user" | "faculty" } | null> {
+    ): Promise<{ user; collection: "register" | "admin" | "user" | "faculty" } | null> {
         let user;
         switch (collectionType) {
             case "register":
@@ -71,7 +63,7 @@ export class AuthRepository implements IAuthRepository {
         return null;
     }
 
-    async register(params: RegisterRequestDTO): Promise<RegisterResponseDTO> {
+    async register(params: RegisterRequest) {
         const existingUser = await Register.findOne({ email: params.email });
         if (existingUser) {
             throw new UserAlreadyExistsError(params.email);
@@ -98,8 +90,8 @@ export class AuthRepository implements IAuthRepository {
         };
     }
 
-    async login(params: LoginRequestDTO): Promise<LoginResponseDTO> {
-        const userResult = await this.findUserByEmailAcrossCollections(params.email);
+    async login(email: string) {
+        const userResult = await this.findUserByEmailAcrossCollections(email);
 
         if (!userResult) {
             throw new InvalidCredentialsError();
@@ -122,8 +114,8 @@ export class AuthRepository implements IAuthRepository {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
-                id: user._id?.toString(),
-                profilePicture: (user as any).profilePicture || "",
+                id: user._id?.toString() || "",
+                profilePicture: user.profilePicture || "",
                 password: user.password,
                 blocked: user.blocked,
             },
@@ -131,31 +123,31 @@ export class AuthRepository implements IAuthRepository {
         };
     }
 
-    async refreshToken(params: RefreshTokenRequestDTO): Promise<RefreshTokenResponseDTO> {
+    async refreshToken(userId: string, collection: "register" | "admin" | "user" | "faculty") {
         const userResult = await this.findUserByIdAcrossCollections(
-            params.userId as string,
-            params.collection as "register" | "admin" | "user" | "faculty"
+            userId,
+            collection
         );
 
-        if (!userResult || userResult.user.email !== params.email) {
+        if (!userResult) {
             throw new UserNotFoundError("User linked to token not found or email mismatch.");
         }
 
-        const { user, collection } = userResult;
+        const { user, collection: userCollection } = userResult;
 
         return {
             user: {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
-                id: user._id?.toString(),
-                profilePicture: (user as any).profilePicture || "",
+                id: user._id?.toString() || "",
+                profilePicture: user.profilePicture || "",
             },
-            collection,
+            collection: userCollection,
         };
     }
 
-    async registerFaculty(params: RegisterFacultyRequestDTO): Promise<RegisterFacultyResponseDTO> {
+    async registerFaculty(params: RegisterFacultyRequest) {
         const existingFaculty = await FacultyRegister.findOne({ email: params.email });
         if (existingFaculty) {
             throw new FacultyAlreadyExistsError(params.email);
@@ -183,12 +175,12 @@ export class AuthRepository implements IAuthRepository {
                 department: faculty.department,
                 id: faculty._id.toString(),
             },
-            collection: "faculty",
+            collection: "faculty" as const,
         };
     }
 
-    async sendEmailOtp(params: SendEmailOtpRequestDTO): Promise<SendEmailOtpResponseDTO> {
-        const userResult = await this.findUserByEmailAcrossCollections(params.email);
+    async sendEmailOtp(email: string) {
+        const userResult = await this.findUserByEmailAcrossCollections(email);
 
         if (!userResult) {
             throw new EmailNotFoundError();
@@ -196,16 +188,15 @@ export class AuthRepository implements IAuthRepository {
         return { message: "User found for OTP." };
     }
 
-
-    async resetPassword(params: ResetPasswordRequestDTO): Promise<ResetPasswordResponseDTO> {
-        const userResult = await this.findUserByEmailAcrossCollections(params.email); // `email` comes from verified token in Use Case
+    async resetPassword(email: string, newPassword: string) {
+        const userResult = await this.findUserByEmailAcrossCollections(email); // `email` comes from verified token in Use Case
 
         if (!userResult) {
             throw new UserNotFoundError();
         }
 
         const { user, collection } = userResult;
-        let Model: any;
+        let Model
 
         switch (collection) {
             case "admin": Model = Admin; break;
@@ -215,15 +206,16 @@ export class AuthRepository implements IAuthRepository {
             default: throw new Error("Invalid user collection type.");
         }
 
-        await Model.updateOne({ email: params.email }, { password: params.newPassword });
+        // Update the password in the database
+        await Model.updateOne({ email: email }, { password: newPassword });
 
         return {
             user: {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
-                id: user._id?.toString(),
-                profilePicture: (user as any).profilePicture || "",
+                id: user._id?.toString() || "",
+                profilePicture: user.profilePicture || "",
             },
             collection,
         };
@@ -258,32 +250,32 @@ export class AuthRepository implements IAuthRepository {
         await RefreshSession.create(params);
     }
 
-    async findSessionBySessionIdAndUserId(sessionId: string, userId: string): Promise<any> {
+    async findSessionBySessionIdAndUserId(sessionId: string, userId: string) {
         return await RefreshSession.findOne({ sessionId, userId });
     }
-    async updateSessionRefreshToken(sessionId: string, newRefreshToken: string, newExpiresAt: Date, newLastUsedAt: Date): Promise<void> {
+    async updateSessionRefreshToken(sessionId: string, newRefreshToken: string, newExpiresAt: Date, newLastUsedAt: Date) {
         await RefreshSession.updateOne(
             { sessionId },
             { $set: { refreshToken: newRefreshToken, expiresAt: newExpiresAt, lastUsedAt: newLastUsedAt } }
         );
     }
-    async deleteSessionBySessionId(sessionId: string): Promise<void> {
+    async deleteSessionBySessionId(sessionId: string) {
         await RefreshSession.deleteOne({ sessionId });
     }
-    async deleteAllSessionsByUserId(userId: string): Promise<void> {
+    async deleteAllSessionsByUserId(userId: string) {
         await RefreshSession.deleteMany({ userId });
     }
 
-    async findSessionByUserIdAndDevice(userId: string, userAgent: string, ipAddress: string): Promise<any> {
+    async findSessionByUserIdAndDevice(userId: string, userAgent: string, ipAddress: string) {
         const session = await RefreshSession.findOne({ userId, userAgent, ipAddress });
         return session;
     }
 
-    async findLatestSessionByUserId(userId: string): Promise<any> {
+    async findLatestSessionByUserId(userId: string) {
         return await RefreshSession.findOne({ userId }).sort({ lastUsedAt: -1 });
     }
 
-    async getAllSessions(): Promise<any[]> {
+    async getAllSessions() {
         return await RefreshSession.find({});
     }
 }

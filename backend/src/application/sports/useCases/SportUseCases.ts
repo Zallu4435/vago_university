@@ -17,6 +17,26 @@ import { SportStatus } from "../../../domain/sports/entities/SportTypes";
 import { Sport } from "../../../domain/sports/entities/Sport";
 import mongoose from "mongoose";
 
+export interface IGetSportsUseCase {
+  execute(params: GetSportsRequestDTO): Promise<GetSportsResponseDTO>;
+}
+
+export interface IGetSportByIdUseCase {
+  execute(params: GetSportByIdRequestDTO): Promise<GetSportByIdResponseDTO>;
+}
+
+export interface ICreateSportUseCase {
+  execute(params: CreateSportRequestDTO): Promise<CreateSportResponseDTO>;
+}
+
+export interface IUpdateSportUseCase {
+  execute(params: UpdateSportRequestDTO): Promise<UpdateSportResponseDTO>;
+}
+
+export interface IDeleteSportUseCase {
+  execute(params: DeleteSportRequestDTO): Promise<{ message: string }>;
+}
+
 export class GetSportsUseCase {
   constructor(private sportsRepository: ISportsRepository) { }
 
@@ -72,23 +92,27 @@ export class CreateSportUseCase {
 
   async execute(params: CreateSportRequestDTO): Promise<CreateSportResponseDTO> {
     const newSport: any = await this.sportsRepository.createSport(params);
+    
     return {
-      sport: new Sport({
+      sport: {
         id: newSport._id?.toString() || newSport.id,
         title: newSport.title,
         type: newSport.type,
-        headCoach: newSport.headCoach,
-        playerCount: newSport.participants || 0,
-        status: newSport.status === "active" ? SportStatus.Active : SportStatus.Inactive,
-        formedOn: newSport.createdAt ? new Date(newSport.createdAt).toISOString() : undefined,
-        logo: newSport.logo || "",
-        division: newSport.division || "",
-        participants: newSport.participants || 0,
+        category: newSport.category,
+        organizer: newSport.organizer,
+        organizerType: newSport.organizerType,
         icon: newSport.icon,
         color: newSport.color,
+        division: newSport.division,
+        headCoach: newSport.headCoach,
+        homeGames: newSport.homeGames,
+        record: newSport.record,
+        upcomingGames: newSport.upcomingGames,
+        participants: newSport.participants,
+        status: newSport.status === "active" ? SportStatus.Active : SportStatus.Inactive,
         createdAt: newSport.createdAt,
         updatedAt: newSport.updatedAt,
-      }),
+      },
     };
   }
 }
@@ -105,22 +129,25 @@ export class UpdateSportUseCase {
       throw new Error("Sport not found");
     }
     return {
-      sport: new Sport({
+      sport: {
         id: updatedSport._id?.toString() || updatedSport.id,
         title: updatedSport.title,
         type: updatedSport.type,
-        headCoach: updatedSport.headCoach,
-        playerCount: updatedSport.participants || 0,
-        status: updatedSport.status === "active" ? SportStatus.Active : SportStatus.Inactive,
-        formedOn: updatedSport.createdAt ? new Date(updatedSport.createdAt).toISOString() : undefined,
-        logo: updatedSport.logo || "",
-        division: updatedSport.division || "",
-        participants: updatedSport.participants || 0,
+        category: updatedSport.category,
+        organizer: updatedSport.organizer,
+        organizerType: updatedSport.organizerType,
         icon: updatedSport.icon,
         color: updatedSport.color,
+        division: updatedSport.division,
+        headCoach: updatedSport.headCoach,
+        homeGames: updatedSport.homeGames,
+        record: updatedSport.record,
+        upcomingGames: updatedSport.upcomingGames,
+        participants: updatedSport.participants,
+        status: updatedSport.status === "active" ? SportStatus.Active : SportStatus.Inactive,
         createdAt: updatedSport.createdAt,
         updatedAt: updatedSport.updatedAt,
-      }),
+      },
     };
   }
 }

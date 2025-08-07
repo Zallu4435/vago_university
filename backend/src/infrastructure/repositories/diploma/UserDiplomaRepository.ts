@@ -1,29 +1,11 @@
 import { IUserDiplomaRepository } from "../../../application/diploma/repositories/IUserDiplomaRepository";
-import {
-  GetUserDiplomasRequestDTO,
-  GetUserDiplomaByIdRequestDTO,
-  GetUserDiplomaChapterRequestDTO,
-  UpdateVideoProgressRequestDTO,
-  MarkChapterCompleteRequestDTO,
-  ToggleBookmarkRequestDTO
-} from "../../../domain/diploma/dtos/UserDiplomaRequestDTOs";
-import {
-  GetUserDiplomasResponseDTO,
-  GetUserDiplomaByIdResponseDTO,
-  GetUserDiplomaChapterResponseDTO,
-  UpdateVideoProgressResponseDTO,
-  MarkChapterCompleteResponseDTO,
-  ToggleBookmarkResponseDTO
-} from "../../../domain/diploma/dtos/UserDiplomaResponseDTOs";
 import { Diploma as DiplomaModel } from "../../../infrastructure/database/mongoose/models/diploma.model";
 import { UserProgress } from "../../../infrastructure/database/mongoose/models/userProgress.model";
 import { Video } from "../../../infrastructure/database/mongoose/models/video.model";
 import { VideoStatus } from "../../../domain/video/enums/VideoStatus";
-import mongoose from "mongoose";
 
 export class UserDiplomaRepository implements IUserDiplomaRepository {
-  async getUserDiplomas(params: GetUserDiplomasRequestDTO): Promise<GetUserDiplomasResponseDTO> {
-    const { userId, page, limit, category, status, dateRange } = params;
+  async getUserDiplomas(page: number, limit: number, category: string, status: string, dateRange: string) {
     const skip = (page - 1) * limit;
 
     const query: any = { status: true };
@@ -95,9 +77,9 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
     };
   }
 
-  async getUserDiplomaById(params: GetUserDiplomaByIdRequestDTO): Promise<GetUserDiplomaByIdResponseDTO | null> {
+  async getUserDiplomaById(id: string) {
     const diploma = await DiplomaModel.findOne({
-      _id: params.id,
+      _id: id,
       status: true
     }).lean();
     
@@ -136,14 +118,14 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
     };
   }
 
-  async getUserDiplomaChapter(params: GetUserDiplomaChapterRequestDTO): Promise<GetUserDiplomaChapterResponseDTO | null> {
+  async getUserDiplomaChapter(courseId: string, chapterId: string) {
     const diploma = await DiplomaModel.findOne({
-      _id: params.courseId,
+      _id: courseId,
       status: true
     });
     if (!diploma) return null;
     
-    const chapter = await Video.findOne({ _id: params.chapterId }).lean();
+    const chapter = await Video.findOne({ _id: chapterId }).lean();
     if (!chapter) return null;
     
     // Transform to match Chapter interface
@@ -160,8 +142,7 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
     };
   }
 
-  async updateVideoProgress(params: UpdateVideoProgressRequestDTO): Promise<UpdateVideoProgressResponseDTO> {
-    const { userId, courseId, chapterId, progress } = params;
+  async updateVideoProgress(userId: string, courseId: string, chapterId: string, progress: number) {
     const userProgress = await UserProgress.findOneAndUpdate(
       { userId, courseId, chapterId },
       { progress },
@@ -174,8 +155,7 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
     };
   }
 
-  async markChapterComplete(params: MarkChapterCompleteRequestDTO): Promise<MarkChapterCompleteResponseDTO> {
-    const { userId, courseId, chapterId } = params;
+  async markChapterComplete(userId: string, courseId: string, chapterId: string) {
     const userProgress = await UserProgress.findOneAndUpdate(
       { userId, courseId, chapterId },
       { isCompleted: true },
@@ -188,8 +168,7 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
     };
   }
 
-  async toggleBookmark(params: ToggleBookmarkRequestDTO): Promise<ToggleBookmarkResponseDTO> {
-    const { userId, courseId, chapterId } = params;
+  async toggleBookmark(userId: string, courseId: string, chapterId: string) {
     const userProgress = await UserProgress.findOne({ userId, courseId, chapterId });
     let isBookmarked = false;
     
@@ -213,7 +192,7 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
     };
   }
 
-  async getCompletedChapters(userId: string, courseId: string): Promise<string[]> {
+  async getCompletedChapters(userId: string, courseId: string) {
     const completedChapters = await UserProgress.find({
       userId,
       courseId,
@@ -223,7 +202,7 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
     return completedChapters.map(chapter => chapter.chapterId.toString());
   }
 
-  async getBookmarkedChapters(userId: string, courseId: string): Promise<string[]> {
+  async getBookmarkedChapters(userId: string, courseId: string) {
     const bookmarkedChapters = await UserProgress.find({
       userId,
       courseId,

@@ -1,22 +1,19 @@
 import {
-  GetClubsRequestDTO,
-  GetClubByIdRequestDTO,
-  CreateClubRequestDTO,
-  UpdateClubRequestDTO,
-  DeleteClubRequestDTO,
-} from "../../../domain/clubs/dtos/ClubRequestDTOs";
-import {
-  GetClubRequestsRequestDTO,
-  ApproveClubRequestRequestDTO,
-  RejectClubRequestRequestDTO,
-  GetClubRequestDetailsRequestDTO,
-} from "../../../domain/clubs/dtos/ClubRequestRequestDTOs";
+  GetClubsRequest,
+  CreateClubRequest,
+  UpdateClubRequest,
+  DeleteClubRequest,
+  GetClubRequestsRequest,
+  ApproveClubRequestRequest,
+  RejectClubRequestRequest,
+  GetClubRequestDetailsRequest,
+} from "../../../domain/clubs/entities/Club";
 import { IClubsRepository } from "../../../application/clubs/repositories/IClubsRepository";
 import { ClubModel, ClubRequestModel } from "../../../infrastructure/database/mongoose/models/clubs/ClubModel";
 import mongoose from "mongoose";
 
 export class ClubsRepository implements IClubsRepository {
-  async getClubs(params: GetClubsRequestDTO): Promise<any> {
+  async getClubs(params: GetClubsRequest) {
     const { page, limit, category, status, startDate, endDate, search } = params;
     const query: any = {};
     if (category && category.toLowerCase() !== "all") {
@@ -48,27 +45,30 @@ export class ClubsRepository implements IClubsRepository {
     return { clubs, totalItems, totalPages, currentPage: page };
   }
 
-  async getClubById(params: GetClubByIdRequestDTO): Promise<any> {
-    return await ClubModel.findById(params.id).lean();
+  async getClubById(id: string) {
+    const club = await ClubModel.findById(id).lean();
+    return { club };
   }
 
-  async createClub(params: CreateClubRequestDTO): Promise<any> {
-    return await ClubModel.create({ ...params, status: params.status?.toLowerCase() || "active" });
+  async createClub(params: CreateClubRequest) {
+    const club = await ClubModel.create({ ...params, status: params.status?.toLowerCase() || "active" });
+    return { club };
   }
 
-  async updateClub(params: UpdateClubRequestDTO): Promise<any> {
-    return await ClubModel.findByIdAndUpdate(
+  async updateClub(params: UpdateClubRequest) {
+    const club = await ClubModel.findByIdAndUpdate(
       params.id,
       { $set: { ...params, updatedAt: new Date() } },
       { new: true }
     ).lean();
+    return { club };
   }
 
-  async deleteClub(params: DeleteClubRequestDTO): Promise<void> {
+  async deleteClub(params: DeleteClubRequest): Promise<void> {
     await ClubModel.findByIdAndDelete(params.id);
   }
 
-  async getClubRequests(params: GetClubRequestsRequestDTO): Promise<any> {
+  async getClubRequests(params: GetClubRequestsRequest) {
     const { page, limit, status, type, startDate, endDate, search } = params;
     const query: any = {};
     if (status && status.toLowerCase() !== "all") {
@@ -121,7 +121,7 @@ export class ClubsRepository implements IClubsRepository {
     return { rawRequests, totalItems, totalPages, currentPage: page };
   }
 
-  async approveClubRequest(params: ApproveClubRequestRequestDTO): Promise<any> {
+  async approveClubRequest(params: ApproveClubRequestRequest) {
     await ClubRequestModel.findByIdAndUpdate(
       params.id,
       { status: "approved", updatedAt: new Date() },
@@ -137,7 +137,7 @@ export class ClubsRepository implements IClubsRepository {
     }
   }
 
-  async rejectClubRequest(params: RejectClubRequestRequestDTO): Promise<any> {
+  async rejectClubRequest(params: RejectClubRequestRequest) {
     await ClubRequestModel.findByIdAndUpdate(
       params.id,
       { status: "rejected", updatedAt: new Date() },
@@ -145,8 +145,8 @@ export class ClubsRepository implements IClubsRepository {
     );
   }
 
-  async getClubRequestDetails(params: GetClubRequestDetailsRequestDTO): Promise<any> {
-    return await ClubRequestModel.findById(params.id)
+  async getClubRequestDetails(params: GetClubRequestDetailsRequest) {
+    const clubRequest = await ClubRequestModel.findById(params.id)
       .populate({
         path: "clubId",
         select: "name type about nextMeeting enteredMembers",
@@ -156,6 +156,7 @@ export class ClubsRepository implements IClubsRepository {
         select: "firstName lastName email",
       })
       .lean();
+    return { clubRequest };
   }
 }
   

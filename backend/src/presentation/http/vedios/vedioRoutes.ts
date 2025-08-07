@@ -1,11 +1,11 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { VideoComposer } from '../../../infrastructure/services/vedios/VideoComposer';
 import { authMiddleware } from '../../../shared/middlewares/authMiddleware';
 import { expressAdapter } from '../../adapters/ExpressAdapter';
 import { contentVideoUploadWithErrorHandling } from '../../../config/cloudinary.config';
+import { getVideoComposer } from '../../../infrastructure/services/vedios/VideoComposer';
 
 const router = Router();
-const videoController = VideoComposer.composeVideoController();
+const videoController = getVideoComposer();
 
 router.post(
     '/categories/:category/videos',

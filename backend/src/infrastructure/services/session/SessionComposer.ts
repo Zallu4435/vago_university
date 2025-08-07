@@ -1,23 +1,46 @@
 import { ISessionRepository } from '../../../application/session/repositories/ISessionRepository';
 import { SessionRepository } from '../../repositories/session/SessionRepository';
-import { CreateVideoSessionUseCase, JoinVideoSessionUseCase, GetVideoSessionUseCase, DeleteVideoSessionUseCase, UpdateVideoSessionUseCase, GetAllVideoSessionsUseCase, UpdateVideoSessionStatusUseCase, GetSessionAttendanceUseCase, UpdateAttendanceStatusUseCase, RecordAttendanceJoinUseCase, RecordAttendanceLeaveUseCase } from '../../../application/session/useCases/VideoSessionUseCases';
+import {
+  CreateVideoSessionUseCase,
+  JoinVideoSessionUseCase,
+  GetVideoSessionUseCase,
+  DeleteVideoSessionUseCase,
+  UpdateVideoSessionUseCase,
+  GetAllVideoSessionsUseCase,
+  UpdateVideoSessionStatusUseCase,
+  GetSessionAttendanceUseCase,
+  UpdateAttendanceStatusUseCase,
+  RecordAttendanceJoinUseCase,
+  RecordAttendanceLeaveUseCase,
+  ICreateVideoSessionUseCase,
+  IJoinVideoSessionUseCase,
+  IGetVideoSessionUseCase,
+  IUpdateVideoSessionUseCase,
+  IDeleteVideoSessionUseCase,
+  IGetAllVideoSessionsUseCase,
+  IUpdateVideoSessionStatusUseCase,
+  IGetSessionAttendanceUseCase,
+  IUpdateAttendanceStatusUseCase,
+  IRecordAttendanceJoinUseCase,
+  IRecordAttendanceLeaveUseCase
+} from '../../../application/session/useCases/VideoSessionUseCases';
 import { VideoSessionController } from '../../../presentation/http/session/VideoSessionController';
 import { IVideoSessionController } from '../../../presentation/http/IHttp';
 
 export function getVideoSessionComposer(): IVideoSessionController {
   const repository: ISessionRepository = new SessionRepository();
-  const createUseCase = new CreateVideoSessionUseCase(repository);
-  const joinUseCase = new JoinVideoSessionUseCase(repository);
-  const getUseCase = new GetVideoSessionUseCase(repository);
-  const updateUseCase = new UpdateVideoSessionUseCase(repository);
-  const deleteUseCase = new DeleteVideoSessionUseCase(repository);
-  const getAllUseCase = new GetAllVideoSessionsUseCase(repository);
-  const updateStatusUseCase = new UpdateVideoSessionStatusUseCase(repository);
-  const getSessionAttendanceUseCase = new GetSessionAttendanceUseCase(repository);
-  const updateAttendanceStatusUseCase = new UpdateAttendanceStatusUseCase(repository);
-  const recordAttendanceJoinUseCase = new RecordAttendanceJoinUseCase(repository);
-  const recordAttendanceLeaveUseCase = new RecordAttendanceLeaveUseCase(repository);
-  
+  const createUseCase: ICreateVideoSessionUseCase = new CreateVideoSessionUseCase(repository);
+  const joinUseCase: IJoinVideoSessionUseCase = new JoinVideoSessionUseCase(repository);
+  const getUseCase: IGetVideoSessionUseCase = new GetVideoSessionUseCase(repository);
+  const updateUseCase: IUpdateVideoSessionUseCase = new UpdateVideoSessionUseCase(repository);
+  const deleteUseCase: IDeleteVideoSessionUseCase = new DeleteVideoSessionUseCase(repository);
+  const getAllUseCase: IGetAllVideoSessionsUseCase = new GetAllVideoSessionsUseCase(repository);
+  const updateStatusUseCase: IUpdateVideoSessionStatusUseCase = new UpdateVideoSessionStatusUseCase(repository);
+  const getSessionAttendanceUseCase: IGetSessionAttendanceUseCase = new GetSessionAttendanceUseCase(repository);
+  const updateAttendanceStatusUseCase: IUpdateAttendanceStatusUseCase = new UpdateAttendanceStatusUseCase(repository);
+  const recordAttendanceJoinUseCase: IRecordAttendanceJoinUseCase = new RecordAttendanceJoinUseCase(repository);
+  const recordAttendanceLeaveUseCase: IRecordAttendanceLeaveUseCase = new RecordAttendanceLeaveUseCase(repository);
+
   return new VideoSessionController(
     createUseCase,
     joinUseCase,

@@ -13,17 +13,23 @@ export interface SportProps {
   id?: string;
   title: string;
   type: string;
+  category: string;
+  organizer: string;
+  organizerType: string;
+  icon: string;
+  color: string;
+  division: string;
   headCoach: string;
-  playerCount: number;
+  homeGames: number;
+  record: string;
+  upcomingGames: { date: string; description: string }[];
+  participants: number;
   status?: SportStatus;
-  formedOn: string;
-  logo: string;
-  division?: string;
-  participants?: number;
-  icon?: string;
-  color?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  playerCount?: number;
+  formedOn?: string;
+  logo?: string;
 }
 
 export interface SportRequestProps {
@@ -39,18 +45,21 @@ export interface SportRequestProps {
 
 // Interface for Mongoose model
 export interface Sport {
-  _id: string;
+  id?: string;
   title: string;
   type: string;
-  headCoach: string;
-  playerCount: number;
-  status: SportStatus;
-  formedOn: string;
-  logo: string;
-  division: string;
-  participants: number;
+  category: string;
+  organizer: string;
+  organizerType: string;
   icon: string;
   color: string;
+  division: string;
+  headCoach: string;
+  homeGames: number;
+  record: string;
+  upcomingGames: { date: string; description: string }[];
+  participants: number;
+  status: SportStatus;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -70,4 +79,4 @@ export interface SportRequest {
 export type CreateSportProps = Omit<SportProps, 'id' | 'createdAt' | 'updatedAt'>;
 export type UpdateSportProps = Partial<Omit<SportProps, 'createdAt' | 'updatedAt'>> & { id: string };
 export type CreateSportRequestProps = Omit<SportRequestProps, 'id' | 'createdAt' | 'updatedAt'>;
-export type UpdateSportRequestProps = Partial<Omit<SportRequestProps, 'createdAt' | 'updatedAt'>> & { id: string }; 
+export type UpdateSportRequestProps = Partial<Omit<SportRequestProps, 'createdAt' | 'updatedAt'>> & { id: string };

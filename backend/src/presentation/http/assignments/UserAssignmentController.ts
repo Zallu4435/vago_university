@@ -1,35 +1,35 @@
 import { IHttpRequest, IHttpResponse, IUserAssignmentController, HttpSuccess, HttpErrors } from '../../http/IHttp';
 import {
-  GetUserAssignmentsUseCase,
-  GetUserAssignmentByIdUseCase,
-  SubmitUserAssignmentUseCase,
-  GetUserAssignmentStatusUseCase,
-  GetUserAssignmentFeedbackUseCase
+  IGetUserAssignmentsUseCase,
+  IGetUserAssignmentByIdUseCase,
+  ISubmitUserAssignmentUseCase,
+  IGetUserAssignmentStatusUseCase,
+  IGetUserAssignmentFeedbackUseCase
 } from '../../../application/assignments/useCases/UserAssignmentUseCases';
 import { v2 as cloudinary } from 'cloudinary';
 import { config } from '../../../config/config';
+import { AssignmentStatus } from '../../../domain/assignments/assignmenttypes';
 
 export class UserAssignmentController implements IUserAssignmentController {
   private httpSuccess: HttpSuccess;
   private httpErrors: HttpErrors;
 
   constructor(
-    private getUserAssignmentsUseCase: GetUserAssignmentsUseCase,
-    private getUserAssignmentByIdUseCase: GetUserAssignmentByIdUseCase,
-    private submitUserAssignmentUseCase: SubmitUserAssignmentUseCase,
-    private getUserAssignmentStatusUseCase: GetUserAssignmentStatusUseCase,
-    private getUserAssignmentFeedbackUseCase: GetUserAssignmentFeedbackUseCase
+    private getUserAssignmentsUseCase: IGetUserAssignmentsUseCase,
+    private getUserAssignmentByIdUseCase: IGetUserAssignmentByIdUseCase,
+    private submitUserAssignmentUseCase: ISubmitUserAssignmentUseCase,
+    private getUserAssignmentStatusUseCase: IGetUserAssignmentStatusUseCase,
+    private getUserAssignmentFeedbackUseCase: IGetUserAssignmentFeedbackUseCase
   ) {
     this.httpSuccess = new HttpSuccess();
     this.httpErrors = new HttpErrors();
   }
 
   async getAssignments(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const startTime = Date.now();
     const { subject, status, page, limit, search, sortBy } = httpRequest.query;
     const result = await this.getUserAssignmentsUseCase.execute({
       subject: subject as string,
-      status: status as any,
+      status: status as AssignmentStatus,
       page: page ? parseInt(page as string) : undefined,
       limit: limit ? parseInt(limit as string) : undefined,
       search: search as string,

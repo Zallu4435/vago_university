@@ -19,7 +19,7 @@ import {
 } from "../../../domain/diploma/dtos/UserDiplomaResponseDTOs";
 import { DiplomaNotFoundError, InvalidDiplomaStatusError } from "../../../domain/diploma/errors/DiplomaErrors";
 import mongoose from "mongoose";
-
+ 
 interface ResponseDTO<T> {
   data: T;
   success: boolean;
@@ -64,7 +64,7 @@ export class GetUserDiplomasUseCase implements IGetUserDiplomasUseCase {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
       throw new Error("Invalid page or limit parameters");
     }
-    const { courses, total, page, limit } = await this.userDiplomaRepository.getUserDiplomas(params);
+    const { courses, total, page, limit } = await this.userDiplomaRepository.getUserDiplomas(params.page, params.limit, params.category, params.status, params.dateRange);
     return {
       success: true,
       data: {
@@ -85,7 +85,7 @@ export class GetUserDiplomaByIdUseCase implements IGetUserDiplomaByIdUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new InvalidDiplomaStatusError("Invalid diploma ID");
     }
-    const diploma = await this.userDiplomaRepository.getUserDiplomaById(params);
+    const diploma = await this.userDiplomaRepository.getUserDiplomaById(params.id);
     if (!diploma) {
       throw new DiplomaNotFoundError(params.id);
     }
@@ -103,7 +103,7 @@ export class GetUserDiplomaChapterUseCase implements IGetUserDiplomaChapterUseCa
     if (!mongoose.isValidObjectId(params.courseId) || !mongoose.isValidObjectId(params.chapterId)) {
       throw new InvalidDiplomaStatusError("Invalid course or chapter ID");
     }
-    const chapter = await this.userDiplomaRepository.getUserDiplomaChapter(params);
+    const chapter = await this.userDiplomaRepository.getUserDiplomaChapter(params.courseId, params.chapterId);
     if (!chapter) {
       throw new DiplomaNotFoundError(params.chapterId);
     }
@@ -124,7 +124,7 @@ export class UpdateVideoProgressUseCase implements IUpdateVideoProgressUseCase {
     if (typeof params.progress !== 'number' || params.progress < 0 || params.progress > 100) {
       throw new Error("Invalid progress value");
     }
-    const userProgress = await this.userDiplomaRepository.updateVideoProgress(params);
+    const userProgress = await this.userDiplomaRepository.updateVideoProgress(params.userId, params.courseId, params.chapterId, params.progress);
     return {
       success: true,
       data: {
@@ -142,7 +142,7 @@ export class MarkChapterCompleteUseCase implements IMarkChapterCompleteUseCase {
     if (!mongoose.isValidObjectId(params.courseId) || !mongoose.isValidObjectId(params.chapterId)) {
       throw new InvalidDiplomaStatusError("Invalid course or chapter ID");
     }
-    const userProgress = await this.userDiplomaRepository.markChapterComplete(params);
+    const userProgress = await this.userDiplomaRepository.markChapterComplete(params.userId, params.courseId, params.chapterId);
     return {
       success: true,
       data: {
@@ -160,7 +160,7 @@ export class ToggleBookmarkUseCase implements IToggleBookmarkUseCase {
     if (!mongoose.isValidObjectId(params.courseId) || !mongoose.isValidObjectId(params.chapterId)) {
       throw new InvalidDiplomaStatusError("Invalid course or chapter ID");
     }
-    const userProgress = await this.userDiplomaRepository.toggleBookmark(params);
+    const userProgress = await this.userDiplomaRepository.toggleBookmark(params.userId, params.courseId, params.chapterId);
     return {
       success: true,
       data: {

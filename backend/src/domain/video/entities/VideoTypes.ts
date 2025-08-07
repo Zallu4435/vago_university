@@ -10,7 +10,6 @@ export interface IVideoBase {
   videoUrl?: string;
   uploadedAt?: Date;
   category?: string;
-  diplomaId?: string; // Use string, not mongoose.Types.ObjectId
 }
 
 export interface IDiplomaInfo {
@@ -20,5 +19,6 @@ export interface IDiplomaInfo {
 }
 
 export interface IVideo extends IVideoBase {
+  diplomaId: string;
   diploma?: IDiplomaInfo;
 } 

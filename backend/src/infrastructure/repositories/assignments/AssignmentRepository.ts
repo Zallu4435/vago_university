@@ -1,21 +1,8 @@
 import { IAssignmentRepository } from '../../../application/assignments/repositories/IAssignmentRepository';
+import { AssignmentModel } from '../../database/mongoose/assignment/AssignmentModel';
+import { SubmissionModel } from '../../database/mongoose/assignment/SubmissionModel';
 import { Assignment } from '../../../domain/assignments/entities/Assignment';
-import { Submission } from '../../../domain/assignments/entities/Submission';
-import { AssignmentModel, IAssignmentDocument } from '../../database/mongoose/assignment/AssignmentModel';
-import { SubmissionModel, ISubmissionDocument } from '../../database/mongoose/assignment/SubmissionModel';
-import {
-  CreateAssignmentRequestDTO,
-  UpdateAssignmentRequestDTO,
-  GetAssignmentsRequestDTO,
-  GetAssignmentByIdRequestDTO,
-  DeleteAssignmentRequestDTO,
-  GetSubmissionsRequestDTO,
-  GetSubmissionByIdRequestDTO,
-  ReviewSubmissionRequestDTO,
-  DownloadSubmissionRequestDTO,
-  GetAnalyticsRequestDTO
-} from '../../../domain/assignments/dtos/AssignmentRequestDTOs';
-
+import { IAssignment } from '../../../domain/assignments/entities/Assignment';
 
 export class AssignmentRepository implements IAssignmentRepository {
   async findAssignmentsRaw(query: any, skip: number, limit: number) {
@@ -25,8 +12,7 @@ export class AssignmentRepository implements IAssignmentRepository {
       .sort({ createdAt: -1 });
   }
 
-  async getAssignments(params: GetAssignmentsRequestDTO & { search?: string }): Promise<any> {
-    const { subject, status, page = 1, limit = 10, search } = params;
+  async getAssignments(subject: string, status: string, page: number, limit: number, search: string) {
     const query: any = {};
     if (subject) query.subject = subject;
     if (status) query.status = status;
@@ -44,30 +30,27 @@ export class AssignmentRepository implements IAssignmentRepository {
     return { assignments, total, page, limit };
   }
 
-  async getAssignmentById(params: GetAssignmentByIdRequestDTO): Promise<any> {
-    const { id } = params;
+  async getAssignmentById(id: string) {
     return AssignmentModel.findById(id);
   }
 
-  async createAssignment(params: CreateAssignmentRequestDTO): Promise<any> {
-    return AssignmentModel.create(params);
+  async createAssignment(assignment: Assignment) {
+    return AssignmentModel.create(assignment);
   }
 
-  async updateAssignment(id: string, params: UpdateAssignmentRequestDTO): Promise<any> {
+  async updateAssignment(id: string, assignment: Partial<IAssignment>): Promise<IAssignment | null> {
     return AssignmentModel.findByIdAndUpdate(
       id,
-      { $set: params },
+      { $set: assignment },
       { new: true }
-    );
+    ).lean<IAssignment>().exec();
   }
 
-  async deleteAssignment(params: DeleteAssignmentRequestDTO): Promise<any> {
-    const { id } = params;
+  async deleteAssignment(id: string) {
     return AssignmentModel.findByIdAndDelete(id);
   }
 
-  async getSubmissions(params: GetSubmissionsRequestDTO): Promise<any> {
-    const { assignmentId, page = 1, limit = 10 } = params;
+  async getSubmissions(assignmentId: string, page: number, limit: number) {
     const skip = (page - 1) * limit;
     const [submissions, total] = await Promise.all([
       SubmissionModel.find({ assignmentId })
@@ -79,16 +62,14 @@ export class AssignmentRepository implements IAssignmentRepository {
     return { submissions, total, page, limit };
   }
 
-  async getSubmissionById(params: GetSubmissionByIdRequestDTO): Promise<any> {
-    const { assignmentId, submissionId } = params;
+  async getSubmissionById(assignmentId: string, submissionId: string) {
     return SubmissionModel.findOne({
       _id: submissionId,
       assignmentId
     });
   }
 
-  async reviewSubmission(params: ReviewSubmissionRequestDTO): Promise<any> {
-    const { assignmentId, submissionId, marks, feedback, status, isLate } = params;
+  async reviewSubmission(assignmentId: string, submissionId: string, marks: number, feedback: string, status: string, isLate: boolean) {
     return SubmissionModel.findOneAndUpdate(
       { _id: submissionId, assignmentId },
       { $set: { marks, feedback, status, isLate } },
@@ -96,15 +77,14 @@ export class AssignmentRepository implements IAssignmentRepository {
     );
   }
 
-  async downloadSubmission(params: DownloadSubmissionRequestDTO): Promise<any> {
-    const { assignmentId, submissionId } = params;
+  async downloadSubmission(assignmentId: string, submissionId: string) {
     return SubmissionModel.findOne({
       _id: submissionId,
       assignmentId
     });
   }
 
-  async getAnalytics(): Promise<any> {
+  async getAnalytics() {
     console.log('getAnalytics called in AssignmentRepository');
     // Total assignments
     const totalAssignments = await AssignmentModel.countDocuments();
@@ -176,4 +156,4 @@ export class AssignmentRepository implements IAssignmentRepository {
       topPerformers
     };
   }
-} 
+}

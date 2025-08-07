@@ -1,34 +1,35 @@
-import {
-  CreateAssignmentRequestDTO,
-  UpdateAssignmentRequestDTO,
-  GetAssignmentsRequestDTO,
-  GetAssignmentByIdRequestDTO,
-  DeleteAssignmentRequestDTO,
-  GetSubmissionsRequestDTO,
-  GetSubmissionByIdRequestDTO,
-  ReviewSubmissionRequestDTO,
-  DownloadSubmissionRequestDTO,
-} from "../../../domain/assignments/dtos/AssignmentRequestDTOs";
-import {
-  GetAssignmentsResponseDTO,
-  GetAssignmentResponseDTO,
-  CreateAssignmentResponseDTO,
-  UpdateAssignmentResponseDTO,
-  GetSubmissionsResponseDTO,
-  GetSubmissionResponseDTO,
-  ReviewSubmissionResponseDTO,
-  AnalyticsResponseDTO
-} from "../../../domain/assignments/dtos/AssignmentResponseDTOs";
-
+import { Assignment, IAssignment } from "../../../domain/assignments/entities/Assignment";
+import { IAssignmentDocument } from "../../../infrastructure/database/mongoose/assignment/AssignmentModel";
+import { ISubmissionDocument } from "../../../infrastructure/database/mongoose/assignment/SubmissionModel";
+ 
 export interface IAssignmentRepository {
-  getAssignments(params: GetAssignmentsRequestDTO): Promise<GetAssignmentsResponseDTO>;
-  getAssignmentById(params: GetAssignmentByIdRequestDTO): Promise<GetAssignmentResponseDTO>;
-  createAssignment(params: CreateAssignmentRequestDTO): Promise<CreateAssignmentResponseDTO>;
-  updateAssignment(id: string, params: UpdateAssignmentRequestDTO): Promise<UpdateAssignmentResponseDTO>;
-  deleteAssignment(params: DeleteAssignmentRequestDTO): Promise<void>;
-  getSubmissions(params: GetSubmissionsRequestDTO): Promise<GetSubmissionsResponseDTO>;
-  getSubmissionById(params: GetSubmissionByIdRequestDTO): Promise<GetSubmissionResponseDTO>;
-  reviewSubmission(params: ReviewSubmissionRequestDTO): Promise<ReviewSubmissionResponseDTO>;
-  downloadSubmission(params: DownloadSubmissionRequestDTO): Promise<Buffer>;
-  getAnalytics(): Promise<AnalyticsResponseDTO>;
+  getAssignments(subject: string, status: string, page: number, limit: number, search: string): Promise<{ assignments: IAssignmentDocument[]; total: number; page: number; limit: number }>;
+  getAssignmentById(id: string): Promise<IAssignmentDocument | null>;
+  createAssignment(assignment: IAssignment): Promise<IAssignmentDocument>;
+  updateAssignment(id: string, assignment: Partial<IAssignment>): Promise<IAssignment | null>;
+  deleteAssignment(id: string): Promise<IAssignmentDocument>;
+  getSubmissions(assignmentId: string, page: number, limit: number): Promise<{ submissions: ISubmissionDocument[]; total: number; page: number; limit: number }>;
+  getSubmissionById(assignmentId: string, submissionId: string): Promise<ISubmissionDocument | null>;
+  reviewSubmission(assignmentId: string, submissionId: string, marks: number, feedback: string, status: string, isLate: boolean): Promise<ISubmissionDocument | null>;
+  downloadSubmission(assignmentId: string, submissionId: string): Promise<ISubmissionDocument | null>;
+  getAnalytics(): Promise<{
+    totalAssignments: number;
+    totalSubmissions: number;
+    submissionRate: number;
+    averageSubmissionTimeHours: number;
+    subjectDistribution: Record<string, number>;
+    statusDistribution: Record<string, number>;
+    recentSubmissions: Array<{
+      assignmentTitle: string;
+      studentName: string;
+      submittedAt: Date;
+      score: number;
+    }>;
+    topPerformers: Array<{
+      studentId: string;
+      studentName: string;
+      averageScore: number;
+      submissionsCount: number;
+    }>;
+  }>;
 } 

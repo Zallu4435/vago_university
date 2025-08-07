@@ -1,22 +1,34 @@
 import { IVideoSessionController, IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess } from '../IHttp';
-import { CreateVideoSessionUseCase, JoinVideoSessionUseCase, GetVideoSessionUseCase, UpdateVideoSessionUseCase, DeleteVideoSessionUseCase, GetAllVideoSessionsUseCase, UpdateVideoSessionStatusUseCase, RecordAttendanceJoinUseCase, RecordAttendanceLeaveUseCase } from '../../../application/session/useCases/VideoSessionUseCases';
+import {
+  ICreateVideoSessionUseCase,
+  IJoinVideoSessionUseCase,
+  IGetVideoSessionUseCase,
+  IUpdateVideoSessionUseCase,
+  IDeleteVideoSessionUseCase,
+  IGetAllVideoSessionsUseCase,
+  IUpdateVideoSessionStatusUseCase,
+  IGetSessionAttendanceUseCase,
+  IUpdateAttendanceStatusUseCase,
+  IRecordAttendanceJoinUseCase,
+  IRecordAttendanceLeaveUseCase
+} from '../../../application/session/useCases/VideoSessionUseCases';
 
 const httpErrors = new HttpErrors();
 const httpSuccess = new HttpSuccess();
 
 export class VideoSessionController implements IVideoSessionController {
   constructor(
-    private createUseCase: CreateVideoSessionUseCase,
-    private joinUseCase: JoinVideoSessionUseCase,
-    private getUseCase: GetVideoSessionUseCase,
-    private updateUseCase: UpdateVideoSessionUseCase,
-    private deleteUseCase: DeleteVideoSessionUseCase,
-    private getAllUseCase: GetAllVideoSessionsUseCase,
-    private updateStatusUseCase: UpdateVideoSessionStatusUseCase,
-    private getSessionAttendanceUseCase: any,
-    private updateAttendanceStatusUseCase: any,
-    private recordAttendanceJoinUseCase: RecordAttendanceJoinUseCase,
-    private recordAttendanceLeaveUseCase: RecordAttendanceLeaveUseCase
+    private createUseCase: ICreateVideoSessionUseCase,
+    private joinUseCase: IJoinVideoSessionUseCase,
+    private getUseCase: IGetVideoSessionUseCase,
+    private updateUseCase: IUpdateVideoSessionUseCase,
+    private deleteUseCase: IDeleteVideoSessionUseCase,
+    private getAllUseCase: IGetAllVideoSessionsUseCase,
+    private updateStatusUseCase: IUpdateVideoSessionStatusUseCase,
+    private getSessionAttendanceUseCase: IGetSessionAttendanceUseCase,
+    private updateAttendanceStatusUseCase: IUpdateAttendanceStatusUseCase,
+    private recordAttendanceJoinUseCase: IRecordAttendanceJoinUseCase,
+    private recordAttendanceLeaveUseCase: IRecordAttendanceLeaveUseCase
   ) { }
 
   async createSession(httpRequest: IHttpRequest): Promise<IHttpResponse> {

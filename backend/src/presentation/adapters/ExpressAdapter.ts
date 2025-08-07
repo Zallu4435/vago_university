@@ -14,11 +14,11 @@ export async function expressAdapter(
     req.body,
     req.query,
     req.params,
-    req.user,
+    req.user ? { ...req.user, id: req.user.userId } : undefined, 
     req.file,
     files,
     req.cookies,
-    req.ip // Add IP address as the last argument
+    req.ip
   );
 
   try {

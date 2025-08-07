@@ -13,7 +13,6 @@ export interface DeadlineDTO {
   title: string;
   date: Date;
   urgent: boolean;
-  courseId?: string;
   type: string;
 }
 
@@ -22,12 +21,9 @@ export interface ClassInfoDTO {
   title: string;
   faculty: string;
   schedule: string;
-  credits: number;
-  specialization: string;
-  currentEnrollment: number;
-  maxEnrollment: number;
+  cousre: string;
+  description: string;
 }
-
 
 export interface NewEventDTO {
   id: string;
@@ -59,7 +55,7 @@ export interface GetClassesResponseDTO {
 
 export interface GetCalendarDaysResponseDTO {
   success: boolean;
-  data: number[];
+  data: Record<number, { type: string; title: string; date: string }[]>;
   message?: string;
   error?: string;
 }

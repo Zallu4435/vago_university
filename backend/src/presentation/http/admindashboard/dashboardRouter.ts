@@ -40,12 +40,4 @@ router.post('/refresh', (req, res, next) =>
   expressAdapter(req, res, next, adminDashboardController.adminDashboardController.refreshDashboard.bind(adminDashboardController.adminDashboardController))
 );
 
-router.delete('/alerts/:alertId', (req, res, next) => 
-  expressAdapter(req, res, next, adminDashboardController.adminDashboardController.dismissAlert.bind(adminDashboardController.adminDashboardController))
-);
-
-router.patch('/activities/:activityId/read', (req, res, next) => 
-  expressAdapter(req, res, next, adminDashboardController.adminDashboardController.markActivityAsRead.bind(adminDashboardController.adminDashboardController))
-);
-
 export default router; 

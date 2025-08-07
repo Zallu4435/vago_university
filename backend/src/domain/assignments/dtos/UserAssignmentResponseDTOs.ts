@@ -1,22 +1,56 @@
-import { Assignment } from '../entities/Assignment';
-import { Submission } from '../entities/Submission';
-import { AssignmentStatus, Pagination } from '../assignmenttypes';
-import type { AssignmentWithSubmission } from '../assignmenttypes';
+import { AssignmentFile, SubmissionFile } from '../assignmenttypes';
 
-export interface GetUserAssignmentsResponseDTO extends Pagination {
-  assignments: AssignmentWithSubmission[];
+export interface AssignmentDTO {
+  _id: string;
+  title: string;
+  subject: string;
+  dueDate: Date;
+  maxMarks: number;
+  description: string;
+  files: AssignmentFile[];
+  createdAt: Date;
+  updatedAt: Date;
+  status: 'draft' | 'published' | 'closed';
+  totalSubmissions: number;
+}
+
+export interface SubmissionDTO {
+  id: string;
+  studentId: string;
+  studentName: string;
+  assignmentId: string;
+  files: SubmissionFile[];
+  submittedDate: Date;
+  status: 'pending' | 'reviewed' | 'late';
+  marks?: number;
+  feedback?: string;
+  isLate: boolean;
+}
+
+export interface AssignmentWithSubmissionDTO extends AssignmentDTO {
+  submission: SubmissionDTO | null;
+}
+
+export interface PaginationDTO {
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface GetUserAssignmentsResponseDTO extends PaginationDTO {
+  assignments: AssignmentWithSubmissionDTO[];
 }
 
 export interface GetUserAssignmentResponseDTO {
-  assignment: AssignmentWithSubmission;
+  assignment: AssignmentWithSubmissionDTO;
 }
 
 export interface SubmitUserAssignmentResponseDTO {
-  submission: Submission;
+  submission: SubmissionDTO;
 }
 
 export interface GetUserAssignmentStatusResponseDTO {
-  status: AssignmentStatus;
+  status: 'pending' | 'reviewed' | 'late';
   submittedAt?: Date;
   score?: number;
 }

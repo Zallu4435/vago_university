@@ -9,9 +9,11 @@ export type SportDataDTO = Pick<SportProps,
 
 // Reusable types for SportRequest
 export type SportRequestDataDTO = Pick<SportRequestProps, 
-  'sportId' | 'userId' | 'whyJoin'
+  'sportId' | 'userId' | 'whyJoin' 
 > & {
   additionalInfo?: string;
+  studentId?: string; // <-- Add this line
+  reason?: string; // Optional field for join requests
 };
 
 // Request DTOs
@@ -62,4 +64,9 @@ export interface GetSportRequestDetailsRequestDTO {
   id: string;
 }
 
-export interface JoinSportRequestDTO extends SportRequestDataDTO {} 
+export interface JoinSportRequestDTO {
+  sportId: string;
+  studentId: string;
+  reason: string;
+  additionalInfo?: string;
+}

@@ -13,6 +13,7 @@ import {
   EnrollmentNotFoundError,
   InvalidEnrollmentIdError,
 } from "../../../domain/courses/errors/CourseErrors";
+import { EnrollmentStatus } from "../../../domain/courses/entities/coursetypes";
 
 export interface IGetEnrollmentsUseCase {
   execute(params: GetEnrollmentsRequestDTO): Promise<{ success: boolean; data: GetEnrollmentsResponseDTO }>;
@@ -20,7 +21,7 @@ export interface IGetEnrollmentsUseCase {
 
 export interface IApproveEnrollmentUseCase {
   execute(params: ApproveEnrollmentRequestDTO): Promise<{ success: boolean; data: void }>;
-}
+} 
 
 export interface IRejectEnrollmentUseCase {
   execute(params: RejectEnrollmentRequestDTO): Promise<{ success: boolean; data: void }>;
@@ -34,18 +35,18 @@ export class GetEnrollmentsUseCase implements IGetEnrollmentsUseCase {
   constructor(private readonly courseRepository: ICoursesRepository) {}
 
   async execute(params: GetEnrollmentsRequestDTO): Promise<{ success: boolean; data: GetEnrollmentsResponseDTO }> {
-    // Pass all filter/search params to the repository
     const { enrollments, totalItems, page, limit } = await this.courseRepository.getEnrollments(params);
-    const mappedEnrollments: SimplifiedEnrollmentDTO[] = enrollments.map((enrollment: any) => ({
+    const mappedEnrollments: SimplifiedEnrollmentDTO[] = enrollments.map((enrollment) => ({
       id: enrollment._id.toString(),
-      studentName: (enrollment.studentId as any)?.email || "Unknown",
-      studentId: (enrollment.studentId as any)?._id?.toString() || "",
-      courseTitle: (enrollment.courseId as any)?.title || "Unknown Course",
-      requestedAt: enrollment.requestedAt?.toISOString() || "",
-      status: enrollment.status,
-      specialization: (enrollment.courseId as any)?.specialization || "N/A",
-      faculty: (enrollment.courseId as any)?.faculty || "N/A",
-      term: (enrollment.courseId as any)?.term || "N/A",
+      studentName: enrollment.studentId?.email || "Unknown",
+      studentId: enrollment.studentId?._id?.toString() || "",
+      courseId: enrollment.courseId?._id?.toString() || "",
+      courseTitle: enrollment.courseId?.title || "Unknown Course",
+      requestedAt: new Date(enrollment.requestedAt),
+      status: enrollment.status as EnrollmentStatus,
+      specialization: enrollment.courseId?.specialization || "N/A",
+      faculty: enrollment.courseId?.faculty || "N/A",
+      term: enrollment.courseId?.term || "N/A",
     }));
     return {
       success: true,
@@ -107,18 +108,18 @@ export class GetCourseRequestDetailsUseCase implements IGetCourseRequestDetailsU
           updatedAt: enrollment.updatedAt?.toISOString() || new Date().toISOString(),
           reason: enrollment.reason || "No reason provided",
           course: {
-            id: (enrollment.courseId as any)._id.toString(),
-            title: (enrollment.courseId as any).title,
-            specialization: (enrollment.courseId as any).specialization,
-            term: (enrollment.courseId as any).term || "",
-            faculty: (enrollment.courseId as any).faculty,
-            credits: (enrollment.courseId as any).credits,
+            id: enrollment.courseId._id.toString(),
+            title: enrollment.courseId.title,
+            specialization: enrollment.courseId.specialization,
+            term: enrollment.courseId.term || "",
+            faculty: enrollment.courseId.faculty,
+            credits: enrollment.courseId.credits,
           },
           user: enrollment.studentId
             ? {
-                id: (enrollment.studentId as any)._id.toString(),
-                name: `${(enrollment.studentId as any).firstName} ${(enrollment.studentId as any).lastName || ''}`.trim(),
-                email: (enrollment.studentId as any).email,
+                id: enrollment.studentId._id.toString(),
+                name: `${enrollment.studentId.firstName} ${enrollment.studentId.lastName || ''}`.trim(),
+                email: enrollment.studentId.email,
               }
             : undefined,
         },

@@ -36,8 +36,11 @@ export interface PaginatedResponseDTO<T> {
 // Response DTOs
 export interface ClubSummaryDTO extends ClubSummaryData {}
 
-export interface GetClubsResponseDTO extends PaginatedResponseDTO<ClubSummaryDTO> {
-  data: ClubSummaryDTO[];
+export interface GetClubsResponseDTO {
+  clubs: ClubSummaryDTO[];
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
 }
 
 export interface GetClubByIdResponseDTO {

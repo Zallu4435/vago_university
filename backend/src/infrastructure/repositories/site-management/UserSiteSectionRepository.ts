@@ -2,11 +2,11 @@ import { SiteSectionModel } from '../../database/mongoose/models/site-management
 import { IUserSiteSectionRepository } from '../../../application/site-management/repositories/IUserSiteSectionRepository';
 
 export class UserSiteSectionRepository implements IUserSiteSectionRepository {
-  async findSectionsRaw(query: any, skip: number, limit: number): Promise<any[]> {
+  async findSectionsRaw(query: any, skip: number, limit: number) {
     return SiteSectionModel.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }).lean();
   }
 
-  async countSectionsRaw(query: any): Promise<number> {
+  async countSectionsRaw(query: any) {
     return SiteSectionModel.countDocuments(query);
   }
 } 

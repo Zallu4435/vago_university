@@ -1,31 +1,23 @@
 import { IDiplomaRepository } from "../../../application/diploma/repositories/IDiplomaRepository";
-import {
-  GetDiplomasRequestDTO,
-  GetDiplomaByIdRequestDTO,
-  CreateDiplomaRequestDTO,
-  UpdateDiplomaRequestDTO,
-  DeleteDiplomaRequestDTO,
-  EnrollStudentRequestDTO,
-  UnenrollStudentRequestDTO,
-} from "../../../domain/diploma/dtos/DiplomaRequestDTOs";
+import { Diploma } from "../../../domain/diploma/entities/Diploma";
+import { EnrollStudent, UnenrollStudent } from "../../../domain/diploma/entities/diplomatypes";
 import { Diploma as DiplomaModel } from "../../../infrastructure/database/mongoose/models/diploma.model";
 import mongoose from "mongoose";
 
 export class DiplomaRepository implements IDiplomaRepository {
-  async getDiplomas(params: GetDiplomasRequestDTO & { search?: string }) {
-    const { page, limit, department, category, status, instructor, dateRange, search, startDate, endDate } = params;
+  async getDiplomas(page: number, limit: number, department: string, category: string, status: string, instructor: string, dateRange: string, search: string, startDate: string, endDate: string) {
     const skip = (page - 1) * limit;
 
     const filter: any = {};
 
     let dept = undefined;
-    if (params.category && params.category !== 'all' && params.category !== 'All' && params.category !== 'All Categories') {
-      dept = params.category
+    if (category && category !== 'all' && category !== 'All' && category !== 'All Categories') {
+      dept = category
         .split('_')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
-    } else if (params.department && params.department !== 'all' && params.department !== 'All' && params.department !== 'All Categories') {
-      dept = params.department;
+    } else if (department && department !== 'all' && department !== 'All' && department !== 'All Categories') {
+      dept = department;
     }
     if (dept) {
       filter.category = dept;
@@ -44,9 +36,9 @@ export class DiplomaRepository implements IDiplomaRepository {
       let startDate: Date | undefined;
       let endDate: Date | undefined;
       const now = new Date();
-      if (dateRange === 'custom' && params.startDate && params.endDate) {
-        startDate = new Date(params.startDate);
-        endDate = new Date(params.endDate);
+      if (dateRange === 'custom' && startDate && endDate) {
+        startDate = new Date(startDate);
+        endDate = new Date(endDate);
         // Set endDate to end of day
         endDate.setHours(23, 59, 59, 999);
       } else {
@@ -90,40 +82,40 @@ export class DiplomaRepository implements IDiplomaRepository {
     return { diplomas, totalItems };
   }
 
-  async getDiplomaById(params: GetDiplomaByIdRequestDTO) {
-    return DiplomaModel.findById(params.id).lean();
+  async getDiplomaById(id: string) {
+    return DiplomaModel.findById(id).lean();
   }
 
-  async createDiploma(params: CreateDiplomaRequestDTO) {
-    return DiplomaModel.create({ ...params, videoIds: [] });
+  async createDiploma(diploma: Diploma) {
+    return DiplomaModel.create({ ...diploma, videoIds: [] });
   }
 
-  async updateDiploma(params: UpdateDiplomaRequestDTO) {
+  async updateDiploma(diploma: Diploma) {
     return DiplomaModel.findByIdAndUpdate(
-      params.id,
-      { $set: params },
+      diploma.id,
+      { $set: diploma },
       { new: true }
     ).lean();
   }
 
-  async deleteDiploma(params: DeleteDiplomaRequestDTO) {
-    await DiplomaModel.findByIdAndDelete(params.id);
+  async deleteDiploma(id: string) {
+    await DiplomaModel.findByIdAndDelete(id);
   }
 
-  async enrollStudent(params: EnrollStudentRequestDTO) {
-    const diploma = await DiplomaModel.findById(params.diplomaId);
+  async enrollStudent(enrollStudent: EnrollStudent) {
+    const diploma = await DiplomaModel.findById(enrollStudent.diplomaId);
     if (!diploma) return null;
-    await DiplomaModel.findByIdAndUpdate(params.diplomaId, {
-      $addToSet: { students: new mongoose.Types.ObjectId(params.studentId) },
+    await DiplomaModel.findByIdAndUpdate(enrollStudent.diplomaId, {
+      $addToSet: { students: new mongoose.Types.ObjectId(enrollStudent.studentId) },
     });
     return true;
   }
 
-  async unenrollStudent(params: UnenrollStudentRequestDTO) {
-    const diploma = await DiplomaModel.findById(params.diplomaId);
+  async unenrollStudent(unenrollStudent: UnenrollStudent) {
+    const diploma = await DiplomaModel.findById(unenrollStudent.diplomaId);
     if (!diploma) return null;
-    await DiplomaModel.findByIdAndUpdate(params.diplomaId, {
-      $pull: { students: new mongoose.Types.ObjectId(params.studentId) },
+    await DiplomaModel.findByIdAndUpdate(unenrollStudent.diplomaId, {
+      $pull: { students: new mongoose.Types.ObjectId(unenrollStudent.studentId) },
     });
     return true;
   }

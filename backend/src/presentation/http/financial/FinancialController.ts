@@ -70,7 +70,6 @@ export class FinancialController implements IFinancialController {
       return this.httpErrors.error_401();
     }
     const { amount, method, term, chargeId, razorpayPaymentId, razorpayOrderId, razorpaySignature } = httpRequest.body || {};
-    // Validate required fields
     if (!chargeId) {
       return this.httpErrors.error_400('Charge ID is required');
     }
@@ -119,7 +118,6 @@ export class FinancialController implements IFinancialController {
 
   async createCharge(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { title, description, amount, term, dueDate, applicableFor } = httpRequest.body || {};
-    console.log(httpRequest.user);
     if (!httpRequest.user?.userId) {
       return this.httpErrors.error_401();
     }
@@ -154,28 +152,26 @@ export class FinancialController implements IFinancialController {
   }
 
   async updateCharge(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log(httpRequest.user);  
-    console.log(httpRequest.body) 
-    console.log(httpRequest.params);
     const { id } = httpRequest.params || {};
-    // Instead of wrapping in { id, data }, spread the body fields directly
     const response = await this.updateChargeUseCase.execute({ id, ...httpRequest.body });
     if (!response.success) {
-      const errorMsg = typeof response.data === 'object' && response.data && 'error' in response.data ? (response.data as any).error : 'Bad Request';
+      const errorMsg = hasErrorProperty(response.data) ? response.data.error : 'Bad Request';
       return this.httpErrors.error_400(errorMsg);
     }
     return this.httpSuccess.success_200(response.data);
   }
 
   async deleteCharge(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log(httpRequest.user, "user user");
-    console.log(httpRequest.body, "bidy, bidy");
-    console.log(httpRequest.params, "params params") 
     const { id } = httpRequest.params || {};
     const response = await this.deleteChargeUseCase.execute({ id });
     if (!response.success) {
-      return this.httpErrors.error_400(response.data?.error || 'Bad Request');
+      const errorMsg = typeof response.data === 'object' && response.data && 'error' in response.data ? (response.data).error : 'Bad Request';
+      return this.httpErrors.error_400(errorMsg);
     }
     return this.httpSuccess.success_200(response.data);
   }
+}
+
+function hasErrorProperty(data: unknown): data is { error: string } {
+  return typeof data === 'object' && data !== null && 'error' in data;
 }

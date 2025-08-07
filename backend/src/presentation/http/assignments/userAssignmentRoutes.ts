@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { UserAssignmentComposers } from '../../../infrastructure/services/assignments/UserAssignmentComposers';
+import { getUserAssignmentComposer } from '../../../infrastructure/services/assignments/UserAssignmentComposers';
 import { assignmentSubmissionUpload, cloudinary } from '../../../config/cloudinary.config';
 import { authMiddleware } from '../../../shared/middlewares/authMiddleware';
 import { expressAdapter } from '../../adapters/ExpressAdapter';
@@ -7,7 +7,7 @@ import multer from 'multer';
 const fetch = require('node-fetch');
 
 const router = Router();
-const userAssignmentController = UserAssignmentComposers.composeUserAssignmentController();
+const userAssignmentController = getUserAssignmentComposer();
 
 router.get('/download-file', authMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {

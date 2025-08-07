@@ -7,7 +7,7 @@ export type CreateAssignmentRequestDTO = Pick<AssignmentBase, 'title' | 'subject
 export type UpdateAssignmentRequestDTO = {
   id: string;
 } & Partial<Omit<CreateAssignmentRequestDTO, 'files'>> & {
-  files?: string[];
+  files?: AssignmentFile[];
   status?: AssignmentStatus;
 };
 
@@ -16,6 +16,7 @@ export interface GetAssignmentsRequestDTO {
   status?: AssignmentStatus;
   page?: number;
   limit?: number;
+  search?: string;
 }
 
 export interface GetAssignmentByIdRequestDTO {

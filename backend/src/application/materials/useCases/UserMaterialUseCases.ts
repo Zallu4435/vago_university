@@ -9,6 +9,27 @@ import {
 import { GetUserMaterialsResponseDTO } from '../../../domain/materials/dtos/UserMaterialResponseDTOs';
 import { MaterialNotFoundError, MaterialValidationError } from '../../../domain/materials/errors/MaterialErrors';
 
+export interface IGetUserMaterialsUseCase {
+  execute(params: GetUserMaterialsRequestDTO): Promise<GetUserMaterialsResponseDTO>;
+}
+
+export interface IGetUserMaterialByIdUseCase {
+  execute(params: GetUserMaterialByIdRequestDTO): Promise<GetUserMaterialsResponseDTO>;
+}
+
+export interface IToggleBookmarkUseCase {
+  execute(params: ToggleBookmarkRequestDTO): Promise<void>;
+}
+
+export interface IToggleLikeUseCase {
+  execute(params: ToggleLikeRequestDTO): Promise<void>;
+}
+
+export interface IDownloadMaterialUseCase {
+  execute(params: DownloadMaterialRequestDTO): Promise<string>;
+}
+
+
 function toUserMaterialProps(obj: any, userId: string) {
   const isBookmarked = obj.bookmarks && obj.bookmarks.some((b: any) => b.userId === userId);
   const isLiked = obj.likes && obj.likes.some((l: any) => l.userId === userId);

@@ -18,7 +18,7 @@ import {
 
 
 export class CommunicationRepository implements ICommunicationRepository {
-  async getInboxMessages(params: GetInboxMessagesRequestDTO): Promise<any> {
+  async getInboxMessages(params: GetInboxMessagesRequestDTO) {
     const { userId, page, limit, search, status } = params;
     const query: any = {
       "recipients._id": userId
@@ -48,7 +48,7 @@ export class CommunicationRepository implements ICommunicationRepository {
       .skip(skip)
       .limit(limit)
       .lean();
-    const totalItems = await (MessageModel as any).countDocuments(query);
+    const totalItems = await MessageModel.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
     return { messages, totalItems, totalPages, page, limit, userId, status, search };
   }
@@ -76,14 +76,11 @@ export class CommunicationRepository implements ICommunicationRepository {
   }
 
   async sendMessage(params: SendMessageRequestDTO): Promise<any> {
-    console.log('[CommunicationRepository] sendMessage called with params:', params);
-    // Construct sender UserInfo
     const sender = await this.findUserById(params.senderId, params.senderRole);
     if (!sender) {
       throw new Error('Sender not found');
     }
 
-    // Determine recipients
     let recipients: UserInfo[] = [];
     for (const recipient of params.to) {
       if (recipient.value.startsWith('all_') || recipient.value.startsWith('all-')) {
@@ -91,15 +88,12 @@ export class CommunicationRepository implements ICommunicationRepository {
         const groupUsers = await this.findUsersByGroup(recipient.value.replace('_', '-'));
         recipients = recipients.concat(groupUsers);
       } else {
-        // Individual recipient (assume value is userId)
         const user = await this.findUserById(recipient.value, 'student'); // Default to student, adjust as needed
         if (user) recipients.push(user);
       }
     }
-    // Remove duplicates
-    recipients = recipients.filter((v,i,a)=>a.findIndex(t=>(t._id===v._id))===i);
+    recipients = recipients.filter((v, i, a) => a.findIndex(t => (t._id === v._id)) === i);
 
-    // Prepare message object for saving
     const messageData = {
       subject: params.subject,
       content: params.content,
@@ -109,7 +103,6 @@ export class CommunicationRepository implements ICommunicationRepository {
       attachments: params.attachments || []
     };
     const message = await (MessageModel as any).create(messageData);
-    console.log('[CommunicationRepository] message created:', message);
     return message.toObject ? message.toObject() : message;
   }
 
@@ -121,16 +114,16 @@ export class CommunicationRepository implements ICommunicationRepository {
 
   async deleteMessage(params: DeleteMessageRequestDTO): Promise<any> {
     const { messageId, userId } = params;
-      await (MessageModel as any).findByIdAndDelete(messageId);
-      return { success: true, message: "Message deleted successfully" };
-    }
-    
+    await (MessageModel as any).findByIdAndDelete(messageId);
+    return { success: true, message: "Message deleted successfully" };
+  }
+
   async getMessageDetails(params: GetMessageDetailsRequestDTO): Promise<any> {
     const { messageId } = params;
     return await (MessageModel as any).findById(messageId).lean();
   }
 
-  async getAllAdmins(params: GetAllAdminsRequestDTO): Promise<any> {
+  async getAllAdmins(params: GetAllAdminsRequestDTO) {
     const { search } = params;
     const query: any = {};
     if (search) {
@@ -159,10 +152,10 @@ export class CommunicationRepository implements ICommunicationRepository {
       { value: 'individual', label: 'Individual User' }
     ];
     const filteredGroups = search
-      ? groups.filter(group => 
-          group.label.toLowerCase().includes(search.toLowerCase()) ||
-          group.value.toLowerCase().includes(search.toLowerCase())
-        )
+      ? groups.filter(group =>
+        group.label.toLowerCase().includes(search.toLowerCase()) ||
+        group.value.toLowerCase().includes(search.toLowerCase())
+      )
       : groups;
     return filteredGroups;
   }
@@ -191,11 +184,8 @@ export class CommunicationRepository implements ICommunicationRepository {
   }
 
   async findUserById(userId: string, role: string): Promise<UserInfo | null> {
-    console.log('Finding user by ID:', userId, 'with role:', role);
     const user = await UserModel.findOne({ _id: userId, role }).lean();
-    console.log('Found user:', user);
     if (!user) {
-      console.log('No user found');
       return null;
     }
     const userInfo = {
@@ -204,7 +194,6 @@ export class CommunicationRepository implements ICommunicationRepository {
       email: user.email,
       role: role as UserRole
     };
-    console.log('Returning user info:', userInfo);
     return userInfo;
   }
 
@@ -236,20 +225,11 @@ export class CommunicationRepository implements ICommunicationRepository {
   }
 
   async findMessageById(messageId: string): Promise<Message | null> {
-    console.log('=== findMessageById DEBUG ===');
-    console.log('Looking for messageId:', messageId);
-    
     const message = await (MessageModel as any).findById(messageId).lean();
-    console.log('Raw message from DB:', message);
-    
+
     if (!message) {
-      console.log('Message not found in DB');
       return null;
     }
-
-    console.log('Message sender:', message.sender);
-    console.log('Message recipients:', message.recipients);
-    console.log('User trying to access:', messageId);
 
     const messageEntity = new Message(
       message._id.toString(),
@@ -262,11 +242,6 @@ export class CommunicationRepository implements ICommunicationRepository {
       message.createdAt.toISOString(),
       message.updatedAt.toISOString()
     );
-    
-    console.log('Created message entity');
-    console.log('Sender ID:', messageEntity.sender._id);
-    console.log('Recipient IDs:', messageEntity.recipients.map(r => r._id));
-    
     return messageEntity;
   }
 
@@ -304,7 +279,6 @@ export class CommunicationRepository implements ICommunicationRepository {
   }
 
   async findUsersByType(type: string, search?: string, requesterId?: string): Promise<UserInfo[]> {
-
     if (type === 'students' || type === 'all_students') {
       const query: any = {};
       if (search) {
@@ -323,13 +297,12 @@ export class CommunicationRepository implements ICommunicationRepository {
         _id: user._id.toString(),
         name: `${user.firstName} ${user.lastName}`,
         email: user.email,
-        role: 'student'
+        role: 'student' as UserRole
       }));
-      
-      console.log('Returning students count:', mappedStudents.length);
+
       return mappedStudents;
     }
-    
+
     if (type === 'faculty' || type === 'all_faculty') {
       const query: any = {};
       if (search) {
@@ -348,51 +321,44 @@ export class CommunicationRepository implements ICommunicationRepository {
         _id: user._id.toString(),
         name: `${user.firstName} ${user.lastName}`,
         email: user.email,
-        role: 'faculty'
+        role: 'faculty' as UserRole
       }));
-      
-      console.log('Returning faculty count:', mappedFaculty.length);
+
       return mappedFaculty;
     }
-    
+
     if (type === 'all') {
-      // Fetch from both User and Faculty collections
       const [students, faculty] = await Promise.all([
         UserModel.find().select('_id firstName lastName email').lean(),
         FacultyModel.find().select('_id firstName lastName email').lean()
       ]);
-      
+
       const allUsers = [
         ...students.map((user: any) => ({
           _id: user._id.toString(),
           name: `${user.firstName} ${user.lastName}`,
           email: user.email,
-          role: 'student'
+          role: 'student' as UserRole
         })),
         ...faculty.map((user: any) => ({
           _id: user._id.toString(),
           name: `${user.firstName} ${user.lastName}`,
           email: user.email,
-          role: 'faculty'
+          role: 'faculty' as UserRole
         }))
       ];
-      
-      // Apply search filter if provided
+
       if (search) {
         const searchLower = search.toLowerCase();
-        const filteredUsers = allUsers.filter(user => 
+        const filteredUsers = allUsers.filter(user =>
           user.name.toLowerCase().includes(searchLower) ||
           user.email.toLowerCase().includes(searchLower)
         );
-        console.log('Filtered users count:', filteredUsers.length);
         return filteredUsers;
       }
-      
-      console.log('Returning all users count:', allUsers.length);
       return allUsers;
     }
-    
-    console.log('Unknown type, returning empty array');
     return [];
   }
+
 }

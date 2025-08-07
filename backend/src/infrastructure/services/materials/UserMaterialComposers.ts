@@ -6,6 +6,11 @@ import {
   ToggleBookmarkUseCase,
   ToggleLikeUseCase,
   DownloadMaterialUseCase,
+  IGetUserMaterialsUseCase,
+  IGetUserMaterialByIdUseCase,
+  IToggleBookmarkUseCase,
+  IToggleLikeUseCase,
+  IDownloadMaterialUseCase
 } from '../../../application/materials/useCases/UserMaterialUseCases';
 
 class GetUserBookmarkedMaterialsUseCase {
@@ -25,11 +30,11 @@ class GetUserLikedMaterialsUseCase {
 export const makeUserMaterialController = () => {
   const repository = new UserMaterialsRepository();
   
-  const getMaterialsUseCase = new GetUserMaterialsUseCase(repository);
-  const getMaterialByIdUseCase = new GetUserMaterialByIdUseCase(repository);
-  const toggleBookmarkUseCase = new ToggleBookmarkUseCase(repository);
-  const toggleLikeUseCase = new ToggleLikeUseCase(repository);
-  const downloadMaterialUseCase = new DownloadMaterialUseCase(repository);
+  const getMaterialsUseCase: IGetUserMaterialsUseCase = new GetUserMaterialsUseCase(repository);
+  const getMaterialByIdUseCase: IGetUserMaterialByIdUseCase = new GetUserMaterialByIdUseCase(repository);
+  const toggleBookmarkUseCase: IToggleBookmarkUseCase = new ToggleBookmarkUseCase(repository);
+  const toggleLikeUseCase: IToggleLikeUseCase = new ToggleLikeUseCase(repository);
+  const downloadMaterialUseCase: IDownloadMaterialUseCase = new DownloadMaterialUseCase(repository);
   const getBookmarkedMaterialsUseCase = new GetUserBookmarkedMaterialsUseCase(repository);
   const getLikedMaterialsUseCase = new GetUserLikedMaterialsUseCase(repository);
 

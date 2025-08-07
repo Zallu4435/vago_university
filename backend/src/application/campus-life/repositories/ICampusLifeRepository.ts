@@ -1,35 +1,27 @@
 import {
-  GetCampusLifeOverviewRequestDTO,
-  GetEventsRequestDTO,
-  GetEventByIdRequestDTO,
-  GetSportsRequestDTO,
-  GetSportByIdRequestDTO,
-  GetClubsRequestDTO,
-  GetClubByIdRequestDTO,
-  JoinClubRequestDTO,
-  JoinSportRequestDTO,
-  JoinEventRequestDTO,
-  CampusLifeOverviewResponseDTO,
-  GetEventsResponseDTO,
-  GetEventByIdResponseDTO,
-  GetSportsResponseDTO,
-  GetSportByIdResponseDTO,
-  GetClubsResponseDTO,
-  GetClubByIdResponseDTO,
-  JoinClubResponseDTO,
-  JoinSportResponseDTO,
-  JoinEventResponseDTO,
-} from "../../../domain/campus-life/dtos/CampusLifeDTOs";
+  CampusLifeOverviewRequest,
+  EventsRequest,
+  SportsRequest,
+  ClubsRequest,
+  JoinClubRequest,
+  JoinSportRequest,
+  JoinEventRequest,
+  RawCampusEvent,
+  RawSport,
+  RawClub,
+  RawJoinRequest,
+} from "../../../domain/campus-life/entities/CampusLife";
 
+ 
 export interface ICampusLifeRepository {
-  getCampusLifeOverview(params: GetCampusLifeOverviewRequestDTO): Promise<CampusLifeOverviewResponseDTO>;
-  getEvents(params: GetEventsRequestDTO): Promise<GetEventsResponseDTO>;
-  getEventById(params: GetEventByIdRequestDTO): Promise<GetEventByIdResponseDTO | null>;
-  getSports(params: GetSportsRequestDTO): Promise<GetSportsResponseDTO>;
-  getSportById(params: GetSportByIdRequestDTO): Promise<GetSportByIdResponseDTO | null>;
-  getClubs(params: GetClubsRequestDTO): Promise<GetClubsResponseDTO>;
-  getClubById(params: GetClubByIdRequestDTO): Promise<GetClubByIdResponseDTO | null>;
-  joinClub(params: JoinClubRequestDTO): Promise<JoinClubResponseDTO>;
-  joinSport(params: JoinSportRequestDTO): Promise<JoinSportResponseDTO>;
-  joinEvent(params: JoinEventRequestDTO): Promise<JoinEventResponseDTO>;
+  getCampusLifeOverview(params: CampusLifeOverviewRequest): Promise<{ events: RawCampusEvent[]; sports: RawSport[]; clubs: RawClub[] }>;
+  getEvents(params: EventsRequest): Promise<{ events: RawCampusEvent[]; requests: RawJoinRequest[]; totalItems: number; totalPages: number; currentPage: number }>;
+  getEventById(id: string): Promise<RawCampusEvent | null>;
+  getSports(params: SportsRequest): Promise<{ sports: RawSport[]; requests: RawJoinRequest[]; totalItems: number }>;
+  getSportById(id: string): Promise<RawSport | null>;
+  getClubs(params: ClubsRequest): Promise<{ clubs: RawClub[]; requests: RawJoinRequest[]; totalItems: number }>;
+  getClubById(id: string): Promise<RawClub | null>;
+  joinClub(params: JoinClubRequest): Promise<RawJoinRequest>;
+  joinSport(params: JoinSportRequest): Promise<RawJoinRequest>;
+  joinEvent(params: JoinEventRequest): Promise<RawJoinRequest>;
 }

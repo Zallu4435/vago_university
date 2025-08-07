@@ -12,6 +12,7 @@ import {
 } from "../../../domain/auth/dtos/AuthResponseDTOs";
 
 import { IAuthRepository } from '../repositories/IAuthRepository';
+import { RegisterRequest, RegisterFacultyRequest } from "../../../domain/auth/entities/Auth";
 
 import { IJwtService } from "../../../infrastructure/services/auth/JwtService";
 import { IOtpService } from '../../../infrastructure/services/auth/OtpService';
@@ -67,9 +68,14 @@ export class RegisterUseCase implements IRegisterUseCase {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(params.password, salt);
 
-    const registerParamsWithHashedPassword = { ...params, password: hashedPassword };
+    const registerRequest = RegisterRequest.create({
+      firstName: params.firstName,
+      lastName: params.lastName,
+      email: params.email,
+      password: hashedPassword
+    });
 
-    const resultFromRepo = await this.authRepository.register(registerParamsWithHashedPassword);
+    const resultFromRepo = await this.authRepository.register(registerRequest);
 
     const confirmationToken = this.jwtService.generateToken(
       { email: params.email },
@@ -103,7 +109,7 @@ export class LoginUseCase implements ILoginUseCase {
   ) { }
 
   async execute(params: LoginRequestDTO & { userAgent: string; ipAddress: string }): Promise<LoginResponseDTO & { sessionId: string }> {
-    const resultFromRepo = await this.authRepository.login(params);
+    const resultFromRepo = await this.authRepository.login(params.email);
 
     const user = resultFromRepo.user;
     const collection = resultFromRepo.collection;
@@ -174,7 +180,7 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
   ) { }
 
   async execute(params: { refreshToken: string }): Promise<RefreshTokenResponseDTO> {
-    let decoded: any;
+    let decoded;
     try {
       decoded = this.jwtService.verifyToken<{ userId: string; email: string; collection: string; sessionId: string }>(params.refreshToken, { isRefreshToken: true });
     } catch (err) {
@@ -191,12 +197,7 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
     await this.authRepository.updateSessionRefreshToken(sessionId, newRefreshToken, newExpiresAt, newLastUsedAt);
     const tokenPayload = { userId, email, collection };
     const accessToken = this.jwtService.generateAccessToken(tokenPayload);
-    const resultFromRepo = await this.authRepository.refreshToken({
-      accessToken,
-      userId,
-      email,
-      collection,
-    });
+    const resultFromRepo = await this.authRepository.refreshToken(userId, collection);
     return {
       accessToken,
       user: {
@@ -236,7 +237,19 @@ export class RegisterFacultyUseCase implements IRegisterFacultyUseCase {
   ) { }
 
   async execute(params: RegisterFacultyRequestDTO): Promise<RegisterFacultyResponseDTO> {
-    const resultFromRepo = await this.authRepository.registerFaculty(params);
+    const registerFacultyRequest = RegisterFacultyRequest.create({
+      fullName: params.fullName,
+      email: params.email,
+      phone: params.phone,
+      department: params.department,
+      qualification: params.qualification,
+      experience: params.experience,
+      aboutMe: params.aboutMe,
+      cvUrl: params.cvUrl,
+      certificatesUrl: params.certificatesUrl
+    });
+
+    const resultFromRepo = await this.authRepository.registerFaculty(registerFacultyRequest);
 
     const token = this.jwtService.generateToken(
       { userId: resultFromRepo.user.id, email: resultFromRepo.user.email, collection: resultFromRepo.collection },
@@ -259,7 +272,7 @@ export class SendEmailOtpUseCase implements ISendEmailOtpUseCase {
   ) { }
 
   async execute(params: SendEmailOtpRequestDTO): Promise<SendEmailOtpResponseDTO> {
-    await this.authRepository.sendEmailOtp(params);
+    await this.authRepository.sendEmailOtp(params.email);
 
     const otp = this.otpService.generateOtp();
     this.otpService.storeOtp(params.email, otp);
@@ -307,8 +320,7 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
 
     const hashedPassword = await bcrypt.hash(params.newPassword, 10);
 
-    const resetPasswordParamsForRepo = { ...params, email: payload.email, newPassword: hashedPassword };
-    const resultFromRepo = await this.authRepository.resetPassword(resetPasswordParamsForRepo);
+    const resultFromRepo = await this.authRepository.resetPassword(payload.email, hashedPassword);
 
     const token = this.jwtService.generateToken(
       { userId: resultFromRepo.user.id, email: resultFromRepo.user.email, collection: resultFromRepo.collection },

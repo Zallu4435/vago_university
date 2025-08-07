@@ -1,4 +1,3 @@
-
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IAuthController } from '../../http/IHttp';
 import {
   IRegisterUseCase,
@@ -189,7 +188,10 @@ export class AuthController implements IAuthController {
       });
       return this.httpSuccess.success_201(data);
     } catch (err) {
-      throw err;
+      if (err instanceof Error) {
+        return this.httpErrors.error_400(err.message);
+      }
+      return this.httpErrors.error_500();
     }
   }
 

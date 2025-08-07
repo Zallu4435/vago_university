@@ -14,8 +14,7 @@ import {
   GetUserAssignmentFeedbackResponseDTO
 } from '../../../domain/assignments/dtos/UserAssignmentResponseDTOs';
 import { AssignmentErrorType } from '../../../domain/assignments/enums/AssignmentErrorType';
-import mongoose from 'mongoose';
-
+ 
 interface ResponseDTO<T> {
   data: T | { error: string };
   success: boolean;
@@ -51,36 +50,36 @@ export class GetUserAssignmentsUseCase implements IGetUserAssignmentsUseCase {
       if (params.limit && (isNaN(params.limit) || params.limit < 1)) {
         return { data: { error: AssignmentErrorType.InvalidPageOrLimit }, success: false };
       }
-    const { assignments, page, limit, status, studentId } = await this.userAssignmentRepository.getAssignments(params, params.studentId);
-    const assignmentIds = assignments.map((assignment: any) => assignment._id);
+    const { assignments, page, limit, status, studentId } = await this.userAssignmentRepository.getAssignments(params.subject, params.status, params.page, params.limit, params.search, params.studentId, params.sortBy);
+    const assignmentIds = assignments.map((assignment) => assignment._id);
     const submissions = await (require('../../../infrastructure/database/mongoose/assignment/SubmissionModel').SubmissionModel).find({
       assignmentId: { $in: assignmentIds },
       studentId: studentId
     }).lean();
     const submissionMap = new Map();
-    submissions.forEach((submission: any) => {
+    submissions.forEach((submission) => {
       submissionMap.set(submission.assignmentId.toString(), submission);
     });
     let filteredAssignments = assignments;
     if (status && status !== 'all') {
       if (status === 'graded') {
-        filteredAssignments = assignments.filter((assignment: any) => {
+        filteredAssignments = assignments.filter((assignment) => {
           const submission = submissionMap.get(assignment._id.toString());
           return submission && submission.status === 'reviewed';
         });
       } else if (status === 'submitted') {
-        filteredAssignments = assignments.filter((assignment: any) => {
+        filteredAssignments = assignments.filter((assignment) => {
           const submission = submissionMap.get(assignment._id.toString());
           return !!submission;
         });
       } else {
-        filteredAssignments = assignments.filter((assignment: any) => assignment.status === status);
+        filteredAssignments = assignments.filter((assignment) => assignment.status === status);
       }
     }
     const total = filteredAssignments.length;
     const paginatedAssignments = filteredAssignments.slice((page - 1) * limit, page * limit);
     const result = {
-      assignments: paginatedAssignments.map((assignment: any) => {
+      assignments: paginatedAssignments.map((assignment) => {
         const assignmentData = {
           _id: assignment._id.toString(),
           title: assignment.title,
@@ -101,7 +100,7 @@ export class GetUserAssignmentsUseCase implements IGetUserAssignmentsUseCase {
             id: submission._id.toString(),
             studentId: submission.studentId,
             studentName: submission.studentName,
-            assignmentId: submission.assignmentId,
+            assignmentId: submission.assignmentId.toString(),
             files: submission.files,
             submittedDate: submission.submittedDate,
             status: submission.status,
@@ -123,10 +122,10 @@ export class GetUserAssignmentByIdUseCase implements IGetUserAssignmentByIdUseCa
   constructor(private userAssignmentRepository: IUserAssignmentRepository) {}
 
   async execute(params: GetUserAssignmentByIdRequestDTO): Promise<ResponseDTO<GetUserAssignmentResponseDTO>> {
-      if (!mongoose.isValidObjectId(params.id)) {
+      if (!params.id || params.id.trim() === '') {
         return { data: { error: AssignmentErrorType.InvalidAssignmentId }, success: false };
       }
-    const { assignment, submission } = await this.userAssignmentRepository.getAssignmentById(params, params.studentId);
+    const { assignment, submission } = await this.userAssignmentRepository.getAssignmentById(params.id, params.studentId);
     if (!assignment) {
         return { data: { error: AssignmentErrorType.AssignmentNotFound }, success: false };
       }
@@ -151,7 +150,7 @@ export class GetUserAssignmentByIdUseCase implements IGetUserAssignmentByIdUseCa
             id: submission._id.toString(),
             studentId: submission.studentId,
             studentName: submission.studentName,
-            assignmentId: submission.assignmentId,
+            assignmentId: submission.assignmentId.toString(),
             files: submission.files,
             submittedDate: submission.submittedDate,
             status: submission.status,
@@ -170,13 +169,13 @@ export class SubmitUserAssignmentUseCase implements ISubmitUserAssignmentUseCase
   constructor(private userAssignmentRepository: IUserAssignmentRepository) {}
 
   async execute(params: SubmitUserAssignmentRequestDTO): Promise<ResponseDTO<SubmitUserAssignmentResponseDTO>> {
-      if (!mongoose.isValidObjectId(params.assignmentId)) {
+      if (!params.assignmentId || params.assignmentId.trim() === '') {
         return { data: { error: AssignmentErrorType.InvalidAssignmentId }, success: false };
       }
       if (!params.file) {
         return { data: { error: AssignmentErrorType.FileRequired }, success: false };
       }
-    const { submission } = await this.userAssignmentRepository.submitAssignment(params, params.studentId);
+    const { submission } = await this.userAssignmentRepository.submitAssignment(params.assignmentId, [params.file], params.studentId);
     if (!submission) {
       return { data: { error: 'Submission failed' }, success: false };
     }
@@ -184,7 +183,7 @@ export class SubmitUserAssignmentUseCase implements ISubmitUserAssignmentUseCase
       id: submission._id.toString(),
       studentId: submission.studentId,
       studentName: submission.studentName,
-      assignmentId: submission.assignmentId,
+      assignmentId: submission.assignmentId.toString(),
       files: submission.files,
       submittedDate: submission.submittedDate,
       status: submission.status,
@@ -200,10 +199,10 @@ export class GetUserAssignmentStatusUseCase implements IGetUserAssignmentStatusU
   constructor(private userAssignmentRepository: IUserAssignmentRepository) {}
 
   async execute(params: GetUserAssignmentStatusRequestDTO): Promise<ResponseDTO<GetUserAssignmentStatusResponseDTO>> {
-      if (!mongoose.isValidObjectId(params.assignmentId)) {
+      if (!params.assignmentId || params.assignmentId.trim() === '') {
         return { data: { error: AssignmentErrorType.InvalidAssignmentId }, success: false };
       }
-    const { submission } = await this.userAssignmentRepository.getAssignmentStatus(params, params.studentId);
+    const { submission } = await this.userAssignmentRepository.getAssignmentStatus(params.assignmentId, params.studentId);
     if (!submission) {
       return { data: { status: 'pending' }, success: true };
     }
@@ -222,10 +221,10 @@ export class GetUserAssignmentFeedbackUseCase implements IGetUserAssignmentFeedb
   constructor(private userAssignmentRepository: IUserAssignmentRepository) {}
 
   async execute(params: GetUserAssignmentFeedbackRequestDTO): Promise<ResponseDTO<GetUserAssignmentFeedbackResponseDTO>> {
-      if (!mongoose.isValidObjectId(params.assignmentId)) {
+      if (!params.assignmentId || params.assignmentId.trim() === '') {
         return { data: { error: AssignmentErrorType.InvalidAssignmentId }, success: false };
       }
-    const { submission } = await this.userAssignmentRepository.getAssignmentFeedback(params, params.studentId);
+    const { submission } = await this.userAssignmentRepository.getAssignmentFeedback(params.assignmentId, params.studentId);
     if (!submission) {
       return { data: { error: 'Feedback not found' }, success: false };
     }

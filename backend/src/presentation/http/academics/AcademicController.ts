@@ -12,7 +12,6 @@ import {
 } from "../../../application/academics/useCases/AcademicUseCases";
 import { IHttpRequest, IHttpResponse, HttpSuccess, HttpErrors } from "../IHttp";
 import { IAcademicController } from "../IHttp"
-import mongoose from "mongoose";
 
 export class AcademicController implements IAcademicController {
     private httpSuccess: HttpSuccess;
@@ -129,7 +128,7 @@ export class AcademicController implements IAcademicController {
         if (!httpRequest.user) {
             return this.httpErrors.error_401();
         }
-        if (!mongoose.isValidObjectId(courseId)) {
+        if (!courseId) {
             return this.httpErrors.error_400();
         }
         if (!reason) {
@@ -152,7 +151,7 @@ export class AcademicController implements IAcademicController {
         if (!httpRequest.user) {
             return this.httpErrors.error_401();
         }
-        if (!mongoose.isValidObjectId(courseId)) {
+        if (!courseId) {
             return this.httpErrors.error_400();
         }
         const result = await this.dropCourseUseCase.execute({

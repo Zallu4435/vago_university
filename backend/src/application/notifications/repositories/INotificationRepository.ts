@@ -25,7 +25,7 @@ export interface INotificationRepository {
     markAllNotificationsAsRead(params: MarkAllNotificationsAsReadRequestDTO): Promise<MarkAllNotificationsAsReadResponseDTO>;
     
     create(data: NotificationProps): Promise<any>;
-    find(filter: any, options: { skip?: number; limit?: number; sort?: any }): Promise<any[]>;
+    find(filter: any, options?: { skip?: number; limit?: number; sort?: any }): Promise<any[]>;
     count(filter: any): Promise<number>;
     findById(id: string): Promise<any | null>;
     update(id: string, data: Partial<NotificationProps>): Promise<any | null>;

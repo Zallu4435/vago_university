@@ -35,7 +35,7 @@ export interface IUpdateCourseUseCase {
 export interface IDeleteCourseUseCase {
   execute(params: DeleteCourseRequestDTO): Promise<{ success: boolean; data: void }>;
 }
-
+ 
 export class GetCoursesUseCase implements IGetCoursesUseCase {
   constructor(private readonly courseRepository: ICoursesRepository) {}
 
@@ -70,7 +70,7 @@ export class GetCourseByIdUseCase implements IGetCourseByIdUseCase {
     if (!params.id) {
       throw new InvalidCourseIdError();
     }
-    const course: any = await this.courseRepository.getCourseById(params);
+    const course: any = await this.courseRepository.getCourseById(params.id);
     if (!course) {
       throw new CourseNotFoundError(params.id);
     }

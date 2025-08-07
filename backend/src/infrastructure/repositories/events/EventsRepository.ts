@@ -1,36 +1,23 @@
-import {
-  GetEventByIdRequestDTO,
-  CreateEventRequestDTO,
-  UpdateEventRequestDTO,
-  DeleteEventRequestDTO,
-  GetEventsRequestDTO,
-} from "../../../domain/events/dtos/EventRequestDTOs";
-import {
-  GetEventRequestsRequestDTO,
-  RejectEventRequestRequestDTO,
-  GetEventRequestDetailsRequestDTO,
-  ApproveEventRequestRequestDTO,
-} from "../../../domain/events/dtos/EventRequestRequestDTOs";
 import { IEventsRepository } from "../../../application/events/repositories/IEventsRepository";
 import {
   CampusEventModel,
   EventRequestModel,
 } from "../../../infrastructure/database/mongoose/models/events/CampusEventModel";
 import { EventRequestStatus } from "../../../domain/events/entities/EventTypes";
+import { Event } from "../../../domain/events/entities/Event";
 
 export class EventsRepository implements IEventsRepository {
-  async getEvents(params: GetEventsRequestDTO): Promise<any> {
-    const { page, limit, type, status, startDate, endDate, search, organizerType, dateRange } = params;
+  async getEvents(page: number, limit: number, type: string, status: string, startDate: string, endDate: string, search: string, organizerType: string, dateRange: string) {
     const query: any = {};
-    
+
     if (type && type !== "all") {
       query.eventType = { $regex: `^${type}$`, $options: "i" };
     }
-    
+
     if (status && status !== "all") {
       query.status = { $regex: `^${status}$`, $options: "i" };
     }
-    
+
     if (organizerType && organizerType !== "all") {
       query.organizerType = { $regex: `^${organizerType}$`, $options: "i" };
     }
@@ -38,7 +25,7 @@ export class EventsRepository implements IEventsRepository {
     if (dateRange && dateRange !== "all") {
       const now = new Date();
       let calculatedStartDate: Date;
-      
+
       switch (dateRange) {
         case "last_week":
           calculatedStartDate = new Date(now.setDate(now.getDate() - 7));
@@ -58,13 +45,13 @@ export class EventsRepository implements IEventsRepository {
         default:
           calculatedStartDate = now;
       }
-      
+
       query.date = { $gte: calculatedStartDate.toISOString().split('T')[0] };
     } else if (startDate || endDate) {
       // Custom date range
       query.date = {};
-      if (startDate) query.date.$gte = startDate.toISOString().split('T')[0];
-      if (endDate) query.date.$lte = endDate.toISOString().split('T')[0];
+      if (startDate) query.date.$gte = new Date(startDate).toISOString().split('T')[0];
+      if (endDate) query.date.$lte = new Date(endDate).toISOString().split('T')[0];
     }
 
     // Search functionality
@@ -79,52 +66,51 @@ export class EventsRepository implements IEventsRepository {
     }
 
     const skip = (page - 1) * limit;
-    const events = await (CampusEventModel as any).find(query)
+    const events = await CampusEventModel.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
-    const totalItems = await (CampusEventModel as any).countDocuments(query);
+    const totalItems = await CampusEventModel.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
     return { events, totalItems, totalPages, currentPage: page };
   }
 
-  async getEventById(params: GetEventByIdRequestDTO): Promise<any> {
-    return await (CampusEventModel as any).findById(params.id).lean();
+  async getEventById(id: string) {
+    return await (CampusEventModel as any).findById(id).lean();
   }
 
-  async createEvent(params: CreateEventRequestDTO): Promise<any> {
-    return await (CampusEventModel as any).create(params);
+  async createEvent(event: Event) {
+    return await CampusEventModel.create(event);
   }
 
-  async updateEvent(params: UpdateEventRequestDTO): Promise<any> {
+  async updateEvent(event: Event) {
     return await (CampusEventModel as any).findByIdAndUpdate(
-      params.id,
-      { $set: params },
+      event.id,
+      { $set: event },
       { new: true }
     ).lean();
   }
 
-  async deleteEvent(params: DeleteEventRequestDTO): Promise<void> {
-    await (CampusEventModel as any).findByIdAndDelete(params.id);
+  async deleteEvent(id: string) {
+    await CampusEventModel.findByIdAndDelete(id);
   }
 
   async getEventRequests(
-    params: GetEventRequestsRequestDTO
-  ): Promise<any> {
-    const { page, limit, status, startDate, endDate, type, search, organizerType, dateRange } = params;
+    page: number, limit: number, status: string, startDate: string, endDate: string, type: string, search: string, organizerType: string, dateRange: string
+  ) {
     const query: any = {};
-    
+
     if (status && status !== "all") {
       query.status = { $regex: `^${status}$`, $options: "i" };
     }
-    
+
     const eventQuery: any = {};
-    
+
     if (type && type.toLowerCase() !== "all") {
       eventQuery.eventType = { $regex: `^${type}$`, $options: "i" };
     }
-    
+
     if (organizerType && organizerType !== "all") {
       eventQuery.organizerType = { $regex: `^${organizerType}$`, $options: "i" };
     }
@@ -132,7 +118,7 @@ export class EventsRepository implements IEventsRepository {
     if (dateRange && dateRange !== "all") {
       const now = new Date();
       let calculatedStartDate: Date;
-      
+
       switch (dateRange) {
         case "last_week":
           calculatedStartDate = new Date(now.setDate(now.getDate() - 7));
@@ -152,7 +138,7 @@ export class EventsRepository implements IEventsRepository {
         default:
           calculatedStartDate = now;
       }
-      
+
       eventQuery.date = { $gte: calculatedStartDate.toISOString().split('T')[0] };
     } else if (startDate || endDate) {
       eventQuery.date = {};
@@ -185,7 +171,7 @@ export class EventsRepository implements IEventsRepository {
     if (eventIds.length > 0) {
       query.eventId = { $in: eventIds };
     }
-    
+
     const totalItems = await (EventRequestModel as any).countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
     const skip = (page - 1) * limit;
@@ -201,23 +187,21 @@ export class EventsRepository implements IEventsRepository {
       .limit(limit)
       .lean();
     return {
-      rawRequests,
+      events: rawRequests,
       totalItems,
       totalPages,
       currentPage: page,
     };
   }
 
-  async approveEventRequest(
-    params: ApproveEventRequestRequestDTO
-  ): Promise<void> {
+  async approveEventRequest(id: string) {
     await (EventRequestModel as any).findByIdAndUpdate(
-      params.id,
+      id,
       { status: EventRequestStatus.Approved, updatedAt: new Date() },
       { runValidators: true }
     );
 
-    const eventRequest = await (EventRequestModel as any).findById(params.id);
+    const eventRequest = await (EventRequestModel as any).findById(id);
     if (eventRequest && eventRequest.eventId) {
       await (CampusEventModel as any).findByIdAndUpdate(
         eventRequest.eventId,
@@ -227,20 +211,18 @@ export class EventsRepository implements IEventsRepository {
     }
   }
 
-  async rejectEventRequest(
-    params: RejectEventRequestRequestDTO
-  ): Promise<void> {
+  async rejectEventRequest(id: string) {
     await (EventRequestModel as any).findByIdAndUpdate(
-      params.id,
+      id,
       { status: EventRequestStatus.Rejected, updatedAt: new Date() },
       { runValidators: true }
     );
   }
 
   async getEventRequestDetails(
-    params: GetEventRequestDetailsRequestDTO
-  ): Promise<any> {
-    return await (EventRequestModel as any).findById(params.id)
+    id: string
+  ) {
+    return await (EventRequestModel as any).findById(id)
       .populate({
         path: "eventId",
         select: "title description date location participantsCount",

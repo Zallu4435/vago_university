@@ -1,19 +1,19 @@
 import { IHttpRequest, IHttpResponse } from '../IHttp';
 import {
-  GetUserMaterialsUseCase,
-  GetUserMaterialByIdUseCase,
-  ToggleBookmarkUseCase,
-  ToggleLikeUseCase,
-  DownloadMaterialUseCase
+  IGetUserMaterialsUseCase,
+  IGetUserMaterialByIdUseCase,
+  IToggleBookmarkUseCase,
+  IToggleLikeUseCase,
+  IDownloadMaterialUseCase
 } from '../../../application/materials/useCases/UserMaterialUseCases';
 
 export class UserMaterialController {
   constructor(
-    private getMaterialsUseCase: GetUserMaterialsUseCase,
-    private getMaterialByIdUseCase: GetUserMaterialByIdUseCase,
-    private toggleBookmarkUseCase: ToggleBookmarkUseCase,
-    private toggleLikeUseCase: ToggleLikeUseCase,
-    private downloadMaterialUseCase: DownloadMaterialUseCase
+    private getMaterialsUseCase: IGetUserMaterialsUseCase,
+    private getMaterialByIdUseCase: IGetUserMaterialByIdUseCase,
+    private toggleBookmarkUseCase: IToggleBookmarkUseCase,
+    private toggleLikeUseCase: IToggleLikeUseCase,
+    private downloadMaterialUseCase: IDownloadMaterialUseCase
   ) { }
 
   async getMaterials(req: IHttpRequest): Promise<IHttpResponse> {

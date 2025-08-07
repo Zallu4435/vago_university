@@ -1,21 +1,34 @@
-import { GetVideosRequestDTO, GetVideoByIdRequestDTO, CreateVideoRequestDTO, UpdateVideoRequestDTO, DeleteVideoRequestDTO } from "../../../domain/video/dtos/VideoRequestDTOs";
-import { GetVideosResponseDTO, GetVideoByIdResponseDTO, CreateVideoResponseDTO, UpdateVideoResponseDTO } from "../../../domain/video/dtos/VideoResponseDTOs";
+import { IVideoBase, IVideo } from "../../../domain/video/entities/VideoTypes";
 
-export interface IDiploma {
-    _id: string;
+export interface IRepoVideo extends IVideo {
+    _id?: string;
+}
+
+export interface IRepoDiploma {
+    _id?: string;
     title: string;
+    description: string;
+    price: number;
     category: string;
+    thumbnail: string;
+    duration: string;
+    prerequisites: string[];
+    status: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    videoIds: string[];
+    students?: string[];
 }
 
 export interface IVideoRepository {
-    getVideos(params: GetVideosRequestDTO): Promise<GetVideosResponseDTO>;
-    getVideoById(params: GetVideoByIdRequestDTO): Promise<GetVideoByIdResponseDTO | null>;
-    createVideo(params: CreateVideoRequestDTO): Promise<CreateVideoResponseDTO>;
-    updateVideo(params: UpdateVideoRequestDTO): Promise<UpdateVideoResponseDTO | null>;
-    deleteVideo(params: DeleteVideoRequestDTO): Promise<void>;
-
-    findDiplomaByCategory(category: string): Promise<IDiploma | null>;
-    findDiplomaById(id: string): Promise<IDiploma | null>;
+    findVideos(query: any, page: number, limit: number): Promise<IRepoVideo[]>;
+    countVideos(query: any): Promise<number>;
+    findDiplomaByCategory(category: string): Promise<IRepoDiploma | null>;
+    getVideoById(id: string): Promise<IRepoVideo | null>;
+    createVideo(video: IVideoBase & { diplomaId: string; videoFile?: Express.Multer.File }): Promise<IRepoVideo>;
+    updateVideo(id: string, video: Partial<IVideoBase> & { diplomaId?: string; videoFile?: Express.Multer.File }): Promise<IRepoVideo | null>;
+    deleteVideo(id: string): Promise<void>;
+    findDiplomaById(id: string): Promise<IRepoDiploma | null>;
     addVideoToDiploma(diplomaId: string, videoId: string): Promise<void>;
     removeVideoFromDiploma(diplomaId: string, videoId: string): Promise<void>;
 } 

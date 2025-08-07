@@ -1,33 +1,34 @@
 import {
-    GetCoursesRequestDTO,
-    GetCourseByIdRequestDTO,
-    CreateCourseRequestDTO,
-    UpdateCourseRequestDTO,
-    DeleteCourseRequestDTO,
-  } from "../../../domain/courses/dtos/CourseRequestDTOs";
+    GetCoursesRequest,
+    CreateCourseRequest,
+    UpdateCourseRequest,
+    DeleteCourseRequest,
+  } from "../../../domain/courses/entities/CourseRequestEntities";
   import {
-    GetCoursesResponseDTO,
-    GetCourseByIdResponseDTO,
-    CreateCourseResponseDTO,
-    UpdateCourseResponseDTO,
-  } from "../../../domain/courses/dtos/CourseResponseDTOs";
+    GetCoursesResponse,
+    GetCourseByIdResponse,
+    CreateCourseResponse,
+    UpdateCourseResponse,
+  } from "../../../domain/courses/entities/CourseResponseEntities";
   import {
-    GetEnrollmentsRequestDTO,
-    ApproveEnrollmentRequestDTO,
-    RejectEnrollmentRequestDTO,
-    GetCourseRequestDetailsRequestDTO,
-    GetEnrollmentsResponseDTO,
-    GetCourseRequestDetailsResponseDTO,
-  } from "../../../domain/courses/dtos/EnrollmentRequestDTOs";
-  
+    GetEnrollmentsRequest,
+    ApproveEnrollmentRequest,
+    RejectEnrollmentRequest,
+    GetCourseRequestDetailsRequest,
+  } from "../../../domain/courses/entities/EnrollmentRequestEntities";
+  import {
+    GetEnrollmentsResponse,
+    GetCourseRequestDetailsResponse,
+  } from "../../../domain/courses/entities/EnrollmentResponseEntities";
+   
   export interface ICoursesRepository {
-    getCourses(params: GetCoursesRequestDTO): Promise<GetCoursesResponseDTO>;
-    getCourseById(params: GetCourseByIdRequestDTO): Promise<GetCourseByIdResponseDTO | null>;
-    createCourse(params: CreateCourseRequestDTO): Promise<CreateCourseResponseDTO>;
-    updateCourse(params: UpdateCourseRequestDTO): Promise<UpdateCourseResponseDTO | null>;
-    deleteCourse(params: DeleteCourseRequestDTO): Promise<void>;
-    getEnrollments(params: GetEnrollmentsRequestDTO): Promise<GetEnrollmentsResponseDTO>;
-    approveEnrollment(params: ApproveEnrollmentRequestDTO): Promise<void>;
-    rejectEnrollment(params: RejectEnrollmentRequestDTO): Promise<void>;
-    getCourseRequestDetails(params: GetCourseRequestDetailsRequestDTO): Promise<GetCourseRequestDetailsResponseDTO | null>;
+    getCourses(params: GetCoursesRequest): Promise<GetCoursesResponse>;
+    getCourseById(id: string): Promise<GetCourseByIdResponse>;
+    createCourse(params: CreateCourseRequest): Promise<CreateCourseResponse>;
+    updateCourse(params: UpdateCourseRequest): Promise<UpdateCourseResponse>;
+    deleteCourse(params: DeleteCourseRequest): Promise<void>;
+    getEnrollments(params: GetEnrollmentsRequest): Promise<GetEnrollmentsResponse>;
+    approveEnrollment(params: ApproveEnrollmentRequest): Promise<void>;
+    rejectEnrollment(params: RejectEnrollmentRequest): Promise<void>;
+    getCourseRequestDetails(params: GetCourseRequestDetailsRequest): Promise<GetCourseRequestDetailsResponse>;
   }

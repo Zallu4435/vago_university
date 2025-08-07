@@ -7,6 +7,118 @@ import {
   EventStatus 
 } from "./EventTypes";
 
+// Response types matching repository returns
+export interface PaginatedResponse<T> {
+  events: T[];
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+}
+
+export interface EventSummary {
+  _id: string;
+  title: string;
+  organizerType: string;
+  eventType: string;
+  location: string;
+  timeframe: string;
+  status: string;
+  // Add any other fields returned by the DB if needed
+}
+
+export interface SimplifiedEventRequest {
+  eventName: string;
+  requestedId: string;
+  requestedBy: string;
+  type: string;
+  requestedDate: string;
+  status: string;
+  proposedDate: string;
+}
+
+export interface EventRequestDetails {
+  _id: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  whyJoin: string;
+  additionalInfo: string;
+  eventId: {
+    _id: string;
+    title: string;
+    description: string;
+    date: string;
+    location: string;
+    participantsCount: number;
+  };
+  userId?: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+}
+
+// Populated user type for event requests
+export interface PopulatedUser {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+// Event document type (from Mongoose, with all fields)
+export interface EventDocument {
+  _id: string;
+  title: string;
+  organizer: string;
+  organizerType: string;
+  eventType: string;
+  date: string;
+  time: string;
+  location: string;
+  timeframe: string;
+  icon: string;
+  color: string;
+  description: string;
+  fullTime: boolean;
+  additionalInfo: string;
+  requirements: string;
+  status: string;
+  maxParticipants: number;
+  registrationRequired: boolean;
+  participants: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// EventRequest document type (with populated eventId and userId)
+export interface EventRequestDocument {
+  _id: string;
+  eventId: EventDocument | string;
+  userId: PopulatedUser | string;
+  status: string;
+  whyJoin: string;
+  additionalInfo: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface EventsListResponse {
+  events: EventDocument[];
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+}
+
+export interface EventRequestsListResponse {
+  rawRequests: EventRequestDocument[];
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+}
+
+export { OrganizerType, EventType, Timeframe, EventStatus };
+
 export class Event {
   private _id?: string;
   private _title: string;

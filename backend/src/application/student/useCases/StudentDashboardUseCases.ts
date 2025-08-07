@@ -22,19 +22,19 @@ interface ResponseDTO<T> {
 }
 
 export interface IGetAnnouncementsUseCase {
-  execute(params: GetAnnouncementsRequestDTO): Promise<ResponseDTO<{ title: string; date: string }[]>>;
+  execute(params: GetAnnouncementsRequestDTO): Promise<ResponseDTO<{ title: string; date: Date }[]>>;
 }
 
 export interface IGetDeadlinesUseCase {
-  execute(params: GetDeadlinesRequestDTO): Promise<ResponseDTO<GetDeadlinesResponseDTO>>;
+  execute(params: GetDeadlinesRequestDTO): Promise<GetDeadlinesResponseDTO>;
 }
 
 export interface IGetClassesUseCase {
-  execute(params: GetClassesRequestDTO): Promise<ResponseDTO<GetClassesResponseDTO>>;
+  execute(params: GetClassesRequestDTO): Promise<GetClassesResponseDTO>;
 }
 
 export interface IGetCalendarDaysUseCase {
-  execute(params: GetCalendarDaysRequestDTO): Promise<ResponseDTO<GetCalendarDaysResponseDTO>>;
+  execute(params: GetCalendarDaysRequestDTO): Promise<GetCalendarDaysResponseDTO>;
 }
 
 export interface IGetNewEventsUseCase {
@@ -51,9 +51,9 @@ type NewEventDTO = BaseNewEventDTO & { description: string };
 export class GetAnnouncementsUseCase implements IGetAnnouncementsUseCase {
   constructor(private studentDashboardRepository: IStudentDashboardRepository) { }
 
-  async execute(params: GetAnnouncementsRequestDTO): Promise<ResponseDTO<{ title: string; date: string }[]>> {
-    const [latestMessage, latestNotification] = await this.studentDashboardRepository.getAnnouncements(params);
-    const announcements: { title: string; date: string }[] = [];
+  async execute(): Promise<ResponseDTO<{ title: string; date: Date }[]>> {
+    const [latestMessage, latestNotification] = await this.studentDashboardRepository.getAnnouncements();
+    const announcements: { title: string; date: Date }[] = [];
     if (latestMessage) {
       announcements.push({
         title: latestMessage.subject || 'No Subject',
@@ -63,7 +63,7 @@ export class GetAnnouncementsUseCase implements IGetAnnouncementsUseCase {
     if (latestNotification) {
       announcements.push({
         title: latestNotification.title || 'No Title',
-        date: latestNotification.createdAt,
+        date: latestNotification.createdAt, 
       });
     }
     return { data: announcements, success: true };
@@ -73,14 +73,13 @@ export class GetAnnouncementsUseCase implements IGetAnnouncementsUseCase {
 export class GetDeadlinesUseCase implements IGetDeadlinesUseCase {
   constructor(private studentDashboardRepository: IStudentDashboardRepository) { }
 
-  async execute(params: GetDeadlinesRequestDTO): Promise<ResponseDTO<GetDeadlinesResponseDTO>> {
-    const assignments = await this.studentDashboardRepository.getDeadlines(params);
+  async execute(): Promise<GetDeadlinesResponseDTO> {
+    const assignments = await this.studentDashboardRepository.getDeadlines();
     const mappedDeadlines = assignments.map(a => ({
       id: a._id?.toString?.() || a.id?.toString?.() || '',
       title: a.title,
       date: a.dueDate,
       urgent: a.status === 'draft' || (a.dueDate && (new Date(a.dueDate).getTime() - Date.now()) < 3 * 24 * 60 * 60 * 1000),
-      courseId: a.courseId ? a.courseId.toString() : undefined,
       type: 'assignment'
     }));
     return { data: mappedDeadlines, success: true };
@@ -90,8 +89,8 @@ export class GetDeadlinesUseCase implements IGetDeadlinesUseCase {
 export class GetClassesUseCase implements IGetClassesUseCase {
   constructor(private studentDashboardRepository: IStudentDashboardRepository) { }
 
-  async execute(params: GetClassesRequestDTO): Promise<ResponseDTO<GetClassesResponseDTO>> {
-    const sessionDocs = await this.studentDashboardRepository.getClasses(params);
+  async execute(): Promise<GetClassesResponseDTO> {
+    const sessionDocs = await this.studentDashboardRepository.getClasses();
     // Map to ClassInfoDTO structure for frontend
     const mappedClasses = sessionDocs.map(s => ({
       id: s._id?.toString?.() || '',
@@ -108,8 +107,8 @@ export class GetClassesUseCase implements IGetClassesUseCase {
 export class GetCalendarDaysUseCase implements IGetCalendarDaysUseCase {
   constructor(private studentDashboardRepository: IStudentDashboardRepository) { }
 
-  async execute(params: GetCalendarDaysRequestDTO): Promise<ResponseDTO<GetCalendarDaysResponseDTO>> {
-    const { events, sports, clubs } = await this.studentDashboardRepository.getCalendarDays(params) as any;
+  async execute(): Promise<GetCalendarDaysResponseDTO> {
+    const { events, sports, clubs } = await this.studentDashboardRepository.getCalendarDays() as any;
     // Build a map of days to event/sport/club info
     const dayTypeMap: Record<number, { type: string; title: string; date: string }[]> = {};
     function addEntry(dateStr: string, type: string, title: string) {
@@ -138,8 +137,8 @@ export class GetCalendarDaysUseCase implements IGetCalendarDaysUseCase {
 export class GetNewEventsUseCase implements IGetNewEventsUseCase {
   constructor(private studentDashboardRepository: IStudentDashboardRepository) { }
 
-  async execute(studentId: string): Promise<ResponseDTO<NewEventDTO[]>> {
-    const [latestEvent, latestSport, latestClub]: any[] = await this.studentDashboardRepository.getNewEvents(studentId);
+  async execute(): Promise<ResponseDTO<NewEventDTO[]>> {
+    const [latestEvent, latestSport, latestClub]: any[] = await this.studentDashboardRepository.getNewEvents();
     const events: NewEventDTO[] = [];
     if (latestEvent) {
       events.push({
@@ -190,7 +189,7 @@ export class GetUserInfoForDashboardUseCase implements IGetUserInfoForDashboardU
   constructor(private studentDashboardRepository: IStudentDashboardRepository) { }
 
   async execute(params: GetUserInfoRequestDTO): Promise<ResponseDTO<GetUserInfoResponseDTO>> {
-    const userInfo = await this.studentDashboardRepository.getUserInfo(params);
+    const userInfo = await this.studentDashboardRepository.getUserInfo(params.studentId);
     return { data: userInfo, success: true };
   }
 } 

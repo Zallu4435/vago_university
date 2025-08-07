@@ -21,7 +21,7 @@ import {
   JoinSportResponseDTO,
   JoinEventResponseDTO,
 } from "../../../domain/campus-life/dtos/CampusLifeDTOs";
-import mongoose from "mongoose";
+import { ClubStatus } from "../../../domain/campus-life/entities/CampusLife";
 
 export interface ResponseDTO<T> {
   success: boolean;
@@ -79,7 +79,7 @@ export class GetCampusLifeOverviewUseCase implements IGetCampusLifeOverviewUseCa
     return {
       success: true,
       data: {
-        events: events.map((e: any) => new CampusEvent(
+        events: events.map((e) => new CampusEvent(
           e._id.toString(),
           e.title,
           e.date,
@@ -96,33 +96,33 @@ export class GetCampusLifeOverviewUseCase implements IGetCampusLifeOverviewUseCa
           e.createdAt.toISOString(),
           e.updatedAt.toISOString()
         )),
-        sports: sports.map((s: any) => new Sport(
+        sports: sports.map((s) => new Sport(
           s._id.toString(),
           s.title,
           s.type,
-          [],
+          [], // teams - not in DB, use empty array
           s.icon,
           s.color,
           s.division,
           s.headCoach,
-          [s.homeGames?.toString() || ""],
-          s.record,
-          s.upcomingGames?.map((g: any) => g.description) || [],
+          [], // homeGames - not in DB, use empty array
+          "", // record - not in DB, use empty string
+          [], // upcomingGames - not in DB, use empty array
           s.createdAt.toISOString(),
           s.updatedAt.toISOString()
         )),
-        clubs: clubs.map((c: any) => new Club(
+        clubs: clubs.map((c) => new Club(
           c._id.toString(),
           c.name,
           c.type,
-          parseInt(c.members) || 0,
+          Array.isArray(c.members) ? c.members.length : 0,
           c.icon,
           c.color,
-          c.status,
-          c.role,
+          c.status as ClubStatus,
+          "", // role - not in DB, use empty string
           c.nextMeeting,
-          c.about,
-          c.upcomingEvents?.map((e: any) => e.description) || [],
+          c.about || "",
+          c.upcomingEvents?.map((e) => e.description) || [],
           c.createdAt.toISOString(),
           c.updatedAt.toISOString()
         ))
@@ -146,8 +146,8 @@ export class GetEventsUseCase implements IGetEventsUseCase {
     return {
       success: true,
       data: {
-        events: rawEvents.map((e: any) => {
-          const req = requests.find((r: any) => r.eventId.toString() === e._id.toString());
+        events: rawEvents.map((e) => {
+          const req = requests.find((r) => r.eventId?.toString() === e._id.toString());
           return new CampusEvent(
             e._id.toString(),
             e.title,
@@ -179,10 +179,7 @@ export class GetEventByIdUseCase implements IGetEventByIdUseCase {
   constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetEventByIdRequestDTO): Promise<ResponseDTO<GetEventByIdResponseDTO>> {
-    if (!mongoose.isValidObjectId(params.eventId)) {
-      return { success: false, data: { error: "Invalid event ID" } };
-    }
-    const rawEvent = await this.campusLifeRepository.getEventById(params);
+    const rawEvent = await this.campusLifeRepository.getEventById(params.eventId);
     if (!rawEvent) {
       return { success: false, data: { error: "Event not found" } };
     }
@@ -204,8 +201,8 @@ export class GetEventByIdUseCase implements IGetEventByIdUseCase {
           rawEvent.fullTime,
           rawEvent.additionalInfo,
           rawEvent.requirements,
-          rawEvent.createdAt.toISOString(),
-          rawEvent.updatedAt.toISOString()
+          rawEvent.createdAt.toString(),
+          rawEvent.updatedAt.toString()
         )
       }
     };
@@ -224,20 +221,20 @@ export class GetSportsUseCase implements IGetSportsUseCase {
     return {
       success: true,
       data: {
-        sports: sports.map((s: any) => {
-          const req = requests.find(r => r.sportId.toString() === s._id.toString());
+        sports: sports.map((s) => {
+          const req = requests.find((r) => r.sportId?.toString() === s._id.toString());
           return new Sport(
             s._id.toString(),
             s.title,
             s.type,
-            [],
+            [], // teams - not in DB
             s.icon,
             s.color,
             s.division,
             s.headCoach,
-            [s.homeGames?.toString() || ""],
-            s.record,
-            s.upcomingGames?.map((g: any) => g.description) || [],
+            [], // homeGames - not in DB
+            "", // record - not in DB
+            [], // upcomingGames - not in DB
             s.createdAt.toISOString(),
             s.updatedAt.toISOString(),
             req ? req.status : null
@@ -253,10 +250,7 @@ export class GetSportByIdUseCase implements IGetSportByIdUseCase {
   constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetSportByIdRequestDTO): Promise<ResponseDTO<GetSportByIdResponseDTO>> {
-    if (!mongoose.isValidObjectId(params.sportId)) {
-      return { success: false, data: { error: "Invalid sport ID" } };
-    }
-    const sport = await this.campusLifeRepository.getSportById(params);
+    const sport = await this.campusLifeRepository.getSportById(params.sportId);
     if (!sport) {
       return { success: false, data: { error: "Sport not found" } };
     }
@@ -268,16 +262,16 @@ export class GetSportByIdUseCase implements IGetSportByIdUseCase {
           sport._id.toString(),
           sport.title,
           sport.type,
-          [],
+          [], // teams - not in DB
           sport.icon,
           sport.color,
           sport.division,
           sport.headCoach,
-          [sport.homeGames?.toString() || ""],
-          sport.record,
-          sport.upcomingGames?.map((g: any) => g.description) || [],
-          sport.createdAt.toISOString(),
-          sport.updatedAt.toISOString()
+          [], // homeGames - not in DB
+          "", // record - not in DB
+          [], // upcomingGames - not in DB
+          sport.createdAt.toString(),
+          sport.updatedAt.toString()
         )
       }
     };
@@ -296,20 +290,20 @@ export class GetClubsUseCase implements IGetClubsUseCase {
     return {
       success: true,
       data: {
-        clubs: clubs.map((c: any) => {
-          const req = requests.find(r => r.clubId.toString() === c._id.toString());
+        clubs: clubs.map((c) => {
+          const req = requests.find((r) => r.clubId?.toString() === c._id.toString());
           return new Club(
             c._id.toString(),
             c.name,
             c.type,
-            parseInt(c.members) || 0,
+            Array.isArray(c.members) ? c.members.length : 0,
             c.icon,
             c.color,
-            c.status,
-            c.role,
+            c.status as ClubStatus,
+            "", // role - not in DB, use empty string
             c.nextMeeting,
-            c.about,
-            c.upcomingEvents?.map((e: any) => e.description) || [],
+            c.about || "",
+            c.upcomingEvents?.map((e) => e.description) || [],
             c.createdAt.toISOString(),
             c.updatedAt.toISOString(),
             req ? req.status : null
@@ -325,10 +319,7 @@ export class GetClubByIdUseCase implements IGetClubByIdUseCase {
   constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetClubByIdRequestDTO): Promise<ResponseDTO<GetClubByIdResponseDTO>> {
-    if (!mongoose.isValidObjectId(params.clubId)) {
-      return { success: false, data: { error: "Invalid club ID" } };
-    }
-    const club = await this.campusLifeRepository.getClubById(params);
+    const club = await this.campusLifeRepository.getClubById(params.clubId);
     if (!club) {
       return { success: false, data: { error: "Club not found" } };
     }
@@ -340,16 +331,16 @@ export class GetClubByIdUseCase implements IGetClubByIdUseCase {
           club._id.toString(),
           club.name,
           club.type,
-          parseInt(club.members) || 0,
+          Array.isArray(club.members) ? club.members.length : 0,
           club.icon,
           club.color,
-          club.status,
-          club.role,
+          club.status as ClubStatus,
+          "", // role - not in DB, use empty string
           club.nextMeeting,
-          club.about,
-          club.upcomingEvents?.map((e: any) => e.description) || [],
-          club.createdAt.toISOString(),
-          club.updatedAt.toISOString()
+          club.about || "",
+          club.upcomingEvents?.map((e) => e.description) || [],
+          club.createdAt.toString(),
+          club.updatedAt.toString()
         )
       }
     };
@@ -360,9 +351,6 @@ export class JoinClubUseCase implements IJoinClubUseCase {
   constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: JoinClubRequestDTO): Promise<ResponseDTO<JoinClubResponseDTO>> {
-    if (!mongoose.isValidObjectId(params.clubId) || !mongoose.isValidObjectId(params.studentId)) {
-      return { success: false, data: { error: "Invalid club or student ID" } };
-    }
     if (!params.reason) {
       return { success: false, data: { error: "Reason is required" } };
     }
@@ -371,7 +359,7 @@ export class JoinClubUseCase implements IJoinClubUseCase {
       success: true,
       data: {
         requestId: newRequest._id.toString(),
-        status: newRequest.status,
+        status: newRequest.status as 'pending' | 'approved' | 'rejected',
         message: "Join request submitted successfully"
       }
     };
@@ -382,9 +370,6 @@ export class JoinSportUseCase implements IJoinSportUseCase {
   constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: JoinSportRequestDTO): Promise<ResponseDTO<JoinSportResponseDTO>> {
-    if (!mongoose.isValidObjectId(params.sportId) || !mongoose.isValidObjectId(params.studentId)) {
-      return { success: false, data: { error: "Invalid sport or student ID" } };
-    }
     if (!params.reason) {
       return { success: false, data: { error: "Reason is required" } };
     }
@@ -393,7 +378,7 @@ export class JoinSportUseCase implements IJoinSportUseCase {
       success: true,
       data: {
         requestId: newRequest._id.toString(),
-        status: newRequest.status,
+        status: newRequest.status as 'pending' | 'approved' | 'rejected',
         message: "Join request submitted successfully"
       }
     };
@@ -404,9 +389,6 @@ export class JoinEventUseCase implements IJoinEventUseCase {
   constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: JoinEventRequestDTO): Promise<ResponseDTO<JoinEventResponseDTO>> {
-    if (!mongoose.isValidObjectId(params.eventId) || !mongoose.isValidObjectId(params.studentId)) {
-      return { success: false, data: { error: "Invalid event or student ID" } };
-    }
     if (!params.reason) {
       return { success: false, data: { error: "Reason is required" } };
     }
@@ -415,7 +397,7 @@ export class JoinEventUseCase implements IJoinEventUseCase {
       success: true,
       data: {
         requestId: newRequest._id.toString(),
-        status: newRequest.status,
+        status: newRequest.status as 'pending' | 'approved' | 'rejected',
         message: "Join request submitted successfully"
       }
     };

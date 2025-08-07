@@ -1,14 +1,14 @@
-import {
-  GetSiteSectionByIdRequestDTO,
-  CreateSiteSectionRequestDTO,
-  UpdateSiteSectionRequestDTO,
-  DeleteSiteSectionRequestDTO,
-} from '../../../domain/site-management/dtos/SiteSectionDTOs';
-
+import { 
+  CreateSiteSectionRequest, 
+  UpdateSiteSectionRequest, 
+  DeleteSiteSectionRequest 
+} from '../../../domain/site-management/entities/SiteSection';
+import { ISiteSectionDocument } from '../../../domain/site-management/entities/SiteSectionTypes';
+ 
 export interface ISiteSectionRepository {
-  getSections(query: any): Promise<any[]>;
-  getSectionById(params: GetSiteSectionByIdRequestDTO): Promise<any | null>;
-  createSection(params: CreateSiteSectionRequestDTO): Promise<any>;
-  updateSection(params: UpdateSiteSectionRequestDTO): Promise<any | null>;
-  deleteSection(params: DeleteSiteSectionRequestDTO): Promise<void>;
+  getSections(query: any): Promise<ISiteSectionDocument[]>;
+  getSectionById(id: string): Promise<ISiteSectionDocument | null>;
+  createSection(params: CreateSiteSectionRequest): Promise<ISiteSectionDocument>;
+  updateSection(params: UpdateSiteSectionRequest): Promise<ISiteSectionDocument | null>;
+  deleteSection(params: DeleteSiteSectionRequest): Promise<void>;
 }

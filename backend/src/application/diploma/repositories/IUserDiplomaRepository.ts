@@ -1,27 +1,27 @@
-import {
-  GetUserDiplomasRequestDTO,
-  GetUserDiplomaByIdRequestDTO,
-  GetUserDiplomaChapterRequestDTO,
-  UpdateVideoProgressRequestDTO,
-  MarkChapterCompleteRequestDTO,
-  ToggleBookmarkRequestDTO,
-} from "../../../domain/diploma/dtos/UserDiplomaRequestDTOs";
-import {
-  GetUserDiplomasResponseDTO,
-  GetUserDiplomaByIdResponseDTO,
-  GetUserDiplomaChapterResponseDTO,
-  UpdateVideoProgressResponseDTO,
-  MarkChapterCompleteResponseDTO,
-  ToggleBookmarkResponseDTO,
-} from "../../../domain/diploma/dtos/UserDiplomaResponseDTOs";
-
+import { DiplomaCourse, Chapter } from "../../../domain/diploma/entities/diplomatypes";
+ 
 export interface IUserDiplomaRepository {
-  getUserDiplomas(params: GetUserDiplomasRequestDTO): Promise<GetUserDiplomasResponseDTO>;
-  getUserDiplomaById(params: GetUserDiplomaByIdRequestDTO): Promise<GetUserDiplomaByIdResponseDTO | null>;
-  getUserDiplomaChapter(params: GetUserDiplomaChapterRequestDTO): Promise<GetUserDiplomaChapterResponseDTO | null>;
-  updateVideoProgress(params: UpdateVideoProgressRequestDTO): Promise<UpdateVideoProgressResponseDTO>;
-  markChapterComplete(params: MarkChapterCompleteRequestDTO): Promise<MarkChapterCompleteResponseDTO>;
-  toggleBookmark(params: ToggleBookmarkRequestDTO): Promise<ToggleBookmarkResponseDTO>;
+  getUserDiplomas(page: number, limit: number, category: string, status: string, dateRange: string): Promise<{
+    courses: DiplomaCourse[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }>;
+  getUserDiplomaById(id: string): Promise<DiplomaCourse | null>;
+  getUserDiplomaChapter(courseId: string, chapterId: string): Promise<Chapter | null>;
+  updateVideoProgress(userId: string, courseId: string, chapterId: string, progress: number): Promise<{
+    message: string;
+    progress: number;
+  }>;
+  markChapterComplete(userId: string, courseId: string, chapterId: string): Promise<{
+    message: string;
+    completed: boolean;
+  }>;
+  toggleBookmark(userId: string, courseId: string, chapterId: string): Promise<{
+    message: string;
+    bookmarked: boolean;
+  }>;
   getCompletedChapters(userId: string, courseId: string): Promise<string[]>;
   getBookmarkedChapters(userId: string, courseId: string): Promise<string[]>;
 } 

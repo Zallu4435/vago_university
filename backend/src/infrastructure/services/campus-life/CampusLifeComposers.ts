@@ -10,6 +10,16 @@ import {
   JoinClubUseCase,
   JoinSportUseCase,
   JoinEventUseCase,
+  IGetCampusLifeOverviewUseCase,
+  IGetEventsUseCase,
+  IGetEventByIdUseCase,
+  IGetSportsUseCase,
+  IGetSportByIdUseCase,
+  IGetClubsUseCase,
+  IGetClubByIdUseCase,
+  IJoinClubUseCase,
+  IJoinSportUseCase,
+  IJoinEventUseCase,
 } from "../../../application/campus-life/useCases/CampusLifeUseCases";
 import { CampusLifeRepository} from "../../../infrastructure/repositories/campus-life/CampusLifeRepository"; 
 import { CampusLifeController } from "../../../presentation/http/campus-life/CampusLifeController";
@@ -18,16 +28,16 @@ import { ICampusLifeController } from "../../../presentation/http/IHttp";
 export function getCampusLifeComposer(): ICampusLifeController {
   const campusLifeRepository: ICampusLifeRepository = new CampusLifeRepository();
 
-  const getCampusLifeOverviewUseCase = new GetCampusLifeOverviewUseCase(campusLifeRepository);
-  const getEventsUseCase = new GetEventsUseCase(campusLifeRepository);
-  const getEventByIdUseCase = new GetEventByIdUseCase(campusLifeRepository);
-  const getSportsUseCase = new GetSportsUseCase(campusLifeRepository);
-  const getSportByIdUseCase = new GetSportByIdUseCase(campusLifeRepository);
-  const getClubsUseCase = new GetClubsUseCase(campusLifeRepository);
-  const getClubByIdUseCase = new GetClubByIdUseCase(campusLifeRepository);
-  const joinClubUseCase = new JoinClubUseCase(campusLifeRepository);
-  const joinSportUseCase = new JoinSportUseCase(campusLifeRepository);
-  const joinEventUseCase = new JoinEventUseCase(campusLifeRepository);
+  const getCampusLifeOverviewUseCase: IGetCampusLifeOverviewUseCase = new GetCampusLifeOverviewUseCase(campusLifeRepository);
+  const getEventsUseCase: IGetEventsUseCase = new GetEventsUseCase(campusLifeRepository);
+  const getEventByIdUseCase: IGetEventByIdUseCase = new GetEventByIdUseCase(campusLifeRepository);
+  const getSportsUseCase: IGetSportsUseCase = new GetSportsUseCase(campusLifeRepository);
+  const getSportByIdUseCase: IGetSportByIdUseCase = new GetSportByIdUseCase(campusLifeRepository);
+  const getClubsUseCase: IGetClubsUseCase = new GetClubsUseCase(campusLifeRepository);
+  const getClubByIdUseCase: IGetClubByIdUseCase = new GetClubByIdUseCase(campusLifeRepository);
+  const joinClubUseCase: IJoinClubUseCase = new JoinClubUseCase(campusLifeRepository);
+  const joinSportUseCase: IJoinSportUseCase = new JoinSportUseCase(campusLifeRepository);
+  const joinEventUseCase: IJoinEventUseCase = new JoinEventUseCase(campusLifeRepository);
 
   return new CampusLifeController(
     getCampusLifeOverviewUseCase,

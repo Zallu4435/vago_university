@@ -6,12 +6,33 @@ import {
   GetSportRequestDetailsRequestDTO,
   JoinSportRequestDTO,
 } from "../../../domain/sports/dtos/SportRequestDTOs";
-import {  
+import {
   GetSportRequestsResponseDTO,
   GetSportRequestDetailsResponseDTO,
   JoinSportResponseDTO,
 } from "../../../domain/sports/dtos/SportResponseDTOs";
 import mongoose from "mongoose";
+
+
+export interface IGetSportRequestsUseCase {
+  execute(params: GetSportRequestsRequestDTO): Promise<GetSportRequestsResponseDTO>;
+}
+
+export interface IApproveSportRequestUseCase {
+  execute(params: ApproveSportRequestRequestDTO): Promise<{ message: string }>;
+}
+
+export interface IRejectSportRequestUseCase {
+  execute(params: RejectSportRequestRequestDTO): Promise<{ message: string }>;
+}
+
+export interface IGetSportRequestDetailsUseCase {
+  execute(params: GetSportRequestDetailsRequestDTO): Promise<GetSportRequestDetailsResponseDTO>;
+}
+
+export interface IJoinSportUseCase {
+  execute(params: JoinSportRequestDTO): Promise<JoinSportResponseDTO>;
+}
 
 export class GetSportRequestsUseCase {
   constructor(private sportsRepository: ISportsRepository) { }
@@ -109,10 +130,10 @@ export class GetSportRequestDetailsUseCase {
         },
         user: sportRequest.userId
           ? {
-              id: sportRequest.userId._id?.toString() || sportRequest.userId.id,
-              name: `${sportRequest.userId.firstName} ${sportRequest.userId.lastName}`.trim(),
-              email: sportRequest.userId.email,
-            }
+            id: sportRequest.userId._id?.toString() || sportRequest.userId.id,
+            name: `${sportRequest.userId.firstName} ${sportRequest.userId.lastName}`.trim(),
+            email: sportRequest.userId.email,
+          }
           : undefined,
       },
     };

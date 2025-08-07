@@ -26,9 +26,9 @@ import {
   EnquiryReplyFailedError,
 } from "../../../domain/enquiry/errors/EnquiryErrors";
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
 
-function toEnquiryProps(raw: any): EnquiryProps {
+function toEnquiryProps(raw): EnquiryProps {
   return {
     id: raw._id?.toString() ?? raw.id,
     name: raw.name,

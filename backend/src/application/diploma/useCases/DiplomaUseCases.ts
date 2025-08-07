@@ -4,6 +4,7 @@ import { GetDiplomasResponseDTO, GetDiplomaByIdResponseDTO, CreateDiplomaRespons
 import { Diploma } from "../../../domain/diploma/entities/Diploma";
 import { DiplomaNotFoundError, InvalidDiplomaStatusError } from "../../../domain/diploma/errors/DiplomaErrors";
 import mongoose from "mongoose";
+import { DiplomaDocument } from "../../../domain/diploma/entities/diplomatypes";
 
 interface ResponseDTO<T> {
   data: T;
@@ -13,7 +14,7 @@ interface ResponseDTO<T> {
 export interface IGetDiplomasUseCase {
   execute(params: GetDiplomasRequestDTO): Promise<ResponseDTO<GetDiplomasResponseDTO>>;
 }
-
+ 
 export interface IGetDiplomaByIdUseCase {
   execute(params: GetDiplomaByIdRequestDTO): Promise<ResponseDTO<GetDiplomaByIdResponseDTO>>;
 }
@@ -38,7 +39,7 @@ export interface IUnenrollStudentUseCase {
   execute(params: UnenrollStudentRequestDTO): Promise<ResponseDTO<UnenrollStudentResponseDTO>>;
 }
 
-function mapDiplomaToSummaryDTO(diploma: any): DiplomaSummaryDTO {
+function mapDiplomaToSummaryDTO(diploma): DiplomaSummaryDTO {
   return {
     id: diploma._id?.toString() || diploma.id,
     title: diploma.title,
@@ -51,7 +52,7 @@ function mapDiplomaToSummaryDTO(diploma: any): DiplomaSummaryDTO {
     status: diploma.status,
     createdAt: diploma.createdAt?.toISOString?.() || diploma.createdAt,
     updatedAt: diploma.updatedAt?.toISOString?.() || diploma.updatedAt,
-    videoIds: (diploma.videoIds || []).map((id: any) => id.toString()),
+    videoIds: (diploma.videoIds || []).map((id) => id.toString()),
   };
 }
 
@@ -62,7 +63,7 @@ export class GetDiplomasUseCase implements IGetDiplomasUseCase {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
       throw new Error("Invalid page or limit parameters");
     }
-    const { diplomas, totalItems } = await this.diplomaRepository.getDiplomas(params);
+    const { diplomas, totalItems } = await this.diplomaRepository.getDiplomas(params.page, params.limit, params.department, params.category, params.status, params.instructor, params.dateRange, params.search, params.startDate, params.endDate);
     const totalPages = Math.ceil(totalItems / params.limit);
     const mappedDiplomas: DiplomaSummaryDTO[] = diplomas.map(mapDiplomaToSummaryDTO);
     return {
@@ -84,7 +85,7 @@ export class GetDiplomaByIdUseCase implements IGetDiplomaByIdUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new InvalidDiplomaStatusError("Invalid diploma ID");
     }
-    const diplomaDoc: any = await this.diplomaRepository.getDiplomaById(params);
+    const diplomaDoc = await this.diplomaRepository.getDiplomaById(params.id);
     if (!diplomaDoc) {
       throw new DiplomaNotFoundError(params.id);
     }
@@ -92,7 +93,7 @@ export class GetDiplomaByIdUseCase implements IGetDiplomaByIdUseCase {
       success: true,
       data: {
         diploma: new Diploma({
-          id: diplomaDoc._id?.toString() || diplomaDoc.id,
+          id: diplomaDoc._id?.toString() || diplomaDoc._id,
           title: diplomaDoc.title,
           description: diplomaDoc.description,
           price: diplomaDoc.price,
@@ -103,7 +104,7 @@ export class GetDiplomaByIdUseCase implements IGetDiplomaByIdUseCase {
           status: diplomaDoc.status,
           createdAt: diplomaDoc.createdAt,
           updatedAt: diplomaDoc.updatedAt,
-          videoIds: (diplomaDoc.videoIds || []).map((id: any) => id.toString()),
+          videoIds: (diplomaDoc.videoIds || []).map((id) => id.toString()),
         }),
       },
     };
@@ -114,12 +115,12 @@ export class CreateDiplomaUseCase implements ICreateDiplomaUseCase {
   constructor(private readonly diplomaRepository: IDiplomaRepository) { }
 
   async execute(params: CreateDiplomaRequestDTO): Promise<ResponseDTO<CreateDiplomaResponseDTO>> {
-    const diplomaDoc: any = await this.diplomaRepository.createDiploma(params);
+    const diplomaDoc: DiplomaDocument = await this.diplomaRepository.createDiploma(params);
     return {
       success: true,
       data: {
         diploma: new Diploma({
-          id: diplomaDoc._id?.toString() || diplomaDoc.id,
+          id: diplomaDoc._id?.toString() || '',
           title: diplomaDoc.title,
           description: diplomaDoc.description,
           price: diplomaDoc.price,
@@ -130,7 +131,7 @@ export class CreateDiplomaUseCase implements ICreateDiplomaUseCase {
           status: diplomaDoc.status,
           createdAt: diplomaDoc.createdAt,
           updatedAt: diplomaDoc.updatedAt,
-          videoIds: (diplomaDoc.videoIds || []).map((id: any) => id.toString()),
+          videoIds: (diplomaDoc.videoIds || []).map((id) => id.toString()),
         }),
       },
     };
@@ -144,15 +145,15 @@ export class UpdateDiplomaUseCase implements IUpdateDiplomaUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new InvalidDiplomaStatusError("Invalid diploma ID");
     }
-    const diplomaDoc: any = await this.diplomaRepository.updateDiploma(params);
-    if (!diplomaDoc) {
-      throw new DiplomaNotFoundError(params.id);
-    }
+    const existingDiploma = await this.diplomaRepository.getDiplomaById(params.id);
+    if (!existingDiploma) throw new DiplomaNotFoundError(params.id);
+    const updatedDiploma = { ...existingDiploma, ...params };
+    const diplomaDoc: DiplomaDocument = await this.diplomaRepository.updateDiploma(updatedDiploma);
     return {
       success: true,
       data: {
         diploma: new Diploma({
-          id: diplomaDoc._id?.toString() || diplomaDoc.id,
+          id: diplomaDoc._id?.toString() || diplomaDoc._id,
           title: diplomaDoc.title,
           description: diplomaDoc.description,
           price: diplomaDoc.price,
@@ -163,7 +164,7 @@ export class UpdateDiplomaUseCase implements IUpdateDiplomaUseCase {
           status: diplomaDoc.status,
           createdAt: diplomaDoc.createdAt,
           updatedAt: diplomaDoc.updatedAt,
-          videoIds: (diplomaDoc.videoIds || []).map((id: any) => id.toString()),
+          videoIds: (diplomaDoc.videoIds || []).map((id) => id.toString()),
         }),
       },
     };
@@ -177,7 +178,7 @@ export class DeleteDiplomaUseCase implements IDeleteDiplomaUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new InvalidDiplomaStatusError("Invalid diploma ID");
     }
-    await this.diplomaRepository.deleteDiploma(params);
+    await this.diplomaRepository.deleteDiploma(params.id);
     return { success: true, data: { message: "Diploma deleted successfully" } };
   }
 }

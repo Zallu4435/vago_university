@@ -1,14 +1,15 @@
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IFacultyController } from "../IHttp";
 import { v2 as cloudinary } from 'cloudinary';
 import {
-  GetFacultyUseCase,
-  GetFacultyByIdUseCase,
-  GetFacultyByTokenUseCase,
-  ApproveFacultyUseCase,
-  RejectFacultyUseCase,
-  DeleteFacultyUseCase,
-  ConfirmFacultyOfferUseCase,
-  DownloadCertificateUseCase,
+  IGetFacultyUseCase,
+  IGetFacultyByIdUseCase,
+  IGetFacultyByTokenUseCase,
+  IApproveFacultyUseCase,
+  IRejectFacultyUseCase,
+  IDeleteFacultyUseCase,
+  IConfirmFacultyOfferUseCase,
+  IDownloadCertificateUseCase,
+  IBlockFacultyUseCase,
 } from "../../../application/faculty/useCases/FacultyUseCases";
 
 export class FacultyController implements IFacultyController {
@@ -16,15 +17,15 @@ export class FacultyController implements IFacultyController {
   private httpSuccess: HttpSuccess;
 
   constructor(
-    private getFacultyUseCase: GetFacultyUseCase,
-    private getFacultyByIdUseCase: GetFacultyByIdUseCase,
-    private getFacultyByTokenUseCase: GetFacultyByTokenUseCase,
-    private approveFacultyUseCase: ApproveFacultyUseCase,
-    private rejectFacultyUseCase: RejectFacultyUseCase,
-    private deleteFacultyUseCase: DeleteFacultyUseCase,
-    private confirmFacultyOfferUseCase: ConfirmFacultyOfferUseCase,
-    private downloadCertificateUseCase: DownloadCertificateUseCase,
-    private blockFacultyUseCase: any
+    private getFacultyUseCase: IGetFacultyUseCase,
+    private getFacultyByIdUseCase: IGetFacultyByIdUseCase,
+    private getFacultyByTokenUseCase: IGetFacultyByTokenUseCase,
+    private approveFacultyUseCase: IApproveFacultyUseCase,
+    private rejectFacultyUseCase: IRejectFacultyUseCase,
+    private deleteFacultyUseCase: IDeleteFacultyUseCase,
+    private confirmFacultyOfferUseCase: IConfirmFacultyOfferUseCase,
+    private downloadCertificateUseCase: IDownloadCertificateUseCase,
+    private blockFacultyUseCase: IBlockFacultyUseCase
   ) {
     this.httpErrors = new HttpErrors();
     this.httpSuccess = new HttpSuccess();

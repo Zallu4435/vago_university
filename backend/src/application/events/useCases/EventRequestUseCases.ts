@@ -34,7 +34,17 @@ export class GetEventRequestsUseCase implements IGetEventRequestsUseCase {
       throw new Error("Invalid endDate format");
     }
 
-    const result: any = await this.eventsRepository.getEventRequests(params);
+    const result: any = await this.eventsRepository.getEventRequests(
+      params.page,
+      params.limit,
+      params.status,
+      params.startDate ? params.startDate.toISOString() : "",
+      params.endDate ? params.endDate.toISOString() : "",
+      params.type,
+      params.search,
+      params.organizerType,
+      params.dateRange
+    );
 
     const filteredRequests = result.rawRequests.filter((req: any) => req.eventId);
     const mappedRequests = filteredRequests.map((req: any) => ({
@@ -63,14 +73,14 @@ export class ApproveEventRequestUseCase implements IApproveEventRequestUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new InvalidEventRequestIdError(params.id);
     }
-    const eventRequestDetails: any = await this.eventsRepository.getEventRequestDetails({ id: params.id });
+    const eventRequestDetails: any = await this.eventsRepository.getEventRequestDetails(params.id);
     if (!eventRequestDetails) {
       throw new EventRequestNotFoundError(params.id);
     }
     if (eventRequestDetails.status !== "pending") {
       throw new InvalidEventStatusError(eventRequestDetails.status);
     }
-    await this.eventsRepository.approveEventRequest(params);
+    await this.eventsRepository.approveEventRequest(params.id);
     return { message: "Event request approved successfully" };
   }
 }
@@ -82,14 +92,14 @@ export class RejectEventRequestUseCase implements IRejectEventRequestUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new InvalidEventRequestIdError(params.id);
     }
-    const eventRequestDetails: any = await this.eventsRepository.getEventRequestDetails({ id: params.id });
+    const eventRequestDetails: any = await this.eventsRepository.getEventRequestDetails(params.id);
     if (!eventRequestDetails) {
       throw new EventRequestNotFoundError(params.id);
     }
     if (eventRequestDetails.status !== "pending") {
       throw new InvalidEventStatusError(eventRequestDetails.status);
     }
-    await this.eventsRepository.rejectEventRequest(params);
+    await this.eventsRepository.rejectEventRequest(params.id);
     return { message: "Event request rejected successfully" };
   }
 }
@@ -101,7 +111,7 @@ export class GetEventRequestDetailsUseCase implements IGetEventRequestDetailsUse
     if (!mongoose.isValidObjectId(params.id)) {
       throw new InvalidEventRequestIdError(params.id);
     }
-    const eventRequest: any = await this.eventsRepository.getEventRequestDetails(params);
+    const eventRequest: any = await this.eventsRepository.getEventRequestDetails(params.id);
     if (!eventRequest) {
       throw new EventRequestNotFoundError(params.id);
     }

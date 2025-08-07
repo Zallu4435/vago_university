@@ -1,36 +1,14 @@
-import {
-  GetEventsRequestDTO,
-  GetEventByIdRequestDTO,
-  CreateEventRequestDTO,
-  UpdateEventRequestDTO,
-  DeleteEventRequestDTO,
-} from "../../../domain/events/dtos/EventRequestDTOs";
-import {
-  GetEventsResponseDTO,
-  GetEventByIdResponseDTO,
-  CreateEventResponseDTO,
-  UpdateEventResponseDTO,
-} from "../../../domain/events/dtos/EventResponseDTOs";
-import {
-  GetEventRequestsRequestDTO,
-  ApproveEventRequestRequestDTO,
-  RejectEventRequestRequestDTO,
-  GetEventRequestDetailsRequestDTO,
-} from "../../../domain/events/dtos/EventRequestRequestDTOs";
-import {
-  GetEventRequestsResponseDTO,
-  GetEventRequestDetailsResponseDTO,
-} from "../../../domain/events/dtos/EventRequestResponseDTOs";
+import { Event, PaginatedResponse, EventSummary, SimplifiedEventRequest, EventRequestDetails, EventDocument } from "../../../domain/events/entities/Event";
 
 export interface IEventsRepository {
-  getEvents(params: GetEventsRequestDTO): Promise<GetEventsResponseDTO>;
-  getEventById(params: GetEventByIdRequestDTO): Promise<GetEventByIdResponseDTO | null>;
-  createEvent(params: CreateEventRequestDTO): Promise<CreateEventResponseDTO>;
-  updateEvent(params: UpdateEventRequestDTO): Promise<UpdateEventResponseDTO | null>;
-  deleteEvent(params: DeleteEventRequestDTO): Promise<void>;
-  
-  getEventRequests(params: GetEventRequestsRequestDTO): Promise<GetEventRequestsResponseDTO>;
-  approveEventRequest(params: ApproveEventRequestRequestDTO): Promise<void>;
-  rejectEventRequest(params: RejectEventRequestRequestDTO): Promise<void>;
-  getEventRequestDetails(params: GetEventRequestDetailsRequestDTO): Promise<GetEventRequestDetailsResponseDTO | null>;
+  getEvents(page: number, limit: number, type: string, status: string, startDate: string, endDate: string, search: string, organizerType: string, dateRange: string): Promise<PaginatedResponse<EventSummary>>;
+  getEventById(id: string): Promise<Event | null>;
+  createEvent(event: Event): Promise<EventDocument>;
+  updateEvent(event: Event): Promise<Event | null>;
+  deleteEvent(id: string): Promise<void>;
+
+  getEventRequests(page: number, limit: number, status: string, startDate: string, endDate: string, type: string, search: string, organizerType: string, dateRange: string): Promise<PaginatedResponse<SimplifiedEventRequest>>;
+  approveEventRequest(id: string): Promise<void>;
+  rejectEventRequest(id: string): Promise<void>;
+  getEventRequestDetails(id: string): Promise<EventRequestDetails | null>;
 }

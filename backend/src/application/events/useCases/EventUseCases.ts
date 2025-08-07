@@ -1,9 +1,9 @@
 import { GetEventsRequestDTO, GetEventByIdRequestDTO, CreateEventRequestDTO, UpdateEventRequestDTO, DeleteEventRequestDTO } from "../../../domain/events/dtos/EventRequestDTOs";
 import { GetEventsResponseDTO, GetEventByIdResponseDTO, CreateEventResponseDTO, UpdateEventResponseDTO } from "../../../domain/events/dtos/EventResponseDTOs";
 import { IEventsRepository } from "../repositories/IEventsRepository";
-import mongoose from "mongoose";
 import { Event } from "../../../domain/events/entities/Event";
 import { InvalidEventIdError, EventNotFoundError } from "../../../domain/events/errors/EventErrors";
+import { OrganizerType, EventType, Timeframe, EventStatus } from "../../../domain/events/entities/Event";
 
 export interface IGetEventsUseCase {
   execute(params: GetEventsRequestDTO): Promise<GetEventsResponseDTO>;
@@ -38,7 +38,17 @@ export class GetEventsUseCase implements IGetEventsUseCase {
     if (params.endDate && isNaN(params.endDate.getTime())) {
       throw new Error("Invalid endDate format");
     }
-    const result: any = await this.eventsRepository.getEvents(params);
+    const result: any = await this.eventsRepository.getEvents(
+      params.page,
+      params.limit,
+      params.type,
+      params.status,
+      params.startDate ? params.startDate.toISOString() : "",
+      params.endDate ? params.endDate.toISOString() : "",
+      params.search,
+      params.organizerType,
+      params.dateRange
+    );
     const mappedEvents = result.events.map((event: any) => ({
       id: event._id.toString(),
       title: event.title,
@@ -62,10 +72,10 @@ export class GetEventByIdUseCase implements IGetEventByIdUseCase {
   constructor(private eventsRepository: IEventsRepository) {}
 
   async execute(params: GetEventByIdRequestDTO): Promise<GetEventByIdResponseDTO> {
-    if (!mongoose.isValidObjectId(params.id)) {
+    if (!params.id) {
       throw new InvalidEventIdError(params.id);
     }
-    const event: any = await this.eventsRepository.getEventById(params);
+    const event: any = await this.eventsRepository.getEventById(params.id);
     if (!event) {
       throw new EventNotFoundError(params.id);
     }
@@ -99,8 +109,8 @@ export class CreateEventUseCase implements ICreateEventUseCase {
   constructor(private eventsRepository: IEventsRepository) {}
 
   async execute(params: CreateEventRequestDTO): Promise<CreateEventResponseDTO> {
-    const event = Event.create(params);
-    const newEvent: any = await this.eventsRepository.createEvent(params);
+    const event = Event.create(mapCreateEventDTOToEventProps(params));
+    const newEvent: any = await this.eventsRepository.createEvent(event);
     return {
       event: new Event({
         id: newEvent._id.toString(),
@@ -131,10 +141,11 @@ export class UpdateEventUseCase implements IUpdateEventUseCase {
   constructor(private eventsRepository: IEventsRepository) {}
 
   async execute(params: UpdateEventRequestDTO): Promise<UpdateEventResponseDTO> {
-    if (!mongoose.isValidObjectId(params.id)) {
+    if (!params.id) {
       throw new InvalidEventIdError(params.id);
     }
-    const updatedEvent: any = await this.eventsRepository.updateEvent(params);
+    const event = Event.create(mapUpdateEventDTOToEventProps(params));
+    const updatedEvent: any = await this.eventsRepository.updateEvent(event);
     if (!updatedEvent) {
       throw new EventNotFoundError(params.id);
     }
@@ -168,11 +179,58 @@ export class DeleteEventUseCase implements IDeleteEventUseCase {
   constructor(private eventsRepository: IEventsRepository) {}
 
   async execute(params: DeleteEventRequestDTO): Promise<{ message: string }> {
-    if (!mongoose.isValidObjectId(params.id)) {
+    if (!params.id) {
       throw new InvalidEventIdError(params.id);
     }
 
-    await this.eventsRepository.deleteEvent(params);
+    await this.eventsRepository.deleteEvent(params.id);
     return { message: "Event deleted successfully" };
   }
+}
+
+function mapCreateEventDTOToEventProps(dto: CreateEventRequestDTO) {
+  return {
+    title: dto.title,
+    organizer: dto.organizer,
+    organizerType: dto.organizerType,
+    eventType: dto.eventType,
+    date: dto.date,
+    time: dto.time,
+    location: dto.location,
+    timeframe: dto.timeframe,
+    status: dto.status,
+    icon: dto.icon,
+    color: dto.color,
+    description: dto.description,
+    fullTime: dto.fullTime,
+    additionalInfo: dto.additionalInfo,
+    requirements: dto.requirements,
+    maxParticipants: dto.maxParticipants,
+    registrationRequired: dto.registrationRequired,
+    participants: dto.participants,
+  };
+}
+
+function mapUpdateEventDTOToEventProps(dto: UpdateEventRequestDTO) {
+  return {
+    id: dto.id,
+    title: dto.title ?? "",
+    organizer: dto.organizer ?? "",
+    organizerType: dto.organizerType ?? OrganizerType.Department,
+    eventType: dto.eventType ?? EventType.Workshop,
+    date: dto.date ?? "",
+    time: dto.time ?? "",
+    location: dto.location ?? "",
+    timeframe: dto.timeframe ?? Timeframe.Morning,
+    status: dto.status ?? EventStatus.Upcoming,
+    icon: dto.icon,
+    color: dto.color,
+    description: dto.description,
+    fullTime: dto.fullTime,
+    additionalInfo: dto.additionalInfo,
+    requirements: dto.requirements,
+    maxParticipants: dto.maxParticipants,
+    registrationRequired: dto.registrationRequired,
+    participants: dto.participants,
+  };
 }

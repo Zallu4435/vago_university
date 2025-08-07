@@ -10,16 +10,46 @@ import {
   SimplifiedClubRequestDTO,
 } from "../../../domain/clubs/dtos/ClubRequestResponseDTOs";
 import { IClubsRepository } from "../repositories/IClubsRepository";
+import { GetClubRequestsRequest } from "../../../domain/clubs/entities/Club";
 import mongoose from "mongoose";
 
-export class GetClubRequestsUseCase {
+// Use Case Interfaces
+export interface IGetClubRequestsUseCase {
+  execute(params: GetClubRequestsRequestDTO): Promise<GetClubRequestsResponseDTO>;
+}
+
+export interface IApproveClubRequestUseCase {
+  execute(params: ApproveClubRequestRequestDTO): Promise<{ message: string }>;
+}
+
+export interface IRejectClubRequestUseCase {
+  execute(params: RejectClubRequestRequestDTO): Promise<{ message: string }>;
+}
+
+export interface IGetClubRequestDetailsUseCase {
+  execute(params: GetClubRequestDetailsRequestDTO): Promise<GetClubRequestDetailsResponseDTO>;
+}
+
+
+export class GetClubRequestsUseCase implements IGetClubRequestsUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(params: GetClubRequestsRequestDTO): Promise<GetClubRequestsResponseDTO> {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
       throw new Error("Invalid page or limit parameters");
     }
-    const { rawRequests, totalItems, totalPages, currentPage } = await this.clubsRepository.getClubRequests(params);
+    
+    const repositoryRequest = new GetClubRequestsRequest(
+      params.page,
+      params.limit,
+      params.status || "all",
+      params.type || "all",
+      params.startDate?.toISOString(),
+      params.endDate?.toISOString(),
+      params.search
+    );
+    
+    const { rawRequests, totalItems, totalPages, currentPage } = await this.clubsRepository.getClubRequests(repositoryRequest);
     const mappedRequests: SimplifiedClubRequestDTO[] = rawRequests.map((req: any) => ({
       clubName: req.clubId?.name || "Unknown Club",
       requestedId: req._id.toString(),
@@ -37,7 +67,7 @@ export class GetClubRequestsUseCase {
   }
 }
 
-export class ApproveClubRequestUseCase {
+export class ApproveClubRequestUseCase implements IApproveClubRequestUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(params: ApproveClubRequestRequestDTO): Promise<{ message: string }> {
@@ -54,9 +84,9 @@ export class ApproveClubRequestUseCase {
     await this.clubsRepository.approveClubRequest(params);
     return { message: "Club request approved successfully" };
   }
-}
+} 
 
-export class RejectClubRequestUseCase {
+export class RejectClubRequestUseCase implements IRejectClubRequestUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(params: RejectClubRequestRequestDTO): Promise<{ message: string }> {
@@ -75,7 +105,7 @@ export class RejectClubRequestUseCase {
   }
 }
 
-export class GetClubRequestDetailsUseCase {
+export class GetClubRequestDetailsUseCase implements IGetClubRequestDetailsUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(params: GetClubRequestDetailsRequestDTO): Promise<GetClubRequestDetailsResponseDTO> {

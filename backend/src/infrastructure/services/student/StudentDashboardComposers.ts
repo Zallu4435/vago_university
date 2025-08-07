@@ -5,19 +5,25 @@ import {
   GetClassesUseCase,
   GetCalendarDaysUseCase,
   GetNewEventsUseCase,
-  GetUserInfoForDashboardUseCase
+  GetUserInfoForDashboardUseCase,
+  IGetAnnouncementsUseCase,
+  IGetDeadlinesUseCase,
+  IGetCalendarDaysUseCase,
+  IGetClassesUseCase,
+  IGetNewEventsUseCase,
+  IGetUserInfoForDashboardUseCase
 } from '../../../application/student/useCases/StudentDashboardUseCases';
 import { StudentDashboardRepository } from '../../repositories/student/StudentDashboardRepositoryImpl';
 
 export function getStudentDashboardComposer() {
   const dashboardRepository = new StudentDashboardRepository();
 
-  const getAnnouncementsUseCase = new GetAnnouncementsUseCase(dashboardRepository);
-  const getDeadlinesUseCase = new GetDeadlinesUseCase(dashboardRepository);
-  const getClassesUseCase = new GetClassesUseCase(dashboardRepository);
-  const getCalendarDaysUseCase = new GetCalendarDaysUseCase(dashboardRepository);
-  const getNewEventsUseCase = new GetNewEventsUseCase(dashboardRepository);
-  const getUserInfoForDashboardUseCase = new GetUserInfoForDashboardUseCase(dashboardRepository);
+  const getAnnouncementsUseCase: IGetAnnouncementsUseCase = new GetAnnouncementsUseCase(dashboardRepository);
+  const getDeadlinesUseCase: IGetDeadlinesUseCase = new GetDeadlinesUseCase(dashboardRepository);
+  const getClassesUseCase: IGetClassesUseCase = new GetClassesUseCase(dashboardRepository);
+  const getCalendarDaysUseCase: IGetCalendarDaysUseCase = new GetCalendarDaysUseCase(dashboardRepository);
+  const getNewEventsUseCase: IGetNewEventsUseCase = new GetNewEventsUseCase(dashboardRepository);
+  const getUserInfoForDashboardUseCase: IGetUserInfoForDashboardUseCase = new GetUserInfoForDashboardUseCase(dashboardRepository);
 
   const studentDashboardController = new StudentDashboardController(
     getAnnouncementsUseCase,

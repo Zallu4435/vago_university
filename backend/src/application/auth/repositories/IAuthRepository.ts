@@ -1,19 +1,58 @@
-import {
-  RegisterRequestDTO, LoginRequestDTO, RefreshTokenRequestDTO, LogoutRequestDTO,
-  RegisterFacultyRequestDTO, SendEmailOtpRequestDTO, ResetPasswordRequestDTO,
-} from "../../../domain/auth/dtos/AuthRequestDTOs";
-import {
-  RegisterResponseDTO, LoginResponseDTO, RefreshTokenResponseDTO, LogoutResponseDTO,
-  RegisterFacultyResponseDTO, SendEmailOtpResponseDTO, ResetPasswordResponseDTO,
-} from "../../../domain/auth/dtos/AuthResponseDTOs";
+import { RegisterRequest, RegisterFacultyRequest } from "../../../domain/auth/entities/Auth";
 
 export interface IAuthRepository {
-  register(params: RegisterRequestDTO): Promise<RegisterResponseDTO>;
-  login(params: LoginRequestDTO): Promise<LoginResponseDTO>;
-  refreshToken(params: RefreshTokenRequestDTO): Promise<RefreshTokenResponseDTO>;
-  registerFaculty(params: RegisterFacultyRequestDTO): Promise<RegisterFacultyResponseDTO>;
-  sendEmailOtp(params: SendEmailOtpRequestDTO): Promise<SendEmailOtpResponseDTO>;
-  resetPassword(params: ResetPasswordRequestDTO): Promise<ResetPasswordResponseDTO>;
+  register(params: RegisterRequest): Promise<{
+    message: string;
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+    };
+  }>;
+  login(email: string): Promise<{
+    user: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      id: string;
+      profilePicture: string;
+      password: string;
+      blocked?: boolean;
+    };
+    collection: "register" | "admin" | "user" | "faculty";
+  }>;
+  refreshToken(userId: string, collection: "register" | "admin" | "user" | "faculty"): Promise<{
+    user: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      id: string;
+      profilePicture: string;
+    };
+    collection: "register" | "admin" | "user" | "faculty";
+  }>;
+  registerFaculty(params: RegisterFacultyRequest): Promise<{
+    user: {
+      fullName: string;
+      email: string;
+      phone: string;
+      department: string;
+      id: string;
+    };
+    collection: "faculty";
+  }>;
+  sendEmailOtp(email: string): Promise<{ message: string }>;
+  resetPassword(email: string, newPassword: string): Promise<{
+    user: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      id: string;
+      profilePicture: string;
+    };
+    collection: "register" | "admin" | "user" | "faculty";
+  }>;
   confirmRegistration(email: string): Promise<{ message: string }>;
   createRefreshSession(params: {
     userId: string;
@@ -26,6 +65,7 @@ export interface IAuthRepository {
     expiresAt: Date;
   }): Promise<void>;
   findSessionBySessionIdAndUserId(sessionId: string, userId: string): Promise<any>;
+  findSessionByUserIdAndDevice(userId: string, userAgent: string, ipAddress: string): Promise<any>;
   updateSessionRefreshToken(sessionId: string, newRefreshToken: string, newExpiresAt: Date, newLastUsedAt: Date): Promise<void>;
   deleteSessionBySessionId(sessionId: string): Promise<void>;
   deleteAllSessionsByUserId(userId: string): Promise<void>;

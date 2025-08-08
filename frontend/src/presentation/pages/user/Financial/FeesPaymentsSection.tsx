@@ -83,15 +83,12 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
       }
     };
 
-    // Handle page unload (tab close, browser close, navigation)
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+    const handleBeforeUnload = () => {
       cleanupPendingPayment();
     };
 
-    // Only add the beforeunload event listener
     window.addEventListener('beforeunload', handleBeforeUnload);
 
-    // Cleanup on component unmount
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       cleanupPendingPayment();

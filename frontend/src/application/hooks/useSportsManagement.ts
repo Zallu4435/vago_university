@@ -231,7 +231,7 @@ export const useSportsManagement = () => {
     approvePlayerRequest,
     rejectPlayerRequest,
     handleTabChange,
-    teamDetails : teamDetails?.data?.sport,
+    teamDetails : (teamDetails as any)?.data?.sport,
     handleViewTeam,
     handleEditTeam,
     setSelectedTeamId,

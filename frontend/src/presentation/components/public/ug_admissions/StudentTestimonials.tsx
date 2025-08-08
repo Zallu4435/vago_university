@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import testmonials1 from '../../../../assets/images/ug-programs/testmonials/testmonials1.png'
 import testmonials2 from '../../../../assets/images/ug-programs/testmonials/testmonials2.jpg';

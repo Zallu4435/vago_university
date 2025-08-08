@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { FaRegCheckCircle, FaRegIdCard, FaShieldAlt } from 'react-icons/fa';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { Input } from '../../components/base/Input';

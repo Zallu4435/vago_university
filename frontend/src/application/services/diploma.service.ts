@@ -1,5 +1,12 @@
 import httpClient from '../../frameworks/api/httpClient';
-import { Chapter, DiplomaApiResponse } from '../../domain/types/diploma';
+import { 
+  Chapter, 
+  DiplomaApiResponse,
+  DiplomaCourseResponse,
+  ChapterResponse,
+  CompletedChaptersResponse,
+  BookmarkedChaptersResponse
+} from '../../domain/types/diploma';
 
 
 class DiplomaService {
@@ -9,7 +16,7 @@ class DiplomaService {
         category?: string,
         status?: string,
         dateRange?: string
-    ): Promise<DiplomaApiResponse> {
+    ): Promise<DiplomaApiResponse['data']> {
         try {
             const params: Record<string, string | number> = { page, limit };
             if (category && category !== 'all') params.category = category;
@@ -30,7 +37,7 @@ class DiplomaService {
 
     async getDiplomaCourseById(id: string): Promise<any> {
         try {
-            const response = await httpClient.get<{ course: any }>(`/diploma-courses/${id}`);
+            const response = await httpClient.get<DiplomaCourseResponse>(`/diploma-courses/${id}`);
             console.log('[DiplomaService] getDiplomaCourseById response:', response.data);
             return response.data.data;
         } catch (error: any) {
@@ -40,7 +47,7 @@ class DiplomaService {
 
     async getChapterById(courseId: string, chapterId: string): Promise<Chapter> {
         try {
-            const response = await httpClient.get<{ chapter: Chapter }>(`/diploma-courses/${courseId}/chapters/${chapterId}`);
+            const response = await httpClient.get<ChapterResponse>(`/diploma-courses/${courseId}/chapters/${chapterId}`);
             console.log(response.data, "oooooooooooooooooooooooooooooooooomb")
             return response.data.data.chapter;
         } catch (error: any) {
@@ -74,7 +81,7 @@ class DiplomaService {
 
     async getCompletedChapters(courseId: string): Promise<string[]> {
         try {
-            const response = await httpClient.get<{ completedChapters: string[] }>(`/diploma-courses/${courseId}/completed-chapters`);
+            const response = await httpClient.get<CompletedChaptersResponse>(`/diploma-courses/${courseId}/completed-chapters`);
             return response.data.data.chapters;
         } catch (error: any) {
             throw new Error(error.response?.data?.error || 'Failed to fetch completed chapters');
@@ -83,7 +90,7 @@ class DiplomaService {
 
     async getBookmarkedChapters(courseId: string): Promise<string[]> {
         try {
-            const response = await httpClient.get<{ bookmarkedChapters: string[] }>(`/diploma-courses/${courseId}/bookmarked-chapters`);
+            const response = await httpClient.get<BookmarkedChaptersResponse>(`/diploma-courses/${courseId}/bookmarked-chapters`);
             return response.data.data.chapters;
         } catch (error: any) {
             throw new Error(error.response?.data?.error || 'Failed to fetch bookmarked chapters');

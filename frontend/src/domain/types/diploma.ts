@@ -47,11 +47,35 @@ export interface DiplomaCourse {
 }
 
 export interface DiplomaApiResponse {
-  courses: DiplomaCourse[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  data: {
+    courses: DiplomaCourse[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface DiplomaCourseResponse {
+  data: DiplomaCourse;
+}
+
+export interface ChapterResponse {
+  data: {
+    chapter: Chapter;
+  };
+}
+
+export interface CompletedChaptersResponse {
+  data: {
+    chapters: string[];
+  };
+}
+
+export interface BookmarkedChaptersResponse {
+  data: {
+    chapters: string[];
+  };
 }
 
 export interface VideoProgress {

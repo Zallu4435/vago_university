@@ -63,11 +63,13 @@ const NotificationPermissionModal: React.FC = () => {
               serviceWorkerRegistration
             });
 
-
-            if (user?.id && collection) {
+            // Skip FCM token registration for admin users
+            if (user?.id && collection && collection !== 'admin') {
               await httpClient.post(`/fcm/${collection}/${user.id}/fcm-token`, {
                 token,
               });
+            } else if (collection === 'admin') {
+              console.log('[NotificationModal] Skipping FCM token registration for admin user');
             } else {
               console.error('[NotificationModal] Missing user ID or collection');
             }

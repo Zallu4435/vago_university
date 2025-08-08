@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useCallback } from 'react';
-import { FaClock, FaUsers, FaEye, FaFileAlt, FaCalendarAlt, FaStopwatch, FaFilter, FaSearch, FaChevronDown, FaTimes } from 'react-icons/fa';
+import { FaClock, FaUsers, FaEye, FaFileAlt, FaCalendarAlt, FaFilter, FaSearch, FaChevronDown, FaTimes } from 'react-icons/fa';
 import { useSessionManagement } from '../../../../application/hooks/useSessionManagement';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Session } from '../../../../application/hooks/useSessionManagement';
@@ -241,12 +241,6 @@ const SessionAttendancePage = () => {
 
   const closeIntervalModal = () => {
     setSelectedUser(null);
-  };
-
-  const getAttendanceColor = (percentage: number) => {
-    if (percentage >= 90) return 'text-green-600 bg-green-100';
-    if (percentage >= 70) return 'text-yellow-600 bg-yellow-100';
-    return 'text-red-600 bg-red-100';
   };
 
   const getAttendanceRecommendation = (percentage: number) => {

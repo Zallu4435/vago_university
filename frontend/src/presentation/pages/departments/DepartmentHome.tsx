@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaArrowRight, FaGraduationCap, FaGlobeAmericas, FaRupeeSign, FaUsers, FaCalendarAlt, FaStar } from 'react-icons/fa';
+import { FaGraduationCap, FaGlobeAmericas, FaRupeeSign, FaUsers } from 'react-icons/fa';
 import { useSectionAnimation } from '../../../shared/hooks/useSectionAnimation';
 import { useLocation } from 'react-router-dom';
 

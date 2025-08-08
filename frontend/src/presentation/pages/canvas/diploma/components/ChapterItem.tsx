@@ -2,6 +2,7 @@ import React from 'react';
 import { FiLock, FiClock, FiCheckCircle, FiBookmark } from 'react-icons/fi';
 import { getChapterTypeIcon, getChapterTypeColor } from '../utils/diplomaUtils';
 import { ChapterItemProps } from '../../../../../domain/types/canvas/diploma';
+import { ChapterType } from '../../../../../domain/types/diploma';
 
 export const ChapterItem: React.FC<ChapterItemProps> = ({
   chapter,
@@ -15,7 +16,7 @@ export const ChapterItem: React.FC<ChapterItemProps> = ({
   onBookmark
 }) => {
   const isAccessible = isFirst || isPrevCompleted;
-  const TypeIcon = getChapterTypeIcon(chapter.type);
+  const TypeIcon = getChapterTypeIcon(chapter.type as ChapterType);
 console.log(chapter, "chapter from chapter")
   return (
     <div 
@@ -38,7 +39,7 @@ console.log(chapter, "chapter from chapter")
               ) : !isAccessible ? (
                 <FiLock className={`w-5 h-5 sm:w-6 sm:h-6 ${styles?.icon.secondary}`} />
               ) : (
-                <TypeIcon className={`w-5 h-5 sm:w-6 sm:h-6 ${getChapterTypeColor(chapter.type, styles)}`} />
+                <TypeIcon className={`w-5 h-5 sm:w-6 sm:h-6 ${getChapterTypeColor(chapter.type as ChapterType, styles)}`} />
               )}
             </div>
 

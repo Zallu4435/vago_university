@@ -14,6 +14,8 @@ export const diplomaBackendService = {
         dateRange?: string;
         instructor?: string;
         department?: string;
+        startDate?: string;
+        endDate?: string;
     }): Promise<{ diplomas: Diploma[]; totalPages: number }> {
         const response = await httpClient.get('/admin/diploma-courses', { params });
         return {

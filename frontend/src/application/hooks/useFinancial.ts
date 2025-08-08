@@ -71,6 +71,9 @@ export const usePaymentsManagement = (
     handleViewPayment,
     handleEditPayment,
     getStudentFinancialInfo: financialService.getStudentFinancialInfo,
+    getFinancialAidApplications: financialService.getFinancialAidApplications,
+    applyForFinancialAid: financialService.applyForFinancialAid,
+    uploadDocument: financialService.uploadDocument,
     loading: isLoading,
   };
 };

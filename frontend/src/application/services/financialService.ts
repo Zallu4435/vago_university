@@ -1,5 +1,4 @@
 import { 
-    StudentFinancialInfo, 
     Charge, 
     Payment, 
     FinancialAidApplication, 
@@ -7,6 +6,7 @@ import {
     ScholarshipApplication,
     PaymentForm 
   } from '../../domain/types/management/financialmanagement';
+import { StudentFinancialInfo } from '../../domain/types/user/financial';
   import httpClient from '../../frameworks/api/httpClient';
   
   export class FinancialService {
@@ -232,6 +232,25 @@ import {
         throw new Error('Failed to fetch payment details');
       }
     }
+
+    async checkPendingPayment(): Promise<boolean> {
+      try {
+        const response = await httpClient.post(`${this.baseUrl}/check-pending`);
+        return response.data.data.hasPending;
+      } catch (error) {
+        throw new Error('Failed to check pending payment status');
+      }
+    }
+
+    async clearPendingPayment(): Promise<void> {
+      try {
+        await httpClient.post(`${this.baseUrl}/clear-pending`);
+      } catch (error) {
+        console.error('Failed to clear pending payment:', error);
+        throw new Error('Failed to clear pending payment status');
+      }
+    }
+    
   }
   
   export const financialService = FinancialService.getInstance();

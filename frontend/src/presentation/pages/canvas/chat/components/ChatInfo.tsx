@@ -15,9 +15,7 @@ interface ChatInfoProps {
 
 export const ChatInfo: React.FC<ChatInfoProps> = ({
   chat,
-  styles,
   onClose,
-  onDeleteChat,
   onAddMembers
 }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -123,7 +121,7 @@ export const ChatInfo: React.FC<ChatInfoProps> = ({
                       {participant.firstName} {participant.lastName}
                     </span>
                     <span className="text-xs text-gray-500 dark:text-gray-400 block truncate">
-                      {participant.email} ({participant.type})
+                      {participant.email}
                     </span>
                   </div>
                 </div>

@@ -19,7 +19,7 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
       ? {
         title: initialValues.title || '',
         description: initialValues.description || '',
-        amount: initialValues.amount !== undefined ? String(initialValues.amount) : '',
+        amount: initialValues.amount !== undefined ? initialValues.amount : 0,
         term: initialValues.term || '',
         dueDate: initialValues.dueDate || '',
         applicableFor: initialValues.applicableFor || '',
@@ -27,7 +27,7 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
       : {
         title: '',
         description: '',
-        amount: '',
+        amount: 0,
         term: '',
         dueDate: '',
         applicableFor: '',
@@ -40,7 +40,7 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
       reset({
         title: initialValues.title || '',
         description: initialValues.description || '',
-        amount: initialValues.amount !== undefined ? String(initialValues.amount) : '',
+        amount: initialValues.amount !== undefined ? initialValues.amount : 0,
         term: initialValues.term || '',
         dueDate: initialValues.dueDate || '',
         applicableFor: initialValues.applicableFor || '',
@@ -49,7 +49,7 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
       reset({
         title: '',
         description: '',
-        amount: '',
+        amount: 0,
         term: '',
         dueDate: '',
         applicableFor: '',
@@ -72,7 +72,7 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
   // Particle effect
   const ghostParticles = Array(30)
     .fill(0)
-    .map((_, i) => ({
+    .map((_) => ({
       size: Math.random() * 10 + 5,
       top: Math.random() * 100,
       left: Math.random() * 100,

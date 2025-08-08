@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaArrowRight, FaCalendarAlt } from 'react-icons/fa';
+import { FaArrowRight } from 'react-icons/fa';
 import { VisibilityState } from '../../../../shared/hooks/useSectionAnimation';
 
 interface Programme {

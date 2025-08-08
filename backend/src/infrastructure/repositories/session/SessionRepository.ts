@@ -58,24 +58,47 @@ export class SessionRepository implements ISessionRepository {
 
   async getAll(params: { search?: string; status?: string; instructor?: string; course?: string } = {}): Promise<VideoSession[]> {
     const query: any = {};
+
     if (params.status && params.status !== 'all') {
-      query.status = params.status;
+      if (params.status === 'upcoming') {
+        // Search for both 'upcoming' and 'scheduled' statuses
+        query.$or = [
+          { status: 'upcoming' },
+          { status: 'scheduled' }
+        ];
+      } else {
+        query.status = params.status;
+      }
     }
+
     if (params.instructor && params.instructor !== 'all') {
       query.instructor = params.instructor;
     }
+
     if (params.course && params.course !== 'all') {
       query.course = params.course;
     }
+
     if (params.search && params.search.trim()) {
       const searchRegex = new RegExp(params.search.trim(), 'i');
-      query.$or = [
+      const searchConditions = [
         { title: searchRegex },
         { description: searchRegex },
         { instructor: searchRegex },
         { course: searchRegex }
       ];
+
+      if (query.$or) {
+        query.$and = [
+          { $or: query.$or },
+          { $or: searchConditions } 
+        ];
+        delete query.$or; 
+      } else {
+        query.$or = searchConditions;
+      }
     }
+
     const sessions = await VideoSessionModel.find(query).sort({ createdAt: -1 });
     return sessions.map(doc => doc.toObject() as VideoSession);
   }
@@ -139,7 +162,7 @@ export class SessionRepository implements ISessionRepository {
               const joined = new Date(interval.joinedAt).getTime();
               const left = new Date(interval.leftAt).getTime();
               if (!isNaN(joined) && !isNaN(left) && left > joined) {
-                return sum + (left - joined) / 60000; 
+                return sum + (left - joined) / 60000;
               }
             }
             return sum;
@@ -161,7 +184,7 @@ export class SessionRepository implements ISessionRepository {
 
         return a.intervals.some((interval) => {
           if (!interval.joinedAt) return false;
-          
+
           const joinDate = new Date(interval.joinedAt);
           let startDate = null;
           let endDate = null;
@@ -170,16 +193,16 @@ export class SessionRepository implements ISessionRepository {
             startDate = new Date(filters.startDate);
             startDate.setHours(0, 0, 0, 0);
           }
-          
+
           if (filters.endDate) {
             endDate = new Date(filters.endDate);
             endDate.setHours(23, 59, 59, 999);
           }
 
           if (startDate && joinDate < startDate) return false;
-          
+
           if (endDate && joinDate > endDate) return false;
-          
+
           return true;
         });
       });

@@ -5,9 +5,6 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   AddEventModalProps,
-  TimeframeOption,
-  OrganizerTypeOption,
-  EventTypeOption,
   ParticleConfig
 } from '../../../../../domain/types/management/eventmanagement';
 import {
@@ -16,9 +13,6 @@ import {
   EVENT_TYPE_OPTIONS,
   EVENT_ICONS,
   EVENT_COLORS,
-  EVENT_VALIDATION_MESSAGES,
-  EVENT_SUCCESS_MESSAGES,
-  EVENT_ERROR_MESSAGES,
 } from '../../../../../shared/constants/eventManagementConstants';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { eventSchema } from '../../../../../domain/validation/management/eventSchema';
@@ -42,7 +36,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
     setValue,
     reset,
   } = useForm<EventFormData>({
-    resolver: zodResolver(eventSchema),
+    resolver: zodResolver(eventSchema) as any,
     defaultValues: {
       title: '',
       date: '',
@@ -120,7 +114,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
 
   const ghostParticles: ParticleConfig[] = Array(30)
     .fill(0)
-    .map((_, i) => ({
+    .map((_) => ({
       size: Math.random() * 10 + 5,
       top: Math.random() * 100,
       left: Math.random() * 100,

@@ -84,7 +84,7 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
     const subscription = watch((formData) => {
       
       if (isDirty && onChange) {
-        onChange(formData);
+        onChange(formData as any);
       }
     });
     

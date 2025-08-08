@@ -304,7 +304,7 @@ const MaterialManagement: React.FC = () => {
                   <ApplicationsTable
                     data={paginatedMaterials}
                     columns={materialColumns}
-                    actions={materialActions.map(action => {
+                    actions={materialActions.map((action: any) => {
                       if ('customIcon' in action && 'customLabel' in action) {
                         return {
                           ...action,

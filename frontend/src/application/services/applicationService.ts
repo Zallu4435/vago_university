@@ -100,7 +100,7 @@ class ApplicationService {
     try {
       const result = await applicationController.processPayment(applicationId, paymentDetails);
       if (!result.data?.paymentId || !result.data?.status) {
-        throw new Error(result.message || 'Invalid payment response');
+        throw new Error(result.data?.message || 'Invalid payment response');
       }
       return {
         paymentId: result.data?.paymentId,
@@ -119,7 +119,7 @@ class ApplicationService {
     try {
       const result = await applicationController.confirmPayment(paymentId, stripePaymentIntentId);
       if (!result.data?.paymentId || !result.data?.status) {
-        throw new Error(result.message || 'Invalid payment confirmation response');
+        throw new Error(result.data?.message || 'Invalid payment confirmation response');
       }
       return {
         paymentId: result.data?.paymentId,

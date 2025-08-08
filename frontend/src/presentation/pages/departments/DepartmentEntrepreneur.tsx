@@ -43,7 +43,7 @@ interface EntrepreneurshipDataMap {
 }
 
 const Entrepreneurship: React.FC = () => {
-  const [currentDepartment, setCurrentDepartment] = useState<string>('computer-science');
+  const [currentDepartment] = useState<string>('computer-science');
   const isVisible = useSectionAnimation();
 
   const entrepreneurshipData: EntrepreneurshipDataMap = {

@@ -12,7 +12,6 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   onFileSelect,
   onSubmit
 }) => {
-  // Prevent background scrolling when modal is open
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';

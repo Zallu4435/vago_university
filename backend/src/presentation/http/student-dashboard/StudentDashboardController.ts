@@ -95,7 +95,6 @@ export class StudentDashboardController implements IStudentDashboardController {
 
 
   async getUserInfo(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log(httpRequest, "sknsksndkspkdnp")
     const studentId = httpRequest.user?.userId;
     
     if (!studentId) {

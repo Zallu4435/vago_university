@@ -5,6 +5,7 @@ import { usePaymentsManagement } from '../../../../application/hooks/useFinancia
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import PaymentReceiptModal from './PaymentReceiptModal';
 import type { Charge, Payment, FeesPaymentsSectionProps } from '../../../../domain/types/user/financial';
+import { financialService } from '../../../../application/services/financialService';
 
 interface ExtendedCharge extends Charge {
   paidAt?: string;
@@ -62,6 +63,7 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
     setShowReceiptModal(false);
     setSelectedPayment(null);
   };
+
   useEffect(() => {
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
@@ -71,6 +73,32 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
       document.body.removeChild(script);
     };
   }, []);
+
+  useEffect(() => {
+    const cleanupPendingPayment = async () => {
+      try {
+        await financialService.clearPendingPayment();
+      } catch (error) {
+        console.error('Failed to cleanup pending payment:', error);
+      }
+    };
+
+    // Handle page unload (tab close, browser close, navigation)
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      cleanupPendingPayment();
+    };
+
+    // Only add the beforeunload event listener
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Cleanup on component unmount
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      cleanupPendingPayment();
+    };
+  }, []);
+
+
 
   const handlePayment = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -83,6 +111,17 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
       return;
     }
     setAmountError(null);
+
+    try {
+      const hasPending = await financialService.checkPendingPayment();
+      if (hasPending) {
+        toast.error('You already have a pending payment. Please complete it before starting a new one.');
+        return;
+      }
+    } catch (error) {
+      toast.error('Failed to check pending payment status.');
+      return;
+    }
 
     try {
       const payment = {
@@ -141,13 +180,31 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
               theme: {
                 color: '#F59E0B',
               },
+              modal: {
+                ondismiss: async () => {
+                  // Handle payment modal close/cancel
+                  try {
+                    await financialService.clearPendingPayment();
+                    toast('Payment cancelled. You can try again anytime.');
+                  } catch (error) {
+                    console.error('Failed to clear pending payment on modal dismiss:', error);
+                  }
+                }
+              }
             };
 
             const rzp = new (window as any).Razorpay(options);
-            rzp.on('payment.failed', (rzpResponse: any) => {
+            rzp.on('payment.failed', async (rzpResponse: any) => {
+              // Clear pending payment on failure
+              try {
+                await financialService.clearPendingPayment();
+              } catch (error) {
+                console.error('Failed to clear pending payment on failure:', error);
+              }
               setAmountError(`Payment failed: ${rzpResponse.error.description}`);
             });
             rzp.open();
+
           } else {
             toast.success('Payment successful! Your payment has been processed.');
             if (onPaymentSuccess) {

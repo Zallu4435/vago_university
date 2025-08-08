@@ -8,19 +8,15 @@ import { formatDate } from '../../canvas/materials/utils/materialUtils';
 export default function PaymentReceiptModal({ payment, isOpen, onClose }: PaymentReceiptModalProps) {
     const { styles } = usePreferences();
 
-    // Prevent background scrolling when modal is open
     useEffect(() => {
         if (isOpen) {
-            // Save current scroll position
             const scrollY = window.scrollY;
 
-            // Add styles to prevent scrolling
             document.body.style.position = 'fixed';
             document.body.style.top = `-${scrollY}px`;
             document.body.style.width = '100%';
             document.body.style.overflow = 'hidden';
 
-            // Cleanup function to restore scrolling
             return () => {
                 document.body.style.position = '';
                 document.body.style.top = '';
@@ -44,7 +40,7 @@ export default function PaymentReceiptModal({ payment, isOpen, onClose }: Paymen
 Payment Receipt
 ================
 
-Date: ${formatDate(payment.paidAt || payment.date)}
+Date: ${formatDate(payment.paidAt || payment.date || new Date().toISOString())}
 Description: ${payment.chargeTitle || payment.description || 'N/A'}
 Payment Method: ${payment.method || 'N/A'}
 Amount: $${formatAmount(payment.amount)}
@@ -148,7 +144,7 @@ Thank you for your payment!
               </div>
               <div class="row">
                 <span class="label">Date:</span>
-                <span class="value">${formatDate(payment.paidAt || payment.date)}</span>
+                <span class="value">${formatDate(payment.paidAt || payment.date || new Date().toISOString())}</span>
               </div>
               <div class="row">
                 <span class="label">Description:</span>
@@ -210,7 +206,7 @@ Thank you for your payment!
                                         Date
                                     </span>
                                     <span className={`text-sm font-medium ${styles.textPrimary}`}>
-                                        {formatDate(payment.paidAt || payment.date)}
+                                        {formatDate(payment.paidAt || payment.date || new Date().toISOString())}
                                     </span>
                                 </div>
 

@@ -17,7 +17,7 @@ const UniversitySessionsDashboard = () => {
     searchTerm,
     setSearchTerm
   } = useUniversitySessionManagement({ status: 'all', instructor: 'all' }, '');
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [, setCurrentTime] = useState(new Date());
   const [userAccess, setUserAccess] = useState<UserAccess>({
     isEnrolled: true,
     watchedSessions: [] as string[],
@@ -79,7 +79,7 @@ const UniversitySessionsDashboard = () => {
 
         <div className="space-y-6">
           {sessions.length === 0 ? (
-            <div className={`${styles.card.background} rounded-2xl ${styles.cardShadow} ${styles.cardBorder} text-center py-16`}>
+            <div className={`${styles.card.background} rounded-2xl shadow-lg border ${styles.border} text-center py-16`}>
               <div className={`w-16 h-16 ${styles.backgroundSecondary} rounded-full flex items-center justify-center mx-auto mb-4`}>
                 <FaFilter className={`w-8 h-8 ${styles.icon.secondary}`} />
               </div>

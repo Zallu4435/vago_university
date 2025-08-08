@@ -4,7 +4,8 @@ import Submissions from './Submissions';
 import Analytics from './components/Analytics';
 import CreateAssignmentModal from './CreateAssignmentModal';
 import { useAssignmentManagement } from './hooks/useAssignmentManagement';
-import { NewAssignment } from './types';
+import { NewAssignment, Submission } from './types';
+import { assignmentService } from './services/assignmentService';
 
 export default function AssignmentManagement() {
     const [activeTab, setActiveTab] = useState('all-assignments');
@@ -60,7 +61,15 @@ export default function AssignmentManagement() {
 
     const handleDownload = async (submissionId: string) => {
         if (!selectedAssignment) return;
-        await handleDownloadSubmission(selectedAssignment._id, submissionId);
+        // Find the submission and download its files
+        const submission = submissions?.find((s: Submission) => s._id === submissionId);
+        if (submission?.files && submission.files.length > 0) {
+            for (const file of submission.files) {
+                const fileUrl = typeof file === 'string' ? file : file.fileUrl;
+                const fileName = typeof file === 'string' ? file.split('/').pop()?.split('?')[0] || 'file' : file.fileName;
+                await assignmentService.downloadSubmissionFile(fileUrl, fileName);
+            }
+        }
     };
 
     const handleTabChange = (tabId: string) => {
@@ -133,12 +142,12 @@ export default function AssignmentManagement() {
                                         assignments={assignments}
                                         isLoading={isLoading}
                                         error={error}
-                                        setSelectedAssignment={setSelectedAssignment}
+                                        setSelectedAssignment={setSelectedAssignment as any}
                                         setActiveTab={setActiveTab}
                                         setShowCreateModal={setShowCreateModal}
                                         onDelete={handleDeleteAssignment}
                                         isDeleting={isDeleting}
-                                        onUpdate={handleUpdateAssignment}
+                                        onUpdate={handleUpdateAssignment as any}
                                         isUpdating={isUpdating}
                                         searchTerm={searchTerm}
                                         setSearchTerm={setSearchTerm}
@@ -192,7 +201,7 @@ export default function AssignmentManagement() {
                                 onSubmit={handleCreateAssignment}
                                 isLoading={isCreating}
                                 selectedAssignment={selectedAssignment}
-                                onUpdate={handleUpdateAssignment}
+                                onUpdate={handleUpdateAssignment as any}
                                 setActiveTab={setActiveTab}
                                 setSelectedAssignment={setSelectedAssignment}
                             />

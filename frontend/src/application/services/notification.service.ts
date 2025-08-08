@@ -13,7 +13,7 @@ class NotificationService {
   }): Promise<NotificationApiResponse> {
     try {
       const endpoint = '/admin/notifications';
-      const response = await httpClient.get<NotificationApiResponse>(endpoint, {
+      const response = await httpClient.get<Notification>(endpoint, {
         params: filters,
       });
       return response.data.data;

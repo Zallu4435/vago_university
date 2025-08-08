@@ -15,6 +15,7 @@ export interface Assignment {
 
 export interface Submission {
     _id: string;
+    id: string;
     assignmentId: string;
     studentId: string;
     studentName: string;

@@ -228,7 +228,7 @@ const UniversityDashboard = () => {
             {/* Right Section - User Info */}
             <div className="flex items-center">
               <div className="px-3 py-1.5 bg-sky-50 rounded-lg text-sm text-sky-700 font-medium border border-sky-200">
-                {user?.name || user?.firstName || 'User'}
+                {user?.firstName || 'User'}
               </div>
             </div>
           </div>

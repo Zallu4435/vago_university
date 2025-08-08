@@ -1,3 +1,5 @@
+import React, { JSX } from 'react';
+
 export interface Diploma {
     id: string;
     title: string;

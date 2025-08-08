@@ -55,7 +55,7 @@ const HealthConditionForm: React.FC<HealthConditionFormProps> = ({ onAddConditio
                     }}
                     aria-label="Close"
                     label="×"
-                    variant="ghost"
+                    variant=""
                     className="text-cyan-400 hover:text-cyan-600 transition-colors px-2 py-0 text-xl font-bold"
                   />
                 </div>

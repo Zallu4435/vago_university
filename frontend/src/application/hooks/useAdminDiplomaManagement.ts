@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { diplomaBackendService } from '../../application/services/diplomaBackend.service';
-import { Diploma, Enrollment } from '../../domain/types/management/diplomamanagement';
+import { Diploma } from '../../domain/types/management/diplomamanagement';
 
 type Filters = {
   category: string;
@@ -46,7 +46,7 @@ export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters
   });
 
   const { data: diplomaDetails, isLoading: isLoadingDiplomaDetails } = useQuery<
-    Diploma & { enrolledStudents: Enrollment[] },
+    Diploma,
     Error
   >({
     queryKey: ['diploma-details', selectedDiplomaId],

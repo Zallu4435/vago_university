@@ -35,7 +35,7 @@ interface DepartmentDataMap {
 }
 
 const DepartmentAbout: React.FC = () => {
-  const [currentDepartment, setCurrentDepartment] = useState<string>('computer-science');
+  const [currentDepartment] = useState<string>('computer-science');
   const isVisible = useSectionAnimation();
 
   const departmentData: DepartmentDataMap = {

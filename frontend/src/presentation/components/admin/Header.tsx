@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiBell, FiLogOut, FiUser, FiChevronDown, FiHelpCircle } from 'react-icons/fi';
+import { FiLogOut, FiUser, FiChevronDown, FiHelpCircle } from 'react-icons/fi';
 
 interface AdminHeaderProps {
   adminName?: string;
@@ -12,9 +12,7 @@ interface AdminHeaderProps {
 const AdminHeader: React.FC<AdminHeaderProps> = ({
   adminName = 'Admin User',
   adminRole = 'System Administrator',
-  notificationCount = 3,
   onLogout = () => console.log('Logout clicked'),
-  collapsed = false,
 }) => {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 

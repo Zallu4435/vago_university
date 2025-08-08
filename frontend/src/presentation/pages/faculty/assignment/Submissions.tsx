@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { FaSearch, FaDownload, FaEye, FaCheck, FaClock, FaExclamationTriangle, FaUsers, FaFileAlt, FaCode, FaCalculator, FaFlask, FaLanguage, FaHistory, FaGlobe, FaBook } from 'react-icons/fa';
 import ReviewModal from './ReviewModal';
@@ -6,7 +6,7 @@ import { Assignment, Submission } from './types';
 import { assignmentService } from './services/assignmentService';
 
 const getSubjectIcon = (subject: string) => {
-  const subjectIcons: { [key: string]: JSX.Element } = {
+  const subjectIcons: { [key: string]: React.ReactElement } = {
     'Computer Science': <FaCode />,
     'Mathematics': <FaCalculator />,
     'Physics': <FaFlask />,
@@ -264,8 +264,6 @@ export default function Submissions({
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {filteredSubmissions.map((submission, index) => {
             const statusConfig = getStatusConfig(submission.status);
-            const fileUrl = submission.files?.[0]; // Get the first file URL
-
             return (
               <div 
                 key={submission.id} 
@@ -351,8 +349,8 @@ export default function Submissions({
                               const urlParts = fileObj.split('/');
                               fileName = urlParts[urlParts.length - 1].split('?')[0];
                               console.log('Extracted fileName from string URL:', fileName);
-                            } else if (typeof fileObj === 'object' && fileObj.fileName) {
-                              fileName = fileObj.fileName;
+                            } else if (typeof fileObj === 'object' && fileObj && 'fileName' in fileObj) {
+                              fileName = (fileObj as any).fileName;
                               console.log('Extracted fileName from object:', fileName);
                             } else {
                               console.error('❌ Unable to extract fileName from fileObj:', fileObj);
@@ -367,7 +365,7 @@ export default function Submissions({
                           
                           console.log('Calling handleDownloadSubmission with:', fileObj, fileName);
                           handleDownloadSubmission(
-                            typeof fileObj === 'string' ? fileObj : fileObj.fileUrl,
+                            typeof fileObj === 'string' ? fileObj : (fileObj as any).fileUrl,
                             fileName
                           );
                         }}
@@ -408,8 +406,6 @@ export default function Submissions({
               <tbody className="divide-y divide-gray-200">
                 {filteredSubmissions.map((submission, index) => {
                   const statusConfig = getStatusConfig(submission.status);
-                  const fileUrl = submission.files?.[0]; // Get the first file URL
-
                   return (
                     <tr key={submission.id} className="hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all animate-fadeInUp" style={{ animationDelay: `${index * 0.05}s` }}>
                       {/* No per-row selection checkbox */}
@@ -481,8 +477,8 @@ export default function Submissions({
                                   const urlParts = fileObj.split('/');
                                   fileName = urlParts[urlParts.length - 1].split('?')[0];
                                   console.log('Extracted fileName from string URL:', fileName);
-                                } else if (typeof fileObj === 'object' && fileObj.fileName) {
-                                  fileName = fileObj.fileName;
+                                } else if (typeof fileObj === 'object' && fileObj && 'fileName' in fileObj) {
+                                  fileName = (fileObj as any).fileName;
                                   console.log('Extracted fileName from object:', fileName);
                                 } else {
                                   console.error('❌ Unable to extract fileName from fileObj:', fileObj);
@@ -497,7 +493,7 @@ export default function Submissions({
                               
                               console.log('Calling handleDownloadSubmission with:', fileObj, fileName);
                               handleDownloadSubmission(
-                                typeof fileObj === 'string' ? fileObj : fileObj.fileUrl,
+                                typeof fileObj === 'string' ? fileObj : (fileObj as any).fileUrl,
                                 fileName
                               );
                             }}
@@ -537,13 +533,13 @@ export default function Submissions({
             studentName: selectedSubmission.studentName,
             studentId: selectedSubmission.studentId,
             submittedDate: selectedSubmission.submittedDate,
-            status: selectedSubmission.status,
+            status: selectedSubmission.status === 'graded' ? 'reviewed' : selectedSubmission.status === 'submitted' ? 'pending' : 'needs_correction',
             marks: selectedSubmission.marks ?? 0,
             feedback: selectedSubmission.feedback ?? '',
             isLate: selectedSubmission.isLate,
             fileName: typeof selectedSubmission.files[0] === 'string' 
-              ? selectedSubmission.files[0]?.split('/').pop() || 'No file'
-              : selectedSubmission.files[0]?.fileName || 'No file',
+              ? (selectedSubmission.files[0] as string)?.split('/').pop() || 'No file'
+              : (selectedSubmission.files[0] as any)?.fileName || 'No file',
             fileSize: 'Unknown',
           }}
           saveReview={handleReviewSubmit}

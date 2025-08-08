@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { FaHandHoldingUsd, FaTimes } from 'react-icons/fa';
 import { usePaymentsManagement } from '../../../../application/hooks/useFinancial';
 import { FinancialAidApplication } from '../../../../domain/types/management/financialmanagement';
-import type { Document, ApplicationType, ApplicationForm } from '../../../../domain/types/user/financial';
+import type { ApplicationType } from '../../../../domain/types/user/financial';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 export default function FinancialAidSection() {
@@ -57,15 +57,17 @@ export default function FinancialAidSection() {
         selectedFiles.map((file) => uploadDocument(file, 'financial-aid'))
       );
 
-      if (documentUrls.every((url) => url !== null)) {
-        const application: ApplicationForm = {
+      if (documentUrls.every((url: any) => url !== null)) {
+        const application = {
           studentId: 'current-user-id',
           term: 'Spring 2025',
           amount: parseFloat(amount),
           type: applicationType as ApplicationType,
-          documents: documentUrls.map((url, index) => ({
+          documents: documentUrls.map((url: any, index: number) => ({
+            id: `doc-${Date.now()}-${index}`,
             name: selectedFiles[index].name,
             url: url.url,
+            status: 'Pending' as const,
           })),
         };
 
@@ -117,7 +119,7 @@ export default function FinancialAidSection() {
         <div className="relative z-10 p-4 sm:p-6">
           {error && (
             <div className={`mb-4 p-3 ${styles.status.error} rounded-lg text-sm`}>
-              {error}
+              {error.message || 'An error occurred'}
             </div>
           )}
 

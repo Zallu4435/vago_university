@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaUniversity, FaGraduationCap, FaUsers, FaChartLine } from 'react-icons/fa';
+import { FaUniversity, FaChartLine } from 'react-icons/fa';
 
 const InNumbers: React.FC = () => {
   const stats = {

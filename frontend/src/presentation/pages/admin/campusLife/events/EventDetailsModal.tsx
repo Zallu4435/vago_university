@@ -74,7 +74,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
 
   const ghostParticles: ParticleConfig[] = Array(30)
     .fill(0)
-    .map((_, i) => ({
+    .map((_) => ({
       size: Math.random() * 10 + 5,
       top: Math.random() * 100,
       left: Math.random() * 100,
@@ -113,7 +113,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
                 <Sparkles size={28} className="text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-purple-100">{event._title || event.name || 'Untitled Event'}</h2>
+                <h2 className="text-2xl font-bold text-purple-100">{event._title || 'Untitled Event'}</h2>
                 <p className="text-sm text-purple-300 mt-1">Event ID: {event._id || event.id}</p>
                 <div className="flex items-center mt-2 space-x-4">
                   <StatusBadge status={event._status || event.status} />
@@ -131,12 +131,12 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
 
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <InfoCard icon={OrganizerIcon} label="Organizer" value={event._organizer || event.organizer || 'Unknown'} />
-            <InfoCard icon={Ticket} label="Event Type" value={event._eventType || event.type || 'Unknown'} />
-            <InfoCard icon={MapPin} label="Venue" value={event._location || event.venue || 'TBD'} />
-            <InfoCard icon={Clock} label="Timeframe" value={event._timeframe || `${event.date} ${event.time}` || 'TBD'} />
-            <InfoCard icon={Users} label="Participants" value={`${event._participants || event.participants || 0} / ${event._maxParticipants || event.maxParticipants || 0} registered`} />
-            <InfoCard icon={Calendar} label="Registration" value={event._registrationRequired !== undefined ? (event._registrationRequired ? "Required" : "Not Required") : (event.registrationRequired ? "Required" : "Not Required")} />
+            <InfoCard icon={OrganizerIcon} label="Organizer" value={event._organizer || 'Unknown'} />
+            <InfoCard icon={Ticket} label="Event Type" value={event._eventType || 'Unknown'} />
+            <InfoCard icon={MapPin} label="Venue" value={event._location || 'TBD'} />
+            <InfoCard icon={Clock} label="Timeframe" value={event._timeframe || 'TBD'} />
+            <InfoCard icon={Users} label="Participants" value={`${event._participants || 0} / ${event._maxParticipants || 0} registered`} />
+            <InfoCard icon={Calendar} label="Registration" value={event._registrationRequired ? "Required" : "Not Required"} />
           </div>
 
           <div className="mb-8">

@@ -23,7 +23,7 @@ const StatusBadge = ({ status }: StatusBadgeProps) => {
     },
   };
 
-  const config = statusConfig[status?.toLowerCase()] || statusConfig.pending;
+  const config = statusConfig[status?.toLowerCase() as keyof typeof statusConfig] || statusConfig.pending;
 
   return (
     <span
@@ -56,7 +56,7 @@ const NotificationDetailsModal: React.FC<NotificationDetailsModalProps> = ({ isO
 
   const ghostParticles = Array(30)
     .fill(0)
-    .map((_, i) => ({
+    .map((_) => ({
       size: Math.random() * 10 + 5,
       top: Math.random() * 100,
       left: Math.random() * 100,

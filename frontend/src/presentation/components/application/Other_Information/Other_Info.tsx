@@ -35,7 +35,7 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }
 
 const Other_Info: React.FC<OtherInfoProps> = ({ initialData, onSave }) => {
   const methods = useForm<OtherInformationFormData>({
-    resolver: zodResolver(OtherInformationSchema),
+    resolver: zodResolver(OtherInformationSchema) as any,
     defaultValues: {
       health: {
         hasHealthSupport: initialData?.health?.hasHealthSupport ?? '',
@@ -53,14 +53,14 @@ const Other_Info: React.FC<OtherInfoProps> = ({ initialData, onSave }) => {
     mode: 'onChange',
   });
 
-  const { handleSubmit, trigger, formState: { errors }, watch } = methods;
+  const { handleSubmit, trigger, formState: { errors } } = methods;
 
   const [step, setStep] = React.useState(1);
   const totalSteps = 2;
 
   const handleNext = async () => {
-    const fieldsToValidate = step === 1 ? ['health'] : ['legal'];
-    const isValid = await trigger(fieldsToValidate, { shouldFocus: true });
+    const fieldToValidate = step === 1 ? 'health' : 'legal';
+    const isValid = await trigger(fieldToValidate, { shouldFocus: true });
     console.log('Other_Info: Validation result:', { isValid, errors: JSON.stringify(errors, null, 2) });
     if (isValid) {
       setStep(Math.min(step + 1, totalSteps));

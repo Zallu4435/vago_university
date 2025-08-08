@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { IoAttachOutline as Paperclip, IoCloseOutline as X, IoSearchOutline as Search, IoMailOutline as Mail } from 'react-icons/io5';
-import { RecipientType, User, ComposeMessageModalProps } from '../../../../domain/types/management/communicationmanagement';
+import { RecipientType, User, ComposeMessageModalProps, UserArrayWithUsers } from '../../../../domain/types/management/communicationmanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const RECIPIENT_TYPES = [
@@ -40,7 +40,7 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
     setIsLoadingUsers(true);
     try {
       const fetchedUsers = await fetchUsers(type, search);
-      setUsers(fetchedUsers?.users || []);
+      setUsers((fetchedUsers as UserArrayWithUsers)?.users || []);
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
@@ -106,7 +106,7 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
   // Particle effect
   const ghostParticles = Array(30)
     .fill(0)
-    .map((_, i) => ({
+    .map((_) => ({
       size: Math.random() * 10 + 5,
       top: Math.random() * 100,
       left: Math.random() * 100,
@@ -353,7 +353,7 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .no-scroll {
           overflow: hidden;
         }

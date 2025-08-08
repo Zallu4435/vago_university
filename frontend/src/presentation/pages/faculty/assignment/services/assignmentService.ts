@@ -7,7 +7,7 @@ export const assignmentService = {
       Object.entries(params).filter(([_, value]) => value !== undefined && value !== null && value !== '' && value !== 'all')
     );
     const queryString = Object.keys(filteredParams).length
-      ? '?' + new URLSearchParams(filteredParams).toString()
+      ? '?' + new URLSearchParams(filteredParams as any).toString()
       : '';
     const response = await httpClient.get(`/faculty/assignments${queryString}`);
     return response.data.data;
@@ -58,7 +58,7 @@ export const assignmentService = {
       if (assignment.dueDate) formData.append('dueDate', assignment.dueDate);
       if (assignment.maxMarks) formData.append('maxMarks', assignment.maxMarks.toString());
       if (assignment.description) formData.append('description', assignment.description);
-      assignment.files.forEach((file, index) => {
+      assignment.files.forEach((file) => {
         formData.append('files', file);
       });
       const response = await httpClient.put(`/faculty/assignments/${id}`, formData, {

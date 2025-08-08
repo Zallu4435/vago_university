@@ -22,7 +22,7 @@ const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
     if (conditions.length < 3) {
       append(condition);
       setShowModal(false);
-      const details = [...conditions, condition].map(c => `${c.condition}: ${c.details}`).join('; ');
+      const details = [...(conditions as unknown as HealthCondition[]), condition].map(c => `${c.condition}: ${c.details}`).join('; ');
       setValue('health.medicalConditions', details, { shouldValidate: true });
     }
   };
@@ -31,7 +31,7 @@ const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
     if (index !== undefined && index >= 0) {
       console.log('Other_Info_One: Updating condition at index:', index, condition);
       update(index, condition);
-      const details = conditions
+      const details = (conditions as unknown as HealthCondition[])
         .map((c, i) => (i === index ? condition : c))
         .map(c => `${c.condition}: ${c.details}`)
         .join('; ');
@@ -45,7 +45,7 @@ const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
   const handleRemoveCondition = (index: number) => {
     console.log('Other_Info_One: Removing condition at index:', index);
     remove(index);
-    const details = conditions
+    const details = (conditions as unknown as HealthCondition[])
       .filter((_, i) => i !== index)
       .map(c => `${c.condition}: ${c.details}`)
       .join('; ');
@@ -55,7 +55,7 @@ const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
   const handleEditClick = (index: number) => {
     console.log('Other_Info_One: Editing condition at index:', index, 'condition:', conditions[index]);
     setEditIndex(index);
-    setEditCondition(conditions[index]);
+    setEditCondition(conditions[index] as unknown as HealthCondition);
     setShowModal(true);
   };
 
@@ -66,10 +66,10 @@ const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
       setValue('health.conditions', [], { shouldValidate: true });
     } else {
       const currentConditions = conditions || [];
-      setValue('health.medicalConditions', 
-        currentConditions.length > 0 
-          ? currentConditions.map(c => `${c.condition}: ${c.details}`).join('; ') 
-          : '', 
+      setValue('health.medicalConditions',
+        currentConditions.length > 0
+          ? (currentConditions as unknown as HealthCondition[]).map(c => `${c.condition}: ${c.details}`).join('; ')
+          : '',
         { shouldValidate: true }
       );
     }
@@ -82,9 +82,9 @@ const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
       conditions: watch('health.conditions')
     });
     const isValid = await trigger('health', { shouldFocus: true });
-    console.log('Other_Info_One: Validation result:', { 
-      isValid, 
-      errors: errors.health ? JSON.stringify(errors.health, null, 2) : 'No errors' 
+    console.log('Other_Info_One: Validation result:', {
+      isValid,
+      errors: errors.health ? JSON.stringify(errors.health, null, 2) : 'No errors'
     });
     if (isValid) {
       onNext();
@@ -130,8 +130,8 @@ const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
                 </label>
               </div>
             ))}
-            {errors.health?.hasHealthSupport && (
-              <p className="text-sm text-red-700 mt-2">{errors.health.hasHealthSupport.message}</p>
+            {(errors.health as any)?.hasHealthSupport && (
+              <p className="text-sm text-red-700 mt-2">{(errors.health as any).hasHealthSupport.message}</p>
             )}
           </div>
         </div>
@@ -151,16 +151,16 @@ const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
                 className="bg-gradient-to-r from-cyan-400 to-blue-400 text-white px-4 py-2 rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all duration-300 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
-            <HealthConditionTable 
-              conditions={conditions} 
+            <HealthConditionTable
+              conditions={conditions as unknown as HealthCondition[]}
               onRemove={handleRemoveCondition}
               onEdit={handleEditClick}
             />
-            {errors.health?.conditions && (
-              <p className="text-sm text-red-700 mt-2">{errors.health.conditions.message}</p>
+            {(errors.health as any)?.conditions && (
+              <p className="text-sm text-red-700 mt-2">{(errors.health as any).conditions.message}</p>
             )}
-            {errors.health?.medicalConditions && (
-              <p className="text-sm text-red-700 mt-2">{errors.health.medicalConditions.message}</p>
+            {(errors.health as any)?.medicalConditions && (
+              <p className="text-sm text-red-700 mt-2">{(errors.health as any).medicalConditions.message}</p>
             )}
           </>
         )}

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FaChevronDown, FaChevronUp, FaCalendar, FaCheckSquare, FaRegClock, FaListOl, FaStar, FaRegFileAlt } from 'react-icons/fa';
 
 const EssentialSteps = () => {
-  const [expandedItems, setExpandedItems] = useState([]);
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [expandAll, setExpandAll] = useState(false);
   
   const steps = [
@@ -105,7 +105,7 @@ const EssentialSteps = () => {
     }
   ];
 
-  const toggleItem = (id) => {
+  const toggleItem = (id: any) => {
     setExpandedItems(prev => 
       prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     );

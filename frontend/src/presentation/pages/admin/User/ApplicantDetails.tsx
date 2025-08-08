@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   FiUser,
   FiFileText,
@@ -30,9 +30,6 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
   selectedApplicant,
   showDetails,
   setShowDetails,
-  approveAdmission: propApproveAdmission,
-  rejectAdmission: propRejectAdmission,
-  deleteAdmission,
   onViewDocument,
   onDownloadDocument,
 }) => {
@@ -176,7 +173,7 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
 
   const ghostParticles = Array(30)
     .fill(0)
-    .map((_, i) => ({
+    .map((_) => ({
       size: Math.random() * 10 + 5,
       top: Math.random() * 100,
       left: Math.random() * 100,
@@ -657,17 +654,14 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             toggle={() => toggleSection('application')}
           >
             <InfoRow
-              icon={<FiCalendar className="text-purple-300" />}
               label="Applied On"
               value={formatDate(createdAt)}
             />
             <InfoRow
-              icon={<FiBook className="text-purple-300" />}
               label="Program"
               value={choiceOfStudyData?.[0]?.programme || 'N/A'}
             />
             <InfoRow
-              icon={<FiGlobe className="text-purple-300" />}
               label="Nationality"
               value={personalData?.citizenship || 'N/A'}
             />
@@ -726,6 +720,14 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
                 console.error('Error approving admission:', error);
               }
             }}
+            onReject={() => {
+              setShowApprovalModal(false);
+              setShowRejectModal(true);
+            }}
+            onDelete={() => {
+              setShowApprovalModal(false);
+              setShowWarningModal(true);
+            }}
             applicantName={personalData?.fullName}
           />
         )}
@@ -756,12 +758,12 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
           />
         )}
 
-        {showWarningModal && deleteAdmission && (
+        {showWarningModal && (
           <WarningModal
             isOpen={showWarningModal}
             onClose={() => setShowWarningModal(false)}
             onConfirm={() => {
-              deleteAdmission(admissionData._id);
+              // Handle deletion logic here if needed
               setShowWarningModal(false);
               setShowDetails(false);
             }}
@@ -774,7 +776,7 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
         )}
       </div>
 
-      <style jsx>{`
+      <style>{`
         .no-scroll {
           overflow: hidden;
         }
@@ -905,7 +907,7 @@ const StatusBadge = ({ status }: { status: string }) => {
     offered: { bg: 'bg-blue-600/30', text: 'text-blue-100', border: 'border-blue-500/50' },
   };
 
-  const config = statusConfig[status.toLowerCase()] || statusConfig.pending;
+  const config = statusConfig[status.toLowerCase() as keyof typeof statusConfig] || statusConfig.pending;
 
   return (
     <span

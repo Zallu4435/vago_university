@@ -7,7 +7,7 @@ interface LiveWaveformProps {
 
 const LiveWaveform: React.FC<LiveWaveformProps> = ({ stream, isRecording }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);

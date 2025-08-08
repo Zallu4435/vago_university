@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { FiX, FiUser, FiCheck, FiMessageSquare, FiUsers, FiImage, FiLock, FiCamera, FiArrowLeft } from 'react-icons/fi';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-}
+import { User, PaginatedResponse } from '../types/ChatTypes';
 
 interface CreateGroupModalProps {
   onClose: () => void;
@@ -25,7 +19,7 @@ interface CreateGroupModalProps {
     };
     avatar?: File;
   }) => void;
-  onSearch: (query: string) => Promise<{ data: User[] }>;
+  onSearch: (query: string) => Promise<PaginatedResponse<User>>;
 }
 
 const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
@@ -188,7 +182,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
                     </button>
                   </div>
                   <span className="text-xs text-gray-600 dark:text-gray-400 mt-1 max-w-[60px] truncate">
-                    {user.name.split(' ')[0]}
+                    {user.name?.split(' ')[0] || user.firstName || 'User'}
                   </span>
                 </div>
               ))}
@@ -206,13 +200,13 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               >
                 <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center overflow-hidden mr-4">
                   {user.avatar ? (
-                    <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                    <img src={user.avatar} alt={user.name || user.firstName || 'User'} className="w-full h-full object-cover" />
                   ) : (
                     <FiUser size={20} className="text-gray-500 dark:text-gray-400" />
                   )}
                 </div>
                 <div className="flex-1 text-left">
-                  <div className="text-gray-900 dark:text-white font-medium">{user.name}</div>
+                  <div className="text-gray-900 dark:text-white font-medium">{user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User'}</div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
                 </div>
               </button>

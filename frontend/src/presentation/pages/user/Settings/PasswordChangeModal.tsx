@@ -60,7 +60,7 @@ export const PasswordChangeModal = ({
   };
 
   const togglePasswordVisibility = (field: string) => {
-    setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
+    setShowPasswords(prev => ({ ...prev, [field as keyof typeof prev]: !prev[field as keyof typeof prev] }));
   };
 
   const isValid =

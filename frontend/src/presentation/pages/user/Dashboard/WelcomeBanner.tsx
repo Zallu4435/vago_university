@@ -3,7 +3,7 @@ import { usePreferences } from '../../../../application/context/PreferencesConte
 
 export default function WelcomeBanner() {
   const { styles, theme } = usePreferences();
-  const { studentInfo, studentInfoLoading } = useStudentDashboard();
+  const { studentInfo } = useStudentDashboard();
   const fullName = studentInfo ? `${studentInfo.firstName ?? ''} ${studentInfo.lastName ?? ''}`.trim() : 'Student';
   const course = studentInfo?.course;
   const profilePicture = studentInfo?.profilePicture;

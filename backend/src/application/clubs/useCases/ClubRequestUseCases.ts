@@ -74,10 +74,11 @@ export class ApproveClubRequestUseCase implements IApproveClubRequestUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new Error("Invalid club request ID");
     }
-    const clubRequest: any = await this.clubsRepository.getClubRequestDetails({ id: params.id });
-    if (!clubRequest) {
+    const response: any = await this.clubsRepository.getClubRequestDetails({ id: params.id });
+    if (!response || !response.clubRequest) {
       throw new Error("Club request not found");
     }
+    const clubRequest = response.clubRequest;
     if (clubRequest.status !== "pending") {
       throw new Error("Club request is not in pending status");
     }
@@ -93,10 +94,11 @@ export class RejectClubRequestUseCase implements IRejectClubRequestUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new Error("Invalid club request ID");
     }
-    const clubRequest: any = await this.clubsRepository.getClubRequestDetails({ id: params.id });
-    if (!clubRequest) {
+    const response: any = await this.clubsRepository.getClubRequestDetails({ id: params.id });
+    if (!response || !response.clubRequest) {
       throw new Error("Club request not found");
     }
+    const clubRequest = response.clubRequest;
     if (clubRequest.status !== "pending") {
       throw new Error("Club request is not in pending status");
     }
@@ -112,10 +114,11 @@ export class GetClubRequestDetailsUseCase implements IGetClubRequestDetailsUseCa
     if (!mongoose.isValidObjectId(params.id)) {
       throw new Error("Invalid club request ID");
     }
-    const clubRequest: any = await this.clubsRepository.getClubRequestDetails(params);
-    if (!clubRequest) {
+    const response: any = await this.clubsRepository.getClubRequestDetails(params);
+    if (!response || !response.clubRequest) {
       throw new Error("Club request not found");
     }
+    const clubRequest = response.clubRequest;
     if (!clubRequest.clubId) {
       throw new Error("Associated club not found");
     }

@@ -13,11 +13,13 @@ export interface SiteSection {
 }
 
 export interface SiteSectionsResponse {
-  sections: SiteSection[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  data: {
+    sections: SiteSection[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 export interface SiteSectionsParams {
@@ -77,7 +79,7 @@ class SiteSectionsService {
     if (params?.category) urlParams.append('category', params.category);
     
     const response = await httpClient.get<SiteSectionsResponse>(`/site-sections?${urlParams.toString()}`);
-    return response.data.sections;
+    return response.data.data.sections;
   }
 }
 

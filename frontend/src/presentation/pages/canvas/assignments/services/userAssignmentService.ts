@@ -1,7 +1,7 @@
 import httpClient from '../../../../../frameworks/api/httpClient';
 
 export const userAssignmentService = {
-  getAssignments: async (params?: { status?: string; page?: number; limit?: number; subject?: string }) => {
+  getAssignments: async (params?: { status?: string; page?: number; limit?: number; subject?: string; search?: string; sortBy?: string }) => {
     try {
 
       const response = await httpClient.get('/assignments', { params });
@@ -53,7 +53,7 @@ export const userAssignmentService = {
       );
 
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Service: Submission error:', error);
       console.error('Service: Error response:', error.response?.data);
       console.error('Service: Error status:', error.response?.status);

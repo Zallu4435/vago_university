@@ -26,7 +26,7 @@ export const SubjectModal: React.FC<SubjectModalProps> = ({
     otherSubject: string;
     grade: string;
   }>({
-    resolver: zodResolver(subjectSchema),
+    resolver: zodResolver(subjectSchema) as any,
     defaultValues: {
       subject: '',
       otherSubject: '',

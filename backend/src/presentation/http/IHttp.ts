@@ -356,6 +356,8 @@ export interface IFinancialController extends IController {
   getAllCharges(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   updateCharge(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   deleteCharge(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  checkPendingPayment(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  clearPendingPayment(httpRequest: IHttpRequest): Promise<IHttpResponse>; 
 }
 
 export interface IEnquiryController extends IController {

@@ -93,7 +93,7 @@ const AdminEventsManagement: React.FC = () => {
   const handleEditEvent = async (event: Event) => {
     try {
       const details = await getEventDetails(event.id);
-      setSelectedEvent(details);
+      setSelectedEvent(details as any);
       setShowAddEventModal(true);
     } catch (error) {
       console.error('Error fetching event details:', error);
@@ -105,7 +105,7 @@ const AdminEventsManagement: React.FC = () => {
     try {
       if ('id' in event) {
         const details = await getEventDetails(event.id);
-        setSelectedEvent(details);
+        setSelectedEvent(details as any);
       } else {
         setSelectedEvent(null);
       }
@@ -421,15 +421,15 @@ const AdminEventsManagement: React.FC = () => {
           date: selectedEvent._date,
           time: selectedEvent._time,
           location: selectedEvent._location,
-          organizerType: selectedEvent._organizerType,
-          eventType: selectedEvent._eventType,
+          organizerType: selectedEvent._organizerType as "club" | "department" | "student" | "administration" | "external",
+          eventType: selectedEvent._eventType as "workshop" | "seminar" | "fest" | "competition" | "exhibition" | "conference" | "hackathon" | "cultural" | "sports" | "academic",
           icon: selectedEvent._icon,
           color: selectedEvent._color,
           description: selectedEvent._description,
           fullTime: selectedEvent._fullTime,
           additionalInfo: selectedEvent._additionalInfo,
           requirements: selectedEvent._requirements,
-          status: selectedEvent._status,
+          // status: selectedEvent._status, // Removed as it's not in EventFormData
           maxParticipants: selectedEvent._maxParticipants,
           registrationRequired: selectedEvent._registrationRequired,
           organizer: selectedEvent._organizer,

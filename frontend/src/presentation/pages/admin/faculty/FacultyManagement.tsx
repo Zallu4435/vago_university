@@ -18,7 +18,7 @@ const facultyColumns = [
   ...baseFacultyColumns.slice(0, 3),
   {
     ...baseFacultyColumns[3],
-    render: (faculty) => (
+    render: (faculty: Faculty) => (
       <div className="flex items-center text-gray-300">
         <FiCalendar size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{formatDate(faculty.createdAt)}</span>
@@ -27,7 +27,7 @@ const facultyColumns = [
   },
   {
     ...baseFacultyColumns[4],
-    render: (faculty) => (
+    render: (faculty: Faculty) => (
       <span
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
           faculty.status.toLowerCase() === 'approved'
@@ -225,6 +225,7 @@ const FacultyManagement: React.FC = () => {
 
 
   const handleBlock = (faculty: Faculty) => {
+    console.log(faculty, "ohoshdsodhsodh")
     blockFaculty.mutate(faculty._id);
     setShowBlockWarning(false);
     setFacultyToBlock(null);
@@ -294,7 +295,7 @@ const FacultyManagement: React.FC = () => {
             debouncedSearchChange(query);
           }}
           searchPlaceholder="Search by name or email..."
-          filters={filters}
+          filters={filters as any}
           filterOptions={{
             status: STATUSES,
             department: DEPARTMENTS,
@@ -312,8 +313,8 @@ const FacultyManagement: React.FC = () => {
                 <>
                   <ApplicationsTable
                     data={faculty}
-                    columns={facultyColumns}
-                    actions={facultyActions}
+                    columns={facultyColumns as any}
+                    actions={facultyActions as any}
                     formatDate={formatDate}
                   />
                   <Pagination
@@ -350,7 +351,7 @@ const FacultyManagement: React.FC = () => {
           message={`Are you sure you want to approve ${selectedFaculty.fullName}'s application?`}
           confirmText="Approve"
           cancelText="Cancel"
-          type="success"
+          type="info"
         />
       )}
 
@@ -367,8 +368,6 @@ const FacultyManagement: React.FC = () => {
           confirmText="Reject"
           cancelText="Cancel"
           type="danger"
-          showReasonInput
-          onReasonChange={(reason) => handleReject(reason)}
         />
       )}
 
@@ -410,8 +409,8 @@ const FacultyManagement: React.FC = () => {
           setIsDetailsModalOpen(false);
           setSelectedFaculty(null);
         }}
-        faculty={selectedFaculty}
-        onBlockToggle={handleBlock}
+        faculty={selectedFaculty as any}
+        onBlockToggle={handleBlock as any}
       />
 
       <style>{`

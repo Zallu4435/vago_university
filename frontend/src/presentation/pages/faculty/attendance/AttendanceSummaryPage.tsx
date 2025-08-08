@@ -61,8 +61,8 @@ const AttendanceSummaryPage = () => {
   const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [, setDateRange] = useState({ start: '', end: '' });
+  const [, setSelectedUser] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'students' | 'details'>('students');
   const [selectedStudent, setSelectedStudent] = useState<StudentAttendanceData | null>(null);
   const [selectedSessionForIntervals, setSelectedSessionForIntervals] = useState<any>(null);
@@ -82,7 +82,7 @@ const AttendanceSummaryPage = () => {
     }
   }, [sessions, selectedSessionId]);
 
-  const { data: currentAttendanceData = [], isLoading: isLoadingAttendance } = useSessionAttendance(selectedSessionId, { search: debouncedSearchTerm });
+  const { data: currentAttendanceData = [] } = useSessionAttendance(selectedSessionId, { search: debouncedSearchTerm });
 
   const currentSession = sessions.find((s: any) => s._id === selectedSessionId);
 
@@ -194,10 +194,6 @@ const AttendanceSummaryPage = () => {
   const clearFilters = () => {
     setSearchTerm('');
     setDateRange({ start: '', end: '' });
-  };
-
-  const handleViewIntervals = (user: any) => {
-    setSelectedUser(user);
   };
 
   const closeIntervalModal = () => {

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { FaMobileAlt, FaCheckCircle, FaExclamationCircle, FaShieldAlt } from 'react-icons/fa';
 import type { MobileOTPStep, MobileOTPComponentProps } from '../../../domain/types/auth/ForgotPassword';
 
-const MobileOTPComponent = ({ onBack, onClose }: MobileOTPComponentProps) => {
+const MobileOTPComponent = ({ onClose }: MobileOTPComponentProps) => {
   const [step, setStep] = useState<MobileOTPStep>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');

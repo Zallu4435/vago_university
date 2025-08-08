@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FiPlay, FiPause, FiSkipForward, FiVolume2, FiSettings, FiMaximize2 } from 'react-icons/fi';
 import { VideoPlayerProps } from '../../../../../domain/types/canvas/diploma';
 

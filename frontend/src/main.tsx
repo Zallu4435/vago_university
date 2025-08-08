@@ -23,7 +23,7 @@ if ('serviceWorker' in navigator) {
 
 
         if (userId && collection) {
-          const response = await httpClient.post(`/notifications/${event.data.notificationId}/mark-read`, {
+          await httpClient.post(`/notifications/${event.data.notificationId}/mark-read`, {
             userId,
             collection
           });

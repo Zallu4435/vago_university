@@ -2,6 +2,10 @@ import httpClient from '../../frameworks/api/httpClient';
 import { LoginResponse } from '../../domain/types/auth/Login';
 import { RegisterResponse } from '../../domain/types/auth/Register';
 
+interface ApiResponseWrapper<T> {
+  data: T;
+}
+
 
 class AuthService {
   async registerUser(data: {
@@ -20,7 +24,7 @@ class AuthService {
 
   async loginUser(data: { email: string; password: string }): Promise<LoginResponse> {
     try {
-      const response = await httpClient.post<LoginResponse>('/auth/login', data);
+      const response = await httpClient.post<ApiResponseWrapper<LoginResponse>>('/auth/login', data);
       return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to login');
@@ -38,7 +42,7 @@ class AuthService {
 
   async verifyEmailOtp(email: string, otp: string): Promise<{ resetToken: string }> {
     try {
-      const response = await httpClient.post('/auth/verify-email-otp', { email, otp });
+      const response = await httpClient.post<ApiResponseWrapper<{ resetToken: string }>>('/auth/verify-email-otp', { email, otp });
       return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to verify OTP');

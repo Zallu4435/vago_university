@@ -116,7 +116,7 @@ const UserManagement: React.FC = () => {
   const handleViewDetails = async (user: User) => {
     try {
       const details = await getAdmissionDetails(user._id);
-      setSelectedApplicant(details);
+      setSelectedApplicant(details as any);
       setShowDetails(true);
     } catch (error) {
       console.error('Error fetching admission details:', error);
@@ -310,7 +310,7 @@ const UserManagement: React.FC = () => {
             debouncedSearchChange(query);
           }}
           searchPlaceholder="Search by name or email..."
-          filters={filters}
+          filters={filters as any}
           filterOptions={{
             status: STATUSES,
             program: PROGRAMS,
@@ -327,9 +327,9 @@ const UserManagement: React.FC = () => {
               {users?.length > 0 ? (
                 <>
                   <ApplicationsTable
-                    data={users}
+                    data={users as any}
                     columns={userColumns}
-                    actions={userActions}
+                    actions={userActions as any}
                     formatDate={formatDate}
                   />
                   <Pagination

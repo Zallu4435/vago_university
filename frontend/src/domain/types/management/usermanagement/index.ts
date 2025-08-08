@@ -53,11 +53,19 @@ export interface AdmissionDetails {
 }
 
 export interface AdmissionApiResponse {
-  admissions: AdmissionDetails[];
-  totalPages: number;
-  currentPage: number;
-  totalItems: number;
-} 
+  data: {
+    admissions: AdmissionDetails[];
+    totalPages: number;
+    currentPage: number;
+    totalItems: number;
+  };
+}
+
+export interface AdmissionDetailsResponse {
+  data: {
+    admission: AdmissionDetails;
+  };
+}
 
 export interface Filters {
   status: string;

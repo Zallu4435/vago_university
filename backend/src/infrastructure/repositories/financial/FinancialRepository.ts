@@ -48,7 +48,6 @@ export class FinancialRepository implements IFinancialRepository {
                 };
             }
 
-            const currentDate = new Date();
             const allCharges = await (ChargeModel as any).find({}).lean();
 
             const applicableCharges = allCharges.filter((charge: any) => {
@@ -101,10 +100,12 @@ export class FinancialRepository implements IFinancialRepository {
                     chargeTitle: info.chargeId ? "Payment for " + info.term : "Payment",
                     method: info.method,
                     amount: info.amount,
-                }));
+                }))
+                .sort((a: any, b: any) => new Date(b.paidAt).getTime() - new Date(a.paidAt).getTime());
+
 
             const unpaidCharges = formattedCharges.filter(charge => charge.status === "Pending");
-            
+
             return {
                 info: unpaidCharges,
                 history: formattedHistory,
@@ -433,7 +434,7 @@ export class FinancialRepository implements IFinancialRepository {
 
         const total = await (ChargeModel as any).countDocuments(query);
         const charges = await (ChargeModel as any).find(query)
-            .sort({ createdAt: -1 }) 
+            .sort({ createdAt: -1 })
             .skip((params.page - 1) * params.limit)
             .limit(params.limit)
             .lean();
@@ -485,4 +486,52 @@ export class FinancialRepository implements IFinancialRepository {
         const deleted = await (ChargeModel as any).findByIdAndDelete(params.id);
         return { success: !!deleted };
     }
+
+    async hasPendingPayment(studentId: string): Promise<boolean> {
+        const pending = await (PaymentModel as any).exists({ studentId, status: 'Pending' });
+        console.log(pending, "sonsoosndonson")
+        return !!pending;
+    }
+
+    async clearPendingPayment(studentId: string): Promise<boolean> {
+        try {
+            await (StudentFinancialInfoModel as any).deleteMany({
+                studentId: studentId,
+                status: "Pending",
+                paymentId: { $exists: false }
+            });
+
+            await (PaymentModel as any).updateMany(
+                {
+                    studentId: studentId,
+                    status: 'Pending'
+                },
+                {
+                    $set: {
+                        status: 'Cancelled',
+                        updatedAt: new Date()
+                    }
+                }
+            );
+
+            const cancelledPayments = await (PaymentModel as any).find({
+                studentId: studentId,
+                status: 'Cancelled'
+            }).select('_id').lean();
+
+            if (cancelledPayments.length > 0) {
+                const cancelledPaymentIds = cancelledPayments.map(p => p._id);
+                await (StudentFinancialInfoModel as any).deleteMany({
+                    studentId: studentId,
+                    paymentId: { $in: cancelledPaymentIds },
+                    status: 'Pending'
+                });
+            }
+            return true;
+        } catch (error) {
+            console.error('[FinancialRepository] Error clearing pending payment:', error);
+            return false;
+        }
+    }
+
 }

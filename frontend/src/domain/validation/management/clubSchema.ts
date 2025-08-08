@@ -3,10 +3,10 @@ import { z } from 'zod';
 export const clubSchema = z.object({
   name: z.string().min(2, 'Club name must be at least 2 characters'),
   type: z.string().min(1, 'Club type is required'),
-  members: z.string().regex(/^[0-9]+$/, 'Members must be a number').optional().or(z.literal('')),
-  icon: z.string().default('🎓'),
-  color: z.string().default('#8B5CF6'),
-  status: z.enum(['active', 'inactive']).default('active').optional(),
+  members: z.string().optional(),
+  icon: z.string().optional(),
+  color: z.string().optional(),
+  status: z.enum(['active', 'inactive']).optional(),
   role: z.string().min(1, 'Role is required'),
   nextMeeting: z.string().optional(),
   about: z.string().optional(),
@@ -17,4 +17,6 @@ export const clubSchema = z.object({
       description: z.string().min(5, 'Description must be at least 5 characters'),
     })
   ).optional(),
-}); 
+});
+
+export type ClubFormData = z.infer<typeof clubSchema>; 

@@ -35,6 +35,7 @@ const ChatMessageComponent = ({
   styles,
   onDelete,
   onReply,
+  onForward,
   currentUserId
 }: ChatMessageProps, ref: ForwardedRef<HTMLDivElement>) => {
 
@@ -49,7 +50,7 @@ const ChatMessageComponent = ({
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState('');
 
-  const { editMessage, deleteMessage, forwardMessage, addReaction, removeReaction } = useChatMutations(message.chatId, currentUserId);
+  const { editMessage, addReaction, removeReaction } = useChatMutations(message.chatId, currentUserId);
 
   const handleOpenReactionsModal = (event: React.MouseEvent) => {
     const rect = reactionIconRef.current?.getBoundingClientRect();
@@ -72,12 +73,12 @@ const ChatMessageComponent = ({
   };
 
   const handleAddReaction = (emoji: string) => {
-    addReaction.mutate({ messageId: message.id, emoji, userId: currentUserId });
+    addReaction.mutate({ messageId: message.id, emoji });
     setShowEmojiPicker(false);
   };
 
-  const handleRemoveReaction = (emoji: string) => {
-    removeReaction.mutate({ messageId: message.id, userId: currentUserId });
+  const handleRemoveReaction = () => {
+    removeReaction.mutate({ messageId: message.id });
     setShowReactionsModal(false);
   };
 
@@ -427,7 +428,7 @@ const ChatMessageComponent = ({
         {isSentMessage && !message.isDeleted && (
           <div className="flex items-center space-x-1 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button
-              onClick={() => forwardMessage.mutate({ messageId: message.id, targetChatId: '' })}
+              onClick={() => onForward(message.id)}
               className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-[#2a3942] text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
               title="Forward"
             >
@@ -493,7 +494,7 @@ const ChatMessageComponent = ({
                 onClose={() => setShowMenu(false)}
                 onReact={() => setShowEmojiPicker(true)}
                 onReply={() => onReply(message)}
-                onForward={() => forwardMessage.mutate({ messageId: message.id, targetChatId: '' })}
+                onForward={() => onForward(message.id)}
                 onEdit={() => setIsEditing(true)}
                 onDelete={handleDeleteForMe}
                 onShowDeleteOptions={() => setShowDeleteOptions(true)}
@@ -527,7 +528,7 @@ const ChatMessageComponent = ({
               <FiSmile className="w-4 h-4" />
             </button>
             <button
-              onClick={() => forwardMessage.mutate({ messageId: message.id, targetChatId: '' })}
+              onClick={() => onForward(message.id)}
               className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-[#2a3942] text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
               title="Forward"
             >

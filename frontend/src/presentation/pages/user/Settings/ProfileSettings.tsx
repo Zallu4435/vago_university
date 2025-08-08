@@ -228,8 +228,8 @@ export default function ProfileSettings() {
           <ProfilePictureModal
             isOpen={showProfileModal}
             onClose={() => setShowProfileModal(false)}
-            currentImage={formData.profilePicture}
-            onImageUpdate={handleProfilePictureUpdate}
+            currentImage={formData.profilePicture || null}
+            onImageUpdate={handleProfilePictureUpdate as any}
           />
         </div>
       </div>
@@ -430,8 +430,8 @@ export default function ProfileSettings() {
       <ProfilePictureModal
         isOpen={showProfileModal}
         onClose={() => setShowProfileModal(false)}
-        currentImage={profile?.profilePicture}
-        onImageUpdate={handleProfilePictureUpdate}
+        currentImage={profile?.profilePicture || null}
+        onImageUpdate={handleProfilePictureUpdate as any}
       />
 
       <PasswordChangeModal

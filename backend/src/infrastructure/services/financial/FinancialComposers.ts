@@ -20,6 +20,10 @@ import {
   IGetAllChargesUseCase,
   IUpdateChargeUseCase,
   IDeleteChargeUseCase,
+  CheckPendingPaymentUseCase,
+  ICheckPendingPaymentUseCase,
+  ClearPendingPaymentUseCase,
+  IClearPendingPaymentUseCase,
 } from '../../../application/financial/useCases/FinancialUseCases';
 import { FinancialRepository } from '../../repositories/financial/FinancialRepository';
 import { FinancialController } from '../../../presentation/http/financial/FinancialController';
@@ -37,6 +41,9 @@ export function getFinancialComposer(): IFinancialController {
   const getAllChargesUseCase: IGetAllChargesUseCase = new GetAllChargesUseCase(repository);
   const updateChargeUseCase: IUpdateChargeUseCase = new UpdateChargeUseCase(repository);
   const deleteChargeUseCase: IDeleteChargeUseCase = new DeleteChargeUseCase(repository);
+  const checkPendingPaymentUseCase: ICheckPendingPaymentUseCase = new CheckPendingPaymentUseCase(repository);
+  const clearPendingPaymentUseCase: IClearPendingPaymentUseCase = new ClearPendingPaymentUseCase(repository);
+
   return new FinancialController(
     getStudentFinancialInfoUseCase,
     getAllPaymentsUseCase,
@@ -47,6 +54,8 @@ export function getFinancialComposer(): IFinancialController {
     createChargeUseCase,
     getAllChargesUseCase,
     updateChargeUseCase,
-    deleteChargeUseCase
+    deleteChargeUseCase,
+    checkPendingPaymentUseCase,
+    clearPendingPaymentUseCase
   );
 } 

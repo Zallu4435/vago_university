@@ -12,8 +12,8 @@ import {
   FiLogOut,
 } from 'react-icons/fi';
 
-export default function FacultySidebar({ activeTab, setActiveTab, onLogout, user }) {
-  const sidebarItems = [
+export default function FacultySidebar({ activeTab, setActiveTab, onLogout, user }: { activeTab: string, setActiveTab: (tab: string) => void, onLogout: () => void, user: any }) {
+  const sidebarItems = [  
     { id: 'profile', icon: FaUser, label: 'Profile' },
     { id: 'preferences', icon: FaCog, label: 'Preferences' },
     { id: 'notifications', icon: FiBell, label: 'Notifications' },

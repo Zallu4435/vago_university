@@ -29,10 +29,7 @@ interface FilterPanelProps {
 }
 
 const FilterPanel: React.FC<FilterPanelProps> = ({
-  searchQuery,
-  setSearchQuery,
   filterOpen,
-  setFilterOpen,
   filters,
   filterOptions,
   debouncedFilterChange,

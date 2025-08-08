@@ -12,7 +12,7 @@ class FacultyService {
     startDate?: string,
     endDate?: string,
     search?: string
-  ): Promise<FacultyApiResponse> {
+  ): Promise<FacultyApiResponse['data']> {
     try {
       const params: Record<string, string | number> = {
         page,

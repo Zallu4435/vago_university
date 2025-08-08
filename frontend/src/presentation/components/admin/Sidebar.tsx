@@ -4,13 +4,10 @@ import { FiChevronLeft, FiChevronRight, FiMenu, FiX } from 'react-icons/fi';
 import {
   MdDashboard,
   MdPeople,
-  MdImage,
   MdSchool,
   MdEvent,
-  MdMilitaryTech,
   MdGroups,
   MdSportsSoccer,
-  MdAssignment,
   MdMessage,
   MdBook,
   MdNotifications,

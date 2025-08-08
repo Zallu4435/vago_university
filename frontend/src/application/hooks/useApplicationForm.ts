@@ -19,7 +19,7 @@ export const useApplicationForm = () => {
       if (!userId) throw new Error('User ID is missing');
       return await applicationService.createApplication(userId);
     },
-    onSuccess: (data, userId) => {
+    onSuccess: (_, userId) => {
       queryClient.invalidateQueries({ queryKey: ['application', userId] });
       toast.success('Application initialized');
     },

@@ -1,5 +1,3 @@
-import { IconType } from 'react-icons';
-
 export interface User {
   id: string;
   name?: string;
@@ -139,6 +137,7 @@ export interface Chat {
 
 export interface PaginatedResponse<T> {
   data: T[];
+  messages?: T[];
   total: number;
   page: number;
   limit: number;

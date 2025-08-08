@@ -3,8 +3,8 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IoCloseOutline as X, IoAdd, IoTrash } from 'react-icons/io5';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
-import { AddClubModalProps, ClubFormData } from '../../../../../domain/types/management/clubmanagement';
-import { clubSchema } from '../../../../../domain/validation/management/clubSchema';
+import { AddClubModalProps } from '../../../../../domain/types/management/clubmanagement';
+import { clubSchema, ClubFormData } from '../../../../../domain/validation/management/clubSchema';
 
 const AddClubModal: React.FC<AddClubModalProps> = ({
   isOpen,
@@ -25,7 +25,7 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
     setValue,
     reset,
   } = useForm<ClubFormData>({
-    resolver: zodResolver(clubSchema),
+    resolver: zodResolver(clubSchema) as any,
     defaultValues: {
       name: '',
       type: '',
@@ -65,7 +65,7 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
       createdBy: data.createdBy,
       upcomingEvents: data.upcomingEvents || [],
     };
-    onSubmit(clubData);
+    onSubmit(clubData as any);
     reset();
     onClose();
   };
@@ -94,7 +94,7 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
 
   const ghostParticles = Array(30)
     .fill(0)
-    .map((_, i) => ({
+    .map(() => ({
       size: Math.random() * 10 + 5,
       top: Math.random() * 100,
       left: Math.random() * 100,
@@ -535,7 +535,7 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .no-scroll {
           overflow: hidden;
         }

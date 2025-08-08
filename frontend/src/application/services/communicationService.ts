@@ -1,4 +1,4 @@
-import { Message, MessageForm, User } from '../../domain/types/user/communication';
+import { Message, MessageForm, User, Admin } from '../../domain/types/user/communication';
 import httpClient from '../../frameworks/api/httpClient';
 type RecipientType = '' | 'all_students' | 'all_faculty' | 'all_users' | 'individual_students' | 'individual_faculty';
 

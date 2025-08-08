@@ -22,7 +22,7 @@ export const AlternativeContactSection: React.FC = () => {
                   id={field.id}
                   name={field.id}
                   label={field.label}
-                  options={field.options}
+                  options={field.options || []}
                   value={value as string}
                   onChange={onChange}
                   onBlur={onBlur}

@@ -24,14 +24,14 @@ const PaymentManagement: React.FC = () => {
   const [filters, setFilters] = useState<Filters>({ status: 'All Statuses', term: 'All Terms', startDate: '', endDate: '', dateRange: 'all' });
   const [page, setPage] = useState(1);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
-  const [selectedReceiptUrl, setSelectedReceiptUrl] = useState('');
+  const [selectedReceiptUrl] = useState('');
   const [showActionModal, setShowActionModal] = useState(false);
-  const [selectedApplication, setSelectedApplication] = useState<FinancialAidApplication | ScholarshipApplication | null>(null);
-  const [actionType, setActionType] = useState<'approve' | 'reject'>('approve');
+  const [selectedApplication] = useState<FinancialAidApplication | ScholarshipApplication | null>(null);
+  const [actionType] = useState<'approve' | 'reject'>('approve');
   const [showAddChargeModal, setShowAddChargeModal] = useState(false);
   const [showViewChargesModal, setShowViewChargesModal] = useState(false);
   const [showPaymentDetailsModal, setShowPaymentDetailsModal] = useState(false);
-  const [customDateRange, setCustomDateRange] = useState<{ startDate: string; endDate: string }>({ startDate: '', endDate: '' });
+  const [customDateRange] = useState<{ startDate: string; endDate: string }>({ startDate: '', endDate: '' });
 
   const {
     payments,
@@ -78,7 +78,6 @@ const PaymentManagement: React.FC = () => {
   const handleConfirmAction = async () => {
     if (!selectedApplication) return;
     try {
-      const status = actionType === 'approve' ? 'Approved' : 'Rejected';
       if ('term' in selectedApplication) {
       } else {
       }

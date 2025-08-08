@@ -5,6 +5,7 @@ import { clubService } from '../services/club.service';
 import { Club } from '../../domain/types/club';
 
 interface Filters {
+  [key: string]: string;
   category: string;
   status: string;
   dateRange: string;
@@ -217,10 +218,12 @@ export const useClubManagement = () => {
     },
   });
 
+  console.log(getClubDetails, " getClubDetails")
+
 
   return {
     clubs: clubsData?.clubs || [],
-    clubRequests: clubRequestsData?.data || [],
+    clubRequests: (clubRequestsData as any)?.data || [],
     totalPages:
       activeTab === 'clubs'
         ? clubsData?.totalPages || 0

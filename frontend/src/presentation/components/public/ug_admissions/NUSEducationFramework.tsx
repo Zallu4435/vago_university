@@ -1,6 +1,3 @@
-import React from 'react';
-
-// Import images from assets
 import flexiblePathwaysImage from '../../../../assets/images/ug-programs/education-framework/flexible-pathways.jpg';
 import commonCurriculumImage from '../../../../assets/images/ug-programs/education-framework/common-curriculum.jpg';
 import interdisciplinaryLearningImage from '../../../../assets/images/ug-programs/education-framework/interdisciplinary-learning.jpg';

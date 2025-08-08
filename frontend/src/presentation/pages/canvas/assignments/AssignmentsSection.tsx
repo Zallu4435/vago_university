@@ -117,7 +117,7 @@ const AssignmentsSection = () => {
                       setCurrentAssignment(assignment);
                       setShowUploadModal(true);
                     }}
-                    onViewGrade={(assignment) => {
+                    onViewGrade={() => {
                     }}
                   />
                 ))}

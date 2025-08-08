@@ -14,7 +14,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ isOpen, onClose, course }
 
   const ghostParticles = Array(30)
     .fill(0)
-    .map((_, i) => ({
+    .map((_) => ({
       size: Math.random() * 10 + 5,
       top: Math.random() * 100,
       left: Math.random() * 100,
@@ -124,7 +124,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ isOpen, onClose, course }
             </div>
           )}
 
-          {course.prerequisites?.length > 0 && (
+          {(course.prerequisites?.length ?? 0) > 0 && (
             <div className="mb-8">
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg shadow-sm overflow-hidden">
                 <div className="p-4 bg-gray-900/60 flex items-center">
@@ -132,7 +132,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ isOpen, onClose, course }
                   <h3 className="ml-3 text-lg font-semibold text-purple-100">Prerequisites</h3>
                 </div>
                 <div className="p-6 flex flex-wrap gap-3">
-                  {course.prerequisites.map((prereq, index) => (
+                  {(course.prerequisites ?? []).map((prereq, index) => (
                     <span
                       key={index}
                       className="px-4 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-sm text-purple-300"
@@ -219,7 +219,9 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ isOpen, onClose, course }
 const InfoCard: React.FC<InfoCardProps> = ({ icon, label, value }) => (
   <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
     <div className="flex items-center mb-2">
-      <div className="text-purple-300">{icon}</div>
+      <div className="text-purple-300">
+        {typeof icon === 'function' ? React.createElement(icon, { size: 18 }) : icon}
+      </div>
       <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
     </div>
     <p className="text-white font-semibold">{value}</p>

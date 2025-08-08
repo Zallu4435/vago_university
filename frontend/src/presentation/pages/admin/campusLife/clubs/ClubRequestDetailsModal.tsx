@@ -85,7 +85,7 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
 
   const ghostParticles: ParticleConfig[] = Array(30)
     .fill(0)
-    .map((_, i) => ({
+    .map((_) => ({
       size: Math.random() * 10 + 5,
       top: Math.random() * 100,
       left: Math.random() * 100,

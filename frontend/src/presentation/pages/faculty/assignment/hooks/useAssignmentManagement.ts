@@ -41,7 +41,7 @@ export const useAssignmentManagement = ({ searchTerm, filterStatus, filterSubjec
     });
 
     const updateAssignmentMutation = useMutation({
-        mutationFn: ({ id, data }: { id: string; data: Partial<Assignment> }) =>
+        mutationFn: ({ id, data }: { id: string; data: Partial<Assignment> & { files?: File[] } }) =>
             assignmentService.updateAssignment(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['assignments'] });
@@ -82,7 +82,7 @@ export const useAssignmentManagement = ({ searchTerm, filterStatus, filterSubjec
         }
     }, [createAssignmentMutation]);
 
-    const handleUpdateAssignment = useCallback(async (id: string, data: Partial<Assignment>) => {
+    const handleUpdateAssignment = useCallback(async (id: string, data: Partial<Assignment> & { files?: File[] }) => {
         try {
             await updateAssignmentMutation.mutateAsync({ id, data });
             return { success: true };

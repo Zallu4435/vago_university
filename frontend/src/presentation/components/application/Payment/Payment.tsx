@@ -16,7 +16,7 @@ export const Payment: React.FC<PaymentProps> = ({
   onPrevious
 }) => {
   const [selectedMethod, setSelectedMethod] = useState<string>('stripe');
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const { processPayment, confirmPayment, submitApplication } = useApplicationForm();
   const [submissionStatus, setSubmissionStatus] = useState<{

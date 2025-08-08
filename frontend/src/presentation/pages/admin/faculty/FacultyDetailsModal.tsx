@@ -5,7 +5,7 @@ import { FacultyDetailsModalProps } from '../../../../domain/types/management/fa
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClose, faculty, onBlockToggle }) => {
-  
+
   usePreventBodyScroll(isOpen);
 
   if (!isOpen || !faculty) return null;
@@ -15,10 +15,10 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
       console.error('No document URL provided');
       return;
     }
-    
+
     try {
       const response = await facultyService.getFacultyDocument(faculty._id, type, documentUrl);
-      
+
       if (response && response.pdfData) {
         const byteCharacters = atob(response.pdfData);
         const byteNumbers = new Array(byteCharacters.length);
@@ -49,38 +49,38 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
       console.error('No document URL provided');
       return;
     }
-    
+
     try {
       const response = await facultyService.getFacultyDocument(faculty._id, type, documentUrl);
-      
+
       if (response && response.pdfData) {
         const byteCharacters = atob(response.pdfData);
-        
+
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
         const byteArray = new Uint8Array(byteNumbers);
-        
+
         const blob = new Blob([byteArray], { type: 'application/pdf' });
-        
+
         const url = window.URL.createObjectURL(blob);
-        
+
         const link = document.createElement('a');
         link.href = url;
         link.download = fileName;
         link.style.display = 'none';
-        
+
         document.body.appendChild(link);
-        
+
         link.click();
-        
+
         document.body.removeChild(link);
-        
+
         setTimeout(() => {
           window.URL.revokeObjectURL(url);
         }, 1000);
-        
+
       } else {
         console.error('No PDF data in response');
       }
@@ -91,7 +91,7 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
 
   const ghostParticles = Array(30)
     .fill(0)
-    .map((_, i) => ({
+    .map((_) => ({
       size: Math.random() * 10 + 5,
       top: Math.random() * 100,
       left: Math.random() * 100,
@@ -149,9 +149,28 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
             <div className="flex items-center space-x-2">
               {typeof faculty.blocked === 'boolean' && onBlockToggle && (
                 <button
-                  onClick={() => onBlockToggle(faculty._id, faculty.blocked)}
-                  className={`flex items-center px-4 py-2 rounded-lg font-semibold border transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500/50 shadow-md ${faculty.blocked ? 'bg-green-700/80 hover:bg-green-600/80 text-white border-green-500/40' : 'bg-red-700/80 hover:bg-red-600/80 text-white border-red-500/40'}`}
-                  title={faculty.blocked ? 'Unblock Faculty' : 'Block Faculty'}
+                  onClick={() => {
+                    console.log('Block button clicked:', {
+                      facultyId: faculty._id,
+                      currentBlockedStatus: faculty.blocked,
+                      facultyStatus: faculty.status
+                    });
+                    onBlockToggle(faculty._id, faculty.blocked ?? false);
+                  }}
+                  disabled={faculty.status?.toLowerCase() !== 'approved'}
+                  className={`flex items-center px-4 py-2 rounded-lg font-semibold border transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500/50 shadow-md ${faculty.status?.toLowerCase() !== 'approved'
+                      ? 'bg-gray-700/50 text-gray-400 border-gray-600/40 cursor-not-allowed opacity-50'
+                      : faculty.blocked
+                        ? 'bg-green-700/80 hover:bg-green-600/80 text-white border-green-500/40'
+                        : 'bg-red-700/80 hover:bg-red-600/80 text-white border-red-500/40'
+                    }`}
+                  title={
+                    faculty.status?.toLowerCase() !== 'approved'
+                      ? 'Can only block/unblock approved faculty'
+                      : faculty.blocked
+                        ? 'Unblock Faculty'
+                        : 'Block Faculty'
+                  }
                 >
                   {faculty.blocked ? (
                     <>
@@ -171,6 +190,7 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
                 <FiX size={24} className="text-purple-300" />
               </button>
             </div>
+
           </div>
         </div>
 
@@ -197,7 +217,7 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
             title="Personal Information"
             icon={<FiUser className="text-purple-300" />}
             isOpen={true}
-            toggle={() => {}}
+            toggle={() => { }}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <InfoGroup title="Contact Information">
@@ -211,7 +231,7 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
             title="Professional Information"
             icon={<FiBook className="text-purple-300" />}
             isOpen={true}
-            toggle={() => {}}
+            toggle={() => { }}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <InfoGroup title="Academic Details">
@@ -226,7 +246,7 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
             title="Uploaded Documents"
             icon={<FiFileText className="text-purple-300" />}
             isOpen={true}
-            toggle={() => {}}
+            toggle={() => { }}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {faculty.cvUrl && (
@@ -239,14 +259,14 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
                   </div>
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => handleViewDocument(faculty.cvUrl, 'cv', 'Curriculum_Vitae.pdf')}
+                      onClick={() => handleViewDocument(faculty.cvUrl ?? '', 'cv')}
                       className="p-1 text-purple-300 hover:bg-purple-500/20 rounded transition-colors"
                       title="View Document"
                     >
                       <FiEye size={16} />
                     </button>
                     <button
-                      onClick={() => handleDownloadDocument(faculty.cvUrl, 'cv', 'Curriculum_Vitae.pdf')}
+                      onClick={() => handleDownloadDocument(faculty.cvUrl ?? '', 'cv', 'Curriculum_Vitae.pdf')}
                       className="p-1 text-purple-300 hover:bg-purple-500/20 rounded transition-colors"
                       title="Download Document"
                     >
@@ -269,7 +289,7 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
                     </div>
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => handleViewDocument(url, 'certificate', `Certificate_${index + 1}.pdf`)}
+                        onClick={() => handleViewDocument(url, 'certificate')}
                         className="p-1 text-purple-300 hover:bg-purple-500/20 rounded transition-colors"
                         title="View Document"
                       >
@@ -296,7 +316,7 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
               title="About"
               icon={<FiInfo className="text-purple-300" />}
               isOpen={true}
-              toggle={() => {}}
+              toggle={() => { }}
             >
               <p className="text-purple-200 whitespace-pre-wrap">{faculty.aboutMe}</p>
             </SectionCard>

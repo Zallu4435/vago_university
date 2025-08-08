@@ -10,7 +10,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ src }) => {
   const waveformRef = useRef<HTMLDivElement>(null);
   const wavesurfer = useRef<WaveSurfer | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [duration, setDuration] = useState(0);
+  const [, setDuration] = useState(0);
   const [current, setCurrent] = useState(0);
 
   // Helper to initialize WaveSurfer
@@ -27,22 +27,18 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ src }) => {
         barWidth: 2,
         barRadius: 2,
         height: 32,
-        responsive: false, // We'll handle resizing manually
         normalize: true,
-        partialRender: true,
       });
       wavesurfer.current.load(src);
 
       wavesurfer.current.on('ready', () => {
         setDuration(wavesurfer.current?.getDuration() || 0);
         setCurrent(0);
-        // Force a redraw in case of flexbox issues
-        wavesurfer.current?.drawBuffer();
       });
       wavesurfer.current.on('audioprocess', () => {
         setCurrent(wavesurfer.current?.getCurrentTime() || 0);
       });
-      wavesurfer.current.on('seek', () => {
+      wavesurfer.current.on('interaction', () => {
         setCurrent(wavesurfer.current?.getCurrentTime() || 0);
       });
       wavesurfer.current.on('finish', () => {
@@ -65,8 +61,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ src }) => {
   useEffect(() => {
     const handleResize = () => {
       if (wavesurfer.current) {
-        wavesurfer.current.drawer.containerWidth = waveformRef.current?.clientWidth || 0;
-        wavesurfer.current.drawBuffer();
+        wavesurfer.current.zoom(1);
       }
     };
     window.addEventListener('resize', handleResize);

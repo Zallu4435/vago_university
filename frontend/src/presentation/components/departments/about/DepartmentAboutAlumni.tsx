@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaArrowRight, FaUserCircle } from 'react-icons/fa';
+import { FaUserCircle } from 'react-icons/fa';
 import { VisibilityState } from '../../../../shared/hooks/useSectionAnimation';
 
 interface AlumniMember {

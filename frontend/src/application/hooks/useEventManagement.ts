@@ -200,13 +200,14 @@ export const useEventManagement = () => {
             filters.organizerType !== 'All' ? filters.organizerType : undefined
           );
         },
-      });
+      }); 
     }
   };
 
+  console.log(eventsData, "events from ")
   return {
-    events: eventsData?.data || [],
-    eventRequests: (eventRequestsData?.eventRequests || []).map(req => ({ ...req, id: req.requestedId })),
+    events: (eventsData as any)?.data || [],
+    eventRequests: ((eventRequestsData as any)?.eventRequests || []).map((req: any) => ({ ...req, id: req.requestedId })),
     totalPages: activeTab === 'events' ? eventsData?.totalPages || 0 : eventRequestsData?.totalPages || 0,
     page,
     setPage,

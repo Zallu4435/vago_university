@@ -44,17 +44,16 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
   const [newDescription, setNewDescription] = useState(chat.description || '');
   const [newName, setNewName] = useState(chat.name || '');
 
-  const { chatDetails, isLoadingChatDetails, searchUsers } = useChatQueries({ chatId: chat.id, query: searchQuery, page: 1, limit: 20 });
+  const { chatDetails, isLoadingChatDetails, searchUsers } = useChatQueries({ chatId: chat.id, query: searchQuery, chatsPage: 1, chatsLimit: 20 });
   const {
     addGroupMember,
     removeGroupMember,
     updateGroupAdmin,
     updateGroupSettings,
     updateGroupInfo,
-    leaveGroup,
   } = useChatMutations(chat.id, currentUser.id);
 
-  const group = chatDetails ? chatDetails.chat : chat;
+  const group = chatDetails || chat;
 
   console.log(group, "groi[")
 
@@ -106,7 +105,6 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
   };
 
   const firstAdmin = Array.isArray(group.admins) && group.admins.length > 0 ? group.admins[0] : undefined;
-  const isCreator = firstAdmin === currentUser.id;
 
   const settingsConfig = [
     {
@@ -362,7 +360,7 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
             </div>
 
             <div className="space-y-2 max-h-60 overflow-y-auto">
-              {group.participants.map((participant) => (
+              {group.participants.map((participant: any) => (
                 <div
                   key={participant.id}
                   className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 group"

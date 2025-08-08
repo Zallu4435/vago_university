@@ -21,7 +21,7 @@ import {
     GetAllChargesResponseDTO,
     UpdateChargeResponseDTO,
     DeleteChargeResponseDTO,
-} from "../../../domain/financial/dtos/FinancialResponseDTOs";  
+} from "../../../domain/financial/dtos/FinancialResponseDTOs";
 
 export interface IFinancialRepository {
     getStudentFinancialInfo(params: GetStudentFinancialInfoRequestDTO): Promise<GetStudentFinancialInfoResponseDTO>;
@@ -34,4 +34,6 @@ export interface IFinancialRepository {
     getAllCharges(params: GetAllChargesRequestDTO): Promise<GetAllChargesResponseDTO>;
     updateCharge(params: UpdateChargeRequestDTO): Promise<UpdateChargeResponseDTO>;
     deleteCharge(params: DeleteChargeRequestDTO): Promise<DeleteChargeResponseDTO>;
+    hasPendingPayment(studentId: string): Promise<boolean>;
+    clearPendingPayment(studentId: string): Promise<boolean>;
 }

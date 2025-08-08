@@ -21,11 +21,7 @@ interface ChatHeaderProps {
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
   chat,
-  styles,
-  onInfoClick,
   onSettingsClick,
-  isDarkMode,
-  onToggleTheme,
   onDeleteChat,
   onBlock,
   onClearChat,

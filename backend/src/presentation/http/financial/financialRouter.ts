@@ -31,6 +31,17 @@ router.get(
   authMiddleware,
   (req, res, next) => expressAdapter(req, res, next, financialController.getPaymentReceipt.bind(financialController))
 );
+router.post(
+  "/check-pending",
+  authMiddleware,
+  (req, res, next) => expressAdapter(req, res, next, financialController.checkPendingPayment.bind(financialController))
+);
+router.post(
+  "/clear-pending",
+  authMiddleware,
+  (req, res, next) => expressAdapter(req, res, next, financialController.clearPendingPayment.bind(financialController))
+);
+
 
 // Admin Routes
 router.get(

@@ -10,7 +10,7 @@ const StatusBadge = ({ status }: StatusBadgeProps) => {
     rejected: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },
   };
 
-  const config = statusConfig[status?.toLowerCase()] || statusConfig.pending;
+  const config = statusConfig[status?.toLowerCase() as keyof typeof statusConfig] || statusConfig.pending;
 
   return (
     <span
@@ -50,7 +50,7 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
 
   const ghostParticles = Array(30)
     .fill(0)
-    .map((_, i) => ({
+    .map((_) => ({
       size: Math.random() * 10 + 5,
       top: Math.random() * 100,
       left: Math.random() * 100,

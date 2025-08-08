@@ -1,5 +1,5 @@
 // src/application/services/event.service.ts
-import { EventApiResponse, EventRequest } from '../../domain/types/management/eventmanagement';
+import { EventApiResponse, EventRequest, EventApiResponseSingle, EventRequestApiResponseSingle, Event } from '../../domain/types/management/eventmanagement';
 import httpClient from '../../frameworks/api/httpClient';
 
 class EventService {
@@ -11,7 +11,7 @@ class EventService {
     dateRange?: string,
     search?: string,
     organizerType?: string
-  ): Promise<EventApiResponse> {
+  ): Promise<EventApiResponse['data']> {
     try {
       const params: Record<string, string | number> = {
         page,
@@ -48,7 +48,7 @@ class EventService {
 
   async getEventDetails(id: string): Promise<Event> {
     try {
-      const response = await httpClient.get<Event>(`/admin/events/${id}`);
+      const response = await httpClient.get<EventApiResponseSingle>(`/admin/events/${id}`);
       return response.data.data.event;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch event details');
@@ -89,7 +89,7 @@ class EventService {
     dateRange?: string,
     search?: string,
     organizerType?: string
-  ): Promise<EventApiResponse> {
+  ): Promise<EventApiResponse['data']> {
     try {
       const params: Record<string, string | number> = {
         page,
@@ -143,7 +143,7 @@ class EventService {
 
   async getEventRequestDetails(id: string): Promise<EventRequest> {
     try {
-      const response = await httpClient.get<EventRequest>(`/admin/event-requests/${id}`);
+      const response = await httpClient.get<EventRequestApiResponseSingle>(`/admin/event-requests/${id}`);
       return response.data.data.eventRequest;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch event request details');

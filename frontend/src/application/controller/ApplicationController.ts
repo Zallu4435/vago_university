@@ -1,6 +1,12 @@
 import { FormData } from '../../domain/types/application';
 import httpClient from '../../frameworks/api/httpClient';
 
+interface ApplicationResponse {
+  data: {
+    draft: FormData | null;
+  };
+}
+
 export const applicationController = {
   async createApplication(userId: string): Promise<{ applicationId: string }> {
     try {
@@ -13,7 +19,7 @@ export const applicationController = {
   },
 
 
-  async getApplicationById(userId: string): Promise<FormData | null> {
+  async getApplicationById(userId: string): Promise<ApplicationResponse> {
     try {
       const response = await httpClient.get(`/admission/applications/user/${userId}`);
       return response.data;
@@ -49,7 +55,7 @@ export const applicationController = {
   async processPayment(
     applicationId: string,
     paymentDetails: any
-  ): Promise<{ paymentId: string; status: string; message: string; clientSecret?: string; stripePaymentIntentId?: string }> {
+  ): Promise<{ data: { paymentId: string; status: string; message: string; clientSecret?: string; stripePaymentIntentId?: string } }> {
     try {
       const response = await httpClient.post('/admission/payment/process', { applicationId, paymentDetails });
       return response.data;
@@ -74,7 +80,7 @@ export const applicationController = {
   async confirmPayment(
     paymentId: string,
     stripePaymentIntentId: string
-  ): Promise<{ paymentId: string; status: string; message: string; stripePaymentIntentId: string }> {
+  ): Promise<{ data: { paymentId: string; status: string; message: string; stripePaymentIntentId: string } }> {
     try {
       const response = await httpClient.post('/admission/payment/confirm', { paymentId, stripePaymentIntentId });
       return response.data;

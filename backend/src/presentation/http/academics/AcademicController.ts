@@ -60,10 +60,12 @@ export class AcademicController implements IAcademicController {
     async getCourses(httpRequest: IHttpRequest): Promise<IHttpResponse> {
         const { search, page = 1, limit = 10 } = httpRequest.query;
         const defaultLimit = search ? Number(limit) : 5;
+        const userId = httpRequest.user?.userId;
         const result = await this.getCoursesUseCase.execute({
             search: search as string,
             page: Number(page),
-            limit: defaultLimit
+            limit: defaultLimit,
+            userId
         });
         if (!result.success) {
             return this.httpErrors.error_400();

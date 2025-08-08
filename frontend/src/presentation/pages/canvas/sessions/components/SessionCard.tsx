@@ -67,7 +67,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
                 </div>
               </div>
               <div className="flex items-center gap-2 sm:gap-3 mt-2 sm:mt-0">
-                {getStatusBadge(status, session.isLive, styles)}
+                {getStatusBadge(status, styles)}
               </div>
             </div>
             <p className={`${styles.textSecondary} mb-3 sm:mb-4 text-sm sm:text-lg`}>{session.description}</p>

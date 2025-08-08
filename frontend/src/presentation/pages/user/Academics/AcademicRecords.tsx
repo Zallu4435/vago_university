@@ -1,7 +1,35 @@
 import { FaBookOpen, FaArrowRight } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 
-export default function AcademicRecords({ studentInfo, gradeInfo, academicHistory }) {
+interface StudentInfo {
+  name: string;
+  email: string;
+  major: string;
+  academicStanding: string;
+}
+
+interface GradeInfo {
+  cumulativeGPA: string;
+  termGPA: string;
+  termName: string;
+  creditsEarned: number;
+  creditsInProgress: number;
+}
+
+interface AcademicTerm {
+  id: string;
+  term: string;
+  credits: number;
+  gpa: string;
+}
+
+interface AcademicRecordsProps {
+  studentInfo: StudentInfo;
+  gradeInfo: GradeInfo;
+  academicHistory: AcademicTerm[];
+}
+
+export default function AcademicRecords({ studentInfo, gradeInfo, academicHistory }: AcademicRecordsProps) {
   const { styles, theme } = usePreferences();
 
   return (

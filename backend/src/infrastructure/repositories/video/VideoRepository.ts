@@ -16,7 +16,10 @@ export class VideoRepository implements IVideoRepository {
         return videos.map((video) => ({
             ...video,
             _id: video._id.toString(),
-            diplomaId: video.diplomaId?.toString?.() ?? video.diplomaId,
+            // Handle both populated and unpopulated diplomaId
+            diplomaId: video.diplomaId && typeof video.diplomaId === 'object' && 'title' in video.diplomaId 
+                ? video.diplomaId as unknown as IRepoDiploma
+                : video.diplomaId?.toString() || '',
         }));
     }
 
@@ -26,7 +29,7 @@ export class VideoRepository implements IVideoRepository {
 
     async findDiplomaByCategory(category: string) {
         return DiplomaModel.findOne({ category })
-        .lean<WithStringId<IRepoDiploma>>({ getters: true });   // 👈 generic added
+        .lean<WithStringId<IRepoDiploma>>({ getters: true });   
     }
 
     async getVideoById(id: string): Promise<IRepoVideo | null> {
@@ -37,7 +40,9 @@ export class VideoRepository implements IVideoRepository {
             ? {
                 ...video,
                 _id: video._id.toString(),
-                diplomaId: video.diplomaId ? video.diplomaId.toString() : "",
+                diplomaId: video.diplomaId && typeof video.diplomaId === 'object' && 'title' in video.diplomaId 
+                    ? video.diplomaId as unknown as IRepoDiploma
+                    : video.diplomaId?.toString() || '',
             }
             : null;
     }
@@ -77,7 +82,7 @@ export class VideoRepository implements IVideoRepository {
 
     async findDiplomaById(id: string) {
         return DiplomaModel.findById(id)
-        .lean<WithStringId<IRepoDiploma>>({ getters: true });   // 👈 generic added
+        .lean<WithStringId<IRepoDiploma>>({ getters: true });   
     }
     
     async addVideoToDiploma(diplomaId: string, videoId: string) {

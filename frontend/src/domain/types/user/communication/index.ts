@@ -7,7 +7,7 @@ export interface MessageForm {
 }
 
 export interface Admin {
-    id: string;
+    _id: string;
     name: string;
     email: string;
     role: string;

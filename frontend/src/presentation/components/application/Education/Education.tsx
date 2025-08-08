@@ -37,7 +37,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
-export const Education = forwardRef<EducationRef, EducationProps>(({ initialData, onSave }, ref) => {
+export const Education = forwardRef<EducationRef, EducationProps>(({ initialData }, ref) => {
   const methods = useFormContext();
   const { control, formState: { errors }, setValue, trigger, watch, getValues } = methods;
 

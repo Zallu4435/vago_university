@@ -16,7 +16,7 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
   );
   const [subject, setSubject] = useState(initialForm?.subject || '');
   const [message, setMessage] = useState(initialForm?.message || '');
-  const [attachments, setAttachments] = useState<string[]>(initialForm?.attachments || []);
+  const [attachments, setAttachments] = useState<File[]>(initialForm?.attachments || []);
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [isLoadingAdmins, setIsLoadingAdmins] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +30,7 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
         setError(null);
         try {
           const adminList = await communicationService.getAllAdmins();
-          setAdmins(adminList?.admins);
+          setAdmins(adminList);
         } catch (err) {
           setError('Failed to load admins. Please try again.');
           console.error('Error fetching admins:', err);

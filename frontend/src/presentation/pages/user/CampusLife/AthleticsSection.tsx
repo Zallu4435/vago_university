@@ -4,7 +4,7 @@ import { useCampusLife } from '../../../../application/hooks/useCampusLife';
 import JoinRequestForm from './JoinRequestForm';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import ReactDOM from 'react-dom';
-import type { Sport, SportsData } from '../../../../domain/types/user/campus-life';
+import type { Sport } from '../../../../domain/types/user/campus-life';
 
 interface AthleticsSectionProps {
   sports: Sport[];

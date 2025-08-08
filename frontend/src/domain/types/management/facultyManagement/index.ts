@@ -12,6 +12,9 @@ export interface Faculty {
   createdAt: string;
   updatedAt: string;
   blocked?: boolean;
+  cvUrl?: string;
+  certificatesUrl?: string[];
+  aboutMe?: string;
 }
 
 export interface FacultyApprovalData {
@@ -38,8 +41,10 @@ export interface FacultyDetailsModalProps {
 } 
 
 export interface FacultyApiResponse {
-  faculty: Faculty[];
-  totalPages: number;
-  currentPage: number;
-  totalItems: number;
+  data: {
+    faculty: Faculty[];
+    totalPages: number;
+    currentPage: number;
+    totalItems: number;
+  };
 }

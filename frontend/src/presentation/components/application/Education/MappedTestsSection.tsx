@@ -2,10 +2,10 @@ import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import TestRow from './TestRow';
 import { testConfigs } from './options';
-import { getNestedObjectError } from '../../../../shared/utils/formErrors'; // Add this import
+import { getNestedObjectError } from '../../../../shared/utils/formErrors';
 
 const MappedTestsSection: React.FC = () => {
-  const { control, formState: { errors } } = useFormContext();
+  const { formState: { errors } } = useFormContext();
 
   return (
     <div className="space-y-6">

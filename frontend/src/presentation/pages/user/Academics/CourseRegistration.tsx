@@ -1,16 +1,19 @@
 import { useState, useMemo } from 'react';
-import { FaSearch, FaArrowRight, FaTimes } from 'react-icons/fa';
+import { FaSearch, FaArrowRight, FaTimes, FaEye } from 'react-icons/fa';
 import { useCourseRegistration, useCourseSearch } from '../../../../application/hooks/useAcademic';
 import CourseDetailsModal from './CourseDetailsModal';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import { Course, CourseRegistrationProps } from '../../../../domain/types/user/academics';
 import { toast } from 'react-hot-toast';
+import { financialService } from '../../../../application/services/financialService';
 
 
 export default function CourseRegistration({ courses, enrolledCredits, waitlistedCredits }: CourseRegistrationProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewedEnrolledCourse, setViewedEnrolledCourse] = useState<Course | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const { registerForCourse, isRegistering } = useCourseRegistration();
   const { styles, theme } = usePreferences();
 
@@ -23,9 +26,18 @@ export default function CourseRegistration({ courses, enrolledCredits, waitliste
     return courses;
   }, [searchQuery, searchResults, courses]);
 
-  const handleEnrollClick = (course: Course) => {
-    setSelectedCourse(course);
-    setIsModalOpen(true);
+  const handleEnrollClick = async (course: Course) => {
+    try {
+      const hasPending = await financialService.checkPendingPayment();
+      if (hasPending) {
+        toast.error('You already have a pending payment. Please complete it before starting a new one.');
+        return;
+      }
+      setSelectedCourse(course);
+      setIsModalOpen(true);
+    } catch (error) {
+      toast.error('Failed to check pending payment status.');
+    }
   };
 
   const handleConfirmEnrollment = async (enrollmentData: { reason: string }) => {
@@ -212,7 +224,7 @@ export default function CourseRegistration({ courses, enrolledCredits, waitliste
                 )}
                 {displayCourses.map((course) => (
                   <tr
-                    key={course.id}
+                    key={course.id || course._id}
                     className={`group/item border-b ${styles.border} hover:bg-amber-50/50 transition-all duration-300`}
                   >
                     <td className={`py-2 sm:py-3 px-2 sm:px-4 ${styles.textPrimary} font-medium text-xs sm:text-sm`}>
@@ -226,15 +238,36 @@ export default function CourseRegistration({ courses, enrolledCredits, waitliste
                     <td className={`py-2 sm:py-3 px-2 sm:px-4 ${styles.textSecondary} text-xs sm:text-sm hidden md:table-cell`}>{course.faculty}</td>
                     <td className={`py-2 sm:py-3 px-2 sm:px-4 ${styles.textSecondary} text-xs sm:text-sm hidden lg:table-cell`}>{course.schedule}</td>
                     <td className="py-2 sm:py-3 px-2 sm:px-4 text-center">
-                      <button
-                        onClick={() => handleEnrollClick(course)}
-                        className={`group/btn bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-1 px-2 sm:px-3 rounded-full transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 text-xs`}
-                      >
-                        <span className="flex items-center space-x-1 sm:space-x-2">
-                          <span>Add</span>
-                          <FaArrowRight className="group-hover/btn:translate-x-1 transition-transform duration-300" size={10} />
-                        </span>
-                      </button>
+                      {course.joined ? (
+                        <div className="flex items-center justify-center space-x-2">
+                          <button
+                            className="bg-green-200 text-green-700 px-3 py-1 rounded-full text-xs cursor-not-allowed"
+                            disabled
+                          >
+                            Enrolled
+                          </button>
+                          <button
+                            className="bg-blue-100 text-blue-700 p-2 rounded-full hover:bg-blue-200 transition-colors duration-200"
+                            title="View Enrolled Course"
+                            onClick={() => {
+                              setViewedEnrolledCourse(course);
+                              setIsViewModalOpen(true);
+                            }}
+                          >
+                            <FaEye />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleEnrollClick(course)}
+                          className={`group/btn bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white py-1 px-2 sm:px-3 rounded-full transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 text-xs`}
+                        >
+                          <span className="flex items-center space-x-1 sm:space-x-2">
+                            <span>Add</span>
+                            <FaArrowRight className="group-hover/btn:translate-x-1 transition-transform duration-300" size={10} />
+                          </span>
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -254,6 +287,18 @@ export default function CourseRegistration({ courses, enrolledCredits, waitliste
           onConfirm={handleConfirmEnrollment}
           course={selectedCourse}
           isEnrolling={isRegistering}
+        />
+      )}
+      {viewedEnrolledCourse && (
+        <CourseDetailsModal
+          isOpen={isViewModalOpen}
+          onClose={() => {
+            setIsViewModalOpen(false);
+            setViewedEnrolledCourse(null);
+          }}
+          onConfirm={() => {}}
+          course={viewedEnrolledCourse}
+          isEnrolling={false}
         />
       )}
     </div>

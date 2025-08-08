@@ -15,7 +15,7 @@ export const useUserManagement = () => {
   });
   const limit = 5;
 
-  const { data, isLoading, error } = useQuery<AdmissionApiResponse, Error>({
+  const { data, isLoading, error } = useQuery<AdmissionApiResponse['data'], Error>({
     queryKey: ['admissions', page, filters, limit],
     queryFn: () =>
       userService.getAdmissions(

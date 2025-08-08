@@ -22,7 +22,7 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
     formState: { errors },
     reset,
   } = useForm<DiplomaFormData>({
-    resolver: zodResolver(diplomaSchema),
+    resolver: zodResolver(diplomaSchema) as any,
     defaultValues: {
       title: '',
       description: '',
@@ -44,7 +44,7 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
 
   usePreventBodyScroll(isOpen);
 
-  const prerequisites = watch('prerequisites');
+  const prerequisites = watch('prerequisites') || [];
   const [newPrerequisite, setNewPrerequisite] = useState('');
 
   const handleAddPrerequisite = () => {
@@ -64,7 +64,7 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
 
   if (!isOpen) return null;
 
-  const ghostParticles = Array(20).fill(0).map((_, i) => ({
+  const ghostParticles = Array(20).fill(0).map((_) => ({
     size: Math.random() * 8 + 4,
     top: Math.random() * 100,
     left: Math.random() * 100,

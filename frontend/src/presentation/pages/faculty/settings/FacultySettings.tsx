@@ -115,7 +115,7 @@ export default function FacultySettings() {
             {/* Right Section - User Info */}
             <div className="flex items-center">
               <div className="px-3 py-1.5 bg-purple-50 rounded-lg text-sm text-purple-700 font-medium border border-purple-200">
-                {user?.name || user?.firstName || 'Faculty'}
+                {user?.firstName || 'Faculty'}
               </div>
             </div>
           </div>

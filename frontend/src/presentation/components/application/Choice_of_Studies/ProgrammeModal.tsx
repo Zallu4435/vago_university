@@ -13,7 +13,7 @@ export const ProgrammeModal: React.FC<ProgrammeModalProps> = ({
   onSubmit,
   choices,
 }) => {
-  const { control, handleSubmit, formState: { errors }, watch, reset } = useForm<ProgrammeChoiceFormData>({
+  const { control, handleSubmit, watch, reset } = useForm<ProgrammeChoiceFormData>({
     resolver: zodResolver(createProgrammeChoiceSchema(choices)),
     defaultValues: {
       programme: '',

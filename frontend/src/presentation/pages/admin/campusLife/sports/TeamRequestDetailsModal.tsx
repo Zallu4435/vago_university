@@ -15,7 +15,8 @@ import {
 import { 
   TeamRequestDetailsModalProps, 
   TeamRequestDetailsStatusBadgeProps, 
-  TeamRequestDetailsInfoCardProps, 
+  TeamRequestDetailsInfoCardProps,
+  SportStatus, 
 } from '../../../../../domain/types/management/sportmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate, formatDateTime } from '../../../../../shared/utils/dateUtils';
@@ -27,7 +28,7 @@ const StatusBadge: React.FC<TeamRequestDetailsStatusBadgeProps> = ({ status }) =
     rejected: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },
   };
 
-  const config = statusConfig[status];
+  const config = statusConfig[status as keyof typeof statusConfig];
 
   return (
     <span
@@ -60,10 +61,11 @@ const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
   if (!isOpen || !request) return null;
 
   const { sport, user } = request.sportRequest;
+  if (!user) return null;
 
   const ghostParticles = Array(30)
     .fill(0)
-    .map((_, i) => ({
+    .map((_) => ({
       size: Math.random() * 10 + 5,
       top: Math.random() * 100,
       left: Math.random() * 100,
@@ -107,7 +109,7 @@ const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
                 <h2 className="text-2xl font-bold text-purple-100">{sport.title}</h2>
                 <p className="text-sm text-purple-300">Request ID: {request.sportRequest.id}</p>
                 <div className="flex items-center mt-2">
-                  <StatusBadge status={request.sportRequest.status as StatusType} />
+                  <StatusBadge status={request.sportRequest.status as SportStatus} />
                 </div>
               </div>
             </div>
@@ -122,7 +124,7 @@ const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
 
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
-            <StatusBadge status={request.sportRequest.status as StatusType} />
+                         <StatusBadge status={request.sportRequest.status as SportStatus} />
             <div className="flex items-center space-x-6 text-sm text-purple-300">
               <div className="flex items-center space-x-2">
                 <Calendar size={16} className="text-purple-400" />

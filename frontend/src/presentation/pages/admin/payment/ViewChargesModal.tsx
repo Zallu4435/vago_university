@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiDollarSign, FiX, FiFileText, FiSearch } from 'react-icons/fi';
 import { Charge, ViewChargesModalProps } from '../../../../domain/types/management/financialmanagement';
 import ReactDOM from 'react-dom';
@@ -46,7 +46,7 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
   // Particle effect
   const ghostParticles = Array(30)
     .fill(0)
-    .map((_, i) => ({
+    .map((_) => ({
       size: Math.random() * 10 + 5,
       top: Math.random() * 100,
       left: Math.random() * 100,

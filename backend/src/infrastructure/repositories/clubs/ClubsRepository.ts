@@ -37,6 +37,7 @@ export class ClubsRepository implements IClubsRepository {
     const skip = (page - 1) * limit;
     const clubs = await ClubModel.find(query)
       .select("name type createdBy status createdAt color icon enteredMembers")
+      .sort({ updatedAt: -1, createdAt: -1 }) 
       .skip(skip)
       .limit(limit)
       .lean();

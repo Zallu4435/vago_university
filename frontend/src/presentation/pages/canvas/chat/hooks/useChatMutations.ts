@@ -5,7 +5,6 @@ import { toast } from 'react-hot-toast';
 export const useChatMutations = (chatId?: string, currentUserId?: string) => {
   const queryClient = useQueryClient();
 
-  // Helper to ensure required params
   const requireIds = () => {
     if (!chatId || !currentUserId) throw new Error('chatId and currentUserId are required');
   };
@@ -114,7 +113,7 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
       queryClient.setQueryData(['messages', params?.chatId], (old: any[] = []) => [...old, optimisticMessage]);
       return { previousMessages };
     },
-    onError: (err, params, context) => {
+    onError: (_err, params, context) => {
       queryClient.setQueryData(['messages', params?.chatId], context?.previousMessages);
     },
     onSettled: (_data, _error, params) => {
@@ -171,14 +170,14 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
       return { previousMessages, optimisticMessage };
     },
 
-    onError: (err, variables, context) => {
+    onError: (_err, variables, context) => {
       if (context?.previousMessages) {
         queryClient.setQueryData(['messages', variables.chatId], context.previousMessages);
       }
       toast.error('Failed to send file.');
     },
 
-    onSettled: (data, error, variables, context) => {
+    onSettled: (_data, _error, variables, context) => {
       if (context?.optimisticMessage?.attachments?.[0]?.url) {
         URL.revokeObjectURL(context.optimisticMessage.attachments[0].url);
       }
@@ -210,7 +209,7 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
       });
       return { previousMessages };
     },
-    onError: (err, params, context) => {
+    onError: (_err, params, context) => {
       queryClient.setQueryData(['messages', params.chatId], context?.previousMessages);
     },
     onSettled: (_data, _error, params) => {

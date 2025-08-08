@@ -10,7 +10,7 @@ const VideoPreviewModal: React.FC<VideoPreviewModalProps> = ({ isOpen, onClose, 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const { fetchVideoById } = useVideoManagement(1, 10, { status: 'all', category: '' }, 'all');
+  const { fetchVideoById } = useVideoManagement(1, 10, { status: 'all', category: '', dateRange: 'all' }, 'all', 'all');
 
   usePreventBodyScroll(isOpen);
 
@@ -37,7 +37,7 @@ const VideoPreviewModal: React.FC<VideoPreviewModalProps> = ({ isOpen, onClose, 
 
   const ghostParticles = Array(30)
     .fill(0)
-    .map((_, i) => ({
+    .map((_) => ({
       size: Math.random() * 10 + 5,
       top: Math.random() * 100,
       left: Math.random() * 100,

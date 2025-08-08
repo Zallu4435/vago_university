@@ -31,7 +31,7 @@ export const useNotificationManagement = () => {
 
   const isAdmin = user?.role === 'admin';
 
-  const { data: notificationsData, isLoading, error, refetch, isFetching } = useQuery({
+  const { data: notificationsData, isLoading, error, isFetching } = useQuery({
     queryKey: ['notifications', page, filters, limit, isAdmin],
     queryFn: () => {
       return notificationService.getNotifications({
@@ -57,7 +57,7 @@ export const useNotificationManagement = () => {
     if (notificationsData && notificationsData.notifications) {
       setAllNotifications((prev) => {
         const ids = new Set(prev.map((n) => n._id));
-        const newOnes = notificationsData.notifications.filter((n) => !ids.has(n._id));
+        const newOnes = notificationsData.notifications.filter((n: any) => !ids.has(n._id));
         return page === 1 ? notificationsData.notifications : [...prev, ...newOnes];
       });
       setHasMore(page < (notificationsData.totalPages || 1));
@@ -81,7 +81,7 @@ export const useNotificationManagement = () => {
       if (data && data.notifications && data.notifications.length > 0) {
         setAllNotifications((prev) => {
           const ids = new Set(prev.map((n) => n._id));
-          const newOnes = data.notifications.filter((n) => !ids.has(n._id));
+          const newOnes = data.notifications.filter((n: any) => !ids.has(n._id));
           return [...prev, ...newOnes];
         });
         setPage(nextPage);

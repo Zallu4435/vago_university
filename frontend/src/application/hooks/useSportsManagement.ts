@@ -211,10 +211,11 @@ export const useSportsManagement = () => {
     setSelectedRequestId(requestId);
   };
 
-console.log(teamsData, "teamsData")
+  console.log(requestDetails, "requestdetails")
+
   return {
-    teams: teamsData?.sports || [],
-    playerRequests: playerRequestsData?.data || [],
+    teams: (teamsData as any)?.data || [],
+    playerRequests: (playerRequestsData as any)?.data || [],
     totalPages: activeTab === 'teams' ? teamsData?.totalPages || 0 : playerRequestsData?.totalPages || 0,
     page,
     setPage,

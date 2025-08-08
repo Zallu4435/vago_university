@@ -2,7 +2,6 @@ import httpClient from '../../frameworks/api/httpClient';
 import { ProfileData, PasswordChangeData } from '../../domain/types/profile';
 
 class ProfileService {
-  // Update profile information - automatically uses correct endpoint based on auth context
   async updateProfile(data: ProfileData): Promise<void> {
     try {
       await httpClient.put('/profile', data);
@@ -11,7 +10,6 @@ class ProfileService {
     }
   }
 
-  // Change password - automatically uses correct endpoint based on auth context
   async changePassword(data: PasswordChangeData): Promise<void> {
     try {
       await httpClient.post('/profile/password', data);
@@ -20,7 +18,6 @@ class ProfileService {
     }
   }
 
-  // Upload profile picture and return the URL - automatically uses correct endpoint based on auth context
   async updateProfilePicture(file: File): Promise<string> {
     try {
       const formData = new FormData();
@@ -32,11 +29,10 @@ class ProfileService {
     }
   }
 
-  // Fetch profile data - automatically uses correct endpoint based on auth context
   async getProfile(): Promise<ProfileData> {
     try {
-      const response = await httpClient.get<ProfileData>('/profile');
-      return response.data;
+      const response = await httpClient.get<{ data: ProfileData }>('/profile');
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch profile data');
     }

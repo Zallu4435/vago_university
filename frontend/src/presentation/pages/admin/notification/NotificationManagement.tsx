@@ -187,7 +187,7 @@ const NotificationManagement: React.FC = () => {
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           searchPlaceholder="Search notifications..."
-          filters={filters}
+          filters={filters as any}
           filterOptions={{
             recipientType: RECIPIENT_TYPES,
             status: STATUSES,

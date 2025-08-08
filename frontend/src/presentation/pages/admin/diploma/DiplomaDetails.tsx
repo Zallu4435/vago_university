@@ -16,7 +16,7 @@ const DiplomaDetails: React.FC<DiplomaDetailsProps> = ({ isOpen, onClose, diplom
     });
   };
 
-  const ghostParticles = Array(20).fill(0).map((_, i) => ({
+  const ghostParticles = Array(20).fill(0).map((_) => ({
     size: Math.random() * 8 + 4,
     top: Math.random() * 100,
     left: Math.random() * 100,
@@ -122,7 +122,7 @@ const DiplomaDetails: React.FC<DiplomaDetailsProps> = ({ isOpen, onClose, diplom
             </div>
           )}
 
-          {diploma.enrolledStudents?.length > 0 && (
+          {Array.isArray(diploma.enrolledStudents) && diploma.enrolledStudents.length > 0 && (
             <div className="mb-8">
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg shadow-sm overflow-hidden">
                 <div className="p-4 bg-gray-900/60 flex items-center">
@@ -131,7 +131,7 @@ const DiplomaDetails: React.FC<DiplomaDetailsProps> = ({ isOpen, onClose, diplom
                 </div>
                 <div className="p-6">
                   <div className="space-y-4">
-                    {diploma.enrolledStudents.map((student) => (
+                    {(diploma.enrolledStudents || []).map((student) => (
                       <div
                         key={student.id}
                         className="flex justify-between items-center bg-gray-900/60 p-3 rounded-lg border border-purple-600/30"

@@ -52,4 +52,4 @@ export interface VideoPlayerProps {
   onPlayPause: () => void;
 }
 
-export type ViewMode = 'grid' | 'table';
+export type ViewMode = 'grid' | 'table' | 'courses' | 'details';

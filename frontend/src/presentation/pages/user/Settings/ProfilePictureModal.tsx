@@ -2,13 +2,20 @@ import { useRef, useState, useEffect } from 'react';
 import { FaTimes, FaUpload, FaEdit, FaImage, FaUserAlt, FaCamera } from 'react-icons/fa';
 import { ImageCropper } from './ImageCropper';
 
+interface ProfilePictureModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  currentImage: string | null;
+  onImageUpdate: (imageData: string) => void;
+}
+
 export const ProfilePictureModal = ({
   isOpen,
   onClose,
   currentImage,
   onImageUpdate,
-}) => {
-  const [selectedImage, setSelectedImage] = useState(null);
+}: ProfilePictureModalProps) => {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showCropper, setShowCropper] = useState(false);
   const [cropData, setCropData] = useState({
     x: 100,
@@ -17,7 +24,7 @@ export const ProfilePictureModal = ({
     scale: 1,
     rotate: 0,
   });
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -30,12 +37,12 @@ export const ProfilePictureModal = ({
     };
   }, [isOpen]);
 
-  const handleImageSelect = (event) => {
-    const file = event.target.files[0];
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setSelectedImage(e.target.result);
+        setSelectedImage(e.target?.result as string);
         setShowCropper(true);
         setCropData({
           x: 100,
@@ -63,7 +70,7 @@ export const ProfilePictureModal = ({
     }
   };
 
-  const handleCropApply = (croppedImageData) => {
+  const handleCropApply = (croppedImageData: string) => {
     onImageUpdate(croppedImageData);
     onClose();
     resetModal();
@@ -199,10 +206,10 @@ export const ProfilePictureModal = ({
           </div>
         ) : (
           <ImageCropper
-            selectedImage={selectedImage}
+            selectedImage={selectedImage || ''}
             cropData={cropData}
             onCropChange={setCropData}
-            onCropApply={handleCropApply}
+            onCropApply={handleCropApply as any}
             onCancel={handleCancel}
             onChooseDifferent={handleChooseDifferent}
           />

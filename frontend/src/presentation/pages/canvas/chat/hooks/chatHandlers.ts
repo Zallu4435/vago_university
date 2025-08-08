@@ -1,5 +1,5 @@
 import { toast } from 'react-hot-toast';
-import { Message, User, Chat } from '../types/ChatTypes';
+import { Message, User } from '../types/ChatTypes';
 import { RefObject } from 'react';
 
 export const handleScroll = (
@@ -152,10 +152,7 @@ export const handleReplyToMessage = (
 ) => setReplyToMessage(message);
 
 export const handleForwardMessage = async (
-  messageId: string,
-  messages: Message[]
 ) => {
-  const message = messages.find((m: Message) => m.id === messageId);
 };
 
 export const handleSendMessage = async (
@@ -241,7 +238,6 @@ export const handleReaction = async (
 
 export const handleRemoveReaction = async (
   messageId: string,
-  emoji: string,
   currentUserId: string,
   chatMutations: any
 ) => {
@@ -324,7 +320,7 @@ export const handleMakeAdmin = async (
   if (!flatChat || !currentUser) return;
   try {
     await chatMutations.updateGroupAdmin.mutateAsync({ userId, isAdmin: true });
-    setSelectedChatId(prev => prev ? { ...prev, admins: [...prev.admins, userId] } : null);
+    setSelectedChatId((prev: any) => prev ? { ...prev, admins: [...prev.admins, userId] } : null);
     toast.success('Admin added');
   } catch (error) {
     console.error('Error making admin:', error);
@@ -342,7 +338,7 @@ export const handleRemoveAdmin = async (
   if (!flatChat || !currentUser) return;
   try {
     await chatMutations.updateGroupAdmin.mutateAsync({ userId, isAdmin: false });
-    setSelectedChatId(prev => prev ? { ...prev, admins: prev.admins.filter(id => id !== userId) } : null);
+    setSelectedChatId((prev: any) => prev ? { ...prev, admins: prev.admins.filter((id: string) => id !== userId) } : null);
     toast.success('Admin removed');
   } catch (error) {
     console.error('Error removing admin:', error);

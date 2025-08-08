@@ -7,7 +7,7 @@ import type { ChoiceOfStudyProps, ChoiceOfStudyRef, ProgrammeChoice } from '../.
 import { ChoiceOfStudyFormData, ProgrammeChoiceFormData, choiceOfStudyFormSchema } from '../../../../domain/validation/ChoiceOfStudySchema';
 
 export const ChoiceOfStudy = forwardRef<ChoiceOfStudyRef, ChoiceOfStudyProps>(
-  ({ initialData, onSave }, ref) => {
+  ({ initialData }, ref) => {
     const [showModal, setShowModal] = useState(false);
 
     const methods = useForm<ChoiceOfStudyFormData>({

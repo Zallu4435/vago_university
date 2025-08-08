@@ -652,7 +652,7 @@ export const VideoConferencePage: React.FC = () => {
       />
 
       {/* CSS for reaction animation */}
-      <style jsx>{`
+      <style>{`
         @keyframes reaction-flow {
           0% {
             transform: translateY(0) scale(1);

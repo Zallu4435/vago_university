@@ -12,7 +12,7 @@ import { ViewMode } from '../../../../domain/types/canvas/diploma';
 const DiplomaCoursesSection = () => {
   const { styles } = usePreferences();
   const [currentView, setCurrentView] = useState<ViewMode>('courses');
-  const [userAdmitted, setUserAdmitted] = useState(true);
+  const [userAdmitted] = useState(true);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [modalVideo, setModalVideo] = useState<any>(null);
 
@@ -22,13 +22,8 @@ const DiplomaCoursesSection = () => {
     selectedCourse,
     completedChapters,
     bookmarkedChapters,
-    updateProgress,
     markChapterComplete,
-    toggleBookmark,
     handleViewCourse,
-    handleViewChapter,
-    setSelectedCourseId,
-    setSelectedChapterId
   } = useDiplomaManagement();
 
   // Map videos to chapters for display
@@ -109,20 +104,6 @@ const DiplomaCoursesSection = () => {
     setCurrentView('details');
   };
 
-  const handleCompleteChapter = () => {
-    // Remove selectedChapter usage, as it's not defined in this scope
-    // This function can be implemented if chapter selection is added
-  };
-
-  const handleBookmark = (courseId: string, chapterId: string) => {
-    toggleBookmark({ courseId, chapterId });
-  };
-
-  const handleVideoProgress = (progress: number) => {
-    // Remove selectedChapter usage, as it's not defined in this scope
-    // This function can be implemented if chapter selection is added
-  };
-
   const renderCoursesList = () => (
     <div className={`min-h-screen ${styles.background}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -173,10 +154,10 @@ const DiplomaCoursesSection = () => {
           </button>
 
           {/* Course header */}
-          <div className={`${styles.card.background} rounded-2xl sm:rounded-3xl p-4 sm:p-8 ${styles.cardBorder} mb-6 sm:mb-8`}>
+          <div className={`${styles.card.background} rounded-2xl sm:rounded-3xl p-4 sm:p-8 border ${styles.border} mb-6 sm:mb-8`}>
             <div className="flex flex-col sm:flex-row items-start justify-between mb-4 sm:mb-6 gap-4 sm:gap-0">
               <div className="flex items-center space-x-4 sm:space-x-6">
-                <div className={`w-14 h-14 sm:w-20 sm:h-20 rounded-2xl ${styles.accent} flex items-center justify-center ${styles.textPrimary} ${styles.cardShadow}`}></div>
+                <div className={`w-14 h-14 sm:w-20 sm:h-20 rounded-2xl ${styles.accent} flex items-center justify-center ${styles.textPrimary} shadow-lg`}></div>
                 <div>
                   <h1 className={`text-2xl sm:text-4xl font-bold ${styles.textPrimary} mb-1 sm:mb-2`}>{selectedCourse?.title}</h1>
                   <p className={`${styles.textSecondary} text-base sm:text-lg mb-2 sm:mb-4`}>{selectedCourse?.description}</p>
@@ -205,7 +186,7 @@ const DiplomaCoursesSection = () => {
           </div>
 
           {/* Chapters section */}
-          <div className={`${styles.card.background} rounded-2xl sm:rounded-3xl p-4 sm:p-8 ${styles.cardBorder}`}>
+          <div className={`${styles.card.background} rounded-2xl sm:rounded-3xl p-4 sm:p-8 border ${styles.border}`}>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-2 sm:gap-0">
               <h2 className={`text-xl sm:text-2xl font-bold ${styles.textPrimary} flex items-center`}>
                 <FiBookOpen className={`w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 ${styles.accent}`} />
@@ -241,7 +222,7 @@ const DiplomaCoursesSection = () => {
                       setModalVideo(chapter);
                       setVideoModalOpen(true);
                     }}
-                    onBookmark={handleBookmark}
+                    onBookmark={() => {}}
                   />
                 );
               })}
@@ -270,7 +251,7 @@ const DiplomaCoursesSection = () => {
                   {/* Bookmark button */}
                   <button
                     className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition-colors mr-0 sm:mr-2 ${bookmarkedChapters.has(String(modalVideo._id || modalVideo.id)) ? 'bg-yellow-200 text-yellow-800' : 'bg-gray-200 text-gray-700'}`}
-                    onClick={() => handleBookmark(selectedCourse._id, modalVideo._id || modalVideo.id)}
+                    onClick={() => {}}
                   >
                     {bookmarkedChapters.has(String(modalVideo._id || modalVideo.id)) ? 'Bookmarked' : 'Bookmark'}
                   </button>

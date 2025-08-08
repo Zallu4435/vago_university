@@ -32,14 +32,31 @@ export interface GetStudentInfoRequestDTO {
   search?: string;
   page?: number;
   limit?: number;
+  userId?: string
 }
   
-  export interface GetCoursesResponseDTO {
-    courses: any[];
-    totalCourses: number;
-    totalPages: number;
-    currentPage: number;
-  }
+  export interface CourseWithJoined {
+  id: string;
+  title: string;
+  specialization: string;
+  faculty: string;
+  credits: number;
+  term: string;
+  maxEnrollment: number;
+  currentEnrollment: number;
+  createdAt: string;
+  schedule?: string;
+  description?: string;
+  prerequisites?: string[];
+  joined: boolean;
+}
+
+export interface GetCoursesResponseDTO {
+  courses: CourseWithJoined[];
+  totalCourses: number;
+  totalPages: number;
+  currentPage: number;
+}
   
   export interface GetAcademicHistoryRequestDTO {
     userId: string;

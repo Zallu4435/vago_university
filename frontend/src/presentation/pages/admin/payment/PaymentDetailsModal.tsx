@@ -29,7 +29,7 @@ const StatusBadge = ({ status }: { status: string }) => {
     },
   };
 
-  const config = statusConfig[status?.toLowerCase()] || statusConfig.pending;
+  const config = statusConfig[status?.toLowerCase() as keyof typeof statusConfig] || statusConfig.pending;
 
   return (
     <span
@@ -98,7 +98,7 @@ const PaymentDetailsModal: React.FC<PaymentDetailsModalProps> = ({ isOpen, onClo
 
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-            <InfoCard icon={User} label="Student ID" value={payment.studentId} />
+            <InfoCard icon={User} label="Student ID" value={payment.studentId ?? 'N/A'} />
             <InfoCard icon={Calendar} label="Date" value={formatDate(payment.date)} />
             <InfoCard icon={DollarSign} label="Amount" value={`$${payment.amount?.toFixed(2)}`} />
             <InfoCard icon={CreditCard} label="Method" value={payment.method} />

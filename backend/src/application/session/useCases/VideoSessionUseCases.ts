@@ -52,7 +52,6 @@ export interface IRecordAttendanceLeaveUseCase {
 export class CreateVideoSessionUseCase implements ICreateVideoSessionUseCase {
     constructor(private sessionRepository: ISessionRepository) {}
     async execute(params: CreateVideoSessionRequestDTO): Promise<CreateVideoSessionResponseDTO> {
-        // Combine date and time if present
         let startTime: Date;
         if (params.date && params.time) {
             startTime = new Date(`${params.date}T${params.time}:00.000Z`);
@@ -62,7 +61,6 @@ export class CreateVideoSessionUseCase implements ICreateVideoSessionUseCase {
             throw new Error('startTime or (date and time) must be provided');
         }
 
-        // Ensure hostId is provided
         if (!params.hostId) {
             throw new Error('hostId is required');
         }
@@ -89,7 +87,6 @@ export class CreateVideoSessionUseCase implements ICreateVideoSessionUseCase {
             params.attendeeList
         );
         const created = await this.sessionRepository.create(session);
-        // Add joinUrl after session is created and has an id
         if (created && created.id) {
             const joinUrl = `${config.backendUrl}/api/video-sessions/${created.id}/join`;
             (created as any).joinUrl = joinUrl;
@@ -125,7 +122,6 @@ export class UpdateVideoSessionUseCase {
                 updateData.status = VideoSessionStatus[updateData.status] || undefined;
             }
         }
-        // Combine date and time if present
         if (updateData.date && updateData.time) {
             updateData.startTime = new Date(`${updateData.date}T${updateData.time}:00.000Z`);
             delete updateData.date;
@@ -139,7 +135,6 @@ export class UpdateVideoSessionUseCase {
         const session = await this.sessionRepository.update(params.sessionId, updateData as Partial<VideoSession>);
 
         if (session && !session.joinUrl) {
-            // If id is missing but _id exists, use _id
             let sessionId = session.id;
             if (!sessionId && (session as any)._id) {
                 sessionId = (session as any)._id.toString();
@@ -169,6 +164,8 @@ export class DeleteVideoSessionUseCase {
 export class GetAllVideoSessionsUseCase {
     constructor(private sessionRepository: ISessionRepository) {}
     async execute(params: { search?: string; status?: string; instructor?: string; course?: string } = {}): Promise<VideoSessionResponseDTO[]> {
+
+        console.log(params," sodsohdsd")
         const sessions = await this.sessionRepository.getAll(params);
         return sessions as VideoSessionResponseDTO[];
     }

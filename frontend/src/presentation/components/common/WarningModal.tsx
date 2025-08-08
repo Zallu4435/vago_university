@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiAlertTriangle, FiAlertCircle, FiInfo, FiX } from 'react-icons/fi';
+import { FiAlertTriangle, FiAlertCircle, FiInfo } from 'react-icons/fi';
 
 interface WarningModalProps {
   isOpen: boolean;

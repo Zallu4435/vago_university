@@ -10,6 +10,8 @@ export interface StudentInfo {
 
 export interface Course {
     id: string;
+    _id: string;
+    joined: boolean;
     title: string;
     specialization: string;
     faculty: string;
@@ -38,6 +40,7 @@ export interface CourseDetails {
     currentEnrollment: number;
     description?: string;
     prerequisites?: string[];
+    joined: boolean;
 }
 
 export interface CourseDetailsModalProps {

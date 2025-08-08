@@ -172,7 +172,7 @@ const relationshipOptions = [
 ];
 
 export const altContactFields = [
-  { id: 'alternateContactName', label: 'Name of Guardian', type: 'input', placeholder: 'Enter name' },
-  { id: 'relationshipWithApplicant', label: 'Relationship with Applicant', type: 'select', options: relationshipOptions, placeholder: 'Select relationship' },
-  { id: 'occupation', label: 'Occupation', type: 'input', placeholder: 'Enter occupation' },
+  { id: 'alternateContactName', label: 'Name of Guardian', type: 'input', placeholder: 'Enter name', required: false },
+  { id: 'relationshipWithApplicant', label: 'Relationship with Applicant', type: 'select', options: relationshipOptions, placeholder: 'Select relationship', required: false },
+  { id: 'occupation', label: 'Occupation', type: 'input', placeholder: 'Enter occupation', required: false },
 ];

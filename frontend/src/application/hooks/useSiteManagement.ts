@@ -17,7 +17,6 @@ export const useSiteManagement = (
   const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // Fetch sections only for the active tab
   const {
     data: sections = [],
     isLoading,
@@ -27,7 +26,6 @@ export const useSiteManagement = (
     queryFn: () => siteManagementService.getSections(activeTab, 10, page, search, category, dateRange, startDate, endDate),
   });
 
-  // Fetch individual section by ID
   const {
     data: selectedSection,
     isLoading: isLoadingSection,
@@ -38,7 +36,6 @@ export const useSiteManagement = (
     enabled: !!selectedId,
   });
 
-  // Unified CRUD mutations
   const createSection = useMutation({
     mutationFn: (data: CreateSiteSectionData) => siteManagementService.createSection(data),
     onSuccess: (data) => {
@@ -68,15 +65,13 @@ export const useSiteManagement = (
 
   const deleteSection = useMutation({
     mutationFn: (id: string) => siteManagementService.deleteSection(id),
-    onSuccess: (_, id) => {
-      // Invalidate the current tab's query
+    onSuccess: (_) => {
       queryClient.invalidateQueries({ queryKey: ['site-sections', activeTab] });
       toast.success('Section deleted successfully');
     },
     onError: () => toast.error('Failed to delete section'),
   });
 
-  // Helper functions for specific section types
   const createHighlight = (data: Omit<CreateSiteSectionData, 'sectionKey'>) => 
     createSection.mutateAsync({ ...data, sectionKey: 'highlights' });
   

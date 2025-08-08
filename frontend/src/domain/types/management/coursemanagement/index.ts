@@ -58,6 +58,7 @@ export interface CourseDetailsProps {
     createdAt?: string;
     updatedAt?: string;
   };
+  isLoading?: boolean;
 }
 
 export type StatusType = 'pending' | 'approved' | 'rejected';

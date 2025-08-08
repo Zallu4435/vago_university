@@ -25,6 +25,7 @@ export class FacultyRepository implements IFacultyRepository {
     async findFaculty(query, options: { skip?: number; limit?: number; select?: string }): Promise<any[]> {
         return (FacultyRegister as any).find(query)
             .select((options.select ? options.select + ' blocked' : 'blocked'))
+            .sort({ updatedAt: -1, createdAt: -1 }) 
             .skip(options.skip || 0)
             .limit(options.limit || 0)
             .lean();

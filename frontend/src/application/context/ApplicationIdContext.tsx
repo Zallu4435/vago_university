@@ -1,7 +1,7 @@
 // application/contexts/ApplicationIdContext.tsx
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { generateUUID } from '../../infrastructure/utils/uuid';
+import { generateUUID } from '../../frameworks/utils/uuid';
 
 interface ApplicationIdContextType {
   applicationId: string | null;

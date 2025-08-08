@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FaCheckCircle, FaArrowRight, FaArrowLeft, FaCircle } from 'react-icons/fa';
+import { useState } from 'react';
+import { FaCheckCircle, FaArrowRight, FaArrowLeft } from 'react-icons/fa';
 
 const ApplicationProcess = () => {
   const [activeStep, setActiveStep] = useState(1);
@@ -53,7 +53,7 @@ const ApplicationProcess = () => {
     }
   ];
 
-  const handleStepClick = (stepId) => {
+  const handleStepClick = (stepId: any) => {
     setActiveStep(stepId);
   };
 

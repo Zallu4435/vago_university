@@ -10,6 +10,8 @@ import {
   IGetAllChargesUseCase,
   IUpdateChargeUseCase,
   IDeleteChargeUseCase,
+  ICheckPendingPaymentUseCase,
+  IClearPendingPaymentUseCase
 } from "../../../application/financial/useCases/FinancialUseCases";
 
 export class FinancialController implements IFinancialController {
@@ -26,7 +28,9 @@ export class FinancialController implements IFinancialController {
     private readonly createChargeUseCase: ICreateChargeUseCase,
     private readonly getAllChargesUseCase: IGetAllChargesUseCase,
     private readonly updateChargeUseCase: IUpdateChargeUseCase,
-    private readonly deleteChargeUseCase: IDeleteChargeUseCase
+    private readonly deleteChargeUseCase: IDeleteChargeUseCase,
+    private readonly checkPendingPaymentUseCase: ICheckPendingPaymentUseCase,
+    private readonly clearPendingPaymentUseCase: IClearPendingPaymentUseCase 
   ) { }
 
   async getStudentFinancialInfo(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -170,6 +174,29 @@ export class FinancialController implements IFinancialController {
     }
     return this.httpSuccess.success_200(response.data);
   }
+
+  async checkPendingPayment(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    if (!httpRequest.user?.userId) {
+      return this.httpErrors.error_401();
+    }
+    const response = await this.checkPendingPaymentUseCase.execute(httpRequest.user.userId);
+    if (!response.success) {
+      return this.httpErrors.error_400();
+    }
+    return this.httpSuccess.success_200(response.data);
+  }
+
+  async clearPendingPayment(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    if (!httpRequest.user?.userId) {
+      return this.httpErrors.error_401();
+    }
+    const response = await this.clearPendingPaymentUseCase.execute(httpRequest.user.userId);
+    if (!response.success) {
+      return this.httpErrors.error_400();
+    }
+    return this.httpSuccess.success_200(response.data);
+  }
+  
 }
 
 function hasErrorProperty(data: unknown): data is { error: string } {

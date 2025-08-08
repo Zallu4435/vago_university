@@ -20,7 +20,7 @@ export interface DocumentsProps {
 }
 
 export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
-  ({ initialData, onSave, applicationId }, ref) => {
+  ({ initialData, applicationId }, ref) => {
 
     const defaultDocuments: DocumentUpload[] = [
       { id: 'passport', name: 'Passport' },

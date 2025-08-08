@@ -37,9 +37,9 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
     setValue,
     reset,
   } = useForm<TeamFormData>({
-    resolver: zodResolver(teamSchema),
+    resolver: zodResolver(teamSchema) as any,
     defaultValues: {
-      ...DEFAULT_TEAM_FORM_VALUES,
+      ...DEFAULT_TEAM_FORM_VALUES as any,
       ...initialData,
     },
     mode: 'onChange',
@@ -77,16 +77,16 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
 
   React.useEffect(() => {
     if (isOpen && initialData) {
-      reset({ ...initialData });
+      reset({ ...initialData } as any);
     } else if (isOpen && !isEditing) {
-      reset(DEFAULT_TEAM_FORM_VALUES);
+      reset(DEFAULT_TEAM_FORM_VALUES as any);
     }
   }, [isOpen, initialData, isEditing, reset]);
 
   // Particle effect
   const ghostParticles = Array(PARTICLE_COUNT)
     .fill(0)
-    .map((_, i) => ({
+    .map((_) => ({
       size: Math.random() * (PARTICLE_SIZE_RANGE.max - PARTICLE_SIZE_RANGE.min) + PARTICLE_SIZE_RANGE.min,
       top: Math.random() * 100,
       left: Math.random() * 100,

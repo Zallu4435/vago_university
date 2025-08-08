@@ -1,3 +1,4 @@
+import React from 'react';
 import { 
   FaClock, 
   FaRecordVinyl, 
@@ -12,7 +13,7 @@ import {
 } from 'react-icons/fa';
 import { Session, SessionStats } from '../../../../../domain/types/canvas/session';
 
-export const getStatusBadge = (status: string, isLive: boolean, styles: any): JSX.Element => {
+export const getStatusBadge = (status: string, styles: any): React.JSX.Element => {
   const baseClasses = "px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1";
   const normalized = (status || '').toLowerCase();
   switch (normalized) {
@@ -54,7 +55,7 @@ export const getStatusBadge = (status: string, isLive: boolean, styles: any): JS
   }
 };
 
-export const getDifficultyBadge = (difficulty: Session['difficulty'], styles: any): JSX.Element => {
+export const getDifficultyBadge = (difficulty: Session['difficulty'], styles: any): React.JSX.Element => {
   const colors = {
     'Beginner': styles.status.success,
     'Intermediate': styles.status.warning,
@@ -68,7 +69,7 @@ export const getDifficultyBadge = (difficulty: Session['difficulty'], styles: an
   );
 };
 
-export const getConnectionQualityIcon = (quality: Session['connectionQuality'], styles: any): JSX.Element | null => {
+export const getConnectionQualityIcon = (quality: Session['connectionQuality'], styles: any): React.JSX.Element | null => {
   switch (quality) {
     case 'excellent':
       return <FaWifi className={`w-4 h-4 ${styles.status.success}`} />;
@@ -81,7 +82,7 @@ export const getConnectionQualityIcon = (quality: Session['connectionQuality'], 
   }
 };
 
-export const getActionButton = (session: Session, userAccess: { isEnrolled: boolean }, styles: any): JSX.Element => {
+export const getActionButton = (session: Session, userAccess: { isEnrolled: boolean }, styles: any): React.JSX.Element => {
   if (!userAccess.isEnrolled) {
     return (
       <button className={`flex items-center gap-2 px-6 py-3 ${styles.button.secondary} rounded-xl cursor-not-allowed ${styles.border}`}>

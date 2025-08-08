@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiUsers, FiMic, FiVideo, FiImage, FiFile, FiPlay } from 'react-icons/fi';
+import { FiUsers} from 'react-icons/fi';
 import { Chat, Message, Styles, User, PaginatedResponse } from '../types/ChatTypes';
 import { formatChatTime } from '../utils/chatUtils';
 
@@ -122,7 +122,30 @@ export const ChatList: React.FC<ChatListProps> = ({
                               :
                             </span>
                           )}{' '}
-                          {formatLastMessage(chat.lastMessage)}
+                          {formatLastMessage({
+                            id: chat.lastMessage.id,
+                            chatId: chat.id,
+                            senderId: chat.lastMessage.senderId,
+                            senderName: chat.participants.find(p => p.id === chat.lastMessage?.senderId)?.firstName + ' ' + chat.participants.find(p => p.id === chat.lastMessage?.senderId)?.lastName || '',
+                            content: chat.lastMessage.content,
+                            type: chat.lastMessage.type as any,
+                            fileUrl: undefined,
+                            fileName: undefined,
+                            fileSize: undefined,
+                            fileType: undefined,
+                            replyToId: undefined,
+                            replyTo: undefined,
+                            forwardedFrom: undefined,
+                            reactions: [],
+                            status: chat.lastMessage.status as any,
+                            createdAt: chat.lastMessage.createdAt,
+                            updatedAt: chat.lastMessage.createdAt,
+                            deletedAt: undefined,
+                            deletedFor: undefined,
+                            isDeleted: false,
+                            deletedForEveryone: false,
+                            attachments: undefined,
+                          })}
                         </>
                       ) : (
                         <span className="italic text-gray-400">No messages yet</span>

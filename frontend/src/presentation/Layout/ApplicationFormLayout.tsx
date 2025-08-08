@@ -17,10 +17,6 @@ const ApplicationFormLayout: React.FC<{ children: React.ReactNode }> = ({ childr
     navigate('/login');
   };
 
-  const handleSettings = () => {
-    navigate('/settings');
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Header

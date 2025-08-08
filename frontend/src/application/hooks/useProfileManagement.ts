@@ -57,7 +57,7 @@ export const useProfileManagement = () => {
   });
 
   return {
-    profile: profile?.data,
+    profile: profile,
     isLoading,
     error,
     isEditing,

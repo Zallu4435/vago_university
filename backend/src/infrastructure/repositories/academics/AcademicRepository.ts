@@ -30,7 +30,7 @@ export class AcademicRepository implements IAcademicRepository {
     return UserModel
       .findById(id)
       .select("_id firstName lastName email phone profilePicture")
-      .lean<WithStringId<IUserDocument>>({ getters: true });   // 👈 generic added
+      .lean<WithStringId<IUserDocument>>({ getters: true });   
   }
 
   private async getProgramByStudentId(id: string) {
@@ -42,11 +42,11 @@ export class AcademicRepository implements IAcademicRepository {
 
   private async getPendingEnrollmentsByStudentId(
     id: string
-  ): Promise<WithStringId<IEnrollmentDocument>[]> {           // 👈 note the [] here
+  ): Promise<WithStringId<IEnrollmentDocument>[]> {          
     return EnrollmentModel
       .find({ studentId: id, status: /^pending/i })
       .populate({ path: "courseId", select: "credits" })
-      .lean<WithStringId<IEnrollmentDocument>[]>({ getters: true }); // 👈 and here
+      .lean<WithStringId<IEnrollmentDocument>[]>({ getters: true }); 
   }
 
   async findStudentById(userId: string) {

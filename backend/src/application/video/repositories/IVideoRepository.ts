@@ -1,7 +1,8 @@
 import { IVideoBase, IVideo } from "../../../domain/video/entities/VideoTypes";
 
-export interface IRepoVideo extends IVideo {
+export interface IRepoVideo extends Omit<IVideo, 'diplomaId'> {
     _id?: string;
+    diplomaId?: string | IRepoDiploma;
 }
 
 export interface IRepoDiploma {

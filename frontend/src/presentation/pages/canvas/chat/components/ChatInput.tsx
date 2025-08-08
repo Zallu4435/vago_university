@@ -5,7 +5,6 @@ import { AttachmentMenu } from './AttachmentMenu';
 import { Styles, Message } from '../types/ChatTypes';
 import { MediaPreview } from './MediaPreview';
 import LiveWaveform from './LiveWaveform';
-import AudioPlayer from './AudioPlayer';
 
 
 interface ChatInputProps {
@@ -25,7 +24,6 @@ export const ChatInput: React.FC<ChatInputProps & { disabled?: boolean }> = ({
   replyToMessage,
   onCancelReply,
   selectedChatId,
-  currentUserId,
   disabled = false
 }) => {
   const [message, setMessage] = useState('');
@@ -35,13 +33,13 @@ export const ChatInput: React.FC<ChatInputProps & { disabled?: boolean }> = ({
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [showMediaPreview, setShowMediaPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const attachmentRef = useRef<HTMLButtonElement>(null);
   const emojiRef = useRef<HTMLButtonElement>(null);
   const [recording, setRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [, setAudioUrl] = useState<string | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const recordingInterval = useRef<NodeJS.Timeout | null>(null);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
@@ -110,16 +108,6 @@ export const ChatInput: React.FC<ChatInputProps & { disabled?: boolean }> = ({
     setPreviewUrls([]);
   };
 
-  const handleSendMedia = (caption: string) => {
-    if (selectedFiles.length > 0) {
-      selectedFiles.forEach((file) => {
-        onSendMessage(caption, file, replyToMessage || undefined);
-      });
-      setMessage('');
-      clearSelectedFiles();
-      setShowMediaPreview(false);
-    }
-  };
 
   const handleCloseMediaPreview = () => {
     setShowMediaPreview(false);

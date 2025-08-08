@@ -2,7 +2,7 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { 
-  LuList, LuClock, LuCalendar, LuUsers, LuBookOpen, LuSettings, 
+  LuList, LuClock, LuCalendar, LuBookOpen, LuSettings, 
   LuLogOut, LuGraduationCap, LuChevronRight, LuStar, LuTrendingUp,
   LuAward, LuFileText
 } from 'react-icons/lu';
@@ -15,7 +15,7 @@ interface SidebarProps {
   onCollapse?: (collapsed: boolean) => void;
 }
 
-export default function Sidebar({ activeTab, setActiveTab, facultyName, department, onCollapse }: SidebarProps) {
+export default function Sidebar({ activeTab, setActiveTab, onCollapse }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<number | 'logout' | null>(null);
   const navigate = useNavigate();

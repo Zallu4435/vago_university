@@ -36,7 +36,7 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
   const { data: diplomasData, isLoading: isLoadingDiplomas } = useQuery<{ diplomas: DiplomaForHook[] }, Error>({
     queryKey: ['diplomas'],
     queryFn: async () => {
-      const { diplomas } = await diplomaBackendService.getDiplomas(1, 100);
+      const { diplomas } = await diplomaBackendService.getDiplomas({ page: 1, limit: 100 });
       return { diplomas };
     },
   });

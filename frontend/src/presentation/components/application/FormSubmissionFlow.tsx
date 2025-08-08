@@ -18,14 +18,12 @@ import type { DocumentUpload, FormSubmissionFlowProps } from '../../../domain/ty
 
 export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
   formData,
-  onPaymentComplete,
   onBackToForm,
-  onConfirm,
   onLogout
 }) => {
   const [showPayment, setShowPayment] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [submissionStatus, setSubmissionStatus] = useState<{ success: boolean; message: string }>({ success: false, message: '' });
+  const [submissionStatus] = useState<{ success: boolean; message: string }>({ success: false, message: '' });
   const [selectedDocument, setSelectedDocument] = useState<DocumentUpload | null>(null);
   const [showDocumentModal, setShowDocumentModal] = useState(false);
 

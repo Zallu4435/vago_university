@@ -81,9 +81,7 @@ export class GetClubByIdUseCase implements IGetClubByIdUseCase {
     if (!club) {
       throw new Error("Club not found!");
     }
-    return {
-      club: club
-    };
+    return club;
   }
 }
 

@@ -18,7 +18,6 @@ import {
   EventRequestDetailsModalProps,
   EventRequestDetailsStatusBadgeProps,
   EventRequestDetailsInfoCardProps,
-  ParticleConfig
 } from '../../../../../domain/types/management/eventmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate, formatDateTime } from '../../../../../shared/utils/dateUtils';
@@ -89,11 +88,11 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <InfoCard icon={User} label="Requested By" value={request.user?.name || request.requestedBy} />
             <InfoCard icon={Mail} label="Email" value={request.user?.email || 'N/A'} />
-            <InfoCard icon={MapPin} label="Venue" value={request.event?.location || request.proposedVenue} />
-            <InfoCard icon={Calendar} label="Event Date" value={request.event?.date ? formatDate(request.event.date) : formatDate(request.proposedDate)} />
-            <InfoCard icon={Clock} label="Requested At" value={formatDateTime(request.createdAt || request.requestedAt)} />
+            <InfoCard icon={MapPin} label="Venue" value={request.event?.location || request.proposedVenue || 'N/A'} />
+            <InfoCard icon={Calendar} label="Event Date" value={request.event?.date ? formatDate(request.event.date) : (request.proposedDate ? formatDate(request.proposedDate) : 'N/A')} />
+            <InfoCard icon={Clock} label="Requested At" value={formatDateTime(request.createdAt || request.requestedAt || '')} />
             <InfoCard icon={Users} label="Expected Participants" value={request.expectedParticipants?.toString() || 'N/A'} />
-            <InfoCard icon={DocumentText} label="Type" value={request.type} />
+            <InfoCard icon={DocumentText} label="Type" value={request.type || 'N/A'} />
             <InfoCard icon={Info} label="Status" value={request.status} />
           </div>
 

@@ -12,7 +12,7 @@ export class AdmissionRepository implements IAdmissionRepository {
     async find(filter, projection, skip: number, limit: number) {
         const results = await AdmissionModel.find(filter)
             .select(projection)
-            .sort({ createdAt: -1 })
+            .sort({ updatedAt: -1, createdAt: -1 }) 
             .skip(skip)
             .limit(limit)
             .lean({ getters: true });
@@ -25,21 +25,20 @@ export class AdmissionRepository implements IAdmissionRepository {
 
 
     async getAdmissionById(id: string) {
-        const admission = await AdmissionModel.findById(id).lean({ getters: true });
+        const admission = await AdmissionModel.findById(id);
         return { admission } as unknown as FullAdmissionDetails;
     }
 
     async getAdmissionByToken(admissionId: string, token: string) {
 
         const admission = await AdmissionModel.findById(admissionId)
-            .select("personal choiceOfStudy status confirmationToken tokenExpiry")
-            .lean({ getters: true });
+            .select("personal choiceOfStudy status confirmationToken tokenExpiry");
 
         return admission as unknown as FullAdmissionDetails;
     }
 
     async findAdmissionById(id: string) {
-        return AdmissionModel.findById(id).lean({ getters: true }) as unknown as FullAdmissionDetails;
+        return AdmissionModel.findById(id) as unknown as FullAdmissionDetails;
     }
 
     async saveAdmission(admission) {
@@ -47,7 +46,7 @@ export class AdmissionRepository implements IAdmissionRepository {
     }
 
     async findUserByEmail(email: string) {
-        return UserModel.findOne({ email }).lean({ getters: true }) as unknown as User;
+        return UserModel.findOne({ email }) as unknown as User;
     }
 
     async saveUser(user) {

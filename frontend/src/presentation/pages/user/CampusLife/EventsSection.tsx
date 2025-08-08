@@ -180,7 +180,7 @@ export default function EventsSection({ events, searchTerm, statusFilter, onFilt
               {events.length === 0 && (
                 <div className={`p-4 text-center ${styles.textSecondary} text-xs sm:text-sm`}>No events found</div>
               )}
-              {events.map((event: EventType, idx: number) => (
+              {events.map((event: EventType) => (
                 <div
                   key={event.id}
                   className={`p-3 sm:p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${selectedEvent?.id === event.id ? 'bg-orange-50/70' : ''
@@ -295,7 +295,7 @@ export default function EventsSection({ events, searchTerm, statusFilter, onFilt
                           onSubmit={handleJoinRequest}
                           onCancel={() => setShowJoinForm(false)}
                           isLoading={isJoiningEvent}
-                          title={selectedEvent?.title}
+                          title={selectedEvent?.title as string}
                         />
                         {joinEventError && (
                           <div className={`mt-2 ${styles.status.error} text-xs`}>Failed to submit registration request. Please try again.</div>

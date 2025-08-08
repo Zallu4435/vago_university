@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { FaBell, FaSearch, FaBars, FaTimes, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserAlt, FaExchangeAlt, FaChalkboardTeacher, FaTachometerAlt, FaUserGraduate } from 'react-icons/fa';
+import { FaBell, FaSearch, FaBars, FaTimes, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserAlt, FaExchangeAlt, FaChalkboardTeacher, FaTachometerAlt } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePreferences } from '../../../application/context/PreferencesContext';
 import { useNotificationManagement } from '../../../application/hooks/useNotificationManagement';
 import NotificationModal from '../common/NotificationModal';
 
 interface HeaderProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
   mobileMenuOpen: boolean;
   setMobileMenuOpen: (open: boolean) => void;
   onLogout: () => void;

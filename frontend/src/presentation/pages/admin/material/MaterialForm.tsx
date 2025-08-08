@@ -254,7 +254,7 @@ const MaterialForm: React.FC<MaterialFormProps> = ({ isOpen, onClose, onSubmit, 
                     }`}
                   />
                   {fileName && <p className="mt-1 text-sm text-gray-400">Selected: {fileName}</p>}
-                  {errors.file && <p className="mt-1 text-sm text-red-400">{errors.file.message}</p>}
+                  {errors.file && <p className="mt-1 text-sm text-red-400">{errors.file.message as string}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-purple-300 mb-2">Thumbnail Upload</label>
@@ -267,7 +267,7 @@ const MaterialForm: React.FC<MaterialFormProps> = ({ isOpen, onClose, onSubmit, 
                     }`}
                   />
                   {thumbnailName && <p className="mt-1 text-sm text-gray-400">Selected: {thumbnailName}</p>}
-                  {errors.thumbnail && <p className="mt-1 text-sm text-red-400">{errors.thumbnail.message}</p>}
+                  {errors.thumbnail && <p className="mt-1 text-sm text-red-400">{errors.thumbnail.message as string}</p>}
                 </div>
               </div>
             </div>

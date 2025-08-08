@@ -79,7 +79,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
     mode: 'onSubmit',
   });
 
-  const { setValue, watch, trigger, getValues } = methods;
+  const { setValue, watch, getValues } = methods;
   const formData = watch();
 
   const {
@@ -260,7 +260,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
     }
   };
 
-  const handleUpdateAchievements = async (data: AchievementSection, validate: boolean = false) => {
+  const handleUpdateAchievements = async (data: AchievementSection) => {
     if (isInitializing) {
       return;
     }
@@ -418,7 +418,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
         const latestAchievements = achievementsFormRef.current.getValues();
         if (isValid && latestAchievements) {
           try {
-            await handleUpdateAchievements(latestAchievements, true);
+            await handleUpdateAchievements(latestAchievements);
             if (!saveError) {
               handleNextTab();
             }

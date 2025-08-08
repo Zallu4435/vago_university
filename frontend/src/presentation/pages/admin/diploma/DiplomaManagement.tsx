@@ -89,7 +89,7 @@ const DiplomaManagement: React.FC = () => {
                 await createDiploma({
                     ...formData,
                     videoIds: [],
-                } as Omit<Diploma, 'id' | 'createdAt' | 'updatedAt'>);
+                } as Omit<Diploma, '_id' | 'createdAt' | 'updatedAt'>);
             }
             setShowDiplomaModal(false);
             setEditingDiploma(null);
@@ -236,9 +236,9 @@ const DiplomaManagement: React.FC = () => {
                             ) : filteredDiplomas.length > 0 ? (
                                 <>
                                     <ApplicationsTable
-                                        data={filteredDiplomas}
-                                        columns={diplomaColumns}
-                                        actions={diplomaActions}
+                                        data={filteredDiplomas as any}
+                                        columns={diplomaColumns as any}
+                                        actions={diplomaActions as any}
                                     />
                                     <Pagination
                                         page={page}
@@ -277,7 +277,7 @@ const DiplomaManagement: React.FC = () => {
                 <DiplomaDetails
                     isOpen={showDiplomaDetail}
                     onClose={() => setShowDiplomaDetail(false)}
-                    diploma={diplomaDetails}
+                    diploma={diplomaDetails as any}
                     isLoading={isLoadingDiplomaDetails}
                 />
             )}

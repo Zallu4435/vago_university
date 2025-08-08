@@ -71,6 +71,15 @@ export interface IDeleteChargeUseCase {
     execute(params: DeleteChargeRequestDTO): Promise<ResponseDTO<DeleteChargeResponseDTO>>;
 }
 
+export interface ICheckPendingPaymentUseCase {
+    execute(studentId: string): Promise<ResponseDTO<{ hasPending: boolean }>>;
+}
+
+export interface IClearPendingPaymentUseCase {
+    execute(studentId: string): Promise<ResponseDTO<{ success: boolean }>>;
+}
+
+
 export class GetStudentFinancialInfoUseCase implements IGetStudentFinancialInfoUseCase {
     constructor(private financialRepository: IFinancialRepository) { }
 
@@ -194,5 +203,28 @@ export class GetAllChargesUseCase implements IGetAllChargesUseCase {
     async execute(params: GetAllChargesRequestDTO): Promise<ResponseDTO<GetAllChargesResponseDTO>> {
         const result = await this.financialRepository.getAllCharges(params);
         return { data: result, success: true };
+    }
+}
+
+export class CheckPendingPaymentUseCase implements ICheckPendingPaymentUseCase {
+    constructor(private financialRepository: IFinancialRepository) { }
+    async execute(studentId: string): Promise<ResponseDTO<{ hasPending: boolean }>> {
+        if (!mongoose.Types.ObjectId.isValid(studentId)) {
+            return { data: { error: FinancialErrorType.InvalidStudentId }, success: false };
+        }
+        const hasPending = await this.financialRepository.hasPendingPayment(studentId);
+        return { data: { hasPending }, success: true };
+    }
+}
+
+export class ClearPendingPaymentUseCase implements IClearPendingPaymentUseCase {
+    constructor(private financialRepository: IFinancialRepository) { }
+
+    async execute(studentId: string): Promise<ResponseDTO<{ success: boolean }>> {
+        if (!mongoose.Types.ObjectId.isValid(studentId)) {
+            return { data: { error: FinancialErrorType.InvalidStudentId }, success: false };
+        }
+        const result = await this.financialRepository.clearPendingPayment(studentId);
+        return { data: { success: result }, success: true };
     }
 }

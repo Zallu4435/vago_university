@@ -11,6 +11,7 @@ export interface Course {
     description?: string;
     prerequisites?: string[];
     term: string;
+    joined?: boolean;
   }
   
   export interface CourseDetails extends Course {
@@ -69,13 +70,33 @@ export interface Course {
   }
   
   export interface CourseApiResponse {
-    courses: Course[];
+    data: Course[];
     totalPages: number;
     totalItems: number;
+    currentPage: number;
+  }
+
+  export interface CourseApiWrapper {
+    data: CourseApiResponse;
   }
 
 export interface RequestFilters {
   status: string;
   specialization: string;
   term: string;
+}
+
+export interface CourseDetailsResponse {
+  data: CourseDetails;
+}
+
+export interface EnrollmentRequestsResponse {
+  data: {
+    requests: EnrollmentRequest[];
+    totalPages: number;
+  };
+}
+
+export interface EnrollmentRequestDetailsResponse {
+  data: EnrollmentRequest;
 }

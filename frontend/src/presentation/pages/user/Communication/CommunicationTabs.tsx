@@ -1,7 +1,12 @@
 import PropTypes from 'prop-types';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 
-export default function CommunicationTabs({ activeTab, setActiveTab }) {
+type CommunicationTabsProps = {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+};
+
+export default function CommunicationTabs({ activeTab, setActiveTab }: CommunicationTabsProps) {
   const tabs = ['Inbox', 'Sent'];
   const { styles } = usePreferences();
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   IoReturnUpBackOutline as Reply,
   IoArchiveOutline as Archive,
@@ -7,7 +7,7 @@ import {
   IoMailOutline as Mail,
 } from 'react-icons/io5';
 import WarningModal from '../../../components/common/WarningModal';
-import { Message, MessageDetailsModalProps } from '../../../../domain/types/management/communicationmanagement';
+import { MessageDetailsModalProps } from '../../../../domain/types/management/communicationmanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 
 const MessageDetailsModal: React.FC<MessageDetailsModalProps> = ({
@@ -37,7 +37,7 @@ const MessageDetailsModal: React.FC<MessageDetailsModalProps> = ({
   // Particle effect
   const ghostParticles = Array(30)
     .fill(0)
-    .map((_, i) => ({
+    .map((_) => ({
       size: Math.random() * 10 + 5,
       top: Math.random() * 100,
       left: Math.random() * 100,
@@ -193,7 +193,7 @@ const MessageDetailsModal: React.FC<MessageDetailsModalProps> = ({
         type="danger"
       />
 
-      <style jsx>{`
+      <style>{`
         .no-scroll {
           overflow: hidden;
         }

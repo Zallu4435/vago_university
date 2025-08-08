@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaAt, FaShieldAlt, FaCheckCircle, FaExclamationCircle, FaLock } from 'react-icons/fa';
 import { authService } from '../../../application/services/auth.service';
 import type { EmailOTPStep, EmailOTPComponentProps } from '../../../domain/types/auth/ForgotPassword';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
-const EmailOTPComponent = ({ onBack, onClose, onVerified }: EmailOTPComponentProps) => {
+const EmailOTPComponent = ({ onClose, onVerified }: EmailOTPComponentProps) => {
   const navigate = useNavigate();
   const [step, setStep] = useState<EmailOTPStep>('email');
   const [email, setEmail] = useState('');
@@ -15,6 +15,17 @@ const EmailOTPComponent = ({ onBack, onClose, onVerified }: EmailOTPComponentPro
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [timer, setTimer] = useState(0);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [timer]);
 
   const handleSendOTP = async () => {
     if (!email.trim() || !email.includes('@')) {
@@ -26,8 +37,23 @@ const EmailOTPComponent = ({ onBack, onClose, onVerified }: EmailOTPComponentPro
     try {
       await authService.sendEmailOtp(email);
       setStep('otp');
+      setTimer(30); // Start 30-second timer
     } catch (err: any) {
       setError(err.message || 'Failed to send OTP');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      await authService.sendEmailOtp(email);
+      setTimer(30); // Reset timer
+      toast.success('New verification code sent!');
+    } catch (err: any) {
+      setError(err.message || 'Failed to resend OTP');
     } finally {
       setLoading(false);
     }
@@ -191,12 +217,19 @@ const EmailOTPComponent = ({ onBack, onClose, onVerified }: EmailOTPComponentPro
               )}
             </button>
 
-            <button
-              onClick={() => setStep('email')}
-              className="w-full text-violet-600 py-4 text-sm font-bold hover:text-violet-700 hover:bg-violet-50/50 rounded-2xl transition-all duration-300 backdrop-blur-sm border border-transparent hover:border-violet-200"
-            >
-              Didn't receive code? Resend
-            </button>
+            {timer > 0 ? (
+              <div className="text-center text-slate-600 py-4 text-sm font-medium">
+                Resend code in {timer} seconds
+              </div>
+            ) : (
+              <button
+                onClick={handleResendOTP}
+                disabled={loading}
+                className="w-full text-violet-600 py-4 text-sm font-bold hover:text-violet-700 hover:bg-violet-50/50 rounded-2xl transition-all duration-300 backdrop-blur-sm border border-transparent hover:border-violet-200"
+              >
+                Resend Code
+              </button>
+            )}
           </div>
         </>
       )}
@@ -272,4 +305,4 @@ const EmailOTPComponent = ({ onBack, onClose, onVerified }: EmailOTPComponentPro
   );
 };
 
-export default EmailOTPComponent; 
+export default EmailOTPComponent;

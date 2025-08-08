@@ -18,9 +18,13 @@ export interface Team {
   division: string;
   homeGames: number;
   record: string;
-  upcomingGames: { date: string; description: string }[];
+  name: string;
+  participants: number;
+  formedOn: string;
+  description: string;
+  upcomingGames: { date: string; description: string; _id: string }[];
   // Additional properties for modal display
-  _id?: string;
+  _id: string;
   _title?: string;
   _type?: string;
   _headCoach?: string;
@@ -37,6 +41,7 @@ export interface Team {
   _homeGames?: number;
   _record?: string;
   _upcomingGames?: { date: string; description: string }[];
+  data?: any; // <-- Added to fix the error
 }
 
 export interface PlayerRequest {
@@ -68,6 +73,27 @@ export interface SportRequestDetails {
     };
     user: {
       name?: string;
+      email: string;
+    };
+  };
+  sportRequest: {
+    id: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+    whyJoin: string;
+    additionalInfo?: string;
+    sport: {
+      id: string;
+      title: string;
+      type: string;
+      headCoach: string;
+      playerCount: number;
+      division: string;
+    };
+    user?: {
+      id: string;
+      name: string;
       email: string;
     };
   };
@@ -232,13 +258,13 @@ export interface ItemToAction {
 export interface TeamRequestDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  request: TeamRequestDetails | null;
+  request: SportRequestDetails | null;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
 }
 
 export interface TeamRequestDetailsStatusBadgeProps {
-  status: StatusType;
+  status: SportStatus;
 }
 
 export interface TeamRequestDetailsInfoCardProps {
@@ -322,13 +348,28 @@ export interface ColorOption {
 } 
 
 export interface SportsApiResponse {
-  teams: Team[];
-  events?: Event[];
-  teamRequests?: TeamRequest[];
-  playerRequests?: PlayerRequest[];
-  totalPages: number;
-  currentPage: number;
-  totalItems: number;
+  data: {
+    teams: Team[];
+    events?: Event[];
+    teamRequests?: TeamRequest[];
+    playerRequests?: PlayerRequest[];
+    totalPages: number;
+    currentPage: number;
+    totalItems: number;
+  };
+}
+
+// API Response wrappers for single items
+export interface TeamApiResponseSingle {
+  data: {
+    team: Team;
+  };
+}
+
+export interface PlayerRequestApiResponseSingle {
+  data: {
+    playerRequest: PlayerRequest;
+  };
 }
 
 export interface Team {
@@ -348,7 +389,7 @@ export interface Team {
   division: string;
   homeGames: number;
   record: string;
-  upcomingGames: { date: string; description: string }[];
+  upcomingGames: { date: string; description: string; _id: string }[];
 }
 
 export interface TeamRequest {

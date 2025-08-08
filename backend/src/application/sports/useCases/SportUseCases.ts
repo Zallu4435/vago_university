@@ -61,7 +61,6 @@ export class GetSportsUseCase {
       createdAt: sport.createdAt ? new Date(sport.createdAt).toISOString() : undefined
     }));
     return {
-      sports: mappedSports,
       data: mappedSports,
       totalItems,
       totalPages,

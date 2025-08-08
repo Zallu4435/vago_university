@@ -261,21 +261,21 @@ export default function PreferenceSettings() {
                   {fontSizes.map((size) => (
                     <button
                       key={size.id}
-                      onClick={() => setPreviewFontSize(size.id as 'small' | 'medium' | 'large' | 'extra-large')}
+                      onClick={() => setPreviewFontSize(size.id as unknown as number)}
                       className={`p-4 rounded-xl border-2 transition-all duration-200 text-center ${
-                        previewFontSize === size.id
+                        previewFontSize === size.id as unknown as number
                           ? 'border-purple-400 bg-purple-50'
                           : 'border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50'
                       }`}
                     >
                       <div className={`${size.size} font-medium mb-1 ${
-                        previewFontSize === size.id ? 'text-purple-900' : 'text-slate-800'
+                        previewFontSize === size.id as unknown as number ? 'text-purple-900' : 'text-slate-800'
                       }`}>
                         Aa
                       </div>
                       <div className="text-xs text-slate-600">{size.name}</div>
                       <div className="text-xs text-slate-500">{size.preview}</div>
-                      {previewFontSize === size.id && (
+                      {previewFontSize === size.id as unknown as number && (
                         <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center mx-auto mt-2">
                           <FiCheck className="w-3 h-3 text-white" />
                         </div>

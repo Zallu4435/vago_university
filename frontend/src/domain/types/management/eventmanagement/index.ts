@@ -36,6 +36,8 @@ export interface Event {
   _maxParticipants?: number;
   _registrationRequired?: boolean;
   _organizer?: string;
+  _participants?: number;
+  _timeframe?: string;
 }
 
 export interface EventRequest {
@@ -50,13 +52,48 @@ export interface EventRequest {
   requestedAt: string;
   description: string;
   expectedParticipants: number;
+  // Additional properties for modal display
+  _id?: string;
+  _title?: string;
+  _date?: string;
+  _time?: string;
+  _location?: string;
+  _organizerType?: string;
+  _eventType?: string;
+  _icon?: string;
+  _color?: string;
+  _description?: string;
+  _fullTime?: boolean;
+  _additionalInfo?: string;
+  _requirements?: string;
+  _status?: string;
+  _maxParticipants?: number;
+  _registrationRequired?: boolean;
+  _organizer?: string;
+  _participants?: number;
+  _timeframe?: string;
 }
 
 export interface EventApiResponse {
-  events: Event[];
-  totalPages: number;
-  currentPage: number;
-  totalItems: number;
+  data: {
+    events: Event[];
+    totalPages: number;
+    currentPage: number;
+    totalItems: number;
+  };
+}
+
+// API Response wrappers for single items
+export interface EventApiResponseSingle {
+  data: {
+    event: Event;
+  };
+}
+
+export interface EventRequestApiResponseSingle {
+  data: {
+    eventRequest: EventRequest;
+  };
 }
 
 // Event Status Types
@@ -161,6 +198,30 @@ export interface ItemToAction {
 
 // Event Request Details Types
 export interface EventRequestDetails {
+  id: string;
+  status: EventStatus;
+  createdAt: string;
+  updatedAt: string;
+  description: string;
+  additionalInfo?: string;
+  eventName?: string;
+  requestedBy: string;
+  proposedDate?: string;
+  proposedVenue?: string;
+  expectedParticipants?: number;
+  type?: string;
+  whyJoin?: string;
+  user?: {
+    name?: string;
+    email: string;
+  };
+  event?: {
+    title?: string;
+    location?: string;
+    date?: string;
+    description?: string;
+  };
+  requestedAt?: string;
   eventRequest: {
     id: string;
     status: EventStatus;

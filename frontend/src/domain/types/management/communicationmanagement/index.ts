@@ -15,6 +15,13 @@ export interface Message {
     role: string;
     status: 'read' | 'unread';
   }>;
+  attachments: Array<{
+    id: string;
+    name: string;
+    url: string;
+    size: number;
+    type: string;
+  }>;
   isBroadcast: boolean;
   createdAt: string;
   updatedAt: string;
@@ -72,6 +79,7 @@ export interface ComposeMessageForm {
   subject: string;
   message: string;
   attachments: File[];
+  isAdmin?: boolean;
 }
 
 export interface ComposeMessageModalProps {
@@ -79,5 +87,9 @@ export interface ComposeMessageModalProps {
   onSend: (form: ComposeMessageForm) => void;
   onCancel: () => void;
   isOpen: boolean;
+  userGroups: UserGroup[];
   fetchUsers: (type: RecipientType, search?: string) => Promise<User[]>;
-} 
+}
+
+// Utility type for compatibility with code expecting fetchedUsers?.users
+export type UserArrayWithUsers = User[] & { users?: User[] }; 

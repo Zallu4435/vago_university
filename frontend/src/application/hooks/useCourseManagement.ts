@@ -206,9 +206,12 @@ export const useCourseManagement = (searchQuery: string = "") => {
     setSelectedRequestId(requestId);
   };
 
+  console.log(coursesData, "ijsdisdiojsdoijsd");
   return {
     courses: coursesData?.data || [],
     totalPages: coursesData?.totalPages || 0,
+    totalItems: coursesData?.totalItems || 0,
+    currentPage: coursesData?.currentPage || 1,
     page,
     setPage,
     filters,
@@ -218,7 +221,7 @@ export const useCourseManagement = (searchQuery: string = "") => {
     createCourse,
     updateCourse,
     deleteCourse,
-    enrollmentRequests: enrollmentRequestsData?.data || [],
+    enrollmentRequests: enrollmentRequestsData?.requests || [],
     enrollmentRequestsTotalPages: enrollmentRequestsData?.totalPages || 0,
     isLoadingRequests,
     approveEnrollmentRequest,
@@ -228,7 +231,7 @@ export const useCourseManagement = (searchQuery: string = "") => {
     setRequestFilters,
     activeTab,
     handleTabChange,
-    courseDetails: courseDetails?.course,
+    courseDetails,
     isLoadingCourseDetails,
     handleViewCourse,
     handleEditCourse,

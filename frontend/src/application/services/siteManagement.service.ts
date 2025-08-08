@@ -30,11 +30,19 @@ export interface UpdateSiteSectionData {
 }
 
 export interface SiteSectionsResponse {
-  sections: SiteSection[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  data: {
+    sections: SiteSection[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface SiteSectionResponse {
+  data: {
+    section: SiteSection;
+  };
 }
 
 function isFile(value: any): value is File {
@@ -69,7 +77,7 @@ class SiteManagementService {
 
   // Get section by ID
   async getSectionById(id: string): Promise<SiteSection> {
-    const response = await httpClient.get<{ section: SiteSection }>(`/admin/site-sections/${id}`);
+    const response = await httpClient.get<SiteSectionResponse>(`/admin/site-sections/${id}`);
     return response.data.data.section;
   }
 
@@ -90,7 +98,7 @@ class SiteManagementService {
       });
       headers['Content-Type'] = 'multipart/form-data';
     }
-    const response = await httpClient.post<{ section: SiteSection }>('/admin/site-sections', payload, { headers });
+    const response = await httpClient.post<SiteSectionResponse>('/admin/site-sections', payload, { headers });
     console.log(response, "popopopopop")
     return response.data.data.section;
   }
@@ -112,7 +120,7 @@ class SiteManagementService {
       });
       headers['Content-Type'] = 'multipart/form-data';
     }
-    const response = await httpClient.put<{ section: SiteSection }>(`/admin/site-sections/${id}`, payload, { headers });
+    const response = await httpClient.put<SiteSectionResponse>(`/admin/site-sections/${id}`, payload, { headers });
     console.log(response, "pl[k[akof[kdf")
     return response.data.data.section;
   }

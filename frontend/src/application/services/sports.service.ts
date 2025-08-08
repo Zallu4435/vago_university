@@ -1,4 +1,4 @@
-import { PlayerRequest, SportsApiResponse, Team } from '../../domain/types/management/sportmanagement';
+import { SportsApiResponse, Team, TeamApiResponseSingle, PlayerRequestApiResponseSingle } from '../../domain/types/management/sportmanagement';
 import httpClient from '../../frameworks/api/httpClient';
 
 class SportsService {
@@ -10,7 +10,7 @@ class SportsService {
     coach?: string,
     dateRange?: string,
     search?: string
-  ): Promise<SportsApiResponse> {
+  ): Promise<SportsApiResponse['data']> {
     try {
       const params: Record<string, string | number> = { page, limit };
       if (sportType && sportType !== 'All') params.sportType = sportType;
@@ -38,7 +38,7 @@ class SportsService {
     status?: string,
     dateRange?: string,
     search?: string
-  ): Promise<SportsApiResponse> {
+  ): Promise<SportsApiResponse['data']> {
     try {
       const params: Record<string, string | number> = { page, limit };
       if (sportType && sportType !== 'All') params.sportType = sportType;
@@ -101,19 +101,19 @@ class SportsService {
     }
   }
 
-  async getTeamDetails(id: string): Promise<Team> {
+  async getTeamDetails(id: string): Promise<TeamApiResponseSingle['data']> {
     try {
-      const response = await httpClient.get(`/admin/sports/${id}`);
-      return response.data;
+      const response = await httpClient.get<TeamApiResponseSingle>(`/admin/sports/${id}`);
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching team details:', error);
       throw error;
     }
   }
 
-  async getRequestDetails(id: string): Promise<PlayerRequest> {
+  async getRequestDetails(id: string): Promise<PlayerRequestApiResponseSingle['data']> {
     try {
-      const response = await httpClient.get(`/admin/sport-requests/${id}`);
+      const response = await httpClient.get<PlayerRequestApiResponseSingle>(`/admin/sport-requests/${id}`);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching request details:', error);

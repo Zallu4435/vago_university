@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import { FaEdit, FaEye } from 'react-icons/fa';
 import { Assignment } from '../types';
-import AssignmentMenu from './AssignmentMenu';
 
 interface AssignmentListProps {
   assignments: Assignment[];
@@ -11,7 +9,7 @@ interface AssignmentListProps {
   isDeleting: boolean;
 }
 
-const AssignmentList = ({ assignments, onEdit, onView, onDelete, isDeleting }: AssignmentListProps) => {
+const AssignmentList = ({ assignments, onEdit, onView }: AssignmentListProps) => {
   return (
     <div className="space-y-4">
       {assignments.map((assignment) => (
@@ -37,11 +35,7 @@ const AssignmentList = ({ assignments, onEdit, onView, onDelete, isDeleting }: A
               >
                 <FaEdit size={16} />
               </button>
-              <AssignmentMenu
-                assignment={assignment}
-                onDelete={onDelete}
-                isDeleting={isDeleting}
-              />
+             
             </div>
           </div>
           <div className="mt-4 flex items-center justify-between">

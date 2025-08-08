@@ -16,7 +16,8 @@ export interface Submission {
 }
 
 export interface Assignment {
-    id: string;
+    id?: string;
+    _id: string;
     title: string;
     subject: string;
     dueDate: string;

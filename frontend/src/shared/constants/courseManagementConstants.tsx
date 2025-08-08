@@ -64,16 +64,6 @@ export const courseColumns = [
     ),
   },
   {
-    header: 'Schedule',
-    key: 'schedule',
-    render: (course: Course) => (
-      <div className="flex items-center text-gray-300">
-        <FiClock size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{course.schedule || 'N/A'}</span>
-      </div>
-    ),
-  },
-  {
     header: 'Enrollment',
     key: 'currentEnrollment',
     render: (course: Course) => (

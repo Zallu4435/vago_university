@@ -45,8 +45,8 @@ export default function StudentDashboard() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-4 md:gap-6 mt-8 sm:mt-4 md:mt-6 h-full">
                   <ScheduledClasses classes={classes} />
-                  <NewEvents events={newEvents} />
-                  <Calendar calendarDays={calendarDays} />
+                  <NewEvents events={newEvents as any} />
+                  <Calendar calendarDays={calendarDays as any} />
                 </div>
               </div>
             </>

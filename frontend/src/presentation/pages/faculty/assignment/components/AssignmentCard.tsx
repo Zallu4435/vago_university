@@ -7,7 +7,6 @@ interface AssignmentCardProps {
   assignment: Assignment;
   onViewSubmissions: (assignment: Assignment) => void;
   onDelete: (id: string) => Promise<boolean>;
-  isDeleting: boolean;
   getSubjectIcon: (subject: string) => string;
   getStatusColor: (status: string) => string;
 }
@@ -16,7 +15,6 @@ export default function AssignmentCard({
   assignment,
   onViewSubmissions,
   onDelete,
-  isDeleting,
   getSubjectIcon,
   getStatusColor
 }: AssignmentCardProps) {
@@ -124,7 +122,6 @@ export default function AssignmentCard({
         onConfirm={handleDeleteConfirm}
         title="Delete Assignment"
         message={`Are you sure you want to delete "${assignment.title}"? This action cannot be undone.`}
-        isLoading={isDeleting}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { siteSectionsService, SiteSection, SiteSectionsParams } from '../services/siteSections.service';
+import { siteSectionsService, SiteSectionsParams } from '../services/siteSections.service';
 
 // Hook for fetching highlights with pagination and filtering
 export const useHighlights = (params?: SiteSectionsParams) => {

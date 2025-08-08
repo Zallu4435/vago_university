@@ -54,12 +54,12 @@ class DocumentUploadService {
     try {
       const formData = new FormData();
       
-      files.forEach((file, index) => {
+      files.forEach((file) => {
         formData.append('files', file);
       });
       
       formData.append('applicationId', applicationId);
-      documentTypes.forEach((documentType, index) => {
+      documentTypes.forEach((documentType) => {
         formData.append('documentTypes', documentType);
       });
 

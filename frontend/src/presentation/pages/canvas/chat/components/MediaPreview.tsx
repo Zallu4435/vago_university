@@ -68,7 +68,7 @@ interface CropArea {
   height: number;
 }
 
-export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, styles, onAddMore, onRemoveMedia, onSendMedia }) => {
+export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, onAddMore, onRemoveMedia, onSendMedia }) => {
   const [caption, setCaption] = useState('');
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [captions, setCaptions] = useState<string[]>(() => (message.attachments || []).map(() => ''));

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FaSearch, FaPlus, FaEdit, FaTrash, FaClock, FaCheck, FaPlay } from 'react-icons/fa';
 import { FaCheckCircle, FaSpinner } from 'react-icons/fa';
 import CreateSessionModal from './CreateSessionModal';

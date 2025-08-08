@@ -1,5 +1,20 @@
 import { useState, useRef } from 'react';
-import { FaTimes, FaCrop, FaUpload, FaCheck, FaSearchPlus, FaSearchMinus, FaUndo, FaRedo } from 'react-icons/fa';
+import { FaTimes, FaUpload, FaCheck, FaSearchPlus, FaSearchMinus, FaUndo, FaRedo } from 'react-icons/fa';
+
+interface ImageCropperProps {
+  selectedImage: string;
+  cropData: {
+    x: number;
+    y: number;
+    size: number;
+    scale: number;
+    rotate: number;
+  };
+  onCropChange: (data: { x: number; y: number; size: number; scale: number; rotate: number }) => void;
+  onCropApply: (file: File) => void;
+  onCancel: () => void;
+  onChooseDifferent: () => void;
+}
 
 export const ImageCropper = ({
   selectedImage,
@@ -8,9 +23,9 @@ export const ImageCropper = ({
   onCropApply,
   onCancel,
   onChooseDifferent,
-}) => {
-  const canvasRef = useRef(null);
-  const imageRef = useRef(null);
+}: ImageCropperProps) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [imageLoadError, setImageLoadError] = useState(false);
@@ -21,6 +36,8 @@ export const ImageCropper = ({
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const img = imageRef.current;
+    
+    if (!ctx) return null;
 
     const outputSize = 200;
     canvas.width = outputSize;
@@ -126,7 +143,7 @@ export const ImageCropper = ({
     });
   };
 
-  const handleMouseDown = (e, type) => {
+  const handleMouseDown = (e: React.MouseEvent, type: 'move' | 'resize') => {
     e.preventDefault();
     const targetElement = e.currentTarget;
     const containerElement = targetElement.closest('.crop-container');
@@ -139,7 +156,7 @@ export const ImageCropper = ({
       const startX = e.clientX - containerRect.left - cropData.x;
       const startY = e.clientY - containerRect.top - cropData.y;
 
-      const handleMouseMove = (e) => {
+      const handleMouseMove = (e: MouseEvent) => {
         const newX = e.clientX - containerRect.left - startX;
         const newY = e.clientY - containerRect.top - startY;
 
@@ -165,7 +182,7 @@ export const ImageCropper = ({
       const startSize = cropData.size;
       const startX = e.clientX;
 
-      const handleMouseMove = (e) => {
+      const handleMouseMove = (e: MouseEvent) => {
         const deltaX = e.clientX - startX;
         const newSize = Math.max(80, Math.min(startSize + deltaX, 280));
 
@@ -191,7 +208,7 @@ export const ImageCropper = ({
     }
   };
 
-  const getPreviewStyle = (size) => {
+  const getPreviewStyle = (size: number) => {
     const scale = size / cropData.size;
     return {
       backgroundImage: `url(${selectedImage})`,

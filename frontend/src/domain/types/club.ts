@@ -28,6 +28,7 @@ export interface ClubRequest {
     nextMeeting: string;
     about: string;
     requestedBy: string;
+    createdBy?: string;
     createdAt: string;
     status: string;
     rejectionReason: string;
@@ -35,9 +36,29 @@ export interface ClubRequest {
 }
 
 export interface ClubApiResponse {
-    clubs: Club[];
-    clubRequests: ClubRequest[];
-    totalPages: number;
-    currentPage: number;
-    totalItems: number;
+    data: {
+        clubs: Club[];
+        clubRequests: ClubRequest[];
+        totalPages: number;
+        currentPage: number;
+        totalItems: number;
+    };
+}
+
+export interface ClubResponse {
+    data: {
+        club: Club;
+    };
+}
+
+export interface ClubRequestsData {
+    data: {
+        club: ClubResponse;
+    }
+}
+
+export interface ClubRequestResponse {
+    data: {
+        clubRequest: ClubRequest;
+    };
 }

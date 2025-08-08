@@ -23,15 +23,15 @@ export const socketRef = React.createRef<Socket | null>();
 export const ChatComponent: React.FC = () => {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showInfo, setShowInfo] = useState(false);
+  const [, setShowInfo] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
+  const [isTyping,] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [showNewChat, setShowNewChat] = useState(false);
+  const [, setShowNewChat] = useState(false);
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
-  const [oldestMessageTimestamp, setOldestMessageTimestamp] = useState<string | null>(null);
+  const [, setOldestMessageTimestamp] = useState<string | null>(null);
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
   const [socketError, setSocketError] = useState<string | null>(null);
   const [showGroupSettings, setShowGroupSettings] = useState(false);
@@ -45,7 +45,7 @@ export const ChatComponent: React.FC = () => {
   const [messagesPage, setMessagesPage] = useState(1);
   const [allMessages, setAllMessages] = useState<Message[]>([]);
   const [chatsPage, setChatsPage] = useState(1);
-  const [hasMoreChats, setHasMoreChats] = useState(true);
+  const [hasMoreChats, ] = useState(true);
   const [loadingMoreChats, setLoadingMoreChats] = useState(false);
   const scrollState = useRef({
     shouldScrollToBottom: true,
@@ -64,7 +64,6 @@ export const ChatComponent: React.FC = () => {
     chatDetails,
     messagesResponse,
     isLoadingMessages,
-    searchUsers: searchUsersQuery
   } = useChatQueries({
     chatId: selectedChatId || undefined,
     messagesPage,
@@ -74,12 +73,14 @@ export const ChatComponent: React.FC = () => {
     query: searchQuery
   });
 
+  console.log(messagesResponse, "messagesResponse")
   const messages = messagesResponse?.messages || [];
   const chats = chatsResponse?.data || [];
+  console.log(messages, "huuuuuuuuuuuuuu")
 
   const chatMutations = useChatMutations(selectedChatId || undefined, currentUserId);
 
-  const flatChat = chatDetails?.chat ?? chatDetails;
+  const flatChat = chatDetails;
 
   const isBlockedByMe = Array.isArray(flatChat?.blockedUsers) && flatChat.blockedUsers.some(
     (entry: { blocker: string; blocked: string }) => entry.blocker === currentUserId
@@ -153,7 +154,7 @@ export const ChatComponent: React.FC = () => {
     setSelectedChatId(chatId);
     setReplyToMessage(null);
     
-    const chatArray: Chat[] = Array.isArray(chats) ? chats as Chat[] : (chats?.data as Chat[] || []);
+    const chatArray: Chat[] = Array.isArray(chats) ? chats as Chat[] : ((chats as any)?.data as Chat[] || []);
     if (!chatId || !chatArray) return;
     
     try {
@@ -230,10 +231,6 @@ export const ChatComponent: React.FC = () => {
 
   const handleReplyToMessage = (message: Message) => setReplyToMessage(message);
 
-  const handleForwardMessage = async (messageId: string) => {
-    const message = messages.find((m: Message) => m.id === messageId);
-  };
-
   const handleSendMessage = async (message: string, fileOrFiles?: File | File[], replyTo?: Message) => {
     if (!message.trim() && !fileOrFiles) return;
 
@@ -287,23 +284,17 @@ export const ChatComponent: React.FC = () => {
   };
 
 
-  const handleCameraSelect = () => {
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => { console.log('Camera access granted'); stream.getTracks().forEach(track => track.stop()); })
-      .catch(error => console.error('Error accessing camera:', error));
-  };
-
   const handleReaction = async (messageId: string, emoji: string) => {
     try {
-      await chatMutations.addReaction.mutateAsync({ messageId, emoji, userId: currentUserId! });
+      await chatMutations.addReaction.mutateAsync({ messageId, emoji });
     } catch (error) {
       console.error('Error adding reaction:', error);
     }
   };
 
-  const handleRemoveReaction = async (messageId: string, emoji: string) => {
+  const handleRemoveReaction = async (messageId: string) => {
     try {
-      await chatMutations.removeReaction.mutateAsync({ messageId, userId: currentUserId! });
+      await chatMutations.removeReaction.mutateAsync({ messageId });
     } catch (error) {
       console.error('Error removing reaction:', error);
     }
@@ -332,17 +323,17 @@ export const ChatComponent: React.FC = () => {
     }
   };
 
-  const handleAddMembers = async (selectedUsers: User[]) => {
-    if (!flatChat || !currentUser) return;
-    try {
-      for (const user of selectedUsers) {
-        await chatMutations.addGroupMember.mutateAsync(user.id);
-      }
-      toast.success('Members added');
-    } catch (error) {
-      toast.error('Failed to add members');
-    }
-  };
+  // const handleAddMembers = async (selectedUsers: User[]) => {
+  //   if (!flatChat || !currentUser) return;
+  //   try {
+  //     for (const user of selectedUsers) {
+  //       await chatMutations.addGroupMember.mutateAsync(user.id);
+  //     }
+  //     toast.success('Members added');
+  //   } catch (error) {
+  //     toast.error('Failed to add members');
+  //   }
+  // };
 
   const handleRemoveMember = async (userId: string) => {
     if (!flatChat || !currentUser) return;
@@ -359,7 +350,6 @@ export const ChatComponent: React.FC = () => {
     if (!flatChat || !currentUser) return;
     try {
       await chatMutations.updateGroupAdmin.mutateAsync({ userId, isAdmin: true });
-      setSelectedChatId(prev => prev ? { ...prev, admins: [...prev.admins, userId] } : null);
       toast.success('Admin added');
     } catch (error) {
       console.error('Error making admin:', error);
@@ -371,7 +361,6 @@ export const ChatComponent: React.FC = () => {
     if (!flatChat || !currentUser) return;
     try {
       await chatMutations.updateGroupAdmin.mutateAsync({ userId, isAdmin: false });
-      setSelectedChatId(prev => prev ? { ...prev, admins: prev.admins.filter(id => id !== userId) } : null);
       toast.success('Admin removed');
     } catch (error) {
       console.error('Error removing admin:', error);
@@ -876,7 +865,7 @@ export const ChatComponent: React.FC = () => {
                           onDelete={handleDeleteMessage}
                           onEdit={handleEditMessage}
                           onReply={handleReplyToMessage}
-                          onForward={handleForwardMessage}
+                          onForward={() => {}}
                           currentUserId={currentUserId || ''}
                         />
                       );
@@ -953,7 +942,7 @@ export const ChatComponent: React.FC = () => {
                 chat={flatChat}
                 currentUser={currentUser}
                 onUpdateGroup={handleUpdateGroup}
-                onAddMembers={handleAddMembers}
+                onAddMembers={() => {}}
                 onRemoveMember={handleRemoveMember}
                 onMakeAdmin={handleMakeAdmin}
                 onRemoveAdmin={handleRemoveAdmin}
@@ -980,7 +969,7 @@ export const ChatComponent: React.FC = () => {
                   chat={flatChat}
                   currentUser={currentUser}
                   onUpdateGroup={handleUpdateGroup}
-                  onAddMembers={handleAddMembers}
+                  onAddMembers={() => {}}
                   onRemoveMember={handleRemoveMember}
                   onMakeAdmin={handleMakeAdmin}
                   onRemoveAdmin={handleRemoveAdmin}

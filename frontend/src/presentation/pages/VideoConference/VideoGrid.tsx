@@ -3,9 +3,7 @@ import { FaMicrophoneSlash, FaHandPaper, FaUserTie, FaChalkboardTeacher } from '
 import { VideoGridProps } from '../../../domain/types/videoConference';
 
 
-const getOptimalLayout = (participantCount: number, screenWidth: number, screenHeight: number) => {
-  const availableHeight = screenHeight - 208;
-  const availableWidth = screenWidth - 32;
+const getOptimalLayout = (participantCount: number, screenWidth: number) => {
 
   if (screenWidth < 768) {
     if (participantCount === 1) {
@@ -102,7 +100,6 @@ const getOptimalLayout = (participantCount: number, screenWidth: number, screenH
 
 export const VideoGrid: React.FC<VideoGridProps> = ({
   participants,
-  compact = false,
   maxVisible = 25,
   localParticipantId,
   localStream
@@ -125,7 +122,7 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const layout = getOptimalLayout(participants.length, dimensions.width, dimensions.height);
+  const layout = getOptimalLayout(participants.length, dimensions.width);
   const effectiveMaxVisible = Math.min(layout.maxVisible, maxVisible);
   const visibleParticipants = participants.slice(0, effectiveMaxVisible);
 

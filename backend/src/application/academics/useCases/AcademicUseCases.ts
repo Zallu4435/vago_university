@@ -126,23 +126,48 @@ export class GetGradeInfoUseCase implements IGetGradeInfoUseCase {
 export class GetCoursesUseCase implements IGetCoursesUseCase {
   constructor(private academicRepository: IAcademicRepository) { }
 
-  async execute(input: GetCoursesRequestDTO): Promise<ResponseDTO<GetCoursesResponseDTO>> {
-    const { search, page = 1, limit = 5 } = input;
+  async execute(input: GetCoursesRequestDTO & { userId?: string }): Promise<ResponseDTO<GetCoursesResponseDTO>> {
+    const { search, page = 1, limit = 5, userId } = input;
     const courses = await this.academicRepository.findAllCourses(search, page, limit);
-    const mappedCourses = courses.map((course: ICourseDocument) => ({
-      id: course._id?.toString() || '',
-      title: course.title,
-      specialization: course.specialization,
-      faculty: course.faculty,
-      credits: course.credits,
-      term: course.term || '',
-      maxEnrollment: course.maxEnrollment || 0,
-      currentEnrollment: course.currentEnrollment || 0,
-      createdAt: course.createdAt ? new Date(course.createdAt).toISOString() : new Date().toISOString(),
-      schedule: course.schedule,
-      description: course.description,
-      prerequisites: course.prerequisites
-    }));
+    let mappedCourses;
+    if (userId) {
+      mappedCourses = await Promise.all(
+        courses.map(async (course: ICourseDocument) => {
+          const enrollment = await this.academicRepository.findEnrollment(userId, course._id.toString());
+          return {
+            id: course._id?.toString() || '',
+            title: course.title,
+            specialization: course.specialization,
+            faculty: course.faculty,
+            credits: course.credits,
+            term: course.term || '',
+            maxEnrollment: course.maxEnrollment || 0,
+            currentEnrollment: course.currentEnrollment || 0,
+            createdAt: course.createdAt ? new Date(course.createdAt).toISOString() : new Date().toISOString(),
+            schedule: course.schedule,
+            description: course.description,
+            prerequisites: course.prerequisites,
+            joined: !!enrollment,
+          };
+        })
+      );
+    } else {
+      mappedCourses = courses.map((course: ICourseDocument) => ({
+        id: course._id?.toString() || '',
+        title: course.title,
+        specialization: course.specialization,
+        faculty: course.faculty,
+        credits: course.credits,
+        term: course.term || '',
+        maxEnrollment: course.maxEnrollment || 0,
+        currentEnrollment: course.currentEnrollment || 0,
+        createdAt: course.createdAt ? new Date(course.createdAt).toISOString() : new Date().toISOString(),
+        schedule: course.schedule,
+        description: course.description,
+        prerequisites: course.prerequisites,
+        joined: false,
+      }));
+    }
     const response: GetCoursesResponseDTO = {
       courses: mappedCourses,
       totalCourses: mappedCourses.length,

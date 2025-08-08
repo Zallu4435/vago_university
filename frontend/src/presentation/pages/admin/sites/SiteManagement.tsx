@@ -28,7 +28,6 @@ const SiteManagement = () => {
   const [showForm, setShowForm] = React.useState(false);
   const [showView, setShowView] = React.useState(false);
   const [showDelete, setShowDelete] = React.useState(false);
-  const [editData, setEditData] = React.useState<SiteSection | null>(null);
   const [filters, setFilters] = React.useState<{ [key: string]: string }>({});
   const [searchQuery, setSearchQuery] = React.useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = React.useState('');
@@ -124,7 +123,6 @@ const SiteManagement = () => {
   };
 
   const handleAdd = () => {
-    setEditData(null);
     setShowForm(true);
   };
 
@@ -225,7 +223,7 @@ const SiteManagement = () => {
         <Header
           title="Site Management"
           subtitle="Manage homepage sections: Highlights, VAGO Now, Leadership"
-          tabs={SECTIONS.map((tab, idx) => ({
+          tabs={SECTIONS.map((tab) => ({
             label: tab.label,
             icon: tab.icon,
             active: activeTab === tab.key

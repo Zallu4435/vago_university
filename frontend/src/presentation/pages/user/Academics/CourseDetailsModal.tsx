@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { FaTimes, FaCheck, FaArrowRight } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import type { CourseDetailsModalProps } from '../../../../domain/types/user/academics';
@@ -9,6 +9,8 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
   const [isAnimating, setIsAnimating] = useState(false);
   const [enrollmentData, setEnrollmentData] = useState({ reason: '' });
   const { styles, theme } = usePreferences();
+
+  const isReadOnly = !onConfirm || isEnrolling === undefined || (typeof onConfirm === 'function' && onConfirm.toString() === (() => {}).toString() && isEnrolling === false);
 
   useEffect(() => {
     if (isOpen) {
@@ -53,6 +55,7 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
 
   const availableSpots = course.maxEnrollment - course.currentEnrollment;
   const isFullyBooked = availableSpots <= 0;
+  const isAlreadyJoined = course.joined;
 
   return (
     <div className="fixed inset-0 z-[9999] overflow-y-auto">
@@ -114,7 +117,8 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
 
             {/* Content */}
             <div className="relative z-10 p-4 sm:p-8">
-              {!showConfirmation ? (
+              {/* Only show enrollment actions if not read-only */}
+              {!isReadOnly && !showConfirmation ? (
                 // Course Details View
                 <div className="space-y-4 sm:space-y-6">
                   <div className="grid grid-cols-2 gap-4 sm:gap-6">
@@ -197,16 +201,102 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
                     </button>
                     <button
                       onClick={handleEnrollClick}
-                      disabled={isFullyBooked || isEnrolling}
-                      className={`group/btn flex-1 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 ${isFullyBooked
-                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : `bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white`
+                      disabled={isFullyBooked || isEnrolling || isAlreadyJoined}
+                      className={`group/btn flex-1 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105 ${isFullyBooked || isAlreadyJoined
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : `bg-gradient-to-r ${styles.accent} hover:${styles.button.primary} text-white`
                         }`}
                     >
                       <span className="flex items-center justify-center space-x-2">
-                        <span className="text-sm sm:text-base">{isFullyBooked ? 'Course Full' : 'Enroll Now'}</span>
+                        <span className="text-sm sm:text-base">
+                          {isAlreadyJoined
+                            ? 'Already Enrolled'
+                            : isFullyBooked
+                              ? 'Course Full'
+                              : 'Enroll Now'}
+                        </span>
                         <FaArrowRight className="group-hover/btn:translate-x-1 transition-transform duration-300" size={12} />
                       </span>
+                    </button>
+                  </div>
+                </div>
+              ) : isReadOnly ? (
+                // Read-only mode: just show course details, no actions
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                    <div className="space-y-1">
+                      <p className={`text-xs font-medium ${styles.textTertiary} uppercase tracking-wider`}>Specialization</p>
+                      <p className={`text-base sm:text-lg font-semibold ${styles.textPrimary}`}>{course.specialization}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className={`text-xs font-medium ${styles.textTertiary} uppercase tracking-wider`}>Faculty</p>
+                      <p className={`text-base sm:text-lg font-semibold ${styles.textPrimary}`}>{course.faculty}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className={`text-xs font-medium ${styles.textTertiary} uppercase tracking-wider`}>Schedule</p>
+                    <p className={`text-base sm:text-lg font-semibold ${styles.textPrimary}`}>{course.schedule}</p>
+                  </div>
+
+                  <div className={`relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br ${styles.accentSecondary} p-3 sm:p-4 border ${styles.border} hover:${styles.card.hover} transition-all duration-300 group/item`}>
+                    <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-xl sm:rounded-2xl blur transition-all duration-300`}></div>
+                    <div className="relative z-10">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className={`text-xs font-medium ${theme == 'dark' ? 'text-white' : styles.textTertiary} uppercase tracking-wider`}>Enrollment Status</span>
+                        <span
+                          className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-medium ${isFullyBooked
+                              ? styles.status.error.replace('text-', 'bg-') + '/10 text-red-800'
+                              : availableSpots <= 5
+                                ? styles.status.warning.replace('text-', 'bg-') + '/10 text-yellow-800'
+                                : styles.status.success.replace('text-', 'bg-') + '/10 text-green-800'
+                            }`}
+                        >
+                          {isFullyBooked ? 'Full' : availableSpots <= 5 ? 'Almost Full' : 'Available'}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-3 sm:space-x-4">
+                        <div className={`flex-1 bg-amber-200/50 rounded-full h-2 sm:h-3 overflow-hidden`}>
+                          <div
+                            className={`h-full bg-gradient-to-r ${styles.accent} transition-all duration-1000`}
+                            style={{ width: `${(course.currentEnrollment / course.maxEnrollment) * 100}%` }}
+                          />
+                        </div>
+                        <span className={`text-xs sm:text-sm font-semibold ${styles.textSecondary}`}>
+                          {course.currentEnrollment} / {course.maxEnrollment}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {course.description && (
+                    <div className="space-y-1 sm:space-y-2">
+                      <p className={`text-xs font-medium ${styles.textTertiary} uppercase tracking-wider`}>Description</p>
+                      <p className={`text-xs sm:text-sm leading-relaxed ${styles.textSecondary}`}>{course.description}</p>
+                    </div>
+                  )}
+
+                  {course.prerequisites && course.prerequisites.length > 0 && (
+                    <div className="space-y-1 sm:space-y-2">
+                      <p className={`text-xs font-medium ${styles.textTertiary} uppercase tracking-wider`}>Prerequisites</p>
+                      <div className="space-y-1.5 sm:space-y-2">
+                        {course.prerequisites.map((prereq, index) => (
+                          <div key={index} className="flex items-center space-x-2">
+                            <div className={`w-1.5 sm:w-2 h-1.5 sm:h-2 bg-gradient-to-r ${styles.accent} rounded-full`}></div>
+                            <span className={`text-xs sm:text-sm ${styles.textSecondary}`}>{prereq}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Only show close button at the bottom */}
+                  <div className="flex justify-end pt-4 sm:pt-6 border-t border-amber-100/50">
+                    <button
+                      onClick={handleClose}
+                      className={`group/btn px-6 py-2.5 sm:px-8 sm:py-3 bg-gradient-to-r ${styles.accent} text-white rounded-full font-medium transition-all duration-300 shadow-sm hover:shadow-md`}
+                    >
+                      Close
                     </button>
                   </div>
                 </div>

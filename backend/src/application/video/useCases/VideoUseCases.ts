@@ -1,4 +1,4 @@
-import { IVideoRepository } from '../repositories/IVideoRepository';
+import { IVideoRepository, IRepoDiploma } from '../repositories/IVideoRepository';
 import { Video } from '../../../domain/video/entities/Video';
 import {
     GetVideosRequestDTO,
@@ -186,19 +186,41 @@ export class GetVideoByIdUseCase implements IGetVideoByIdUseCase {
         }
         let diplomaInfo = undefined;
         let diplomaId = video.diplomaId;
-        if (diplomaId && typeof diplomaId === 'object') {
-            diplomaId = (diplomaId as { id?: string | null; _id?: string | null })?.id
-                ?? (diplomaId as { id?: string | null; _id?: string | null })?._id
-                ?? '';
+        
+        // Handle populated diplomaId object
+        if (diplomaId && typeof diplomaId === 'object' && diplomaId !== null) {
+            // If it's a populated object, extract the _id
+            if ('_id' in diplomaId) {
+                diplomaId = (diplomaId as IRepoDiploma)._id?.toString() || '';
+            } else {
+                diplomaId = '';
+            }
+        } else if (diplomaId && diplomaId !== null) {
+            // If it's already a string, use it as is
+            diplomaId = diplomaId.toString();
+        } else {
+            diplomaId = '';
         }
-        if (diplomaId != null && diplomaId !== '') {
-            const diploma = await this.videoRepository.findDiplomaById(String(diplomaId));
-            if (diploma) {
+        
+        if (diplomaId && diplomaId !== '') {
+            // Since we already have the populated data, we can construct diplomaInfo directly
+            if (video.diplomaId && typeof video.diplomaId === 'object' && '_id' in video.diplomaId) {
+                const populatedDiploma = video.diplomaId as IRepoDiploma;
                 diplomaInfo = {
-                    id: diploma._id.toString(),
-                    title: diploma.title,
-                    category: diploma.category
+                    id: populatedDiploma._id?.toString() || '',
+                    title: populatedDiploma.title || '',
+                    category: populatedDiploma.category || ''
                 };
+            } else {
+                // Fallback to fetching diploma data
+                const diploma = await this.videoRepository.findDiplomaById(diplomaId);
+                if (diploma) {
+                    diplomaInfo = {
+                        id: diploma._id.toString(),
+                        title: diploma.title,
+                        category: diploma.category
+                    };
+                }
             }
         }
         const videoEntity = new Video({
@@ -208,7 +230,9 @@ export class GetVideoByIdUseCase implements IGetVideoByIdUseCase {
             uploadedAt: video.uploadedAt,
             module: video.module,
             status: video.status,
-            diplomaId: video.diplomaId?.toString() || '',
+            diplomaId: video.diplomaId && typeof video.diplomaId === 'object' && video.diplomaId !== null && '_id' in video.diplomaId 
+                ? (video.diplomaId as any)._id?.toString() || ''
+                : (video.diplomaId?.toString() || ''),
             description: video.description,
             videoUrl: video.videoUrl,
             diploma: diplomaInfo
@@ -350,7 +374,8 @@ export class DeleteVideoUseCase implements IDeleteVideoUseCase {
             } catch (error) {
             }
         }
-        await this.videoRepository.removeVideoFromDiploma(video.diplomaId, video.id);
+        const diplomaId = typeof video.diplomaId === 'string' ? video.diplomaId : video.diplomaId?._id?.toString() || '';
+        await this.videoRepository.removeVideoFromDiploma(diplomaId, video.id);
         await this.videoRepository.deleteVideo(params.id);
         return { data: { message: "Video deleted successfully" }, success: true };
     }

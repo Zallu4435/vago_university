@@ -82,7 +82,8 @@ const AdminClubManagement: React.FC = () => {
     return (item as ClubRequest).requestedId !== undefined;
   }
 
-  const handleEditClub = (club: Club) => {
+  const handleEditClub = (club: Club | ClubRequest) => {
+    if (!isClub(club)) return;
     (async () => {
       try {
         const id = club.id || club._id;
@@ -122,7 +123,8 @@ const AdminClubManagement: React.FC = () => {
     })();
   };
 
-  const handleViewRequest = (request: ClubRequest) => {
+  const handleViewRequest = (request: Club | ClubRequest) => {
+    if (!isClubRequest(request)) return;
     (async () => {
       try {
         const id = request.requestedId || request._id;
@@ -140,7 +142,7 @@ const AdminClubManagement: React.FC = () => {
     })();
   };
 
-  const handleSaveClub = (data: Omit<Club, 'id'>) => {
+  const handleSaveClub = (data: any) => {
     (async () => {
       try {
         if (selectedClub && isClub(selectedClub)) {
@@ -241,7 +243,7 @@ const AdminClubManagement: React.FC = () => {
       icon: <Trash2 />,
       label: 'Delete Club',
       onClick: (club: Club | ClubRequest) => {
-        if (isClub(club)) handleDeleteClub(club.id);
+        if (isClub(club) && club.id) handleDeleteClub(club.id);
       },
       color: 'red' as const,
     },
@@ -259,7 +261,7 @@ const AdminClubManagement: React.FC = () => {
       icon: <Edit size={16} />,
       label: 'Approve Request',
       onClick: (item: Club | ClubRequest) => {
-        if (isClubRequest(item)) handleApproveRequest(item.requestedId);
+        if (isClubRequest(item) && item.requestedId) handleApproveRequest(item.requestedId);
       },
       color: 'green' as const,
       disabled: (item: Club | ClubRequest) => isClubRequest(item) ? item.status !== 'pending' || isLoadingClubDetails : true,
@@ -268,7 +270,7 @@ const AdminClubManagement: React.FC = () => {
       icon: <Trash2 size={16} />,
       label: 'Reject Request',
       onClick: (item: Club | ClubRequest) => {
-        if (isClubRequest(item)) handleRejectRequest(item.requestedId);
+        if (isClubRequest(item) && item.requestedId) handleRejectRequest(item.requestedId);
       },
       color: 'red' as const,
       disabled: (item: Club | ClubRequest) => isClubRequest(item) ? item.status !== 'pending' || isLoadingClubDetails : true,
@@ -377,7 +379,7 @@ const AdminClubManagement: React.FC = () => {
                   {isLoading ? (
                     <LoadingSpinner />
                   ) : (
-                    <ApplicationsTable data={clubs} columns={clubColumns} actions={clubActions} />
+                    <ApplicationsTable data={clubs as any} columns={clubColumns as any} actions={clubActions as any} />
                   )}
                   <Pagination
                     page={page}
@@ -396,9 +398,9 @@ const AdminClubManagement: React.FC = () => {
                     </div>
                   ) : (
                     <ApplicationsTable
-                      data={clubRequests}
-                      columns={clubRequestColumns}
-                      actions={clubRequestActions}
+                      data={clubRequests as any}
+                      columns={clubRequestColumns as any}
+                      actions={clubRequestActions as any}
                     />
                   )}
                   <Pagination
@@ -473,7 +475,7 @@ const AdminClubManagement: React.FC = () => {
           setShowClubDetailsModal(false);
           setSelectedClub(null);
         }}
-        club={selectedClub}
+        club={selectedClub as any}
         onEdit={handleEditClub}
       />
 
@@ -483,7 +485,7 @@ const AdminClubManagement: React.FC = () => {
           setShowRequestDetailsModal(false);
           setSelectedRequest(null);
         }}
-        request={selectedRequest}
+        request={selectedRequest ? { clubRequest: selectedRequest as any } : null}
         onApprove={(id) => handleApproveRequest(id)}
         onReject={(id) => handleRejectRequest(id)}
       />
@@ -517,7 +519,7 @@ const AdminClubManagement: React.FC = () => {
               : 'Reject'
         }
         cancelText="Cancel"
-        type={itemToAction?.action === 'approve' ? 'success' : 'danger'}
+        type={itemToAction?.action === 'approve' ? 'info' : 'warning'}
       />
 
       <style>{`

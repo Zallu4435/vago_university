@@ -1,6 +1,6 @@
 // src/application/services/club.service.ts
 import httpClient from '../../frameworks/api/httpClient';
-import { Club, ClubRequest, ClubApiResponse } from '../../domain/types/club';
+import { Club, ClubRequest, ClubApiResponse, ClubResponse, ClubRequestResponse } from '../../domain/types/club';
 
 class ClubService {
   async getClubs(
@@ -10,7 +10,7 @@ class ClubService {
     status?: string,
     dateRange?: string,
     search?: string
-  ): Promise<ClubApiResponse> {
+  ): Promise<ClubApiResponse['data']> {
     try {
       const response = await httpClient.get<ClubApiResponse>('/admin/clubs', {
         params: { page, limit, category, status, dateRange, search },
@@ -23,7 +23,8 @@ class ClubService {
 
   async getClubDetails(id: string): Promise<Club> {
     try {
-      const response = await httpClient.get<Club>(`/admin/clubs/${id}`);
+      const response = await httpClient.get<ClubResponse>(`/admin/clubs/${id}`);
+      console.log(response.data, "[md[lsmsl[ms[lms[ldm")
       return response.data.data.club;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch club details');
@@ -63,9 +64,9 @@ class ClubService {
     status?: string,
     dateRange?: string,
     search?: string
-  ): Promise<ClubApiResponse> {
+  ): Promise<ClubApiResponse['data']> {
     try {
-      const response = await httpClient.get('/admin/club-requests', {
+      const response = await httpClient.get<ClubApiResponse>('/admin/club-requests', {
         params: { page, limit, category, status, dateRange, search },
       });
       return response.data.data;
@@ -92,8 +93,8 @@ class ClubService {
 
   async getClubRequestDetails(id: string): Promise<ClubRequest> {
     try {
-      const response = await httpClient.get<ClubRequest>(`/admin/club-requests/${id}`);
-      return response.data.data;
+      const response = await httpClient.get<ClubRequestResponse>(`/admin/club-requests/${id}`);
+      return response.data.data.clubRequest;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch event request details');
     }

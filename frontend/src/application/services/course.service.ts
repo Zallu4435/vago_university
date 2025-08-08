@@ -2,8 +2,12 @@ import httpClient from "../../frameworks/api/httpClient";
 import {
   Course,
   CourseApiResponse,
+  CourseApiWrapper,
   CourseDetails,
+  CourseDetailsResponse,
   EnrollmentRequest,
+  EnrollmentRequestsResponse,
+  EnrollmentRequestDetailsResponse,
 } from "../../domain/types/course";
 
 class CourseService {
@@ -16,7 +20,7 @@ class CourseService {
     search?: string
   ): Promise<CourseApiResponse> {
     try {
-      const response = await httpClient.get<CourseApiResponse>(
+      const response = await httpClient.get<CourseApiWrapper>(
         "/admin/courses",
         {
           params: { page, limit, specialization, faculty, term, search },
@@ -30,7 +34,7 @@ class CourseService {
 
   async getCourseDetails(courseId: string): Promise<CourseDetails> {
     try {
-      const response = await httpClient.get<CourseDetails>(
+      const response = await httpClient.get<CourseDetailsResponse>(
         `/admin/courses/${courseId}`
       );
       console.log("Course details response:", response.data);
@@ -86,11 +90,11 @@ class CourseService {
         params.specialization = specialization;
       if (term && term !== "All Terms") params.term = term;
 
-      const response = await httpClient.get<{
-        requests: EnrollmentRequest[];
-        totalPages: number;
-      }>("/admin/courses/course-enrollments", { params });
-      return response.data?.data;
+      const response = await httpClient.get<EnrollmentRequestsResponse>(
+        "/admin/courses/course-enrollments", 
+        { params }
+      );
+      return response.data.data;
     } catch (error: any) {
       throw new Error(
         error.response?.data?.error || "Failed to fetch enrollment requests"
@@ -130,10 +134,10 @@ class CourseService {
     requestId: string
   ): Promise<EnrollmentRequest> {
     try {
-      const response = await httpClient.get<EnrollmentRequest>(
+      const response = await httpClient.get<EnrollmentRequestDetailsResponse>(
         `/admin/courses/course-enrollments/${requestId}/details`
       );
-      return response.data?.data;
+      return response.data.data;
     } catch (error: any) {
       console.error("Error fetching enrollment request details:", error);
       throw new Error(

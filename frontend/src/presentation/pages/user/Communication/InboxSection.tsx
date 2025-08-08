@@ -52,7 +52,7 @@ export default function InboxSection() {
 
   const handleConfirmDelete = () => {
     if (messageToDelete) {
-      handleDeleteMessage(messageToDelete.id, 'inbox');
+      handleDeleteMessage(messageToDelete.id);
       if (selectedMessage?.id === messageToDelete.id) {
         setSelectedMessage(null);
       }

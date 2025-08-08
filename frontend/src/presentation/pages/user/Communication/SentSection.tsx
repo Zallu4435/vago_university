@@ -25,7 +25,7 @@ export default function SentSection() {
 
   const handleConfirmDelete = () => {
     if (messageToDelete) {
-      handleDeleteMessage(messageToDelete.id, 'sent');
+      handleDeleteMessage(messageToDelete.id);
       if (selectedMessage?.id === messageToDelete.id) {
         setSelectedMessage(null);
       }

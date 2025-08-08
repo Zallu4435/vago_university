@@ -73,7 +73,7 @@ const CommunicationManagement: React.FC = () => {
 
   const handleConfirmDelete = () => {
     if (messageToDelete) {
-      handleDeleteMessage(messageToDelete.id, activeTab as 'inbox' | 'sent'); // Use id instead of _id
+      handleDeleteMessage(messageToDelete.id); // Use id instead of _id
       setShowDeleteWarning(false);
       setMessageToDelete(null);
     }
@@ -229,7 +229,7 @@ const CommunicationManagement: React.FC = () => {
                 <>
                   {activeTab === 'inbox' && !isLoadingInbox && inboxMessages.length > 0 && (
                     <>
-                      <ApplicationsTable data={inboxMessages} columns={inboxColumns} actions={inboxActions} />
+                      <ApplicationsTable data={inboxMessages as any} columns={inboxColumns as any} actions={inboxActions as any} />
                       <Pagination
                         page={page}
                         totalPages={totalInboxPages}
@@ -243,7 +243,7 @@ const CommunicationManagement: React.FC = () => {
                   )}
                   {activeTab === 'sent' && !isLoadingSent && sentMessages.length > 0 && (
                     <>
-                      <ApplicationsTable data={sentMessages} columns={sentColumns} actions={sentActions} />
+                      <ApplicationsTable data={sentMessages as any} columns={sentColumns as any} actions={sentActions as any} />
                       <Pagination
                         page={page}
                         totalPages={totalSentPages}
@@ -312,7 +312,7 @@ const CommunicationManagement: React.FC = () => {
           setShowMessageDetails(false);
         }}
         onDelete={() => {
-          handleDeleteMessage(selectedMessage!.id, activeTab as 'inbox' | 'sent'); // Use id instead of _id
+          handleDeleteMessage(selectedMessage!.id); // Use id instead of _id
           setShowMessageDetails(false);
         }}
         onClose={() => {
@@ -336,7 +336,7 @@ const CommunicationManagement: React.FC = () => {
         type="danger"
       />
 
-      <style jsx>{`
+      <style>{`
         @keyframes floatingMist {
           0% {
             transform: translateY(0) translateX(0);

@@ -48,7 +48,6 @@ export interface SportSummaryDTO extends SportSummaryData {
 }
 
 export interface GetSportsResponseDTO extends PaginatedResponseDTO<SportSummaryDTO> {
-  sports: SportSummaryDTO[];
 }
 
 export interface GetSportByIdResponseDTO {

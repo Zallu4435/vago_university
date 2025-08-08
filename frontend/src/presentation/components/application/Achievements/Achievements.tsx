@@ -1,4 +1,4 @@
-import React, { useEffect, forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import { useEffect, forwardRef, useImperativeHandle, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AchievementQuestions } from './AchievementQuestions';
@@ -9,7 +9,7 @@ import type { AchievementSection, AchievementsProps } from '../../../../domain/t
 import { AchievementSectionSchema } from '../../../../domain/validation/AchievementSchema';
 
 
-export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getValues: () => any }, AchievementsProps>(({ initialData, onSave }, ref) => {
+export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getValues: () => any }, AchievementsProps>(({ initialData }, ref) => {
   const defaultValues: AchievementSection = {
     questions: questions.reduce((acc, q) => ({ ...acc, [q.id]: '' }), {}),
     achievements: [],
@@ -17,7 +17,7 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getVal
   };
 
   const methods = useForm<AchievementSection>({
-    resolver: zodResolver(AchievementSectionSchema),
+    resolver: zodResolver(AchievementSectionSchema) as any,
     defaultValues: initialData ?? defaultValues,
     mode: 'onSubmit',
   });
@@ -73,7 +73,7 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getVal
     const maxLength = questions.find(q => q.id === questionId)?.maxLength || 1000;
     if (value.length <= maxLength) {
       console.log('Achievements: handleAnswerChange', { questionId, value });
-      setValue(`questions.${questionId}`, value, { shouldValidate: false, shouldDirty: true });
+      setValue('questions', { ...achievementData.questions, [questionId]: value }, { shouldValidate: false, shouldDirty: true });
     }
   };
 
@@ -191,7 +191,7 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getVal
                 achievements={achievementData.achievements}
                 onAdd={handleAddAchievement}
                 onEdit={(achievement, index) => {
-                  setNewAchievement(achievement);
+                  setNewAchievement(achievement as any);
                   setEditingIndex(index);
                   setShowModal(true);
                 }}
@@ -211,7 +211,7 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getVal
             resetModalFields();
           }}
           onSubmit={async () => {
-            const isValid = await trigger(['newAchievement'], { shouldFocus: true });
+            const isValid = await trigger(['achievements'], { shouldFocus: true });
             console.log('AchievementModal: Validation result', { isValid, errors, newAchievement });
             if (!isValid) {
               return;
@@ -230,7 +230,7 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getVal
             resetModalFields();
           }}
           newAchievement={newAchievement}
-          setNewAchievement={setNewAchievement}
+          setNewAchievement={setNewAchievement as any}
         />
       </div>
     </FormProvider>

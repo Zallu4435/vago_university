@@ -1,5 +1,5 @@
 // frontend/src/application/services/user.service.ts
-import { AdmissionApiResponse, AdmissionDetails } from '../../domain/types/management/usermanagement';
+import { AdmissionApiResponse, AdmissionDetails, AdmissionDetailsResponse } from '../../domain/types/management/usermanagement';
 import httpClient from '../../frameworks/api/httpClient';
 
 class UserService {
@@ -12,7 +12,7 @@ class UserService {
     startDate?: string,
     endDate?: string,
     search?: string
-  ): Promise<AdmissionApiResponse> {
+  ): Promise<AdmissionApiResponse['data']> {
     try {
       const response = await httpClient.get<AdmissionApiResponse>('/admin/admissions', {
         params: { page, limit, status, program, dateRange, startDate, endDate, search },
@@ -25,8 +25,8 @@ class UserService {
 
   async getAdmissionDetails(id: string): Promise<AdmissionDetails> {
     try {
-      const response = await httpClient.get<AdmissionDetails>(`/admin/admissions/${id}`);
-      return response.data.data;
+      const response = await httpClient.get<AdmissionDetailsResponse>(`/admin/admissions/${id}`);
+      return response.data.data.admission;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to fetch admission details');
     }

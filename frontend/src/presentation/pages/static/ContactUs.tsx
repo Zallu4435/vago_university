@@ -43,10 +43,10 @@ const ContactUs = () => {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     setSubmitError(null);
-    
+
     try {
       const backendUrl = import.meta.env.VITE_API_BASE_URL || 'https://vago-university.onrender.com/api';
-      const response = await axios.post(`${backendUrl}/enquiries`, {
+      await axios.post(`${backendUrl}/enquiries`, {
         name: data.name.trim(),
         email: data.email.trim(),
         subject: data.subject.trim(),
@@ -54,9 +54,9 @@ const ContactUs = () => {
       });
 
       toast.success('Thank you! Your message has been sent successfully.');
-      
+
       reset();
-      
+
       setTimeout(() => setSubmitSuccess(false), 5000);
     } catch (error: any) {
       console.error('Error submitting enquiry:', error);
@@ -72,9 +72,8 @@ const ContactUs = () => {
     <section
       id="contact-us"
       data-animate
-      className={`w-full bg-gradient-to-b from-cyan-50 via-white to-cyan-50 pt-12 sm:pt-16 md:pt-20 pb-16 sm:pb-20 md:pb-30 transition-all duration-800 ${
-        isVisible["contact-us"] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-      }`}
+      className={`w-full bg-gradient-to-b from-cyan-50 via-white to-cyan-50 pt-12 sm:pt-16 md:pt-20 pb-16 sm:pb-20 md:pb-30 transition-all duration-800 ${isVisible["contact-us"] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+        }`}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-10 md:mb-12">

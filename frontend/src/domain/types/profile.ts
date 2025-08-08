@@ -8,6 +8,10 @@ export interface ProfileData {
     profilePicture?: string;
     passwordChangedAt?: string;
     
+    // ID fields
+    studentId?: string;
+    facultyId?: string;
+    
     // Faculty-specific fields
     department?: string;
     qualification?: string;

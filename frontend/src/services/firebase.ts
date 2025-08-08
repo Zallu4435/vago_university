@@ -81,6 +81,12 @@ export async function setupFirebaseMessaging(registration: ServiceWorkerRegistra
         return;
       }
 
+      // Skip FCM token registration for admin users
+      if (collection === 'admin') {
+        console.log('[Firebase Setup] Skipping FCM token registration for admin user');
+        return;
+      }
+
       try {
         const response = await httpClient.post(`/fcm/${collection}/${userId}/fcm-token`, {
           token,

@@ -91,7 +91,7 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
   });
 };
 
-  const handleDeleteMessage = (messageId: string, tab: 'inbox' | 'sent') => {
+  const handleDeleteMessage = (messageId: string) => {
     deleteMessageMutation.mutate(messageId);
   };
 
@@ -238,8 +238,8 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
   return {
     inboxMessages: (inboxQuery.data?.messages || []).map(mapMessage),
     sentMessages: (sentQuery.data?.messages || []).map(mapMessage),
-    totalInboxPages: inboxQuery.data?.totalPages || 1,
-    totalSentPages: sentQuery.data?.totalPages || 1,
+    totalInboxPages: inboxQuery.data?.pagination.totalPages || 1,
+    totalSentPages: sentQuery.data?.pagination.totalPages || 1,
     isLoadingInbox: inboxQuery.isLoading,
     isLoadingSent: sentQuery.isLoading,
     page,

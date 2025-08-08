@@ -149,7 +149,7 @@ const HelpSupportPage = () => {
     return matchesCategory && matchesSearch;
   });
 
-  const getPriorityIcon = (priority) => {
+  const getPriorityIcon = (priority: any) => {
     switch(priority) {
       case 'high': return <FaExclamationTriangle className="text-red-500" />;
       case 'medium': return <FaClock className="text-amber-500" />;
@@ -188,7 +188,7 @@ const HelpSupportPage = () => {
 
             <div className="flex items-center">
               <div className="px-3 py-1.5 bg-sky-50 rounded-lg text-sm text-sky-700 font-medium border border-sky-200">
-                {user?.name || user?.firstName || 'User'}
+                {user?.firstName || 'User'}
               </div>
             </div>
           </div>

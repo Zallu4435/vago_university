@@ -8,14 +8,12 @@ export const useUserAssignments = () => {
   const [selectedFile, setSelectedFile] = useState<SelectedFile>({});
   const [error, setError] = useState<string | null>(null);
 
-  // UI state for filters/search/sort/pagination
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [sortBy, setSortBy] = useState<SortOption>('dueDate');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
 
-  // Fetch assignments from backend with current filters
   const { data: assignments, isLoading: isLoadingAssignments } = useQuery({
     queryKey: ['userAssignments', { search: searchTerm, status: filterStatus, sortBy, page: currentPage, limit: itemsPerPage }],
     queryFn: async () => {
@@ -30,12 +28,11 @@ export const useUserAssignments = () => {
     }
   });
 
-  // Submit assignment mutation
   const submitAssignmentMutation = useMutation({
     mutationFn: ({ assignmentId, file }: { assignmentId: string; file: File }) => {
       return userAssignmentService.submitAssignment(assignmentId, file);
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (variables) => {
       queryClient.invalidateQueries({ queryKey: ['userAssignments'] });
       setSelectedFile(prev => {
         const updated = { ...prev };

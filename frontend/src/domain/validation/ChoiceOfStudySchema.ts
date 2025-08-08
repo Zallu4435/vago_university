@@ -5,8 +5,7 @@ export const programmeChoiceSchema = z.object({
   preferredMajor: z.string().optional(),
 }).refine(
   (data) => {
-    // If programme requires a major (e.g., certain programmes), preferredMajor must be provided
-    const programmesRequiringMajor = ['Engineering', 'Science']; // Adjust based on your programmeOptions
+    const programmesRequiringMajor = ['Engineering', 'Science'];
     if (programmesRequiringMajor.includes(data.programme) && !data.preferredMajor) {
       return false;
     }
@@ -18,11 +17,9 @@ export const programmeChoiceSchema = z.object({
   }
 );
 
-// Context-aware schema creator to check for duplicates
 export const createProgrammeChoiceSchema = (existingChoices: { programme: string; preferredMajor: string }[]) =>
   programmeChoiceSchema.refine(
     (data) => {
-      // Check if programme already exists in choices
       return !existingChoices.some(choice => choice.programme === data.programme);
     },
     {
@@ -31,7 +28,6 @@ export const createProgrammeChoiceSchema = (existingChoices: { programme: string
     }
   );
 
-// Create a schema for the form data structure
 export const choiceOfStudyFormSchema = z.object({
   choices: z.array(programmeChoiceSchema)
     .min(1, 'At least one programme is required')

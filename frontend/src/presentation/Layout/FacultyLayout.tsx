@@ -29,7 +29,6 @@ export default function FacultyLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden relative">
-      {/* Sidebar-style background pattern for the whole layout */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 opacity-95 z-0"></div>
       <div className="absolute inset-0 opacity-10 z-0">
         <div className="absolute inset-0" style={{

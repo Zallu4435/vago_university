@@ -85,7 +85,11 @@ const AdminClubManagement: React.FC = () => {
   const handleEditClub = (club: Club) => {
     (async () => {
       try {
-        const id = club.id;
+        const id = club.id || club._id;
+        if (!id) {
+          toast.error('Club ID not found');
+          return;
+        }
         const details = await getClubDetails(id);
         setSelectedClub(details);
         setShowAddClubModal(true);
@@ -100,7 +104,12 @@ const AdminClubManagement: React.FC = () => {
     (async () => {
       try {
         if (isClub(club)) {
-          const details = await getClubDetails(club.id);
+          const id = club.id || club._id;
+          if (!id) {
+            toast.error('Club ID not found');
+            return;
+          }
+          const details = await getClubDetails(id);
           setSelectedClub(details);
         } else {
           setSelectedClub(club);
@@ -116,7 +125,12 @@ const AdminClubManagement: React.FC = () => {
   const handleViewRequest = (request: ClubRequest) => {
     (async () => {
       try {
-        const details = await getClubRequestDetails(request.requestedId);
+        const id = request.requestedId || request._id;
+        if (!id) {
+          toast.error('Request ID not found');
+          return;
+        }
+        const details = await getClubRequestDetails(id);
         setSelectedRequest(details);
         setShowRequestDetailsModal(true);
       } catch (error) {
@@ -126,11 +140,16 @@ const AdminClubManagement: React.FC = () => {
     })();
   };
 
-  const handleSaveClub = (data: Omit<Club, 'id' | 'createdAt'>) => {
+  const handleSaveClub = (data: Omit<Club, 'id'>) => {
     (async () => {
       try {
         if (selectedClub && isClub(selectedClub)) {
-          await updateClub({ id: selectedClub.id, data });
+          const id = selectedClub.id || selectedClub._id;
+          if (!id) {
+            toast.error('Club ID not found');
+            return;
+          }
+          await updateClub({ id, data });
           toast.success('Club updated successfully');
         } else {
           await createClub(data);
@@ -501,7 +520,7 @@ const AdminClubManagement: React.FC = () => {
         type={itemToAction?.action === 'approve' ? 'success' : 'danger'}
       />
 
-      <style jsx>{`
+      <style>{`
         @keyframes floatingMist {
           0% {
             transform: translateY(0) translateX(0);

@@ -1,4 +1,3 @@
-// Payment Management Constants
 import { FiDollarSign, FiCreditCard, FiFileText, FiAward } from 'react-icons/fi';
 import { Payment } from '../../domain/types/management/financialmanagement';
 

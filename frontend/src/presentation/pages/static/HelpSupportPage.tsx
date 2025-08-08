@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   FaQuestionCircle, 
   FaComments, 
@@ -6,9 +6,7 @@ import {
   FaEnvelope, 
   FaBook, 
   FaUsers, 
-  FaCog, 
   FaCreditCard, 
-  FaShieldAlt, 
   FaMapMarkerAlt, 
   FaClock, 
   FaSearch,
@@ -27,7 +25,7 @@ import {
 import { FiHelpCircle } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../redux/store';
+import { RootState } from '../../../appStore/store';
 
 const HelpSupportPage = () => {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -188,7 +186,6 @@ const HelpSupportPage = () => {
               </div>
             </div>
 
-            {/* Right Section - User Info */}
             <div className="flex items-center">
               <div className="px-3 py-1.5 bg-sky-50 rounded-lg text-sm text-sky-700 font-medium border border-sky-200">
                 {user?.name || user?.firstName || 'User'}
@@ -198,16 +195,13 @@ const HelpSupportPage = () => {
         </div>
       </div>
 
-      {/* Main Content with top padding for fixed header */}
       <div className="pt-16">
-        {/* Hero Section */}
         <div className="bg-sky-600 text-white py-12">
           <div className="max-w-6xl mx-auto px-4">
             <div className="text-center">
               <h2 className="text-4xl font-bold mb-4">Help & Support Center</h2>
               <p className="text-xl text-sky-100 mb-8">We're here to help you succeed. Find answers, get support, and connect with our team.</p>
               
-              {/* Search Bar */}
               <div className="max-w-2xl mx-auto relative">
                 <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" />
                 <input

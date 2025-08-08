@@ -51,12 +51,12 @@ const teamSchema = new Schema<Sport>({
   updatedAt: { type: Date, default: Date.now },
 });
 
-teamSchema.path("upcomingGames").validate(function (value: any[]) {
+teamSchema.path("upcomingGames").validate(function (value) {
   return value && value.length > 0;
 }, "At least one upcoming game is required");
 
 teamSchema.pre("save", function (next) {
-  (this as any).updatedAt = new Date();
+  (this).updatedAt = new Date();
   next();
 });
 

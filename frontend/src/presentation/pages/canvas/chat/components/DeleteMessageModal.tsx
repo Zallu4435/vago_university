@@ -26,8 +26,6 @@ export const DeleteMessageModal: React.FC<DeleteMessageModalProps> = ({
     };
 
     if (isVisible) {
-      // Prevent body scrolling when modal is open
-      const originalStyle = window.getComputedStyle(document.body).overflow;
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.width = '100%';
@@ -37,7 +35,6 @@ export const DeleteMessageModal: React.FC<DeleteMessageModalProps> = ({
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      // Restore body scrolling when modal is closed
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';

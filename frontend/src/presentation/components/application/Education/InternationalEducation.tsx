@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { InternationalSchoolInfo } from './InternationalSchoolInfo';
 import { InternationalTestInfo } from './InternationalTestInfo';
+import { getNestedError } from '../../../../shared/utils/formErrors';
 
 export const InternationalEducation: React.FC = () => {
   const { formState: { errors }, trigger, handleSubmit } = useFormContext();
@@ -41,9 +42,9 @@ export const InternationalEducation: React.FC = () => {
   return (
     <div className="w-full max-w-screen-2xl">
       <div className="bg-white shadow-sm rounded-xl border border-cyan-100">
-        {errors.international?.message && (
+        {getNestedError(errors, 'international') && (
           <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
-            <p className="text-sm text-red-700">{errors.international.message}</p>
+            <p className="text-sm text-red-700">{getNestedError(errors, 'international')}</p>
           </div>
         )}
         {step === 1 && (

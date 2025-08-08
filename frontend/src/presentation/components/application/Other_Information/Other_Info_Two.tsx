@@ -4,6 +4,7 @@ import { Button } from '../../base/Button';
 import { Textarea } from '../../base/Textarea';
 import { radioOptions } from './options';
 import type { OtherInfoTwoProps } from '../../../../domain/types/application';
+import { getNestedObjectError } from '../../../../shared/utils/formErrors';
 
 export const Other_Info_Two: React.FC<OtherInfoTwoProps> = ({ onBack, onNext }) => {
   const { register, watch, setValue, formState: { errors }, trigger } = useFormContext();
@@ -73,8 +74,8 @@ export const Other_Info_Two: React.FC<OtherInfoTwoProps> = ({ onBack, onNext }) 
                 </label>
               </div>
             ))}
-            {errors.legal?.hasCriminalRecord && (
-              <p className="text-sm text-red-700 mt-2">{errors.legal.hasCriminalRecord.message}</p>
+              {getNestedObjectError(errors, 'legal', 'hasCriminalRecord') && (
+              <p className="text-sm text-red-700 mt-2">{getNestedObjectError(errors, 'legal', 'hasCriminalRecord')}</p>
             )}
           </div>
         </div>
@@ -108,7 +109,7 @@ export const Other_Info_Two: React.FC<OtherInfoTwoProps> = ({ onBack, onNext }) 
                 rows={5}
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.legal?.criminalRecord?.message}
+                error={getNestedObjectError(errors, 'legal', 'criminalRecord')}
               />
               <div className="flex justify-between mt-2 text-sm">
                 <span className="text-cyan-600">

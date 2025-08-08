@@ -214,7 +214,7 @@ export class FacultyController implements IFacultyController {
         }
       };
       return result_response;
-    } catch (error: any) {
+    } catch (error) {
       return this.httpErrors.error_500();
     }
   }

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { FiImage, FiCamera, FiMic, FiFile, FiMapPin } from 'react-icons/fi';
+import { FiImage, FiCamera, FiFile, FiMapPin } from 'react-icons/fi';
 import { Styles } from '../types/ChatTypes';
 
 interface AttachmentMenuProps {

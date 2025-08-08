@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import { FaPaperPlane, FaTimes } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import { useForm } from 'react-hook-form';
@@ -135,10 +133,3 @@ export default function JoinRequestForm({ onSubmit, onCancel, isLoading, title }
     </div>
   );
 }
-
-JoinRequestForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
-  isLoading: PropTypes.bool.isRequired,
-  title: PropTypes.string.isRequired,
-};

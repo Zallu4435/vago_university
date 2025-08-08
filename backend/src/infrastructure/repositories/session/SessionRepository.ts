@@ -80,17 +80,17 @@ export class SessionRepository implements ISessionRepository {
     return sessions.map(doc => doc.toObject() as VideoSession);
   }
 
-  async getSessionAttendance(sessionId: string, filters: any = {}): Promise<any[]> {
+  async getSessionAttendance(sessionId: string, filters: any = {}) {
     const session = await VideoSessionModel.findById(sessionId);
     if (!session) throw new Error('Session not found');
     let attendance = session.attendance || [];
 
     if (filters.search && filters.search.trim() !== '') {
       const search = filters.search.toLowerCase();
-      const userIds = attendance.map((a: any) => a.userId);
+      const userIds = attendance.map((a) => a.userId);
       const users = await User.find({ _id: { $in: userIds } }).lean();
-      const userMap = new Map(users.map((u: any) => [u._id.toString(), u]));
-      attendance = attendance.filter((a: any) => {
+      const userMap = new Map(users.map((u) => [u._id.toString(), u]));
+      attendance = attendance.filter((a) => {
         const user = userMap.get(a.userId);
         return user && (
           (user.firstName && user.firstName.toLowerCase().includes(search)) ||
@@ -103,8 +103,7 @@ export class SessionRepository implements ISessionRepository {
     if (filters.decision && filters.decision.trim() !== '' && filters.decision !== 'all') {
       const decision = filters.decision.toLowerCase();
 
-      const beforeCount = attendance.length;
-      attendance = attendance.filter((a: any) => {
+      attendance = attendance.filter((a) => {
 
         if (!a.status) {
           const result = decision === 'pending';
@@ -132,15 +131,15 @@ export class SessionRepository implements ISessionRepository {
 
     if (filters.attendanceLevel && filters.attendanceLevel.trim() !== '' && filters.attendanceLevel !== 'all') {
       const level = filters.attendanceLevel.toLowerCase();
-      attendance = attendance.filter((a: any) => {
+      attendance = attendance.filter((a) => {
         let totalMinutes = 0;
         if (Array.isArray(a.intervals)) {
-          totalMinutes = a.intervals.reduce((sum: number, interval: any) => {
+          totalMinutes = a.intervals.reduce((sum: number, interval) => {
             if (interval.joinedAt && interval.leftAt) {
               const joined = new Date(interval.joinedAt).getTime();
               const left = new Date(interval.leftAt).getTime();
               if (!isNaN(joined) && !isNaN(left) && left > joined) {
-                return sum + (left - joined) / 60000; // ms to minutes
+                return sum + (left - joined) / 60000; 
               }
             }
             return sum;
@@ -154,15 +153,13 @@ export class SessionRepository implements ISessionRepository {
       });
     }
 
-    // Date range filtering
     if (filters.startDate || filters.endDate) {
-      attendance = attendance.filter((a: any) => {
+      attendance = attendance.filter((a) => {
         if (!Array.isArray(a.intervals) || a.intervals.length === 0) {
           return false;
         }
 
-        // Check if any interval falls within the date range
-        return a.intervals.some((interval: any) => {
+        return a.intervals.some((interval) => {
           if (!interval.joinedAt) return false;
           
           const joinDate = new Date(interval.joinedAt);
@@ -171,18 +168,16 @@ export class SessionRepository implements ISessionRepository {
 
           if (filters.startDate) {
             startDate = new Date(filters.startDate);
-            startDate.setHours(0, 0, 0, 0); // Start of day
+            startDate.setHours(0, 0, 0, 0);
           }
           
           if (filters.endDate) {
             endDate = new Date(filters.endDate);
-            endDate.setHours(23, 59, 59, 999); // End of day
+            endDate.setHours(23, 59, 59, 999);
           }
 
-          // If start date is specified, join date must be >= start date
           if (startDate && joinDate < startDate) return false;
           
-          // If end date is specified, join date must be <= end date
           if (endDate && joinDate > endDate) return false;
           
           return true;
@@ -190,12 +185,12 @@ export class SessionRepository implements ISessionRepository {
       });
     }
 
-    const userIds = attendance.map((a: any) => a.userId);
+    const userIds = attendance.map((a) => a.userId);
     const users = await User.find({ _id: { $in: userIds } }).lean();
-    const userMap = new Map(users.map((u: any) => [u._id.toString(), u]));
+    const userMap = new Map(users.map((u) => [u._id.toString(), u]));
     const result = attendance
-      .filter((a: any) => userMap.has(a.userId))
-      .map((a: any) => {
+      .filter((a) => userMap.has(a.userId))
+      .map((a) => {
         const user = userMap.get(a.userId);
         return {
           id: a.userId,
@@ -212,16 +207,16 @@ export class SessionRepository implements ISessionRepository {
     const session = await VideoSessionModel.findById(sessionId);
     if (!session) throw new Error('Session not found');
 
-    const attendanceIndex = session.attendance.findIndex((a: any) => a.userId === userId);
+    const attendanceIndex = session.attendance.findIndex((a) => a.userId === userId);
     if (attendanceIndex === -1) throw new Error('Attendance record not found');
 
     session.attendance[attendanceIndex].status = status;
 
     if (status === 'approved' || status === 'approve') {
-      session.attendeeList = session.attendeeList.filter((a: any) => a.id !== userId);
+      session.attendeeList = session.attendeeList.filter((a) => a.id !== userId);
       session.attendeeList.push({ id: userId, name });
     } else {
-      session.attendeeList = session.attendeeList.filter((a: any) => a.id !== userId);
+      session.attendeeList = session.attendeeList.filter((a) => a.id !== userId);
     }
 
     session.markModified('attendance');
@@ -269,7 +264,7 @@ export class SessionRepository implements ISessionRepository {
       throw new Error('Session not found');
     }
 
-    const attendance = session.attendance.find((a: any) => a.userId === userId);
+    const attendance = session.attendance.find((a) => a.userId === userId);
     if (!attendance || !attendance.intervals || attendance.intervals.length === 0) {
       throw new Error('No attendance record found');
     }

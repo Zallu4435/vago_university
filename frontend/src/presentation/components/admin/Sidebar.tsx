@@ -44,7 +44,6 @@ const sidebarItems = [
   { name: 'Payment', path: '/admin/payment', icon: <MdPayment size={20} /> },
 ];
 
-// Group sidebar items into categories
 const groupedItems = [
   { category: 'Main', items: [sidebarItems[0]] },
   { category: 'People', items: [sidebarItems[1], sidebarItems[2]] },
@@ -79,7 +78,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar }) => {
     navigate('/login')
   };
 
-  // Handle window resize
   useEffect(() => {
     const handleWindowResize = () => {
       if (window.innerWidth > 1024) {
@@ -103,7 +101,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar }) => {
     );
   };
 
-  // Filter items based on search query
   const filteredGroupedItems = groupedItems
     .map(group => ({
       ...group,
@@ -113,7 +110,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar }) => {
     }))
     .filter(group => group.items.length > 0 || collapsed);
 
-  // Gradient for categories
   const getCategoryGradient = (category: string) => {
     const gradients: { [key: string]: string } = {
       Main: 'from-purple-500 to-blue-500',
@@ -129,7 +125,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar }) => {
 
   return (
     <>
-      {/* Mobile Menu Button */}
       <div className="lg:hidden fixed top-6 left-6 z-50">
         <button
           onClick={toggleMobileSidebar}
@@ -140,7 +135,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar }) => {
         </button>
       </div>
 
-      {/* Mobile Overlay */}
       {mobileOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-30 transition-opacity duration-300"
@@ -148,16 +142,13 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar }) => {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 z-40 bg-gray-900/90 backdrop-blur-lg border-r border-purple-600/30 shadow-2xl shadow-purple-600/10 transition-all duration-300 ease-in-out
           ${collapsed ? 'w-20' : 'w-72'}
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
         <div className="flex flex-col h-full">
-          {/* Header */}
           <div className="bg-gradient-to-r from-purple-900 to-blue-900 text-white flex items-center justify-between h-20 px-4 relative overflow-hidden border-b border-purple-600/30 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-            {/* Particles */}
             <div className="absolute inset-0 overflow-hidden">
               {[...Array(10)].map((_, i) => (
                 <div
@@ -193,7 +184,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar }) => {
             </button>
           </div>
 
-          {/* Search Box */}
           {!collapsed && (
             <div className="px-4 py-3">
               <div className="relative">
@@ -209,7 +199,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar }) => {
             </div>
           )}
 
-          {/* Content */}
           <div className="flex-1 overflow-y-auto py-2 px-2 scroll-smooth custom-scrollbar">
             <nav className="space-y-1">
               {filteredGroupedItems.map((group) => (
@@ -288,7 +277,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar }) => {
             </nav>
           </div>
 
-          {/* Footer */}
           <div className="p-4 border-t border-purple-600/30 bg-gradient-to-b from-gray-900/0 to-purple-900/40 relative overflow-hidden">
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <div className="absolute -top-20 left-1/2 w-40 h-40 bg-purple-600/10 rounded-full blur-3xl -translate-x-1/2" />
@@ -318,9 +306,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar }) => {
         </div>
       </aside>
 
-      {/* Main content wrapper */}
       <div className={`transition-all duration-300 ease-in-out ${collapsed ? 'lg:ml-20' : 'lg:ml-72'}`}>
-        {/* Your main content goes here */}
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `

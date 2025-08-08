@@ -21,14 +21,14 @@ import {
 } from "../../../domain/sports/dtos/SportResponseDTOs";
 
 export interface ISportsRepository {
-  getSports(params: GetSportsRequestDTO): Promise<GetSportsResponseDTO>;
+  getSports(params: GetSportsRequestDTO)
   getSportById(params: GetSportByIdRequestDTO): Promise<GetSportByIdResponseDTO | null>;
   createSport(params: CreateSportRequestDTO): Promise<CreateSportResponseDTO>;
   updateSport(params: UpdateSportRequestDTO): Promise<UpdateSportResponseDTO | null>;
   deleteSport(params: DeleteSportRequestDTO): Promise<void>;
-  getSportRequests(params: GetSportRequestsRequestDTO): Promise<GetSportRequestsResponseDTO>;
+  getSportRequests(params: GetSportRequestsRequestDTO);
   approveSportRequest(params: ApproveSportRequestRequestDTO): Promise<void>;
   rejectSportRequest(params: RejectSportRequestRequestDTO): Promise<void>;
-  getSportRequestDetails(params: GetSportRequestDetailsRequestDTO): Promise<GetSportRequestDetailsResponseDTO | null>;
-  joinSport(params: JoinSportRequestDTO): Promise<JoinSportResponseDTO>;
+  getSportRequestDetails(params: GetSportRequestDetailsRequestDTO);
+  joinSport(params: JoinSportRequestDTO);
 } 

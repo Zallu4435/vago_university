@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 import { useLocation } from 'react-router-dom';
 import { usePreferences } from '../../../application/context/PreferencesContext';

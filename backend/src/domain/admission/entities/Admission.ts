@@ -3,8 +3,6 @@ import {
   AdmissionProps, 
   AdmissionStatus, 
   RejectedBy,
-  PaymentStatus,
-  PaymentMethod
 } from "./AdmissionTypes";
 import { AdmissionErrorType } from "../enums/AdmissionErrorType";
 
@@ -58,13 +56,13 @@ export class AdmissionDraft {
   get id(): string | undefined { return this._id; }
   getApplicationId(): string { return this.applicationId; }
   getRegisterId(): string { return this.registerId; }
-  getPersonal(): any { return this.personal; }
-  getChoiceOfStudy(): any[] { return this.choiceOfStudy; }
-  getEducation(): any { return this.education; }
-  getAchievements(): any { return this.achievements; }
-  getOtherInformation(): any { return this.otherInformation; }
-  getDocuments(): any { return this.documents; }
-  getDeclaration(): any { return this.declaration; }
+  getPersonal() { return this.personal; }
+  getChoiceOfStudy() { return this.choiceOfStudy; }
+  getEducation() { return this.education; }
+  getAchievements() { return this.achievements; }
+  getOtherInformation() { return this.otherInformation; }
+  getDocuments() { return this.documents; }
+  getDeclaration() { return this.declaration; }
   getCompletedSteps(): string[] { return this.completedSteps; }
   getCreatedAt(): Date | undefined { return this.createdAt; }
   getUpdatedAt(): Date | undefined { return this.updatedAt; }

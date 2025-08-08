@@ -14,15 +14,15 @@ import {
 } from '../../../application/materials/useCases/UserMaterialUseCases';
 
 class GetUserBookmarkedMaterialsUseCase {
-  constructor(private repo: any) {}
-  async execute(params: any): Promise<any> {
+  constructor(private repo) {}
+  async execute(params){
     return { materials: [], totalPages: 0 };
   }
 }
 
 class GetUserLikedMaterialsUseCase {
-  constructor(private repo: any) {}
-  async execute(params: any): Promise<any> {
+  constructor(private repo) {}
+  async execute(params){
     return { materials: [], totalPages: 0 };
   }
 }

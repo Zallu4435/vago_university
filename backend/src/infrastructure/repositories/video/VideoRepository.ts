@@ -5,7 +5,7 @@ type WithStringId<T> = Omit<T, "_id"> & { _id: string };
 
 
 export class VideoRepository implements IVideoRepository {
-    async findVideos(query: any, page: number, limit: number) {
+    async findVideos(query, page: number, limit: number) {
         const videos = await VideoModel.find(query)
             .populate('diplomaId', 'title category')
             .skip((page - 1) * limit)
@@ -13,14 +13,14 @@ export class VideoRepository implements IVideoRepository {
             .sort({ module: 1, uploadedAt: -1 })
             .lean();
 
-        return videos.map((video: any) => ({
+        return videos.map((video) => ({
             ...video,
             _id: video._id.toString(),
             diplomaId: video.diplomaId?.toString?.() ?? video.diplomaId,
         }));
     }
 
-    async countVideos(query: any) {
+    async countVideos(query) {
         return VideoModel.countDocuments(query);
     }
 
@@ -42,7 +42,7 @@ export class VideoRepository implements IVideoRepository {
             : null;
     }
 
-    async createVideo(video: any): Promise<IRepoVideo> {
+    async createVideo(video): Promise<IRepoVideo> {
         const created = await VideoModel.create({
             ...video,
             uploadedAt: new Date(),
@@ -55,7 +55,7 @@ export class VideoRepository implements IVideoRepository {
         };
     }
 
-    async updateVideo(id: string, video: any): Promise<IRepoVideo | null> {
+    async updateVideo(id: string, video): Promise<IRepoVideo | null> {
         const updated = await VideoModel.findByIdAndUpdate(
             id,
             { $set: { ...video, updatedAt: new Date() } },

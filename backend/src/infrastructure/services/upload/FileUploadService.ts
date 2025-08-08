@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (req, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowedTypes = [
     "image/jpeg",
     "image/png",

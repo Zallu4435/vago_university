@@ -9,6 +9,7 @@ import MappedTestsSection from './MappedTestsSection';
 import SATSection from './SATSection';
 import ACTSection from './ACTSection';
 import APSection from './APSection';
+import { getNestedError } from '../../../../shared/utils/formErrors';
 
 interface InternationalTestInfoProps {
   onBack: () => void;
@@ -33,17 +34,18 @@ const InternationalTestInfo: React.FC<InternationalTestInfoProps> = ({ onBack, o
         </div>
 
         <div className="p-6 space-y-6">
-          {errors.international?.message && (
+          {getNestedError(errors, 'international') && (
             <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
-              <p className="text-sm text-red-700">{errors.international.message}</p>
+              <p className="text-sm text-red-700">{getNestedError(errors, 'international')}</p>
             </div>
           )}
+
 
           {/* English Language Tests */}
           <div className="space-y-6">
             <div className="bg-cyan-50 border-l-4 border-cyan-400 p-4 rounded">
               <p className="text-sm text-cyan-800">
-                Please provide your test scores for at least one of the following English language proficiency tests 
+                Please provide your test scores for at least one of the following English language proficiency tests
                 taken in the past 2 years.
               </p>
             </div>

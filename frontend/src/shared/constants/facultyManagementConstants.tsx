@@ -1,4 +1,5 @@
 import { FiUser, FiMail, FiBriefcase } from 'react-icons/fi';
+import { Faculty } from '../../domain/types/management/facultyManagement';
 
 export const DEPARTMENTS = [
   'All Departments',
@@ -18,7 +19,7 @@ export const facultyColumns = [
   {
     header: 'Applicant',
     key: 'fullName',
-    render: (faculty) => (
+    render: (faculty: Faculty) => (
       <div className="flex items-center">
         <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white shadow-lg relative overflow-hidden">
           <div className="absolute inset-0 bg-purple-500/20 backdrop-blur-sm"></div>
@@ -37,7 +38,7 @@ export const facultyColumns = [
   {
     header: 'Email',
     key: 'email',
-    render: (faculty) => (
+    render: (faculty: Faculty) => (
       <div className="flex items-center text-gray-300">
         <FiMail size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{faculty.email || 'N/A'}</span>
@@ -47,22 +48,21 @@ export const facultyColumns = [
   {
     header: 'Department',
     key: 'department',
-    render: (faculty) => (
+    render: (faculty: Faculty) => (
       <div className="flex items-center text-gray-300">
         <FiBriefcase size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{faculty.department || 'N/A'}</span>
       </div>
     ),
   },
-  // The following columns should be injected with functions from the component
   {
     header: 'Applied On',
     key: 'createdAt',
-    render: null, // Replace in component with a function using formatDate
+    render: null,
   },
   {
     header: 'Status',
     key: 'status',
-    render: null, // Replace in component with a function rendering status
+    render: null,
   },
 ]; 

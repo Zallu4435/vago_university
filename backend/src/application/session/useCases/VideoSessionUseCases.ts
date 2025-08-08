@@ -34,7 +34,7 @@ export interface IUpdateVideoSessionStatusUseCase {
 }
 
 export interface IGetSessionAttendanceUseCase {
-    execute(sessionId: string, filters: any): Promise<any[]>;
+    execute(sessionId: string, filters);
 }
 
 export interface IUpdateAttendanceStatusUseCase {
@@ -119,12 +119,10 @@ export class UpdateVideoSessionUseCase {
     async execute(params: UpdateVideoSessionRequestDTO): Promise<UpdateVideoSessionResponseDTO | null> {
         let updateData = { ...params.data };
         if (updateData.status && typeof updateData.status === 'string') {
-            // Map string to enum if needed
             if (Object.values(VideoSessionStatus).includes(updateData.status as VideoSessionStatus)) {
                 updateData.status = updateData.status as VideoSessionStatus;
             } else {
-                // fallback: try to map from string key
-                updateData.status = (VideoSessionStatus as any)[updateData.status] || undefined;
+                updateData.status = VideoSessionStatus[updateData.status] || undefined;
             }
         }
         // Combine date and time if present

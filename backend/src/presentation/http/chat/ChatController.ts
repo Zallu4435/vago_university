@@ -80,7 +80,7 @@ export class ChatController {
           data: result
         }
       };
-    } catch (error: any) {
+    } catch (error) {
       if (error.message === "User not found") {
         return {
           statusCode: 404,
@@ -128,7 +128,7 @@ export class ChatController {
           data: result
         }
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         statusCode: 500,
         body: { 
@@ -256,7 +256,7 @@ export class ChatController {
               size: file.size,
               mimetype: file.mimetype,
             });
-          } catch (uploadErr: any) {
+          } catch (uploadErr) {
             // handle error
           }
         }

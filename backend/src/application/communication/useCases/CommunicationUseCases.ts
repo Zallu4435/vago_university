@@ -77,7 +77,7 @@ export class GetInboxMessagesUseCase implements IGetInboxMessagesUseCase {
     }
     const { messages, totalItems, totalPages, page, limit, userId } = await this.repository.getInboxMessages(params);
     const MessageStatus = require("../../../domain/communication/entities/Communication").MessageStatus;
-    const mappedMessages = messages.map((message: any) => ({
+    const mappedMessages = messages.map((message) => ({
       _id: message._id.toString(),
       subject: message.subject,
       content: message.content,
@@ -87,14 +87,14 @@ export class GetInboxMessagesUseCase implements IGetInboxMessagesUseCase {
         email: message.sender.email,
         role: message.sender.role
       },
-      recipients: message.recipients.map((r: any) => ({
+      recipients: message.recipients.map((r) => ({
         _id: r._id.toString(),
         name: r.name,
         email: r.email,
         role: r.role,
         status: r.status || MessageStatus.Unread
       })),
-      status: message.recipients.find((r: any) => r._id === userId)?.status || MessageStatus.Unread,
+      status: message.recipients.find((r) => r._id === userId)?.status || MessageStatus.Unread,
       createdAt: message.createdAt,
       updatedAt: message.updatedAt,
       isBroadcast: message.isBroadcast,
@@ -128,7 +128,7 @@ export class GetSentMessagesUseCase implements IGetSentMessagesUseCase {
     }
     const { messages, totalItems, totalPages, page, limit, userId } = await this.repository.getSentMessages(params);
     const MessageStatus = require("../../../domain/communication/entities/Communication").MessageStatus;
-    const mappedMessages = messages.map((message: any) => ({
+    const mappedMessages = messages.map((message) => ({
       _id: message._id.toString(),
       subject: message.subject,
       content: message.content,
@@ -138,14 +138,14 @@ export class GetSentMessagesUseCase implements IGetSentMessagesUseCase {
         email: message.sender.email,
         role: message.sender.role
       },
-      recipients: message.recipients.map((r: any) => ({
+      recipients: message.recipients.map((r) => ({
         _id: r._id.toString(),
         name: r.name,
         email: r.email,
         role: r.role,
         status: r.status || MessageStatus.Unread
       })),
-      status: message.recipients.find((r: any) => r._id === userId)?.status || MessageStatus.Unread,
+      status: message.recipients.find((r) => r._id === userId)?.status || MessageStatus.Unread,
       createdAt: message.createdAt,
       updatedAt: message.updatedAt,
       isBroadcast: message.isBroadcast,
@@ -226,7 +226,7 @@ export class GetAllAdminsUseCase implements IGetAllAdminsUseCase {
 
   async execute(params: GetAllAdminsRequestDTO): Promise<ResponseDTO<GetAllAdminsResponseDTO>> {
     const admins = await this.repository.getAllAdmins(params);
-    const mappedAdmins = admins.map((admin: any) => ({
+    const mappedAdmins = admins.map((admin) => ({
       _id: admin._id.toString(),
       name: `${admin.firstName} ${admin.lastName}`,
       email: admin.email,
@@ -250,7 +250,7 @@ export class FetchUsersUseCase implements IFetchUsersUseCase {
 
   async execute(params: FetchUsersRequestDTO): Promise<ResponseDTO<FetchUsersResponseDTO>> {
     const users = await this.repository.fetchUsers(params);
-    const mappedUsers = users.map((user: any) => ({
+    const mappedUsers = users.map((user) => ({
       _id: user._id.toString(),
       name: `${user.firstName} ${user.lastName}`,
       email: user.email,

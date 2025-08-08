@@ -98,7 +98,7 @@ export class PaginatedResponse<T> {
 
 // Updated to match repository return structure
 export type GetCoursesResponse = {
-  courses: Pick<ICourseDocument, 'title' | 'specialization' | 'faculty' | 'term' | 'credits'>[];
+  courses: Pick<ICourseDocument, '_id' | 'title' | 'specialization' | 'faculty' | 'term' | 'credits'>[];
   totalItems: number;
   page: number;
   limit: number;

@@ -1,12 +1,9 @@
-// Video management constants
-
 import { FiVideo } from 'react-icons/fi';
 
 export const ITEMS_PER_PAGE = 10;
 
 export const STATUS_OPTIONS = ['All Status', 'Published', 'Draft'];
 
-// The categories will be dynamic, so export a function to get them from diplomas data
 export const getCategoryOptions = (diplomasData: any) => diplomasData?.diplomas.map((d: any) => d.category) || [];
 
 export const getTabs = (filteredVideos: any[], activeTab: string) => [

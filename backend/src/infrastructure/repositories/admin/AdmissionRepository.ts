@@ -9,7 +9,7 @@ import { User } from "../../../domain/auth/entities/Auth";
 
 
 export class AdmissionRepository implements IAdmissionRepository {
-    async find(filter: any, projection: any, skip: number, limit: number) {
+    async find(filter, projection, skip: number, limit: number) {
         const results = await AdmissionModel.find(filter)
             .select(projection)
             .sort({ createdAt: -1 })
@@ -19,7 +19,7 @@ export class AdmissionRepository implements IAdmissionRepository {
         return results as unknown as AdminAdmission[];
     }
 
-    async count(filter: any) {
+    async count(filter) {
         return AdmissionModel.countDocuments(filter);
     }
 
@@ -42,7 +42,7 @@ export class AdmissionRepository implements IAdmissionRepository {
         return AdmissionModel.findById(id).lean({ getters: true }) as unknown as FullAdmissionDetails;
     }
 
-    async saveAdmission(admission: any) {
+    async saveAdmission(admission) {
         return admission.save();
     }
 
@@ -50,7 +50,7 @@ export class AdmissionRepository implements IAdmissionRepository {
         return UserModel.findOne({ email }).lean({ getters: true }) as unknown as User;
     }
 
-    async saveUser(user: any) {
+    async saveUser(user) {
         return user.save();
     }
 

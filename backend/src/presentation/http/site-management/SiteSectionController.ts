@@ -50,7 +50,7 @@ export class SiteSectionController {
       };
     }
     const params: GetSiteSectionsRequestDTO = {
-      sectionKey: sectionKey as any,
+      sectionKey: sectionKey,
       page: pageNum,
       limit: limitNum,
       search: search as string,

@@ -240,7 +240,7 @@ export class CreateVideoUseCase implements ICreateVideoUseCase {
                     quality: 'auto'
                 });
                 videoUrl = result.secure_url;
-            } catch (error: any) {
+            } catch (error) {
                 throw new DomainError('Failed to upload video to Cloudinary');
             }
         }
@@ -250,7 +250,7 @@ export class CreateVideoUseCase implements ICreateVideoUseCase {
             uploadedAt: new Date(),
             videoUrl
         };
-        const created = await this.videoRepository.createVideo(videoData as any);
+        const created = await this.videoRepository.createVideo(videoData);
         await this.videoRepository.addVideoToDiploma(diploma._id, created._id);
         const videoEntity = new Video({
             id: created._id?.toString() || created.id,
@@ -278,7 +278,7 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
         if (!existingVideo) {
             throw new VideoNotFoundError();
         }
-        let updateData: any = { ...params };
+        let updateData = { ...params };
         if (params.videoFile) {
             if (existingVideo.videoUrl) {
                 try {
@@ -286,7 +286,7 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
                     if (publicId) {
                         await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
                     }
-                } catch (deleteError: any) {
+                } catch (deleteError) {
                 }
             }
             try {
@@ -297,7 +297,7 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
                     timeout: 60000
                 });
                 updateData.videoUrl = result.secure_url;
-            } catch (error: any) {
+            } catch (error) {
                 throw new DomainError('Failed to upload video to Cloudinary');
             }
         } else {
@@ -347,7 +347,7 @@ export class DeleteVideoUseCase implements IDeleteVideoUseCase {
                 if (publicId) {
                     await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
                 }
-            } catch (error: any) {
+            } catch (error) {
             }
         }
         await this.videoRepository.removeVideoFromDiploma(video.diplomaId, video.id);

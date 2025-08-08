@@ -984,7 +984,7 @@ export class ChatRepository implements IChatRepository {
     if (chat.type === 'direct') {
       const otherUserId = chat.participants.find((id: string) => id !== userId);
       if (otherUserId) {
-        const isBlocked = chat.blockedUsers?.some((entry: any) => entry.blocker === userId && entry.blocked === otherUserId);
+        const isBlocked = chat.blockedUsers?.some((entry) => entry.blocker === userId && entry.blocked === otherUserId);
         if (isBlocked) {
           await ChatModel.findByIdAndUpdate(chatId, {
             $pull: { blockedUsers: { blocker: userId, blocked: otherUserId } }

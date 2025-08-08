@@ -1,7 +1,6 @@
 import React from 'react';
 import { OrganizerTypeOption } from '../../domain/types/management/sportmanagement';
 
-// Sport Management Constants
 export const SPORT_TYPES = ['All', 'Football', 'Basketball', 'Badminton', 'Athletics', 'Swimming'] as const;
 export const TEAM_STATUSES = ['All', 'Active', 'Inactive'] as const;
 export const REQUEST_STATUSES = ['All', 'Pending', 'Approved', 'Rejected'] as const;
@@ -10,7 +9,6 @@ export const DATE_RANGES = ['All', 'Last Week', 'Last Month', 'Last 3 Months', '
 export const TEAM_CATEGORIES = ['Varsity', 'Club', 'Intramural'] as const;
 export const DIVISIONS = ['Division I', 'Division II', 'Division III'] as const;
 
-// Sport Type Options for Forms
 export const SPORT_TYPE_OPTIONS = [
   { value: 'football', label: 'Football', emoji: '⚽' },
   { value: 'basketball', label: 'Basketball', emoji: '🏀' },
@@ -24,21 +22,18 @@ export const SPORT_TYPE_OPTIONS = [
   { value: 'rugby', label: 'Rugby', emoji: '🏉' },
 ] as const;
 
-// Team Category Options for Forms
 export const TEAM_CATEGORY_OPTIONS = [
   { value: 'varsity', label: 'Varsity', emoji: '🏆' },
   { value: 'club', label: 'Club', emoji: '🎪' },
   { value: 'intramural', label: 'Intramural', emoji: '🎯' },
 ] as const;
 
-// Division Options for Forms
 export const DIVISION_OPTIONS = [
   { value: 'division_i', label: 'Division I', emoji: '🥇' },
   { value: 'division_ii', label: 'Division II', emoji: '🥈' },
   { value: 'division_iii', label: 'Division III', emoji: '🥉' },
 ] as const;
 
-// Coach Options for Forms
 export const COACH_OPTIONS = [
   { value: 'dr_john_smith', label: 'Dr. John Smith', emoji: '👨‍🏫' },
   { value: 'prof_sarah_johnson', label: 'Prof. Sarah Johnson', emoji: '👩‍🏫' },
@@ -47,14 +42,12 @@ export const COACH_OPTIONS = [
   { value: 'coach_david_lee', label: 'Coach David Lee', emoji: '🏃‍♂️' },
 ] as const;
 
-// Icon Options for Teams
 export const TEAM_ICONS = [
   '⚽', '🏀', '🏸', '🏃', '🏊', '🎾', '🏐', '🏏', '🏒', '🏉',
   '🥎', '🏓', '🏸', '🏊‍♀️', '🏃‍♀️', '🚴', '🏋️', '🤸', '🤺', '🏹',
   '🎯', '��', '🏸', '🏊‍♂️', '🏃‍♂️', '🚴‍♀️', '🏋️‍♀️', '🤸‍♀️', '🤺', '🏹'
 ] as const;
 
-// AddTeamModal Constants
 export const ORGANIZER_TYPE_OPTIONS: OrganizerTypeOption[] = [
   { value: 'department', label: 'Department', emoji: '🏛️' },
   { value: 'club', label: 'Club', emoji: '🎉' },
@@ -75,7 +68,6 @@ export const COLOR_OPTIONS = [
   '#DC2626', '#7C3AED', '#059669', '#DB2777', '#9333EA'
 ] as const;
 
-// Default Form Values
 export const DEFAULT_TEAM_FORM_VALUES = {
   title: '',
   type: '',
@@ -93,13 +85,11 @@ export const DEFAULT_TEAM_FORM_VALUES = {
   status: 'Active' as const,
 };
 
-// Particle Animation Configuration
 export const PARTICLE_COUNT = 30;
 export const PARTICLE_SIZE_RANGE = { min: 5, max: 15 };
 export const PARTICLE_ANIMATION_RANGE = { min: 15, max: 25 };
 export const PARTICLE_DELAY_RANGE = { min: 0, max: 5 };
 
-// Color Options for Teams
 export const TEAM_COLORS = [
   '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
   '#06B6D4', '#84CC16', '#F97316', '#EC4899', '#6366F1',
@@ -107,7 +97,6 @@ export const TEAM_COLORS = [
   '#4ADE80', '#FB923C', '#F472B6', '#818CF8', '#2DD4BF'
 ] as const;
 
-// Status Badge Colors
 export const STATUS_BADGE_COLORS = {
   active: 'bg-green-900/30 text-green-400 border-green-500/30',
   inactive: 'bg-gray-900/30 text-gray-400 border-gray-500/30',
@@ -116,7 +105,6 @@ export const STATUS_BADGE_COLORS = {
   rejected: 'bg-red-900/30 text-red-400 border-red-500/30',
 } as const;
 
-// Sport Statistics Labels
 export const SPORT_STATS_LABELS = {
   totalTeams: 'Total Teams',
   activeTeams: 'Active Teams',
@@ -128,7 +116,6 @@ export const SPORT_STATS_LABELS = {
   rejectedRequests: 'Rejected Requests',
 } as const;
 
-// Form Validation Messages
 export const SPORT_VALIDATION_MESSAGES = {
   titleRequired: 'Team title is required',
   typeRequired: 'Sport type is required',
@@ -145,7 +132,6 @@ export const SPORT_VALIDATION_MESSAGES = {
   invalidDate: 'Please select a valid date',
 } as const;
 
-// Success Messages
 export const SPORT_SUCCESS_MESSAGES = {
   teamCreated: 'Team created successfully',
   teamUpdated: 'Team updated successfully',
@@ -154,7 +140,6 @@ export const SPORT_SUCCESS_MESSAGES = {
   requestRejected: 'Player request rejected',
 } as const;
 
-// Error Messages
 export const SPORT_ERROR_MESSAGES = {
   fetchTeamsFailed: 'Failed to fetch teams',
   fetchRequestsFailed: 'Failed to fetch player requests',
@@ -167,7 +152,6 @@ export const SPORT_ERROR_MESSAGES = {
   fetchRequestDetailsFailed: 'Failed to fetch request details',
 } as const;
 
-// Table Column Definitions
 export const getTeamColumns = (
   Users: React.ComponentType<{ size?: number | string; className?: string }>,
   Trophy: React.ComponentType<{ size?: number | string; className?: string }>,

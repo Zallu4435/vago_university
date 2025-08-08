@@ -35,16 +35,23 @@ export async function setupFirebaseMessaging(registration: ServiceWorkerRegistra
     }
     console.log('[Firebase Setup] Got messaging instance');
 
-    onMessage(messagingInstance, (payload) => {
-      if (payload.data?.tokenRefresh === 'true') {
-        console.log('[Firebase Setup] FCM token refresh triggered');
-        retryCount = 0;
-        setupFirebaseMessaging(registration);
-      }
-    });
+    if (messagingInstance) {
+      onMessage(messagingInstance, (payload) => {
+        if (payload.data?.tokenRefresh === 'true') {
+          console.log('[Firebase Setup] FCM token refresh triggered');
+          retryCount = 0;
+          setupFirebaseMessaging(registration);
+        }
+      });
+    }
 
     try {
       let token;
+      if (!messagingInstance) {
+        console.error('[Firebase Setup] Messaging instance is not available');
+        return;
+      }
+
       try {
         token = await getToken(messagingInstance, {
           vapidKey: VAPID_KEY

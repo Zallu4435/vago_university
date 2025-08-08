@@ -1,4 +1,4 @@
-import { FaGraduationCap, FaUniversity, FaBook, FaUsers, FaCalendarAlt, FaLaptopCode, FaDollarSign, FaGlobeAmericas, FaHandshake, FaTrophy, FaMicroscope, FaChartLine, FaShieldAlt, FaMobileAlt, FaCloud, FaGamepad, FaBrain, FaDatabase, FaNetworkWired, FaPalette, FaMusic, FaVolleyballBall, FaLeaf, FaLightbulb, FaBriefcase, FaGraduationCap as FaDegree, FaClock, FaFileAlt, FaCheckCircle, FaStar, FaAward, FaGlobe, FaUserGraduate, FaIndustry, FaRocket, FaCode, FaPython, FaJava, FaJs, FaReact, FaNodeJs, FaDocker, FaAws, FaGoogle, FaMicrosoft } from 'react-icons/fa';
+import { FaGraduationCap, FaUniversity, FaBook, FaUsers, FaCalendarAlt, FaLaptopCode, FaDollarSign, FaGlobeAmericas, FaHandshake, FaTrophy, FaMicroscope, FaChartLine, FaShieldAlt, FaMobileAlt, FaCloud, FaBrain, FaVolleyballBall, FaLightbulb, FaBriefcase, FaGraduationCap as FaDegree, FaClock, FaFileAlt, FaCheckCircle, FaAward, FaGlobe, FaUserGraduate, FaRocket, FaCode, FaPython, FaJava } from 'react-icons/fa';
 
 export interface SearchResult {
   id: string;
@@ -9,7 +9,7 @@ export interface SearchResult {
   icon: () => React.ReactNode;
   keywords: string[];
   category: string;
-  priority: number; // 1-5, where 5 is highest priority
+  priority: number; 
 }
 
 export const searchDatabase: SearchResult[] = [

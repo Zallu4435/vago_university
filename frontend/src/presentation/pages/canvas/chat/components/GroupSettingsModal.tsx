@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiX, FiUser, FiEdit2, FiUsers, FiLock, FiMessageSquare, FiImage, FiLink, FiSearch, FiTrash2, FiLogOut, FiBell, FiBellOff, FiCheck, FiPlus, FiArrowRight } from 'react-icons/fi';
+import { FiX, FiUser, FiEdit2, FiUsers, FiLock, FiMessageSquare, FiTrash2, FiLogOut, FiBell, FiBellOff, FiPlus, FiArrowRight } from 'react-icons/fi';
 import { Chat, User } from '../types/ChatTypes';
 import { useChatQueries } from '../hooks/useChatQueries';
 import { useChatMutations } from '../hooks/useChatMutations';
@@ -33,13 +33,7 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
   onClose,
   chat,
   currentUser,
-  onUpdateGroup,
-  onAddMembers,
-  onRemoveMember,
-  onMakeAdmin,
-  onRemoveAdmin,
   onLeaveGroup,
-  onDeleteGroup
 }) => {
   const [showMemberSearch, setShowMemberSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,7 +44,7 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
   const [newDescription, setNewDescription] = useState(chat.description || '');
   const [newName, setNewName] = useState(chat.name || '');
 
-  const { chatDetails, isLoadingChatDetails, searchUsers, isLoadingSearchUsers, errorSearchUsers } = useChatQueries({ chatId: chat.id, query: searchQuery, page: 1, limit: 20 });
+  const { chatDetails, isLoadingChatDetails, searchUsers } = useChatQueries({ chatId: chat.id, query: searchQuery, page: 1, limit: 20 });
   const {
     addGroupMember,
     removeGroupMember,

@@ -7,7 +7,7 @@ import { Course, CourseRegistrationProps } from '../../../../domain/types/user/a
 import { toast } from 'react-hot-toast';
 
 
-export default function CourseRegistration({ studentInfo, courses, enrolledCredits, waitlistedCredits }: CourseRegistrationProps) {
+export default function CourseRegistration({ courses, enrolledCredits, waitlistedCredits }: CourseRegistrationProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);

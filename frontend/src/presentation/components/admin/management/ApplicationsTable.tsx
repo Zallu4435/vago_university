@@ -1,5 +1,4 @@
 import React from 'react';
-import { FiUser, FiMail, FiEye, FiCheckCircle, FiXCircle, FiCalendar, FiBriefcase, FiEdit, FiBook } from 'react-icons/fi';
 
 interface ColumnConfig<T> {
   header: string;
@@ -27,7 +26,6 @@ const ApplicationsTable = <T extends { _id: string }>({
   data,
   columns,
   actions = [],
-  formatDate,
 }: ApplicationsTableProps<T>) => {
   console.log('data', data)
   console.log('column', columns)
@@ -101,36 +99,6 @@ const TableHeader = ({ children, width }: { children: React.ReactNode; width?: s
   </th>
 );
 
-const StatusBadge = ({ status }: { status: string }) => {
-  const getStatusStyles = () => {
-    switch (status?.toLowerCase()) {
-      case 'approved':
-        return 'bg-green-900/30 text-green-400 border-green-500/30';
-      case 'rejected':
-        return 'bg-red-900/30 text-red-400 border-red-500/30';
-      case 'pending':
-      default:
-        return 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30';
-    }
-  };
-
-  return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusStyles()}`}
-      role="status"
-    >
-      <span
-        className="h-1.5 w-1.5 rounded-full mr-1.5"
-        style={{
-          boxShadow: `0 0 8px currentColor`,
-          backgroundColor: 'currentColor',
-        }}
-      ></span>
-      {status?.charAt(0).toUpperCase() + status?.slice(1) || 'Pending'}
-    </span>
-  );
-};
-
 const ActionButton = ({ icon, label, onClick, color, disabled }: ActionConfig<any>) => {
   const colors = {
     blue: 'text-blue-400 hover:bg-blue-900/30 border-blue-500/30 focus:ring-blue-500/50',
@@ -138,17 +106,21 @@ const ActionButton = ({ icon, label, onClick, color, disabled }: ActionConfig<an
     red: 'text-red-400 hover:bg-red-900/30 border-red-500/30 focus:ring-red-500/50',
   };
 
+  const resolvedLabel = typeof label === 'function' ? label({}) : label;
+  const resolvedDisabled = typeof disabled === 'function' ? disabled({}) : !!disabled;
+  const resolvedIcon = typeof icon === 'function' ? icon({}) : icon;
+
   return (
     <button
       className={`p-1.5 border backdrop-blur-sm rounded-md focus:outline-none focus:ring-2 transition-all duration-300 hover:shadow-lg hover:shadow-${color}-500/20 ${colors[color]} ${
-        disabled ? 'opacity-50 cursor-not-allowed' : ''
+        resolvedDisabled ? 'opacity-50 cursor-not-allowed' : ''
       }`}
       onClick={onClick}
-      disabled={disabled}
-      title={label}
-      aria-label={label}
+      disabled={resolvedDisabled}
+      title={resolvedLabel}
+      aria-label={resolvedLabel}
     >
-      {icon}
+      {resolvedIcon}
     </button>
   );
 };

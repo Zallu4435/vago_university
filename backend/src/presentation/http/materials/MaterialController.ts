@@ -43,8 +43,8 @@ export class MaterialController implements IMaterialController {
     let file, thumbnail;
     const files = httpRequest.files as any;
     if (Array.isArray(files)) {
-      file = files.find((f: any) => f.fieldname === 'file');
-      thumbnail = files.find((f: any) => f.fieldname === 'thumbnail');
+      file = files.find((f) => f.fieldname === 'file');
+      thumbnail = files.find((f) => f.fieldname === 'thumbnail');
     } else if (files) {
       file = files.file?.[0];
       thumbnail = files.thumbnail?.[0];
@@ -77,8 +77,8 @@ export class MaterialController implements IMaterialController {
     let file, thumbnail;
     const files = httpRequest.files as any;
     if (Array.isArray(files)) {
-      file = files.find((f: any) => f.fieldname === 'file');
-      thumbnail = files.find((f: any) => f.fieldname === 'thumbnail');
+      file = files.find((f) => f.fieldname === 'file');
+      thumbnail = files.find((f) => f.fieldname === 'thumbnail');
     } else if (files) {
       file = files.file?.[0];
       thumbnail = files.thumbnail?.[0];

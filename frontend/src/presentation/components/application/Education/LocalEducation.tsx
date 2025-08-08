@@ -3,9 +3,8 @@ import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '../../base/Input';
 import { Select } from '../../base/Select';
 import { countryOptions } from './options';
+import { getNestedObjectError } from '../../../../shared/utils/formErrors';
 
-// Note: This component assumes it is rendered within a FormProvider context
-// provided by a parent component (e.g., Education.tsx).
 export const LocalEducation: React.FC = () => {
   const { control, formState: { errors } } = useFormContext();
 
@@ -31,7 +30,7 @@ export const LocalEducation: React.FC = () => {
                 placeholder="Enter school or institution name"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.local?.schoolName?.message}
+                error={getNestedObjectError(errors, 'local', 'schoolName')}
               />
             )}
           />
@@ -50,7 +49,7 @@ export const LocalEducation: React.FC = () => {
                 placeholder="Select country"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.local?.country?.message}
+                error={getNestedObjectError(errors, 'local', 'country')}
               />
             )}
           />
@@ -68,7 +67,7 @@ export const LocalEducation: React.FC = () => {
                 placeholder="Start year"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.local?.from?.message}
+                error={getNestedObjectError(errors, 'local', 'from')}
               />
             )}
           />
@@ -86,7 +85,7 @@ export const LocalEducation: React.FC = () => {
                 placeholder="End year"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.local?.to?.message}
+                error={getNestedObjectError(errors, 'local', 'to')}
               />
             )}
           />
@@ -104,7 +103,7 @@ export const LocalEducation: React.FC = () => {
                 placeholder="Enter national ID or registration number"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.local?.nationalID?.message}
+                error={getNestedObjectError(errors, 'local', 'nationalID')}
               />
             )}
           />
@@ -122,8 +121,7 @@ export const LocalEducation: React.FC = () => {
                 placeholder="Enter school category"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.local?.localSchoolCategory?.message}
-              />
+                error={getNestedObjectError(errors, 'local', 'localSchoolCategory')} />
             )}
           />
           <Controller
@@ -140,7 +138,7 @@ export const LocalEducation: React.FC = () => {
                 placeholder="Enter state or province"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.local?.stateOrProvince?.message}
+                error={getNestedObjectError(errors, 'local', 'stateOrProvince')}
               />
             )}
           />

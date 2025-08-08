@@ -58,9 +58,9 @@ export const DocumentUploadTable: React.FC<DocumentUploadTableProps> = ({
                 ) : (
                   <span className="text-cyan-400 italic">No file uploaded</span>
                 )}
-                {errors.documents?.[index] && (
+                {(errors.documents as any)?.[index] && (
                   <p className="text-sm text-red-700 mt-1">
-                    {errors.documents[index]?.fileName?.message || 'File is required'}
+                    {(errors.documents as any)[index]?.fileName?.message || 'File is required'}
                   </p>
                 )}
               </td>

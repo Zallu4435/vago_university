@@ -13,8 +13,6 @@ export const SessionFilters: React.FC<Omit<SessionFiltersProps, 'filters' | 'onF
   onFilterChange,
   onClearFilters,
   uniqueInstructors,
-  userAccess,
-  onToggleEnrollment,
   styles,
   searchTerm,
   setSearchTerm
@@ -42,7 +40,6 @@ export const SessionFilters: React.FC<Omit<SessionFiltersProps, 'filters' | 'onF
             />
           </div>
         </div>
-        {/* Filters and clear button right-aligned */}
         <div className="w-full sm:w-auto flex flex-row gap-2 sm:gap-3 justify-end">
           <select
             value={filters.status}

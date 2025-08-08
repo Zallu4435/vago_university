@@ -179,56 +179,58 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
         </div>
       )}
 
-      <style jsx>{`
-        @keyframes floatingMist {
-          0% {
-            transform: translateY(0) translateX(0);
-            opacity: 0.2;
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @keyframes floatingMist {
+            0% {
+              transform: translateY(0) translateX(0);
+              opacity: 0.2;
+            }
+            50% {
+              transform: translateY(-20px) translateX(15px);
+              opacity: 0.6;
+            }
+            100% {
+              transform: translateY(0) translateX(0);
+              opacity: 0.2;
+            }
           }
-          50% {
-            transform: translateY(-20px) translateX(15px);
-            opacity: 0.6;
-          }
-          100% {
-            transform: translateY(0) translateX(0);
-            opacity: 0.2;
-          }
-        }
 
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(-10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
           }
-          to {
-            opacity: 1;
-            transform: translateY(0);
+
+          .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out forwards;
           }
-        }
 
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out forwards;
-        }
-
-        .animate-pulse-slow {
-          animation: pulse 3s infinite;
-        }
-
-        @keyframes pulse {
-          0%,
-          100% {
-            opacity: 1;
+          .animate-pulse-slow {
+            animation: pulse 3s infinite;
           }
-          50% {
-            opacity: 0.6;
-          }
-        }
 
-        input[type='date']::-webkit-calendar-picker-indicator {
-          filter: invert(0.8) brightness(0.8) sepia(1) hue-rotate(220deg) saturate(5);
-          opacity: 0.8;
-        }
-      `}</style>
+          @keyframes pulse {
+            0%,
+            100% {
+              opacity: 1;
+            }
+            50% {
+              opacity: 0.6;
+            }
+          }
+
+          input[type='date']::-webkit-calendar-picker-indicator {
+            filter: invert(0.8) brightness(0.8) sepia(1) hue-rotate(220deg) saturate(5);
+            opacity: 0.8;
+          }
+        `
+      }} />
     </div>
   );
 };
@@ -265,21 +267,23 @@ const FilterSelect: React.FC<FilterSelectProps> = ({ label, value, onChange, opt
         </option>
       ))}
     </select>
-    <style jsx>{`
-      select option {
-        background-color: #1f2937;
-        color: #e9d5ff;
-        border-bottom: 1px solid rgba(147, 51, 234, 0.2);
-        padding: 8px;
-        transition: background-color 0.2s ease;
-      }
-      select option:hover {
-        background-color: rgba(88, 28, 135, 0.5);
-      }
-      .text-shadow-sm {
-        text-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
-      }
-    `}</style>
+    <style dangerouslySetInnerHTML={{
+      __html: `
+        select option {
+          background-color: #1f2937;
+          color: #e9d5ff;
+          border-bottom: 1px solid rgba(147, 51, 234, 0.2);
+          padding: 8px;
+          transition: background-color 0.2s ease;
+        }
+        select option:hover {
+          background-color: rgba(88, 28, 135, 0.5);
+        }
+        .text-shadow-sm {
+          text-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
+        }
+      `
+    }} />
   </div>
 );
 

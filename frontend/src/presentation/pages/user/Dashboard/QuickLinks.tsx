@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { FaBookmark, FaBookOpen, FaDollarSign, FaArrowRight, FaCalendarAlt } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import { useNavigate } from 'react-router-dom';

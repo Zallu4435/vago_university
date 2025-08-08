@@ -4,7 +4,7 @@ import { SubmissionModel } from '../../database/mongoose/assignment/SubmissionMo
 import mongoose from 'mongoose';
 
 export class UserAssignmentRepository implements IUserAssignmentRepository {
-  async findUserAssignmentsRaw(query: any, sortField: string, sortOrder: 1 | -1) {
+  async findUserAssignmentsRaw(query, sortField: string, sortOrder: 1 | -1) {
     return AssignmentModel.find(query).sort({ [sortField]: sortOrder });
   }
  
@@ -47,7 +47,7 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
     return { assignment, submission };
   }
 
-  async submitAssignment(assignmentId: string, files: any[], studentId: string) {
+  async submitAssignment(assignmentId: string, files, studentId: string) {
     const student = await mongoose.model('User').findOne({ _id: studentId });
     const existingSubmission = await SubmissionModel.findOne({ assignmentId, studentId });
     let submission;
@@ -55,7 +55,7 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
       submission = await SubmissionModel.findOneAndUpdate(
         { assignmentId, studentId },
         {
-          files: files.map((file: any) => ({
+          files: files.map((file) => ({
             fileName: file.originalname,
             fileUrl: file.path,
             fileSize: file.size
@@ -74,7 +74,7 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
         studentId,
         studentName: student ? `${student.firstName} ${student.lastName}` : '',
         assignmentId,
-        files: files.map((file: any) => ({
+        files: files.map((file) => ({
           fileName: file.originalname,
           fileUrl: file.path,
           fileSize: file.size

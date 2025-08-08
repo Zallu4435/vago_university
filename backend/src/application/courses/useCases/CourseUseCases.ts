@@ -40,10 +40,8 @@ export class GetCoursesUseCase implements IGetCoursesUseCase {
   constructor(private readonly courseRepository: ICoursesRepository) {}
 
   async execute(params: GetCoursesRequestDTO): Promise<{ success: boolean; data: GetCoursesResponseDTO }> {
-    console.log('[GetCoursesUseCase] execute called with params:', params);
-    const { courses, totalItems, page, limit }: any = await this.courseRepository.getCourses(params);
-    console.log('[GetCoursesUseCase] repository result:', { courses, totalItems, page, limit });
-    const mappedCourses: CourseSummaryDTO[] = courses.map((course: any) => ({
+    const { courses, totalItems, page, limit } = await this.courseRepository.getCourses(params);
+    const mappedCourses: CourseSummaryDTO[] = courses.map((course) => ({
       id: course._id.toString(),
       title: course.title,
       specialization: course.specialization,
@@ -70,7 +68,7 @@ export class GetCourseByIdUseCase implements IGetCourseByIdUseCase {
     if (!params.id) {
       throw new InvalidCourseIdError();
     }
-    const course: any = await this.courseRepository.getCourseById(params.id);
+    const course = await this.courseRepository.getCourseById(params.id);
     if (!course) {
       throw new CourseNotFoundError(params.id);
     }
@@ -99,7 +97,7 @@ export class CreateCourseUseCase implements ICreateCourseUseCase {
   constructor(private readonly courseRepository: ICoursesRepository) {}
 
   async execute(params: CreateCourseRequestDTO): Promise<{ success: boolean; data: CreateCourseResponseDTO }> {
-    const newCourse: any = await this.courseRepository.createCourse(params);
+    const newCourse = await this.courseRepository.createCourse(params);
     return {
       success: true,
       data: {
@@ -128,7 +126,7 @@ export class UpdateCourseUseCase implements IUpdateCourseUseCase {
     if (!params.id) {
       throw new InvalidCourseIdError();
     }
-    const updatedCourse: any = await this.courseRepository.updateCourse(params);
+    const updatedCourse = await this.courseRepository.updateCourse(params);
     if (!updatedCourse) {
       throw new CourseNotFoundError(params.id);
     }

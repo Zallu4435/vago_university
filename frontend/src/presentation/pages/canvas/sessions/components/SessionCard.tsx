@@ -15,7 +15,6 @@ import {
 import { 
   getStatusBadge, 
   getDifficultyBadge, 
-  getConnectionQualityIcon, 
   getActionButton 
 } from '../utils/sessionUtils';
 import { useSelector } from 'react-redux';
@@ -36,7 +35,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
   const status = (session.status || '').toLowerCase();
-  // Parse startTime for date and time
+
   const start = backendSession.startTime ? new Date(backendSession.startTime) : null;
   const dateStr = start ? start.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '';
   const timeStr = start ? start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '';

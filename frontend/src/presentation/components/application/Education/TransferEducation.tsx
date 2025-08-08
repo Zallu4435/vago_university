@@ -4,6 +4,7 @@ import { Input } from '../../base/Input';
 import { Select } from '../../base/Select';
 import { Textarea } from '../../base/Textarea';
 import { countryOptions, universityOptions } from './options';
+import { getNestedObjectError } from '../../../../shared/utils/formErrors';
 
 export const TransferEducation: React.FC = () => {
   const { control, formState: { errors }, watch } = useFormContext();
@@ -22,8 +23,8 @@ export const TransferEducation: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Input
+                name="schoolName"
                 id="schoolName"
-                name="transfer.schoolName"
                 label="Name of School/Institution"
                 value={field.value}
                 onChange={field.onChange}
@@ -31,7 +32,7 @@ export const TransferEducation: React.FC = () => {
                 placeholder="Enter school or institution name"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.transfer?.schoolName?.message}
+                error={getNestedObjectError(errors, 'transfer', 'schoolName')}
               />
             )}
           />
@@ -40,8 +41,8 @@ export const TransferEducation: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Select
+                name="country"
                 id="country"
-                name="transfer.country"
                 label="Country"
                 options={countryOptions}
                 value={field.value}
@@ -50,7 +51,7 @@ export const TransferEducation: React.FC = () => {
                 placeholder="Select country"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.transfer?.country?.message}
+                error={getNestedObjectError(errors, 'transfer', 'country')}
               />
             )}
           />
@@ -59,8 +60,8 @@ export const TransferEducation: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Input
+                name="from"
                 id="from"
-                name="transfer.from"
                 label="From"
                 value={field.value}
                 onChange={field.onChange}
@@ -68,7 +69,7 @@ export const TransferEducation: React.FC = () => {
                 placeholder="Start year"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.transfer?.from?.message}
+                error={getNestedObjectError(errors, 'transfer', 'from')}
               />
             )}
           />
@@ -77,8 +78,8 @@ export const TransferEducation: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Input
+                name="to"
                 id="to"
-                name="transfer.to"
                 label="To"
                 value={field.value}
                 onChange={field.onChange}
@@ -86,7 +87,7 @@ export const TransferEducation: React.FC = () => {
                 placeholder="End year"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.transfer?.to?.message}
+                error={getNestedObjectError(errors, 'transfer', 'to')}
               />
             )}
           />
@@ -95,8 +96,8 @@ export const TransferEducation: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Select
+                name="previousUniversity"
                 id="previousUniversity"
-                name="transfer.previousUniversity"
                 label="Previous University"
                 options={universityOptions}
                 value={field.value}
@@ -105,7 +106,7 @@ export const TransferEducation: React.FC = () => {
                 placeholder="Select university"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.transfer?.previousUniversity?.message}
+                error={getNestedObjectError(errors, 'transfer', 'previousUniversity')}
               />
             )}
           />
@@ -115,8 +116,8 @@ export const TransferEducation: React.FC = () => {
               control={control}
               render={({ field }) => (
                 <Input
+                  name="otherUniversity"
                   id="otherUniversity"
-                  name="transfer.otherUniversity"
                   label="Other University Name"
                   value={field.value}
                   onChange={field.onChange}
@@ -124,7 +125,7 @@ export const TransferEducation: React.FC = () => {
                   placeholder="Enter university name"
                   className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                   labelClassName="text-cyan-700"
-                  error={errors.transfer?.otherUniversity?.message}
+                  error={getNestedObjectError(errors, 'transfer', 'otherUniversity')}
                 />
               )}
             />
@@ -134,8 +135,8 @@ export const TransferEducation: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Input
+                name="creditsEarned"
                 id="creditsEarned"
-                name="transfer.creditsEarned"
                 label="Credits Earned"
                 value={field.value}
                 onChange={field.onChange}
@@ -143,7 +144,7 @@ export const TransferEducation: React.FC = () => {
                 placeholder="Enter credits earned"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.transfer?.creditsEarned?.message}
+                error={getNestedObjectError(errors, 'transfer', 'creditsEarned')}
               />
             )}
           />
@@ -152,8 +153,8 @@ export const TransferEducation: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Input
+                name="gpa"
                 id="gpa"
-                name="transfer.gpa"
                 label="GPA"
                 value={field.value}
                 onChange={field.onChange}
@@ -161,7 +162,7 @@ export const TransferEducation: React.FC = () => {
                 placeholder="Enter GPA"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.transfer?.gpa?.message}
+                error={getNestedObjectError(errors, 'transfer', 'gpa')}
               />
             )}
           />
@@ -170,8 +171,8 @@ export const TransferEducation: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Input
+                name="programStudied"
                 id="programStudied"
-                name="transfer.programStudied"
                 label="Program/Major Studied"
                 value={field.value}
                 onChange={field.onChange}
@@ -179,7 +180,7 @@ export const TransferEducation: React.FC = () => {
                 placeholder="Enter program or major"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.transfer?.programStudied?.message}
+                error={getNestedObjectError(errors, 'transfer', 'programStudied')}
               />
             )}
           />
@@ -188,8 +189,8 @@ export const TransferEducation: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Textarea
+                name="reasonForTransfer"
                 id="reasonForTransfer"
-                name="transfer.reasonForTransfer"
                 label="Reason for Transfer"
                 value={field.value}
                 onChange={field.onChange}
@@ -198,7 +199,7 @@ export const TransferEducation: React.FC = () => {
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
                 rows={3}
-                error={errors.transfer?.reasonForTransfer?.message}
+                error={getNestedObjectError(errors, 'transfer', 'reasonForTransfer')}
               />
             )}
           />

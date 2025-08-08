@@ -6,11 +6,11 @@ import {
 } from "../../../domain/profile/dtos/ProfileRequestDTOs";
 
 export interface IProfileRepository {
-    getProfile(params: GetProfileRequestDTO): Promise<any>;
-    updateProfile(params: UpdateProfileRequestDTO): Promise<any>;
-    changePassword(params: ChangePasswordRequestDTO): Promise<any>;
-    updateProfilePicture(params: UpdateProfilePictureRequestDTO): Promise<any>;
-    findUserByEmail(email: string): Promise<any>;
-    findFacultyByEmail(email: string): Promise<any>;
-    saveUser(user: any): Promise<any>;
+    getProfile(params: GetProfileRequestDTO);
+    updateProfile(params: UpdateProfileRequestDTO);
+    changePassword(params: ChangePasswordRequestDTO);
+    updateProfilePicture(params: UpdateProfilePictureRequestDTO);
+    findUserByEmail(email: string);
+    findFacultyByEmail(email: string);
+    saveUser(user);
 }

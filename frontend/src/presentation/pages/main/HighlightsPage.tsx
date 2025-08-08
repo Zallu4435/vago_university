@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FaArrowLeft, FaSearch, FaFilter, FaTimes, FaStar, FaCalendar, FaTag } from 'react-icons/fa';
+import { FaArrowLeft, FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
 import { useHighlights, useHighlightsCategories } from '../../../application/hooks/useSiteSections';
 import { SiteSection } from '../../../application/services/siteSections.service';
 import SiteSectionModal from '../../components/public/SiteSectionModal';
@@ -13,21 +13,18 @@ export const HighlightsPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Get categories for filter dropdown
   const { data: categories = ['all'] } = useHighlightsCategories();
 
-  // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-    }, 500); // 500ms delay
+    }, 500); 
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Get highlights with server-side filtering using debounced search
   const { data: highlights, isLoading, error } = useHighlights({
-    limit: 100, // Get more results at once
+    limit: 100,
     search: debouncedSearchQuery || undefined,
     category: selectedCategory === 'all' ? undefined : selectedCategory,
   });
@@ -44,7 +41,6 @@ export const HighlightsPage: React.FC = () => {
 
   const handleClearSearch = () => {
     setSearchQuery('');
-    // Focus back to input after clearing
     setTimeout(() => {
       searchInputRef.current?.focus();
     }, 0);

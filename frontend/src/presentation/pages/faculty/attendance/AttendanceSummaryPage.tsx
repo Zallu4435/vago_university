@@ -17,7 +17,6 @@ import {
 import { useSessionManagement } from '../../../../application/hooks/useSessionManagement';
 import type { Session } from '../../../../application/hooks/useSessionManagement';
 
-// Add types for attendance data
 interface AttendanceInterval {
   joinedAt: string;
   leftAt?: string;
@@ -53,14 +52,12 @@ interface StudentAttendanceData {
 }
 
 const AttendanceSummaryPage = () => {
-  // Use the session management hook
   const {
     sessions,
     isLoading: isLoadingSessions,
     useSessionAttendance
   } = useSessionManagement();
 
-  // State for filters
   const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
@@ -70,7 +67,6 @@ const AttendanceSummaryPage = () => {
   const [selectedStudent, setSelectedStudent] = useState<StudentAttendanceData | null>(null);
   const [selectedSessionForIntervals, setSelectedSessionForIntervals] = useState<any>(null);
 
-  // Debounce searchTerm
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -86,13 +82,10 @@ const AttendanceSummaryPage = () => {
     }
   }, [sessions, selectedSessionId]);
 
-  // Fetch attendance for selected session
   const { data: currentAttendanceData = [], isLoading: isLoadingAttendance } = useSessionAttendance(selectedSessionId, { search: debouncedSearchTerm });
 
-  // Get current session data
   const currentSession = sessions.find((s: any) => s._id === selectedSessionId);
 
-  // Fetch attendance for all sessions (pass debouncedSearchTerm as filter)
   const sessionAttendanceQueries = sessions.map((session: any) => ({
     sessionId: session._id,
     query: useSessionAttendance(session._id, { search: debouncedSearchTerm })
@@ -100,7 +93,6 @@ const AttendanceSummaryPage = () => {
 
   const isLoadingAttendanceAllSessions = sessionAttendanceQueries.some((q: any) => q.query.isLoading);
 
-  // Calculate total time spent for a user
   const calculateTotalTime = (
     intervals: AttendanceInterval[],
     sessionEndTime?: string
@@ -113,9 +105,8 @@ const AttendanceSummaryPage = () => {
         ? new Date(interval.leftAt)
         : sessionEndTime
           ? new Date(sessionEndTime)
-          : new Date(); // fallback to now
+          : new Date();
   
-      // Ensure both are valid and join < leave
       if (
         !isNaN(joinTime.getTime()) &&
         !isNaN(leaveTime.getTime()) &&
@@ -128,7 +119,6 @@ const AttendanceSummaryPage = () => {
     }, 0);
   };
 
-  // Format duration in hours and minutes
   const formatDuration = (milliseconds: number): string => {
     const hours = Math.floor(milliseconds / (1000 * 60 * 60));
     const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
@@ -139,7 +129,6 @@ const AttendanceSummaryPage = () => {
     return `${seconds}s`;
   };
 
-  // Format time for display
   const formatTime = (timestamp: string): string => {
     return new Date(timestamp).toLocaleTimeString('en-US', {
       hour: '2-digit',
@@ -148,7 +137,6 @@ const AttendanceSummaryPage = () => {
     });
   };
 
-  // Calculate attendance percentage
   const calculateAttendancePercentage = (
     totalTimeMs: number,
     session?: Session
@@ -156,11 +144,10 @@ const AttendanceSummaryPage = () => {
     if (!session || !session.duration) return 0;
     const sessionDurationMs = session.duration
       ? session.duration * 60 * 1000
-      : 2 * 60 * 60 * 1000; // fallback to 2 hours
+      : 2 * 60 * 60 * 1000;
     return Math.round((totalTimeMs / sessionDurationMs) * 100);
   };
 
-  // Process attendance data - only approved users
   const processedAttendance = useMemo(() => {
     if (!currentSession) return [];
     // Filter only approved users
@@ -179,11 +166,9 @@ const AttendanceSummaryPage = () => {
           sessionData: currentSession
         };
       });
-    // Remove local search filter here (now handled by backend)
     return data;
   }, [currentAttendanceData, currentSession]);
 
-  // Calculate summary statistics
   const summaryStats = useMemo(() => {
     if (!processedAttendance.length) return null;
 
@@ -205,18 +190,6 @@ const AttendanceSummaryPage = () => {
     };
   }, [processedAttendance]);
 
-  // Filter sessions by date range
-  const filteredSessions = useMemo(() => {
-    if (!dateRange.start && !dateRange.end) return sessions;
-    return sessions.filter((session: any) => {
-      const sessionDate = new Date(session.startTime);
-      const startDate = dateRange.start ? new Date(dateRange.start) : null;
-      const endDate = dateRange.end ? new Date(dateRange.end) : null;
-      if (startDate && sessionDate < startDate) return false;
-      if (endDate && sessionDate > endDate) return false;
-      return true;
-    });
-  }, [dateRange, sessions]);
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -248,33 +221,7 @@ const AttendanceSummaryPage = () => {
     return 'text-yellow-600 bg-yellow-100';
   };
 
-  const exportAttendanceData = () => {
-    if (!summaryStats || !currentSession) return;
-
-    const csvData = [
-      ['Student Name', 'Email', 'Time Spent', 'Attendance %', 'Session Count'],
-      ...processedAttendance.map((user: any) => [
-        user.username,
-        user.email,
-        user.formattedTime,
-        `${user.attendancePercentage}%`,
-        user.intervals.length.toString()
-      ])
-    ];
-
-    const csvContent = csvData.map(row => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `attendance-summary-${currentSession.title}-${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
-
-  // Process all attendance data to group by student
+ 
   const studentsAttendanceData = useMemo(() => {
     const studentMap = new Map<string, StudentAttendanceData>();
 
@@ -328,7 +275,6 @@ const AttendanceSummaryPage = () => {
       });
     });
 
-    // Calculate averages
     studentMap.forEach(student => {
       student.averageAttendance = Math.round(
         student.sessionDetails.reduce((sum, session) => sum + session.attendancePercentage, 0) / student.sessionDetails.length
@@ -338,7 +284,6 @@ const AttendanceSummaryPage = () => {
     return Array.from(studentMap.values());
   }, [sessionAttendanceQueries, sessions]);
 
-  // Filter students (remove local search filter, now handled by backend)
   const filteredStudents = useMemo(() => {
     return studentsAttendanceData;
   }, [studentsAttendanceData]);

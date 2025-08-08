@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiBell, FiLogOut, FiUser, FiChevronDown, FiSettings, FiHelpCircle } from 'react-icons/fi';
+import { FiBell, FiLogOut, FiUser, FiChevronDown, FiHelpCircle } from 'react-icons/fi';
 
 interface AdminHeaderProps {
   adminName?: string;
@@ -69,7 +69,6 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
         </div>
       </div>
 
-      {/* Particle Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(5)].map((_, i) => (
           <div
@@ -84,21 +83,23 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
         ))}
       </div>
 
-      <style jsx>{`
-        .text-shadow-sm {
-          text-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
-        }
-        @keyframes floatingMist {
-          0%, 100% {
-            transform: translateY(0) translateX(0);
-            opacity: 0.2;
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .text-shadow-sm {
+            text-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
           }
-          50% {
-            transform: translateY(-10px) translateX(5px);
-            opacity: 0.6;
+          @keyframes floatingMist {
+            0%, 100% {
+              transform: translateY(0) translateX(0);
+              opacity: 0.2;
+            }
+            50% {
+              transform: translateY(-10px) translateX(5px);
+              opacity: 0.6;
+            }
           }
-        }
-      `}</style>
+        `
+      }} />
     </header>
   );
 };

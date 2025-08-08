@@ -30,9 +30,9 @@ export interface IDownloadMaterialUseCase {
 }
 
 
-function toUserMaterialProps(obj: any, userId: string) {
-  const isBookmarked = obj.bookmarks && obj.bookmarks.some((b: any) => b.userId === userId);
-  const isLiked = obj.likes && obj.likes.some((l: any) => l.userId === userId);
+function toUserMaterialProps(obj, userId: string) {
+  const isBookmarked = obj.bookmarks && obj.bookmarks.some((b) => b.userId === userId);
+  const isLiked = obj.likes && obj.likes.some((l) => l.userId === userId);
   return {
     id: obj._id.toString(),
     title: obj.title,
@@ -108,7 +108,7 @@ export class GetUserMaterialsUseCase {
     ]);
     const totalPages = Math.ceil(total / limit);
     return {
-      materials: materials.map((m: any) => toUserMaterialProps(m, userId)),
+      materials: materials.map((m) => toUserMaterialProps(m, userId)),
       totalPages,
       bookmarkedMaterials: [],
       likedMaterials: []

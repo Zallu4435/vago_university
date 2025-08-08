@@ -82,7 +82,7 @@ export interface IBlockFacultyUseCase {
     execute(params: { id: string }): Promise<ResponseDTO<{ message: string }>>;
 }
 
-function mapFacultyToDTO(f: any): FacultyResponseDTO {
+function mapFacultyToDTO(f): FacultyResponseDTO {
     return {
         _id: f._id.toString(),
         fullName: f.fullName,

@@ -27,6 +27,7 @@ import {
 
 } from '../../../domain/admin/errors/AdminAdmissionErrors';
 import { AdminAdmissionStatus } from "../../../domain/admin/entities/AdminAdmissionTypes";
+import { User } from "../../../domain/auth/entities/Auth";
 
 interface ResponseDTO<T> {
     data: T | { error: string };
@@ -70,7 +71,7 @@ export class GetAdmissionsUseCase implements IGetAdmissionsUseCase {
 
     async execute(p: GetAdmissionsRequestDTO): Promise<ResponseDTO<GetAdmissionsResponseDTO>> {
         /* ---------- build filter ---------- */
-        const filter: Record<string, any> = {};
+        const filter: Record<string, unknown> = {};
 
         // status
         if (p.status && !p.status.startsWith("all")) {
@@ -143,7 +144,7 @@ export class GetAdmissionsUseCase implements IGetAdmissionsUseCase {
                     createdAt: new Date(a.createdAt).toISOString(),
                     status: (a.status ?? "pending") as AdminAdmissionStatus,
                     program: a.choiceOfStudy?.[0]?.programme ?? "N/A",
-                    blocked: (user as any)?.blocked ?? false,
+                    blocked: (user as User)?.blocked ?? false,
                 };
             })
         );
@@ -203,7 +204,7 @@ export class ApproveAdmissionUseCase implements IApproveAdmissionUseCase {
     constructor(
         private admissionRepository: IAdmissionRepository,
         private emailService: IEmailService,
-        private config: any
+        private config
     ) { }
 
     async execute(params: ApproveAdmissionRequestDTO): Promise<ResponseDTO<ApproveAdmissionResponseDTO>> {

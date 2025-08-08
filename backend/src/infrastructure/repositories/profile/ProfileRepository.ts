@@ -9,7 +9,7 @@ import {
 import { IProfileRepository } from "../../../application/profile/repositories/IProfileRepository";
 
 export class ProfileRepository implements IProfileRepository {
-    async getProfile(params: GetProfileRequestDTO): Promise<any> {
+    async getProfile(params: GetProfileRequestDTO) {
         let user = await User.findById(params.userId).select("firstName lastName email phone profilePicture passwordChangedAt");
         let isFaculty = false;
         if (!user) {
@@ -20,7 +20,7 @@ export class ProfileRepository implements IProfileRepository {
         return { user, isFaculty };
     }
 
-    async updateProfile(params: UpdateProfileRequestDTO): Promise<any> {
+    async updateProfile(params: UpdateProfileRequestDTO) {
         let user = await User.findById(params.userId);
         let isFaculty = false;
         if (!user) {
@@ -31,21 +31,21 @@ export class ProfileRepository implements IProfileRepository {
         return { user, isFaculty };
     }
 
-    async findUserByEmail(email: string): Promise<any> {
+    async findUserByEmail(email: string) {
         const user = await User.findOne({ email });
         return user;
     }
 
-    async findFacultyByEmail(email: string): Promise<any> {
+    async findFacultyByEmail(email: string) {
         const faculty = await Faculty.findOne({ email });
         return faculty;
     }
 
-    async saveUser(user: any): Promise<any> {
+    async saveUser(user: any) {
         return await user.save();
     }
 
-    async changePassword(params: ChangePasswordRequestDTO): Promise<any> {
+    async changePassword(params: ChangePasswordRequestDTO) {
         let user = await User.findById(params.userId);
         if (!user) {
             const faculty = await Faculty.findById(params.userId);
@@ -54,7 +54,7 @@ export class ProfileRepository implements IProfileRepository {
         return user;
     }
 
-    async updateProfilePicture(params: UpdateProfilePictureRequestDTO): Promise<any> {
+    async updateProfilePicture(params: UpdateProfilePictureRequestDTO) {
         let user = await User.findById(params.userId);
         if (!user) {
             const faculty = await Faculty.findById(params.userId);

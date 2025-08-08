@@ -24,9 +24,9 @@ export const inboxColumns: MessageColumn[] = [
         <Mail size={14} className="text-purple-400 mr-2" />
         <div>
           <p className={`text-sm ${message.status === 'unread' ? 'font-semibold text-gray-200' : 'text-gray-300'}`}>
-            {message.sender?.name || message.from}
+            {message.sender?.name}
           </p>
-          <p className="text-xs text-gray-400">{message.sender?.email || message.email}</p>
+          <p className="text-xs text-gray-400">{message.sender?.email}</p>
         </div>
       </div>
     ),
@@ -77,7 +77,7 @@ export const sentColumns: MessageColumn[] = [
     render: (message: Message) => (
       <div className="flex items-center text-gray-300">
         <Mail size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{message.recipients?.[0]?.email || message.recipients?.[0]?.name || message.to}</span>
+        <span className="text-sm">{message.recipients?.[0]?.email || message.recipients?.[0]?.name}</span>
       </div>
     ),
     width: '20%',

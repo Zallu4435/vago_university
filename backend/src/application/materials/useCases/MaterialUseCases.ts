@@ -24,7 +24,7 @@ export interface IDeleteMaterialUseCase {
   execute(params: DeleteMaterialRequestDTO): Promise<void>;
 }
 
-function toMaterialProps(raw: any): MaterialProps {
+function toMaterialProps(raw): MaterialProps {
   return {
     id: raw._id?.toString() ?? raw.id,
     title: raw.title,
@@ -104,7 +104,6 @@ export class GetMaterialsUseCase {
         })
         .join(' ');
 
-      // Clean up any double dots
       normalizedCourse = normalizedCourse.replace(/\.\./g, '.');
 
       filter.course = normalizedCourse;

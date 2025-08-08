@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useCommunicationManagement } from '../../../../application/hooks/useCommunication';
-import { Message } from '../../../../domain/types/communication';
-import { FaSearch, FaChevronRight, FaTrash, FaEnvelopeOpen } from 'react-icons/fa';
+import { FaTrash, FaEnvelopeOpen } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import WarningModal from '../../../components/common/WarningModal';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../appStore/store';
+import { Message } from '../../../../domain/types/user/communication';
 
 export default function InboxSection() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);

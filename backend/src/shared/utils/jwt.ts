@@ -15,7 +15,7 @@ export function verifyToken(token: string): DecodedToken {
     const secret = process.env.JWT_SECRET || 'your-secret-key';
     const decoded = jwt.verify(token, secret) as DecodedToken;
     return decoded;
-  } catch (err: any) {
+  } catch (err) {
     throw new Error('Invalid or expired token');
   }
 }

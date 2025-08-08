@@ -1,6 +1,7 @@
 import React from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '../../base/Input';
+import { getNestedObjectError } from '../../../../shared/utils/formErrors';
 
 interface TOEFLEssentialsSectionProps {
   label: string;
@@ -27,6 +28,7 @@ const TOEFLEssentialsSection: React.FC<TOEFLEssentialsSectionProps> = ({ label, 
             control={control}
             render={({ field }) => (
               <Input
+                name={`${prefix}Date`}
                 id={`${prefix}Date`}
                 label="Date Taken"
                 value={field.value}
@@ -34,7 +36,7 @@ const TOEFLEssentialsSection: React.FC<TOEFLEssentialsSectionProps> = ({ label, 
                 placeholder="MM/YYYY"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.international?.[prefix]?.date?.message}
+                error={getNestedObjectError(errors, `international.${prefix}`, 'date')}
               />
             )}
           />
@@ -43,6 +45,7 @@ const TOEFLEssentialsSection: React.FC<TOEFLEssentialsSectionProps> = ({ label, 
             control={control}
             render={({ field }) => (
               <Input
+                name={`${prefix}Grade`}
                 id={`${prefix}Grade`}
                 label="Score"
                 value={field.value}
@@ -50,7 +53,7 @@ const TOEFLEssentialsSection: React.FC<TOEFLEssentialsSectionProps> = ({ label, 
                 placeholder="Essential 1-12"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.international?.[prefix]?.grade?.message}
+                error={getNestedObjectError(errors, `international.${prefix}`, 'grade')}
               />
             )}
           />

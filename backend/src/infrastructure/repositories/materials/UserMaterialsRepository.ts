@@ -11,7 +11,7 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
       .populate('likes');
   }
 
-  async count(filter: any): Promise<number> {
+  async count(filter): Promise<number> {
     return MaterialModel.countDocuments(filter);
   }
 
@@ -19,14 +19,14 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
     return MaterialModel.findById(id).populate('bookmarks').populate('likes');
   }
 
-  async update(id: string, data: any): Promise<any | null> {
+  async update(id: string, data): Promise<any | null> {
     return MaterialModel.findByIdAndUpdate(id, data, { new: true });
   }
 
   async toggleBookmark(materialId: string, userId: string): Promise<void> {
     const material = await MaterialModel.findById(materialId);
     if (!material) throw new Error('Material not found');
-    const bookmarkIndex = material.bookmarks.findIndex((b: any) => b.userId === userId);
+    const bookmarkIndex = material.bookmarks.findIndex((b) => b.userId === userId);
     if (bookmarkIndex > -1) {
       material.bookmarks.splice(bookmarkIndex, 1);
     } else {
@@ -38,7 +38,7 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
   async toggleLike(materialId: string, userId: string): Promise<void> {
     const material = await MaterialModel.findById(materialId);
     if (!material) throw new Error('Material not found');
-    const likeIndex = material.likes.findIndex((l: any) => l.userId === userId);
+    const likeIndex = material.likes.findIndex((l) => l.userId === userId);
     if (likeIndex > -1) {
       material.likes.splice(likeIndex, 1);
     } else {

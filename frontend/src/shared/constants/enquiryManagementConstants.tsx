@@ -1,5 +1,5 @@
 // Enquiry Management Constants
-import { FiUser, FiMail, FiFlag, FiClock, FiHelpCircle, FiCheckSquare, FiEye, FiTrash2, FiMessageSquare } from 'react-icons/fi';
+import { FiUser, FiMail, FiFlag, FiClock, FiHelpCircle, FiEye, FiTrash2, FiMessageSquare } from 'react-icons/fi';
 import { EnquiryStatus } from '../../domain/types/management/enquirymanagement';
 
 export const ENQUIRY_STATUSES = ['All Statuses', ...Object.values(EnquiryStatus)];

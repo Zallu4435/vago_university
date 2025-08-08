@@ -118,7 +118,7 @@ export class AuthController implements IAuthController {
     if (!accessToken) {
       return response;
     }
-    let decoded: any;
+    let decoded;
     try {
       decoded = this.loginUseCase['jwtService'].verifyToken(accessToken);
     } catch (err) {
@@ -134,7 +134,7 @@ export class AuthController implements IAuthController {
     if (!accessToken) {
       return this.httpErrors.error_401('No access token provided');
     }
-    let decoded: any;
+    let decoded;
     try {
       decoded = this.loginUseCase['jwtService'].verifyToken(accessToken);
     } catch (err) {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FaArrowLeft, FaSearch, FaFilter, FaTimes, FaUserTie, FaCalendar, FaTag, FaEnvelope, FaPhone, FaLinkedin } from 'react-icons/fa';
+import { FaArrowLeft, FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
 import { useLeadership, useLeadershipCategories } from '../../../application/hooks/useSiteSections';
 import { SiteSection } from '../../../application/services/siteSections.service';
 import SiteSectionModal from '../../components/public/SiteSectionModal';
@@ -13,29 +13,24 @@ export const LeadershipPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Get categories for filter dropdown
   const { data: categories = ['all'] } = useLeadershipCategories();
 
-  // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-    }, 500); // 500ms delay
+    }, 500); 
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Get leadership with server-side filtering using debounced search
   const { data: leadership, isLoading, error } = useLeadership({
-    limit: 100, // Get more results at once
+    limit: 100,
     search: debouncedSearchQuery || undefined,
     category: selectedCategory === 'all' ? undefined : selectedCategory,
   });
 
-  // Preserve input focus after data updates
   useEffect(() => {
     if (searchInputRef.current && searchQuery.length > 0) {
-      // If there's an active search, maintain focus
       setTimeout(() => {
         searchInputRef.current?.focus();
       }, 0);
@@ -54,7 +49,6 @@ export const LeadershipPage: React.FC = () => {
 
   const handleClearSearch = () => {
     setSearchQuery('');
-    // Focus back to input after clearing
     setTimeout(() => {
       searchInputRef.current?.focus();
     }, 0);
@@ -87,10 +81,8 @@ export const LeadershipPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cyan-50 via-white to-cyan-50">
-      {/* Updated Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-cyan-100/50">
         <div className="max-w-7xl mx-auto px-6 py-6">
-          {/* Title Section */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4">
               <Link

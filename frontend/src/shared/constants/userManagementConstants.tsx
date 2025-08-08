@@ -17,7 +17,6 @@ export const filterOptions = {
   program: PROGRAMS,
 };
 
-// For columns that need functions (like formatDate), pass them as props or inject in the component
 export const userColumns = [
   {
     header: 'Applicant',

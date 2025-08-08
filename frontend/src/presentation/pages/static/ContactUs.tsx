@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaFacebook, FaTwitter, FaInstagram, FaPaperPlane } from 'react-icons/fa';
+import { useState } from 'react';
+import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,7 +10,6 @@ import { Button } from '../../components/base/Button';
 import { Textarea } from '../../components/base/Textarea';
 import { useSectionAnimation } from '../../../shared/hooks/useSectionAnimation';
 
-// Zod validation schema
 const contactFormSchema = z.object({
   name: z.string().min(1, 'Name is required').min(2, 'Name must be at least 2 characters'),
   email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
@@ -56,10 +55,8 @@ const ContactUs = () => {
 
       toast.success('Thank you! Your message has been sent successfully.');
       
-      // Reset form on success
       reset();
       
-      // Reset success message after 5 seconds
       setTimeout(() => setSubmitSuccess(false), 5000);
     } catch (error: any) {
       console.error('Error submitting enquiry:', error);

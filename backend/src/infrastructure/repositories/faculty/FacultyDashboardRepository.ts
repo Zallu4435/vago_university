@@ -107,7 +107,7 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
           totalExpectedAttendance += session.maxAttendees;
         }
         if (session.attendance && Array.isArray(session.attendance)) {
-          const actualAttendance = session.attendance.filter((a: any) =>
+          const actualAttendance = session.attendance.filter((a) =>
             a.intervals && Array.isArray(a.intervals) && a.intervals.length > 0
           );
           totalActualAttendance += actualAttendance.length;

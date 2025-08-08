@@ -66,7 +66,7 @@ export class DashboardRepository implements IDashboardRepository {
     const end = new Date();
     const start = new Date(end.getTime() - 6 * 30 * 24 * 60 * 60 * 1000);
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const userGrowthRaw: any[] = [];
+    const userGrowthRaw = [];
     for (let i = 0; i < 6; i++) {
       const date = new Date(start.getTime() + i * 30 * 24 * 60 * 60 * 1000);
       const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -86,7 +86,7 @@ export class DashboardRepository implements IDashboardRepository {
     const end = new Date();
     const start = new Date(end.getTime() - 6 * 30 * 24 * 60 * 60 * 1000);
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const revenueRaw: any[] = [];
+    const revenueRaw = [];
     for (let i = 0; i < 6; i++) {
       const date = new Date(start.getTime() + i * 30 * 24 * 60 * 60 * 1000);
       const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);

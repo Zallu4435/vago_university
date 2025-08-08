@@ -178,45 +178,47 @@ const Header: React.FC<HeaderProps> = ({
         handleResetFilters={handleResetFilters}
       />
 
-      <style jsx>{`
-        .text-shadow-lg {
-          text-shadow: 0 0 15px rgba(139, 92, 246, 0.5), 0 0 10px rgba(139, 92, 246, 0.3);
-        }
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .text-shadow-lg {
+            text-shadow: 0 0 15px rgba(139, 92, 246, 0.5), 0 0 10px rgba(139, 92, 246, 0.3);
+          }
 
-        .text-shadow-sm {
-          text-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
-        }
+          .text-shadow-sm {
+            text-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
+          }
 
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
+          .no-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
 
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
+          .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
 
-        @keyframes floatParticle {
-          0% {
-            transform: translateY(0) translateX(0);
-            opacity: 0;
+          @keyframes floatParticle {
+            0% {
+              transform: translateY(0) translateX(0);
+              opacity: 0;
+            }
+            25% {
+              opacity: 0.8;
+            }
+            50% {
+              transform: translateY(-20px) translateX(10px);
+              opacity: 0.3;
+            }
+            75% {
+              opacity: 0.7;
+            }
+            100% {
+              transform: translateY(0) translateX(0);
+              opacity: 0;
+            }
           }
-          25% {
-            opacity: 0.8;
-          }
-          50% {
-            transform: translateY(-20px) translateX(10px);
-            opacity: 0.3;
-          }
-          75% {
-            opacity: 0.7;
-          }
-          100% {
-            transform: translateY(0) translateX(0);
-            opacity: 0;
-          }
-        }
-      `}</style>
+        `
+      }} />
     </div>
   );
 };

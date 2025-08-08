@@ -84,7 +84,6 @@ const App: React.FC = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // On mount, try to fetch user info and update Redux
     (async () => {
       try {
         const response = await httpClient.get('/auth/me');
@@ -93,28 +92,22 @@ const App: React.FC = () => {
           dispatch(setAuth({ user: response.data.user, collection: response.data.collection }));
         }
       } catch (err) {
-        // Not authenticated or error, do nothing
       }
     })();
   }, [dispatch]);
 
-  // Define departments array
   const departments = [
     { path: 'computer-science', component: ComputerScience },
     { path: 'business', component: Business },
-    // Add more departments here as needed
-    // { path: 'engineering', component: Engineering },
   ];
 
-  // Define sub-routes for each department
   const departmentSubRoutes = [
-    { path: '', element: <DepartmentHome /> }, // Home page for the department
+    { path: '', element: <DepartmentHome /> }, 
     { path: 'about', element: <DepartmentAbout /> },
     { path: 'program', element: <DepartmentEducation /> },
     { path: 'community', element: <DepartmentCommunity /> },
     { path: 'entrepreneur', element: <DepartmentEntrepreneur /> },
     { path: 'contact', element: <ContactUs /> },
-    // Add login and register as sub-routes under departments
     {
       path: 'login',
       element: <LoginPage />,

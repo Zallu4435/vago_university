@@ -2,10 +2,10 @@ import { CreateMaterialRequestDTO, UpdateMaterialRequestDTO } from '../../../dom
 import { MaterialProps } from '../../../domain/materials/entities/MaterialTypes';
 
 export interface IMaterialsRepository {
-  find(filter: Partial<MaterialProps>, options?: { skip?: number; limit?: number; sort?: any }): Promise<MaterialProps[]>;
-  count(filter: Partial<MaterialProps>): Promise<number>;
-  findById(id: string): Promise<MaterialProps | null>;
-  create(data: CreateMaterialRequestDTO): Promise<MaterialProps>;
-  update(id: string, data: UpdateMaterialRequestDTO): Promise<MaterialProps | null>;
+  find(filter: Partial<MaterialProps>, options?: { skip?: number; limit?: number; sort?: any });
+  count(filter: Partial<MaterialProps>);
+  findById(id: string);
+  create(data: CreateMaterialRequestDTO);
+  update(id: string, data: UpdateMaterialRequestDTO);
   delete(id: string): Promise<void>;
 } 

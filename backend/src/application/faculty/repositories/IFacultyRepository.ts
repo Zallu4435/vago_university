@@ -16,15 +16,15 @@ import {
 } from "../../../domain/faculty/dtos/FacultyResponseDTOs";
 
 export interface IFacultyRepository {
-    findFaculty(query: any, options: { skip?: number; limit?: number; select?: string }): Promise<any[]>;
-    countFaculty(query: any): Promise<number>;
-    getFacultyById(params: GetFacultyByIdRequestDTO): Promise<any>;
-    getFacultyByToken(params: GetFacultyByTokenRequestDTO): Promise<any>;
+    findFaculty(query, options: { skip?: number; limit?: number; select?: string });
+    countFaculty(query);
+    getFacultyById(params: GetFacultyByIdRequestDTO);
+    getFacultyByToken(params: GetFacultyByTokenRequestDTO);
     approveFaculty(params: ApproveFacultyRequestDTO): Promise<ApproveFacultyResponseDTO>;
     rejectFaculty(params: RejectFacultyRequestDTO): Promise<RejectFacultyResponseDTO>;
     deleteFaculty(params: DeleteFacultyRequestDTO): Promise<DeleteFacultyResponseDTO>;
     confirmFacultyOffer(params: ConfirmFacultyOfferRequestDTO): Promise<ConfirmFacultyOfferResponseDTO>;
     downloadCertificate(params: DownloadCertificateRequestDTO): Promise<DownloadCertificateResponseDTO>;
     blockFaculty(id: string): Promise<{ message: string }>;
-    saveFaculty(faculty: any): Promise<any>;
+    saveFaculty(faculty);
 }

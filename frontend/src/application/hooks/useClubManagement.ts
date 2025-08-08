@@ -20,7 +20,7 @@ export const useClubManagement = () => {
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'clubs' | 'requests' | 'members'>('clubs');
-  const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
+  const [selectedClubId] = useState<string | null>(null);
   const limit = 10;
 
   const getDateRangeFilter = (dateRange: string): string | undefined => {
@@ -162,7 +162,7 @@ export const useClubManagement = () => {
   };
 
   const { mutateAsync: createClub } = useMutation({
-    mutationFn: (data: Omit<Club, '_id' | 'members'>) => clubService.createClub(data),
+    mutationFn: (data: Omit<Club, 'id' | 'members'>) => clubService.createClub(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clubs'] });
       toast.success('Club created successfully');

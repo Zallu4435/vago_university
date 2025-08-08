@@ -1,6 +1,7 @@
 import React from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '../../base/Input';
+import { getNestedObjectError } from '../../../../shared/utils/formErrors';
 
 const SATSection: React.FC = () => {
   const { control, formState: { errors } } = useFormContext();
@@ -22,6 +23,7 @@ const SATSection: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Input
+                name="satDate"
                 id="satDate"
                 label="Date Taken"
                 value={field.value}
@@ -29,7 +31,7 @@ const SATSection: React.FC = () => {
                 placeholder="MM/YYYY"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.international?.sat?.date?.message}
+                error={getNestedObjectError(errors, 'international.sat', 'date')}
               />
             )}
           />
@@ -52,12 +54,13 @@ const SATSection: React.FC = () => {
                     control={control}
                     render={({ field }) => (
                       <Input
+                        name="satMath"
                         id="satMath"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="200-800"
                         className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-                        error={errors.international?.sat?.math?.message}
+                        error={getNestedObjectError(errors, 'international.sat', 'math')}
                       />
                     )}
                   />
@@ -71,12 +74,13 @@ const SATSection: React.FC = () => {
                     control={control}
                     render={({ field }) => (
                       <Input
+                        name="satReading"
                         id="satReading"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="200-800"
                         className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-                        error={errors.international?.sat?.reading?.message}
+                        error={getNestedObjectError(errors, 'international.sat', 'reading')}
                       />
                     )}
                   />
@@ -90,12 +94,13 @@ const SATSection: React.FC = () => {
                     control={control}
                     render={({ field }) => (
                       <Input
+                        name="satEssay"
                         id="satEssay"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="2-8"
                         className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-                        error={errors.international?.sat?.essay?.message}
+                        error={getNestedObjectError(errors, 'international.sat', 'essay')}
                       />
                     )}
                   />

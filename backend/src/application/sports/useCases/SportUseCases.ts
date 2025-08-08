@@ -45,7 +45,7 @@ export class GetSportsUseCase {
       throw new Error("Invalid page or limit parameters");
     }
     const { sports, totalItems, totalPages, currentPage } = await this.sportsRepository.getSports(params);
-    const mappedSports: SportSummaryDTO[] = sports.map((sport: any) => ({
+    const mappedSports: SportSummaryDTO[] = sports.map((sport) => ({
       id: sport._id?.toString() || sport.id,
       title: sport.title,
       type: sport.type,

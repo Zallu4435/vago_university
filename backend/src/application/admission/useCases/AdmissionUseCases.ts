@@ -11,7 +11,7 @@ import {
 import { isValidObjectId } from "mongoose";
 import { IAdmissionDraft, IAdmission } from '../../../domain/admission/entities/AdmissionTypes';
 
-function mapToIAdmissionDraft(draft: any): IAdmissionDraft {
+function mapToIAdmissionDraft(draft): IAdmissionDraft {
     return {
         id: draft._id?.toString(),
         applicationId: draft.applicationId,
@@ -29,7 +29,7 @@ function mapToIAdmissionDraft(draft: any): IAdmissionDraft {
     };
 }
 
-function mapToIAdmission(admission: any): IAdmission {
+function mapToIAdmission(admission): IAdmission {
     return {
         id: admission._id?.toString(),
         applicationId: admission.applicationId,
@@ -168,7 +168,7 @@ export class UploadMultipleDocumentsUseCase {
 
 export class GetDocumentByKeyUseCase {
     constructor(private admissionsRepository: IAdmissionsRepository) { }
-    async execute(params: { userId: string; documentKey: string }): Promise<any | null> {
+    async execute(params: { userId: string; documentKey: string }) {
         return this.admissionsRepository.getDocumentByKey(params);
     }
 }

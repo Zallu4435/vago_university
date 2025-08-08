@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { 
   FiArrowLeft, FiBookOpen, FiAward, FiHeart, FiShare2,
   FiClock, FiUsers, FiStar

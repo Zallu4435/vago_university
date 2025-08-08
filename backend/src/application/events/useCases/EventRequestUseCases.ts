@@ -46,8 +46,8 @@ export class GetEventRequestsUseCase implements IGetEventRequestsUseCase {
       params.dateRange
     );
 
-    const filteredRequests = result.rawRequests.filter((req: any) => req.eventId);
-    const mappedRequests = filteredRequests.map((req: any) => ({
+    const filteredRequests = result.rawRequests.filter((req) => req.eventId);
+    const mappedRequests = filteredRequests.map((req) => ({
       eventName: req.eventId?.title || "Unknown Event",
       requestedId: req._id.toString(),
       requestedBy: req.userId?.email || "Unknown User",

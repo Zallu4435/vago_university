@@ -5,7 +5,7 @@ import { Assignment } from '../../../domain/assignments/entities/Assignment';
 import { IAssignment } from '../../../domain/assignments/entities/Assignment';
 
 export class AssignmentRepository implements IAssignmentRepository {
-  async findAssignmentsRaw(query: any, skip: number, limit: number) {
+  async findAssignmentsRaw(query, skip: number, limit: number) {
     return AssignmentModel.find(query)
       .skip(skip)
       .limit(limit)

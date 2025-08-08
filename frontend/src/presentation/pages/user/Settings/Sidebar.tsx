@@ -14,7 +14,7 @@ import {
   } from 'react-icons/fi';
 
 export default function Sidebar({ activeTab, setActiveTab, onLogout, onLogoutAll, user }) {
-    const sidebarItems = [
+    const sidebarItems = [ 
         { id: 'profile', icon: FaUser, label: 'Profile', active: true },
         { id: 'academic', icon: FaGraduationCap, label: 'Academic Settings' },
         { id: 'offline', icon: FiDownload, label: 'Offline Learning' },

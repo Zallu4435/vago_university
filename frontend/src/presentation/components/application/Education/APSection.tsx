@@ -2,6 +2,7 @@ import React from 'react';
 import { useFormContext, Controller, useFieldArray } from 'react-hook-form';
 import { Input } from '../../base/Input';
 import { Button } from '../../base/Button';
+import { getNestedObjectError, getArrayError } from '../../../../shared/utils/formErrors';
 
 const APSection: React.FC = () => {
   const { control, formState: { errors } } = useFormContext();
@@ -27,6 +28,7 @@ const APSection: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Input
+                name="apDate"
                 id="apDate"
                 label="Date Taken"
                 value={field.value}
@@ -34,7 +36,7 @@ const APSection: React.FC = () => {
                 placeholder="MM/YYYY"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.international?.ap?.date?.message}
+                error={getNestedObjectError(errors, 'international.ap', 'date')}
               />
             )}
           />
@@ -72,12 +74,13 @@ const APSection: React.FC = () => {
                         control={control}
                         render={({ field: subField }) => (
                           <Input
+                            name={`apSubject-${index}`}
                             id={`apSubject-${index}`}
                             value={subField.value}
                             onChange={subField.onChange}
                             placeholder="AP Subject Name"
                             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-                            error={errors.international?.ap?.subjects?.[index]?.subject?.message}
+                            error={getArrayError(errors, 'international.ap.subjects', index)}
                           />
                         )}
                       />
@@ -88,12 +91,13 @@ const APSection: React.FC = () => {
                         control={control}
                         render={({ field: subField }) => (
                           <Input
+                            name={`apScore-${index}`}
                             id={`apScore-${index}`}
                             value={subField.value}
                             onChange={subField.onChange}
                             placeholder="1-5"
                             className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-                            error={errors.international?.ap?.subjects?.[index]?.score?.message}
+                            error={getArrayError(errors, 'international.ap.subjects', index)}
                           />
                         )}
                       />

@@ -5,7 +5,7 @@ interface ButtonProps {
   onClick?: () => void;
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
-  variant?: 'primary' | 'outline' | ''; // Allow empty string for no variant
+  variant?: 'primary' | 'outline' | ''; 
   className?: string;
 }
 
@@ -22,7 +22,7 @@ export const Button: React.FC<ButtonProps> = ({
   const variantStyles: Record<string, string> = {
     primary: "bg-blue-600 text-white hover:bg-blue-700",
     outline: "bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-50",
-    '': "", // No variant, no extra styles
+    '': "", 
   };
 
   return (

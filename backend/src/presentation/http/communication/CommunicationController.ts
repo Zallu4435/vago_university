@@ -93,7 +93,7 @@ export class CommunicationController implements ICommunicationController {
     if (!userId || !role) {
       return this.httpErrors.error_401();
     }
-    const attachments = (httpRequest.files || []).map((file: any) => ({
+    const attachments = (httpRequest.files || []).map((file) => ({
       filename: file.filename,
       path: file.path,
       contentType: file.mimetype,

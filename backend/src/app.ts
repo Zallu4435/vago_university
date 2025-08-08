@@ -12,6 +12,11 @@ import { setupSessionSocketHandlers } from './infrastructure/services/socket/Ses
 import Logger from "./shared/utils/logger";
 import { loggerMiddleware } from "./shared/middlewares/loggerMiddleware";
 
+interface CustomError extends Error {
+  statusCode?: number;
+  code?: string;
+}
+
 const app = express();
 const httpServer = createServer(app);
 
@@ -68,7 +73,7 @@ Logger.info('Socket.IO services initialized');
 app.use("/api/chats", chatRouter);
 app.use("/api", indexRoute);
 
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: CustomError, req: express.Request, res: express.Response, next: express.NextFunction) => {
   Logger.error(`Error: ${err.message}`);
   Logger.error(`Stack: ${err.stack}`);
   Logger.debug(`Error object: ${JSON.stringify(err)}`);

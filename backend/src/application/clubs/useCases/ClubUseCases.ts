@@ -50,7 +50,7 @@ export class GetClubsUseCase implements IGetClubsUseCase {
       throw new Error("Invalid endDate format");
     }
     const { clubs, totalItems, totalPages, currentPage } = await this.clubsRepository.getClubs(dto);
-    const mappedClubs: ClubSummaryDTO[] = clubs.map((club: any) => ({
+    const mappedClubs: ClubSummaryDTO[] = clubs.map((club) => ({
       id: club._id.toString(),
       name: club.name,
       type: club.type,

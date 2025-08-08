@@ -53,7 +53,7 @@ export class CommunicationRepository implements ICommunicationRepository {
     return { messages, totalItems, totalPages, page, limit, userId, status, search };
   }
 
-  async getSentMessages(params: GetSentMessagesRequestDTO): Promise<any> {
+  async getSentMessages(params: GetSentMessagesRequestDTO) {
     const { userId, page, limit, search } = params;
     const query: any = {
       "sender._id": userId
@@ -75,7 +75,7 @@ export class CommunicationRepository implements ICommunicationRepository {
     return { messages, totalItems, totalPages, page, limit, userId, search };
   }
 
-  async sendMessage(params: SendMessageRequestDTO): Promise<any> {
+  async sendMessage(params: SendMessageRequestDTO) {
     const sender = await this.findUserById(params.senderId, params.senderRole);
     if (!sender) {
       throw new Error('Sender not found');
@@ -106,19 +106,19 @@ export class CommunicationRepository implements ICommunicationRepository {
     return message.toObject ? message.toObject() : message;
   }
 
-  async markMessageAsRead(params: MarkMessageAsReadRequestDTO): Promise<any> {
+  async markMessageAsRead(params: MarkMessageAsReadRequestDTO) {
     const { messageId, userId } = params;
     await this.updateMessageRecipientStatus(messageId, userId, MessageStatus.Read);
     return { success: true, message: "Message marked as read" };
   }
 
-  async deleteMessage(params: DeleteMessageRequestDTO): Promise<any> {
+  async deleteMessage(params: DeleteMessageRequestDTO) {
     const { messageId, userId } = params;
     await (MessageModel as any).findByIdAndDelete(messageId);
     return { success: true, message: "Message deleted successfully" };
   }
 
-  async getMessageDetails(params: GetMessageDetailsRequestDTO): Promise<any> {
+  async getMessageDetails(params: GetMessageDetailsRequestDTO) {
     const { messageId } = params;
     return await (MessageModel as any).findById(messageId).lean();
   }
@@ -139,7 +139,7 @@ export class CommunicationRepository implements ICommunicationRepository {
     return admins;
   }
 
-  async getUserGroups(params: GetUserGroupsRequestDTO): Promise<any> {
+  async getUserGroups(params: GetUserGroupsRequestDTO) {
     const { search } = params;
     const groups = [
       { value: 'all-students', label: 'All Students' },
@@ -160,7 +160,7 @@ export class CommunicationRepository implements ICommunicationRepository {
     return filteredGroups;
   }
 
-  async fetchUsers(params: FetchUsersRequestDTO): Promise<any> {
+  async fetchUsers(params: FetchUsersRequestDTO) {
     const { type, search } = params;
     const query: any = {};
     if (type === "students") {
@@ -270,11 +270,11 @@ export class CommunicationRepository implements ICommunicationRepository {
       .select("_id firstName lastName email role")
       .lean();
 
-    return admins.map((admin: any) => ({
+    return admins.map((admin) => ({
       _id: admin._id.toString(),
       name: `${admin.firstName} ${admin.lastName}`,
       email: admin.email,
-      role: admin.role
+      role: 'admin' as UserRole
     }));
   }
 
@@ -293,7 +293,7 @@ export class CommunicationRepository implements ICommunicationRepository {
         .select("_id firstName lastName email")
         .lean();
 
-      const mappedStudents = students.map((user: any) => ({
+      const mappedStudents = students.map((user) => ({
         _id: user._id.toString(),
         name: `${user.firstName} ${user.lastName}`,
         email: user.email,
@@ -317,7 +317,7 @@ export class CommunicationRepository implements ICommunicationRepository {
         .select("_id firstName lastName email")
         .lean();
 
-      const mappedFaculty = faculty.map((user: any) => ({
+      const mappedFaculty = faculty.map((user) => ({
         _id: user._id.toString(),
         name: `${user.firstName} ${user.lastName}`,
         email: user.email,
@@ -334,13 +334,13 @@ export class CommunicationRepository implements ICommunicationRepository {
       ]);
 
       const allUsers = [
-        ...students.map((user: any) => ({
+        ...students.map((user) => ({
           _id: user._id.toString(),
           name: `${user.firstName} ${user.lastName}`,
           email: user.email,
           role: 'student' as UserRole
         })),
-        ...faculty.map((user: any) => ({
+        ...faculty.map((user) => ({
           _id: user._id.toString(),
           name: `${user.firstName} ${user.lastName}`,
           email: user.email,

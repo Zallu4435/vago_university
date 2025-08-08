@@ -7,7 +7,7 @@ interface AcademicsTabsWithDisabledProps extends AcademicsTabsProps {
 
 export default function AcademicsTabs({ activeSubTab, setActiveSubTab, disabledTabs = [] }: AcademicsTabsWithDisabledProps) {
   const tabs = ['Course Registration', 'Academic Records', 'Degree Audit'];
-  const { styles, theme } = usePreferences();
+  const { styles } = usePreferences();
 
   return (
     <div className="container mx-auto px-3 sm:px-4 md:px-4 mt-4 sm:mt-6">

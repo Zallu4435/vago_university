@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FaEllipsisH, FaCalendar, FaUsers, FaCheckCircle, FaTrash } from 'react-icons/fa';
 import { Assignment } from '../types';
-import WarningModal from './WarningModal';
+import WarningModal from '../../../../components/common/WarningModal';
 
 interface AssignmentCardProps {
   assignment: Assignment;
@@ -37,12 +37,9 @@ export default function AssignmentCard({
 
   return (
     <div className="group relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-8 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 animate-fadeInUp">
-      {/* Gradient Border Effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-xl"></div>
       
-      {/* Card Content */}
       <div className="relative z-10">
-        {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-center space-x-3 mb-2">

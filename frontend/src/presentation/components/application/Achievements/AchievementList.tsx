@@ -42,9 +42,9 @@ export const AchievementList: React.FC<AchievementListProps> = ({
       </div> 
 
       <div className="p-6">
-        {errors.achievements?.achievements && (
+        {(errors.achievements as any)?.achievements && (
           <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
-            <p className="text-sm text-red-700">{errors.achievements?.achievements.message}</p>
+            <p className="text-sm text-red-700">{(errors.achievements as any)?.achievements.message}</p>
           </div>
         )}
 

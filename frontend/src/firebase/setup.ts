@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getMessaging } from "firebase/messaging";
+import { getAuth, Auth } from "firebase/auth";
+import { getMessaging, Messaging } from "firebase/messaging";
 
 
 const firebaseConfig = {
@@ -14,8 +14,8 @@ const firebaseConfig = {
 };
 
 let app;
-let auth;
-let messaging;
+let auth: Auth | undefined;
+let messaging: Messaging | undefined;
 
 try {
   app = initializeApp(firebaseConfig);

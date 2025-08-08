@@ -172,7 +172,7 @@ export default function PreferenceSettings() {
                 <div key={themeOption.id} className="space-y-3">
                   <PreviewCard themeOption={themeOption} />
                   <button
-                    onClick={() => setPreviewTheme(themeOption.id as 'light' | 'dark' | 'system')}
+                    onClick={() => setPreviewTheme(themeOption.id as 'light' | 'dark' | 'default')}
                     className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left ${
                       previewTheme === themeOption.id
                         ? 'border-sky-400 bg-sky-50'

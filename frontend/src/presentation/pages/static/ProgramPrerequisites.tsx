@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { FaDownload, FaChevronRight, FaUsers, FaGlobe, FaGraduationCap, FaFileAlt, FaCalendarAlt, FaCheckCircle, FaExclamationCircle, FaChevronDown, FaChevronUp, FaBars, FaTimes } from 'react-icons/fa';
 import { useSearchParams } from 'react-router-dom';
 
@@ -8,7 +8,6 @@ export default function ProgramPrerequisites() {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Set active tab from URL parameter on component mount
   useEffect(() => {
     const tabFromUrl = searchParams.get('tab');
     if (tabFromUrl && ['admission', 'dates', 'aptitude', 'guides', 'offer', 'before', 'after', 'international', 'transfer'].includes(tabFromUrl)) {

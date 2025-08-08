@@ -22,7 +22,7 @@ import { FacultyRegister } from "../../database/mongoose/models/facultyRegister.
 
 
 export class FacultyRepository implements IFacultyRepository {
-    async findFaculty(query: any, options: { skip?: number; limit?: number; select?: string }): Promise<any[]> {
+    async findFaculty(query, options: { skip?: number; limit?: number; select?: string }): Promise<any[]> {
         return (FacultyRegister as any).find(query)
             .select((options.select ? options.select + ' blocked' : 'blocked'))
             .skip(options.skip || 0)
@@ -30,11 +30,11 @@ export class FacultyRepository implements IFacultyRepository {
             .lean();
     }
 
-    async countFaculty(query: any): Promise<number> {
+    async countFaculty(query): Promise<number> {
         return (FacultyRegister as any).countDocuments(query);
     }
 
-    async getFacultyById(params: GetFacultyByIdRequestDTO): Promise<any> {
+    async getFacultyById(params: GetFacultyByIdRequestDTO) {
         if (!mongoose.isValidObjectId(params.id)) {
             throw new Error(FacultyErrorType.InvalidFacultyId);
         }
@@ -50,7 +50,7 @@ export class FacultyRepository implements IFacultyRepository {
         return faculty;
     }
 
-    async getFacultyByToken(params: GetFacultyByTokenRequestDTO): Promise<any> {
+    async getFacultyByToken(params: GetFacultyByTokenRequestDTO) {
         const faculty = await (FacultyRegister as any).findById(params.facultyId)
             .select("fullName email phone department qualification experience aboutMe cvUrl certificatesUrl createdAt status confirmationToken tokenExpiry")
             .lean();

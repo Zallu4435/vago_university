@@ -37,6 +37,7 @@ const TestRow: React.FC<{ fields: TestField[] }> = ({ fields }) => {
               />
             ) : (
               <Input
+                name={field.name}
                 id={field.id}
                 label={field.label}
                 value={controllerField.value}

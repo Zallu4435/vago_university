@@ -50,7 +50,7 @@ export class GetClubRequestsUseCase implements IGetClubRequestsUseCase {
     );
     
     const { rawRequests, totalItems, totalPages, currentPage } = await this.clubsRepository.getClubRequests(repositoryRequest);
-    const mappedRequests: SimplifiedClubRequestDTO[] = rawRequests.map((req: any) => ({
+    const mappedRequests: SimplifiedClubRequestDTO[] = rawRequests.map((req) => ({
       clubName: req.clubId?.name || "Unknown Club",
       requestedId: req._id.toString(),
       requestedBy: req.userId?.email || "Unknown User",

@@ -66,7 +66,7 @@ export class AdmissionsRepository implements IAdmissionsRepository {
         return AdmissionDraftModel.findOne({ applicationId });
     }
 
-    async saveDraft(draft: any) {
+    async saveDraft(draft) {
         return draft.save();
     }
 
@@ -247,7 +247,7 @@ export class AdmissionsRepository implements IAdmissionsRepository {
         };
     }
 
-    async getDocumentByKey(params: { userId: string; documentKey: string }): Promise<any | null> {
+    async getDocumentByKey(params: { userId: string; documentKey: string }) {
         console.log('[getDocumentByKey] userId:', params.userId, 'documentKey:', params.documentKey);
         const draft = await AdmissionDraftModel.findOne({ registerId: params.userId }).lean();
         console.log('[getDocumentByKey] fetched draft:', draft);
@@ -259,7 +259,7 @@ export class AdmissionsRepository implements IAdmissionsRepository {
         const docsArray = Array.isArray(draft.documents.documents)
             ? draft.documents.documents
             : [];
-        const found = docsArray.find((doc: any) => doc.id === params.documentKey);
+        const found = docsArray.find((doc) => doc.id === params.documentKey);
         console.log('[getDocumentByKey] found document:', found);
         return found || null;
     }

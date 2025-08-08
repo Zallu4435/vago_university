@@ -1,9 +1,7 @@
 // PersonalFormSchema.ts
 import { z } from "zod";
 
-// Phone number pattern (simple for demonstration)
-const phonePattern = /^\d{8}$/; // 8 digits
-const postalCodePattern = /^\d{6}$/; // 6 digits for Singapore postal code
+const postalCodePattern = /^\d{6}$/;
 
 export const personalFormSchema = z.object({
   // Personal details
@@ -17,7 +15,6 @@ export const personalFormSchema = z.object({
   gender: z.string().min(1, "Gender is required"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
 
-  // Address details
   postalCode: z
     .string()
     .regex(postalCodePattern, "Please enter a valid 6-digit postal code"),
@@ -29,7 +26,6 @@ export const personalFormSchema = z.object({
   stateCity: z.string().min(1, "City is required"),
   country: z.string().min(1, "Country is required"),
 
-  // Personal identification
   citizenship: z.string().min(1, "Citizenship is required"),
   residentialStatus: z.string().min(1, "Residential status is required"),
   race: z.string().min(1, "Race is required"),
@@ -37,7 +33,6 @@ export const personalFormSchema = z.object({
   maritalStatus: z.string().min(1, "Marital status is required"),
   passportNumber: z.string().min(1, "Passport number is required"),
 
-  // Contact details
   emailAddress: z.string().email("Please enter a valid email address"),
   alternativeEmail: z
     .string()
@@ -51,7 +46,6 @@ export const personalFormSchema = z.object({
   phoneArea: z.string().optional(),
   phoneNumber: z.string().optional(),
 
-  // Alternative contact
   alternateContactName: z.string().min(1, "Contact name is required"),
   relationshipWithApplicant: z.string().min(1, "Relationship is required"),
   occupation: z.string().min(1, "Occupation is required"),

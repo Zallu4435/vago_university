@@ -1,6 +1,7 @@
 // src/domain/types/club.ts
 export interface Club {
-    _id: string;
+    _id?: string;
+    id?: string;
     name: string;
     type: string;
     members: string;
@@ -16,7 +17,8 @@ export interface Club {
 }
 
 export interface ClubRequest {
-    _id: string;
+    _id?: string;
+    requestedId?:string; 
     name: string;
     type: string;
     members: string;

@@ -6,6 +6,7 @@ import { Button } from '../../base/Button';
 import { RadioGroup } from '../../base/RadioGroup';
 import { SubjectModal } from './SubjectModal';
 import { countryOptions, examOptions } from './options';
+import { getNestedObjectError } from '../../../../shared/utils/formErrors';
 
 interface InternationalSchoolInfoProps {
   onNext: () => void;
@@ -68,7 +69,7 @@ export const InternationalSchoolInfo: React.FC<InternationalSchoolInfoProps> = (
                 placeholder="Enter school name"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
                 labelClassName="text-cyan-700"
-                error={errors.international?.schoolName?.message}
+                error={getNestedObjectError(errors, 'international', 'schoolName')}
               />
             )}
           />
@@ -87,7 +88,7 @@ export const InternationalSchoolInfo: React.FC<InternationalSchoolInfoProps> = (
                 placeholder="Select country"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
                 labelClassName="text-cyan-700"
-                error={errors.international?.country?.message}
+                error={getNestedObjectError(errors, 'international', 'country')}
               />
             )}
           />
@@ -105,7 +106,7 @@ export const InternationalSchoolInfo: React.FC<InternationalSchoolInfoProps> = (
                 placeholder="Start year"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
                 labelClassName="text-cyan-700"
-                error={errors.international?.from?.message}
+                error={getNestedObjectError(errors, 'international', 'from')}
               />
             )}
           />
@@ -123,7 +124,7 @@ export const InternationalSchoolInfo: React.FC<InternationalSchoolInfoProps> = (
                 placeholder="End year"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
                 labelClassName="text-cyan-700"
-                error={errors.international?.to?.message}
+                error={getNestedObjectError(errors, 'international', 'to')}
               />
             )}
           />
@@ -142,7 +143,7 @@ export const InternationalSchoolInfo: React.FC<InternationalSchoolInfoProps> = (
                 placeholder="Select examination"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
                 labelClassName="text-cyan-700"
-                error={errors.international?.examination?.message}
+                error={getNestedObjectError(errors, 'international', 'examination')}
               />
             )}
           />
@@ -160,7 +161,7 @@ export const InternationalSchoolInfo: React.FC<InternationalSchoolInfoProps> = (
                 placeholder="e.g. 06/2023"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
                 labelClassName="text-cyan-700"
-                error={errors.international?.examMonthYear?.message}
+                error={getNestedObjectError(errors, 'international', 'examMonthYear')}
               />
             )}
           />
@@ -212,21 +213,24 @@ export const InternationalSchoolInfo: React.FC<InternationalSchoolInfoProps> = (
                   </td>
                 </tr>
               ) : (
-                subjects.map((subj, idx) => (
-                  <tr key={subj.id} className="border-b border-cyan-100">
-                    <td className="py-2 px-3">{subj.subject}</td>
-                    <td className="py-2 px-3">{subj.otherSubject || '-'}</td>
-                    <td className="py-2 px-3">{subj.grade}</td>
-                    <td className="py-2 px-3">
-                      <Button
-                        label="Remove"
-                        onClick={() => remove(idx)}
-                        variant="outline"
-                        className="text-cyan-600 hover:text-cyan-700 border border-cyan-300 hover:border-cyan-400 px-3 py-1 rounded-md"
-                      />
-                    </td>
-                  </tr>
-                ))
+                subjects.map((subj, idx) => {
+                  const s = subj as { id: string; subject?: string; otherSubject?: string; grade?: string };
+                  return (
+                    <tr key={s.id} className="border-b border-cyan-100">
+                      <td className="py-2 px-3">{s.subject}</td>
+                      <td className="py-2 px-3">{s.otherSubject || '-'}</td>
+                      <td className="py-2 px-3">{s.grade}</td>
+                      <td className="py-2 px-3">
+                        <Button
+                          label="Remove"
+                          onClick={() => remove(idx)}
+                          variant="outline"
+                          className="text-cyan-600 hover:text-cyan-700 border border-cyan-300 hover:border-cyan-400 px-3 py-1 rounded-md"
+                        />
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

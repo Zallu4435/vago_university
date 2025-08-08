@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   FaGraduationCap,
   FaGlobe,
@@ -26,7 +26,6 @@ export default function ScholarshipComponent() {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Set active navigation item from URL parameter on component mount
   useEffect(() => {
     const tabFromUrl = searchParams.get('tab');
     if (tabFromUrl) {

@@ -29,12 +29,10 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Determine which tabs to show based on URL
   const isCanvas = location.pathname.includes('/canvas');
   const tabs = isCanvas ? canvasTabs : dashboardTabs;
   const portalName = 'VAGO';
 
-  // Helper to get the exact path for each tab
   const getTabPath = (tab: string) => {
     if (!isCanvas) {
       switch (tab) {
@@ -88,7 +86,6 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
-      // Close profile dropdown if clicking outside
       if (
         profileDropdownRef.current &&
         !profileDropdownRef.current.contains(event.target as Node)
@@ -97,8 +94,6 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
       }
 
 
-
-      // Close mobile menu if clicking outside
       if (
         mobileMenuOpen &&
         mobileMenuRef.current &&
@@ -118,19 +113,16 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
 
   return (
     <header className={`relative z-[9998] ${styles.backgroundSecondary} shadow-2xl border-b ${styles.borderSecondary}`}>
-      {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className={`absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br ${styles.orb.secondary} rounded-full blur-xl animate-pulse`}></div>
         <div className={`absolute top-8 right-16 w-16 h-16 bg-gradient-to-br ${styles.orb.primary} rounded-full blur-lg animate-pulse delay-700`}></div>
         <div className={`absolute bottom-4 left-1/3 w-20 h-20 bg-gradient-to-br ${styles.orb.secondary} rounded-full blur-xl animate-pulse delay-1000`}></div>
       </div>
 
-      {/* Main gradient overlay */}
       <div className={`absolute inset-0 bg-gradient-to-r ${styles.accent} opacity-20 backdrop-blur-md`}></div>
 
       <div className="container mx-auto py-4 relative z-10">
         <div className="flex items-center justify-between">
-          {/* Logo - Hidden on Mobile */}
           <div className="hidden md:flex items-center space-x-3 group">
             <div className="relative">
               <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${styles.accent} flex items-center justify-center shadow-xl transform group-hover:scale-105 transition-all duration-300`}>
@@ -147,7 +139,6 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
             </div>
           </div>
 
-          {/* Mobile Menu Button - Left Side */}
           <button
             ref={mobileMenuButtonRef}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -159,7 +150,6 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
               : <FaBars className={`${styles.icon.primary}`} size={20} />}
           </button>
 
-          {/* Mobile Portal Toggle - Between Menu and Notifications */}
           <div className="relative group md:hidden flex-1 mx-2">
             <button
               onClick={handlePortalToggle}
@@ -179,9 +169,7 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
             </button>
           </div>
 
-          {/* Center Section - Search Bar & Portal Toggle */}
           <div className="hidden md:flex items-center space-x-4">
-            {/* Search Bar */}
             <div className="relative group">
               <div className={`absolute -inset-1 bg-gradient-to-r ${styles.orb.primary} rounded-full blur opacity-25 group-hover:opacity-75 transition-opacity duration-300`}></div>
               <div className={`relative ${styles.card.background} backdrop-blur-xl rounded-full px-6 py-3 shadow-lg border ${styles.border}`}>
@@ -197,7 +185,6 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
               </div>
             </div>
 
-            {/* Portal Toggle Button */}
             <div className="relative group">
               <div className={`absolute -inset-1 bg-gradient-to-r ${isCanvas ? 'from-purple-400 to-blue-400' : 'from-blue-400 to-indigo-400'} rounded-2xl blur opacity-25 group-hover:opacity-75 transition-opacity duration-300`}></div>
               <button
@@ -225,9 +212,7 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
             </div>
           </div>
 
-          {/* Icons & User Section */}
           <div className="flex items-center space-x-3 md:space-x-5">
-            {/* Notification Bell */}
             <div className="relative group">
               <button
                 onClick={() => setIsNotificationOpen(!isNotificationOpen)}
@@ -243,14 +228,12 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
                 <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${styles.orb.primary} opacity-0 group-hover:opacity-10 transition-all duration-300`}></div>
               </button>
 
-              {/* Notification Modal */}
               <NotificationModal 
                 isOpen={isNotificationOpen}
                 onClose={() => setIsNotificationOpen(false)}
               />
             </div>
 
-            {/* Mobile Profile Icon */}
             <div className="relative md:hidden">
               <button
                 onClick={toggleProfileDropdown}
@@ -269,7 +252,6 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
                 </div>
               </button>
 
-              {/* Mobile Profile Dropdown */}
               {isProfileDropdownOpen && (
                 <div ref={profileDropdownRef} className={`absolute right-0 mt-3 w-64 ${styles.card.background} backdrop-blur-xl rounded-2xl shadow-2xl z-50 border ${styles.border}`}>
                   <div className={`absolute inset-0 bg-gradient-to-br ${styles.backgroundSecondary} opacity-50`}></div>
@@ -318,7 +300,6 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
               )}
             </div>
 
-            {/* Profile Section - Desktop Only */}
             <div className="relative hidden md:block">
               <button
                 onClick={toggleProfileDropdown}
@@ -339,7 +320,6 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
                 <div className={`w-2 h-2 bg-gradient-to-br ${styles.accent} rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-200`}></div>
               </button>
 
-              {/* Profile Dropdown */}
               {isProfileDropdownOpen && (
                 <div ref={profileDropdownRef} className={`absolute right-0 mt-3 w-56 ${styles.card.background} backdrop-blur-xl rounded-2xl shadow-2xl z-50 border ${styles.border}`}>
                   <div className={`absolute inset-0 bg-gradient-to-br ${styles.backgroundSecondary} opacity-50`}></div>
@@ -390,7 +370,6 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
           </div>
         </div>
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:block mt-6">
           <div className="relative">
             <div className={`absolute inset-0 bg-gradient-to-r ${styles.accent} opacity-20 rounded-2xl blur-sm`}></div>

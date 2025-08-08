@@ -1,7 +1,7 @@
 import React from 'react';
 import { usePreferences } from '../../../../../application/context/PreferencesContext';
 import {
-    FiDownload, FiInfo, FiHeart, FiBookmark,
+    FiDownload, FiHeart, FiBookmark,
     FiUser, FiClock, FiCalendar, FiBook, FiLock, FiStar, FiEye
 } from 'react-icons/fi';
 import { getFileIcon, getDifficultyColor, formatDate, formatNumber } from '../utils/materialUtils';

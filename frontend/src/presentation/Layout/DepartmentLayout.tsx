@@ -1,10 +1,9 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { Navbar } from '../components/public/Navbar'; // Adjust the path as needed
+import { Navbar } from '../components/public/Navbar'; 
 import DepartmentFooter from '../components/departments/common/DepartmentFooter';
 import { Header } from '../components/public/Header';
 
-// Change from named export to default export
 const DepartmentLayout: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-cyan-50 via-white to-cyan-50 pt-16 sm:pt-20 md:pt-24 lg:pt-28 xl:pt-32">
@@ -18,5 +17,4 @@ const DepartmentLayout: React.FC = () => {
   );
 };
 
-// Use default export
 export default DepartmentLayout;

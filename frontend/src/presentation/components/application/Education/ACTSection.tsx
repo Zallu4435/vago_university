@@ -1,6 +1,7 @@
 import React from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '../../base/Input';
+import { getNestedObjectError } from '../../../../shared/utils/formErrors';
 
 const ACTSection: React.FC = () => {
   const { control, formState: { errors } } = useFormContext();
@@ -22,6 +23,7 @@ const ACTSection: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Input
+                name="actDate"
                 id="actDate"
                 label="Date Taken"
                 value={field.value}
@@ -29,7 +31,7 @@ const ACTSection: React.FC = () => {
                 placeholder="MM/YYYY"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.international?.act?.date?.message}
+                error={getNestedObjectError(errors, 'international.act', 'date')}
               />
             )}
           />
@@ -52,12 +54,13 @@ const ACTSection: React.FC = () => {
                     control={control}
                     render={({ field }) => (
                       <Input
+                        name="actComposite"
                         id="actComposite"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="1-36"
                         className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-                        error={errors.international?.act?.composite?.message}
+                        error={getNestedObjectError(errors, 'international.act', 'composite')}
                       />
                     )}
                   />
@@ -71,12 +74,13 @@ const ACTSection: React.FC = () => {
                     control={control}
                     render={({ field }) => (
                       <Input
+                        name="actEnglish"
                         id="actEnglish"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="1-36"
                         className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-                        error={errors.international?.act?.english?.message}
+                        error={getNestedObjectError(errors, 'international.act', 'english')}
                       />
                     )}
                   />
@@ -90,12 +94,13 @@ const ACTSection: React.FC = () => {
                     control={control}
                     render={({ field }) => (
                       <Input
+                        name="actMath"
                         id="actMath"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="1-36"
                         className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-                        error={errors.international?.act?.math?.message}
+                        error={getNestedObjectError(errors, 'international.act', 'math')}
                       />
                     )}
                   />
@@ -109,12 +114,13 @@ const ACTSection: React.FC = () => {
                     control={control}
                     render={({ field }) => (
                       <Input
+                        name="actReading"
                         id="actReading"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="1-36"
                         className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-                        error={errors.international?.act?.reading?.message}
+                        error={getNestedObjectError(errors, 'international.act', 'reading')}
                       />
                     )}
                   />
@@ -128,12 +134,13 @@ const ACTSection: React.FC = () => {
                     control={control}
                     render={({ field }) => (
                       <Input
+                        name="actScience"
                         id="actScience"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="1-36"
                         className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-                        error={errors.international?.act?.science?.message}
+                        error={getNestedObjectError(errors, 'international.act', 'science')}
                       />
                     )}
                   />

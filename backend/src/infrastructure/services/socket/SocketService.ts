@@ -71,7 +71,7 @@ export class SocketService {
     this.chatNamespace.on("connection", this.handleConnection.bind(this));
   }
 
-  private authenticateSocket(socket: any, next: (err?: Error) => void) {
+  private authenticateSocket(socket, next: (err?: Error) => void) {
     try {
       const token = this.extractToken(socket);
 
@@ -97,7 +97,7 @@ export class SocketService {
     }
   }
 
-  private extractToken(socket: any): string | null {
+  private extractToken(socket): string | null {
     if (socket.handshake.headers?.cookie) {
       const cookieStr = socket.handshake.headers.cookie;
       const accessTokenMatch = cookieStr.match(/access_token=([^;]+)/);
@@ -108,7 +108,7 @@ export class SocketService {
     return null;
   }
 
-  private handleConnection(socket: any) {
+  private handleConnection(socket) {
     const userId = socket.data.user.userId;
     this.userSockets.set(userId, socket.id);
 
@@ -121,7 +121,7 @@ export class SocketService {
     this.setupEventListeners(socket, userId);
   }
 
-  private setupEventListeners(socket: any, userId: string) {
+  private setupEventListeners(socket, userId: string) {
     socket.on("joinChat", (data: { chatId: string }) => {
       socket.join(data.chatId);
     });
@@ -173,7 +173,7 @@ export class SocketService {
     });
   }
 
-  private handleDisconnect(socket: any, reason: string) {
+  private handleDisconnect(socket, reason: string) {
     const userId = this.getUserIdBySocketId(socket.id);
     if (userId) {
       this.userSockets.delete(userId);
@@ -230,7 +230,7 @@ export class SocketService {
     }
   }
 
-  public async handleUpdatedChat(chat: any) {
+  public async handleUpdatedChat(chat) {
     if (!chat || !chat.id) return;
     this.chatNamespace.to(chat.id).emit('chat', chat);
   }

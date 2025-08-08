@@ -24,14 +24,14 @@ export interface INotificationRepository {
     markNotificationAsRead(params: MarkNotificationAsReadRequestDTO): Promise<MarkNotificationAsReadResponseDTO>;
     markAllNotificationsAsRead(params: MarkAllNotificationsAsReadRequestDTO): Promise<MarkAllNotificationsAsReadResponseDTO>;
     
-    create(data: NotificationProps): Promise<any>;
-    find(filter: any, options?: { skip?: number; limit?: number; sort?: any }): Promise<any[]>;
-    count(filter: any): Promise<number>;
-    findById(id: string): Promise<any | null>;
-    update(id: string, data: Partial<NotificationProps>): Promise<any | null>;
+    create(data: NotificationProps);
+    find(filter, options?: { skip?: number; limit?: number; sort? });
+    count(filter);
+    findById(id: string);
+    update(id: string, data: Partial<NotificationProps>);
     delete(id: string): Promise<void>;
     
-    findUsersByCollection(collection: string): Promise<any[]>;
-    findFacultyByCollection(collection: string): Promise<any[]>;
+    findUsersByCollection(collection: string);
+    findFacultyByCollection(collection: string);
     removeToken(token: string): Promise<void>;
 }

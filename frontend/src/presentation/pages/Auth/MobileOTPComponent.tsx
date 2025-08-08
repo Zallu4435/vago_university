@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FaMobileAlt, FaCheckCircle, FaExclamationCircle, FaShieldAlt } from 'react-icons/fa';
 import type { MobileOTPStep, MobileOTPComponentProps } from '../../../domain/types/auth/ForgotPassword';
 

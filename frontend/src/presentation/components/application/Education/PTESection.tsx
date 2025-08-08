@@ -1,6 +1,7 @@
 import React from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '../../base/Input';
+import { getNestedObjectError } from '../../../../shared/utils/formErrors';
 
 const PTESection: React.FC = () => {
   const { control, formState: { errors } } = useFormContext();
@@ -22,6 +23,7 @@ const PTESection: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Input
+                name="pteDate"
                 id="pteDate"
                 label="Date Taken"
                 value={field.value}
@@ -29,7 +31,7 @@ const PTESection: React.FC = () => {
                 placeholder="MM/YYYY"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.international?.pte?.date?.message}
+                error={getNestedObjectError(errors, 'international.pte', 'date')}
               />
             )}
           />
@@ -52,12 +54,13 @@ const PTESection: React.FC = () => {
                     control={control}
                     render={({ field }) => (
                       <Input
+                        name="pteOverall"
                         id="pteOverall"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="<10 to 90 inclusive>"
                         className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-                        error={errors.international?.pte?.overall?.message}
+                        error={getNestedObjectError(errors, 'international.pte', 'overall')}
                       />
                     )}
                   />
@@ -71,12 +74,13 @@ const PTESection: React.FC = () => {
                     control={control}
                     render={({ field }) => (
                       <Input
+                        name="pteReading"
                         id="pteReading"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="<10 to 90 inclusive>"
                         className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-                        error={errors.international?.pte?.reading?.message}
+                        error={getNestedObjectError(errors, 'international.pte', 'reading')}
                       />
                     )}
                   />
@@ -90,12 +94,13 @@ const PTESection: React.FC = () => {
                     control={control}
                     render={({ field }) => (
                       <Input
+                        name="pteWriting"
                         id="pteWriting"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="<10 to 90 inclusive>"
                         className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-                        error={errors.international?.pte?.writing?.message}
+                        error={getNestedObjectError(errors, 'international.pte', 'writing')}
                       />
                     )}
                   />

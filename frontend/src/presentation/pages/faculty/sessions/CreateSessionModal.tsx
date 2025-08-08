@@ -27,13 +27,12 @@ export default function CreateSessionModal({ setShowCreateModal, createSession, 
 
   useEffect(() => {
     if (isEditMode && sessionToEdit) {
-      // Split startTime into date and time
       let date = '';
       let time = '';
       if (sessionToEdit.startTime) {
         const dt = new Date(sessionToEdit.startTime);
-        date = dt.toISOString().slice(0, 10); // yyyy-mm-dd
-        time = dt.toTimeString().slice(0, 5); // hh:mm
+        date = dt.toISOString().slice(0, 10);
+        time = dt.toTimeString().slice(0, 5); 
       }
       setNewSession({
         title: sessionToEdit.title || '',
@@ -97,7 +96,6 @@ export default function CreateSessionModal({ setShowCreateModal, createSession, 
       return;
     }
 
-    // Combine date and time into ISO string for startTime
     const startTime = new Date(`${newSession.date}T${newSession.time}`).toISOString();
 
     const sessionPayload: Session = {

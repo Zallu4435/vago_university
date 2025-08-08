@@ -1,4 +1,4 @@
-import { FiBook, FiBriefcase, FiUser, FiHash, FiClock, FiUsers, FiClipboard } from 'react-icons/fi';
+import { FiBook, FiBriefcase, FiUser, FiHash, FiClock, FiUsers } from 'react-icons/fi';
 import { Course, EnrollmentRequest } from '../../domain/types/management/coursemanagement';
 
 export const SPECIALIZATIONS = [

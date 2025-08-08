@@ -42,7 +42,7 @@ router.post('/:type/:id/fcm-token', authMiddleware, async (req: Request, res: Re
     }
 
     res.status(200).json({ message: 'FCM token saved' });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error saving FCM token:', error);
     res.status(500).json({ error: 'Failed to save FCM token' });
   }

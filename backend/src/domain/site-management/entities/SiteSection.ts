@@ -37,7 +37,7 @@ export class SiteSection {
 
   get id() { return this._props.id; }
   get sectionKey() { return this._props.sectionKey; }
-  get title() { return (this._props as any).title; }
+  get title() { return (this._props).title; }
   get description() { return (this._props as any).description; }
   get content() { return (this._props as any).content; }
   get bio() { return (this._props as any).bio; }

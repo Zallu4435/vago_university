@@ -3,20 +3,21 @@ import { OtherInformationSchema } from './OtherInfoSchema';
 import { DocumentUploadSectionSchema } from './DocumentSchema';
 import { DeclarationSchema } from './DeclarationSchema';
 import { personalFormSchema } from './PersonalFormSchema';
-import { choiceOfStudySchema } from './ChoiceOfStudySchema';
+import { choiceOfStudyFormSchema } from './ChoiceOfStudySchema';
 import { educationSchema } from './EducationSchema';
+import { AchievementSectionSchema } from './AchievementSchema';
 
 
 export const ApplicationFormSchema = z.object({
   applicationId: z.string().min(1, 'Application ID is required').optional(),
   personalInfo: personalFormSchema.optional(),
-  choiceOfStudy: choiceOfStudySchema.optional(),
+  choiceOfStudy: choiceOfStudyFormSchema.optional(),
   education: educationSchema.optional(),
-//   achievements: AchievementSectionSchema.optional(),
+  achievements: AchievementSectionSchema.optional(),
   otherInformation: OtherInformationSchema.optional(),
   documents: DocumentUploadSectionSchema.optional(),
   declaration: DeclarationSchema.optional(),
-}).refine(data => {
+}).refine((data: any) => {
   if (data.declaration?.privacyPolicy) {
     return !!data.personalInfo && !!data.choiceOfStudy && !!data.education && !!data.otherInformation && !!data.documents;
   }

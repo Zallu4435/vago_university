@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 export const useAnimation = (delay = 100) => {
-  const [style, setStyle] = useState({ opacity: 0, transform: 'translateY(20px)' });
+  const [style, setStyle] = useState({ opacity: 0, transform: 'translateY(20px)', transition: '' });
 
   useEffect(() => {
     const timer = setTimeout(() => {

@@ -17,13 +17,13 @@ import {
   
   export interface IAdmissionsRepository {
     createApplication(params: CreateApplicationRequestDTO): Promise<CreateApplicationResponseDTO>;
-    findDraftByRegisterId(userId: string): Promise<any>;
-    findDraftByApplicationId(applicationId: string): Promise<any>;
-    saveDraft(draft: any): Promise<any>;
+    findDraftByRegisterId(userId: string);
+    findDraftByApplicationId(applicationId: string)
+    saveDraft(draft);
     processPayment(params: ProcessPaymentRequestDTO): Promise<ProcessPaymentResponseDTO>;
     confirmPayment(params: ConfirmPaymentRequestDTO): Promise<ConfirmPaymentResponseDTO>;
     finalizeAdmission(params: FinalizeAdmissionRequestDTO): Promise<FinalizeAdmissionResponseDTO>;
     uploadDocument(params: UploadDocumentRequestDTO): Promise<UploadDocumentResponseDTO>;
     uploadMultipleDocuments(params: UploadMultipleDocumentsRequestDTO): Promise<UploadMultipleDocumentsResponseDTO>;
-    getDocumentByKey(params: { userId: string; documentKey: string }): Promise<any | null>;
+    getDocumentByKey(params: { userId: string; documentKey: string });
   }

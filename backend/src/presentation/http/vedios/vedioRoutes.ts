@@ -9,7 +9,7 @@ const videoController = getVideoComposer();
 
 router.post(
     '/categories/:category/videos',
-    authMiddleware as any,
+    authMiddleware,
     contentVideoUploadWithErrorHandling,
     (req: Request, res: Response, next: NextFunction) => {
         req.body.category = req.params.category;
@@ -19,19 +19,19 @@ router.post(
 
 router.get(
     '/videos',
-    authMiddleware as any,
+    authMiddleware,
     (req: Request, res: Response, next: NextFunction) => expressAdapter(req, res, next, videoController.getVideos.bind(videoController))
 );
 
 router.get(
     '/videos/:id',
-    authMiddleware as any,
+    authMiddleware,
     (req: Request, res: Response, next: NextFunction) => expressAdapter(req, res, next, videoController.getVideoById.bind(videoController))
 );
 
 router.put(
     '/videos/:id',
-    authMiddleware as any,
+    authMiddleware,
     contentVideoUploadWithErrorHandling,
     (req: Request, res: Response, next: NextFunction) => {
         console.log('🎬 [ROUTE] PUT /videos/:id - Video update route hit');
@@ -41,7 +41,7 @@ router.put(
 
 router.delete(
     '/videos/:id',
-    authMiddleware as any,
+    authMiddleware,
     (req: Request, res: Response, next: NextFunction) => expressAdapter(req, res, next, videoController.deleteVideo.bind(videoController))
 );
 

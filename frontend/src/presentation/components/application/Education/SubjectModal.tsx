@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '../../base/Input';
 import { Button } from '../../base/Button';
 import { subjectSchema } from '../../../../domain/validation/EducationSchema';
+import { getNestedError } from '../../../../shared/utils/formErrors'; // Add this import
 
 interface SubjectModalProps {
   showModal: boolean;
@@ -70,6 +71,7 @@ export const SubjectModal: React.FC<SubjectModalProps> = ({
             control={control}
             render={({ field }) => (
               <Input
+                name="subject"
                 id="subject"
                 label="Subject"
                 value={field.value}
@@ -78,7 +80,7 @@ export const SubjectModal: React.FC<SubjectModalProps> = ({
                 placeholder="Enter subject"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
                 labelClassName="text-cyan-700"
-                error={errors.subject?.message}
+                error={getNestedError(errors, 'subject')}
               />
             )}
           />
@@ -88,6 +90,7 @@ export const SubjectModal: React.FC<SubjectModalProps> = ({
               control={control}
               render={({ field }) => (
                 <Input
+                  name="otherSubject"
                   id="otherSubject"
                   label="Other Subject"
                   value={field.value}
@@ -96,7 +99,7 @@ export const SubjectModal: React.FC<SubjectModalProps> = ({
                   placeholder="Enter other subject name"
                   className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
                   labelClassName="text-cyan-700"
-                  error={errors.otherSubject?.message}
+                  error={getNestedError(errors, 'otherSubject')}
                 />
               )}
             />
@@ -106,6 +109,7 @@ export const SubjectModal: React.FC<SubjectModalProps> = ({
             control={control}
             render={({ field }) => (
               <Input
+                name="grade"
                 id="grade"
                 label="Grade"
                 value={field.value}
@@ -114,7 +118,7 @@ export const SubjectModal: React.FC<SubjectModalProps> = ({
                 placeholder="Enter grade"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200"
                 labelClassName="text-cyan-700"
-                error={errors.grade?.message}
+                error={getNestedError(errors, 'grade')}
               />
             )}
           />

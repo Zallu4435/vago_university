@@ -235,7 +235,7 @@ export class GetSubmissionsUseCase implements IGetSubmissionsUseCase {
 
   async execute(params: GetSubmissionsRequestDTO): Promise<ResponseDTO<GetSubmissionsResponseDTO>> {
     const { submissions, total, page, limit } = await this.assignmentRepository.getSubmissions(params.assignmentId, params.page, params.limit);
-    const mappedSubmissions = submissions.map((submission: any) => ({
+    const mappedSubmissions = submissions.map((submission) => ({
       id: submission._id.toString(),
       assignmentId: submission.assignmentId.toString(),
       studentId: submission.studentId,

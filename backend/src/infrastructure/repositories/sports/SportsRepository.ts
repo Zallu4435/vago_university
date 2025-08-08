@@ -15,7 +15,7 @@ import { TeamModel, SportRequestModel } from "../../../infrastructure/database/m
 import { User as UserModel } from "../../database/mongoose/auth/user.model";
 
 export class SportsRepository implements ISportsRepository {
-  async getSports(params: GetSportsRequestDTO): Promise<any> {
+  async getSports(params: GetSportsRequestDTO) {
     const { page, limit, sportType, status, coach, startDate, endDate, search } = params;
     const query: any = {};
     if (sportType && sportType !== "all") {
@@ -49,15 +49,15 @@ export class SportsRepository implements ISportsRepository {
     return { sports, totalItems, totalPages, currentPage: page };
   }
 
-  async getSportById(params: GetSportByIdRequestDTO): Promise<any> {
+  async getSportById(params: GetSportByIdRequestDTO) {
     return await (TeamModel as any).findById(params.id).lean();
   }
 
-  async createSport(params: CreateSportRequestDTO): Promise<any> {
+  async createSport(params: CreateSportRequestDTO) {
     return await (TeamModel as any).create({ ...params, status: params.status?.toLowerCase() || "active" });
   }
 
-  async updateSport(params: UpdateSportRequestDTO): Promise<any> {
+  async updateSport(params: UpdateSportRequestDTO) {
     return await (TeamModel as any).findByIdAndUpdate(
       params.id,
       { $set: { ...params, updatedAt: new Date() } },
@@ -69,7 +69,7 @@ export class SportsRepository implements ISportsRepository {
     await TeamModel.findByIdAndDelete(params.id);
   }
 
-  async getSportRequests(params: GetSportRequestsRequestDTO): Promise<any> {
+  async getSportRequests(params: GetSportRequestsRequestDTO) {
     const { page, limit, status, type, startDate, endDate, search } = params;
     const query: any = {};
     if (status && status.toLowerCase() !== "all") {
@@ -138,14 +138,14 @@ export class SportsRepository implements ISportsRepository {
     );
   }
 
-  async getSportRequestDetails(params: GetSportRequestDetailsRequestDTO): Promise<any> {
+  async getSportRequestDetails(params: GetSportRequestDetailsRequestDTO) {
     return await SportRequestModel.findById(params.id)
       .populate({ path: "sportId", select: "title type headCoach participants division" })
       .populate({ path: "userId", select: "firstName lastName email" })
       .lean();
   }
 
-  async joinSport(params: JoinSportRequestDTO): Promise<any> {
+  async joinSport(params: JoinSportRequestDTO) {
     const sportRequest = new SportRequestModel({
       sportId: params.sportId,
       userId: params.studentId,

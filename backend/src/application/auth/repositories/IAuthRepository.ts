@@ -64,8 +64,8 @@ export interface IAuthRepository {
     lastUsedAt: Date;
     expiresAt: Date;
   }): Promise<void>;
-  findSessionBySessionIdAndUserId(sessionId: string, userId: string): Promise<any>;
-  findSessionByUserIdAndDevice(userId: string, userAgent: string, ipAddress: string): Promise<any>;
+  findSessionBySessionIdAndUserId(sessionId: string, userId: string);
+  findSessionByUserIdAndDevice(userId: string, userAgent: string, ipAddress: string);
   updateSessionRefreshToken(sessionId: string, newRefreshToken: string, newExpiresAt: Date, newLastUsedAt: Date): Promise<void>;
   deleteSessionBySessionId(sessionId: string): Promise<void>;
   deleteAllSessionsByUserId(userId: string): Promise<void>;

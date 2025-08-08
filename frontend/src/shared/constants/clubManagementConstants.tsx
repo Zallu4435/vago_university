@@ -1,7 +1,4 @@
 import {
-  IoEyeOutline as Eye,
-  IoCreateOutline as Edit,
-  IoTrashOutline as Trash2,
   IoBusinessOutline as Building,
   IoPersonOutline as User,
 } from 'react-icons/io5';
@@ -19,76 +16,94 @@ export const clubColumns: ClubColumn[] = [
   {
     header: 'Club',
     key: 'name',
-    render: (club: Club) => (
-      <div className="flex items-center gap-3">
-        <span
-          className="text-2xl w-8 h-8 rounded-lg flex items-center justify-center"
-          style={{ backgroundColor: `${club.color}20`, color: club.color }}
-        >
-          {club.icon}
-        </span>
-        <div>
-          <p className="font-medium text-gray-200">{club.name}</p>
-          <p className="text-xs text-gray-400">ID: {club.id?.slice(0, 7)}</p>
+    render: (item: Club | ClubRequest) => {
+      const club = item as Club;
+      return (
+        <div className="flex items-center gap-3">
+          <span
+            className="text-2xl w-8 h-8 rounded-lg flex items-center justify-center"
+            style={{ backgroundColor: `${club.color}20`, color: club.color }}
+          >
+            {club.icon}
+          </span>
+          <div>
+            <p className="font-medium text-gray-200">{club.name}</p>
+            <p className="text-xs text-gray-400">ID: {club.id?.slice(0, 7)}</p>
+          </div>
         </div>
-      </div>
-    ),
+      );
+    },
     width: '20%',
   },
   {
     header: 'Type',
     key: 'type',
-    render: (club: Club) => (
-      <div className="text-sm text-gray-300 capitalize">{club.type}</div>
-    ),
+    render: (item: Club | ClubRequest) => {
+      const club = item as Club;
+      return (
+        <div className="text-sm text-gray-300 capitalize">{club.type}</div>
+      );
+    },
   },
   {
     header: 'Created By',
     key: 'createdBy',
-    render: (club: Club) => (
-      <div className="flex items-center text-gray-300">
-        {club.createdBy?.includes('Admin') ? (
-          <Building size={14} className="text-purple-400 mr-2" />
-        ) : (
-          <User size={14} className="text-purple-400 mr-2" />
-        )}
-        <span className="text-sm">{club.createdBy}</span>
-      </div>
-    ),
+    render: (item: Club | ClubRequest) => {
+      const club = item as Club;
+      return (
+        <div className="flex items-center text-gray-300">
+          {club.createdBy?.includes('Admin') ? (
+            <Building size={14} className="text-purple-400 mr-2" />
+          ) : (
+            <User size={14} className="text-purple-400 mr-2" />
+          )}
+          <span className="text-sm">{club.createdBy}</span>
+        </div>
+      );
+    },
   },
   {
     header: 'Created Date',
     key: 'createdAt',
-    render: (club: Club) => (
-      <div className="text-sm text-gray-300">{formatDate(club.createdAt)}</div>
-    ),
+    render: (item: Club | ClubRequest) => {
+      const club = item as Club;
+      return (
+        <div className="text-sm text-gray-300">{formatDate(club.createdAt)}</div>
+      );
+    },
   },
   {
     header: 'Members',
     key: 'members',
-    render: (club: Club) => (
-      <div className="flex items-center text-gray-300">
-        <span className="text-sm">{club.memberCount || '0'}</span>
-      </div>
-    ),
+    render: (item: Club | ClubRequest) => {
+      const club = item as Club;
+      return (
+        <div className="flex items-center text-gray-300">
+          <span className="text-sm">{club.memberCount || '0'}</span>
+        </div>
+      );
+    },
   },
   {
     header: 'Status',
     key: 'status',
-    render: (club: Club) => (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${club.status.toLowerCase() === 'active'
-            ? 'bg-green-900/30 text-green-400 border-green-500/30'
-            : 'bg-red-900/30 text-red-400 border-red-500/30'
-          }`}
-      >
+    render: (item: Club | ClubRequest) => {
+      const club = item as Club;
+      return (
         <span
-          className="h-1.5 w-1.5 rounded-full mr-1.5"
-          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
-        ></span>
-        {club.status.charAt(0).toUpperCase() + club.status.slice(1)}
-      </span>
-    ),
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${club.status.toLowerCase() === 'active'
+              ? 'bg-green-900/30 text-green-400 border-green-500/30'
+              : 'bg-red-900/30 text-red-400 border-red-500/30'
+            }`}
+        >
+          <span
+            className="h-1.5 w-1.5 rounded-full mr-1.5"
+            style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
+          ></span>
+          {club.status.charAt(0).toUpperCase() + club.status.slice(1)}
+        </span>
+      );
+    },
   },
 ];
 
@@ -96,56 +111,71 @@ export const clubRequestColumns: ClubColumn[] = [
   {
     header: 'Request',
     key: 'name',
-    render: (request: ClubRequest) => (
-      <div>
-        <p className="font-medium text-gray-200">{request.clubName}</p>
-        <p className="text-xs text-gray-400">ID: {request.requestedId?.slice(0, 7)}</p>
-      </div>
-    ),
+    render: (item: Club | ClubRequest) => {
+      const request = item as ClubRequest;
+      return (
+        <div>
+          <p className="font-medium text-gray-200">{request.clubName}</p>
+          <p className="text-xs text-gray-400">ID: {request.requestedId?.slice(0, 7)}</p>
+        </div>
+      );
+    },
     width: '20%',
   },
   {
     header: 'Requested By',
     key: 'requestedBy',
-    render: (request: ClubRequest) => (
-      <div className="flex items-center text-gray-300">
-        <User size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{request.requestedBy}</span>
-      </div>
-    ),
+    render: (item: Club | ClubRequest) => {
+      const request = item as ClubRequest;
+      return (
+        <div className="flex items-center text-gray-300">
+          <User size={14} className="text-purple-400 mr-2" />
+          <span className="text-sm">{request.requestedBy}</span>
+        </div>
+      );
+    },
   },
   {
     header: 'Type',
     key: 'type',
-    render: (request: ClubRequest) => (
-      <div className="text-sm text-gray-300 capitalize">{request.type}</div>
-    ),
+    render: (item: Club | ClubRequest) => {
+      const request = item as ClubRequest;
+      return (
+        <div className="text-sm text-gray-300 capitalize">{request.type}</div>
+      );
+    },
   },
   {
     header: 'Requested At',
     key: 'createdAt',
-    render: (request: ClubRequest) => (
-      <div className="text-sm text-gray-300">{formatDate(request.requestedAt)}</div>
-    ),
+    render: (item: Club | ClubRequest) => {
+      const request = item as ClubRequest;
+      return (
+        <div className="text-sm text-gray-300">{formatDate(request.requestedAt || '')}</div>
+      );
+    },
   },
   {
     header: 'Status',
     key: 'status',
-    render: (request: ClubRequest) => (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${request.status.toLowerCase() === 'pending'
-            ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
-            : request.status.toLowerCase() === 'approved'
-              ? 'bg-green-900/30 text-green-400 border-green-500/30'
-              : 'bg-red-900/30 text-red-400 border-red-500/30'
-          }`}
-      >
+    render: (item: Club | ClubRequest) => {
+      const request = item as ClubRequest;
+      return (
         <span
-          className="h-1.5 w-1.5 rounded-full mr-1.5"
-          style={{ boxShadow: '0 0 8px currentColor', backgroundColor: 'currentColor' }}
-        ></span>
-        {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-      </span>
-    ),
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${request.status.toLowerCase() === 'pending'
+              ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
+              : request.status.toLowerCase() === 'approved'
+                ? 'bg-green-900/30 text-green-400 border-green-500/30'
+                : 'bg-red-900/30 text-red-400 border-red-500/30'
+            }`}
+        >
+          <span
+            className="h-1.5 w-1.5 rounded-full mr-1.5"
+            style={{ boxShadow: '0 0 8px currentColor', backgroundColor: 'currentColor' }}
+          ></span>
+          {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+        </span>
+      );
+    },
   },
 ]; 

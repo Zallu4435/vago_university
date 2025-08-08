@@ -1,10 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
-import { FaBell, FaCog, FaEye, FaEyeSlash, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaBell, FaCog, FaCheck } from 'react-icons/fa';
 import { useNotificationManagement } from '../../../../application/hooks/useNotificationManagement';
-import { usePreferences } from '../../../../application/context/PreferencesContext';
 
 export default function FacultyNotificationSettings() {
-  const { styles } = usePreferences();
   const { notifications, markAsRead, markAllAsRead, fetchNextPage, hasMore, isLoadingMore } = useNotificationManagement();
   const [activeTab, setActiveTab] = useState<'preferences' | 'notifications'>('preferences');
   const [preferences, setPreferences] = useState({

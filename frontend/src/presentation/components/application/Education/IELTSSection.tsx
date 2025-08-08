@@ -1,6 +1,7 @@
 import React from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '../../base/Input';
+import { getNestedObjectError } from '../../../../shared/utils/formErrors';
 
 const IELTSSection: React.FC = () => {
   const { control, formState: { errors } } = useFormContext();
@@ -22,6 +23,7 @@ const IELTSSection: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Input
+                name="ieltsDate"
                 id="ieltsDate"
                 label="Date Taken"
                 value={field.value}
@@ -29,7 +31,7 @@ const IELTSSection: React.FC = () => {
                 placeholder="MM/YYYY"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.international?.ielts?.date?.message}
+                error={getNestedObjectError(errors, 'international.ielts', 'date')}
               />
             )}
           />
@@ -52,12 +54,13 @@ const IELTSSection: React.FC = () => {
                     control={control}
                     render={({ field }) => (
                       <Input
+                        name="ieltsOverall"
                         id="ieltsOverall"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="0.0 to 9.0"
                         className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-                        error={errors.international?.ielts?.overall?.message}
+                        error={getNestedObjectError(errors, 'international.ielts', 'overall')}
                       />
                     )}
                   />
@@ -71,12 +74,13 @@ const IELTSSection: React.FC = () => {
                     control={control}
                     render={({ field }) => (
                       <Input
+                        name="ieltsReading"
                         id="ieltsReading"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="0.0 to 9.0"
                         className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-                        error={errors.international?.ielts?.reading?.message}
+                        error={getNestedObjectError(errors, 'international.ielts', 'reading')}
                       />
                     )}
                   />
@@ -90,12 +94,13 @@ const IELTSSection: React.FC = () => {
                     control={control}
                     render={({ field }) => (
                       <Input
+                        name="ieltsWriting"
                         id="ieltsWriting"
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="0.0 to 9.0"
                         className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
-                        error={errors.international?.ielts?.writing?.message}
+                        error={getNestedObjectError(errors, 'international.ielts', 'writing')}
                       />
                     )}
                   />

@@ -58,7 +58,7 @@ router.get('/download-submission-file', authMiddleware, async (req: any, res: an
     response.body.pipe(res);
     console.log('--- /download-submission-file route END ---');
 
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof Error) {
       console.error('❌ Error name:', err.name);
       console.error('❌ Error message:', err.message);
@@ -104,7 +104,7 @@ router.get('/download-file', authMiddleware, async (req: any, res: any) => {
     
     response.body.pipe(res);
 
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof Error) {
       console.error('❌ Error name:', err.name);
     }

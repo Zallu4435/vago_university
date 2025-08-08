@@ -1,14 +1,12 @@
 import { FiFileText, FiVideo, FiTag } from 'react-icons/fi';
 import { Material } from '../../domain/types/management/materialmanagement';
 
-// Material Filter Options
 export const SUBJECTS = ['All Subjects', 'Mathematics', 'Computer Science', 'Physics', 'Chemistry'];
 export const COURSES = ['All Courses', 'B.Sc. Mathematics', 'B.Tech. CS', 'B.Sc. Physics'];
 export const SEMESTERS = ['All Semesters', '1', '2', '3', '4', '5', '6'];
 export const TYPES = ['All Types', 'pdf', 'video'];
 export const UPLOADERS = ['All Uploaders', 'Dr. Smith', 'Prof. Jones'];
 
-// Material Column Definitions
 export const getMaterialColumns = () => [
   {
     header: 'Title',

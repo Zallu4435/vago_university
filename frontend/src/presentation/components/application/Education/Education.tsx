@@ -5,6 +5,7 @@ import { LocalEducation } from './LocalEducation';
 import { TransferEducation } from './TransferEducation';
 import { InternationalEducation } from './InternationalEducation';
 import { Select } from '../../base/Select';
+import { getNestedError } from '../../../../shared/utils/formErrors';
 
 const studentTypeOptions = [
   { value: 'local', label: 'Local' },
@@ -114,9 +115,9 @@ const handleStudentTypeChange = (value: string) => {
         <div className="bg-white shadow-sm rounded-xl border border-cyan-100 p-6">
           <h1 className="text-2xl font-semibold text-cyan-900 mb-6">Education Information</h1>
 
-          {errors.studentType && (
+          {getNestedError(errors, 'studentType') && (
             <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
-              <p className="text-sm text-red-700">{errors.studentType.message}</p>
+              <p className="text-sm text-red-700">{getNestedError(errors, 'studentType')}</p>
             </div>
           )}
 
@@ -136,7 +137,7 @@ const handleStudentTypeChange = (value: string) => {
                   placeholder="Select student type"
                   className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                   labelClassName="text-cyan-700"
-                  error={errors.studentType?.message}
+                  error={getNestedError(errors, 'studentType')}
                 />
               )}
             />

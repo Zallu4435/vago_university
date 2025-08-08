@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { FaSearch, FaDownload, FaEye, FaComment, FaCheck, FaClock, FaExclamationTriangle, FaFilter, FaUsers, FaFileAlt, FaStar, FaCode, FaCalculator, FaFlask, FaLanguage, FaHistory, FaGlobe, FaBook } from 'react-icons/fa';
+import { FaSearch, FaDownload, FaEye, FaCheck, FaClock, FaExclamationTriangle, FaUsers, FaFileAlt, FaCode, FaCalculator, FaFlask, FaLanguage, FaHistory, FaGlobe, FaBook } from 'react-icons/fa';
 import ReviewModal from './ReviewModal';
 import { Assignment, Submission } from './types';
 import { assignmentService } from './services/assignmentService';

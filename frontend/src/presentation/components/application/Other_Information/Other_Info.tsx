@@ -58,8 +58,6 @@ const Other_Info: React.FC<OtherInfoProps> = ({ initialData, onSave }) => {
   const [step, setStep] = React.useState(1);
   const totalSteps = 2;
 
-  // console.log('Other_Info: Form values:', watch());
-
   const handleNext = async () => {
     const fieldsToValidate = step === 1 ? ['health'] : ['legal'];
     const isValid = await trigger(fieldsToValidate, { shouldFocus: true });

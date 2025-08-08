@@ -1,7 +1,7 @@
 // src/infrastructure/database/mongoose/plugins/stringId.plugin.ts
 import mongoose, { Schema } from "mongoose";
 
-function stringifyIds(obj: any): void {
+function stringifyIds(obj): void {
   if (obj == null || typeof obj !== "object") return;
 
   if (obj instanceof mongoose.Types.ObjectId) {
@@ -20,7 +20,7 @@ function stringifyIds(obj: any): void {
 }
 
 export function stringIdPlugin(schema: Schema): void {
-  const transform = (_: unknown, ret: any) => {
+  const transform = (_: unknown, ret) => {
     stringifyIds(ret);
     return ret;
   };

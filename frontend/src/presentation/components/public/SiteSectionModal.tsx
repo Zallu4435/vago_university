@@ -22,13 +22,11 @@ const SiteSectionModal: React.FC<SiteSectionModalProps> = ({
 }) => {
   if (!isOpen || !item) return null;
 
-  // Prevent background scrolling when modal is open
   useEffect(() => {
     document.body.classList.add('no-scroll');
     return () => document.body.classList.remove('no-scroll');
   }, []);
 
-  // Configuration for different section types
   const config = {
     highlights: {
       icon: FaStar,
@@ -59,7 +57,6 @@ const SiteSectionModal: React.FC<SiteSectionModalProps> = ({
   const currentConfig = config[type];
   const IconComponent = currentConfig.icon;
 
-  // Dark variant styling
   const isDark = variant === 'dark';
   const bgClass = isDark ? 'bg-gray-900' : 'bg-white';
   const textClass = isDark ? 'text-white' : 'text-gray-800';
@@ -68,20 +65,17 @@ const SiteSectionModal: React.FC<SiteSectionModalProps> = ({
 
   const modalContent = (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Modal Container */}
       <div
         className={`
           relative w-full max-w-4xl max-h-[85vh] ${bgClass} rounded-2xl shadow-2xl
           overflow-hidden flex flex-col
         `}
       >
-        {/* Fixed Header */}
         <div
           className={`
             bg-gradient-to-r ${currentConfig.gradient} p-6 text-white
@@ -111,10 +105,8 @@ const SiteSectionModal: React.FC<SiteSectionModalProps> = ({
           </div>
         </div>
 
-        {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 sm:p-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-            {/* Image Section */}
             <div className="flex justify-center">
               <div className="relative w-full max-w-md">
                 <img
@@ -129,9 +121,7 @@ const SiteSectionModal: React.FC<SiteSectionModalProps> = ({
               </div>
             </div>
 
-            {/* Details Section */}
             <div className="space-y-6">
-              {/* Description */}
               <div>
                 <h3 className={`text-xl sm:text-2xl font-semibold ${textClass} mb-3`}>
                   {currentConfig.descriptionLabel}
@@ -141,7 +131,6 @@ const SiteSectionModal: React.FC<SiteSectionModalProps> = ({
                 </p>
               </div>
 
-              {/* Metadata */}
               <div
                 className={`
                   flex flex-wrap gap-4 text-sm ${textMutedClass}
@@ -164,7 +153,6 @@ const SiteSectionModal: React.FC<SiteSectionModalProps> = ({
                 )}
               </div>
 
-              {/* Action Button */}
               {item.link && (
                 <div className="pt-4">
                   <a
@@ -188,7 +176,6 @@ const SiteSectionModal: React.FC<SiteSectionModalProps> = ({
         </div>
       </div>
 
-      {/* Global Styles */}
       <style>{`
         .no-scroll {
           overflow: hidden;

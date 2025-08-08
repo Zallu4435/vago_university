@@ -1,10 +1,8 @@
-// for education.ts
 export const studentTypeOptions = [
   { value: "local", label: "Local Student" },
   { value: "transfer", label: "Transfer Student" },
   { value: "international", label: "International Student" },
 ];
-
 
 
 // for internationaSchoolInfo.ts / localEducatio.ts / transferEducation.tsx
@@ -15,8 +13,6 @@ export const countryOptions = [
   { value: "cn", label: "China" },
   { value: "us", label: "United States" },
 ];
-
-
 
 
 // for transferEducation.tsx
@@ -38,7 +34,6 @@ export const examOptions = [
   { value: 'ap', label: 'Advanced Placement (AP)' },
   { value: 'other', label: 'Other High School Qualification' },
 ];
-
 
 
 // for subjectmodal.tsx

@@ -19,8 +19,8 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
   if (!show) return null;
 
   const selectFields = getSelectFields(newAchievement, setNewAchievement);
-  const referenceFields = getReferenceFields(newAchievement.reference, (updatedRef) => {
-    setNewAchievement({ ...newAchievement, reference: updatedRef });
+  const referenceFields = getReferenceFields((newAchievement as any).reference, (updatedRef) => {
+    setNewAchievement({ ...newAchievement, reference: updatedRef } as any);
     setValue('newAchievement.reference', updatedRef, { shouldValidate: false });
   });
 
@@ -32,7 +32,7 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
     } else {
       console.log('AchievementModal: Validation errors', {
         achievementErrors: errors.newAchievement,
-        referenceErrors: errors.newAchievement?.reference,
+        referenceErrors: (errors.newAchievement as any)?.reference,
       });
     }
   };
@@ -47,7 +47,6 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
               onClick={onClose}
               aria-label="Close"
               label="×"
-              variant="ghost"
               className="text-cyan-400 hover:text-cyan-600"
             />
           </div>
@@ -79,9 +78,9 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
                   className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                   labelClassName="text-cyan-700"
                 />
-                {errors.newAchievement?.[field.id]?.message && (
+                {(errors.newAchievement as any)?.[field.id]?.message && (
                   <p className="text-sm text-red-700 mt-1">
-                    {errors.newAchievement[field.id]?.message}
+                    {(errors.newAchievement as any)[field.id]?.message}
                   </p>
                 )}
               </div>
@@ -94,7 +93,7 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
                   label={fieldKey === 'organizationName' ? 'Organization / Employer' :
                         fieldKey === 'fromDate' ? 'From (MM/YYYY)' : 'To (MM/YYYY)'}
                   {...register(`newAchievement.${fieldKey}`)}
-                  value={newAchievement[fieldKey]}
+                  value={(newAchievement as any)[fieldKey]}
                   onChange={e => {
                     setNewAchievement({ ...newAchievement, [fieldKey]: e.target.value });
                     setValue(`newAchievement.${fieldKey}`, e.target.value, { shouldValidate: false });
@@ -103,9 +102,9 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
                   className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                   labelClassName="text-cyan-700"
                 />
-                {errors.newAchievement?.[fieldKey]?.message && (
+                {(errors.newAchievement as any)?.[fieldKey]?.message && (
                   <p className="text-sm text-red-700 mt-1">
-                    {errors.newAchievement[fieldKey]?.message}
+                    {(errors.newAchievement as any)[fieldKey]?.message}
                   </p>
                 )}
               </div>
@@ -129,16 +128,16 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
               maxLength={1000}
               rows={4}
             />
-            {errors.newAchievement?.description?.message && (
+            {(errors.newAchievement as any)?.description?.message && (
               <p className="text-sm text-red-700 mt-1">
-                {errors.newAchievement.description.message}
+                {(errors.newAchievement as any).description.message}
               </p>
             )}
           </div>
 
           <div className="border-t border-cyan-100 pt-6 mt-6">
             <h3 className="text-lg font-medium text-cyan-800 mb-4">Reference Contact</h3>
-            {errors.newAchievement?.reference && (
+            {(errors.newAchievement as any)?.reference && (
               <p className="text-sm text-red-700 mb-4">
                 Please complete all reference contact fields.
               </p>
@@ -148,9 +147,9 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
                 let errorMessage;
                 if (field.registerId.startsWith('phone.')) {
                   const phoneField = field.registerId.split('.')[1];
-                  errorMessage = errors.newAchievement?.reference?.phone?.[phoneField]?.message;
+                  errorMessage = (errors.newAchievement as any)?.reference?.phone?.[phoneField]?.message;
                 } else {
-                  errorMessage = errors.newAchievement?.reference?.[field.registerId]?.message;
+                  errorMessage = (errors.newAchievement as any)?.reference?.[field.registerId]?.message;
                 }
 
                 return (

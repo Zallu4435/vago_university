@@ -31,7 +31,6 @@ const ApplicationFormLayout: React.FC<{ children: React.ReactNode }> = ({ childr
         onLogout={handleLogout}
       />
       <main className="mt-24 sm:mt-26 md:mt-28 lg:mt-30">
-        {/* Pass handleLogout to ApplicationForm as onLogout */}
         {React.Children.map(children, child =>
           React.isValidElement(child)
             ? React.cloneElement(child as React.ReactElement<any>, { onLogout: handleLogout })

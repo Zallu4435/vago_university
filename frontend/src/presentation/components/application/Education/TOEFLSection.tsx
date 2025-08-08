@@ -1,6 +1,7 @@
 import React from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '../../base/Input';
+import { getNestedObjectError } from '../../../../shared/utils/formErrors';
 
 const TOEFLSection: React.FC = () => {
   const { control, formState: { errors } } = useFormContext();
@@ -22,6 +23,7 @@ const TOEFLSection: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Input
+                name="toeflDate"
                 id="toeflDate"
                 label="Date Taken"
                 value={field.value}
@@ -29,7 +31,7 @@ const TOEFLSection: React.FC = () => {
                 placeholder="MM/YYYY"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.international?.toefl?.date?.message}
+                error={getNestedObjectError(errors, 'international.toefl', 'date')}
               />
             )}
           />
@@ -38,6 +40,7 @@ const TOEFLSection: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Input
+                name="toeflGrade"
                 id="toeflGrade"
                 label="Total Score"
                 value={field.value}
@@ -45,7 +48,7 @@ const TOEFLSection: React.FC = () => {
                 placeholder="Internet: 0-120; Paper: 310-677"
                 className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                 labelClassName="text-cyan-700"
-                error={errors.international?.toefl?.grade?.message}
+                error={getNestedObjectError(errors, 'international.toefl', 'grade')}
               />
             )}
           />
@@ -78,8 +81,8 @@ const TOEFLSection: React.FC = () => {
                   />
                   <span className="ml-2 text-cyan-800">Paper-Based</span>
                 </label>
-                {errors.international?.toefl?.type && (
-                  <p className="text-sm text-red-700 mt-2">{errors.international.toefl.type.message}</p>
+                {getNestedObjectError(errors, 'international.toefl', 'type') && (
+                  <p className="text-sm text-red-700 mt-2">{getNestedObjectError(errors, 'international.toefl', 'type')}</p>
                 )}
               </>
             )}

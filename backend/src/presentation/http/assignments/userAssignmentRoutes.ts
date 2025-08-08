@@ -33,7 +33,7 @@ router.get('/download-file', authMiddleware, async (req: Request, res: Response)
 
     res.json(response);
 
-  } catch (error: any) {
+  } catch (error) {
     res.status(500).json({
       error: 'Failed to process download request',
       details: error.message,
@@ -79,7 +79,7 @@ router.get('/download-reference-file', authMiddleware, async (req: Request, res:
     res.setHeader('Content-Type', contentType);
     response.body.pipe(res);
     
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof Error) {
       console.error('❌ Error name:', err.name);
     }

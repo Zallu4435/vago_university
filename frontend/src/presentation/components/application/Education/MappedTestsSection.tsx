@@ -2,6 +2,7 @@ import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import TestRow from './TestRow';
 import { testConfigs } from './options';
+import { getNestedObjectError } from '../../../../shared/utils/formErrors'; // Add this import
 
 const MappedTestsSection: React.FC = () => {
   const { control, formState: { errors } } = useFormContext();
@@ -18,7 +19,7 @@ const MappedTestsSection: React.FC = () => {
               fields={test.fields.map(field => ({
                 ...field,
                 name: `international.${test.testName.toLowerCase()}.${field.id}`,
-                error: errors.international?.[test.testName.toLowerCase()]?.[field.id]?.message,
+                error: getNestedObjectError(errors, `international.${test.testName.toLowerCase()}`, field.id),
               }))}
             />
           </div>

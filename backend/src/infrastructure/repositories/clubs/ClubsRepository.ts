@@ -79,7 +79,7 @@ export class ClubsRepository implements IClubsRepository {
       clubQuery.type = { $regex: `^${type}$`, $options: "i" };
     }
     let matchingClubs = [];
-    let userIds: any[] = [];
+    let userIds = [];
     if (search && search.trim() !== "") {
       clubQuery.$or = [
         { name: { $regex: search, $options: "i" } },

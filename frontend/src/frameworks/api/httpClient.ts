@@ -1,7 +1,11 @@
-import axios from 'axios';
+import axios, { InternalAxiosRequestConfig } from 'axios';
 import store from '../../appStore/store';
 import { logout, setAuth } from '../../appStore/authSlice';
 import { RootState } from '../../appStore/store';
+
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _checkedAuth?: boolean;
+}
 
 const httpClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'https://vago-university.onrender.com/api',
@@ -35,7 +39,7 @@ const processQueue = (error: any = null) => {
 };
 
 httpClient.interceptors.request.use(
-  async (config) => {
+  async (config: CustomAxiosRequestConfig) => {
     if (config.data instanceof FormData && config.url?.includes('/videos')) {
       config.timeout = 60000;
       delete config.headers['Content-Type'];

@@ -30,7 +30,7 @@ const facultySchema = new Schema<IFaculty>({
 });
 
 facultySchema.pre("save", async function (next) {
-  const faculty = this as any;
+  const faculty = this;
 
   if (!faculty.isModified("password")) return next();
 

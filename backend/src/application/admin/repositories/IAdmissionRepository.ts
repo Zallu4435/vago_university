@@ -2,8 +2,8 @@ import { AdminAdmission, FullAdmissionDetails } from "../../../domain/admin/enti
 import { User } from "../../../domain/auth/entities/Auth";
 
 export interface IAdmissionRepository {
-  find(filter: any, projection: any, skip: number, limit: number): Promise<AdminAdmission[]>;
-  count(filter: any): Promise<number>;  
+  find(filter, projection, skip: number, limit: number): Promise<AdminAdmission[]>;
+  count(filter): Promise<number>;  
   getAdmissionById(id: string): Promise<FullAdmissionDetails>;
   getAdmissionByToken(admissionId: string, token: string): Promise<FullAdmissionDetails>;
   deleteAdmission(id: string): Promise<FullAdmissionDetails>;

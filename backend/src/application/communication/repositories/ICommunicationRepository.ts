@@ -11,15 +11,10 @@ import {
   FetchUsersRequestDTO,
 } from "../../../domain/communication/dtos/CommunicationRequestDTOs";
 import {
-  GetInboxMessagesResponseDTO,
-  GetSentMessagesResponseDTO,
   SendMessageResponseDTO,
   MarkMessageAsReadResponseDTO,
   DeleteMessageResponseDTO,
   GetMessageDetailsResponseDTO,
-  GetAllAdminsResponseDTO,
-  GetUserGroupsResponseDTO,
-  FetchUsersResponseDTO,
 } from "../../../domain/communication/dtos/CommunicationResponseDTOs";
 
 export interface ICommunicationRepository {
@@ -47,12 +42,12 @@ export interface ICommunicationRepository {
   deleteMessage(params: DeleteMessageRequestDTO): Promise<DeleteMessageResponseDTO>;
   getMessageDetails(params: GetMessageDetailsRequestDTO): Promise<GetMessageDetailsResponseDTO>;
   markMessageAsRead(params: MarkMessageAsReadRequestDTO): Promise<MarkMessageAsReadResponseDTO>;
-  getAllAdmins(params: GetAllAdminsRequestDTO): Promise<any[]>;
+  getAllAdmins(params: GetAllAdminsRequestDTO);
   getUserGroups(params: GetUserGroupsRequestDTO): Promise<Array<{
     value: string;
     label: string;
   }>>;
-  fetchUsers(params: FetchUsersRequestDTO): Promise<any[]>;
+  fetchUsers(params: FetchUsersRequestDTO);
 
   // Helper methods
   findUserById(userId: string, role: string): Promise<UserInfo | null>;

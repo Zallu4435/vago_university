@@ -11,10 +11,10 @@ export interface Cookie {
 }
 
 export interface IHttpRequest {
-  headers?: any;
-  body?: any;
-  query?: any;
-  params?: any;
+  headers?;
+  body?;
+  query?;
+  params?;
   file?: Express.Multer.File;
   files?: Express.Multer.File[];
   user?: {
@@ -35,18 +35,18 @@ export interface IHttpResponse {
   statusCode: number;
   body: {
     error?: string;
-    data?: any;
-    details?: any;
+    data?;
+    details?;
   };
   cookies?: Cookie[];
 }
 
 export class HttpRequest implements IHttpRequest {
   constructor(
-    public headers?: any,
-    public body?: any,
-    public query?: any,
-    public params?: any,
+    public headers?,
+    public body?,
+    public query?,
+    public params?,
     public user?: {
       id: string;
       collection: 'register' | 'admin' | 'user' | 'faculty';
@@ -62,44 +62,44 @@ export class HttpRequest implements IHttpRequest {
 }
 
 export interface IHttpErrors {
-  error_400(message?: string, details?: any): IHttpResponse;
-  error_401(message?: string, details?: any): IHttpResponse;
-  error_403(message?: string, details?: any): IHttpResponse;
-  error_404(message?: string, details?: any): IHttpResponse;
-  error_500(message?: string, details?: any): IHttpResponse;
+  error_400(message?: string, details?): IHttpResponse;
+  error_401(message?: string, details?): IHttpResponse;
+  error_403(message?: string, details?): IHttpResponse;
+  error_404(message?: string, details?): IHttpResponse;
+  error_500(message?: string, details?): IHttpResponse;
 }
 
 export interface IHttpSuccess {
-  success_200(data: any): IHttpResponse;
-  success_201(data: any): IHttpResponse;
+  success_200(data): IHttpResponse;
+  success_201(data): IHttpResponse;
 }
 
 export class HttpErrors implements IHttpErrors {
-  error_400(message = "Bad Request", details?: any): IHttpResponse {
+  error_400(message = "Bad Request", details?): IHttpResponse {
     return { statusCode: 400, body: { error: message, details } };
   }
-  error_401(message = "Unauthorized", details?: any): IHttpResponse {
+  error_401(message = "Unauthorized", details?): IHttpResponse {
     return { statusCode: 401, body: { error: message, details } };
   }
-  error_403(message = "Forbidden", details?: any): IHttpResponse {
+  error_403(message = "Forbidden", details?): IHttpResponse {
     return { statusCode: 403, body: { error: message, details } };
   }
-  error_404(message = "Not Found", details?: any): IHttpResponse {
+  error_404(message = "Not Found", details?): IHttpResponse {
     return { statusCode: 404, body: { error: message, details } };
   }
-  error_500(message = "Internal Server Error", details?: any): IHttpResponse {
+  error_500(message = "Internal Server Error", details?): IHttpResponse {
     return { statusCode: 500, body: { error: message, details } };
   }
 }
 
 export class HttpSuccess implements IHttpSuccess {
-  success_200(data: any): IHttpResponse {
+  success_200(data): IHttpResponse {
     return { statusCode: 200, body: { data } };
   }
-  success_201(data: any): IHttpResponse {
+  success_201(data): IHttpResponse {
     return { statusCode: 201, body: { data } };
   }
-  success_200_flat(data: any): IHttpResponse {
+  success_200_flat(data): IHttpResponse {
     return { statusCode: 200, body: data };
   }
 }

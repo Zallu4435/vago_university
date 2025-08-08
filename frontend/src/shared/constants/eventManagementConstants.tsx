@@ -1,13 +1,11 @@
 import React from 'react';
 
-// Event Management Constants
 export const EVENT_TYPES = ['All', 'Workshop', 'Seminar', 'Fest', 'Competition', 'Exhibition'] as const;
 export const EVENT_STATUSES = ['All', 'Upcoming', 'Completed', 'Cancelled'] as const;
 export const REQUEST_STATUSES = ['All', 'Pending', 'Approved', 'Rejected'] as const;
 export const DATE_RANGES = ['All', 'Last Week', 'Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'] as const;
 export const ORGANIZERS = ['All', 'Department', 'Club', 'Student'] as const;
 
-// Event Type Options for Forms
 export const EVENT_TYPE_OPTIONS = [
   { value: 'workshop', label: 'Workshop', emoji: '🔧' },
   { value: 'seminar', label: 'Seminar', emoji: '📚' },
@@ -21,7 +19,6 @@ export const EVENT_TYPE_OPTIONS = [
   { value: 'academic', label: 'Academic', emoji: '🎓' },
 ] as const;
 
-// Organizer Type Options for Forms
 export const ORGANIZER_TYPE_OPTIONS = [
   { value: 'department', label: 'Department', emoji: '🏢' },
   { value: 'club', label: 'Club', emoji: '🎪' },
@@ -30,7 +27,6 @@ export const ORGANIZER_TYPE_OPTIONS = [
   { value: 'external', label: 'External', emoji: '🌐' },
 ] as const;
 
-// Timeframe Options for Forms
 export const TIMEFRAME_OPTIONS = [
   { value: 'morning', label: 'Morning (9 AM - 12 PM)', emoji: '🌅' },
   { value: 'afternoon', label: 'Afternoon (12 PM - 5 PM)', emoji: '☀️' },
@@ -39,14 +35,12 @@ export const TIMEFRAME_OPTIONS = [
   { value: 'multi-day', label: 'Multi-Day Event', emoji: '📆' },
 ] as const;
 
-// Icon Options for Events
 export const EVENT_ICONS = [
   '🎓', '🎉', '🏆', '🎨', '🎭', '🎤', '🎵', '🎬', '📚', '🔬',
   '💻', '⚽', '🏀', '🎾', '🏈', '⚾', '🎯', '🎪', '🎨', '🎭',
   '🎤', '🎵', '🎬', '📚', '🔬', '💻', '⚽', '🏀', '🎾', '🏈'
 ] as const;
 
-// Color Options for Events
 export const EVENT_COLORS = [
   '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
   '#06B6D4', '#84CC16', '#F97316', '#EC4899', '#6366F1',
@@ -54,7 +48,6 @@ export const EVENT_COLORS = [
   '#4ADE80', '#FB923C', '#F472B6', '#818CF8', '#2DD4BF'
 ] as const;
 
-// Status Badge Colors
 export const STATUS_BADGE_COLORS = {
   upcoming: 'bg-blue-900/30 text-blue-400 border-blue-500/30',
   completed: 'bg-green-900/30 text-green-400 border-green-500/30',
@@ -64,7 +57,6 @@ export const STATUS_BADGE_COLORS = {
   rejected: 'bg-red-900/30 text-red-400 border-red-500/30',
 } as const;
 
-// Event Statistics Labels
 export const EVENT_STATS_LABELS = {
   totalEvents: 'Total Events',
   upcomingEvents: 'Upcoming Events',
@@ -74,7 +66,6 @@ export const EVENT_STATS_LABELS = {
   averageParticipants: 'Average Participants',
 } as const;
 
-// Form Validation Messages
 export const EVENT_VALIDATION_MESSAGES = {
   titleRequired: 'Event title is required',
   dateRequired: 'Event date is required',
@@ -90,7 +81,6 @@ export const EVENT_VALIDATION_MESSAGES = {
   invalidTime: 'Please select a valid time',
 } as const;
 
-// Success Messages
 export const EVENT_SUCCESS_MESSAGES = {
   eventCreated: 'Event created successfully',
   eventUpdated: 'Event updated successfully',
@@ -99,7 +89,6 @@ export const EVENT_SUCCESS_MESSAGES = {
   requestRejected: 'Event request rejected',
 } as const;
 
-// Error Messages
 export const EVENT_ERROR_MESSAGES = {
   fetchEventsFailed: 'Failed to fetch events',
   fetchRequestsFailed: 'Failed to fetch event requests',
@@ -112,7 +101,6 @@ export const EVENT_ERROR_MESSAGES = {
   fetchRequestDetailsFailed: 'Failed to fetch request details',
 } as const;
 
-// Table Column Definitions
 export const getEventColumns = (
   Calendar: React.ComponentType<{ size?: number | string; className?: string }>,
   MapPin: React.ComponentType<{ size?: number | string; className?: string }>,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
@@ -13,7 +13,6 @@ import { useAnimation } from '../../../shared/hooks/useAnimation';
 import type { RegisterFormData } from '../../../domain/types/auth/Register';
 
 const RegisterPage = () => {
-  const navigate = useNavigate();
   const formAnimation = useAnimation(300);
   const backgroundAnimation = useAnimation(0);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);

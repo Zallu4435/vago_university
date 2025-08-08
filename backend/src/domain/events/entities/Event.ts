@@ -23,7 +23,6 @@ export interface EventSummary {
   location: string;
   timeframe: string;
   status: string;
-  // Add any other fields returned by the DB if needed
 }
 
 export interface SimplifiedEventRequest {

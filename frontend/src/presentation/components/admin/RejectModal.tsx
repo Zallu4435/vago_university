@@ -41,7 +41,6 @@ const RejectModal: React.FC<RejectModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
-      {/* Background overlay */}
       <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm">
         {[...Array(20)].map((_, i) => (
           <div 
@@ -59,21 +58,17 @@ const RejectModal: React.FC<RejectModalProps> = ({
         ))}
       </div>
 
-      {/* Modal container */}
       <div 
         className={`bg-gradient-to-br from-gray-900 via-red-900/20 to-gray-900 
                    rounded-xl border border-red-500/30 shadow-2xl w-full max-w-md 
                    relative overflow-hidden transition-all duration-500 transform mx-4
                    ${animateIn ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
       >
-        {/* Inner glow effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-red-600/5 via-transparent to-red-600/5 pointer-events-none" />
         
-        {/* Corner decorations */}
         <div className="absolute top-0 right-0 w-20 h-20 bg-red-500/10 rounded-bl-full" />
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-red-500/10 rounded-tr-full" />
-
-        {/* Header */}
+        
         <div className="relative px-6 pt-6 pb-4 border-b border-red-500/30">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
@@ -101,7 +96,6 @@ const RejectModal: React.FC<RejectModalProps> = ({
           </div>
         </div>
 
-        {/* Form content */}
         <div className="px-6 pb-6">
           <form onSubmit={handleSubmit} className="mt-4">
             <div className="space-y-4">
@@ -126,7 +120,6 @@ const RejectModal: React.FC<RejectModalProps> = ({
               </div>
             </div>
 
-            {/* Action buttons */}
             <div className="flex justify-end space-x-3 mt-6">
               <button
                 type="button"
@@ -152,7 +145,6 @@ const RejectModal: React.FC<RejectModalProps> = ({
         </div>
       </div>
 
-      {/* CSS for animations */}
       <style>{`
         .text-shadow-lg {
           text-shadow: 0 0 15px rgba(239, 68, 68, 0.5), 0 0 10px rgba(239, 68, 68, 0.3);

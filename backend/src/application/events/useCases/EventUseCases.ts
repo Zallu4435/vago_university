@@ -49,7 +49,7 @@ export class GetEventsUseCase implements IGetEventsUseCase {
       params.organizerType,
       params.dateRange
     );
-    const mappedEvents = result.events.map((event: any) => ({
+    const mappedEvents = result.events.map((event) => ({
       id: event._id.toString(),
       title: event.title,
       organizerType: event.organizerType,

@@ -178,7 +178,7 @@ async function updateSessionInDatabase(sessionId: string, userId: string) {
   }
 }
 
-function relayToTargetUser(io: Server, data: any, eventType: string) {
+function relayToTargetUser(io: Server, data, eventType: string) {
   if (data.to) {
     const targetSocketId = getSocketIdForUser(data.sessionId, data.to);
     if (targetSocketId) {

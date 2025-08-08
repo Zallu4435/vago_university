@@ -26,7 +26,6 @@ const WarningModal: React.FC<WarningModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      // Trigger animation after modal is displayed
       setTimeout(() => setAnimateIn(true), 50);
     } else {
       setAnimateIn(false);
@@ -92,9 +91,7 @@ const WarningModal: React.FC<WarningModalProps> = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm transition-all duration-300">
-      {/* Background overlay with particles */}
       <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm">
-        {/* Ghost particles */}
         {[...Array(25)].map((_, i) => (
           <div 
             key={i}
@@ -111,22 +108,18 @@ const WarningModal: React.FC<WarningModalProps> = ({
         ))}
       </div>
 
-      {/* Modal container */}
       <div 
         className={`bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 
                    rounded-xl border border-purple-500/30 shadow-2xl w-full max-w-md 
                    relative overflow-hidden transition-all duration-500 transform mx-4
                    ${animateIn ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
       >
-        {/* Inner glow effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
         
-        {/* Corner decorations */}
         <div className="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-bl-full" />
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/10 rounded-tr-full" />
 
         <div className="p-6 relative z-10">
-          {/* Icon header */}
           <div className="flex items-center justify-center mb-6">
             <div className={`w-16 h-16 rounded-full flex items-center justify-center 
                           ${styles.iconBg} ${styles.iconColor} border ${styles.iconBorder}
@@ -135,7 +128,6 @@ const WarningModal: React.FC<WarningModalProps> = ({
             </div>
           </div>
           
-          {/* Content */}
           <div className={`p-4 rounded-lg ${styles.contentBg} border ${styles.contentBorder} mb-6`}>
             <h3 className="text-xl font-bold text-white text-center mb-3 text-shadow-sm">
               {title}
@@ -146,7 +138,6 @@ const WarningModal: React.FC<WarningModalProps> = ({
             </p>
           </div>
 
-          {/* Buttons */}
           <div className="flex space-x-4">
             <button
               onClick={onClose}
@@ -168,8 +159,7 @@ const WarningModal: React.FC<WarningModalProps> = ({
         </div>
       </div>
 
-      {/* CSS for animations and effects */}
-      <style jsx>{`
+      <style>{`
         .text-shadow-sm {
           text-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
         }

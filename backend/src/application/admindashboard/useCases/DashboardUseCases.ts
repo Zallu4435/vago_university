@@ -119,7 +119,7 @@ export class GetUserGrowthDataUseCase implements IGetUserGrowthDataUseCase {
       throw new DashboardUserGrowthError();
     }
     let cumulativeUsers = 0;
-    const userGrowth = raw.map((item: any, i: number) => {
+    const userGrowth = raw.map((item, i: number) => {
       const users = item.usersCount + item.facultyCount;
       cumulativeUsers += users;
       const target = Math.floor(cumulativeUsers * 1.1) + 2;
@@ -141,9 +141,9 @@ export class GetRevenueDataUseCase implements IGetRevenueDataUseCase {
     if (!raw || !Array.isArray(raw) || raw.length === 0) {
       throw new DashboardRevenueError();
     }
-    const revenue = raw.map((item: any) => {
+    const revenue = raw.map((item) => {
       let tuition = 0, fees = 0, other = 0;
-      item.payments.forEach((p: any) => {
+      item.payments.forEach((p) => {
         if (p._id === 'Credit Card' || p._id === 'Bank Transfer') tuition += p.total;
         else if (p._id === 'Razorpay' || p._id === 'stripe') fees += p.total;
         else if (p._id === 'Financial Aid') other += p.total;
@@ -194,8 +194,8 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
     if (!raw || !raw.recentAdmissions || !raw.recentPayments || !raw.recentEnquiries || !raw.recentNotifications) {
       throw new DashboardActivitiesError();
     }
-    const activities: any[] = [];
-    raw.recentAdmissions.forEach((admission: any) => {
+    const activities = [];
+    raw.recentAdmissions.forEach((admission) => {
       const fullName = admission.personal?.fullName || (admission.registerId?.firstName + ' ' + admission.registerId?.lastName) || 'Unknown';
       activities.push({
         id: admission._id.toString(),
@@ -207,7 +207,7 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
         isRead: false,
       });
     });
-    raw.recentPayments.forEach((payment: any) => {
+    raw.recentPayments.forEach((payment) => {
       const studentName = payment.studentId?.firstName && payment.studentId?.lastName 
         ? `${payment.studentId.firstName} ${payment.studentId.lastName}`
         : 'Unknown Student';
@@ -221,7 +221,7 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
         isRead: false,
       });
     });
-    raw.recentEnquiries.forEach((enquiry: any) => {
+    raw.recentEnquiries.forEach((enquiry) => {
       const enquiryName = enquiry.name || 'Anonymous';
       activities.push({
         id: enquiry._id.toString(),
@@ -233,7 +233,7 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
         isRead: false,
       });
     });
-    raw.recentNotifications.forEach((notification: any) => {
+    raw.recentNotifications.forEach((notification) => {
       activities.push({
         id: notification._id.toString(),
         action: `Notification sent: ${notification.title || 'System notification'}`,

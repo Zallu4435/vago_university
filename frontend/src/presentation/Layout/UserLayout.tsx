@@ -16,7 +16,7 @@ const UserLayout = () => {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { styles } = usePreferences();
-  const isSettingsPage = location.pathname === '/settings';
+  const isSettingsPage   = location.pathname === '/settings';
   const isHelpPage = location.pathname === '/help';
 
   const user = useSelector((state: RootState) => state.auth.user);

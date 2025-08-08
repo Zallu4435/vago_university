@@ -1,5 +1,4 @@
-// src/presentation/pages/ConfirmFaculty.tsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaSpinner, FaCheckCircle, FaEnvelope } from 'react-icons/fa';
@@ -17,23 +16,18 @@ const ConfirmFaculty = () => {
   const [facultyDetails, setFacultyDetails] = useState<ConfirmFacultyDetails | null>(null);
 
   useEffect(() => {
-    // Validate parameters
     if (!id || !token || (action !== 'accept' && action !== 'reject')) {
       setError('Invalid confirmation link');
       setIsLoading(false);
       return;
     }
 
-    // Fetch faculty details
     const fetchFacultyDetails = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/admin/faculty/${id}/token`, {
           params: { token }
         });
 
-        // window.alert('Success: ' + JSON.stringify(response.data.data, null, 2));
-        //         console.log(response.data, "response.data")
-        
         const facultyData = response.data.data.faculty;
         setFacultyDetails({
           fullName: facultyData.fullName,

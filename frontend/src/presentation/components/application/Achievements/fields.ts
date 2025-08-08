@@ -1,4 +1,4 @@
-import { Achievement, ReferenceContact } from '../../../../domain/types/formTypes';
+import { Achievement, ReferenceContact } from '../../../../domain/types/application';
 
 export const getSelectFields = (
   newAchievement: Achievement,

@@ -1,1 +1,0 @@
-// All enquiry management types have been moved to domain/types/enquirymanagement/index.ts 

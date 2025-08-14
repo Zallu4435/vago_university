@@ -1,9 +1,9 @@
 import { GetEventsRequestDTO, GetEventByIdRequestDTO, CreateEventRequestDTO, UpdateEventRequestDTO, DeleteEventRequestDTO } from "../../../domain/events/dtos/EventRequestDTOs";
-import { GetEventsResponseDTO, GetEventByIdResponseDTO, CreateEventResponseDTO, UpdateEventResponseDTO } from "../../../domain/events/dtos/EventResponseDTOs";
+import { GetEventsResponseDTO, GetEventByIdResponseDTO, CreateEventResponseDTO, UpdateEventResponseDTO, EventSummaryDTO } from "../../../domain/events/dtos/EventResponseDTOs";
 import { IEventsRepository } from "../repositories/IEventsRepository";
-import { Event } from "../../../domain/events/entities/Event";
+import { Event, PaginatedResponse, EventSummary, EventDocument } from "../../../domain/events/entities/Event";
 import { InvalidEventIdError, EventNotFoundError } from "../../../domain/events/errors/EventErrors";
-import { OrganizerType, EventType, Timeframe, EventStatus } from "../../../domain/events/entities/Event";
+import { OrganizerType, EventType, Timeframe, EventStatus } from "../../../domain/events/entities/EventTypes";
 
 export interface IGetEventsUseCase {
   execute(params: GetEventsRequestDTO): Promise<GetEventsResponseDTO>;
@@ -38,7 +38,7 @@ export class GetEventsUseCase implements IGetEventsUseCase {
     if (params.endDate && isNaN(params.endDate.getTime())) {
       throw new Error("Invalid endDate format");
     }
-    const result: any = await this.eventsRepository.getEvents(
+    const result: PaginatedResponse<EventSummary> = await this.eventsRepository.getEvents(
       params.page,
       params.limit,
       params.type,
@@ -49,15 +49,14 @@ export class GetEventsUseCase implements IGetEventsUseCase {
       params.organizerType,
       params.dateRange
     );
-    const mappedEvents = result.events.map((event) => ({
+    const mappedEvents: EventSummaryDTO[] = result.events.map((event) => ({
       id: event._id.toString(),
       title: event.title,
-      organizerType: event.organizerType,
-      eventType: event.eventType,
+      organizerType: event.organizerType as OrganizerType,
+      eventType: event.eventType as EventType,
       location: event.location,
-      timeframe: event.timeframe,
-      status: event.status,
-      date: event.date
+      timeframe: event.timeframe as Timeframe,
+      status: event.status as EventStatus,
     }));
     return {
       data: mappedEvents,
@@ -75,7 +74,7 @@ export class GetEventByIdUseCase implements IGetEventByIdUseCase {
     if (!params.id) {
       throw new InvalidEventIdError(params.id);
     }
-    const event: any = await this.eventsRepository.getEventById(params.id);
+    const event: EventDocument | null = await this.eventsRepository.getEventById(params.id);
     if (!event) {
       throw new EventNotFoundError(params.id);
     }
@@ -84,13 +83,13 @@ export class GetEventByIdUseCase implements IGetEventByIdUseCase {
         id: event._id.toString(),
         title: event.title,
         organizer: event.organizer,
-        organizerType: event.organizerType,
-        eventType: event.eventType,
+        organizerType: event.organizerType as OrganizerType,
+        eventType: event.eventType as EventType,
         date: event.date,
         time: event.time,
         location: event.location,
-        timeframe: event.timeframe,
-        status: event.status,
+        timeframe: event.timeframe as Timeframe,
+        status: event.status as EventStatus,
         icon: event.icon,
         color: event.color,
         description: event.description,
@@ -110,19 +109,19 @@ export class CreateEventUseCase implements ICreateEventUseCase {
 
   async execute(params: CreateEventRequestDTO): Promise<CreateEventResponseDTO> {
     const event = Event.create(mapCreateEventDTOToEventProps(params));
-    const newEvent: any = await this.eventsRepository.createEvent(event);
+    const newEvent: EventDocument = await this.eventsRepository.createEvent(event);
     return {
       event: new Event({
         id: newEvent._id.toString(),
         title: newEvent.title,
         organizer: newEvent.organizer,
-        organizerType: newEvent.organizerType,
-        eventType: newEvent.eventType,
+        organizerType: newEvent.organizerType as OrganizerType,
+        eventType: newEvent.eventType as EventType,
         date: newEvent.date,
         time: newEvent.time,
         location: newEvent.location,
-        timeframe: newEvent.timeframe,
-        status: newEvent.status,
+        timeframe: newEvent.timeframe as Timeframe,
+        status: newEvent.status as EventStatus,
         icon: newEvent.icon,
         color: newEvent.color,
         description: newEvent.description,
@@ -145,7 +144,7 @@ export class UpdateEventUseCase implements IUpdateEventUseCase {
       throw new InvalidEventIdError(params.id);
     }
     const event = Event.create(mapUpdateEventDTOToEventProps(params));
-    const updatedEvent: any = await this.eventsRepository.updateEvent(event);
+    const updatedEvent: EventDocument | null = await this.eventsRepository.updateEvent(event);
     if (!updatedEvent) {
       throw new EventNotFoundError(params.id);
     }
@@ -154,13 +153,13 @@ export class UpdateEventUseCase implements IUpdateEventUseCase {
         id: updatedEvent._id.toString(),
         title: updatedEvent.title,
         organizer: updatedEvent.organizer,
-        organizerType: updatedEvent.organizerType,
-        eventType: updatedEvent.eventType,
+        organizerType: updatedEvent.organizerType as OrganizerType,
+        eventType: updatedEvent.eventType as EventType,
         date: updatedEvent.date,
         time: updatedEvent.time,
         location: updatedEvent.location,
-        timeframe: updatedEvent.timeframe,
-        status: updatedEvent.status,
+        timeframe: updatedEvent.timeframe as Timeframe,
+        status: updatedEvent.status as EventStatus,
         icon: updatedEvent.icon,
         color: updatedEvent.color,
         description: updatedEvent.description,

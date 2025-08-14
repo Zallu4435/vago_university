@@ -56,7 +56,6 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
     ),
   });
 
-  // Fetch single video by ID - memoized to prevent infinite re-renders
   const fetchVideoById = useCallback(async (videoId: string): Promise<VideoForHook> => {
     try {
       const video = await diplomaBackendService.getVideoById(videoId);
@@ -67,7 +66,6 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
     }
   }, []);
 
-  // Create video mutation
   const createVideoMutation = useMutation({
     mutationFn: ({ category, videoData }: { category: string; videoData: FormData }) =>
       diplomaBackendService.createVideo(category, videoData),
@@ -76,7 +74,7 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
       queryClient.invalidateQueries({ queryKey: ['diplomas'] });
       toast.success('Video created successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to create video');
     },
   });
@@ -89,7 +87,7 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
       queryClient.invalidateQueries({ queryKey: ['videos'] });
       toast.success('Video updated successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to update video');
     },
   });
@@ -102,7 +100,7 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
       queryClient.invalidateQueries({ queryKey: ['diplomas'] });
       toast.success('Video deleted successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to delete video');
     },
   });
@@ -137,7 +135,7 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
         if (!videoData.id) {
           throw new Error('Video ID is required for updates');
         }
-        console.log('Updating video without new file:', videoData.id);
+        console.log('Updating video without new file:', videoData.id, videoData);
         await updateVideoMutation.mutateAsync({ 
           videoId: videoData.id, 
           videoData 

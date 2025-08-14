@@ -89,7 +89,7 @@ export class CreateVideoSessionUseCase implements ICreateVideoSessionUseCase {
         const created = await this.sessionRepository.create(session);
         if (created && created.id) {
             const joinUrl = `${config.backendUrl}/api/video-sessions/${created.id}/join`;
-            (created as any).joinUrl = joinUrl;
+            created.joinUrl = joinUrl;
         }
         return { session: created as VideoSessionResponseDTO };
     }

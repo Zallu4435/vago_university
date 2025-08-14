@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { sportsService } from '../services/sports.service';
-import { Team } from '../../domain/types/management/sportmanagement';
+import { Team, TeamApiResponseSingle } from '../../domain/types/management/sportmanagement';
 
 interface Filters {
   sportType: string;
@@ -87,7 +87,7 @@ export const useSportsManagement = () => {
     enabled: activeTab === 'requests',
   });
 
-  const { data: teamDetails, isLoading: isLoadingTeamDetails } = useQuery({
+  const { data: teamDetails, isLoading: isLoadingTeamDetails } = useQuery<TeamApiResponseSingle['data']>({
     queryKey: ['teamDetails', selectedTeamId],
     queryFn: () => {
       if (!selectedTeamId) throw new Error('No team ID provided');
@@ -111,7 +111,7 @@ export const useSportsManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['teams'] });
       toast.success('Team created successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to create team');
     },
   });
@@ -123,7 +123,7 @@ export const useSportsManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['teams'] });
       toast.success('Team updated successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to update team');
     },
   });
@@ -134,7 +134,7 @@ export const useSportsManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['teams'] });
       toast.success('Team deleted successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to delete team');
     },
   });
@@ -145,7 +145,7 @@ export const useSportsManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['playerRequests', 'teams'] });
       toast.success('Player request approved successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to approve player request');
     },
   });
@@ -156,7 +156,7 @@ export const useSportsManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['playerRequests'] });
       toast.success('Player request rejected successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to reject player request');
     },
   });
@@ -211,11 +211,11 @@ export const useSportsManagement = () => {
     setSelectedRequestId(requestId);
   };
 
-  console.log(requestDetails, "requestdetails")
+  console.log(teamDetails, "teamDetails");
 
   return {
-    teams: (teamsData as any)?.data || [],
-    playerRequests: (playerRequestsData as any)?.data || [],
+    teams: teamsData?.data || [],
+    playerRequests: playerRequestsData?.data || [],
     totalPages: activeTab === 'teams' ? teamsData?.totalPages || 0 : playerRequestsData?.totalPages || 0,
     page,
     setPage,
@@ -231,7 +231,7 @@ export const useSportsManagement = () => {
     approvePlayerRequest,
     rejectPlayerRequest,
     handleTabChange,
-    teamDetails : (teamDetails as any)?.data?.sport,
+    teamDetails : teamDetails?.sport,
     handleViewTeam,
     handleEditTeam,
     setSelectedTeamId,

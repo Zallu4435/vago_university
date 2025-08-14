@@ -289,12 +289,6 @@ export default function ProfileSettings() {
                   <h2 className="text-xl font-bold text-slate-800 mb-1">
                     {formData.firstName} {formData.lastName}
                   </h2>
-                  {profile?.studentId && (
-                    <p className="text-sky-600 mb-1 font-medium text-sm">ID: {profile.studentId}</p>
-                  )}
-                  {profile?.facultyId && (
-                    <p className="text-purple-600 mb-1 font-medium text-sm">ID: {profile.facultyId}</p>
-                  )}
                   <p className="text-slate-600 text-sm">{formData.email}</p>
                 </div>
               </div>

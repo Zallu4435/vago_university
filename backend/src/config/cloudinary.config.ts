@@ -2,6 +2,16 @@ import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import multer from 'multer';
 import { config as appConfig } from '../config/config';
+import {
+  CloudinaryStorageParams,
+  ResourceTypeCallback,
+  TransformationCallback,
+  PublicIdCallback,
+  ParamsCallback,
+  Request,
+  Response,
+  NextFunction
+} from './cloudinary.types';
 
 cloudinary.config({
   cloud_name: appConfig.cloudinary.cloudName,
@@ -12,69 +22,69 @@ cloudinary.config({
 const facultyStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'faculty-documents',
-    allowed_formats: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
-    resource_type: (req, file) => {
+    folder: () => 'faculty-documents',
+    allowed_formats: () => ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+    resource_type: ((req: Request, file: Express.Multer.File) => {
       const ext = file.originalname.split('.').pop()?.toLowerCase();
       const type = (['pdf', 'doc', 'docx'].includes(ext)) ? 'raw' : 'image';
       console.log('[Cloudinary] resource_type:', type, 'for', file.originalname);
       return type;
-    },
-    public_id: (req, file) => {
+    }) as ResourceTypeCallback,
+    public_id: ((req: Request, file: Express.Multer.File) => {
       const timestamp = Date.now();
       const originalName = file.originalname.split('.')[0];
       const fieldName = file.fieldname; // 'cv' or 'certificates'
       const id = `faculty_${fieldName}_${timestamp}_${originalName}`;
       console.log('[Cloudinary] public_id:', id);
       return id;
-    }
-  } as any,
+    }) as PublicIdCallback
+  } as CloudinaryStorageParams,
 });
 
 const profilePictureStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'profile-pictures',
-    allowed_formats: ['jpg', 'jpeg', 'png'],
-    transformation: [
+    folder: () => 'profile-pictures',
+    allowed_formats: () => ['jpg', 'jpeg', 'png'],
+    transformation: () => [
       { width: 200, height: 200, crop: 'fill', gravity: 'face', quality: 'auto' },
     ],
-  } as any,
+  } as CloudinaryStorageParams,
 });
 
 const messageAttachmentStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'message-attachments',
-    allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
-    resource_type: 'auto', 
-    transformation: [{ quality: 'auto' }],
-  } as any,
+    folder: () => 'message-attachments',
+    allowed_formats: () => ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
+    resource_type: () => 'auto', 
+    transformation: () => [{ quality: 'auto' }],
+  } as CloudinaryStorageParams,
 });
 
 const assignmentStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'assignments',
-    allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
-    resource_type: (req, file) => {
+    folder: () => 'assignments',
+    allowed_formats: () => ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
+    resource_type: ((req: Request, file: Express.Multer.File) => {
       const ext = file.originalname.split('.').pop()?.toLowerCase();
       if (['pdf', 'doc', 'docx', 'txt'].includes(ext)) return 'raw';
       return 'image';
-    },
-    transformation: (req, file) => {
+    }) as ResourceTypeCallback,
+    transformation: ((req: Request, file: Express.Multer.File) => {
       const ext = file.originalname.split('.').pop()?.toLowerCase();
       if (['jpg', 'jpeg', 'png'].includes(ext)) {
         return [{ quality: 'auto' }];
       }
       return undefined;
-    },
-  } as any,
+    }) as TransformationCallback,
+  } as CloudinaryStorageParams,
 });
 
 const assignmentSubmissionStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: (req, file) => {
+  params: ((req: Request, file: Express.Multer.File) => {
     const ext = file.originalname.split('.').pop()?.toLowerCase();
     
     console.log('=== CLOUDINARY STORAGE PARAMS ===');
@@ -85,77 +95,77 @@ const assignmentSubmissionStorage = new CloudinaryStorage({
       size: file.size
     });
     
-    const params = {
-      folder: 'assignment-submissions',
-      allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'],
-      resource_type: 'auto',
-      transformation: (req, file) => {
+    const params: CloudinaryStorageParams = {
+      folder: () => 'assignment-submissions',
+      allowed_formats: () => ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'],
+      resource_type: () => 'auto',
+      transformation: ((req: Request, file: Express.Multer.File) => {
         const ext = file.originalname.split('.').pop()?.toLowerCase();
         if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'].includes(ext)) {
           return [{ quality: 'auto' }];
         }
         return undefined;
-      },
+      }) as TransformationCallback,
     };
     
     console.log('Cloudinary params:', params);
     console.log('=== CLOUDINARY STORAGE PARAMS END ===');
     
     return params;
-  }
-} as any);
+  }) as ParamsCallback,
+});
 
 const materialStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'materials',
-    allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
-    resource_type: (req, file) => {
+    folder: () => 'materials',
+    allowed_formats: () => ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
+    resource_type: ((req: Request, file: Express.Multer.File) => {
       const ext = file.originalname.split('.').pop()?.toLowerCase();
       if (['pdf', 'doc', 'docx', 'txt'].includes(ext)) return 'raw';
       return 'image';
-    },
-    transformation: (req, file) => {
+    }) as ResourceTypeCallback,
+    transformation: ((req: Request, file: Express.Multer.File) => {
       const ext = file.originalname.split('.').pop()?.toLowerCase();
       if (['jpg', 'jpeg', 'png'].includes(ext)) {
         return [{ quality: 'auto' }];
       }
       return undefined;
-    },
-  } as any,
+    }) as TransformationCallback,
+  } as CloudinaryStorageParams,
 });
 
 const admissionDocumentStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'admission-documents',
-    allowed_formats: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
-    resource_type: (req, file) => {
+    folder: () => 'admission-documents',
+    allowed_formats: () => ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+    resource_type: ((req: Request, file: Express.Multer.File) => {
       const ext = file.originalname.split('.').pop()?.toLowerCase();
       if (['pdf', 'doc', 'docx'].includes(ext)) return 'raw';
       return 'image';
-    },
-    public_id: (req, file) => {
+    }) as ResourceTypeCallback,
+    public_id: ((req: Request, file: Express.Multer.File) => {
       const timestamp = Date.now();
       const originalName = file.originalname.split('.')[0];
       const documentType = req.body.documentType || 'document';
       return `admission_${documentType}_${timestamp}_${originalName}`;
-    }
-  } as any,
+    }) as PublicIdCallback
+  } as CloudinaryStorageParams,
 });
 
 const siteSectionImageStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: (req, file) => {
-    const params = {
-      folder: 'site-section-images',
-      allowed_formats: ['jpg', 'jpeg', 'png'],
-      transformation: [
+  params: ((req: Request, file: Express.Multer.File) => {
+    const params: CloudinaryStorageParams = {
+      folder: () => 'site-section-images',
+      allowed_formats: () => ['jpg', 'jpeg', 'png'],
+      transformation: () => [
         { width: 800, height: 600, crop: 'limit', quality: 'auto' },
       ],
     };
     return params;
-  },
+  }) as ParamsCallback,
 });
 
 const siteSectionImageUpload = multer({
@@ -344,12 +354,12 @@ const admissionDocumentUpload = multer({
 const contentVideoStorage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: 'content',          
-    resource_type: 'video',
-    allowed_formats: ['mp4', 'mov', 'avi', 'webm', 'mkv'],
-    transformation: [{ quality: 'auto' }],
-    timeout: 60000, 
-  } as any,
+    folder: () => 'content',          
+    resource_type: () => 'video',
+    allowed_formats: () => ['mp4', 'mov', 'avi', 'webm', 'mkv'],
+    transformation: () => [{ quality: 'auto' }],
+    timeout: () => 60000, 
+  } as CloudinaryStorageParams,
 });
 
 const contentVideoUpload = multer({
@@ -375,7 +385,7 @@ const contentVideoUpload = multer({
   },
 });
 
-const contentVideoUploadWithErrorHandling = (req, res, next) => {
+const contentVideoUploadWithErrorHandling = (req: Request, res: Response, next: NextFunction) => {
   console.log('☁️ [CLOUDINARY] contentVideoUploadWithErrorHandling middleware triggered');
   req.setTimeout(60000);
   res.setTimeout(60000);
@@ -392,14 +402,14 @@ const contentVideoUploadWithErrorHandling = (req, res, next) => {
     if (err) {
       console.error('☁️ [CLOUDINARY] Video upload error:', err);
 
-      if (err.code === 'LIMIT_FILE_SIZE') {
+      if ((err).code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({
           error: 'File too large',
           message: 'Video file size exceeds the 500MB limit'
         });
       }
 
-      if (err.code === 'ETIMEDOUT' || err.message?.includes('timeout')) {
+      if ((err).code === 'ETIMEDOUT' || err.message?.includes('timeout')) {
         return res.status(408).json({
           error: 'Upload timeout',
           message: 'Video upload took too long. Please try again.'
@@ -442,11 +452,11 @@ const contentVideoUploadWithErrorHandling = (req, res, next) => {
 const chatAttachmentStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'chat-attachments',
-    allowed_formats: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'mp4', 'mov', 'avi', 'webm', 'mkv', 'mp3', 'wav', 'ogg', 'm4a'],
-    resource_type: 'auto',
-    transformation: [{ quality: 'auto' }],
-  } as any,
+    folder: () => 'chat-attachments',
+    allowed_formats: () => ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'mp4', 'mov', 'avi', 'webm', 'mkv', 'mp3', 'wav', 'ogg', 'm4a'],
+    resource_type: () => 'auto',
+    transformation: () => [{ quality: 'auto' }],
+  } as CloudinaryStorageParams,
 });
 
 const chatAttachmentUpload = multer({

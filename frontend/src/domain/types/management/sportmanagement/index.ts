@@ -52,6 +52,7 @@ export interface PlayerRequest {
   requestedDate: string;
   status: string;
   sportName?: string;
+  requestedAt: string;
 }
 
 export interface SportRequestDetails {
@@ -347,12 +348,9 @@ export interface ColorOption {
   color: string;
 } 
 
-export interface SportsApiResponse {
+export interface SportsApiResponse<T = any> {
   data: {
-    teams: Team[];
-    events?: Event[];
-    teamRequests?: TeamRequest[];
-    playerRequests?: PlayerRequest[];
+    data: T[];
     totalPages: number;
     currentPage: number;
     totalItems: number;
@@ -362,7 +360,7 @@ export interface SportsApiResponse {
 // API Response wrappers for single items
 export interface TeamApiResponseSingle {
   data: {
-    team: Team;
+    sport: Team;
   };
 }
 

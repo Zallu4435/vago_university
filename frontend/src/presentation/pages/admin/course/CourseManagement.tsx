@@ -423,6 +423,16 @@ const AdminCourseManagement: React.FC = () => {
             setShowRequestDetails(false);
           }}
           request={requestDetails as any}
+          onApprove={(id: string) => {
+            const req: any = (enrollmentRequests as any[])?.find((r: any) => r.id === id) || { id };
+            setSelectedRequest(req);
+            setShowApproveWarning(true);
+          }}
+          onReject={(id: string) => {
+            const req: any = (enrollmentRequests as any[])?.find((r: any) => r.id === id) || { id, studentName: (requestDetails as any)?.user?.name };
+            setSelectedRequest(req);
+            setShowRejectWarning(true);
+          }}
         />
       )}
 
@@ -468,6 +478,11 @@ const AdminCourseManagement: React.FC = () => {
         confirmText="Reject"
         cancelText="Cancel"
         type="danger"
+        showInput
+        inputLabel="Reason for rejection"
+        inputPlaceholder="Provide a clear reason (required)"
+        inputValue={rejectReason}
+        onInputChange={setRejectReason}
       />
 
       <style>{`

@@ -44,6 +44,7 @@ export interface FinancialAidApplication {
   amount: number;
   type: 'Grant' | 'Loan' | 'Scholarship';
   documents: { id: string; name: string; url: string; status: DocumentStatus }[];
+  applicationDate: Date | string
 }
 
 export interface Scholarship {
@@ -63,6 +64,7 @@ export interface ScholarshipApplication {
   studentId: string;
   status: 'Approved' | 'Pending' | 'Rejected';
   documents: { id: string; name: string; url: string; status: DocumentStatus }[];
+  applicationDate: Date | string
 }
 
 export interface PaymentForm {

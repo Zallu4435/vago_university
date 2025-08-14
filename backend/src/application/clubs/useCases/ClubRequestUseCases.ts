@@ -13,6 +13,45 @@ import { IClubsRepository } from "../repositories/IClubsRepository";
 import { GetClubRequestsRequest } from "../../../domain/clubs/entities/Club";
 import mongoose from "mongoose";
 
+// Define proper types for the repository responses
+interface ClubRequestDetailsResponse {
+  clubRequest: {
+    _id: mongoose.Types.ObjectId;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+    whyJoin: string;
+    additionalInfo?: string;
+    clubId: {
+      _id: mongoose.Types.ObjectId;
+      name: string;
+      type: string;
+      about?: string;
+      nextMeeting?: string;
+      enteredMembers?: number;
+    };
+    userId?: {
+      _id: mongoose.Types.ObjectId;
+      firstName: string;
+      lastName: string;
+      email: string;
+    };
+  };
+}
+
+interface RawClubRequest {
+  _id: mongoose.Types.ObjectId;
+  clubId?: {
+    name: string;
+    type: string;
+  };
+  userId?: {
+    email: string;
+  };
+  createdAt?: Date;
+  status?: string;
+}
+
 // Use Case Interfaces
 export interface IGetClubRequestsUseCase {
   execute(params: GetClubRequestsRequestDTO): Promise<GetClubRequestsResponseDTO>;
@@ -50,7 +89,7 @@ export class GetClubRequestsUseCase implements IGetClubRequestsUseCase {
     );
     
     const { rawRequests, totalItems, totalPages, currentPage } = await this.clubsRepository.getClubRequests(repositoryRequest);
-    const mappedRequests: SimplifiedClubRequestDTO[] = rawRequests.map((req) => ({
+    const mappedRequests: SimplifiedClubRequestDTO[] = rawRequests.map((req: RawClubRequest) => ({
       clubName: req.clubId?.name || "Unknown Club",
       requestedId: req._id.toString(),
       requestedBy: req.userId?.email || "Unknown User",
@@ -74,7 +113,7 @@ export class ApproveClubRequestUseCase implements IApproveClubRequestUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new Error("Invalid club request ID");
     }
-    const response: any = await this.clubsRepository.getClubRequestDetails({ id: params.id });
+    const response: ClubRequestDetailsResponse = await this.clubsRepository.getClubRequestDetails({ id: params.id });
     if (!response || !response.clubRequest) {
       throw new Error("Club request not found");
     }
@@ -94,7 +133,7 @@ export class RejectClubRequestUseCase implements IRejectClubRequestUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new Error("Invalid club request ID");
     }
-    const response: any = await this.clubsRepository.getClubRequestDetails({ id: params.id });
+    const response: ClubRequestDetailsResponse = await this.clubsRepository.getClubRequestDetails({ id: params.id });
     if (!response || !response.clubRequest) {
       throw new Error("Club request not found");
     }
@@ -114,7 +153,7 @@ export class GetClubRequestDetailsUseCase implements IGetClubRequestDetailsUseCa
     if (!mongoose.isValidObjectId(params.id)) {
       throw new Error("Invalid club request ID");
     }
-    const response: any = await this.clubsRepository.getClubRequestDetails(params);
+    const response: ClubRequestDetailsResponse = await this.clubsRepository.getClubRequestDetails(params);
     if (!response || !response.clubRequest) {
       throw new Error("Club request not found");
     }

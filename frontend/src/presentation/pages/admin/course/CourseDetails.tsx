@@ -6,7 +6,7 @@ import { formatDate } from '../../../../shared/utils/dateUtils';
 
 const CourseDetails: React.FC<CourseDetailsProps> = ({ isOpen, onClose, course }) => {
   usePreventBodyScroll(isOpen);
-
+  console.log(course, "course");
   if (!isOpen || !course) return null;
 
   const enrollmentPercentage = (course.currentEnrollment / course.maxEnrollment) * 100;

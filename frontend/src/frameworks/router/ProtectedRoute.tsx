@@ -27,7 +27,7 @@ export const ProtectedRoute = ({ allowedCollections, isPublic = false }: Protect
   }
 
   if (!isAuthenticated && !isPublic) {
-    return <Navigate to="/register" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   if (isPublic) {
@@ -49,7 +49,7 @@ export const ProtectedRoute = ({ allowedCollections, isPublic = false }: Protect
       case 'faculty':
         return <Navigate to="/faculty/" replace />;
       default:
-        return <Navigate to="/register" replace />;
+        return <Navigate to="/login" replace />;
     }
   }
 

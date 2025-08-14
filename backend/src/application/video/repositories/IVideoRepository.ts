@@ -22,8 +22,8 @@ export interface IRepoDiploma {
 }
 
 export interface IVideoRepository {
-    findVideos(query: any, page: number, limit: number);
-    countVideos(query: any): Promise<number>;
+    findVideos(query, page: number, limit: number);
+    countVideos(query): Promise<number>;
     findDiplomaByCategory(category: string): Promise<IRepoDiploma | null>;
     getVideoById(id: string): Promise<IRepoVideo | null>;
     createVideo(video: IVideoBase & { diplomaId: string; videoFile?: Express.Multer.File }): Promise<IRepoVideo>;

@@ -59,7 +59,7 @@ export interface AddVideoModalProps {
   onClose: () => void;
   selectedVideo: Video | null;
   onSave: (videoData: FormData | Partial<Video>) => void;
-  categories: string[];
+  diplomas: { id: string; title: string; category: string }[];
 }
 
 // VideoFormInputs is inferred from zod schema, but define it for type sharing

@@ -86,17 +86,17 @@ export interface RequestFilters {
   term: string;
 }
 
-export interface CourseDetailsResponse {
-  data: CourseDetails;
+  export interface CourseDetailsResponse {
+  data: { course: CourseDetails };
 }
 
 export interface EnrollmentRequestsResponse {
   data: {
-    requests: EnrollmentRequest[];
+    data: EnrollmentRequest[];
     totalPages: number;
   };
 }
 
 export interface EnrollmentRequestDetailsResponse {
-  data: EnrollmentRequest;
+  data: { courseRequest: EnrollmentRequest };
 }

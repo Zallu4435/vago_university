@@ -64,7 +64,14 @@ export class GetUserDiplomasUseCase implements IGetUserDiplomasUseCase {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
       throw new Error("Invalid page or limit parameters");
     }
-    const { courses, total, page, limit } = await this.userDiplomaRepository.getUserDiplomas(params.page, params.limit, params.category, params.status, params.dateRange);
+    const { courses, total, page, limit } = await this.userDiplomaRepository.getUserDiplomas(
+      params.userId,
+      params.page,
+      params.limit,
+      params.category,
+      params.status,
+      params.dateRange
+    );
     return {
       success: true,
       data: {
@@ -179,9 +186,10 @@ export class GetCompletedChaptersUseCase implements IGetCompletedChaptersUseCase
       throw new InvalidDiplomaStatusError("Invalid course ID");
     }
     const completedChapters = await this.userDiplomaRepository.getCompletedChapters(userId, courseId);
+    // Repository already returns an array of chapterId strings; avoid remapping
     return {
       success: true,
-      data: { chapters: completedChapters.map((chapter: any) => chapter.chapterId.toString()) }
+      data: { chapters: completedChapters }
     };
   }
 }
@@ -194,9 +202,10 @@ export class GetBookmarkedChaptersUseCase implements IGetBookmarkedChaptersUseCa
       throw new InvalidDiplomaStatusError("Invalid course ID");
     }
     const bookmarkedChapters = await this.userDiplomaRepository.getBookmarkedChapters(userId, courseId);
+    // Repository already returns an array of chapterId strings; avoid remapping
     return {
       success: true,
-      data: { chapters: bookmarkedChapters.map((chapter: any) => chapter.chapterId.toString()) }
+      data: { chapters: bookmarkedChapters }
     };
   }
 } 

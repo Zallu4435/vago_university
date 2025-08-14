@@ -1,28 +1,17 @@
 import {
     FaUser,
     FaGraduationCap,
-    FaCreditCard,
-    FaShieldAlt,
     FaUserAlt,
     FaCog,
   } from 'react-icons/fa';
   import {
-    FiDownload,
-    FiBell,
-    FiHelpCircle,
     FiLogOut,
   } from 'react-icons/fi';
 
 export default function Sidebar({ activeTab, setActiveTab, onLogout, onLogoutAll, user }: { activeTab: string, setActiveTab: (tab: string) => void, onLogout: () => void, onLogoutAll: () => void, user: any }) {
     const sidebarItems = [ 
         { id: 'profile', icon: FaUser, label: 'Profile', active: true },
-        { id: 'academic', icon: FaGraduationCap, label: 'Academic Settings' },
-        { id: 'offline', icon: FiDownload, label: 'Offline Learning' },
-        { id: 'notifications', icon: FiBell, label: 'Notifications' },
-        { id: 'financial', icon: FaCreditCard, label: 'Financial Info' },
-        { id: 'preferences', icon: FaCog, label: 'Preferences' },
-        { id: 'security', icon: FaShieldAlt, label: 'Security' },
-        { id: 'support', icon: FiHelpCircle, label: 'Support' }
+        { id: 'preferences', icon: FaCog, label: 'Preferences' }
       ];
     
 

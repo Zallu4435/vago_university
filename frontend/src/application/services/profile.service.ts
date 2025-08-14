@@ -1,20 +1,27 @@
 import httpClient from '../../frameworks/api/httpClient';
 import { ProfileData, PasswordChangeData } from '../../domain/types/profile';
+import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 
 class ProfileService {
   async updateProfile(data: ProfileData): Promise<void> {
     try {
       await httpClient.put('/profile', data);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to update profile');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to update profile');
+      }
+      throw new Error('Failed to update profile');
     }
   }
 
   async changePassword(data: PasswordChangeData): Promise<void> {
     try {
       await httpClient.post('/profile/password', data);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to change password');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to change password');
+      }
+      throw new Error('Failed to change password');
     }
   }
 
@@ -24,8 +31,11 @@ class ProfileService {
       formData.append('profilePicture', file);
       const response = await httpClient.post<{ url: string }>('/profile/profile-picture', formData);
       return response.data.url;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to update profile picture');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to update profile picture');
+      }
+      throw new Error('Failed to update profile picture');
     }
   }
 
@@ -33,8 +43,11 @@ class ProfileService {
     try {
       const response = await httpClient.get<{ data: ProfileData }>('/profile');
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch profile data');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch profile data');
+      }
+      throw new Error('Failed to fetch profile data');
     }
   }
 }

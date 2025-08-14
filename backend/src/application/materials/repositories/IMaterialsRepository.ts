@@ -2,7 +2,7 @@ import { CreateMaterialRequestDTO, UpdateMaterialRequestDTO } from '../../../dom
 import { MaterialProps } from '../../../domain/materials/entities/MaterialTypes';
 
 export interface IMaterialsRepository {
-  find(filter: Partial<MaterialProps>, options?: { skip?: number; limit?: number; sort?: any });
+  find(filter: Partial<MaterialProps>, options?: { skip?: number; limit?: number; sort});
   count(filter: Partial<MaterialProps>);
   findById(id: string);
   create(data: CreateMaterialRequestDTO);

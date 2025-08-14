@@ -241,7 +241,7 @@ export class PaginatedResponse<T> {
 
 export class GetClubsResponse {
   constructor(
-    public clubs: any[],
+    public clubs: Club[],
     public totalItems: number,
     public totalPages: number,
     public currentPage: number
@@ -250,19 +250,19 @@ export class GetClubsResponse {
 
 export class GetClubByIdResponse {
   constructor(
-    public club: any
+    public club: Club
   ) {}
 }
 
 export class CreateClubResponse {
   constructor(
-    public club: any
+    public club: Club
   ) {}
 }
 
 export class UpdateClubResponse {
   constructor(
-    public club: any
+    public club: Club
   ) {}
 }
 
@@ -298,7 +298,7 @@ export class ClubRequestSummary {
 
 export class GetClubRequestsResponse {
   constructor(
-    public rawRequests: any[],
+    public rawRequests: ClubRequestSummary[],
     public totalItems: number,
     public totalPages: number,
     public currentPage: number
@@ -352,6 +352,6 @@ export class ClubRequestDetails {
 
 export class GetClubRequestDetailsResponse {
   constructor(
-    public clubRequest: any
+    public clubRequest: ClubRequestSummary
   ) {}
 }

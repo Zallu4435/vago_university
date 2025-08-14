@@ -45,6 +45,15 @@ export interface ClubApiResponse {
     };
 }
 
+export interface ClubRequestsResponse {
+    data: ClubRequest[];
+    clubs: Club[];
+    clubRequests: ClubRequest[];
+    totalPages: number;
+    currentPage: number;
+    totalItems: number;
+}
+
 export interface ClubResponse {
     data: {
         club: Club;

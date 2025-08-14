@@ -31,7 +31,7 @@ interface Payment extends mongoose.Document {
   amount: number;
   status: "Completed" | "Pending" | "Failed";
   receiptUrl?: string;
-  metadata?: Record<string, any>; // For gateway-specific data
+  metadata?: Record<string, unknown>;
 }
 
 const StudentFinancialInfoSchema = new mongoose.Schema<StudentFinancialInfo>(

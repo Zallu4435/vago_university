@@ -1,22 +1,10 @@
 import { ISportsRepository } from "../../../application/sports/repositories/ISportsRepository";
-import {
-  GetSportsRequestDTO,
-  GetSportByIdRequestDTO,
-  CreateSportRequestDTO,
-  UpdateSportRequestDTO,
-  DeleteSportRequestDTO,
-  GetSportRequestsRequestDTO,
-  ApproveSportRequestRequestDTO,
-  RejectSportRequestRequestDTO,
-  GetSportRequestDetailsRequestDTO,
-  JoinSportRequestDTO,
-} from "../../../domain/sports/dtos/SportRequestDTOs";
 import { TeamModel, SportRequestModel } from "../../../infrastructure/database/mongoose/models/sports.model";
 import { User as UserModel } from "../../database/mongoose/auth/user.model";
+import { Sport, SportLeanResult, CreateSportData, UpdateSportData } from "../../../domain/sports/entities/SportTypes";
 
 export class SportsRepository implements ISportsRepository {
-  async getSports(params: GetSportsRequestDTO) {
-    const { page, limit, sportType, status, coach, startDate, endDate, search } = params;
+  async getSports(page: number, limit: number, sportType: string, status: string, coach: string, startDate: string, endDate: string, search: string) {
     const query: any = {};
     if (sportType && sportType !== "all") {
       query.type = { $regex: `^${sportType}$`, $options: "i" };
@@ -49,28 +37,27 @@ export class SportsRepository implements ISportsRepository {
     return { sports, totalItems, totalPages, currentPage: page };
   }
 
-  async getSportById(params: GetSportByIdRequestDTO) {
-    return await (TeamModel as any).findById(params.id).lean();
+  async getSportById(id: string) {
+    return await TeamModel.findById(id).lean();
   }
 
-  async createSport(params: CreateSportRequestDTO) {
-    return await (TeamModel as any).create({ ...params, status: params.status?.toLowerCase() || "active" });
+  async createSport(params: CreateSportData) {
+    return await TeamModel.create({ ...params, status: params.status?.toLowerCase() || "active" });
   }
 
-  async updateSport(params: UpdateSportRequestDTO) {
-    return await (TeamModel as any).findByIdAndUpdate(
+  async updateSport(params: UpdateSportData) {
+    return await TeamModel.findByIdAndUpdate(
       params.id,
       { $set: { ...params, updatedAt: new Date() } },
       { new: true }
     ).lean();
   }
 
-  async deleteSport(params: DeleteSportRequestDTO): Promise<void> {
-    await TeamModel.findByIdAndDelete(params.id);
+  async deleteSport(id: string): Promise<void> {
+    await TeamModel.findByIdAndDelete(id);
   }
 
-  async getSportRequests(params: GetSportRequestsRequestDTO) {
-    const { page, limit, status, type, startDate, endDate, search } = params;
+  async getSportRequests(page: number, limit: number, status: string, type: string, startDate: string, endDate: string, search: string) {
     const query: any = {};
     if (status && status.toLowerCase() !== "all") {
       query.status = status;
@@ -122,36 +109,36 @@ export class SportsRepository implements ISportsRepository {
     return { requests, totalItems, totalPages, currentPage: page };
   }
 
-  async approveSportRequest(params: ApproveSportRequestRequestDTO): Promise<void> {
+  async approveSportRequest(id: string): Promise<void> {
     await SportRequestModel.findByIdAndUpdate(
-      params.id,
+      id,
       { status: "approved", updatedAt: new Date() },
       { runValidators: true }
     );
   }
 
-  async rejectSportRequest(params: RejectSportRequestRequestDTO): Promise<void> {
+  async rejectSportRequest(id: string): Promise<void> {
     await SportRequestModel.findByIdAndUpdate(
-      params.id,
+      id,
       { status: "rejected", updatedAt: new Date() },
       { runValidators: true }
     );
   }
 
-  async getSportRequestDetails(params: GetSportRequestDetailsRequestDTO) {
-    return await SportRequestModel.findById(params.id)
+  async getSportRequestDetails(id: string) {
+    return await SportRequestModel.findById(id)
       .populate({ path: "sportId", select: "title type headCoach participants division" })
       .populate({ path: "userId", select: "firstName lastName email" })
       .lean();
   }
 
-  async joinSport(params: JoinSportRequestDTO) {
+  async joinSport(id: string) {
     const sportRequest = new SportRequestModel({
-      sportId: params.sportId,
-      userId: params.studentId,
+      sportId: id,
+      userId: id,
       status: "pending",
-      whyJoin: params.reason,
-      additionalInfo: params.additionalInfo,
+      whyJoin: "",
+      additionalInfo: "",
       createdAt: new Date(),
     });
     await sportRequest.save();

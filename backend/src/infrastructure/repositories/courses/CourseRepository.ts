@@ -56,7 +56,7 @@ export class CoursesRepository implements ICoursesRepository {
     }
     const skip = (page - 1) * limit;
     const courses = await CourseModel.find(query)
-      .select("title specialization faculty term credits")
+      .select("title specialization faculty term credits currentEnrollment maxEnrollment")
       .sort(search ? {} : { createdAt: -1 })
       .skip(skip)
       .limit(limit)

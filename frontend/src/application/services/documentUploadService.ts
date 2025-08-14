@@ -1,4 +1,5 @@
 import httpClient from "../../frameworks/api/httpClient";
+import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 
 export interface DocumentUploadResult {
   url: string;
@@ -42,22 +43,23 @@ class DocumentUploadService {
       });
 
       return response.data.data?.document;
-    } catch (error: any) {
-      console.error('Error uploading document:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to upload document');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        console.error('Error uploading document:', error);
+        console.error('Error response:', error.response?.data);
+        console.error('Error status:', error.response?.status);
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to upload document');
+      }
+      throw new Error('Failed to upload document');
     }
   }
 
   async uploadMultipleDocuments(applicationId: string, files: File[], documentTypes: string[]): Promise<MultipleDocumentUploadResult> {
     try {
       const formData = new FormData();
-      
       files.forEach((file) => {
         formData.append('files', file);
       });
-      
       formData.append('applicationId', applicationId);
       documentTypes.forEach((documentType) => {
         formData.append('documentTypes', documentType);
@@ -70,9 +72,12 @@ class DocumentUploadService {
       });
 
       return response.data;
-    } catch (error: any) {
-      console.error('Error uploading multiple documents:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to upload documents');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        console.error('Error uploading multiple documents:', error);
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to upload documents');
+      }
+      throw new Error('Failed to upload documents');
     }
   }
 
@@ -80,22 +85,27 @@ class DocumentUploadService {
     try {
       const response = await httpClient.get(`${this.baseUrl}/documents/${documentId}`);
       return response.data.data;
-    } catch (error: any) {
-      console.error('Error fetching document:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to fetch document');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        console.error('Error fetching document:', error);
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to fetch document');
+      }
+      throw new Error('Failed to fetch document');
     }
   }
 
   async getAdminDocument(documentId: string, admissionId: string): Promise<any> {
     try {
       const response = await httpClient.get(`/admin/admissions/documents/${documentId}?admissionId=${admissionId}`);
-
       return response.data.data;
-    } catch (error: any) {
-      console.error('Error fetching admin document:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to fetch admin document');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        console.error('Error fetching admin document:', error);
+        console.error('Error response:', error.response?.data);
+        console.error('Error status:', error.response?.status);
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to fetch admin document');
+      }
+      throw new Error('Failed to fetch admin document');
     }
   }
 }

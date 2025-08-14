@@ -14,7 +14,7 @@ type TabType = 'unread' | 'all';
 
 export default function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
     const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
-    const { styles } = usePreferences();
+    const { styles, theme } = usePreferences();
     const { notifications, markAsRead, markAllAsRead, fetchNextPage, hasMore, isLoadingMore } = useNotificationManagement();
     const notificationDropdownRef = useRef<HTMLDivElement>(null);
     const [activeTab, setActiveTab] = useState<TabType>('unread');
@@ -127,6 +127,8 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
 
     if (!isOpen) return null;
 
+    const isDarkMode = theme === 'dark';
+
     return (
         <div ref={notificationDropdownRef} className={`absolute right-0 mt-3 w-[480px] ${styles.card.background} backdrop-blur-xl rounded-2xl shadow-2xl z-50 border ${styles.border} overflow-hidden`}>
             <div className={`absolute inset-0 bg-gradient-to-br ${styles.backgroundSecondary} opacity-20`}></div>
@@ -175,16 +177,18 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
                     </div>
 
                     {/* Tabs */}
-                    <div className="flex space-x-2 p-1.5 rounded-xl bg-black bg-opacity-5">
+                    <div className={`flex space-x-2 p-1.5 rounded-xl ${isDarkMode ? 'bg-white/10' : 'bg-slate-100'}`}>
                         <button
                             onClick={() => setActiveTab('unread')}
                             className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex-1 ${activeTab === 'unread'
                                     ? `${styles.status.primary} text-white shadow-lg`
-                                    : `${styles.textSecondary} hover:bg-black hover:bg-opacity-10`
+                                    : `${isDarkMode ? 'text-slate-300' : 'text-slate-700'} ${isDarkMode ? 'hover:bg-white/10' : 'hover:bg-slate-200'}`
                                 }`}
                         >
                             Unread {unreadCount > 0 && (
-                                <span className={`ml-2 px-2.5 py-1 text-xs rounded-full ${activeTab === 'unread' ? 'bg-white bg-opacity-25' : `${styles.status.primary} bg-opacity-15`
+                                <span className={`ml-2 px-2.5 py-1 text-xs rounded-full font-semibold ${activeTab === 'unread'
+                                        ? (isDarkMode ? 'bg-white/20 text-white' : 'bg-white text-slate-700')
+                                        : (isDarkMode ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-700')
                                     }`}>
                                     {unreadCount}
                                 </span>
@@ -194,7 +198,7 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
                             onClick={() => setActiveTab('all')}
                             className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex-1 ${activeTab === 'all'
                                     ? `${styles.status.primary} text-white shadow-lg`
-                                    : `${styles.textSecondary} hover:bg-black hover:bg-opacity-10`
+                                    : `${isDarkMode ? 'text-slate-300' : 'text-slate-700'} ${isDarkMode ? 'hover:bg-white/10' : 'hover:bg-slate-200'}`
                                 }`}
                         >
                             All
@@ -227,8 +231,8 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
                             {filteredNotifications.map((notification, index) => (
                                 <div
                                     key={notification._id}
-                                    className={`px-6 py-4 hover:bg-black hover:bg-opacity-5 transition-all duration-200 border-l-4 group ${!notification.isRead
-                                            ? `${styles.status.primary} border-opacity-100 bg-black bg-opacity-3`
+                                    className={`px-6 py-4 ${isDarkMode ? 'hover:bg-white/10' : 'hover:bg-slate-100'} transition-all duration-200 border-l-4 group ${!notification.isRead
+                                            ? `${styles.status.primary} border-opacity-100 ${isDarkMode ? 'bg-white/5' : 'bg-slate-50'}`
                                             : 'border-transparent'
                                         } ${index !== filteredNotifications.length - 1 ? `border-b ${styles.borderSecondary}` : ''}`}
                                 >
@@ -266,7 +270,7 @@ export default function NotificationModal({ isOpen, onClose }: NotificationModal
                                                         {!notification.isRead && (
                                                             <button
                                                                 onClick={(e) => handleMarkAsRead(e, notification._id)}
-                                                                className={`p-2 rounded-lg hover:bg-black hover:bg-opacity-10 transition-all duration-200 ${styles.status.primary} bg-opacity-10 opacity-0 group-hover:opacity-100`}
+                                                                className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-white/10' : 'hover:bg-slate-200'} transition-all duration-200 ${styles.status.primary} bg-opacity-10 opacity-0 group-hover:opacity-100`}
                                                                 title="Mark as read"
                                                             >
                                                                 <svg

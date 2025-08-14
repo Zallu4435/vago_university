@@ -56,7 +56,7 @@ export const useEnquiryManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['enquiries'] });
       toast.success('Enquiry created successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to create enquiry');
     },
   });
@@ -69,7 +69,7 @@ export const useEnquiryManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['enquiry-details'] });
       toast.success('Enquiry status updated successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to update enquiry status');
     },
   });
@@ -80,7 +80,7 @@ export const useEnquiryManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['enquiries'] });
       toast.success('Enquiry deleted successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to delete enquiry');
     },
   });
@@ -92,7 +92,7 @@ export const useEnquiryManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['enquiries'] });
       toast.success('Reply sent successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to send reply');
     },
   });

@@ -65,7 +65,7 @@ export const useCourseManagement = (searchQuery: string = "") => {
     data: enrollmentRequestsData,
     isLoading: isLoadingRequests,
     error: requestsError,
-  } = useQuery<{ requests: EnrollmentRequest[]; totalPages: number }, Error>({
+  } = useQuery<{ data: EnrollmentRequest[]; totalPages: number }, Error>({
     queryKey: ["course-enrollments", page, requestFilters, limit],
     queryFn: () =>
       courseService.getEnrollmentRequests(
@@ -81,7 +81,7 @@ export const useCourseManagement = (searchQuery: string = "") => {
   });
 
   const { data: courseDetails, isLoading: isLoadingCourseDetails } = useQuery<
-    CourseDetails,
+    { course: CourseDetails },
     Error
   >({
     queryKey: ["course-details", selectedCourseId],
@@ -90,7 +90,7 @@ export const useCourseManagement = (searchQuery: string = "") => {
   });
 
   const { data: requestDetails, isLoading: isLoadingRequestDetails } = useQuery<
-    EnrollmentRequest,
+    { courseRequest: EnrollmentRequest },
     Error
   >({
     queryKey: ["enrollment-request-details", selectedRequestId],
@@ -106,7 +106,7 @@ export const useCourseManagement = (searchQuery: string = "") => {
       queryClient.invalidateQueries({ queryKey: ["courses"] });
       toast.success("Course created successfully");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Failed to create course");
     },
   });
@@ -118,7 +118,7 @@ export const useCourseManagement = (searchQuery: string = "") => {
       queryClient.invalidateQueries({ queryKey: ["courses"] });
       toast.success("Course updated successfully");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Failed to update course");
     },
   });
@@ -129,7 +129,7 @@ export const useCourseManagement = (searchQuery: string = "") => {
       queryClient.invalidateQueries({ queryKey: ["courses"] });
       toast.success("Course deleted successfully");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Failed to delete course");
     },
   });
@@ -141,7 +141,7 @@ export const useCourseManagement = (searchQuery: string = "") => {
       queryClient.invalidateQueries({ queryKey: ["course-enrollments"] });
       toast.success("Enrollment request approved successfully");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Failed to approve enrollment request");
     },
   });
@@ -158,7 +158,7 @@ export const useCourseManagement = (searchQuery: string = "") => {
       queryClient.invalidateQueries({ queryKey: ["course-enrollments"] });
       toast.success("Enrollment request rejected successfully");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Failed to reject enrollment request");
     },
   });
@@ -166,7 +166,7 @@ export const useCourseManagement = (searchQuery: string = "") => {
   const { mutateAsync: getEnrollmentRequestDetails } = useMutation({
     mutationFn: (requestId: string) =>
       courseService.getEnrollmentRequestDetails(requestId),
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(
         error.message || "Failed to fetch enrollment request details"
       );
@@ -206,7 +206,7 @@ export const useCourseManagement = (searchQuery: string = "") => {
     setSelectedRequestId(requestId);
   };
 
-  console.log(coursesData, "ijsdisdiojsdoijsd");
+
   return {
     courses: coursesData?.data || [],
     totalPages: coursesData?.totalPages || 0,
@@ -221,21 +221,20 @@ export const useCourseManagement = (searchQuery: string = "") => {
     createCourse,
     updateCourse,
     deleteCourse,
-    enrollmentRequests: enrollmentRequestsData?.requests || [],
+    enrollmentRequests: enrollmentRequestsData?.data || [],
     enrollmentRequestsTotalPages: enrollmentRequestsData?.totalPages || 0,
     isLoadingRequests,
     approveEnrollmentRequest,
     rejectEnrollmentRequest,
-    getEnrollmentRequestDetails,
     requestFilters,
     setRequestFilters,
     activeTab,
     handleTabChange,
-    courseDetails,
+    courseDetails: courseDetails?.course || null,
     isLoadingCourseDetails,
     handleViewCourse,
     handleEditCourse,
-    requestDetails,
+    requestDetails: requestDetails?.courseRequest || null,
     isLoadingRequestDetails,
     handleViewRequest,
   };

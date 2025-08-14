@@ -80,7 +80,7 @@ export const VideoConferencePage: React.FC = () => {
       return;
     }
 
-    const SOCKET_URL = 'http://localhost:5000';
+    const SOCKET_URL = 'https://vago-uv.ddns.net';
     const socket = io(SOCKET_URL, {
       transports: ['websocket'],
       auth: { userId }

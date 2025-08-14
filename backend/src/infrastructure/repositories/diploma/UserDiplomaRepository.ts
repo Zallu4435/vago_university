@@ -5,7 +5,7 @@ import { Video } from "../../../infrastructure/database/mongoose/models/video.mo
 import { VideoStatus } from "../../../domain/video/enums/VideoStatus";
 
 export class UserDiplomaRepository implements IUserDiplomaRepository {
-  async getUserDiplomas(page: number, limit: number, category: string, status: string, dateRange: string) {
+  async getUserDiplomas(userId: string, page: number, limit: number, category: string, status: string, dateRange: string) {
     const skip = (page - 1) * limit;
 
     const query: any = { status: true };
@@ -35,24 +35,12 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
       DiplomaModel.countDocuments(query)
     ]);
 
-    // Fetch videos for each diploma
+    // Build course summaries with counts only
     const courses = await Promise.all(diplomaDocs.map(async (doc) => {
-      const videos = await Video.find({ 
-        diplomaId: doc._id, 
-        status: VideoStatus.Published 
-      }).sort({ module: 1 }).lean();
-      
-      const chapters = videos.map(video => ({
-        _id: video._id.toString(),
-        title: video.title,
-        description: video.description,
-        videoUrl: video.videoUrl || '',
-        duration: parseInt(video.duration) || 0,
-        order: video.module || 0,
-        isPublished: video.status === VideoStatus.Published,
-        createdAt: video.uploadedAt || new Date(),
-        updatedAt: video.uploadedAt || new Date()
-      }));
+      const [videoCount, completedVideoCount] = await Promise.all([
+        Video.countDocuments({ diplomaId: doc._id, status: VideoStatus.Published }),
+        UserProgress.countDocuments({ userId, courseId: doc._id, isCompleted: true })
+      ]);
 
       return {
         _id: doc._id.toString(),
@@ -60,12 +48,14 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
         description: doc.description,
         category: doc.category,
         status: doc.status ? 'published' : 'draft' as 'published' | 'draft' | 'archived',
-        instructor: 'Faculty Instructor', // Default value
+        instructor: 'Faculty Instructor',
         department: doc.category || 'General',
-        chapters,
+        chapters: [],
+        videoCount,
+        completedVideoCount,
         createdAt: doc.createdAt || new Date(),
         updatedAt: doc.updatedAt || new Date()
-      };
+      } as any;
     }));
 
     return { 

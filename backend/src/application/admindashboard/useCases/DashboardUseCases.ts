@@ -21,6 +21,11 @@ import {
   PerformanceRawData, 
   PerformanceData,
   DashboardDataRaw,
+  DashboardMetricsRaw,
+  UserGrowthDataRaw,
+  RevenueDataRaw,
+  ActivityItemRaw,
+  SystemAlertRaw,
 } from '../../../domain/admindashboard/entities/AdminDashboardTypes';
 import {
   DashboardDataNotFoundError,
@@ -74,7 +79,7 @@ export class GetDashboardDataUseCase implements IGetDashboardDataUseCase {
   constructor(private dashboardRepository: IDashboardRepository) {}
 
   async execute(): Promise<ResponseDTO<GetDashboardDataResponseDTO>> {
-    const raw: any = await this.dashboardRepository.getDashboardData();
+    const raw: DashboardDataRaw = await this.dashboardRepository.getDashboardData();
     if (!raw || !raw.metricsRaw || !raw.userGrowthRaw || !raw.revenueRaw || !raw.performanceRaw || !raw.activitiesRaw || !raw.alertsRaw) {
       throw new DashboardDataNotFoundError();
     } 
@@ -94,7 +99,7 @@ export class GetDashboardMetricsUseCase implements IGetDashboardMetricsUseCase {
   constructor(private dashboardRepository: IDashboardRepository) {}
 
   async execute(): Promise<ResponseDTO<GetDashboardMetricsResponseDTO>> {
-    const raw: any = await this.dashboardRepository.getDashboardMetrics();
+    const raw: DashboardMetricsRaw = await this.dashboardRepository.getDashboardMetrics();
     if (!raw || !Array.isArray(raw.completedPayments)) {
       throw new DashboardMetricsError();
     }
@@ -114,12 +119,12 @@ export class GetUserGrowthDataUseCase implements IGetUserGrowthDataUseCase {
   constructor(private dashboardRepository: IDashboardRepository) {}
 
   async execute(): Promise<ResponseDTO<GetUserGrowthDataResponseDTO>> {
-    const raw: any = await this.dashboardRepository.getUserGrowthData();
-    if (!raw || !Array.isArray(raw) || raw.length === 0) {
+    const raw: UserGrowthDataRaw[] = await this.dashboardRepository.getUserGrowthData();
+    if (!raw || raw.length === 0) {
       throw new DashboardUserGrowthError();
     }
     let cumulativeUsers = 0;
-    const userGrowth = raw.map((item, i: number) => {
+    const userGrowth = raw.map((item) => {
       const users = item.usersCount + item.facultyCount;
       cumulativeUsers += users;
       const target = Math.floor(cumulativeUsers * 1.1) + 2;
@@ -137,8 +142,8 @@ export class GetRevenueDataUseCase implements IGetRevenueDataUseCase {
   constructor(private dashboardRepository: IDashboardRepository) {}
 
   async execute(): Promise<ResponseDTO<GetRevenueDataResponseDTO>> {
-    const raw = await this.dashboardRepository.getRevenueData();
-    if (!raw || !Array.isArray(raw) || raw.length === 0) {
+    const raw: RevenueDataRaw[] = await this.dashboardRepository.getRevenueData();
+    if (!raw || raw.length === 0) {
       throw new DashboardRevenueError();
     }
     const revenue = raw.map((item) => {
@@ -190,7 +195,7 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
   constructor(private dashboardRepository: IDashboardRepository) {}
 
   async execute(): Promise<ResponseDTO<GetRecentActivitiesResponseDTO>> {
-    const raw = await this.dashboardRepository.getRecentActivities();
+    const raw: ActivityItemRaw = await this.dashboardRepository.getRecentActivities();
     if (!raw || !raw.recentAdmissions || !raw.recentPayments || !raw.recentEnquiries || !raw.recentNotifications) {
       throw new DashboardActivitiesError();
     }
@@ -258,11 +263,11 @@ export class GetSystemAlertsUseCase implements IGetSystemAlertsUseCase {
   constructor(private dashboardRepository: IDashboardRepository) {}
 
   async execute(): Promise<ResponseDTO<GetSystemAlertsResponseDTO>> {
-    const raw = await this.dashboardRepository.getSystemAlerts();
+    const raw: SystemAlertRaw = await this.dashboardRepository.getSystemAlerts();
     if (!raw) {
       throw new DashboardAlertsError();
     }
-    const alerts: any[] = [];
+    const alerts: GetSystemAlertsResponseDTO = [];
     if (raw.pendingAdmissions > 0) {
       alerts.push({
         id: '1',

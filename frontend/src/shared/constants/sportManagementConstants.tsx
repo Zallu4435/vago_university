@@ -1,5 +1,6 @@
 import React from 'react';
 import { OrganizerTypeOption } from '../../domain/types/management/sportmanagement';
+import { Team, PlayerRequest } from '../../domain/types/management/sportmanagement';
 
 export const SPORT_TYPES = ['All', 'Football', 'Basketball', 'Badminton', 'Athletics', 'Swimming'] as const;
 export const TEAM_STATUSES = ['All', 'Active', 'Inactive'] as const;
@@ -160,7 +161,7 @@ export const getTeamColumns = (
   {
     header: 'Team',
     key: 'name',
-    render: (team: any) => (
+    render: (team: Team) => (
       <div className="flex items-center gap-3">
         <span 
           className="text-2xl w-8 h-8 rounded-lg flex items-center justify-center"
@@ -170,7 +171,7 @@ export const getTeamColumns = (
         </span>
         <div>
           <p className="font-medium text-gray-200">{team.title}</p>
-          <p className="text-xs text-gray-400">ID: {team._id?.slice(0, 7)}</p>
+          <p className="text-xs text-gray-400">ID: {(team._id || team.id)?.slice(0, 8)}</p>
         </div>
       </div>
     ),
@@ -179,7 +180,7 @@ export const getTeamColumns = (
   {
     header: 'Sport',
     key: 'sportType',
-    render: (team: any) => (
+    render: (team: Team) => (
       <div className="flex items-center text-gray-300">
         <Trophy size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{team.type}</span>
@@ -189,7 +190,7 @@ export const getTeamColumns = (
   {
     header: 'Players',
     key: 'playerCount',
-    render: (team: any) => (
+    render: (team: Team) => (
       <div className="flex items-center text-gray-300">
         <Users size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{team.playerCount}</span>
@@ -199,7 +200,7 @@ export const getTeamColumns = (
   {
     header: 'Status',
     key: 'status',
-    render: (team: any) => (
+    render: (team: Team) => (
       <span
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
           team.status === 'Active'
@@ -218,7 +219,7 @@ export const getTeamColumns = (
   {
     header: 'Formed On',
     key: 'formedOn',
-    render: (team: any) => (
+    render: (team: Team) => (
       <div className="flex items-center text-gray-300">
         <Users size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{formatDate(team.createdAt)}</span>
@@ -235,7 +236,7 @@ export const getPlayerRequestColumns = (
   {
     header: 'Student',
     key: 'studentName',
-    render: (request: any) => (
+    render: (request: PlayerRequest) => (
       <div>
         <p className="font-medium text-gray-200">{request.requestedBy}</p>
         <p className="text-xs text-gray-400">ID: {request?.requestId?.slice(0, 7)}</p>
@@ -246,7 +247,7 @@ export const getPlayerRequestColumns = (
   {
     header: 'Team',
     key: 'team',
-    render: (request: any) => (
+    render: (request: PlayerRequest) => (
       <div className="flex items-center text-gray-300">
         <Users size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{request.sportName}</span>
@@ -256,7 +257,7 @@ export const getPlayerRequestColumns = (
   {
     header: 'Sport',
     key: 'sport',
-    render: (request: any) => (
+    render: (request: PlayerRequest) => (
       <div className="flex items-center text-gray-300">
         <Trophy size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{request.type}</span>
@@ -266,7 +267,7 @@ export const getPlayerRequestColumns = (
   {
     header: 'Requested Date',
     key: 'requestedAt',
-    render: (request: any) => (
+    render: (request: PlayerRequest) => (
       <div className="flex items-center text-gray-300">
         <Users size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{formatDate(request.requestedAt)}</span>
@@ -276,7 +277,7 @@ export const getPlayerRequestColumns = (
   {
     header: 'Status',
     key: 'status',
-    render: (request: any) => (
+    render: (request: PlayerRequest) => (
       <span
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
           request.status === 'pending'

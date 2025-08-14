@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiLock, FiClock, FiCheckCircle, FiBookmark } from 'react-icons/fi';
+import { FiLock, FiCheckCircle, FiBookmark } from 'react-icons/fi';
 import { getChapterTypeIcon, getChapterTypeColor } from '../utils/diplomaUtils';
 import { ChapterItemProps } from '../../../../../domain/types/canvas/diploma';
 import { ChapterType } from '../../../../../domain/types/diploma';
@@ -49,12 +49,6 @@ console.log(chapter, "chapter from chapter")
                 {chapter.title}
               </h4>
               <p className="text-xs text-gray-500 mb-1 line-clamp-2">{chapter.description}</p>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm">
-                <div className="flex items-center">
-                  <FiClock className={`w-4 h-4 mr-1 ${styles?.icon.secondary}`} />
-                  <span className={`${styles?.textSecondary}`}>{chapter.duration}</span>
-                </div>
-              </div>
             </div>
           </div>
 

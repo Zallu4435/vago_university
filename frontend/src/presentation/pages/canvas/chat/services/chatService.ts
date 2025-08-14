@@ -1,5 +1,6 @@
 import httpClient from '../../../../../frameworks/api/httpClient';
 import { Chat, Message, User, PaginatedResponse } from '../types/ChatTypes';
+import { isAxiosErrorWithApiError } from '../../../../../shared/types/apiError';
 
 class ChatService {
   async getChats(page = 1, limit = 20): Promise<PaginatedResponse<Chat>> {
@@ -20,8 +21,11 @@ class ChatService {
         ...response.data,
         data: chats
       };
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch chats');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch chats');
+      }
+      throw new Error('Failed to fetch chats');
     }
   }
 
@@ -29,8 +33,11 @@ class ChatService {
     try {
       const response = await httpClient.get(`/chats/search?query=${query}&page=${page}&limit=${limit}`);
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to search chats');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to search chats');
+      }
+      throw new Error('Failed to search chats');
     }
   }
 
@@ -38,8 +45,11 @@ class ChatService {
     try {
       const response = await httpClient.get(`/chats/${chatId}`);
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch chat details');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch chat details');
+      }
+      throw new Error('Failed to fetch chat details');
     }
   }
 
@@ -47,8 +57,11 @@ class ChatService {
     try {
       const response = await httpClient.post('/chats', params);
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to create chat');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to create chat');
+      }
+      throw new Error('Failed to create chat');
     }
   }
 
@@ -56,8 +69,11 @@ class ChatService {
     try {
       const response = await httpClient.get(`/chats/${chatId}/messages?page=${page}&limit=${limit}${before ? `&before=${before}` : ''}`);
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch messages');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch messages');
+      }
+      throw new Error('Failed to fetch messages');
     }
   }
 
@@ -65,8 +81,11 @@ class ChatService {
     try {
       const response = await httpClient.post(`/chats/${chatId}/messages`, { content, type });
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to send message');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to send message');
+      }
+      throw new Error('Failed to send message');
     }
   }
 
@@ -76,8 +95,11 @@ class ChatService {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to send file');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to send file');
+      }
+      throw new Error('Failed to send file');
     }
   }
 
@@ -87,8 +109,11 @@ class ChatService {
         content: newContent
       });
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to edit message');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to edit message');
+      }
+      throw new Error('Failed to edit message');
     }
   }
 
@@ -100,8 +125,11 @@ class ChatService {
       await httpClient.delete(`/chats/${chatId}/messages/${messageId}`, {
         data: { deleteForEveryone }
       });
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to delete message');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to delete message');
+      }
+      throw new Error('Failed to delete message');
     }
   }
 
@@ -109,32 +137,44 @@ class ChatService {
     try {
       const response = await httpClient.post(`/chats/${chatId}/messages`, { content, replyToId });
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to reply to message');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to reply to message');
+      }
+      throw new Error('Failed to reply to message');
     }
   }
 
   async markMessagesAsRead(chatId: string): Promise<void> {
     try {
       await httpClient.put(`/chats/${chatId}/read`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to mark messages as read');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to mark messages as read');
+      }
+      throw new Error('Failed to mark messages as read');
     }
   }
 
   async addReaction(messageId: string, emoji: string, userId: string): Promise<void> {
     try {
       await httpClient.post(`/chats/messages/${messageId}/reactions`, { userId, emoji });
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to add reaction');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to add reaction');
+      }
+      throw new Error('Failed to add reaction');
     }
   }
 
   async removeReaction(messageId: string, userId: string): Promise<void> {
     try {
       await httpClient.delete(`/chats/messages/${messageId}/reactions`, { data: { userId } });
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to remove reaction');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to remove reaction');
+      }
+      throw new Error('Failed to remove reaction');
     }
   }
 
@@ -142,8 +182,11 @@ class ChatService {
     try {
       const response = await httpClient.post('/chats/group', params);
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to create group chat');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to create group chat');
+      }
+      throw new Error('Failed to create group chat');
     }
   }
 
@@ -151,8 +194,11 @@ class ChatService {
     try {
       const response = await httpClient.post(`/chats/group/${chatId}/members`, { userId, addedBy });
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to add group member');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to add group member');
+      }
+      throw new Error('Failed to add group member');
     }
   }
 
@@ -160,16 +206,22 @@ class ChatService {
     try {
       const response = await httpClient.delete(`/chats/group/${chatId}/members/${userId}`, { data: { removedBy } });
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to remove group member');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to remove group member');
+      }
+      throw new Error('Failed to remove group member');
     }
   }
 
   async updateGroupAdmin(chatId: string, userId: string, isAdmin: boolean, updatedBy: string): Promise<void> {
     try {
       await httpClient.patch(`/chats/group/${chatId}/admins/${userId}`, { isAdmin, updatedBy });
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to update group admin');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to update group admin');
+      }
+      throw new Error('Failed to update group admin');
     }
   }
 
@@ -180,8 +232,11 @@ class ChatService {
   }, updatedBy: string): Promise<void> {
     try {
       await httpClient.patch(`/chats/group/${chatId}/settings`, { settings, updatedBy });
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to update group settings');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to update group settings');
+      }
+      throw new Error('Failed to update group settings');
     }
   }
 
@@ -192,16 +247,22 @@ class ChatService {
   }, updatedBy: string): Promise<void> {
     try {
       await httpClient.patch(`/chats/group/${chatId}`, { ...info, updatedBy });
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to update group info');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to update group info');
+      }
+      throw new Error('Failed to update group info');
     }
   }
 
   async leaveGroup(chatId: string, userId: string): Promise<void> {
     try {
       await httpClient.post(`/chats/group/${chatId}/leave`, { userId });
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to leave group');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to leave group');
+      }
+      throw new Error('Failed to leave group');
     }
   }
 
@@ -209,32 +270,44 @@ class ChatService {
     try {
       const response = await httpClient.get(`/chats/users/search?query=${query}&page=${page}&limit=${limit}`);
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to search users');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to search users');
+      }
+      throw new Error('Failed to search users');
     }
   }
 
   async deleteChat(chatId: string): Promise<void> {
     try {
       await httpClient.delete(`/chats/${chatId}`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to delete chat');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to delete chat');
+      }
+      throw new Error('Failed to delete chat');
     }
   }
 
   async blockChat(chatId: string): Promise<void> {
     try {
       await httpClient.post(`/chats/${chatId}/block`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to block chat');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to block chat');
+      }
+      throw new Error('Failed to block chat');
     }
   }
 
   async clearChat(chatId: string): Promise<void> {
     try {
       await httpClient.delete(`/chats/${chatId}/messages`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to clear chat');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to clear chat');
+      }
+      throw new Error('Failed to clear chat');
     }
   }
 }

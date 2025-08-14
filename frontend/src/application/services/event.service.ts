@@ -1,6 +1,7 @@
 // src/application/services/event.service.ts
 import { EventApiResponse, EventRequest, EventApiResponseSingle, EventRequestApiResponseSingle, Event } from '../../domain/types/management/eventmanagement';
 import httpClient from '../../frameworks/api/httpClient';
+import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 
 class EventService {
   async getEvents(
@@ -40,9 +41,11 @@ class EventService {
         params
       });
       return response.data.data;
-    } catch (error: any) {
-      console.error('getEvents error:', error);
-      throw new Error(error.response?.data?.error || 'Failed to fetch events');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch events');
+      }
+      throw new Error('Failed to fetch events');
     }
   }
 
@@ -50,8 +53,11 @@ class EventService {
     try {
       const response = await httpClient.get<EventApiResponseSingle>(`/admin/events/${id}`);
       return response.data.data.event;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch event details');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch event details');
+      }
+      throw new Error('Failed to fetch event details');
     }
   }
 
@@ -59,8 +65,11 @@ class EventService {
     try {
       const response = await httpClient.post<Event>('/admin/events', data);
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to create event');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to create event');
+      }
+      throw new Error('Failed to create event');
     }
   }
 
@@ -68,16 +77,22 @@ class EventService {
     try {
       const response = await httpClient.put<Event>(`/admin/events/${id}`, data);
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to update event');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to update event');
+      }
+      throw new Error('Failed to update event');
     }
   }
 
   async deleteEvent(id: string): Promise<void> {
     try {
       await httpClient.delete(`/admin/events/${id}`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to delete event');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to delete event');
+      }
+      throw new Error('Failed to delete event');
     }
   }
 
@@ -118,35 +133,45 @@ class EventService {
         params
       });
       return response.data.data;
-    } catch (error: any) {
-      console.error('getEventRequests error:', error);
-      throw new Error(error.response?.data?.error || 'Failed to fetch event requests');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch event requests');
+      }
+      throw new Error('Failed to fetch event requests');
     }
   }
 
   async approveEventRequest(id: string): Promise<void> {
     try {
       await httpClient.post(`/admin/event-requests/${id}/approve`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to approve event request');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to approve event request');
+      }
+      throw new Error('Failed to approve event request');
     }
   }
 
   async rejectEventRequest(id: string): Promise<void> {
     try {
       await httpClient.post(`/admin/event-requests/${id}/reject`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to reject event request');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to reject event request');
+      }
+      throw new Error('Failed to reject event request');
     }
   }
-
 
   async getEventRequestDetails(id: string): Promise<EventRequest> {
     try {
       const response = await httpClient.get<EventRequestApiResponseSingle>(`/admin/event-requests/${id}`);
       return response.data.data.eventRequest;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch event request details');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch event request details');
+      }
+      throw new Error('Failed to fetch event request details');
     }
   }
 }

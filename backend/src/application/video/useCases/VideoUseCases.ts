@@ -231,7 +231,7 @@ export class GetVideoByIdUseCase implements IGetVideoByIdUseCase {
             module: video.module,
             status: video.status,
             diplomaId: video.diplomaId && typeof video.diplomaId === 'object' && video.diplomaId !== null && '_id' in video.diplomaId 
-                ? (video.diplomaId as any)._id?.toString() || ''
+                ? video.diplomaId._id?.toString() || ''
                 : (video.diplomaId?.toString() || ''),
             description: video.description,
             videoUrl: video.videoUrl,
@@ -295,6 +295,16 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
     constructor(private videoRepository: IVideoRepository) { }
 
     async execute(params: UpdateVideoRequestDTO): Promise<ResponseDTO<UpdateVideoResponseDTO>> {
+        console.log('🎬 [UseCase] UpdateVideoUseCase.execute params', {
+            id: params.id,
+            title: !!params.title,
+            duration: !!params.duration,
+            module: params.module,
+            status: params.status,
+            hasVideoFile: !!params.videoFile,
+            hasVideoUrl: !!params.videoUrl,
+            category: params.category
+        });
         if (!mongoose.isValidObjectId(params.id)) {
             throw new InvalidVideoIdError();
         }
@@ -302,7 +312,38 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
         if (!existingVideo) {
             throw new VideoNotFoundError();
         }
-        let updateData = { ...params };
+        console.log('📼 [UseCase] Existing video loaded', {
+            id: existingVideo._id || existingVideo.id,
+            currentDiplomaId: typeof existingVideo.diplomaId === 'string' ? existingVideo.diplomaId : existingVideo.diplomaId?._id,
+        });
+        // Prepare update payload
+        let updateData: any = { ...params };
+
+        // Resolve current and possibly new diploma IDs
+        const oldDiplomaId = (existingVideo.diplomaId && typeof existingVideo.diplomaId === 'object' && existingVideo.diplomaId !== null && '_id' in existingVideo.diplomaId)
+            ? existingVideo.diplomaId._id?.toString() || ''
+            : (existingVideo.diplomaId?.toString() || '');
+
+        let categoryChanged = false;
+        let newDiplomaId: string | undefined = undefined;
+
+        if (params.category && params.category.trim()) {
+            const newDiploma = await this.videoRepository.findDiplomaByCategory(params.category);
+            if (!newDiploma) {
+                throw new InvalidDiplomaIdError();
+            }
+            newDiplomaId = newDiploma._id?.toString();
+            if (newDiplomaId && newDiplomaId !== oldDiplomaId) {
+                categoryChanged = true;
+            }
+            updateData.diplomaId = newDiplomaId;
+            console.log('🏷️ [UseCase] Category provided', { category: params.category, newDiplomaId, oldDiplomaId, categoryChanged });
+        }
+
+        // The repository update does not accept `category`; remove it from payload
+        if ('category' in updateData) {
+            delete updateData.category;
+        }
         if (params.videoFile) {
             if (existingVideo.videoUrl) {
                 try {
@@ -335,9 +376,25 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
                 updateData.videoUrl = existingVideo.videoUrl;
             }
         }
+        console.log('🛠️ [UseCase] Calling repository.updateVideo with fields', Object.keys(updateData));
         const updated = await this.videoRepository.updateVideo(params.id, { ...updateData });
         if (!updated) {
             throw new VideoNotFoundError();
+        }
+
+        // If category changed, move the video reference between diplomas
+        if (categoryChanged && newDiplomaId) {
+            try {
+                if (oldDiplomaId) {
+                    console.log('🔁 [UseCase] Removing video from old diploma array', { oldDiplomaId, videoId: params.id });
+                    await this.videoRepository.removeVideoFromDiploma(oldDiplomaId, params.id);
+                }
+                console.log('🔁 [UseCase] Adding video to new diploma array', { newDiplomaId, videoId: params.id });
+                await this.videoRepository.addVideoToDiploma(newDiplomaId, params.id);
+                console.log('✅ [UseCase] Moved video between diplomas successfully');
+            } catch (err) {
+                console.error('⚠️ [UseCase] Failed to move video between diploma arrays', err);
+            }
         }
         const videoEntity = new Video({
             id: updated._id?.toString() || updated.id,

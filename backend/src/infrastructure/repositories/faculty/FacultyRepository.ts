@@ -19,11 +19,12 @@ import {
 import { IFacultyRepository } from "../../../application/faculty/repositories/IFacultyRepository";
 import { Faculty as FacultyModel } from "../../database/mongoose/auth/faculty.model";
 import { FacultyRegister } from "../../database/mongoose/models/facultyRegister.model";
+import { FacultyStatus } from "../../../domain/faculty/FacultyTypes";
 
 
 export class FacultyRepository implements IFacultyRepository {
-    async findFaculty(query, options: { skip?: number; limit?: number; select?: string }): Promise<any[]> {
-        return (FacultyRegister as any).find(query)
+    async findFaculty(query, options: { skip?: number; limit?: number; select?: string }) {
+        return FacultyRegister.find(query)
             .select((options.select ? options.select + ' blocked' : 'blocked'))
             .sort({ updatedAt: -1, createdAt: -1 }) 
             .skip(options.skip || 0)
@@ -32,7 +33,7 @@ export class FacultyRepository implements IFacultyRepository {
     }
 
     async countFaculty(query): Promise<number> {
-        return (FacultyRegister as any).countDocuments(query);
+        return FacultyRegister.countDocuments(query);
     }
 
     async getFacultyById(params: GetFacultyByIdRequestDTO) {
@@ -40,7 +41,7 @@ export class FacultyRepository implements IFacultyRepository {
             throw new Error(FacultyErrorType.InvalidFacultyId);
         }
 
-        const faculty = await (FacultyRegister as any).findById(params.id)
+        const faculty = await FacultyRegister.findById(params.id)
             .select('fullName email phone department qualification experience aboutMe cvUrl certificatesUrl createdAt status blocked')
             .lean();
 
@@ -52,7 +53,7 @@ export class FacultyRepository implements IFacultyRepository {
     }
 
     async getFacultyByToken(params: GetFacultyByTokenRequestDTO) {
-        const faculty = await (FacultyRegister as any).findById(params.facultyId)
+        const faculty = await FacultyRegister.findById(params.facultyId)
             .select("fullName email phone department qualification experience aboutMe cvUrl certificatesUrl createdAt status confirmationToken tokenExpiry")
             .lean();
         if (!faculty) {
@@ -62,20 +63,20 @@ export class FacultyRepository implements IFacultyRepository {
     }
 
     async approveFaculty(params: ApproveFacultyRequestDTO): Promise<ApproveFacultyResponseDTO> {
-        const faculty = await (FacultyRegister as any).findById(params.id);
+        const faculty = await FacultyRegister.findById(params.id);
         if (!faculty) {
             return null;
         }
         faculty.department = params.additionalInfo.department;
-        if ((params.additionalInfo as any).status) faculty.status = (params.additionalInfo as any).status;
-        if ((params.additionalInfo as any).confirmationToken) faculty.confirmationToken = (params.additionalInfo as any).confirmationToken;
-        if ((params.additionalInfo as any).tokenExpiry) faculty.tokenExpiry = (params.additionalInfo as any).tokenExpiry;
+        if ((params.additionalInfo).status) faculty.status = (params.additionalInfo).status as FacultyStatus;
+        if ((params.additionalInfo).confirmationToken) faculty.confirmationToken = (params.additionalInfo).confirmationToken;
+        if ((params.additionalInfo).tokenExpiry) faculty.tokenExpiry = (params.additionalInfo).tokenExpiry;
         await faculty.save();
         return { message: "Faculty updated" };
     }
 
     async rejectFaculty(params: RejectFacultyRequestDTO): Promise<RejectFacultyResponseDTO> {
-        const faculty = await (FacultyRegister as any).findById(params.id);
+        const faculty = await FacultyRegister.findById(params.id);
         if (!faculty) {
             return null;
         }
@@ -86,16 +87,16 @@ export class FacultyRepository implements IFacultyRepository {
     }
 
     async deleteFaculty(params: DeleteFacultyRequestDTO): Promise<DeleteFacultyResponseDTO> {
-        const faculty = await (FacultyRegister as any).findById(params.id);
+        const faculty = await FacultyRegister.findById(params.id);
         if (!faculty) {
             return null;
         }
-        await (FacultyRegister as any).deleteOne({ _id: params.id });
+        await FacultyRegister.deleteOne({ _id: params.id });
         return { message: "Faculty registration deleted" };
     }
 
     async confirmFacultyOffer(params: ConfirmFacultyOfferRequestDTO): Promise<ConfirmFacultyOfferResponseDTO> {
-        const facultyRegister = await (FacultyRegister as any).findById(params.facultyId);
+        const facultyRegister = await FacultyRegister.findById(params.facultyId);
         if (!facultyRegister) {
             return null;
         }
@@ -117,11 +118,11 @@ export class FacultyRepository implements IFacultyRepository {
     }
 
     async downloadCertificate(params: DownloadCertificateRequestDTO): Promise<DownloadCertificateResponseDTO> {
-        const faculty = await (FacultyRegister as any).findById(params.facultyId);
+        const faculty = await FacultyRegister.findById(params.facultyId);
         if (!faculty) {
             return null;
         }
-        return null as any;
+        return null;
     }
 
     async blockFaculty(id: string): Promise<{ message: string }> {
@@ -144,7 +145,7 @@ export class FacultyRepository implements IFacultyRepository {
         return { message: (blockedStatus ?? facultyRegister?.blocked) ? 'Faculty blocked' : 'Faculty unblocked' };
     }
 
-    async saveFaculty(faculty: any) {
+    async saveFaculty(faculty) {
         return faculty.save();
     }
 }

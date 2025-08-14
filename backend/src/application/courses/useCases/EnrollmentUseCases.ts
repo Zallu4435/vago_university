@@ -14,6 +14,7 @@ import {
   InvalidEnrollmentIdError,
 } from "../../../domain/courses/errors/CourseErrors";
 import { EnrollmentStatus } from "../../../domain/courses/entities/coursetypes";
+import { PopulatedEnrollment } from "../../../domain/courses/entities/EnrollmentResponseEntities";
 
 export interface IGetEnrollmentsUseCase {
   execute(params: GetEnrollmentsRequestDTO): Promise<{ success: boolean; data: GetEnrollmentsResponseDTO }>;
@@ -36,7 +37,7 @@ export class GetEnrollmentsUseCase implements IGetEnrollmentsUseCase {
 
   async execute(params: GetEnrollmentsRequestDTO): Promise<{ success: boolean; data: GetEnrollmentsResponseDTO }> {
     const { enrollments, totalItems, page, limit } = await this.courseRepository.getEnrollments(params);
-    const mappedEnrollments: SimplifiedEnrollmentDTO[] = enrollments.map((enrollment) => ({
+    const mappedEnrollments: SimplifiedEnrollmentDTO[] = enrollments.map((enrollment: PopulatedEnrollment) => ({
       id: enrollment._id.toString(),
       studentName: enrollment.studentId?.email || "Unknown",
       studentId: enrollment.studentId?._id?.toString() || "",
@@ -64,10 +65,7 @@ export class ApproveEnrollmentUseCase implements IApproveEnrollmentUseCase {
   constructor(private readonly courseRepository: ICoursesRepository) {}
 
   async execute(params: ApproveEnrollmentRequestDTO): Promise<{ success: boolean; data: void }> {
-    const enrollment: any = await this.courseRepository.approveEnrollment(params);
-    if (!enrollment) {
-      throw new EnrollmentNotFoundError(params.enrollmentId);
-    }
+    await this.courseRepository.approveEnrollment(params);
     return { success: true, data: undefined };
   }
 }
@@ -76,10 +74,7 @@ export class RejectEnrollmentUseCase implements IRejectEnrollmentUseCase {
   constructor(private readonly courseRepository: ICoursesRepository) {}
 
   async execute(params: RejectEnrollmentRequestDTO): Promise<{ success: boolean; data: void }> {
-    const enrollment: any = await this.courseRepository.rejectEnrollment(params);
-    if (!enrollment) {
-      throw new EnrollmentNotFoundError(params.enrollmentId);
-    }
+    await this.courseRepository.rejectEnrollment(params);
     return { success: true, data: undefined };
   }
 }
@@ -91,7 +86,7 @@ export class GetCourseRequestDetailsUseCase implements IGetCourseRequestDetailsU
     if (!params.id) {
       throw new InvalidEnrollmentIdError();
     }
-    const enrollment: any = await this.courseRepository.getCourseRequestDetails(params);
+    const enrollment: PopulatedEnrollment = await this.courseRepository.getCourseRequestDetails(params);
     if (!enrollment) {
       throw new EnrollmentNotFoundError(params.id);
     }

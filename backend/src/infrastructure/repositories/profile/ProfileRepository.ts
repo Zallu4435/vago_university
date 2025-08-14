@@ -14,7 +14,7 @@ export class ProfileRepository implements IProfileRepository {
         let isFaculty = false;
         if (!user) {
             const faculty = await Faculty.findById(params.userId).select("firstName lastName email phone profilePicture passwordChangedAt");
-            user = faculty as any;
+            user = faculty;
             isFaculty = true;
         }
         return { user, isFaculty };
@@ -25,7 +25,7 @@ export class ProfileRepository implements IProfileRepository {
         let isFaculty = false;
         if (!user) {
             const faculty = await Faculty.findById(params.userId);
-            user = faculty as any;
+            user = faculty;
             isFaculty = true;
         }
         return { user, isFaculty };
@@ -41,7 +41,7 @@ export class ProfileRepository implements IProfileRepository {
         return faculty;
     }
 
-    async saveUser(user: any) {
+    async saveUser(user) {
         return await user.save();
     }
 
@@ -49,7 +49,7 @@ export class ProfileRepository implements IProfileRepository {
         let user = await User.findById(params.userId);
         if (!user) {
             const faculty = await Faculty.findById(params.userId);
-            user = faculty as any;
+            user = faculty;
         }
         return user;
     }
@@ -58,7 +58,7 @@ export class ProfileRepository implements IProfileRepository {
         let user = await User.findById(params.userId);
         if (!user) {
             const faculty = await Faculty.findById(params.userId);
-            user = faculty as any;
+            user = faculty;
         }
         return user;
     }

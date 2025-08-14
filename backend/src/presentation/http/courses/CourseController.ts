@@ -46,7 +46,8 @@ export class CourseController implements ICourseController {
   }
 
   async createCourse(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const params: CreateCourseRequestDTO = httpRequest.body;
+    const { _id: _omitId, id: _omitStringId, ...body } = (httpRequest.body || {}) as Record<string, unknown>;
+    const params: CreateCourseRequestDTO = body as CreateCourseRequestDTO;
     const result = await this.createCourseUseCase.execute(params);
     if (!result.success) {
       return this.httpErrors.error_400("Failed to create course");
@@ -56,9 +57,11 @@ export class CourseController implements ICourseController {
 
   async updateCourse(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params;
+    // Prevent client from overriding identifiers in the payload
+    const { _id: _omitId, id: _omitStringId, ...body } = (httpRequest.body || {}) as Record<string, unknown>;
     const params: UpdateCourseRequestDTO = {
       id,
-      ...httpRequest.body,
+      ...(body as any),
     };
     const result = await this.updateCourseUseCase.execute(params);
     if (!result.success) {

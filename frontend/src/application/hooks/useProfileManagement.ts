@@ -27,7 +27,7 @@ export const useProfileManagement = () => {
       toast.success('Profile updated successfully');
       setIsEditing(false);
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to update profile');
     },
   });
@@ -37,7 +37,7 @@ export const useProfileManagement = () => {
     onSuccess: () => {
       toast.success('Password changed successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.log('Password change error:', error);
       toast.error(error.message || 'Failed to change password');
     },
@@ -51,7 +51,7 @@ export const useProfileManagement = () => {
       );
       toast.success('Profile picture updated successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to update profile picture');
     },
   });

@@ -223,7 +223,7 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
               >
                 <FaBell className={`${styles.icon.primary} group-hover:scale-110 transition-transform duration-200`} size={20} />
                 {unreadCount > 0 && (
-                  <div className={`absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br ${styles.status.error} rounded-full text-xs flex items-center justify-center text-white font-bold shadow-lg animate-pulse`}>
+                  <div className={`absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full text-xs flex items-center justify-center text-white font-bold shadow-lg animate-pulse`}>
                     {unreadCount}
                   </div>
                 )}

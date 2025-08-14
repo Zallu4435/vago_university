@@ -23,6 +23,7 @@ import {
     DeleteChargeResponseDTO,
 } from "../../../domain/financial/dtos/FinancialResponseDTOs";
 import { IFinancialRepository } from "../../../application/financial/repositories/IFinancialRepository";
+import { ChargeDocument, FinancialInfoDocument, PaymentDocument } from "../../../domain/financial/financialtypes";
 import mongoose from 'mongoose';
 
 const razorpay = new Razorpay({
@@ -48,9 +49,9 @@ export class FinancialRepository implements IFinancialRepository {
                 };
             }
 
-            const allCharges = await (ChargeModel as any).find({}).lean();
+            const allCharges = await ChargeModel.find({}).lean() as unknown as ChargeDocument[];
 
-            const applicableCharges = allCharges.filter((charge: any) => {
+            const applicableCharges = allCharges.filter((charge) => {
                 if (charge.applicableFor === "All Students") {
                     return true;
                 }
@@ -62,12 +63,12 @@ export class FinancialRepository implements IFinancialRepository {
                 return false;
             });
 
-            const studentFinancialInfo = await (StudentFinancialInfoModel as any).find({
+            const studentFinancialInfo = await StudentFinancialInfoModel.find({
                 studentId: params.studentId
             }).populate('paymentId').lean();
 
-            const formattedCharges = applicableCharges.map((charge: any) => {
-                const financialInfo = studentFinancialInfo.find((info: any) =>
+            const formattedCharges = applicableCharges.map((charge) => {
+                const financialInfo = studentFinancialInfo.find((info) =>
                     info.chargeId.toString() === charge._id.toString() &&
                     info.status === "Paid"
                 );
@@ -93,15 +94,15 @@ export class FinancialRepository implements IFinancialRepository {
             });
 
             const formattedHistory = studentFinancialInfo
-                .filter((info: any) => info.status === "Paid")
-                .map((info: any) => ({
+                .filter((info) => info.status === "Paid")
+                .map((info) => ({
                     id: info.paymentId ? info.paymentId.toString() : undefined,
                     paidAt: info.paidAt.toISOString(),
                     chargeTitle: info.chargeId ? "Payment for " + info.term : "Payment",
                     method: info.method,
                     amount: info.amount,
                 }))
-                .sort((a: any, b: any) => new Date(b.paidAt).getTime() - new Date(a.paidAt).getTime());
+                .sort((a, b) => new Date(b.paidAt).getTime() - new Date(a.paidAt).getTime());
 
 
             const unpaidCharges = formattedCharges.filter(charge => charge.status === "Pending");
@@ -134,8 +135,8 @@ export class FinancialRepository implements IFinancialRepository {
             }
         }
 
-        const total = await (PaymentModel as any).countDocuments(query);
-        const payments = await (PaymentModel as any).find(query)
+        const total = await PaymentModel.countDocuments(query);
+        const payments = await PaymentModel.find(query)
             .sort({ date: -1 })
             .skip((params.page - 1) * params.limit)
             .limit(params.limit)
@@ -162,7 +163,7 @@ export class FinancialRepository implements IFinancialRepository {
     }
 
     async getOnePayment(params: GetOnePaymentRequestDTO): Promise<GetOnePaymentResponseDTO> {
-        const payment = await (PaymentModel as any).findById(params.paymentId).lean();
+        const payment = await PaymentModel.findById(params.paymentId).lean();
         if (!payment) {
             throw new Error(FinancialErrorType.PaymentNotFound);
         }
@@ -187,12 +188,12 @@ export class FinancialRepository implements IFinancialRepository {
             throw new Error('Charge ID is required for payment');
         }
 
-        const charge = await (ChargeModel as any).findById(params.chargeId).lean();
+        const charge = await ChargeModel.findById(params.chargeId).lean();
         if (!charge) {
             throw new Error(`Charge with ID ${params.chargeId} not found`);
         }
 
-        const existingPending = await (StudentFinancialInfoModel as any).findOne({
+        const existingPending = await StudentFinancialInfoModel.findOne({
             studentId: params.studentId,
             chargeId: params.chargeId,
             status: "Pending",
@@ -206,13 +207,13 @@ export class FinancialRepository implements IFinancialRepository {
             if (timeSinceStart < fiveMinutesInMs) {
                 throw new Error("Payment for this charge is already in progress. Please complete the transaction in your other tab or wait for the pending transaction to expire.");
             } else {
-                await (StudentFinancialInfoModel as any).deleteOne({
+                await StudentFinancialInfoModel.deleteOne({
                     _id: existingPending._id
                 });
             }
         }
 
-        const existingPaid = await (StudentFinancialInfoModel as any).findOne({
+        const existingPaid = await StudentFinancialInfoModel.findOne({
             studentId: params.studentId,
             chargeId: params.chargeId,
             status: "Paid"
@@ -222,7 +223,7 @@ export class FinancialRepository implements IFinancialRepository {
             throw new Error("This charge has already been paid.");
         }
 
-        const transactionLock = new (StudentFinancialInfoModel as any)({
+        const transactionLock = new StudentFinancialInfoModel({
             studentId: params.studentId,
             chargeId: charge._id,
             amount: params.amount,
@@ -247,7 +248,7 @@ export class FinancialRepository implements IFinancialRepository {
                         throw new Error(FinancialErrorType.InvalidPaymentSignature);
                     }
 
-                    const payment = await (PaymentModel as any).findOneAndUpdate(
+                    const payment = await PaymentModel.findOneAndUpdate(
                         { "metadata.razorpayOrderId": params.razorpayOrderId, studentId: params.studentId },
                         {
                             $set: {
@@ -265,7 +266,7 @@ export class FinancialRepository implements IFinancialRepository {
                         throw new Error(FinancialErrorType.PaymentNotFound);
                     }
 
-                    await (StudentFinancialInfoModel as any).findByIdAndUpdate(
+                    await StudentFinancialInfoModel.findByIdAndUpdate(
                         transactionLock._id,
                         {
                             paymentId: payment._id,
@@ -310,7 +311,7 @@ export class FinancialRepository implements IFinancialRepository {
 
                     await payment.save();
 
-                    await (StudentFinancialInfoModel as any).findByIdAndUpdate(
+                    await StudentFinancialInfoModel.findByIdAndUpdate(
                         transactionLock._id,
                         {
                             paymentId: payment._id
@@ -341,7 +342,7 @@ export class FinancialRepository implements IFinancialRepository {
 
                 await payment.save();
 
-                await (StudentFinancialInfoModel as any).findByIdAndUpdate(
+                await StudentFinancialInfoModel.findByIdAndUpdate(
                     transactionLock._id,
                     {
                         paymentId: payment._id,
@@ -362,13 +363,13 @@ export class FinancialRepository implements IFinancialRepository {
             }
         } catch (error) {
             console.error('[FinancialRepository] Error during payment processing:', error);
-            await (StudentFinancialInfoModel as any).findByIdAndDelete(transactionLock._id);
+            await StudentFinancialInfoModel.findByIdAndDelete(transactionLock._id);
             console.log(`[FinancialRepository] Removed transaction lock ${transactionLock._id} due to error`);
             throw error;
         }
     }
 
-    async uploadDocument(params: any): Promise<any> {
+    async uploadDocument(params) {
         const result = await cloudinary.uploader.upload(params.file.path, {
             folder: "financial-documents",
         });
@@ -377,16 +378,16 @@ export class FinancialRepository implements IFinancialRepository {
         };
     }
 
-    async getPaymentReceipt(params: any): Promise<any> {
-        const payment = await (PaymentModel as any).findById(params.paymentId).lean();
+    async getPaymentReceipt(params) {
+        const payment = await PaymentModel.findById(params.paymentId).lean();
         if (!payment) throw new Error(FinancialErrorType.PaymentNotFound);
         return {
             url: payment.receiptUrl || "",
         };
     }
 
-    async createCharge(params: any): Promise<any> {
-        const charge = new (ChargeModel as any)({
+    async createCharge(params) {
+        const charge = new ChargeModel({
             title: params.title,
             description: params.description,
             amount: params.amount,
@@ -432,15 +433,15 @@ export class FinancialRepository implements IFinancialRepository {
             ];
         }
 
-        const total = await (ChargeModel as any).countDocuments(query);
-        const charges = await (ChargeModel as any).find(query)
+        const total = await ChargeModel.countDocuments(query);
+        const charges = await ChargeModel.find(query)
             .sort({ createdAt: -1 })
             .skip((params.page - 1) * params.limit)
             .limit(params.limit)
             .lean();
 
         return {
-            data: charges.map((charge: any) => ({
+            data: charges.map((charge) => ({
                 id: charge._id.toString(),
                 title: charge.title,
                 description: charge.description,
@@ -459,7 +460,7 @@ export class FinancialRepository implements IFinancialRepository {
 
     async updateCharge(params: UpdateChargeRequestDTO): Promise<UpdateChargeResponseDTO> {
         const { id, ...updateFields } = params;
-        const updated = await (ChargeModel as any).findByIdAndUpdate(
+        const updated = await ChargeModel.findByIdAndUpdate(
             id,
             { $set: updateFields },
             { new: true }
@@ -483,25 +484,25 @@ export class FinancialRepository implements IFinancialRepository {
     }
 
     async deleteCharge(params: DeleteChargeRequestDTO): Promise<DeleteChargeResponseDTO> {
-        const deleted = await (ChargeModel as any).findByIdAndDelete(params.id);
+        const deleted = await ChargeModel.findByIdAndDelete(params.id);
         return { success: !!deleted };
     }
 
     async hasPendingPayment(studentId: string): Promise<boolean> {
-        const pending = await (PaymentModel as any).exists({ studentId, status: 'Pending' });
+        const pending = await PaymentModel.exists({ studentId, status: 'Pending' });
         console.log(pending, "sonsoosndonson")
         return !!pending;
     }
 
     async clearPendingPayment(studentId: string): Promise<boolean> {
         try {
-            await (StudentFinancialInfoModel as any).deleteMany({
+            await StudentFinancialInfoModel.deleteMany({
                 studentId: studentId,
                 status: "Pending",
                 paymentId: { $exists: false }
             });
 
-            await (PaymentModel as any).updateMany(
+            await PaymentModel.updateMany(
                 {
                     studentId: studentId,
                     status: 'Pending'
@@ -514,14 +515,14 @@ export class FinancialRepository implements IFinancialRepository {
                 }
             );
 
-            const cancelledPayments = await (PaymentModel as any).find({
+            const cancelledPayments = await PaymentModel.find({
                 studentId: studentId,
                 status: 'Cancelled'
             }).select('_id').lean();
 
             if (cancelledPayments.length > 0) {
                 const cancelledPaymentIds = cancelledPayments.map(p => p._id);
-                await (StudentFinancialInfoModel as any).deleteMany({
+                await StudentFinancialInfoModel.deleteMany({
                     studentId: studentId,
                     paymentId: { $in: cancelledPaymentIds },
                     status: 'Pending'

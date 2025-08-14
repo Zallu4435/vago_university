@@ -333,7 +333,7 @@ export class ChatRepository implements IChatRepository {
     if (!chat) throw new Error('Chat not found');
     if (chat.type === 'direct') {
       const receiverId = chat.participants.find((id: string) => id !== senderId);
-      if (receiverId && chat.blockedUsers.some((entry: any) => entry.blocker === receiverId && entry.blocked === senderId)) {
+      if (receiverId && chat.blockedUsers.some((entry) => entry.blocker === receiverId && entry.blocked === senderId)) {
         throw new Error('You are blocked and cannot send messages to this user.');
       }
     }
@@ -760,7 +760,7 @@ export class ChatRepository implements IChatRepository {
         throw new Error('Only admins can update group settings');
       }
 
-      const updateQuery: { [key: string]: any } = {};
+      const updateQuery: { [key: string]: boolean } = {};
       for (const key in settings) {
         if (Object.prototype.hasOwnProperty.call(settings, key)) {
           updateQuery[`settings.${key}`] = settings[key as keyof typeof settings];

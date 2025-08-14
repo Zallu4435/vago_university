@@ -33,13 +33,13 @@ export enum RejectedBy {
 export interface IAdmissionDraftBase extends IBase {
   applicationId: string;
   registerId: string; // Use string instead of ObjectId
-  personal: any;
-  choiceOfStudy: any[];
-  education: any;
-  achievements: any;
-  otherInformation: any;
-  documents: any;
-  declaration: any;
+  personal: Record<string, unknown>;
+  choiceOfStudy: Record<string, unknown>[];
+  education: Record<string, unknown>;
+  achievements: Record<string, unknown>;
+  otherInformation: Record<string, unknown>;
+  documents: Record<string, unknown>;
+  declaration: Record<string, unknown>;
   completedSteps: string[];
 }
 
@@ -48,13 +48,13 @@ export interface AdmissionDraftProps {
   id?: string;
   applicationId: string;
   registerId: string;
-  personal?: any;
-  choiceOfStudy?: any[];
-  education?: any;
-  achievements?: any;
-  otherInformation?: any;
-  documents?: any;
-  declaration?: any;
+  personal?: Record<string, unknown>;
+  choiceOfStudy?: Record<string, unknown>[];
+  education?: Record<string, unknown>;
+  achievements?: Record<string, unknown>;
+  otherInformation?: Record<string, unknown>;
+  documents?: Record<string, unknown>;
+  declaration?: Record<string, unknown>;
   completedSteps?: string[];
   createdAt?: Date;
   updatedAt?: Date;

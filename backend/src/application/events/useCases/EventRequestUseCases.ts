@@ -3,6 +3,7 @@ import { GetEventRequestsResponseDTO, GetEventRequestDetailsResponseDTO } from "
 import { IEventsRepository } from "../repositories/IEventsRepository";
 import mongoose from "mongoose";
 import { InvalidEventRequestIdError, EventRequestNotFoundError, AssociatedEventNotFoundError, InvalidEventStatusError } from "../../../domain/events/errors/EventErrors";
+import { PaginatedResponse, SimplifiedEventRequest, EventRequestDetails, EventRequestDocument } from "../../../domain/events/entities/Event";
 
 export interface IGetEventRequestsUseCase {
   execute(params: GetEventRequestsRequestDTO): Promise<GetEventRequestsResponseDTO>;
@@ -34,7 +35,7 @@ export class GetEventRequestsUseCase implements IGetEventRequestsUseCase {
       throw new Error("Invalid endDate format");
     }
 
-    const result: any = await this.eventsRepository.getEventRequests(
+    const result = await this.eventsRepository.getEventRequests(
       params.page,
       params.limit,
       params.status,
@@ -46,16 +47,39 @@ export class GetEventRequestsUseCase implements IGetEventRequestsUseCase {
       params.dateRange
     );
     
-    const filteredRequests = result.events.filter((req) => req.eventId);
-    const mappedRequests = filteredRequests.map((req) => ({
-      eventName: req.eventId?.title || "Unknown Event",
-      requestedId: req._id.toString(),
-      requestedBy: req.userId?.email || "Unknown User",
-      type: req.eventId?.eventType || "Unknown Type",
-      requestedDate: req.createdAt ? new Date(req.createdAt).toISOString() : "N/A",
-      status: req.status || "pending",
-      proposedDate: req.eventId?.date ? new Date(req.eventId.date).toISOString() : "N/A",
-    }));
+    // Use EventRequestDocument for filter and map
+    const filteredRequests = result.events.filter((req) => {
+      // eventId can be string or EventDocument
+      if (typeof req.eventId === 'object' && req.eventId !== null && 'title' in req.eventId) {
+        return true;
+      }
+      return false;
+    });
+    const mappedRequests = filteredRequests.map((req) => {
+      let eventName = "Unknown Event";
+      let type = "Unknown Type";
+      let proposedDate = "N/A";
+      if (typeof req.eventId === 'object' && req.eventId !== null) {
+        eventName = req.eventId.title || eventName;
+        type = (req.eventId as { eventType?: string }).eventType || type;
+        if ('date' in req.eventId && req.eventId.date) {
+          proposedDate = new Date(req.eventId.date).toISOString();
+        }
+      }
+      let requestedBy = "Unknown User";
+      if (typeof req.userId === 'object' && req.userId !== null && 'email' in req.userId) {
+        requestedBy = req.userId.email;
+      }
+      return {
+        eventName,
+        requestedId: req._id.toString(),
+        requestedBy,
+        type,
+        requestedDate: req.createdAt ? new Date(req.createdAt).toISOString() : "N/A",
+        status: req.status || "pending",
+        proposedDate,
+      };
+    });
 
     return {
       data: mappedRequests,
@@ -73,7 +97,7 @@ export class ApproveEventRequestUseCase implements IApproveEventRequestUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new InvalidEventRequestIdError(params.id);
     }
-    const eventRequestDetails: any = await this.eventsRepository.getEventRequestDetails(params.id);
+    const eventRequestDetails: EventRequestDetails | null = await this.eventsRepository.getEventRequestDetails(params.id);
     if (!eventRequestDetails) {
       throw new EventRequestNotFoundError(params.id);
     }
@@ -92,7 +116,7 @@ export class RejectEventRequestUseCase implements IRejectEventRequestUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new InvalidEventRequestIdError(params.id);
     }
-    const eventRequestDetails: any = await this.eventsRepository.getEventRequestDetails(params.id);
+    const eventRequestDetails: EventRequestDetails | null = await this.eventsRepository.getEventRequestDetails(params.id);
     if (!eventRequestDetails) {
       throw new EventRequestNotFoundError(params.id);
     }
@@ -111,7 +135,7 @@ export class GetEventRequestDetailsUseCase implements IGetEventRequestDetailsUse
     if (!mongoose.isValidObjectId(params.id)) {
       throw new InvalidEventRequestIdError(params.id);
     }
-    const eventRequest: any = await this.eventsRepository.getEventRequestDetails(params.id);
+    const eventRequest: EventRequestDetails | null = await this.eventsRepository.getEventRequestDetails(params.id);
     if (!eventRequest) {
       throw new EventRequestNotFoundError(params.id);
     }
@@ -120,14 +144,14 @@ export class GetEventRequestDetailsUseCase implements IGetEventRequestDetailsUse
     }
     return {
       eventRequest: {
-        id: eventRequest._id.toString(),
+        id: eventRequest._id,
         status: eventRequest.status,
-        createdAt: eventRequest.createdAt.toISOString(),
-        updatedAt: eventRequest.updatedAt.toISOString(),
+        createdAt: eventRequest.createdAt,
+        updatedAt: eventRequest.updatedAt,
         whyJoin: eventRequest.whyJoin,
         additionalInfo: eventRequest.additionalInfo || "",
         event: {
-          id: eventRequest.eventId._id.toString(),
+          id: eventRequest.eventId._id,
           title: eventRequest.eventId.title,
           description: eventRequest.eventId.description,
           date: eventRequest.eventId.date,
@@ -136,8 +160,8 @@ export class GetEventRequestDetailsUseCase implements IGetEventRequestDetailsUse
         },
         user: eventRequest.userId
           ? {
-            id: eventRequest.userId._id.toString(),
-            name: `${eventRequest.userId.firstName} ${eventRequest.userId.lastName}`.trim(),
+            id: eventRequest.userId._id,
+            name: eventRequest.userId.name,
             email: eventRequest.userId.email,
           }
           : undefined,

@@ -1,7 +1,7 @@
 export interface ChapterItemProps {
   chapter: Chapter;
   courseId: string;
-  styles: any;
+  styles: unknown;
   isFirst: boolean;
   isPrevCompleted: boolean;
   isCompleted: boolean;
@@ -20,7 +20,7 @@ export interface Chapter {
   order?: number;
   isCompleted?: boolean;
   isBookmarked?: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface DiplomaCourse {
@@ -32,13 +32,13 @@ export interface DiplomaCourse {
   createdAt?: string;
   updatedAt?: string;
   isEnrolled?: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface DiplomaCardProps {
   course: DiplomaCourse;
   index: number;
-  styles: any;
+  styles: unknown;
   userAdmitted: boolean;
   completedChapters: Set<string>;
   onViewDetails: (course: DiplomaCourse) => void;
@@ -46,7 +46,7 @@ export interface DiplomaCardProps {
 }
 
 export interface VideoPlayerProps {
-  styles: any;
+  styles: unknown;
   isPlaying: boolean;
   videoProgress: number;
   onPlayPause: () => void;

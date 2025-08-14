@@ -7,6 +7,7 @@ import {
   CompletedChaptersResponse,
   BookmarkedChaptersResponse
 } from '../../domain/types/diploma';
+import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 
 
 class DiplomaService {
@@ -29,9 +30,12 @@ class DiplomaService {
 
             const response = await httpClient.get<DiplomaApiResponse>('/diploma-courses', { params });
             return response.data.data;
-        } catch (error: any) {
-            console.error('getDiplomaCourses error:', error);
-            throw new Error(error.response?.data?.error || 'Failed to fetch diploma courses');
+        } catch (error: unknown) {
+            if (isAxiosErrorWithApiError(error)) {
+                console.error('getDiplomaCourses error:', error);
+                throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch diploma courses');
+            }
+            throw new Error('Failed to fetch diploma courses');
         }
     }
 
@@ -40,8 +44,11 @@ class DiplomaService {
             const response = await httpClient.get<DiplomaCourseResponse>(`/diploma-courses/${id}`);
             console.log('[DiplomaService] getDiplomaCourseById response:', response.data);
             return response.data.data;
-        } catch (error: any) {
-            throw new Error(error.response?.data?.error || 'Failed to fetch diploma course');
+        } catch (error: unknown) {
+            if (isAxiosErrorWithApiError(error)) {
+                throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch diploma course');
+            }
+            throw new Error('Failed to fetch diploma course');
         }
     }
 
@@ -50,32 +57,44 @@ class DiplomaService {
             const response = await httpClient.get<ChapterResponse>(`/diploma-courses/${courseId}/chapters/${chapterId}`);
             console.log(response.data, "oooooooooooooooooooooooooooooooooomb")
             return response.data.data.chapter;
-        } catch (error: any) {
-            throw new Error(error.response?.data?.error || 'Failed to fetch chapter');
+        } catch (error: unknown) {
+            if (isAxiosErrorWithApiError(error)) {
+                throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch chapter');
+            }
+            throw new Error('Failed to fetch chapter');
         }
     }
 
     async updateVideoProgress(courseId: string, chapterId: string, progress: number): Promise<void> {
         try {
             await httpClient.post(`/diploma-courses/${courseId}/chapters/${chapterId}/progress`, { progress });
-        } catch (error: any) {
-            throw new Error(error.response?.data?.error || 'Failed to update video progress');
+        } catch (error: unknown) {
+            if (isAxiosErrorWithApiError(error)) {
+                throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to update video progress');
+            }
+            throw new Error('Failed to update video progress');
         }
     }
 
     async markChapterComplete(courseId: string, chapterId: string): Promise<void> {
         try {
             await httpClient.post(`/diploma-courses/${courseId}/chapters/${chapterId}/complete`);
-        } catch (error: any) {
-            throw new Error(error.response?.data?.error || 'Failed to mark chapter as complete');
+        } catch (error: unknown) {
+            if (isAxiosErrorWithApiError(error)) {
+                throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to mark chapter as complete');
+            }
+            throw new Error('Failed to mark chapter as complete');
         }
     }
 
     async toggleBookmark(courseId: string, chapterId: string): Promise<void> {
         try {
             await httpClient.post(`/diploma-courses/${courseId}/chapters/${chapterId}/bookmark`);
-        } catch (error: any) {
-            throw new Error(error.response?.data?.error || 'Failed to toggle bookmark');
+        } catch (error: unknown) {
+            if (isAxiosErrorWithApiError(error)) {
+                throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to toggle bookmark');
+            }
+            throw new Error('Failed to toggle bookmark');
         }
     }
 
@@ -83,8 +102,11 @@ class DiplomaService {
         try {
             const response = await httpClient.get<CompletedChaptersResponse>(`/diploma-courses/${courseId}/completed-chapters`);
             return response.data.data.chapters;
-        } catch (error: any) {
-            throw new Error(error.response?.data?.error || 'Failed to fetch completed chapters');
+        } catch (error: unknown) {
+            if (isAxiosErrorWithApiError(error)) {
+                throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch completed chapters');
+            }
+            throw new Error('Failed to fetch completed chapters');
         }
     }
 
@@ -92,8 +114,11 @@ class DiplomaService {
         try {
             const response = await httpClient.get<BookmarkedChaptersResponse>(`/diploma-courses/${courseId}/bookmarked-chapters`);
             return response.data.data.chapters;
-        } catch (error: any) {
-            throw new Error(error.response?.data?.error || 'Failed to fetch bookmarked chapters');
+        } catch (error: unknown) {
+            if (isAxiosErrorWithApiError(error)) {
+                throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch bookmarked chapters');
+            }
+            throw new Error('Failed to fetch bookmarked chapters');
         }
     }
 }

@@ -1,6 +1,30 @@
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IMaterialController } from '../IHttp';
 import { IGetMaterialByIdUseCase, ICreateMaterialUseCase, IUpdateMaterialUseCase, IDeleteMaterialUseCase, IGetMaterialsUseCase } from '../../../application/materials/useCases/MaterialUseCases';
 
+// File upload types for clean architecture
+interface UploadedFile {
+  fieldname: string;
+  originalname: string;
+  path: string;
+  mimetype: string;
+  size: number;
+}
+
+interface MaterialUpdateData {
+  id: string;
+  title?: string;
+  description?: string;
+  subject?: string;
+  course?: string;
+  semester?: string;
+  tags?: string[];
+  isNewMaterial?: boolean;
+  isRestricted?: boolean;
+  fileUrl?: string;
+  thumbnailUrl?: string;
+  [key: string]: unknown;
+}
+
 export class MaterialController implements IMaterialController {
   private httpErrors: HttpErrors;
   private httpSuccess: HttpSuccess;
@@ -40,8 +64,8 @@ export class MaterialController implements IMaterialController {
         return this.httpErrors.error_400();
       }
     
-    let file, thumbnail;
-    const files = httpRequest.files as any;
+    let file: UploadedFile | undefined, thumbnail: UploadedFile | undefined;
+    const files = httpRequest.files as UploadedFile[] | { [fieldname: string]: UploadedFile[] };
     if (Array.isArray(files)) {
       file = files.find((f) => f.fieldname === 'file');
       thumbnail = files.find((f) => f.fieldname === 'thumbnail');
@@ -74,8 +98,8 @@ export class MaterialController implements IMaterialController {
         return this.httpErrors.error_400();
       }
     
-    let file, thumbnail;
-    const files = httpRequest.files as any;
+    let file: UploadedFile | undefined, thumbnail: UploadedFile | undefined;
+    const files = httpRequest.files as UploadedFile[] | { [fieldname: string]: UploadedFile[] };
     if (Array.isArray(files)) {
       file = files.find((f) => f.fieldname === 'file');
       thumbnail = files.find((f) => f.fieldname === 'thumbnail');
@@ -84,7 +108,7 @@ export class MaterialController implements IMaterialController {
       thumbnail = files.thumbnail?.[0];
     }
     
-    const updateData: any = {
+    const updateData: MaterialUpdateData = {
       id,
           ...httpRequest.body,
       ...(httpRequest.body.isNew !== undefined && { isNewMaterial: httpRequest.body.isNew === 'true' }),

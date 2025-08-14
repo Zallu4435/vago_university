@@ -1,7 +1,7 @@
 import { DiplomaCourse, Chapter } from "../../../domain/diploma/entities/diplomatypes";
  
 export interface IUserDiplomaRepository {
-  getUserDiplomas(page: number, limit: number, category: string, status: string, dateRange: string): Promise<{
+  getUserDiplomas(userId: string, page: number, limit: number, category: string, status: string, dateRange: string): Promise<{
     courses: DiplomaCourse[];
     total: number;
     page: number;

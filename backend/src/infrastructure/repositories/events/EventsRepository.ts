@@ -77,7 +77,7 @@ export class EventsRepository implements IEventsRepository {
   }
 
   async getEventById(id: string) {
-    return await (CampusEventModel as any).findById(id).lean();
+    return await CampusEventModel.findById(id).lean();
   }
 
   async createEvent(event: Event) {
@@ -85,9 +85,13 @@ export class EventsRepository implements IEventsRepository {
   }
 
   async updateEvent(event: Event) {
-    return await (CampusEventModel as any).findByIdAndUpdate(
+    const eventData = Object.fromEntries(
+      Object.entries(event).filter(([key]) => key !== '_id' && key !== 'id')
+    );
+    
+    return await CampusEventModel.findByIdAndUpdate(
       event.id,
-      { $set: event },
+      { $set: eventData },
       { new: true }
     ).lean();
   }
@@ -164,18 +168,18 @@ export class EventsRepository implements IEventsRepository {
       ];
     }
 
-    const matchingEvents = await (CampusEventModel as any).find(eventQuery)
+    const matchingEvents = await CampusEventModel.find(eventQuery)
       .select("_id")
       .lean();
-    const eventIds = matchingEvents.map((event: any) => event._id);
+    const eventIds = matchingEvents.map((event) => event._id);
     if (eventIds.length > 0) {
       query.eventId = { $in: eventIds };
     }
 
-    const totalItems = await (EventRequestModel as any).countDocuments(query);
+    const totalItems = await EventRequestModel.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
     const skip = (page - 1) * limit;
-    const rawRequests = await (EventRequestModel as any).find(query)
+    const rawRequests = await EventRequestModel.find(query)
       .populate({
         path: "eventId",
         select: "title eventType date organizer location description",
@@ -195,15 +199,15 @@ export class EventsRepository implements IEventsRepository {
   }
 
   async approveEventRequest(id: string) {
-    await (EventRequestModel as any).findByIdAndUpdate(
+    await EventRequestModel.findByIdAndUpdate(
       id,
       { status: EventRequestStatus.Approved, updatedAt: new Date() },
       { runValidators: true }
     );
 
-    const eventRequest = await (EventRequestModel as any).findById(id);
+    const eventRequest = await EventRequestModel.findById(id);
     if (eventRequest && eventRequest.eventId) {
-      await (CampusEventModel as any).findByIdAndUpdate(
+      await CampusEventModel.findByIdAndUpdate(
         eventRequest.eventId,
         { $inc: { participantsCount: 1 } },
         { new: true }
@@ -212,7 +216,7 @@ export class EventsRepository implements IEventsRepository {
   }
 
   async rejectEventRequest(id: string) {
-    await (EventRequestModel as any).findByIdAndUpdate(
+    await EventRequestModel.findByIdAndUpdate(
       id,
       { status: EventRequestStatus.Rejected, updatedAt: new Date() },
       { runValidators: true }
@@ -222,7 +226,7 @@ export class EventsRepository implements IEventsRepository {
   async getEventRequestDetails(
     id: string
   ) {
-    return await (EventRequestModel as any).findById(id)
+    return await EventRequestModel.findById(id)
       .populate({
         path: "eventId",
         select: "title description date location participantsCount",

@@ -57,7 +57,7 @@ export const diplomaBackendService = {
             },
             timeout: 60000, // 1 minute timeout for video uploads
         });
-        return response.data.video;
+        return response.data.data.video;
     },
 
     async updateVideo(videoId: string, videoData: Partial<Video> | FormData): Promise<Video> {
@@ -68,7 +68,12 @@ export const diplomaBackendService = {
         const isFormData = videoData instanceof FormData;
         
         if (!isFormData) {
-            console.log('diplomaBackendService: videoData.videoUrl =', (videoData as Partial<Video>).videoUrl);
+            console.log('[diplomaBackendService] updateVideo plain payload', videoData);
+        }
+        if (isFormData) {
+            const keys: string[] = [];
+            (videoData as FormData).forEach((_, key) => keys.push(key));
+            console.log('[diplomaBackendService] updateVideo FormData keys', keys);
         }
         
         const config = isFormData ? {
@@ -79,7 +84,7 @@ export const diplomaBackendService = {
         } : {};
         
         const response = await httpClient.put(`/admin/vedio/videos/${videoId}`, videoData, config);
-        return response.data.video;
+        return response.data.data.video;
     },
 
     async deleteVideo(videoId: string): Promise<void> {

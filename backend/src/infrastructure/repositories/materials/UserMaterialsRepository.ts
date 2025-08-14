@@ -2,7 +2,7 @@ import { IUserMaterialsRepository } from '../../../application/materials/reposit
 import { MaterialModel } from '../../database/mongoose/material/MaterialModel';
 
 export class UserMaterialsRepository implements IUserMaterialsRepository {
-  async find(filter: any, options: { skip?: number; limit?: number; sort?: any } = {}): Promise<any[]> {
+  async find(filter, options: { skip?: number; limit?: number; sort? } = {}) {
     return MaterialModel.find(filter)
       .sort(options.sort ?? {})
       .skip(options.skip ?? 0)
@@ -11,19 +11,19 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
       .populate('likes');
   }
 
-  async count(filter): Promise<number> {
+  async count(filter) {
     return MaterialModel.countDocuments(filter);
   }
 
-  async findById(id: string): Promise<any | null> {
+  async findById(id: string) {
     return MaterialModel.findById(id).populate('bookmarks').populate('likes');
   }
 
-  async update(id: string, data): Promise<any | null> {
+  async update(id: string, data) {
     return MaterialModel.findByIdAndUpdate(id, data, { new: true });
   }
 
-  async toggleBookmark(materialId: string, userId: string): Promise<void> {
+  async toggleBookmark(materialId: string, userId: string) {
     const material = await MaterialModel.findById(materialId);
     if (!material) throw new Error('Material not found');
     const bookmarkIndex = material.bookmarks.findIndex((b) => b.userId === userId);
@@ -35,7 +35,7 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
     await material.save();
   }
 
-  async toggleLike(materialId: string, userId: string): Promise<void> {
+  async toggleLike(materialId: string, userId: string) {
     const material = await MaterialModel.findById(materialId);
     if (!material) throw new Error('Material not found');
     const likeIndex = material.likes.findIndex((l) => l.userId === userId);
@@ -47,7 +47,7 @@ export class UserMaterialsRepository implements IUserMaterialsRepository {
     await material.save();
   }
 
-  async incrementDownloads(materialId: string): Promise<string> {
+  async incrementDownloads(materialId: string) {
     const material = await MaterialModel.findByIdAndUpdate(
       materialId,
       { $inc: { downloads: 1 } }, 

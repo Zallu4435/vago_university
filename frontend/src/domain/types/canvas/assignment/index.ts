@@ -47,7 +47,7 @@ export type FilterStatus = 'all' | 'draft' | 'published' | 'submitted' | 'graded
 
 export interface AssignmentCardProps {
     assignment: Assignment;
-    styles: any;
+    styles: unknown;
     onUpload: (assignment: Assignment) => void;
     onViewGrade: (assignment: Assignment) => void;
 }
@@ -59,7 +59,7 @@ export interface GradeModalProps {
 
 export interface UploadModalProps {
     assignment: Assignment;
-    styles: any;
+    styles: unknown;
     selectedFile: File | null;
     onClose: () => void;
     onFileSelect: (file: File) => void;

@@ -8,6 +8,7 @@ import {
   } from '../../domain/types/management/financialmanagement';
 import { StudentFinancialInfo } from '../../domain/types/user/financial';
   import httpClient from '../../frameworks/api/httpClient';
+  import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
   
   export class FinancialService {
     private static instance: FinancialService;
@@ -27,7 +28,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
       try {
         const response = await httpClient.get(`${this.baseUrl}/student-info`);
         return response.data.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch student financial info');
+        }
         throw new Error('Failed to fetch student financial info');
       }
     }
@@ -55,7 +59,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
           params: queryParams,
         });
         return response.data.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch all payments');
+        }
         throw new Error('Failed to fetch all payments');
       }
     }
@@ -64,7 +71,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
       try {
         const response = await httpClient.post(`${this.baseUrl}/payments`, payment);
         return response.data.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to process payment');
+        }
         throw new Error('Failed to process payment');
       }
     }
@@ -73,7 +83,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
       try {
         const response = await httpClient.get(`${this.baseUrl}/financial-aid`);
         return response.data.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch financial aid applications');
+        }
         throw new Error('Failed to fetch financial aid applications');
       }
     }
@@ -82,7 +95,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
       try {
         const response = await httpClient.get(`${this.adminBaseUrl}/financial-aid`);
         return response.data.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch all financial aid applications');
+        }
         throw new Error('Failed to fetch all financial aid applications');
       }
     }
@@ -91,7 +107,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
       try {
         const response = await httpClient.post(`${this.baseUrl}/financial-aid`, application);
         return response.data.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to submit financial aid application');
+        }
         throw new Error('Failed to submit financial aid application');
       }
     }
@@ -100,7 +119,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
       try {
         const response = await httpClient.patch(`${this.baseUrl}/financial-aid/${id}`, data);
         return response.data.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to update financial aid application');
+        }
         throw new Error('Failed to update financial aid application');
       }
     }
@@ -109,7 +131,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
       try {
         const response = await httpClient.get(`${this.baseUrl}/scholarships`);
         return response.data.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch available scholarships');
+        }
         throw new Error('Failed to fetch available scholarships');
       }
     }
@@ -118,7 +143,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
       try {
         const response = await httpClient.get(`${this.baseUrl}/scholarship-applications`);
         return response.data.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch scholarship applications');
+        }
         throw new Error('Failed to fetch scholarship applications');
       }
     }
@@ -127,7 +155,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
       try {
         const response = await httpClient.get(`${this.adminBaseUrl}/scholarship-applications`);
         return response.data.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch all scholarship applications');
+        }
         throw new Error('Failed to fetch all scholarship applications');
       }
     }
@@ -136,7 +167,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
       try {
         const response = await httpClient.post(`${this.baseUrl}/scholarship-applications`, application);
         return response.data.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to submit scholarship application');
+        }
         throw new Error('Failed to submit scholarship application');
       }
     }
@@ -145,7 +179,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
       try {
         const response = await httpClient.patch(`${this.baseUrl}/scholarship-applications/${id}`, data);
         return response.data.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to update scholarship application');
+        }
         throw new Error('Failed to update scholarship application');
       }
     }
@@ -162,7 +199,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
           },
         });
         return response.data.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to upload document');
+        }
         throw new Error('Failed to upload document');
       }
     }
@@ -178,7 +218,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
       try {
         const response = await httpClient.post(`${this.adminBaseUrl}/charges`, chargeData);
         return response.data.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to create charge');
+        }
         throw new Error('Failed to create charge');
       }
     }
@@ -201,7 +244,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
           }
         });
         return response.data.data.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch charges');
+        }
         throw new Error('Failed to fetch charges');
       }
     }
@@ -210,7 +256,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
       try {
         const response = await httpClient.patch(`${this.adminBaseUrl}/charges/${id}`, data);
         return response.data.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to update charge');
+        }
         throw new Error('Failed to update charge');
       }
     }
@@ -218,7 +267,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
     async deleteCharge(id: string): Promise<void> {
       try {
         await httpClient.delete(`${this.adminBaseUrl}/charges/${id}`);
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to delete charge');
+        }
         throw new Error('Failed to delete charge');
       }
     }
@@ -228,7 +280,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
         const response = await httpClient.get(`${this.adminBaseUrl}/payments/${paymentId}`);
         console.log(response.data.data.payment, "response.data.data.paymentresponse.data.data.payment")
         return response.data.data.payment;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch payment details');
+        }
         throw new Error('Failed to fetch payment details');
       }
     }
@@ -237,7 +292,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
       try {
         const response = await httpClient.post(`${this.baseUrl}/check-pending`);
         return response.data.data.hasPending;
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to check pending payment status');
+        }
         throw new Error('Failed to check pending payment status');
       }
     }
@@ -245,7 +303,10 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
     async clearPendingPayment(): Promise<void> {
       try {
         await httpClient.post(`${this.baseUrl}/clear-pending`);
-      } catch (error) {
+      } catch (error: unknown) {
+        if (isAxiosErrorWithApiError(error)) {
+          throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to clear pending payment status');
+        }
         console.error('Failed to clear pending payment:', error);
         throw new Error('Failed to clear pending payment status');
       }

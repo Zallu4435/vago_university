@@ -109,7 +109,7 @@ export const useDiplomaManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['diploma-course', selectedCourseId] });
       toast.success('Progress updated successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to update progress');
     },
   });
@@ -122,7 +122,7 @@ export const useDiplomaManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['diploma-course', selectedCourseId] });
       toast.success('Chapter marked as complete');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to mark chapter as complete');
     },
   });
@@ -134,7 +134,7 @@ export const useDiplomaManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['bookmarked-chapters', selectedCourseId] });
       toast.success('Bookmark toggled successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to toggle bookmark');
     },
   });

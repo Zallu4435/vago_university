@@ -77,7 +77,7 @@ export class GetClubByIdUseCase implements IGetClubByIdUseCase {
     if (!mongoose.isValidObjectId(dto.id)) {
       throw new Error("Invalid club ID");
     }
-    const club: any = await this.clubsRepository.getClubById(dto.id);
+    const club = await this.clubsRepository.getClubById(dto.id);
     if (!club) {
       throw new Error("Club not found!");
     }
@@ -89,9 +89,9 @@ export class CreateClubUseCase implements ICreateClubUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(dto: CreateClubRequestDTO): Promise<CreateClubResponseDTO> {
-    const newClub: any = await this.clubsRepository.createClub(dto);
+    const newClub = await this.clubsRepository.createClub(dto);
     return {
-      club: newClub
+      club: newClub.club
     };
   }
 }
@@ -103,12 +103,12 @@ export class UpdateClubUseCase implements IUpdateClubUseCase {
     if (!mongoose.isValidObjectId(dto.id)) {
       throw new Error("Invalid club ID");
     }
-    const updatedClub: any = await this.clubsRepository.updateClub(dto);
+    const updatedClub = await this.clubsRepository.updateClub(dto);
     if (!updatedClub) {
       throw new Error("Club not found!");
     }
     return {
-      club: updatedClub
+      club: updatedClub.club
     };
   }
 }

@@ -3,6 +3,7 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import multer from 'multer';
 import { IDocument } from '../../../domain/admission/entities/AdmissionTypes';
 import { DocumentUploadFailedException } from '../../../domain/admission/errors/AdmissionErrors';
+import { CloudinaryStorageParams } from '../../../config/cloudinary.types';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -13,10 +14,10 @@ cloudinary.config({
 const cloudinaryStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'admission-documents',
-    allowed_formats: ['pdf'],
-    transformation: [{ width: 1000, height: 1000, crop: 'limit' }],
-  } as any,
+    folder: () => 'admission-documents',
+    allowed_formats: () => ['pdf'],
+    transformation: () => [{ width: 1000, height: 1000, crop: 'limit' }],
+  } as CloudinaryStorageParams,
 });
 
 export const admissionDocumentUpload = multer({

@@ -1,6 +1,7 @@
 import httpClient from '../../frameworks/api/httpClient';
 import { LoginResponse } from '../../domain/types/auth/Login';
 import { RegisterResponse } from '../../domain/types/auth/Register';
+import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 
 interface ApiResponseWrapper<T> {
   data: T;
@@ -17,8 +18,11 @@ class AuthService {
     try {
       const response = await httpClient.post<RegisterResponse>('/auth/register', data);
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to register user');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || 'Failed to register user');
+      }
+      throw new Error('Failed to register user');
     }
   }
 
@@ -26,8 +30,11 @@ class AuthService {
     try {
       const response = await httpClient.post<ApiResponseWrapper<LoginResponse>>('/auth/login', data);
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to login');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || 'Failed to login');
+      }
+      throw new Error('Failed to login');
     }
   }
 
@@ -35,8 +42,11 @@ class AuthService {
     try {
       const response = await httpClient.post('/auth/send-email-otp', { email });
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to send OTP');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || 'Failed to send OTP');
+      }
+      throw new Error('Failed to send OTP');
     }
   }
 
@@ -44,17 +54,23 @@ class AuthService {
     try {
       const response = await httpClient.post<ApiResponseWrapper<{ resetToken: string }>>('/auth/verify-email-otp', { email, otp });
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to verify OTP');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || 'Failed to verify OTP');
+      }
+      throw new Error('Failed to verify OTP');
     }
   }
 
-  async resetPassword(resetToken: string, newPassword: string): Promise<{ token: string; user: any; collection: string }> {
+  async resetPassword(resetToken: string, newPassword: string): Promise<{ token: string; user: unknown; collection: string }> {
     try {
       const response = await httpClient.post('/auth/reset-password', { resetToken, newPassword });
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to reset password');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || 'Failed to reset password');
+      }
+      throw new Error('Failed to reset password');
     }
   }
 
@@ -62,16 +78,22 @@ class AuthService {
     try {
       const response = await httpClient.post('/auth/confirm-registration', { token });
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to confirm registration');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || 'Failed to confirm registration');
+      }
+      throw new Error('Failed to confirm registration');
     }
   }
 
   async logout(): Promise<void> {
     try {
       await httpClient.post('/auth/logout');
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to logout');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || 'Failed to logout');
+      }
+      throw new Error('Failed to logout');
     }
   }
 }

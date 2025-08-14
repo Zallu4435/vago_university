@@ -1,4 +1,4 @@
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema, model, Document } from "mongoose";
 import { 
   Club, 
   ClubRequest, 
@@ -41,9 +41,14 @@ clubSchema.pre("save", function (next) {
   next();
 });
 
-const clubRequestSchema = new Schema<ClubRequest>({
-  clubId: { type: Schema.Types.ObjectId, ref: "Club", required: true } as any,
-  userId: { type: Schema.Types.ObjectId, ref: "User", required: true } as any,
+type ClubRequestDocument = ClubRequest & Document & {
+  clubId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+};
+
+const clubRequestSchema = new Schema<ClubRequestDocument>({
+  clubId: { type: Schema.Types.ObjectId, ref: "Club", required: true },
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   status: {
     type: String,
     enum: Object.values(ClubRequestStatus),
@@ -63,7 +68,7 @@ export const ClubModel = mongoose.model<Club>(
   "Club", 
   clubSchema
 );
-export const ClubRequestModel = mongoose.model<ClubRequest>(
+export const ClubRequestModel = mongoose.model<ClubRequestDocument>(
   "ClubRequest", 
   clubRequestSchema
 );

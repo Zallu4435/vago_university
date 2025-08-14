@@ -39,7 +39,6 @@ const AdminDashboard = () => {
     error,
     refreshDashboard,
     dismissAlert,
-    markActivityAsRead
   } = useAdminDashboard();
 
   useEffect(() => {
@@ -127,14 +126,6 @@ const AdminDashboard = () => {
       await dismissAlert(alertId);
     } catch (error) {
       console.error('Failed to dismiss alert:', error);
-    }
-  };
-
-  const handleMarkActivityAsRead = async (activityId: string) => {
-    try {
-      await markActivityAsRead(activityId);
-    } catch (error) {
-      console.error('Failed to mark activity as read:', error);
     }
   };
 
@@ -332,7 +323,7 @@ const AdminDashboard = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <GlassPanel title="Recent Activities" icon={HiLightningBoltIcon}>
-            <RecentActivities activitiesData={safeActivitiesData} markActivityAsRead={handleMarkActivityAsRead} />
+            <RecentActivities activitiesData={safeActivitiesData} />
           </GlassPanel>
 
           <GlassPanel title="System Alerts" icon={HiBellIcon}>

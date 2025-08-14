@@ -48,6 +48,8 @@ export class GetCoursesUseCase implements IGetCoursesUseCase {
       faculty: course.faculty,
       term: course.term || "",
       credits: course.credits,
+      currentEnrollment: course.currentEnrollment || 0,
+      maxEnrollment: course.maxEnrollment || 0,
     }));
     return {
       success: true,
@@ -98,6 +100,7 @@ export class CreateCourseUseCase implements ICreateCourseUseCase {
 
   async execute(params: CreateCourseRequestDTO): Promise<{ success: boolean; data: CreateCourseResponseDTO }> {
     const newCourse = await this.courseRepository.createCourse(params);
+    console.log(newCourse)
     return {
       success: true,
       data: {

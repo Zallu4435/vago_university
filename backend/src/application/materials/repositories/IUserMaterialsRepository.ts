@@ -1,7 +1,7 @@
 import { MaterialProps } from '../../../domain/materials/entities/MaterialTypes';
 
 export interface IUserMaterialsRepository {
-  find(filter: Partial<MaterialProps>, options?: { skip?: number; limit?: number; sort?: any }): Promise<MaterialProps[]>;
+  find(filter: Partial<MaterialProps>, options?: { skip?: number; limit?: number; sort? }): Promise<MaterialProps[]>;
   count(filter: Partial<MaterialProps>): Promise<number>;
   findById(id: string): Promise<MaterialProps | null>;
   update(id: string, data: Partial<MaterialProps>): Promise<MaterialProps | null>;

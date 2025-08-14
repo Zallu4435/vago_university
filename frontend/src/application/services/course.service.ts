@@ -9,6 +9,7 @@ import {
   EnrollmentRequestsResponse,
   EnrollmentRequestDetailsResponse,
 } from "../../domain/types/course";
+import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 
 class CourseService {
   async getCourses(
@@ -27,19 +28,25 @@ class CourseService {
         }
       );
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || "Failed to fetch courses");
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || "Failed to fetch courses");
+      }
+      throw new Error("Failed to fetch courses");
     }
   }
 
-  async getCourseDetails(courseId: string): Promise<CourseDetails> {
+  async getCourseDetails(courseId: string): Promise<{ course: CourseDetails }> {
     try {
       const response = await httpClient.get<CourseDetailsResponse>(
         `/admin/courses/${courseId}`
       );
       console.log("Course details response:", response.data);
       return response.data.data;
-    } catch (error) {
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || "Failed to fetch course details");
+      }
       console.error("Error fetching course details:", error);
       throw error;
     }
@@ -51,8 +58,11 @@ class CourseService {
     try {
       const response = await httpClient.post<Course>("/admin/courses", data);
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || "Failed to create course");
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || "Failed to create course");
+      }
+      throw new Error("Failed to create course");
     }
   }
 
@@ -63,16 +73,22 @@ class CourseService {
         data
       );
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || "Failed to update course");
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || "Failed to update course");
+      }
+      throw new Error("Failed to update course");
     }
   }
 
   async deleteCourse(id: string): Promise<void> {
     try {
       await httpClient.delete(`/admin/courses/${id}`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || "Failed to delete course");
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || "Failed to delete course");
+      }
+      throw new Error("Failed to delete course");
     }
   }
 
@@ -82,7 +98,7 @@ class CourseService {
     status?: string,
     specialization?: string,
     term?: string
-  ): Promise<{ requests: EnrollmentRequest[]; totalPages: number }> {
+  ): Promise<{ data: EnrollmentRequest[]; totalPages: number }> {
     try {
       const params: Record<string, string | number> = { page, limit };
       if (status && status !== "All") params.status = status;
@@ -95,10 +111,11 @@ class CourseService {
         { params }
       );
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.error || "Failed to fetch enrollment requests"
-      );
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || "Failed to fetch enrollment requests");
+      }
+      throw new Error("Failed to fetch enrollment requests");
     }
   }
 
@@ -107,10 +124,11 @@ class CourseService {
       await httpClient.post(
         `/admin/courses/course-enrollments/${requestId}/approve`
       );
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.error || "Failed to approve enrollment request"
-      );
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || "Failed to approve enrollment request");
+      }
+      throw new Error("Failed to approve enrollment request");
     }
   }
 
@@ -123,27 +141,28 @@ class CourseService {
         `/admin/courses/course-enrollments/${requestId}/reject`,
         { reason }
       );
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.error || "Failed to reject enrollment request"
-      );
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || "Failed to reject enrollment request");
+      }
+      throw new Error("Failed to reject enrollment request");
     }
   }
 
   async getEnrollmentRequestDetails(
     requestId: string
-  ): Promise<EnrollmentRequest> {
+  ): Promise<{ courseRequest: EnrollmentRequest }> {
     try {
       const response = await httpClient.get<EnrollmentRequestDetailsResponse>(
         `/admin/courses/course-enrollments/${requestId}/details`
       );
       return response.data.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || "Failed to fetch enrollment request details");
+      }
       console.error("Error fetching enrollment request details:", error);
-      throw new Error(
-        error.response?.data?.error ||
-          "Failed to fetch enrollment request details"
-      );
+      throw new Error("Failed to fetch enrollment request details");
     }
   }
 }

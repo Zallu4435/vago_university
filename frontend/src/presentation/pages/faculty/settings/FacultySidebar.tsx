@@ -1,14 +1,11 @@
 import {
   FaUser,
-  FaCreditCard,
-  FaShieldAlt,
   FaUserAlt,
   FaCog,
   FaChalkboardTeacher,
 } from 'react-icons/fa';
 import {
   FiBell,
-  FiHelpCircle,
   FiLogOut,
 } from 'react-icons/fi';
 
@@ -17,9 +14,6 @@ export default function FacultySidebar({ activeTab, setActiveTab, onLogout, user
     { id: 'profile', icon: FaUser, label: 'Profile' },
     { id: 'preferences', icon: FaCog, label: 'Preferences' },
     { id: 'notifications', icon: FiBell, label: 'Notifications' },
-    { id: 'financial', icon: FaCreditCard, label: 'Financial Info' },
-    { id: 'security', icon: FaShieldAlt, label: 'Security' },
-    { id: 'support', icon: FiHelpCircle, label: 'Support' },
   ];
 
   return (

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IoCloseOutline as X } from 'react-icons/io5';
-import { FiUpload, FiVideo, FiCheck } from 'react-icons/fi';
+import { FiUpload, FiVideo, FiCheck, FiCopy } from 'react-icons/fi';
+import { toast } from 'react-hot-toast';
 import { AddVideoModalProps, VideoFormInputs } from '../../../../domain/types/management/videomanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 import { videoSchema } from '../../../../domain/validation/management/videoSchema';
@@ -12,7 +13,7 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
   onClose,
   selectedVideo,
   onSave,
-  categories,
+  diplomas,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -88,6 +89,11 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
   };
 
   const handleFormSubmit = async (data: VideoFormInputs) => {
+    console.log('[AddVideoModal] handleFormSubmit', {
+      isEdit: !!selectedVideo,
+      hasFile: !!selectedFile,
+      data
+    });
     if (!selectedVideo && !selectedFile) {
       setError('root', {
         type: 'manual',
@@ -104,7 +110,10 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
     formData.append('module', moduleNumber.toString());
     formData.append('status', data.status);
     formData.append('description', data.description);
-    formData.append('duration', '0:00');
+    // Only send duration for creates; for updates, let backend keep existing
+    if (!selectedVideo) {
+      formData.append('duration', '0:00');
+    }
     
     if (selectedFile) {
       formData.append('videoFile', selectedFile);
@@ -119,9 +128,8 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
         module: moduleNumber, 
         status: data.status,
         description: data.description,
-        duration: '0:00',
-        videoUrl: selectedVideo.videoUrl, 
       };
+      console.log('[AddVideoModal] update without file payload', updateData);
       
       try {
         await onSave(updateData);
@@ -138,6 +146,7 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
 
     if (selectedVideo && selectedFile) {
       formData.append('id', selectedVideo.id);
+      console.log('[AddVideoModal] update with file keys', Array.from(formData.keys()));
     }
 
     try {
@@ -216,7 +225,7 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
 
                   <div>
                     <label className="block text-sm font-medium text-purple-300 mb-2">
-                      Category *
+                      Diploma (Category) *
                     </label>
                     <Controller
                       name="category"
@@ -229,13 +238,30 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
                               errors.category ? 'border-red-500' : 'border-purple-500/30'
                             }`}
                           >
-                            <option value="">Select a category</option>
-                            {categories.map((category) => (
-                              <option key={category} value={category}>
-                                {category}
+                            <option value="">Select a diploma</option>
+                            {diplomas.map((d) => (
+                              <option key={d.id} value={d.category}>
+                                {d.title} ({d.category})
                               </option>
                             ))}
                           </select>
+                         {currentCategory && (
+                           <button
+                             type="button"
+                             onClick={() => {
+                               const id = diplomas.find(d => d.category === currentCategory)?.id;
+                               if (id) {
+                                 navigator.clipboard.writeText(id);
+                                 toast.success('Backend reference copied');
+                               }
+                             }}
+                             title={diplomas.find(d => d.category === currentCategory)?.id || ''}
+                             className="text-xs text-purple-300 mt-1 hover:text-purple-200 underline inline-flex items-center gap-1"
+                           >
+                             <FiCopy className="h-3 w-3" />
+                             Copy backend reference
+                           </button>
+                         )}
                           {selectedVideo && currentCategory && (
                             <p className="text-xs text-blue-400 mt-1">
                               Current category: {currentCategory}

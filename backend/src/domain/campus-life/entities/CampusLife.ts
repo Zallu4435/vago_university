@@ -168,7 +168,7 @@ export class JoinRequest {
 
 
 export interface RawCampusEvent {
-  _id: any;
+  _id: string;
   title: string;
   date: string;
   time: string;
@@ -186,7 +186,7 @@ export interface RawCampusEvent {
 }
 
 export interface RawSport {
-  _id: any;
+  _id: string;
   title: string;
   type: string;
   headCoach: string;
@@ -203,7 +203,7 @@ export interface RawSport {
 }
 
 export interface RawClub {
-  _id: any;
+  _id: string;
   name: string;
   type: string;
   createdBy: string;
@@ -214,13 +214,13 @@ export interface RawClub {
   icon: string;
   nextMeeting: string;
   about: string;
-  upcomingEvents: any[];
+  upcomingEvents: string[];
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface RawJoinRequest {
-  _id: any;
+  _id: string;
   userId: string;
   eventId?: string;
   sportId?: string;

@@ -15,6 +15,21 @@ import {
   GetFacultySessionDistributionRequestDTO,
   GetFacultyRecentActivitiesRequestDTO,
 } from "../../../domain/faculty/dashboard/dtos/FacultyDashboardRequestDTOs";
+import {
+  GetFacultyDashboardStatsResponseDTO,
+  GetFacultyDashboardDataResponseDTO,
+  GetFacultyWeeklyAttendanceResponseDTO,
+  GetFacultyCoursePerformanceResponseDTO,
+  GetFacultySessionDistributionResponseDTO,
+  GetFacultyRecentActivitiesResponseDTO,
+} from "../../../domain/faculty/dashboard/dtos/FacultyDashboardResponseDTOs";
+
+// Error response type for clean architecture
+interface ErrorResponse {
+  error: string;
+  message?: string;
+  [key: string]: unknown;
+}
 
 export class FacultyDashboardController implements IFacultyDashboardController {
   private httpErrors: HttpErrors;
@@ -40,9 +55,9 @@ export class FacultyDashboardController implements IFacultyDashboardController {
     const params: GetFacultyDashboardStatsRequestDTO = { facultyId };
     const result = await this.getFacultyDashboardStatsUseCase.execute(params);
     if (result.success) {
-      return this.httpSuccess.success_200((result.data as any).stats);
+      return this.httpSuccess.success_200((result.data as GetFacultyDashboardStatsResponseDTO).stats);
     } else {
-      return this.httpErrors.error_400((result.data as any)?.error || "Failed to fetch dashboard stats");
+      return this.httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch dashboard stats");
     }
   }
 
@@ -54,9 +69,9 @@ export class FacultyDashboardController implements IFacultyDashboardController {
     const params: GetFacultyDashboardDataRequestDTO = { facultyId };
     const result = await this.getFacultyDashboardDataUseCase.execute(params);
     if (result.success) {
-      return this.httpSuccess.success_200((result.data as any).dashboardData);
+      return this.httpSuccess.success_200((result.data as GetFacultyDashboardDataResponseDTO).dashboardData);
     } else {
-      return this.httpErrors.error_400((result.data as any)?.error || "Failed to fetch dashboard data");
+      return this.httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch dashboard data");
     }
   }
 
@@ -68,9 +83,9 @@ export class FacultyDashboardController implements IFacultyDashboardController {
     const params: GetFacultyWeeklyAttendanceRequestDTO = { facultyId };
     const result = await this.getFacultyWeeklyAttendanceUseCase.execute(params);
     if (result.success) {
-      return this.httpSuccess.success_200((result.data as any).weeklyAttendance);
+      return this.httpSuccess.success_200((result.data as GetFacultyWeeklyAttendanceResponseDTO).weeklyAttendance);
     } else {
-      return this.httpErrors.error_400((result.data as any)?.error || "Failed to fetch weekly attendance");
+      return this.httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch weekly attendance");
     }
   }
 
@@ -82,9 +97,9 @@ export class FacultyDashboardController implements IFacultyDashboardController {
     const params: GetFacultyCoursePerformanceRequestDTO = { facultyId };
     const result = await this.getFacultyCoursePerformanceUseCase.execute(params);
     if (result.success) {
-      return this.httpSuccess.success_200((result.data as any).assignmentPerformance);
+      return this.httpSuccess.success_200((result.data as GetFacultyCoursePerformanceResponseDTO).assignmentPerformance);
     } else {
-      return this.httpErrors.error_400((result.data as any)?.error || "Failed to fetch assignment performance");
+      return this.httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch assignment performance");
     }
   }
 
@@ -96,9 +111,9 @@ export class FacultyDashboardController implements IFacultyDashboardController {
     const params: GetFacultySessionDistributionRequestDTO = { facultyId };
     const result = await this.getFacultySessionDistributionUseCase.execute(params);
     if (result.success) {
-      return this.httpSuccess.success_200((result.data as any).sessionDistribution);
+      return this.httpSuccess.success_200((result.data as GetFacultySessionDistributionResponseDTO).sessionDistribution);
     } else {
-      return this.httpErrors.error_400((result.data as any)?.error || "Failed to fetch session distribution");
+      return this.httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch session distribution");
     }
   }
 
@@ -110,9 +125,9 @@ export class FacultyDashboardController implements IFacultyDashboardController {
     const params: GetFacultyRecentActivitiesRequestDTO = { facultyId };
     const result = await this.getFacultyRecentActivitiesUseCase.execute(params);
     if (result.success) {
-      return this.httpSuccess.success_200((result.data as any).recentActivities);
+      return this.httpSuccess.success_200((result.data as GetFacultyRecentActivitiesResponseDTO).recentActivities);
     } else {
-      return this.httpErrors.error_400((result.data as any)?.error || "Failed to fetch recent activities");
+      return this.httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch recent activities");
     }
   }
 

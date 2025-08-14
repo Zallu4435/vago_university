@@ -43,7 +43,7 @@ export interface SessionCardProps {
     session: Session;
     index: number;
     userAccess: UserAccess;
-    styles: any;
+    styles: unknown;
     onToggleWatched: (sessionId: string) => void;
     onToggleLike: (sessionId: string) => void;
 }
@@ -55,7 +55,7 @@ export interface SessionFiltersProps {
     uniqueInstructors: string[];
     userAccess: UserAccess;
     onToggleEnrollment: (isEnrolled: boolean) => void;
-    styles: any;
+    styles: unknown;
 }
 
 export interface SessionHeaderProps {
@@ -63,17 +63,17 @@ export interface SessionHeaderProps {
     currentTime: Date;
     isEnrolled: boolean;
     sessionCount: number;
-    styles: any;
+    styles: unknown;
 }
 
 export interface SessionStatsProps {
     stats: SessionStats;
-    styles: any;
+    styles: unknown;
 } 
 
 
 export interface BackendSession {
     startTime: string;
     joinUrl?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }

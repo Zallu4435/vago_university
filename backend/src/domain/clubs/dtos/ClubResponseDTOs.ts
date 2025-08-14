@@ -1,5 +1,25 @@
 import { Club, ClubRequest, ClubProps } from "../entities/ClubTypes";
 
+// Proper types for repository responses - no more any!
+export interface RepositoryClubData {
+  _id: string;
+  name: string;
+  type: string;
+  status: string;
+  createdBy?: string;
+  description?: string;
+  members?: string[];
+  color?: string;
+  icon?: string;
+  nextMeeting?: string;
+  about?: string;
+  enteredMembers?: number;
+  upcomingEvents?: { date: string; description: string }[];
+  role?: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
 // Reusable types for Club responses
 export type ClubSummaryData = Pick<ClubProps, 
   'name' | 'type' | 'members' | 'color' | 'icon'
@@ -44,15 +64,15 @@ export interface GetClubsResponseDTO {
 }
 
 export interface GetClubByIdResponseDTO {
-  club: Club;
+  club: RepositoryClubData;
 }
 
 export interface CreateClubResponseDTO {
-  club: Club;
+  club: RepositoryClubData;
 }
 
 export interface UpdateClubResponseDTO {
-  club: Club;
+  club: RepositoryClubData;
 }
 
 export interface JoinClubResponseDTO {

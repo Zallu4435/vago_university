@@ -1,5 +1,5 @@
 import { FiDollarSign, FiCreditCard, FiFileText, FiAward } from 'react-icons/fi';
-import { Payment } from '../../domain/types/management/financialmanagement';
+import { Payment, FinancialAidApplication, ScholarshipApplication } from '../../domain/types/management/financialmanagement';
 
 export const STATUSES = [
   'All Statuses',
@@ -67,7 +67,7 @@ export const financialAidColumns = [
   {
     header: 'Student ID',
     key: 'studentId',
-    render: (app: any) => (
+    render: (app: FinancialAidApplication) => (
       <div className="flex items-center text-gray-300">
         <FiCreditCard size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{app.studentId}</span>
@@ -78,7 +78,7 @@ export const financialAidColumns = [
   {
     header: 'Term',
     key: 'term',
-    render: (app: any) => (
+    render: (app: FinancialAidApplication) => (
       <div className="flex items-center text-gray-300">
         <FiFileText size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{app.term}</span>
@@ -88,7 +88,7 @@ export const financialAidColumns = [
   {
     header: 'Type',
     key: 'type',
-    render: (app: any) => (
+    render: (app: FinancialAidApplication) => (
       <div className="flex items-center text-gray-300">
         <FiFileText size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{app.type}</span>
@@ -98,7 +98,7 @@ export const financialAidColumns = [
   {
     header: 'Amount',
     key: 'amount',
-    render: (app: any) => (
+    render: (app: FinancialAidApplication) => (
       <div className="flex items-center text-gray-300">
         <FiDollarSign size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">${app.amount.toFixed(2)}</span>
@@ -108,7 +108,7 @@ export const financialAidColumns = [
   {
     header: 'Status',
     key: 'status',
-    render: (app: any) => (
+    render: (app: FinancialAidApplication) => (
       <div className="flex items-center text-gray-300">
         <FiFileText size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{app.status}</span>
@@ -118,10 +118,10 @@ export const financialAidColumns = [
   {
     header: 'Date',
     key: 'applicationDate',
-    render: (app: any) => (
+    render: (app: FinancialAidApplication) => (
       <div className="flex items-center text-gray-300">
         <FiFileText size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{new Date(app.applicationDate).toLocaleDateString()}</span>
+        <span className="text-sm">{new Date((app).applicationDate).toLocaleDateString()}</span>
       </div>
     ),
   },
@@ -131,7 +131,7 @@ export const scholarshipColumns = [
   {
     header: 'Student ID',
     key: 'studentId',
-    render: (app: any) => (
+    render: (app: ScholarshipApplication) => (
       <div className="flex items-center text-gray-300">
         <FiCreditCard size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{app.studentId}</span>
@@ -142,7 +142,7 @@ export const scholarshipColumns = [
   {
     header: 'Scholarship ID',
     key: 'scholarshipId',
-    render: (app: any) => (
+    render: (app: ScholarshipApplication) => (
       <div className="flex items-center text-gray-300">
         <FiAward size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{app.scholarshipId}</span>
@@ -152,7 +152,7 @@ export const scholarshipColumns = [
   {
     header: 'Status',
     key: 'status',
-    render: (app: any) => (
+    render: (app: ScholarshipApplication) => (
       <div className="flex items-center text-gray-300">
         <FiFileText size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{app.status}</span>
@@ -162,10 +162,10 @@ export const scholarshipColumns = [
   {
     header: 'Date',
     key: 'applicationDate',
-    render: (app: any) => (
+    render: (app: ScholarshipApplication) => (
       <div className="flex items-center text-gray-300">
         <FiFileText size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{new Date(app.applicationDate).toLocaleDateString()}</span>
+        <span className="text-sm">{new Date((app).applicationDate).toLocaleDateString()}</span>
       </div>
     ),
   },

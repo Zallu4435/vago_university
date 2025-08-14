@@ -411,7 +411,7 @@ const App: React.FC = () => {
           } />
 
           {/* Fallback */}
-          <Route path="*" element={<Navigate to="/register" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
     </Provider>
   );

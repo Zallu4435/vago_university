@@ -11,14 +11,17 @@ import {
   SubmissionResult
 } from '../../domain/types/application';
 import { applicationController } from '../controller/ApplicationController';
+import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 
 class ApplicationService {
   async createApplication(userId: string): Promise<{ applicationId: string }> {
     try {
       return await applicationController.createApplication(userId);
-    } catch (error: any) {
-      console.error('Error creating application:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to create application');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to create application');
+      }
+      throw new Error('Failed to create application');
     }
   }
 
@@ -27,72 +30,88 @@ class ApplicationService {
       const response = await applicationController.getApplicationById(userId);
       console.log(response, "popopopo")
       return response?.data?.draft
-    } catch (error: any) {
-      console.error('Error fetching application data:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to fetch application data');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to fetch application data');
+      }
+      throw new Error('Failed to fetch application data');
     }
   }
 
   async savePersonalInfo(applicationId: string, data: PersonalInfo): Promise<FormData> {
     try {
       return await applicationController.saveSection(applicationId, 'personalInfo', data);
-    } catch (error: any) {
-      console.error('Error saving personal information:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to save personal information');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to save personal information');
+      }
+      throw new Error('Failed to save personal information');
     }
   }
 
   async saveChoiceOfStudy(applicationId: string, data: ProgrammeChoice[]): Promise<FormData> {
     try {
       return await applicationController.saveSection(applicationId, 'choiceOfStudy', data);
-    } catch (error: any) {
-      console.error('Error saving choice of study:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to save choice of study');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to save choice of study');
+      }
+      throw new Error('Failed to save choice of study');
     }
   }
 
   async saveEducation(applicationId: string, data: EducationData): Promise<FormData> {
     try {
       return await applicationController.saveSection(applicationId, 'education', data);
-    } catch (error: any) {
-      console.error('Error saving education data:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to save education data');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to save education data');
+      }
+      throw new Error('Failed to save education data');
     }
   }
 
   async saveAchievements(applicationId: string, data: AchievementSection): Promise<FormData> {
     try {
       return await applicationController.saveSection(applicationId, 'achievements', data);
-    } catch (error: any) {
-      console.error('Error saving achievements:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to save achievements');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to save achievements');
+      }
+      throw new Error('Failed to save achievements');
     }
   }
 
   async saveOtherInfo(applicationId: string, data: OtherInformationSection): Promise<FormData> {
     try {
       return await applicationController.saveSection(applicationId, 'otherInformation', data);
-    } catch (error: any) {
-      console.error('Error saving other information:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to save other information');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to save other information');
+      }
+      throw new Error('Failed to save other information');
     }
   }
 
   async saveDocuments(applicationId: string, data: DocumentUploadSection): Promise<FormData> {
     try {
       return await applicationController.saveSection(applicationId, 'documents', data);
-    } catch (error: any) {
-      console.error('Error saving documents:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to save documents');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to save documents');
+      }
+      throw new Error('Failed to save documents');
     }
   }
 
   async saveDeclaration(applicationId: string, data: DeclarationSection): Promise<FormData> {
     try {
       return await applicationController.saveSection(applicationId, 'declaration', data);
-    } catch (error: any) {
-      console.error('Error saving declaration:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to save declaration');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to save declaration');
+      }
+      throw new Error('Failed to save declaration');
     }
   }
 
@@ -109,9 +128,11 @@ class ApplicationService {
         clientSecret: result.data?.clientSecret,
         stripePaymentIntentId: result.data?.stripePaymentIntentId,
       };
-    } catch (error: any) {
-      console.error('Error processing payment:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to process payment');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to process payment');
+      }
+      throw new Error('Failed to process payment');
     }
   }
 
@@ -126,9 +147,11 @@ class ApplicationService {
         status: result.data?.status,
         message: result.data?.message
       };
-    } catch (error: any) {
-      console.error('Error confirming payment:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to confirm payment');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to confirm payment');
+      }
+      throw new Error('Failed to confirm payment');
     }
   }
 
@@ -139,18 +162,22 @@ class ApplicationService {
         message: result.message || 'Application submitted successfully',
         admission: result.admission
       };
-    } catch (error: any) {
-      console.error('Error submitting application:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to submit application');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to submit application');
+      }
+      throw new Error('Failed to submit application');
     }
   }
 
   async getApplicationStatus(applicationId: string): Promise<string> {
     try {
       return await applicationController.getApplicationStatus(applicationId);
-    } catch (error: any) {
-      console.error('Error fetching application status:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to fetch application status');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to fetch application status');
+      }
+      throw new Error('Failed to fetch application status');
     }
   }
 }

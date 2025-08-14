@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { usePreferences } from '../../../application/context/PreferencesContext';
-import DiplomaCoursesSection from './diploma/DiplomaCoursesSection';
+import { DiplomaCoursesSection } from './diploma/DiplomaCoursesSection';
 import AssignmentsSection from './assignments/AssignmentsSection';
 import StudyMaterialsPage from './materials/StudyMaterialsPage';
 import UniversitySessionsDashboard from './sessions/UniversitySessionsDashboard';

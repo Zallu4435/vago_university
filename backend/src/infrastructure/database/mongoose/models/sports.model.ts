@@ -1,4 +1,4 @@
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema, model, Document } from "mongoose";
 import { 
   Sport, 
   SportRequest, 
@@ -60,9 +60,15 @@ teamSchema.pre("save", function (next) {
   next();
 });
 
-const sportRequestSchema = new Schema<SportRequest>({
-  sportId: { type: Schema.Types.ObjectId, ref: "Team", required: true } as any,
-  userId: { type: Schema.Types.ObjectId, ref: "User", required: true } as any,
+// 2nd approach: use SportRequestDocument for schema
+type SportRequestDocument = SportRequest & Document & {
+  sportId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+};
+
+const sportRequestSchema = new Schema({
+  sportId: { type: Schema.Types.ObjectId, ref: "Team", required: true },
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   status: {
     type: String,
     enum: Object.values(SportRequestStatus),
@@ -82,7 +88,7 @@ export const TeamModel = mongoose.model<Sport>(
   "Team", 
   teamSchema
 );
-export const SportRequestModel = mongoose.model<SportRequest>(
+export const SportRequestModel = mongoose.model<SportRequestDocument>(
   "SportRequest", 
   sportRequestSchema
 );

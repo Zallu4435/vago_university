@@ -1,6 +1,6 @@
 // Enquiry Management Constants
 import { FiUser, FiMail, FiFlag, FiClock, FiHelpCircle, FiEye, FiTrash2, FiMessageSquare } from 'react-icons/fi';
-import { EnquiryStatus } from '../../domain/types/management/enquirymanagement';
+import { Enquiry, EnquiryStatus } from '../../domain/types/management/enquirymanagement';
 
 export const ENQUIRY_STATUSES = ['All Statuses', ...Object.values(EnquiryStatus)];
 
@@ -8,7 +8,7 @@ export const ENQUIRY_COLUMNS = [
   {
     header: 'Name',
     key: 'name',
-    render: (item: any) => (
+    render: (item: Enquiry) => (
       <div className="flex items-center text-gray-300">
         <FiUser size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{item.name}</span>
@@ -18,7 +18,7 @@ export const ENQUIRY_COLUMNS = [
   {
     header: 'Email',
     key: 'email',
-    render: (item: any) => (
+    render: (item: Enquiry) => (
       <div className="flex items-center text-gray-300">
         <FiMail size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{item.email}</span>
@@ -28,7 +28,7 @@ export const ENQUIRY_COLUMNS = [
   {
     header: 'Status',
     key: 'status',
-    render: (item: any) => (
+    render: (item: Enquiry) => (
       <div className="flex items-center text-gray-300">
         <FiFlag size={14} className="text-purple-400 mr-2" />
         <span className={`capitalize px-2 py-1 rounded-full text-xs font-semibold border ${
@@ -45,7 +45,7 @@ export const ENQUIRY_COLUMNS = [
   {
     header: 'Created At',
     key: 'createdAt',
-    render: (item: any) => (
+    render: (item: Enquiry) => (
       <div className="flex items-center text-gray-300">
         <FiClock size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{new Date(item.createdAt).toLocaleDateString()}</span>
@@ -72,7 +72,7 @@ export const ENQUIRY_ACTIONS = [
   },
 ];
 
-export const ENQUIRY_STATS = (enquiries: any[]) => ({
+export const ENQUIRY_STATS = (enquiries: Enquiry[]) => ({
   total: enquiries.length,
   pending: enquiries.filter(e => e.status === 'pending').length,
   resolved: enquiries.filter(e => e.status === 'resolved').length,

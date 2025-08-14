@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { clubService } from '../services/club.service';
-import { Club } from '../../domain/types/club';
+import { Club, ClubRequestsResponse } from '../../domain/types/club';
 
 interface Filters {
   [key: string]: string;
@@ -79,7 +79,7 @@ export const useClubManagement = () => {
     enabled: activeTab === 'clubs',
   });
 
-  const { data: clubRequestsData, isLoading: isLoadingRequests, error: requestsError } = useQuery({
+  const { data: clubRequestsData, isLoading: isLoadingRequests, error: requestsError } = useQuery<ClubRequestsResponse>({
     queryKey: ['clubRequests', page, filters, searchQuery, limit],
     queryFn: () => {
       const dateRange = getDateRangeFilter(filters.dateRange);
@@ -109,14 +109,14 @@ export const useClubManagement = () => {
 
   const { mutateAsync: getClubDetails } = useMutation({
     mutationFn: (id: string) => clubService.getClubDetails(id),
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to fetch club details');
     },
   });
 
   const { mutateAsync: getClubRequestDetails } = useMutation({
     mutationFn: (id: string) => clubService.getClubRequestDetails(id),
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to fetch club request details');
     },
   });
@@ -168,7 +168,7 @@ export const useClubManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['clubs'] });
       toast.success('Club created successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to create club');
     },
   });
@@ -180,7 +180,7 @@ export const useClubManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['clubs'] });
       toast.success('Club updated successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to update club');
     },
   });
@@ -191,7 +191,7 @@ export const useClubManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['clubs'] });
       toast.success('Club deleted successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to delete club');
     },
   });
@@ -202,7 +202,7 @@ export const useClubManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['clubRequests', 'clubs'] });
       toast.success('Club request approved successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to approve club request');
     },
   });
@@ -213,7 +213,7 @@ export const useClubManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['clubRequests'] });
       toast.success('Club request rejected successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to reject club request');
     },
   });
@@ -223,7 +223,7 @@ export const useClubManagement = () => {
 
   return {
     clubs: clubsData?.clubs || [],
-    clubRequests: (clubRequestsData as any)?.data || [],
+    clubRequests: clubRequestsData?.data || [],
     totalPages:
       activeTab === 'clubs'
         ? clubsData?.totalPages || 0

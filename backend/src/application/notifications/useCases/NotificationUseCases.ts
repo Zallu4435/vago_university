@@ -100,8 +100,8 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
                 throw error;
             }
         } else {
-            let students: any[] = [];
-            let faculty: any[] = [];
+            let students = [];
+            let faculty = [];
 
             if ([NotificationRecipientType.ALL_STUDENTS, NotificationRecipientType.ALL, NotificationRecipientType.ALL_STUDENTS_AND_FACULTY].includes(recipientType)) {
                 students = await this.notificationRepository.findUsersByCollection("user");

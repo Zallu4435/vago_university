@@ -1,6 +1,7 @@
 // src/application/services/faculty.service.ts
 import { Faculty, FacultyApiResponse, FacultyApprovalData } from '../../domain/types/management/facultyManagement';
 import httpClient from '../../frameworks/api/httpClient';
+import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 
 class FacultyService {
   async getFaculty(
@@ -30,17 +31,27 @@ class FacultyService {
         params
       });
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch faculty');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || 'Failed to fetch faculty');
+      }
+      throw new Error('Failed to fetch faculty');
     }
   }
 
-  async getFacultyDetails(id: string): Promise<any> {
-    const response = await httpClient.get(`/admin/faculty/${id}`);
-    return response.data.data;
+  async getFacultyDetails(id: string) {
+    try {
+      const response = await httpClient.get(`/admin/faculty/${id}`);
+      return response.data.data;
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || 'Failed to fetch faculty details');
+      }
+      throw new Error('Failed to fetch faculty details');
+    }
   }
 
-  async getFacultyDocument(facultyId: string, type: string, documentUrl: string): Promise<any> {
+  async getFacultyDocument(facultyId: string, type: string, documentUrl: string) {
     try {
       console.log('Fetching faculty document with ID:', facultyId, 'type:', type);
       console.log('Using URL:', `/faculty/${facultyId}/documents?type=${type}&documentUrl=${encodeURIComponent(documentUrl)}`);
@@ -53,9 +64,13 @@ class FacultyService {
 
       console.log('Faculty document fetch response:', response.data);
       return response.data.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        console.error('Error fetching faculty document:', error);
+        throw new Error(error.response?.data?.error || 'Failed to fetch faculty document');
+      }
       console.error('Error fetching faculty document:', error);
-      throw new Error(error.response?.data?.error || 'Failed to fetch faculty document');
+      throw new Error('Failed to fetch faculty document');
     }
   }
 
@@ -69,8 +84,11 @@ class FacultyService {
         approvalData
       );
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to approve faculty request');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || 'Failed to approve faculty request');
+      }
+      throw new Error('Failed to approve faculty request');
     }
   }
 
@@ -84,8 +102,11 @@ class FacultyService {
         { reason }
       );
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to reject faculty request');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || 'Failed to reject faculty request');
+      }
+      throw new Error('Failed to reject faculty request');
     }
   }
 
@@ -93,8 +114,11 @@ class FacultyService {
     try {
       const response = await httpClient.delete<{ message: string }>(`/admin/faculty/${id}`);
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to delete faculty request');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || 'Failed to delete faculty request');
+      }
+      throw new Error('Failed to delete faculty request');
     }
   }
 
@@ -108,8 +132,11 @@ class FacultyService {
         { status }
       );
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to update faculty status');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || 'Failed to update faculty status');
+      }
+      throw new Error('Failed to update faculty status');
     }
   }
 
@@ -119,10 +146,131 @@ class FacultyService {
         `/admin/faculty/${id}/block`
       );
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to block/unblock faculty');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || 'Failed to block/unblock faculty');
+      }
+      throw new Error('Failed to block/unblock faculty');
     }
   }
 }
 
 export const facultyService = new FacultyService();
+
+export interface DocumentUploadResult {
+  url: string;
+  publicId: string;
+  fileName: string;
+  fileType: string;
+}
+
+export interface MultipleDocumentUploadResult {
+  documents: DocumentUploadResult[];
+}
+
+export interface DocumentViewResult {
+  pdfData: string;
+  fileName: string;
+  fileType: string;
+}
+
+class DocumentUploadService {
+  private baseUrl = '/admission';
+
+  async uploadDocument(applicationId: string, documentType: string, file: File): Promise<DocumentUploadResult> {
+    if (!applicationId || applicationId === '') {
+      throw new Error('Application ID is required for document upload');
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('applicationId', applicationId);
+      formData.append('documentType', documentType);
+
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+
+      const response = await httpClient.post(`${this.baseUrl}/documents/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      return response.data.data?.document;
+    } catch (error: unknown) {
+      console.error('Error uploading document:', error);
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const err = error as { response?: { data?: { error?: string }, status?: number }, message?: string };
+        console.error('Error response:', err.response?.data);
+        console.error('Error status:', err.response?.status);
+        throw new Error(err.response?.data?.error || err.message || 'Failed to upload document');
+      }
+      throw new Error('Failed to upload document');
+    }
+  }
+
+  async uploadMultipleDocuments(applicationId: string, files: File[], documentTypes: string[]): Promise<MultipleDocumentUploadResult> {
+    try {
+      const formData = new FormData();
+      
+      files.forEach((file) => {
+        formData.append('files', file);
+      });
+      
+      formData.append('applicationId', applicationId);
+      documentTypes.forEach((documentType) => {
+        formData.append('documentTypes', documentType);
+      });
+
+      const response = await httpClient.post(`${this.baseUrl}/documents/upload-multiple`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error uploading multiple documents:', error);
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const err = error as { response?: { data?: { error?: string } }, message?: string };
+        throw new Error(err.response?.data?.error || err.message || 'Failed to upload documents');
+      }
+      throw new Error('Failed to upload documents');
+    }
+  }
+
+  async getDocument(documentId: string): Promise<DocumentViewResult> {
+    try {
+      const response = await httpClient.get(`${this.baseUrl}/documents/${documentId}`);
+      return response.data.data;
+    } catch (error: unknown) {
+      console.error('Error fetching document:', error);
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const err = error as { response?: { data?: { error?: string } }, message?: string };
+        throw new Error(err.response?.data?.error || err.message || 'Failed to fetch document');
+      }
+      throw new Error('Failed to fetch document');
+    }
+  }
+
+  async getAdminDocument(documentId: string, admissionId: string) {
+    try {
+      const response = await httpClient.get(`/admin/admissions/documents/${documentId}?admissionId=${admissionId}`);
+
+      return response.data.data;
+    } catch (error: unknown) {
+      console.error('Error fetching admin document:', error);
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const err = error as { response?: { data?: { error?: string }, status?: number }, message?: string };
+        console.error('Error response:', err.response?.data);
+        console.error('Error status:', err.response?.status);
+        throw new Error(err.response?.data?.error || err.message || 'Failed to fetch admin document');
+      }
+      throw new Error('Failed to fetch admin document');
+    }
+  }
+}
+
+export const documentUploadService = new DocumentUploadService();

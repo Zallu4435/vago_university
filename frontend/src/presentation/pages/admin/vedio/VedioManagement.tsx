@@ -199,7 +199,7 @@ const VideoManagementPage = () => {
 
         <div className="flex justify-between items-center mb-4">
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={() => { setSelectedVideo(null); setShowAddModal(true); }}
             className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center space-x-2"
           >
             <FiUpload className="h-4 w-4" />
@@ -284,7 +284,7 @@ const VideoManagementPage = () => {
                                 {video.title}
                               </div>
                               <div className="text-sm text-purple-300">
-                                ID: {video.id}
+                                 ID: {video.id.substring(0, 8)}
                               </div>
                             </div>
                           </div>
@@ -438,7 +438,7 @@ const VideoManagementPage = () => {
 
       <AddVideoModal
         isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
+        onClose={() => { setShowAddModal(false); setSelectedVideo(null); }}
         selectedVideo={selectedVideo ? {
           id: selectedVideo._id,
           title: selectedVideo.title,
@@ -451,7 +451,7 @@ const VideoManagementPage = () => {
           videoUrl: selectedVideo.videoUrl,
         } : null}
         onSave={onSaveVideo}
-        categories={filterOptions.category}
+        diplomas={(diplomasData?.diplomas || []).map(d => ({ id: d.id, title: d.title, category: d.category }))}
       />
       <VideoPreviewModal
         isOpen={showPreviewModal}

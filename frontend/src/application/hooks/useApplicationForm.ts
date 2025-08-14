@@ -23,7 +23,7 @@ export const useApplicationForm = () => {
       queryClient.invalidateQueries({ queryKey: ['application', userId] });
       toast.success('Application initialized');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('useApplicationForm: Error creating application:', error);
       toast.error(error.message || 'Failed to initialize application');
     }
@@ -37,7 +37,7 @@ export const useApplicationForm = () => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
       toast.success('Personal information saved');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('useApplicationForm: Error saving personal info:', error);
       toast.error(error.message || 'Failed to save personal information');
     }
@@ -51,7 +51,7 @@ export const useApplicationForm = () => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
       toast.success('Choice of study saved');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('useApplicationForm: Error saving choice of study:', error);
       toast.error(error.message || 'Failed to save choice of study');
     }
@@ -65,7 +65,7 @@ export const useApplicationForm = () => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
       toast.success('Education information saved');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('useApplicationForm: Error saving education:', error);
       toast.error(error.message || 'Failed to save education information');
     }
@@ -79,7 +79,7 @@ export const useApplicationForm = () => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
       toast.success('Achievements saved');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('useApplicationForm: Error saving achievements:', error);
       toast.error(error.message || 'Failed to save achievements');
     }
@@ -93,7 +93,7 @@ export const useApplicationForm = () => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
       toast.success('Other information saved');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('useApplicationForm: Error saving other info:', error);
       toast.error(error.message || 'Failed to save other information');
     }
@@ -107,7 +107,7 @@ export const useApplicationForm = () => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
       toast.success('Documents uploaded successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('useApplicationForm: Error saving documents:', error);
       toast.error(error.message || 'Failed to upload documents');
     }
@@ -121,7 +121,7 @@ export const useApplicationForm = () => {
       queryClient.invalidateQueries({ queryKey: ['application', variables.applicationId] });
       toast.success('Declaration saved');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('useApplicationForm: Error saving declaration:', error);
       toast.error(error.message || 'Failed to save declaration');
     }
@@ -131,8 +131,9 @@ export const useApplicationForm = () => {
     mutationFn: async ({ applicationId, paymentDetails }: { applicationId: string, paymentDetails: any }) => {
       try {
         return await applicationService.processPayment(applicationId, paymentDetails);
-      } catch (error: any) {
-        if (error.message.includes('token') || error.response?.status === 401) {
+      } catch (error) {
+        const err = error as Error & { response?: { status?: number } };
+        if (err.message.includes('token') || err.response?.status === 401) {
           throw new Error('Your session has expired. Please log in again.');
         }
         throw error;
@@ -141,7 +142,7 @@ export const useApplicationForm = () => {
     onSuccess: (data) => {
       toast.success(data.message || 'Payment processed successfully!');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('useApplicationForm: Error processing payment:', error);
       toast.error(error.message || 'Payment processing failed');
     }
@@ -154,7 +155,7 @@ export const useApplicationForm = () => {
     onSuccess: (data) => {
       toast.success(data.message || 'Application submitted successfully!');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('useApplicationForm: Error submitting application:', error);
       toast.error(error.message || 'Failed to submit application');
     }
@@ -167,7 +168,7 @@ export const useApplicationForm = () => {
     onSuccess: (data) => {
       console.log('Payment confirmed successfully:', data);
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error('useApplicationForm: Error confirming payment:', error);
       toast.error(error.message || 'Failed to confirm payment');
     }

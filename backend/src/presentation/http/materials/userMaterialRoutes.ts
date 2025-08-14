@@ -41,7 +41,7 @@ userMaterialRoutes.get('/:id/download-file', authMiddleware, async (req: Request
     await repo.incrementDownloads(materialId);
     let fileUrl = material.fileUrl;
     if (!/^https?:\/\//i.test(fileUrl)) {
-      fileUrl = `http://localhost:5000${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+      fileUrl = `https://vago-uv.ddns.net${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
     }
     let fileName = (material.title || 'material').replace(/\s+/g, '_') + '.' + (fileUrl.split('.').pop().split('?')[0] || 'pdf');
     fileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '');

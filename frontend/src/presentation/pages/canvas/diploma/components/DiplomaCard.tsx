@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiLock, FiClock, FiUsers, FiStar, FiBook } from 'react-icons/fi';
+import { FiLock, FiUsers, FiStar, FiBook } from 'react-icons/fi';
 import { DiplomaCardProps } from '../../../../../domain/types/canvas/diploma';
 
 export const DiplomaCard: React.FC<DiplomaCardProps> = ({
@@ -12,6 +12,8 @@ export const DiplomaCard: React.FC<DiplomaCardProps> = ({
   onStartCourse
 }) => {
   const isAccessible = userAdmitted && course.status === 'published';
+  const displayDepartment = course.department || course.category || 'General';
+  const displayInstructor = course.instructor;
 
   const totalVideos = typeof course.videoCount === 'number' ? course.videoCount : (course.chapters ? course.chapters.length : 0);
   const completedCount = typeof course.completedVideoCount === 'number'
@@ -64,16 +66,17 @@ export const DiplomaCard: React.FC<DiplomaCardProps> = ({
           {/* Course stats */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm mb-2 sm:mb-4">
             <div className="flex items-center">
-              <FiClock className={`w-4 h-4 mr-1 ${styles.icon.secondary}`} />
               <span className={`${styles.textSecondary}`}>{course.category}</span>
             </div>
-            <div className="flex items-center">
-              <FiUsers className={`w-4 h-4 mr-1 ${styles.icon.secondary}`} />
-              <span className={`${styles.textSecondary}`}>{course.instructor || 'No instructor'}</span>
-            </div>
+            {displayInstructor && (
+              <div className="flex items-center">
+                <FiUsers className={`w-4 h-4 mr-1 ${styles.icon.secondary}`} />
+                <span className={`${styles.textSecondary}`}>{displayInstructor}</span>
+              </div>
+            )}
             <div className="flex items-center">
               <FiStar className="w-4 h-4 mr-1 text-yellow-500" />
-              <span className={`${styles.textSecondary}`}>{course.department || 'No department'}</span>
+              <span className={`${styles.textSecondary}`}>{displayDepartment}</span>
             </div>
           </div>
 

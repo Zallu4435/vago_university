@@ -1,5 +1,6 @@
 import httpClient from '../../../../../frameworks/api/httpClient';
 import { Assignment, NewAssignment } from '../types';
+import { isAxiosErrorWithApiError } from '../../../../../shared/types/apiError';
 
 export const assignmentService = {
   getAssignments: async (params = {}) => {
@@ -44,9 +45,11 @@ export const assignmentService = {
         },
       });
       return response.data;
-    } catch (error: any) {
-      console.error('Error uploading assignment:', error.response?.data || error.message);
-      throw error;
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || 'Error uploading assignment');
+      }
+      throw new Error('Error uploading assignment');
     }
   },
 
@@ -158,14 +161,14 @@ export const assignmentService = {
       console.log('Service: File download triggered successfully');
       console.log('=== SERVICE: DOWNLOAD SUBMISSION FILE COMPLETED ===');
       return blob;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('=== SERVICE: DOWNLOAD SUBMISSION FILE ERROR ===');
+      if (isAxiosErrorWithApiError(error)) {
+        console.error('Service: Error downloading submission file:', error.response?.data?.error || error.message);
+        throw new Error(error.response?.data?.error || 'Error downloading submission file');
+      }
       console.error('Service: Error downloading submission file:', error);
-      console.error('Service: Error response:', error.response?.data);
-      console.error('Service: Error status:', error.response?.status);
-      console.error('Service: Error message:', error.message);
-      console.error('=== SERVICE: DOWNLOAD SUBMISSION FILE ERROR END ===');
-      throw error;
+      throw new Error('Error downloading submission file');
     }
   },
 }; 

@@ -61,6 +61,7 @@ export class VideoRepository implements IVideoRepository {
     }
 
     async updateVideo(id: string, video): Promise<IRepoVideo | null> {
+        console.log('🗄️ [Repo] updateVideo called', { id, updateKeys: Object.keys(video || {}) });
         const updated = await VideoModel.findByIdAndUpdate(
             id,
             { $set: { ...video, updatedAt: new Date() } },
@@ -86,9 +87,11 @@ export class VideoRepository implements IVideoRepository {
     }
     
     async addVideoToDiploma(diplomaId: string, videoId: string) {
-        await DiplomaModel.findByIdAndUpdate(diplomaId, { $push: { videoIds: videoId } });
+        console.log('🗄️ [Repo] addVideoToDiploma', { diplomaId, videoId });
+        await DiplomaModel.findByIdAndUpdate(diplomaId, { $addToSet: { videoIds: videoId } });
     }
     async removeVideoFromDiploma(diplomaId: string, videoId: string) {
+        console.log('🗄️ [Repo] removeVideoFromDiploma', { diplomaId, videoId });
         await DiplomaModel.findByIdAndUpdate(diplomaId, { $pull: { videoIds: videoId } });
     }
 } 

@@ -82,9 +82,16 @@ export class GetStudentInfoUseCase implements IGetStudentInfoUseCase {
       return { data: { error: "Student not found" }, success: false };
     }
     const { user, program, pendingEnrollments } = result;
-    const pendingCredits = pendingEnrollments
-      .filter((enrollment: IEnrollmentDocument) => enrollment.courseId)
-      .reduce((sum: number, enrollment: IEnrollmentDocument) => sum + ((enrollment.courseId as any)?.credits || 0), 0);
+    const pendingCredits = (
+      await Promise.all(
+        pendingEnrollments
+          .filter((enrollment: IEnrollmentDocument) => Boolean(enrollment.courseId))
+          .map(async (enrollment: IEnrollmentDocument) => {
+            const course = await this.academicRepository.findCourseById(enrollment.courseId);
+            return course?.credits ?? 0;
+          })
+      )
+    ).reduce((sum: number, credits: number) => sum + credits, 0);
     const academicStanding = 'Good';
     const advisor = 'Unknown';
     const response: GetStudentInfoResponseDTO = {

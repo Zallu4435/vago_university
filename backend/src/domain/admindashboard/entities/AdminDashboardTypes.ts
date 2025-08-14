@@ -67,33 +67,77 @@ export interface PerformanceRawData {
   diplomaCount: number;
   eventsCount: number;
   clubsCount: number;
+  data: PerformanceData[];
 }
 
 // Repository-specific types that match actual return data
+export interface CompletedPaymentsAggResult {
+  _id: null;
+  total: number;
+}
+
 export interface DashboardMetricsRaw {
   totalUsers: number;
   totalFaculty: number;
   totalCourses: number;
   pendingAdmissions: number;
-  completedPayments: any[];
+  completedPayments: CompletedPaymentsAggResult[];
+  data: DashboardMetrics;
 }
 
 export interface UserGrowthDataRaw {
   month: string;
   usersCount: number;
   facultyCount: number;
+  data: UserGrowthData[];
+}
+
+export interface RevenuePaymentAggResult {
+  _id: string;
+  total: number;
 }
 
 export interface RevenueDataRaw {
   month: string;
-  payments: any[];
+  payments: RevenuePaymentAggResult[];
+  data: RevenueData[];
+}
+
+export interface RecentAdmissionRaw {
+  _id: string;
+  status?: string;
+  personal?: { fullName?: string };
+  registerId?: { firstName?: string; lastName?: string; email?: string };
+  createdAt?: string;
+}
+
+export interface RecentPaymentRaw {
+  _id: string;
+  amount?: number;
+  method?: string;
+  studentId?: { firstName?: string; lastName?: string; email?: string };
+  createdAt?: string;
+}
+
+export interface RecentEnquiryRaw {
+  _id: string;
+  name?: string;
+  subject?: string;
+  createdAt?: string;
+}
+
+export interface RecentNotificationRaw {
+  _id: string;
+  title?: string;
+  createdAt?: string;
 }
 
 export interface ActivityItemRaw {
-  recentAdmissions: any[];
-  recentPayments: any[];
-  recentEnquiries: any[];
-  recentNotifications: any[];
+  recentAdmissions: RecentAdmissionRaw[];
+  recentPayments: RecentPaymentRaw[];
+  recentEnquiries: RecentEnquiryRaw[];
+  recentNotifications: RecentNotificationRaw[];
+  data: ActivityItem[];
 }
 
 export interface SystemAlertRaw {
@@ -101,12 +145,13 @@ export interface SystemAlertRaw {
   failedPayments: number;
   overdueCharges: number;
   completedPayments: number;
+  data: SystemAlert[];
 }
 
 export interface DashboardDataRaw {
   metricsRaw: DashboardMetricsRaw;
-  userGrowthRaw: UserGrowthDataRaw[];
-  revenueRaw: RevenueDataRaw[];
+  userGrowthRaw: UserGrowthDataRaw;
+  revenueRaw: RevenueDataRaw;
   performanceRaw: PerformanceRawData;
   activitiesRaw: ActivityItemRaw;
   alertsRaw: SystemAlertRaw;

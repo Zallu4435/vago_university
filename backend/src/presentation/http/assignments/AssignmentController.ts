@@ -11,6 +11,7 @@ import {
   IDownloadSubmissionUseCase,
   IGetAnalyticsUseCase
 } from '../../../application/assignments/useCases/AssignmentUseCases';
+import { AssignmentFile } from '../../../domain/assignments/assignmenttypes';
 
 
 export class AssignmentController implements IAssignmentController {
@@ -73,7 +74,7 @@ export class AssignmentController implements IAssignmentController {
     const { id } = httpRequest.params;
     let updateData = { ...httpRequest.body };
     if (httpRequest.files && httpRequest.files.length > 0) {
-      updateData.files = httpRequest.files.map((file: any) => ({
+      updateData.files = httpRequest.files.map((file: Express.Multer.File) => ({
         fileName: file.originalname,
         fileUrl: file.path,
         fileSize: file.size
@@ -188,7 +189,7 @@ export class AssignmentController implements IAssignmentController {
     if (!assignment) {
       return this.httpErrors.error_404('Assignment not found');
     }
-    const file = assignment.files.find((f: any) => f.fileName === fileName);
+    const file = assignment.files.find((f: AssignmentFile) => f.fileName === fileName as string);
     if (!file) {
       return this.httpErrors.error_404('File not found');
     }

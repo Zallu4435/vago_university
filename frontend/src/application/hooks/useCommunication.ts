@@ -125,7 +125,7 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
     []
   );
 
-  const mapMessage = (msg: any): Message => {
+  const mapMessage = (msg): Message => {
     const mappedMessage = {
       id: msg._id,
       subject: msg.subject,
@@ -136,7 +136,7 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
         email: msg.sender.email,
         role: msg.sender.role,
       },
-      recipients: msg.recipients.map((recipient: any) => ({
+      recipients: msg.recipients.map((recipient) => ({
         id: recipient._id,
         name: recipient.name,
         email: recipient.email,

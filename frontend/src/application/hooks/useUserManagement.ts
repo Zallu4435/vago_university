@@ -33,7 +33,7 @@ export const useUserManagement = () => {
 
   const { mutateAsync: getAdmissionDetails } = useMutation({
     mutationFn: (id: string) => userService.getAdmissionDetails(id),
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to fetch admission details');
     },
   });
@@ -49,7 +49,7 @@ export const useUserManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['admissions'] });
       toast.success('Admission approved successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to approve admission');
     },
   });
@@ -61,7 +61,7 @@ export const useUserManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['admissions'] });
       toast.success('Admission rejected successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to reject admission');
     },
   });
@@ -72,7 +72,7 @@ export const useUserManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['admissions'] });
       toast.success('Admission deleted');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to delete admission');
     },
   });
@@ -83,7 +83,7 @@ export const useUserManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['admissions'] });
       toast.success(data?.message || 'User block status updated');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to block/unblock user');
     },
   });

@@ -2,6 +2,7 @@ import { Server as SocketIOServer, Namespace } from "socket.io";
 import { ChatRepository } from "../../repositories/chat/ChatRepository";
 import { MessageStatus } from "../../../domain/chat/entities/Message";
 import jwt from "jsonwebtoken";
+import { config } from "../../../config/config";
 
 interface AuthenticatedSocket {
   userId: string;
@@ -78,11 +79,11 @@ export class SocketService {
       if (!token) {
         return next(new Error("Authentication error: No access_token cookie provided"));
       }
-
-      const jwtSecret = process.env.JWT_SECRET || "your_jwt_secret";
+ 
+      const jwtSecret = config.jwt.secret as jwt.Secret;
 
       try {
-        const decoded = jwt.verify(token, jwtSecret) as any;
+        const decoded = jwt.verify(token, jwtSecret) as { userId: string; collection: string };
         socket.data.user = {
           userId: decoded.userId,
           collection: decoded.collection,

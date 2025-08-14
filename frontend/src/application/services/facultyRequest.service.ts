@@ -1,5 +1,6 @@
 import httpClient from '../../frameworks/api/httpClient';
 import { FacultyRequestFormData } from '../../domain/validation/facultyRequestSchema';
+import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 
 interface FacultyRequestResponse {
   message: string;
@@ -39,8 +40,11 @@ class FacultyRequestService {
       );
       
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to submit faculty request');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || 'Failed to submit faculty request');
+      }
+      throw new Error('Failed to submit faculty request');
     }
   }
 }

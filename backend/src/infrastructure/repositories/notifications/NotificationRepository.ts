@@ -22,7 +22,7 @@ import {
 } from "../../../domain/notifications/dtos/NotificationResponseDTOs";
 
 export class NotificationRepository implements INotificationRepository {
-    async create(data: NotificationProps): Promise<any> {
+    async create(data: NotificationProps) {
         const notification = new NotificationModel({
             title: data.title,
             message: data.message,
@@ -38,7 +38,7 @@ export class NotificationRepository implements INotificationRepository {
         return await notification.save();
     }
 
-    async find(filter: any, options: { skip?: number; limit?: number; sort?: any } = {}): Promise<any[]> {
+    async find(filter, options: { skip?: number; limit?: number; sort? } = {}) {
         // Add search support
         if (filter.search) {
             const searchRegex = new RegExp(filter.search, 'i');
@@ -57,7 +57,7 @@ export class NotificationRepository implements INotificationRepository {
         return result;
     }
 
-    async count(filter: any): Promise<number> {
+    async count(filter): Promise<number> {
         if (filter.search) {
             const searchRegex = new RegExp(filter.search, 'i');
             filter.$or = [
@@ -70,23 +70,23 @@ export class NotificationRepository implements INotificationRepository {
         return NotificationModel.countDocuments(filter);
     }
 
-    async findById(id: string): Promise<any | null> {
+    async findById(id: string) {
         return NotificationModel.findById(id).lean();
     }
 
-    async update(id: string, data: Partial<NotificationProps>): Promise<any | null> {
+    async update(id: string, data: Partial<NotificationProps>) {
         return NotificationModel.findByIdAndUpdate(id, data, { new: true });
     }
 
-    async delete(id: string): Promise<void> {
+    async delete(id: string) {
         await NotificationModel.findByIdAndDelete(id);
     }
 
-    async findUsersByCollection(collection: string): Promise<any[]> {
+    async findUsersByCollection(collection: string) {
         return UserModel.find().select("fcmTokens").lean();
     }
 
-    async findFacultyByCollection(collection: string): Promise<any[]> {
+    async findFacultyByCollection(collection: string) {
         return FacultyModel.find().select("fcmTokens").lean();
     }
 

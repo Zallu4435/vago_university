@@ -10,6 +10,12 @@ interface WarningModalProps {
   confirmText?: string;
   cancelText?: string;
   type?: 'danger' | 'warning' | 'info';
+  // Optional input support (e.g., rejection reason)
+  showInput?: boolean;
+  inputLabel?: string;
+  inputPlaceholder?: string;
+  inputValue?: string;
+  onInputChange?: (value: string) => void;
 }
 
 const WarningModal: React.FC<WarningModalProps> = ({
@@ -20,7 +26,12 @@ const WarningModal: React.FC<WarningModalProps> = ({
   message,
   confirmText = 'Confirm',
   cancelText = 'Cancel',
-  type = 'danger'
+  type = 'danger',
+  showInput = false,
+  inputLabel,
+  inputPlaceholder,
+  inputValue,
+  onInputChange,
 }) => {
   const [animateIn, setAnimateIn] = useState(false);
 
@@ -137,6 +148,21 @@ const WarningModal: React.FC<WarningModalProps> = ({
               {message}
             </p>
           </div>
+
+          {showInput && (
+            <div className="mb-6">
+              {inputLabel && (
+                <label className="block text-purple-200 text-sm mb-2">{inputLabel}</label>
+              )}
+              <textarea
+                value={inputValue || ''}
+                onChange={(e) => onInputChange?.(e.target.value)}
+                placeholder={inputPlaceholder || ''}
+                className="w-full bg-gray-800/70 border border-purple-500/30 rounded-lg p-3 text-purple-100 placeholder-purple-300/60 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                rows={4}
+              />
+            </div>
+          )}
 
           <div className="flex space-x-4">
             <button

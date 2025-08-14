@@ -57,7 +57,7 @@ export const useNotificationManagement = () => {
     if (notificationsData && notificationsData.notifications) {
       setAllNotifications((prev) => {
         const ids = new Set(prev.map((n) => n._id));
-        const newOnes = notificationsData.notifications.filter((n: any) => !ids.has(n._id));
+        const newOnes = notificationsData.notifications.filter((n) => !ids.has(n._id));
         return page === 1 ? notificationsData.notifications : [...prev, ...newOnes];
       });
       setHasMore(page < (notificationsData.totalPages || 1));
@@ -81,7 +81,7 @@ export const useNotificationManagement = () => {
       if (data && data.notifications && data.notifications.length > 0) {
         setAllNotifications((prev) => {
           const ids = new Set(prev.map((n) => n._id));
-          const newOnes = data.notifications.filter((n: any) => !ids.has(n._id));
+          const newOnes = data.notifications.filter((n) => !ids.has(n._id));
           return [...prev, ...newOnes];
         });
         setPage(nextPage);
@@ -107,7 +107,7 @@ export const useNotificationManagement = () => {
 
   const { mutateAsync: getNotificationDetails } = useMutation({
     mutationFn: (id: string) => notificationService.getNotificationDetails(id),
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to fetch notification details');
     },
   });
@@ -118,7 +118,7 @@ export const useNotificationManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.success('Notification sent successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to send notification');
     },
   });
@@ -129,7 +129,7 @@ export const useNotificationManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.success('Notification deleted successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to delete notification');
     },
   });
@@ -140,7 +140,7 @@ export const useNotificationManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.success('Notification marked as read');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to mark notification as read');
     },
   });
@@ -151,7 +151,7 @@ export const useNotificationManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.success('All notifications marked as read');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to mark all notifications as read');
     },
   });

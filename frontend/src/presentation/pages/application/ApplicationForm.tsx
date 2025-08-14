@@ -131,9 +131,9 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
         return;
       }
 
-      if (fetchedData && (fetchedData as any).applicationId) {
-        setApplicationId((fetchedData as any).applicationId);
-        setValue('applicationId', (fetchedData as any).applicationId, { shouldValidate: false });
+      if (fetchedData && fetchedData.applicationId) {
+        setApplicationId(fetchedData.applicationId);
+        setValue('applicationId', fetchedData.applicationId, { shouldValidate: false });
       } else {
         try {
           console.log(user?.id, "user?.id");
@@ -152,15 +152,15 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
 
   useEffect(() => {
     if (fetchedData) {
-      setValue('applicationId', (fetchedData as any)?.applicationId ?? '', { shouldValidate: false });
-      setValue('personalInfo', (fetchedData as any)?.personal ?? undefined, { shouldValidate: false });
-      setValue('choiceOfStudy', (fetchedData as any)?.choiceOfStudy ?? [], { shouldValidate: false });
-      setValue('education', (fetchedData as any)?.education ?? undefined, { shouldValidate: false });
-      setValue('achievements', (fetchedData as any)?.achievements ?? undefined, { shouldValidate: false });
-      setValue('otherInformation', (fetchedData as any)?.otherInformation ?? undefined, { shouldValidate: false });
-      setValue('documents', (fetchedData as any)?.documents ?? undefined, { shouldValidate: false });
-      setValue('declaration', (fetchedData as any)?.declaration ?? undefined, { shouldValidate: false });
-      calculateFormProgress(fetchedData as any);
+      setValue('applicationId', fetchedData?.applicationId ?? '', { shouldValidate: false });
+      setValue('personalInfo', fetchedData?.personalInfo ?? undefined, { shouldValidate: false });
+      setValue('choiceOfStudy', fetchedData?.choiceOfStudy ?? [], { shouldValidate: false });
+      setValue('education', fetchedData?.education ?? undefined, { shouldValidate: false });
+      setValue('achievements', fetchedData?.achievements ?? undefined, { shouldValidate: false });
+      setValue('otherInformation', fetchedData?.otherInformation ?? undefined, { shouldValidate: false });
+      setValue('documents', fetchedData?.documents ?? undefined, { shouldValidate: false });
+      setValue('declaration', fetchedData?.declaration ?? undefined, { shouldValidate: false });
+      calculateFormProgress(fetchedData);
     }
   }, [fetchedData, setValue]);
 

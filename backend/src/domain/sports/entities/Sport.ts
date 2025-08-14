@@ -100,4 +100,12 @@ export class Sport {
   getUpdatedAt(): Date {
     return this.updatedAt;
   }
+
+  getUpcomingGames(): { date: string; description: string }[] {
+    return this.upcomingGames;
+  }
+
+  getHomeGames(): number {
+    return this.homeGames;
+  }
 } 

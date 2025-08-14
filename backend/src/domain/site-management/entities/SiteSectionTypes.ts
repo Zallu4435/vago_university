@@ -9,8 +9,17 @@ export enum SiteSectionKey {
 export interface ISiteSectionBase {
   id?: string;
   sectionKey: SiteSectionKey;
-  createdAt?: string;
-  updatedAt?: string;
+  title?: string;
+  description?: string;
+  content?: string;
+  bio?: string;
+  image?: string;
+  photo?: string;
+  link?: string;
+  position?: string;
+  category?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface IHighlightSection extends ISiteSectionBase {

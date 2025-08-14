@@ -41,6 +41,8 @@ export interface DiplomaCourse {
   instructor: string;
   department: string;
   chapters: Chapter[];
+  videoCount?: number;
+  completedVideoCount?: number;
   videos?: any[]; 
   createdAt: Date;
   updatedAt: Date;

@@ -12,7 +12,7 @@ export const applicationController = {
     try {
       const response = await httpClient.post('/admission/applications', { userId });
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating application:', error);
       throw error;
     }
@@ -23,7 +23,7 @@ export const applicationController = {
     try {
       const response = await httpClient.get(`/admission/applications/user/${userId}`);
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
       console.error(`Error fetching application for user ${userId}:`, error);
       throw error;
     }
@@ -34,18 +34,18 @@ export const applicationController = {
     try {
       const response = await httpClient.post(`/admission/applications/${applicationId}/sections/${section}`, data);
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
       console.error(`Error saving ${section} for application ${applicationId}:`, error);
       throw error;
     }
   },
 
 
-  async submitApplication(applicationId: string, paymentId: string): Promise<{ message: string; admission: any }> {
+  async submitApplication(applicationId: string, paymentId: string): Promise<{ message: string; admission }> {
     try {
       const response = await httpClient.post('/admission/finalize', { applicationId, paymentId });
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
       console.error(`Error submitting application ${applicationId}:`, error);
       throw error;
     }
@@ -59,7 +59,7 @@ export const applicationController = {
     try {
       const response = await httpClient.post('/admission/payment/process', { applicationId, paymentDetails });
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
       console.error(`Error processing payment for application ${applicationId}:`, error);
       throw error;
     }
@@ -70,7 +70,7 @@ export const applicationController = {
     try {
       const response = await httpClient.get(`/admission/applications/${applicationId}/status`);
       return response.data.status;
-    } catch (error: any) {
+    } catch (error) {
       console.error(`Error fetching status for application ${applicationId}:`, error);
       throw error;
     }
@@ -84,7 +84,7 @@ export const applicationController = {
     try {
       const response = await httpClient.post('/admission/payment/confirm', { paymentId, stripePaymentIntentId });
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
       console.error(`Error confirming payment ${paymentId}:`, error);
       throw error;
     }

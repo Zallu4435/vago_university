@@ -106,7 +106,7 @@ export default function Header({ currentDate, facultyName, onLogout }: HeaderPro
           >
             <LuBell size={20} className="text-pink-600" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center shadow-lg">
+              <span className={`absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 ${isDarkMode ? 'text-white' : 'text-black'} text-xs rounded-full h-6 w-6 flex items-center justify-center shadow-lg`}>
                 {unreadCount}
               </span>
             )}

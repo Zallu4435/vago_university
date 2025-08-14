@@ -1,34 +1,14 @@
-import {
-  GetSportsRequestDTO,
-  GetSportByIdRequestDTO,
-  CreateSportRequestDTO,
-  UpdateSportRequestDTO,
-  DeleteSportRequestDTO,
-  GetSportRequestsRequestDTO,
-  ApproveSportRequestRequestDTO,
-  RejectSportRequestRequestDTO,
-  GetSportRequestDetailsRequestDTO,
-  JoinSportRequestDTO,
-} from "../../../domain/sports/dtos/SportRequestDTOs";
-import {
-  GetSportsResponseDTO,
-  GetSportByIdResponseDTO,
-  CreateSportResponseDTO,
-  UpdateSportResponseDTO,
-  GetSportRequestsResponseDTO,
-  GetSportRequestDetailsResponseDTO,
-  JoinSportResponseDTO,
-} from "../../../domain/sports/dtos/SportResponseDTOs";
+import { Sport, SportLeanResult, CreateSportData, UpdateSportData } from "../../../domain/sports/entities/SportTypes";
 
 export interface ISportsRepository {
-  getSports(params: GetSportsRequestDTO)
-  getSportById(params: GetSportByIdRequestDTO): Promise<GetSportByIdResponseDTO | null>;
-  createSport(params: CreateSportRequestDTO): Promise<CreateSportResponseDTO>;
-  updateSport(params: UpdateSportRequestDTO): Promise<UpdateSportResponseDTO | null>;
-  deleteSport(params: DeleteSportRequestDTO): Promise<void>;
-  getSportRequests(params: GetSportRequestsRequestDTO);
-  approveSportRequest(params: ApproveSportRequestRequestDTO): Promise<void>;
-  rejectSportRequest(params: RejectSportRequestRequestDTO): Promise<void>;
-  getSportRequestDetails(params: GetSportRequestDetailsRequestDTO);
-  joinSport(params: JoinSportRequestDTO);
+  getSports(page: number, limit: number, sportType: string, status: string, coach: string, startDate: string, endDate: string, search: string)
+  getSportById(id: string): Promise<SportLeanResult | null>;
+  createSport(params: CreateSportData): Promise<Sport>;
+  updateSport(params: UpdateSportData): Promise<SportLeanResult | null>;
+  deleteSport(id: string): Promise<void>;
+  getSportRequests(page: number, limit: number, status: string, type: string, startDate: string, endDate: string, search: string);
+  approveSportRequest(id: string): Promise<void>;
+  rejectSportRequest(id: string): Promise<void>;
+  getSportRequestDetails(id: string);
+  joinSport(id: string);
 } 

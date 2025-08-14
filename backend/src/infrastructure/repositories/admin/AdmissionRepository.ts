@@ -6,6 +6,7 @@ import { ProgramModel } from "../../database/mongoose/models/studentProgram.mode
 import { AdminAdmission, FullAdmissionDetails } from "../../../domain/admin/entities/AdminAdmissionTypes";
 import { AdmissionErrorType } from "../../../domain/admin/enums/AdmissionErrorType";
 import { User } from "../../../domain/auth/entities/Auth";
+import { AdmissionStatus, RejectedBy } from "../../../domain/admission/entities/AdmissionTypes";
 
 
 export class AdmissionRepository implements IAdmissionRepository {
@@ -87,14 +88,14 @@ export class AdmissionRepository implements IAdmissionRepository {
         }
 
         if (action === "accept") {
-            admission.status = "approved" as any;
+            admission.status = "approved" as AdmissionStatus;
             admission.rejectedBy = undefined;
             const registerUser = await Register.findById(admission.registerId);
             if (!registerUser) {
                 throw new Error(AdmissionErrorType.RegisterUserNotFound);
             }
 
-            const fullNameParts = admission.personal.fullName.split(" ");
+            const fullNameParts = (admission.personal.fullName as string).split(" ");
             const firstName = fullNameParts[0];
             const lastName = fullNameParts.slice(1).join(" ") || "";
 
@@ -115,8 +116,8 @@ export class AdmissionRepository implements IAdmissionRepository {
             const yearRange = `${currentYear}-${currentYear + 4}`;
 
             if (admission.choiceOfStudy && admission.choiceOfStudy.length > 0) {
-                degree = admission.choiceOfStudy[0]?.programme || "";
-                catalogYear = admission.choiceOfStudy[0]?.catalogYear || yearRange;
+                degree = (admission.choiceOfStudy[0]?.programme as string) || "";
+                catalogYear = (admission.choiceOfStudy[0]?.catalogYear as string) || yearRange;
             }
 
             if (degree && catalogYear) {
@@ -129,8 +130,8 @@ export class AdmissionRepository implements IAdmissionRepository {
             }
 
         } else {
-            admission.status = "rejected" as any;
-            admission.rejectedBy = "user" as any;
+            admission.status = "rejected" as AdmissionStatus;
+            admission.rejectedBy = "user" as RejectedBy;
         }
 
         admission.confirmationToken = undefined;

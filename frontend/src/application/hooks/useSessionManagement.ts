@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { sessionService, CreateVideoSessionPayload, UpdateVideoSessionPayload, Attendee } from '../services/session.service';
 
 export interface Session {
-  id: string;
+  _id: string;
   title: string;
   hostId: string;
   startTime: string;
@@ -139,7 +139,7 @@ export const useSessionManagement = () => {
   }, []);
 
   // Fetch session attendance
-  const useSessionAttendance = (sessionId: string, filters: any = {}) => {
+  const useSessionAttendance = (sessionId: string, filters = {}) => {
     return useQuery({
       queryKey: ['sessionAttendance', sessionId, filters],
       queryFn: () => sessionService.getSessionAttendance(sessionId, filters),

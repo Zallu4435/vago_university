@@ -61,7 +61,7 @@ export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters
       queryClient.invalidateQueries({ queryKey: ['diplomas'] });
       toast.success('Diploma created successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to create diploma');
     },
   });
@@ -74,7 +74,7 @@ export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters
       queryClient.invalidateQueries({ queryKey: ['diploma-details'] });
       toast.success('Diploma updated successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to update diploma');
     },
   });
@@ -85,7 +85,7 @@ export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters
       queryClient.invalidateQueries({ queryKey: ['diplomas'] });
       toast.success('Diploma deleted successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to delete diploma');
     },
   });

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Event, EventRequest } from '../../domain/types/management/eventmanagement';
 
 export const EVENT_TYPES = ['All', 'Workshop', 'Seminar', 'Fest', 'Competition', 'Exhibition'] as const;
 export const EVENT_STATUSES = ['All', 'Upcoming', 'Completed', 'Cancelled'] as const;
@@ -112,7 +113,7 @@ export const getEventColumns = (
   {
     header: 'Event',
     key: 'title',
-    render: (event: any) => (
+    render: (event: Event) => (
       <div>
         <p className="font-medium text-gray-200">{event.title}</p>
         <p className="text-xs text-gray-400">ID: {event.id?.slice(0, 7)}</p>
@@ -123,7 +124,7 @@ export const getEventColumns = (
   {
     header: 'Organizer Type',
     key: 'organizerType',
-    render: (event: any) => (
+    render: (event: Event) => (
       <div className="flex items-center text-gray-300">
         {event.organizerType?.toLowerCase() === 'department' ? (
           <Building size={14} className="text-purple-400 mr-2" />
@@ -141,14 +142,14 @@ export const getEventColumns = (
   {
     header: 'Type',
     key: 'eventType',
-    render: (event: any) => (
+    render: (event: Event) => (
       <div className="text-sm text-gray-300 capitalize">{event.eventType}</div>
     ),
   },
   {
     header: 'Date & Time',
     key: 'date',
-    render: (event: any) => (
+    render: (event: Event) => (
       <div className="flex items-center text-gray-300">
         <Calendar size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{formatDate(event.date)}</span>
@@ -158,7 +159,7 @@ export const getEventColumns = (
   {
     header: 'Venue',
     key: 'location',
-    render: (event: any) => (
+    render: (event: Event) => (
       <div className="flex items-center text-gray-300">
         <MapPin size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{event.location}</span>
@@ -168,7 +169,7 @@ export const getEventColumns = (
   {
     header: 'Status',
     key: 'status',
-    render: (event: any) => (
+    render: (event: Event) => (
       <span
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${event.status === 'upcoming'
             ? 'bg-blue-900/30 text-blue-400 border-blue-500/30'
@@ -197,7 +198,7 @@ export const getEventRequestColumns = (
   {
     header: 'Request',
     key: 'eventName',
-    render: (request: any) => (
+    render: (request: EventRequest) => (
       <div>
         <p className="font-medium text-gray-200">{request.eventName}</p>
         <p className="text-xs text-gray-400">ID: {request.id?.slice(0, 7)}</p>
@@ -208,7 +209,7 @@ export const getEventRequestColumns = (
   {
     header: 'Requested By',
     key: 'requestedBy',
-    render: (request: any) => (
+    render: (request: EventRequest) => (
       <div className="flex items-center text-gray-300">
         {request.requesterType?.toLowerCase() === 'department' ? (
           <Building size={14} className="text-purple-400 mr-2" />
@@ -227,14 +228,14 @@ export const getEventRequestColumns = (
   {
     header: 'Type',
     key: 'type',
-    render: (request: any) => (
+    render: (request: EventRequest) => (
       <div className="text-sm text-gray-300 capitalize">{request.type}</div>
     ),
   },
   {
     header: 'Proposed Date',
     key: 'proposedDate',
-    render: (request: any) => (
+    render: (request: EventRequest) => (
       <div className="flex items-center text-gray-300">
         <Calendar size={14} className="text-purple-400 mr-2" />
         <span className="text-sm">{formatDate(request.proposedDate)}</span>
@@ -244,7 +245,7 @@ export const getEventRequestColumns = (
   {
     header: 'Status',
     key: 'status',
-    render: (request: any) => (
+    render: (request: EventRequest) => (
       <span
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${request.status === 'pending'
             ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'

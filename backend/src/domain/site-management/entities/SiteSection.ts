@@ -38,14 +38,14 @@ export class SiteSection {
   get id() { return this._props.id; }
   get sectionKey() { return this._props.sectionKey; }
   get title() { return (this._props).title; }
-  get description() { return (this._props as any).description; }
-  get content() { return (this._props as any).content; }
-  get bio() { return (this._props as any).bio; }
-  get image() { return (this._props as any).image; }
-  get photo() { return (this._props as any).photo; }
-  get link() { return (this._props as any).link; }
-  get position() { return (this._props as any).position; }
-  get category() { return (this._props as any).category; }
+  get description() { return (this._props).description; }
+  get content() { return (this._props).content; }
+  get bio() { return (this._props).bio; }
+  get image() { return (this._props).image; }
+  get photo() { return (this._props).photo; }
+  get link() { return (this._props).link; }
+  get position() { return (this._props).position; }
+  get category() { return (this._props).category; }
   get createdAt() { return this._props.createdAt; }
   get updatedAt() { return this._props.updatedAt; }
 }

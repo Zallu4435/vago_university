@@ -101,7 +101,7 @@ export const useEventManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       toast.success('Event created successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to create event');
     },
   });
@@ -113,7 +113,7 @@ export const useEventManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       toast.success('Event updated successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to update event');
     },
   });
@@ -124,7 +124,7 @@ export const useEventManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       toast.success('Event deleted successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to delete event');
     },
   });
@@ -135,7 +135,7 @@ export const useEventManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['eventRequests', 'events'] });
       toast.success('Event request approved successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to approve event request');
     },
   });
@@ -146,21 +146,21 @@ export const useEventManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['eventRequests'] });
       toast.success('Event request rejected successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to reject event request');
     },
   });
 
   const { mutateAsync: getEventDetails } = useMutation({
     mutationFn: (id: string) => eventService.getEventDetails(id),
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to fetch event details');
     },
   });
 
   const { mutateAsync: getEventRequestDetails } = useMutation({
     mutationFn: (id: string) => eventService.getEventRequestDetails(id),
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to fetch request details');
     },
   });
@@ -206,8 +206,8 @@ export const useEventManagement = () => {
 
   console.log(eventsData, "events from ")
   return {
-    events: (eventsData as any)?.data || [],
-    eventRequests: ((eventRequestsData as any)?.eventRequests || []).map((req: any) => ({ ...req, id: req.requestedId })),
+    events: eventsData?.data || [],
+    eventRequests: (eventRequestsData?.eventRequests || []).map((req) => ({ ...req, id: req.requestedId })),
     totalPages: activeTab === 'events' ? eventsData?.totalPages || 0 : eventRequestsData?.totalPages || 0,
     page,
     setPage,

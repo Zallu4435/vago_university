@@ -62,10 +62,10 @@ const AttendanceSummaryPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [, setDateRange] = useState({ start: '', end: '' });
-  const [, setSelectedUser] = useState<any>(null);
+  const [, setSelectedUser] = useState<AttendanceUser | null>(null);
   const [viewMode, setViewMode] = useState<'students' | 'details'>('students');
   const [selectedStudent, setSelectedStudent] = useState<StudentAttendanceData | null>(null);
-  const [selectedSessionForIntervals, setSelectedSessionForIntervals] = useState<any>(null);
+  const [selectedSessionForIntervals, setSelectedSessionForIntervals] = useState<StudentAttendanceData['sessionDetails'][number] | null>(null);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -84,14 +84,14 @@ const AttendanceSummaryPage = () => {
 
   const { data: currentAttendanceData = [] } = useSessionAttendance(selectedSessionId, { search: debouncedSearchTerm });
 
-  const currentSession = sessions.find((s: any) => s._id === selectedSessionId);
+  const currentSession = sessions.find((s: Session) => s._id === selectedSessionId);
 
-  const sessionAttendanceQueries = sessions.map((session: any) => ({
+  const sessionAttendanceQueries: { sessionId: string, query: ReturnType<typeof useSessionAttendance> }[] = sessions.map((session: Session) => ({
     sessionId: session._id,
     query: useSessionAttendance(session._id, { search: debouncedSearchTerm })
   }));
 
-  const isLoadingAttendanceAllSessions = sessionAttendanceQueries.some((q: any) => q.query.isLoading);
+  const isLoadingAttendanceAllSessions = sessionAttendanceQueries.some((q) => q.query.isLoading);
 
   const calculateTotalTime = (
     intervals: AttendanceInterval[],
@@ -173,9 +173,9 @@ const AttendanceSummaryPage = () => {
     if (!processedAttendance.length) return null;
 
     const totalUsers = processedAttendance.length;
-    const avgAttendance = processedAttendance.reduce((sum: number, user: any) => sum + user.attendancePercentage, 0) / totalUsers;
-    const highAttendance = processedAttendance.filter((user: any) => user.attendancePercentage >= 75).length;
-    const totalTimeSpent = processedAttendance.reduce((sum: number, user: any) => sum + user.totalTime, 0);
+    const avgAttendance = processedAttendance.reduce((sum: number, user: AttendanceUser & { attendancePercentage: number }) => sum + user.attendancePercentage, 0) / totalUsers;
+    const highAttendance = processedAttendance.filter((user: AttendanceUser & { attendancePercentage: number }) => user.attendancePercentage >= 75).length;
+    const totalTimeSpent = processedAttendance.reduce((sum: number, user: AttendanceUser & { totalTime: number }) => sum + user.totalTime, 0);
 
     return {
       totalUsers,
@@ -183,9 +183,9 @@ const AttendanceSummaryPage = () => {
       highAttendance,
       totalTimeSpent: formatDuration(totalTimeSpent),
       attendanceDistribution: {
-        high: processedAttendance.filter((user: any) => user.attendancePercentage >= 75).length,
-        medium: processedAttendance.filter((user: any) => user.attendancePercentage >= 50 && user.attendancePercentage < 75).length,
-        low: processedAttendance.filter((user: any) => user.attendancePercentage < 50).length
+        high: processedAttendance.filter((user: AttendanceUser & { attendancePercentage: number }) => user.attendancePercentage >= 75).length,
+        medium: processedAttendance.filter((user: AttendanceUser & { attendancePercentage: number }) => user.attendancePercentage >= 50 && user.attendancePercentage < 75).length,
+        low: processedAttendance.filter((user: AttendanceUser & { attendancePercentage: number }) => user.attendancePercentage < 50).length
       }
     };
   }, [processedAttendance]);
@@ -201,7 +201,7 @@ const AttendanceSummaryPage = () => {
     setSelectedSessionForIntervals(null);
   };
 
-  const handleViewSessionIntervals = (session: any) => {
+  const handleViewSessionIntervals = (session: StudentAttendanceData['sessionDetails'][number]) => {
     setSelectedSessionForIntervals(session);
   };
 
@@ -221,8 +221,8 @@ const AttendanceSummaryPage = () => {
   const studentsAttendanceData = useMemo(() => {
     const studentMap = new Map<string, StudentAttendanceData>();
 
-    sessionAttendanceQueries.forEach(({ sessionId, query }: any) => {
-      const session = sessions.find((s: any) => s._id === sessionId);
+    sessionAttendanceQueries.forEach(({ sessionId, query }) => {
+      const session = sessions.find((s: Session) => s._id === sessionId);
       if (!session || !query.data) return;
 
       const attendanceData = query.data as AttendanceUser[];

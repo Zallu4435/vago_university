@@ -109,8 +109,8 @@ export interface CourseRequestDetailsModalProps {
 export interface CourseFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
-  initialData?: any;
+  onSubmit: (data: unknown) => void;
+  initialData?: unknown;
   isEditing?: boolean;
   specializations: string[];
   faculties: string[];

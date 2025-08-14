@@ -1,17 +1,18 @@
 import React from 'react';
+import { formatRelativeTime } from '../../../../shared/utils/dateUtils';
 
-interface Activity {
+interface ActivityItem {
   id: string;
   action: string;
   user: string;
   time: string;
   avatar: string;
-  type?: string;
+  type: 'success' | 'warning' | 'info' | 'default';
+  isRead: boolean;
 }
 
 interface RecentActivitiesProps {
-  activitiesData: Activity[];
-  markActivityAsRead: (id: string) => void;
+  activitiesData: ActivityItem[];
 }
 
 const EnhancedActivityItem = ({ action, user, time, avatar, type = "default" }: any) => {
@@ -40,18 +41,18 @@ const EnhancedActivityItem = ({ action, user, time, avatar, type = "default" }: 
       </div>
       <div className="flex-shrink-0">
         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-900/30 text-purple-400 border border-purple-500/30 backdrop-blur-sm">
-          {time}
+          {formatRelativeTime(time)}
         </span>
       </div>
     </div>
   );
 };
 
-const RecentActivities: React.FC<RecentActivitiesProps> = ({ activitiesData, markActivityAsRead }) => (
+const RecentActivities: React.FC<RecentActivitiesProps> = ({ activitiesData }) => (
   <div className="space-y-2">
     {activitiesData.length > 0 ? (
       activitiesData.map((activity) => (
-        <div key={activity.id} className="cursor-pointer" onClick={() => markActivityAsRead(activity.id)}>
+        <div key={activity.id}>
           <EnhancedActivityItem
             action={activity.action}
             user={activity.user}

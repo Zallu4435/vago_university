@@ -41,8 +41,8 @@ export class GetSportRequestsUseCase {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
       throw new Error("Invalid page or limit parameters");
     }
-    const { requests, totalItems, totalPages, currentPage } = await this.sportsRepository.getSportRequests(params);
-    const mappedRequests = requests.map((request: any) => ({
+    const { requests, totalItems, totalPages, currentPage } = await this.sportsRepository.getSportRequests(params.page, params.limit, params.status, params.type, params.startDate, params.endDate, params.search);
+    const mappedRequests = requests.map((request) => ({
       sportName: request.sportId?.title || "Unknown Sport",
       requestId: request._id?.toString() || request.requestId,
       requestedBy: request.userId?.email || "Unknown User",
@@ -67,14 +67,14 @@ export class ApproveSportRequestUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new Error("Invalid sport request ID");
     }
-    const sportRequest: any = await this.sportsRepository.getSportRequestDetails({ id: params.id });
+    const sportRequest = await this.sportsRepository.getSportRequestDetails(params.id);
     if (!sportRequest) {
       throw new Error("Sport request not found");
     }
     if (sportRequest.status !== "pending") {
       throw new Error("Sport request is not in pending status");
     }
-    await this.sportsRepository.approveSportRequest(params);
+    await this.sportsRepository.approveSportRequest(params.id);
     return { message: "Sport request approved successfully" };
   }
 }
@@ -86,14 +86,14 @@ export class RejectSportRequestUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new Error("Invalid sport request ID");
     }
-    const sportRequest: any = await this.sportsRepository.getSportRequestDetails({ id: params.id });
+    const sportRequest = await this.sportsRepository.getSportRequestDetails(params.id);
     if (!sportRequest) {
       throw new Error("Sport request not found");
     }
     if (sportRequest.status !== "pending") {
       throw new Error("Sport request is not in pending status");
     }
-    await this.sportsRepository.rejectSportRequest(params);
+    await this.sportsRepository.rejectSportRequest(params.id);
     return { message: "Sport request rejected successfully" };
   }
 }
@@ -105,7 +105,7 @@ export class GetSportRequestDetailsUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new Error("Invalid sport request ID");
     }
-    const sportRequest: any = await this.sportsRepository.getSportRequestDetails(params);
+    const sportRequest = await this.sportsRepository.getSportRequestDetails(params.id);
     if (!sportRequest) {
       throw new Error("Sport request not found");
     }
@@ -147,7 +147,7 @@ export class JoinSportUseCase {
     if (!mongoose.isValidObjectId(params.sportId)) {
       throw new Error("Invalid sport ID");
     }
-    const joinResult: any = await this.sportsRepository.joinSport(params);
+    const joinResult = await this.sportsRepository.joinSport(params.sportId);
     return {
       requestId: joinResult._id?.toString() || joinResult.requestId,
       status: joinResult.status,

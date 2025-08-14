@@ -13,9 +13,7 @@ import {
   UpdateSportResponseDTO,
   SportSummaryDTO,
 } from "../../../domain/sports/dtos/SportResponseDTOs";
-import { SportStatus } from "../../../domain/sports/entities/SportTypes";
-import { Sport } from "../../../domain/sports/entities/Sport";
-import mongoose from "mongoose";
+import { Sport, SportDocument } from "../../../domain/sports/entities/SportTypes";
 
 export interface IGetSportsUseCase {
   execute(params: GetSportsRequestDTO): Promise<GetSportsResponseDTO>;
@@ -44,8 +42,8 @@ export class GetSportsUseCase {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
       throw new Error("Invalid page or limit parameters");
     }
-    const { sports, totalItems, totalPages, currentPage } = await this.sportsRepository.getSports(params);
-    const mappedSports: SportSummaryDTO[] = sports.map((sport) => ({
+    const { sports, totalItems, totalPages, currentPage } = await this.sportsRepository.getSports(params.page, params.limit, params.sportType, params.status, params.coach, params.startDate, params.endDate, params.search);
+    const mappedSports: SportSummaryDTO[] = sports.map((sport: SportDocument) => ({
       id: sport._id?.toString() || sport.id,
       title: sport.title,
       type: sport.type,
@@ -73,15 +71,15 @@ export class GetSportByIdUseCase {
   constructor(private sportsRepository: ISportsRepository) { }
 
   async execute(params: GetSportByIdRequestDTO): Promise<GetSportByIdResponseDTO> {
-    if (!mongoose.isValidObjectId(params.id)) {
+    if (!params.id || typeof params.id !== 'string') {
       throw new Error("Invalid sport ID");
     }
-    const sport: any = await this.sportsRepository.getSportById(params);
+    const sport = await this.sportsRepository.getSportById(params.id);
     if (!sport) {
       throw new Error("Sport not found");
     }
     return {
-      sport: sport
+      sport: sport as unknown as Sport
     };
   }
 }
@@ -90,29 +88,9 @@ export class CreateSportUseCase {
   constructor(private sportsRepository: ISportsRepository) { }
 
   async execute(params: CreateSportRequestDTO): Promise<CreateSportResponseDTO> {
-    const newSport: any = await this.sportsRepository.createSport(params);
+    const newSport = await this.sportsRepository.createSport(params);
     
-    return {
-      sport: {
-        id: newSport._id?.toString() || newSport.id,
-        title: newSport.title,
-        type: newSport.type,
-        category: newSport.category,
-        organizer: newSport.organizer,
-        organizerType: newSport.organizerType,
-        icon: newSport.icon,
-        color: newSport.color,
-        division: newSport.division,
-        headCoach: newSport.headCoach,
-        homeGames: newSport.homeGames,
-        record: newSport.record,
-        upcomingGames: newSport.upcomingGames,
-        participants: newSport.participants,
-        status: newSport.status === "active" ? SportStatus.Active : SportStatus.Inactive,
-        createdAt: newSport.createdAt,
-        updatedAt: newSport.updatedAt,
-      },
-    };
+    return newSport;
   }
 }
 
@@ -120,34 +98,14 @@ export class UpdateSportUseCase {
   constructor(private sportsRepository: ISportsRepository) { }
 
   async execute(params: UpdateSportRequestDTO): Promise<UpdateSportResponseDTO> {
-    if (!mongoose.isValidObjectId(params.id)) {
+    if (!params.id || typeof params.id !== 'string') {
       throw new Error("Invalid sport ID");
     }
-    const updatedSport: any = await this.sportsRepository.updateSport(params);
+    const updatedSport = await this.sportsRepository.updateSport(params);
     if (!updatedSport) {
       throw new Error("Sport not found");
     }
-    return {
-      sport: {
-        id: updatedSport._id?.toString() || updatedSport.id,
-        title: updatedSport.title,
-        type: updatedSport.type,
-        category: updatedSport.category,
-        organizer: updatedSport.organizer,
-        organizerType: updatedSport.organizerType,
-        icon: updatedSport.icon,
-        color: updatedSport.color,
-        division: updatedSport.division,
-        headCoach: updatedSport.headCoach,
-        homeGames: updatedSport.homeGames,
-        record: updatedSport.record,
-        upcomingGames: updatedSport.upcomingGames,
-        participants: updatedSport.participants,
-        status: updatedSport.status === "active" ? SportStatus.Active : SportStatus.Inactive,
-        createdAt: updatedSport.createdAt,
-        updatedAt: updatedSport.updatedAt,
-      },
-    };
+    return updatedSport;
   }
 }
 
@@ -155,10 +113,10 @@ export class DeleteSportUseCase {
   constructor(private sportsRepository: ISportsRepository) { }
 
   async execute(params: DeleteSportRequestDTO): Promise<{ message: string }> {
-    if (!mongoose.isValidObjectId(params.id)) {
+    if (!params.id || typeof params.id !== 'string') {
       throw new Error("Invalid sport ID");
     }
-    await this.sportsRepository.deleteSport(params);
+    await this.sportsRepository.deleteSport(params.id);
     return { message: "Sport deleted successfully" };
   }
 } 

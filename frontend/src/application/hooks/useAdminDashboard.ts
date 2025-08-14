@@ -99,7 +99,7 @@ export const useAdminDashboard = () => {
       queryClient.setQueryData(['admin-dashboard'], data);
       toast.success('Dashboard refreshed successfully');
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error(error.message || 'Failed to refresh dashboard');
     },
   });
@@ -109,21 +109,9 @@ export const useAdminDashboard = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard-alerts'] });
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
-      toast.success('Alert dismissed');
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast.error(error.message || 'Failed to dismiss alert');
-    },
-  });
-
-  const { mutateAsync: markActivityAsRead } = useMutation({
-    mutationFn: (activityId: string) => adminDashboardService.markActivityAsRead(activityId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-dashboard-activities'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to mark activity as read');
     },
   });
 
@@ -167,7 +155,6 @@ export const useAdminDashboard = () => {
 
     refreshDashboard: handleRefresh,
     dismissAlert,
-    markActivityAsRead,
     refetchDashboard,
   };
 }; 

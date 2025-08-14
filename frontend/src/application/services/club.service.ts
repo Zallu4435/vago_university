@@ -1,6 +1,7 @@
 // src/application/services/club.service.ts
 import httpClient from '../../frameworks/api/httpClient';
 import { Club, ClubRequest, ClubApiResponse, ClubResponse, ClubRequestResponse } from '../../domain/types/club';
+import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 
 class ClubService {
   async getClubs(
@@ -16,8 +17,11 @@ class ClubService {
         params: { page, limit, category, status, dateRange, search },
       });
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch clubs');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch clubs');
+      }
+      throw new Error('Failed to fetch clubs');
     }
   }
 
@@ -26,8 +30,11 @@ class ClubService {
       const response = await httpClient.get<ClubResponse>(`/admin/clubs/${id}`);
       console.log(response.data, "[md[lsmsl[ms[lms[ldm")
       return response.data.data.club;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch club details');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch club details');
+      }
+      throw new Error('Failed to fetch club details');
     }
   }
 
@@ -35,8 +42,11 @@ class ClubService {
     try {
       const response = await httpClient.post<Club>('/admin/clubs', data);
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to create club');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to create club');
+      }
+      throw new Error('Failed to create club');
     }
   }
 
@@ -44,16 +54,22 @@ class ClubService {
     try {
       const response = await httpClient.put<Club>(`/admin/clubs/${id}`, data);
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to update club');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to update club');
+      }
+      throw new Error('Failed to update club');
     }
   }
 
   async deleteClub(id: string): Promise<void> {
     try {
       await httpClient.delete(`/admin/clubs/${id}`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to delete club');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to delete club');
+      }
+      throw new Error('Failed to delete club');
     }
   }
 
@@ -70,24 +86,33 @@ class ClubService {
         params: { page, limit, category, status, dateRange, search },
       });
       return response.data.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch club requests');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch club requests');
+      }
+      throw new Error('Failed to fetch club requests');
     }
   }
 
   async approveClubRequest(id: string): Promise<void> {
     try {
       await httpClient.post(`/admin/club-requests/${id}/approve`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to approve club request');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to approve club request');
+      }
+      throw new Error('Failed to approve club request');
     }
   }
 
   async rejectClubRequest(id: string): Promise<void> {
     try {
       await httpClient.post(`/admin/club-requests/${id}/reject`);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to reject club request');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to reject club request');
+      }
+      throw new Error('Failed to reject club request');
     }
   }
 
@@ -95,8 +120,11 @@ class ClubService {
     try {
       const response = await httpClient.get<ClubRequestResponse>(`/admin/club-requests/${id}`);
       return response.data.data.clubRequest;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to fetch event request details');
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch event request details');
+      }
+      throw new Error('Failed to fetch event request details');
     }
   }
 }

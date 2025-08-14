@@ -18,6 +18,8 @@ import AddTeamModal from './AddTeamModal';
 import TeamDetailsModal from './TeamDetailsModal';
 import { useSportsManagement } from '../../../../../application/hooks/useSportsManagement';
 import TeamRequestDetailsModal from './TeamRequestDetailsModal';
+import LoadingSpinner from '../../../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../../../shared/components/ErrorMessage';
 import {
   Team,
   PlayerRequest,
@@ -60,8 +62,6 @@ const getFilterOptions = (activeTab: 'teams' | 'requests') => {
     };
   }
 };
-import LoadingSpinner from '../../../../../shared/components/LoadingSpinner';
-import ErrorMessage from '../../../../../shared/components/ErrorMessage';
 
 const AdminSportsManagement: React.FC = () => {
   const {

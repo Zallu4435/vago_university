@@ -1,16 +1,23 @@
 import { ISportsRepository } from "../../../application/sports/repositories/ISportsRepository";
 import { TeamModel, SportRequestModel } from "../../../infrastructure/database/mongoose/models/sports.model";
 import { User as UserModel } from "../../database/mongoose/auth/user.model";
-import { Sport, SportLeanResult, CreateSportData, UpdateSportData } from "../../../domain/sports/entities/SportTypes";
+import { Sport, SportDocument, SportRequest } from "../../../domain/sports/entities/SportTypes";
+import { BaseRepository } from "../../../application/repositories/BaseRepository";
 
-export class SportsRepository implements ISportsRepository {
+export class SportsRepository extends BaseRepository<Sport, Record<string, any>, Record<string, any>, Record<string, unknown>, SportDocument> implements ISportsRepository {
+  constructor() {
+    super(TeamModel);
+  }
+
   async getSports(page: number, limit: number, sportType: string, status: string, coach: string, startDate: string, endDate: string, search: string) {
     const query: any = {};
     if (sportType && sportType !== "all") {
       query.type = { $regex: `^${sportType}$`, $options: "i" };
     }
     if (status && status !== "all") {
-      query.status = { $regex: `^${status}$`, $options: "i" };
+      // Normalize status to lowercase to match enum values
+      const normalizedStatus = status.toLowerCase();
+      query.status = { $regex: `^${normalizedStatus}$`, $options: "i" };
     }
     if (coach && coach !== "all") {
       query.headCoach = { $regex: coach, $options: "i" };
@@ -31,31 +38,32 @@ export class SportsRepository implements ISportsRepository {
     const totalPages = Math.ceil(totalItems / limit);
     const skip = (page - 1) * limit;
     const sports = await TeamModel.find(query)
+      .sort({ updatedAt: -1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
-    return { sports, totalItems, totalPages, currentPage: page };
+    return { sports: sports as unknown as SportDocument[], totalItems, totalPages, currentPage: page };
   }
 
-  async getSportById(id: string) {
-    return await TeamModel.findById(id).lean();
-  }
+  // async getSportById(id: string) {
+  //   return await TeamModel.findById(id).lean();
+  // }
 
-  async createSport(params: CreateSportData) {
-    return await TeamModel.create({ ...params, status: params.status?.toLowerCase() || "active" });
-  }
+  // async createSport(params: CreateSportData) {
+  //   return await TeamModel.create({ ...params, status: params.status?.toLowerCase() || "active" });
+  // }
 
-  async updateSport(params: UpdateSportData) {
-    return await TeamModel.findByIdAndUpdate(
-      params.id,
-      { $set: { ...params, updatedAt: new Date() } },
-      { new: true }
-    ).lean();
-  }
+  // async updateSport(params: UpdateSportData) {
+  //   return await TeamModel.findByIdAndUpdate(
+  //     params.id,
+  //     { $set: { ...params, updatedAt: new Date() } },
+  //     { new: true }
+  //   ).lean();
+  // }
 
-  async deleteSport(id: string): Promise<void> {
-    await TeamModel.findByIdAndDelete(id);
-  }
+  // async deleteSport(id: string): Promise<void> {
+  //   await TeamModel.findByIdAndDelete(id);
+  // }
 
   async getSportRequests(page: number, limit: number, status: string, type: string, startDate: string, endDate: string, search: string) {
     const query: any = {};

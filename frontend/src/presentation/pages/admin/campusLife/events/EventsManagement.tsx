@@ -93,7 +93,8 @@ const AdminEventsManagement: React.FC = () => {
   const handleEditEvent = async (event: Event) => {
     try {
       const details = await getEventDetails(event.id);
-      setSelectedEvent(details as any);
+      // Ensure selectedEvent has an id property for update logic
+      setSelectedEvent({ ...details, id: details.id || details._id });
       setShowAddEventModal(true);
     } catch (error) {
       console.error('Error fetching event details:', error);
@@ -118,8 +119,13 @@ const AdminEventsManagement: React.FC = () => {
 
   const handleSaveEvent = async (data: any) => {
     try {
-      if (selectedEvent && 'id' in selectedEvent) {
-        await updateEvent({ id: selectedEvent.id, data });
+      if (selectedEvent && (selectedEvent.id || selectedEvent._id)) {
+        const eventId = selectedEvent.id || selectedEvent._id;
+        if (!eventId) {
+          toast.error('Event ID is missing for update!');
+          return;
+        }
+        await updateEvent({ id: eventId, data });
         toast.success('Event updated successfully');
       } else {
         await createEvent(data);
@@ -128,6 +134,7 @@ const AdminEventsManagement: React.FC = () => {
       setShowAddEventModal(false);
       setSelectedEvent(null);
     } catch (error: any) {
+      console.error('handleSaveEvent - error:', error);
       toast.error(error.response?.data?.message || error.message || 'Failed to save event');
     }
   };

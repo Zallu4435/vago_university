@@ -1,29 +1,27 @@
 import {
   GetClubsRequest,
-  GetClubByIdRequest,
   CreateClubRequest,
   UpdateClubRequest,
-  DeleteClubRequest,
   GetClubRequestsRequest,
   ApproveClubRequestRequest,
   RejectClubRequestRequest,
   GetClubRequestDetailsRequest,
-  GetClubsResponse,
-  GetClubByIdResponse,
-  CreateClubResponse,
-  UpdateClubResponse,
-  GetClubRequestsResponse,
-  GetClubRequestDetailsResponse,
 } from "../../../domain/clubs/entities/Club";
-   
-export interface IClubsRepository {
-  getClubs(params: GetClubsRequest): Promise<GetClubsResponse>;
-  getClubById(id: string): Promise<GetClubByIdResponse | null>;
-  createClub(params: CreateClubRequest): Promise<CreateClubResponse>;
-  updateClub(params: UpdateClubRequest): Promise<UpdateClubResponse | null>;
-  deleteClub(params: DeleteClubRequest): Promise<void>;
-  getClubRequests(params: GetClubRequestsRequest): Promise<GetClubRequestsResponse>;
+import { IBaseRepository } from "../../repositories";
+import { Club, ClubRequest } from "../../../domain/clubs/entities/ClubTypes";
+
+export interface IClubsRepository extends 
+  IBaseRepository<Club, CreateClubRequest, UpdateClubRequest, Record<string, any>, Club> {
+  
+  getClubs(params: GetClubsRequest): Promise<{ clubs: Club[]; totalItems: number; totalPages: number; currentPage: number }>;
+  
+  // getClubById(id: string): Promise<GetClubByIdResponse | null>;        // Use getById() instead
+  // createClub(params: CreateClubRequest): Promise<CreateClubResponse>;  // Use create() instead  
+  // updateClub(params: UpdateClubRequest): Promise<UpdateClubResponse | null>;  // Use updateById() instead
+  // deleteClub(params: DeleteClubRequest): Promise<void>;               // Use deleteById() instead
+
+  getClubRequests(params: GetClubRequestsRequest): Promise<{ rawRequests: ClubRequest[]; totalItems: number; totalPages: number; currentPage: number }>;
   approveClubRequest(params: ApproveClubRequestRequest): Promise<void>;
   rejectClubRequest(params: RejectClubRequestRequest): Promise<void>;
-  getClubRequestDetails(params: GetClubRequestDetailsRequest): Promise<GetClubRequestDetailsResponse | null>;
+  getClubRequestDetails(params: GetClubRequestDetailsRequest): Promise<{ clubRequest: ClubRequest } | null>;
 }

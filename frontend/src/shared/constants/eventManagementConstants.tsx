@@ -147,16 +147,6 @@ export const getEventColumns = (
     ),
   },
   {
-    header: 'Date & Time',
-    key: 'date',
-    render: (event: Event) => (
-      <div className="flex items-center text-gray-300">
-        <Calendar size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{formatDate(event.date)}</span>
-      </div>
-    ),
-  },
-  {
     header: 'Venue',
     key: 'location',
     render: (event: Event) => (

@@ -38,8 +38,8 @@ export interface SimplifiedEventRequest {
 export interface EventRequestDetails {
   _id: string;
   status: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
   whyJoin: string;
   additionalInfo: string;
   eventId: {
@@ -193,4 +193,27 @@ export class Event {
   get maxParticipants(): number { return this._maxParticipants; }
   get registrationRequired(): boolean { return this._registrationRequired; }
   get participants(): number { return this._participants; }
+
+  toPersistence() {
+    return {
+      title: this._title,
+      organizer: this._organizer,
+      organizerType: this._organizerType,
+      eventType: this._eventType,
+      date: this._date,
+      time: this._time,
+      location: this._location,
+      timeframe: this._timeframe,
+      status: this._status,
+      icon: this._icon,
+      color: this._color,
+      description: this._description,
+      fullTime: this._fullTime,
+      additionalInfo: this._additionalInfo,
+      requirements: this._requirements,
+      maxParticipants: this._maxParticipants,
+      registrationRequired: this._registrationRequired,
+      participants: this._participants,
+    };
+  }
 }

@@ -10,9 +10,11 @@ import { financialService } from '../../../../application/services/financialServ
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 
+import { Charge, Payment } from '../../../../domain/types/user/financial';
+
 interface FinancialState {
-  info: any[];
-  history: any[];
+  info: Charge[];
+  history: Payment[];
   financialAidStatus: string;
 }
 
@@ -39,9 +41,13 @@ export default function Financial() {
         financialAidStatus: response?.financialAidStatus || '',
       });
       setError(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching financial data:', err);
-      setError(err);
+      if (err instanceof Error) {
+        setError(err);
+      } else {
+        setError(new Error(String(err)));
+      }
     } finally {
       setLoading(false);
     }

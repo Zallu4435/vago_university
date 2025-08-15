@@ -60,7 +60,7 @@ export const ORGANIZER_TYPE_OPTIONS: OrganizerTypeOption[] = [
 export const ICON_OPTIONS = [
   '📅', '🎉', '🏆', '🎭', '🎵', '🏃', '🍽️', '🎨', '📚', '💼',
   '🔬', '🎯', '⚽', '🎪', '🎬', '🏛️', '🌟', '🎊', '🎓', '💡',
-  '🚀', '🎮', '🏋️', '🎤', '📸', '🎸', '🏆', '🎺', '🎻', '🎲'
+  '🚀', '🎮', '🏋️', '🎤', '📸', '🎸', '🎺', '🎻', '🎲'
 ] as const;
 
 export const COLOR_OPTIONS = [

@@ -1,19 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
-import { studentDashboardService } from '../services/studentDashboardService';
+import { studentDashboardService, Announcement, Deadline, ClassInfo, NewEvent, CalendarDayEntry } from '../services/studentDashboardService';
 
-type EventItem = {
-  id: string;
-  title: string;
-  date: string;
-  location: string;
-};
+interface StudentInfo {
+  name: string;
+  email: string;
+}
 
 type StudentDashboardData = {
-  announcements: any[];
-  deadlines: any[];
-  classes: any[];
-  newEvents: EventItem[];
-  calendarDays: number[];
+  announcements: Announcement[];
+  deadlines: Deadline[];
+  classes: ClassInfo[];
+  newEvents: NewEvent[];
+  calendarDays: Record<number, CalendarDayEntry[]>;
   isLoading: boolean;
   isLoadingAnnouncements: boolean;
   isLoadingDeadlines: boolean;
@@ -21,12 +19,12 @@ type StudentDashboardData = {
   isLoadingNewEvents: boolean;
   isLoadingCalendarDays: boolean;
   hasError: boolean;
-  dashboardError: any;
-  announcementsError: any;
-  deadlinesError: any;
-  classesError: any;
-  newEventsError: any;
-  calendarDaysError: any;
+  dashboardError: unknown;
+  announcementsError: unknown;
+  deadlinesError: unknown;
+  classesError: unknown;
+  newEventsError: unknown;
+  calendarDaysError: unknown;
   refetchDashboard: () => Promise<void>;
   refetchAnnouncements: () => Promise<void>;
   refetchDeadlines: () => Promise<void>;
@@ -36,9 +34,9 @@ type StudentDashboardData = {
 };
 
 export const useStudentDashboard = (): StudentDashboardData & {
-  studentInfo?: any;
+  studentInfo?: StudentInfo;
   studentInfoLoading: boolean;
-  studentInfoError: any;
+  studentInfoError: unknown;
 } => {
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['student-dashboard'],
@@ -86,4 +84,4 @@ export const useStudentDashboard = (): StudentDashboardData & {
     studentInfoLoading,
     studentInfoError,
   };
-}; 
+};

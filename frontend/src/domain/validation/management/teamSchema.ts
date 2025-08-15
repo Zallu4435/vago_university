@@ -21,5 +21,5 @@ export const teamSchema = z.object({
     })
   ).min(1, 'At least one upcoming game is required'),
   participants: z.number().min(0, 'Participants must be 0 or greater').default(0),
-  status: z.enum(['Active', 'Inactive']).default('Active'),
+  status: z.string().regex(/^(active|inactive)$/i, 'Status must be Active or Inactive').default('Active'),
 }); 

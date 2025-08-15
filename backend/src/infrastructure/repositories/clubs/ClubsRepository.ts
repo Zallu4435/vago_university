@@ -2,7 +2,6 @@ import {
   GetClubsRequest,
   CreateClubRequest,
   UpdateClubRequest,
-  DeleteClubRequest,
   GetClubRequestsRequest,
   ApproveClubRequestRequest,
   RejectClubRequestRequest,
@@ -10,9 +9,15 @@ import {
 } from "../../../domain/clubs/entities/Club";
 import { IClubsRepository } from "../../../application/clubs/repositories/IClubsRepository";
 import { ClubModel, ClubRequestModel } from "../../../infrastructure/database/mongoose/models/clubs/ClubModel";
+import { BaseRepository } from "../../../application/repositories/BaseRepository";
+import { Club } from "../../../domain/clubs/entities/ClubTypes";
 import mongoose from "mongoose";
 
-export class ClubsRepository implements IClubsRepository {
+export class ClubsRepository extends BaseRepository<Club, CreateClubRequest, UpdateClubRequest, Record<string, any>, Club> implements IClubsRepository {
+  constructor() {
+    super(ClubModel);
+  }
+
   async getClubs(params: GetClubsRequest) {
     const { page, limit, category, status, startDate, endDate, search } = params;
     const query: any = {};
@@ -46,28 +51,28 @@ export class ClubsRepository implements IClubsRepository {
     return { clubs, totalItems, totalPages, currentPage: page };
   }
 
-  async getClubById(id: string) {
-    const club = await ClubModel.findById(id).lean();
-    return { club };
-  }
+  // async getClubById(id: string) {
+  //   const club = await ClubModel.findById(id).lean();
+  //   return { club };
+  // }
 
-  async createClub(params: CreateClubRequest) {
-    const club = await ClubModel.create({ ...params, status: params.status?.toLowerCase() || "active" });
-    return { club };
-  }
+  // async createClub(params: CreateClubRequest) {
+  //   const club = await ClubModel.create({ ...params, status: params.status?.toLowerCase() || "active" });
+  //   return { club };
+  // }
 
-  async updateClub(params: UpdateClubRequest) {
-    const club = await ClubModel.findByIdAndUpdate(
-      params.id,
-      { $set: { ...params, updatedAt: new Date() } },
-      { new: true }
-    ).lean();
-    return { club };
-  }
+  // async updateClub(params: UpdateClubRequest) {
+  //   const club = await ClubModel.findByIdAndUpdate(
+  //     params.id,
+  //     { $set: { ...params, updatedAt: new Date() } },
+  //     { new: true }
+  //   ).lean();
+  //   return { club };
+  // }
 
-  async deleteClub(params: DeleteClubRequest): Promise<void> {
-    await ClubModel.findByIdAndDelete(params.id);
-  }
+  // async deleteClub(params: DeleteClubRequest): Promise<void> {
+  //   await ClubModel.findByIdAndDelete(params.id);
+  // }
 
   async getClubRequests(params: GetClubRequestsRequest) {
     const { page, limit, status, type, startDate, endDate, search } = params;

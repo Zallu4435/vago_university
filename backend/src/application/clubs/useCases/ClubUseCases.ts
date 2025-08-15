@@ -77,11 +77,11 @@ export class GetClubByIdUseCase implements IGetClubByIdUseCase {
     if (!mongoose.isValidObjectId(dto.id)) {
       throw new Error("Invalid club ID");
     }
-    const club = await this.clubsRepository.getClubById(dto.id);
+    const club = await this.clubsRepository.getById(dto.id);
     if (!club) {
       throw new Error("Club not found!");
     }
-    return club;
+    return { club };
   }
 }
 
@@ -89,9 +89,9 @@ export class CreateClubUseCase implements ICreateClubUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(dto: CreateClubRequestDTO): Promise<CreateClubResponseDTO> {
-    const newClub = await this.clubsRepository.createClub(dto);
+    const newClub = await this.clubsRepository.create(dto);
     return {
-      club: newClub.club
+      club: newClub
     };
   }
 }
@@ -103,12 +103,13 @@ export class UpdateClubUseCase implements IUpdateClubUseCase {
     if (!mongoose.isValidObjectId(dto.id)) {
       throw new Error("Invalid club ID");
     }
-    const updatedClub = await this.clubsRepository.updateClub(dto);
+    const { id, ...updateData } = dto;
+    const updatedClub = await this.clubsRepository.updateById(id, updateData as any);
     if (!updatedClub) {
       throw new Error("Club not found!");
     }
     return {
-      club: updatedClub.club
+      club: updatedClub
     };
   }
 }
@@ -120,7 +121,7 @@ export class DeleteClubUseCase implements IDeleteClubUseCase {
     if (!mongoose.isValidObjectId(dto.id)) {
       throw new Error("Invalid club ID");
     }
-    await this.clubsRepository.deleteClub(dto);
+    await this.clubsRepository.deleteById(dto.id);
     return { message: "Club deleted successfully" };
   }
 }

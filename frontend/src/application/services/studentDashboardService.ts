@@ -12,11 +12,12 @@ export interface Deadline {
 }
 
 export interface ClassInfo {
-  code: string;
-  name: string;
-  time: string;
-  room: string;
-  status: string;
+  id: string;
+  title: string;
+  faculty: string;
+  schedule: string;
+  cousre: string;
+  description: string;
 }
 
 export interface OnlineTopic {
@@ -30,6 +31,13 @@ export interface NewEvent {
   title: string;
   date: string;
   location: string;
+  description: string;
+}
+
+export interface CalendarDayEntry {
+  type: string;
+  title: string;
+  date: string;
 }
 
 export interface StudentDashboardData {
@@ -37,7 +45,7 @@ export interface StudentDashboardData {
   deadlines: Deadline[];
   classes: ClassInfo[];
   newEvents: NewEvent[];
-  calendarDays: number[];
+  calendarDays: Record<number, CalendarDayEntry[]>;
 }
 
 class StudentDashboardService {
@@ -61,7 +69,7 @@ class StudentDashboardService {
     return response.data.data;
   }
 
-  async getCalendarDays(): Promise<number[]> {
+  async getCalendarDays(): Promise<Record<number, CalendarDayEntry[]>> {
     const response = await httpClient.get('/student/dashboard/calendar-days');
     return response.data.data;
   }

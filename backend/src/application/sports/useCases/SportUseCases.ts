@@ -74,7 +74,7 @@ export class GetSportByIdUseCase {
     if (!params.id || typeof params.id !== 'string') {
       throw new Error("Invalid sport ID");
     }
-    const sport = await this.sportsRepository.getSportById(params.id);
+    const sport = await this.sportsRepository.getById(params.id);
     if (!sport) {
       throw new Error("Sport not found");
     }
@@ -88,9 +88,15 @@ export class CreateSportUseCase {
   constructor(private sportsRepository: ISportsRepository) { }
 
   async execute(params: CreateSportRequestDTO): Promise<CreateSportResponseDTO> {
-    const newSport = await this.sportsRepository.createSport(params);
+    // Normalize status to lowercase to match enum values
+    const normalizedParams = {
+      ...params,
+      status: params.status?.toLowerCase() || "active"
+    };
     
-    return newSport;
+    const newSport = await this.sportsRepository.create(normalizedParams);
+    
+    return { sport: newSport as unknown as Sport };
   }
 }
 
@@ -101,11 +107,18 @@ export class UpdateSportUseCase {
     if (!params.id || typeof params.id !== 'string') {
       throw new Error("Invalid sport ID");
     }
-    const updatedSport = await this.sportsRepository.updateSport(params);
+    const { id, ...updateData } = params;
+    
+    // Normalize status to lowercase if provided
+    if (updateData.status) {
+      updateData.status = updateData.status.toLowerCase() as any;
+    }
+    
+    const updatedSport = await this.sportsRepository.updateById(id, updateData);
     if (!updatedSport) {
       throw new Error("Sport not found");
     }
-    return updatedSport;
+    return { sport: updatedSport as unknown as Sport };
   }
 }
 
@@ -116,7 +129,7 @@ export class DeleteSportUseCase {
     if (!params.id || typeof params.id !== 'string') {
       throw new Error("Invalid sport ID");
     }
-    await this.sportsRepository.deleteSport(params.id);
+    await this.sportsRepository.deleteById(params.id);
     return { message: "Sport deleted successfully" };
   }
 } 

@@ -26,7 +26,7 @@ export interface IDeleteEventUseCase {
 }
 
 export class GetEventsUseCase implements IGetEventsUseCase {
-  constructor(private eventsRepository: IEventsRepository) {}
+  constructor(private eventsRepository: IEventsRepository) { }
 
   async execute(params: GetEventsRequestDTO): Promise<GetEventsResponseDTO> {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
@@ -68,13 +68,13 @@ export class GetEventsUseCase implements IGetEventsUseCase {
 }
 
 export class GetEventByIdUseCase implements IGetEventByIdUseCase {
-  constructor(private eventsRepository: IEventsRepository) {}
+  constructor(private eventsRepository: IEventsRepository) { }
 
   async execute(params: GetEventByIdRequestDTO): Promise<GetEventByIdResponseDTO> {
     if (!params.id) {
       throw new InvalidEventIdError(params.id);
     }
-    const event: EventDocument | null = await this.eventsRepository.getEventById(params.id);
+    const event: EventDocument | null = await this.eventsRepository.getById(params.id);
     if (!event) {
       throw new EventNotFoundError(params.id);
     }
@@ -105,11 +105,18 @@ export class GetEventByIdUseCase implements IGetEventByIdUseCase {
 }
 
 export class CreateEventUseCase implements ICreateEventUseCase {
-  constructor(private eventsRepository: IEventsRepository) {}
+  constructor(private eventsRepository: IEventsRepository) { }
 
   async execute(params: CreateEventRequestDTO): Promise<CreateEventResponseDTO> {
-    const event = Event.create(mapCreateEventDTOToEventProps(params));
-    const newEvent: EventDocument = await this.eventsRepository.createEvent(event);
+    const mappedParams = {
+      ...params,
+      eventType: (Object.values(EventType) as string[]).includes(params.eventType) ? params.eventType : undefined,
+      organizerType: (Object.values(OrganizerType) as string[]).includes(params.organizerType) ? params.organizerType : undefined,
+      status: (Object.values(EventStatus) as string[]).includes(params.status) ? params.status : undefined,
+    };
+    const event = Event.create(mapCreateEventDTOToEventProps(mappedParams));
+    const eventObj = event.toPersistence();
+    const newEvent: EventDocument = await this.eventsRepository.create(eventObj);
     return {
       event: new Event({
         id: newEvent._id.toString(),
@@ -137,14 +144,21 @@ export class CreateEventUseCase implements ICreateEventUseCase {
 }
 
 export class UpdateEventUseCase implements IUpdateEventUseCase {
-  constructor(private eventsRepository: IEventsRepository) {}
+  constructor(private eventsRepository: IEventsRepository) { }
 
   async execute(params: UpdateEventRequestDTO): Promise<UpdateEventResponseDTO> {
     if (!params.id) {
       throw new InvalidEventIdError(params.id);
     }
-    const event = Event.create(mapUpdateEventDTOToEventProps(params));
-    const updatedEvent: EventDocument | null = await this.eventsRepository.updateEvent(event);
+    const mappedParams = {
+      ...params,
+      eventType: (Object.values(EventType) as string[]).includes(params.eventType) ? params.eventType : undefined,
+      organizerType: (Object.values(OrganizerType) as string[]).includes(params.organizerType) ? params.organizerType : undefined,
+      status: (Object.values(EventStatus) as string[]).includes(params.status) ? params.status : undefined,
+    };
+    const event = Event.create(mapUpdateEventDTOToEventProps(mappedParams));
+    const eventObj = event.toPersistence();
+    const updatedEvent: EventDocument | null = await this.eventsRepository.updateById(params.id, eventObj);
     if (!updatedEvent) {
       throw new EventNotFoundError(params.id);
     }
@@ -175,14 +189,14 @@ export class UpdateEventUseCase implements IUpdateEventUseCase {
 }
 
 export class DeleteEventUseCase implements IDeleteEventUseCase {
-  constructor(private eventsRepository: IEventsRepository) {}
+  constructor(private eventsRepository: IEventsRepository) { }
 
   async execute(params: DeleteEventRequestDTO): Promise<{ message: string }> {
     if (!params.id) {
       throw new InvalidEventIdError(params.id);
     }
 
-    await this.eventsRepository.deleteEvent(params.id);
+    await this.eventsRepository.deleteById(params.id);
     return { message: "Event deleted successfully" };
   }
 }

@@ -3,10 +3,15 @@ import {
   CampusEventModel,
   EventRequestModel,
 } from "../../../infrastructure/database/mongoose/models/events/CampusEventModel";
-import { EventRequestStatus } from "../../../domain/events/entities/EventTypes";
-import { Event } from "../../../domain/events/entities/Event";
+import { EventRequestStatus, Event as EventSchema } from "../../../domain/events/entities/EventTypes";
+import { EventDocument, EventRequestDetails } from "../../../domain/events/entities/Event";
+import { BaseRepository } from "../../../application/repositories/BaseRepository";
 
-export class EventsRepository implements IEventsRepository {
+export class EventsRepository extends BaseRepository<EventSchema, Record<string, any>, Record<string, any>, Record<string, unknown>, EventDocument> implements IEventsRepository {
+  constructor() {
+    super(CampusEventModel);
+  }
+
   async getEvents(page: number, limit: number, type: string, status: string, startDate: string, endDate: string, search: string, organizerType: string, dateRange: string) {
     const query: any = {};
 
@@ -67,7 +72,7 @@ export class EventsRepository implements IEventsRepository {
 
     const skip = (page - 1) * limit;
     const events = await CampusEventModel.find(query)
-      .sort({ createdAt: -1 })
+      .sort({ updatedAt: -1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
@@ -76,29 +81,29 @@ export class EventsRepository implements IEventsRepository {
     return { events, totalItems, totalPages, currentPage: page };
   }
 
-  async getEventById(id: string) {
-    return await CampusEventModel.findById(id).lean();
-  }
+  // async getEventById(id: string) {
+  //   return await CampusEventModel.findById(id).lean();
+  // }
 
-  async createEvent(event: Event) {
-    return await CampusEventModel.create(event);
-  }
+  // async createEvent(event: Event) {
+  //   return await CampusEventModel.create(event);
+  // }
 
-  async updateEvent(event: Event) {
-    const eventData = Object.fromEntries(
-      Object.entries(event).filter(([key]) => key !== '_id' && key !== 'id')
-    );
-    
-    return await CampusEventModel.findByIdAndUpdate(
-      event.id,
-      { $set: eventData },
-      { new: true }
-    ).lean();
-  }
+  // async updateEvent(event: Event) {
+  //   const eventData = Object.fromEntries(
+  //     Object.entries(event).filter(([key]) => key !== '_id' && key !== 'id')
+  //   );
 
-  async deleteEvent(id: string) {
-    await CampusEventModel.findByIdAndDelete(id);
-  }
+  //   return await CampusEventModel.findByIdAndUpdate(
+  //     event.id,
+  //     { $set: eventData },
+  //     { new: true }
+  //   ).lean();
+  // }
+
+  // async deleteEvent(id: string) {
+  //   await CampusEventModel.findByIdAndDelete(id);
+  // }
 
   async getEventRequests(
     page: number, limit: number, status: string, startDate: string, endDate: string, type: string, search: string, organizerType: string, dateRange: string

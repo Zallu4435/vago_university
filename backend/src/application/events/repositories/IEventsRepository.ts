@@ -1,8 +1,16 @@
-import { Event, PaginatedResponse, EventSummary, SimplifiedEventRequest, EventRequestDetails, EventDocument, EventRequestDocument } from "../../../domain/events/entities/Event";
+import { 
+  PaginatedResponse, 
+  EventSummary, 
+  EventDocument, 
+  EventRequestDocument,
+  CreateEventDto,
+  UpdateEventDto,
+  EventFilter,
+} from "../../../domain/events/entities/Event";
 import { IBaseRepository } from "../../repositories";
 
 export interface IEventsRepository extends 
-  IBaseRepository<EventDocument, Record<string, any>, Record<string, any>, any, EventDocument> {
+  IBaseRepository<EventDocument, CreateEventDto, UpdateEventDto, EventFilter, EventDocument> {
   
   getEvents(page: number, limit: number, type: string, status: string, startDate: string, endDate: string, search: string, organizerType: string, dateRange: string): Promise<PaginatedResponse<EventSummary>>;
   

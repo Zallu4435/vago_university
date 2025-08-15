@@ -6,6 +6,7 @@ import {
   ApproveClubRequestRequest,
   RejectClubRequestRequest,
   GetClubRequestDetailsRequest,
+  ClubFilter,
 } from "../../../domain/clubs/entities/Club";
 import { IClubsRepository } from "../../../application/clubs/repositories/IClubsRepository";
 import { ClubModel, ClubRequestModel } from "../../../infrastructure/database/mongoose/models/clubs/ClubModel";
@@ -13,14 +14,14 @@ import { BaseRepository } from "../../../application/repositories/BaseRepository
 import { Club } from "../../../domain/clubs/entities/ClubTypes";
 import mongoose from "mongoose";
 
-export class ClubsRepository extends BaseRepository<Club, CreateClubRequest, UpdateClubRequest, Record<string, any>, Club> implements IClubsRepository {
+export class ClubsRepository extends BaseRepository<Club, CreateClubRequest, UpdateClubRequest, Record<string, unknown>, Club> implements IClubsRepository {
   constructor() {
     super(ClubModel);
   }
 
   async getClubs(params: GetClubsRequest) {
     const { page, limit, category, status, startDate, endDate, search } = params;
-    const query: any = {};
+    const query: ClubFilter = {};
     if (category && category.toLowerCase() !== "all") {
       query.type = { $regex: `^${category}$`, $options: "i" };
     }
@@ -76,11 +77,11 @@ export class ClubsRepository extends BaseRepository<Club, CreateClubRequest, Upd
 
   async getClubRequests(params: GetClubRequestsRequest) {
     const { page, limit, status, type, startDate, endDate, search } = params;
-    const query: any = {};
+    const query: ClubFilter = {};
     if (status && status.toLowerCase() !== "all") {
       query.status = status;
     }
-    const clubQuery: any = {};
+    const clubQuery: ClubFilter = {};
     if (type && type.toLowerCase() !== "all") {
       clubQuery.type = { $regex: `^${type}$`, $options: "i" };
     }
@@ -96,7 +97,7 @@ export class ClubsRepository extends BaseRepository<Club, CreateClubRequest, Upd
     const clubIds = matchingClubs.map((club) => club._id);
     if (search && search.trim() !== "") {
       const userMatches = await mongoose.model('User').find({ email: { $regex: search, $options: "i" } }).select("_id").lean();
-      userIds = userMatches.map((u: any) => u._id);
+      userIds = userMatches.map((u) => u._id);
       if (clubIds.length === 0 && userIds.length === 0) {
         return { rawRequests: [], totalItems: 0, totalPages: 0, currentPage: page };
       }

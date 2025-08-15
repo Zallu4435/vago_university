@@ -128,7 +128,14 @@ export const useApplicationForm = () => {
   });
 
   const { mutateAsync: processPayment, isPending: isProcessingPayment } = useMutation({
-    mutationFn: async ({ applicationId, paymentDetails }: { applicationId: string, paymentDetails: any }) => {
+    mutationFn: async ({ applicationId, paymentDetails }: { applicationId: string, paymentDetails: {
+      amount: number;
+      currency: string;
+      paymentMethod: string;
+      customerEmail: string;
+      customerName: string;
+      customerPhone: string;
+    } }) => {
       try {
         return await applicationService.processPayment(applicationId, paymentDetails);
       } catch (error) {
@@ -199,7 +206,7 @@ export const useApplicationData = (userId: string | undefined) => {
     },
     enabled: !!userId,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error) => {
       if (error.message.includes('401') || error.message.includes('403')) {
         return false; // Don't retry auth errors
       }

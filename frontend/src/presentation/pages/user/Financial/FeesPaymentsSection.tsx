@@ -133,7 +133,7 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
       createPayment(payment, {
         onSuccess: (response) => {
           if (response && typeof response === 'object' && 'error' in response) {
-            setAmountError((response as any).error || 'Payment validation failed.');
+            setAmountError((response as { error: string }).error || 'Payment validation failed.');
             return;
           }
 

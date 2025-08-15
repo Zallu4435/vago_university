@@ -12,12 +12,13 @@ import {
   CreateCourseRequest,
   UpdateCourseRequest,
   DeleteCourseRequest,
+  CourseFilter,
 } from "../../../domain/courses/entities/CourseRequestEntities";
 
 export class CoursesRepository implements ICoursesRepository {
   async getCourses(params: GetCoursesRequest) {
     const { page, limit, specialization, faculty, term, search } = params;
-    const query: any = {};
+    const query: CourseFilter = {};
     if (specialization && specialization !== "all") {
       const formattedSpecialization = specialization.replace(/_/g, " ");
       query.specialization = {
@@ -87,7 +88,7 @@ export class CoursesRepository implements ICoursesRepository {
 
   async getEnrollments(params: GetEnrollmentsRequest) {
     const { page, limit, status, specialization, faculty, term, search } = params;
-    const query: any = {};
+    const query: CourseFilter = {};
     if (status && status.toLowerCase() !== "all") {
       query.status = {
         $regex: `^${status.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}$`,

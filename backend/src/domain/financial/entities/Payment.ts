@@ -11,7 +11,7 @@ export class Payment {
   private _amount: number;
   private _status: "Completed" | "Pending" | "Failed";
   private _receiptUrl?: string;
-  private _metadata?: Record<string, any>;
+  private _metadata?: Record<string, unknown>;
   private _createdAt?: Date;
   private _updatedAt?: Date;
 
@@ -53,7 +53,7 @@ export class Payment {
   get amount(): number { return this._amount; }
   get status(): "Completed" | "Pending" | "Failed" { return this._status; }
   get receiptUrl(): string | undefined { return this._receiptUrl; }
-  get metadata(): Record<string, any> | undefined { return this._metadata; }
+  get metadata(): Record<string, unknown> | undefined { return this._metadata; }
   get createdAt(): Date | undefined { return this._createdAt; }
   get updatedAt(): Date | undefined { return this._updatedAt; }
 

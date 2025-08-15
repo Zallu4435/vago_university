@@ -54,7 +54,14 @@ export const applicationController = {
 
   async processPayment(
     applicationId: string,
-    paymentDetails: any
+    paymentDetails: {
+      amount: number;
+      currency: string;
+      paymentMethod: string;
+      customerEmail: string;
+      customerName: string;
+      customerPhone: string;
+    }
   ): Promise<{ data: { paymentId: string; status: string; message: string; clientSecret?: string; stripePaymentIntentId?: string } }> {
     try {
       const response = await httpClient.post('/admission/payment/process', { applicationId, paymentDetails });

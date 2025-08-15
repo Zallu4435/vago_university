@@ -43,13 +43,13 @@ export interface DiplomaCourse {
   chapters: Chapter[];
   videoCount?: number;
   completedVideoCount?: number;
-  videos?: any[]; 
+  videos?: string[]; 
   createdAt: Date;
   updatedAt: Date;
 } 
 
 export interface DiplomaDocument {
-  _id: any; 
+  _id: string; 
   title: string;
   description: string;
   price: number;
@@ -60,7 +60,7 @@ export interface DiplomaDocument {
   status: boolean;
   createdAt: Date;
   updatedAt: Date;
-  videoIds: any[];
+  videoIds: string[];
   __v?: number;
 }
 
@@ -132,3 +132,22 @@ export class UserDiploma {
     this.completed = props.completed;
   }
 } 
+
+export interface DiplomaFilter {
+  title?: string | { $regex: string; $options: string };
+  description?: string | { $regex: string; $options: string };
+  category?: string | { $regex: string; $options: string };
+  instructor?: string | { $regex: string; $options: string };
+  status?: boolean | string | { $regex: string; $options: string };
+  diplomaId?: string | { $in: string[] };
+  studentId?: string | { $in: string[] };
+  createdAt?: { $gte?: Date; $lte?: Date };
+  updatedAt?: { $gte?: Date; $lte?: Date };
+  $or?: Array<{
+    title?: { $regex: string; $options: string };
+    description?: { $regex: string; $options: string };
+    category?: { $regex: string; $options: string };
+    instructor?: { $regex: string; $options: string };
+  }>;
+  [key: string]: unknown;
+}

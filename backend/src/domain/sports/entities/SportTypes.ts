@@ -64,7 +64,6 @@ export interface Sport {
   updatedAt: Date;
 }
 
-// Type for repository layer results (when using .lean())
 export interface SportDocument {
   _id: string;
   title: string;
@@ -87,9 +86,8 @@ export interface SportDocument {
   logo?: string;
 }
 
-// Type for Mongoose lean results (actual database return type)
 export type SportLeanResult = {
-  _id: any; // ObjectId from Mongoose
+  _id: string; 
   title: string;
   type: string;
   category: string;
@@ -110,7 +108,6 @@ export type SportLeanResult = {
   logo?: string;
 };
 
-// Interface for Mongoose SportRequest model
 export interface SportRequest {
   _id: string;
   sportId: string;
@@ -149,3 +146,29 @@ export type CreateSportData = {
 };
 
 export type UpdateSportData = Partial<Omit<CreateSportData, 'status'>> & { id: string };
+
+export interface SportFilter {
+  type?: string | { $regex: string; $options: string };
+  status?: SportStatus | string | { $regex: string; $options: string };
+  coach?: string;
+  headCoach?: string | { $regex: string; $options: string };
+  category?: string;
+  organizer?: string;
+  organizerType?: string;
+  division?: string;
+  sportId?: string | { $in: string[] };
+  userId?: string | { $in: string[] };
+  createdAt?: { $gte?: Date; $lte?: Date };
+  updatedAt?: { $gte?: Date; $lte?: Date };
+  $or?: Array<{
+    title?: { $regex: string; $options: string };
+    headCoach?: { $regex: string; $options: string };
+    organizer?: { $regex: string; $options: string };
+    category?: { $regex: string; $options: string };
+    type?: { $regex: string; $options: string };
+    division?: { $regex: string; $options: string };
+    sportId?: { $in: string[] };
+    userId?: { $in: string[] };
+  }>;
+  [key: string]: unknown;
+}

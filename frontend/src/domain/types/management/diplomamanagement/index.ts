@@ -71,8 +71,8 @@ export interface InfoCardProps {
 export interface DiplomaFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
-  initialData?: any;
+  onSubmit: (data: unknown) => void;
+  initialData?: unknown;
   isEditing?: boolean;
   categories: string[];
 } 

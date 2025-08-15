@@ -46,7 +46,7 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
       term?: string;
     }): Promise<{ data: Payment[]; totalPayments: number; totalPages: number; currentPage: number }> {
       try {
-        const queryParams: any = {
+        const queryParams: Record<string, string | number> = {
           page: params?.page || 1,
           limit: params?.limit || 10,
         };

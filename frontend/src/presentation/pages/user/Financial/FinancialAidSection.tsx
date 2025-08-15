@@ -57,13 +57,13 @@ export default function FinancialAidSection() {
         selectedFiles.map((file) => uploadDocument(file, 'financial-aid'))
       );
 
-      if (documentUrls.every((url: any) => url !== null)) {
+      if (documentUrls.every((url) => url !== null)) {
         const application = {
           studentId: 'current-user-id',
           term: 'Spring 2025',
           amount: parseFloat(amount),
           type: applicationType as ApplicationType,
-          documents: documentUrls.map((url: any, index: number) => ({
+          documents: documentUrls.map((url, index) => ({
             id: `doc-${Date.now()}-${index}`,
             name: selectedFiles[index].name,
             url: url.url,

@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 interface IPayment extends Document {
   applicationId: string;
-  paymentDetails: any;
+  paymentDetails;
   status: string;
   createdAt: Date;
   updatedAt: Date;

@@ -1,5 +1,5 @@
 import { IVideoRepository, IRepoDiploma } from '../repositories/IVideoRepository';
-import { Video } from '../../../domain/video/entities/Video';
+import { Video, VideoFilter } from '../../../domain/video/entities/Video';
 import {
     GetVideosRequestDTO,
     GetVideoByIdRequestDTO,
@@ -81,7 +81,7 @@ export class GetVideosUseCase implements IGetVideosUseCase {
 
     private async buildQuery(params: GetVideosRequestDTO) {
         const { category, status, dateRange, startDate, endDate, search } = params;
-        let query: any = {};
+        let query: VideoFilter = {};
 
         // Handle category filter
         if (category && category !== 'all') {
@@ -317,7 +317,7 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
             currentDiplomaId: typeof existingVideo.diplomaId === 'string' ? existingVideo.diplomaId : existingVideo.diplomaId?._id,
         });
         // Prepare update payload
-        let updateData: any = { ...params };
+        let updateData = { ...params };
 
         // Resolve current and possibly new diploma IDs
         const oldDiplomaId = (existingVideo.diplomaId && typeof existingVideo.diplomaId === 'object' && existingVideo.diplomaId !== null && '_id' in existingVideo.diplomaId)

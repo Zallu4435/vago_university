@@ -15,7 +15,7 @@ interface RecentActivitiesProps {
   activitiesData: ActivityItem[];
 }
 
-const EnhancedActivityItem = ({ action, user, time, avatar, type = "default" }: any) => {
+const EnhancedActivityItem = ({ action, user, time, avatar, type = "default" }: ActivityItem) => {
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'success': return 'from-emerald-400 to-emerald-600';

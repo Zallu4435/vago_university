@@ -1,8 +1,8 @@
-import { SportDocument, SportRequest } from "../../../domain/sports/entities/SportTypes";
+import { SportDocument, SportRequest, CreateSportData, UpdateSportData, SportFilter } from "../../../domain/sports/entities/SportTypes";
 import { IBaseRepository } from "../../repositories";
 
 export interface ISportsRepository extends 
-  IBaseRepository<SportDocument, Record<string, any>, Record<string, any>, any, SportDocument> {
+  IBaseRepository<SportDocument, CreateSportData, UpdateSportData, SportFilter, SportDocument> {
   
   getSports(page: number, limit: number, sportType: string, status: string, coach: string, startDate: string, endDate: string, search: string): Promise<{
     sports: SportDocument[];

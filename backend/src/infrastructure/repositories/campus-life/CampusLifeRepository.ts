@@ -2,9 +2,9 @@ import { ICampusLifeRepository } from "../../../application/campus-life/reposito
 import { CampusEventModel, EventRequestModel } from "../../../infrastructure/database/mongoose/models/events/CampusEventModel";
 import { TeamModel, SportRequestModel } from "../../../infrastructure/database/mongoose/models/sports.model";
 import { ClubModel, ClubRequestModel } from "../../../infrastructure/database/mongoose/models/clubs/ClubModel";
-import { CampusLifeOverviewRequest, ClubsRequest, EventsRequest, JoinClubRequest, JoinEventRequest, JoinSportRequest, RawCampusEvent, RawClub, RawSport, SportsRequest } from "../../../domain/campus-life/entities/CampusLife";
+import { CampusEventFilter, CampusLifeOverviewRequest, ClubFilter, ClubsRequest, EventsRequest, JoinClubRequest, JoinEventRequest, JoinSportRequest, RawCampusEvent, RawClub, RawSport, SportFilter, SportsRequest } from "../../../domain/campus-life/entities/CampusLife";
 type WithStringId<T> = Omit<T, "_id"> & { _id: string };
-
+ 
 export class CampusLifeRepository implements ICampusLifeRepository {
   async findEvents(query, skip: number, limit: number) {
     return CampusEventModel.find(query)
@@ -86,7 +86,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
   }
 
   async getEvents(params: EventsRequest) {
-    const query: any = {};
+    const query: CampusEventFilter = {};
     const hasFilter = !!(params.search || (params.status && params.status !== 'all'));
     if (params.search) {
       query.title = { $regex: params.search, $options: "i" };
@@ -124,7 +124,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
   }
 
   async getSports(params: SportsRequest) {
-    const query: any = {};
+    const query: SportFilter = {};
     if (params.type) {
       query.type = params.type;
     }
@@ -145,7 +145,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
   }
 
   async getClubs(params: ClubsRequest) {
-    const query: any = {};
+    const query: ClubFilter = {};
     const hasFilter = !!(params.search || params.type || (params.status && params.status !== 'all'));
     if (params.search) {
       query.name = { $regex: params.search, $options: "i" };

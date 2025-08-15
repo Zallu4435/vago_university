@@ -6,6 +6,7 @@ export interface Attendee {
 }
 
 export class VideoSession {
+    _id?: string;
     constructor(
         public readonly id: string,
         public readonly title: string,
@@ -26,6 +27,34 @@ export class VideoSession {
         public readonly recordingUrl?: string,
         public readonly attendees?: number,
         public readonly attendeeList?: Attendee[],
-        public readonly joinUrl?: string
-    ) {}
-} 
+        public joinUrl?: string
+    ) { }
+}
+
+export interface VideoSessionFilter {
+    search?: string;
+    decision?: string;
+    attendanceLevel?: string;
+    startDate?: string | Date;
+    endDate?: string | Date;
+}
+
+export interface PaymentFilter {
+    userId?: string;
+    status?: string;
+    paymentMethod?: string;
+    startDate?: string | Date;
+    endDate?: string | Date;
+    minAmount?: number;
+    maxAmount?: number;
+    search?: string;
+    currency?: string;
+    instructor?: string;
+    course?: string;
+    $or?: Array<{
+        title?: { $regex: string; $options: string };
+        instructor?: { $regex: string; $options: string };
+        course?: { $regex: string; $options: string };
+    }>;
+    [key: string]: unknown;
+}

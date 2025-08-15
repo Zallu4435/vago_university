@@ -300,7 +300,7 @@ export class CommunicationController implements ICommunicationController {
     // Parse the to parameter if it's a string
     const recipients = typeof to === 'string' ? JSON.parse(to) : to;
     // Get attachments from files
-    const attachments = (httpRequest.files || []).map((file: any) => ({
+    const attachments = (httpRequest.files || []).map((file) => ({
       filename: file.filename,
       path: file.path,
       contentType: file.mimetype,

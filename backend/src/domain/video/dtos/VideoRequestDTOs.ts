@@ -23,6 +23,7 @@ export interface CreateVideoRequestDTO extends Omit<IVideoBase, 'id' | 'uploaded
 export interface UpdateVideoRequestDTO extends Partial<Omit<IVideoBase, 'uploadedAt'>> {
     id: string;
     videoFile?: Express.Multer.File;
+    diplomaId?: string;
 }
 
 export interface DeleteVideoRequestDTO {

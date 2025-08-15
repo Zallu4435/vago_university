@@ -34,3 +34,16 @@ export class Video implements IVideo {
         });
     }
 } 
+
+
+export interface VideoFilter {
+    diplomaId?: string; 
+    status?: string;
+    uploadedAt?: { $gte?: Date; $lte?: Date };
+    $or?: Array<{
+      title?: { $regex: string; $options: string };
+      description?: { $regex: string; $options: string };
+    }>;
+    [key: string]: unknown;
+  }
+  

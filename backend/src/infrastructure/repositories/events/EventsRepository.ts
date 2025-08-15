@@ -4,7 +4,7 @@ import {
   EventRequestModel,
 } from "../../../infrastructure/database/mongoose/models/events/CampusEventModel";
 import { EventRequestStatus, Event as EventSchema } from "../../../domain/events/entities/EventTypes";
-import { EventDocument, EventRequestDetails } from "../../../domain/events/entities/Event";
+import { EventDocument, EventFilter } from "../../../domain/events/entities/Event";
 import { BaseRepository } from "../../../application/repositories/BaseRepository";
 
 export class EventsRepository extends BaseRepository<EventSchema, Record<string, any>, Record<string, any>, Record<string, unknown>, EventDocument> implements IEventsRepository {
@@ -13,7 +13,7 @@ export class EventsRepository extends BaseRepository<EventSchema, Record<string,
   }
 
   async getEvents(page: number, limit: number, type: string, status: string, startDate: string, endDate: string, search: string, organizerType: string, dateRange: string) {
-    const query: any = {};
+    const query: EventFilter = {};
 
     if (type && type !== "all") {
       query.eventType = { $regex: `^${type}$`, $options: "i" };
@@ -108,13 +108,13 @@ export class EventsRepository extends BaseRepository<EventSchema, Record<string,
   async getEventRequests(
     page: number, limit: number, status: string, startDate: string, endDate: string, type: string, search: string, organizerType: string, dateRange: string
   ) {
-    const query: any = {};
+    const query: EventFilter = {};
 
     if (status && status !== "all") {
       query.status = { $regex: `^${status}$`, $options: "i" };
     }
 
-    const eventQuery: any = {};
+    const eventQuery: EventFilter = {};
 
     if (type && type.toLowerCase() !== "all") {
       eventQuery.eventType = { $regex: `^${type}$`, $options: "i" };

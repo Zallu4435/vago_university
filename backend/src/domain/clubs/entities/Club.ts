@@ -355,3 +355,25 @@ export class GetClubRequestDetailsResponse {
     public clubRequest: ClubRequestSummary
   ) {}
 }
+
+
+export interface ClubFilter {
+  name?: string | { $regex: string; $options: string };
+  type?: string | { $regex: string; $options: string };
+  status?: string | { $regex: string; $options: string };
+  createdBy?: string | { $regex: string; $options: string };
+  enteredMembers?: number;
+  createdAt?: { $gte?: Date; $lte?: Date };
+  updatedAt?: { $gte?: Date; $lte?: Date };
+  clubId?: string | { $in: string[] };
+  userId?: string | { $in?: string[] };
+  $or?: Array<{
+    name?: { $regex: string; $options: string };
+    type?: { $regex: string; $options: string };
+    status?: { $regex: string; $options: string };
+    createdBy?: { $regex: string; $options: string };
+    clubId?: { $in: string[] };
+    userId?: { $in: string[] };
+  }>;
+  [key: string]: unknown;
+}

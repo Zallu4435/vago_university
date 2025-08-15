@@ -136,12 +136,12 @@ export class UpdateVideoSessionUseCase {
 
         if (session && !session.joinUrl) {
             let sessionId = session.id;
-            if (!sessionId && (session as any)._id) {
-                sessionId = (session as any)._id.toString();
+            if (!sessionId && session._id) {
+                sessionId = session._id.toString();
             }
             if (sessionId) {
                 const joinUrl = `${config.backendUrl}/api/video-sessions/${sessionId}/join`;
-                (session as any).joinUrl = joinUrl;
+                session.joinUrl = joinUrl;
                 await this.sessionRepository.update(sessionId, { joinUrl });
             } else {
                 console.log('Session is missing both id and _id:', session);
@@ -181,7 +181,7 @@ export class UpdateVideoSessionStatusUseCase {
 
 export class GetSessionAttendanceUseCase {
     constructor(private sessionRepository: ISessionRepository) {}
-    async execute(sessionId: string, filters: any = {}): Promise<any[]> {
+    async execute(sessionId: string, filters = {}) {
         return this.sessionRepository.getSessionAttendance(sessionId, filters);
     }
 }

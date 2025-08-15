@@ -60,7 +60,7 @@ teamSchema.pre("save", function (next) {
   next();
 });
 
-// 2nd approach: use SportRequestDocument for schema
+
 type SportRequestDocument = SportRequest & Document & {
   sportId: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;

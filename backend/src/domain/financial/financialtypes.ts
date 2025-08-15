@@ -23,7 +23,7 @@ export interface PaymentProps {
   amount: number;
   status: "Completed" | "Pending" | "Failed";
   receiptUrl?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt?: Date;
   updatedAt?: Date;
 } 

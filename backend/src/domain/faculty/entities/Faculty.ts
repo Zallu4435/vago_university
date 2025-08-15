@@ -81,3 +81,14 @@ export class Faculty {
     this._tokenExpiry = undefined;
   }
 }
+
+export interface FacultyFilter {
+  status?: { $regex: string; $options: string };
+  department?: { $regex: string; $options: string };
+  createdAt?: { $gte?: Date; $lte?: Date };
+  $or?: Array<{
+    fullName?: { $regex: string; $options: string };
+    email?: { $regex: string; $options: string };
+  }>;
+  [key: string]: unknown; // allows additional query fields if needed
+}

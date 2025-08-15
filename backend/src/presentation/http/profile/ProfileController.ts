@@ -34,7 +34,7 @@ export class ProfileController implements IProfileController {
     const dto: GetProfileRequestDTO = { userId };
     const response = await this.getProfileUseCase.execute(dto);
     if (!response.success) {
-      const errorMessage = (response.data as any)?.error || 'Profile not found';
+      const errorMessage = (response.data as { error?: string })?.error || 'Profile not found';
       return this.httpErrors.error_400(errorMessage);
     }
     return this.httpSuccess.success_200(response.data);
@@ -49,7 +49,7 @@ export class ProfileController implements IProfileController {
     const dto: UpdateProfileRequestDTO = { userId, firstName, lastName, phone, email };
     const response = await this.updateProfileUseCase.execute(dto);
     if (!response.success) {
-      const errorMessage = (response.data as any)?.error || 'Failed to update profile';
+      const errorMessage = (response.data as { error?: string })?.error || 'Failed to update profile';
       return this.httpErrors.error_400(errorMessage);
     }
     return this.httpSuccess.success_200(response.data);
@@ -64,7 +64,7 @@ export class ProfileController implements IProfileController {
     const dto: ChangePasswordRequestDTO = { userId, currentPassword, newPassword, confirmPassword };
     const response = await this.changePasswordUseCase.execute(dto);
     if (!response.success) {
-      const errorMessage = (response.data as any)?.error || 'Failed to change password';
+      const errorMessage = (response.data as { error?: string })?.error || 'Failed to change password';
       return this.httpErrors.error_400(errorMessage);
     }
     return this.httpSuccess.success_200(response.data);
@@ -82,9 +82,9 @@ export class ProfileController implements IProfileController {
     const dto: UpdateProfilePictureRequestDTO = { userId, filePath: file.path };
     const response = await this.updateProfilePictureUseCase.execute(dto);
     if (!response.success || !('profilePicture' in response.data)) {
-      const errorMessage = (response.data as any)?.error || 'Failed to update profile picture';
+      const errorMessage = (response.data as { error?: string })?.error || 'Failed to update profile picture';
       return this.httpErrors.error_400(errorMessage);
     }
-    return this.httpSuccess.success_200({ url: (response.data as any).profilePicture });
+    return this.httpSuccess.success_200({ url: (response.data as { profilePicture?: string }).profilePicture });
   }
 }

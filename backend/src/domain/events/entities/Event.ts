@@ -7,6 +7,90 @@ import {
   EventStatus 
 } from "./EventTypes";
 
+// DTOs for repository operations
+export interface CreateEventDto {
+  title: string;
+  organizer: string;
+  organizerType: OrganizerType;
+  eventType: EventType;
+  date: string;
+  time: string;
+  location: string;
+  timeframe: Timeframe;
+  status?: EventStatus;
+  icon?: string;
+  color?: string;
+  description?: string;
+  fullTime?: boolean;
+  additionalInfo?: string;
+  requirements?: string;
+  maxParticipants?: number;
+  registrationRequired?: boolean;
+  participants?: number;
+}
+
+export interface UpdateEventDto {
+  title?: string;
+  organizer?: string;
+  organizerType?: OrganizerType;
+  eventType?: EventType;
+  date?: string;
+  time?: string;
+  location?: string;
+  timeframe?: Timeframe;
+  status?: EventStatus;
+  icon?: string;
+  color?: string;
+  description?: string;
+  fullTime?: boolean;
+  additionalInfo?: string;
+  requirements?: string;
+  maxParticipants?: number;
+  registrationRequired?: boolean;
+  participants?: number;
+}
+
+// Filter type for MongoDB queries
+export interface EventFilter {
+  eventType?: { $regex: string; $options: string } | string;
+  status?: { $regex: string; $options: string } | string;
+  organizerType?: { $regex: string; $options: string } | string;
+  date?: { $gte?: string; $lte?: string } | string;
+  $or?: Array<{
+    title?: { $regex: string; $options: string };
+    description?: { $regex: string; $options: string };
+    organizer?: { $regex: string; $options: string };
+    location?: { $regex: string; $options: string };
+  }>;
+}
+
+// Event Request DTOs
+export interface CreateEventRequestDto {
+  eventId: string;
+  userId: string;
+  status: string;
+  whyJoin: string;
+  additionalInfo?: string;
+}
+
+export interface UpdateEventRequestDto {
+  status?: string;
+  whyJoin?: string;
+  additionalInfo?: string;
+}
+
+// Filter type for event request queries
+export interface EventRequestFilter {
+  status?: { $regex: string; $options: string } | string;
+  eventId?: string;
+  userId?: string;
+  createdAt?: { $gte?: Date; $lte?: Date };
+  $or?: Array<{
+    whyJoin?: { $regex: string; $options: string };
+    additionalInfo?: { $regex: string; $options: string };
+  }>;
+}
+
 // Response types matching repository returns
 export interface PaginatedResponse<T> {
   events: T[];
@@ -216,4 +300,30 @@ export class Event {
       participants: this._participants,
     };
   }
+}
+
+export interface EventFilter {
+  title?: string | { $regex: string; $options: string };
+  description?: string | { $regex: string; $options: string };
+  eventType?: string | { $regex: string; $options: string };
+  organizer?: string | { $regex: string; $options: string };
+  organizerType?: string | { $regex: string; $options: string };
+  location?: string | { $regex: string; $options: string };
+  additionalInfo?: string | { $regex: string; $options: string };
+  status?: string | { $regex: string; $options: string };
+  eventId?: string | { $in: string[] };
+  userId?: string | { $in: string[] };
+  date?: { $gte?: string; $lte?: string } | string;
+  createdAt?: { $gte?: Date; $lte?: Date };
+  updatedAt?: { $gte?: Date; $lte?: Date };
+  $or?: Array<{
+    title?: { $regex: string; $options: string };
+    description?: { $regex: string; $options: string };
+    organizer?: { $regex: string; $options: string };
+    location?: { $regex: string; $options: string };
+    additionalInfo?: { $regex: string; $options: string };
+    eventType?: { $regex: string; $options: string };
+    organizerType?: { $regex: string; $options: string };
+  }>;
+  [key: string]: unknown;
 }

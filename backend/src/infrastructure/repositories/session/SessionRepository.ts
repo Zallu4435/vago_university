@@ -1,5 +1,5 @@
 import { ISessionRepository } from '../../../application/session/repositories/ISessionRepository';
-import { VideoSession } from '../../../domain/session/entities/VideoSession';
+import { PaymentFilter, VideoSession, VideoSessionFilter } from '../../../domain/session/entities/VideoSession';
 import { VideoSessionModel } from '../../database/mongoose/models/session.model';
 import { User } from '../../database/mongoose/auth/user.model';
 
@@ -57,7 +57,7 @@ export class SessionRepository implements ISessionRepository {
   }
 
   async getAll(params: { search?: string; status?: string; instructor?: string; course?: string } = {}): Promise<VideoSession[]> {
-    const query: any = {};
+    const query: PaymentFilter = {};
 
     if (params.status && params.status !== 'all') {
       if (params.status === 'upcoming') {
@@ -103,7 +103,7 @@ export class SessionRepository implements ISessionRepository {
     return sessions.map(doc => doc.toObject() as VideoSession);
   }
 
-  async getSessionAttendance(sessionId: string, filters: any = {}) {
+  async getSessionAttendance(sessionId: string, filters: VideoSessionFilter = {}) {
     const session = await VideoSessionModel.findById(sessionId);
     if (!session) throw new Error('Session not found');
     let attendance = session.attendance || [];

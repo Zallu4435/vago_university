@@ -40,6 +40,7 @@ import {
     AuthenticationRequiredError,
     InvalidDocumentTypeError,
 } from '../../../domain/faculty/errors/FacultyErrors';
+import { FacultyFilter } from "../../../domain/faculty/entities/Faculty";
 
 interface ResponseDTO<T> {
     data: T | { error: string };
@@ -98,7 +99,7 @@ function mapFacultyToDTO(f): FacultyResponseDTO {
         status: f.status,
         blocked: f.blocked,
     };
-}
+} 
 
 export class GetFacultyUseCase implements IGetFacultyUseCase {
     constructor(private facultyRepository: IFacultyRepository) { }
@@ -106,7 +107,7 @@ export class GetFacultyUseCase implements IGetFacultyUseCase {
     async execute(params: GetFacultyRequestDTO): Promise<ResponseDTO<GetFacultyResponseDTO>> {
         const { page = 1, limit = 5, status = "all", department = "all_departments", dateRange = "all", search, startDate, endDate } = params;
 
-        const query: any = {};
+        const query: FacultyFilter = {};
 
         if (status && !status.startsWith("all")) {
             query.status = { $regex: `^${status}$`, $options: "i" };

@@ -7,6 +7,7 @@ import {
   DownloadMaterialRequestDTO,
 } from '../../../domain/materials/dtos/UserMaterialRequestDTOs';
 import { GetUserMaterialsResponseDTO } from '../../../domain/materials/dtos/UserMaterialResponseDTOs';
+import { UserMaterialFilter, MaterialSortOptions } from '../../../domain/materials/entities/MaterialTypes';
 import { MaterialNotFoundError, MaterialValidationError } from '../../../domain/materials/errors/MaterialErrors';
 
 export interface IGetUserMaterialsUseCase {
@@ -63,7 +64,7 @@ export class GetUserMaterialsUseCase {
   async execute(params: GetUserMaterialsRequestDTO): Promise<GetUserMaterialsResponseDTO> {
     const { userId, subject, course, semester, type, difficulty, search, sortBy = 'createdAt', sortOrder = 'desc', page = 1, limit = 10 } = params;
     const skip = (page - 1) * limit;
-    const filter: any = {};
+    const filter: UserMaterialFilter = {};
     if (subject) filter.subject = { $regex: `^${subject.replace(/\+/g, ' ')}`, $options: 'i' };
     if (course) {
       filter.course = course;
@@ -82,7 +83,7 @@ export class GetUserMaterialsUseCase {
         { tags: { $in: [new RegExp(search, 'i')] } }
       ];
     }
-    let sortOptions: any = {};
+    let sortOptions: MaterialSortOptions = {};
     switch (sortBy) {
       case 'createdAt':
         sortOptions.uploadedAt = sortOrder === 'desc' ? -1 : 1;

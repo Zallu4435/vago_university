@@ -1,21 +1,21 @@
 import { ISportsRepository } from "../../../application/sports/repositories/ISportsRepository";
 import { TeamModel, SportRequestModel } from "../../../infrastructure/database/mongoose/models/sports.model";
 import { User as UserModel } from "../../database/mongoose/auth/user.model";
-import { Sport, SportDocument, SportRequest } from "../../../domain/sports/entities/SportTypes";
+import { Sport, SportDocument, SportFilter } from "../../../domain/sports/entities/SportTypes";
 import { BaseRepository } from "../../../application/repositories/BaseRepository";
 
-export class SportsRepository extends BaseRepository<Sport, Record<string, any>, Record<string, any>, Record<string, unknown>, SportDocument> implements ISportsRepository {
+export class SportsRepository extends BaseRepository<Sport, Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, SportDocument> implements ISportsRepository {
   constructor() {
     super(TeamModel);
   }
 
   async getSports(page: number, limit: number, sportType: string, status: string, coach: string, startDate: string, endDate: string, search: string) {
-    const query: any = {};
+    const query: SportFilter = {};
     if (sportType && sportType !== "all") {
       query.type = { $regex: `^${sportType}$`, $options: "i" };
     }
     if (status && status !== "all") {
-      // Normalize status to lowercase to match enum values
+
       const normalizedStatus = status.toLowerCase();
       query.status = { $regex: `^${normalizedStatus}$`, $options: "i" };
     }
@@ -66,16 +66,16 @@ export class SportsRepository extends BaseRepository<Sport, Record<string, any>,
   // }
 
   async getSportRequests(page: number, limit: number, status: string, type: string, startDate: string, endDate: string, search: string) {
-    const query: any = {};
+    const query: SportFilter = {};
     if (status && status.toLowerCase() !== "all") {
       query.status = status;
     }
-    const sportQuery: any = {};
+    const sportQuery: SportFilter = {};
     if (type && type.toLowerCase() !== "all") {
       sportQuery.type = { $regex: `^${type}$`, $options: "i" };
     }
     let matchingSports = [];
-    let userIds: any[] = [];
+    let userIds = [];
     if (search && search.trim() !== "") {
       sportQuery.$or = [
         { title: { $regex: search, $options: "i" } },

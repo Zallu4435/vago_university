@@ -115,7 +115,14 @@ class ApplicationService {
     }
   }
 
-  async processPayment(applicationId: string, paymentDetails: any): Promise<PaymentResult> {
+  async processPayment(applicationId: string, paymentDetails: {
+    amount: number;
+    currency: string;
+    paymentMethod: string;
+    customerEmail: string;
+    customerName: string;
+    customerPhone: string;
+  }): Promise<PaymentResult> {
     try {
       const result = await applicationController.processPayment(applicationId, paymentDetails);
       if (!result.data?.paymentId || !result.data?.status) {

@@ -41,7 +41,7 @@ export interface Team {
   _homeGames?: number;
   _record?: string;
   _upcomingGames?: { date: string; description: string }[];
-  data?: any; // <-- Added to fix the error
+  data?: unknown;
 }
 
 export interface PlayerRequest {
@@ -348,7 +348,7 @@ export interface ColorOption {
   color: string;
 } 
 
-export interface SportsApiResponse<T = any> {
+export interface SportsApiResponse<T = unknown> {
   data: {
     data: T[];
     totalPages: number;
@@ -422,6 +422,6 @@ export interface EventModalProps {
     venue: string;
     status: string;
   };
-  setForm: (form: any) => void;
+  setForm: (form: unknown) => void;
   sportTypes: string[];
 }

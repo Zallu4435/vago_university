@@ -61,7 +61,7 @@ export class CourseController implements ICourseController {
     const { _id: _omitId, id: _omitStringId, ...body } = (httpRequest.body || {}) as Record<string, unknown>;
     const params: UpdateCourseRequestDTO = {
       id,
-      ...(body as any),
+      ...body,
     };
     const result = await this.updateCourseUseCase.execute(params);
     if (!result.success) {

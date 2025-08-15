@@ -2,7 +2,7 @@ import { NotificationModel } from "../../database/mongoose/models/notification.m
 import { User as UserModel } from "../../database/mongoose/auth/user.model";
 import { Faculty as FacultyModel } from "../../database/mongoose/auth/faculty.model";
 import { INotificationRepository } from "../../../application/notifications/repositories/INotificationRepository";
-import { NotificationProps } from "../../../domain/notifications/entities/NotificationTypes";
+import { NotificationFilter, NotificationProps } from "../../../domain/notifications/entities/NotificationTypes";
 import {
     CreateNotificationRequestDTO,
     GetAllNotificationsRequestDTO,
@@ -121,7 +121,7 @@ export class NotificationRepository implements INotificationRepository {
     async getAllNotifications(params: GetAllNotificationsRequestDTO): Promise<GetAllNotificationsResponseDTO> {
         const { userId, collection, page = 1, limit = 10, recipientType, status, dateRange, isRead, search } = params;
 
-        const query: any = {};
+        const query: NotificationFilter = {};
 
         if (userId && collection !== "admin") {
             const validRecipientTypes = ["all", "all_students_and_faculty"];
@@ -249,7 +249,7 @@ export class NotificationRepository implements INotificationRepository {
     async markAllNotificationsAsRead(params: MarkAllNotificationsAsReadRequestDTO): Promise<MarkAllNotificationsAsReadResponseDTO> {
         const { authenticatedUserId, collection } = params;
 
-        const query: any = {};
+        const query: NotificationFilter = {};
         if (collection !== "admin") {
             const validRecipientTypes = ["all", "all_students_and_faculty"];
             

@@ -23,8 +23,8 @@ import {
     DeleteChargeResponseDTO,
 } from "../../../domain/financial/dtos/FinancialResponseDTOs";
 import { IFinancialRepository } from "../../../application/financial/repositories/IFinancialRepository";
-import { ChargeDocument, FinancialInfoDocument, PaymentDocument } from "../../../domain/financial/financialtypes";
 import mongoose from 'mongoose';
+import { ChargeFilter } from "../../../domain/financial/entities/Charge";
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID!,
@@ -49,7 +49,7 @@ export class FinancialRepository implements IFinancialRepository {
                 };
             }
 
-            const allCharges = await ChargeModel.find({}).lean() as unknown as ChargeDocument[];
+            const allCharges = await ChargeModel.find({}).lean();
 
             const applicableCharges = allCharges.filter((charge) => {
                 if (charge.applicableFor === "All Students") {
@@ -83,11 +83,11 @@ export class FinancialRepository implements IFinancialRepository {
                     paymentDueDate: charge.dueDate.toISOString(),
                     status: isPaid ? "Paid" as const : "Pending" as const,
                     term: charge.term,
-                    issuedAt: charge.createdAt.toISOString(),
-                    paidAt: isPaid ? financialInfo.paidAt.toISOString() : undefined,
+                    issuedAt: charge.createdAt?.toISOString(),
+                    paidAt: isPaid ? financialInfo.paidAt?.toISOString() : undefined,
                     method: isPaid ? financialInfo.method : undefined,
-                    createdAt: charge.createdAt.toISOString(),
-                    updatedAt: charge.updatedAt.toISOString(),
+                    createdAt: charge.createdAt?.toISOString(),
+                    updatedAt: charge.updatedAt?.toISOString(),
                     chargeTitle: charge.title,
                     chargeDescription: charge.description,
                 };
@@ -118,7 +118,7 @@ export class FinancialRepository implements IFinancialRepository {
     }
 
     async getAllPayments(params: GetAllPaymentsRequestDTO): Promise<GetAllPaymentsResponseDTO> {
-        const query: any = {};
+        const query: ChargeFilter = {};
         if (params.startDate && params.endDate) {
             query.date = { $gte: new Date(params.startDate), $lte: new Date(params.endDate) };
         } else if (params.startDate) {
@@ -418,7 +418,7 @@ export class FinancialRepository implements IFinancialRepository {
     }
 
     async getAllCharges(params: GetAllChargesRequestDTO): Promise<GetAllChargesResponseDTO> {
-        const query: any = {};
+        const query: ChargeFilter = {};
 
         if (params.term && params.term !== 'All Terms') query.term = params.term;
         if (params.status && params.status !== 'All Statuses') query.status = params.status;

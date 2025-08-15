@@ -214,3 +214,34 @@ export type StudentInfoResult = {
   program: IProgramDocument;
   pendingEnrollments: IEnrollmentDocument[];
 };
+
+
+export interface CourseFilter {
+  title?: { $regex: string; $options: string } | RegExp;
+  specialization?: { $regex: string; $options: string } | RegExp;
+  faculty?: { $regex: string; $options: string } | RegExp;
+  description?: { $regex: string; $options: string } | RegExp;
+  credits?: number;
+  term?: string;
+  schedule?: string;
+  maxEnrollment?: number;
+  currentEnrollment?: number;
+  prerequisites?: string[];
+  $or?: Array<{
+    title?: { $regex: string; $options: string } | RegExp;
+    specialization?: { $regex: string; $options: string } | RegExp;
+    faculty?: { $regex: string; $options: string } | RegExp;
+    description?: { $regex: string; $options: string } | RegExp;
+  }>;
+  [key: string]: unknown;
+}
+
+// Filter type for findAcademicHistory
+export interface AcademicHistoryFilter {
+  userId?: string;
+  term?: { $gte?: string; $lte?: string };
+  credits?: number;
+  gpa?: number;
+  id?: string;
+  [key: string]: unknown;
+}

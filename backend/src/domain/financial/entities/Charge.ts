@@ -54,3 +54,13 @@ export class Charge {
   get updatedAt(): Date | undefined { return this._updatedAt; }
   get status(): "Active" | "Inactive" | undefined { return this._status; }
 }
+
+export interface ChargeFilter {
+  title?: string | { $regex: string; $options: string };
+  description?: string | { $regex: string; $options: string };
+  term?: string | { $regex: string; $options: string };
+  applicableFor?: string | { $regex: string; $options: string };
+  status?: string;
+  _id?: string | { $in: string[] };
+  [key: string]: unknown;
+}

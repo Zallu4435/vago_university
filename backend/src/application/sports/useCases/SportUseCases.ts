@@ -13,7 +13,7 @@ import {
   UpdateSportResponseDTO,
   SportSummaryDTO,
 } from "../../../domain/sports/dtos/SportResponseDTOs";
-import { Sport, SportDocument } from "../../../domain/sports/entities/SportTypes";
+import { Sport, SportDocument, SportStatus } from "../../../domain/sports/entities/SportTypes";
 
 export interface IGetSportsUseCase {
   execute(params: GetSportsRequestDTO): Promise<GetSportsResponseDTO>;
@@ -88,14 +88,25 @@ export class CreateSportUseCase {
   constructor(private sportsRepository: ISportsRepository) { }
 
   async execute(params: CreateSportRequestDTO): Promise<CreateSportResponseDTO> {
-    // Normalize status to lowercase to match enum values
+    // Normalize status to enum value to match CreateSportData
     const normalizedParams = {
       ...params,
-      status: params.status?.toLowerCase() || "active"
+      status: (params.status && Object.values(SportStatus).includes(params.status as SportStatus))
+        ? params.status as SportStatus
+        : SportStatus.Active,
+      category: params.category ?? "",
+      organizer: params.organizer ?? "",
+      organizerType: params.organizerType ?? "",
+      icon: params.icon ?? "",
+      color: params.color ?? "",
+      division: params.division ?? "",
+      headCoach: params.headCoach ?? "",
+      homeGames: params.homeGames ?? 0,
+      record: params.record ?? "",
+      upcomingGames: params.upcomingGames ?? [],
+      participants: params.participants ?? 0,
     };
-    
     const newSport = await this.sportsRepository.create(normalizedParams);
-    
     return { sport: newSport as unknown as Sport };
   }
 }
@@ -108,13 +119,11 @@ export class UpdateSportUseCase {
       throw new Error("Invalid sport ID");
     }
     const { id, ...updateData } = params;
-    
     // Normalize status to lowercase if provided
     if (updateData.status) {
-      updateData.status = updateData.status.toLowerCase() as any;
+      updateData.status = updateData.status.toLowerCase() as SportStatus;
     }
-    
-    const updatedSport = await this.sportsRepository.updateById(id, updateData);
+    const updatedSport = await this.sportsRepository.updateById(id, { ...updateData, id });
     if (!updatedSport) {
       throw new Error("Sport not found");
     }

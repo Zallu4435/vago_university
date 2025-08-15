@@ -73,7 +73,7 @@ class SessionService {
     }
   }
 
-  async updateSession(id: string, data: any) {
+  async updateSession(id: string, data: Partial<CreateVideoSessionPayload>) {
     console.log('Updating session with id:', id);
     console.log('Update data:', data);
     try {
@@ -133,7 +133,7 @@ class SessionService {
     }
   }
 
-  async getSessionAttendance(sessionId: string, filters: any = {}) {
+  async getSessionAttendance(sessionId: string, filters: Record<string, string | number> = {}) {
     const filteredParams = Object.fromEntries(
       Object.entries(filters).filter(([_, value]) => 
         value !== undefined && value !== null && value !== '' && value !== 'all'

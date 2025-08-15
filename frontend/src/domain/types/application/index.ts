@@ -201,7 +201,7 @@ export interface ApplicationFormProps {
 }
 
 export interface FormSubmissionFlowProps {
-    formData: any;
+    formData: unknown;
     onPaymentComplete: () => void;
     onBackToForm?: () => void;
     onConfirm?: () => void;
@@ -222,13 +222,13 @@ export interface FormTabsProps {
 export interface PersonalParticularsFormProps {
     initialData?: PersonalInfo;
     onChange?: (data: PersonalInfo) => void;
-    triggerValidation?: any;
+    triggerValidation?: unknown;
 }
 
 export interface PaymentProps {
     formData: {
         applicationId: string;
-        [key: string]: any;
+        [key: string]: unknown;
     };
     onComplete: () => void;
     onPrevious: () => void;
@@ -286,14 +286,14 @@ export interface StepIndicatorProps {
 }
 
 export interface OtherInfoProps {
-    initialData?: any; // Use OtherInformationSection if available in types
-    onSave: (data: any) => void; // Use OtherInformationSection if available in types
+    initialData?: unknown; 
+    onSave: (data: unknown) => void; 
 }
 
 export interface ProgrammeModalProps {
     showModal: boolean;
     onClose: () => void;
-    onSubmit: (data: any) => void; // Use ProgrammeChoiceFormData if available in types
+    onSubmit: (data: unknown) => void; 
     choices: { programme: string; preferredMajor: string }[];
 }
 
@@ -328,5 +328,5 @@ export interface PaymentResult {
 
 export interface SubmissionResult {
   message: string;
-  admission: any;
+  admission: unknown;
 } 

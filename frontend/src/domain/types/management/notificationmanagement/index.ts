@@ -12,7 +12,7 @@ export interface Notification {
   status: 'sent' | 'failed' | string;
   isRead: boolean;
   type?: 'course' | 'assignment' | 'general' | 'default';
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface NotificationFilters {

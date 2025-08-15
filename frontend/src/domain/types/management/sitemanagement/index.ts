@@ -17,13 +17,13 @@ export type SiteSectionKey = 'highlights' | 'vagoNow' | 'leadership';
 
 export interface SiteSectionFormProps {
   fields: SectionField[];
-  initialData?: Record<string, any>;
+  initialData?: Record<string, unknown>;
   onClose: () => void;
-  onSuccess: (data: Record<string, any>) => void;
+  onSuccess: (data: Record<string, unknown>) => void;
 }
 
 export interface SiteSectionViewModalProps {
   fields: SectionField[];
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   onClose: () => void;
 } 

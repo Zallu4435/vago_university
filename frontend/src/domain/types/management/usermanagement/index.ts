@@ -9,10 +9,10 @@ export type User = {
 };
 
 export interface ApplicantDetailsProps {
-  selectedApplicant: any;
+  selectedApplicant: unknown;
   showDetails: boolean;
   setShowDetails: (value: boolean) => void;
-  approveAdmission: (data: any) => void;
+  approveAdmission: (data: unknown) => void;
   rejectAdmission: (data: { id: string; reason: string }) => void;
   deleteAdmission?: (id: string) => void;
   onViewDocument?: (document: { name: string; url: string }) => void;
@@ -34,8 +34,8 @@ export interface ApplicantDetailsProps {
 export interface ApprovalModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onApprove: (data: any) => void;
-  onReject: (data: any) => void;
+  onApprove: (data: unknown) => void;
+  onReject: (data: unknown) => void;
   onDelete: () => void;
   applicantName: string;
 }
@@ -49,7 +49,7 @@ export interface AdmissionDetails {
   status: string;
   createdAt: string;
   documents?: Array<{ name: string; url: string }>;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface AdmissionApiResponse {

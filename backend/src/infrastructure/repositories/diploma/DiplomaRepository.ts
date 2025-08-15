@@ -3,12 +3,13 @@ import { Diploma } from "../../../domain/diploma/entities/Diploma";
 import { EnrollStudent, UnenrollStudent } from "../../../domain/diploma/entities/diplomatypes";
 import { Diploma as DiplomaModel } from "../../../infrastructure/database/mongoose/models/diploma.model";
 import mongoose from "mongoose";
+import { DiplomaFilter } from "../../../domain/diploma/entities/diplomatypes";
 
 export class DiplomaRepository implements IDiplomaRepository {
   async getDiplomas(page: number, limit: number, department: string, category: string, status: string, instructor: string, dateRange: string, search: string, startDate: string, endDate: string) {
     const skip = (page - 1) * limit;
 
-    const filter: any = {};
+    const filter: DiplomaFilter = {};
 
     let dept = undefined;
     if (category && category !== 'all' && category !== 'All' && category !== 'All Categories') {

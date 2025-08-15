@@ -11,6 +11,7 @@ import {
   IDownloadCertificateUseCase,
   IBlockFacultyUseCase,
 } from "../../../application/faculty/useCases/FacultyUseCases";
+import { FacultyStatus } from "../../../domain/faculty/FacultyTypes";
 
 export class FacultyController implements IFacultyController {
   private httpErrors: HttpErrors;
@@ -39,7 +40,7 @@ export class FacultyController implements IFacultyController {
     const response = await this.getFacultyUseCase.execute({
       page: Number(page),
       limit: Number(limit),
-      status: status as any,
+      status: status as FacultyStatus,
       department: String(department),
       dateRange: String(dateRange),
       search: search ? String(search) : undefined,

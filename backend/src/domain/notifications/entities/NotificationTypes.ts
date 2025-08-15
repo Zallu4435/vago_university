@@ -25,7 +25,6 @@ export interface NotificationProps {
   readBy?: string[]; 
 }
 
-// Interface for Mongoose model
 export interface Notification {
   _id: string;
   title: string;
@@ -36,8 +35,21 @@ export interface Notification {
   createdBy: string;
   createdAt: Date;
   status: NotificationStatus;
-  readBy: string[]; // Array of user IDs who have read this notification
+  readBy: string[]; 
 }
 
 export type CreateNotificationProps = Omit<NotificationProps, 'id' | 'createdAt'>;
 export type UpdateNotificationProps = Partial<Omit<NotificationProps, 'createdAt'>> & { id: string }; 
+
+export interface NotificationFilter {
+  $or?: Array<{
+    recipientId?: string;
+    recipientType?: NotificationRecipientType | { $in: string[] };
+  }>;
+  readBy?: string | { $ne: string };
+  recipientType?: NotificationRecipientType | string | { $in: string[] };
+  status?: string;
+  createdAt?: { $gte?: Date; $lte?: Date };
+  search?: string;
+  [key: string]: unknown; 
+}

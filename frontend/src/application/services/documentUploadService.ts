@@ -94,7 +94,7 @@ class DocumentUploadService {
     }
   }
 
-  async getAdminDocument(documentId: string, admissionId: string): Promise<any> {
+  async getAdminDocument(documentId: string, admissionId: string) {
     try {
       const response = await httpClient.get(`/admin/admissions/documents/${documentId}?admissionId=${admissionId}`);
       return response.data.data;

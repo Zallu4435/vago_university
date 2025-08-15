@@ -39,7 +39,7 @@ class DiplomaService {
         }
     }
 
-    async getDiplomaCourseById(id: string): Promise<any> {
+    async getDiplomaCourseById(id: string) {
         try {
             const response = await httpClient.get<DiplomaCourseResponse>(`/diploma-courses/${id}`);
             console.log('[DiplomaService] getDiplomaCourseById response:', response.data);

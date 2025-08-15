@@ -137,3 +137,24 @@ export class DeleteCourseRequest {
     return new DeleteCourseRequest(params.id);
   }
 } 
+
+export interface CourseFilter {
+  title?: string | { $regex: string; $options: string };
+  specialization?: string | { $regex: string; $options: string };
+  faculty?: string | { $regex: string; $options: string };
+  term?: string | { $regex: string; $options: string };
+  status?: string | { $regex: string; $options: string };
+  courseId?: string | { $in: string[] };
+  studentId?: string | { $in: string[] };
+  createdAt?: { $gte?: Date; $lte?: Date };
+  updatedAt?: { $gte?: Date; $lte?: Date };
+  $or?: Array<{
+    title?: { $regex: string; $options: string };
+    specialization?: { $regex: string; $options: string };
+    faculty?: { $regex: string; $options: string };
+    term?: { $regex: string; $options: string };
+    courseId?: { $in: string[] };
+    studentId?: { $in: string[] };
+  }>;
+  [key: string]: unknown;
+}

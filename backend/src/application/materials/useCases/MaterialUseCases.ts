@@ -2,6 +2,7 @@ import { IMaterialsRepository } from '../repositories/IMaterialsRepository';
 import { GetMaterialsRequestDTO, GetMaterialByIdRequestDTO, CreateMaterialRequestDTO, UpdateMaterialRequestDTO, DeleteMaterialRequestDTO } from '../../../domain/materials/dtos/MaterialRequestDTOs';
 import { GetMaterialsResponseDTO, GetMaterialByIdResponseDTO, CreateMaterialResponseDTO, UpdateMaterialResponseDTO } from '../../../domain/materials/dtos/MaterialResponseDTOs';
 import { Material, MaterialProps } from '../../../domain/materials/entities/Material';
+import { MaterialFilter } from '../../../domain/materials/entities/MaterialTypes';
 import { MaterialNotFoundError, MaterialValidationError } from '../../../domain/materials/errors/MaterialErrors';
 
 export interface IGetMaterialsUseCase {
@@ -51,23 +52,9 @@ function toMaterialProps(raw): MaterialProps {
 export class GetMaterialsUseCase {
   constructor(private repo: IMaterialsRepository) { }
   async execute(params: GetMaterialsRequestDTO): Promise<GetMaterialsResponseDTO> {
-    try {
-      const sampleMaterials = await this.repo.find({}, { skip: 0, limit: 5, sort: { uploadedAt: -1 } });
-
-
-      // Get all unique courses in database
-      const allMaterials = await this.repo.find({}, { skip: 0, limit: 100, sort: { uploadedAt: -1 } });
-      const uniqueCourses = [...new Set(allMaterials.map(m => m.course))];
-    } catch (error) {
-      console.log('Error fetching sample materials:', error);
-    }
-
-    // Build query/filter logic here (not in repository)
-    const filter: any = {};
-
-    // Existing filters
+    const filter: MaterialFilter = {};
+    
     if (params.subject && params.subject !== 'All Subjects' && params.subject !== 'all' && params.subject !== 'All') {
-      // Normalize subject filter: convert underscores to spaces and capitalize words
       const normalizedSubject = params.subject
         .split('_')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -76,10 +63,8 @@ export class GetMaterialsUseCase {
       filter.subject = normalizedSubject;
     }
     if (params.course && params.course !== 'All Courses' && params.course !== 'all') {
-      // Normalize course filter: convert underscores to spaces and capitalize words
       let normalizedCourse = params.course;
 
-      // Handle special cases first
       if (normalizedCourse.toLowerCase().includes('b.tech')) {
         normalizedCourse = normalizedCourse.replace(/b\.tech/gi, 'B.Tech.');
       } else if (normalizedCourse.toLowerCase().includes('b.sc')) {
@@ -88,15 +73,12 @@ export class GetMaterialsUseCase {
         normalizedCourse = normalizedCourse.replace(/m\.sc/gi, 'M.Sc.');
       }
 
-      // Convert underscores to spaces and capitalize remaining words
       normalizedCourse = normalizedCourse
         .split('_')
         .map(word => {
-          // Skip if already processed (B.Tech., B.Sc., M.Sc.)
           if (word === 'B.Tech.' || word === 'B.Sc.' || word === 'M.Sc.') {
             return word;
           }
-          // Handle CS abbreviation only if it's a standalone word
           if (word.toLowerCase() === 'cs') {
             return 'CS';
           }
@@ -114,14 +96,12 @@ export class GetMaterialsUseCase {
       params.semester.toString() !== 'All Semesters' &&
       params.semester.toString() !== 'all'
     ) {
-      // Convert string to number if needed
       const semesterValue = typeof params.semester === 'string' ? parseInt(params.semester, 10) : params.semester;
       if (!isNaN(semesterValue) && semesterValue > 0) {
         filter.semester = semesterValue;
       }
     }
 
-    // Search functionality
     if (params.search && params.search.trim()) {
       const searchRegex = new RegExp(params.search.trim(), 'i');
       filter.$or = [
@@ -133,7 +113,6 @@ export class GetMaterialsUseCase {
       ];
     }
 
-    // Status filter (for restricted/unrestricted)
     if (params.status && params.status !== 'all') {
       if (params.status === 'restricted') {
         filter.isRestricted = true;
@@ -142,7 +121,6 @@ export class GetMaterialsUseCase {
       }
     }
 
-    // Date range filtering
     if (params.dateRange && params.dateRange !== 'all') {
       const now = new Date();
       let startDate: Date;

@@ -188,3 +188,13 @@ export class DeleteSiteSectionRequest {
 
   get id(): string { return this._id; }
 }
+
+
+export interface SiteSectionFilter{
+  sectionKey?:string;
+  $or?:Array<{title?:RegExp;description?:RegExp;category?:RegExp;}>;
+  category?:{$regex:string;$options:string};
+  isActive?:boolean;
+  createdAt?:{$gte?:Date;$lte?:Date};
+  [key:string]:unknown;
+}

@@ -1,8 +1,7 @@
 import { IAssignmentRepository } from '../../../application/assignments/repositories/IAssignmentRepository';
 import { AssignmentModel } from '../../database/mongoose/assignment/AssignmentModel';
 import { SubmissionModel } from '../../database/mongoose/assignment/SubmissionModel';
-import { Assignment } from '../../../domain/assignments/entities/Assignment';
-import { IAssignment } from '../../../domain/assignments/entities/Assignment';
+import { Assignment, AssignmentFilter, IAssignment } from '../../../domain/assignments/entities/Assignment';
 
 export class AssignmentRepository implements IAssignmentRepository {
   async findAssignmentsRaw(query, skip: number, limit: number) {
@@ -13,7 +12,7 @@ export class AssignmentRepository implements IAssignmentRepository {
   }
 
   async getAssignments(subject: string, status: string, page: number, limit: number, search: string) {
-    const query: any = {};
+    const query: AssignmentFilter = {};
     if (subject) query.subject = subject;
     if (status) query.status = status;
     if (search && search.trim() !== '') {
@@ -85,14 +84,12 @@ export class AssignmentRepository implements IAssignmentRepository {
   }
 
   async getAnalytics() {
-    console.log('getAnalytics called in AssignmentRepository');
-    // Total assignments
     const totalAssignments = await AssignmentModel.countDocuments();
-    // Total submissions
+
     const totalSubmissions = await SubmissionModel.countDocuments();
-    // Submission rate (submissions/assignments, capped at 1)
+
     const submissionRate = totalAssignments > 0 ? Math.min(totalSubmissions / totalAssignments, 1) : 0;
-    // Average submission time (in hours, from assignment creation to submission)
+
     const submissions = await SubmissionModel.find().lean();
     const assignments = await AssignmentModel.find().lean();
     let totalHours = 0;
@@ -107,24 +104,23 @@ export class AssignmentRepository implements IAssignmentRepository {
       }
     }
     const averageSubmissionTimeHours = countWithTime > 0 ? totalHours / countWithTime : 0;
-    // Subject distribution
+
     const subjectDistribution: Record<string, number> = {};
     for (const a of assignments) {
       subjectDistribution[a.subject] = (subjectDistribution[a.subject] || 0) + 1;
     }
-    // Status distribution
+
     const statusDistribution: Record<string, number> = {};
     for (const s of submissions) {
       statusDistribution[s.status] = (statusDistribution[s.status] || 0) + 1;
     }
-    // Recent submissions (last 5)
     const recentSubmissions = (await SubmissionModel.find().sort({ submittedDate: -1 }).limit(5).lean()).map(s => ({
       assignmentTitle: assignmentMap.get(s.assignmentId.toString())?.title || '',
       studentName: s.studentName,
       submittedAt: s.submittedDate,
       score: s.marks || 0
     }));
-    // Top performers (top 5 by average score, min 1 submission)
+
     const studentScores: Record<string, { studentName: string; totalScore: number; count: number }> = {};
     for (const s of submissions) {
       if (!studentScores[s.studentId]) {

@@ -1,4 +1,5 @@
 import { IUserAssignmentRepository } from '../../../application/assignments/repositories/IUserAssignmentRepository';
+import { UserAssignmentFilter } from '../../../domain/assignments/entities/Assignment';
 import { AssignmentModel } from '../../database/mongoose/assignment/AssignmentModel';
 import { SubmissionModel } from '../../database/mongoose/assignment/SubmissionModel';
 import mongoose from 'mongoose';
@@ -9,7 +10,7 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
   }
  
   async getAssignments(subject: string, status: string, page: number, limit: number, search: string, studentId: string, sortBy: string) {
-    const query: any = {};
+    const query: UserAssignmentFilter = {};
     if (subject && subject !== 'all') {
       query.subject = subject;
     }

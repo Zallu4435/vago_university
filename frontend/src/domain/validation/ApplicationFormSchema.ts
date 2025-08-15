@@ -17,7 +17,7 @@ export const ApplicationFormSchema = z.object({
   otherInformation: OtherInformationSchema.optional(),
   documents: DocumentUploadSectionSchema.optional(),
   declaration: DeclarationSchema.optional(),
-}).refine((data: any) => {
+}).refine((data) => {
   if (data.declaration?.privacyPolicy) {
     return !!data.personalInfo && !!data.choiceOfStudy && !!data.education && !!data.otherInformation && !!data.documents;
   }

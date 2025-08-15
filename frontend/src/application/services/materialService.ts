@@ -18,7 +18,7 @@ export const materialService = {
     limit: number
   ): Promise<{ materials: Material[]; totalPages: number }> {
     try {
-      const params: any = { page, limit };
+      const params: Record<string, string | number> = { page, limit };
       if (filters.subject && filters.subject !== 'All Subjects') params.subject = filters.subject;
       if (filters.course && filters.course !== 'All Courses') params.course = filters.course;
       if (filters.semester && filters.semester !== 'All Semesters') params.semester = filters.semester;

@@ -62,3 +62,14 @@ export interface ISiteSectionDocument extends Document {
 }
 
 export type ISiteSection = IHighlightSection | IVagoNowSection | ILeadershipSection; 
+
+export interface SiteSectionFilter {
+  sectionKey?: string;
+  $or?: Array<{
+    title?: { $regex: string; $options: string };
+    description?: { $regex: string; $options: string };
+    category?: { $regex: string; $options: string };
+  }>;
+  category?: string;
+  [key: string]: unknown; 
+}

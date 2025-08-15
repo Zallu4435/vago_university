@@ -59,7 +59,7 @@ export interface DocumentDTO {
     date?: string;
     description?: string;
     method?: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay" | "stripe";
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }
   
   export interface UploadDocumentResponseDTO {

@@ -1,4 +1,5 @@
 import { AssignmentFile } from '../assignmenttypes';
+import { Submission } from './Submission';
 
 export enum AssignmentStatus {
   Draft = 'draft',
@@ -124,7 +125,7 @@ export class Assignment implements IAssignment {
   }
 
   static createSubmissionList(props: {
-    submissions: any[];
+    submissions: Submission[];
     total: number;
     page: number;
     limit: number;
@@ -137,7 +138,7 @@ export class Assignment implements IAssignment {
     };
   }
 
-  static createSubmissionResponse(submission: any) {
+  static createSubmissionResponse(submission: Submission) {
     return submission;
   }
 
@@ -191,3 +192,27 @@ export class Assignment implements IAssignment {
   }
 }
 
+export interface AssignmentFilter {
+  subject?: string;
+  status?: string;
+  title?: { $regex: string; $options: string };
+  $or?: Array<{
+    title?: { $regex: string; $options: string };
+    subject?: { $regex: string; $options: string };
+  }>;
+  [key: string]: unknown;
+}
+
+
+export interface UserAssignmentFilter {
+  subject?: string;
+  status?: string;
+  dueDate?: { $gte?: Date; $lte?: Date };
+  priority?: number;
+  title?: { $regex: string; $options: string };
+  $or?: Array<{
+    title?: { $regex: string; $options: string };
+    subject?: { $regex: string; $options: string };
+  }>;
+  [key: string]: unknown;
+}

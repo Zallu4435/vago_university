@@ -1,4 +1,5 @@
 import { GetUserSiteSectionsRequestDTO, GetUserSiteSectionsResponseDTO, UserSiteSectionDTO } from "../../../domain/site-management/dtos/UserSiteSectionDTOs";
+import { SiteSectionFilter } from "../../../domain/site-management/entities/SiteSectionTypes";
 import { IUserSiteSectionRepository } from "../repositories/IUserSiteSectionRepository";
 
 export interface IGetUserSiteSectionsUseCase {
@@ -24,7 +25,7 @@ export class GetUserSiteSectionsUseCase implements IGetUserSiteSectionsUseCase {
 
   async execute(params: GetUserSiteSectionsRequestDTO): Promise<{ success: boolean; data: GetUserSiteSectionsResponseDTO }> {
     const { sectionKey, page = 1, limit = 10, search, category } = params;
-    const query: any = { sectionKey };
+    const query: SiteSectionFilter = { sectionKey };
     if (search && search.trim() !== '') {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },

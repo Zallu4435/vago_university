@@ -17,7 +17,7 @@ import {
     MarkAllNotificationsAsReadResponseDTO,
 } from "../../../domain/notifications/dtos/NotificationResponseDTOs";
 import { INotificationRepository } from "../repositories/INotificationRepository";
-import { NotificationStatus, NotificationRecipientType } from "../../../domain/notifications/entities/NotificationTypes";
+import { NotificationStatus, NotificationRecipientType, NotificationFilter } from "../../../domain/notifications/entities/NotificationTypes";
 import { Notification } from "../../../domain/notifications/entities/Notification";
 import {
     NotificationNotFoundError,
@@ -167,7 +167,7 @@ export class GetAllNotificationsUseCase implements IGetAllNotificationsUseCase {
     async execute(params: GetAllNotificationsRequestDTO): Promise<GetAllNotificationsResponseDTO> {
         const { userId, collection, page = 1, limit = 10, recipientType, status, dateRange, isRead, search } = params;
 
-        const filter: any = {};
+        const filter: NotificationFilter = {};
 
         if (userId && collection !== "admin") {
             const validRecipientTypes = [
@@ -349,7 +349,7 @@ export class MarkAllNotificationsAsReadUseCase implements IMarkAllNotificationsA
     async execute(params: MarkAllNotificationsAsReadRequestDTO): Promise<MarkAllNotificationsAsReadResponseDTO> {
         const { authenticatedUserId, collection } = params;
 
-        const filter: any = {};
+        const filter: NotificationFilter = {};
         if (collection !== "admin") {
             const validRecipientTypes = [NotificationRecipientType.ALL, NotificationRecipientType.ALL_STUDENTS_AND_FACULTY];
 

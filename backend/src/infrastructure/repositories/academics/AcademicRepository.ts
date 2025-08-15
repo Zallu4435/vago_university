@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import { IAcademicRepository } from '../../../application/academics/repositories/IAcademicRepository';
 import {
+  AcademicHistoryFilter,
+  CourseFilter,
   Enrollment,
   EnrollmentStatus,
   IAcademicHistoryDocument,
@@ -72,7 +74,7 @@ export class AcademicRepository implements IAcademicRepository {
   }
 
   async findAllCourses(search?: string, page: number = 1, limit: number = 5) {
-    const query: any = {};
+    const query: CourseFilter = {};
     if (search && search.trim()) {
       const searchRegex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
       query.$or = [
@@ -92,7 +94,7 @@ export class AcademicRepository implements IAcademicRepository {
   }
 
   async findAcademicHistory(userId: string, startTerm?: string, endTerm?: string) {
-    const query: any = { userId };
+    const query: AcademicHistoryFilter = { userId };
     if (startTerm) query.term = { $gte: startTerm };
     if (endTerm) query.term = { ...query.term, $lte: endTerm };
     return await AcademicHistoryModel.find(query)

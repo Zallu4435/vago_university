@@ -11,7 +11,7 @@ import {
   UpdateSiteSectionResponseDTO,
 } from "../../../domain/site-management/dtos/SiteSectionDTOs";
 import { ISiteSectionRepository } from "../repositories/ISiteSectionRepository";
-import { CreateSiteSectionRequest, DeleteSiteSectionRequest, UpdateSiteSectionRequest } from '../../../domain/site-management/entities/SiteSection';
+import { CreateSiteSectionRequest, DeleteSiteSectionRequest, SiteSectionFilter, UpdateSiteSectionRequest } from '../../../domain/site-management/entities/SiteSection';
 import { InvalidSectionKeyError, InvalidHighlightError, InvalidVagoNowError, InvalidLeadershipError } from '../../../domain/site-management/errors/SiteSectionErrors';
  
 export class GetSiteSectionsUseCase {
@@ -19,7 +19,7 @@ export class GetSiteSectionsUseCase {
 
   async execute(params: GetSiteSectionsRequestDTO): Promise<{ success: boolean; data: GetSiteSectionsResponseDTO }> {
     const { sectionKey, page = 1, limit = 10, search, category, dateRange, startDate, endDate, status } = params;
-    const query: any = {};
+    const query: SiteSectionFilter = {};
     
     if (sectionKey) query.sectionKey = sectionKey;
     

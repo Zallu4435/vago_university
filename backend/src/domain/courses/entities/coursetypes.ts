@@ -45,8 +45,8 @@ export interface ICourseDocument extends Document {
 }
 
 export interface IEnrollmentDocument extends Document {
-  studentId: any; // mongoose.Types.ObjectId, but avoid direct import for type-only
-  courseId: any;  // mongoose.Types.ObjectId
+  studentId: string; 
+  courseId: string;  
   status: "Pending" | "Approved" | "Rejected";
   requestedAt: Date;
   reason?: string;

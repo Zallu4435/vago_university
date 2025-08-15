@@ -16,7 +16,7 @@ import {
 } from "../../../domain/enquiry/dtos/EnquiryResponseDTOs";
 import { IEnquiryRepository } from "../repositories/IEnquiryRepository";
 import { Enquiry, EnquiryProps } from "../../../domain/enquiry/entities/Enquiry";
-import { EnquiryStatus } from "../../../domain/enquiry/entities/EnquiryTypes";
+import { EnquiryFilter, EnquiryStatus } from "../../../domain/enquiry/entities/EnquiryTypes";
 import { IEmailService } from "../../auth/service/IEmailService";
 import {
   EnquiryNotFoundError,
@@ -93,7 +93,7 @@ export class GetEnquiriesUseCase implements IGetEnquiriesUseCase {
     const { page = 1, limit = 10, status, startDate, endDate, search } = params;
     const skip = (page - 1) * limit;
 
-    const filter: any = {};
+    const filter: EnquiryFilter = {};
 
     if (status && typeof status === 'string') {
       const statusStr = status.toLowerCase();

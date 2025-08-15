@@ -33,7 +33,7 @@ export interface Payment {
   receiptUrl?: string;
   paidAt?: string;
   chargeTitle?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface FinancialAidApplication {

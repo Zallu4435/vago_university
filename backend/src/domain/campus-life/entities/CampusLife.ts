@@ -231,3 +231,38 @@ export interface RawJoinRequest {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface CampusEventFilter {
+  title?: { $regex: string; $options: string };
+  date?: { $gte?: string; $lte?: string };
+  organizer?: { $regex: string; $options: string };
+  status?: 'upcoming' | 'past' | string;
+  $or?: Array<{
+    title?: { $regex: string; $options: string };
+    organizer?: { $regex: string; $options: string };
+  }>;
+  [key: string]: unknown;
+}
+
+export interface SportFilter {
+  title?: { $regex: string; $options: string };
+  type?: string;
+  division?: string;
+  headCoach?: { $regex: string; $options: string };
+  $or?: Array<{
+    title?: { $regex: string; $options: string };
+    headCoach?: { $regex: string; $options: string };
+  }>;
+  [key: string]: unknown;
+}
+
+export interface ClubFilter {
+  name?: { $regex: string; $options: string };
+  type?: { $regex: string; $options: string };
+  status?: string;
+  $or?: Array<{
+    name?: { $regex: string; $options: string };
+    type?: { $regex: string; $options: string };
+  }>;
+  [key: string]: unknown;
+}

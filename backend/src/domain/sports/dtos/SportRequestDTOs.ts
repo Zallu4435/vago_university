@@ -5,6 +5,15 @@ export type SportDataDTO = Pick<SportProps,
   'title' | 'type' | 'headCoach' | 'playerCount' | 'formedOn' | 'logo' | 'division'
 > & {
   status?: SportStatus;
+  category: string;
+  organizer: string;
+  organizerType: string;
+  icon: string;
+  color: string;
+  homeGames: number;
+  record: string;
+  upcomingGames: { date: string; description: string }[];
+  participants: number;
 };
 
 // Reusable types for SportRequest

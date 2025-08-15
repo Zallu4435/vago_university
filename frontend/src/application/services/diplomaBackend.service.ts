@@ -25,7 +25,7 @@ export const diplomaBackendService = {
     },
 
     async getVideos(category?: string, page: number = 1, limit: number = 10, status?: string, search?: string, dateRange?: string, startDate?: string, endDate?: string): Promise<{ videos: Video[]; totalPages: number }> {
-        const params: any = { page, limit };
+        const params: Record<string, string | number> = { page, limit };
         if (status && status !== 'all') params.status = status;
         if (category && category !== 'all') params.category = category;
         if (search && search.trim()) params.search = search.trim();

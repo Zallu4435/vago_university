@@ -1,0 +1,15 @@
+export enum FacultyErrorType {
+    MissingRequiredFields = "All required fields must be provided!",
+    FacultyNotFound = "Faculty not found!",
+    FacultyAlreadyProcessed = "Faculty registration already processed!",
+    InvalidStatus = "Invalid faculty status!",
+    InvalidToken = "Invalid confirmation token!",
+    TokenExpired = "Confirmation token has expired!",
+    InvalidAction = "Invalid action!",
+    InvalidFacultyId = "Invalid faculty ID!",
+    InvalidCertificateUrl = "Invalid certificate URL!",
+    CertificateNotFound = "Certificate file not found!",
+    UnauthorizedAccess = "Unauthorized access to certificate!",
+    AuthenticationRequired = "Authentication required!",
+    InvalidDocumentType = "Invalid document type. Must be 'cv' or 'certificate'!",
+  }

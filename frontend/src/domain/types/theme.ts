@@ -1,1 +1,0 @@
-export type Theme = 'light' | 'dark' | 'sepia' | 'high-contrast';

@@ -41,7 +41,7 @@ export const applicationController = {
   },
 
 
-  async submitApplication(applicationId: string, paymentId: string): Promise<{ message: string; admission }> {
+  async submitApplication(applicationId: string, paymentId: string): Promise<{ message: string; admission?: unknown }> {
     try {
       const response = await httpClient.post('/admission/finalize', { applicationId, paymentId });
       return response.data;

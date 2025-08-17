@@ -15,16 +15,19 @@ export interface Admin {
 
 export interface Message {
     id: string;
+    _id?: string;
     subject: string;
     content: string;
     sender: {
         id: string;
+        _id?: string;
         name: string;
         email: string;
         role: string;
     };
     recipients: Array<{
         id: string;
+        _id?: string;
         name: string;
         email: string;
         role: string;

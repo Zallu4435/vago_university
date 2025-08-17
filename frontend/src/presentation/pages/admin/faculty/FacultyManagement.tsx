@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useFacultyManagement } from '../../../../application/hooks/useFacultyManagement';
-import { FiFileText, FiUsers, FiClipboard, FiBarChart2, FiCalendar, FiEye, FiCheckCircle, FiXCircle, FiLock } from 'react-icons/fi';
+import { FiFileText, FiUsers, FiClipboard, FiBarChart2, FiEye, FiCheckCircle, FiXCircle, FiLock } from 'react-icons/fi';
 import { debounce } from 'lodash';
 import WarningModal from '../../../components/common/WarningModal';
 import FacultyDetailsModal from './FacultyDetailsModal';
@@ -14,39 +14,7 @@ import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import EmptyState from '../../../../shared/components/EmptyState';
 import { Faculty, FacultyFilters } from '../../../../domain/types/management/facultyManagement';
 
-const facultyColumns = [
-  ...baseFacultyColumns.slice(0, 3),
-  {
-    ...baseFacultyColumns[3],
-    render: (faculty: Faculty) => (
-      <div className="flex items-center text-gray-300">
-        <FiCalendar size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{formatDate(faculty.createdAt)}</span>
-      </div>
-    ),
-  },
-  {
-    ...baseFacultyColumns[4],
-    render: (faculty: Faculty) => (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          faculty.status.toLowerCase() === 'approved'
-            ? 'bg-green-900/30 text-green-400 border-green-500/30'
-            : faculty.status.toLowerCase() === 'rejected'
-            ? 'bg-red-900/30 text-red-400 border-red-500/30'
-            : 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
-        }`}
-        role="status"
-      >
-        <span
-          className="h-1.5 w-1.5 rounded-full mr-1.5"
-          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
-        ></span>
-        {faculty.status?.charAt(0).toUpperCase() + faculty.status?.slice(1) || 'Pending'}
-      </span>
-    ),
-  },
-];
+const facultyColumns = baseFacultyColumns;
 
 const FacultyManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -218,7 +186,7 @@ const FacultyManagement: React.FC = () => {
         setFacultyToBlock(faculty);
         setShowBlockWarning(true);
       },
-      color: 'red',
+      color: 'red' as const,
       disabled: (faculty: Faculty) => faculty.status !== 'approved',
     },
   ];
@@ -313,8 +281,8 @@ const FacultyManagement: React.FC = () => {
                 <>
                   <ApplicationsTable
                     data={faculty}
-                    columns={facultyColumns as any}
-                    actions={facultyActions as any}
+                    columns={facultyColumns}
+                    actions={facultyActions}
                     formatDate={formatDate}
                   />
                   <Pagination
@@ -403,15 +371,23 @@ const FacultyManagement: React.FC = () => {
         />
       )}
 
-      <FacultyDetailsModal
-        isOpen={isDetailsModalOpen}
-        onClose={() => {
-          setIsDetailsModalOpen(false);
-          setSelectedFaculty(null);
-        }}
-        faculty={selectedFaculty as any}
-        onBlockToggle={handleBlock as any}
-      />
+      {selectedFaculty && (
+        <FacultyDetailsModal
+          isOpen={isDetailsModalOpen}
+          onClose={() => {
+            setIsDetailsModalOpen(false);
+            setSelectedFaculty(null);
+          }}
+          faculty={selectedFaculty}
+          onBlockToggle={(facultyId: string) => {
+            // Find the faculty and call handleBlock
+            const facultyToBlock = faculty?.find((f: Faculty) => f._id === facultyId);
+            if (facultyToBlock) {
+              handleBlock(facultyToBlock);
+            }
+          }}
+        />
+      )}
 
       <style>{`
         @keyframes floatingMist {

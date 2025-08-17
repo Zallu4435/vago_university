@@ -7,6 +7,7 @@ import { SessionFilters } from './components/SessionFilters';
 import { SessionCard } from './components/SessionCard';
 import { calculateSessionStats } from './utils/sessionUtils';
 import { useUniversitySessionManagement } from '../../../../application/hooks/useUniversitySessionManagement';
+import { Session } from '../../faculty/sessions/types';
 
 const UniversitySessionsDashboard = () => {
   const { styles } = usePreferences();
@@ -55,7 +56,7 @@ const UniversitySessionsDashboard = () => {
     }));
   };
 
-  const uniqueInstructors = [...new Set((sessions as any[]).map((s: { instructor: string }) => s.instructor))];
+  const uniqueInstructors = [...new Set((sessions as Session[]).map((s: { instructor: string }) => s.instructor))];
   const sessionStats = calculateSessionStats(sessions, userAccess.watchedSessions);
 
   return (
@@ -87,10 +88,10 @@ const UniversitySessionsDashboard = () => {
               <p className={`${styles.textSecondary}`}>Try adjusting your filters to see more sessions.</p>
             </div>
           ) : (
-            sessions.map((session: any, index: number) => (
+            sessions.map((session: Session, index: number) => (
               <SessionCard
                 key={session.id}
-                session={session}
+                session={session as any}
                 index={index}
                 userAccess={userAccess}
                 styles={styles}

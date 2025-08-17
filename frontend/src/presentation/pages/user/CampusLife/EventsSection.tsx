@@ -50,10 +50,16 @@ export default function EventsSection({ events, searchTerm, statusFilter, onFilt
     };
   }, [showMobileDetails]);
 
-  const handleJoinRequest = async (request: any) => {
+  const handleJoinRequest = async (data: { reason: string; additionalInfo?: string }) => {
     if (!selectedEvent) return;
     try {
-      await requestToJoinEvent({ eventId: selectedEvent.id, request });
+      await requestToJoinEvent({
+        eventId: selectedEvent.id,
+        request: {
+          reason: data.reason,
+          additionalInfo: data.additionalInfo ?? '',
+        },
+      });
       setShowJoinForm(false);
     } catch (error) {
       console.error('Failed to submit join request:', error);

@@ -261,7 +261,7 @@ const AttendanceSummaryPage = () => {
 
         studentData.sessionDetails.push({
           sessionId,
-          sessionTitle: session.title || session.name || 'Untitled Session',
+          sessionTitle: session.title || (session as { name?: string }).name || 'Untitled Session',
           sessionDate: new Date(session.startTime).toLocaleDateString(),
           timeSpent: totalTime,
           attendancePercentage,

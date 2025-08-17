@@ -1,5 +1,5 @@
 import { FaEdit, FaEye } from 'react-icons/fa';
-import { Assignment } from '../types';
+import { Assignment } from '../types/index';
 
 interface AssignmentListProps {
   assignments: Assignment[];

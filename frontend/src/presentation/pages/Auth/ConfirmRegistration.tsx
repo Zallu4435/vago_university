@@ -23,10 +23,16 @@ const ConfirmRegistration = () => {
         const response = await authService.confirmRegistration(token);
         setStatus('success');
         setMessage(response.message || 'Email confirmed successfully. You can now log in.');
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Confirmation error:', error);
         setStatus('error');
-        setMessage(error.message || 'An error occurred while confirming your email.');
+        let errorMessage = 'An error occurred while confirming your email.';
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        }
+        setMessage(errorMessage);
       }
     };
 

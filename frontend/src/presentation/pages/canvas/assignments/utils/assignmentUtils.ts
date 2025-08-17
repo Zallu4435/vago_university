@@ -19,7 +19,7 @@ export const formatDueDate = (dueDate: string): string => {
   });
 };
 
-export const getStatusColor = (status: Assignment['status'] | 'needs_correction', styles: any) => {
+export const getStatusColor = (status: Assignment['status'] | 'needs_correction', styles: { status: { warning: string; info: string; success: string; error: string }; button: { primary: string; secondary: string } }) => {
   switch (status) {
     case 'draft': return `${styles?.status.warning} ${styles?.button.primary}`;
     case 'published': return `${styles?.status.info} ${styles?.button.primary}`;

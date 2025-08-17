@@ -5,7 +5,8 @@ import { Button } from '../../base/Button';
 import { Select } from '../../base/Select';
 import { Textarea } from '../../base/Textarea';
 import { getReferenceFields, getSelectFields } from './fields';
-import type { AchievementModalProps } from '../../../../domain/types/application';
+import { getNestedError } from '../../../../shared/utils/formErrors';
+import type { AchievementModalProps, ReferenceContact } from '../../../../domain/types/application';
 
 export const AchievementModal: React.FC<AchievementModalProps> = ({
   show,
@@ -19,8 +20,8 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
   if (!show) return null;
 
   const selectFields = getSelectFields(newAchievement, setNewAchievement);
-  const referenceFields = getReferenceFields((newAchievement as any).reference, (updatedRef) => {
-    setNewAchievement({ ...newAchievement, reference: updatedRef } as any);
+  const referenceFields = getReferenceFields(newAchievement.reference, (updatedRef: ReferenceContact) => {
+    setNewAchievement({ ...newAchievement, reference: updatedRef });
     setValue('newAchievement.reference', updatedRef, { shouldValidate: false });
   });
 
@@ -32,7 +33,7 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
     } else {
       console.log('AchievementModal: Validation errors', {
         achievementErrors: errors.newAchievement,
-        referenceErrors: (errors.newAchievement as any)?.reference,
+        referenceErrors: getNestedError(errors, 'newAchievement.reference'),
       });
     }
   };
@@ -78,22 +79,22 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
                   className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                   labelClassName="text-cyan-700"
                 />
-                {(errors.newAchievement as any)?.[field.id]?.message && (
+                {getNestedError(errors, `newAchievement.${field.id}`) && (
                   <p className="text-sm text-red-700 mt-1">
-                    {(errors.newAchievement as any)[field.id]?.message}
+                    {getNestedError(errors, `newAchievement.${field.id}`)}
                   </p>
                 )}
               </div>
             ))}
 
-            {['organizationName', 'fromDate', 'toDate'].map((fieldKey) => (
+            {(['organizationName', 'fromDate', 'toDate'] as const).map((fieldKey) => (
               <div key={fieldKey}>
                 <Input
                   id={fieldKey}
                   label={fieldKey === 'organizationName' ? 'Organization / Employer' :
                         fieldKey === 'fromDate' ? 'From (MM/YYYY)' : 'To (MM/YYYY)'}
                   {...register(`newAchievement.${fieldKey}`)}
-                  value={(newAchievement as any)[fieldKey]}
+                  value={newAchievement[fieldKey]}
                   onChange={e => {
                     setNewAchievement({ ...newAchievement, [fieldKey]: e.target.value });
                     setValue(`newAchievement.${fieldKey}`, e.target.value, { shouldValidate: false });
@@ -102,9 +103,9 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
                   className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-200 bg-white"
                   labelClassName="text-cyan-700"
                 />
-                {(errors.newAchievement as any)?.[fieldKey]?.message && (
+                {getNestedError(errors, `newAchievement.${fieldKey}`) && (
                   <p className="text-sm text-red-700 mt-1">
-                    {(errors.newAchievement as any)[fieldKey]?.message}
+                    {getNestedError(errors, `newAchievement.${fieldKey}`)}
                   </p>
                 )}
               </div>
@@ -128,29 +129,23 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
               maxLength={1000}
               rows={4}
             />
-            {(errors.newAchievement as any)?.description?.message && (
+            {getNestedError(errors, 'newAchievement.description') && (
               <p className="text-sm text-red-700 mt-1">
-                {(errors.newAchievement as any).description.message}
+                {getNestedError(errors, 'newAchievement.description')}
               </p>
             )}
           </div>
 
           <div className="border-t border-cyan-100 pt-6 mt-6">
             <h3 className="text-lg font-medium text-cyan-800 mb-4">Reference Contact</h3>
-            {(errors.newAchievement as any)?.reference && (
+            {getNestedError(errors, 'newAchievement.reference') && (
               <p className="text-sm text-red-700 mb-4">
                 Please complete all reference contact fields.
               </p>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {referenceFields.map(field => {
-                let errorMessage;
-                if (field.registerId.startsWith('phone.')) {
-                  const phoneField = field.registerId.split('.')[1];
-                  errorMessage = (errors.newAchievement as any)?.reference?.phone?.[phoneField]?.message;
-                } else {
-                  errorMessage = (errors.newAchievement as any)?.reference?.[field.registerId]?.message;
-                }
+                const errorMessage = getNestedError(errors, `newAchievement.reference.${field.registerId}`);
 
                 return (
                   <div key={field.id}>

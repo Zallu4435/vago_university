@@ -43,10 +43,10 @@ export class GetSportRequestsUseCase {
     }
     const { requests, totalItems, totalPages, currentPage } = await this.sportsRepository.getSportRequests(params.page, params.limit, params.status, params.type, params.startDate, params.endDate, params.search);
     const mappedRequests = requests.map((request) => ({
-      sportName: request.sportId?.title || "Unknown Sport",
-      requestId: request._id?.toString() || request.requestId,
-      requestedBy: request.userId?.email || "Unknown User",
-      type: request.sportId?.type || "Unknown Type",
+      sportName: typeof request.sportId === 'object' && request.sportId?.title ? request.sportId.title : "Unknown Sport",
+      requestId: request._id?.toString() || "",
+      requestedBy: typeof request.userId === 'object' && request.userId?.email ? request.userId.email : "Unknown User",
+      type: typeof request.sportId === 'object' && request.sportId?.type ? request.sportId.type : "Unknown Type",
       requestedAt: request.createdAt ? new Date(request.createdAt).toISOString() : "",
       status: request.status || "pending",
     }));
@@ -109,32 +109,33 @@ export class GetSportRequestDetailsUseCase {
     if (!sportRequest) {
       throw new Error("Sport request not found");
     }
-    if (!sportRequest.sportId) {
+    if (!sportRequest.sportId || typeof sportRequest.sportId === 'string') {
       throw new Error("Associated sport not found");
+    }
+    if (!sportRequest.userId || typeof sportRequest.userId === 'string') {
+      throw new Error("Associated user not found");
     }
     return {
       sportRequest: {
-        id: sportRequest._id?.toString() || sportRequest.id,
+        id: sportRequest._id?.toString() || "",
         status: sportRequest.status,
         createdAt: sportRequest.createdAt ? new Date(sportRequest.createdAt).toISOString() : undefined,
         updatedAt: sportRequest.updatedAt ? new Date(sportRequest.updatedAt).toISOString() : undefined,
         whyJoin: sportRequest.whyJoin,
         additionalInfo: sportRequest.additionalInfo || "",
         sport: {
-          id: sportRequest.sportId._id?.toString() || sportRequest.sportId.id,
+          id: sportRequest.sportId._id?.toString() || "",
           title: sportRequest.sportId.title,
           type: sportRequest.sportId.type,
           headCoach: sportRequest.sportId.headCoach || "Unknown",
           playerCount: sportRequest.sportId.participants || 0,
           division: sportRequest.sportId.division || "N/A",
         },
-        user: sportRequest.userId
-          ? {
-            id: sportRequest.userId._id?.toString() || sportRequest.userId.id,
-            name: `${sportRequest.userId.firstName} ${sportRequest.userId.lastName}`.trim(),
-            email: sportRequest.userId.email,
-          }
-          : undefined,
+        user: {
+          id: sportRequest.userId._id?.toString() || "",
+          name: `${sportRequest.userId.firstName} ${sportRequest.userId.lastName}`.trim(),
+          email: sportRequest.userId.email,
+        },
       },
     };
   }
@@ -149,9 +150,9 @@ export class JoinSportUseCase {
     }
     const joinResult = await this.sportsRepository.joinSport(params.sportId);
     return {
-      requestId: joinResult._id?.toString() || joinResult.requestId,
+      requestId: joinResult._id?.toString() || "",
       status: joinResult.status,
-      message: joinResult.message,
+      message: "Sport join request created successfully",
     };
   }
 } 

@@ -53,8 +53,8 @@ const campusEventSchema = new Schema<Event>(
 );
 
 const eventRequestSchema = new Schema<EventRequest>({
-  eventId: { type: Schema.Types.ObjectId, ref: "CampusEvent", required: true },
-  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  eventId: { type: String, required: true },
+  userId: { type: String, required: true },
   status: {
     type: String,
     enum: Object.values(EventRequestStatus),

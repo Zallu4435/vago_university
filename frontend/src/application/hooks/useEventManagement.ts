@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { eventService } from '../services/event.service';
-import { Event } from '../../domain/types/management/eventmanagement';
+import { Event, EventRequest } from '../../domain/types/management/eventmanagement';
 
 interface Filters {
   eventType: string;
@@ -204,10 +204,9 @@ export const useEventManagement = () => {
     }
   };
 
-  console.log(eventsData, "events from ")
   return {
-    events: eventsData?.data || [],
-    eventRequests: (eventRequestsData?.eventRequests || []).map((req) => ({ ...req, id: req.requestedId })),
+    events: eventsData?.events || [],
+    eventRequests: (eventRequestsData?.eventRequests || []).map((req: EventRequest) => ({ ...req, id: req.id })),
     totalPages: activeTab === 'events' ? eventsData?.totalPages || 0 : eventRequestsData?.totalPages || 0,
     page,
     setPage,

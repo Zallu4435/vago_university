@@ -1,6 +1,10 @@
+import { ThemeStyles } from '../../config/types';
+
 export interface Session {
-    id: string;
+    id?: string;
+    _id?: string;
     title: string;
+    name?: string;
     instructor: string;
     instructorAvatar: string;
     course: string;
@@ -17,6 +21,14 @@ export interface Session {
     isLive: boolean;
     connectionQuality: 'excellent' | 'good' | 'poor' | null;
 }
+
+export interface Faculty {
+    _id?: string;
+    id: string;
+    firstName: string;
+    lastName: string;
+
+  }
 
 export interface UserAccess {
     isEnrolled: boolean;
@@ -43,7 +55,7 @@ export interface SessionCardProps {
     session: Session;
     index: number;
     userAccess: UserAccess;
-    styles: unknown;
+    styles: ThemeStyles;
     onToggleWatched: (sessionId: string) => void;
     onToggleLike: (sessionId: string) => void;
 }
@@ -55,7 +67,7 @@ export interface SessionFiltersProps {
     uniqueInstructors: string[];
     userAccess: UserAccess;
     onToggleEnrollment: (isEnrolled: boolean) => void;
-    styles: unknown;
+    styles: ThemeStyles;
 }
 
 export interface SessionHeaderProps {
@@ -63,12 +75,12 @@ export interface SessionHeaderProps {
     currentTime: Date;
     isEnrolled: boolean;
     sessionCount: number;
-    styles: unknown;
+    styles: ThemeStyles;
 }
 
 export interface SessionStatsProps {
     stats: SessionStats;
-    styles: unknown;
+    styles: ThemeStyles;
 } 
 
 

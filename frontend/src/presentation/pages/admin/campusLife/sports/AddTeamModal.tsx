@@ -36,11 +36,13 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
     watch,
     setValue,
     reset,
-  } = useForm<TeamFormData>({
-    resolver: zodResolver(teamSchema) as any,
+  } = useForm({
+    resolver: zodResolver(teamSchema),
     defaultValues: {
-      ...DEFAULT_TEAM_FORM_VALUES as any,
+      ...DEFAULT_TEAM_FORM_VALUES,
       ...initialData,
+      organizerType: (initialData?.organizerType ?? DEFAULT_TEAM_FORM_VALUES.organizerType) as "department" | "club" | "student" | "administration" | "external",
+      status: (initialData?.status ?? DEFAULT_TEAM_FORM_VALUES.status) as "Active" | "Inactive",
     },
     mode: 'onChange',
   });
@@ -55,20 +57,9 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
 
   const handleFormSubmit = (data: TeamFormData) => {
     const teamData = {
-      title: data.title,
-      type: data.type,
-      category: data.category,
-      organizer: data.organizer,
-      organizerType: data.organizerType,
-      icon: data.icon,
-      color: data.color,
-      division: data.division,
-      headCoach: data.headCoach,
-      homeGames: data.homeGames,
-      record: data.record,
-      upcomingGames: data.upcomingGames,
-      participants: data.participants || 0,
-      status: data.status || 'Active',
+      ...data,
+      organizerType: data.organizerType as "department" | "club" | "student" | "administration" | "external",
+      status: data.status as "Active" | "Inactive",
     };
     onSubmit(teamData);
     reset();

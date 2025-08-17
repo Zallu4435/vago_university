@@ -79,7 +79,7 @@ export class GetDashboardDataUseCase implements IGetDashboardDataUseCase {
   constructor(private dashboardRepository: IDashboardRepository) {}
 
   async execute(): Promise<ResponseDTO<GetDashboardDataResponseDTO>> {
-    const raw: DashboardDataRaw = await this.dashboardRepository.getDashboardData();
+    const raw: any = await this.dashboardRepository.getDashboardData();
     if (!raw || !raw.metricsRaw || !raw.userGrowthRaw || !raw.revenueRaw || !raw.performanceRaw || !raw.activitiesRaw || !raw.alertsRaw) {
       throw new DashboardDataNotFoundError();
     } 

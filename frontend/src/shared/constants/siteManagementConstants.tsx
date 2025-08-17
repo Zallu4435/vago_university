@@ -90,7 +90,7 @@ export const createColumns = (sectionKey: SiteSectionKey) => [
   },
 ];
 
-export const columnsMap: Record<SiteSectionKey, any[]> = {
+export const columnsMap: Record<SiteSectionKey, unknown[]> = {
   highlights: createColumns('highlights'),
   vagoNow: createColumns('vagoNow'),
   leadership: createColumns('leadership'),

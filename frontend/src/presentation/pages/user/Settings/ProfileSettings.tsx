@@ -94,7 +94,11 @@ export default function ProfileSettings() {
     setShowPasswordModal(false);
   };
 
-  const handleProfilePictureUpdate = async (file: File) => {
+  const handleProfilePictureUpdate = async (imageData: string) => {
+    const response = await fetch(imageData);
+    const blob = await response.blob();
+    const file = new File([blob], 'profile-picture.jpg', { type: 'image/jpeg' });
+    
     await updateProfilePicture(file);
     setShowProfileModal(false);
   };
@@ -229,7 +233,7 @@ export default function ProfileSettings() {
             isOpen={showProfileModal}
             onClose={() => setShowProfileModal(false)}
             currentImage={formData.profilePicture || null}
-            onImageUpdate={handleProfilePictureUpdate as any}
+            onImageUpdate={handleProfilePictureUpdate}
           />
         </div>
       </div>
@@ -425,7 +429,7 @@ export default function ProfileSettings() {
         isOpen={showProfileModal}
         onClose={() => setShowProfileModal(false)}
         currentImage={profile?.profilePicture || null}
-        onImageUpdate={handleProfilePictureUpdate as any}
+        onImageUpdate={handleProfilePictureUpdate}
       />
 
       <PasswordChangeModal

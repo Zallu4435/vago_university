@@ -9,7 +9,7 @@ export interface Assignment {
     fileName: string;
     fileUrl: string;
     fileSize: number;
-  }>;
+  }> | string[];
   createdAt: string;
   updatedAt: string;
   status: 'active' | 'draft' | 'archived';
@@ -21,6 +21,7 @@ export interface Assignment {
 
 export interface Submission {
   _id: string;
+  id: string;
   assignmentId: string;
   studentId: string;
   studentName: string;
@@ -29,7 +30,7 @@ export interface Submission {
   marks: number;
   feedback: string;
   isLate: boolean;
-  files: string[];
+  files: string[] | Array<{ fileName: string; fileUrl: string; fileSize: number }>;
   fileName: string;
   fileSize: number;
 }

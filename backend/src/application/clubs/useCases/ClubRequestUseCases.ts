@@ -11,36 +11,32 @@ import {
 } from "../../../domain/clubs/dtos/ClubRequestResponseDTOs";
 import { IClubsRepository } from "../repositories/IClubsRepository";
 import { GetClubRequestsRequest } from "../../../domain/clubs/entities/Club";
-import mongoose from "mongoose";
 
-// Define proper types for the repository responses
-interface ClubRequestDetailsResponse {
-  clubRequest: {
-    _id: mongoose.Types.ObjectId;
-    status: string;
-    createdAt: Date;
-    updatedAt: Date;
-    whyJoin: string;
-    additionalInfo?: string;
-    clubId: {
-      _id: mongoose.Types.ObjectId;
-      name: string;
-      type: string;
-      about?: string;
-      nextMeeting?: string;
-      enteredMembers?: number;
-    };
-    userId?: {
-      _id: mongoose.Types.ObjectId;
-      firstName: string;
-      lastName: string;
-      email: string;
-    };
+interface PopulatedClubRequest {
+  _id: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  whyJoin: string;
+  additionalInfo?: string;
+  clubId: {
+    _id: string;
+    name: string;
+    type: string;
+    about?: string;
+    nextMeeting?: string;
+    enteredMembers?: number;
+  };
+  userId?: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
   };
 }
 
-interface RawClubRequest {
-  _id: mongoose.Types.ObjectId;
+interface PopulatedClubRequestSummary {
+  _id: string;
   clubId?: {
     name: string;
     type: string;
@@ -52,7 +48,6 @@ interface RawClubRequest {
   status?: string;
 }
 
-// Use Case Interfaces
 export interface IGetClubRequestsUseCase {
   execute(params: GetClubRequestsRequestDTO): Promise<GetClubRequestsResponseDTO>;
 }
@@ -77,7 +72,7 @@ export class GetClubRequestsUseCase implements IGetClubRequestsUseCase {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
       throw new Error("Invalid page or limit parameters");
     }
-    
+
     const repositoryRequest = new GetClubRequestsRequest(
       params.page,
       params.limit,
@@ -87,9 +82,9 @@ export class GetClubRequestsUseCase implements IGetClubRequestsUseCase {
       params.endDate?.toISOString(),
       params.search
     );
-    
+
     const { rawRequests, totalItems, totalPages, currentPage } = await this.clubsRepository.getClubRequests(repositoryRequest);
-    const mappedRequests: SimplifiedClubRequestDTO[] = rawRequests.map((req: RawClubRequest) => ({
+    const mappedRequests: SimplifiedClubRequestDTO[] = (rawRequests as unknown as PopulatedClubRequestSummary[]).map((req: PopulatedClubRequestSummary) => ({
       clubName: req.clubId?.name || "Unknown Club",
       requestedId: req._id.toString(),
       requestedBy: req.userId?.email || "Unknown User",
@@ -110,10 +105,10 @@ export class ApproveClubRequestUseCase implements IApproveClubRequestUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(params: ApproveClubRequestRequestDTO): Promise<{ message: string }> {
-    if (!mongoose.isValidObjectId(params.id)) {
+    if (!params.id || params.id.trim() === "") {
       throw new Error("Invalid club request ID");
     }
-    const response: ClubRequestDetailsResponse = await this.clubsRepository.getClubRequestDetails({ id: params.id });
+    const response: { clubRequest: PopulatedClubRequest } | null = await this.clubsRepository.getClubRequestDetails({ id: params.id }) as unknown as { clubRequest: PopulatedClubRequest } | null;
     if (!response || !response.clubRequest) {
       throw new Error("Club request not found");
     }
@@ -124,16 +119,16 @@ export class ApproveClubRequestUseCase implements IApproveClubRequestUseCase {
     await this.clubsRepository.approveClubRequest(params);
     return { message: "Club request approved successfully" };
   }
-} 
+}
 
 export class RejectClubRequestUseCase implements IRejectClubRequestUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(params: RejectClubRequestRequestDTO): Promise<{ message: string }> {
-    if (!mongoose.isValidObjectId(params.id)) {
+    if (!params.id || params.id.trim() === "") {
       throw new Error("Invalid club request ID");
     }
-    const response: ClubRequestDetailsResponse = await this.clubsRepository.getClubRequestDetails({ id: params.id });
+    const response: { clubRequest: PopulatedClubRequest } | null = await this.clubsRepository.getClubRequestDetails({ id: params.id }) as unknown as { clubRequest: PopulatedClubRequest } | null;
     if (!response || !response.clubRequest) {
       throw new Error("Club request not found");
     }
@@ -150,10 +145,10 @@ export class GetClubRequestDetailsUseCase implements IGetClubRequestDetailsUseCa
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(params: GetClubRequestDetailsRequestDTO): Promise<GetClubRequestDetailsResponseDTO> {
-    if (!mongoose.isValidObjectId(params.id)) {
+    if (!params.id || params.id.trim() === "") {
       throw new Error("Invalid club request ID");
     }
-    const response: ClubRequestDetailsResponse = await this.clubsRepository.getClubRequestDetails(params);
+    const response: { clubRequest: PopulatedClubRequest } | null = await this.clubsRepository.getClubRequestDetails(params) as unknown as { clubRequest: PopulatedClubRequest } | null;
     if (!response || !response.clubRequest) {
       throw new Error("Club request not found");
     }
@@ -179,10 +174,10 @@ export class GetClubRequestDetailsUseCase implements IGetClubRequestDetailsUseCa
         },
         user: clubRequest.userId
           ? {
-              id: clubRequest.userId._id.toString(),
-              name: `${clubRequest.userId.firstName} ${clubRequest.userId.lastName}`.trim(),
-              email: clubRequest.userId.email,
-            }
+            id: clubRequest.userId._id.toString(),
+            name: `${clubRequest.userId.firstName} ${clubRequest.userId.lastName}`.trim(),
+            email: clubRequest.userId.email,
+          }
           : undefined,
       },
     };

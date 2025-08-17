@@ -58,9 +58,11 @@ const ContactUs = () => {
       reset();
 
       setTimeout(() => setSubmitSuccess(false), 5000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error submitting enquiry:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to send message. Please try again.';
+      const errorMessage = axios.isAxiosError(error) 
+        ? error.response?.data?.message || 'Failed to send message. Please try again.'
+        : 'Failed to send message. Please try again.';
       toast.error(errorMessage);
       setSubmitError(errorMessage);
     } finally {

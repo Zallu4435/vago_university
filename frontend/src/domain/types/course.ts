@@ -1,6 +1,7 @@
 // src/domain/types/course.ts
 export interface Course {
-    _id: string;
+    _id?: string;
+    id?: string;
     title: string;
     specialization: string;
     faculty: string;
@@ -42,7 +43,8 @@ export interface Course {
   }
   
   export interface EnrollmentRequest {
-    _id: string;
+    _id?: string;
+    id?: string;
     studentName: string;
     courseTitle: string;
     requestedAt: string;

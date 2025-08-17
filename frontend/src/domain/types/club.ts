@@ -46,7 +46,6 @@ export interface ClubApiResponse {
 }
 
 export interface ClubRequestsResponse {
-    data: ClubRequest[];
     clubs: Club[];
     clubRequests: ClubRequest[];
     totalPages: number;
@@ -70,4 +69,18 @@ export interface ClubRequestResponse {
     data: {
         clubRequest: ClubRequest;
     };
+}
+
+export interface ClubRequestsApiResponse {
+    data: {
+        clubRequests: ClubRequest[];
+        clubs: Club[];
+        totalPages: number;
+        currentPage: number;
+        totalItems: number;
+    };
+}
+
+export interface ClubRequestsDataArray {
+    data: ClubRequest[];
 }

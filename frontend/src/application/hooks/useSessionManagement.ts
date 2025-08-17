@@ -5,10 +5,11 @@ import { sessionService, CreateVideoSessionPayload, UpdateVideoSessionPayload, A
 export interface Session {
   _id: string;
   title: string;
-  hostId: string;
+  name?: string;
+  hostId?: string;
+  status?: string;
   startTime: string;
   endTime?: string;
-  status: string;
   description?: string;
   instructor?: string;
   course?: string;

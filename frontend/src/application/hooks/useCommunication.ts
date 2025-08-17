@@ -125,7 +125,7 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
     []
   );
 
-  const mapMessage = (msg): Message => {
+  const mapMessage = (msg: Message) => {
     const mappedMessage = {
       id: msg._id,
       subject: msg.subject,

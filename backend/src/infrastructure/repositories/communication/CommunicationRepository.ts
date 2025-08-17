@@ -1,32 +1,74 @@
 import { ICommunicationRepository } from '../../../application/communication/repositories/ICommunicationRepository';
 import { Message, UserInfo, MessageStatus, UserRole } from "../../../domain/communication/entities/Communication";
-import { MessageModel } from '../../../infrastructure/database/mongoose/models/communication.model';
+import { MessageModel, IMessage } from '../../../infrastructure/database/mongoose/models/communication.model';
 import { User as UserModel } from '../../database/mongoose/auth/user.model';
 import { Admin as AdminModel } from '../../database/mongoose/auth/admin.model';
 import { Faculty as FacultyModel } from '../../database/mongoose/auth/faculty.model';
-import {
-  GetInboxMessagesRequestDTO,
-  GetSentMessagesRequestDTO,
-  SendMessageRequestDTO,
-  MarkMessageAsReadRequestDTO,
-  DeleteMessageRequestDTO,
-  GetMessageDetailsRequestDTO,
-  GetAllAdminsRequestDTO,
-  GetUserGroupsRequestDTO,
-  FetchUsersRequestDTO,
-} from "../../../domain/communication/dtos/CommunicationRequestDTOs";
+import mongoose from 'mongoose';
 
+interface CommunicationFilter {
+  "recipients._id"?: string;
+  "recipients.status"?: MessageStatus;
+  "sender._id"?: string;
+  $and?: Array<{
+    "recipients._id"?: string;
+    "recipients.status"?: MessageStatus;
+    $or?: Array<{
+      subject?: { $regex: string; $options: string };
+      content?: { $regex: string; $options: string };
+    }>;
+  }>;
+  $or?: Array<{
+    subject?: { $regex: string; $options: string };
+    content?: { $regex: string; $options: string };
+    firstName?: { $regex: string; $options: string };
+    lastName?: { $regex: string; $options: string };
+    email?: { $regex: string; $options: string };
+  }>;
+  role?: UserRole;
+  year?: string;
+  [key: string]: unknown;
+}
+
+interface GetAdminQuery {
+  firstName?: { $regex: string; $options: string };
+  lastName?: { $regex: string; $options: string };
+  email?: { $regex: string; $options: string };
+  $or?: Array<{
+    firstName?: { $regex: string; $options: string };
+    lastName?: { $regex: string; $options: string };
+    email?: { $regex: string; $options: string };
+  }>;
+}
+
+interface GetUserQuery {
+  firstName?: { $regex: string; $options: string };
+  lastName?: { $regex: string; $options: string };
+  email?: { $regex: string; $options: string };
+  $or?: Array<{
+    firstName?: { $regex: string; $options: string };
+    lastName?: { $regex: string; $options: string };
+    email?: { $regex: string; $options: string };
+  }>;
+  role?: UserRole;
+  [key: string]: unknown;
+}
 
 export class CommunicationRepository implements ICommunicationRepository {
-  async getInboxMessages(params: GetInboxMessagesRequestDTO) {
-    const { userId, page, limit, search, status } = params;
-    const query: any = {
+  private messageModel: mongoose.Model<IMessage>;
+
+  constructor() {
+    this.messageModel = MessageModel as mongoose.Model<IMessage>;
+  }
+
+  async getInboxMessages(userId: string, page: number, limit: number, search?: string, status?: string) {
+    const query: CommunicationFilter = {
       "recipients._id": userId
     };
-    if (status && (status as any) !== "all") {
+    if (status && (status as string) !== "all") {
       query.$and = [
         { "recipients._id": userId },
-        { "recipients.status": status }
+        { "recipients.status": status as MessageStatus }
       ];
     }
     if (search) {
@@ -43,19 +85,18 @@ export class CommunicationRepository implements ICommunicationRepository {
       }
     }
     const skip = (page - 1) * limit;
-    const messages = await (MessageModel as any).find(query)
+    const messages = await this.messageModel.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
-    const totalItems = await MessageModel.countDocuments(query);
+    const totalItems = await this.messageModel.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
     return { messages, totalItems, totalPages, page, limit, userId, status, search };
   }
 
-  async getSentMessages(params: GetSentMessagesRequestDTO) {
-    const { userId, page, limit, search } = params;
-    const query: any = {
+  async getSentMessages(userId: string, page: number, limit: number, search?: string, status?: string) {
+    const query: CommunicationFilter = {
       "sender._id": userId
     };
     if (search) {
@@ -65,24 +106,29 @@ export class CommunicationRepository implements ICommunicationRepository {
       ];
     }
     const skip = (page - 1) * limit;
-    const messages = await (MessageModel as any).find(query)
+    const messages = await this.messageModel.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
-    const totalItems = await (MessageModel as any).countDocuments(query);
+    const totalItems = await this.messageModel.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
     return { messages, totalItems, totalPages, page, limit, userId, search };
   }
 
-  async sendMessage(params: SendMessageRequestDTO) {
-    const sender = await this.findUserById(params.senderId, params.senderRole);
+  async sendMessage(senderId: string, senderRole: string, to: Array<{ value: string; label: string }>, subject: string, content: string, attachments?: Array<{
+    filename: string;
+    path: string;
+    contentType: string;
+    size: number;
+  }>) {
+    const sender = await this.findUserById(senderId, senderRole);
     if (!sender) {
       throw new Error('Sender not found');
     }
 
     let recipients: UserInfo[] = [];
-    for (const recipient of params.to) {
+    for (const recipient of to) {
       if (recipient.value.startsWith('all_') || recipient.value.startsWith('all-')) {
         // Group recipient
         const groupUsers = await this.findUsersByGroup(recipient.value.replace('_', '-'));
@@ -95,37 +141,31 @@ export class CommunicationRepository implements ICommunicationRepository {
     recipients = recipients.filter((v, i, a) => a.findIndex(t => (t._id === v._id)) === i);
 
     const messageData = {
-      subject: params.subject,
-      content: params.content,
+      subject,
+      content,
       sender,
       recipients,
-      isBroadcast: params.to.some(r => r.value.startsWith('all_') || r.value.startsWith('all-')),
-      attachments: params.attachments || []
+      isBroadcast: to.some(r => r.value.startsWith('all_') || r.value.startsWith('all-')),
+      attachments: attachments || []
     };
-    const message = await (MessageModel as any).create(messageData);
+    const message = await this.messageModel.create(messageData);
     return message.toObject ? message.toObject() : message;
   }
 
-  async markMessageAsRead(params: MarkMessageAsReadRequestDTO) {
-    const { messageId, userId } = params;
+  async markMessageAsRead(messageId: string, userId: string): Promise<void> {
     await this.updateMessageRecipientStatus(messageId, userId, MessageStatus.Read);
-    return { success: true, message: "Message marked as read" };
   }
 
-  async deleteMessage(params: DeleteMessageRequestDTO) {
-    const { messageId, userId } = params;
-    await (MessageModel as any).findByIdAndDelete(messageId);
-    return { success: true, message: "Message deleted successfully" };
+  async deleteMessage(messageId: string, userId: string): Promise<void> {
+    await this.messageModel.findByIdAndDelete(messageId);
   }
 
-  async getMessageDetails(params: GetMessageDetailsRequestDTO) {
-    const { messageId } = params;
-    return await (MessageModel as any).findById(messageId).lean();
+  async getMessageDetails(messageId: string) {
+    return await this.messageModel.findById(messageId).lean();
   }
 
-  async getAllAdmins(params: GetAllAdminsRequestDTO) {
-    const { search } = params;
-    const query: any = {};
+  async getAllAdmins(search?: string): Promise<UserInfo[]> {
+    const query: GetAdminQuery = {};
     if (search) {
       query.$or = [
         { firstName: { $regex: search, $options: "i" } },
@@ -136,11 +176,15 @@ export class CommunicationRepository implements ICommunicationRepository {
     const admins = await AdminModel.find(query)
       .select("_id firstName lastName email")
       .lean();
-    return admins;
+    return admins.map((admin) => ({
+      _id: admin._id.toString(),
+      name: `${admin.firstName} ${admin.lastName}`,
+      email: admin.email,
+      role: 'admin' as UserRole
+    }));
   }
 
-  async getUserGroups(params: GetUserGroupsRequestDTO) {
-    const { search } = params;
+  async getUserGroups(search?: string) {
     const groups = [
       { value: 'all-students', label: 'All Students' },
       { value: 'all-faculty', label: 'All Faculty' },
@@ -160,9 +204,8 @@ export class CommunicationRepository implements ICommunicationRepository {
     return filteredGroups;
   }
 
-  async fetchUsers(params: FetchUsersRequestDTO) {
-    const { type, search } = params;
-    const query: any = {};
+  async fetchUsers(type: string, search?: string): Promise<UserInfo[]> {
+    const query: GetUserQuery = {};
     if (type === "students") {
       query.role = UserRole.Student;
     } else if (type === "faculty") {
@@ -180,7 +223,12 @@ export class CommunicationRepository implements ICommunicationRepository {
     const users = await UserModel.find(query)
       .select("_id firstName lastName email role")
       .lean();
-    return users;
+    return users.map((user) => ({
+      _id: user._id.toString(),
+      name: `${user.firstName} ${user.lastName}`,
+      email: user.email,
+      role: type === "students" ? UserRole.Student : type === "faculty" ? UserRole.Staff : UserRole.Staff,
+    }));
   }
 
   async findUserById(userId: string, role: string): Promise<UserInfo | null> {
@@ -198,7 +246,7 @@ export class CommunicationRepository implements ICommunicationRepository {
   }
 
   async findUsersByGroup(group: string): Promise<UserInfo[]> {
-    let query: any = {};
+    let query: GetUserQuery = {};
     if (group === "all-students") {
       query.role = UserRole.Student;
     } else if (group === "all-faculty") {
@@ -206,7 +254,7 @@ export class CommunicationRepository implements ICommunicationRepository {
     } else if (group === "all-staff") {
       query.role = UserRole.Staff;
     } else if (group.startsWith("all-")) {
-      query.role = group.replace("all-", "");
+      query.role = group.replace("all-", "") as UserRole;
     } else if (["freshman", "sophomore", "junior", "senior"].includes(group)) {
       query.role = UserRole.Student;
       query.year = group;
@@ -216,27 +264,42 @@ export class CommunicationRepository implements ICommunicationRepository {
       .select("_id firstName lastName email role")
       .lean();
 
-    return users.map((user: any) => ({
+    return users.map((user) => ({
       _id: user._id.toString(),
       name: `${user.firstName} ${user.lastName}`,
       email: user.email,
-      role: user.role
+      role: query.role || UserRole.Student,
     }));
   }
 
   async findMessageById(messageId: string): Promise<Message | null> {
-    const message = await (MessageModel as any).findById(messageId).lean();
+    const message = await this.messageModel.findById(messageId).lean();
 
     if (!message) {
       return null;
     }
 
+    const sender: UserInfo = {
+      _id: message.sender._id.toString(),
+      name: message.sender.name,
+      email: message.sender.email,
+      role: message.sender.role as UserRole
+    };
+
+    const recipients: UserInfo[] = message.recipients.map(recipient => ({
+      _id: recipient._id.toString(),
+      name: recipient.name,
+      email: recipient.email,
+      role: recipient.role as UserRole,
+      status: recipient.status as MessageStatus
+    }));
+
     const messageEntity = new Message(
       message._id.toString(),
       message.subject,
       message.content,
-      message.sender,
-      message.recipients,
+      sender,
+      recipients,
       message.isBroadcast,
       message.attachments || [],
       message.createdAt.toISOString(),
@@ -246,18 +309,18 @@ export class CommunicationRepository implements ICommunicationRepository {
   }
 
   async createMessage(message: Message): Promise<void> {
-    await (MessageModel as any).create(message);
+    await this.messageModel.create(message);
   }
 
   async updateMessageRecipientStatus(messageId: string, userId: string, status: string): Promise<void> {
-    await (MessageModel as any).updateOne(
+    await this.messageModel.updateOne(
       { _id: messageId, "recipients._id": userId },
       { $set: { "recipients.$.status": status } }
     );
   }
 
   async findAdmins(search?: string): Promise<UserInfo[]> {
-    const query: any = { role: 'admin' };
+    const query: GetAdminQuery = {};
     if (search) {
       query.$or = [
         { firstName: { $regex: search, $options: "i" } },
@@ -280,7 +343,7 @@ export class CommunicationRepository implements ICommunicationRepository {
 
   async findUsersByType(type: string, search?: string, requesterId?: string): Promise<UserInfo[]> {
     if (type === 'students' || type === 'all_students') {
-      const query: any = {};
+      const query: GetUserQuery = {};
       if (search) {
         query.$or = [
           { firstName: { $regex: search, $options: "i" } },
@@ -304,7 +367,7 @@ export class CommunicationRepository implements ICommunicationRepository {
     }
 
     if (type === 'faculty' || type === 'all_faculty') {
-      const query: any = {};
+      const query: GetUserQuery = {};
       if (search) {
         query.$or = [
           { firstName: { $regex: search, $options: "i" } },

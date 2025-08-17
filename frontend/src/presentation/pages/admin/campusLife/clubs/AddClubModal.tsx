@@ -25,7 +25,7 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
     setValue,
     reset,
   } = useForm<ClubFormData>({
-    resolver: zodResolver(clubSchema) as any,
+    resolver: zodResolver(clubSchema),
     defaultValues: {
       name: '',
       type: '',
@@ -56,8 +56,8 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
       name: data.name,
       type: data.type,
       members: data.members || '',
-      icon: data.icon,
-      color: data.color,
+      icon: data.icon || '🎓',
+      color: data.color || '#8B5CF6',
       status: data.status || 'active',
       role: data.role,
       nextMeeting: data.nextMeeting || '',
@@ -65,7 +65,7 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
       createdBy: data.createdBy,
       upcomingEvents: data.upcomingEvents || [],
     };
-    onSubmit(clubData as any);
+    onSubmit(clubData);
     reset();
     onClose();
   };

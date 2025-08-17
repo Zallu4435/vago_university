@@ -1,3 +1,5 @@
+import { ThemeStyles } from '../../config/types';
+
 export interface Submission {
     id: string;
     studentId: string;
@@ -47,7 +49,7 @@ export type FilterStatus = 'all' | 'draft' | 'published' | 'submitted' | 'graded
 
 export interface AssignmentCardProps {
     assignment: Assignment;
-    styles: unknown;
+    styles: ThemeStyles;
     onUpload: (assignment: Assignment) => void;
     onViewGrade: (assignment: Assignment) => void;
 }
@@ -59,7 +61,7 @@ export interface GradeModalProps {
 
 export interface UploadModalProps {
     assignment: Assignment;
-    styles: unknown;
+    styles: ThemeStyles;
     selectedFile: File | null;
     onClose: () => void;
     onFileSelect: (file: File) => void;

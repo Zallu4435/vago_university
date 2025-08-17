@@ -14,7 +14,13 @@ interface CalendarProps {
 interface LegendProps {
   color: string;
   label: string;
-  styles: any;
+  styles: {
+    card: {
+      background: string;
+      border: string;
+    };
+    textSecondary: string;
+  };
 }
 
 export default function Calendar({ calendarDays }: CalendarProps) {

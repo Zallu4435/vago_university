@@ -22,7 +22,6 @@ import { useNavigate } from 'react-router-dom';
 import type { RootState } from '../../../../../appStore/store';
 import { BackendSession, SessionCardProps } from '../../../../../domain/types/canvas/session';
 
-
 export const SessionCard: React.FC<SessionCardProps> = ({
   session,
   index,
@@ -39,19 +38,37 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   const start = backendSession.startTime ? new Date(backendSession.startTime) : null;
   const dateStr = start ? start.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '';
   const timeStr = start ? start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '';
-  const avatar = backendSession.instructorAvatar || '👤';
-  const tags = backendSession.tags || [];
+  const avatar = (backendSession.instructorAvatar as string) || '👤';
+  const tags = (backendSession.tags as string[]) || [];
   const attendees = typeof backendSession.attendees === 'number' ? backendSession.attendees : 0;
   const maxAttendees = typeof backendSession.maxAttendees === 'number' ? backendSession.maxAttendees : 0;
 
+  // Create a compatible styles object for sessionUtils
+  const sessionStyles = {
+    status: styles.status,
+    badgeBackground: styles.badgeBackground || styles.backgroundSecondary,
+    button: styles.button,
+    textSecondary: styles.textSecondary,
+    success: styles.success || styles.status.success,
+    error: styles.error || styles.status.error,
+    info: styles.info || styles.status.info,
+    border: styles.border,
+    cardHover: styles.cardHover || styles.card.hover,
+    cardShadow: styles.cardShadow || '',
+    card: styles.card,
+    icon: styles.icon,
+    backgroundSecondary: styles.backgroundSecondary,
+    accent: styles.accent
+  };
+
   return (
-    <div className={`${styles.card.background} rounded-xl sm:rounded-2xl ${styles.cardShadow} ${styles.cardBorder} ${styles.cardHover} overflow-hidden ${session.status === 'live' ? `${styles.status.error} bg-gradient-to-r ${styles.backgroundSecondary}` : ''}`}>
+    <div className={`${styles.card.background} rounded-xl sm:rounded-2xl ${styles.cardShadow || ''} ${styles.cardBorder || ''} ${styles.cardHover || styles.card.hover} overflow-hidden ${session.status === 'live' ? `${styles.status.error} bg-gradient-to-r ${styles.backgroundSecondary}` : ''}`}>
       <div className="p-3 sm:p-8">
         <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-6">
           <div className="flex-1">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-3 sm:mb-4">
               <div className="flex items-center gap-2 sm:gap-4">
-                <div className="text-2xl sm:text-4xl">{avatar}</div>
+                <div className="text-2xl sm:text-4xl">{avatar || '👤'}</div>
                 <div>
                   <h3 className={`text-base sm:text-2xl font-bold ${styles.textPrimary} mb-1 sm:mb-2`}>
                     Session {index + 1}: {session.title}
@@ -67,7 +84,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
                 </div>
               </div>
               <div className="flex items-center gap-2 sm:gap-3 mt-2 sm:mt-0">
-                {getStatusBadge(status, styles)}
+                {getStatusBadge(status, sessionStyles) as React.ReactElement}
               </div>
             </div>
             <p className={`${styles.textSecondary} mb-3 sm:mb-4 text-sm sm:text-lg`}>{session.description}</p>
@@ -86,8 +103,8 @@ export const SessionCard: React.FC<SessionCardProps> = ({
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-              {getDifficultyBadge(session.difficulty, styles)}
-              {tags.map((tag: string) => (
+              {getDifficultyBadge(session.difficulty, sessionStyles) as React.ReactElement}
+              {(tags || []).map((tag: string) => (
                 <span key={tag} className={`px-2 sm:px-3 py-0.5 sm:py-1 ${styles.backgroundSecondary} ${styles.textSecondary} rounded-full text-xs font-medium`}>
                   {tag}
                 </span>
@@ -96,11 +113,11 @@ export const SessionCard: React.FC<SessionCardProps> = ({
             <div className="flex flex-wrap items-center gap-2 sm:gap-4">
               {session.status === 'completed' && session.hasRecording && userAccess.isEnrolled && (
                 <button
-                  onClick={() => onToggleWatched(session.id)}
+                  onClick={() => onToggleWatched(session.id || '')}
                   className={`flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium ${styles.textSecondary} hover:${styles.status.success} transition-colors`}
-                  aria-label={userAccess.watchedSessions.includes(session.id) ? 'Mark as unwatched' : 'Mark as watched'}
+                  aria-label={userAccess.watchedSessions.includes(session.id || '') ? 'Mark as unwatched' : 'Mark as watched'}
                 >
-                  {userAccess.watchedSessions.includes(session.id) ? (
+                  {userAccess.watchedSessions.includes(session.id || '') ? (
                     <>
                       <FaCheckCircle className={`w-4 h-4 ${styles.status.success}`} />
                       <span className={`${styles.status.success}`}>Watched</span>
@@ -114,12 +131,12 @@ export const SessionCard: React.FC<SessionCardProps> = ({
                 </button>
               )}
               <button
-                onClick={() => onToggleLike(session.id)}
-                className={`flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium transition-colors ${userAccess.likedSessions.includes(session.id) ? `${styles.status.error} hover:${styles.status.error}` : `${styles.textSecondary} hover:${styles.status.error}`}`}
-                aria-label={userAccess.likedSessions.includes(session.id) ? 'Unlike session' : 'Like session'}
+                onClick={() => onToggleLike(session.id || '')}
+                className={`flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium transition-colors ${userAccess.likedSessions.includes(session.id || '') ? `${styles.status.error} hover:${styles.status.error}` : `${styles.textSecondary} hover:${styles.status.error}`}`}
+                aria-label={userAccess.likedSessions.includes(session.id || '') ? 'Unlike session' : 'Like session'}
               >
-                <FaHeart className={`w-4 h-4 ${userAccess.likedSessions.includes(session.id) ? 'fill-current' : ''}`} />
-                <span>{userAccess.likedSessions.includes(session.id) ? 'Liked' : 'Like'}</span>
+                <FaHeart className={`w-4 h-4 ${userAccess.likedSessions.includes(session.id || '') ? 'fill-current' : ''}`} />
+                <span>{userAccess.likedSessions.includes(session.id || '') ? 'Liked' : 'Like'}</span>
               </button>
             </div>
           </div>
@@ -138,7 +155,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
                 ></div>
               </div>
             )}
-            {getActionButton(session, userAccess, styles)}
+            {getActionButton(session, userAccess, sessionStyles) as React.ReactElement}
           </div>
         </div>
         {session.status === 'live' && (

@@ -37,10 +37,11 @@ export const ChoiceOfStudy = forwardRef<ChoiceOfStudyRef, ChoiceOfStudyProps>(
       getValues: () => currentChoices,
     }));
 
-    const handleAddProgramme = (data: ProgrammeChoiceFormData) => {
+    const handleAddProgramme = (data: unknown) => {
+      const formData = data as ProgrammeChoiceFormData;
       const newChoice: ProgrammeChoice = { 
-        programme: data.programme, 
-        preferredMajor: data.preferredMajor ?? ''
+        programme: formData.programme, 
+        preferredMajor: formData.preferredMajor ?? ''
       };
       const updatedChoices = [...currentChoices, newChoice].map(choice => ({
         programme: choice.programme,
@@ -111,7 +112,7 @@ export const ChoiceOfStudy = forwardRef<ChoiceOfStudyRef, ChoiceOfStudyProps>(
                       </tr>
                     ) : (
                       currentChoices?.map((choice, idx: number) => (
-                        ((choice: any) => ({
+                        ((choice: ProgrammeChoice) => ({
                           ...choice,
                           preferredMajor: choice.preferredMajor ?? ''
                         }))(choice),

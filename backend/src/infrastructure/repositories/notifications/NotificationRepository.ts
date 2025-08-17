@@ -2,7 +2,7 @@ import { NotificationModel } from "../../database/mongoose/models/notification.m
 import { User as UserModel } from "../../database/mongoose/auth/user.model";
 import { Faculty as FacultyModel } from "../../database/mongoose/auth/faculty.model";
 import { INotificationRepository } from "../../../application/notifications/repositories/INotificationRepository";
-import { NotificationFilter, NotificationProps } from "../../../domain/notifications/entities/NotificationTypes";
+import { NotificationFilter, NotificationProps, NotificationRecipientType } from "../../../domain/notifications/entities/NotificationTypes";
 import {
     CreateNotificationRequestDTO,
     GetAllNotificationsRequestDTO,
@@ -42,12 +42,19 @@ export class NotificationRepository implements INotificationRepository {
         // Add search support
         if (filter.search) {
             const searchRegex = new RegExp(filter.search, 'i');
-            filter.$or = [
-                ...(filter.$or || []),
-                { title: { $regex: searchRegex } },
-                { message: { $regex: searchRegex } }
-            ];
+            const searchFilter = {
+                $or: [
+                    { title: { $regex: searchRegex.source, $options: "i" } },
+                    { message: { $regex: searchRegex.source, $options: "i" } }
+                ]
+            };
             delete filter.search;
+            const result = await NotificationModel.find({ ...filter, ...searchFilter })
+                .sort(options.sort ?? {})
+                .skip(options.skip ?? 0)
+                .limit(options.limit ?? 0)
+                .lean();
+            return result;
         }
         const result = await NotificationModel.find(filter)
             .sort(options.sort ?? {})
@@ -60,12 +67,14 @@ export class NotificationRepository implements INotificationRepository {
     async count(filter): Promise<number> {
         if (filter.search) {
             const searchRegex = new RegExp(filter.search, 'i');
-            filter.$or = [
-                ...(filter.$or || []),
-                { title: { $regex: searchRegex } },
-                { message: { $regex: searchRegex } }
-            ];
+            const searchFilter = {
+                $or: [
+                    { title: { $regex: searchRegex.source, $options: "i" } },
+                    { message: { $regex: searchRegex.source, $options: "i" } }
+                ]
+            };
             delete filter.search;
+            return NotificationModel.countDocuments({ ...filter, ...searchFilter });
         }
         return NotificationModel.countDocuments(filter);
     }
@@ -133,7 +142,7 @@ export class NotificationRepository implements INotificationRepository {
             }
 
             query.$or = [
-                { recipientType: "individual", recipientId: userId },
+                { recipientType: NotificationRecipientType.INDIVIDUAL, recipientId: userId },
                 { recipientType: { $in: validRecipientTypes } },
             ];
         }
@@ -159,22 +168,24 @@ export class NotificationRepository implements INotificationRepository {
             query.createdAt = { $gte: new Date(start), $lte: new Date(end) };
         }
 
+        let searchFilter = {};
         if (search) {
             const searchRegex = new RegExp(search, 'i');
-            query.$or = [
-                ...(query.$or || []),
-                { title: { $regex: searchRegex } },
-                { message: { $regex: searchRegex } }
-            ];
+            searchFilter = {
+                $or: [
+                    { title: { $regex: searchRegex.source, $options: "i" } },
+                    { message: { $regex: searchRegex.source, $options: "i" } }
+                ]
+            };
         }
 
-        const notifications = await NotificationModel.find(query)
+        const notifications = await NotificationModel.find({ ...query, ...searchFilter })
             .skip((page - 1) * limit)
             .limit(limit)
             .sort({ createdAt: -1 })
             .lean();
 
-        const totalItems = await NotificationModel.countDocuments(query);
+        const totalItems = await NotificationModel.countDocuments({ ...query, ...searchFilter });
         const totalPages = Math.ceil(totalItems / limit);
 
         const notificationResponse: NotificationResponseDTO[] = notifications.map((n) => ({
@@ -260,7 +271,7 @@ export class NotificationRepository implements INotificationRepository {
             }
 
             query.$or = [
-                { recipientType: "individual", recipientId: authenticatedUserId },
+                { recipientType: NotificationRecipientType.INDIVIDUAL, recipientId: authenticatedUserId },
                 { recipientType: { $in: validRecipientTypes } },
             ];
         }

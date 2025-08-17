@@ -2,8 +2,19 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { FaSearch, FaDownload, FaEye, FaCheck, FaClock, FaExclamationTriangle, FaUsers, FaFileAlt, FaCode, FaCalculator, FaFlask, FaLanguage, FaHistory, FaGlobe, FaBook } from 'react-icons/fa';
 import ReviewModal from './ReviewModal';
-import { Assignment, Submission } from './types';
+import { Assignment, Submission } from './types/index';
 import { assignmentService } from './services/assignmentService';
+
+// Helper function to extract file information from different file types
+const extractFileInfo = (file: string | { fileName: string; fileUrl: string; fileSize: number }) => {
+  if (typeof file === 'string') {
+    const urlParts = file.split('/');
+    const fileName = urlParts[urlParts.length - 1].split('?')[0];
+    return { fileName, fileUrl: file, fileSize: 0 };
+  } else {
+    return { fileName: file.fileName, fileUrl: file.fileUrl, fileSize: file.fileSize };
+  }
+};
 
 const getSubjectIcon = (subject: string) => {
   const subjectIcons: { [key: string]: React.ReactElement } = {
@@ -319,7 +330,7 @@ export default function Submissions({
                       <div className="flex-1 min-w-0">
                         {submission.files && submission.files.length > 0 ? (
                           <a 
-                            href={submission.files[0]} 
+                            href={extractFileInfo(submission.files[0]).fileUrl} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-pink-600 hover:text-pink-800 font-medium truncate block"
@@ -342,32 +353,9 @@ export default function Submissions({
                             return;
                           }
                           
-                          let fileName = submission.fileName;
-                          const fileObj = submission.files[0];
-                          if (!fileName && fileObj) {
-                            if (typeof fileObj === 'string') {
-                              const urlParts = fileObj.split('/');
-                              fileName = urlParts[urlParts.length - 1].split('?')[0];
-                              console.log('Extracted fileName from string URL:', fileName);
-                            } else if (typeof fileObj === 'object' && fileObj && 'fileName' in fileObj) {
-                              fileName = (fileObj as any).fileName;
-                              console.log('Extracted fileName from object:', fileName);
-                            } else {
-                              console.error('❌ Unable to extract fileName from fileObj:', fileObj);
-                            }
-                          }
-                          
-                          if (!fileName) {
-                            console.error('❌ No fileName found in submission');
-                            alert('No filename found in this submission');
-                            return;
-                          }
-                          
-                          console.log('Calling handleDownloadSubmission with:', fileObj, fileName);
-                          handleDownloadSubmission(
-                            typeof fileObj === 'string' ? fileObj : (fileObj as any).fileUrl,
-                            fileName
-                          );
+                          const fileInfo = extractFileInfo(submission.files[0]);
+                          console.log('Calling handleDownloadSubmission with:', fileInfo);
+                          handleDownloadSubmission(fileInfo.fileUrl, fileInfo.fileName);
                         }}
                         className="p-2 text-gray-500 hover:text-indigo-600 transition-colors"
                       >
@@ -470,32 +458,9 @@ export default function Submissions({
                                 return;
                               }
                               
-                              let fileName = submission.fileName;
-                              const fileObj = submission.files[0];
-                              if (!fileName && fileObj) {
-                                if (typeof fileObj === 'string') {
-                                  const urlParts = fileObj.split('/');
-                                  fileName = urlParts[urlParts.length - 1].split('?')[0];
-                                  console.log('Extracted fileName from string URL:', fileName);
-                                } else if (typeof fileObj === 'object' && fileObj && 'fileName' in fileObj) {
-                                  fileName = (fileObj as any).fileName;
-                                  console.log('Extracted fileName from object:', fileName);
-                                } else {
-                                  console.error('❌ Unable to extract fileName from fileObj:', fileObj);
-                                }
-                              }
-                              
-                              if (!fileName) {
-                                console.error('❌ No fileName found in submission');
-                                alert('No filename found in this submission');
-                                return;
-                              }
-                              
-                              console.log('Calling handleDownloadSubmission with:', fileObj, fileName);
-                              handleDownloadSubmission(
-                                typeof fileObj === 'string' ? fileObj : (fileObj as any).fileUrl,
-                                fileName
-                              );
+                              const fileInfo = extractFileInfo(submission.files[0]);
+                              console.log('Calling handleDownloadSubmission with:', fileInfo);
+                              handleDownloadSubmission(fileInfo.fileUrl, fileInfo.fileName);
                             }}
                             className="p-3 bg-green-50 text-green-600 hover:bg-green-100 rounded-xl transition-all border border-green-200 hover:border-green-300 hover:scale-110 transform shadow-lg"
                             title="Download"
@@ -537,9 +502,9 @@ export default function Submissions({
             marks: selectedSubmission.marks ?? 0,
             feedback: selectedSubmission.feedback ?? '',
             isLate: selectedSubmission.isLate,
-            fileName: typeof selectedSubmission.files[0] === 'string' 
-              ? (selectedSubmission.files[0] as string)?.split('/').pop() || 'No file'
-              : (selectedSubmission.files[0] as any)?.fileName || 'No file',
+            fileName: selectedSubmission.files && selectedSubmission.files.length > 0 
+              ? extractFileInfo(selectedSubmission.files[0]).fileName
+              : 'No file',
             fileSize: 'Unknown',
           }}
           saveReview={handleReviewSubmit}

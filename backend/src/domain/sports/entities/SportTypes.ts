@@ -1,3 +1,5 @@
+import { PopulatedUser } from "../../events/entities/Event";
+
 export enum SportStatus {
   Active = "active",
   Inactive = "inactive",
@@ -110,8 +112,8 @@ export type SportLeanResult = {
 
 export interface SportRequest {
   _id: string;
-  sportId: string;
-  userId: string;
+  sportId: string | SportDocument;
+  userId: string | PopulatedUser;
   status: SportRequestStatus;
   whyJoin: string;
   additionalInfo: string;

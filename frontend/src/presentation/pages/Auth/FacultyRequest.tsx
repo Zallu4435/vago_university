@@ -33,13 +33,17 @@ export default function FacultyRequestForm() {
       await facultyRequestService.submitRequest(data);
       setIsSubmitted(true);
       reset(); 
-      
-      // Reset form after 5 seconds
       setTimeout(() => {
         setIsSubmitted(false);
       }, 5000);
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error: unknown) {
+      let errorMsg: string = 'An error occurred while submitting your request.';
+      if (error instanceof Error) {
+        errorMsg = error.message;
+      } else if (typeof error === 'string') {
+        errorMsg = error;
+      }
+      setError(errorMsg);
     } finally {
       setIsSubmitting(false);
     }

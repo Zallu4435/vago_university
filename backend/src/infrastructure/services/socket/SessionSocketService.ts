@@ -1,7 +1,17 @@
 import { Server } from 'socket.io';
 import { VideoSessionModel } from '../../database/mongoose/models/session.model';
 
-const sessionParticipants: Record<string, any[]> = {};
+interface SessionParticipant {
+  userId: string;
+  name: string;
+  isHost: boolean;
+  socketId: string;
+  micOn: boolean;
+  cameraOn: boolean;
+  handRaised: boolean;
+}
+
+const sessionParticipants: Record<string, SessionParticipant[]> = {};
 
 declare module 'socket.io' {
   interface Socket {

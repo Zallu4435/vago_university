@@ -116,7 +116,7 @@ const UserManagement: React.FC = () => {
   const handleViewDetails = async (user: User) => {
     try {
       const details = await getAdmissionDetails(user._id);
-      setSelectedApplicant(details as any);
+      setSelectedApplicant(details);
       setShowDetails(true);
     } catch (error) {
       console.error('Error fetching admission details:', error);
@@ -128,21 +128,22 @@ const UserManagement: React.FC = () => {
     setShowApprovalModal(true);
   };
 
-  const handleApprove = async (data: {
-    programDetails: string;
-    startDate: string;
-    scholarshipInfo: string;
-    additionalNotes: string;
-  }) => {
+  const handleApprove = async (data: unknown) => {
     if (!selectedAdmission) return;
+    const approvalData = data as {
+      programDetails: string;
+      startDate: string;
+      scholarshipInfo: string;
+      additionalNotes: string;
+    };
     try {
       await approveAdmission({
         id: selectedAdmission._id,
         approvalData: {
-          programDetails: data.programDetails || '',
-          startDate: data.startDate || '',
-          scholarshipInfo: data.scholarshipInfo || '',
-          additionalNotes: data.additionalNotes || '',
+          programDetails: approvalData.programDetails || '',
+          startDate: approvalData.startDate || '',
+          scholarshipInfo: approvalData.scholarshipInfo || '',
+          additionalNotes: approvalData.additionalNotes || '',
         },
       });
       setShowApprovalModal(false);
@@ -153,12 +154,13 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  const handleReject = async (data: { reason: string }) => {
+  const handleReject = async (data: unknown) => {
     if (!selectedAdmission) return;
+    const rejectData = data as { reason: string };
     try {
       await rejectAdmission({
         id: selectedAdmission._id,
-        reason: data.reason || 'Application rejected',
+        reason: rejectData.reason || 'Application rejected',
       });
       setShowApprovalModal(false);
       setShowDetails(false);
@@ -241,7 +243,7 @@ const UserManagement: React.FC = () => {
         setAdmissionToBlock(user);
         setShowBlockWarning(true);
       },
-      color: 'red',
+      color: 'red' as const,
       disabled: (user: User) => user.status !== 'approved',
     },
   ];
@@ -289,14 +291,14 @@ const UserManagement: React.FC = () => {
             {
               icon: <FiClipboard />,
               title: 'Pending',
-              value: users?.filter((u: any) => u.status.toLowerCase() === 'pending').length || '0',
+              value: users?.filter((u) => u.status.toLowerCase() === 'pending').length || '0',
               change: '-2.1%',
               isPositive: true,
             },
             {
               icon: <FiBarChart2 />,
               title: 'Approval Rate',
-              value: `${((users?.filter((u: any) => u.status.toLowerCase() === 'approved').length / users?.length) * 100 || 0).toFixed(2)}%`,
+              value: `${((users?.filter((u) => u.status.toLowerCase() === 'approved').length / users?.length) * 100 || 0).toFixed(2)}%`,
               change: '+3.8%',
               isPositive: true,
             },
@@ -327,9 +329,9 @@ const UserManagement: React.FC = () => {
               {users?.length > 0 ? (
                 <>
                   <ApplicationsTable
-                    data={users as any}
+                    data={users as User[]}
                     columns={userColumns}
-                    actions={userActions as any}
+                    actions={userActions}
                     formatDate={formatDate}
                   />
                   <Pagination

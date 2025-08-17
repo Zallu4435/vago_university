@@ -149,7 +149,7 @@ const HelpSupportPage = () => {
     return matchesCategory && matchesSearch;
   });
 
-  const getPriorityIcon = (priority: any) => {
+  const getPriorityIcon = (priority: 'high' | 'medium' | 'low') => {
     switch(priority) {
       case 'high': return <FaExclamationTriangle className="text-red-500" />;
       case 'medium': return <FaClock className="text-amber-500" />;
@@ -282,7 +282,7 @@ const HelpSupportPage = () => {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            {getPriorityIcon(faq.priority)}
+                            {getPriorityIcon(faq.priority as 'high' | 'medium' | 'low')}
                             <h3 className="font-semibold text-slate-800">{faq.question}</h3>
                           </div>
                           <p className="text-slate-600">{faq.answer}</p>

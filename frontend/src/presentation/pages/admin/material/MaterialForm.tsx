@@ -85,10 +85,12 @@ const MaterialForm: React.FC<MaterialFormProps> = ({ isOpen, onClose, onSubmit, 
   }, [isOpen]);
 
   const handleFormSubmit = (data: MaterialFormData) => {
+    const { file, thumbnail, ...restData } = data;
     const formData: Partial<Material> = {
-      ...data,
+      ...restData,
       fileUrl: fileName ? `/files/${fileName}` : initialData?.fileUrl,
       thumbnailUrl: thumbnailName ? `/thumbnails/${thumbnailName}` : initialData?.thumbnailUrl,
+      file: file as File | undefined,
     };
     onSubmit(formData);
     reset();

@@ -8,6 +8,9 @@ import { VideoSessionModel } from '../../database/mongoose/models/session.model'
 import { User as UserModel } from '../../database/mongoose/auth/user.model';
 import { ProgramModel } from '../../database/mongoose/models/studentProgram.model';
 import { MessageModel } from '../../database/mongoose/models/communication.model';
+import { Event } from '../../../domain/events/entities/EventTypes';
+import { Sport } from '../../../domain/sports/entities/Sport';
+import { Club } from '../../../domain/clubs/entities/ClubTypes';
 
 export class StudentDashboardRepository implements IStudentDashboardRepository {
 
@@ -44,9 +47,9 @@ export class StudentDashboardRepository implements IStudentDashboardRepository {
     ]);
 
     return {
-      events,
-      sports,
-      clubs
+      events: events as unknown as Event[],
+      sports: sports as unknown as Sport[],
+      clubs: clubs as unknown as Club[]
     };
   }
 

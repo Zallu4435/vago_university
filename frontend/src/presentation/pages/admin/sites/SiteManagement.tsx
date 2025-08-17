@@ -13,6 +13,15 @@ import { SECTIONS, columnsMap } from '../../../../shared/constants/siteManagemen
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import EmptyState from '../../../../shared/components/EmptyState';
+import type { ColumnConfig } from '../../../components/admin/management/ApplicationsTable';
+
+type FormData = {
+  title: string;
+  description: string;
+  image?: string;
+  link?: string;
+  category?: string;
+};
 
 
 const convertToTableData = (sections: SiteSection[]) => {
@@ -151,13 +160,14 @@ const SiteManagement = () => {
     setShowDelete(true);
   };
 
-  const handleFormSuccess = async (formData: any) => {
+  const handleFormSuccess = async (formData: Record<string, unknown>) => {
+    const data = formData as FormData;
     try {
       if (selectedId) {
-        await updateSection.mutateAsync({ id: selectedId, data: { ...formData, sectionKey: activeTab } });
+        await updateSection.mutateAsync({ id: selectedId, data });
         toast.success('Section updated successfully!');
       } else {
-        await createSection.mutateAsync({ ...formData, sectionKey: activeTab });
+        await createSection.mutateAsync({ ...data, sectionKey: activeTab });
       }
       setShowForm(false);
       setSelectedId(null);
@@ -261,7 +271,7 @@ const SiteManagement = () => {
                 <>
                   <ApplicationsTable
                     data={tableData}
-                    columns={columnsMap[activeTab]}
+                    columns={columnsMap[activeTab] as ColumnConfig<{ _id: string; id: string; sectionKey: "highlights" | "vagoNow" | "leadership"; title: string; description: string; category?: string | undefined; image: string; link: string; createdAt: string; updatedAt: string; }>[]}
                     actions={tableActions}
                   />
                   <Pagination
@@ -286,7 +296,7 @@ const SiteManagement = () => {
       {showForm && (
         <SiteSectionForm
           fields={section.fields}
-          initialData={selectedSection || undefined}
+          initialData={selectedSection ? { ...selectedSection } : undefined}
           onClose={() => {
             setShowForm(false);
             setSelectedId(null);

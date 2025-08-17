@@ -2,8 +2,14 @@ import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { FaClock, FaUsers, FaEye, FaFileAlt, FaCalendarAlt, FaFilter, FaSearch, FaChevronDown, FaTimes } from 'react-icons/fa';
 import { useSessionManagement } from '../../../../application/hooks/useSessionManagement';
 import { useQueryClient } from '@tanstack/react-query';
-import type { Session } from '../../../../application/hooks/useSessionManagement';
+import type { Session as BaseSession } from '../../../../application/hooks/useSessionManagement';
 import SessionAttendanceViewModal from './SessionAttendanceViewModal'
+
+// Extended Session type with additional properties
+interface Session extends BaseSession {
+  name?: string;
+  date?: string;
+}
 
 interface AttendanceInterval {
   joinedAt: string;
@@ -14,6 +20,7 @@ interface AttendanceUser {
   username: string;
   email: string;
   intervals: AttendanceInterval[];
+  status?: string;
 }
 
 const SessionAttendancePage = () => {
@@ -69,7 +76,7 @@ const SessionAttendancePage = () => {
     };
   }, []);
 
-  const currentSession = sessions.find((s: any) => s._id === selectedSessionId);
+  const currentSession = sessions.find((s) => s._id === selectedSessionId) as Session | undefined;
 
   const calculateTotalTime = (
     intervals: AttendanceInterval[],
@@ -141,14 +148,14 @@ const SessionAttendancePage = () => {
         formattedTime: formatDuration(totalTime),
         attendancePercentage,
         sessionData: currentSession,
-        status: (user as any).status
+        status: user.status
       };
     });
   }, [currentAttendanceData, currentSession]);
 
   const filteredSessions = useMemo(() => {
     if (!dateRange.start && !dateRange.end) return sessions;
-    return sessions.filter((session: any) => {
+    return sessions.filter((session) => {
       const sessionDate = new Date(session.startTime);
       const startDate = dateRange.start ? new Date(dateRange.start) : null;
       const endDate = dateRange.end ? new Date(dateRange.end) : null;
@@ -220,7 +227,7 @@ const SessionAttendancePage = () => {
 
   const handleAttendanceDecision = async (userId: string, decision: string) => {
     setAttendanceDecisions(prev => new Map(prev.set(userId, decision)));
-    const user = (currentAttendanceData || []).find((u: any) => u.id.toString() === userId.toString());
+    const user = (currentAttendanceData || []).find((u: AttendanceUser) => u.id.toString() === userId.toString());
     const name = user?.username || '';
     if (selectedSessionId && userId) {
       try {
@@ -235,7 +242,7 @@ const SessionAttendancePage = () => {
     }
   };
 
-  const handleViewIntervals = (user: any) => {
+  const handleViewIntervals = (user: AttendanceUser) => {
     setSelectedUser(user);
   };
 
@@ -341,7 +348,7 @@ const SessionAttendancePage = () => {
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
               >
-                {filteredSessions.map((session: any) => (
+                {filteredSessions.map((session) => (
                   <option key={session._id} value={session._id}>
                     {session.title} - {new Date(session.startTime).toLocaleDateString()}
                   </option>
@@ -511,7 +518,7 @@ const SessionAttendancePage = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-pink-100">
-                  {processedAttendance.map((user: AttendanceUser & { totalTime: number; formattedTime: string; attendancePercentage: number; sessionData: any, status?: string }) => (
+                  {processedAttendance.map((user: AttendanceUser & { totalTime: number; formattedTime: string; attendancePercentage: number; sessionData: Session, status?: string }) => (
                     <tr key={user.id} className="hover:bg-pink-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">

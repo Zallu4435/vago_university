@@ -17,7 +17,7 @@ export interface CreateSiteSectionData {
   title: string;
   description: string;
   category?: string;
-  image?: string;
+  image?: string | File;
   link?: string;
 }
 
@@ -25,7 +25,7 @@ export interface UpdateSiteSectionData {
   title?: string;
   description?: string;
   category?: string;
-  image?: string;
+  image?: string | File;
   link?: string;
 }
 
@@ -45,8 +45,20 @@ export interface SiteSectionResponse {
   };
 }
 
-function isFile(value: any): value is File {
+export interface RequestHeaders {
+  [key: string]: string;
+}
+
+function isFile(value: unknown): value is File {
   return typeof File !== 'undefined' && value instanceof File;
+}
+
+function isString(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
+function isUndefinedOrNull(value: unknown): value is undefined | null {
+  return value === undefined || value === null;
 }
 
 class SiteManagementService {
@@ -83,21 +95,26 @@ class SiteManagementService {
 
   // Create new section
   async createSection(data: CreateSiteSectionData): Promise<SiteSection> {
-    let payload: any = data;
-    let headers: any = {};
+    let payload: CreateSiteSectionData | FormData;
+    let headers: RequestHeaders = {};
+    
     if (data.image && isFile(data.image)) {
-      payload = new FormData();
+      const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
+        if (!isUndefinedOrNull(value)) {
           if (isFile(value)) {
-            payload.append(key, value);
-          } else {
-            payload.append(key, value as string);
+            formData.append(key, value);
+          } else if (isString(value)) {
+            formData.append(key, value);
           }
         }
       });
+      payload = formData;
       headers['Content-Type'] = 'multipart/form-data';
+    } else {
+      payload = data;
     }
+    
     const response = await httpClient.post<SiteSectionResponse>('/admin/site-sections', payload, { headers });
     console.log(response, "popopopopop")
     return response.data.data.section;
@@ -105,21 +122,26 @@ class SiteManagementService {
 
   // Update section
   async updateSection(id: string, data: UpdateSiteSectionData): Promise<SiteSection> {
-    let payload: any = data;
-    let headers: any = {};
+    let payload: UpdateSiteSectionData | FormData;
+    let headers: RequestHeaders = {};
+    
     if (data.image && isFile(data.image)) {
-      payload = new FormData();
+      const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
+        if (!isUndefinedOrNull(value)) {
           if (isFile(value)) {
-            payload.append(key, value);
-          } else {
-            payload.append(key, value as string);
+            formData.append(key, value);
+          } else if (isString(value)) {
+            formData.append(key, value);
           }
         }
       });
+      payload = formData;
       headers['Content-Type'] = 'multipart/form-data';
+    } else {
+      payload = data;
     }
+    
     const response = await httpClient.put<SiteSectionResponse>(`/admin/site-sections/${id}`, payload, { headers });
     console.log(response, "pl[k[akof[kdf")
     return response.data.data.section;

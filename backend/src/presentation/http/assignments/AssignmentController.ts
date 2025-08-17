@@ -9,6 +9,8 @@ import {
   IGetSubmissionByIdUseCase,
   IReviewSubmissionUseCase,
   IDownloadSubmissionUseCase,
+  IDownloadFileUseCase,
+  IDownloadSubmissionFileUseCase,
   IGetAnalyticsUseCase
 } from '../../../application/assignments/useCases/AssignmentUseCases';
 import { AssignmentFile } from '../../../domain/assignments/assignmenttypes';
@@ -28,6 +30,8 @@ export class AssignmentController implements IAssignmentController {
     private getSubmissionByIdUseCase: IGetSubmissionByIdUseCase,
     private reviewSubmissionUseCase: IReviewSubmissionUseCase,
     private downloadSubmissionUseCase: IDownloadSubmissionUseCase,
+    private downloadFileUseCase: IDownloadFileUseCase,
+    private downloadSubmissionFileUseCase: IDownloadSubmissionFileUseCase,
     private getAnalyticsUseCase: IGetAnalyticsUseCase
   ) {
     this.httpSuccess = new HttpSuccess();
@@ -166,6 +170,64 @@ export class AssignmentController implements IAssignmentController {
       headers: {
         'Content-Type': 'application/octet-stream',
         'Content-Disposition': 'attachment'
+      }
+    } as IHttpResponse;
+  }
+
+  async downloadFile(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    const { fileUrl, fileName } = httpRequest.query;
+    
+    const result = await this.downloadFileUseCase.execute({
+      fileUrl: fileUrl as string,
+      fileName: fileName as string
+    });
+    
+    if (!result.success) {
+      return this.httpErrors.error_400();
+    }
+    
+    if ('error' in result.data) {
+      return this.httpErrors.error_400();
+    }
+    
+    const { buffer, contentType, fileName: cleanFileName } = result.data;
+    const contentDisposition = `attachment; filename="${cleanFileName}"`;
+    
+    return {
+      statusCode: 200,
+      body: { data: buffer },
+      headers: {
+        'Content-Type': contentType,
+        'Content-Disposition': contentDisposition
+      }
+    } as IHttpResponse;
+  }
+
+  async downloadSubmissionFile(httpRequest: IHttpRequest): Promise<IHttpResponse> {
+    const { fileUrl, fileName } = httpRequest.query;
+    
+    const result = await this.downloadSubmissionFileUseCase.execute({
+      fileUrl: fileUrl as string,
+      fileName: fileName as string
+    });
+    
+    if (!result.success) {
+      return this.httpErrors.error_400();
+    }
+    
+    if ('error' in result.data) {
+      return this.httpErrors.error_400();
+    }
+    
+    const { buffer, contentType, fileName: cleanFileName } = result.data;
+    const contentDisposition = `attachment; filename="${cleanFileName}"`;
+    
+    return {
+      statusCode: 200,
+      body: { data: buffer },
+      headers: {
+        'Content-Type': contentType,
+        'Content-Disposition': contentDisposition
       }
     } as IHttpResponse;
   }

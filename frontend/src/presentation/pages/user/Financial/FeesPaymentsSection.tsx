@@ -144,8 +144,8 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
               currency: 'INR',
               name: 'Your Institution Name',
               description: `Payment for ${studentInfo[0]?.term || 'Spring 2025'} Fees`,
-              order_id: response.orderId,
-              handler: (rzpResponse: any) => {
+              order_id: response.orderId as string,
+              handler: (rzpResponse: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) => {
                 createPayment({
                   ...payment,
                   chargeId: selectedCharge.id,
@@ -179,7 +179,6 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
               },
               modal: {
                 ondismiss: async () => {
-                  // Handle payment modal close/cancel
                   try {
                     await financialService.clearPendingPayment();
                     toast('Payment cancelled. You can try again anytime.');
@@ -190,8 +189,9 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
               }
             };
 
-            const rzp = new (window as any).Razorpay(options);
-            rzp.on('payment.failed', async (rzpResponse: any) => {
+            const rzp = new (window as Window & typeof globalThis).Razorpay(options);
+            rzp.on('payment.failed', async (...args: unknown[]) => {
+              const rzpResponse = args[0] as { error: { description: string } };
               // Clear pending payment on failure
               try {
                 await financialService.clearPendingPayment();
@@ -214,9 +214,9 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
           setAmountError(err.message || 'Failed to initiate payment.');
         }
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Payment error:', err);
-      setAmountError(err.message || 'Failed to initiate payment.');
+      setAmountError((err as Error).message || 'Failed to initiate payment.');
     }
   };
 

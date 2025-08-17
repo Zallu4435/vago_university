@@ -126,7 +126,7 @@ export class AdmissionsRepository implements IAdmissionsRepository {
         if (!payment) throw new Error(AdmissionErrorType.PaymentNotFound);
 
         const paymentIntent = await stripe.paymentIntents.confirm(stripePaymentIntentId, {
-            payment_method: payment.metadata?.paymentMethodId,
+            payment_method: payment.metadata?.paymentMethodId as string,
         });
 
         const stripeStatus = paymentIntent.status;

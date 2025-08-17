@@ -7,7 +7,7 @@ import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScr
 import { SiteSectionFormProps, SectionField } from '../../../../domain/types/management/sitemanagement';
 
 const createSchema = (fields: SectionField[]) => {
-  const schemaObject: Record<string, any> = {};
+  const schemaObject: Record<string, unknown> = {};
   
   fields.forEach(field => {
     if (field.type === 'image') {
@@ -19,7 +19,7 @@ const createSchema = (fields: SectionField[]) => {
     }
   });
   
-  return z.object(schemaObject);
+  return z.object(schemaObject as z.ZodRawShape);
 };
 
 const SiteSectionForm: React.FC<SiteSectionFormProps> = ({ fields, initialData, onClose, onSuccess }) => {
@@ -128,14 +128,14 @@ const SiteSectionForm: React.FC<SiteSectionFormProps> = ({ fields, initialData, 
                 {field.type === 'textarea' ? (
                   <div>
                     <textarea
-                      {...register(field.name as keyof FormData)}
+                      {...register(String(field.name))}
                       rows={8}
                       placeholder={field.placeholder || field.label}
                       className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 resize-vertical"
                     />
-                    {errors[field.name as keyof FormData] && (
+                    {errors[field.name as string as keyof FormData] && (
                       <p className="text-red-400 text-sm mt-1">
-                        {(errors[field.name as keyof FormData]?.message as string) || ''}
+                        {(errors[field.name as string as keyof FormData]?.message as string) || ''}
                       </p>
                     )}
                   </div>
@@ -163,14 +163,14 @@ const SiteSectionForm: React.FC<SiteSectionFormProps> = ({ fields, initialData, 
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          setValue(field.name as keyof FormData, file);
+                          setValue(field.name.toString(), file);
                         }
                       }}
                       className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                     />
-                    {errors[field.name as keyof FormData] && (
+                    {errors[field.name as string as keyof FormData] && (
                       <p className="text-red-400 text-sm mt-1">
-                        {(errors[field.name as keyof FormData]?.message as string) || ''}
+                        {(errors[field.name as string as keyof FormData]?.message as string) || ''}
                       </p>
                     )}
                   </div>
@@ -178,13 +178,13 @@ const SiteSectionForm: React.FC<SiteSectionFormProps> = ({ fields, initialData, 
                   <div>
                     <input
                       type={field.type}
-                      {...register(field.name as keyof FormData)}
+                      {...register(field.name.toString())}
                       placeholder={field.placeholder || field.label}
                       className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                     />
-                    {errors[field.name as keyof FormData] && (
+                    {errors[field.name as string as keyof FormData] && (
                       <p className="text-red-400 text-sm mt-1">
-                        {(errors[field.name as keyof FormData]?.message as string) || ''}
+                        {(errors[field.name as string as keyof FormData]?.message as string) || ''}
                       </p>
                     )}
                   </div>

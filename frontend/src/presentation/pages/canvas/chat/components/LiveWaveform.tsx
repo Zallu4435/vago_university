@@ -1,5 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 
+// Extend Window interface to include webkitAudioContext
+declare global {
+  interface Window {
+    webkitAudioContext: typeof AudioContext;
+  }
+}
+
 interface LiveWaveformProps {
   stream: MediaStream | null;
   isRecording: boolean;
@@ -14,7 +21,7 @@ const LiveWaveform: React.FC<LiveWaveformProps> = ({ stream, isRecording }) => {
 
   useEffect(() => {
     if (isRecording && stream && canvasRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
       analyserRef.current = audioContextRef.current.createAnalyser();
       sourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
       sourceRef.current.connect(analyserRef.current);

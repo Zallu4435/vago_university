@@ -1,28 +1,30 @@
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IAdminAdmissionController } from "../IHttp";
-import {
-  GetAdmissionsUseCase,
-  GetAdmissionByIdUseCase,
-  GetAdmissionByTokenUseCase,
-  ApproveAdmissionUseCase,
-  RejectAdmissionUseCase,
-  DeleteAdmissionUseCase,
-  ConfirmAdmissionOfferUseCase,
-} from "../../../application/admin/useCases/AdmissionUseCases";
+
 import { Admission } from "../../../infrastructure/database/mongoose/admission/AdmissionModel";
+import {
+  IApproveAdmissionUseCase,
+  IBlockAdmissionUseCase,
+  IConfirmAdmissionOfferUseCase,
+  IDeleteAdmissionUseCase,
+  IGetAdmissionByIdUseCase,
+  IGetAdmissionByTokenUseCase,
+  IGetAdmissionsUseCase,
+  IRejectAdmissionUseCase
+} from "../../../application/admin/useCases/AdmissionUseCases";
 
 export class AdminAdmissionController implements IAdminAdmissionController {
   private httpErrors: HttpErrors;
   private httpSuccess: HttpSuccess;
 
   constructor(
-    private getAdmissionsUseCase: GetAdmissionsUseCase,
-    private getAdmissionByIdUseCase: GetAdmissionByIdUseCase,
-    private getAdmissionByTokenUseCase: GetAdmissionByTokenUseCase,
-    private approveAdmissionUseCase: ApproveAdmissionUseCase,
-    private rejectAdmissionUseCase: RejectAdmissionUseCase,
-    private deleteAdmissionUseCase: DeleteAdmissionUseCase,
-    private confirmAdmissionOfferUseCase: ConfirmAdmissionOfferUseCase,
-    private blockAdmissionUseCase: any
+    private getAdmissionsUseCase: IGetAdmissionsUseCase,
+    private getAdmissionByIdUseCase: IGetAdmissionByIdUseCase,
+    private getAdmissionByTokenUseCase: IGetAdmissionByTokenUseCase,
+    private approveAdmissionUseCase: IApproveAdmissionUseCase,
+    private rejectAdmissionUseCase: IRejectAdmissionUseCase,
+    private deleteAdmissionUseCase: IDeleteAdmissionUseCase,
+    private confirmAdmissionOfferUseCase: IConfirmAdmissionOfferUseCase,
+    private blockAdmissionUseCase: IBlockAdmissionUseCase
   ) {
     this.httpErrors = new HttpErrors();
     this.httpSuccess = new HttpSuccess();
@@ -163,7 +165,10 @@ export class AdminAdmissionController implements IAdminAdmissionController {
       return this.httpErrors.error_404();
     }
 
-    const document = admission.documents?.documents?.find((doc: any) => doc.id === documentId);
+    const docsArray = Array.isArray(admission.documents?.documents) 
+      ? admission.documents.documents 
+      : [];
+    const document = docsArray.find((doc) => doc.id === documentId);
 
     if (!document) {
       return this.httpErrors.error_404();

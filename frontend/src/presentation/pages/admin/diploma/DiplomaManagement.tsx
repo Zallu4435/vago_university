@@ -81,12 +81,13 @@ const DiplomaManagement: React.FC = () => {
         setShowDiplomaModal(true);
     };
 
-    const handleSaveDiploma = async (formData: Partial<Diploma>) => {
+    const handleSaveDiploma = (data: unknown) => {
+        const formData = data as Partial<Diploma>;
         try {
             if (editingDiploma) {
-                await updateDiploma({ id: editingDiploma.id, data: formData });
+                updateDiploma({ id: editingDiploma.id, data: formData });
             } else {
-                await createDiploma({
+                createDiploma({
                     ...formData,
                     videoIds: [],
                 } as Omit<Diploma, '_id' | 'createdAt' | 'updatedAt'>);
@@ -236,9 +237,9 @@ const DiplomaManagement: React.FC = () => {
                             ) : filteredDiplomas.length > 0 ? (
                                 <>
                                     <ApplicationsTable
-                                        data={filteredDiplomas as any}
-                                        columns={diplomaColumns as any}
-                                        actions={diplomaActions as any}
+                                        data={filteredDiplomas}
+                                        columns={diplomaColumns}
+                                        actions={diplomaActions}
                                     />
                                     <Pagination
                                         page={page}
@@ -277,7 +278,7 @@ const DiplomaManagement: React.FC = () => {
                 <DiplomaDetails
                     isOpen={showDiplomaDetail}
                     onClose={() => setShowDiplomaDetail(false)}
-                    diploma={diplomaDetails as any}
+                    diploma={diplomaDetails}
                     isLoading={isLoadingDiplomaDetails}
                 />
             )}

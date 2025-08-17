@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { chatService } from '../services/chatService';
 import { toast } from 'react-hot-toast';
+import { Message } from '../types/ChatTypes';
 
 export const useChatMutations = (chatId?: string, currentUserId?: string) => {
   const queryClient = useQueryClient();
@@ -43,7 +44,7 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
   });
 
   const updateGroupSettings = useMutation({
-    mutationFn: async (settings: any) => {
+    mutationFn: async (settings: { onlyAdminsCanPost?: boolean; onlyAdminsCanAddMembers?: boolean; onlyAdminsCanChangeInfo?: boolean; onlyAdminsCanPinMessages?: boolean; onlyAdminsCanSendMedia?: boolean; onlyAdminsCanSendLinks?: boolean }) => {
       requireIds();
       return chatService.updateGroupSettings(chatId!, settings, currentUserId!);
     },
@@ -88,6 +89,13 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
     }
   });
 
+  const createGroupChatWithAvatar = useMutation({
+    mutationFn: chatService.createGroupChatWithAvatar,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chats'] });
+    }
+  });
+
   // Message mutations
   const sendMessage = useMutation({
     mutationFn: async (params: { chatId: string; content: string; type?: string }) =>
@@ -110,7 +118,7 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
         isDeleted: false,
         deletedForEveryone: false,
       };
-      queryClient.setQueryData(['messages', params?.chatId], (old: any[] = []) => [...old, optimisticMessage]);
+      queryClient.setQueryData(['messages', params?.chatId], (old: Message[] = []) => [...old, optimisticMessage]);
       return { previousMessages };
     },
     onError: (_err, params, context) => {
@@ -126,6 +134,7 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
       chatService.sendFile(params.chatId, params.formData),
     
     onMutate: async (variables) => {
+      if (!currentUserId) throw new Error('User not authenticated');
       await queryClient.cancelQueries({ queryKey: ['messages', variables.chatId] });
       
       const optimisticMessage = {
@@ -134,7 +143,7 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
         senderId: currentUserId,
         senderName: 'You',
         content: variables.formData.get('content') as string || '',
-        type: variables.file.type.startsWith('image/') ? 'image' : 'document',
+        type: (variables.file.type.startsWith('image/') ? 'image' : 'document') as 'image' | 'document',
         status: 'sending' as const,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -144,7 +153,7 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
           name: variables.file.name,
           size: variables.file.size,
           mimeType: variables.file.type,
-          type: variables.file.type.startsWith('image/') ? 'image' : 'document',
+          type: (variables.file.type.startsWith('image/') ? 'image' : 'document') as 'image' | 'document',
         }],
         reactions: [],
         isDeleted: false,
@@ -152,7 +161,7 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
 
       const previousMessages = queryClient.getQueryData(['messages', variables.chatId]);
 
-      queryClient.setQueryData(['messages', variables.chatId], (oldData: any) => {
+      queryClient.setQueryData(['messages', variables.chatId], (oldData: { pages: { messages: Message[] }[] }) => {
         if (!oldData || !oldData.pages) {
           return {
             pages: [{ messages: [optimisticMessage], hasMore: true }],
@@ -191,17 +200,17 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
     onMutate: async (params) => {
       await queryClient.cancelQueries({ queryKey: ['messages', params.chatId] });
       const previousMessages = queryClient.getQueryData(['messages', params.chatId]);
-      queryClient.setQueryData(['messages', params.chatId], (old: any) => {
+      queryClient.setQueryData(['messages', params.chatId], (old: { pages: { messages: Message[] }[] } | Message[]) => {
         if (!old) return old;
         if (Array.isArray(old)) {
-          return old.filter((msg: any) => msg.id !== params.messageId);
+          return old.filter((msg) => msg.id !== params.messageId);
         }
         if (old.pages) {
           return {
             ...old,
-            pages: old.pages.map((page: any) => ({
+            pages: old.pages.map((page: { messages: Message[] }) => ({
               ...page,
-              messages: page.messages.filter((msg: any) => msg.id !== params.messageId)
+              messages: page.messages.filter((msg) => msg.id !== params.messageId)
             }))
           };
         }
@@ -293,6 +302,7 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
     // Chat mutations
     createChat,
     createGroupChat,
+    createGroupChatWithAvatar,
     deleteChat,
     blockChat,
     clearChat,

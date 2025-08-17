@@ -90,7 +90,10 @@ const VideoManagementPage = () => {
   const paginatedVideos = videosData?.videos || [];
   const totalPages = videosData?.totalPages || 1;
 
-  const tabs = getTabs(paginatedVideos, activeTab);
+  const tabs = getTabs(
+    paginatedVideos.map(video => ({ ...video, _id: video.id })),
+    activeTab
+  );
 
   const handleTabClick = (index: number) => {
     const tabKeys = ['all', 'published', 'drafts'];

@@ -100,14 +100,14 @@ export class GetCampusLifeOverviewUseCase implements IGetCampusLifeOverviewUseCa
           s._id.toString(),
           s.title,
           s.type,
-          [], // teams - not in DB, use empty array
+          [],
           s.icon,
           s.color,
           s.division,
           s.headCoach,
-          [], // homeGames - not in DB, use empty array
-          "", // record - not in DB, use empty string
-          [], // upcomingGames - not in DB, use empty array
+          [],
+          "",
+          [],
           s.createdAt.toISOString(),
           s.updatedAt.toISOString()
         )),
@@ -119,10 +119,10 @@ export class GetCampusLifeOverviewUseCase implements IGetCampusLifeOverviewUseCa
           c.icon,
           c.color,
           c.status as ClubStatus,
-          "", // role - not in DB, use empty string
+          "",
           c.nextMeeting,
           c.about || "",
-          c.upcomingEvents?.map((e) => e.description) || [],
+          c.upcomingEvents || [],
           c.createdAt.toISOString(),
           c.updatedAt.toISOString()
         ))
@@ -227,14 +227,14 @@ export class GetSportsUseCase implements IGetSportsUseCase {
             s._id.toString(),
             s.title,
             s.type,
-            [], // teams - not in DB
+            [],
             s.icon,
             s.color,
             s.division,
             s.headCoach,
-            [], // homeGames - not in DB
-            "", // record - not in DB
-            [], // upcomingGames - not in DB
+            [],
+            "",
+            [],
             s.createdAt.toISOString(),
             s.updatedAt.toISOString(),
             req ? req.status : null
@@ -262,14 +262,14 @@ export class GetSportByIdUseCase implements IGetSportByIdUseCase {
           sport._id.toString(),
           sport.title,
           sport.type,
-          [], // teams - not in DB
+          [],
           sport.icon,
           sport.color,
           sport.division,
           sport.headCoach,
-          [], // homeGames - not in DB
-          "", // record - not in DB
-          [], // upcomingGames - not in DB
+          [],
+          "",
+          [],
           sport.createdAt.toString(),
           sport.updatedAt.toString()
         )
@@ -300,10 +300,10 @@ export class GetClubsUseCase implements IGetClubsUseCase {
             c.icon,
             c.color,
             c.status as ClubStatus,
-            "", // role - not in DB, use empty string
+            "",
             c.nextMeeting,
             c.about || "",
-            c.upcomingEvents?.map((e) => e.description) || [],
+            c.upcomingEvents || [],
             c.createdAt.toISOString(),
             c.updatedAt.toISOString(),
             req ? req.status : null
@@ -335,10 +335,10 @@ export class GetClubByIdUseCase implements IGetClubByIdUseCase {
           club.icon,
           club.color,
           club.status as ClubStatus,
-          "", // role - not in DB, use empty string
+          "",
           club.nextMeeting,
           club.about || "",
-          club.upcomingEvents?.map((e) => e.description) || [],
+          club.upcomingEvents || [],
           club.createdAt.toString(),
           club.updatedAt.toString()
         )

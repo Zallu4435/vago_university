@@ -6,10 +6,13 @@ export type User = {
   status: string;
   createdAt: string;
   blocked: boolean;
+  profilePicture?: string;
+  firstName?: string;
+  lastName?: string;
 };
 
 export interface ApplicantDetailsProps {
-  selectedApplicant: unknown;
+  selectedApplicant: any;
   showDetails: boolean;
   setShowDetails: (value: boolean) => void;
   approveAdmission: (data: unknown) => void;
@@ -42,12 +45,14 @@ export interface ApprovalModalProps {
 
 // Added based on usage in user.service.ts and typical admission data
 export interface AdmissionDetails {
+  _id: string;
   id: string;
   fullName: string;
   email: string;
   program: string;
   status: string;
   createdAt: string;
+  blocked: boolean;
   documents?: Array<{ name: string; url: string }>;
   [key: string]: unknown;
 }

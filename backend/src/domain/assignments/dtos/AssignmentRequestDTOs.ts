@@ -52,6 +52,16 @@ export interface DownloadSubmissionRequestDTO {
   submissionId: string;
 }
 
+export interface DownloadFileRequestDTO {
+  fileUrl: string;
+  fileName: string;
+}
+
+export interface DownloadSubmissionFileRequestDTO {
+  fileUrl: string;
+  fileName: string;
+}
+
 export interface GetAnalyticsRequestDTO {
   assignmentId?: string;
 }

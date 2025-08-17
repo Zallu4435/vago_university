@@ -25,6 +25,7 @@ import { documentUploadService } from '../../../../application/services/document
 import { ApplicantDetailsProps } from '../../../../domain/types/management/usermanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate } from '../../../../shared/utils/dateUtils';
+import { DocumentUpload, ProgrammeChoice } from '../../../../domain/types/application';
 
 const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
   selectedApplicant,
@@ -347,7 +348,7 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
           >
             <div className="space-y-4">
               {choiceOfStudyData?.length ? (
-                choiceOfStudyData.map((choice: any, idx: number) => (
+                choiceOfStudyData.map((choice: ProgrammeChoice, idx: number) => (
                   <div
                     key={idx}
                     className="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30"
@@ -477,7 +478,16 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
               )}
               {achievementsData?.achievements && achievementsData.achievements.length > 0 ? (
                 <div className="space-y-3">
-                  {achievementsData.achievements.map((achievement: any, idx: number) => (
+                  {achievementsData.achievements.map((achievement: {
+                    activity: string;
+                    level: string;
+                    levelOfAchievement: string;
+                    positionHeld: string;
+                    organizationName: string;
+                    fromDate: string;
+                    toDate: string;
+                    description?: string;
+                  }, idx: number) => (
                     <div
                       key={idx}
                       className="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30"
@@ -528,10 +538,10 @@ const ApplicantDetails: React.FC<ApplicantDetailsProps> = ({
             toggle={() => toggleSection('documents')}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {documentsData?.documents?.filter((doc: any) => doc.cloudinaryUrl)?.length ? (
+              {documentsData?.documents?.filter((doc: DocumentUpload) => doc.cloudinaryUrl)?.length ? (
                 documentsData.documents
-                  .filter((doc: any) => doc.cloudinaryUrl)
-                  .map((doc: any, idx: number) => (
+                  .filter((doc: DocumentUpload) => doc.cloudinaryUrl)
+                  .map((doc: DocumentUpload, idx: number) => (
                     <div
                       key={idx}
                       className="flex items-center justify-between p-3 bg-gray-800/80 rounded-lg border border-purple-500/30"

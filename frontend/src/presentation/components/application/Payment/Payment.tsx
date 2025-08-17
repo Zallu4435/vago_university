@@ -41,10 +41,12 @@ export const Payment: React.FC<PaymentProps> = ({
       const paymentPayload = {
         applicationId: formData.applicationId,
         paymentDetails: {
-          method: selectedMethod,
           amount: 1000.00,
           currency: 'INR',
-          paymentMethodId: paymentDetails?.paymentMethodId,
+          paymentMethod: selectedMethod,
+          customerEmail: (formData as { personalInfo?: { email?: string } }).personalInfo?.email || '',
+          customerName: `${(formData as { personalInfo?: { firstName?: string; lastName?: string } }).personalInfo?.firstName || ''} ${(formData as { personalInfo?: { firstName?: string; lastName?: string } }).personalInfo?.lastName || ''}`.trim(),
+          customerPhone: (formData as { personalInfo?: { phone?: string } }).personalInfo?.phone || '',
         },
       };
       
@@ -84,9 +86,13 @@ export const Payment: React.FC<PaymentProps> = ({
       });
 
       onComplete();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Payment and Submission Error:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to submit application. Please try again.';
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : typeof error === 'object' && error !== null && 'response' in error
+        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to submit application. Please try again.'
+        : 'Failed to submit application. Please try again.';
       setPaymentError(errorMessage);
       setSubmissionStatus({
         success: false,

@@ -35,8 +35,8 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
     watch,
     setValue,
     reset,
-  } = useForm<EventFormData>({
-    resolver: zodResolver(eventSchema) as any,
+  } = useForm({
+    resolver: zodResolver(eventSchema),
     defaultValues: {
       title: '',
       date: '',

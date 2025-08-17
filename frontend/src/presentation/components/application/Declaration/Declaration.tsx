@@ -95,18 +95,7 @@ export const Declaration: React.FC<DeclarationProps> = ({ value, onChange }) => 
       ) : (
         <FormSubmissionFlow
           formData={getValues()}
-          onConfirm={() => {
-            setIsSubmitting(false);
-            onChange(value); // Ensure state is saved before moving to summary
-          }}
           onBackToForm={() => setIsSubmitting(false)}
-          onPaymentComplete={() => {
-            onChange({ privacyPolicy: false, marketingEmail: false, marketingCall: false }); // Reset declaration
-          }}
-          onLogout={() => {
-            // Handle logout if needed
-            window.location.href = '/login';
-          }}
         />
       )}
     </div>

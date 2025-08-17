@@ -27,7 +27,7 @@ let lastRefreshAttempt = 0;
 const MIN_REFRESH_INTERVAL = 30000;
 let shouldAttemptRefresh = true;
 
-const processQueue = (error: any = null) => {
+const processQueue = (error: unknown = null) => {
   failedQueue.forEach(prom => {
     if (error) {
       prom.reject(error);
@@ -183,8 +183,8 @@ httpClient.interceptors.response.use(
         console.log('✅ Processing queue');
         processQueue();
         return httpClient(originalRequest);
-      } catch (refreshError: any) {
-        if (refreshError.message === 'Network Error') {
+      } catch (refreshError: unknown) {
+        if (refreshError && typeof refreshError === 'object' && 'message' in refreshError && refreshError.message === 'Network Error') {
           console.error('⚠️ Network error during token refresh');
           networkErrorCount++;
 
@@ -196,7 +196,7 @@ httpClient.interceptors.response.use(
           return Promise.reject(refreshError);
         }
 
-        if (refreshError.response?.status === 401) {
+        if (refreshError && typeof refreshError === 'object' && 'response' in refreshError && refreshError.response && typeof refreshError.response === 'object' && 'status' in refreshError.response && refreshError.response.status === 401) {
           console.log('🚫 Refresh token expired or invalid');
           console.log('🚪 Logging out user due to invalid refresh token');
           shouldAttemptRefresh = false;
@@ -206,7 +206,9 @@ httpClient.interceptors.response.use(
         }
 
         console.error('❌ Token refresh failed:', refreshError);
-        console.log('⚠️ Refresh token request failed:', refreshError.message);
+        if (refreshError && typeof refreshError === 'object' && 'message' in refreshError) {
+          console.log('⚠️ Refresh token request failed:', refreshError.message);
+        }
         processQueue(refreshError);
         return Promise.reject(refreshError);
       } finally {

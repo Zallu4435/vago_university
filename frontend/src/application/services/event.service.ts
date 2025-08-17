@@ -1,5 +1,5 @@
 // src/application/services/event.service.ts
-import { EventApiResponse, EventRequest, EventApiResponseSingle, EventRequestApiResponseSingle, Event } from '../../domain/types/management/eventmanagement';
+import { EventApiResponse, EventRequest, EventApiResponseSingle, EventRequestApiResponseSingle, Event, EventServiceResponse, EventRequestsServiceResponse, EventRequestsApiResponse } from '../../domain/types/management/eventmanagement';
 import httpClient from '../../frameworks/api/httpClient';
 import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 
@@ -12,7 +12,7 @@ class EventService {
     dateRange?: string,
     search?: string,
     organizerType?: string
-  ): Promise<EventApiResponse['data']> {
+  ): Promise<EventServiceResponse> {
     try {
       const params: Record<string, string | number> = {
         page,
@@ -104,7 +104,7 @@ class EventService {
     dateRange?: string,
     search?: string,
     organizerType?: string
-  ): Promise<EventApiResponse['data']> {
+  ): Promise<EventRequestsServiceResponse> {
     try {
       const params: Record<string, string | number> = {
         page,
@@ -129,7 +129,7 @@ class EventService {
         params.organizerType = organizerType;
       }
 
-      const response = await httpClient.get<EventApiResponse>('/admin/event-requests', {
+      const response = await httpClient.get<EventRequestsApiResponse>('/admin/event-requests', {
         params
       });
       return response.data.data;

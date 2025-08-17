@@ -65,7 +65,7 @@ export default function SessionManagement() {
     setEditLoading(true);
     try {
       const session = await sessionService.getSessionById(sessionId);
-      setSelectedSession(session);
+      setSelectedSession(session as any);
       setShowEditModal(true);
     } finally {
       setEditLoading(false);
@@ -155,8 +155,8 @@ export default function SessionManagement() {
                     </tr>
                   </thead>
             <tbody className="divide-y divide-pink-50">
-                    {sessions.map((session: any, index: number) => {
-                      const statusConfig = getStatusConfig(session.status);
+                    {sessions.map((session, index: number) => {
+                      const statusConfig = getStatusConfig(session.status as 'live' | 'upcoming' | 'completed');
                       return (
                   <tr key={session._id || session.id} className={`hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-pink-50/50 transition-all ${index % 2 === 0 ? 'bg-white' : 'bg-pink-50'} animate-fadeInUp`} style={{ animationDelay: `${index * 0.05}s` }}>
                     <td className="px-6 py-4 whitespace-nowrap font-bold text-purple-900">{session.title}</td>
@@ -172,7 +172,31 @@ export default function SessionManagement() {
                           <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-wrap gap-2">
                               <button
-                                onClick={() => { setSelectedSession(session); setShowDetailsModal(true); }}
+                                onClick={() => { 
+                                  const sessionWithDate: Session = {
+                                    id: parseInt(session.id) || 0,
+                                    _id: session._id,
+                                    title: session.title,
+                                    instructor: session.instructor || '',
+                                    course: session.course || '',
+                                    date: session.startTime ? new Date(session.startTime).toLocaleDateString() : '',
+                                    time: session.startTime ? new Date(session.startTime).toLocaleTimeString() : '',
+                                    duration: session.duration?.toString() || '',
+                                    maxAttendees: session.maxAttendees || 0,
+                                    description: session.description || '',
+                                    tags: session.tags || [],
+                                    difficulty: session.difficulty || 'beginner',
+                                    status: (session.status as 'upcoming' | 'live' | 'completed') || 'upcoming',
+                                    isLive: session.isLive || false,
+                                    hasRecording: session.hasRecording || false,
+                                    recordingUrl: session.recordingUrl,
+                                    attendees: session.attendees || 0,
+                                    attendeeList: session.attendeeList,
+                                    startTime: session.startTime
+                                  };
+                                  setSelectedSession(sessionWithDate); 
+                                  setShowDetailsModal(true); 
+                                }}
                           className="p-3 bg-purple-50 text-purple-600 hover:bg-pink-100 rounded-xl transition-all border border-pink-100 hover:border-pink-200 hover:scale-110 transform min-w-[40px]"
                                 title="View"
                               >

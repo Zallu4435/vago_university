@@ -96,7 +96,7 @@ const CommunicationManagement: React.FC = () => {
       icon: <Archive size={16} />,
       label: 'Archive',
       onClick: handleArchiveMessage,
-      color: 'gray' as const,
+      color: 'blue' as const,
     },
     {
       icon: <Trash2 size={16} />,
@@ -229,7 +229,12 @@ const CommunicationManagement: React.FC = () => {
                 <>
                   {activeTab === 'inbox' && !isLoadingInbox && inboxMessages.length > 0 && (
                     <>
-                      <ApplicationsTable data={inboxMessages as any} columns={inboxColumns as any} actions={inboxActions as any} />
+                      <ApplicationsTable data={inboxMessages.filter(msg => msg.id).map(msg => ({ 
+                        ...msg, 
+                        id: msg.id!,
+                        sender: { ...msg.sender, id: msg.sender.id! },
+                        recipients: msg.recipients.map(recipient => ({ ...recipient, id: recipient.id! }))
+                      }))} columns={inboxColumns} actions={inboxActions} />
                       <Pagination
                         page={page}
                         totalPages={totalInboxPages}
@@ -243,7 +248,12 @@ const CommunicationManagement: React.FC = () => {
                   )}
                   {activeTab === 'sent' && !isLoadingSent && sentMessages.length > 0 && (
                     <>
-                      <ApplicationsTable data={sentMessages as any} columns={sentColumns as any} actions={sentActions as any} />
+                      <ApplicationsTable data={sentMessages.filter(msg => msg.id).map(msg => ({ 
+                        ...msg, 
+                        id: msg.id!,
+                        sender: { ...msg.sender, id: msg.sender.id! },
+                        recipients: msg.recipients.map(recipient => ({ ...recipient, id: recipient.id! }))
+                      }))} columns={sentColumns} actions={sentActions} />
                       <Pagination
                         page={page}
                         totalPages={totalSentPages}

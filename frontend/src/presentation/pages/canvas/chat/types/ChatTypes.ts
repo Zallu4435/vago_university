@@ -44,6 +44,7 @@ export interface ForwardedFrom {
 
 export interface Message {
   id: string;
+  _id?: string;
   chatId: string;
   senderId: string;
   senderName: string;
@@ -64,6 +65,7 @@ export interface Message {
   deletedFor?: string[];
   isDeleted?: boolean;
   deletedForEveryone?: boolean;
+  time?: string;
   attachments?: {
     id: string;
     type: 'image' | 'document' | 'audio' | 'video' | 'file';

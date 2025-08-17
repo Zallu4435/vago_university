@@ -97,7 +97,7 @@ export class ApproveEventRequestUseCase implements IApproveEventRequestUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new InvalidEventRequestIdError(params.id);
     }
-    const eventRequestDetails: EventRequestDetails | null = await this.eventsRepository.getEventRequestDetails(params.id);
+    const eventRequestDetails: EventRequestDocument | null = await this.eventsRepository.getEventRequestDetails(params.id);
     if (!eventRequestDetails) {
       throw new EventRequestNotFoundError(params.id);
     }
@@ -116,7 +116,7 @@ export class RejectEventRequestUseCase implements IRejectEventRequestUseCase {
     if (!mongoose.isValidObjectId(params.id)) {
       throw new InvalidEventRequestIdError(params.id);
     }
-    const eventRequestDetails: EventRequestDetails | null = await this.eventsRepository.getEventRequestDetails(params.id);
+    const eventRequestDetails: EventRequestDocument | null = await this.eventsRepository.getEventRequestDetails(params.id);
     if (!eventRequestDetails) {
       throw new EventRequestNotFoundError(params.id);
     }
@@ -135,19 +135,22 @@ export class GetEventRequestDetailsUseCase implements IGetEventRequestDetailsUse
     if (!mongoose.isValidObjectId(params.id)) {
       throw new InvalidEventRequestIdError(params.id);
     }
-    const eventRequest: EventRequestDetails | null = await this.eventsRepository.getEventRequestDetails(params.id);
+    const eventRequest: EventRequestDocument | null = await this.eventsRepository.getEventRequestDetails(params.id);
     if (!eventRequest) {
       throw new EventRequestNotFoundError(params.id);
     }
-    if (!eventRequest.eventId) {
+    if (!eventRequest.eventId || typeof eventRequest.eventId === 'string') {
+      throw new AssociatedEventNotFoundError();
+    }
+    if (!eventRequest.userId || typeof eventRequest.userId === 'string') {
       throw new AssociatedEventNotFoundError();
     }
     return {
       eventRequest: {
         id: eventRequest._id,
         status: eventRequest.status,
-        createdAt: eventRequest.createdAt,
-        updatedAt: eventRequest.updatedAt,
+        createdAt: eventRequest.createdAt.toISOString(),
+        updatedAt: eventRequest.updatedAt.toISOString(),
         whyJoin: eventRequest.whyJoin,
         additionalInfo: eventRequest.additionalInfo || "",
         event: {
@@ -156,15 +159,13 @@ export class GetEventRequestDetailsUseCase implements IGetEventRequestDetailsUse
           description: eventRequest.eventId.description,
           date: eventRequest.eventId.date,
           location: eventRequest.eventId.location,
-          participantsCount: eventRequest.eventId.participantsCount,
+          participantsCount: eventRequest.eventId.participants,
         },
-        user: eventRequest.userId
-          ? {
-            id: eventRequest.userId._id,
-            name: eventRequest.userId.name,
-            email: eventRequest.userId.email,
-          }
-          : undefined,
+        user: {
+          id: eventRequest.userId._id,
+          name: `${eventRequest.userId.firstName} ${eventRequest.userId.lastName}`,
+          email: eventRequest.userId.email,
+        },
       },
     };
   }

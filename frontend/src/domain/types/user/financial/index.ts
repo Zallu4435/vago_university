@@ -37,7 +37,7 @@ export interface StudentFinancialInfo {
     term?: string;
     status?: 'Pending' | 'Paid';
   }>;
-  history: any[];
+  history: unknown[];
   financialAidStatus?: string;
 }
 

@@ -83,7 +83,7 @@ const PaymentManagement: React.FC = () => {
       }
       setShowActionModal(false);
       fetchData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to update application:', err);
     }
   };
@@ -288,8 +288,8 @@ const PaymentManagement: React.FC = () => {
                 <>
                   <ApplicationsTable
                     data={payments.map((item: Payment) => ({ ...item, _id: item._id || item.id }))}
-                    columns={paymentColumns as any}
-                    actions={paymentActions as any}
+                    columns={paymentColumns}
+                    actions={paymentActions}
                   />
                   <Pagination
                     page={page}

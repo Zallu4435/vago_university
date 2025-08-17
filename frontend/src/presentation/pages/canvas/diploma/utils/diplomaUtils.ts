@@ -12,7 +12,7 @@ export const getChapterTypeIcon = (type: ChapterType): IconType => {
   }
 };
 
-export const getChapterTypeColor = (type: ChapterType, styles: any): string => {
+export const getChapterTypeColor = (type: ChapterType, styles: { status: { info: string; success: string; warning: string }; accentSecondary: string }): string => {
   switch (type) {
     case 'video': return styles?.status.info;
     case 'interactive': return styles?.status.success;

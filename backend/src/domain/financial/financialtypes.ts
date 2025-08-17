@@ -6,24 +6,24 @@ export interface ChargeProps {
   description: string;
   amount: number;
   term: string;
-  dueDate: Date;
+  dueDate: string;
   applicableFor: string;
   createdBy?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: string;
+  updatedAt?: string;
   status?: "Active" | "Inactive";
 }
 
 export interface PaymentProps {
   _id?: mongoose.Types.ObjectId;
   studentId: string;
-  date: Date;
+  date: string;
   description: string;
   method: "Credit Card" | "Bank Transfer" | "Financial Aid" | "Razorpay" | "stripe";
   amount: number;
   status: "Completed" | "Pending" | "Failed";
   receiptUrl?: string;
   metadata?: Record<string, unknown>;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: string;
+  updatedAt?: string;
 } 

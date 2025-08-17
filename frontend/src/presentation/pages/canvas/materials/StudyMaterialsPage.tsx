@@ -47,7 +47,7 @@ const StudyMaterialsPage: React.FC = () => {
     }
   }, [shouldFetch, getMaterials]);
 
-  const handleDownload = async (material: any): Promise<void> => {
+  const handleDownload = async (material: Material): Promise<void> => {
     try {
       const materialData = material.props || material;
       await downloadMaterial(materialData.id);

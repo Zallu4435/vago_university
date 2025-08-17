@@ -4,6 +4,7 @@ import HealthConditionForm from './HealthConditionForm';
 import HealthConditionTable from './HealthConditionTable';
 import { Button } from '../../base/Button';
 import { radioOptions } from './options';
+import { getNestedError } from '../../../../shared/utils/formErrors';
 import type { HealthCondition, OtherInfoOneProps } from '../../../../domain/types/application';
 
 const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
@@ -130,8 +131,8 @@ const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
                 </label>
               </div>
             ))}
-            {(errors.health as any)?.hasHealthSupport && (
-              <p className="text-sm text-red-700 mt-2">{(errors.health as any).hasHealthSupport.message}</p>
+            {getNestedError(errors, 'health.hasHealthSupport') && (
+              <p className="text-sm text-red-700 mt-2">{getNestedError(errors, 'health.hasHealthSupport')}</p>
             )}
           </div>
         </div>
@@ -156,11 +157,11 @@ const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
               onRemove={handleRemoveCondition}
               onEdit={handleEditClick}
             />
-            {(errors.health as any)?.conditions && (
-              <p className="text-sm text-red-700 mt-2">{(errors.health as any).conditions.message}</p>
+            {getNestedError(errors, 'health.conditions') && (
+              <p className="text-sm text-red-700 mt-2">{getNestedError(errors, 'health.conditions')}</p>
             )}
-            {(errors.health as any)?.medicalConditions && (
-              <p className="text-sm text-red-700 mt-2">{(errors.health as any).medicalConditions.message}</p>
+            {getNestedError(errors, 'health.medicalConditions') && (
+              <p className="text-sm text-red-700 mt-2">{getNestedError(errors, 'health.medicalConditions')}</p>
             )}
           </>
         )}

@@ -9,13 +9,13 @@ import ErrorMessage from '../../../../shared/components/ErrorMessage';
 interface AssignmentListProps {
   assignments: Assignment[];
   isLoading: boolean;
-  error: any;
+  error: unknown;
   setSelectedAssignment: (assignment: Assignment | null) => void;
   setActiveTab: (tab: string) => void;
   setShowCreateModal: (show: boolean) => void;
   onDelete: (id: string) => Promise<{ success: boolean; error?: string }>;
   isDeleting: boolean;
-  onUpdate: (id: string, data: Partial<Assignment>) => Promise<{ success: boolean; error?: string }>;
+  onUpdate: (id: string, data: Partial<Omit<Assignment, 'files'>> & { files?: File[] }) => Promise<{ success: boolean; error?: string }>;
   isUpdating: boolean;
   searchTerm: string;
   setSearchTerm: (v: string) => void;
@@ -99,12 +99,17 @@ export default function AssignmentList({
   }
 
   if (error) {
-    return <ErrorMessage message={error.message || 'Please try again later'} />;
+    let errorMsg = 'Please try again later';
+    if (error instanceof Error) {
+      errorMsg = error.message;
+    } else if (typeof error === 'string') {
+      errorMsg = error;
+    }
+    return <ErrorMessage message={errorMsg} />;
   }
 
   return (
     <div className="space-y-8">
-      {/* Improved Search and Filter Section */}
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6 md:p-8 mb-6">
         <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-6">
           {/* Search */}

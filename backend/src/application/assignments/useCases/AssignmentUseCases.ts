@@ -9,6 +9,8 @@ import {
   GetSubmissionByIdRequestDTO,
   ReviewSubmissionRequestDTO,
   DownloadSubmissionRequestDTO,
+  DownloadFileRequestDTO,
+  DownloadSubmissionFileRequestDTO,
 } from '../../../domain/assignments/dtos/AssignmentRequestDTOs';
 import {
   GetAssignmentsResponseDTO,
@@ -62,6 +64,14 @@ export interface IReviewSubmissionUseCase {
 
 export interface IDownloadSubmissionUseCase {
   execute(params: DownloadSubmissionRequestDTO): Promise<ResponseDTO<Buffer>>;
+}
+
+export interface IDownloadFileUseCase {
+  execute(params: DownloadFileRequestDTO): Promise<ResponseDTO<{ buffer: Buffer; contentType: string; fileName: string }>>;
+}
+
+export interface IDownloadSubmissionFileUseCase {
+  execute(params: DownloadSubmissionFileRequestDTO): Promise<ResponseDTO<{ buffer: Buffer; contentType: string; fileName: string }>>;
 }
 
 export interface IGetAnalyticsUseCase {
@@ -317,5 +327,91 @@ export class GetAnalyticsUseCase implements IGetAnalyticsUseCase {
   async execute(): Promise<ResponseDTO<AnalyticsResponseDTO>> {
     const analytics = await this.assignmentRepository.getAnalytics();
     return { data: analytics, success: true };
+  }
+}
+
+export class DownloadFileUseCase implements IDownloadFileUseCase {
+  constructor(private assignmentRepository: IAssignmentRepository) { }
+
+  async execute(params: DownloadFileRequestDTO): Promise<ResponseDTO<{ buffer: Buffer; contentType: string; fileName: string }>> {
+    // Validate input parameters
+    if (!params.fileUrl || typeof params.fileUrl !== 'string') {
+      return { data: { error: 'File URL is required' }, success: false };
+    }
+
+    if (!params.fileName || typeof params.fileName !== 'string') {
+      return { data: { error: 'File name is required' }, success: false };
+    }
+
+    // Clean the file name
+    let cleanFileName = params.fileName.replace(/\s+/g, '_');
+    cleanFileName = cleanFileName.replace(/[^a-zA-Z0-9._-]/g, '');
+    cleanFileName = cleanFileName.replace(/"/g, '');
+
+    try {
+      const fetch = require('node-fetch');
+      const response = await fetch(params.fileUrl);
+
+      if (!response.ok) {
+        return { data: { error: 'Failed to fetch file from URL' }, success: false };
+      }
+
+      const buffer = await response.buffer();
+      const contentType = response.headers.get('content-type') || 'application/octet-stream';
+
+      return { 
+        data: { 
+          buffer, 
+          contentType, 
+          fileName: cleanFileName 
+        }, 
+        success: true 
+      };
+    } catch (error) {
+      return { data: { error: 'Download failed' }, success: false };
+    }
+  }
+}
+
+export class DownloadSubmissionFileUseCase implements IDownloadSubmissionFileUseCase {
+  constructor(private assignmentRepository: IAssignmentRepository) { }
+
+  async execute(params: DownloadSubmissionFileRequestDTO): Promise<ResponseDTO<{ buffer: Buffer; contentType: string; fileName: string }>> {
+    // Validate input parameters
+    if (!params.fileUrl || typeof params.fileUrl !== 'string') {
+      return { data: { error: 'File URL is required' }, success: false };
+    }
+
+    if (!params.fileName || typeof params.fileName !== 'string') {
+      return { data: { error: 'File name is required' }, success: false };
+    }
+
+    // Clean the file name
+    let cleanFileName = params.fileName.replace(/\s+/g, '_');
+    cleanFileName = cleanFileName.replace(/[^a-zA-Z0-9._-]/g, '');
+    cleanFileName = cleanFileName.replace(/"/g, '');
+
+    try {
+      const fetch = require('node-fetch');
+      const response = await fetch(params.fileUrl);
+
+      if (!response.ok) {
+        return { data: { error: 'Failed to fetch file from URL' }, success: false };
+      }
+
+      const buffer = await response.buffer();
+      const contentType = response.headers.get('content-type') || 'application/octet-stream';
+
+      return { 
+        data: { 
+          buffer, 
+          contentType, 
+          fileName: cleanFileName 
+        }, 
+        success: true 
+      };
+    } catch (error) {
+      return { data: { error: 'Download failed' }, success: false };
+    }
   }
 }

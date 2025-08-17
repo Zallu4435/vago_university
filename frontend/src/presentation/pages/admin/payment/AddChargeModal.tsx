@@ -14,12 +14,12 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
     formState: { errors, isSubmitting },
     reset,
   } = useForm<ChargeFormDataRaw>({
-    resolver: zodResolver(chargeSchema) as any,
+    resolver: zodResolver(chargeSchema),
     defaultValues: initialValues
       ? {
         title: initialValues.title || '',
         description: initialValues.description || '',
-        amount: initialValues.amount !== undefined ? initialValues.amount : 0,
+        amount: initialValues.amount !== undefined ? String(initialValues.amount) : '0',
         term: initialValues.term || '',
         dueDate: initialValues.dueDate || '',
         applicableFor: initialValues.applicableFor || '',
@@ -27,7 +27,7 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
       : {
         title: '',
         description: '',
-        amount: 0,
+        amount: '0',
         term: '',
         dueDate: '',
         applicableFor: '',
@@ -40,7 +40,7 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
       reset({
         title: initialValues.title || '',
         description: initialValues.description || '',
-        amount: initialValues.amount !== undefined ? initialValues.amount : 0,
+        amount: initialValues.amount !== undefined ? String(initialValues.amount) : '0',
         term: initialValues.term || '',
         dueDate: initialValues.dueDate || '',
         applicableFor: initialValues.applicableFor || '',
@@ -49,7 +49,7 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
       reset({
         title: '',
         description: '',
-        amount: 0,
+        amount: '0',
         term: '',
         dueDate: '',
         applicableFor: '',
@@ -125,7 +125,7 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
           </div>
         </div>
 
-        <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-purple-100 mb-4 flex items-center gap-2">
               <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
@@ -267,7 +267,6 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
               <button
                 type="submit"
                 disabled={isSubmitting}
-                onClick={handleSubmit(handleFormSubmit)}
                 className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-blue-500/50 flex items-center justify-center"
               >
                 {isSubmitting ? (
@@ -281,7 +280,7 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
               </button>
             </div>
           </div>
-        </div>
+        </form>
       </div>
 
       <style>{`

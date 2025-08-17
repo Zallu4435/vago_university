@@ -11,7 +11,7 @@ interface ActionConfig<T> {
   icon: React.ReactNode | ((item: T) => React.ReactNode);
   label: string | ((item: T) => string);
   onClick: (item: T) => void;
-  color: 'blue' | 'green' | 'red';
+  color: 'blue' | 'green' | 'red' | 'yellow';
   disabled?: boolean | ((item: T) => boolean);
 }
 
@@ -22,7 +22,9 @@ interface ApplicationsTableProps<T> {
   formatDate?: (date: string) => string;
 }
 
-const ApplicationsTable = <T extends { _id: string }>({
+export type { ColumnConfig };
+
+const ApplicationsTable = <T extends { _id?: string; id?: string }>({
   data,
   columns,
   actions = [],
@@ -48,7 +50,7 @@ const ApplicationsTable = <T extends { _id: string }>({
           </thead>
           <tbody className="divide-y divide-purple-500/10">
             {data.map((item) => (
-              <tr key={item._id} className="hover:bg-purple-900/10 transition-all duration-200">
+              <tr key={item._id || item.id || Math.random().toString()} className="hover:bg-purple-900/10 transition-all duration-200">
                 {columns.map((column, index) => (
                   <td
                     key={index}
@@ -104,6 +106,7 @@ const ActionButton = ({ icon, label, onClick, color, disabled }: ActionConfig<an
     blue: 'text-blue-400 hover:bg-blue-900/30 border-blue-500/30 focus:ring-blue-500/50',
     green: 'text-green-400 hover:bg-green-900/30 border-green-500/30 focus:ring-green-500/50',
     red: 'text-red-400 hover:bg-red-900/30 border-red-500/30 focus:ring-red-500/50',
+    yellow: 'text-yellow-400 hover:bg-yellow-900/30 border-yellow-500/30 focus:ring-yellow-500/50',
   };
 
   const resolvedLabel = typeof label === 'function' ? label({}) : label;

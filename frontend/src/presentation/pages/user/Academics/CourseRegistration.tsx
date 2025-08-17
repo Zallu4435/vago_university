@@ -49,8 +49,20 @@ export default function CourseRegistration({ courses, enrolledCredits, waitliste
           section: '001',
           reason: enrollmentData.reason,
         });
-      } catch (error: any) {
-        const errorMsg = error?.response?.data?.error || error?.response?.data?.data?.error || error?.message || 'Failed to enroll';
+      } catch (error: unknown) {
+        let errorMsg = 'Failed to enroll';
+        if (error && typeof error === 'object' && 'response' in error) {
+          const response = (error as { response?: { data?: { error?: string; data?: { error?: string } } } }).response;
+          errorMsg =
+            response?.data?.error ||
+            response?.data?.data?.error ||
+            (error as { message?: string }).message ||
+            errorMsg;
+        } else if (error instanceof Error) {
+          errorMsg = error.message;
+        } else if (typeof error === 'string') {
+          errorMsg = error;
+        }
         toast.error(errorMsg);
         console.error('Failed to enroll in course:', error);
       }

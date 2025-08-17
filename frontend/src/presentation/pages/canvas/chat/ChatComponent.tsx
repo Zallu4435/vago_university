@@ -154,7 +154,7 @@ export const ChatComponent: React.FC = () => {
     setSelectedChatId(chatId);
     setReplyToMessage(null);
     
-    const chatArray: Chat[] = Array.isArray(chats) ? chats as Chat[] : ((chats as any)?.data as Chat[] || []);
+    const chatArray: Chat[] = Array.isArray(chats) ? chats as Chat[] : ((chats as unknown as { data: Chat[] })?.data as Chat[] || []);
     if (!chatId || !chatArray) return;
     
     try {
@@ -315,7 +315,7 @@ export const ChatComponent: React.FC = () => {
   }) => {
     if (!flatChat || !currentUser) return;
     try {
-      await chatMutations.updateGroupSettings.mutateAsync({ chatId: selectedChatId!, updates });
+      await chatMutations.updateGroupSettings.mutateAsync(updates.settings || {});
       toast.success('Group settings updated');
     } catch (error) {
       console.error('Error updating group:', error);
@@ -467,20 +467,24 @@ export const ChatComponent: React.FC = () => {
   useEffect(() => {
     if (!socketRef.current || !currentUser?.id) return;
 
-    const handleNewMessage = (message: any) => {
+    const handleNewMessage = (message: Message) => {
       const normalizedMessage = { ...message, id: message.id || message._id };
       console.log('[Socket.IO] Received real-time message:', normalizedMessage);
       
-      if (normalizedMessage.chatId === selectedChatId) {
+      if (normalizedMessage.chatId === selectedChatId && normalizedMessage.id) {
+        const validMessage: Message = {
+          ...normalizedMessage,
+          id: normalizedMessage.id
+        };
         setAllMessages(prev => {
-          const idx = prev.findIndex(m => m.id === normalizedMessage.id);
+          const idx = prev.findIndex(m => m.id === validMessage.id);
           if (idx !== -1) {
             const updated = [...prev];
-            updated[idx] = normalizedMessage;
+            updated[idx] = validMessage;
             console.log('[Socket.IO] Updated allMessages (replaced):', updated);
             return updated;
           }
-          const updated = [...prev, normalizedMessage];
+          const updated = [...prev, validMessage];
           console.log('[Socket.IO] Updated allMessages (appended):', updated);
           return updated;
         });
@@ -492,7 +496,7 @@ export const ChatComponent: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['chats'] });
     };
 
-    const handleChatUpdate = (updatedChat: any) => {
+    const handleChatUpdate = (updatedChat: Chat) => {
       console.log('[Socket.IO] Received chat update:', updatedChat);
       queryClient.invalidateQueries({ queryKey: ['chats'] });
     };
@@ -765,9 +769,10 @@ export const ChatComponent: React.FC = () => {
                   formData.append('participants', JSON.stringify(params.participants));
                   if (params.settings) formData.append('settings', JSON.stringify(params.settings));
                   formData.append('avatar', params.avatar);
-                  newGroup = await chatMutations.createGroupChat.mutateAsync(formData);
+                  newGroup = await chatMutations.createGroupChatWithAvatar.mutateAsync(formData);
                 } else {
-                  newGroup = await chatMutations.createGroupChat.mutateAsync({ ...params, creatorId: currentUser?.id || '' });
+                  const { avatar, ...paramsWithoutAvatar } = params;
+                  newGroup = await chatMutations.createGroupChat.mutateAsync({ ...paramsWithoutAvatar, creatorId: currentUser?.id || '' });
                 }
                 setSelectedChatId(newGroup.id);
                 setAllMessages([]);

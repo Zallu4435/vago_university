@@ -14,7 +14,7 @@ class NotificationService {
   }): Promise<NotificationApiResponse> {
     try {
       const endpoint = '/admin/notifications';
-      const response = await httpClient.get<Notification>(endpoint, {
+      const response = await httpClient.get<{ data: NotificationApiResponse }>(endpoint, {
         params: filters,
       });
       return response.data.data;
@@ -28,7 +28,7 @@ class NotificationService {
 
   async getNotificationDetails(id: string): Promise<Notification> {
     try {
-      const response = await httpClient.get<Notification>(`/admin/notifications/${id}`);
+      const response = await httpClient.get<{ data: Notification }>(`/admin/notifications/${id}`);
       return response.data.data;
     } catch (error: unknown) {
       if (isAxiosErrorWithApiError(error)) {

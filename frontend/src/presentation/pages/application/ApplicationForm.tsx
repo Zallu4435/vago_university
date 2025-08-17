@@ -15,7 +15,8 @@ import type {
   AchievementSection,
   OtherInformationSection,
   DeclarationSection,
-  DocumentUploadSection
+  DocumentUploadSection,
+  Achievement
 } from '../../../domain/types/application';
 import Other_Info from '../../components/application/Other_Information/Other_Info';
 import { FormSubmissionFlow } from '../../components/application/FormSubmissionFlow';
@@ -45,9 +46,25 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
   const [isInitializing, setIsInitializing] = useState(true);
   const [validationAttempted, setValidationAttempted] = useState(false);
 
-  const personalFormRef = useRef<{ trigger: () => Promise<boolean>, getValues: () => any }>(null);
+  const personalFormRef = useRef<{ trigger: () => Promise<boolean>, getValues: () => PersonalInfo }>(null);
   const educationFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
-  const achievementsFormRef = useRef<{ trigger: () => Promise<boolean>; getValues: () => any }>(null);
+  const achievementsFormRef = useRef<{ trigger: () => Promise<boolean>; getValues: () => { questions: { 1: string; 2: string; 3: string; 4: string; 5: string; }; hasNoAchievements: boolean; achievements?: any[] } }>(null);
+
+  // Type adapter to convert between AchievementSection and component format
+  const adaptAchievementsData = (data: AchievementSection | undefined) => {
+    if (!data) return undefined;
+    return {
+      questions: {
+        1: data.questions[1] || '',
+        2: data.questions[2] || '',
+        3: data.questions[3] || '',
+        4: data.questions[4] || '',
+        5: data.questions[5] || '',
+      },
+      hasNoAchievements: data.hasNoAchievements,
+      achievements: data.achievements,
+    };
+  };
   const documentsFormRef = useRef<{ trigger: () => Promise<boolean>; getValues: () => DocumentUploadSection }>(null);
   const choiceOfStudyRef = useRef<{ trigger: () => Promise<boolean>; getValues: () => ProgrammeChoice[] }>(null);
 
@@ -260,7 +277,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
     }
   };
 
-  const handleUpdateAchievements = async (data: AchievementSection) => {
+  const handleUpdateAchievements = async (data: { questions: { 1: string; 2: string; 3: string; 4: string; 5: string; }; hasNoAchievements: boolean; achievements?: Achievement[] | undefined }) => {
     if (isInitializing) {
       return;
     }
@@ -271,9 +288,9 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
 
     try {
       setSaveError(null);
-      const payload = {
+      const payload: AchievementSection = {
         questions: data.questions,
-        achievements: data.achievements,
+        achievements: data.achievements || [],
         hasNoAchievements: data.hasNoAchievements,
       };
       await saveAchievements({ applicationId: formData.applicationId, data: payload });
@@ -286,7 +303,8 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
     }
   };
 
-  const handleUpdateOtherInformation = async (data: OtherInformationSection) => {
+  const handleUpdateOtherInformation = (data: unknown) => {
+    const otherInfoData = data as OtherInformationSection;
     if (isInitializing) {
       return;
     }
@@ -296,9 +314,9 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
     }
     try {
       setSaveError(null);
-      setValue('otherInformation', data, { shouldValidate: false });
-      await saveOtherInfo({ applicationId: formData.applicationId, data });
-      calculateFormProgress({ ...formData, otherInformation: data });
+      setValue('otherInformation', otherInfoData, { shouldValidate: false });
+      saveOtherInfo({ applicationId: formData.applicationId, data: otherInfoData });
+      calculateFormProgress({ ...formData, otherInformation: otherInfoData });
     } catch (error) {
       console.error('Error saving otherInformation:', error);
       setSaveError('Failed to update other information. Please try again.');
@@ -555,15 +573,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
     return (
       <FormSubmissionFlow
         formData={formData}
-        onConfirm={() => {
-          setShowSummary(false);
-          setShowPayment(true);
-        }}
         onBackToForm={() => setShowSummary(false)}
-        onPaymentComplete={() => {
-          setShowSummary(false);
-          setShowPayment(true);
-        }}
         onLogout={handleLogout}
       />
     );
@@ -576,7 +586,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
           ...formData,
           registerId: user?.id
         }}
-        onPaymentComplete={() => {
+        onBackToForm={() => {
           setShowPayment(false);
           setActiveTab('personalDetails');
           setApplicationId(undefined);
@@ -696,7 +706,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
           )}
           {activeTab === 'achievements' && (
             <Achievements
-              initialData={formData.achievements}
+              initialData={adaptAchievementsData(formData.achievements)}
               onSave={handleUpdateAchievements}
               ref={achievementsFormRef}
             />

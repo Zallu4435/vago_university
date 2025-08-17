@@ -14,7 +14,6 @@ import {
   UpdateGroupAdminRequestDTO,
   UpdateGroupSettingsRequestDTO,
   UpdateGroupInfoRequestDTO,
-  LeaveGroupRequestDTO,
   EditMessageRequestDTO,
   DeleteMessageRequestDTO,
   ReplyToMessageRequestDTO,
@@ -37,7 +36,8 @@ import { User as UserModel } from "../../database/mongoose/auth/user.model";
 import { Faculty as FacultyModel } from "../../database/mongoose/auth/faculty.model";
 import { MessageStatus } from "../../../domain/chat/entities/Message";
 import { MessageType } from "../../../domain/chat/entities/MessageType";
-import { ChatType } from "../../../domain/chat/entities/Chat";
+import { ChatFilter, ChatType } from "../../../domain/chat/entities/Chat";
+
 
 export class ChatRepository implements IChatRepository {
   async getChats(params: GetChatsRequestDTO): Promise<GetChatsResponseDTO> {
@@ -139,7 +139,7 @@ export class ChatRepository implements IChatRepository {
       const users = await UserModel.find(userSearchQuery).select('_id firstName lastName email profilePicture').lean();
       const matchingUserIds = users.map(user => user._id.toString());
 
-      let searchQuery: any = {
+      let searchQuery: ChatFilter = {
         participants: {
           $in: [userId, ...matchingUserIds]
         }
@@ -268,7 +268,7 @@ export class ChatRepository implements IChatRepository {
       const { chatId, userId, page = 1, limit = 20, before } = params;
       const skip = (page - 1) * limit;
 
-      const query: any = {
+      const query: ChatFilter = {
         chatId,
         $or: [
           { deletedFor: { $exists: false } },
@@ -942,7 +942,7 @@ export class ChatRepository implements IChatRepository {
       if (!chat) throw new Error('Chat not found');
       if (chat.type !== ChatType.Group) throw new Error('Can only update info for group chats');
       if (!chat.admins.includes(updatedBy)) throw new Error('Only admins can update group info');
-      const update: any = {};
+      const update: Record<string, string | undefined> = {};
       if (name !== undefined) update.name = name;
       if (description !== undefined) update.description = description;
       if (avatar !== undefined) update.avatar = avatar;

@@ -53,10 +53,13 @@ export const userAssignmentService = {
       );
 
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Service: Submission error:', error);
-      console.error('Service: Error response:', error.response?.data);
-      console.error('Service: Error status:', error.response?.status);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: unknown; status?: number } };
+        console.error('Service: Error response:', axiosError.response?.data);
+        console.error('Service: Error status:', axiosError.response?.status);
+      }
       throw error;
     }
   },

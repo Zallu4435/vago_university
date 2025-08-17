@@ -84,7 +84,7 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
     }
   };
 
-  const unreadCount = notifications.filter(n => !(n as any).isRead).length;
+  const unreadCount = notifications.filter(n => !(n).isRead).length;
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {

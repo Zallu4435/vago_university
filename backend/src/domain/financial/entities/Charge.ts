@@ -21,11 +21,11 @@ export class Charge {
     this._description = props.description;
     this._amount = props.amount;
     this._term = props.term;
-    this._dueDate = props.dueDate;
+    this._dueDate = new Date(props.dueDate);
     this._applicableFor = props.applicableFor;
     this._createdBy = props.createdBy;
-    this._createdAt = props.createdAt;
-    this._updatedAt = props.updatedAt;
+    this._createdAt = props.createdAt ? new Date(props.createdAt) : undefined;
+    this._updatedAt = props.updatedAt ? new Date(props.updatedAt) : undefined;
     this._status = props.status || "Active";
   }
 
@@ -36,7 +36,7 @@ export class Charge {
     if (props.amount <= 0) {
       throw new Error(FinancialErrorType.InvalidAmount);
     }
-    if (!(props.dueDate instanceof Date) || isNaN(props.dueDate.getTime())) {
+    if (!props.dueDate || isNaN(new Date(props.dueDate).getTime())) {
       throw new Error(FinancialErrorType.InvalidDueDate);
     }
     return new Charge(props);

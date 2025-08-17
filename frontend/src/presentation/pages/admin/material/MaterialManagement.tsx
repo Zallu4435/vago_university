@@ -120,7 +120,7 @@ const MaterialManagement: React.FC = () => {
 
   const handleSaveMaterial = async (formData: Partial<Material>) => {
     try {
-      let dataToSend: any = formData;
+      let dataToSend = formData;
       if (formData.file && formData.file instanceof File) {
         const fd = new FormData();
         Object.entries(formData).forEach(([key, value]) => {
@@ -130,16 +130,16 @@ const MaterialManagement: React.FC = () => {
             if (Array.isArray(value)) {
               value.forEach((v) => fd.append(key, v));
             } else {
-              fd.append(key, value as any);
+              fd.append(key, String(value));
             }
           }
         });
-        dataToSend = fd;
+        dataToSend = fd as any;
       }
       if (editingMaterial) {
         await updateMaterial({ id: editingMaterial.id, data: dataToSend });
       } else {
-        await createMaterial(dataToSend);
+        await createMaterial(dataToSend as any);
       }
       setShowMaterialModal(false);
       setEditingMaterial(null);
@@ -203,9 +203,7 @@ const MaterialManagement: React.FC = () => {
         setMaterialToToggle({ material, isRestricted: !material.isRestricted });
         setShowToggleWarning(true);
       },
-      color: 'yellow' as const,
-      customIcon: (material: MaterialWithId) => (material.isRestricted ? <FiUnlock size={16} /> : <FiLock size={16} />),
-      customLabel: (material: MaterialWithId) => (material.isRestricted ? 'Unrestrict Material' : 'Restrict Material'),
+      color: 'red' as const,
     },
   ];
 
@@ -304,16 +302,7 @@ const MaterialManagement: React.FC = () => {
                   <ApplicationsTable
                     data={paginatedMaterials}
                     columns={materialColumns}
-                    actions={materialActions.map((action: any) => {
-                      if ('customIcon' in action && 'customLabel' in action) {
-                        return {
-                          ...action,
-                          icon: (action as any).customIcon,
-                          label: (action as any).customLabel,
-                        };
-                      }
-                      return action;
-                    })}
+                    actions={materialActions}
                   />
                   <Pagination
                     page={page}

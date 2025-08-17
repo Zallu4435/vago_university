@@ -62,7 +62,7 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
     setChargeToEdit(charge);
     setEditModalOpen(true);
   };
-  const handleEditSubmit = (data: any) => {
+  const handleEditSubmit = (data: { title: string; description: string; amount: number; term: string; dueDate: string; applicableFor: string; }) => {
     if (chargeToEdit) {
       updateCharge({ id: chargeToEdit.id, data });
       setEditModalOpen(false);

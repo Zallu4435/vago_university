@@ -39,7 +39,6 @@ export interface ClubRequestProps {
   updatedAt?: Date;
 }
 
-// Interface for Mongoose model
 export interface Club {
   _id: string;
   name: string;

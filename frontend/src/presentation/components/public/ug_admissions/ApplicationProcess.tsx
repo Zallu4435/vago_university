@@ -53,7 +53,7 @@ const ApplicationProcess = () => {
     }
   ];
 
-  const handleStepClick = (stepId: any) => {
+  const handleStepClick = (stepId: number) => {
     setActiveStep(stepId);
   };
 

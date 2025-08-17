@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { PersonalParticularsFormProps } from '../../../../domain/types/application';
+import { PersonalParticularsFormProps, PersonalInfo } from '../../../../domain/types/application';
 import { PersonalSection } from './PersonalSection';
 import { AlternativeContactSection } from './AlternativeContactSection';
 import { personalFormSchema, PersonalFormData } from '../../../../domain/validation/PersonalFormSchema';
@@ -62,14 +62,14 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
 
   const { reset, formState: { errors, isDirty }, watch, trigger } = methods;
 
-  React.useImperativeHandle(triggerValidation, () => ({
+  React.useImperativeHandle(triggerValidation as React.Ref<{ trigger: () => Promise<boolean>; getValues: () => PersonalFormData }>, () => ({
     trigger: async () => {
       const isValid = await trigger();
       console.log('Trigger validation result:', { isValid, errors });
       return isValid;
     },
     getValues: () => methods.getValues(),
-  }));
+  }), [trigger, errors, methods]);
 
   useEffect(() => {
     console.log('PersonalParticularsForm: Received initialData:', initialData);
@@ -84,7 +84,7 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
     const subscription = watch((formData) => {
       
       if (isDirty && onChange) {
-        onChange(formData as any);
+        onChange(formData as unknown as PersonalInfo);
       }
     });
     

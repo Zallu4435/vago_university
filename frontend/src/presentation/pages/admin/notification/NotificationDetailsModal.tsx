@@ -98,7 +98,7 @@ const NotificationDetailsModal: React.FC<NotificationDetailsModalProps> = ({ isO
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-purple-100">{notification.title}</h2>
-                <p className="text-sm text-purple-300">Notification ID: {notification.id || 'N/A'}</p>
+                <p className="text-sm text-purple-300">Notification ID: {(notification.id as string) || 'N/A'}</p>
                 <div className="flex items-center mt-2">
                   <StatusBadge status={notification.status} />
                 </div>

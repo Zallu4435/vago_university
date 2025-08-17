@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FaEllipsisH, FaCalendar, FaUsers, FaCheckCircle, FaTrash } from 'react-icons/fa';
-import { Assignment } from '../types';
+import { Assignment } from '../types/index';
 import WarningModal from '../../../../components/common/WarningModal';
 
 interface AssignmentCardProps {

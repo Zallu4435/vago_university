@@ -66,7 +66,7 @@ const NotificationManagement: React.FC = () => {
   const handleViewNotification = async (notification: Notification) => {
     try {
       const details = await getNotificationDetails(notification._id);
-      setSelectedNotification(details?.notification);
+      setSelectedNotification(details?.notification as Notification | null);
       setShowNotificationDetailsModal(true);
     } catch (error) {
       console.error('Error fetching notification details:', error);
@@ -78,8 +78,16 @@ const NotificationManagement: React.FC = () => {
     try {
       await createNotification(data);
       setShowAddNotificationModal(false);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || error.message || 'Failed to send notification');
+    } catch (error: unknown) {
+      let message = 'Failed to send notification';
+      if (error && typeof error === 'object') {
+        if ('response' in error && error.response && typeof error.response === 'object' && 'data' in error.response && error.response.data && typeof error.response.data === 'object' && 'message' in error.response.data) {
+          message = (error.response.data as { message?: string }).message || message;
+        } else if ('message' in error && typeof error.message === 'string') {
+          message = error.message;
+        }
+      }
+      toast.error(message);
     }
   };
 
@@ -94,8 +102,12 @@ const NotificationManagement: React.FC = () => {
         await deleteNotification(itemToDelete);
         setShowWarningModal(false);
         setItemToDelete(null);
-      } catch (error: any) {
-        toast.error(error.message || 'Failed to delete notification');
+      } catch (error: unknown) {
+        let message = 'Failed to delete notification';
+        if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+          message = error.message;
+        }
+        toast.error(message);
       }
     }
   };

@@ -101,7 +101,8 @@ export default function InboxSection() {
         <div className={`lg:col-span-1 relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
           <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
           <div className="relative z-10 divide-y divide-amber-100/50">
-            {messages.map((message: Message) => {
+            {messages.filter(msg => msg.id).map((message) => {
+              const typedMessage = message as Message;
               // Get current user ID from Redux
               const currentUserId = user?.id;
               const currentUserRecipient = message.recipients.find(r => r.id === currentUserId);
@@ -113,7 +114,7 @@ export default function InboxSection() {
                   className={`p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${
                     selectedMessage?.id === message.id ? 'bg-orange-50/70' : ''
                   }`}
-                  onClick={() => handleMessageClick(message)}
+                  onClick={() => handleMessageClick(typedMessage)}
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -128,7 +129,7 @@ export default function InboxSection() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(message);
+                        handleDelete(typedMessage);
                       }}
                       className={`ml-2 ${styles.icon.secondary} hover:${styles.status.error} transition-colors duration-300`}
                     >

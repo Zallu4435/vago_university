@@ -4,7 +4,7 @@ import Submissions from './Submissions';
 import Analytics from './components/Analytics';
 import CreateAssignmentModal from './CreateAssignmentModal';
 import { useAssignmentManagement } from './hooks/useAssignmentManagement';
-import { NewAssignment, Submission } from './types';
+import { NewAssignment, Submission } from './types/index';
 import { assignmentService } from './services/assignmentService';
 
 export default function AssignmentManagement() {
@@ -142,12 +142,12 @@ export default function AssignmentManagement() {
                                         assignments={assignments}
                                         isLoading={isLoading}
                                         error={error}
-                                        setSelectedAssignment={setSelectedAssignment as any}
+                                        setSelectedAssignment={setSelectedAssignment}
                                         setActiveTab={setActiveTab}
                                         setShowCreateModal={setShowCreateModal}
                                         onDelete={handleDeleteAssignment}
                                         isDeleting={isDeleting}
-                                        onUpdate={handleUpdateAssignment as any}
+                                        onUpdate={handleUpdateAssignment}
                                         isUpdating={isUpdating}
                                         searchTerm={searchTerm}
                                         setSearchTerm={setSearchTerm}
@@ -201,7 +201,7 @@ export default function AssignmentManagement() {
                                 onSubmit={handleCreateAssignment}
                                 isLoading={isCreating}
                                 selectedAssignment={selectedAssignment}
-                                onUpdate={handleUpdateAssignment as any}
+                                onUpdate={handleUpdateAssignment}
                                 setActiveTab={setActiveTab}
                                 setSelectedAssignment={setSelectedAssignment}
                             />

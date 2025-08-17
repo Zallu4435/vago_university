@@ -18,6 +18,8 @@ export interface UserInfo {
   email: string;
   role: UserRole;
   status?: MessageStatus;
+  firstName?: string;
+  lastName?: string;
 }
 
 export interface Attachment {
@@ -81,3 +83,4 @@ export class Message {
     return this.isSender(userId) || this.isRecipient(userId);
   }
 }
+

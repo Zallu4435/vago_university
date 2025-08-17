@@ -31,7 +31,19 @@ export async function expressAdapter(
       }
     }
 
-    res.status(response.statusCode).json(response.body);
+    // Set custom headers if present
+    if (response.headers) {
+      for (const [key, value] of Object.entries(response.headers)) {
+        res.setHeader(key, value as string);
+      }
+    }
+
+    // Handle file downloads (binary data)
+    if (response.body && response.body.data && Buffer.isBuffer(response.body.data)) {
+      res.status(response.statusCode).send(response.body.data);
+    } else {
+      res.status(response.statusCode).json(response.body);
+    }
   } catch (error) {
     next(error); // Let errors propagate to the global error handler
   }

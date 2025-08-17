@@ -13,7 +13,11 @@ import { TeamModel } from '../../database/mongoose/models/sports.model';
 import { Diploma } from '../../database/mongoose/models/diploma.model';
 import { CampusEventModel } from '../../database/mongoose/models/events/CampusEventModel';
 import { ClubModel } from '../../database/mongoose/models/clubs/ClubModel';
-import { PerformanceRawData } from '../../../domain/admindashboard/entities/AdminDashboardTypes';
+import { PerformanceRawData, RecentAdmissionRaw, RecentPaymentRaw, RecentEnquiryRaw, RecentNotificationRaw } from '../../../domain/admindashboard/entities/AdminDashboardTypes';
+
+// Type for converting ObjectIds to strings
+type WithStringId<T> = Omit<T, "_id"> & { _id: string };
+type WithStringIdArray<T> = WithStringId<T>[];
 
 export class DashboardRepository implements IDashboardRepository {
   async getDashboardData() {
@@ -161,12 +165,11 @@ export class DashboardRepository implements IDashboardRepository {
   }
 
   async getRecentActivities() {
-    // Only fetch raw recent admissions, payments, enquiries, notifications
     const [recentAdmissions, recentPayments, recentEnquiries, recentNotifications] = await Promise.all([
-      Admission.find({}).sort({ createdAt: -1 }).limit(3).populate('registerId', 'firstName lastName email'),
-      PaymentModel.find({ status: 'Completed' }).sort({ date: -1 }).limit(3).populate('studentId', 'firstName lastName email'),
-      Enquiry.find({}).sort({ createdAt: -1 }).limit(3),
-      NotificationModel.find({}).sort({ createdAt: -1 }).limit(3),
+      Admission.find({}).sort({ createdAt: -1 }).limit(3).populate('registerId', 'firstName lastName email').lean<WithStringIdArray<RecentAdmissionRaw>>({ getters: true }),
+      PaymentModel.find({ status: 'Completed' }).sort({ date: -1 }).limit(3).populate('studentId', 'firstName lastName email').lean<WithStringIdArray<RecentPaymentRaw>>({ getters: true }),
+      Enquiry.find({ status: 'Completed' }).sort({ createdAt: -1 }).limit(3).lean<WithStringIdArray<RecentEnquiryRaw>>({ getters: true }),
+      NotificationModel.find({}).sort({ createdAt: -1 }).limit(3).lean<WithStringIdArray<RecentNotificationRaw>>({ getters: true }),
     ]);
     return {
       recentAdmissions,

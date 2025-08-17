@@ -22,6 +22,9 @@ export interface ThemeStyles {
     border: string;
     hover: string;
   };
+  cardShadow?: string;
+  cardBorder?: string;
+  cardHover?: string;
   input: {
     background: string;
     border: string;
@@ -50,4 +53,8 @@ export interface ThemeStyles {
     background: string;
     fill: string;
   };
+  badgeBackground?: string;
+  success?: string;
+  error?: string;
+  info?: string;
 } 

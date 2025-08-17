@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { assignmentService } from '../services/assignmentService';
-import { Assignment, NewAssignment, Submission } from '../types';
+import { Assignment, NewAssignment, Submission } from '../types/index';
 
 // Accept search/filter as arguments
 export const useAssignmentManagement = ({ searchTerm, filterStatus, filterSubject }: { searchTerm: string, filterStatus: string, filterSubject: string }) => {
@@ -41,8 +41,9 @@ export const useAssignmentManagement = ({ searchTerm, filterStatus, filterSubjec
     });
 
     const updateAssignmentMutation = useMutation({
-        mutationFn: ({ id, data }: { id: string; data: Partial<Assignment> & { files?: File[] } }) =>
-            assignmentService.updateAssignment(id, data),
+        mutationFn: ({ id, data }: { id: string; data: Partial<Omit<Assignment, 'files'>> & { files?: File[] } }) => {
+            return assignmentService.updateAssignment(id, data);
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['assignments'] });
         }
@@ -82,9 +83,10 @@ export const useAssignmentManagement = ({ searchTerm, filterStatus, filterSubjec
         }
     }, [createAssignmentMutation]);
 
-    const handleUpdateAssignment = useCallback(async (id: string, data: Partial<Assignment> & { files?: File[] }) => {
+    const handleUpdateAssignment = useCallback(async (id: string, data: Partial<Omit<Assignment, 'files'>> & { files?: File[] }) => {
         try {
-            await updateAssignmentMutation.mutateAsync({ id, data });
+            const { files, ...assignmentData } = data;
+            await updateAssignmentMutation.mutateAsync({ id, data: { ...assignmentData, files } });
             return { success: true };
         } catch (error) {
             console.error('Error updating assignment:', error);

@@ -103,12 +103,10 @@ export const EVENT_ERROR_MESSAGES = {
 } as const;
 
 export const getEventColumns = (
-  Calendar: React.ComponentType<{ size?: number | string; className?: string }>,
   MapPin: React.ComponentType<{ size?: number | string; className?: string }>,
   Building: React.ComponentType<{ size?: number | string; className?: string }>,
   GraduationCap: React.ComponentType<{ size?: number | string; className?: string }>,
   User: React.ComponentType<{ size?: number | string; className?: string }>,
-  formatDate: (date: string) => string
 ) => [
   {
     header: 'Event',

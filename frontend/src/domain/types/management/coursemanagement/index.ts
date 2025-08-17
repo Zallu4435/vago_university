@@ -1,5 +1,6 @@
 export interface Course {
-  id: string;
+  id?: string;
+  _id?: string;
   title: string;
   specialization: string;
   faculty: string;
@@ -13,7 +14,8 @@ export interface Course {
 }
 
 export interface EnrollmentRequest {
-  id: string;
+  id?: string;
+  _id?: string;
   studentName: string;
   courseTitle: string;
   requestedAt: string;

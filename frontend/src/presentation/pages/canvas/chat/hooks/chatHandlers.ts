@@ -1,6 +1,25 @@
 import { toast } from 'react-hot-toast';
-import { Message, User } from '../types/ChatTypes';
+import { Chat, Message, User } from '../types/ChatTypes';
 import { RefObject } from 'react';
+
+interface ChatMutations {
+  markMessagesAsRead: { mutateAsync: (chatId: string) => Promise<void> };
+  editMessage: { mutateAsync: (params: { chatId: string; messageId: string; newContent: string }) => Promise<void> };
+  deleteMessage: { mutateAsync: (params: { chatId: string; messageId: string; deleteForEveryone: boolean }) => Promise<void> };
+  addReaction: { mutateAsync: (params: { messageId: string; emoji: string; userId: string }) => Promise<void> };
+  removeReaction: { mutateAsync: (params: { messageId: string; userId: string }) => Promise<void> };
+  updateGroupSettings: { mutateAsync: (params: { chatId: string; updates: { name?: string; description?: string; settings?: { onlyAdminsCanPost?: boolean; onlyAdminsCanAddMembers?: boolean; onlyAdminsCanChangeInfo?: boolean; onlyAdminsCanPinMessages?: boolean; onlyAdminsCanSendMedia?: boolean; onlyAdminsCanSendLinks?: boolean; } } }) => Promise<void> };
+  addGroupMember: { mutateAsync: (params: { userId: string }) => Promise<void> };
+  removeGroupMember: { mutateAsync: (params: { userId: string }) => Promise<Chat> };
+  updateGroupAdmin: { mutateAsync: (params: { userId: string; isAdmin: boolean }) => Promise<void> };
+  leaveGroup: { mutateAsync: () => Promise<void> };
+  deleteChat: { mutateAsync: (params: { chatId: string }) => Promise<void> };
+  blockChat: { mutateAsync: (params: { chatId: string }) => Promise<void> };
+  clearChat: { mutateAsync: (params: { chatId: string }) => Promise<void> };
+  createChat: { mutateAsync: (params: { creatorId: string; participantId: string; type: string; name: string; avatar: string }) => Promise<Chat> };
+  sendFile: { mutateAsync: (params: { chatId: string; formData: FormData; file: File }) => Promise<void> };
+  sendMessage: { mutateAsync: (params: { chatId: string; content: string; type: string }) => Promise<void> };
+}
 
 export const handleScroll = (
   e: React.UIEvent<HTMLDivElement>,
@@ -38,12 +57,12 @@ export const handleChatListScroll = (
 export const handleChatSelect = async (
   chatId: string,
   setSelectedChatId: (id: string) => void,
-  setAllMessages: (msgs: any[]) => void,
+  setAllMessages: (msgs: Message[]) => void,
   setMessagesPage: (page: number) => void,
   setHasMoreMessages: (hasMore: boolean) => void,
-  setReplyToMessage: (msg: any) => void,
-  chats: any,
-  chatMutations: any,
+  setReplyToMessage: (msg: Message | null) => void,
+  chats: Chat[],
+  chatMutations: ChatMutations,
   setOldestMessageTimestamp: (ts: string | null) => void,
   scrollToBottom: (scrollRef: React.RefObject<HTMLDivElement>) => void,
   scrollRef: React.RefObject<HTMLDivElement>
@@ -54,7 +73,7 @@ export const handleChatSelect = async (
   setMessagesPage(1);
   setHasMoreMessages(true);
   setReplyToMessage(null);
-  const chatArray: any[] = Array.isArray(chats) ? chats : (chats && chats.data ? chats.data : []);
+  const chatArray = Array.isArray(chats) ? chats : (chats && typeof chats === 'object' && 'data' in chats ? (chats as any).data : []);
   if (!chatId || !chatArray) return;
   try {
     setOldestMessageTimestamp(null);
@@ -66,16 +85,16 @@ export const handleChatSelect = async (
 };
 
 export const handleUserSelect = async (
-  user: any,
-  chats: any,
-  setPendingUser: (user: any) => void,
+  user: User,
+  chats: Chat[],
+  setPendingUser: (user: User | null) => void,
   setSelectedChatId: (id: string | null) => void,
   setSearchQuery: (q: string) => void,
-  setSearchResults: (r: any[]) => void,
+  setSearchResults: (r: User[]) => void,
   setShowNewChat: (b: boolean) => void
 ) => {
   try {
-    const chatArray: any[] = Array.isArray(chats) ? chats : [];
+    const chatArray = Array.isArray(chats) ? chats : [];
     if (!chatArray.length) {
       const userWithName = {
         ...user,
@@ -88,7 +107,7 @@ export const handleUserSelect = async (
       setShowNewChat(false);
       return;
     }
-    const existingChat = chatArray.find((chat) => chat.type === 'direct' && chat.participants.some((p: any) => p.id === user.id));
+    const existingChat = chatArray.find((chat) => chat.type === 'direct' && chat.participants.some((p) => p.id === user.id));
     if (existingChat) {
       setSelectedChatId(existingChat.id);
     } else {
@@ -120,7 +139,7 @@ export const handleEditMessage = async (
   messageId: string,
   newContent: string,
   selectedChatId: string,
-  chatMutations: any
+  chatMutations: ChatMutations
 ) => {
   try {
     await chatMutations.editMessage.mutateAsync({ chatId: selectedChatId!, messageId, newContent });
@@ -133,7 +152,7 @@ export const handleDeleteMessage = async (
   messageId: string,
   deleteForEveryone: boolean,
   selectedChatId: string,
-  chatMutations: any
+  chatMutations: ChatMutations
 ) => {
   try {
     await chatMutations.deleteMessage.mutateAsync({
@@ -159,8 +178,8 @@ export const handleSendMessage = async (
   message: string,
   selectedChatId: string | null,
   pendingUser: User | null,
-  currentUser: any,
-  chatMutations: any,
+  currentUser: User,
+  chatMutations: ChatMutations,
   setSelectedChatId: (value: string) => void,
   setPendingUser: (value: null) => void,
   setReplyToMessage: (value: null) => void,
@@ -176,7 +195,7 @@ export const handleSendMessage = async (
         participantId: pendingUser.id,
         type: 'direct',
         name: `${pendingUser.firstName} ${pendingUser.lastName}`,
-        avatar: pendingUser.avatar
+        avatar: pendingUser.avatar || ""
       });
       setSelectedChatId(newChat.id);
       setPendingUser(null);
@@ -227,7 +246,7 @@ export const handleReaction = async (
   messageId: string,
   emoji: string,
   currentUserId: string,
-  chatMutations: any
+  chatMutations: ChatMutations
 ) => {
   try {
     await chatMutations.addReaction.mutateAsync({ messageId, emoji, userId: currentUserId! });
@@ -239,7 +258,7 @@ export const handleReaction = async (
 export const handleRemoveReaction = async (
   messageId: string,
   currentUserId: string,
-  chatMutations: any
+  chatMutations: ChatMutations
 ) => {
   try {
     await chatMutations.removeReaction.mutateAsync({ messageId, userId: currentUserId! });
@@ -261,10 +280,10 @@ export const handleUpdateGroup = async (
       onlyAdminsCanSendLinks?: boolean;
     };
   },
-  flatChat: any,
-  currentUser: any,
+  flatChat: Chat,
+  currentUser: User,
   selectedChatId: string,
-  chatMutations: any
+  chatMutations: ChatMutations
 ) => {
   if (!flatChat || !currentUser) return;
   try {
@@ -278,14 +297,14 @@ export const handleUpdateGroup = async (
 
 export const handleAddMembers = async (
   selectedUsers: User[],
-  flatChat: any,
-  currentUser: any,
-  chatMutations: any
+  flatChat: Chat,
+  currentUser: User,
+  chatMutations: ChatMutations
 ) => {
   if (!flatChat || !currentUser) return;
   try {
     for (const user of selectedUsers) {
-      await chatMutations.addGroupMember.mutateAsync(user.id);
+      await chatMutations.addGroupMember.mutateAsync({ userId: user.id });
     }
     toast.success('Members added');
   } catch (error) {
@@ -295,14 +314,14 @@ export const handleAddMembers = async (
 
 export const handleRemoveMember = async (
   userId: string,
-  flatChat: any,
-  currentUser: any,
-  chatMutations: any,
+  flatChat: Chat,
+  currentUser: User,
+  chatMutations: ChatMutations,
   setSelectedChatId: (value: string) => void
 ) => {
   if (!flatChat || !currentUser) return;
   try {
-    const updatedChat = await chatMutations.removeGroupMember.mutateAsync(userId);
+    const updatedChat = await chatMutations.removeGroupMember.mutateAsync({ userId });
     setSelectedChatId(updatedChat.id);
     toast.success('Member removed');
   } catch (error) {
@@ -312,15 +331,15 @@ export const handleRemoveMember = async (
 
 export const handleMakeAdmin = async (
   userId: string,
-  flatChat: any,
-  currentUser: any,
-  chatMutations: any,
-  setSelectedChatId: (value: any) => void
+  flatChat: Chat,
+  currentUser: User,
+  chatMutations: ChatMutations,
+  setSelectedChatId: (value: Chat | null | ((prev: Chat | null) => Chat | null)) => void
 ) => {
   if (!flatChat || !currentUser) return;
   try {
     await chatMutations.updateGroupAdmin.mutateAsync({ userId, isAdmin: true });
-    setSelectedChatId((prev: any) => prev ? { ...prev, admins: [...prev.admins, userId] } : null);
+    setSelectedChatId((prev) => prev ? { ...prev, admins: [...prev.admins, userId] } : null);
     toast.success('Admin added');
   } catch (error) {
     console.error('Error making admin:', error);
@@ -330,15 +349,15 @@ export const handleMakeAdmin = async (
 
 export const handleRemoveAdmin = async (
   userId: string,
-  flatChat: any,
-  currentUser: any,
-  chatMutations: any,
-  setSelectedChatId: (value: any) => void
+  flatChat: Chat,
+  currentUser: User,
+  chatMutations: ChatMutations,
+  setSelectedChatId: (value: Chat | null | ((prev: Chat | null) => Chat | null)) => void
 ) => {
   if (!flatChat || !currentUser) return;
   try {
     await chatMutations.updateGroupAdmin.mutateAsync({ userId, isAdmin: false });
-    setSelectedChatId((prev: any) => prev ? { ...prev, admins: prev.admins.filter((id: string) => id !== userId) } : null);
+    setSelectedChatId((prev) => prev ? { ...prev, admins: prev.admins.filter((id: string) => id !== userId) } : null);
     toast.success('Admin removed');
   } catch (error) {
     console.error('Error removing admin:', error);
@@ -347,8 +366,8 @@ export const handleRemoveAdmin = async (
 };
 
 export const handleLeaveGroup = async (
-  flatChat: any,
-  chatMutations: any,
+  flatChat: Chat,
+  chatMutations: ChatMutations,
   setSelectedChatId: (value: null) => void,
   setShowGroupSettings: (value: boolean) => void
 ) => {
@@ -365,8 +384,8 @@ export const handleLeaveGroup = async (
 };
 
 export const handleDeleteGroup = async (
-  flatChat: any,
-  currentUser: any,
+  flatChat: Chat,
+  currentUser: User,
   setSelectedChatId: (value: null) => void,
   setShowGroupSettings: (value: boolean) => void
 ) => {
@@ -382,14 +401,14 @@ export const handleDeleteGroup = async (
 };
 
 export const handleDeleteChat = async (
-  flatChat: any,
-  chatMutations: any,
+  flatChat: Chat,
+  chatMutations: ChatMutations,
   setSelectedChatId: (value: null) => void
 ) => {
   if (!flatChat) return;
   if (window.confirm('Are you sure you want to delete this chat? This action cannot be undone.')) {
     try {
-      await chatMutations.deleteChat.mutateAsync(flatChat.id);
+      await chatMutations.deleteChat.mutateAsync({ chatId: flatChat.id });
       setSelectedChatId(null);
       toast.success('Chat deleted');
     } catch (error) {
@@ -399,14 +418,14 @@ export const handleDeleteChat = async (
 };
 
 export const handleBlock = async (
-  flatChat: any,
-  chatMutations: any,
+  flatChat: Chat,
+  chatMutations: ChatMutations,
   setSelectedChatId: (value: null) => void
 ) => {
   if (!flatChat) return;
   if (window.confirm(`Are you sure you want to block this ${flatChat.type === 'group' ? 'group' : 'user'}?`)) {
     try {
-      await chatMutations.blockChat.mutateAsync(flatChat.id);
+      await chatMutations.blockChat.mutateAsync({ chatId: flatChat.id });
       setSelectedChatId(null);
       toast.success(`${flatChat.type === 'group' ? 'Group' : 'User'} blocked`);
     } catch (error) {
@@ -416,14 +435,14 @@ export const handleBlock = async (
 };
 
 export const handleClearChat = async (
-  flatChat: any,
-  chatMutations: any,
+  flatChat: Chat,
+  chatMutations: ChatMutations,
   setAllMessages: (value: Message[]) => void
 ) => {
   if (!flatChat) return;
   if (window.confirm('Are you sure you want to clear all messages in this chat?')) {
     try {
-      await chatMutations.clearChat.mutateAsync(flatChat.id);
+      await chatMutations.clearChat.mutateAsync({ chatId: flatChat.id });
       setAllMessages([]);
       toast.success('Chat cleared');
     } catch (error) {

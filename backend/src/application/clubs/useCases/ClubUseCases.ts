@@ -12,6 +12,7 @@ import {
   UpdateClubResponseDTO,
   ClubSummaryDTO,
 } from "../../../domain/clubs/dtos/ClubResponseDTOs";
+import { UpdateClubRequest } from "../../../domain/clubs/entities/Club";
 import { IClubsRepository } from "../repositories/IClubsRepository";
 import mongoose from "mongoose";
 
@@ -104,7 +105,7 @@ export class UpdateClubUseCase implements IUpdateClubUseCase {
       throw new Error("Invalid club ID");
     }
     const { id, ...updateData } = dto;
-    const updatedClub = await this.clubsRepository.updateById(id, updateData as any);
+    const updatedClub = await this.clubsRepository.updateById(id, updateData as UpdateClubRequest);
     if (!updatedClub) {
       throw new Error("Club not found!");
     }

@@ -4,6 +4,10 @@ import { studentDashboardService, Announcement, Deadline, ClassInfo, NewEvent, C
 interface StudentInfo {
   name: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
+  course?: string;
+  profilePicture?: string;
 }
 
 type StudentDashboardData = {

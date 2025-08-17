@@ -56,11 +56,15 @@ export interface EventFilter {
   status?: { $regex: string; $options: string } | string;
   organizerType?: { $regex: string; $options: string } | string;
   date?: { $gte?: string; $lte?: string } | string;
+  eventId?: string | { $in: string[] };
   $or?: Array<{
     title?: { $regex: string; $options: string };
     description?: { $regex: string; $options: string };
     organizer?: { $regex: string; $options: string };
     location?: { $regex: string; $options: string };
+    additionalInfo?: { $regex: string; $options: string };
+    eventType?: { $regex: string; $options: string };
+    organizerType?: { $regex: string; $options: string };
   }>;
 }
 
@@ -302,28 +306,5 @@ export class Event {
   }
 }
 
-export interface EventFilter {
-  title?: string | { $regex: string; $options: string };
-  description?: string | { $regex: string; $options: string };
-  eventType?: string | { $regex: string; $options: string };
-  organizer?: string | { $regex: string; $options: string };
-  organizerType?: string | { $regex: string; $options: string };
-  location?: string | { $regex: string; $options: string };
-  additionalInfo?: string | { $regex: string; $options: string };
-  status?: string | { $regex: string; $options: string };
-  eventId?: string | { $in: string[] };
-  userId?: string | { $in: string[] };
-  date?: { $gte?: string; $lte?: string } | string;
-  createdAt?: { $gte?: Date; $lte?: Date };
-  updatedAt?: { $gte?: Date; $lte?: Date };
-  $or?: Array<{
-    title?: { $regex: string; $options: string };
-    description?: { $regex: string; $options: string };
-    organizer?: { $regex: string; $options: string };
-    location?: { $regex: string; $options: string };
-    additionalInfo?: { $regex: string; $options: string };
-    eventType?: { $regex: string; $options: string };
-    organizerType?: { $regex: string; $options: string };
-  }>;
-  [key: string]: unknown;
-}
+
+

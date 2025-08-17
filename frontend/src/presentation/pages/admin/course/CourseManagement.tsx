@@ -10,6 +10,11 @@ import CourseDetails from './CourseDetails';
 import CourseForm from './CourseForm';
 import EnrollmentRequestDetails from './EnrollmentRequestDetails';
 import { Course as ManagementCourse, EnrollmentRequest } from '../../../../domain/types/management/coursemanagement';
+import { 
+  adaptDomainCourseToManagement, 
+  adaptDomainEnrollmentRequestToManagement,
+  adaptToCourseRequestDetails
+} from '../../../../domain/types/courseTypeAdapter';
 import { SPECIALIZATIONS, FACULTIES, TERMS, REQUEST_STATUSES, courseColumns, enrollmentRequestColumns } from '../../../../shared/constants/courseManagementConstants';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
@@ -73,9 +78,19 @@ const AdminCourseManagement: React.FC = () => {
   const handleSaveCourse = async (formData: Partial<ManagementCourse>) => {
     try {
       if (editingCourse) {
-        await updateCourse({ id: editingCourse.id, data: formData });
+        await updateCourse({ id: editingCourse.id as string, data: formData });
       } else {
-        await createCourse({ ...(formData as any), _id: '' } as any);
+        await createCourse({ 
+          ...formData, 
+          _id: '',
+          specialization: formData.specialization || '',
+          faculty: formData.faculty || '',
+          title: formData.title || '',
+          credits: formData.credits || 0,
+          schedule: formData.schedule || '',
+          maxEnrollment: formData.maxEnrollment || 0,
+          term: formData.term || ''
+        });
       }
       setShowCourseModal(false);
       setEditingCourse(null);
@@ -89,7 +104,7 @@ const AdminCourseManagement: React.FC = () => {
       icon: <FiEye size={16} />,
       label: 'View Course',
       onClick: (course: ManagementCourse) => {
-        handleViewCourse(course.id);
+        handleViewCourse(course.id as string);
         setShowCourseDetail(true);
       },
       color: 'blue' as const,
@@ -98,8 +113,8 @@ const AdminCourseManagement: React.FC = () => {
       icon: <FiEdit size={16} />,
       label: 'Edit Course',
       onClick: (course: ManagementCourse) => {
-        handleEditCourse(course.id);
-        setEditingCourse(courseDetails as any);
+        handleEditCourse(course.id as string);
+        setEditingCourse(courseDetails as unknown as ManagementCourse);
         setShowCourseModal(true);
       },
       color: 'green' as const,
@@ -120,7 +135,7 @@ const AdminCourseManagement: React.FC = () => {
       icon: <FiEye size={16} />,
       label: 'View Details',
       onClick: (request: EnrollmentRequest) => {
-        handleViewRequest(request.id);
+        handleViewRequest(request.id as string);
         setShowRequestDetails(true);
       },
       color: 'blue' as const,
@@ -190,7 +205,7 @@ const AdminCourseManagement: React.FC = () => {
   const handleConfirmDelete = async () => {
     if (courseToDelete) {
       try {
-        await deleteCourse(courseToDelete.id);
+        await deleteCourse(courseToDelete.id as string);
         setShowDeleteWarning(false);
         setCourseToDelete(null);
       } catch (error) {
@@ -202,7 +217,7 @@ const AdminCourseManagement: React.FC = () => {
   const handleConfirmApprove = async () => {
     if (selectedRequest) {
       try {
-        await approveEnrollmentRequest(selectedRequest.id);
+        await approveEnrollmentRequest(selectedRequest.id as string);
         setShowApproveWarning(false);
         setSelectedRequest(null);
       } catch (error) {
@@ -214,7 +229,7 @@ const AdminCourseManagement: React.FC = () => {
   const handleConfirmReject = async () => {
     if (selectedRequest && rejectReason) {
       try {
-        await rejectEnrollmentRequest({ requestId: selectedRequest.id, reason: rejectReason });
+        await rejectEnrollmentRequest({ requestId: selectedRequest.id as string, reason: rejectReason });
         setShowRejectWarning(false);
         setSelectedRequest(null);
         setRejectReason('');
@@ -263,14 +278,14 @@ const AdminCourseManagement: React.FC = () => {
             {
               icon: <FiClipboard />,
               title: 'Active Courses',
-              value: courses?.filter((c: any) => c.currentEnrollment > 0).length?.toString() || '0',
+              value: courses?.filter((c) => (c).currentEnrollment > 0).length?.toString() || '0',
               change: '+2.1%',
               isPositive: true,
             },
             {
               icon: <FiBarChart2 />,
               title: 'Enrollment Rate',
-              value: `${((courses?.reduce((acc: number, c: any) => acc + c.currentEnrollment, 0) / courses?.reduce((acc: number, c: any) => acc + c.maxEnrollment, 0)) * 100 || 0).toFixed(2)}%`,
+              value: `${((courses?.reduce((acc: number, c) => acc + c.currentEnrollment, 0) / courses?.reduce((acc: number, c) => acc + c.maxEnrollment, 0)) * 100 || 0).toFixed(2)}%`,
               change: '+3.8%',
               isPositive: true,
             },
@@ -325,9 +340,9 @@ const AdminCourseManagement: React.FC = () => {
                 ) : courses.length > 0 ? (
                   <>
                     <ApplicationsTable
-                      data={courses}
-                      columns={courseColumns as any}
-                      actions={courseActions as any}
+                      data={courses.map(adaptDomainCourseToManagement)}
+                      columns={courseColumns}
+                      actions={courseActions}
                     />
                     <Pagination
                       page={page}
@@ -356,9 +371,9 @@ const AdminCourseManagement: React.FC = () => {
                   ) : enrollmentRequests.length > 0 ? (
                     <>
                       <ApplicationsTable
-                        data={enrollmentRequests}
-                        columns={enrollmentRequestColumns as any}
-                        actions={enrollmentRequestActions as any}
+                        data={enrollmentRequests.map(adaptDomainEnrollmentRequestToManagement)}
+                        columns={enrollmentRequestColumns}
+                        actions={enrollmentRequestActions}
                       />
                       <Pagination
                         page={page}
@@ -396,7 +411,7 @@ const AdminCourseManagement: React.FC = () => {
         <CourseForm
           isOpen={showCourseModal}
           onClose={() => setShowCourseModal(false)}
-          onSubmit={handleSaveCourse}
+          onSubmit={(data: unknown) => handleSaveCourse(data as Partial<ManagementCourse>)}
           initialData={editingCourse}
           isEditing={!!editingCourse}
           specializations={SPECIALIZATIONS.filter((s) => s !== 'All Specializations')}
@@ -411,7 +426,7 @@ const AdminCourseManagement: React.FC = () => {
           onClose={() => {
             setShowCourseDetail(false);
           }}
-          course={courseDetails as any}
+          course={adaptDomainCourseToManagement(courseDetails)}
           isLoading={isLoadingCourseDetails}
         />
       )}
@@ -422,15 +437,19 @@ const AdminCourseManagement: React.FC = () => {
           onClose={() => {
             setShowRequestDetails(false);
           }}
-          request={requestDetails as any}
+          request={requestDetails ? adaptToCourseRequestDetails(requestDetails) : null}
           onApprove={(id: string) => {
-            const req: any = (enrollmentRequests as any[])?.find((r: any) => r.id === id) || { id };
-            setSelectedRequest(req);
+            const req = (enrollmentRequests)?.find((r) => r.id === id);
+            if (req) {
+              setSelectedRequest(adaptDomainEnrollmentRequestToManagement(req));
+            }
             setShowApproveWarning(true);
           }}
           onReject={(id: string) => {
-            const req: any = (enrollmentRequests as any[])?.find((r: any) => r.id === id) || { id, studentName: (requestDetails as any)?.user?.name };
-            setSelectedRequest(req);
+            const req = (enrollmentRequests)?.find((r) => r.id === id);
+            if (req) {
+              setSelectedRequest(adaptDomainEnrollmentRequestToManagement(req));
+            }
             setShowRejectWarning(true);
           }}
         />

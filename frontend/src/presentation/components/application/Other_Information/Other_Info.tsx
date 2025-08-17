@@ -3,7 +3,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Other_Info_One from './Other_Info_One';
 import Other_Info_Two from './Other_Info_Two';
-import { OtherInformationFormData, OtherInformationSchema } from '../../../../domain/validation/OtherInfoSchema';
+import { OtherInformationFormData, OtherInformationSchema, OtherInformationSection } from '../../../../domain/validation/OtherInfoSchema';
 import type { StepIndicatorProps, OtherInfoProps } from '../../../../domain/types/application';
 
 const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }) => (
@@ -34,24 +34,24 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }
 );
 
 const Other_Info: React.FC<OtherInfoProps> = ({ initialData, onSave }) => {
-  const methods = useForm<OtherInformationFormData>({
-    resolver: zodResolver(OtherInformationSchema) as any,
+  const methods = useForm({
+    resolver: zodResolver(OtherInformationSchema),
     defaultValues: {
       health: {
-        hasHealthSupport: initialData?.health?.hasHealthSupport ?? '',
-        conditions: initialData?.health?.conditions ?? [],
-        medicalConditions: initialData?.health?.medicalConditions ?? '',
-        disabilities: initialData?.health?.disabilities ?? '',
-        specialNeeds: initialData?.health?.specialNeeds ?? '',
+        hasHealthSupport: ((initialData as OtherInformationSection)?.health?.hasHealthSupport as 'true' | 'false') ?? '',
+        conditions: (initialData as OtherInformationSection)?.health?.conditions ?? [],
+        medicalConditions: (initialData as OtherInformationSection)?.health?.medicalConditions ?? '',
+        disabilities: (initialData as OtherInformationSection)?.health?.disabilities ?? '',
+        specialNeeds: (initialData as OtherInformationSection)?.health?.specialNeeds ?? '',
       },
       legal: {
-        hasCriminalRecord: initialData?.legal?.hasCriminalRecord ?? '',
-        criminalRecord: initialData?.legal?.criminalRecord ?? '',
-        legalProceedings: initialData?.legal?.legalProceedings ?? '',
+        hasCriminalRecord: ((initialData as OtherInformationSection)?.legal?.hasCriminalRecord as 'true' | 'false') ?? '',
+        criminalRecord: (initialData as OtherInformationSection)?.legal?.criminalRecord ?? '',
+        legalProceedings: (initialData as OtherInformationSection)?.legal?.legalProceedings ?? '',
       },
     },
     mode: 'onChange',
-  });
+  } as const);
 
   const { handleSubmit, trigger, formState: { errors } } = methods;
 

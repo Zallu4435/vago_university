@@ -72,7 +72,7 @@ const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({ session, onCl
             <div className="mt-4">
               <div className="text-lg font-bold text-purple-700 mb-2 flex items-center gap-2"><FaUsers /> Attendee List</div>
               <ul className="divide-y divide-purple-100 bg-purple-50 rounded-xl p-4 border border-purple-100">
-                {session.attendeeList.map((a: any, idx: number) => (
+                {session.attendeeList.map((a: { id: string; name: string }, idx: number) => (
                   <li key={a.id || idx} className="py-2 flex justify-between text-gray-800">
                     <span>{a.name}</span>
                     <span className="text-xs text-gray-500">{a.id}</span>

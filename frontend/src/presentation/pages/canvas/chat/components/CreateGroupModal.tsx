@@ -65,7 +65,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     if (query.trim()) {
       try {
         const result = await onSearch(query);
-        let usersArray: any[] = [];
+        let usersArray: User[] = [];
         if (result && typeof result === 'object') {
           if ('items' in result && Array.isArray(result.items)) {
             usersArray = result.items;
@@ -73,13 +73,13 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
             usersArray = result.data;
           }
         }
-        const mappedUsers = usersArray.map((user: any) => ({
+        const mappedUsers = usersArray.map((user) => ({
           id: user.id,
           name: `${user.firstName} ${user.lastName}`,
           email: user.email,
           avatar: user.avatar
         }));
-        const filteredUsers = mappedUsers.filter((user: any) => !selectedUsers.some(selected => selected.id === user.id));
+        const filteredUsers = mappedUsers.filter((user) => !selectedUsers.some(selected => selected.id === user.id));
         setSearchResults(filteredUsers);
       } catch (error) {
         console.error('Search error:', error);

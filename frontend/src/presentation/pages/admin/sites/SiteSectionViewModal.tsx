@@ -74,10 +74,10 @@ const SiteSectionViewModal: React.FC<SiteSectionViewModalProps> = ({ fields, dat
                   <span className="text-sm font-medium text-purple-300">{field.label}</span>
                 </div>
                 {field.type === 'text' || field.type === 'textarea' ? (
-                  <p className="text-white font-semibold break-words">{data[field.name]}</p>
+                  <p className="text-white font-semibold break-words">{data[field.name] as string}</p>
                 ) : null}
                 {field.type === 'image' && data[field.name] ? (
-                  <img src={data[field.name]} alt={field.label} className="mt-2 max-h-40 rounded-lg border border-purple-600/30" />
+                  <img src={data[field.name] as string} alt={field.label} className="mt-2 max-h-40 rounded-lg border border-purple-600/30" />
                 ) : null}
               </div>
             ))}

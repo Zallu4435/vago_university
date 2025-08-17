@@ -38,8 +38,14 @@ const EmailOTPComponent = ({ onClose, onVerified }: EmailOTPComponentProps) => {
       await authService.sendEmailOtp(email);
       setStep('otp');
       setTimer(30); // Start 30-second timer
-    } catch (err: any) {
-      setError(err.message || 'Failed to send OTP');
+    } catch (err: unknown) {
+      let errorMsg = 'Failed to send OTP';
+      if (err instanceof Error) {
+        errorMsg = err.message;
+      } else if (typeof err === 'string') {
+        errorMsg = err;
+      }
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -52,8 +58,14 @@ const EmailOTPComponent = ({ onClose, onVerified }: EmailOTPComponentProps) => {
       await authService.sendEmailOtp(email);
       setTimer(30); // Reset timer
       toast.success('New verification code sent!');
-    } catch (err: any) {
-      setError(err.message || 'Failed to resend OTP');
+    } catch (err: unknown) {
+      let errorMsg = 'Failed to resend OTP';
+      if (err instanceof Error) {
+        errorMsg = err.message;
+      } else if (typeof err === 'string') {
+        errorMsg = err;
+      }
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -71,8 +83,14 @@ const EmailOTPComponent = ({ onClose, onVerified }: EmailOTPComponentProps) => {
       setResetToken(result.resetToken);
       setStep('change-password');
       onVerified(email);
-    } catch (err: any) {
-      setError(err.message || 'Failed to verify OTP');
+    } catch (err: unknown) {
+      let errorMsg = 'Failed to verify OTP';
+      if (err instanceof Error) {
+        errorMsg = err.message;
+      } else if (typeof err === 'string') {
+        errorMsg = err;
+      }
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -94,8 +112,14 @@ const EmailOTPComponent = ({ onClose, onVerified }: EmailOTPComponentProps) => {
       toast.success('Password changed successfully! You are now logged in.');
       navigate('/login');
       onClose();
-    } catch (err: any) {
-      setError(err.message || 'Failed to reset password');
+    } catch (err: unknown) {
+      let errorMsg = 'Failed to reset password';
+      if (err instanceof Error) {
+        errorMsg = err.message;
+      } else if (typeof err === 'string') {
+        errorMsg = err;
+      }
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

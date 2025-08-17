@@ -12,6 +12,7 @@ export interface MaterialData {
     difficulty: string;
     estimatedTime: string;
     isNew: boolean;
+    isNewMaterial?: boolean;
     isRestricted: boolean;
     uploadedBy: string;
     uploadedAt: string;
@@ -37,6 +38,7 @@ export interface Material {
     difficulty: string;
     estimatedTime: string;
     isNew: boolean;
+    isNewMaterial?: boolean;
     isRestricted: boolean;
     uploadedBy: string;
     uploadedAt: string;

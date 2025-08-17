@@ -1,3 +1,4 @@
+import { MessageDTO } from "../dtos/ChatResponseDTOs";
 import { Message } from "./Message";
 
 export interface GroupSettings {
@@ -177,3 +178,21 @@ export class Chat {
     this.props.updatedAt = new Date();
   }
 } 
+
+
+export interface ChatFilter {
+  participants?: string[] | { $in: string[] };
+  type?: ChatType;
+  name?: string;
+  avatar?: string;
+  lastMessage?: MessageDTO;
+  $or?: Array<{
+    name?: { $regex: string; $options: string };
+    "lastMessage.content"?: { $regex: string; $options: string };
+    deletedFor?: { $exists?: boolean; $ne?: string };
+  }>;
+  $in?: string[];
+  chatId?: string;
+  deletedFor?: { $exists?: boolean; $ne?: string };
+  [key: string]: unknown;
+}

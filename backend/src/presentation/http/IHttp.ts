@@ -39,6 +39,7 @@ export interface IHttpResponse {
     details?;
   };
   cookies?: Cookie[];
+  headers?: { [key: string]: string };
 }
 
 export class HttpRequest implements IHttpRequest {
@@ -212,6 +213,8 @@ export interface IAssignmentController extends IController {
   getSubmissionById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   reviewSubmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   downloadSubmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  downloadFile(httpRequest: IHttpRequest): Promise<IHttpResponse>;
+  downloadSubmissionFile(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getAnalytics(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   viewAssignmentFile(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }

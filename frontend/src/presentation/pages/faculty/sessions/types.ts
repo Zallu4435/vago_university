@@ -1,5 +1,6 @@
 export interface Session {
   id: number;
+  _id?: string;
   title: string;
   instructor: string;
   course: string;

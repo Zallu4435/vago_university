@@ -3,12 +3,13 @@ import { Diploma as DiplomaModel } from "../../../infrastructure/database/mongoo
 import { UserProgress } from "../../../infrastructure/database/mongoose/models/userProgress.model";
 import { Video } from "../../../infrastructure/database/mongoose/models/video.model";
 import { VideoStatus } from "../../../domain/video/enums/VideoStatus";
+import { DiplomaFilter } from "../../../domain/diploma/entities/diplomatypes";
 
 export class UserDiplomaRepository implements IUserDiplomaRepository {
   async getUserDiplomas(userId: string, page: number, limit: number, category: string, status: string, dateRange: string) {
     const skip = (page - 1) * limit;
 
-    const query: any = { status: true };
+    const query: DiplomaFilter = { status: true };
     if (category !== 'all') query.category = category;
     if (status !== 'all') query.status = status === 'published';
     if (dateRange !== 'all') {
@@ -35,7 +36,6 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
       DiplomaModel.countDocuments(query)
     ]);
 
-    // Build course summaries with counts only
     const courses = await Promise.all(diplomaDocs.map(async (doc) => {
       const [videoCount, completedVideoCount] = await Promise.all([
         Video.countDocuments({ diplomaId: doc._id, status: VideoStatus.Published }),
@@ -55,7 +55,7 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
         completedVideoCount,
         createdAt: doc.createdAt || new Date(),
         updatedAt: doc.updatedAt || new Date()
-      } as any;
+      };
     }));
 
     return { 
@@ -75,7 +75,6 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
     
     if (!diploma) return null;
     
-    // Fetch videos for this diploma
     const videos = await Video.find({ 
       diplomaId: diploma._id, 
       status: VideoStatus.Published 
@@ -93,14 +92,13 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
       updatedAt: video.uploadedAt || new Date()
     }));
     
-    // Transform to match DiplomaCourse interface
     return {
       _id: diploma._id.toString(),
       title: diploma.title,
       description: diploma.description,
       category: diploma.category,
       status: diploma.status ? 'published' : 'draft' as 'published' | 'draft' | 'archived',
-      instructor: 'Faculty Instructor', // Default value
+      instructor: 'Faculty Instructor', 
       department: diploma.category || 'General',
       chapters,
       createdAt: diploma.createdAt || new Date(),
@@ -118,7 +116,6 @@ export class UserDiplomaRepository implements IUserDiplomaRepository {
     const chapter = await Video.findOne({ _id: chapterId }).lean();
     if (!chapter) return null;
     
-    // Transform to match Chapter interface
     return {
       _id: chapter._id.toString(),
       title: chapter.title,

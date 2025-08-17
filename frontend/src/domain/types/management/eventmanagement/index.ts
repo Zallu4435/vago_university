@@ -83,6 +83,32 @@ export interface EventApiResponse {
   };
 }
 
+// API Response for event requests
+export interface EventRequestsApiResponse {
+  data: {
+    eventRequests: EventRequest[];
+    totalPages: number;
+    currentPage: number;
+    totalItems: number;
+  };
+}
+
+// New type for event service response
+export interface EventServiceResponse {
+  events: Event[];
+  totalPages: number;
+  currentPage: number;
+  totalItems: number;
+}
+
+// New type for event requests service response
+export interface EventRequestsServiceResponse {
+  eventRequests: EventRequest[];
+  totalPages: number;
+  currentPage: number;
+  totalItems: number;
+}
+
 // API Response wrappers for single items
 export interface EventApiResponseSingle {
   data: {

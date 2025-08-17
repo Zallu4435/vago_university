@@ -11,7 +11,7 @@ export interface GetApplicationRequestDTO {
 export interface SaveSectionRequestDTO {
   applicationId: string;
   section: string;
-  data: any;
+  data: Record<string, unknown>;
 }
 
 export interface UploadDocumentRequestDTO {

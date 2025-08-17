@@ -9,7 +9,7 @@ export interface GetApplicationResponseDTO {
 export interface SaveSectionResponseDTO {
   success: boolean;
   message: string;
-  data?: any;
+  data?: IAdmissionDraft;
 }
 
 export interface ProcessPaymentResponseDTO {

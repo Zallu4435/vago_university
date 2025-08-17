@@ -21,7 +21,7 @@ export default function CreateSessionModal({ setShowCreateModal, createSession, 
     reset,
     formState: { errors },
   } = useForm<SessionFormData>({
-    resolver: zodResolver(sessionSchema) as any,
+    resolver: zodResolver(sessionSchema),
     defaultValues: {
       title: '',
       instructor: '',

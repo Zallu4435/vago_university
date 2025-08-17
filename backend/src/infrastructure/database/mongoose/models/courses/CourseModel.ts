@@ -20,7 +20,6 @@ const CourseSchema = new Schema(
   }
 );
 
-// Create a compound text index for better search performance
 CourseSchema.index({
   title: "text",
   specialization: "text",
@@ -29,8 +28,8 @@ CourseSchema.index({
 });
 
 const EnrollmentSchema = new Schema<IEnrollmentDocument>({
-  studentId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
-  courseId: { type: Schema.Types.ObjectId, required: true, ref: "Course", index: true },
+  studentId: { type: String, required: true },
+  courseId: { type: String, required: true, index: true },
   status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
   requestedAt: { type: Date, default: Date.now },
   reason: { type: String, trim: true },

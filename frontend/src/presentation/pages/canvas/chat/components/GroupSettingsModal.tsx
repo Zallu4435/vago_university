@@ -60,8 +60,8 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
 
   if (isLoadingChatDetails || !group || !group.participants) return <div>Loading...</div>;
 
-  const participantIds = (group?.participants ?? []).map((p: any) => p.id);
-  const filteredSearchResults = searchUsers?.items?.filter((user: any) => !participantIds.includes(user.id)) || [];
+  const participantIds = (group?.participants ?? []).map((p) => p.id);
+  const filteredSearchResults = searchUsers?.items?.filter((user) => !participantIds.includes(user.id)) || [];
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
@@ -360,7 +360,7 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
             </div>
 
             <div className="space-y-2 max-h-60 overflow-y-auto">
-              {group.participants.map((participant: any) => (
+              {group.participants.map((participant) => (
                 <div
                   key={participant.id}
                   className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 group"

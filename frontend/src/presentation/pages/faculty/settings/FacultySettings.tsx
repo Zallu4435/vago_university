@@ -14,6 +14,18 @@ export default function FacultySettings() {
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
 
+  // Early return if user is not available
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading user data...</p>
+        </div>
+      </div>
+    );
+  }
+
   const handleLogout = () => {
     dispatch(logout());
     navigate('/login');

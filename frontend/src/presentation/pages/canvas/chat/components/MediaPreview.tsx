@@ -15,7 +15,7 @@ interface Message {
 interface MediaPreviewProps {
   message: Message;
   onClose: () => void;
-  styles?: any;
+  styles?: unknown;
   onAddMore?: () => void;
   onRemoveMedia?: (index: number) => void;
   onSendMedia?: (media: { url: string; name: string; type: string; caption: string }[]) => void;
@@ -75,7 +75,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
   const [rotation, setRotation] = useState<number[]>(() => (message.attachments || []).map(() => 0));
   const [currentTool, setCurrentTool] = useState<Tool>('none');
   const [isDrawing, setIsDrawing] = useState(false);
-  const [drawPaths, setDrawPaths] = useState<{[key: number]: Array<any>}>({});
+  const [drawPaths, setDrawPaths] = useState<{[key: number]: Array<unknown>}>({});
   const [textElements, setTextElements] = useState<{[key: number]: TextElement[]}>({});
   const [rectElements, setRectElements] = useState<{[key: number]: RectElement[]}>({});
   const [blurAreas, setBlurAreas] = useState<{[key: number]: BlurArea[]}>({});
@@ -87,7 +87,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const drawingPath = useRef<{x: number, y: number}[]>([]);
-  const currentElement = useRef<any>(null);
+  const currentElement = useRef<unknown>(null);
 
   const penColors = ['#ff0000', '#00bcd4', '#4caf50', '#ffeb3b', '#ffffff', '#000000'];
   const penThicknesses = [2, 4, 8, 12];
@@ -272,16 +272,18 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
         
       case 'rect':
         if (currentElement.current) {
-          currentElement.current.width = coords.x - currentElement.current.x;
-          currentElement.current.height = coords.y - currentElement.current.y;
+          const rect = currentElement.current as RectElement;
+          rect.width = coords.x - rect.x;
+          rect.height = coords.y - rect.y;
           drawOnCanvas();
         }
         break;
         
       case 'blur':
         if (currentElement.current) {
-          currentElement.current.width = coords.x - currentElement.current.x;
-          currentElement.current.height = coords.y - currentElement.current.y;
+          const blur = currentElement.current as BlurArea;
+          blur.width = coords.x - blur.x;
+          blur.height = coords.y - blur.y;
           drawOnCanvas();
         }
         break;
@@ -319,21 +321,27 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
         break;
         
       case 'rect':
-        if (currentElement.current && (Math.abs(currentElement.current.width) > 10 || Math.abs(currentElement.current.height) > 10)) {
-          setRectElements(prev => ({
-            ...prev,
-            [currentMediaIndex]: [...(prev[currentMediaIndex] || []), currentElement.current]
-          }));
+        if (currentElement.current) {
+          const rect = currentElement.current as RectElement;
+          if (Math.abs(rect.width) > 10 || Math.abs(rect.height) > 10) {
+            setRectElements(prev => ({
+              ...prev,
+              [currentMediaIndex]: [...(prev[currentMediaIndex] || []), rect]
+            }));
+          }
         }
         currentElement.current = null;
         break;
         
       case 'blur':
-        if (currentElement.current && (Math.abs(currentElement.current.width) > 10 || Math.abs(currentElement.current.height) > 10)) {
-          setBlurAreas(prev => ({
-            ...prev,
-            [currentMediaIndex]: [...(prev[currentMediaIndex] || []), currentElement.current]
-          }));
+        if (currentElement.current) {
+          const blur = currentElement.current as BlurArea;
+          if (Math.abs(blur.width) > 10 || Math.abs(blur.height) > 10) {
+            setBlurAreas(prev => ({
+              ...prev,
+              [currentMediaIndex]: [...(prev[currentMediaIndex] || []), blur]
+            }));
+          }
         }
         currentElement.current = null;
         break;
@@ -366,9 +374,10 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
     });
     
     if (currentElement.current && currentTool === 'blur') {
+      const blur = currentElement.current as BlurArea;
       ctx.save();
       ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-      ctx.fillRect(currentElement.current.x, currentElement.current.y, currentElement.current.width, currentElement.current.height);
+      ctx.fillRect(blur.x, blur.y, blur.width, blur.height);
       ctx.restore();
     }
     
@@ -386,19 +395,20 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
     });
     
     if (currentElement.current && currentTool === 'rect') {
+      const rect = currentElement.current as RectElement;
       ctx.save();
-      ctx.strokeStyle = currentElement.current.color;
-      ctx.lineWidth = currentElement.current.thickness;
-      if (currentElement.current.fill) {
-        ctx.fillStyle = currentElement.current.color + '40';
-        ctx.fillRect(currentElement.current.x, currentElement.current.y, currentElement.current.width, currentElement.current.height);
+      ctx.strokeStyle = rect.color;
+      ctx.lineWidth = rect.thickness;
+      if (rect.fill) {
+        ctx.fillStyle = rect.color + '40';
+        ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
       }
-      ctx.strokeRect(currentElement.current.x, currentElement.current.y, currentElement.current.width, currentElement.current.height);
+      ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
       ctx.restore();
     }
     
-    (drawPaths[currentMediaIndex] || []).forEach((pathObj: any) => {
-      const { points, color, thickness } = pathObj;
+    (drawPaths[currentMediaIndex] || []).forEach((pathObj) => {
+      const { points, color, thickness } = pathObj as { points: { x: number; y: number }[]; color: string; thickness: number };
       ctx.save();
       if (color === 'eraser') {
         ctx.globalCompositeOperation = 'destination-out';
@@ -449,10 +459,11 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
 
   const handleEmojiSelect = (emoji: string) => {
     if (currentElement.current) {
+      const coords = currentElement.current as { x: number; y: number };
       const newEmoji: EmojiElement = {
         id: Date.now().toString(),
-        x: currentElement.current.x,
-        y: currentElement.current.y,
+        x: coords.x,
+        y: coords.y,
         emoji: emoji,
         size: 32
       };

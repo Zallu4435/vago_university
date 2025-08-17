@@ -1,26 +1,31 @@
 import { IUserMaterialsRepository } from '../../../application/materials/repositories/IUserMaterialsRepository';
 import { MaterialModel } from '../../database/mongoose/material/MaterialModel';
+import { UserMaterialFilter, MaterialProps } from '../../../domain/materials/entities/MaterialTypes';
 
 export class UserMaterialsRepository implements IUserMaterialsRepository {
-  async find(filter, options: { skip?: number; limit?: number; sort? } = {}) {
-    return MaterialModel.find(filter)
+  async find(filter: UserMaterialFilter, options: { skip?: number; limit?: number; sort? } = {}) {
+    const result = await MaterialModel.find(filter)
       .sort(options.sort ?? {})
       .skip(options.skip ?? 0)
       .limit(options.limit ?? 0)
       .populate('bookmarks')
-      .populate('likes');
+      .populate('likes')
+      .lean();
+    return result as unknown as MaterialProps[];
   }
 
-  async count(filter) {
+  async count(filter: UserMaterialFilter) {
     return MaterialModel.countDocuments(filter);
   }
 
   async findById(id: string) {
-    return MaterialModel.findById(id).populate('bookmarks').populate('likes');
+    const result = await MaterialModel.findById(id).populate('bookmarks').populate('likes').lean();
+    return result as unknown as MaterialProps;
   }
 
-  async update(id: string, data) {
-    return MaterialModel.findByIdAndUpdate(id, data, { new: true });
+  async update(id: string, data: Partial<MaterialProps>) {
+    const result = await MaterialModel.findByIdAndUpdate(id, data, { new: true }).lean();
+    return result as unknown as MaterialProps;
   }
 
   async toggleBookmark(materialId: string, userId: string) {

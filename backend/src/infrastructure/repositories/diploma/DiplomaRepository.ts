@@ -1,9 +1,11 @@
 import { IDiplomaRepository } from "../../../application/diploma/repositories/IDiplomaRepository";
 import { Diploma } from "../../../domain/diploma/entities/Diploma";
-import { EnrollStudent, UnenrollStudent } from "../../../domain/diploma/entities/diplomatypes";
+import { EnrollStudent, UnenrollStudent, DiplomaDocument } from "../../../domain/diploma/entities/diplomatypes";
 import { Diploma as DiplomaModel } from "../../../infrastructure/database/mongoose/models/diploma.model";
 import mongoose from "mongoose";
 import { DiplomaFilter } from "../../../domain/diploma/entities/diplomatypes";
+
+type WithStringId<T> = Omit<T, "_id"> & { _id: string };
 
 export class DiplomaRepository implements IDiplomaRepository {
   async getDiplomas(page: number, limit: number, department: string, category: string, status: string, instructor: string, dateRange: string, search: string, startDate: string, endDate: string) {
@@ -64,10 +66,10 @@ export class DiplomaRepository implements IDiplomaRepository {
     }
 
     if (search && search.trim()) {
-      const searchRegex = new RegExp(search.trim(), 'i');
+      const escapedSearch = search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       filter.$or = [
-        { title: searchRegex },
-        { description: searchRegex },
+        { title: { $regex: escapedSearch, $options: "i" } },
+        { description: { $regex: escapedSearch, $options: "i" } },
       ];
     }
 
@@ -76,7 +78,7 @@ export class DiplomaRepository implements IDiplomaRepository {
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 })
-        .lean(),
+        .lean<WithStringId<DiplomaDocument>[]>({ getters: true }),
       DiplomaModel.countDocuments(filter),
     ]);
 
@@ -84,11 +86,18 @@ export class DiplomaRepository implements IDiplomaRepository {
   }
 
   async getDiplomaById(id: string) {
-    return DiplomaModel.findById(id).lean();
+    return DiplomaModel.findById(id).lean<WithStringId<DiplomaDocument>>({ getters: true });
   }
 
   async createDiploma(diploma: Diploma) {
-    return DiplomaModel.create({ ...diploma, videoIds: [] });
+    const doc = await DiplomaModel.create({ ...diploma, videoIds: [] });
+    const result = doc.toObject({ getters: true });
+    return {
+      ...result,
+      _id: result._id.toString(),
+      videoIds: result.videoIds.map(id => id.toString()),
+      students: result.students?.map(id => id.toString()) || []
+    } as WithStringId<DiplomaDocument>;
   }
 
   async updateDiploma(diploma: Diploma) {
@@ -96,7 +105,7 @@ export class DiplomaRepository implements IDiplomaRepository {
       diploma.id,
       { $set: diploma },
       { new: true }
-    ).lean();
+    ).lean<WithStringId<DiplomaDocument>>({ getters: true });
   }
 
   async deleteDiploma(id: string) {

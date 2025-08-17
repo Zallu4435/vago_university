@@ -38,8 +38,12 @@ const ConfirmAdmission = () => {
           status: admissionData.status
         });
         setIsLoading(false);
-      } catch (err: any) {
-        setError(err.response?.data?.message || 'An error occurred during confirmation');
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err)) {
+          setError(err.response?.data?.message || 'An error occurred during confirmation');
+        } else {
+          setError('An error occurred during confirmation');
+        }
         setIsLoading(false);
       }
     };
@@ -60,19 +64,23 @@ const ConfirmAdmission = () => {
       } else {
         setSuccess('Admission offer rejected. Thank you for your response.');
       }
-    } catch (err: any) {
-      // Handle specific error cases from the backend
-      if (err.response?.status === 400) {
-        if (err.response.data.error === 'Token is required') {
-          setError('Invalid confirmation link: Token is missing');
-        } else if (err.response.data.error === 'Invalid action') {
-          setError('Invalid confirmation action');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        // Handle specific error cases from the backend
+        if (err.response?.status === 400) {
+          if (err.response.data.error === 'Token is required') {
+            setError('Invalid confirmation link: Token is missing');
+          } else if (err.response.data.error === 'Invalid action') {
+            setError('Invalid confirmation action');
+          } else {
+            setError(err.response.data.error || 'Invalid request');
+          }
+        } else if (err.response?.data?.message) {
+          // Handle other backend errors
+          setError(err.response.data.message);
         } else {
-          setError(err.response.data.error || 'Invalid request');
+          setError('An error occurred during confirmation. Please try again later.');
         }
-      } else if (err.response?.data?.message) {
-        // Handle other backend errors
-        setError(err.response.data.message);
       } else {
         setError('An error occurred during confirmation. Please try again later.');
       }

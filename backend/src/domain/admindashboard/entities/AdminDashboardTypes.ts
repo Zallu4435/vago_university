@@ -67,7 +67,6 @@ export interface PerformanceRawData {
   diplomaCount: number;
   eventsCount: number;
   clubsCount: number;
-  data: PerformanceData[];
 }
 
 // Repository-specific types that match actual return data
@@ -82,14 +81,12 @@ export interface DashboardMetricsRaw {
   totalCourses: number;
   pendingAdmissions: number;
   completedPayments: CompletedPaymentsAggResult[];
-  data: DashboardMetrics;
 }
 
 export interface UserGrowthDataRaw {
   month: string;
   usersCount: number;
   facultyCount: number;
-  data: UserGrowthData[];
 }
 
 export interface RevenuePaymentAggResult {
@@ -100,36 +97,43 @@ export interface RevenuePaymentAggResult {
 export interface RevenueDataRaw {
   month: string;
   payments: RevenuePaymentAggResult[];
-  data: RevenueData[];
+}
+
+// Populated user fields from Mongoose
+export interface PopulatedUserFields {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
 }
 
 export interface RecentAdmissionRaw {
-  _id: string;
+  _id: unknown;
   status?: string;
   personal?: { fullName?: string };
-  registerId?: { firstName?: string; lastName?: string; email?: string };
-  createdAt?: string;
+  registerId?: PopulatedUserFields;
+  createdAt?: Date;
 }
 
 export interface RecentPaymentRaw {
-  _id: string;
+  _id: unknown;
   amount?: number;
   method?: string;
-  studentId?: { firstName?: string; lastName?: string; email?: string };
-  createdAt?: string;
+  studentId?: PopulatedUserFields;
+  date?: Date;
+  createdAt?: Date;
 }
 
 export interface RecentEnquiryRaw {
-  _id: string;
+  _id: unknown;
   name?: string;
   subject?: string;
-  createdAt?: string;
+  createdAt?: Date;
 }
 
 export interface RecentNotificationRaw {
-  _id: string;
+  _id: unknown;
   title?: string;
-  createdAt?: string;
+  createdAt?: Date;
 }
 
 export interface ActivityItemRaw {
@@ -137,7 +141,6 @@ export interface ActivityItemRaw {
   recentPayments: RecentPaymentRaw[];
   recentEnquiries: RecentEnquiryRaw[];
   recentNotifications: RecentNotificationRaw[];
-  data: ActivityItem[];
 }
 
 export interface SystemAlertRaw {
@@ -145,13 +148,12 @@ export interface SystemAlertRaw {
   failedPayments: number;
   overdueCharges: number;
   completedPayments: number;
-  data: SystemAlert[];
 }
 
 export interface DashboardDataRaw {
   metricsRaw: DashboardMetricsRaw;
-  userGrowthRaw: UserGrowthDataRaw;
-  revenueRaw: RevenueDataRaw;
+  userGrowthRaw: UserGrowthDataRaw[];
+  revenueRaw: RevenueDataRaw[];
   performanceRaw: PerformanceRawData;
   activitiesRaw: ActivityItemRaw;
   alertsRaw: SystemAlertRaw;

@@ -130,7 +130,7 @@ export class FinancialController implements IFinancialController {
       description,
       amount,
       term,
-      dueDate: new Date(dueDate),
+      dueDate,
       applicableFor,
       createdBy: httpRequest.user.userId,
     });

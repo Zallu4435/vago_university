@@ -23,7 +23,7 @@ const CourseForm: React.FC<CourseFormProps> = ({
     watch,
     formState: { errors },
     reset,
-  } = useForm<CourseFormData>({
+  } = useForm({
     resolver: zodResolver(courseSchema),
     defaultValues: {
       title: '',
@@ -35,7 +35,7 @@ const CourseForm: React.FC<CourseFormProps> = ({
       maxEnrollment: 0,
       prerequisites: [],
       term: '',
-      ...initialData,
+      ...(initialData || {}),
     },
   });
 

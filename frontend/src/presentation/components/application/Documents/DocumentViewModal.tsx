@@ -43,9 +43,10 @@ export const DocumentViewModal: React.FC<DocumentViewModalProps> = ({
       } else {
         setError('Failed to load document - no PDF data received');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as Error;
       console.error('Document fetch error:', err);
-      setError(err.message || 'Failed to load document');
+      setError(error.message || 'Failed to load document');
     } finally {
       setLoading(false);
     }

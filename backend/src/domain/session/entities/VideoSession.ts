@@ -51,10 +51,7 @@ export interface PaymentFilter {
     currency?: string;
     instructor?: string;
     course?: string;
-    $or?: Array<{
-        title?: { $regex: string; $options: string };
-        instructor?: { $regex: string; $options: string };
-        course?: { $regex: string; $options: string };
-    }>;
+    $or?: Array<{ status: string } | { title?: RegExp; description?: RegExp; instructor?: RegExp; course?: RegExp }>;
+    $and?: Array<{ $or: Array<{ status: string } | { title?: RegExp; description?: RegExp; instructor?: RegExp; course?: RegExp }> }>;
     [key: string]: unknown;
 }

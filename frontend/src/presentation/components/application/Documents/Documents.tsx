@@ -95,9 +95,10 @@ export const Documents = React.forwardRef<DocumentsRef, DocumentsProps>(
 
         setValue('documents', updatedDocuments, { shouldValidate: true });
         toast.success('Document uploaded successfully!');
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to upload document';
         console.error('Error uploading document:', error);
-        toast.error(error.message || 'Failed to upload document');
+        toast.error(errorMessage);
       }
     };
 

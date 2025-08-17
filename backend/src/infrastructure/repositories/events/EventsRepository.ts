@@ -4,10 +4,10 @@ import {
   EventRequestModel,
 } from "../../../infrastructure/database/mongoose/models/events/CampusEventModel";
 import { EventRequestStatus, Event as EventSchema } from "../../../domain/events/entities/EventTypes";
-import { EventDocument, EventFilter } from "../../../domain/events/entities/Event";
+import { EventDocument, EventFilter, CreateEventDto, UpdateEventDto } from "../../../domain/events/entities/Event";
 import { BaseRepository } from "../../../application/repositories/BaseRepository";
 
-export class EventsRepository extends BaseRepository<EventSchema, Record<string, any>, Record<string, any>, Record<string, unknown>, EventDocument> implements IEventsRepository {
+export class EventsRepository extends BaseRepository<EventDocument, CreateEventDto, UpdateEventDto, EventFilter, EventDocument> implements IEventsRepository {
   constructor() {
     super(CampusEventModel);
   }
@@ -66,7 +66,6 @@ export class EventsRepository extends BaseRepository<EventSchema, Record<string,
         { description: { $regex: search.trim(), $options: "i" } },
         { organizer: { $regex: search.trim(), $options: "i" } },
         { location: { $regex: search.trim(), $options: "i" } },
-        { additionalInfo: { $regex: search.trim(), $options: "i" } }
       ];
     }
 
@@ -169,7 +168,6 @@ export class EventsRepository extends BaseRepository<EventSchema, Record<string,
         { description: { $regex: search.trim(), $options: "i" } },
         { organizer: { $regex: search.trim(), $options: "i" } },
         { location: { $regex: search.trim(), $options: "i" } },
-        { additionalInfo: { $regex: search.trim(), $options: "i" } }
       ];
     }
 

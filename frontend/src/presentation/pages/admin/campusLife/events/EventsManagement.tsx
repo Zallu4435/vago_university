@@ -26,6 +26,9 @@ import {
   ItemToAction,
 } from '../../../../../domain/types/management/eventmanagement';
 import {
+  adaptToEventRequestDetails
+} from '../../../../../domain/types/eventTypeAdapter';
+import {
   EVENT_TYPES,
   EVENT_STATUSES,
   REQUEST_STATUSES,
@@ -69,7 +72,7 @@ const AdminEventsManagement: React.FC = () => {
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [itemToAction, setItemToAction] = useState<ItemToAction | null>(null);
 
-  const eventColumns = getEventColumns(Calendar, MapPin, Building, GraduationCap, User, formatDate);
+  const eventColumns = getEventColumns(MapPin, Building, GraduationCap, User);
   const eventRequestColumns = getEventRequestColumns(Calendar, Building, GraduationCap, User, formatDate);
 
   const debouncedSearchChange = useCallback(
@@ -94,7 +97,7 @@ const AdminEventsManagement: React.FC = () => {
     try {
       const details = await getEventDetails(event.id);
       // Ensure selectedEvent has an id property for update logic
-      setSelectedEvent({ ...details, id: details.id || details._id });
+      setSelectedEvent({ ...details, id: details.id || details._id || '' });
       setShowAddEventModal(true);
     } catch (error) {
       console.error('Error fetching event details:', error);
@@ -106,7 +109,7 @@ const AdminEventsManagement: React.FC = () => {
     try {
       if ('id' in event) {
         const details = await getEventDetails(event.id);
-        setSelectedEvent(details as any);
+        setSelectedEvent(details);
       } else {
         setSelectedEvent(null);
       }
@@ -117,7 +120,7 @@ const AdminEventsManagement: React.FC = () => {
     }
   };
 
-  const handleSaveEvent = async (data: any) => {
+  const handleSaveEvent = async (data: unknown) => {
     try {
       if (selectedEvent && (selectedEvent.id || selectedEvent._id)) {
         const eventId = selectedEvent.id || selectedEvent._id;
@@ -125,18 +128,19 @@ const AdminEventsManagement: React.FC = () => {
           toast.error('Event ID is missing for update!');
           return;
         }
-        await updateEvent({ id: eventId, data });
+        await updateEvent({ id: eventId, data: data as Partial<Event> });
         toast.success('Event updated successfully');
       } else {
-        await createEvent(data);
+        await createEvent(data as Omit<Event, 'id' | 'participants'>);
         toast.success('Event created successfully');
       }
       setShowAddEventModal(false);
       setSelectedEvent(null);
-    } catch (error: any) {
-      console.error('handleSaveEvent - error:', error);
-      toast.error(error.response?.data?.message || error.message || 'Failed to save event');
-    }
+          } catch (error: unknown) {
+        console.error('handleSaveEvent - error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to save event';
+        toast.error(errorMessage);
+      }
   };
 
   const handleDeleteEvent = (id: string) => {
@@ -177,8 +181,9 @@ const AdminEventsManagement: React.FC = () => {
         setShowWarningModal(false);
         setItemToAction(null);
         handleTabChange(activeTab);
-      } catch (error: any) {
-        toast.error(error.message || 'Failed to perform action');
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to perform action';
+        toast.error(errorMessage);
       }
     }
   };
@@ -359,13 +364,13 @@ const AdminEventsManagement: React.FC = () => {
 
               {activeTab === 'events' && events.length > 0 && (
                 <>
-                  <ApplicationsTable data={events} columns={eventColumns} actions={eventActions as any} />
+                  <ApplicationsTable data={events} columns={eventColumns} actions={eventActions} />
                   <Pagination
                     page={page}
                     totalPages={totalPages}
                     itemsCount={events.length}
                     itemName="events"
-                    onPageChange={(newPage: number) => setPage(newPage) as any}
+                    onPageChange={(newPage: number) => setPage(newPage)}
                     onFirstPage={() => setPage(1)}
                     onLastPage={() => setPage(totalPages)}
                   />
@@ -376,14 +381,14 @@ const AdminEventsManagement: React.FC = () => {
                   <ApplicationsTable
                     data={eventRequests}
                     columns={eventRequestColumns}
-                    actions={eventRequestActions as any}
+                    actions={eventRequestActions}
                   />
                   <Pagination
                     page={page}
                     totalPages={totalPages}
                     itemsCount={eventRequests.length}
                     itemName="event requests"
-                    onPageChange={(newPage: number) => setPage(newPage) as any}
+                    onPageChange={(newPage: number) => setPage(newPage)}
                     onFirstPage={() => setPage(1)}
                     onLastPage={() => setPage(totalPages)}
                   />
@@ -460,7 +465,7 @@ const AdminEventsManagement: React.FC = () => {
           setShowRequestDetailsModal(false);
           setSelectedRequest(null);
         }}
-        request={selectedRequest as any}
+        request={selectedRequest ? adaptToEventRequestDetails(selectedRequest) : null}
         onApprove={(id) => {
           setItemToAction({ id, type: 'eventRequest', action: 'approve' });
           setShowWarningModal(true);

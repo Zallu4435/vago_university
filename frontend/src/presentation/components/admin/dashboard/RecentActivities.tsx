@@ -8,14 +8,13 @@ interface ActivityItem {
   time: string;
   avatar: string;
   type: 'success' | 'warning' | 'info' | 'default';
-  isRead: boolean;
 }
 
 interface RecentActivitiesProps {
   activitiesData: ActivityItem[];
 }
 
-const EnhancedActivityItem = ({ action, user, time, avatar, type = "default" }: ActivityItem) => {
+const EnhancedActivityItem = ({ action, user, time, avatar, type = "default" }: Pick<ActivityItem, 'action' | 'user' | 'time' | 'avatar' | 'type'>) => {
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'success': return 'from-emerald-400 to-emerald-600';

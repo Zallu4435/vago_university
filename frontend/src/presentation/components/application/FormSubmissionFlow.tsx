@@ -14,7 +14,89 @@ import {
   FaEye,
 } from 'react-icons/fa';
 import DocumentViewModal from './Documents/DocumentViewModal';
-import type { DocumentUpload, FormSubmissionFlowProps } from '../../../domain/types/application';
+import type { 
+  DocumentUpload, 
+  FormData,
+  ProgrammeChoice,
+  Subject,
+  Achievement
+} from '../../../domain/types/application';
+
+interface SubmissionStatus {
+  success: boolean;
+  message: string;
+}
+
+interface FormValue {
+  [key: string]: string | number | boolean | FormValue | (string | number | boolean | FormValue)[] | null | undefined;
+}
+
+interface FormSubmissionFlowProps {
+  formData: FormData;
+  onBackToForm: () => void;
+  onLogout?: () => void;
+}
+
+interface InternationalSubject {
+  subject: string;
+  otherSubject?: string;
+  marksObtained: string;
+  maxMarks: string;
+}
+
+interface IeltsData {
+  date?: string;
+  overall?: string;
+  reading?: string;
+  writing?: string;
+}
+
+interface ToeflData {
+  date?: string;
+  grade?: string;
+  type?: string;
+}
+
+interface SatData {
+  date?: string;
+  math?: string;
+  reading?: string;
+  essay?: string;
+}
+
+interface ActData {
+  date?: string;
+  composite?: string;
+  english?: string;
+  math?: string;
+  reading?: string;
+  science?: string;
+}
+
+interface ApSubject {
+  subject: string;
+  score: string;
+}
+
+interface ApData {
+  subjects: ApSubject[];
+}
+
+interface ExtendedInternationalEducation {
+  schoolName: string;
+  country: string;
+  from: string;
+  to: string;
+  examination: string;
+  examMonthYear: string;
+  resultType: 'actual' | 'predicted';
+  subjects: InternationalSubject[];
+  ielts?: IeltsData;
+  toefl?: ToeflData;
+  sat?: SatData;
+  act?: ActData;
+  ap?: ApData;
+}
 
 export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
   formData,
@@ -23,11 +105,11 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
 }) => {
   const [showPayment, setShowPayment] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [submissionStatus] = useState<{ success: boolean; message: string }>({ success: false, message: '' });
+  const [submissionStatus] = useState<SubmissionStatus>({ success: false, message: '' });
   const [selectedDocument, setSelectedDocument] = useState<DocumentUpload | null>(null);
   const [showDocumentModal, setShowDocumentModal] = useState(false);
 
-  const formatValue = (value: any): string => {
+  const formatValue = (value: FormValue | string | number | boolean | (string | number | boolean | FormValue)[] | null | undefined): string => {
     if (value === null || value === undefined) return '—';
     if (typeof value === 'boolean') return value ? 'Yes' : 'No';
     if (typeof value === 'object') {
@@ -60,7 +142,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
 
   const renderKeyValueSection = (
     title: string,
-    data: Record<string, any>,
+    data: Record<string, FormValue>,
     icon: React.ReactNode,
     excludeKeys: string[] = []
   ) => {
@@ -70,7 +152,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
       .filter(([key]) => !excludeKeys.includes(key) && data[key] !== null && data[key] !== undefined)
       .filter(([, value]) => {
         if (Array.isArray(value)) return value.length > 0;
-        if (typeof value === 'string') return value.trim() !== '';
+        if (typeof value === 'string') return (value as string).trim() !== '';
         if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
         return true;
       });
@@ -179,7 +261,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
               <div className="space-y-6 max-h-[70vh] overflow-auto pr-2">
                 {renderKeyValueSection(
                   'Personal Information',
-                  formData.personalInfo,
+                  formData.personalInfo as unknown as Record<string, FormValue>,
                   <FaUserCircle className="text-cyan-600" size={20} />,
                   ['applicationId']
                 )}
@@ -191,7 +273,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                       <h3 className="text-lg font-semibold text-cyan-900">Choices of Study</h3>
                     </div>
                     <div className="p-6">
-                      {formData.choiceOfStudy.map((choice: any, index: number) => (
+                      {formData.choiceOfStudy.map((choice: ProgrammeChoice, index: number) => (
                         <div
                           key={index}
                           className="mb-4 pb-4 border-b border-cyan-50 last:border-0"
@@ -324,9 +406,9 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                             <div>
                               <strong className="text-cyan-800 block mb-2">Subjects:</strong>
                               <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
-                                {formData.education.international.subjects.map((subject: any, index: number) => (
+                                {formData.education.international.subjects.map((subject: Subject, index: number) => (
                                   <li key={index}>
-                                    {subject.subject === 'other' ? subject.otherSubject : subject.subject}: {subject.marksObtained}/{subject.maxMarks}
+                                    {subject.subject === 'other' ? (subject as unknown as InternationalSubject).otherSubject : subject.subject}: {(subject as unknown as InternationalSubject).marksObtained}/{(subject as unknown as InternationalSubject).maxMarks}
                                   </li>
                                 ))}
                               </ul>
@@ -334,60 +416,60 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                           )}
 
                           {/* English Proficiency Tests */}
-                          {formData.education.international.ielts && Object.values(formData.education.international.ielts).some(val => val) && (
+                          {(formData.education.international as unknown as ExtendedInternationalEducation).ielts && Object.values((formData.education.international as unknown as ExtendedInternationalEducation).ielts!).some(val => val) && (
                             <div>
                               <strong className="text-cyan-800 block mb-2">IELTS:</strong>
                               <div className="text-sm text-gray-700">
-                                {formData.education.international.ielts.date && <div>Date: {formData.education.international.ielts.date}</div>}
-                                {formData.education.international.ielts.overall && <div>Overall: {formData.education.international.ielts.overall}</div>}
-                                {formData.education.international.ielts.reading && <div>Reading: {formData.education.international.ielts.reading}</div>}
-                                {formData.education.international.ielts.writing && <div>Writing: {formData.education.international.ielts.writing}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).ielts!.date && <div>Date: {(formData.education.international as unknown as ExtendedInternationalEducation).ielts!.date}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).ielts!.overall && <div>Overall: {(formData.education.international as unknown as ExtendedInternationalEducation).ielts!.overall}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).ielts!.reading && <div>Reading: {(formData.education.international as unknown as ExtendedInternationalEducation).ielts!.reading}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).ielts!.writing && <div>Writing: {(formData.education.international as unknown as ExtendedInternationalEducation).ielts!.writing}</div>}
                               </div>
                             </div>
                           )}
 
-                          {formData.education.international.toefl && Object.values(formData.education.international.toefl).some(val => val) && (
+                          {(formData.education.international as unknown as ExtendedInternationalEducation).toefl && Object.values((formData.education.international as unknown as ExtendedInternationalEducation).toefl!).some(val => val) && (
                             <div>
                               <strong className="text-cyan-800 block mb-2">TOEFL:</strong>
                               <div className="text-sm text-gray-700">
-                                {formData.education.international.toefl.date && <div>Date: {formData.education.international.toefl.date}</div>}
-                                {formData.education.international.toefl.grade && <div>Score: {formData.education.international.toefl.grade}</div>}
-                                {formData.education.international.toefl.type && <div>Type: {formData.education.international.toefl.type}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).toefl!.date && <div>Date: {(formData.education.international as unknown as ExtendedInternationalEducation).toefl!.date}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).toefl!.grade && <div>Score: {(formData.education.international as unknown as ExtendedInternationalEducation).toefl!.grade}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).toefl!.type && <div>Type: {(formData.education.international as unknown as ExtendedInternationalEducation).toefl!.type}</div>}
                               </div>
                             </div>
                           )}
 
-                          {formData.education.international.sat && Object.values(formData.education.international.sat).some(val => val) && (
+                          {(formData.education.international as unknown as ExtendedInternationalEducation).sat && Object.values((formData.education.international as unknown as ExtendedInternationalEducation).sat!).some(val => val) && (
                             <div>
                               <strong className="text-cyan-800 block mb-2">SAT:</strong>
                               <div className="text-sm text-gray-700">
-                                {formData.education.international.sat.date && <div>Date: {formData.education.international.sat.date}</div>}
-                                {formData.education.international.sat.math && <div>Math: {formData.education.international.sat.math}</div>}
-                                {formData.education.international.sat.reading && <div>Reading: {formData.education.international.sat.reading}</div>}
-                                {formData.education.international.sat.essay && <div>Essay: {formData.education.international.sat.essay}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).sat!.date && <div>Date: {(formData.education.international as unknown as ExtendedInternationalEducation).sat!.date}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).sat!.math && <div>Math: {(formData.education.international as unknown as ExtendedInternationalEducation).sat!.math}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).sat!.reading && <div>Reading: {(formData.education.international as unknown as ExtendedInternationalEducation).sat!.reading}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).sat!.essay && <div>Essay: {(formData.education.international as unknown as ExtendedInternationalEducation).sat!.essay}</div>}
                               </div>
                             </div>
                           )}
 
-                          {formData.education.international.act && Object.values(formData.education.international.act).some(val => val) && (
+                          {(formData.education.international as unknown as ExtendedInternationalEducation).act && Object.values((formData.education.international as unknown as ExtendedInternationalEducation).act!).some(val => val) && (
                             <div>
                               <strong className="text-cyan-800 block mb-2">ACT:</strong>
                               <div className="text-sm text-gray-700">
-                                {formData.education.international.act.date && <div>Date: {formData.education.international.act.date}</div>}
-                                {formData.education.international.act.composite && <div>Composite: {formData.education.international.act.composite}</div>}
-                                {formData.education.international.act.english && <div>English: {formData.education.international.act.english}</div>}
-                                {formData.education.international.act.math && <div>Math: {formData.education.international.act.math}</div>}
-                                {formData.education.international.act.reading && <div>Reading: {formData.education.international.act.reading}</div>}
-                                {formData.education.international.act.science && <div>Science: {formData.education.international.act.science}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).act!.date && <div>Date: {(formData.education.international as unknown as ExtendedInternationalEducation).act!.date}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).act!.composite && <div>Composite: {(formData.education.international as unknown as ExtendedInternationalEducation).act!.composite}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).act!.english && <div>English: {(formData.education.international as unknown as ExtendedInternationalEducation).act!.english}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).act!.math && <div>Math: {(formData.education.international as unknown as ExtendedInternationalEducation).act!.math}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).act!.reading && <div>Reading: {(formData.education.international as unknown as ExtendedInternationalEducation).act!.reading}</div>}
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).act!.science && <div>Science: {(formData.education.international as unknown as ExtendedInternationalEducation).act!.science}</div>}
                               </div>
                             </div>
                           )}
 
-                          {formData.education.international.ap && formData.education.international.ap.subjects && formData.education.international.ap.subjects.length > 0 && (
+                          {(formData.education.international as unknown as ExtendedInternationalEducation).ap && (formData.education.international as unknown as ExtendedInternationalEducation).ap!.subjects && (formData.education.international as unknown as ExtendedInternationalEducation).ap!.subjects.length > 0 && (
                             <div>
                               <strong className="text-cyan-800 block mb-2">AP Subjects:</strong>
                               <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
-                                {formData.education.international.ap.subjects.map((subject: any, index: number) => (
+                                {(formData.education.international as unknown as ExtendedInternationalEducation).ap!.subjects.map((subject: ApSubject, index: number) => (
                                   <li key={index}>
                                     {subject.subject}: {subject.score}
                                   </li>
@@ -414,7 +496,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                           {Object.entries(formData.achievements.questions).map(([key, value]) => (
                             <div key={key} className="mb-2">
                               <span className="text-gray-700">Q{key}: </span>
-                              <span className="text-gray-900">{formatValue(value)}</span>
+                              <span className="text-gray-900">{formatValue(value as unknown as FormValue)}</span>
                             </div>
                           ))}
                         </div>
@@ -423,7 +505,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                         <div>
                           <strong className="text-cyan-800 block mb-2">Achievements:</strong>
                           <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
-                            {formData.achievements.achievements.map((achievement: any, index: number) => (
+                            {formData.achievements.achievements.map((achievement: Achievement, index: number) => (
                               <li key={index}>
                                 {achievement.activity} - {achievement.level} ({achievement.levelOfAchievement})
                               </li>
@@ -440,14 +522,14 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                     {formData.otherInformation.health && (
                       renderKeyValueSection(
                         'Health Information',
-                        formData.otherInformation.health,
+                        formData.otherInformation.health as unknown as Record<string, FormValue>,
                         <FaHeartbeat className="text-cyan-600" size={20} />
                       )
                     )}
                     {formData.otherInformation.legal && (
                       renderKeyValueSection(
                         'Legal Information',
-                        formData.otherInformation.legal,
+                        formData.otherInformation.legal as unknown as Record<string, FormValue>,
                         <FaBalanceScale className="text-cyan-600" size={20} />
                       )
                     )}
@@ -462,7 +544,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
                     </div>
                     <div className="p-6">
                       <ul className="space-y-3">
-                        {formData.documents.documents.map((doc: any, index: number) => (
+                        {formData.documents.documents.map((doc: DocumentUpload, index: number) => (
                           <li key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                             <div className="flex-1">
                               <strong className="text-cyan-800">{doc.name}:</strong>
@@ -488,7 +570,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
 
                 {renderKeyValueSection(
                   'Declaration',
-                  formData.declaration || {},
+                  formData.declaration as unknown as Record<string, FormValue> || {},
                   <FaClipboardList className="text-cyan-600" size={20} />
                 )}
               </div>
@@ -517,7 +599,7 @@ export const FormSubmissionFlow: React.FC<FormSubmissionFlowProps> = ({
         </div>
       ) : (
         <Payment
-          formData={formData}
+          formData={formData as unknown as { [key: string]: unknown; applicationId: string; }}
           onComplete={() => setShowConfirmation(true)}
           onPrevious={() => setShowPayment(false)}
         />

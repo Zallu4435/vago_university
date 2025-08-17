@@ -242,7 +242,7 @@ const UniversityDashboard = () => {
           setActiveTab={setActiveTab} 
           onLogout={handleLogout} 
           onLogoutAll={handleLogoutAll}
-          user={user} 
+          user={user}
         />
         {renderContent()}
       </div>

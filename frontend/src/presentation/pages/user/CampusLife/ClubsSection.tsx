@@ -5,7 +5,7 @@ import { campusLifeService } from '../../../../application/services/campus-life.
 import JoinRequestForm from './JoinRequestForm';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import ReactDOM from 'react-dom';
-import type { ClubType, ClubUpcomingEvent } from '../../../../domain/types/user/campus-life';
+import type { ClubType, ClubUpcomingEvent, JoinRequest } from '../../../../domain/types/user/campus-life';
 
 export default function ClubsSection({ clubs: clubsProp, searchTerm, typeFilter, statusFilter, onFilterChange, isLoading, error }: {
   clubs?: ClubType[];
@@ -14,7 +14,7 @@ export default function ClubsSection({ clubs: clubsProp, searchTerm, typeFilter,
   statusFilter: string;
   onFilterChange: (filters: { search: string; type: string; status: string }) => void;
   isLoading: boolean;
-  error: any;
+  error: Error | null;
 }) {
   const clubs = clubsProp || [];
   const [selectedClub, setSelectedClub] = useState<ClubType | null>(clubs[0] || null);
@@ -28,7 +28,7 @@ export default function ClubsSection({ clubs: clubsProp, searchTerm, typeFilter,
     isPending: isJoiningClub,
     error: joinClubError
   } = useMutation({
-    mutationFn: ({ clubId, request }: { clubId: string; request: any }) =>
+    mutationFn: ({ clubId, request }: { clubId: string; request: JoinRequest }) =>
       campusLifeService.requestToJoinClub(clubId, request)
   });
   const { styles, theme } = usePreferences();

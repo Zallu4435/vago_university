@@ -40,9 +40,15 @@ export const useUserAssignments = () => {
         return updated;
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Mutation: Submission error:', error);
-      setError(error.message || 'Failed to submit assignment');
+      let errorMsg = 'Failed to submit assignment';
+      if (error instanceof Error) {
+        errorMsg = error.message;
+      } else if (typeof error === 'string') {
+        errorMsg = error;
+      }
+      setError(errorMsg);
     }
   });
 
@@ -61,8 +67,15 @@ export const useUserAssignments = () => {
 
     try {
       await submitAssignmentMutation.mutateAsync({ assignmentId, file });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Hook: Submission error:', error);
+      let errorMsg = 'Failed to submit assignment';
+      if (error instanceof Error) {
+        errorMsg = error.message;
+      } else if (typeof error === 'string') {
+        errorMsg = error;
+      }
+      setError(errorMsg);
     }
   }, [selectedFile, submitAssignmentMutation]);
 
@@ -71,7 +84,7 @@ export const useUserAssignments = () => {
     try {
       const status = await userAssignmentService.getAssignmentStatus(assignmentId);
       return status;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching assignment status:', error);
       return null;
     }
@@ -82,7 +95,7 @@ export const useUserAssignments = () => {
     try {
       const feedback = await userAssignmentService.getAssignmentFeedback(assignmentId);
       return feedback;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching assignment feedback:', error);
       return null;
     }

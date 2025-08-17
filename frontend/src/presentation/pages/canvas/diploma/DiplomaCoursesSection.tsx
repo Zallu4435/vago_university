@@ -9,13 +9,47 @@ import { ChapterItem } from './components/ChapterItem';
 import { useDiplomaManagement } from '../../../../application/hooks/useDiplomaManagement';
 import { ViewMode } from '../../../../domain/types/canvas/diploma';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
+import { Chapter, DiplomaCourse } from '../../../../domain/types/canvas/diploma';
+
+// Define backend types for mapping
+interface BackendChapter {
+  _id?: string;
+  id?: string;
+  title: string;
+  description?: string;
+  type?: string;
+  duration?: string;
+  videoUrl?: string;
+  notes?: string;
+  order?: number;
+  isCompleted?: boolean;
+  isBookmarked?: boolean;
+}
+
+interface BackendCourse {
+  _id?: string;
+  id?: string;
+  title: string;
+  description: string;
+  duration?: string;
+  instructor?: string;
+  department?: string;
+  chapters?: BackendChapter[];
+  videos?: BackendChapter[];
+  videoCount?: number;
+  completedVideoCount?: number;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  isEnrolled?: boolean;
+}
 
 export const DiplomaCoursesSection = () => {
   const { styles } = usePreferences();
   const [currentView, setCurrentView] = useState<ViewMode>('courses');
   const [userAdmitted] = useState(true);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
-  const [modalVideo, setModalVideo] = useState<any>(null);
+  const [modalVideo, setModalVideo] = useState<Chapter | null>(null);
 
   usePreventBodyScroll(videoModalOpen);
 
@@ -30,66 +64,68 @@ export const DiplomaCoursesSection = () => {
     handleViewCourse,
   } = useDiplomaManagement();
 
-  const chapters = useMemo(() => {
+  const chapters = useMemo<Chapter[]>(() => {
     if (!selectedCourse) return [];
-    if (selectedCourse.chapters && selectedCourse.chapters.length > 0) {
-      return selectedCourse.chapters.map((chapter: any) => ({
-        id: chapter._id || chapter.id, 
+    if ((selectedCourse as BackendCourse).chapters?.length) {
+      return ((selectedCourse as BackendCourse).chapters ?? []).map((chapter: BackendChapter): Chapter => ({
+        id: chapter._id || chapter.id || '',
+        _id: chapter._id,
         title: chapter.title,
         description: chapter.description || '',
+        type: chapter.type || 'video',
         duration: chapter.duration || '0',
         videoUrl: chapter.videoUrl || '',
-        notes: chapter.description || '',
-        type: 'video',
+        notes: chapter.notes || chapter.description || '',
+        order: chapter.order,
+        isCompleted: chapter.isCompleted,
+        isBookmarked: chapter.isBookmarked,
       }));
     }
-    if ((selectedCourse as any).videos && (selectedCourse as any).videos.length > 0) {
-      return (selectedCourse as any).videos.map((video: any) => ({
-        id: video._id,
+    if ((selectedCourse as BackendCourse).videos?.length) {
+      return ((selectedCourse as BackendCourse).videos ?? []).map((video: BackendChapter): Chapter => ({
+        id: video._id || video.id || '',
+        _id: video._id,
         title: video.title,
-        duration: video.duration,
-        videoUrl: video.videoUrl,
-        notes: video.description,
+        description: video.description || '',
         type: 'video',
+        duration: video.duration || '0',
+        videoUrl: video.videoUrl || '',
+        notes: video.description || '',
       }));
     }
     return [];
   }, [selectedCourse]);
 
-  const mapBackendCourseToUICourse = (course: any) => ({
-    id: course._id,
+  const mapBackendCourseToUICourse = (course: BackendCourse): DiplomaCourse => ({
+    id: course._id || course.id || '',
     title: course.title,
     description: course.description,
-    duration: course.duration || '',
-    instructor: course.instructor,
-    department: course.department,
-    locked: false,
-    difficulty: '',
-    rating: 0,
-    students: 0,
-    icon: '',
-    color: '',
-    bgColor: '',
-    completionRate: 0,
-    chapters: course.chapters && course.chapters.length > 0 ? course.chapters.map((chapter: any) => ({
-      id: chapter._id || chapter.id, 
+    chapters: course.chapters && course.chapters.length > 0 ? course.chapters.map((chapter: BackendChapter): Chapter => ({
+      id: chapter._id || chapter.id || '',
+      _id: chapter._id,
       title: chapter.title,
       description: chapter.description || '',
+      type: chapter.type || 'video',
       duration: chapter.duration || '0',
       videoUrl: chapter.videoUrl || '',
-      notes: chapter.description || '',
-      type: 'video',
-    })) : ((course.videos || []).map((video: any) => ({
-      id: video._id,
+      notes: chapter.notes || chapter.description || '',
+      order: chapter.order,
+      isCompleted: chapter.isCompleted,
+      isBookmarked: chapter.isBookmarked,
+    })) : ((course.videos || []).map((video: BackendChapter): Chapter => ({
+      id: video._id || video.id || '',
+      _id: video._id,
       title: video.title,
-      duration: video.duration,
-      videoUrl: video.videoUrl,
-      notes: video.description,
+      description: video.description || '',
       type: 'video',
+      duration: video.duration || '0',
+      videoUrl: video.videoUrl || '',
+      notes: video.description || '',
     }))),
-    videoCount: course.videoCount,
-    completedVideoCount: course.completedVideoCount,
-    status: course.status,
+    duration: course.duration || '',
+    createdAt: course.createdAt,
+    updatedAt: course.updatedAt,
+    isEnrolled: course.isEnrolled,
   });
 
   console.log(bookmarkedChapters, 'bookmarkedChapters')
@@ -99,8 +135,8 @@ export const DiplomaCoursesSection = () => {
     setCurrentView('details');
   };
 
-  const handleViewDetails = (course: any) => {
-    const courseId = course._id || course.id;
+  const handleViewDetails = (course: DiplomaCourse) => {
+    const courseId = (course as { _id?: string; id?: string })._id || course.id;
     console.log('[handleViewDetails] courseId:', courseId);
     handleViewCourse(courseId);
     setCurrentView('details');
@@ -182,7 +218,7 @@ export const DiplomaCoursesSection = () => {
               </div>
             </div>
             <div className="space-y-3 sm:space-y-4">
-              {selectedCourse && chapters.map((chapter: any, idx: number) => {
+              {selectedCourse && chapters.map((chapter: Chapter, idx: number) => {
                 const isFirst = idx === 0;
                 const prevId = chapters[idx - 1]?.id;
                 const prevCompleted = isFirst
@@ -225,12 +261,12 @@ export const DiplomaCoursesSection = () => {
                 </button>
                 <h2 className={`text-xl sm:text-2xl font-bold mb-2 ${styles.textPrimary}`}>{modalVideo.title}</h2>
                 <video
-                  src={modalVideo.videoUrl}
+                  src={typeof modalVideo?.videoUrl === 'string' ? modalVideo.videoUrl : ''}
                   controls
                   className={`w-full rounded mb-3 sm:mb-4`}
                   style={{ minHeight: 180, maxHeight: 400 }}
                 />
-                <div className={`${styles.textSecondary}`}>{modalVideo.notes || modalVideo.description}</div>
+                <div className={`${styles.textSecondary}`}>{String(modalVideo?.notes || modalVideo?.description || '')}</div>
                 <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
                   <button
                     className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition-colors mr-0 sm:mr-2 ${bookmarkedChapters.has(String(modalVideo._id || modalVideo.id)) ? 'bg-yellow-200 text-yellow-800' : 'bg-gray-200 text-gray-700'}`}

@@ -1,4 +1,4 @@
-import { Styles } from '../types/ChatTypes';
+import { Message, Styles } from '../types/ChatTypes';
 
 export const getStyles = (isDarkMode: boolean): Styles => ({
   background: () => isDarkMode ? 'bg-gray-900' : 'bg-white',
@@ -88,11 +88,11 @@ export const formatChatTime = (date: string | Date): string => {
   return messageDate.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-export const shouldShowDateHeader = (currentMessage: any, previousMessage: any): boolean => {
+export const shouldShowDateHeader = (currentMessage: Message, previousMessage?: Message): boolean => {
   if (!previousMessage) return true;
   
-  const currentDate = new Date(currentMessage.time);
-  const previousDate = new Date(previousMessage.time);
+  const currentDate = new Date(currentMessage.time || '');
+  const previousDate = new Date(previousMessage.time || '');
   
   return currentDate.toDateString() !== previousDate.toDateString();
 }; 

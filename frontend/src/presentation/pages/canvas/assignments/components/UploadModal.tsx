@@ -3,7 +3,6 @@ import { FiX, FiFileText, FiUpload } from 'react-icons/fi';
 import { formatDueDate } from '../utils/assignmentUtils';
 import { UploadModalProps } from '../../../../../domain/types/canvas/assignment';
 
-
 export const UploadModal: React.FC<UploadModalProps> = ({
   assignment,
   styles,
@@ -25,7 +24,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
       {/* Black background overlay */}
       <div className="fixed inset-0 bg-black bg-opacity-90"></div>
       <div className="relative z-10 w-full max-w-full sm:max-w-md">
-        <div className={`${styles.cardBackground} p-4 sm:p-8 rounded-xl sm:rounded-3xl shadow-2xl border-2 border-gray-800 w-full`}>
+        <div className={`${styles.card.background} p-4 sm:p-8 rounded-xl sm:rounded-3xl shadow-2xl border-2 border-gray-800 w-full`}>
           <div className="flex justify-between items-center mb-4 sm:mb-6">
             <h3 className={`text-base sm:text-2xl font-bold ${styles.textPrimary}`}>Submit Assignment</h3>
             <button

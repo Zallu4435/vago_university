@@ -9,13 +9,14 @@ import { RootState } from '../../../appStore/store';
 import { useSessionManagement } from '../../../application/hooks/useSessionManagement';
 import { Message, Participant, Reaction } from '../../../domain/types/videoConference';
 import { VideoGrid } from './VideoGrid';
+import { Faculty, Session } from '../../../domain/types/canvas/session';
 
 
 export const VideoConferencePage: React.FC = () => {
   const location = useLocation();
   const { session, faculty, isHost } = (location.state || {}) as {
-    session?: any;
-    faculty?: any;
+    session?: Session;
+    faculty?: Faculty;
     isHost?: boolean;
   };
 
@@ -91,7 +92,7 @@ export const VideoConferencePage: React.FC = () => {
     socket.on('connect', () => {
       setIsConnected(true);
 
-      const myId = faculty?.id || faculty?._id;
+      const myId = faculty?.id || faculty?._id || '';
       myIdRef.current = myId;
       const myName = faculty?.firstName + (faculty?.lastName ? ' ' + faculty.lastName : '');
 
@@ -115,8 +116,16 @@ export const VideoConferencePage: React.FC = () => {
       setIsConnected(false);
     });
 
-    socket.on('participant-list', (list) => {
-      setParticipants(list.map((p: any) => ({
+    socket.on('participant-list', (list: Array<{
+      userId: string;
+      name: string;
+      isHost: boolean;
+      cameraOn: boolean;
+      micOn: boolean;
+      handRaised: boolean;
+      isPresenting?: boolean;
+    }>) => {
+      setParticipants(list.map((p) => ({
         id: p.userId,
         name: p.name,
         isHost: p.isHost,
@@ -406,7 +415,7 @@ export const VideoConferencePage: React.FC = () => {
       socketRef.current.disconnect();
     }
     if (session?._id || session?.id) {
-      const sessionId = session._id || session.id;
+      const sessionId = session._id || session.id || '';
       try {
         await attendanceLeave(sessionId);
       } catch (err) {
@@ -474,7 +483,7 @@ export const VideoConferencePage: React.FC = () => {
   };
 
   useEffect(() => {
-    const myId = faculty?.id || faculty?._id;
+    const myId = faculty?.id || faculty?._id || '';
     upsertParticipant({
       id: myId,
       name: faculty?.firstName + (faculty?.lastName ? ' ' + faculty.lastName : ''),
@@ -490,7 +499,7 @@ export const VideoConferencePage: React.FC = () => {
   useEffect(() => {
     if (!session?._id && !session?.id) return;
 
-    const sessionId = session._id || session.id;
+    const sessionId = session._id || session.id || '';
 
     attendanceJoin(sessionId).then(result => {
       if (result.success) {

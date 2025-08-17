@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaUpload, FaTimes, FaFile } from 'react-icons/fa';
 import { FiEye } from 'react-icons/fi';
-import { NewAssignment, Assignment } from './types';
+import { NewAssignment, Assignment } from './types/index';
 import httpClient from '../../../../frameworks/api/httpClient';
 
 interface CreateAssignmentModalProps {
@@ -11,7 +11,7 @@ interface CreateAssignmentModalProps {
   onSubmit: (assignment: NewAssignment) => Promise<{ success: boolean; error?: string }>;
   isLoading: boolean;
   selectedAssignment: Assignment | null;
-  onUpdate?: (id: string, data: Partial<Assignment>) => Promise<{ success: boolean; error?: string }>;
+  onUpdate?: (id: string, data: Partial<Omit<Assignment, 'files'>> & { files?: File[] }) => Promise<{ success: boolean; error?: string }>;
   setActiveTab: (tab: string) => void;
   setSelectedAssignment: (assignment: Assignment | null) => void;
 }
@@ -37,7 +37,6 @@ export default function CreateAssignmentModal({
       // Format the date to YYYY-MM-DD for the input
       const formattedDate = new Date(selectedAssignment.dueDate).toISOString().split('T')[0];
 
-      // Pre-fill the form with the selected assignment's data
       setNewAssignment({
         title: selectedAssignment.title,
         subject: selectedAssignment.subject,
@@ -48,19 +47,19 @@ export default function CreateAssignmentModal({
       });
       // Set existing files
       if (selectedAssignment.files && Array.isArray(selectedAssignment.files)) {
-        setExistingFiles(selectedAssignment.files.map(file => {
-          if (typeof file === 'object' && file !== null && 'fileName' in file && 'fileUrl' in file && 'fileSize' in file && '_id' in file) {
+        setExistingFiles(selectedAssignment.files.map((file) => {
+          if (typeof file === 'string') {
             return {
-              fileName: (file as any).fileName,
-              fileUrl: (file as any).fileUrl,
-              fileSize: (file as any).fileSize,
-              _id: (file as any)._id
+              fileName: file,
+              fileUrl: file,
+              fileSize: 0,
+              _id: ''
             };
           } else {
             return {
-              fileName: typeof file === 'string' ? file : '',
-              fileUrl: typeof file === 'string' ? file : '',
-              fileSize: 0,
+              fileName: file.fileName,
+              fileUrl: file.fileUrl,
+              fileSize: file.fileSize,
               _id: ''
             };
           }
@@ -113,17 +112,14 @@ export default function CreateAssignmentModal({
     }
 
     if (selectedAssignment && onUpdate) {
-      // Update existing assignment
-      const updatePayload: any = {
+      const updatePayload = {
         title: newAssignment.title,
         subject: newAssignment.subject,
         dueDate: newAssignment.dueDate,
         maxMarks: maxMarksNum,
-        description: newAssignment.description
+        description: newAssignment.description,
+        ...(newAssignment.files && newAssignment.files.length > 0 && { files: newAssignment.files })
       };
-      if (newAssignment.files && newAssignment.files.length > 0) {
-        updatePayload.files = newAssignment.files;
-      }
       const result = await onUpdate(selectedAssignment._id, updatePayload);
       if (result.success) {
         setShowCreateModal(false);

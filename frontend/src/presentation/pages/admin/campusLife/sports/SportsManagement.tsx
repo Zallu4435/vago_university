@@ -23,6 +23,7 @@ import ErrorMessage from '../../../../../shared/components/ErrorMessage';
 import {
   Team,
   PlayerRequest,
+  TeamFormData,
 } from '../../../../../domain/types/management/sportmanagement';
 import { formatDate } from '../../../../../shared/utils/dateUtils';
 import {
@@ -155,12 +156,37 @@ const AdminSportsManagement: React.FC = () => {
     setShowAddTeamModal(true);
   };
 
-  const handleSaveTeam = async (data: Team) => {
+  const handleSaveTeam = async (data: TeamFormData) => {
     try {
+      const teamData = {
+        title: data.title,
+        type: data.type,
+        category: data.category,
+        organizer: data.organizer,
+        organizerType: data.organizerType,
+        icon: data.icon,
+        color: data.color,
+        division: data.division,
+        headCoach: data.headCoach,
+        homeGames: data.homeGames,
+        record: data.record,
+        upcomingGames: data.upcomingGames?.map(game => ({ ...game, _id: Math.random().toString() })) || [],
+        playerCount: data.participants || 0,
+        createdAt: new Date().toISOString(),
+        logo: '',
+        name: data.title,
+        _id: '',
+        id: '',
+        status: data.status,
+        participants: data.participants || 0,
+        formedOn: new Date().toISOString(),
+        description: `Team: ${data.title}`,
+      };
+
       if (isEditing && teamDetails) {
-        await updateTeam({ id: teamDetails._id, data });
+        await updateTeam({ id: teamDetails._id, data: teamData });
       } else {
-        await createTeam(data);
+        await createTeam(teamData);
       }
       setShowAddTeamModal(false);
       setSelectedTeamId(null);
@@ -359,7 +385,7 @@ const AdminSportsManagement: React.FC = () => {
 
               {activeTab === 'teams' && teams.length > 0 && (
                 <>
-                  <ApplicationsTable data={teams} columns={getTeamColumns(Users, Trophy, formatDate)} actions={teamActions as any} />
+                  <ApplicationsTable data={teams} columns={getTeamColumns(Users, Trophy, formatDate)} actions={teamActions} />
                   <Pagination
                     page={page}
                     totalPages={totalPages}
@@ -373,7 +399,7 @@ const AdminSportsManagement: React.FC = () => {
                   <ApplicationsTable
                     data={playerRequests}
                     columns={getPlayerRequestColumns(Users, Trophy, formatDate)}
-                    actions={playerRequestActions as any}
+                    actions={playerRequestActions}
                   />
                   <Pagination
                     page={page}
@@ -425,7 +451,7 @@ const AdminSportsManagement: React.FC = () => {
           setShowTeamDetailsModal(false);
           setSelectedTeamId(null);
         }}
-        team={teamDetails}
+        team={teamDetails || null}
         onEdit={handleEditTeamClick}
       />
 
@@ -436,7 +462,7 @@ const AdminSportsManagement: React.FC = () => {
           setSelectedTeamId(null);
           setIsEditing(false);
         }}
-        onSubmit={handleSaveTeam as any}
+        onSubmit={handleSaveTeam}
         initialData={isEditing && teamDetails ? teamToFormData(teamDetails) : undefined}
         isEditing={isEditing}
         sportTypes={[...SPORT_TYPES].filter(type => type !== 'All') as string[]}
@@ -493,7 +519,48 @@ const AdminSportsManagement: React.FC = () => {
           setShowRequestDetailsModal(false);
           setSelectedRequest(null);
         }}
-        request={requestDetails as any}
+        request={requestDetails ? {
+          data: {
+            id: requestDetails.playerRequest.requestId,
+            status: requestDetails.playerRequest.status,
+            createdAt: requestDetails.playerRequest.requestedAt,
+            updatedAt: requestDetails.playerRequest.requestedAt,
+            description: `Request to join ${requestDetails.playerRequest.teamName}`,
+            additionalInfo: '',
+            sport: {
+              id: requestDetails.playerRequest.requestId,
+              name: requestDetails.playerRequest.teamName,
+              type: requestDetails.playerRequest.type,
+              description: `Team: ${requestDetails.playerRequest.teamName}`,
+              expectedParticipants: 1,
+            },
+            user: {
+              name: requestDetails.playerRequest.requestedBy,
+              email: requestDetails.playerRequest.requestedBy,
+            },
+          },
+          sportRequest: {
+            id: requestDetails.playerRequest.requestId,
+            status: requestDetails.playerRequest.status,
+            createdAt: requestDetails.playerRequest.requestedAt,
+            updatedAt: requestDetails.playerRequest.requestedAt,
+            whyJoin: `Requesting to join ${requestDetails.playerRequest.teamName}`,
+            additionalInfo: '',
+            sport: {
+              id: requestDetails.playerRequest.requestId,
+              title: requestDetails.playerRequest.teamName,
+              type: requestDetails.playerRequest.type,
+              headCoach: 'N/A',
+              playerCount: 1,
+              division: 'N/A',
+            },
+            user: {
+              id: requestDetails.playerRequest.requestId,
+              name: requestDetails.playerRequest.requestedBy,
+              email: requestDetails.playerRequest.requestedBy,
+            },
+          },
+        } : null}
         onApprove={handleConfirmApprove}
         onReject={handleConfirmReject}
       />

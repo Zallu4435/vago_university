@@ -1,25 +1,9 @@
 import { Message, UserInfo } from "../../../domain/communication/entities/Communication";
-import {
-  GetInboxMessagesRequestDTO,
-  GetSentMessagesRequestDTO,
-  SendMessageRequestDTO,
-  MarkMessageAsReadRequestDTO,
-  DeleteMessageRequestDTO,
-  GetMessageDetailsRequestDTO,
-  GetAllAdminsRequestDTO,
-  GetUserGroupsRequestDTO,
-  FetchUsersRequestDTO,
-} from "../../../domain/communication/dtos/CommunicationRequestDTOs";
-import {
-  SendMessageResponseDTO,
-  MarkMessageAsReadResponseDTO,
-  DeleteMessageResponseDTO,
-  GetMessageDetailsResponseDTO,
-} from "../../../domain/communication/dtos/CommunicationResponseDTOs";
+import { IMessage } from "../../../infrastructure/database/mongoose/models/communication.model";
 
 export interface ICommunicationRepository {
-  getInboxMessages(params: GetInboxMessagesRequestDTO): Promise<{
-    messages: any[];
+  getInboxMessages(userId: string, page: number, limit: number, search?: string, status?: string): Promise<{
+    messages: IMessage[];
     totalItems: number;
     totalPages: number;
     page: number;
@@ -28,8 +12,8 @@ export interface ICommunicationRepository {
     status?: string;
     search?: string;
   }>;
-  getSentMessages(params: GetSentMessagesRequestDTO): Promise<{
-    messages: any[];
+  getSentMessages(userId: string, page: number, limit: number, search?: string, status?: string): Promise<{
+    messages: IMessage[];
     totalItems: number;
     totalPages: number;
     page: number;
@@ -38,16 +22,21 @@ export interface ICommunicationRepository {
     status?: string;
     search?: string;
   }>;
-  sendMessage(params: SendMessageRequestDTO): Promise<SendMessageResponseDTO>;
-  deleteMessage(params: DeleteMessageRequestDTO): Promise<DeleteMessageResponseDTO>;
-  getMessageDetails(params: GetMessageDetailsRequestDTO): Promise<GetMessageDetailsResponseDTO>;
-  markMessageAsRead(params: MarkMessageAsReadRequestDTO): Promise<MarkMessageAsReadResponseDTO>;
-  getAllAdmins(params: GetAllAdminsRequestDTO);
-  getUserGroups(params: GetUserGroupsRequestDTO): Promise<Array<{
+  sendMessage(senderId: string, senderRole: string, to: Array<{ value: string; label: string }>, subject: string, content: string, attachments?: Array<{
+    filename: string;
+    path: string;
+    contentType: string;
+    size: number;
+  }>): Promise<IMessage>;
+  deleteMessage(messageId: string, userId: string): Promise<void>;
+  getMessageDetails(messageId: string): Promise<IMessage | null>;
+  markMessageAsRead(messageId: string, userId: string): Promise<void>;
+  getAllAdmins(search?: string): Promise<UserInfo[]>;
+  getUserGroups(search?: string): Promise<Array<{
     value: string;
     label: string;
   }>>;
-  fetchUsers(params: FetchUsersRequestDTO);
+  fetchUsers(type: string, search?: string): Promise<UserInfo[]>;
 
   // Helper methods
   findUserById(userId: string, role: string): Promise<UserInfo | null>;

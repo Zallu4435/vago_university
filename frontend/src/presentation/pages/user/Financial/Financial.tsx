@@ -36,8 +36,8 @@ export default function Financial() {
       const response = await financialService.getStudentFinancialInfo();
 
       setStudentInfo({
-        info: Array.isArray(response?.info) ? response.info : [],
-        history: Array.isArray(response?.history) ? response.history : [],
+        info: Array.isArray(response?.info) ? response.info as Charge[] : [],
+        history: Array.isArray(response?.history) ? response.history as Payment[] : [],
         financialAidStatus: response?.financialAidStatus || '',
       });
       setError(null);

@@ -200,7 +200,7 @@ export class ChatController {
         };
       }
 
-      let attachments: any[] = [];
+      let attachments = [];
       if (req.files && Array.isArray(req.files)) {
         for (const file of req.files) {
           try {
@@ -496,15 +496,16 @@ export class ChatController {
     if (typeof settings === 'string') {
       try { settings = JSON.parse(settings); } catch {}
     }
-    const params: any = {
+    const params = {
       name,
       description,
       participants,
       creatorId: req.user.userId,
-      settings
+      settings,
+      avatar: undefined
     };
-    if (req.file && (req.file.path || (req.file as any).url)) {
-      params.avatar = req.file.path || (req.file as any).url;
+    if (req.file && req.file.path) {
+      params.avatar = req.file.path;
     }
 
     const result = await this.createGroupChatUseCase.execute(params);

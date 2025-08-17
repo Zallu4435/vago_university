@@ -7,7 +7,7 @@ import Pagination from '../../../components/admin/management/Pagination';
 import WarningModal from '../../../components/common/WarningModal';
 import EnquiryDetailsModal from './EnquiryDetailsModal';
 import { useEnquiryManagement } from '../../../../application/hooks/useEnquiryManagement';
-import { Enquiry } from '../../../../domain/types/management/enquirymanagement';
+import { Enquiry, EnquiryStatus } from '../../../../domain/types/management/enquirymanagement';
 import ReplyModal from './ReplyModal';
 import { toast } from 'react-hot-toast';
 import {
@@ -89,10 +89,10 @@ const EnquiryManagement: React.FC = () => {
           const { startDate, endDate } = getDateRangeFromKeyword(value);
           setCustomDateRange({ startDate, endDate });
         }
-        setFilters((prev: any) => ({ ...prev, [field]: value }));
+        setFilters((prev) => ({ ...prev, [field]: value }));
         setPage(1);
       } else {
-        setFilters((prev: any) => ({ ...prev, [field]: value }));
+        setFilters((prev) => ({ ...prev, [field]: value }));
         setPage(1);
       }
     }, 300),
@@ -121,7 +121,7 @@ const EnquiryManagement: React.FC = () => {
     try {
       await updateEnquiryStatus({ id: enquiryId, status });
       if (selectedEnquiry && selectedEnquiry.id === enquiryId) {
-        setSelectedEnquiry({ ...selectedEnquiry, status: status as any });
+        setSelectedEnquiry({ ...selectedEnquiry, status: status as EnquiryStatus });
       }
       toast.success('Enquiry status updated successfully');
     } catch (error) {
@@ -194,19 +194,19 @@ const EnquiryManagement: React.FC = () => {
                 <ApplicationsTable
                   data={enquiries}
                   columns={ENQUIRY_COLUMNS}
-                  actions={ENQUIRY_ACTIONS.map((action, idx) => ({
+                  actions={(ENQUIRY_ACTIONS).map((action, idx) => ({
                     ...action,
                     onClick: idx === 0
-                      ? (item: any) => {
+                      ? (item: Enquiry) => {
                         setSelectedEnquiry(item);
                         setShowEnquiryDetails(true);
                       }
                       : idx === 1
-                        ? (item: any) => {
+                        ? (item: Enquiry) => {
                           setEnquiryToReply(item);
                           setShowReplyModal(true);
                         }
-                        : (item: any) => {
+                        : (item: Enquiry) => {
                           setEnquiryToDelete(item);
                           setShowDeleteWarning(true);
                         },

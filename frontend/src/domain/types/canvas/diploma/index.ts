@@ -1,7 +1,9 @@
+import { ThemeStyles } from '../../config/types';
+
 export interface ChapterItemProps {
   chapter: Chapter;
   courseId: string;
-  styles: unknown;
+  styles: ThemeStyles;
   isFirst: boolean;
   isPrevCompleted: boolean;
   isCompleted: boolean;
@@ -38,7 +40,7 @@ export interface DiplomaCourse {
 export interface DiplomaCardProps {
   course: DiplomaCourse;
   index: number;
-  styles: unknown;
+  styles: ThemeStyles;
   userAdmitted: boolean;
   completedChapters: Set<string>;
   onViewDetails: (course: DiplomaCourse) => void;
@@ -46,7 +48,7 @@ export interface DiplomaCardProps {
 }
 
 export interface VideoPlayerProps {
-  styles: unknown;
+  styles: ThemeStyles;
   isPlaying: boolean;
   videoProgress: number;
   onPlayPause: () => void;

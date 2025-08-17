@@ -34,7 +34,7 @@ const AdmissionCategories = () => {
     }
   ];
 
-  const handleLearnMore = (category: any) => {
+  const handleLearnMore = (category: typeof categories[0]) => {
     navigate(`/program-prerequisites?tab=${category.tab}`);
   };
 

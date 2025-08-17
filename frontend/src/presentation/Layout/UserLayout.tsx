@@ -32,9 +32,10 @@ const UserLayout = () => {
     }
     try {
       await authService.logout();
-    } catch (err: any) {
-      if (!err.message?.includes('401')) {
-        console.error('Logout API error:', err);
+    } catch (err: unknown) {
+      const error = err as Error;
+      if (!error.message?.includes('401')) {
+        console.error('Logout API error:', error);
       }
     }
     dispatch(logout());

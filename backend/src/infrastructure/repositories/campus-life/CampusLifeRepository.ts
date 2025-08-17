@@ -2,8 +2,9 @@ import { ICampusLifeRepository } from "../../../application/campus-life/reposito
 import { CampusEventModel, EventRequestModel } from "../../../infrastructure/database/mongoose/models/events/CampusEventModel";
 import { TeamModel, SportRequestModel } from "../../../infrastructure/database/mongoose/models/sports.model";
 import { ClubModel, ClubRequestModel } from "../../../infrastructure/database/mongoose/models/clubs/ClubModel";
-import { CampusEventFilter, CampusLifeOverviewRequest, ClubFilter, ClubsRequest, EventsRequest, JoinClubRequest, JoinEventRequest, JoinSportRequest, RawCampusEvent, RawClub, RawSport, SportFilter, SportsRequest } from "../../../domain/campus-life/entities/CampusLife";
+import { CampusEventFilter, CampusLifeOverviewRequest, ClubFilter, ClubsRequest, EventsRequest, JoinClubRequest, JoinEventRequest, JoinSportRequest, RawCampusEvent, RawClub, RawSport, SportFilter, SportsRequest, RawJoinRequest } from "../../../domain/campus-life/entities/CampusLife";
 type WithStringId<T> = Omit<T, "_id"> & { _id: string };
+type WithStringIdArray<T> = WithStringId<T>[];
  
 export class CampusLifeRepository implements ICampusLifeRepository {
   async findEvents(query, skip: number, limit: number) {
@@ -93,7 +94,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
     }
     if (params.status && params.status !== "all") {
       const today = new Date().toISOString().split("T")[0];
-      query.date = params.status === "upcoming" ? { $gte: today } : { $lt: today };
+      query.date = params.status === "upcoming" ? { $gte: today } : { $lte: today };
     }
     
     const skip = (params.page - 1) * params.limit;
@@ -132,7 +133,9 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       query.title = { $regex: params.search, $options: "i" };
     }
     const totalItems = await this.countSports(query);
-    const sports = await this.findSports(query);
+    const sports = await TeamModel.find(query)
+      .select("title type teams icon color division headCoach homeGames record upcomingGames createdAt updatedAt")
+      .lean<WithStringIdArray<RawSport>>({ getters: true });
     let requests = [];
     if (params.userId) {
       requests = await this.findSportRequestsByUser(params.userId);
@@ -141,7 +144,9 @@ export class CampusLifeRepository implements ICampusLifeRepository {
   }
 
   async getSportById(id: string) {
-    return await this.findSportById(id);
+    return await TeamModel.findById(id)
+      .select("title type teams icon color division headCoach homeGames record upcomingGames createdAt updatedAt")
+      .lean<WithStringId<RawSport>>({ getters: true });
   }
 
   async getClubs(params: ClubsRequest) {
@@ -174,7 +179,9 @@ export class CampusLifeRepository implements ICampusLifeRepository {
   }
 
   async getClubById(id: string) {
-    return await this.findClubById(id);
+    return await ClubModel.findById(id)
+      .select("name type members icon color status role nextMeeting about upcomingEvents createdAt updatedAt")
+      .lean<WithStringId<RawClub>>({ getters: true });
   }
 
   async joinClub(params: JoinClubRequest) {
@@ -200,7 +207,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       createdAt: new Date(),
     });
     await newRequest.save();
-    return newRequest;
+    return newRequest.toObject({ getters: true }) as WithStringId<RawJoinRequest>;
   }
 
   async joinEvent(params: JoinEventRequest) {

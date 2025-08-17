@@ -20,6 +20,51 @@ import { IVideoSession } from "../../../infrastructure/database/mongoose/models/
 import { Event } from "../../../domain/events/entities/EventTypes";
 import { Sport } from "../../../domain/sports/entities/Sport";
 import { Club } from "../../../domain/clubs/entities/ClubTypes";
+import { Notification } from "../../../domain/notifications/entities/NotificationTypes";
+import { IMessage } from "../../../infrastructure/database/mongoose/models/communication.model";
+
+// Type definitions for repository return types
+interface AnnouncementData {
+  latestMessage: IMessage | null;
+  latestNotification: Notification | null;
+}
+
+interface CalendarData {
+  events: Event[];
+  sports: Sport[];
+  clubs: Club[];
+}
+
+interface NewEventsData {
+  latestEvent: Event | null;
+  latestSport: Sport | null;
+  latestClub: Club | null;
+}
+
+// Type definitions for mapped objects
+interface MappedEvent {
+  _id: string;
+  title: string;
+  date: string;
+  location: string;
+  description: string;
+}
+
+interface MappedSport {
+  _id: string;
+  title: string;
+  date: string;
+  location: string;
+  description: string;
+}
+
+interface MappedClub {
+  _id: string;
+  name: string;
+  date: Date;
+  location: string;
+  description: string;
+}
 
 interface ResponseDTO<T> {
   data: T | { error: string };
@@ -113,9 +158,9 @@ export class GetCalendarDaysUseCase implements IGetCalendarDaysUseCase {
   constructor(private studentDashboardRepository: IStudentDashboardRepository) { }
 
   async execute(): Promise<GetCalendarDaysResponseDTO> {
-    const { events, sports, clubs }: { events: Event[]; sports: Sport[]; clubs: Club[] } = await this.studentDashboardRepository.getCalendarDays();
-    // Build a map of days to event/sport/club info
+    const { events, sports, clubs }: CalendarData = await this.studentDashboardRepository.getCalendarDays();
     const dayTypeMap: Record<number, { type: string; title: string; date: string }[]> = {};
+
     function addEntry(dateStr: string, type: string, title: string) {
       if (!dateStr) return;
       const d = new Date(dateStr);
@@ -145,42 +190,48 @@ export class GetNewEventsUseCase implements IGetNewEventsUseCase {
   async execute(): Promise<ResponseDTO<NewEventDTO[]>> {
     const [latestEvent, latestSport, latestClub] = await this.studentDashboardRepository.getNewEvents();
     const events: NewEventDTO[] = [];
+    
     if (latestEvent) {
+      const event = latestEvent as unknown as Event;
       events.push({
-        id: latestEvent._id.toString(),
-        title: latestEvent.title || 'Untitled Event',
-        date: latestEvent.date,
-        location: latestEvent.location || 'Campus',
-        description: latestEvent.description || '',
+        id: event._id || '',
+        title: event.title || 'Untitled Event',
+        date: new Date(event.date),
+        location: event.location || 'Campus',
+        description: event.description || '',
       });
     }
+    
     if (latestSport) {
-      let sportDate = latestSport.getCreatedAt().toISOString();
+      const sport = latestSport as unknown as Sport;
+      let sportDate = new Date(sport.getCreatedAt?.() || Date.now()).toISOString();
       let sportDescription = '';
-      if (Array.isArray(latestSport.getUpcomingGames()) && latestSport.getUpcomingGames().length > 0) {
-        const sortedGames = [...latestSport.getUpcomingGames()].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      if (Array.isArray(sport.getUpcomingGames?.()) && sport.getUpcomingGames().length > 0) {
+        const sortedGames = [...sport.getUpcomingGames()].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         sportDate = sortedGames[0].date;
         sportDescription = sortedGames[0].description || '';
       }
       events.push({
-        id: latestSport.getId() || '',
-        title: latestSport.getTitle() || 'Latest Sport Event',
-        date: sportDate,
-        location: latestSport.getHomeGames()?.toString() || 'Sports Complex',
-        description: sportDescription || latestSport.getDivision() || '',
+        id: sport.getId?.() || '',
+        title: sport.getTitle?.() || 'Latest Sport Event',
+        date: new Date(sportDate),
+        location: sport.getHomeGames?.()?.toString() || 'Sports Complex',
+        description: sportDescription || sport.getDivision?.() || '',
       });
     }
+    
     if (latestClub) {
-      let clubDate = latestClub.date;
-      let clubDescription = latestClub.about || '';
-      if (Array.isArray(latestClub.upcomingEvents) && latestClub.upcomingEvents.length > 0) {
-        const sortedEvents = [...latestClub.upcomingEvents].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        clubDate = sortedEvents[0].date;
+      const club = latestClub as unknown as Club;
+      let clubDate = new Date(club.createdAt);
+      let clubDescription = club.about || '';
+      if (Array.isArray(club.upcomingEvents) && club.upcomingEvents.length > 0) {
+        const sortedEvents = [...club.upcomingEvents].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        clubDate = new Date(sortedEvents[0].date);
         clubDescription = sortedEvents[0].description || clubDescription;
       }
       events.push({
-        id: latestClub._id.toString(),
-        title: latestClub.name || 'Latest Club Event',
+        id: club._id || '',
+        title: club.name || 'Latest Club Event',
         date: clubDate,
         location: 'Club Room',
         description: clubDescription,

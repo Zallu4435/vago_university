@@ -122,6 +122,7 @@ export interface Achievement {
     fromDate: string;
     toDate: string;
     description: string;
+    reference: ReferenceContact;
 }
 
 export interface AchievementListProps {

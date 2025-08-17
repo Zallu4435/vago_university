@@ -61,7 +61,6 @@ export class SessionRepository implements ISessionRepository {
 
     if (params.status && params.status !== 'all') {
       if (params.status === 'upcoming') {
-        // Search for both 'upcoming' and 'scheduled' statuses
         query.$or = [
           { status: 'upcoming' },
           { status: 'scheduled' }

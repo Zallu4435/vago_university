@@ -13,8 +13,8 @@ export interface MessageSummaryDTO {
     contentType: string;
     size: number;
   }>;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
   status?: string;
   to?: string;
   recipientsCount?: number;

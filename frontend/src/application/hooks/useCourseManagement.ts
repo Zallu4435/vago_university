@@ -163,16 +163,6 @@ export const useCourseManagement = (searchQuery: string = "") => {
     },
   });
 
-  const { mutateAsync: getEnrollmentRequestDetails } = useMutation({
-    mutationFn: (requestId: string) =>
-      courseService.getEnrollmentRequestDetails(requestId),
-    onError: (error: Error) => {
-      toast.error(
-        error.message || "Failed to fetch enrollment request details"
-      );
-    },
-  });
-
   const handleTabChange = (tab: "courses" | "requests") => {
     setActiveTab(tab);
     setPage(1);

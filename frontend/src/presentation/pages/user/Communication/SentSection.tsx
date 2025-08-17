@@ -87,7 +87,7 @@ export default function SentSection() {
                 className={`p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${
                   selectedMessage?.id === message.id ? 'bg-orange-50/70' : ''
                 }`}
-                onClick={() => handleMessageClick(message)}
+                onClick={() => handleMessageClick(message as Message)}
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -97,7 +97,7 @@ export default function SentSection() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDelete(message);
+                      handleDelete(message as Message);
                     }}
                     className={`ml-2 ${styles.icon.secondary} hover:${styles.status.error} transition-colors duration-300`}
                   >

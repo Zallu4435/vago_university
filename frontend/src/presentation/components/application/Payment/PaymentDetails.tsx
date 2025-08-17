@@ -66,8 +66,11 @@ const StripePaymentForm: React.FC<PaymentDetailsProps> = ({
       if (paymentMethod) {
         onSubmit({ paymentMethodId: paymentMethod.id });
       }
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : 'An unexpected error occurred';
+      setError(errorMessage);
     } finally {
       setProcessing(false);
     }

@@ -5,19 +5,23 @@ import { AchievementQuestions } from './AchievementQuestions';
 import { questions } from './options';
 import { AchievementList } from './AchievementList';
 import { AchievementModal } from './AchievementModal';
-import type { AchievementSection, AchievementsProps } from '../../../../domain/types/application';
-import { AchievementSectionSchema } from '../../../../domain/validation/AchievementSchema';
+import type { Achievement } from '../../../../domain/types/application';
+import { AchievementSectionSchema, type AchievementFormData } from '../../../../domain/validation/AchievementSchema';
 
+interface AchievementsProps {
+  initialData?: AchievementFormData;
+  onSave: (data: AchievementFormData) => void;
+}
 
-export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getValues: () => any }, AchievementsProps>(({ initialData }, ref) => {
-  const defaultValues: AchievementSection = {
-    questions: questions.reduce((acc, q) => ({ ...acc, [q.id]: '' }), {}),
+export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getValues: () => AchievementFormData }, AchievementsProps>(({ initialData }, ref) => {
+  const defaultValues: AchievementFormData = {
+    questions: { 1: '', 2: '', 3: '', 4: '', 5: '' },
     achievements: [],
     hasNoAchievements: false,
   };
 
-  const methods = useForm<AchievementSection>({
-    resolver: zodResolver(AchievementSectionSchema) as any,
+  const methods = useForm<AchievementFormData>({
+    resolver: zodResolver(AchievementSectionSchema),
     defaultValues: initialData ?? defaultValues,
     mode: 'onSubmit',
   });
@@ -26,7 +30,7 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getVal
   const achievementData = watch();
 
   const [showModal, setShowModal] = useState(false);
-  const [newAchievement, setNewAchievement] = useState({
+  const [newAchievement, setNewAchievement] = useState<Achievement>({
     activity: '',
     level: '',
     levelOfAchievement: '',
@@ -86,7 +90,7 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getVal
   };
 
   const handleRemoveAchievement = (index: number) => {
-    const newAchievements = achievementData.achievements.filter((_, i) => i !== index);
+    const newAchievements = (achievementData.achievements || []).filter((_, i) => i !== index);
     console.log('Removing achievement at index', index, 'New achievements:', newAchievements);
     setValue('achievements', newAchievements, { shouldValidate: false });
   };
@@ -188,10 +192,10 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getVal
               </div>
 
               <AchievementList
-                achievements={achievementData.achievements}
+                achievements={achievementData.achievements || []}
                 onAdd={handleAddAchievement}
                 onEdit={(achievement, index) => {
-                  setNewAchievement(achievement as any);
+                  setNewAchievement(achievement);
                   setEditingIndex(index);
                   setShowModal(true);
                 }}
@@ -230,7 +234,7 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getVal
             resetModalFields();
           }}
           newAchievement={newAchievement}
-          setNewAchievement={setNewAchievement as any}
+          setNewAchievement={setNewAchievement}
         />
       </div>
     </FormProvider>

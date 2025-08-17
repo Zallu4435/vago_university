@@ -11,6 +11,8 @@ interface StudentFinancialInfo extends mongoose.Document {
   status: "Paid" | "Pending";
   term: string;
   method: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 interface Charge extends mongoose.Document {
   title: string;
@@ -21,6 +23,8 @@ interface Charge extends mongoose.Document {
   applicableFor: string;
   createdBy: mongoose.Types.ObjectId;
   status?: "Active" | "Inactive";
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface Payment extends mongoose.Document {
@@ -32,6 +36,8 @@ interface Payment extends mongoose.Document {
   status: "Completed" | "Pending" | "Failed";
   receiptUrl?: string;
   metadata?: Record<string, unknown>;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const StudentFinancialInfoSchema = new mongoose.Schema<StudentFinancialInfo>(

@@ -13,7 +13,24 @@ import {
 } from 'react-icons/fa';
 import { Session, SessionStats } from '../../../../../domain/types/canvas/session';
 
-export const getStatusBadge = (status: string, styles: any): React.JSX.Element => {
+interface Styles {
+  status: { warning: string; error: string; info: string; success: string };
+  badgeBackground: string;
+  button: { secondary: string };
+  textSecondary: string;
+  success: string;
+  error: string;
+  info: string;
+  border: string;
+  cardHover: string;
+  cardShadow: string;
+  card: { background: string };
+  icon: { secondary: string };
+  backgroundSecondary: string;
+  accent: string;
+}
+
+export const getStatusBadge = (status: string, styles: Styles): React.JSX.Element => {
   const baseClasses = "px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1";
   const normalized = (status || '').toLowerCase();
   switch (normalized) {
@@ -27,7 +44,7 @@ export const getStatusBadge = (status: string, styles: any): React.JSX.Element =
       );
     case 'live':
       return (
-        <span className={`${baseClasses} ${styles.status.error} animate-pulse ${styles.cardShadow}`}>
+        <span className={`${baseClasses} ${styles.status.error} animate-pulse`}>
           <FaRecordVinyl className="w-3 h-3 animate-spin" />
           LIVE
         </span>
@@ -55,7 +72,7 @@ export const getStatusBadge = (status: string, styles: any): React.JSX.Element =
   }
 };
 
-export const getDifficultyBadge = (difficulty: Session['difficulty'], styles: any): React.JSX.Element => {
+export const getDifficultyBadge = (difficulty: Session['difficulty'], styles: Styles): React.JSX.Element => {
   const colors = {
     'Beginner': styles.status.success,
     'Intermediate': styles.status.warning,
@@ -69,7 +86,7 @@ export const getDifficultyBadge = (difficulty: Session['difficulty'], styles: an
   );
 };
 
-export const getConnectionQualityIcon = (quality: Session['connectionQuality'], styles: any): React.JSX.Element | null => {
+export const getConnectionQualityIcon = (quality: Session['connectionQuality'], styles: Styles): React.JSX.Element | null => {
   switch (quality) {
     case 'excellent':
       return <FaWifi className={`w-4 h-4 ${styles.status.success}`} />;
@@ -82,7 +99,7 @@ export const getConnectionQualityIcon = (quality: Session['connectionQuality'], 
   }
 };
 
-export const getActionButton = (session: Session, userAccess: { isEnrolled: boolean }, styles: any): React.JSX.Element => {
+export const getActionButton = (session: Session, userAccess: { isEnrolled: boolean }, styles: Styles): React.JSX.Element => {
   if (!userAccess.isEnrolled) {
     return (
       <button className={`flex items-center gap-2 px-6 py-3 ${styles.button.secondary} rounded-xl cursor-not-allowed ${styles.border}`}>

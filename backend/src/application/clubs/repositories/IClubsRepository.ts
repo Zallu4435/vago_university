@@ -11,7 +11,7 @@ import { IBaseRepository } from "../../repositories";
 import { Club, ClubRequest } from "../../../domain/clubs/entities/ClubTypes";
 
 export interface IClubsRepository extends 
-  IBaseRepository<Club, CreateClubRequest, UpdateClubRequest, Record<string, any>, Club> {
+  IBaseRepository<Club, CreateClubRequest, UpdateClubRequest, Record<string, unknown>, Club> {
   
   getClubs(params: GetClubsRequest): Promise<{ clubs: Club[]; totalItems: number; totalPages: number; currentPage: number }>;
   

@@ -6,6 +6,30 @@ export interface Attendee {
   name: string;
 }
 
+export interface VideoSession {
+  _id: string;
+  id?: string;
+  title: string;
+  hostId?: string;
+  startTime: string;
+  endTime?: string;
+  description?: string;
+  instructor?: string;
+  course?: string;
+  duration?: number;
+  maxAttendees?: number;
+  tags?: string[];
+  difficulty?: 'beginner' | 'intermediate' | 'advanced';
+  isLive?: boolean;
+  hasRecording?: boolean;
+  recordingUrl?: string;
+  attendees?: number;
+  attendeeList?: Attendee[];
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface CreateVideoSessionPayload {
   title: string;
   hostId?: string; // Optional since it will be set automatically by the backend
@@ -29,6 +53,14 @@ export interface UpdateVideoSessionPayload {
   data: Partial<CreateVideoSessionPayload & { endTime?: string; status?: string }>;
 }
 
+export interface SessionResponse {
+  data: VideoSession[];
+}
+
+export interface SingleSessionResponse {
+  data: VideoSession;
+}
+
 class SessionService {
   async createVideoSession(payload: CreateVideoSessionPayload) {
     try {
@@ -42,7 +74,7 @@ class SessionService {
     }
   }
 
-  async getSessions(params = {}) {
+  async getSessions(params: Record<string, string | number> = {}) {
     const filteredParams = Object.fromEntries(
       Object.entries(params).filter(([_, value]) => value !== undefined && value !== null && value !== '' && value !== 'all')
     ) as Record<string, string>;
@@ -50,8 +82,8 @@ class SessionService {
       ? '?' + new URLSearchParams(filteredParams).toString()
       : '';
     try {
-      const response = await httpClient.get(`/faculty/sessions/video-sessions${queryString}`);
-      return response.data.data.map((s: any) => ({ ...s, id: s._id }));
+      const response = await httpClient.get<SessionResponse>(`/faculty/sessions/video-sessions${queryString}`);
+      return response.data.data.map((s: VideoSession) => ({ ...s, id: s._id }));
     } catch (error: unknown) {
       if (isAxiosErrorWithApiError(error)) {
         throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to get sessions');
@@ -62,7 +94,7 @@ class SessionService {
 
   async getSessionById(id: string) {
     try {
-      const response = await httpClient.get(`/faculty/sessions/video-sessions/${id}`);
+      const response = await httpClient.get<SingleSessionResponse>(`/faculty/sessions/video-sessions/${id}`);
       const s = response.data.data;
       return { ...s, id: s._id };
     } catch (error: unknown) {

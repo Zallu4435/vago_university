@@ -21,8 +21,8 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
     watch,
     formState: { errors },
     reset,
-  } = useForm<DiplomaFormData>({
-    resolver: zodResolver(diplomaSchema) as any,
+  } = useForm({
+    resolver: zodResolver(diplomaSchema),
     defaultValues: {
       title: '',
       description: '',
@@ -32,7 +32,7 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
       duration: '',
       prerequisites: [],
       status: true,
-      ...initialData,
+      ...(initialData || {}),
     },
   });
 

@@ -53,7 +53,7 @@ export const assignmentService = {
     }
   },
 
-  updateAssignment: async (id: string, assignment: Partial<Assignment> & { files?: File[] }) => {
+  updateAssignment: async (id: string, assignment: Partial<Omit<Assignment, 'files'>> & { files?: File[] }) => {
     if (assignment.files && assignment.files.length > 0) {
       const formData = new FormData();
       if (assignment.title) formData.append('title', assignment.title);

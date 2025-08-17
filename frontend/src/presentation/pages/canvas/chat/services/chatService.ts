@@ -6,9 +6,9 @@ class ChatService {
   async getChats(page = 1, limit = 20): Promise<PaginatedResponse<Chat>> {
     try {
       const response = await httpClient.get(`/chats?page=${page}&limit=${limit}`);
-      const chats = response.data.data.data.map((chat: any) => ({
+      const chats = response.data.data.data.map((chat: Chat) => ({
         ...chat,
-        participants: chat.participants.map((participant: any) => ({
+        participants: chat.participants.map((participant) => ({
           id: participant.id,
           firstName: participant.firstName,
           lastName: participant.lastName,
@@ -178,9 +178,23 @@ class ChatService {
     }
   }
 
-  async createGroupChat(params: any): Promise<Chat> {
+  async createGroupChat(params: { name: string; description?: string; participants: string[]; creatorId: string; settings?: { onlyAdminsCanPost?: boolean; onlyAdminsCanAddMembers?: boolean; onlyAdminsCanChangeInfo?: boolean; onlyAdminsCanPinMessages?: boolean; onlyAdminsCanSendMedia?: boolean; onlyAdminsCanSendLinks?: boolean; }; avatar?: string }): Promise<Chat> {
     try {
       const response = await httpClient.post('/chats/group', params);
+      return response.data;
+    } catch (error: unknown) {
+      if (isAxiosErrorWithApiError(error)) {
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to create group chat');
+      }
+      throw new Error('Failed to create group chat');
+    }
+  }
+
+  async createGroupChatWithAvatar(formData: FormData): Promise<Chat> {
+    try {
+      const response = await httpClient.post('/chats/group', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       return response.data;
     } catch (error: unknown) {
       if (isAxiosErrorWithApiError(error)) {

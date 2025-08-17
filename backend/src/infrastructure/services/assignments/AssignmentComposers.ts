@@ -10,6 +10,8 @@ import {
   IGetSubmissionByIdUseCase,
   IReviewSubmissionUseCase,
   IDownloadSubmissionUseCase,
+  IDownloadFileUseCase,
+  IDownloadSubmissionFileUseCase,
   IGetAnalyticsUseCase,
   GetAssignmentsUseCase,
   GetAssignmentByIdUseCase,
@@ -20,6 +22,8 @@ import {
   GetSubmissionByIdUseCase,
   ReviewSubmissionUseCase,
   DownloadSubmissionUseCase,
+  DownloadFileUseCase,
+  DownloadSubmissionFileUseCase,
   GetAnalyticsUseCase
 } from '../../../application/assignments/useCases/AssignmentUseCases';
 import { AssignmentController } from '../../../presentation/http/assignments/AssignmentController';
@@ -37,6 +41,8 @@ export function getAssignmentComposer(): IAssignmentController {
   const getSubmissionByIdUseCase: IGetSubmissionByIdUseCase = new GetSubmissionByIdUseCase(repository);
   const reviewSubmissionUseCase: IReviewSubmissionUseCase = new ReviewSubmissionUseCase(repository);
   const downloadSubmissionUseCase: IDownloadSubmissionUseCase = new DownloadSubmissionUseCase(repository);
+  const downloadFileUseCase: IDownloadFileUseCase = new DownloadFileUseCase(repository);
+  const downloadSubmissionFileUseCase: IDownloadSubmissionFileUseCase = new DownloadSubmissionFileUseCase(repository);
   const getAnalyticsUseCase: IGetAnalyticsUseCase = new GetAnalyticsUseCase(repository);
 
   return new AssignmentController(
@@ -49,6 +55,8 @@ export function getAssignmentComposer(): IAssignmentController {
     getSubmissionByIdUseCase,
     reviewSubmissionUseCase,
     downloadSubmissionUseCase,
+    downloadFileUseCase,
+    downloadSubmissionFileUseCase,
     getAnalyticsUseCase
   );
 } 

@@ -18,15 +18,15 @@ export class Payment {
   constructor(props: PaymentProps) {
     this._id = props._id;
     this._studentId = props.studentId;
-    this._date = props.date;
+    this._date = new Date(props.date);
     this._description = props.description;
     this._method = props.method;
     this._amount = props.amount;
     this._status = props.status;
     this._receiptUrl = props.receiptUrl;
     this._metadata = props.metadata;
-    this._createdAt = props.createdAt;
-    this._updatedAt = props.updatedAt;
+    this._createdAt = props.createdAt ? new Date(props.createdAt) : undefined;
+    this._updatedAt = props.updatedAt ? new Date(props.updatedAt) : undefined;
   }
 
   static create(props: PaymentProps): Payment {

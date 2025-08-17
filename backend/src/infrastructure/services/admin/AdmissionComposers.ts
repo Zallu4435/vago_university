@@ -8,6 +8,14 @@ import {
     DeleteAdmissionUseCase,
     ConfirmAdmissionOfferUseCase,
     BlockAdmissionUseCase,
+    IGetAdmissionsUseCase,
+    IGetAdmissionByIdUseCase,
+    IGetAdmissionByTokenUseCase,
+    IApproveAdmissionUseCase,
+    IRejectAdmissionUseCase,
+    IDeleteAdmissionUseCase,
+    IConfirmAdmissionOfferUseCase,
+    IBlockAdmissionUseCase
 } from '../../../application/admin/useCases/AdmissionUseCases';
 import { AdmissionRepository } from '../../repositories/admin/AdmissionRepository';
 import { AdminAdmissionController } from '../../../presentation/http/admin/AdmissionController';
@@ -17,14 +25,16 @@ import { config } from '../../../config/config';
 
 export function getAdminAdmissionsComposer(): IAdminAdmissionController {
     const repository: IAdmissionRepository = new AdmissionRepository();
-    const getAdmissionsUseCase = new GetAdmissionsUseCase(repository);
-    const getAdmissionByIdUseCase = new GetAdmissionByIdUseCase(repository);
-    const getAdmissionByTokenUseCase = new GetAdmissionByTokenUseCase(repository);
-    const approveAdmissionUseCase = new ApproveAdmissionUseCase(repository, emailService, config);
-    const rejectAdmissionUseCase = new RejectAdmissionUseCase(repository);
-    const deleteAdmissionUseCase = new DeleteAdmissionUseCase(repository);
-    const confirmAdmissionOfferUseCase = new ConfirmAdmissionOfferUseCase(repository);
-    const blockAdmissionUseCase = new BlockAdmissionUseCase(repository);
+
+    const getAdmissionsUseCase: IGetAdmissionsUseCase = new GetAdmissionsUseCase(repository);
+    const getAdmissionByIdUseCase: IGetAdmissionByIdUseCase = new GetAdmissionByIdUseCase(repository);
+    const getAdmissionByTokenUseCase: IGetAdmissionByTokenUseCase = new GetAdmissionByTokenUseCase(repository);
+    const approveAdmissionUseCase: IApproveAdmissionUseCase = new ApproveAdmissionUseCase(repository, emailService, config);
+    const rejectAdmissionUseCase: IRejectAdmissionUseCase = new RejectAdmissionUseCase(repository);
+    const deleteAdmissionUseCase: IDeleteAdmissionUseCase = new DeleteAdmissionUseCase(repository);
+    const confirmAdmissionOfferUseCase: IConfirmAdmissionOfferUseCase = new ConfirmAdmissionOfferUseCase(repository);
+    const blockAdmissionUseCase: IBlockAdmissionUseCase = new BlockAdmissionUseCase(repository);
+
     return new AdminAdmissionController(
         getAdmissionsUseCase,
         getAdmissionByIdUseCase,

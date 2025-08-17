@@ -14,6 +14,9 @@ import {
   DeleteCourseRequest,
   CourseFilter,
 } from "../../../domain/courses/entities/CourseRequestEntities";
+import { PopulatedEnrollment } from "../../../domain/courses/entities/EnrollmentResponseEntities";
+
+type WithStringId<T> = Omit<T, "_id"> & { _id: string };
 
 export class CoursesRepository implements ICoursesRepository {
   async getCourses(params: GetCoursesRequest) {
@@ -47,12 +50,11 @@ export class CoursesRepository implements ICoursesRepository {
       };
     }
     if (search && search.trim()) {
-      const searchRegex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       query.$or = [
-        { title: searchRegex },
-        { specialization: searchRegex },
-        { faculty: searchRegex },
-        { description: searchRegex }
+        { title: { $regex: escapedSearch, $options: "i" } },
+        { specialization: { $regex: escapedSearch, $options: "i" } },
+        { faculty: { $regex: escapedSearch, $options: "i" } },
       ];
     }
     const skip = (page - 1) * limit;
@@ -97,7 +99,7 @@ export class CoursesRepository implements ICoursesRepository {
     }
     let courseIds: string[] | undefined;
     if ((specialization && specialization !== "all") || (faculty && faculty !== "all") || (term && term !== "all") || (search && search.trim())) {
-      const courseQuery: any = {};
+      const courseQuery: CourseFilter = {};
       if (specialization && specialization !== "all") {
         const formattedSpecialization = specialization.replace(/_/g, " ");
         courseQuery.specialization = {
@@ -123,11 +125,11 @@ export class CoursesRepository implements ICoursesRepository {
         };
       }
       if (search && search.trim()) {
-        const searchRegex = new RegExp(search.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&"), "i");
+        const escapedSearch = search.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&");
         courseQuery.$or = [
-          { title: searchRegex },
-          { specialization: searchRegex },
-          { faculty: searchRegex },
+          { title: { $regex: escapedSearch, $options: "i" } },
+          { specialization: { $regex: escapedSearch, $options: "i" } },
+          { faculty: { $regex: escapedSearch, $options: "i" } },
         ];
       }
       const courses = await CourseModel.find(courseQuery).select("_id").lean();
@@ -145,7 +147,7 @@ export class CoursesRepository implements ICoursesRepository {
       .select("courseId status requestedAt studentId reason createdAt updatedAt")
       .skip(skip)
       .limit(limit)
-      .lean();
+      .lean<PopulatedEnrollment[]>({ getters: true });
     return { enrollments, totalItems, page, limit };
   }
 
@@ -170,6 +172,6 @@ export class CoursesRepository implements ICoursesRepository {
         path: "courseId",
         select: "title specialization term faculty credits",
       })
-      .lean();
+      .lean<PopulatedEnrollment>({ getters: true });
   }
 }

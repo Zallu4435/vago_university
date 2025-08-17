@@ -1,6 +1,5 @@
 import { Club, ClubRequest, ClubProps } from "../entities/ClubTypes";
 
-// Proper types for repository responses - no more any!
 export interface RepositoryClubData {
   _id: string;
   name: string;
@@ -20,7 +19,6 @@ export interface RepositoryClubData {
   updatedAt?: Date;
 }
 
-// Reusable types for Club responses
 export type ClubSummaryData = Pick<ClubProps, 
   'name' | 'type' | 'members' | 'color' | 'icon'
 > & {
@@ -30,7 +28,6 @@ export type ClubSummaryData = Pick<ClubProps,
   image?: string;
 };
 
-// Reusable types for ClubRequest responses
 export type ClubRequestSummaryData = {
   id: string;
   userId: string;
@@ -45,7 +42,6 @@ export type ClubRequestSummaryData = {
   updatedAt: Date;
 };
 
-// Generic pagination type
 export interface PaginatedResponseDTO<T> {
   totalItems: number;
   totalPages: number;
@@ -53,7 +49,6 @@ export interface PaginatedResponseDTO<T> {
   data: T[];
 }
 
-// Response DTOs
 export interface ClubSummaryDTO extends ClubSummaryData {}
 
 export interface GetClubsResponseDTO {

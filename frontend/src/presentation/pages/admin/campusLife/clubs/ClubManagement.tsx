@@ -17,11 +17,35 @@ import ClubDetailsModal from './ClubDetailsModal';
 import ClubRequestDetailsModal from './ClubRequestDetailsModal';
 import { useClubManagement } from '../../../../../application/hooks/useClubManagement';
 import { Club, ClubRequest } from '../../../../../domain/types/club';
-import { ClubActionConfig } from '../../../../../domain/types/management/clubmanagement';
+import { ClubActionConfig, ClubFormData } from '../../../../../domain/types/management/clubmanagement';
+import { 
+  adaptDomainClubToManagement, 
+  adaptDomainClubRequestToManagement,
+  adaptToClubRequestDetails,
+  isDomainClub,
+  isDomainClubRequest 
+} from '../../../../../domain/types/clubTypeAdapter';
 import { CATEGORIES, CLUB_STATUSES, REQUEST_STATUSES, DATE_RANGES, ICONS, COLORS, clubColumns, clubRequestColumns } from '../../../../../shared/constants/clubManagementConstants';
 import LoadingSpinner from '../../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../../shared/components/ErrorMessage';
+import { AxiosError } from 'axios';
+import { ClubRequestDetails } from '../../../../../domain/types/management/clubmanagement';
 
+interface ApiErrorResponse {
+  error?: string;
+  message?: string;
+  [key: string]: unknown;
+}
+
+interface ItemAction {
+  id: string;
+  type: 'club' | 'request';
+  action: 'delete' | 'reject' | 'approve';
+}
+
+function isAxiosErrorWithApiError(error: unknown): error is AxiosError<ApiErrorResponse> {
+  return (error as AxiosError).isAxiosError !== undefined;
+}
 
 const AdminClubManagement: React.FC = () => {
   const {
@@ -47,17 +71,12 @@ const AdminClubManagement: React.FC = () => {
     isLoadingClubDetails,
   } = useClubManagement();
 
-
   const [activeTab, setActiveTab] = useState<'clubs' | 'requests'>('clubs');
   const [showAddClubModal, setShowAddClubModal] = useState(false);
   const [showClubDetailsModal, setShowClubDetailsModal] = useState(false);
   const [selectedClub, setSelectedClub] = useState<Club | ClubRequest | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(false);
-  const [itemToAction, setItemToAction] = useState<{
-    id: string;
-    type: 'club' | 'request';
-    action: 'delete' | 'reject' | 'approve';
-  } | null>(null);
+  const [itemToAction, setItemToAction] = useState<ItemAction | null>(null);
   const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<ClubRequest | null>(null);
 
@@ -76,10 +95,10 @@ const AdminClubManagement: React.FC = () => {
   };
 
   function isClub(item: Club | ClubRequest): item is Club {
-    return (item as Club).createdBy !== undefined;
+    return isDomainClub(item);
   }
   function isClubRequest(item: Club | ClubRequest): item is ClubRequest {
-    return (item as ClubRequest).requestedId !== undefined;
+    return isDomainClubRequest(item);
   }
 
   const handleEditClub = (club: Club | ClubRequest) => {
@@ -142,7 +161,7 @@ const AdminClubManagement: React.FC = () => {
     })();
   };
 
-  const handleSaveClub = (data: any) => {
+  const handleSaveClub = (data: ClubFormData) => {
     (async () => {
       try {
         if (selectedClub && isClub(selectedClub)) {
@@ -154,13 +173,17 @@ const AdminClubManagement: React.FC = () => {
           await updateClub({ id, data });
           toast.success('Club updated successfully');
         } else {
-          await createClub(data);
+          await createClub({ ...data, createdAt: new Date().toISOString() });
           toast.success('Club created successfully');
         }
         setShowAddClubModal(false);
         setSelectedClub(null);
-      } catch (error: any) {
-        toast.error(error.response?.data?.message || error.message || 'Failed to save club');
+      } catch (error) {
+        if (isAxiosErrorWithApiError(error)) {
+          toast.error(error.response?.data?.message || error.message || 'Failed to save club');
+        } else {
+          toast.error('Failed to save club');
+        }
       }
     })();
   };
@@ -200,8 +223,12 @@ const AdminClubManagement: React.FC = () => {
         setShowWarningModal(false);
         setItemToAction(null);
         handleTabChange(activeTab);
-      } catch (error: any) {
-        toast.error(error.message || 'Failed to perform action');
+      } catch (error) {
+        if (isAxiosErrorWithApiError(error)) {
+          toast.error(error.response?.data?.message || error.message || 'Failed to perform action');
+        } else {
+          toast.error('Failed to perform action');
+        }
       }
     }
   };
@@ -379,7 +406,11 @@ const AdminClubManagement: React.FC = () => {
                   {isLoading ? (
                     <LoadingSpinner />
                   ) : (
-                    <ApplicationsTable data={clubs as any} columns={clubColumns as any} actions={clubActions as any} />
+                    <ApplicationsTable 
+                      data={clubs.map(adaptDomainClubToManagement)} 
+                      columns={clubColumns} 
+                      actions={clubActions} 
+                    />
                   )}
                   <Pagination
                     page={page}
@@ -398,9 +429,9 @@ const AdminClubManagement: React.FC = () => {
                     </div>
                   ) : (
                     <ApplicationsTable
-                      data={clubRequests as any}
-                      columns={clubRequestColumns as any}
-                      actions={clubRequestActions as any}
+                      data={clubRequests.map(adaptDomainClubRequestToManagement)}
+                      columns={clubRequestColumns}
+                      actions={clubRequestActions}
                     />
                   )}
                   <Pagination
@@ -475,7 +506,7 @@ const AdminClubManagement: React.FC = () => {
           setShowClubDetailsModal(false);
           setSelectedClub(null);
         }}
-        club={selectedClub as any}
+        club={selectedClub ? (isClub(selectedClub) ? adaptDomainClubToManagement(selectedClub) : adaptDomainClubRequestToManagement(selectedClub)) : null}
         onEdit={handleEditClub}
       />
 
@@ -485,7 +516,7 @@ const AdminClubManagement: React.FC = () => {
           setShowRequestDetailsModal(false);
           setSelectedRequest(null);
         }}
-        request={selectedRequest ? { clubRequest: selectedRequest as any } : null}
+        request={selectedRequest ? (adaptToClubRequestDetails(selectedRequest) as ClubRequestDetails) : null}
         onApprove={(id) => handleApproveRequest(id)}
         onReject={(id) => handleRejectRequest(id)}
       />

@@ -2,6 +2,7 @@ import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Button } from '../../base/Button';
 import { columns } from './options';
+import { getNestedError } from '../../../../shared/utils/formErrors';
 import type { Achievement, AchievementListProps } from '../../../../domain/types/application';
 
 export const AchievementList: React.FC<AchievementListProps> = ({ 
@@ -42,9 +43,9 @@ export const AchievementList: React.FC<AchievementListProps> = ({
       </div> 
 
       <div className="p-6">
-        {(errors.achievements as any)?.achievements && (
+        {getNestedError(errors, 'achievements.achievements') && (
           <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
-            <p className="text-sm text-red-700">{(errors.achievements as any)?.achievements.message}</p>
+            <p className="text-sm text-red-700">{getNestedError(errors, 'achievements.achievements')}</p>
           </div>
         )}
 
@@ -80,7 +81,12 @@ export const AchievementList: React.FC<AchievementListProps> = ({
                     <tr key={index} className="border-b border-cyan-100 hover:bg-cyan-50">
                       {columns.map((col, idx) => (
                         <td key={idx} className="px-6 py-4 text-cyan-800" style={{ minWidth: col.width }}>
-                          {col.key === 'index' ? index + 1 : achievement[col.key as keyof Achievement]}
+                          {col.key === 'index' ? index + 1 : 
+                           col.key === 'reference' ? 
+                             typeof achievement[col.key as keyof Achievement] === 'object' ? 
+                               'Reference Added' : 
+                               String(achievement[col.key as keyof Achievement]) :
+                             String(achievement[col.key as keyof Achievement])}
                         </td>
                       ))}
                       <td className="px-6 py-4 whitespace-nowrap flex space-x-2">

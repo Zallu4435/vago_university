@@ -43,7 +43,7 @@ export const AchievementQuestions: React.FC<AchievementQuestionsProps> = ({ ques
               <Textarea
                 id={`question-${q.id}`}
                 {...register(`questions.${q.id}`)}
-                value={(answers as any)?.[String(q.id)] ?? ''}
+                value={(answers as Record<string, string>)?.[String(q.id)] ?? ''}
                 onChange={e => {
                   onAnswerChange(q.id, e.target.value);
                 }}

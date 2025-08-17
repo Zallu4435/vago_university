@@ -66,17 +66,17 @@ export const DiplomaCard: React.FC<DiplomaCardProps> = ({
           {/* Course stats */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm mb-2 sm:mb-4">
             <div className="flex items-center">
-              <span className={`${styles.textSecondary}`}>{course.category}</span>
+              <span className={`${styles.textSecondary}`}>{course.category as string}</span>
             </div>
-            {displayInstructor && (
+            {(displayInstructor as string) && (
               <div className="flex items-center">
                 <FiUsers className={`w-4 h-4 mr-1 ${styles.icon.secondary}`} />
-                <span className={`${styles.textSecondary}`}>{displayInstructor}</span>
+                <span className={`${styles.textSecondary}`}>{displayInstructor as string}</span>
               </div>
             )}
             <div className="flex items-center">
               <FiStar className="w-4 h-4 mr-1 text-yellow-500" />
-              <span className={`${styles.textSecondary}`}>{displayDepartment}</span>
+              <span className={`${styles.textSecondary}`}>{displayDepartment as string}</span>
             </div>
           </div>
 
@@ -87,7 +87,7 @@ export const DiplomaCard: React.FC<DiplomaCardProps> = ({
               course.status === 'draft' ? styles.status.warning :
               styles.status.error
             } ${styles.badgeBackground}`}>
-              {course.status}
+              {course.status as string}
             </span>
             <span className={`${styles.textSecondary} text-xs`}>{completedCount}/{totalVideos} videos</span>
           </div>

@@ -43,7 +43,7 @@ export default function NUSScholarships() {
     }
   ];
 
-  const handleLearnMore = (category: any) => {
+  const handleLearnMore = (category: { tab: string }) => {
     navigate(`/undergraduate-scholarships?tab=${encodeURIComponent(category.tab)}`);
   };
 

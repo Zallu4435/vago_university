@@ -15,10 +15,16 @@ import {
   CourseFilter,
 } from "../../../domain/courses/entities/CourseRequestEntities";
 import { PopulatedEnrollment } from "../../../domain/courses/entities/EnrollmentResponseEntities";
+import { BaseRepository } from "../../../application/repositories/BaseRepository";
+import { ICourseDocument } from "../../../domain/courses/entities/coursetypes";
 
 type WithStringId<T> = Omit<T, "_id"> & { _id: string };
 
-export class CoursesRepository implements ICoursesRepository {
+export class CoursesRepository extends BaseRepository<ICourseDocument, CreateCourseRequest, UpdateCourseRequest, Record<string, unknown>, ICourseDocument> implements ICoursesRepository {
+  constructor() {
+    super(CourseModel);
+  }
+
   async getCourses(params: GetCoursesRequest) {
     const { page, limit, specialization, faculty, term, search } = params;
     const query: CourseFilter = {};
@@ -60,7 +66,7 @@ export class CoursesRepository implements ICoursesRepository {
     const skip = (page - 1) * limit;
     const courses = await CourseModel.find(query)
       .select("title specialization faculty term credits currentEnrollment maxEnrollment")
-      .sort(search ? {} : { createdAt: -1 })
+      .sort(search ? {} : { updatedAt: -1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
@@ -142,6 +148,7 @@ export class CoursesRepository implements ICoursesRepository {
     const totalItems = await EnrollmentModel.countDocuments(query);
     const skip = (page - 1) * limit;
     const enrollments = await EnrollmentModel.find(query)
+      .sort({ updatedAt: -1, createdAt: -1 })
       .populate("studentId", "email firstName lastName")
       .populate("courseId", "title specialization term faculty credits")
       .select("courseId status requestedAt studentId reason createdAt updatedAt")
@@ -153,10 +160,26 @@ export class CoursesRepository implements ICoursesRepository {
 
   async approveEnrollment(params: ApproveEnrollmentRequest) {
     await EnrollmentModel.findByIdAndUpdate(params.enrollmentId, { status: "Approved" });
+
+    const enrollment = await EnrollmentModel.findById(params.enrollmentId);
+    if (enrollment && enrollment.studentId) {
+      const userId = typeof enrollment.studentId === 'string' ? enrollment.studentId : enrollment.studentId._id.toString();
+      const courseTitle = typeof enrollment.courseId === 'string' ? 'a course' : enrollment.courseId.title || 'a course';
+      
+      await this.sendRequestApprovalNotification('course enrollment', params.enrollmentId, userId, courseTitle);
+    }
   }
 
   async rejectEnrollment(params: RejectEnrollmentRequest) {
     await EnrollmentModel.findByIdAndUpdate(params.enrollmentId, { status: "Rejected" });
+
+    const enrollment = await EnrollmentModel.findById(params.enrollmentId);
+    if (enrollment && enrollment.studentId) {
+      const userId = typeof enrollment.studentId === 'string' ? enrollment.studentId : enrollment.studentId._id.toString();
+      const courseTitle = typeof enrollment.courseId === 'string' ? 'a course' : enrollment.courseId.title || 'a course';
+      
+      await this.sendRequestRejectionNotification('course enrollment', params.enrollmentId, userId, courseTitle);
+    }
   }
 
   async getCourseRequestDetails(params: GetCourseRequestDetailsRequest) {

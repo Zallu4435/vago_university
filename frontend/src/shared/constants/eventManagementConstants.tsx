@@ -189,7 +189,7 @@ export const getEventRequestColumns = (
     render: (request: EventRequest) => (
       <div>
         <p className="font-medium text-gray-200">{request.eventName}</p>
-        <p className="text-xs text-gray-400">ID: {request.id?.slice(0, 7)}</p>
+        <p className="text-xs text-gray-400">ID: {request.eventId?.slice(0, 7)}</p>
       </div>
     ),
     width: '20%',

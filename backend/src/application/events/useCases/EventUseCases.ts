@@ -59,7 +59,7 @@ export class GetEventsUseCase implements IGetEventsUseCase {
       status: event.status as EventStatus,
     }));
     return {
-      data: mappedEvents,
+      events: mappedEvents,
       totalItems: result.totalItems,
       totalPages: result.totalPages,
       currentPage: result.currentPage,

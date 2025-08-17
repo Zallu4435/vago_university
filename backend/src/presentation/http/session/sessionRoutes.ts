@@ -24,6 +24,11 @@ sessionRouter.delete('/video-sessions/:id', authMiddleware, (req, res, next) =>
 sessionRouter.get('/video-sessions', authMiddleware, (req, res, next) =>
   expressAdapter(req, res, next, sessionController.getAllSessions.bind(sessionController))
 );
+
+// New route for university users (lightweight data)
+sessionRouter.get('/university/sessions', authMiddleware, (req, res, next) =>
+  expressAdapter(req, res, next, sessionController.getUserSessions.bind(sessionController))
+);
 sessionRouter.put('/video-sessions/:id/status', authMiddleware, (req, res, next) =>
   expressAdapter(req, res, next, sessionController.updateSessionStatus.bind(sessionController))
 );

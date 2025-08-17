@@ -3,8 +3,8 @@ import { EnrollmentProps, EnrollmentStatus } from "./coursetypes";
 
 export class Enrollment {
   private idValue?: string;
-  private studentIdValue: string;
-  private courseIdValue: string;
+  private studentIdValue: string | { _id: string; email: string; name?: string };
+  private courseIdValue: string | { _id: string; title: string; specialization?: string };
   private statusValue: EnrollmentStatus;
   private requestedAtValue: Date;
   private reasonValue: string;
@@ -29,9 +29,27 @@ export class Enrollment {
   }
 
   get id(): string | undefined { return this.idValue; }
-  get studentId(): string { return this.studentIdValue; }
-  get courseId(): string { return this.courseIdValue; }
+  get studentId(): string | { _id: string; email: string; name?: string } { return this.studentIdValue; }
+  get courseId(): string | { _id: string; title: string; specialization?: string } { return this.courseIdValue; }
   get status(): EnrollmentStatus { return this.statusValue; }
   get requestedAt(): Date { return this.requestedAtValue; }
   get reason(): string { return this.reasonValue; }
+
+  // Helper methods to get the actual ID values
+  get studentIdString(): string {
+    return typeof this.studentIdValue === 'string' ? this.studentIdValue : this.studentIdValue._id;
+  }
+
+  get courseIdString(): string {
+    return typeof this.courseIdValue === 'string' ? this.courseIdValue : this.courseIdValue._id;
+  }
+
+  // Helper methods to get display values
+  get studentEmail(): string {
+    return typeof this.studentIdValue === 'string' ? 'Unknown User' : this.studentIdValue.email;
+  }
+
+  get courseTitle(): string {
+    return typeof this.courseIdValue === 'string' ? 'Unknown Course' : this.courseIdValue.title;
+  }
 }

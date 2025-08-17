@@ -96,7 +96,6 @@ const AdminEventsManagement: React.FC = () => {
   const handleEditEvent = async (event: Event) => {
     try {
       const details = await getEventDetails(event.id);
-      // Ensure selectedEvent has an id property for update logic
       setSelectedEvent({ ...details, id: details.id || details._id || '' });
       setShowAddEventModal(true);
     } catch (error) {
@@ -151,7 +150,7 @@ const AdminEventsManagement: React.FC = () => {
   const handleViewRequest = async (request: EventRequest) => {
     try {
       console.log('Fetching details for request:', request);
-      const details = await getEventRequestDetails(request.id);
+      const details = await getEventRequestDetails(request.requestedId);
       console.log('Received details:', details);
       setSelectedRequest(details);
       setShowRequestDetailsModal(true);
@@ -243,7 +242,7 @@ const AdminEventsManagement: React.FC = () => {
       icon: <Edit size={16} />,
       label: 'Approve Request',
       onClick: (request: EventRequest) => {
-        setItemToAction({ id: request.id, type: 'eventRequest', action: 'approve' });
+        setItemToAction({ id: request.requestedId, type: 'eventRequest', action: 'approve' });
         setShowWarningModal(true);
       },
       color: 'green' as const,
@@ -253,7 +252,7 @@ const AdminEventsManagement: React.FC = () => {
       icon: <Trash2 size={16} />,
       label: 'Reject Request',
       onClick: (request: EventRequest) => {
-        setItemToAction({ id: request.id, type: 'eventRequest', action: 'reject' });
+        setItemToAction({ id: request.requestedId, type: 'eventRequest', action: 'reject' });
         setShowWarningModal(true);
       },
       color: 'red' as const,

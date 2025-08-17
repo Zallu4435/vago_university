@@ -49,6 +49,8 @@ export default function CourseRegistration({ courses, enrolledCredits, waitliste
           section: '001',
           reason: enrollmentData.reason,
         });
+        
+        toast.success('Successfully enrolled in course!');
       } catch (error: unknown) {
         let errorMsg = 'Failed to enroll';
         if (error && typeof error === 'object' && 'response' in error) {
@@ -65,6 +67,9 @@ export default function CourseRegistration({ courses, enrolledCredits, waitliste
         }
         toast.error(errorMsg);
         console.error('Failed to enroll in course:', error);
+      } finally {
+        setIsModalOpen(false);
+        setSelectedCourse(null);
       }
     }
   };

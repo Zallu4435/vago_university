@@ -137,7 +137,8 @@ const CourseForm: React.FC<CourseFormProps> = ({
               <label className="block text-sm font-medium text-purple-300 mb-2">Course Title</label>
               <input
                 type="text"
-                  {...register('title')}
+                {...register('title')}
+                placeholder="e.g., Introduction to Computer Science"
                 className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 required
               />
@@ -148,6 +149,7 @@ const CourseForm: React.FC<CourseFormProps> = ({
               <label className="block text-sm font-medium text-purple-300 mb-2">Description</label>
               <textarea
                   {...register('description')}
+                placeholder="e.g., A comprehensive introduction to programming fundamentals, algorithms, and data structures..."
                 rows={3}
                 className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />
@@ -229,7 +231,7 @@ const CourseForm: React.FC<CourseFormProps> = ({
                 <label className="block text-sm font-medium text-purple-300 mb-2">Schedule</label>
                 <input
                   type="text"
-                    {...register('schedule')}
+                  {...register('schedule')}
                   placeholder="e.g., MWF 10:00-11:45"
                   className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 />

@@ -3,8 +3,8 @@ import { ClubRequestProps, ClubRequestStatus } from "./ClubTypes";
 
 export class ClubRequest {
   private idValue?: string;
-  private clubIdValue: string;
-  private userIdValue: string;
+  private clubIdValue: string | { _id: string; name: string; type: string; about: string; nextMeeting: string; enteredMembers: number };
+  private userIdValue: string | { _id: string; firstName: string; lastName: string; email: string };
   private statusValue: ClubRequestStatus;
   private whyJoinValue: string;
   private additionalInfoValue: string;
@@ -32,8 +32,8 @@ export class ClubRequest {
   }
 
   get id(): string | undefined { return this.idValue; }
-  get clubId(): string { return this.clubIdValue; }
-  get userId(): string { return this.userIdValue; }
+  get clubId(): string | { _id: string; name: string; type: string; about: string; nextMeeting: string; enteredMembers: number } { return this.clubIdValue; }
+  get userId(): string | { _id: string; firstName: string; lastName: string; email: string } { return this.userIdValue; }
   get status(): ClubRequestStatus { return this.statusValue; }
   get whyJoin(): string { return this.whyJoinValue; }
   get additionalInfo(): string { return this.additionalInfoValue; }

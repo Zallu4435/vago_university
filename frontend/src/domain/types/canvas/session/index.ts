@@ -20,6 +20,12 @@ export interface Session {
     difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
     isLive: boolean;
     connectionQuality: 'excellent' | 'good' | 'poor' | null;
+    // New fields from lightweight API
+    startTime?: string;
+    joinUrl?: string;
+    // New user-specific fields
+    isEnrolled?: boolean;
+    userAttendanceStatus?: string;
 }
 
 export interface Faculty {
@@ -57,7 +63,7 @@ export interface SessionCardProps {
     userAccess: UserAccess;
     styles: ThemeStyles;
     onToggleWatched: (sessionId: string) => void;
-    onToggleLike: (sessionId: string) => void;
+    onToggleLike?: (sessionId: string) => void; // Made optional since we removed like functionality
 }
 
 export interface SessionFiltersProps {

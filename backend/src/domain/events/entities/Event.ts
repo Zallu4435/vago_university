@@ -7,7 +7,6 @@ import {
   EventStatus 
 } from "./EventTypes";
 
-// DTOs for repository operations
 export interface CreateEventDto {
   title: string;
   organizer: string;
@@ -50,7 +49,6 @@ export interface UpdateEventDto {
   participants?: number;
 }
 
-// Filter type for MongoDB queries
 export interface EventFilter {
   eventType?: { $regex: string; $options: string } | string;
   status?: { $regex: string; $options: string } | string;
@@ -68,7 +66,6 @@ export interface EventFilter {
   }>;
 }
 
-// Event Request DTOs
 export interface CreateEventRequestDto {
   eventId: string;
   userId: string;
@@ -83,7 +80,6 @@ export interface UpdateEventRequestDto {
   additionalInfo?: string;
 }
 
-// Filter type for event request queries
 export interface EventRequestFilter {
   status?: { $regex: string; $options: string } | string;
   eventId?: string;
@@ -95,7 +91,6 @@ export interface EventRequestFilter {
   }>;
 }
 
-// Response types matching repository returns
 export interface PaginatedResponse<T> {
   events: T[];
   totalItems: number;
@@ -145,7 +140,6 @@ export interface EventRequestDetails {
   };
 }
 
-// Populated user type for event requests
 export interface PopulatedUser {
   _id: string;
   firstName: string;
@@ -153,7 +147,17 @@ export interface PopulatedUser {
   email: string;
 }
 
-// Event document type (from Mongoose, with all fields)
+export interface PopulatedEvent {
+  _id: string;
+  title: string;
+  eventType: string;
+  date: string;
+  organizer: string;
+  location: string;
+  description: string;
+  participants?: number;
+}
+
 export interface EventDocument {
   _id: string;
   title: string;
@@ -181,7 +185,7 @@ export interface EventDocument {
 // EventRequest document type (with populated eventId and userId)
 export interface EventRequestDocument {
   _id: string;
-  eventId: EventDocument | string;
+  eventId: PopulatedEvent | string;
   userId: PopulatedUser | string;
   status: string;
   whyJoin: string;

@@ -23,6 +23,25 @@ export interface VideoSessionResponseDTO {
     joinUrl?: string;
 }
 
+// New DTO for user-facing session data (lightweight)
+export interface UserSessionResponseDTO {
+    id: string;
+    title: string;
+    status: VideoSessionStatus;
+    description?: string;
+    instructor?: string;
+    course?: string;
+    duration?: number;
+    tags?: string[];
+    difficulty?: 'beginner' | 'intermediate' | 'advanced';
+    hasRecording?: boolean;
+    startTime: Date;
+    joinUrl?: string;
+    isLive?: boolean;
+    isEnrolled?: boolean;
+    userAttendanceStatus?: string;
+}
+
 export interface CreateVideoSessionResponseDTO {
     session: VideoSessionResponseDTO;
 }

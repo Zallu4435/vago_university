@@ -30,8 +30,8 @@ export interface ClubProps {
 
 export interface ClubRequestProps {
   id?: string;
-  clubId: string;
-  userId: string;
+  clubId: string | { _id: string; name: string; type: string; about: string; nextMeeting: string; enteredMembers: number };
+  userId: string | { _id: string; firstName: string; lastName: string; email: string };
   status?: ClubRequestStatus;
   whyJoin: string;
   additionalInfo?: string;
@@ -61,8 +61,8 @@ export interface Club {
 // Interface for Mongoose ClubRequest model
 export interface ClubRequest {
   _id: string;
-  clubId: string;
-  userId: string;
+  clubId: string | { _id: string; name: string; type: string; about: string; nextMeeting: string; enteredMembers: number };
+  userId: string | { _id: string; firstName: string; lastName: string; email: string };
   status: ClubRequestStatus;
   whyJoin: string;
   additionalInfo: string;

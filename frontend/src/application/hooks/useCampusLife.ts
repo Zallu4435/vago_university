@@ -1,9 +1,10 @@
 // src/application/hooks/useCampusLife.ts
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { campusLifeService } from '../services/campus-life.service';
 import { JoinRequest } from '../../domain/types/user/campus-life';
 
 export const useCampusLife = (activeTab?: string, searchTerm?: string, typeFilter?: string, statusFilter?: string, eventSearchTerm?: string, sportsSearchTerm?: string, sportsStatusFilter?: string) => {
+  const queryClient = useQueryClient();
   const {
     data: events,
     isLoading: isLoadingEvents,
@@ -16,7 +17,6 @@ export const useCampusLife = (activeTab?: string, searchTerm?: string, typeFilte
         status: statusFilter,
         type: typeFilter,
       };
-      console.log('useCampusLife getEvents params', params);
       return campusLifeService.getEvents(params);
     },
     enabled: activeTab === 'Events',
@@ -31,7 +31,6 @@ export const useCampusLife = (activeTab?: string, searchTerm?: string, typeFilte
     queryKey: ['sports', sportsSearchTerm || '', sportsStatusFilter || ''],
     queryFn: () => {
       const params = { search: sportsSearchTerm, status: sportsStatusFilter };
-      console.log('useCampusLife getSports params', params);
       return campusLifeService.getSports(params);
     },
     enabled: activeTab === 'Athletics',
@@ -54,7 +53,13 @@ export const useCampusLife = (activeTab?: string, searchTerm?: string, typeFilte
     error: joinClubError
   } = useMutation({
     mutationFn: ({ clubId, request }: { clubId: string; request: JoinRequest }) =>
-      campusLifeService.requestToJoinClub(clubId, request)
+      campusLifeService.requestToJoinClub(clubId, request),
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ['clubs'] });
+    },
+    onError: (error) => {
+      console.error('Club join request failed:', error);
+    }
   });
 
   const {
@@ -63,7 +68,13 @@ export const useCampusLife = (activeTab?: string, searchTerm?: string, typeFilte
     error: joinSportError
   } = useMutation({
     mutationFn: ({ sportId, request }: { sportId: string; request: JoinRequest }) =>
-      campusLifeService.requestToJoinSport(sportId, request)
+      campusLifeService.requestToJoinSport(sportId, request),
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ['sports'] });
+    },
+    onError: (error) => {
+      console.error('Sport join request failed:', error);
+    }
   });
 
   const {
@@ -72,7 +83,13 @@ export const useCampusLife = (activeTab?: string, searchTerm?: string, typeFilte
     error: joinEventError
   } = useMutation({
     mutationFn: ({ eventId, request }: { eventId: string; request: JoinRequest }) =>
-      campusLifeService.requestToJoinEvent(eventId, request)
+      campusLifeService.requestToJoinEvent(eventId, request),
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ['events'] });
+    },
+    onError: (error) => {
+      console.error('Event registration failed:', error);
+    }
   });
 
   return {

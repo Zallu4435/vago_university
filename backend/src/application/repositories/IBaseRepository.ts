@@ -18,4 +18,7 @@ export interface IBaseRepository<
   deleteById(id: string): Promise<ResponseType | null>;
   count(filter?: FilterDto): Promise<number>;
   exists(filter: FilterDto): Promise<boolean>;
+  
+  sendRequestApprovalNotification(entityType: string, requestId: string, userId: string, entityTitle: string): Promise<void>;
+  sendRequestRejectionNotification(entityType: string, requestId: string, userId: string, entityTitle: string): Promise<void>;
 }

@@ -46,10 +46,8 @@ export class GetEventRequestsUseCase implements IGetEventRequestsUseCase {
       params.organizerType,
       params.dateRange
     );
-    
-    // Use EventRequestDocument for filter and map
+
     const filteredRequests = result.events.filter((req) => {
-      // eventId can be string or EventDocument
       if (typeof req.eventId === 'object' && req.eventId !== null && 'title' in req.eventId) {
         return true;
       }
@@ -74,6 +72,7 @@ export class GetEventRequestsUseCase implements IGetEventRequestsUseCase {
         eventName,
         requestedId: req._id.toString(),
         requestedBy,
+        eventId: typeof req.eventId === 'object' && req.eventId !== null ? req.eventId._id.toString() : req.eventId,
         type,
         requestedDate: req.createdAt ? new Date(req.createdAt).toISOString() : "N/A",
         status: req.status || "pending",

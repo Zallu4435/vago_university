@@ -42,13 +42,13 @@ clubSchema.pre("save", function (next) {
 });
 
 type ClubRequestDocument = ClubRequest & Document & {
-  clubId: string;
-  userId: string;
+  clubId: mongoose.Types.ObjectId | { _id: mongoose.Types.ObjectId; name: string; type: string; about: string; nextMeeting: string; enteredMembers: number };
+  userId: mongoose.Types.ObjectId | { _id: mongoose.Types.ObjectId; firstName: string; lastName: string; email: string };
 };
 
 const clubRequestSchema = new Schema<ClubRequestDocument>({
-  clubId: { type: String, required: true },
-  userId: { type: String, required: true },
+  clubId: { type: Schema.Types.ObjectId, ref: 'Club', required: true },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   status: {
     type: String,
     enum: Object.values(ClubRequestStatus),

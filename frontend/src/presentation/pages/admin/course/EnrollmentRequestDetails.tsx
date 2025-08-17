@@ -60,6 +60,8 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
 }) => {
   usePreventBodyScroll(isOpen);
 
+  console.log("request", request);
+
   if (!isOpen || !request) return null;
 
   const { course, user } = request;

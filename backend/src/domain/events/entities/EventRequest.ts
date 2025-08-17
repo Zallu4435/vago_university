@@ -11,8 +11,8 @@ export class EventRequest {
 
   constructor(props: EventRequestProps) {
     this._id = props.id;
-    this._eventId = props.eventId;
-    this._userId = props.userId;
+    this._eventId = typeof props.eventId === 'string' ? props.eventId : props.eventId._id;
+    this._userId = typeof props.userId === 'string' ? props.userId : props.userId._id;
     this._status = props.status;
     this._whyJoin = props.whyJoin;
     this._additionalInfo = props.additionalInfo || "";

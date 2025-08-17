@@ -136,22 +136,46 @@ export const useNotificationManagement = () => {
 
   const { mutateAsync: markAsRead } = useMutation({
     mutationFn: (id: string) => notificationService.markAsRead(id),
+    onMutate: async (id: string) => {
+      // Optimistically update the local state
+      setAllNotifications(prev => 
+        prev.map(notification => 
+          notification._id === id 
+            ? { ...notification, isRead: true }
+            : notification
+        )
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.success('Notification marked as read');
     },
     onError: (error: Error) => {
+      // Revert optimistic update on error
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.error(error.message || 'Failed to mark notification as read');
     },
   });
 
   const { mutateAsync: markAllAsRead } = useMutation({
     mutationFn: () => notificationService.markAllAsRead(),
+    onMutate: async () => {
+      // Optimistically update all unread notifications
+      setAllNotifications(prev => 
+        prev.map(notification => 
+          !notification.isRead 
+            ? { ...notification, isRead: true }
+            : notification
+        )
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.success('All notifications marked as read');
     },
     onError: (error: Error) => {
+      // Revert optimistic update on error
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.error(error.message || 'Failed to mark all notifications as read');
     },
   });

@@ -13,7 +13,7 @@ export interface IStudentDashboardRepository {
   getAnnouncements(): Promise<StudentAnnouncementResult>;
   getDeadlines(): Promise<IAssignmentDocument[]>;
   getClasses(): Promise<IVideoSession[]>;
-  getCalendarDays(): Promise<{ events: Event[]; sports: Sport[]; clubs: Club[] }>;
+  getCalendarDays(): Promise<{ events: Event[]; sports: Record<string, unknown>[]; clubs: Club[] }>;
   getNewEvents(): Promise<Record<string, unknown>[]>;
   getUserInfo(studentId: string): Promise<{
     id: string;

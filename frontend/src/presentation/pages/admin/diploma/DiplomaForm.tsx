@@ -125,6 +125,7 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
               <input
                 type="text"
                 {...register('title')}
+                placeholder="e.g., Diploma in Computer Science"
                 className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />
               {errors.title && <p className="text-red-400 text-sm mt-1">{errors.title.message}</p>}
@@ -134,6 +135,7 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
               <label className="block text-sm font-medium text-purple-300 mb-2">Description</label>
               <textarea
                 {...register('description')}
+                placeholder="e.g., A comprehensive program designed to prepare students for careers in computer science and technology..."
                 rows={3}
                 className="w-full px-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               />

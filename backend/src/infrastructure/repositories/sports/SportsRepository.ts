@@ -123,6 +123,15 @@ export class SportsRepository extends BaseRepository<Sport, Record<string, unkno
       { status: "approved", updatedAt: new Date() },
       { runValidators: true }
     );
+
+    // Send approval notification
+    const sportRequest = await SportRequestModel.findById(id);
+    if (sportRequest && sportRequest.userId) {
+      const userId = typeof sportRequest.userId === 'string' ? sportRequest.userId : sportRequest.userId._id.toString();
+      const sportTitle = typeof sportRequest.sportId === 'string' ? 'a sport' : sportRequest.sportId.title || 'a sport';
+      
+      await this.sendRequestApprovalNotification('sport', id, userId, sportTitle);
+    }
   }
 
   async rejectSportRequest(id: string): Promise<void> {
@@ -131,6 +140,15 @@ export class SportsRepository extends BaseRepository<Sport, Record<string, unkno
       { status: "rejected", updatedAt: new Date() },
       { runValidators: true }
     );
+
+    // Send rejection notification
+    const sportRequest = await SportRequestModel.findById(id);
+    if (sportRequest && sportRequest.userId) {
+      const userId = typeof sportRequest.userId === 'string' ? sportRequest.userId : sportRequest.userId._id.toString();
+      const sportTitle = typeof sportRequest.sportId === 'string' ? 'a sport' : sportRequest.sportId.title || 'a sport';
+      
+      await this.sendRequestRejectionNotification('sport', id, userId, sportTitle);
+    }
   }
 
   async getSportRequestDetails(id: string) {

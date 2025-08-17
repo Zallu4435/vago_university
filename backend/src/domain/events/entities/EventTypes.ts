@@ -63,8 +63,8 @@ export interface EventProps {
 
 export interface EventRequestProps {
   id?: string;
-  eventId: string;
-  userId: string;
+  eventId: string | { _id: string; title: string; eventType: string; date: string; organizer: string; location: string; description: string };
+  userId: string | { _id: string; firstName: string; lastName: string; email: string };
   status: EventRequestStatus;
   whyJoin: string;
   additionalInfo?: string;
@@ -98,8 +98,8 @@ export interface Event {
 // Interface for Mongoose EventRequest model
 export interface EventRequest {
   _id: string;
-  eventId: string;
-  userId: string;
+  eventId: string | { _id: string; title: string; eventType: string; date: string; organizer: string; location: string; description: string };
+  userId: string | { _id: string; firstName: string; lastName: string; email: string };
   status: EventRequestStatus;
   whyJoin: string;
   additionalInfo: string;

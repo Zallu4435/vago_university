@@ -102,6 +102,13 @@ export class SessionRepository implements ISessionRepository {
     return sessions.map(doc => doc.toObject() as VideoSession);
   }
 
+  async getUserSessions(params: { search?: string; status?: string; instructor?: string; course?: string; userId?: string } = {}): Promise<VideoSession[]> {
+    // For user sessions, we can use the same query logic but return only essential fields
+    // This method could be optimized further if needed
+    const sessions = await this.getAll(params);
+    return sessions;
+  }
+
   async getSessionAttendance(sessionId: string, filters: VideoSessionFilter = {}) {
     const session = await VideoSessionModel.findById(sessionId);
     if (!session) throw new Error('Session not found');

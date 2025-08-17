@@ -9,59 +9,76 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   onPlayPause
 }) => {
   return (
-    <div className={`relative ${styles.backgroundSecondary} rounded-2xl overflow-hidden aspect-video w-full max-w-2xl mx-auto mb-4 sm:mb-6 group`}>
+    <div className={`relative ${styles.backgroundSecondary} rounded-2xl overflow-hidden aspect-video w-full max-w-4xl mx-auto mb-6 group`}>
       {/* Video placeholder */}
       <div className={`absolute inset-0 ${styles.background} flex items-center justify-center`}>
         <div className="text-center">
-          <div className={`w-14 h-14 sm:w-20 sm:h-20 rounded-full border-4 ${styles.borderSecondary} flex items-center justify-center mb-2 sm:mb-4 mx-auto transition-all duration-300 ${
-            isPlaying ? styles.backgroundSecondary : `${styles.button.secondary} hover:${styles.backgroundSecondary} cursor-pointer`
-          }`} onClick={onPlayPause}>
+          <div 
+            className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 ${styles.borderSecondary} flex items-center justify-center mb-4 mx-auto transition-all duration-300 cursor-pointer hover:scale-110 hover:${styles.border} ${
+              isPlaying 
+                ? `${styles.backgroundSecondary} ${styles.border}` 
+                : `${styles.button?.secondary} hover:${styles.backgroundSecondary}`
+            }`} 
+            onClick={onPlayPause}
+          >
             {isPlaying ? (
-              <FiPause className={`w-6 h-6 sm:w-8 sm:h-8 ${styles.textPrimary}`} />
+              <FiPause className={`w-8 h-8 sm:w-10 sm:h-10 ${styles.textPrimary}`} />
             ) : (
-              <FiPlay className={`w-6 h-6 sm:w-8 sm:h-8 ${styles.textPrimary} ml-1`} />
+              <FiPlay className={`w-8 h-8 sm:w-10 sm:h-10 ${styles.textPrimary} ml-1`} />
             )}
           </div>
-          <p className={`${styles.textSecondary} text-xs sm:text-sm`}>
-            {isPlaying ? 'Playing...' : 'Click to play video'}
+          <p className={`${styles.textSecondary} text-sm sm:text-base font-medium`}>
+            {isPlaying ? 'Video is playing...' : 'Click to start video'}
           </p>
         </div>
       </div>
 
-      {/* Video controls */}
-      <div className={`absolute bottom-0 left-0 right-0 ${styles.backgroundSecondary} p-2 sm:p-4 transition-opacity duration-300 ${
+      {/* Video controls overlay */}
+      <div className={`absolute bottom-0 left-0 right-0 ${styles.backgroundSecondary} bg-opacity-90 p-4 sm:p-6 transition-opacity duration-300 ${
         isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
       }`}>
         {/* Progress bar */}
-        <div className={`w-full ${styles.progress.background} rounded-full h-1 mb-2 sm:mb-3`}>
+        <div className={`w-full ${styles.progress?.background || 'bg-gray-200'} rounded-full h-2 mb-4`}>
           <div
-            className={`h-1 rounded-full ${styles.progress.fill} transition-all duration-300`}
+            className={`h-2 rounded-full ${styles.progress?.fill || 'bg-blue-500'} transition-all duration-300 shadow-lg`}
             style={{ width: `${videoProgress}%` }}
           />
         </div>
 
         {/* Control buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0">
-          <div className="flex items-center space-x-2 sm:space-x-4">
-            <button onClick={onPlayPause} className={`${styles.textPrimary} hover:${styles.textSecondary}`}>
-              {isPlaying ? <FiPause className="w-4 h-4 sm:w-5 sm:h-5" /> : <FiPlay className="w-4 h-4 sm:w-5 sm:h-5" />}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={onPlayPause} 
+              className={`p-2 rounded-lg ${styles.button?.secondary} hover:${styles.button?.primary} transition-colors duration-200 ${styles.textPrimary} hover:scale-110`}
+            >
+              {isPlaying ? (
+                <FiPause className="w-5 h-5" />
+              ) : (
+                <FiPlay className="w-5 h-5" />
+              )}
             </button>
-            <button className={`${styles.textPrimary} hover:${styles.textSecondary}`}>
-              <FiSkipForward className="w-4 h-4 sm:w-5 sm:h-5" />
+            
+            <button className={`p-2 rounded-lg ${styles.button?.secondary} hover:${styles.button?.primary} transition-colors duration-200 ${styles.textPrimary} hover:scale-110`}>
+              <FiSkipForward className="w-5 h-5" />
             </button>
-            <button className={`${styles.textPrimary} hover:${styles.textSecondary}`}>
-              <FiVolume2 className="w-4 h-4 sm:w-5 sm:h-5" />
+            
+            <button className={`p-2 rounded-lg ${styles.button?.secondary} hover:${styles.button?.primary} transition-colors duration-200 ${styles.textPrimary} hover:scale-110`}>
+              <FiVolume2 className="w-5 h-5" />
             </button>
-            <span className={`${styles.textSecondary} text-xs sm:text-sm`}>
-              {Math.floor(videoProgress * 0.45)}/45:00
+            
+            <span className={`${styles.textSecondary} text-sm font-medium px-3 py-1 ${styles.badgeBackground || styles.background} rounded-lg`}>
+              {Math.floor(videoProgress * 0.45)}:00 / 45:00
             </span>
           </div>
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            <button className={`${styles.textPrimary} hover:${styles.textSecondary}`}>
-              <FiSettings className="w-4 h-4 sm:w-5 sm:h-5" />
+          
+          <div className="flex items-center space-x-2">
+            <button className={`p-2 rounded-lg ${styles.button?.secondary} hover:${styles.button?.primary} transition-colors duration-200 ${styles.textPrimary} hover:scale-110`}>
+              <FiSettings className="w-5 h-5" />
             </button>
-            <button className={`${styles.textPrimary} hover:${styles.textSecondary}`}>
-              <FiMaximize2 className="w-4 h-4 sm:w-5 sm:h-5" />
+            
+            <button className={`p-2 rounded-lg ${styles.button?.secondary} hover:${styles.button?.primary} transition-colors duration-200 ${styles.textPrimary} hover:scale-110`}>
+              <FiMaximize2 className="w-5 h-5" />
             </button>
           </div>
         </div>

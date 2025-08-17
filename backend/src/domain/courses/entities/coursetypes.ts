@@ -22,8 +22,8 @@ export enum EnrollmentStatus {
 
 export interface EnrollmentProps {
   id?: string;
-  studentId: string;
-  courseId: string;
+  studentId: string | { _id: string; email: string; name?: string };
+  courseId: string | { _id: string; title: string; specialization?: string };
   status: EnrollmentStatus;
   requestedAt?: Date;
   reason?: string;
@@ -45,8 +45,8 @@ export interface ICourseDocument extends Document {
 }
 
 export interface IEnrollmentDocument extends Document {
-  studentId: string; 
-  courseId: string;  
+  studentId: string | { _id: string; email: string; name?: string }; 
+  courseId: string | { _id: string; title: string; specialization?: string };  
   status: "Pending" | "Approved" | "Rejected";
   requestedAt: Date;
   reason?: string;

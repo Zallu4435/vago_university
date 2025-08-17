@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CampusLifeTabs from './CampusLifeTabs';
 import EventsSection from './EventsSection';
 import ClubsSection from './ClubsSection';
@@ -6,7 +6,6 @@ import AthleticsSection from './AthleticsSection';
 import { useCampusLife } from '../../../../application/hooks/useCampusLife';
 import { FaUsers } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
-import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 
 export default function CampusLife() {
@@ -17,26 +16,23 @@ export default function CampusLife() {
   const [eventSearchTerm, setEventSearchTerm] = useState('');
   const [athleticsStatusFilter, setAthleticsStatusFilter] = useState('');
   const [athleticsSearchTerm, setAthleticsSearchTerm] = useState('');
-  // Debug: log all values passed to useCampusLife
-  console.log('CampusLife useCampusLife args', {
-    activeTab,
-    searchTerm,
-    typeFilter,
-    statusFilter,
-    eventSearchTerm,
-    athleticsSearchTerm,
-    athleticsStatusFilter
-  });
+
+  useEffect(() => {
+    setSearchTerm('');
+    setTypeFilter('');
+    setStatusFilter('');
+    setEventSearchTerm('');
+    setAthleticsStatusFilter('');
+    setAthleticsSearchTerm('');
+  }, [activeTab]);
+
   const { styles, theme } = usePreferences();
   const {
     events,
     sports,
-    isLoadingEvents,
-    isLoadingSports,
     eventsError,
     sportsError,
     clubs,
-    isLoadingClubs,
     clubsError,
   } = useCampusLife(
     activeTab,
@@ -46,15 +42,6 @@ export default function CampusLife() {
     eventSearchTerm,
     athleticsSearchTerm
   );
-
-  const isLoading =
-    (activeTab === 'Events' && isLoadingEvents) ||
-    (activeTab === 'Clubs' && isLoadingClubs) ||
-    (activeTab === 'Athletics' && isLoadingSports);
-
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
 
   const error =
     (activeTab === 'Events' && eventsError) ||
@@ -100,7 +87,6 @@ export default function CampusLife() {
         <div className="mt-6">
           {activeTab === 'Events' && (
             <EventsSection
-              events={Array.isArray(events) ? events : []}
               searchTerm={eventSearchTerm}
               statusFilter={statusFilter}
               onFilterChange={({ search, status }) => {
@@ -111,7 +97,6 @@ export default function CampusLife() {
           )}
           {activeTab === 'Clubs' && (
             <ClubsSection
-              clubs={Array.isArray(clubs) ? clubs : []}
               searchTerm={searchTerm}
               typeFilter={typeFilter}
               statusFilter={statusFilter}
@@ -120,13 +105,10 @@ export default function CampusLife() {
                 setTypeFilter(type);
                 setStatusFilter(status);
               }}
-              isLoading={isLoadingClubs}
-              error={clubsError}
             />
           )}
           {activeTab === 'Athletics' && (
             <AthleticsSection
-              sports={Array.isArray(sports) ? sports : []}
               statusFilter={athleticsStatusFilter}
               searchTerm={athleticsSearchTerm}
               onFilterChange={({ search, status }) => {

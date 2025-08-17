@@ -1,15 +1,9 @@
 import React from 'react';
 import { 
-  FaClock, 
-  FaRecordVinyl, 
-  FaCheckCircle, 
   FaWifi, 
   FaSignal, 
   FaLock, 
   FaPlay, 
-  FaShareAlt, 
-  FaDownload, 
-  FaCalendarAlt 
 } from 'react-icons/fa';
 import { Session, SessionStats } from '../../../../../domain/types/canvas/session';
 
@@ -30,46 +24,41 @@ interface Styles {
   accent: string;
 }
 
-export const getStatusBadge = (status: string, styles: Styles): React.JSX.Element => {
-  const baseClasses = "px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1";
-  const normalized = (status || '').toLowerCase();
-  switch (normalized) {
-    case 'upcoming':
-    case 'scheduled':
-      return (
-        <span className={`${baseClasses} ${styles.status.warning} ${styles.badgeBackground}`}>
-          <FaClock className="w-3 h-3" />
-          Upcoming
-        </span>
-      );
-    case 'live':
-      return (
-        <span className={`${baseClasses} ${styles.status.error} animate-pulse`}>
-          <FaRecordVinyl className="w-3 h-3 animate-spin" />
-          LIVE
-        </span>
-      );
-    case 'completed':
-      return (
-        <span className={`${baseClasses} ${styles.status.info} ${styles.badgeBackground}`}>
-          <FaCheckCircle className="w-3 h-3" />
-          Completed
-        </span>
-      );
-    case 'ended':
-      return (
-        <span className={`${baseClasses} ${styles.status.error} ${styles.badgeBackground}`}>
-          <FaCheckCircle className="w-3 h-3" />
-          Ended
-        </span>
-      );
-    default:
-      return (
-        <span className={`${baseClasses} ${styles.button.secondary} ${styles.textSecondary}`}>
-          Unknown
-        </span>
-      );
-  }
+export const getStatusBadge = (status: string, styles: Styles, isLive?: boolean): React.JSX.Element => {
+  // Map backend statuses to frontend display
+  const getDisplayStatus = (backendStatus: string, isLive?: boolean): { text: string; color: string } => {
+    // If isLive is true, always show as Live regardless of status
+    if (isLive === true) {
+      return { text: 'Live', color: styles.status.error };
+    }
+    
+    switch (backendStatus?.toLowerCase()) {
+      case 'ongoing':
+        return { text: 'Live', color: styles.status.error };
+      case 'scheduled':
+        return { text: 'Upcoming', color: styles.status.warning };
+      case 'ended':
+        return { text: 'Completed', color: styles.status.info };
+      case 'cancelled':
+        return { text: 'Cancelled', color: styles.status.error };
+      case 'live':
+        return { text: 'Live', color: styles.status.error };
+      case 'upcoming':
+        return { text: 'Upcoming', color: styles.status.warning };
+      case 'completed':
+        return { text: 'Completed', color: styles.status.info };
+      default:
+        return { text: backendStatus || 'Unknown', color: styles.status.info };
+    }
+  };
+
+  const { text, color } = getDisplayStatus(status, isLive);
+  
+  return (
+    <span className={`px-3 py-1 rounded-full text-xs font-medium ${color} ${styles.badgeBackground}`}>
+      {text}
+    </span>
+  );
 };
 
 export const getDifficultyBadge = (difficulty: Session['difficulty'], styles: Styles): React.JSX.Element => {
@@ -109,57 +98,90 @@ export const getActionButton = (session: Session, userAccess: { isEnrolled: bool
     );
   }
 
-  switch (session.status) {
+  // Map backend statuses to frontend actions, but prioritize isLive field
+  const getSessionStatus = (backendStatus: string, isLive?: boolean): string => {
+    // If isLive is true, always treat as live
+    if (isLive === true) {
+      return 'live';
+    }
+    
+    switch (backendStatus?.toLowerCase()) {
+      case 'ongoing':
+        return 'live';
+      case 'scheduled':
+        return 'upcoming';
+      case 'ended':
+        return 'completed';
+      case 'cancelled':
+        return 'cancelled';
+      default:
+        return backendStatus?.toLowerCase() || 'unknown';
+    }
+  };
+
+  const status = getSessionStatus(session.status, session.isLive);
+
+  switch (status) {
     case 'live':
       return (
-        <div className="flex gap-2">
-          <button className={`flex items-center gap-2 px-6 py-3 ${styles.status.error} rounded-xl ${styles.cardHover} ${styles.cardShadow}`}>
-            <FaPlay className="w-4 h-4" />
-            Join Live Session
-          </button>
-          <button className={`p-3 ${styles.card.background} ${styles.border} rounded-xl ${styles.cardHover}`}>
-            <FaShareAlt className={`w-4 h-4 ${styles.icon.secondary}`} />
-          </button>
-        </div>
+        <button className={`flex items-center gap-2 px-6 py-3 ${styles.status.error} rounded-xl ${styles.cardHover} ${styles.cardShadow}`}>
+          <FaPlay className="w-4 h-4" />
+          Join Live Session
+        </button>
       );
     case 'completed':
       return session.hasRecording ? (
-        <div className="flex gap-2">
-          <button className={`flex items-center gap-2 px-6 py-3 ${styles.status.info} rounded-xl ${styles.cardHover} ${styles.cardShadow}`}>
-            <FaPlay className="w-4 h-4" />
-            Watch Recording
-          </button>
-          <button className={`p-3 ${styles.card.background} ${styles.border} rounded-xl ${styles.cardHover}`}>
-            <FaDownload className={`w-4 h-4 ${styles.icon.secondary}`} />
-          </button>
-        </div>
+        <button className={`flex items-center gap-2 px-6 py-3 ${styles.status.info} rounded-xl ${styles.cardHover} ${styles.cardShadow}`}>
+          <FaPlay className="w-4 h-4" />
+          Watch Recording
+        </button>
       ) : (
         <span className={`text-sm px-4 py-2 ${styles.backgroundSecondary} rounded-xl ${styles.textSecondary}`}>
           Recording not available
         </span>
       );
     case 'upcoming':
-      return (
-        <div className="flex gap-2">
-          <button className={`flex items-center gap-2 px-6 py-3 ${styles.accent} rounded-xl ${styles.cardHover} ${styles.cardShadow}`}>
-            <FaCalendarAlt className="w-4 h-4" />
-            Set Reminder
-          </button>
-          <button className={`p-3 ${styles.card.background} ${styles.border} rounded-xl ${styles.cardHover}`}>
-            <FaShareAlt className={`w-4 h-4 ${styles.icon.secondary}`} />
-          </button>
-        </div>
-      );
+      return <></>; // Don't show duplicate status text
     default:
       return <></>;
   }
 };
 
 export const calculateSessionStats = (sessions: Session[], watchedSessions: string[]): SessionStats => {
+  // Map backend statuses to frontend statuses
+  const getFrontendStatus = (backendStatus: string): string => {
+    switch (backendStatus?.toLowerCase()) {
+      case 'ongoing':
+        return 'live';
+      case 'scheduled':
+        return 'upcoming';
+      case 'ended':
+        return 'completed';
+      case 'cancelled':
+        return 'cancelled';
+      default:
+        return backendStatus?.toLowerCase() || 'unknown';
+    }
+  };
+
+  // Count sessions by mapped status, but prioritize isLive field for live sessions
+  const liveCount = sessions.filter(s => s.isLive === true).length;
+  const upcomingCount = sessions.filter(s => getFrontendStatus(s.status) === 'upcoming' && !s.isLive).length;
+  const completedCount = sessions.filter(s => getFrontendStatus(s.status) === 'completed').length;
+  const watchedCount = watchedSessions.length;
+
+  console.log('Backend sessions statuses:', sessions.map(s => ({ 
+    id: s.id, 
+    status: s.status, 
+    isLive: s.isLive,
+    mappedStatus: getFrontendStatus(s.status) 
+  })));
+  console.log('Calculated stats:', { liveCount, upcomingCount, completedCount, watchedCount });
+
   return {
-    liveCount: sessions.filter(s => s.status === 'live').length,
-    upcomingCount: sessions.filter(s => s.status === 'upcoming').length,
-    completedCount: sessions.filter(s => s.status === 'completed').length,
-    watchedCount: watchedSessions.length
+    liveCount,
+    upcomingCount,
+    completedCount,
+    watchedCount
   };
 };  

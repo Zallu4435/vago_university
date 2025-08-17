@@ -93,7 +93,7 @@ export class GetClubRequestsUseCase implements IGetClubRequestsUseCase {
       status: req.status || "pending",
     }));
     return {
-      data: mappedRequests,
+      clubRequests: mappedRequests,
       totalItems,
       totalPages,
       currentPage,

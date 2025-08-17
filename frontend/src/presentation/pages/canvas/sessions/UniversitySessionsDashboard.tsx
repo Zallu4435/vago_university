@@ -16,7 +16,9 @@ const UniversitySessionsDashboard = () => {
     filters,
     setFilters,
     searchTerm,
-    setSearchTerm
+    setSearchTerm,
+    isLoading,
+    error
   } = useUniversitySessionManagement({ status: 'all', instructor: 'all' }, '');
   const [, setCurrentTime] = useState(new Date());
   const [userAccess, setUserAccess] = useState<UserAccess>({
@@ -47,24 +49,41 @@ const UniversitySessionsDashboard = () => {
     }));
   };
 
-  const handleToggleLike = (sessionId: string) => {
-    setUserAccess(prev => ({
-      ...prev,
-      likedSessions: prev.likedSessions.includes(sessionId)
-        ? prev.likedSessions.filter(id => id !== sessionId)
-        : [...prev.likedSessions, sessionId]
-    }));
-  };
-
-  const uniqueInstructors = [...new Set((sessions as Session[]).map((s: { instructor: string }) => s.instructor))];
+  // Fix the syntax error and add debugging
+  const uniqueInstructors = [...new Set((sessions as Session[]).map(s => s.instructor).filter(Boolean))] as string[];
   const sessionStats = calculateSessionStats(sessions, userAccess.watchedSessions);
+
+  // Debug logging to see what data we're getting
+  console.log('Sessions data:', sessions);
+  console.log('Session stats:', sessionStats);
+  console.log('User access:', userAccess);
 
   return (
     <div className={`min-h-screen ${styles.background}`}>
-
-
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <SessionStats stats={sessionStats} styles={styles} />
+        {/* Show loading state */}
+        {isLoading && (
+          <div className={`${styles.card.background} rounded-2xl shadow-lg border ${styles.border} text-center py-8 mb-6`}>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className={`${styles.textSecondary}`}>Loading sessions...</p>
+          </div>
+        )}
+
+        {/* Show error state */}
+        {error && (
+          <div className={`${styles.card.background} rounded-2xl shadow-lg border ${styles.border} text-center py-8 mb-6`}>
+            <div className={`w-16 h-16 ${styles.status.error} rounded-full flex items-center justify-center mx-auto mb-4`}>
+              <FaFilter className={`w-8 h-8 text-white`} />
+            </div>
+            <h3 className={`text-xl font-semibold ${styles.textPrimary} mb-2`}>Error Loading Sessions</h3>
+            <p className={`${styles.textSecondary}`}>Failed to load sessions. Please try again.</p>
+          </div>
+        )}
+
+        {/* Show stats only when data is loaded */}
+        {!isLoading && !error && (
+          <SessionStats stats={sessionStats} styles={styles} />
+        )}
 
         <SessionFilters
           filters={filters}
@@ -96,7 +115,6 @@ const UniversitySessionsDashboard = () => {
                 userAccess={userAccess}
                 styles={styles}
                 onToggleWatched={handleToggleWatched}
-                onToggleLike={handleToggleLike}
               />
             ))
           )}

@@ -5,6 +5,15 @@ export interface Attendee {
     name: string;
 }
 
+export interface AttendanceRecord {
+    userId: string;
+    intervals: Array<{
+        joinedAt: Date;
+        leftAt?: Date;
+    }>;
+    status?: string;
+}
+
 export class VideoSession {
     _id?: string;
     constructor(
@@ -27,6 +36,7 @@ export class VideoSession {
         public readonly recordingUrl?: string,
         public readonly attendees?: number,
         public readonly attendeeList?: Attendee[],
+        public readonly attendance?: AttendanceRecord[],
         public joinUrl?: string
     ) { }
 }

@@ -18,8 +18,11 @@ export interface EventSummaryDTO {
   status: EventStatus;
 }
 
-export interface GetEventsResponseDTO extends PaginatedResponseDTO<EventSummaryDTO> {
-  data: EventSummaryDTO[];
+export interface GetEventsResponseDTO {
+  events: EventSummaryDTO[];
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
 }
 
 export interface GetEventByIdResponseDTO {

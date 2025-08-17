@@ -5,50 +5,82 @@ import JoinRequestForm from './JoinRequestForm';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import ReactDOM from 'react-dom';
 import type { Sport } from '../../../../domain/types/user/campus-life';
+import { toast } from 'react-hot-toast';
 
-interface AthleticsSectionProps {
-  sports: Sport[];
-  statusFilter: string;
-  searchTerm: string;
-  onFilterChange: (filters: { search: string; status: string }) => void;
-}
 
-export default function AthleticsSection({ sports, statusFilter, searchTerm, onFilterChange }: AthleticsSectionProps) {
-  console.log('AthleticsSection filter state', { searchTerm, statusFilter });
+export default function AthleticsSection({ statusFilter, searchTerm, onFilterChange }: { statusFilter: string; searchTerm: string; onFilterChange: (filters: { search: string; status: string }) => void }) {
+  const { sports, requestToJoinSport, isJoiningSport, joinSportError } = useCampusLife('Athletics', '', '', '', searchTerm, statusFilter);
   const [selectedSport, setSelectedSport] = useState<Sport | null>(null);
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [showMobileDetails, setShowMobileDetails] = useState(false);
-  const { requestToJoinSport, isJoiningSport, joinSportError } = useCampusLife();
   const { styles, theme } = usePreferences();
   const [filterOpen, setFilterOpen] = useState(false);
   const [searchInput, setSearchInput] = useState(searchTerm);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
-  console.log('sports', sports);
+  const [isSearching, setIsSearching] = useState(false);
 
-  // Keep searchInput in sync with searchTerm prop
   useEffect(() => {
     setSearchInput(searchTerm);
+    if (searchTerm === '') {
+      setSearchInput('');
+    }
   }, [searchTerm]);
 
-  // Debounce search
+  useEffect(() => {
+    if (sports && sports.length > 0) {
+      if (!selectedSport) {
+        setSelectedSport(sports[0]);
+      } else {
+        const updatedSport = sports.find(s => s.id === selectedSport.id);
+        if (updatedSport) {
+          setSelectedSport(updatedSport);
+        }
+      }
+    }
+  }, [sports, selectedSport]);
+
   useEffect(() => {
     if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
-    debounceTimeout.current = setTimeout(() => {
-      if (searchInput !== searchTerm) {
+    
+    if (searchInput !== searchTerm) {
+      setIsSearching(true);
+      debounceTimeout.current = setTimeout(() => {
         onFilterChange({ search: searchInput, status: statusFilter });
-      }
-    }, 400);
+        setIsSearching(false);
+      }, 400);
+    } else {
+      setIsSearching(false);
+    }
+    
     return () => {
       if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
     };
-  }, [searchInput]);
+  }, [searchInput, searchTerm, statusFilter, onFilterChange]);
 
   const handleJoinRequest = async (request: any) => {
     if (!selectedSport) return;
     try {
       await requestToJoinSport({ sportId: selectedSport.id, request });
+      
+      toast.success('Successfully submitted tryout request for sports team!');
+      
       setShowJoinForm(false);
     } catch (error) {
+      let errorMsg = 'Failed to submit tryout request';
+      if (error && typeof error === 'object' && 'response' in error) {
+        const response = (error as { response?: { data?: { error?: string; data?: { error?: string } } } }).response;
+        errorMsg =
+          response?.data?.error ||
+          response?.data?.data?.error ||
+          (error as { message?: string }).message ||
+          errorMsg;
+      } else if (error instanceof Error) {
+        errorMsg = error.message;
+      } else if (typeof error === 'string') {
+        errorMsg = error;
+      }
+      
+      toast.error(errorMsg);
       console.error('Failed to submit join request:', error);
     }
   };
@@ -155,7 +187,15 @@ export default function AthleticsSection({ sports, statusFilter, searchTerm, onF
                 </div>
               </div>
               <div className="max-h-96 overflow-y-auto divide-y divide-amber-100/50">
-                {sports?.map((sport: Sport) => (
+                {isSearching && searchInput.trim() && (
+                  <div className="p-4 text-center">
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                      <span className={`text-sm ${styles.textSecondary}`}>Searching sports...</span>
+                    </div>
+                  </div>
+                )}
+                {!isSearching && sports?.map((sport: Sport) => (
                   <div
                     key={sport.id}
                     className={`p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${selectedSport?.id === sport.id ? 'bg-orange-50/70' : ''}`}
@@ -178,7 +218,10 @@ export default function AthleticsSection({ sports, statusFilter, searchTerm, onF
                     </div>
                   </div>
                 ))}
-                {(sports?.length ?? 0) === 0 && (
+                {!isSearching && (sports?.length ?? 0) === 0 && searchInput.trim() && (
+                  <div className={`p-4 text-center ${styles.textSecondary} text-sm`}>No sports found matching "{searchInput}"</div>
+                )}
+                {!isSearching && (sports?.length ?? 0) === 0 && !searchInput.trim() && (
                   <div className={`p-4 text-center ${styles.textSecondary} text-sm`}>No sports found</div>
                 )}
               </div>

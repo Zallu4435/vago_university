@@ -31,7 +31,7 @@ interface AnnouncementData {
 
 interface CalendarData {
   events: Event[];
-  sports: Sport[];
+  sports: Record<string, unknown>[];
   clubs: Club[];
 }
 
@@ -171,8 +171,9 @@ export class GetCalendarDaysUseCase implements IGetCalendarDaysUseCase {
     }
     events.forEach(e => addEntry(e.date, 'event', e.title));
     sports.forEach(s => {
-      if (Array.isArray(s.getUpcomingGames())) {
-        s.getUpcomingGames().forEach(g => addEntry(g.date, 'sport', s.getTitle()));
+      const sport = s as Record<string, unknown>;
+      if (Array.isArray(sport.upcomingGames)) {
+        (sport.upcomingGames as Array<{date: string, description: string}>).forEach(g => addEntry(g.date, 'sport', sport.title as string));
       }
     });
     clubs.forEach(c => {
@@ -202,21 +203,21 @@ export class GetNewEventsUseCase implements IGetNewEventsUseCase {
       });
     }
     
-    if (latestSport) {
-      const sport = latestSport as unknown as Sport;
-      let sportDate = new Date(sport.getCreatedAt?.() || Date.now()).toISOString();
+    if (latestSport && typeof latestSport === 'object' && latestSport !== null) {
+      const sport = latestSport as Record<string, unknown>;
+      let sportDate = new Date(sport.createdAt as string || Date.now()).toISOString();
       let sportDescription = '';
-      if (Array.isArray(sport.getUpcomingGames?.()) && sport.getUpcomingGames().length > 0) {
-        const sortedGames = [...sport.getUpcomingGames()].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      if (Array.isArray(sport.upcomingGames) && sport.upcomingGames.length > 0) {
+        const sortedGames = [...sport.upcomingGames as Array<{date: string, description: string}>].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         sportDate = sortedGames[0].date;
         sportDescription = sortedGames[0].description || '';
       }
       events.push({
-        id: sport.getId?.() || '',
-        title: sport.getTitle?.() || 'Latest Sport Event',
+        id: (sport._id as string) || '',
+        title: (sport.title as string) || 'Latest Sport Event',
         date: new Date(sportDate),
-        location: sport.getHomeGames?.()?.toString() || 'Sports Complex',
-        description: sportDescription || sport.getDivision?.() || '',
+        location: (sport.homeGames as number)?.toString() || 'Sports Complex',
+        description: sportDescription || (sport.division as string) || '',
       });
     }
     

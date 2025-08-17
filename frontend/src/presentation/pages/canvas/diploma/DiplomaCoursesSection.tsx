@@ -31,6 +31,7 @@ interface BackendCourse {
   id?: string;
   title: string;
   description: string;
+  category?: string;
   duration?: string;
   instructor?: string;
   department?: string;
@@ -100,6 +101,13 @@ export const DiplomaCoursesSection = () => {
     id: course._id || course.id || '',
     title: course.title,
     description: course.description,
+    category: course.category || course.department || 'General',
+    department: course.department || course.category || 'General',
+    instructor: course.instructor || 'Unknown',
+    status: course.status || 'published',
+    videoCount: course.videoCount || (course.chapters ? course.chapters.length : 0) || (course.videos ? course.videos.length : 0),
+    completedVideoCount: course.completedVideoCount || 0,
+    totalVideos: course.videoCount || (course.chapters ? course.chapters.length : 0) || (course.videos ? course.videos.length : 0),
     chapters: course.chapters && course.chapters.length > 0 ? course.chapters.map((chapter: BackendChapter): Chapter => ({
       id: chapter._id || chapter.id || '',
       _id: chapter._id,
@@ -156,18 +164,23 @@ export const DiplomaCoursesSection = () => {
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {courses.map((course, index) => (
-            <DiplomaCard
-              key={course._id}
-              course={mapBackendCourseToUICourse(course)}
-              index={index}
-              styles={styles}
-              userAdmitted={userAdmitted}
-              completedChapters={completedChapters}
-              onViewDetails={handleViewDetails}
-              onStartCourse={handleStartCourse}
-            />
-          ))}
+          {courses.map((course, index) => {
+            const mappedCourse = mapBackendCourseToUICourse(course);
+            console.log('Mapped course data:', mappedCourse);
+            console.log('Original backend course:', course);
+            return (
+              <DiplomaCard
+                key={course._id}
+                course={mappedCourse}
+                index={index}
+                styles={styles}
+                userAdmitted={userAdmitted}
+                completedChapters={completedChapters}
+                onViewDetails={handleViewDetails}
+                onStartCourse={handleStartCourse}
+              />
+            );
+          })}
         </div>
       </div>
     </div>

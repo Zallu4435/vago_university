@@ -1,13 +1,12 @@
 import React from 'react';
-import { FiLock, FiCheckCircle, FiBookmark } from 'react-icons/fi';
-import { getChapterTypeIcon, getChapterTypeColor } from '../utils/diplomaUtils';
+import { FiLock, FiCheckCircle, FiBookmark, FiPlay } from 'react-icons/fi';
+import { getChapterTypeIcon } from '../utils/diplomaUtils';
 import { ChapterItemProps } from '../../../../../domain/types/canvas/diploma';
 import { ChapterType } from '../../../../../domain/types/diploma';
 
 export const ChapterItem: React.FC<ChapterItemProps> = ({
   chapter,
   courseId,
-  styles,
   isFirst,
   isPrevCompleted,
   isCompleted,
@@ -17,67 +16,86 @@ export const ChapterItem: React.FC<ChapterItemProps> = ({
 }) => {
   const isAccessible = isFirst || isPrevCompleted;
   const TypeIcon = getChapterTypeIcon(chapter.type as ChapterType);
-console.log(chapter, "chapter from chapter")
+
   return (
     <div 
-      className={`group relative ${styles?.card?.background} rounded-2xl ${styles?.cardBorder} transition-all duration-300 ${styles?.cardHover} shadow-sm sm:shadow-md ${
-        isAccessible ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
-      } w-full sm:max-w-xl sm:mx-auto md:max-w-none md:w-auto`}
+      className={`group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg hover:border-gray-300 dark:hover:border-gray-600 ${
+        isAccessible ? 'cursor-pointer hover:scale-[1.02]' : 'cursor-not-allowed opacity-60'
+      } w-full`}
       onClick={() => isAccessible && onViewChapter(chapter)}
       aria-label={`View ${chapter.title}`}
     >
-      <div className="py-4 px-3 sm:p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-start sm:items-center flex-1 w-full">
-            {/* Chapter status icon */}
-            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mr-3 sm:mr-4 ${
-              isCompleted ? styles.status.success :
-              isAccessible ? styles?.status?.info : styles?.button?.secondary
-            }`}>
-              {isCompleted ? (
-                <FiCheckCircle className={`w-5 h-5 sm:w-6 sm:h-6 ${styles?.status.success}`} />
-              ) : !isAccessible ? (
-                <FiLock className={`w-5 h-5 sm:w-6 sm:h-6 ${styles?.icon.secondary}`} />
-              ) : (
-                <TypeIcon className={`w-5 h-5 sm:w-6 sm:h-6 ${getChapterTypeColor(chapter.type as ChapterType, styles)}`} />
-              )}
-            </div>
-
-            {/* Chapter info */}
-            <div className="flex-1 min-w-0">
-              <h4 className={`font-semibold text-base sm:text-lg mb-1 ${isAccessible ? styles?.textPrimary : styles?.textSecondary}`}>
-                {chapter.title}
-              </h4>
-              <p className="text-xs text-gray-500 mb-1 line-clamp-2">{chapter.description}</p>
-            </div>
+      <div className="p-5">
+        <div className="flex items-start gap-4">
+          {/* Chapter status icon */}
+          <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
+            isCompleted 
+              ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' 
+              : isAccessible 
+                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+          }`}>
+            {isCompleted ? (
+              <FiCheckCircle className="w-6 h-6" />
+            ) : !isAccessible ? (
+              <FiLock className="w-6 h-6" />
+            ) : (
+              <TypeIcon className="w-6 h-6" />
+            )}
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center space-x-2 sm:space-x-3 mt-3 sm:mt-0 w-full sm:w-auto justify-end sm:justify-start">
-            {/* Status badge */}
-            {isCompleted && (
-              <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium ${styles?.status.success} ${styles?.badgeBackground}`}>
-                Completed
-              </span>
-            )}
+          {/* Chapter content */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <h4 className={`font-semibold text-lg leading-tight ${
+                isAccessible 
+                  ? 'text-gray-900 dark:text-gray-100' 
+                  : 'text-gray-500 dark:text-gray-400'
+              }`}>
+                {chapter.title}
+              </h4>
+              
+              {/* Status badge */}
+              {isCompleted && (
+                <span className="flex-shrink-0 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium rounded-full">
+                  Completed
+                </span>
+              )}
+            </div>
             
-            {/* Bookmark button */}
-            {isAccessible && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onBookmark(courseId, chapter._id || chapter.id);
-                }}
-                className={`p-2 rounded-lg transition-colors text-xs sm:text-sm ${
-                  isBookmarked 
-                    ? `${styles?.status.error} ${styles?.badgeBackground}`
-                    : `${styles?.button.secondary} hover:${styles?.status.error}`
-                }`}
-                aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
-              >
-                <FiBookmark className={`w-4 h-4 sm:w-5 sm:h-5 ${isBookmarked ? 'fill-current' : ''}`} />
-              </button>
-            )}
+            <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-3 line-clamp-2">
+              {chapter.description}
+            </p>
+            
+            {/* Chapter meta info */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                {chapter.type && (
+                  <div className="flex items-center gap-1.5">
+                    <FiPlay className="w-4 h-4" />
+                    <span className="capitalize">{chapter.type}</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Bookmark button */}
+              {isAccessible && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onBookmark(courseId, chapter._id || chapter.id);
+                  }}
+                  className={`p-2 rounded-lg transition-all duration-200 ${
+                    isBookmarked 
+                      ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                  aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
+                >
+                  <FiBookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

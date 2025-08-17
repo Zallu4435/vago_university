@@ -1,45 +1,47 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaCalendarAlt, FaSearch, FaUsers, FaArrowLeft, FaFilter } from 'react-icons/fa';
-import { useMutation } from '@tanstack/react-query';
-import { campusLifeService } from '../../../../application/services/campus-life.service';
 import JoinRequestForm from './JoinRequestForm';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import ReactDOM from 'react-dom';
-import type { ClubType, ClubUpcomingEvent, JoinRequest } from '../../../../domain/types/user/campus-life';
+import type { ClubType, ClubUpcomingEvent } from '../../../../domain/types/user/campus-life';
+import { toast } from 'react-hot-toast';
+import { useCampusLife } from '../../../../application/hooks/useCampusLife';
 
-export default function ClubsSection({ clubs: clubsProp, searchTerm, typeFilter, statusFilter, onFilterChange, isLoading, error }: {
-  clubs?: ClubType[];
+export default function ClubsSection({ searchTerm, typeFilter, statusFilter, onFilterChange }: {
   searchTerm: string;
   typeFilter: string;
   statusFilter: string;
   onFilterChange: (filters: { search: string; type: string; status: string }) => void;
-  isLoading: boolean;
-  error: Error | null;
 }) {
-  const clubs = clubsProp || [];
-  const [selectedClub, setSelectedClub] = useState<ClubType | null>(clubs[0] || null);
+  const { clubs, requestToJoinClub, isJoiningClub, joinClubError, isLoadingClubs, clubsError } = useCampusLife('Clubs', searchTerm, typeFilter, statusFilter);
+  const [selectedClub, setSelectedClub] = useState<ClubType | null>(null);
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [showMobileDetails, setShowMobileDetails] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [searchInput, setSearchInput] = useState(searchTerm);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
-  const {
-    mutate: requestToJoinClub,
-    isPending: isJoiningClub,
-    error: joinClubError
-  } = useMutation({
-    mutationFn: ({ clubId, request }: { clubId: string; request: JoinRequest }) =>
-      campusLifeService.requestToJoinClub(clubId, request)
-  });
   const { styles, theme } = usePreferences();
+  const [, setIsSearching] = useState(false);
 
-  console.log(clubs, "clubs")
   const handleClubClick = (club: ClubType) => {
     setSelectedClub(club);
     if (window.innerWidth < 640) {
       setShowMobileDetails(true);
     }
   };
+
+  useEffect(() => {
+    if (clubs && clubs.length > 0) {
+      if (!selectedClub) {
+        setSelectedClub(clubs[0]);
+      } else {
+        const updatedClub = clubs.find(c => c.id === selectedClub.id);
+        if (updatedClub) {
+          setSelectedClub(updatedClub);
+        }
+      }
+    }
+  }, [clubs, selectedClub]);
 
   React.useEffect(() => {
     if (showMobileDetails) {
@@ -56,27 +58,54 @@ export default function ClubsSection({ clubs: clubsProp, searchTerm, typeFilter,
     if (!selectedClub) return;
     try {
       await requestToJoinClub({ clubId: selectedClub.id, request });
+      
+      toast.success('Successfully submitted join request for club!');
+      
       setShowJoinForm(false);
     } catch (error) {
+      let errorMsg = 'Failed to submit join request';
+      if (error && typeof error === 'object' && 'response' in error) {
+        const response = (error as { response?: { data?: { error?: string; data?: { error?: string } } } }).response;
+        errorMsg =
+          response?.data?.error ||
+          response?.data?.data?.error ||
+          (error as { message?: string }).message ||
+          errorMsg;
+      } else if (error instanceof Error) {
+        errorMsg = error.message;
+      } else if (typeof error === 'string') {
+        errorMsg = error;
+      }
+      
+      toast.error(errorMsg);
       console.error('Failed to submit join request:', error);
     }
   };
 
   useEffect(() => {
     setSearchInput(searchTerm);
+    if (searchTerm === '') {
+      setSearchInput('');
+    }
   }, [searchTerm]);
 
   useEffect(() => {
     if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
-    debounceTimeout.current = setTimeout(() => {
-      if (searchInput !== searchTerm) {
+    
+    if (searchInput !== searchTerm) {
+      setIsSearching(true);
+      debounceTimeout.current = setTimeout(() => {
         onFilterChange({ search: searchInput, type: typeFilter, status: statusFilter });
-      }
-    }, 400);
+        setIsSearching(false);
+      }, 400);
+    } else {
+      setIsSearching(false);
+    }
+    
     return () => {
       if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
     };
-  }, [searchInput]);
+  }, [searchInput, searchTerm, typeFilter, statusFilter, onFilterChange]);
 
   return (
     <div className="relative">
@@ -225,12 +254,22 @@ export default function ClubsSection({ clubs: clubsProp, searchTerm, typeFilter,
               )}
             </div>
             <div className="max-h-96 overflow-y-auto divide-y divide-amber-100/50">
-              {isLoading && <div className="p-4 text-center text-sm text-slate-400">Loading clubs...</div>}
-              {error && <div className="p-4 text-center text-sm text-red-500">Failed to load clubs</div>}
-              {clubs.length === 0 && !isLoading && !error && (
+              {isLoadingClubs && searchInput.trim() && (
+                <div className="p-4 text-center">
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                    <span className={`text-sm ${styles.textSecondary}`}>Searching clubs...</span>
+                  </div>
+                </div>
+              )}
+              {clubsError && <div className="p-4 text-center text-sm text-red-500">Failed to load clubs</div>}
+              {!isLoadingClubs && clubs.length === 0 && searchInput.trim() && (
+                <div className={`p-4 text-center ${styles.textSecondary} text-sm`}>No clubs found matching "{searchInput}"</div>
+              )}
+              {!isLoadingClubs && clubs.length === 0 && !searchInput.trim() && !clubsError && (
                 <div className={`p-4 text-center ${styles.textSecondary} text-sm`}>No clubs found</div>
               )}
-              {clubs.map((club: ClubType) => (
+              {!isLoadingClubs && clubs.map((club: ClubType) => (
                 <div
                   key={club.id}
                   className={`p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${selectedClub?.id === club.id ? 'bg-orange-50/70' : ''}`}

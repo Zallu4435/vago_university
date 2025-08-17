@@ -1,5 +1,6 @@
 import { FilterQuery, UpdateQuery } from 'mongoose';
 import { IBaseRepository } from '../../application/repositories/IBaseRepository';
+import { NotificationModel } from '../../infrastructure/database/mongoose/models/notification.model';
 
 export abstract class BaseRepository<
   TSchema,
@@ -59,5 +60,49 @@ export abstract class BaseRepository<
   async exists(filter: FilterDto): Promise<boolean> {
     const count = await this.model.countDocuments(filter as FilterQuery<TSchema>);
     return count > 0;
+  }
+
+  // Generic notification methods for entity requests
+  async sendRequestApprovalNotification(entityType: string, requestId: string, userId: string, entityTitle: string): Promise<void> {
+    try {
+      const notification = new NotificationModel({
+        title: `Your ${entityType} request has been approved!`,
+        message: `Your ${entityType} request for "${entityTitle}" has been approved.`,
+        recipientType: 'individual',
+        recipientId: userId,
+        recipientName: `User ${userId}`,
+        createdBy: 'system',
+        createdAt: new Date(),
+        status: 'sent',
+        readBy: [],
+      });
+      
+      await notification.save();
+      console.log(`Approval notification sent for ${entityType} request ${requestId} to user ${userId}`);
+    } catch (error) {
+      console.error(`Failed to send approval notification for ${entityType} request ${requestId}:`, error);
+    }
+  }
+
+  async sendRequestRejectionNotification(entityType: string, requestId: string, userId: string, entityTitle: string): Promise<void> {
+    try {
+      const notification = new NotificationModel({
+        title: `Your ${entityType} request has been rejected.`,
+        message: `Your ${entityType} request for "${entityTitle}" has been rejected.`,
+        recipientType: 'individual',
+        recipientId: userId,
+        recipientName: `User ${userId}`,
+        createdBy: 'system',
+        createdAt: new Date(),
+        status: 'sent',
+        readBy: [],
+      });
+      
+      await notification.save();
+      console.log(`Rejection notification sent for ${entityType} request ${requestId} to user ${userId}`);
+    } catch (error) {
+      console.error(`Failed to send rejection notification for ${entityType} request ${requestId}:`, error);
+      // Don't throw error to avoid breaking the main operation
+    }
   }
 }

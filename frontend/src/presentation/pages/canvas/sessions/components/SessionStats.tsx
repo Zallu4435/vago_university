@@ -18,7 +18,7 @@ export const SessionStats: React.FC<SessionStatsProps> = ({ stats, styles }) => 
           </div>
         </div>
       </div>
-      
+
       <div className={`${styles.card.background} p-4 sm:p-6 rounded-xl sm:rounded-2xl ${styles.cardShadow} ${styles.cardBorder} ${styles.cardHover}`}>
         <div className="flex items-center justify-between">
           <div>
@@ -32,7 +32,7 @@ export const SessionStats: React.FC<SessionStatsProps> = ({ stats, styles }) => 
           </div>
         </div>
       </div>
-      
+
       <div className={`${styles.card.background} p-4 sm:p-6 rounded-xl sm:rounded-2xl ${styles.cardShadow} ${styles.cardBorder} ${styles.cardHover}`}>
         <div className="flex items-center justify-between">
           <div>
@@ -46,7 +46,7 @@ export const SessionStats: React.FC<SessionStatsProps> = ({ stats, styles }) => 
           </div>
         </div>
       </div>
-      
+
       <div className={`${styles.card.background} p-4 sm:p-6 rounded-xl sm:rounded-2xl ${styles.cardShadow} ${styles.cardBorder} ${styles.cardHover}`}>
         <div className="flex items-center justify-between">
           <div>
@@ -62,4 +62,4 @@ export const SessionStats: React.FC<SessionStatsProps> = ({ stats, styles }) => 
       </div>
     </div>
   );
-}; 
+};

@@ -7,6 +7,7 @@ import {
   DeleteVideoSessionUseCase,
   UpdateVideoSessionUseCase,
   GetAllVideoSessionsUseCase,
+  GetUserSessionsUseCase,
   UpdateVideoSessionStatusUseCase,
   GetSessionAttendanceUseCase,
   UpdateAttendanceStatusUseCase,
@@ -18,6 +19,7 @@ import {
   IUpdateVideoSessionUseCase,
   IDeleteVideoSessionUseCase,
   IGetAllVideoSessionsUseCase,
+  IGetUserSessionsUseCase,
   IUpdateVideoSessionStatusUseCase,
   IGetSessionAttendanceUseCase,
   IUpdateAttendanceStatusUseCase,
@@ -35,6 +37,7 @@ export function getVideoSessionComposer(): IVideoSessionController {
   const updateUseCase: IUpdateVideoSessionUseCase = new UpdateVideoSessionUseCase(repository);
   const deleteUseCase: IDeleteVideoSessionUseCase = new DeleteVideoSessionUseCase(repository);
   const getAllUseCase: IGetAllVideoSessionsUseCase = new GetAllVideoSessionsUseCase(repository);
+  const getUserSessionsUseCase: IGetUserSessionsUseCase = new GetUserSessionsUseCase(repository);
   const updateStatusUseCase: IUpdateVideoSessionStatusUseCase = new UpdateVideoSessionStatusUseCase(repository);
   const getSessionAttendanceUseCase: IGetSessionAttendanceUseCase = new GetSessionAttendanceUseCase(repository);
   const updateAttendanceStatusUseCase: IUpdateAttendanceStatusUseCase = new UpdateAttendanceStatusUseCase(repository);
@@ -48,6 +51,7 @@ export function getVideoSessionComposer(): IVideoSessionController {
     updateUseCase,
     deleteUseCase,
     getAllUseCase,
+    getUserSessionsUseCase,
     updateStatusUseCase,
     getSessionAttendanceUseCase,
     updateAttendanceStatusUseCase,

@@ -28,8 +28,8 @@ CourseSchema.index({
 });
 
 const EnrollmentSchema = new Schema<IEnrollmentDocument>({
-  studentId: { type: String, required: true },
-  courseId: { type: String, required: true, index: true },
+  studentId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  courseId: { type: Schema.Types.ObjectId, ref: 'Course', required: true, index: true },
   status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
   requestedAt: { type: Date, default: Date.now },
   reason: { type: String, trim: true },

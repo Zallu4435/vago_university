@@ -4,33 +4,57 @@ import { useCampusLife } from '../../../../application/hooks/useCampusLife';
 import JoinRequestForm from './JoinRequestForm';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import ReactDOM from 'react-dom';
-import type { EventType, EventsSectionProps } from '../../../../domain/types/user/campus-life';
+import type { EventType } from '../../../../domain/types/user/campus-life';
+import { toast } from 'react-hot-toast';
 
-export default function EventsSection({ events, searchTerm, statusFilter, onFilterChange }: EventsSectionProps & { searchTerm: string; statusFilter: string; onFilterChange: (filters: { search: string; status: string }) => void }) {
-  const [selectedEvent, setSelectedEvent] = useState<EventType | null>(events[0] || null);
+export default function EventsSection({ searchTerm, statusFilter, onFilterChange }: { searchTerm: string; statusFilter: string; onFilterChange: (filters: { search: string; status: string }) => void }) {
+  const { events, requestToJoinEvent, isJoiningEvent, joinEventError } = useCampusLife('Events', '', '', statusFilter, searchTerm);
+  const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [showMobileDetails, setShowMobileDetails] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [searchInput, setSearchInput] = useState(searchTerm);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
-  const { requestToJoinEvent, isJoiningEvent, joinEventError } = useCampusLife();
   const { styles, theme } = usePreferences();
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     setSearchInput(searchTerm);
+    if (searchTerm === '') {
+      setSearchInput('');
+    }
   }, [searchTerm]);
 
   useEffect(() => {
-    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
-    debounceTimeout.current = setTimeout(() => {
-      if (searchInput !== searchTerm) {
-        onFilterChange({ search: searchInput, status: statusFilter });
+    if (events && events.length > 0) {
+      if (!selectedEvent) {
+        setSelectedEvent(events[0]);
+      } else {
+        const updatedEvent = events.find(e => e.id === selectedEvent.id);
+        if (updatedEvent) {
+          setSelectedEvent(updatedEvent);
+        }
       }
-    }, 400);
+    }
+  }, [events, selectedEvent]);
+
+  useEffect(() => {
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    
+    if (searchInput !== searchTerm) {
+      setIsSearching(true);
+      debounceTimeout.current = setTimeout(() => {
+        onFilterChange({ search: searchInput, status: statusFilter });
+        setIsSearching(false);
+      }, 400);
+    } else {
+      setIsSearching(false);
+    }
+    
     return () => {
       if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
     };
-  }, [searchInput]);
+  }, [searchInput, searchTerm, statusFilter, onFilterChange]);
 
   const handleEventClick = (event: EventType) => {
     setSelectedEvent(event);
@@ -60,8 +84,30 @@ export default function EventsSection({ events, searchTerm, statusFilter, onFilt
           additionalInfo: data.additionalInfo ?? '',
         },
       });
+      
+      // Show success toast
+      toast.success('Successfully registered for event!');
+      
+      // Close the form
       setShowJoinForm(false);
+      
     } catch (error) {
+      // Show error toast
+      let errorMsg = 'Failed to register for event';
+      if (error && typeof error === 'object' && 'response' in error) {
+        const response = (error as { response?: { data?: { error?: string; data?: { error?: string } } } }).response;
+        errorMsg =
+          response?.data?.error ||
+          response?.data?.data?.error ||
+          (error as { message?: string }).message ||
+          errorMsg;
+      } else if (error instanceof Error) {
+        errorMsg = error.message;
+      } else if (typeof error === 'string') {
+        errorMsg = error;
+      }
+      
+      toast.error(errorMsg);
       console.error('Failed to submit join request:', error);
     }
   };
@@ -183,10 +229,21 @@ export default function EventsSection({ events, searchTerm, statusFilter, onFilt
               )}
             </div>
             <div className="max-h-60 sm:max-h-80 md:max-h-96 overflow-y-auto divide-y divide-amber-100/50">
-              {events.length === 0 && (
-                <div className={`p-4 text-center ${styles.textSecondary} text-xs sm:text-sm`}>No events found</div>
+              {isSearching && searchInput.trim() && (
+                <div className="p-4 text-center">
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                    <span className={`text-sm ${styles.textSecondary}`}>Searching events...</span>
+                  </div>
+                </div>
               )}
-              {events.map((event: EventType) => (
+              {!isSearching && events.length === 0 && searchInput.trim() && (
+                <div className={`p-4 text-center ${styles.textSecondary} text-xs sm:text-sm`}>No events found matching "{searchInput}"</div>
+              )}
+              {!isSearching && events.length === 0 && !searchInput.trim() && (
+                <div className={`p-4 text-center ${styles.textSecondary} text-xs sm:text-sm`}>No events available</div>
+              )}
+              {!isSearching && events.map((event: EventType) => (
                 <div
                   key={event.id}
                   className={`p-3 sm:p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${selectedEvent?.id === event.id ? 'bg-orange-50/70' : ''

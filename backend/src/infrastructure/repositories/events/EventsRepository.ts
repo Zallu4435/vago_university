@@ -182,17 +182,21 @@ export class EventsRepository extends BaseRepository<EventDocument, CreateEventD
     const totalItems = await EventRequestModel.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
     const skip = (page - 1) * limit;
+    
+    console.log("Query for EventRequestModel:", JSON.stringify(query, null, 2));
+    
     const rawRequests = await EventRequestModel.find(query)
       .populate({
         path: "eventId",
-        select: "title eventType date organizer location description",
-        match: eventQuery
+        select: "title eventType date organizer location description"
       })
       .populate("userId", "firstName lastName email")
-      .sort({ createdAt: -1 })
+      .sort({ updatedAt: -1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
+      
+    
     return {
       events: rawRequests,
       totalItems,
@@ -212,9 +216,16 @@ export class EventsRepository extends BaseRepository<EventDocument, CreateEventD
     if (eventRequest && eventRequest.eventId) {
       await CampusEventModel.findByIdAndUpdate(
         eventRequest.eventId,
-        { $inc: { participantsCount: 1 } },
+        { $inc: { participants: 1 } },
         { new: true }
       );
+    }
+
+    if (eventRequest && eventRequest.userId) {
+      const userId = typeof eventRequest.userId === 'string' ? eventRequest.userId : eventRequest.userId._id.toString();
+      const eventTitle = typeof eventRequest.eventId === 'string' ? 'an event' : eventRequest.eventId.title || 'an event';
+      
+      await this.sendRequestApprovalNotification('event', id, userId, eventTitle);
     }
   }
 
@@ -224,6 +235,14 @@ export class EventsRepository extends BaseRepository<EventDocument, CreateEventD
       { status: EventRequestStatus.Rejected, updatedAt: new Date() },
       { runValidators: true }
     );
+
+    const eventRequest = await EventRequestModel.findById(id);
+    if (eventRequest && eventRequest.userId) {
+      const userId = typeof eventRequest.userId === 'string' ? eventRequest.userId : eventRequest.userId._id.toString();
+      const eventTitle = typeof eventRequest.eventId === 'string' ? 'an event' : eventRequest.eventId.title || 'an event';
+      
+      await this.sendRequestRejectionNotification('event', id, userId, eventTitle);
+    }
   }
 
   async getEventRequestDetails(

@@ -1,6 +1,6 @@
 import { ISessionRepository } from '../repositories/ISessionRepository';
 import { CreateVideoSessionRequestDTO, JoinVideoSessionRequestDTO, UpdateVideoSessionRequestDTO, DeleteVideoSessionRequestDTO } from '../../../domain/session/dtos/VideoSessionRequestDTOs';
-import { CreateVideoSessionResponseDTO, JoinVideoSessionResponseDTO, VideoSessionResponseDTO, UpdateVideoSessionResponseDTO, DeleteVideoSessionResponseDTO } from '../../../domain/session/dtos/VideoSessionResponseDTOs';
+import { CreateVideoSessionResponseDTO, JoinVideoSessionResponseDTO, VideoSessionResponseDTO, UpdateVideoSessionResponseDTO, DeleteVideoSessionResponseDTO, UserSessionResponseDTO } from '../../../domain/session/dtos/VideoSessionResponseDTOs';
 import { VideoSession } from '../../../domain/session/entities/VideoSession';
 import { VideoSessionStatus } from '../../../domain/session/enums/VideoSessionStatus';
 import { config } from '../../../config/config';
@@ -27,6 +27,10 @@ export interface IDeleteVideoSessionUseCase {
 
 export interface IGetAllVideoSessionsUseCase {
     execute(params: { search?: string; status?: string; instructor?: string; course?: string }): Promise<VideoSessionResponseDTO[]>;
+}
+
+export interface IGetUserSessionsUseCase {
+    execute(params: { search?: string; status?: string; instructor?: string; course?: string; userId?: string }): Promise<UserSessionResponseDTO[]>;
 }
 
 export interface IUpdateVideoSessionStatusUseCase {
@@ -168,6 +172,37 @@ export class GetAllVideoSessionsUseCase {
         console.log(params," sodsohdsd")
         const sessions = await this.sessionRepository.getAll(params);
         return sessions as VideoSessionResponseDTO[];
+    }
+}
+
+export class GetUserSessionsUseCase {
+    constructor(private sessionRepository: ISessionRepository) {}
+    async execute(params: { search?: string; status?: string; instructor?: string; course?: string; userId?: string } = {}): Promise<UserSessionResponseDTO[]> {
+        const sessions = await this.sessionRepository.getUserSessions(params);
+        
+        // Map to lightweight user DTO with enrollment status
+        return sessions.map(session => {
+            const isEnrolled = params.userId ? session.participants.includes(params.userId) : false;
+            const userAttendance = params.userId ? session.attendance?.find(a => a.userId === params.userId) : null;
+            
+            return {
+                id: session._id || session.id,
+                title: session.title,
+                status: session.status,
+                description: session.description,
+                instructor: session.instructor,
+                course: session.course,
+                duration: session.duration,
+                tags: session.tags,
+                difficulty: session.difficulty,
+                hasRecording: session.hasRecording,
+                startTime: session.startTime,
+                joinUrl: session.joinUrl,
+                isLive: session.isLive,
+                isEnrolled,
+                userAttendanceStatus: userAttendance?.status || 'not-attended'
+            };
+        }) as UserSessionResponseDTO[];
     }
 }
 

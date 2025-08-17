@@ -47,9 +47,9 @@ export class StudentDashboardRepository implements IStudentDashboardRepository {
     ]);
 
     return {
-      events: events as unknown as Event[],
-      sports: sports as unknown as Sport[],
-      clubs: clubs as unknown as Club[]
+      events: events as Event[],
+      sports: sports as unknown as Record<string, unknown>[],
+      clubs: clubs as Club[]
     };
   }
 

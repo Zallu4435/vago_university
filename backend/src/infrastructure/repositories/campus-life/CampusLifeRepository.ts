@@ -194,7 +194,7 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       createdAt: new Date(),
     });
     await newRequest.save();
-    return newRequest;
+    return newRequest.toObject({ getters: true }) as WithStringId<RawJoinRequest>;
   }
 
   async joinSport(params: JoinSportRequest) {
@@ -220,6 +220,6 @@ export class CampusLifeRepository implements ICampusLifeRepository {
       createdAt: new Date(),
     });
     await newRequest.save();
-    return newRequest;
+    return newRequest.toObject({ getters: true }) as WithStringId<RawJoinRequest>;
   }
 }

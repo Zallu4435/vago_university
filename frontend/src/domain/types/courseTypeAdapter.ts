@@ -43,7 +43,62 @@ export function isDomainEnrollmentRequest(item: DomainCourse | DomainEnrollmentR
 }
 
 // Adapter for CourseRequestDetails modal
-export function adaptToCourseRequestDetails(request: DomainEnrollmentRequest): CourseRequestDetails {
+export function adaptToCourseRequestDetails(request: any): CourseRequestDetails {
+  // Handle the backend response structure: { data: { courseRequest: {...} } }
+  if (request && typeof request === 'object') {
+    // If request has courseRequest property (backend response)
+    if ('courseRequest' in request) {
+      const courseRequest = request.courseRequest;
+      return {
+        id: courseRequest.id || '',
+        status: courseRequest.status as StatusType,
+        createdAt: courseRequest.createdAt || '',
+        updatedAt: courseRequest.updatedAt || '',
+        reason: courseRequest.reason || '',
+        additionalInfo: courseRequest.additionalInfo,
+        course: {
+          id: courseRequest.course?.id || '',
+          title: courseRequest.course?.title || '',
+          specialization: courseRequest.course?.specialization || '',
+          term: courseRequest.course?.term || '',
+          faculty: courseRequest.course?.faculty || '',
+          credits: courseRequest.course?.credits || 0,
+        },
+        user: courseRequest.user ? {
+          id: courseRequest.user.id || '',
+          name: courseRequest.user.name || '',
+          email: courseRequest.user.email || '',
+        } : undefined,
+      };
+    }
+    
+    // If request is already the courseRequest object
+    if ('course' in request && 'user' in request) {
+      return {
+        id: request.id || '',
+        status: request.status as StatusType,
+        createdAt: request.createdAt || '',
+        updatedAt: request.updatedAt || '',
+        reason: request.reason || '',
+        additionalInfo: request.additionalInfo,
+        course: {
+          id: request.course?.id || '',
+          title: request.course?.title || '',
+          specialization: request.course?.specialization || '',
+          term: request.course?.term || '',
+          faculty: request.course?.faculty || '',
+          credits: request.course?.credits || 0,
+        },
+        user: request.user ? {
+          id: request.user.id || '',
+          name: request.user.name || '',
+          email: request.user.email || '',
+        } : undefined,
+      };
+    }
+  }
+  
+  // Fallback for old structure (DomainEnrollmentRequest)
   return {
     id: request.id || request._id || '',
     status: request.status as StatusType,

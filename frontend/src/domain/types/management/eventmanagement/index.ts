@@ -42,6 +42,8 @@ export interface Event {
 
 export interface EventRequest {
   id: string;
+  requestedId: string; 
+  eventId?: string;
   eventName: string;
   requestedBy: string;
   requesterType: string;

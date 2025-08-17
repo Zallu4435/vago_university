@@ -121,7 +121,7 @@ export class ClubsRepository extends BaseRepository<Club, CreateClubRequest, Upd
     const rawRequests = await ClubRequestModel.find(query)
       .populate("clubId", "name type")
       .populate("userId", "email")
-      .sort({ createdAt: -1 })
+      .sort({ updatedAt: -1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
@@ -142,6 +142,14 @@ export class ClubsRepository extends BaseRepository<Club, CreateClubRequest, Upd
         { new: true }
       );
     }
+
+    // Send approval notification
+    if (clubRequest && clubRequest.userId) {
+      const userId = typeof clubRequest.userId === 'string' ? clubRequest.userId : clubRequest.userId._id.toString();
+      const clubTitle = typeof clubRequest.clubId === 'string' ? 'a club' : clubRequest.clubId.name || 'a club';
+      
+      await this.sendRequestApprovalNotification('club', params.id, userId, clubTitle);
+    }
   }
 
   async rejectClubRequest(params: RejectClubRequestRequest) {
@@ -150,6 +158,15 @@ export class ClubsRepository extends BaseRepository<Club, CreateClubRequest, Upd
       { status: "rejected", updatedAt: new Date() },
       { runValidators: true }
     );
+
+    // Send rejection notification
+    const clubRequest = await ClubRequestModel.findById(params.id);
+    if (clubRequest && clubRequest.userId) {
+      const userId = typeof clubRequest.userId === 'string' ? clubRequest.userId : clubRequest.userId._id.toString();
+      const clubTitle = typeof clubRequest.clubId === 'string' ? 'a club' : clubRequest.clubId.name || 'a club';
+      
+      await this.sendRequestRejectionNotification('club', params.id, userId, clubTitle);
+    }
   }
 
   async getClubRequestDetails(params: GetClubRequestDetailsRequest) {

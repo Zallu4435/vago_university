@@ -78,18 +78,23 @@ const AttendanceSummaryPage = () => {
 
   React.useEffect(() => {
     if (!selectedSessionId && sessions && sessions.length > 0) {
-      setSelectedSessionId(sessions[1]._id);
+      const first = sessions[0] as any;
+      const firstId = first?._id ?? first?.id;
+      if (firstId) setSelectedSessionId(firstId);
     }
   }, [sessions, selectedSessionId]);
 
   const { data: currentAttendanceData = [] } = useSessionAttendance(selectedSessionId, { search: debouncedSearchTerm });
 
-  const currentSession = sessions.find((s: Session) => s._id === selectedSessionId);
+  const currentSession = sessions.find((s: any) => (s?._id ?? s?.id) === selectedSessionId) as Session | undefined;
 
-  const sessionAttendanceQueries: { sessionId: string, query: ReturnType<typeof useSessionAttendance> }[] = sessions.map((session: Session) => ({
-    sessionId: session._id,
-    query: useSessionAttendance(session._id, { search: debouncedSearchTerm })
-  }));
+  const sessionAttendanceQueries: { sessionId: string, query: ReturnType<typeof useSessionAttendance> }[] = sessions.map((session: any) => {
+    const sid = session?._id ?? session?.id;
+    return {
+      sessionId: sid,
+      query: useSessionAttendance(sid, { search: debouncedSearchTerm })
+    };
+  });
 
   const isLoadingAttendanceAllSessions = sessionAttendanceQueries.some((q) => q.query.isLoading);
 
@@ -150,7 +155,6 @@ const AttendanceSummaryPage = () => {
 
   const processedAttendance = useMemo(() => {
     if (!currentSession) return [];
-    // Filter only approved users
     let data = (currentAttendanceData || [])
       .filter((user: AttendanceUser) => 
         user.status === 'approved' || user.status === 'approve'

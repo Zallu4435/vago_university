@@ -46,27 +46,29 @@ const SessionAttendancePage = () => {
 
   React.useEffect(() => {
     if (!selectedSessionId && sessions && sessions.length > 0) {
-      setSelectedSessionId(sessions[1]._id);
+      const list = sessions as any[];
+      const withAttendees = list.find((s) => (s?.attendees ?? 0) > 0);
+      const ongoing = list.find((s) => s?.status === 'Ongoing');
+      const ended = list.find((s) => s?.status === 'Ended');
+      const fallback = list[0];
+      const chosen = withAttendees || ongoing || ended || fallback;
+      const chosenId = chosen?._id ?? chosen?.id;
+      if (chosenId) setSelectedSessionId(chosenId);
     }
   }, [sessions, selectedSessionId]);
 
 
-  const filters = {
+  const filters = React.useMemo(() => ({
     search: searchTerm || undefined,
     decision: decisionFilter !== 'all' ? decisionFilter : undefined,
     attendanceLevel: attendanceFilter !== 'all' ? attendanceFilter : undefined,
     startDate: dateRange.start || undefined,
     endDate: dateRange.end || undefined,
-  };
+  }), [searchTerm, decisionFilter, attendanceFilter, dateRange.start, dateRange.end]);
 
   const { data: currentAttendanceData = [], isLoading: isLoadingAttendance, refetch: refetchAttendance } = useSessionAttendance(selectedSessionId, filters);
 
-  React.useEffect(() => {
-    if (selectedSessionId && refetchAttendance) {
-      refetchAttendance();
-    }
-  }, [selectedSessionId, refetchAttendance]);
-
+  
   React.useEffect(() => {
     return () => {
       if (debounceTimeoutRef.current) {
@@ -75,7 +77,7 @@ const SessionAttendancePage = () => {
     };
   }, []);
 
-  const currentSession = sessions.find((s) => s._id === selectedSessionId) as Session | undefined;
+  const currentSession = sessions.find((s: any) => (s?._id ?? s?.id) === selectedSessionId) as Session | undefined;
 
   const calculateTotalTime = (
     intervals: AttendanceInterval[],
@@ -172,7 +174,6 @@ const SessionAttendancePage = () => {
     });
   }, [dateRange, sessions]);
 
-  // Debounced search function
   const debouncedSearch = useCallback((searchValue: string) => {
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
@@ -183,9 +184,6 @@ const SessionAttendancePage = () => {
     debounceTimeoutRef.current = setTimeout(() => {
       setSearchTerm(searchValue);
       setIsSearching(false);
-      if (refetchAttendance) {
-        refetchAttendance();
-      }
     }, 500);
   }, [refetchAttendance]);
 
@@ -201,9 +199,6 @@ const SessionAttendancePage = () => {
       }
       setIsSearching(false);
       setSearchTerm(e.currentTarget.value);
-      if (refetchAttendance) {
-        refetchAttendance();
-      }
     }
   }, [refetchAttendance]);
 
@@ -219,9 +214,6 @@ const SessionAttendancePage = () => {
     if (searchInputRef.current) {
       searchInputRef.current.value = '';
     }
-    if (refetchAttendance) {
-      refetchAttendance();
-    }
   };
 
   const handleAttendanceDecision = async (userId: string, decision: string) => {
@@ -232,9 +224,6 @@ const SessionAttendancePage = () => {
       try {
         await updateAttendanceStatus(selectedSessionId, userId, decision, name);
         await queryClient.invalidateQueries({ queryKey: ['sessionAttendance', selectedSessionId] });
-        if (refetchAttendance) {
-          await refetchAttendance();
-        }
       } catch (err) {
         console.error('Error updating attendance status:', err);
       }
@@ -347,11 +336,14 @@ const SessionAttendancePage = () => {
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
               >
-                {filteredSessions.map((session) => (
-                  <option key={session._id} value={session._id}>
-                    {session.title} - {new Date(session.startTime).toLocaleDateString()}
-                  </option>
-                ))}
+                {filteredSessions.map((session: any) => {
+                  const sid = session?._id ?? session?.id;
+                  return (
+                    <option key={sid} value={sid}>
+                      {(session?.title || session?.name || 'Untitled')} - {new Date(session.startTime).toLocaleDateString()}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 

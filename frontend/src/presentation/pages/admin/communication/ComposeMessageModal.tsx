@@ -2,13 +2,8 @@ import React, { useState, useRef } from 'react';
 import { IoCloseOutline as X, IoSearchOutline as Search, IoMailOutline as Mail } from 'react-icons/io5';
 import { RecipientType, User, ComposeMessageModalProps, UserArrayWithUsers } from '../../../../domain/types/management/communicationmanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
+import { RECIPIENT_TYPES } from '../../../../shared/constants/communicationManagementConstants';
 import { toast } from 'react-hot-toast';
-
-const RECIPIENT_TYPES = [
-  { value: '', label: 'Select a recipient' },
-  { value: 'all_students', label: 'All Students' },
-  { value: 'individual_students', label: 'Individual Students' },
-];
 
 const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
   initialForm,
@@ -26,11 +21,17 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
 
   usePreventBodyScroll(isOpen);
 
-  // Reset form when modal opens/closes
   React.useEffect(() => {
     if (isOpen) {
       setForm(initialForm);
-      setRecipientType('');
+      
+      if (initialForm.to.length > 0) {
+        setRecipientType('individual_students');
+        loadUsers('individual_students');
+      } else {
+        setRecipientType('');
+      }
+      
       setUsers([]);
       setSearchTerm('');
     }
@@ -38,12 +39,6 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
 
   const loadUsers = async (type: RecipientType, search?: string) => {
     if (!isOpen || !type) return;
-
-    console.log('=== ComposeMessageModal - loadUsers DEBUG ===');
-    console.log('type parameter:', type);
-    console.log('search:', search);
-    console.log('=============================================');
-
     setIsLoadingUsers(true);
     try {
       const fetchedUsers = await fetchUsers(type, search);
@@ -90,13 +85,11 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
       setForm(prev => ({ ...prev, to: [] }));
       setUsers([]);
     } else if (type === 'all_students') {
-      // Clear any existing selections and set to "All Students"
       setForm(prev => ({
         ...prev,
         to: [{ value: type, label: RECIPIENT_TYPES.find(t => t.value === type)?.label || '' }]
       }));
     } else if (type === 'individual_students') {
-      // Clear any "All Students" selection and allow individual selections
       setForm(prev => ({
         ...prev,
         to: prev.to.filter(t => !['all_students', 'all_faculty', 'all_users'].includes(t.value))
@@ -105,7 +98,6 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
     }
   };
 
-  // Particle effect
   const ghostParticles = Array(30)
     .fill(0)
     .map((_) => ({
@@ -120,7 +112,6 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      {/* Background particles */}
       {ghostParticles.map((particle, i) => (
         <div
           key={i}
@@ -136,16 +127,12 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
         />
       ))}
 
-      {/* Main Modal Container */}
       <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-2xl max-h-[90vh] rounded-2xl border border-purple-600/30 shadow-2xl overflow-hidden relative">
-        {/* Inner glow effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
 
-        {/* Corner decorations */}
         <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
         <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
 
-        {/* Header Section */}
         <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -170,7 +157,6 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
           </div>
         </div>
 
-        {/* Content Section */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <div className="space-y-4">
             <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
@@ -245,13 +231,11 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
                             const isSelected = form.to.some(t => t.value === user.id);
                             
                             if (isSelected) {
-                              // Remove user from selection
                               setForm(prev => ({
                                 ...prev,
                                 to: prev.to.filter(t => t.value !== user.id)
                               }));
                             } else {
-                              // Add user to selection
                               setForm(prev => ({
                                 ...prev,
                                 to: [...prev.to, { value: user.id, label: user.name || user.email }]
@@ -323,13 +307,6 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
                   ))
                 )}
               </div>
-              {/* Debug info - remove in production */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="mt-2 text-xs text-purple-400">
-                  Debug: {JSON.stringify(form.to)}
-                </div>
-              )}
-              {/* Show selection type info */}
               {form.to.length > 0 && (
                 <div className="mt-2 text-xs text-purple-400">
                   {form.to.some(t => t.value === 'all_students') 

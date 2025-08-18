@@ -13,6 +13,12 @@ export const USER_GROUPS = [
   { value: 'individual', label: 'Individual User' },
 ];
 
+export const RECIPIENT_TYPES = [
+  { value: '', label: 'Select a recipient' },
+  { value: 'all_students', label: 'All Students' },
+  { value: 'individual_students', label: 'Individual Students' },
+];
+
 export const ITEMS_PER_PAGE = 10;
 
 export const inboxColumns: MessageColumn[] = [

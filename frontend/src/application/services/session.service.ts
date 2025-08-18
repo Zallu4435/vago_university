@@ -83,7 +83,12 @@ class SessionService {
       : '';
     try {
       const response = await httpClient.get<SessionResponse>(`/faculty/sessions/video-sessions${queryString}`);
-      return response.data.data;
+      const rawData = response.data.data;
+      const normalized = (rawData || []).map((s) => ({
+        ...s,
+        _id: s?._id ?? s?.id,
+      }));
+      return normalized;
     } catch (error: unknown) {
       if (isAxiosErrorWithApiError(error)) {
         throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to get sessions');
@@ -178,8 +183,9 @@ class SessionService {
     }
     
     const params = new URLSearchParams(filteredParams).toString();
+    const url = `/faculty/sessions/video-sessions/${sessionId}/attendance${params ? '?' + params : ''}`;
     try {
-      const response = await httpClient.get(`/faculty/sessions/video-sessions/${sessionId}/attendance${params ? '?' + params : ''}`);
+      const response = await httpClient.get(url);
       return response.data.data;
     } catch (error: unknown) {
       if (isAxiosErrorWithApiError(error)) {

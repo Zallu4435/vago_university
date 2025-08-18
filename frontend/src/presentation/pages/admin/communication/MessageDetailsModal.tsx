@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   IoReturnUpBackOutline as Reply,
-  IoArchiveOutline as Archive,
   IoTrashOutline as Trash2,
   IoCloseOutline as X,
   IoMailOutline as Mail,
@@ -13,7 +12,6 @@ import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScr
 const MessageDetailsModal: React.FC<MessageDetailsModalProps> = ({
   message,
   onReply,
-  onArchive,
   onDelete,
   isOpen,
   onClose,

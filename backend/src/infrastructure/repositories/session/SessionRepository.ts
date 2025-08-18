@@ -90,6 +90,8 @@ export class SessionRepository implements ISessionRepository {
   async getSessionAttendance(sessionId: string, filters: VideoSessionFilter = {}) {
     const session = await VideoSessionModel.findById(sessionId);
     if (!session) throw new Error('Session not found');
+    // Debug: session status and counts
+    console.debug('[SessionRepository.getSessionAttendance] sessionId:', sessionId, 'status:', session.status, 'attendanceCount:', Array.isArray(session.attendance) ? session.attendance.length : 0);
     let attendance = session.attendance || [];
 
     if (filters.search && filters.search.trim() !== '') {
@@ -192,6 +194,7 @@ export class SessionRepository implements ISessionRepository {
       });
     }
 
+    console.debug('[SessionRepository.getSessionAttendance] attendance after filters count:', attendance.length, 'filters:', filters);
     const userIds = attendance.map((a) => a.userId);
     const users = await User.find({ _id: { $in: userIds } }).lean();
     const userMap = new Map(users.map((u) => [u._id.toString(), u]));
@@ -207,6 +210,7 @@ export class SessionRepository implements ISessionRepository {
           status: a.status || null
         };
       });
+    console.debug('[SessionRepository.getSessionAttendance] result count:', result.length);
     return result;
   }
 

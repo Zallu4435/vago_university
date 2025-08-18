@@ -87,7 +87,6 @@ export class VideoSessionController implements IVideoSessionController {
   async updateSessionStatus(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { status } = httpRequest.body;
     
-    // Map frontend status values to backend enum values
     let mappedStatus = status;
     if (status === 'live') {
       mappedStatus = 'Ongoing';

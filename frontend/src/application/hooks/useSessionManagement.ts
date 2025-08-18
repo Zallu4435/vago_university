@@ -4,6 +4,7 @@ import { sessionService, CreateVideoSessionPayload, UpdateVideoSessionPayload, A
 
 export interface Session {
   _id: string;
+  id?: string;
   title: string;
   name?: string;
   hostId?: string;
@@ -26,8 +27,9 @@ export interface Session {
 
 export type { UpdateVideoSessionPayload };
 
-export const useSessionManagement = () => {
+export const useSessionManagement = (options?: { loadSessions?: boolean }) => {
   const queryClient = useQueryClient();
+  const loadSessions = options?.loadSessions !== false;
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
@@ -55,13 +57,14 @@ export const useSessionManagement = () => {
   };
 
   const backendStatus = getBackendStatus(filterStatus);
-  const { data: sessions, isLoading: isLoadingSessions, error: sessionsError } = useQuery({
+  const { data: sessions = [], isLoading: isLoadingSessions, error: sessionsError } = useQuery<Session[]>({
     queryKey: ['sessions', debouncedSearchTerm, backendStatus, filterCourse],
     queryFn: () => sessionService.getSessions({
       search: debouncedSearchTerm,
       status: backendStatus,
       course: filterCourse,
     }),
+    enabled: loadSessions,
   });
 
   const createSessionMutation = useMutation({
@@ -170,10 +173,15 @@ export const useSessionManagement = () => {
   }, []);
 
   const useSessionAttendance = (sessionId: string, filters = {}) => {
-    return useQuery({
-      queryKey: ['sessionAttendance', sessionId, filters],
+    const queryKey = ['sessionAttendance', sessionId, filters] as const;
+    return useQuery<any[]>({
+      queryKey,
       queryFn: () => sessionService.getSessionAttendance(sessionId, filters),
-      enabled: !!sessionId
+      enabled: !!sessionId,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+      retry: 1,
     });
   };
 

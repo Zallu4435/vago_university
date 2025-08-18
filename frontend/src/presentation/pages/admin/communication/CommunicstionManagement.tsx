@@ -61,7 +61,6 @@ const CommunicationManagement: React.FC = () => {
     filters,
     setFilters,
     handleSendMessage,
-    handleReplyMessage,
     handleDeleteMessage,
     handleArchiveMessage,
     handleViewMessage,  

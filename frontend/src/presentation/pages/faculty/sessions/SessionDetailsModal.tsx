@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { FaCheck, FaChalkboardTeacher, FaBook, FaCalendarAlt, FaHourglassHalf, FaUsers, FaListOl, FaTag, FaInfoCircle, FaPlay, FaVideo, FaTimes } from 'react-icons/fa';
+import React, { useEffect, useState } from 'react';
+import { FaCheck, FaChalkboardTeacher, FaBook, FaCalendarAlt, FaHourglassHalf, FaUsers, FaListOl, FaTag, FaInfoCircle, FaPlay, FaVideo, FaTimes, FaLink, FaCopy } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { RootState } from '../../../../appStore/store';
@@ -10,8 +10,9 @@ interface SessionDetailsModalProps {
 }
 
 const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({ session, onClose }) => {
+  const [copied, setCopied] = useState(false);
+  
   useEffect(() => {
-    // Prevent body scroll when modal is open
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = '';
@@ -20,6 +21,16 @@ const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({ session, onCl
 
   const user = useSelector((state: RootState) => state.auth.user);
   const navigate = useNavigate();
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+    }
+  };
 
   if (!session) return null;
   const details = [
@@ -36,15 +47,13 @@ const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({ session, onCl
     { label: 'Description', value: session.description, icon: <FaInfoCircle className="text-purple-500" /> },
     { label: 'Is Live', value: session.isLive ? 'Yes' : 'No', icon: <FaPlay className="text-purple-500" /> },
     { label: 'Has Recording', value: session.hasRecording ? 'Yes' : 'No', icon: <FaVideo className="text-purple-500" /> },
+    ...(session.joinUrl && (session.status === 'live' || session.status === 'Ongoing') ? [{ label: 'Join URL', value: session.joinUrl, icon: <FaLink className="text-purple-500" />, isUrl: true }] : []),
   ];
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/10">
       <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-0 relative animate-fadeInUp border border-purple-100 max-h-[90vh] flex flex-col">
-        {/* Close Button */}
         <button onClick={onClose} className="absolute top-5 right-5 text-gray-400 hover:text-pink-600 text-3xl font-bold focus:outline-none z-10 transition-colors"><FaTimes /></button>
-        {/* Modal Header Gradient Bar */}
         <div className="w-full h-3 rounded-t-3xl bg-gradient-to-r from-purple-500 to-pink-500 mb-0" />
-        {/* Ended Badge */}
         {session.status === 'Ended' && (
           <div className="flex justify-center mt-4">
             <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold text-white bg-gradient-to-r from-gray-500 to-slate-600 shadow-lg">
@@ -52,17 +61,34 @@ const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({ session, onCl
             </span>
           </div>
         )}
-        {/* Modal Content */}
         <div className="p-8 flex flex-col gap-6 overflow-y-auto max-h-[90vh]">
           <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500 text-center tracking-tight mb-2">Session Details</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {details.map(({ label, value, icon }) => (
+            {details.map(({ label, value, icon, isUrl }) => (
               value !== undefined && value !== '' && (
                 <div key={label} className="flex items-start gap-3 bg-purple-50 rounded-xl p-4 shadow-sm border border-purple-100">
                   <div className="mt-1">{icon}</div>
-                  <div>
+                  <div className="flex-1">
                     <div className="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-1">{label}</div>
                     <div className="text-base text-gray-900 break-words">{value}</div>
+                    {isUrl && (
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          onClick={() => copyToClipboard(value)}
+                          className="inline-flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-lg text-sm hover:bg-purple-200 transition-colors"
+                        >
+                          <FaCopy size={12} />
+                          {copied ? 'Copied!' : 'Copy URL'}
+                        </button>
+                        <button
+                          onClick={() => window.open(value, '_blank')}
+                          className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm hover:bg-green-200 transition-colors"
+                        >
+                          <FaPlay size={12} />
+                          Open Session
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )
@@ -81,10 +107,20 @@ const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({ session, onCl
               </ul>
             </div>
           )}
-          {session.joinUrl && (
+          {session.joinUrl && (session.status === 'live' || session.status === 'Ongoing') && (
             <div className="mt-6 flex justify-center">
               <button
                 onClick={() => {
+                  // Additional check to ensure session is live before joining
+                  if (session.status === 'Ended' || session.status === 'Cancelled') {
+                    alert('Cannot join session: Session has ended or been cancelled');
+                    return;
+                  }
+                  if (session.status !== 'Ongoing' && session.status !== 'live') {
+                    alert('Cannot join session: Session is not live');
+                    return;
+                  }
+                  
                   navigate(`/faculty/video-conference/${session.id || session._id}`, {
                     state: {
                       session,

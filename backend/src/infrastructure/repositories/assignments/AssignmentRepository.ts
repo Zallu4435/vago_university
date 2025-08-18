@@ -33,6 +33,26 @@ export class AssignmentRepository implements IAssignmentRepository {
     return AssignmentModel.findById(id);
   }
 
+  async getSubmissionsStats(assignmentIds: string[]) {
+    const mongoose = require('mongoose');
+    const objectIds = assignmentIds.map(id => new mongoose.Types.ObjectId(id));
+    
+    const submissionsAggregation = await SubmissionModel.aggregate([
+      { $match: { assignmentId: { $in: objectIds } } },
+      { $group: {
+        _id: '$assignmentId',
+        totalSubmissions: { $sum: 1 },
+        totalMarks: { $sum: { $cond: [{ $isNumber: '$marks' }, '$marks', 0] } },
+        gradedSubmissions: { $sum: { $cond: [{ $isNumber: '$marks' }, 1, 0] } }
+      }},
+      { $addFields: {
+        _id: { $toString: '$_id' }
+      }}
+    ]);
+    
+    return submissionsAggregation;
+  }
+
   async createAssignment(assignment: Assignment) {
     return AssignmentModel.create(assignment);
   }
@@ -49,15 +69,34 @@ export class AssignmentRepository implements IAssignmentRepository {
     return AssignmentModel.findByIdAndDelete(id);
   }
 
-  async getSubmissions(assignmentId: string, page: number, limit: number) {
+  async getSubmissions(assignmentId: string, page: number, limit: number, search?: string, status?: string) {
     const skip = (page - 1) * limit;
+    
+    const filterQuery: any = { assignmentId };
+    
+    if (status) {
+      filterQuery.status = status;
+    }
+    
+    if (search) {
+      const searchRegex = new RegExp(search, 'i');
+      filterQuery.$or = [
+        { studentName: searchRegex },
+        { feedback: searchRegex },
+        { 'files.fileName': searchRegex }
+      ];
+    }
+    
+    const sortQuery: any = { submittedDate: -1 };
+    
     const [submissions, total] = await Promise.all([
-      SubmissionModel.find({ assignmentId })
+      SubmissionModel.find(filterQuery)
         .skip(skip)
         .limit(limit)
-        .sort({ submittedDate: -1 }),
-      SubmissionModel.countDocuments({ assignmentId })
+        .sort(sortQuery),
+      SubmissionModel.countDocuments(filterQuery)
     ]);
+    
     return { submissions, total, page, limit };
   }
 
@@ -69,11 +108,31 @@ export class AssignmentRepository implements IAssignmentRepository {
   }
 
   async reviewSubmission(assignmentId: string, submissionId: string, marks: number, feedback: string, status: string, isLate: boolean) {
-    return SubmissionModel.findOneAndUpdate(
-      { _id: submissionId, assignmentId },
-      { $set: { marks, feedback, status, isLate } },
-      { new: true }
-    );
+    try {
+      const existingSubmission = await SubmissionModel.findOne({ _id: submissionId, assignmentId });
+      if (!existingSubmission) {
+        return null;
+      }
+      
+      const updatedSubmission = await SubmissionModel.findOneAndUpdate(
+        { _id: submissionId, assignmentId },
+        { 
+          $set: { 
+            marks, 
+            feedback, 
+            status, 
+            isLate,
+            reviewedAt: new Date() 
+          } 
+        },
+        { new: true, runValidators: true }
+      );
+      
+      return updatedSubmission;
+    } catch (error) {
+      console.error('Error in reviewSubmission:', error);
+      throw error;
+    }
   }
 
   async downloadSubmission(assignmentId: string, submissionId: string) {

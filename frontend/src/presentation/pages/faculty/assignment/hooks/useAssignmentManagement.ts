@@ -69,6 +69,7 @@ export const useAssignmentManagement = ({ searchTerm, filterStatus, filterSubjec
         }) => assignmentService.reviewSubmission(assignmentId, submissionId, reviewData),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['submissions'] });
+            queryClient.invalidateQueries({ queryKey: ['assignments'] });
         }
     });
 

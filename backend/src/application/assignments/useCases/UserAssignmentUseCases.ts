@@ -208,7 +208,7 @@ export class GetUserAssignmentStatusUseCase implements IGetUserAssignmentStatusU
     }
     return {
       data: {
-        status: submission.status,
+        status: submission.status as 'pending' | 'reviewed' | 'late' | 'needs_correction',
         submittedAt: submission.submittedDate,
         score: submission.marks
       },

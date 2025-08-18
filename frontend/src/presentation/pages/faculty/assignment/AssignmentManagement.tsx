@@ -162,7 +162,7 @@ export default function AssignmentManagement() {
                             {activeTab === 'submissions' && selectedAssignment && (
                                 <div className="animate-fadeIn">
                                     <Submissions
-                                        assignment={selectedAssignment}
+                                        assignment={{ ...selectedAssignment, id: selectedAssignment._id }}
                                         submissions={submissions}
                                         onReview={handleReview}
                                         onDownload={handleDownload}

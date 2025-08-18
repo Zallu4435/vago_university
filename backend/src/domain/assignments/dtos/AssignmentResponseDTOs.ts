@@ -5,11 +5,7 @@ export interface AssignmentDTO {
   title: string;
   subject: string;
   dueDate: Date;
-  maxMarks: number;
   description: string;
-  files: AssignmentFile[];
-  createdAt: Date;
-  updatedAt: Date;
   status: 'draft' | 'published' | 'closed';
   totalSubmissions: number;
   averageMarks?: number;
@@ -21,7 +17,7 @@ export interface SubmissionDTO {
   studentId: string;
   studentName: string;
   submittedDate: Date;
-  status: 'pending' | 'reviewed' | 'late';
+  status: 'pending' | 'reviewed' | 'late' | 'needs_correction';
   marks?: number;
   feedback?: string;
   isLate: boolean;

@@ -31,6 +31,8 @@ export interface GetSubmissionsRequestDTO {
   assignmentId: string;
   page?: number;
   limit?: number;
+  search?: string;
+  status?: 'pending' | 'reviewed' | 'late' | 'needs_correction';
 }
 
 export interface GetSubmissionByIdRequestDTO {
@@ -52,21 +54,10 @@ export interface DownloadSubmissionRequestDTO {
   submissionId: string;
 }
 
-export interface DownloadFileRequestDTO {
-  fileUrl: string;
-  fileName: string;
-}
-
-export interface DownloadSubmissionFileRequestDTO {
-  fileUrl: string;
-  fileName: string;
-}
-
 export interface GetAnalyticsRequestDTO {
   assignmentId?: string;
 }
 
-// Helper base type for assignment creation
 interface AssignmentBase {
   title: string;
   subject: string;

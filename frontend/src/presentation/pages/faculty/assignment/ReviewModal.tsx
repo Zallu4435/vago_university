@@ -63,8 +63,8 @@ export default function ReviewModal({ submission, saveReview, onClose, isLoading
         };
       case 'needs_correction':
         return {
-          color: 'from-red-500 to-pink-600',
-          text: 'text-red-700',
+          color: 'from-orange-500 to-red-600',
+          text: 'text-orange-700',
           icon: <FaExclamationTriangle size={14} />
         };
       default:
@@ -181,7 +181,7 @@ export default function ReviewModal({ submission, saveReview, onClose, isLoading
                   {[
                     { value: 'reviewed', label: 'Reviewed', color: 'from-green-500 to-emerald-600' },
                     { value: 'pending', label: 'Pending', color: 'from-yellow-500 to-orange-600' },
-                    { value: 'needs_correction', label: 'Needs Correction', color: 'from-red-500 to-pink-600' }
+                    { value: 'needs_correction', label: 'Needs Correction', color: 'from-orange-500 to-red-600' }
                   ].map((option, index) => (
                     <button
                       key={option.value}

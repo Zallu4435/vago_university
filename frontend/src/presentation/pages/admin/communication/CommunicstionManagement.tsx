@@ -21,6 +21,33 @@ import debounce from 'lodash/debounce';
 import { Message } from '../../../../domain/types/management/communicationmanagement';
 import { STATUSES, USER_GROUPS, inboxColumns, sentColumns } from '../../../../shared/constants/communicationManagementConstants';
 
+type TransformedMessage = {
+  id: string;
+  subject: string;
+  content: string;
+  sender?: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
+  recipients: string;
+  attachments: Array<{
+    id: string;
+    name: string;
+    url: string;
+    size: number;
+    type: string;
+  }>;
+  isBroadcast: boolean;
+  createdAt: string;
+  updatedAt: string;
+  status: 'read' | 'unread' | 'delivered' | 'opened';
+  recipientsCount: number;
+  date?: string;
+  time?: string;
+};
+
 const CommunicationManagement: React.FC = () => {
   const {
     inboxMessages,
@@ -31,8 +58,6 @@ const CommunicationManagement: React.FC = () => {
     isLoadingSent,
     page,
     setPage,
-    searchTerm,
-    setSearchTerm,
     filters,
     setFilters,
     handleSendMessage,
@@ -42,7 +67,7 @@ const CommunicationManagement: React.FC = () => {
     handleViewMessage,  
     fetchSentMessages,
     fetchUsers,
-  } = useCommunicationManagement({ isAdmin: true }); // Pass isAdmin flag
+  } = useCommunicationManagement({ isAdmin: true }); 
 
 
   const [activeTab, setActiveTab] = useState<'inbox' | 'sent' | 'compose'>('inbox');
@@ -51,14 +76,22 @@ const CommunicationManagement: React.FC = () => {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState<Message | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  console.log(inboxMessages, "hahahahahhahah");
-  console.log(sentMessages, "kokokokokok");
+  function normalizeMessage(message: Message): any {
+    const sender = message.sender
+      ? { ...message.sender, _id: (message.sender as any)._id ?? message.sender.id }
+      : { id: '', _id: '', name: '', email: '', role: '' };
+
+    const recipients = message.recipients;
+
+    return { ...message, sender, recipients };
+  }
 
   const handleViewMessageWithModal = (message: Message) => {
     setSelectedMessage(message);
     setShowMessageDetails(true);
-    handleViewMessage(message);
+    handleViewMessage(normalizeMessage(message));
   };
 
   const handleReplyMessageWithModal = (message: Message) => {
@@ -73,35 +106,59 @@ const CommunicationManagement: React.FC = () => {
 
   const handleConfirmDelete = () => {
     if (messageToDelete) {
-      handleDeleteMessage(messageToDelete.id); // Use id instead of _id
+      handleDeleteMessage(messageToDelete.id); 
       setShowDeleteWarning(false);
       setMessageToDelete(null);
     }
+  };
+
+  const handleArchiveMessageWithSender = (message: Message) => {
+    handleArchiveMessage(normalizeMessage(message));
   };
 
   const inboxActions = [
     {
       icon: <Eye size={16} />,
       label: 'View Message',
-      onClick: handleViewMessageWithModal,
+      onClick: (item: TransformedMessage) => {
+        const originalMessage = inboxMessages.find(msg => msg?.id === item.id);
+        if (originalMessage) {
+          handleViewMessageWithModal(originalMessage);
+        }
+      },
       color: 'blue' as const,
     },
     {
       icon: <Reply size={16} />,
       label: 'Reply',
-      onClick: handleReplyMessageWithModal,
+      onClick: (item: TransformedMessage) => {
+        const originalMessage = inboxMessages.find(msg => msg?.id === item.id);
+        if (originalMessage) {
+          handleReplyMessageWithModal(originalMessage);
+        }
+      },
       color: 'green' as const,
     },
     {
       icon: <Archive size={16} />,
       label: 'Archive',
-      onClick: handleArchiveMessage,
+      onClick: (item: TransformedMessage) => {
+        const originalMessage = inboxMessages.find(msg => msg?.id === item.id);
+        if (originalMessage) {
+          handleArchiveMessageWithSender(originalMessage);
+        }
+      },
       color: 'blue' as const,
     },
     {
       icon: <Trash2 size={16} />,
       label: 'Delete',
-      onClick: handleDeleteMessageWithModal,
+      onClick: (item: TransformedMessage) => {
+        const originalMessage = inboxMessages.find(msg => msg?.id === item.id);
+        if (originalMessage) {
+          handleDeleteMessageWithModal(originalMessage);
+        }
+      },
       color: 'red' as const,
     },
   ];
@@ -110,13 +167,23 @@ const CommunicationManagement: React.FC = () => {
     {
       icon: <Eye size={16} />,
       label: 'View Message',
-      onClick: handleViewMessageWithModal,
+      onClick: (item: TransformedMessage) => {
+        const originalMessage = sentMessages.find(msg => msg?.id === item.id);
+        if (originalMessage) {
+          handleViewMessageWithModal(originalMessage);
+        }
+      },
       color: 'blue' as const,
     },
     {
       icon: <Trash2 size={16} />,
       label: 'Delete',
-      onClick: handleDeleteMessageWithModal,
+      onClick: (item: TransformedMessage) => {
+        const originalMessage = sentMessages.find(msg => msg?.id === item.id);
+        if (originalMessage) {
+          handleDeleteMessageWithModal(originalMessage);
+        }
+      },
       color: 'red' as const,
     },
   ];
@@ -132,9 +199,9 @@ const CommunicationManagement: React.FC = () => {
     }
   };
 
-  const debouncedSearch = useCallback(
-    debounce((value: string) => {
-      setSearchTerm(value);
+  const debouncedSearchChange = useCallback(
+    debounce((query: string) => {
+      setFilters((prev) => ({ ...prev, search: query }));
       setPage(1);
     }, 500),
     []
@@ -175,8 +242,8 @@ const CommunicationManagement: React.FC = () => {
           stats={[
             {
               icon: <Inbox />,
-              title: 'Unread Messages',
-              value: inboxMessages.filter((m) => m.status === 'unread').length.toString(),
+              title: 'Inbox Messages',
+              value: inboxMessages.length.toString(),
               change: '+2',
               isPositive: true,
             },
@@ -190,7 +257,7 @@ const CommunicationManagement: React.FC = () => {
             {
               icon: <Users />,
               title: 'Total Recipients',
-              value: 0,
+              value: sentMessages.reduce((total, msg) => total + (msg?.recipientsCount || 0), 0).toString(),
               change: '+1250',
               isPositive: true,
             },
@@ -200,17 +267,19 @@ const CommunicationManagement: React.FC = () => {
             { label: 'Sent', icon: <Send size={16} />, active: activeTab === 'sent' },
             { label: 'Compose', icon: <Edit size={16} />, active: activeTab === 'compose' },
           ]}
-          searchQuery={searchTerm}
-          setSearchQuery={debouncedSearch}
+          searchQuery={searchQuery}
+          setSearchQuery={(val) => {
+            setSearchQuery(val);
+            debouncedSearchChange(val);
+          }}
           searchPlaceholder="Search messages..."
           filters={filters}
           filterOptions={{
             status: STATUSES,
-            from: ['All Senders', 'John Smith', 'Sarah Johnson', 'Mike Davis'],
-            to: ['All Recipients', 'All Students', 'All Faculty', 'All Staff', 'Freshman Students', 'Sophomore Students', 'Junior Students', 'Senior Students', 'Individual User'],
+            to: ['All Recipients', 'All Students', 'Individual Students'],
           }}
           debouncedFilterChange={debouncedFilterChange}
-          handleResetFilters={() => setFilters({ status: 'All Statuses', from: 'All Senders', to: 'All Recipients' })}
+          handleResetFilters={() => setFilters({ status: 'All Statuses', to: 'All Recipients', search: '' })}
           onTabClick={handleTabChange}
         />
 
@@ -229,12 +298,17 @@ const CommunicationManagement: React.FC = () => {
                 <>
                   {activeTab === 'inbox' && !isLoadingInbox && inboxMessages.length > 0 && (
                     <>
-                      <ApplicationsTable data={inboxMessages.filter(msg => msg.id).map(msg => ({ 
-                        ...msg, 
-                        id: msg.id!,
-                        sender: { ...msg.sender, id: msg.sender.id! },
-                        recipients: msg.recipients.map(recipient => ({ ...recipient, id: recipient.id! }))
-                      }))} columns={inboxColumns} actions={inboxActions} />
+                      <ApplicationsTable data={inboxMessages.filter(msg => msg && msg.id).map((msg) => { 
+                        if (!msg) return null;
+                        return {
+                          ...msg, 
+                          id: msg.id,
+                          sender: msg.sender ? { ...msg.sender, id: msg.sender.id } : undefined,
+                          recipients: typeof msg.recipients === 'string' 
+                            ? msg.recipients 
+                            : msg.recipients.map((recipient: { id: string; name: string; email: string; role: string; status: string }) => ({ ...recipient, id: recipient.id }))
+                        };
+                      }).filter(Boolean) as TransformedMessage[]} columns={inboxColumns} actions={inboxActions} />
                       <Pagination
                         page={page}
                         totalPages={totalInboxPages}
@@ -248,12 +322,15 @@ const CommunicationManagement: React.FC = () => {
                   )}
                   {activeTab === 'sent' && !isLoadingSent && sentMessages.length > 0 && (
                     <>
-                      <ApplicationsTable data={sentMessages.filter(msg => msg.id).map(msg => ({ 
-                        ...msg, 
-                        id: msg.id!,
-                        sender: { ...msg.sender, id: msg.sender.id! },
-                        recipients: msg.recipients.map(recipient => ({ ...recipient, id: recipient.id! }))
-                      }))} columns={sentColumns} actions={sentActions} />
+                      <ApplicationsTable data={sentMessages.filter(msg => msg && msg.id).map((msg) => { 
+                        if (!msg) return null;
+                        return {
+                          ...msg, 
+                          id: msg.id,
+                          sender: msg.sender ? { ...msg.sender, id: msg.sender.id } : undefined,
+                          recipients: msg.recipients 
+                        };
+                      }).filter(Boolean) as TransformedMessage[]} columns={sentColumns} actions={sentActions} />
                       <Pagination
                         page={page}
                         totalPages={totalSentPages}
@@ -287,15 +364,14 @@ const CommunicationManagement: React.FC = () => {
       <ComposeMessageModal
         isOpen={showComposeModal}
         initialForm={
-          selectedMessage
+          selectedMessage && selectedMessage.sender
             ? {
                 to: [{ value: selectedMessage.sender.id, label: selectedMessage.sender.name }],
                 subject: `Re: ${selectedMessage.subject}`,
                 message: '',
-                attachments: [],
                 isAdmin: true
               }
-            : { to: [], subject: '', message: '', attachments: [], isAdmin: true }
+            : { to: [], subject: '', message: '', isAdmin: true }
         }
         userGroups={USER_GROUPS}
         onSend={(form) => {
@@ -312,17 +388,17 @@ const CommunicationManagement: React.FC = () => {
 
       <MessageDetailsModal
         isOpen={showMessageDetails}
-        message={selectedMessage!}
+        message={selectedMessage ? normalizeMessage(selectedMessage) : undefined}
         onReply={() => {
-          handleReplyMessage(selectedMessage!);
+          handleReplyMessageWithModal(selectedMessage ? normalizeMessage(selectedMessage) : selectedMessage);
           setShowMessageDetails(false);
         }}
         onArchive={() => {
-          handleArchiveMessage(selectedMessage!);
+          handleArchiveMessageWithSender(selectedMessage ? normalizeMessage(selectedMessage) : selectedMessage);
           setShowMessageDetails(false);
         }}
         onDelete={() => {
-          handleDeleteMessage(selectedMessage!.id); // Use id instead of _id
+          handleDeleteMessage(selectedMessage!.id);
           setShowMessageDetails(false);
         }}
         onClose={() => {
@@ -366,4 +442,4 @@ const CommunicationManagement: React.FC = () => {
   );
 };
 
-export default CommunicationManagement;
+export default CommunicationManagement; 

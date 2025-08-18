@@ -40,7 +40,7 @@ export class Message {
     public readonly attachments: Attachment[],
     public readonly createdAt: string,
     public readonly updatedAt: string
-  ) {}
+  ) { }
 
   static create(
     subject: string,
@@ -84,3 +84,51 @@ export class Message {
   }
 }
 
+
+export interface CommunicationFilter {
+  "recipients._id"?: string;
+  "recipients.status"?: MessageStatus;
+  "sender._id"?: string;
+  $and?: Array<{
+    "recipients._id"?: string;
+    "recipients.status"?: MessageStatus;
+    $or?: Array<{
+      subject?: { $regex: string; $options: string };
+      content?: { $regex: string; $options: string };
+    }>;
+  }>;
+  $or?: Array<{
+    subject?: { $regex: string; $options: string };
+    content?: { $regex: string; $options: string };
+    firstName?: { $regex: string; $options: string };
+    lastName?: { $regex: string; $options: string };
+    email?: { $regex: string; $options: string };
+  }>;
+  role?: UserRole;
+  year?: string;
+  [key: string]: unknown;
+}
+
+export interface GetAdminQuery {
+  firstName?: { $regex: string; $options: string };
+  lastName?: { $regex: string; $options: string };
+  email?: { $regex: string; $options: string };
+  $or?: Array<{
+    firstName?: { $regex: string; $options: string };
+    lastName?: { $regex: string; $options: string };
+    email?: { $regex: string; $options: string };
+  }>;
+}
+
+export interface GetUserQuery {
+  firstName?: { $regex: string; $options: string };
+  lastName?: { $regex: string; $options: string };
+  email?: { $regex: string; $options: string };
+  $or?: Array<{
+    firstName?: { $regex: string; $options: string };
+    lastName?: { $regex: string; $options: string };
+    email?: { $regex: string; $options: string };
+  }>;
+  role?: UserRole;
+  [key: string]: unknown;
+}

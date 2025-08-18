@@ -80,13 +80,24 @@ export class VideoSessionController implements IVideoSessionController {
   async getUserSessions(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { search, status, instructor, course } = httpRequest.query;
     const userId = httpRequest.user?.userId;
-    const sessions = await this.getUserSessionsUseCase.execute({ search, status, instructor, course, userId });
-    return httpSuccess.success_200(sessions);
+    const result = await this.getUserSessionsUseCase.execute({ search, status, instructor, course, userId });
+    return httpSuccess.success_200(result);
   }
 
   async updateSessionStatus(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { status } = httpRequest.body;
-    const session = await this.updateStatusUseCase.execute(httpRequest.params.id, status);
+    
+    // Map frontend status values to backend enum values
+    let mappedStatus = status;
+    if (status === 'live') {
+      mappedStatus = 'Ongoing';
+    } else if (status === 'upcoming' || status === 'scheduled') {
+      mappedStatus = 'Scheduled';
+    } else if (status === 'completed' || status === 'ended') {
+      mappedStatus = 'Ended';
+    }
+    
+    const session = await this.updateStatusUseCase.execute(httpRequest.params.id, mappedStatus);
     if (!session) return httpErrors.error_404('Session not found');
     return httpSuccess.success_200(session);
   }

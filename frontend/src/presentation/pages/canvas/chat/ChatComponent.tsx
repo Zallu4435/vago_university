@@ -55,7 +55,6 @@ export const ChatComponent: React.FC = () => {
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
   const currentUserId = currentUser?.id;
-  // Remove token from Redux
   const queryClient = useQueryClient();
 
   const {
@@ -73,10 +72,8 @@ export const ChatComponent: React.FC = () => {
     query: searchQuery
   });
 
-  console.log(messagesResponse, "messagesResponse")
   const messages = messagesResponse?.messages || [];
   const chats = chatsResponse?.data || [];
-  console.log(messages, "huuuuuuuuuuuuuu")
 
   const chatMutations = useChatMutations(selectedChatId || undefined, currentUserId);
 
@@ -322,18 +319,6 @@ export const ChatComponent: React.FC = () => {
       toast.error('Failed to update group settings');
     }
   };
-
-  // const handleAddMembers = async (selectedUsers: User[]) => {
-  //   if (!flatChat || !currentUser) return;
-  //   try {
-  //     for (const user of selectedUsers) {
-  //       await chatMutations.addGroupMember.mutateAsync(user.id);
-  //     }
-  //     toast.success('Members added');
-  //   } catch (error) {
-  //     toast.error('Failed to add members');
-  //   }
-  // };
 
   const handleRemoveMember = async (userId: string) => {
     if (!flatChat || !currentUser) return;

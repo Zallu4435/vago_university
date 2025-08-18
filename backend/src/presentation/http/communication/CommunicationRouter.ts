@@ -53,6 +53,7 @@ communicationRouter.get(
 
 communicationRouter.post(
   '/send',
+  authMiddleware,
   messageAttachmentUpload.array('attachments', 5),
   (req: Request, res: Response, next) => expressAdapter(req, res, next, communicationController.sendMessage.bind(communicationController))
 );
@@ -81,11 +82,7 @@ communicationRouter.get(
   (req: Request, res: Response, next) => expressAdapter(req, res, next, communicationController.getAllAdmins.bind(communicationController))
 );
 
-communicationRouter.get(
-  '/user-groups',
-  authMiddleware,
-  (req: Request, res: Response, next) => expressAdapter(req, res, next, communicationController.getUserGroups.bind(communicationController))
-);
+
 
 communicationRouter.get(
   '/users',

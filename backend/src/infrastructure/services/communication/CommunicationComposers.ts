@@ -7,7 +7,6 @@ import {
   DeleteMessageUseCase,
   GetMessageDetailsUseCase,
   GetAllAdminsUseCase,
-  GetUserGroupsUseCase,
   FetchUsersUseCase,
   IGetInboxMessagesUseCase,
   IGetSentMessagesUseCase,
@@ -16,7 +15,6 @@ import {
   IDeleteMessageUseCase,
   IGetMessageDetailsUseCase,
   IGetAllAdminsUseCase,
-  IGetUserGroupsUseCase,
   IFetchUsersUseCase,
 } from "../../../application/communication/useCases/CommunicationUseCases";
 import { CommunicationRepository } from "../../repositories/communication/CommunicationRepository";
@@ -33,7 +31,6 @@ export function getCommunicationComposer(): ICommunicationController {
   const deleteMessageUseCase: IDeleteMessageUseCase = new DeleteMessageUseCase(repository);
   const getMessageDetailsUseCase: IGetMessageDetailsUseCase = new GetMessageDetailsUseCase(repository);
   const getAllAdminsUseCase: IGetAllAdminsUseCase = new GetAllAdminsUseCase(repository);
-  const getUserGroupsUseCase: IGetUserGroupsUseCase = new GetUserGroupsUseCase(repository);
   const fetchUsersUseCase: IFetchUsersUseCase = new FetchUsersUseCase(repository);
 
   return new CommunicationController(
@@ -44,7 +41,6 @@ export function getCommunicationComposer(): ICommunicationController {
     deleteMessageUseCase,
     getMessageDetailsUseCase,
     getAllAdminsUseCase,
-    getUserGroupsUseCase,
     fetchUsersUseCase
   );
 }

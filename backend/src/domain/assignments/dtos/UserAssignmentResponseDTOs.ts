@@ -21,7 +21,7 @@ export interface SubmissionDTO {
   assignmentId: string;
   files: SubmissionFile[];
   submittedDate: Date;
-  status: 'pending' | 'reviewed' | 'late';
+  status: 'pending' | 'reviewed' | 'late' | 'needs_correction';
   marks?: number;
   feedback?: string;
   isLate: boolean;
@@ -50,7 +50,7 @@ export interface SubmitUserAssignmentResponseDTO {
 }
 
 export interface GetUserAssignmentStatusResponseDTO {
-  status: 'pending' | 'reviewed' | 'late';
+  status: 'pending' | 'reviewed' | 'late' | 'needs_correction';
   submittedAt?: Date;
   score?: number;
 }

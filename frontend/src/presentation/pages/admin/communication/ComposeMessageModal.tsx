@@ -1,15 +1,13 @@
 import React, { useState, useRef } from 'react';
-import { IoAttachOutline as Paperclip, IoCloseOutline as X, IoSearchOutline as Search, IoMailOutline as Mail } from 'react-icons/io5';
+import { IoCloseOutline as X, IoSearchOutline as Search, IoMailOutline as Mail } from 'react-icons/io5';
 import { RecipientType, User, ComposeMessageModalProps, UserArrayWithUsers } from '../../../../domain/types/management/communicationmanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
+import { toast } from 'react-hot-toast';
 
 const RECIPIENT_TYPES = [
   { value: '', label: 'Select a recipient' },
   { value: 'all_students', label: 'All Students' },
-  { value: 'all_faculty', label: 'All Faculty' },
-  { value: 'all_users', label: 'All Students and Faculty' },
   { value: 'individual_students', label: 'Individual Students' },
-  { value: 'individual_faculty', label: 'Individual Faculty' },
 ];
 
 const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
@@ -24,10 +22,19 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
   const [users, setUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   usePreventBodyScroll(isOpen);
+
+  // Reset form when modal opens/closes
+  React.useEffect(() => {
+    if (isOpen) {
+      setForm(initialForm);
+      setRecipientType('');
+      setUsers([]);
+      setSearchTerm('');
+    }
+  }, [isOpen, initialForm]);
 
   const loadUsers = async (type: RecipientType, search?: string) => {
     if (!isOpen || !type) return;
@@ -58,19 +65,11 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
     }, 300);
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    setForm((prev) => ({
-      ...prev,
-      attachments: [...prev.attachments, ...files],
-    }));
-  };
 
-  const removeAttachment = (index: number) => {
-    setForm((prev) => ({
-      ...prev,
-      attachments: prev.attachments.filter((_, i) => i !== index),
-    }));
+
+  const handleCancel = () => {
+    setRecipientType('');
+    onCancel();
   };
 
   const handleSubmit = () => {
@@ -79,26 +78,29 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
       return;
     }
     onSend(form);
-    setForm({ to: [], subject: '', message: '', attachments: [] });
+    setForm({ to: [], subject: '', message: '' });
+    setRecipientType('');
+    toast.success('Message sent successfully!');
   };
 
   const handleRecipientTypeChange = (type: RecipientType) => {
-    console.log('=== ComposeMessageModal - handleRecipientTypeChange DEBUG ===');
-    console.log('New type selected:', type);
-    console.log('Previous type was:', recipientType);
-    console.log('===========================================================');
-    
     setRecipientType(type);
+    
     if (type === '') {
       setForm(prev => ({ ...prev, to: [] }));
       setUsers([]);
-    } else if (type === 'all_students' || type === 'all_faculty' || type === 'all_users') {
+    } else if (type === 'all_students') {
+      // Clear any existing selections and set to "All Students"
       setForm(prev => ({
         ...prev,
         to: [{ value: type, label: RECIPIENT_TYPES.find(t => t.value === type)?.label || '' }]
       }));
-    } else {
-      setForm(prev => ({ ...prev, to: [] }));
+    } else if (type === 'individual_students') {
+      // Clear any "All Students" selection and allow individual selections
+      setForm(prev => ({
+        ...prev,
+        to: prev.to.filter(t => !['all_students', 'all_faculty', 'all_users'].includes(t.value))
+      }));
       loadUsers(type);
     }
   };
@@ -160,7 +162,7 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
               </div>
             </div>
             <button
-              onClick={onCancel}
+              onClick={handleCancel}
               className="p-2 hover:bg-purple-500/20 rounded-full transition-colors"
             >
               <X size={24} className="text-purple-300" />
@@ -188,41 +190,71 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
               </select>
             </div>
 
-            {(recipientType === 'individual_students' || recipientType === 'individual_faculty') && (
+            {form.to.some(t => t.value === 'all_students') && (
+              <div className="bg-green-900/20 border border-green-600/30 rounded-lg p-4 shadow-sm">
+                <div className="flex items-center space-x-2 text-green-300">
+                  <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                  <span className="text-sm font-medium">All Students Selected</span>
+                </div>
+                <p className="text-xs text-green-400 mt-1">Message will be sent to all students. Individual user selection is disabled.</p>
+              </div>
+            )}
+
+            {recipientType === 'individual_students' && !form.to.some(t => t.value === 'all_students') && (
               <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
-                <label className="block text-sm font-medium text-purple-300 mb-2">Search Recipients</label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-purple-300">Search Recipients</label>
+                  <span className="text-xs text-purple-400">Click users to select multiple recipients</span>
+                </div>
                 <div className="relative mb-2">
                   <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => handleSearch(e.target.value)}
-                    placeholder="Search by name or email..."
-                    className="w-full pl-10 pr-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                    placeholder="Type to search users by name or email..."
+                    className="w-full pl-10 pr-3 py-2 bg-gray-900/60 border border-purple-600/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all duration-200"
                   />
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-300" size={18} />
+                  {searchTerm && (
+                    <button
+                      onClick={() => {
+                        setSearchTerm('');
+                        loadUsers(recipientType);
+                      }}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-400 hover:text-purple-300 transition-colors"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
                 </div>
                 <div className="max-h-40 overflow-y-auto bg-gray-900/60 rounded-lg custom-scrollbar">
                   {isLoadingUsers ? (
-                    <div className="p-4 text-center text-purple-300">Loading...</div>
+                    <div className="p-4 text-center text-purple-300">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500 mx-auto mb-2"></div>
+                      Loading users...
+                    </div>
                   ) : users.length > 0 ? (
                     <div className="divide-y divide-purple-600/30">
                       {users.map((user) => (
                         <div
                           key={user.id}
-                          className={`p-2 hover:bg-gray-800/60 cursor-pointer flex items-center justify-between ${
-                            form.to.some(t => t.value === user.id) ? 'bg-purple-900/30' : ''
+                          className={`p-2 hover:bg-gray-800/60 cursor-pointer flex items-center justify-between transition-colors ${
+                            form.to.some(t => t.value === user.id) ? 'bg-purple-900/30 border-l-2 border-purple-500' : ''
                           }`}
                           onClick={() => {
                             const isSelected = form.to.some(t => t.value === user.id);
+                            
                             if (isSelected) {
+                              // Remove user from selection
                               setForm(prev => ({
                                 ...prev,
                                 to: prev.to.filter(t => t.value !== user.id)
                               }));
                             } else {
+                              // Add user to selection
                               setForm(prev => ({
                                 ...prev,
-                                to: [...prev.to, { value: user.id, label: user.email }]
+                                to: [...prev.to, { value: user.id, label: user.name || user.email }]
                               }));
                             }
                           }}
@@ -231,44 +263,81 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
                             <div className="text-white">{user.name || 'User Name'}</div>
                             <div className="text-sm text-purple-200">{user.email}</div>
                           </div>
-                          {form.to.some(t => t.value === user.id) && (
+                          {form.to.some(t => t.value === user.id) ? (
                             <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center">
                               <X size={12} className="text-white" />
+                            </div>
+                          ) : (
+                            <div className="w-5 h-5 border-2 border-purple-600/30 rounded-full flex items-center justify-center">
+                              <div className="w-2 h-2 bg-purple-600/30 rounded-full"></div>
                             </div>
                           )}
                         </div>
                       ))}
                     </div>
+                  ) : searchTerm ? (
+                    <div className="p-4 text-center text-purple-300">No users found for "{searchTerm}"</div>
                   ) : (
-                    <div className="p-4 text-center text-purple-300">No users found</div>
+                    <div className="p-4 text-center text-purple-300">Enter a search term to find users</div>
                   )}
                 </div>
               </div>
             )}
 
             <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
-              <label className="block text-sm font-medium text-purple-300 mb-2">Selected Recipients</label>
-              <div className="flex flex-wrap gap-2">
-                {form.to.map((recipient) => (
-                  <div
-                    key={recipient.value}
-                    className="flex items-center gap-1 bg-gray-900/60 border border-purple-600/30 rounded-lg px-3 py-1 text-purple-300 text-sm"
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-purple-300">
+                  Selected Recipients ({form.to.length})
+                </label>
+                {form.to.length > 0 && (
+                  <button
+                    onClick={() => setForm(prev => ({ ...prev, to: [] }))}
+                    className="text-xs text-red-400 hover:text-red-300 transition-colors"
                   >
-                    <span>{recipient.label}</span>
-                    <button
-                      onClick={() => {
-                        setForm((prev) => ({
-                          ...prev,
-                          to: prev.to.filter((t) => t.value !== recipient.value),
-                        }));
-                      }}
-                      className="hover:text-red-400"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                ))}
+                    Clear All
+                  </button>
+                )}
               </div>
+              <div className="flex flex-wrap gap-2">
+                {form.to.length === 0 ? (
+                  <div className="text-purple-400 text-sm">No recipients selected</div>
+                ) : (
+                  form.to.map((recipient) => (
+                    <div
+                      key={recipient.value}
+                      className="flex items-center gap-1 bg-gray-900/60 border border-purple-600/30 rounded-lg px-3 py-1 text-purple-300 text-sm"
+                    >
+                      <span>{recipient.label}</span>
+                      <button
+                        onClick={() => {
+                          setForm((prev) => ({
+                            ...prev,
+                            to: prev.to.filter((t) => t.value !== recipient.value),
+                          }));
+                        }}
+                        className="hover:text-red-400 transition-colors"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+              {/* Debug info - remove in production */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mt-2 text-xs text-purple-400">
+                  Debug: {JSON.stringify(form.to)}
+                </div>
+              )}
+              {/* Show selection type info */}
+              {form.to.length > 0 && (
+                <div className="mt-2 text-xs text-purple-400">
+                  {form.to.some(t => t.value === 'all_students') 
+                    ? 'Broadcasting to all students' 
+                    : `Selected ${form.to.length} individual user${form.to.length > 1 ? 's' : ''}`
+                  }
+                </div>
+              )}
             </div>
 
             <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
@@ -297,47 +366,13 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
               />
             </div>
 
-            <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
-              <label className="block text-sm font-medium text-purple-300 mb-2">Attachments</label>
-              <div className="border-2 border-dashed border-purple-600/30 rounded-lg p-4">
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  multiple
-                  className="hidden"
-                />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center space-x-2 text-purple-300 hover:text-purple-200 transition-colors"
-                >
-                  <Paperclip size={16} />
-                  <span>Add Attachment</span>
-                </button>
-                {form.attachments.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    {form.attachments.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between bg-gray-900/60 border border-purple-600/30 rounded-lg p-2">
-                        <span className="text-sm text-purple-200">{file.name}</span>
-                        <button
-                          onClick={() => removeAttachment(index)}
-                          className="text-red-400 hover:text-red-300"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+
           </div>
 
           <div className="border-t border-purple-600/30 bg-gray-900/80 p-6">
             <div className="flex justify-end space-x-4">
               <button
-                onClick={onCancel}
+                onClick={handleCancel}
                 className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-gray-500/50"
               >
                 Cancel

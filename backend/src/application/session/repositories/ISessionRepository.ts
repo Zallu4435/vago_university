@@ -1,7 +1,7 @@
 import { VideoSession } from '../../../domain/session/entities/VideoSession';
 
 export interface ISessionRepository {
-  create(session: VideoSession): Promise<VideoSession>;
+  create(sessionData: Partial<VideoSession>): Promise<VideoSession>;
   join(sessionId: string, participantId: string): Promise<VideoSession>;
   getById(sessionId: string): Promise<VideoSession | null>;
   update(sessionId: string, data: Partial<VideoSession>): Promise<VideoSession | null>;

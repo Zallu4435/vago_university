@@ -81,8 +81,14 @@ export const assignmentService = {
     return response.data;
   },
 
-  getSubmissions: async (assignmentId: string) => {
-    const response = await httpClient.get(`/faculty/assignments/${assignmentId}/submissions`);
+  getSubmissions: async (assignmentId: string, options: { search?: string; status?: string } = {}) => {
+    const filteredParams = Object.fromEntries(
+      Object.entries(options).filter(([_, value]) => value !== undefined && value !== null && value !== '' && value !== 'all')
+    );
+    const queryString = Object.keys(filteredParams).length
+      ? '?' + new URLSearchParams(filteredParams).toString()
+      : '';
+    const response = await httpClient.get(`/faculty/assignments/${assignmentId}/submissions${queryString}`);
     return response.data.data;
   },
 

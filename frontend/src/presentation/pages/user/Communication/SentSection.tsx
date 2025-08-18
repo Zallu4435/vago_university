@@ -83,16 +83,16 @@ export default function SentSection() {
           <div className="relative z-10 divide-y divide-amber-100/50">
             {sentMessages.map((message) => (
               <div
-                key={message.id}
+                key={message?.id}
                 className={`p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${
-                  selectedMessage?.id === message.id ? 'bg-orange-50/70' : ''
+                  selectedMessage?.id === message?.id ? 'bg-orange-50/70' : ''
                 }`}
                 onClick={() => handleMessageClick(message as Message)}
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <h3 className={`font-medium ${styles.textPrimary} text-sm sm:text-base truncate`}>{message.subject}</h3>
-                    <p className={`text-sm ${styles.textSecondary} truncate mt-1`}>{message.content}</p>
+                    <h3 className={`font-medium ${styles.textPrimary} text-sm sm:text-base truncate`}>{message?.subject}</h3>
+                    <p className={`text-sm ${styles.textSecondary} truncate mt-1`}>{message?.content}</p>
                   </div>
                   <button
                     onClick={(e) => {
@@ -105,8 +105,8 @@ export default function SentSection() {
                   </button>
                 </div>
                 <div className="mt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs">
-                  <span className={`truncate ${styles.textSecondary}`}>To: {message.recipients.map((r) => r.name).join(', ')}</span>
-                  <span className={`mt-1 sm:mt-0 ${styles.textSecondary}`}>{new Date(message.createdAt).toLocaleDateString()}</span>
+                  <span className={`truncate ${styles.textSecondary}`}>To: {message?.recipients}</span>
+                  <span className={`mt-1 sm:mt-0 ${styles.textSecondary}`}>{new Date(message?.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
             ))}
@@ -126,7 +126,7 @@ export default function SentSection() {
                   <div>
                     <h2 className={`text-lg sm:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} mb-2`}>{selectedMessage.subject}</h2>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm">
-                      <span className={`${styles.textSecondary}`}>From: {selectedMessage.sender.name}</span>
+                      <span className={`${styles.textSecondary}`}>From: You</span>
                       <span className={`${styles.textSecondary}`}>To: {selectedMessage.recipients.map((r) => r.name).join(', ')}</span>
                     </div>
                   </div>

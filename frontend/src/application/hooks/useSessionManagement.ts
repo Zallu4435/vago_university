@@ -41,7 +41,20 @@ export const useSessionManagement = () => {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  const backendStatus = filterStatus === 'completed' ? 'Ended' : filterStatus;
+  const getBackendStatus = (frontendStatus: string): string => {
+    switch (frontendStatus) {
+      case 'upcoming':
+        return 'Scheduled';
+      case 'live':
+        return 'Ongoing';
+      case 'completed':
+        return 'Ended';
+      default:
+        return frontendStatus;
+    }
+  };
+
+  const backendStatus = getBackendStatus(filterStatus);
   const { data: sessions, isLoading: isLoadingSessions, error: sessionsError } = useQuery({
     queryKey: ['sessions', debouncedSearchTerm, backendStatus, filterCourse],
     queryFn: () => sessionService.getSessions({
@@ -74,6 +87,13 @@ export const useSessionManagement = () => {
 
   const markSessionAsOverMutation = useMutation({
     mutationFn: (id: string) => sessionService.updateSessionStatus(id, 'Ended'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sessions'] });
+    }
+  });
+
+  const startSessionMutation = useMutation({
+    mutationFn: (id: string) => sessionService.updateSessionStatus(id, 'live'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions'] });
     }
@@ -119,6 +139,16 @@ export const useSessionManagement = () => {
     }
   }, [markSessionAsOverMutation]);
 
+  const startSession = useCallback(async (id: string) => {
+    try {
+      await startSessionMutation.mutateAsync(id);
+      return { success: true };
+    } catch (error) {
+      console.error('Error starting session:', error);
+      return { success: false, error: 'Failed to start session' };
+    }
+  }, [startSessionMutation]);
+
   const attendanceJoin = useCallback(async (sessionId: string) => {
     try {
       await sessionService.attendanceJoin(sessionId);
@@ -139,7 +169,6 @@ export const useSessionManagement = () => {
     }
   }, []);
 
-  // Fetch session attendance
   const useSessionAttendance = (sessionId: string, filters = {}) => {
     return useQuery({
       queryKey: ['sessionAttendance', sessionId, filters],
@@ -148,7 +177,6 @@ export const useSessionManagement = () => {
     });
   };
 
-  // Fetch session attendance (pattern: function, not hook)
   const getSessionAttendance = useCallback(async (sessionId: string) => {
     try {
       return await sessionService.getSessionAttendance(sessionId);
@@ -158,7 +186,6 @@ export const useSessionManagement = () => {
     }
   }, []);
 
-  // Update attendance status
   const updateAttendanceStatus = useCallback(async (sessionId: string, userId: string, status: string, name: string) => {
     try {
       await sessionService.updateAttendanceStatus(sessionId, userId, status, name);
@@ -179,10 +206,12 @@ export const useSessionManagement = () => {
     handleUpdateSession,
     handleDeleteSession,
     markSessionAsOver,
+    startSession,
     isCreating: createSessionMutation.isPending,
     isUpdating: updateSessionMutation.isPending,
     isDeleting: deleteSessionMutation.isPending,
     isMarkingAsOver: markSessionAsOverMutation.isPending,
+    isStartingSession: startSessionMutation.isPending,
     attendanceJoin,
     attendanceLeave,
     useSessionAttendance,

@@ -19,35 +19,33 @@ interface User {
 
 export const useCommunicationManagement = ({ isAdmin = false }: UseCommunicationManagementProps = {}) => {
   const [page, setPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     status: 'All Statuses',
-    from: 'All Senders',
     to: 'All Recipients',
+    search: '',
   });
 
   const ITEMS_PER_PAGE = 10;
 
   const inboxQuery = useQuery({
-    queryKey: ['inboxMessages', page, searchTerm, filters, isAdmin],
+    queryKey: ['inboxMessages', page, filters, isAdmin],
     queryFn: () =>
       communicationService.getInboxMessages({
         page,
         limit: ITEMS_PER_PAGE,
-        search: searchTerm || undefined,
+        search: filters.search || undefined,
         status: filters.status !== 'All Statuses' ? (filters.status.toLowerCase() as 'read' | 'unread') : undefined,
-        from: filters.from !== 'All Senders' ? filters.from : undefined,
         isAdmin,
       }),
   });
 
   const sentQuery = useQuery({
-    queryKey: ['sentMessages', page, searchTerm, filters, isAdmin],
+    queryKey: ['sentMessages', page, filters, isAdmin],
     queryFn: () =>
       communicationService.getSentMessages({
         page,
         limit: ITEMS_PER_PAGE,
-        search: searchTerm || undefined,
+        search: filters.search || undefined,
         status:
           filters.status !== 'All Statuses'
             ? (filters.status.toLowerCase() as 'read' | 'unread' | 'delivered' | 'opened')
@@ -82,21 +80,23 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
   };
 
   const handleReplyMessage = (message: Message) => {
+    if (!message.sender || !message.sender.id || !message.sender.name) {
+      return;
+    }
     sendMessageMutation.mutate({
       to: [{ value: message.sender.id, label: message.sender.name }],
       subject: `Re: ${message.subject}`,
       message: '',
-      attachments: [],
       isAdmin,
-  });
-};
+    });
+  };
 
   const handleDeleteMessage = (messageId: string) => {
     deleteMessageMutation.mutate(messageId);
   };
 
   const handleArchiveMessage = (message: Message) => {
-    console.log('Archiving message:', message); 
+    console.log('Archiving message:', message);
   };
 
   const handleViewMessage = (message: Message) => {
@@ -111,7 +111,7 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
 
   const debouncedSearch = useCallback(
     debounce((value: string) => {
-      setSearchTerm(value);
+      setFilters((prev) => ({ ...prev, search: value }));
       setPage(1);
     }, 500),
     []
@@ -125,32 +125,75 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
     []
   );
 
-  const mapMessage = (msg: Message) => {
-    const mappedMessage = {
-      id: msg._id,
-      subject: msg.subject,
-      content: msg.content,
-      sender: {
-        id: msg.sender._id,
-        name: msg.sender.name,
-        email: msg.sender.email,
-        role: msg.sender.role,
-      },
-      recipients: msg.recipients.map((recipient) => ({
-        id: recipient._id,
-        name: recipient.name,
-        email: recipient.email,
-        role: recipient.role,
-        status: recipient.status
-      })),
-      attachments: msg.attachments || [],
-      isBroadcast: msg.isBroadcast,
-      createdAt: msg.createdAt,
-      updatedAt: msg.updatedAt,
-      status: msg.status,
-      recipientsCount: msg.recipientsCount
-    };
-    return mappedMessage;
+  const mapMessage = (msg: any) => {
+    try {
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('mapMessage input:', {
+          _id: msg._id,
+          id: msg.id,
+          hasSender: !!msg.sender,
+          senderId: msg.sender?._id || msg.sender?.id,
+          recipientsType: typeof msg.recipients,
+          recipientsLength: Array.isArray(msg.recipients) ? msg.recipients.length : 'N/A'
+        });
+
+      }
+
+      const messageId = msg._id || msg.id || msg._id?.toString() || msg.id?.toString();
+
+      if (!messageId) {
+        console.error('Message missing ID:', msg);
+        return null;
+      }
+
+      let sender = undefined;
+      if (msg.sender && msg.sender._id) {
+        sender = {
+          id: msg.sender._id || msg.sender.id,
+          name: msg.sender.name || 'Unknown',
+          email: msg.sender.email || 'unknown@email.com',
+          role: msg.sender.role || 'unknown',
+        };
+      }
+
+      let recipients = [];
+      if (typeof msg.recipients === 'string') {
+        recipients = [{
+          id: 'recipient',
+          name: msg.recipients,
+          email: msg.recipients,
+          role: 'recipient',
+          status: 'read'
+        }];
+      } else if (Array.isArray(msg.recipients)) {
+        recipients = msg.recipients.map((recipient: any) => ({
+          id: recipient._id || recipient.id || 'recipient',
+          name: recipient.name || 'Unknown',
+          email: recipient.email || 'unknown@email.com',
+          role: recipient.role || 'unknown',
+          status: recipient.status || 'read'
+        }));
+      }
+
+      const mappedMessage = {
+        id: messageId,
+        subject: msg.subject || 'No Subject',
+        content: msg.content || 'No Content',
+        sender,
+        recipients,
+        attachments: msg.attachments || [],
+        isBroadcast: msg.isBroadcast || false,
+        createdAt: msg.createdAt || new Date().toISOString(),
+        updatedAt: msg.updatedAt || new Date().toISOString(),
+        status: msg.status || 'read',
+        recipientsCount: msg.recipientCount || recipients.length
+      };
+      return mappedMessage;
+    } catch (error) {
+      console.error('Error mapping message:', error, msg);
+      return null;
+    }
   };
 
   const fetchUsers = useCallback(async (type: RecipientType, search?: string): Promise<User[]> => {
@@ -205,23 +248,22 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
       await communicationService.getInboxMessages({
         page,
         limit: ITEMS_PER_PAGE,
-        search: searchTerm || undefined,
+        search: filters.search || undefined,
         status: filters.status !== 'All Statuses' ? (filters.status.toLowerCase() as 'read' | 'unread') : undefined,
-        from: filters.from !== 'All Senders' ? filters.from : undefined,
         isAdmin,
       });
       inboxQuery.refetch();
     } catch (error) {
       console.error('Error loading inbox messages:', error);
     }
-  }, [inboxQuery, page, searchTerm, filters, isAdmin]);
+  }, [inboxQuery, page, filters, isAdmin]);
 
   const loadSentMessages = useCallback(async () => {
     try {
       await communicationService.getSentMessages({
         page,
         limit: ITEMS_PER_PAGE,
-        search: searchTerm || undefined,
+        search: filters.search || undefined,
         status:
           filters.status !== 'All Statuses'
             ? (filters.status.toLowerCase() as 'read' | 'unread' | 'delivered' | 'opened')
@@ -233,19 +275,17 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
     } catch (error) {
       console.error('Error loading sent messages:', error);
     }
-  }, [sentQuery, page, searchTerm, filters, isAdmin]);
+  }, [sentQuery, page, filters, isAdmin]);
 
   return {
-    inboxMessages: (inboxQuery.data?.messages || []).map(mapMessage),
-    sentMessages: (sentQuery.data?.messages || []).map(mapMessage),
+    inboxMessages: (inboxQuery.data?.messages || []).map(mapMessage).filter(Boolean),
+    sentMessages: (sentQuery.data?.messages || []).map(mapMessage).filter(Boolean),
     totalInboxPages: inboxQuery.data?.pagination.totalPages || 1,
     totalSentPages: sentQuery.data?.pagination.totalPages || 1,
     isLoadingInbox: inboxQuery.isLoading,
     isLoadingSent: sentQuery.isLoading,
     page,
     setPage,
-    searchTerm,
-    setSearchTerm,
     filters,
     setFilters,
     handleSendMessage,

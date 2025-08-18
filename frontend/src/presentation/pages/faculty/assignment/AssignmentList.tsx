@@ -78,16 +78,17 @@ export default function AssignmentList({
   };
 
   const getSubjectIcon = (subject: string) => {
-    if (subject?.toLowerCase().includes('database')) return '🗄️';
-    if (subject?.toLowerCase().includes('web')) return '🌐';
-    if (subject?.toLowerCase().includes('mobile')) return '📱';
-    if (subject?.toLowerCase().includes('ai') || subject.toLowerCase().includes('machine')) return '🤖';
+    if (!subject) return '📘';
+    if (subject.toLowerCase().includes('database')) return '🗄️';
+    if (subject.toLowerCase().includes('web')) return '🌐';
+    if (subject.toLowerCase().includes('mobile')) return '📱';
+    if (subject.toLowerCase().includes('ai') || subject.toLowerCase().includes('machine')) return '🤖';
     return '📘';
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'from-green-500 to-emerald-600';
+      case 'published': return 'from-green-500 to-emerald-600';
       case 'draft': return 'from-yellow-500 to-orange-600';
       case 'closed': return 'from-gray-500 to-slate-600';
       default: return 'from-blue-500 to-indigo-600';
@@ -170,15 +171,15 @@ export default function AssignmentList({
               <div className="flex items-start justify-between mb-6">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
-                    <span className="text-2xl">{getSubjectIcon(assignment.subject)}</span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r ${getStatusColor(assignment.status)}`}>
-                      {assignment.status.toUpperCase()}
+                    <span className="text-2xl">{getSubjectIcon(assignment.subject || '')}</span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r ${getStatusColor(assignment.status || 'draft')}`}>
+                      {(assignment.status || 'draft').toUpperCase()}
                     </span>
                   </div>
                   <h3 className="font-bold text-purple-900 text-xl mb-2 group-hover:text-pink-600 transition-colors">
-                    {assignment.title}
+                    {assignment.title || 'Untitled Assignment'}
                   </h3>
-                  <p className="text-sm text-pink-600 font-medium mb-3">{assignment.subject}</p>
+                  <p className="text-sm text-pink-600 font-medium mb-3">{assignment.subject || 'No Subject'}</p>
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
@@ -199,7 +200,7 @@ export default function AssignmentList({
               </div>
 
               <p className="text-gray-700 text-sm mb-6 line-clamp-3 leading-relaxed">
-                {assignment.description}
+                {assignment.description || 'No description available'}
               </p>
 
               {/* Stats Row */}
@@ -223,7 +224,9 @@ export default function AssignmentList({
               <div className="flex items-center justify-between text-sm mb-6">
                 <div className="flex items-center space-x-2 text-gray-600">
                   <FaCalendar size={14} className="text-pink-500" />
-                  <span className="font-medium">Due: {new Date(assignment.dueDate).toLocaleDateString()}</span>
+                  <span className="font-medium">
+                    Due: {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString() : 'No due date'}
+                  </span>
                 </div>
               </div>
 

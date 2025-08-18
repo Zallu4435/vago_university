@@ -212,11 +212,7 @@ export interface IAssignmentController extends IController {
   getSubmissions(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getSubmissionById(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   reviewSubmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  downloadSubmission(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  downloadFile(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  downloadSubmissionFile(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getAnalytics(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  viewAssignmentFile(httpRequest: IHttpRequest): Promise<IHttpResponse>;
 }
 
 export interface IUserAssignmentController extends IController {
@@ -273,7 +269,6 @@ export interface ICommunicationController extends IController {
   deleteMessage(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getMessageDetails(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getAllAdmins(httpRequest: IHttpRequest): Promise<IHttpResponse>;
-  getUserGroups(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   fetchUsers(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getAdminInboxMessages(httpRequest: IHttpRequest): Promise<IHttpResponse>;
   getAdminSentMessages(httpRequest: IHttpRequest): Promise<IHttpResponse>;

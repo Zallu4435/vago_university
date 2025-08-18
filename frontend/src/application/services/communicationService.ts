@@ -58,11 +58,6 @@ export class CommunicationService {
     if (!type) {
       return [];
     }
-    console.log('=== CommunicationService - fetchUsers DEBUG ===');
-    console.log('Type received:', type);
-    console.log('Type typeof:', typeof type);
-    console.log('Search:', search);
-    console.log('==============================================');
 
     const response = await httpClient.get(`/communication/admin/users`, {
       params: {
@@ -70,39 +65,28 @@ export class CommunicationService {
         search,
       },
     });
-    console.log('CommunicationService - fetchUsers response:', response.data);
     return response.data.data;
   }
 
   async sendMessage(form: MessageForm): Promise<Message> {
-    console.log('CommunicationService - sendMessage called with form:', form);
+    try {
+      const formData = new FormData();
+      formData.append('to', JSON.stringify(form.to));
+      formData.append('subject', form.subject);
+      formData.append('message', form.message);
 
-    const formData = new FormData();
-    formData.append('to', JSON.stringify(form.to));
-    formData.append('subject', form.subject);
-    formData.append('message', form.message);
+      const endpoint = form.isAdmin ? '/communication/admin/messages' : '/communication/send';
 
-    console.log('CommunicationService - Attachments to process:', form.attachments);
-    form.attachments.forEach((file, index) => {
-      console.log(`CommunicationService - Appending attachment ${index}:`, {
-        name: file.name,
-        type: file.type,
-        size: file.size
+      const response = await httpClient.post(endpoint, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-      formData.append('attachments', file);
-    });
 
-    const endpoint = form.isAdmin ? '/communication/admin/messages' : '/communication/admin/messages';
-    console.log('CommunicationService - Sending to endpoint:', endpoint);
-
-    const response = await httpClient.post(endpoint, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-
-    console.log('CommunicationService - Response received:', response.data);
-    return response.data;
+      return response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to send message: ${error.response?.status} - ${error.response?.data?.message || error.message}`);
+    }
   }
 
   async deleteMessage(messageId: string, isAdmin: boolean = false): Promise<void> {
@@ -136,20 +120,13 @@ export class CommunicationService {
   async getAllAdmins(): Promise<Admin[]> {
     try {
       const response = await httpClient.get(`${this.userBaseUrl}/all-admins`);
-      return response.data.data;
-    } catch (error) {
-      throw new Error('Failed to fetch admins');
+      return response.data.data.admins;
+    } catch (error: any) {
+      throw new Error(`Failed to fetch admins: ${error.response?.status} - ${error.response?.data?.message || error.message}`);
     }
   }
 
-  async getUserGroups(): Promise<Array<{ value: string; label: string }>> {
-    try {
-      const response = await httpClient.get(`${this.userBaseUrl}/user-groups`);
-      return response.data.data;
-    } catch (error) {
-      throw new Error('Failed to fetch user groups');
-    }
-  }
+
 
   async markMessageAsRead(messageId: string): Promise<void> {
     await httpClient.patch(`/messages/${messageId}/read`);

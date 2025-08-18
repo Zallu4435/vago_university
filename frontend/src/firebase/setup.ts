@@ -4,13 +4,13 @@ import { getMessaging, Messaging } from "firebase/messaging";
 
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyBjBmm32nCdjBodbUW_qvysHNyrfvaDKpU",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "vago-university.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "vago-university",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "vago-university.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "963590986597",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:963590986597:web:4906c24584898696c39f8c",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-0M835WHH24"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 let app;

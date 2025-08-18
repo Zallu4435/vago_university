@@ -16,7 +16,6 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
   );
   const [subject, setSubject] = useState(initialForm?.subject || '');
   const [message, setMessage] = useState(initialForm?.message || '');
-  const [attachments, setAttachments] = useState<File[]>(initialForm?.attachments || []);
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [isLoadingAdmins, setIsLoadingAdmins] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,10 +29,25 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
         setError(null);
         try {
           const adminList = await communicationService.getAllAdmins();
-          setAdmins(adminList);
-        } catch (err) {
-          setError('Failed to load admins. Please try again.');
-          console.error('Error fetching admins:', err);
+          
+          const transformedAdmins = adminList.map(admin => ({
+            ...admin,
+            name: admin.name || `${admin.firstName || 'Unknown'} ${admin.lastName || 'Admin'}`.trim() || 'Unknown Admin'
+          }));
+          
+          setAdmins(transformedAdmins);
+          setError(null);
+        } catch (err: any) {
+          let errorMessage = 'Failed to load admins. Please try again.';
+          if (err.response?.status === 403) {
+            errorMessage = 'Access forbidden. You may not have permission to view admins.';
+          } else if (err.response?.status === 401) {
+            errorMessage = 'Authentication required. Please log in again.';
+          } else if (err.response?.status === 500) {
+            errorMessage = 'Server error. Please try again later.';
+          }
+          
+          setError(errorMessage);
         } finally {
           setIsLoadingAdmins(false);
         }
@@ -64,25 +78,46 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const form: MessageForm = {
-      to: recipients,
-      subject,
-      message,
-      attachments,
-      isAdmin: false,
-    };
-    onSend(form);
-    setSubject('');
-    setMessage('');
-    setRecipients([]);
-    setAttachments([]);
-    handleClose();
+    
+    if (!recipients || recipients.length === 0) {
+      setError('Please select a recipient.');
+      return;
+    }
+    
+    if (!subject.trim()) {
+      setError('Please enter a subject.');
+      return;
+    }
+    
+    if (!message.trim()) {
+      setError('Please enter a message.');
+      return;
+    }
+    
+    try {
+      const form: MessageForm = {
+        to: recipients,
+        subject: subject.trim(),
+        message: message.trim(),
+        isAdmin: false,
+      };
+      
+      onSend(form);
+      
+      setSubject('');
+      setMessage('');
+      setRecipients([]);
+      setError(null);
+      handleClose();
+    } catch (error: any) {
+      setError('Failed to send message. Please try again.');
+    }
   };
 
   if (!isOpen) return null;
 
 
-  console.log(admins, "ooooooooooop")
+
   return (
     <div className="fixed inset-0 z-[9999] overflow-y-auto">
       {/* Backdrop */}
@@ -154,11 +189,14 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
                     disabled={isLoadingAdmins}
                   >
                     <option value="">Select a recipient</option>
-                    {admins?.map((admin) => (
-                      <option key={admin._id} value={admin._id}>
-                        {admin.name} ({admin.email})
-                      </option>
-                    ))}
+                    {admins?.map((admin) => {
+                      const displayName = admin.name || `${admin.firstName || 'Unknown'} ${admin.lastName || 'Admin'}`.trim() || 'Unknown Admin';
+                      return (
+                        <option key={admin._id} value={admin._id}>
+                          {displayName} ({admin.email})
+                        </option>
+                      );
+                    })}
                   </select>
                   {isLoadingAdmins && (
                     <p className={`mt-1 text-xs sm:text-sm ${styles.textSecondary}`}>Loading admins...</p>

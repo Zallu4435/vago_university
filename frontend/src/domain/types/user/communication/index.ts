@@ -2,13 +2,14 @@ export interface MessageForm {
     to: Array<{ value: string; label: string }>;
     subject: string;
     message: string;
-    attachments: File[];
     isAdmin?: boolean;
 }
 
 export interface Admin {
     _id: string;
-    name: string;
+    name?: string;
+    firstName?: string;
+    lastName?: string;
     email: string;
     role: string;
 }

@@ -8,10 +8,15 @@ export interface IAssignmentRepository {
   createAssignment(assignment: IAssignment): Promise<IAssignmentDocument>;
   updateAssignment(id: string, assignment: Partial<IAssignment>): Promise<IAssignment | null>;
   deleteAssignment(id: string): Promise<IAssignmentDocument>;
-  getSubmissions(assignmentId: string, page: number, limit: number): Promise<{ submissions: ISubmissionDocument[]; total: number; page: number; limit: number }>;
+  getSubmissions(assignmentId: string, page: number, limit: number, search?: string, status?: string, isLate?: boolean, sortBy?: string, sortOrder?: string): Promise<{ submissions: ISubmissionDocument[]; total: number; page: number; limit: number }>;
   getSubmissionById(assignmentId: string, submissionId: string): Promise<ISubmissionDocument | null>;
   reviewSubmission(assignmentId: string, submissionId: string, marks: number, feedback: string, status: string, isLate: boolean): Promise<ISubmissionDocument | null>;
-  downloadSubmission(assignmentId: string, submissionId: string): Promise<ISubmissionDocument | null>;
+  getSubmissionsStats(assignmentIds: string[]): Promise<Array<{
+    _id: string;
+    totalSubmissions: number;
+    totalMarks: number;
+    gradedSubmissions: number;
+  }>>;
   getAnalytics(): Promise<{
     totalAssignments: number;
     totalSubmissions: number;

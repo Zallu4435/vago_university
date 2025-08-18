@@ -32,6 +32,7 @@ export const VideoConferencePage: React.FC = () => {
   const [meetingSeconds, setMeetingSeconds] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
   const [othersOpen, setOthersOpen] = useState(false);
+  const [joinError, setJoinError] = useState<string | null>(null);
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const socketRef = useRef<Socket | null>(null);
@@ -114,6 +115,11 @@ export const VideoConferencePage: React.FC = () => {
 
     socket.on('disconnect', () => {
       setIsConnected(false);
+    });
+
+    socket.on('error', (error) => {
+      console.error('Socket error:', error);
+      setJoinError(error.message || 'Failed to join session');
     });
 
     socket.on('participant-list', (list: Array<{
@@ -526,6 +532,35 @@ export const VideoConferencePage: React.FC = () => {
 
   return (
     <div className="w-screen h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col overflow-hidden">
+      {/* Error Modal */}
+      {joinError && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <span className="text-red-600 text-xl">⚠️</span>
+              </div>
+              <h2 className="text-lg font-semibold text-gray-800">Cannot Join Session</h2>
+            </div>
+            <p className="text-gray-600 mb-6">{joinError}</p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => window.history.back()}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <TopBar sessionName={session?.name || "Video Conference"} meetingTimer={meetingTimer} />
 
       {/* Connection Status */}

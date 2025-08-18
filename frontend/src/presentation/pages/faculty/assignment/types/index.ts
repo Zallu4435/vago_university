@@ -1,4 +1,5 @@
 export interface Assignment {
+  id?: string;
   _id: string;
   title: string;
   subject: string;
@@ -12,7 +13,7 @@ export interface Assignment {
   }> | string[];
   createdAt: string;
   updatedAt: string;
-  status: 'active' | 'draft' | 'archived';
+  status: 'draft' | 'published' | 'closed';
   totalSubmissions: number;
   averageMarks?: number;
   submissionCount?: number;
@@ -26,7 +27,7 @@ export interface Submission {
   studentId: string;
   studentName: string;
   submittedDate: string;
-  status: 'submitted' | 'graded' | 'late';
+  status: 'pending' | 'reviewed' | 'late' | 'needs_correction';
   marks: number;
   feedback: string;
   isLate: boolean;
@@ -37,7 +38,7 @@ export interface Submission {
 
 export interface ReviewData {
   marks: number;
-  status: 'graded' | 'late';
+  status: 'pending' | 'reviewed' | 'needs_correction';
   feedback: string;
 }
 
@@ -55,9 +56,10 @@ export interface Analytics {
   totalSubmissions: number;
   averageMarks: number;
   submissionStatus: {
-    reviewed: number;
     pending: number;
+    reviewed: number;
     needs_correction: number;
+    late: number;
   };
   lateSubmissions: number;
   submissionsByDate: {

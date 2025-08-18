@@ -16,10 +16,28 @@ export const useUniversitySessionManagement = (initialFilters = { status: 'all',
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  const { data: sessions, isLoading, error } = useQuery({
-    queryKey: ['universitySessions', { status: filters.status, instructor: filters.instructor, search: debouncedSearchTerm }],
-    queryFn: () => universitySessionService.getSessions({ status: filters.status, instructor: filters.instructor, search: debouncedSearchTerm })
+  const getBackendStatus = (frontendStatus: string): string => {
+    switch (frontendStatus) {
+      case 'upcoming':
+        return 'Scheduled';
+      case 'live':
+        return 'Ongoing';
+      case 'ended':
+        return 'Ended';
+      default:
+        return frontendStatus;
+    }
+  };
+
+  const backendStatus = getBackendStatus(filters.status);
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['universitySessions', { status: backendStatus, instructor: filters.instructor, search: debouncedSearchTerm }],
+    queryFn: () => universitySessionService.getSessions({ status: backendStatus, instructor: filters.instructor, search: debouncedSearchTerm })
   });
+
+  const sessions = data?.sessions || [];
+  const watchedCount = data?.watchedCount || 0;
 
   const joinSessionMutation = useMutation({
     mutationFn: ({ sessionId, userId }: { sessionId: string, userId: string }) => universitySessionService.joinSession(sessionId, userId),
@@ -38,7 +56,8 @@ export const useUniversitySessionManagement = (initialFilters = { status: 'all',
   }, [joinSessionMutation]);
 
   return {
-    sessions: sessions || [],
+    sessions,
+    watchedCount,
     isLoading,
     error,
     selectedSession,

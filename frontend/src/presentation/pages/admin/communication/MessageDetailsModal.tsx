@@ -110,13 +110,17 @@ const MessageDetailsModal: React.FC<MessageDetailsModalProps> = ({
                   </div>
                   <p className="text-white font-semibold">
                     {messageType === 'inbox'
-                      ? message.sender.name
-                      : message.recipients[0]?.name || 'Multiple Recipients'}
+                      ? message?.sender?.name
+                      : Array.isArray(message?.recipients)
+                        ? message?.recipients.map(r => r?.name).join(', ')
+                        : message?.recipients || 'Multiple Recipients'}
                   </p>
                   <p className="text-purple-200">
                     {messageType === 'inbox'
-                      ? message.sender.email
-                      : message.recipients[0]?.email || `${message.recipientsCount} recipients`}
+                      ? message?.sender?.email
+                      : Array.isArray(message?.recipients)
+                        ? message?.recipients.map(r => r?.email).join(', ')
+                        : message?.recipients || `${message.recipientsCount} recipients`}
                   </p>
                 </div>
                 <div>
@@ -159,13 +163,6 @@ const MessageDetailsModal: React.FC<MessageDetailsModalProps> = ({
                     >
                       <Reply size={18} />
                       <span>Reply</span>
-                    </button>
-                    <button
-                      onClick={onArchive}
-                      className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-gray-500/50 flex items-center space-x-2"
-                    >
-                      <Archive size={18} />
-                      <span>Archive</span>
                     </button>
                   </>
                 )}

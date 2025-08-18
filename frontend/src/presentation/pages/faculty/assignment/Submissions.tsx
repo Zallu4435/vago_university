@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { FaSearch, FaDownload, FaEye, FaCheck, FaClock, FaExclamationTriangle, FaUsers, FaFileAlt, FaCode, FaCalculator, FaFlask, FaLanguage, FaHistory, FaGlobe, FaBook } from 'react-icons/fa';
 import ReviewModal from './ReviewModal';
 import { Assignment, Submission } from './types/index';
 import { assignmentService } from './services/assignmentService';
 
-// Helper function to extract file information from different file types
 const extractFileInfo = (file: string | { fileName: string; fileUrl: string; fileSize: number }) => {
   if (typeof file === 'string') {
     const urlParts = file.split('/');
@@ -34,9 +33,9 @@ const getSubjectIcon = (subject: string) => {
 interface SubmissionsProps {
   assignment: Assignment;
   submissions: Submission[];
-  onReview: (submissionId: string, reviewData: { 
-    marks: number; 
-    feedback: string; 
+  onReview: (submissionId: string, reviewData: {
+    marks: number;
+    feedback: string;
     status: 'reviewed' | 'pending' | 'needs_correction';
     isLate: boolean;
   }) => void;
@@ -46,28 +45,61 @@ interface SubmissionsProps {
   isReviewing?: boolean;
 }
 
-export default function Submissions({ 
-  assignment, 
-  submissions, 
-  onReview, 
+export default function Submissions({
+  assignment,
+  onReview,
   setShowReviewModal,
   isReviewing
 }: SubmissionsProps) {
-  console.log(submissions, 'submissions');
+  console.log('Submissions assignment prop:', assignment);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'reviewed' | 'late' | 'needs_correction'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500); 
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
+
+  const fetchSubmissions = useCallback(async () => {
+    if (!assignment?.id) return;
+    
+    setIsLoading(true);
+    try {
+      const data = await assignmentService.getSubmissions(assignment.id!, {
+        search: debouncedSearchTerm,
+        status: filterStatus !== 'all' ? filterStatus : undefined,
+      });
+      setSubmissions((data?.submissions) || []);
+    } catch (error) {
+      setSubmissions([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [assignment?.id, debouncedSearchTerm, filterStatus]);
+
+  useEffect(() => {
+    fetchSubmissions();
+  }, [fetchSubmissions]);
 
   const handleReview = (submission: Submission) => {
     setSelectedSubmission(submission);
     setShowReviewModal(true);
   };
 
-  const handleReviewSubmit = async (submissionId: string, reviewData: { 
-    marks: number; 
-    feedback: string; 
-    status: 'reviewed' | 'pending' | 'needs_correction';
+  const handleReviewSubmit = async (submissionId: string, reviewData: {
+    marks: number;
+    feedback: string;
+    status: 'pending' | 'reviewed' | 'needs_correction';
     isLate: boolean;
   }) => {
     await onReview(submissionId, reviewData);
@@ -81,9 +113,9 @@ export default function Submissions({
   };
 
 
-  const getStatusConfig = (status: 'submitted' | 'graded' | 'late') => {
+  const getStatusConfig = (status: 'pending' | 'reviewed' | 'late' | 'needs_correction') => {
     switch (status) {
-      case 'graded':
+      case 'reviewed':
         return {
           color: 'from-green-500 to-emerald-600',
           bg: 'bg-green-50',
@@ -91,7 +123,7 @@ export default function Submissions({
           border: 'border-green-200',
           icon: <FaCheck size={14} />
         };
-      case 'submitted':
+      case 'pending':
         return {
           color: 'from-yellow-500 to-orange-600',
           bg: 'bg-yellow-50',
@@ -107,6 +139,14 @@ export default function Submissions({
           border: 'border-red-200',
           icon: <FaExclamationTriangle size={14} />
         };
+      case 'needs_correction':
+        return {
+          color: 'from-orange-500 to-red-600',
+          bg: 'bg-orange-50',
+          text: 'text-orange-700',
+          border: 'border-orange-200',
+          icon: <FaExclamationTriangle size={14} />
+        };
       default:
         return {
           color: 'from-gray-500 to-slate-600',
@@ -118,22 +158,15 @@ export default function Submissions({
     }
   };
 
-  const filteredSubmissions = submissions?.filter(submission => {
-    const matchesSearch = submission.studentName?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
-                        submission.studentId?.toLowerCase().includes(searchTerm?.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || submission.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  });
-
   const handleDownloadSubmission = async (fileUrl: string, fileName: string) => {
     try {
       console.log('=== FACULTY SUBMISSION DOWNLOAD STARTED ===');
       console.log('📁 File details:', { fileUrl, fileName });
-      
+
       let actualFileName = fileName;
       if (fileUrl.includes('.png') || fileUrl.includes('.jpg') || fileUrl.includes('.jpeg')) {
         const urlParts = fileUrl.split('.');
-        const actualExtension = urlParts[urlParts.length - 1].split('?')[0]; 
+        const actualExtension = urlParts[urlParts.length - 1].split('?')[0];
         if (fileName.toLowerCase().endsWith('.pdf')) {
           actualFileName = fileName.replace('.pdf', `.${actualExtension}`);
         }
@@ -141,7 +174,7 @@ export default function Submissions({
 
       // Always call backend for download
       await assignmentService.downloadSubmissionFile(fileUrl, actualFileName);
-      
+
       console.log('✅ Faculty submission download triggered successfully');
       console.log('=== FACULTY SUBMISSION DOWNLOAD COMPLETED ===');
     } catch (error) {
@@ -157,7 +190,7 @@ export default function Submissions({
       <div className="relative">
         <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-pink-500/10"></div>
-          
+
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
@@ -172,8 +205,6 @@ export default function Submissions({
                   <p className="text-gray-500 text-sm">Max Marks: {assignment.maxMarks}</p>
                 </div>
               </div>
-              
-              {/* No bulk download button */}
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -194,7 +225,7 @@ export default function Submissions({
                   </div>
                   <p className="text-sm font-medium text-gray-600">{stat.label}</p>
                   <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                       className={`h-full bg-gradient-to-r ${stat.color} rounded-full transition-all duration-1000`}
                       style={{ width: `${Math.min((stat.value / assignment.totalSubmissions) * 100, 100)}%` }}
                     ></div>
@@ -227,12 +258,13 @@ export default function Submissions({
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="relative px-6 py-4 bg-white border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-pink-300 text-gray-700 font-medium cursor-pointer hover:border-pink-200 transition-all"
+              onChange={(e) => setFilterStatus(e.target.value as 'all' | 'pending' | 'reviewed' | 'late' | 'needs_correction')}
+              className="relative px-4 py-3 bg-white rounded-2xl border-2 border-gray-100 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-700 font-medium shadow-lg hover:shadow-xl transition-all"
             >
-              <option value="all">All Status</option>
+              <option value="all">All Statuses</option>
               <option value="pending">Pending</option>
               <option value="reviewed">Reviewed</option>
+              <option value="late">Late</option>
               <option value="needs_correction">Needs Correction</option>
             </select>
           </div>
@@ -240,21 +272,19 @@ export default function Submissions({
           <div className="flex bg-gray-100 rounded-2xl p-1">
             <button
               onClick={() => setViewMode('grid')}
-              className={`px-4 py-2 rounded-xl transition-all font-medium ${
-                viewMode === 'grid' 
-                  ? 'bg-white shadow-md text-pink-600' 
+              className={`px-4 py-2 rounded-xl transition-all font-medium ${viewMode === 'grid'
+                  ? 'bg-white shadow-md text-pink-600'
                   : 'text-gray-600 hover:text-pink-600'
-              }`}
+                }`}
             >
               Grid
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`px-4 py-2 rounded-xl transition-all font-medium ${
-                viewMode === 'table' 
-                  ? 'bg-white shadow-md text-pink-600' 
+              className={`px-4 py-2 rounded-xl transition-all font-medium ${viewMode === 'table'
+                  ? 'bg-white shadow-md text-pink-600'
                   : 'text-gray-600 hover:text-pink-600'
-              }`}
+                }`}
             >
               Table
             </button>
@@ -264,25 +294,42 @@ export default function Submissions({
         {searchTerm && (
           <div className="mt-4 text-center">
             <span className="inline-flex items-center px-4 py-2 bg-pink-50 text-pink-700 rounded-full text-sm font-medium border border-pink-200">
-              {filteredSubmissions.length} result{filteredSubmissions.length !== 1 ? 's' : ''} found
+              {submissions.length} result{submissions.length !== 1 ? 's' : ''} found
             </span>
           </div>
         )}
       </div>
 
       {/* Enhanced Submissions Display */}
+      {isLoading && (
+        <div className="text-center py-8 animate-fadeIn">
+          <span className="text-pink-600 font-medium">Loading submissions...</span>
+        </div>
+      )}
+      {submissions.length === 0 && !isLoading && (
+        <div className="text-center py-16 animate-fadeIn">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-pink-50 rounded-full mb-4">
+            <FaSearch size={32} className="text-gray-400" />
+          </div>
+          <h3 className="text-2xl font-semibold text-pink-800 mb-2">No Submissions Found</h3>
+          <p className="text-pink-500 max-w-md mx-auto">
+            Try adjusting your search or filter criteria to find the submissions you're looking for.
+          </p>
+        </div>
+      )}
+
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {filteredSubmissions.map((submission, index) => {
+          {submissions.map((submission, index) => {
             const statusConfig = getStatusConfig(submission.status);
             return (
-              <div 
-                key={submission.id} 
+              <div
+                key={submission.id}
                 className="group relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl border border-pink-100 p-8 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 animate-fadeInUp"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-xl"></div>
-                
+
                 <div className="relative z-10">
                   <div className="flex items-start justify-between mb-6">
                     <div className="flex items-center space-x-3">
@@ -291,7 +338,7 @@ export default function Submissions({
                         {submission.studentName.split(' ').map(n => n[0]).join('')}
                       </div>
                     </div>
-                    
+
                     <div className={`px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r ${statusConfig.color} shadow-lg flex items-center space-x-2`}>
                       {statusConfig.icon}
                       <span className="capitalize">{submission.status.replace('_', ' ')}</span>
@@ -303,14 +350,14 @@ export default function Submissions({
                       {submission.studentName}
                     </h3>
                     <p className="text-pink-600 font-medium text-sm mb-2">{submission.studentId}</p>
-                    
+
                     <div className="flex items-center space-x-3">
                       <span className="text-sm text-gray-600">
-                        {new Date(submission.submittedDate).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric', 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
+                        {new Date(submission.submittedDate).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
                         })}
                       </span>
                       {submission.isLate && (
@@ -329,9 +376,9 @@ export default function Submissions({
                       </div>
                       <div className="flex-1 min-w-0">
                         {submission.files && submission.files.length > 0 ? (
-                          <a 
-                            href={extractFileInfo(submission.files[0]).fileUrl} 
-                            target="_blank" 
+                          <a
+                            href={extractFileInfo(submission.files[0]).fileUrl}
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="text-pink-600 hover:text-pink-800 font-medium truncate block"
                           >
@@ -346,13 +393,13 @@ export default function Submissions({
                           console.log('Download button clicked for submission:', submission.id);
                           console.log('Submission files:', submission.files);
                           console.log('Submission fileName:', submission.fileName);
-                          
+
                           if (!submission.files || submission.files.length === 0) {
                             console.error('❌ No files found in submission');
                             alert('No files found in this submission');
                             return;
                           }
-                          
+
                           const fileInfo = extractFileInfo(submission.files[0]);
                           console.log('Calling handleDownloadSubmission with:', fileInfo);
                           handleDownloadSubmission(fileInfo.fileUrl, fileInfo.fileName);
@@ -392,7 +439,7 @@ export default function Submissions({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredSubmissions.map((submission, index) => {
+                {submissions.map((submission, index) => {
                   const statusConfig = getStatusConfig(submission.status);
                   return (
                     <tr key={submission.id} className="hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all animate-fadeInUp" style={{ animationDelay: `${index * 0.05}s` }}>
@@ -411,16 +458,16 @@ export default function Submissions({
                       <td className="px-8 py-6">
                         <div>
                           <p className="text-sm font-medium text-gray-900">
-                            {new Date(submission.submittedDate).toLocaleDateString('en-US', { 
-                              month: 'short', 
+                            {new Date(submission.submittedDate).toLocaleDateString('en-US', {
+                              month: 'short',
                               day: 'numeric',
                               year: 'numeric'
                             })}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {new Date(submission.submittedDate).toLocaleTimeString('en-US', { 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
+                            {new Date(submission.submittedDate).toLocaleTimeString('en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit'
                             })}
                           </p>
                           {submission.isLate && (
@@ -451,13 +498,13 @@ export default function Submissions({
                               console.log('🔍 Download button clicked for submission:', submission.id);
                               console.log('📁 Submission files:', submission.files);
                               console.log('📄 Submission fileName:', submission.fileName);
-                              
+
                               if (!submission.files || submission.files.length === 0) {
                                 console.error('❌ No files found in submission');
                                 alert('No files found in this submission');
                                 return;
                               }
-                              
+
                               const fileInfo = extractFileInfo(submission.files[0]);
                               console.log('Calling handleDownloadSubmission with:', fileInfo);
                               handleDownloadSubmission(fileInfo.fileUrl, fileInfo.fileName);
@@ -478,19 +525,6 @@ export default function Submissions({
         </div>
       )}
 
-      {/* Empty State */}
-      {filteredSubmissions.length === 0 && (
-        <div className="text-center py-16 animate-fadeIn">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-pink-50 rounded-full mb-4">
-            <FaSearch size={32} className="text-gray-400" />
-          </div>
-          <h3 className="text-2xl font-semibold text-pink-800 mb-2">No Submissions Found</h3>
-          <p className="text-pink-500 max-w-md mx-auto">
-            Try adjusting your search or filter criteria to find the submissions you're looking for.
-          </p>
-        </div>
-      )}
-
       {selectedSubmission && ReactDOM.createPortal(
         <ReviewModal
           submission={{
@@ -498,11 +532,11 @@ export default function Submissions({
             studentName: selectedSubmission.studentName,
             studentId: selectedSubmission.studentId,
             submittedDate: selectedSubmission.submittedDate,
-            status: selectedSubmission.status === 'graded' ? 'reviewed' : selectedSubmission.status === 'submitted' ? 'pending' : 'needs_correction',
+            status: selectedSubmission.status === 'late' ? 'pending' : selectedSubmission.status,
             marks: selectedSubmission.marks ?? 0,
             feedback: selectedSubmission.feedback ?? '',
             isLate: selectedSubmission.isLate,
-            fileName: selectedSubmission.files && selectedSubmission.files.length > 0 
+            fileName: selectedSubmission.files && selectedSubmission.files.length > 0
               ? extractFileInfo(selectedSubmission.files[0]).fileName
               : 'No file',
             fileSize: 'Unknown',

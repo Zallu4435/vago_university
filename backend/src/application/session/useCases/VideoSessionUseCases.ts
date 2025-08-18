@@ -1,6 +1,6 @@
 import { ISessionRepository } from '../repositories/ISessionRepository';
 import { CreateVideoSessionRequestDTO, JoinVideoSessionRequestDTO, UpdateVideoSessionRequestDTO, DeleteVideoSessionRequestDTO } from '../../../domain/session/dtos/VideoSessionRequestDTOs';
-import { CreateVideoSessionResponseDTO, JoinVideoSessionResponseDTO, VideoSessionResponseDTO, UpdateVideoSessionResponseDTO, DeleteVideoSessionResponseDTO, UserSessionResponseDTO } from '../../../domain/session/dtos/VideoSessionResponseDTOs';
+import { CreateVideoSessionResponseDTO, JoinVideoSessionResponseDTO, VideoSessionResponseDTO, UpdateVideoSessionResponseDTO, UpdateVideoSessionStatusResponseDTO, DeleteVideoSessionResponseDTO, UserSessionResponseDTO, SessionListResponseDTO } from '../../../domain/session/dtos/VideoSessionResponseDTOs';
 import { VideoSession } from '../../../domain/session/entities/VideoSession';
 import { VideoSessionStatus } from '../../../domain/session/enums/VideoSessionStatus';
 import { config } from '../../../config/config';
@@ -26,15 +26,15 @@ export interface IDeleteVideoSessionUseCase {
 }
 
 export interface IGetAllVideoSessionsUseCase {
-    execute(params: { search?: string; status?: string; instructor?: string; course?: string }): Promise<VideoSessionResponseDTO[]>;
+    execute(params: { search?: string; status?: string; instructor?: string; course?: string }): Promise<SessionListResponseDTO[]>;
 }
 
 export interface IGetUserSessionsUseCase {
-    execute(params: { search?: string; status?: string; instructor?: string; course?: string; userId?: string }): Promise<UserSessionResponseDTO[]>;
+    execute(params: { search?: string; status?: string; instructor?: string; course?: string; userId?: string }): Promise<{ sessions: SessionListResponseDTO[], watchedCount: number }>;
 }
 
 export interface IUpdateVideoSessionStatusUseCase {
-    execute(sessionId: string, status: VideoSessionStatus): Promise<UpdateVideoSessionResponseDTO | null>;
+    execute(sessionId: string, status: VideoSessionStatus): Promise<UpdateVideoSessionStatusResponseDTO | null>;
 }
 
 export interface IGetSessionAttendanceUseCase {
@@ -69,32 +69,28 @@ export class CreateVideoSessionUseCase implements ICreateVideoSessionUseCase {
             throw new Error('hostId is required');
         }
 
-        const session = new VideoSession(
-            '',
-            params.title,
-            params.hostId,
-            [params.hostId],
-            startTime,
-            null,
-            VideoSessionStatus.Scheduled,
-            params.description,
-            params.instructor,
-            params.course,
-            params.duration,
-            params.maxAttendees,
-            params.tags,
-            params.difficulty,
-            params.isLive,
-            params.hasRecording,
-            params.recordingUrl,
-            params.attendees,
-            params.attendeeList
-        );
-        const created = await this.sessionRepository.create(session);
-        if (created && created.id) {
-            const joinUrl = `${config.backendUrl}/api/video-sessions/${created.id}/join`;
-            created.joinUrl = joinUrl;
-        }
+        const sessionData = {
+            title: params.title,
+            hostId: params.hostId,
+            participants: [params.hostId],
+            startTime: startTime,
+            endTime: null,
+            status: VideoSessionStatus.Scheduled,
+            description: params.description,
+            instructor: params.instructor,
+            course: params.course,
+            duration: params.duration,
+            maxAttendees: params.maxAttendees,
+            tags: params.tags,
+            difficulty: params.difficulty,
+            isLive: params.isLive,
+            hasRecording: params.hasRecording,
+            recordingUrl: params.recordingUrl,
+            attendees: params.attendees,
+            attendeeList: params.attendeeList
+        };
+
+        const created = await this.sessionRepository.create(sessionData);
         return { session: created as VideoSessionResponseDTO };
     }
 }
@@ -102,8 +98,24 @@ export class CreateVideoSessionUseCase implements ICreateVideoSessionUseCase {
 export class JoinVideoSessionUseCase {
     constructor(private sessionRepository: ISessionRepository) {}
     async execute(params: JoinVideoSessionRequestDTO): Promise<JoinVideoSessionResponseDTO> {
-        const session = await this.sessionRepository.join(params.sessionId, params.participantId);
-        return { session: session as VideoSessionResponseDTO };
+        // First get the session to check its status
+        const session = await this.sessionRepository.getById(params.sessionId);
+        if (!session) {
+            throw new Error('Session not found');
+        }
+        
+        // Check if session is ended or cancelled
+        if (session.status === VideoSessionStatus.Ended || session.status === VideoSessionStatus.Cancelled) {
+            throw new Error('Cannot join session: Session has ended or been cancelled');
+        }
+        
+        // Only allow joining if session is live (ongoing)
+        if (session.status !== VideoSessionStatus.Ongoing) {
+            throw new Error('Cannot join session: Session is not live');
+        }
+        
+        const joinedSession = await this.sessionRepository.join(params.sessionId, params.participantId);
+        return { session: joinedSession as VideoSessionResponseDTO };
     }
 }
 
@@ -137,22 +149,6 @@ export class UpdateVideoSessionUseCase {
             updateData.endTime = new Date(updateData.endTime);
         }
         const session = await this.sessionRepository.update(params.sessionId, updateData as Partial<VideoSession>);
-
-        if (session && !session.joinUrl) {
-            let sessionId = session.id;
-            if (!sessionId && session._id) {
-                sessionId = session._id.toString();
-            }
-            if (sessionId) {
-                const joinUrl = `${config.backendUrl}/api/video-sessions/${sessionId}/join`;
-                session.joinUrl = joinUrl;
-                await this.sessionRepository.update(sessionId, { joinUrl });
-            } else {
-                console.log('Session is missing both id and _id:', session);
-            }
-        } else {
-            console.log('Session already has joinUrl:', session?.joinUrl);
-        }
         return session ? { session: session as VideoSessionResponseDTO } : null;
     }
 }
@@ -167,50 +163,102 @@ export class DeleteVideoSessionUseCase {
 
 export class GetAllVideoSessionsUseCase {
     constructor(private sessionRepository: ISessionRepository) {}
-    async execute(params: { search?: string; status?: string; instructor?: string; course?: string } = {}): Promise<VideoSessionResponseDTO[]> {
-
-        console.log(params," sodsohdsd")
+    async execute(params: { search?: string; status?: string; instructor?: string; course?: string } = {}): Promise<SessionListResponseDTO[]> {
         const sessions = await this.sessionRepository.getAll(params);
-        return sessions as VideoSessionResponseDTO[];
+        
+        // Map to minimal DTO for table display
+        return sessions.map(session => ({
+            id: session._id || session.id,
+            title: session.title,
+            instructor: session.instructor,
+            course: session.course,
+            status: session.status,
+            attendees: session.attendees,
+            maxAttendees: session.maxAttendees,
+            startTime: session.startTime
+        })) as SessionListResponseDTO[];
     }
 }
 
 export class GetUserSessionsUseCase {
     constructor(private sessionRepository: ISessionRepository) {}
-    async execute(params: { search?: string; status?: string; instructor?: string; course?: string; userId?: string } = {}): Promise<UserSessionResponseDTO[]> {
+    async execute(params: { search?: string; status?: string; instructor?: string; course?: string; userId?: string } = {}): Promise<{ sessions: SessionListResponseDTO[], watchedCount: number }> {
         const sessions = await this.sessionRepository.getUserSessions(params);
-        
-        // Map to lightweight user DTO with enrollment status
-        return sessions.map(session => {
-            const isEnrolled = params.userId ? session.participants.includes(params.userId) : false;
-            const userAttendance = params.userId ? session.attendance?.find(a => a.userId === params.userId) : null;
-            
-            return {
-                id: session._id || session.id,
-                title: session.title,
-                status: session.status,
-                description: session.description,
-                instructor: session.instructor,
-                course: session.course,
-                duration: session.duration,
-                tags: session.tags,
-                difficulty: session.difficulty,
-                hasRecording: session.hasRecording,
-                startTime: session.startTime,
-                joinUrl: session.joinUrl,
-                isLive: session.isLive,
-                isEnrolled,
-                userAttendanceStatus: userAttendance?.status || 'not-attended'
-            };
-        }) as UserSessionResponseDTO[];
+        const userId = params.userId;
+        // Count sessions where userId is in participants or attendance
+        const watchedCount = sessions.filter(session =>
+            (Array.isArray(session.participants) && session.participants.includes(userId)) ||
+            (Array.isArray(session.attendance) && session.attendance.some(a => a.userId === userId))
+        ).length;
+
+        const sessionList = sessions.map(session => ({
+            id: session._id || session.id,
+            title: session.title,
+            instructor: session.instructor,
+            course: session.course,
+            status: session.status,
+            attendees: session.attendees,
+            maxAttendees: session.maxAttendees,
+            startTime: session.startTime,
+            ...(session.status === 'Ongoing' && session.joinUrl ? { joinUrl: session.joinUrl } : {})
+        })) as SessionListResponseDTO[];
+
+        return { sessions: sessionList, watchedCount };
     }
 }
 
 export class UpdateVideoSessionStatusUseCase {
     constructor(private sessionRepository: ISessionRepository) {}
-    async execute(sessionId: string, status: VideoSessionStatus): Promise<UpdateVideoSessionResponseDTO | null> {
+    async execute(sessionId: string, status: VideoSessionStatus): Promise<UpdateVideoSessionStatusResponseDTO | null> {
         const session = await this.sessionRepository.update(sessionId, { status });
-        return session ? { session: session as VideoSessionResponseDTO } : null;
+        
+        if (!session) {
+            return null;
+        }
+        
+        // Generate join URL when session becomes live
+        if (status === VideoSessionStatus.Ongoing && !session.joinUrl) {
+            let sessionIdStr = session.id;
+            if (!sessionIdStr && session._id) {
+                sessionIdStr = session._id.toString();
+            }
+            if (sessionIdStr) {
+                const joinUrl = `${config.frontendUrl}/faculty/video-conference/${sessionIdStr}`;
+                session.joinUrl = joinUrl;
+                await this.sessionRepository.update(sessionIdStr, { joinUrl });
+            }
+        }
+        
+        // Remove join URL when session ends
+        if (status === VideoSessionStatus.Ended && session.joinUrl) {
+            session.joinUrl = undefined;
+            await this.sessionRepository.update(sessionId, { joinUrl: undefined });
+        }
+        
+        // Determine appropriate message based on status
+        let message = '';
+        switch (status) {
+            case VideoSessionStatus.Ongoing:
+                message = 'Session started successfully';
+                break;
+            case VideoSessionStatus.Ended:
+                message = 'Session ended successfully';
+                break;
+            case VideoSessionStatus.Scheduled:
+                message = 'Session scheduled successfully';
+                break;
+            case VideoSessionStatus.Cancelled:
+                message = 'Session cancelled successfully';
+                break;
+            default:
+                message = 'Session status updated successfully';
+        }
+        
+        return {
+            success: true,
+            message,
+            session: session as VideoSessionResponseDTO
+        };
     }
 }
 

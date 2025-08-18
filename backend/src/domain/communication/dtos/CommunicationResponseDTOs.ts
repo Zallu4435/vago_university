@@ -31,7 +31,7 @@ export interface GetInboxMessagesResponseDTO {
 }
 
 export interface GetSentMessagesResponseDTO {
-  messages: MessageSummaryDTO[];
+  messages: AdminSentMessageResponseDTO[];
   pagination: {
     total: number;
     page: number;
@@ -46,6 +46,7 @@ export interface SendMessageResponseDTO {
   content: string;
   sender: UserInfo;
   recipients: UserInfo[];
+  recipientCount: number;
   isBroadcast: boolean;
   attachments?: Array<{
     filename: string;
@@ -73,6 +74,24 @@ export interface GetMessageDetailsResponseDTO {
   content: string;
   sender: UserInfo;
   recipients: UserInfo[];
+  recipientCount: number;
+  isBroadcast: boolean;
+  attachments?: Array<{
+    filename: string;
+    path: string;
+    contentType: string;
+    size: number;
+  }>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminSentMessageResponseDTO {
+  _id: string;
+  subject: string;
+  content: string;
+  recipients: string; // String for admin sent messages (e.g., "All Students", "Multiple Students", "email@example.com")
+  recipientCount: number;
   isBroadcast: boolean;
   attachments?: Array<{
     filename: string;
@@ -88,13 +107,12 @@ export interface GetAllAdminsResponseDTO {
   admins: UserInfo[];
 }
 
-export interface GetUserGroupsResponseDTO {
-  groups: Array<{
-    value: string;
-    label: string;
-  }>;
-}
+
 
 export interface FetchUsersResponseDTO {
-  users: UserInfo[];
+  users: Array<{
+    id: string;
+    email: string;
+    name: string;
+  }>;
 } 

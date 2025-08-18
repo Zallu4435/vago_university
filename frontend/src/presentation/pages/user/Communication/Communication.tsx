@@ -33,7 +33,7 @@ export default function Communication() {
               </div>
             </div>
             <div className="mt-2 text-sm flex flex-wrap gap-x-4 gap-y-1">
-              <span className={`${styles.textSecondary}`}>3 Unread Messages</span>
+              <span className={`${styles.textSecondary}`}>Inbox Messages</span>
               <span className={`${styles.textSecondary}`}>|</span>
               <span className={`${styles.textSecondary}`}>Last Checked: April 29, 2025</span>
               <span className={`${styles.textSecondary}`}>|</span>

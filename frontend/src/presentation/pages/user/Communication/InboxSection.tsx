@@ -8,6 +8,14 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../../appStore/store';
 import { Message } from '../../../../domain/types/user/communication';
 
+type Recipient = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+};
+
 export default function InboxSection() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
@@ -17,24 +25,12 @@ export default function InboxSection() {
   const { styles, theme } = usePreferences();
   const user = useSelector((state: RootState) => state.auth.user);
 
-  console.log(messages, "messages ")
-
   const handleMessageClick = (message: Message) => {
-    console.log('=== handleMessageClick DEBUG ===');
-    console.log('Message clicked:', message);
-    console.log('Message recipients:', message.recipients);
-    
-    // Get current user ID from Redux
     const currentUserId = user?.id;
-    console.log('Current user ID:', currentUserId);
-    
-    // Find the current user's recipient status for this message
+
     const currentUserRecipient = message.recipients.find(r => r.id === currentUserId);
-    console.log('Current user recipient:', currentUserRecipient);
     
     const isCurrentUserUnread = currentUserRecipient?.status === 'unread';
-    console.log('Is current user unread:', isCurrentUserUnread);
-    console.log('================================');
     
     setSelectedMessage(message);
     if (isCurrentUserUnread) {
@@ -95,24 +91,21 @@ export default function InboxSection() {
         </div>
       </div>
 
-      {/* Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Message List */}
         <div className={`lg:col-span-1 relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
           <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
           <div className="relative z-10 divide-y divide-amber-100/50">
-            {messages.filter(msg => msg.id).map((message) => {
+            {messages.filter(msg => msg?.id).map((message) => {
               const typedMessage = message as Message;
-              // Get current user ID from Redux
               const currentUserId = user?.id;
-              const currentUserRecipient = message.recipients.find(r => r.id === currentUserId);
+              const currentUserRecipient = message?.recipients.find((r: Recipient) => r?.id === currentUserId);
               const isCurrentUserUnread = currentUserRecipient?.status === 'unread';
               
               return (
                 <div
-                  key={message.id}
+                  key={message?.id}
                   className={`p-4 cursor-pointer group/item hover:bg-amber-50/50 transition-all duration-300 ${
-                    selectedMessage?.id === message.id ? 'bg-orange-50/70' : ''
+                    selectedMessage?.id === message?.id ? 'bg-orange-50/70' : ''
                   }`}
                   onClick={() => handleMessageClick(typedMessage)}
                 >
@@ -122,9 +115,9 @@ export default function InboxSection() {
                         {isCurrentUserUnread && (
                           <span className={`w-2 h-2 rounded-full ${styles.status.warning}`}></span>
                         )}
-                        <h3 className={`font-medium ${styles.textPrimary} text-sm sm:text-base truncate`}>{message.subject}</h3>
+                        <h3 className={`font-medium ${styles.textPrimary} text-sm sm:text-base truncate`}>{message?.subject}</h3>
                       </div>
-                      <p className={`text-sm ${styles.textSecondary} truncate mt-1`}>{message.content}</p>
+                      <p className={`text-sm ${styles.textSecondary} truncate mt-1`}>{message?.content}</p>
                     </div>
                     <button
                       onClick={(e) => {
@@ -137,8 +130,8 @@ export default function InboxSection() {
                     </button>
                   </div>
                   <div className="mt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs">
-                    <span className={`truncate ${styles.textSecondary}`}>From: {message.sender.email}</span>
-                    <span className={`mt-1 sm:mt-0 ${styles.textSecondary}`}>{new Date(message.createdAt).toLocaleDateString()}</span>
+                    <span className={`truncate ${styles.textSecondary}`}>From: {message?.sender?.email}</span>
+                    <span className={`mt-1 sm:mt-0 ${styles.textSecondary}`}>{new Date(message?.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               );

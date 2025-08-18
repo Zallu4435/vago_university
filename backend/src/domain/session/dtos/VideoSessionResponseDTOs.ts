@@ -1,5 +1,18 @@
 import { VideoSessionStatus } from '../enums/VideoSessionStatus';
 
+// Minimal DTO for session list (table display only)
+export interface SessionListResponseDTO {
+    id: string;
+    title: string;
+    instructor?: string;
+    course?: string;
+    status: VideoSessionStatus;
+    attendees?: number;
+    maxAttendees?: number;
+    startTime: Date;
+    joinUrl?: string; // Add this line
+}
+
 export interface VideoSessionResponseDTO {
     id: string;
     title: string;
@@ -51,6 +64,12 @@ export interface JoinVideoSessionResponseDTO {
 }
 
 export interface UpdateVideoSessionResponseDTO {
+    session: VideoSessionResponseDTO;
+}
+
+export interface UpdateVideoSessionStatusResponseDTO {
+    success: boolean;
+    message: string;
     session: VideoSessionResponseDTO;
 }
 

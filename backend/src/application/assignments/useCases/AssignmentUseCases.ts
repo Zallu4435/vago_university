@@ -9,8 +9,6 @@ import {
   GetSubmissionByIdRequestDTO,
   ReviewSubmissionRequestDTO,
   DownloadSubmissionRequestDTO,
-  DownloadFileRequestDTO,
-  DownloadSubmissionFileRequestDTO,
 } from '../../../domain/assignments/dtos/AssignmentRequestDTOs';
 import {
   GetAssignmentsResponseDTO,
@@ -62,17 +60,7 @@ export interface IReviewSubmissionUseCase {
   execute(params: ReviewSubmissionRequestDTO): Promise<ResponseDTO<ReviewSubmissionResponseDTO>>;
 }
 
-export interface IDownloadSubmissionUseCase {
-  execute(params: DownloadSubmissionRequestDTO): Promise<ResponseDTO<Buffer>>;
-}
 
-export interface IDownloadFileUseCase {
-  execute(params: DownloadFileRequestDTO): Promise<ResponseDTO<{ buffer: Buffer; contentType: string; fileName: string }>>;
-}
-
-export interface IDownloadSubmissionFileUseCase {
-  execute(params: DownloadSubmissionFileRequestDTO): Promise<ResponseDTO<{ buffer: Buffer; contentType: string; fileName: string }>>;
-}
 
 export interface IGetAnalyticsUseCase {
   execute(): Promise<ResponseDTO<AnalyticsResponseDTO>>;
@@ -88,21 +76,36 @@ export class GetAssignmentsUseCase implements IGetAssignmentsUseCase {
     if (params.limit && (isNaN(params.limit) || params.limit < 1)) {
       return { data: { error: AssignmentErrorType.InvalidPageOrLimit }, success: false };
     }
+
     const { assignments, total, page, limit } = await this.assignmentRepository.getAssignments(params.subject, params.status, params.page, params.limit, params.search);
-    const assignmentDTOs = assignments.map(assignment => ({
-      _id: assignment._id.toString(),
-      title: assignment.title,
-      subject: assignment.subject,
-      dueDate: assignment.dueDate,
-      maxMarks: assignment.maxMarks,
-      description: assignment.description,
-      files: assignment.files,
-      createdAt: assignment.createdAt,
-      updatedAt: assignment.updatedAt,
-      status: assignment.status,
-      totalSubmissions: assignment.totalSubmissions,
-      averageMarks: assignment.averageMarks
-    }));
+
+    const assignmentIds = assignments.map(assignment => assignment._id.toString());
+    const submissionsStats = await this.assignmentRepository.getSubmissionsStats(assignmentIds);
+    
+    const statsMap = new Map(
+      submissionsStats.map(stat => [
+        stat._id,
+        {
+          totalSubmissions: stat.totalSubmissions,
+          averageMarks: stat.gradedSubmissions > 0 ? stat.totalMarks / stat.gradedSubmissions : 0
+        }
+      ])
+    );
+
+    const assignmentDTOs = assignments.map(assignment => {
+      const stats = statsMap.get(assignment._id.toString()) || { totalSubmissions: 0, averageMarks: 0 };
+      return {
+        _id: assignment._id.toString(),
+        title: assignment.title,
+        subject: assignment.subject,
+        dueDate: assignment.dueDate,
+        description: assignment.description,
+        status: assignment.status,
+        totalSubmissions: stats.totalSubmissions,
+        averageMarks: stats.averageMarks
+      };
+    });
+
     return { data: { assignments: assignmentDTOs, total, page, limit }, success: true };
   }
 }
@@ -140,7 +143,6 @@ export class CreateAssignmentUseCase implements ICreateAssignmentUseCase {
   constructor(private assignmentRepository: IAssignmentRepository) { }
 
   async execute(params: CreateAssignmentRequestDTO): Promise<ResponseDTO<CreateAssignmentResponseDTO>> {
-    // Transform the DTO into a complete Assignment with default values
     const assignmentData: IAssignment = {
       title: params.title,
       subject: params.subject,
@@ -148,15 +150,15 @@ export class CreateAssignmentUseCase implements ICreateAssignmentUseCase {
       maxMarks: Number(params.maxMarks),
       dueDate: new Date(params.dueDate),
       files: params.files || [],
-      status: AssignmentStatus.Draft, // Default status
-      totalSubmissions: 0,            // Default value
-      averageMarks: 0,               // Default value
+      status: AssignmentStatus.Draft,
+      totalSubmissions: 0,
+      averageMarks: 0,
       createdAt: new Date(),
       updatedAt: new Date()
     };
 
     const newAssignment = await this.assignmentRepository.createAssignment(assignmentData);
-    
+
     const assignmentObj = {
       _id: newAssignment._id.toString(),
       title: newAssignment.title,
@@ -171,7 +173,7 @@ export class CreateAssignmentUseCase implements ICreateAssignmentUseCase {
       totalSubmissions: newAssignment.totalSubmissions || 0,
       averageMarks: newAssignment.averageMarks || 0
     };
-    
+
     return { data: { assignment: assignmentObj }, success: true };
   }
 }
@@ -187,7 +189,6 @@ export class UpdateAssignmentUseCase implements IUpdateAssignmentUseCase {
       return { data: { error: AssignmentErrorType.InvalidStatus }, success: false };
     }
 
-    // Transform the incoming data to match Assignment structure
     const updateData: Partial<IAssignment> = {
       ...(params.title && { title: params.title }),
       ...(params.subject && { subject: params.subject }),
@@ -244,7 +245,14 @@ export class GetSubmissionsUseCase implements IGetSubmissionsUseCase {
   constructor(private assignmentRepository: IAssignmentRepository) { }
 
   async execute(params: GetSubmissionsRequestDTO): Promise<ResponseDTO<GetSubmissionsResponseDTO>> {
-    const { submissions, total, page, limit } = await this.assignmentRepository.getSubmissions(params.assignmentId, params.page, params.limit);
+    const { submissions, total, page, limit } = await this.assignmentRepository.getSubmissions(
+      params.assignmentId, 
+      params.page || 1, 
+      params.limit || 10,
+      params.search,
+      params.status
+    );
+    
     const mappedSubmissions = submissions.map((submission) => ({
       id: submission._id.toString(),
       assignmentId: submission.assignmentId.toString(),
@@ -257,7 +265,8 @@ export class GetSubmissionsUseCase implements IGetSubmissionsUseCase {
       isLate: submission.isLate,
       files: submission.files
     }));
-    return { data: { submissions: mappedSubmissions, total, page, limit }, success: true };
+    
+    return { data: { submissions: mappedSubmissions, total, page: page || 1, limit: limit || 10 }, success: true };
   }
 }
 
@@ -309,18 +318,6 @@ export class ReviewSubmissionUseCase implements IReviewSubmissionUseCase {
   }
 }
 
-export class DownloadSubmissionUseCase implements IDownloadSubmissionUseCase {
-  constructor(private assignmentRepository: IAssignmentRepository) { }
-
-  async execute(params: DownloadSubmissionRequestDTO): Promise<ResponseDTO<Buffer>> {
-    const submission = await this.assignmentRepository.downloadSubmission(params.assignmentId, params.submissionId);
-    if (!submission) {
-      return { data: { error: 'Submission not found' }, success: false };
-    }
-    return { data: Buffer.from(''), success: true };
-  }
-}
-
 export class GetAnalyticsUseCase implements IGetAnalyticsUseCase {
   constructor(private readonly assignmentRepository: IAssignmentRepository) { }
 
@@ -330,88 +327,3 @@ export class GetAnalyticsUseCase implements IGetAnalyticsUseCase {
   }
 }
 
-export class DownloadFileUseCase implements IDownloadFileUseCase {
-  constructor(private assignmentRepository: IAssignmentRepository) { }
-
-  async execute(params: DownloadFileRequestDTO): Promise<ResponseDTO<{ buffer: Buffer; contentType: string; fileName: string }>> {
-    // Validate input parameters
-    if (!params.fileUrl || typeof params.fileUrl !== 'string') {
-      return { data: { error: 'File URL is required' }, success: false };
-    }
-
-    if (!params.fileName || typeof params.fileName !== 'string') {
-      return { data: { error: 'File name is required' }, success: false };
-    }
-
-    // Clean the file name
-    let cleanFileName = params.fileName.replace(/\s+/g, '_');
-    cleanFileName = cleanFileName.replace(/[^a-zA-Z0-9._-]/g, '');
-    cleanFileName = cleanFileName.replace(/"/g, '');
-
-    try {
-      const fetch = require('node-fetch');
-      const response = await fetch(params.fileUrl);
-
-      if (!response.ok) {
-        return { data: { error: 'Failed to fetch file from URL' }, success: false };
-      }
-
-      const buffer = await response.buffer();
-      const contentType = response.headers.get('content-type') || 'application/octet-stream';
-
-      return { 
-        data: { 
-          buffer, 
-          contentType, 
-          fileName: cleanFileName 
-        }, 
-        success: true 
-      };
-    } catch (error) {
-      return { data: { error: 'Download failed' }, success: false };
-    }
-  }
-}
-
-export class DownloadSubmissionFileUseCase implements IDownloadSubmissionFileUseCase {
-  constructor(private assignmentRepository: IAssignmentRepository) { }
-
-  async execute(params: DownloadSubmissionFileRequestDTO): Promise<ResponseDTO<{ buffer: Buffer; contentType: string; fileName: string }>> {
-    // Validate input parameters
-    if (!params.fileUrl || typeof params.fileUrl !== 'string') {
-      return { data: { error: 'File URL is required' }, success: false };
-    }
-
-    if (!params.fileName || typeof params.fileName !== 'string') {
-      return { data: { error: 'File name is required' }, success: false };
-    }
-
-    // Clean the file name
-    let cleanFileName = params.fileName.replace(/\s+/g, '_');
-    cleanFileName = cleanFileName.replace(/[^a-zA-Z0-9._-]/g, '');
-    cleanFileName = cleanFileName.replace(/"/g, '');
-
-    try {
-      const fetch = require('node-fetch');
-      const response = await fetch(params.fileUrl);
-
-      if (!response.ok) {
-        return { data: { error: 'Failed to fetch file from URL' }, success: false };
-      }
-
-      const buffer = await response.buffer();
-      const contentType = response.headers.get('content-type') || 'application/octet-stream';
-
-      return { 
-        data: { 
-          buffer, 
-          contentType, 
-          fileName: cleanFileName 
-        }, 
-        success: true 
-      };
-    } catch (error) {
-      return { data: { error: 'Download failed' }, success: false };
-    }
-  }
-}

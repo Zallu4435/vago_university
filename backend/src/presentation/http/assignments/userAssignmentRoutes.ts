@@ -9,38 +9,6 @@ const fetch = require('node-fetch');
 const router = Router();
 const userAssignmentController = getUserAssignmentComposer();
 
-router.get('/download-file', authMiddleware, async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { fileUrl, fileName } = req.query;
-
-    if (!fileUrl || typeof fileUrl !== 'string') {
-      res.status(400).json({ error: 'File URL is required' });
-      return;
-    }
-
-    if (!fileName || typeof fileName !== 'string') {
-      res.status(400).json({ error: 'File name is required' });
-      return;
-    }
-
-    const response = {
-      success: true,
-      fileUrl: fileUrl,
-      fileName: fileName,
-      message: 'Use window.open to download the file',
-      timestamp: new Date().toISOString()
-    };
-
-    res.json(response);
-
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to process download request',
-      details: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
 
 router.get('/download-reference-file', authMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
@@ -110,7 +78,9 @@ router.post('/:id/submit', authMiddleware, (req: Request, res: Response, next: N
         success: false,
         message: err.message
       });
-    } else if (err) {
+    }
+    
+    if (err) {
       console.error('Route: Non-multer error occurred:', err);
       return res.status(400).json({
         success: false,

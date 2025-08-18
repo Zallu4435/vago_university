@@ -28,19 +28,20 @@ export interface ICommunicationRepository {
     contentType: string;
     size: number;
   }>): Promise<IMessage>;
+  sendUserMessage(senderId: string, senderRole: string, to: Array<{ value: string; label: string }>, subject: string, content: string, attachments?: Array<{
+    filename: string;
+    path: string;
+    contentType: string;
+    size: number;
+  }>): Promise<IMessage>;
   deleteMessage(messageId: string, userId: string): Promise<void>;
   getMessageDetails(messageId: string): Promise<IMessage | null>;
   markMessageAsRead(messageId: string, userId: string): Promise<void>;
   getAllAdmins(search?: string): Promise<UserInfo[]>;
-  getUserGroups(search?: string): Promise<Array<{
-    value: string;
-    label: string;
-  }>>;
   fetchUsers(type: string, search?: string): Promise<UserInfo[]>;
 
   // Helper methods
   findUserById(userId: string, role: string): Promise<UserInfo | null>;
-  findUsersByGroup(group: string): Promise<UserInfo[]>;
   findMessageById(messageId: string): Promise<Message | null>;
   createMessage(message: Message): Promise<void>;
   updateMessageRecipientStatus(messageId: string, userId: string, status: string): Promise<void>;

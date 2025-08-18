@@ -1,58 +1,11 @@
 import { ICommunicationRepository } from '../../../application/communication/repositories/ICommunicationRepository';
-import { Message, UserInfo, MessageStatus, UserRole } from "../../../domain/communication/entities/Communication";
+import { Message, UserInfo, MessageStatus, UserRole, CommunicationFilter, GetAdminQuery, GetUserQuery } from "../../../domain/communication/entities/Communication";
 import { MessageModel, IMessage } from '../../../infrastructure/database/mongoose/models/communication.model';
 import { User as UserModel } from '../../database/mongoose/auth/user.model';
 import { Admin as AdminModel } from '../../database/mongoose/auth/admin.model';
 import { Faculty as FacultyModel } from '../../database/mongoose/auth/faculty.model';
 import mongoose from 'mongoose';
 
-interface CommunicationFilter {
-  "recipients._id"?: string;
-  "recipients.status"?: MessageStatus;
-  "sender._id"?: string;
-  $and?: Array<{
-    "recipients._id"?: string;
-    "recipients.status"?: MessageStatus;
-    $or?: Array<{
-      subject?: { $regex: string; $options: string };
-      content?: { $regex: string; $options: string };
-    }>;
-  }>;
-  $or?: Array<{
-    subject?: { $regex: string; $options: string };
-    content?: { $regex: string; $options: string };
-    firstName?: { $regex: string; $options: string };
-    lastName?: { $regex: string; $options: string };
-    email?: { $regex: string; $options: string };
-  }>;
-  role?: UserRole;
-  year?: string;
-  [key: string]: unknown;
-}
-
-interface GetAdminQuery {
-  firstName?: { $regex: string; $options: string };
-  lastName?: { $regex: string; $options: string };
-  email?: { $regex: string; $options: string };
-  $or?: Array<{
-    firstName?: { $regex: string; $options: string };
-    lastName?: { $regex: string; $options: string };
-    email?: { $regex: string; $options: string };
-  }>;
-}
-
-interface GetUserQuery {
-  firstName?: { $regex: string; $options: string };
-  lastName?: { $regex: string; $options: string };
-  email?: { $regex: string; $options: string };
-  $or?: Array<{
-    firstName?: { $regex: string; $options: string };
-    lastName?: { $regex: string; $options: string };
-    email?: { $regex: string; $options: string };
-  }>;
-  role?: UserRole;
-  [key: string]: unknown;
-}
 
 export class CommunicationRepository implements ICommunicationRepository {
   private messageModel: mongoose.Model<IMessage>;
@@ -111,9 +64,102 @@ export class CommunicationRepository implements ICommunicationRepository {
       .skip(skip)
       .limit(limit)
       .lean();
+    
+    if (process.env.NODE_ENV === 'development' && messages.length > 0) {
+      console.log('[getSentMessages] First message from DB:', {
+        _id: messages[0]._id,
+        hasRecipients: !!messages[0].recipients,
+        recipientsLength: messages[0].recipients?.length
+      });
+    }
+    
     const totalItems = await this.messageModel.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
-    return { messages, totalItems, totalPages, page, limit, userId, search };
+
+    const totalStudents = await UserModel.countDocuments({});
+
+    const messagesWithRecipientType = messages.map((msg: any) => {
+      let recipientType = '';
+      if (msg.recipients && msg.recipients.length === totalStudents) {
+        recipientType = 'All Students';
+      } else if (msg.recipients && msg.recipients.length === 1) {
+        recipientType = msg.recipients[0].email;
+      } else if (msg.recipients && msg.recipients.length > 1) {
+        recipientType = 'Multiple Students';
+      } else {
+        recipientType = 'No Recipients';
+      }
+      const result = { ...msg, recipientType };
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[getSentMessages] Transformed message ${msg._id}:`, {
+          hasRecipients: !!result.recipients,
+          recipientsLength: result.recipients?.length,
+          recipientType: result.recipientType
+        });
+      }
+      
+      return result;
+    });
+
+    if (process.env.NODE_ENV === 'development') {
+      if (messagesWithRecipientType.length > 0) {
+        console.log('[getSentMessages] Final message structure:', {
+          _id: messagesWithRecipientType[0]._id,
+          hasRecipients: !!messagesWithRecipientType[0].recipients,
+          recipientsLength: messagesWithRecipientType[0].recipients?.length,
+          recipientType: messagesWithRecipientType[0].recipientType
+        });
+      }
+    }
+    
+    return { messages: messagesWithRecipientType, totalItems, totalPages, page, limit, userId, search };
+  }
+
+    async sendUserMessage(senderId: string, senderRole: string, to: Array<{ value: string; label: string }>, subject: string, content: string, attachments?: Array<{
+    filename: string;
+    path: string;
+    contentType: string;
+    size: number;
+  }>) {
+    try {
+      const sender = await this.findUserById(senderId, senderRole);
+      
+      if (!sender) {
+        throw new Error('Sender not found');
+      }
+      
+      let recipients: UserInfo[] = [];
+      
+      if (!Array.isArray(to)) {
+        throw new Error('Invalid recipients format');
+      }
+      
+      for (const recipient of to) {
+        const admin = await this.findUserById(recipient.value, 'admin');
+        if (admin) {
+          recipients.push(admin);
+        }
+      }
+      
+      recipients = recipients.filter((v, i, a) => a.findIndex(t => (t._id === v._id)) === i);
+      
+      const messageData = {
+        subject,
+        content,
+        sender,
+        recipients,
+        isBroadcast: false, 
+        attachments: attachments || []
+      };
+      
+      const message = await this.messageModel.create(messageData);
+      
+      const result = message.toObject ? message.toObject() : message;
+      return result;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async sendMessage(senderId: string, senderRole: string, to: Array<{ value: string; label: string }>, subject: string, content: string, attachments?: Array<{
@@ -122,34 +168,53 @@ export class CommunicationRepository implements ICommunicationRepository {
     contentType: string;
     size: number;
   }>) {
-    const sender = await this.findUserById(senderId, senderRole);
-    if (!sender) {
-      throw new Error('Sender not found');
-    }
-
-    let recipients: UserInfo[] = [];
-    for (const recipient of to) {
-      if (recipient.value.startsWith('all_') || recipient.value.startsWith('all-')) {
-        // Group recipient
-        const groupUsers = await this.findUsersByGroup(recipient.value.replace('_', '-'));
-        recipients = recipients.concat(groupUsers);
-      } else {
-        const user = await this.findUserById(recipient.value, 'student'); // Default to student, adjust as needed
-        if (user) recipients.push(user);
+    try {
+      const sender = await this.findUserById(senderId, senderRole);
+      
+      if (!sender) {
+        throw new Error('Sender not found');
       }
+      let recipients: UserInfo[] = [];
+      
+      if (!Array.isArray(to)) {
+        throw new Error('Invalid recipients format');
+      }
+      
+      for (const recipient of to) {
+        if (recipient.value === 'all_students' || recipient.value === 'all-students') {
+          const users = await UserModel.find({}).select('_id firstName lastName email').lean();
+          recipients = users.map((user: any) => ({
+            _id: user._id.toString(),
+            name: `${user.firstName} ${user.lastName}`,
+            email: user.email,
+            role: 'student' as UserRole
+          }));
+          break;
+        } else {
+          const user = await this.findUserById(recipient.value, 'student');
+          if (user) {
+            recipients.push(user);
+          }
+        }
+      }
+      recipients = recipients.filter((v, i, a) => a.findIndex(t => (t._id === v._id)) === i);
+      
+      const messageData = {
+        subject,
+        content,
+        sender,
+        recipients,
+        isBroadcast: to.some(r => r.value === 'all_students' || r.value === 'all-students'),
+        attachments: attachments || []
+      };
+      
+      const message = await this.messageModel.create(messageData);
+      
+      const result = message.toObject ? message.toObject() : message;
+      return result;
+    } catch (error) {
+      throw error;
     }
-    recipients = recipients.filter((v, i, a) => a.findIndex(t => (t._id === v._id)) === i);
-
-    const messageData = {
-      subject,
-      content,
-      sender,
-      recipients,
-      isBroadcast: to.some(r => r.value.startsWith('all_') || r.value.startsWith('all-')),
-      attachments: attachments || []
-    };
-    const message = await this.messageModel.create(messageData);
-    return message.toObject ? message.toObject() : message;
   }
 
   async markMessageAsRead(messageId: string, userId: string): Promise<void> {
@@ -165,54 +230,42 @@ export class CommunicationRepository implements ICommunicationRepository {
   }
 
   async getAllAdmins(search?: string): Promise<UserInfo[]> {
-    const query: GetAdminQuery = {};
-    if (search) {
-      query.$or = [
-        { firstName: { $regex: search, $options: "i" } },
-        { lastName: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } }
-      ];
+    try {
+      const query: GetAdminQuery = {};
+      if (search) {
+        query.$or = [
+          { firstName: { $regex: search, $options: "i" } },
+          { lastName: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } }
+        ];
+      }
+      
+      const admins = await AdminModel.find(query)
+        .select("_id firstName lastName email")
+        .lean();
+      
+      const mappedAdmins = admins.map((admin) => {
+        const firstName = admin.firstName || '';
+        const lastName = admin.lastName || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+        
+        return {
+          _id: admin._id.toString(),
+          name: fullName || 'Unknown Admin',
+          email: admin.email,
+          role: 'admin' as UserRole
+        };
+      });
+      
+      return mappedAdmins;
+    } catch (error) {
+      throw error;
     }
-    const admins = await AdminModel.find(query)
-      .select("_id firstName lastName email")
-      .lean();
-    return admins.map((admin) => ({
-      _id: admin._id.toString(),
-      name: `${admin.firstName} ${admin.lastName}`,
-      email: admin.email,
-      role: 'admin' as UserRole
-    }));
-  }
-
-  async getUserGroups(search?: string) {
-    const groups = [
-      { value: 'all-students', label: 'All Students' },
-      { value: 'all-faculty', label: 'All Faculty' },
-      { value: 'all-staff', label: 'All Staff' },
-      { value: 'freshman', label: 'Freshman Students' },
-      { value: 'sophomore', label: 'Sophomore Students' },
-      { value: 'junior', label: 'Junior Students' },
-      { value: 'senior', label: 'Senior Students' },
-      { value: 'individual', label: 'Individual User' }
-    ];
-    const filteredGroups = search
-      ? groups.filter(group =>
-        group.label.toLowerCase().includes(search.toLowerCase()) ||
-        group.value.toLowerCase().includes(search.toLowerCase())
-      )
-      : groups;
-    return filteredGroups;
   }
 
   async fetchUsers(type: string, search?: string): Promise<UserInfo[]> {
     const query: GetUserQuery = {};
-    if (type === "students") {
-      query.role = UserRole.Student;
-    } else if (type === "faculty") {
-      query.role = UserRole.Faculty;
-    } else if (type === "staff") {
-      query.role = UserRole.Staff;
-    }
+    
     if (search) {
       query.$or = [
         { firstName: { $regex: search, $options: "i" } },
@@ -220,29 +273,66 @@ export class CommunicationRepository implements ICommunicationRepository {
         { email: { $regex: search, $options: "i" } }
       ];
     }
+    
     const users = await UserModel.find(query)
-      .select("_id firstName lastName email role")
+      .select("_id firstName lastName email")
       .lean();
-    return users.map((user) => ({
-      _id: user._id.toString(),
-      name: `${user.firstName} ${user.lastName}`,
-      email: user.email,
-      role: type === "students" ? UserRole.Student : type === "faculty" ? UserRole.Staff : UserRole.Staff,
-    }));
+      
+    return users.map((user) => {
+      const firstName = user.firstName || '';
+      const lastName = user.lastName || '';
+      const fullName = `${firstName} ${lastName}`.trim();
+      
+      return {
+        _id: user._id.toString(),
+        name: fullName || 'Unknown User',
+        email: user.email,
+        role: UserRole.Student, 
+      };
+    });
   }
 
   async findUserById(userId: string, role: string): Promise<UserInfo | null> {
-    const user = await UserModel.findOne({ _id: userId, role }).lean();
-    if (!user) {
+    console.log('[findUserById] Looking for userId:', userId, 'role:', role);
+    try {
+      let user = null;
+      if (role === 'admin') {
+        user = await AdminModel.findOne({ _id: userId }).lean();
+        if (!user) {
+          return null;
+        }
+        const firstName = user.firstName || '';
+        const lastName = user.lastName || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+        
+        const userInfo = {
+          _id: user._id.toString(),
+          name: fullName || 'Unknown Admin',
+          email: user.email,
+          role: 'admin' as UserRole
+        };
+        return userInfo;
+      } else {
+        user = await UserModel.findOne({ _id: userId }).lean();
+        if (!user) {
+          return null;
+        }
+        const firstName = user.firstName || '';
+        const lastName = user.lastName || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+        
+        const userInfo = {
+          _id: user._id.toString(),
+          name: fullName || 'Unknown User',
+          email: user.email,
+          role: 'student' as UserRole
+        };
+        return userInfo;
+      }
+    } catch (error) {
+      console.error('[findUserById] Error:', error);
       return null;
     }
-    const userInfo = {
-      _id: user._id.toString(),
-      name: `${user.firstName} ${user.lastName}`,
-      email: user.email,
-      role: role as UserRole
-    };
-    return userInfo;
   }
 
   async findUsersByGroup(group: string): Promise<UserInfo[]> {
@@ -343,7 +433,7 @@ export class CommunicationRepository implements ICommunicationRepository {
 
   async findUsersByType(type: string, search?: string, requesterId?: string): Promise<UserInfo[]> {
     if (type === 'students' || type === 'all_students') {
-      const query: GetUserQuery = {};
+      const query: any = {};
       if (search) {
         query.$or = [
           { firstName: { $regex: search, $options: "i" } },
@@ -351,23 +441,19 @@ export class CommunicationRepository implements ICommunicationRepository {
           { email: { $regex: search, $options: "i" } }
         ];
       }
-
       const students = await UserModel.find(query)
-        .select("_id firstName lastName email")
+        .select("_id firstName lastName email role")
         .lean();
-
-      const mappedStudents = students.map((user) => ({
+      return students.map((user) => ({
         _id: user._id.toString(),
         name: `${user.firstName} ${user.lastName}`,
         email: user.email,
         role: 'student' as UserRole
       }));
-
-      return mappedStudents;
     }
 
     if (type === 'faculty' || type === 'all_faculty') {
-      const query: GetUserQuery = {};
+      const query: any = {};
       if (search) {
         query.$or = [
           { firstName: { $regex: search, $options: "i" } },
@@ -375,19 +461,15 @@ export class CommunicationRepository implements ICommunicationRepository {
           { email: { $regex: search, $options: "i" } }
         ];
       }
-
       const faculty = await FacultyModel.find(query)
         .select("_id firstName lastName email")
         .lean();
-
-      const mappedFaculty = faculty.map((user) => ({
+      return faculty.map((user) => ({
         _id: user._id.toString(),
         name: `${user.firstName} ${user.lastName}`,
         email: user.email,
         role: 'faculty' as UserRole
       }));
-
-      return mappedFaculty;
     }
 
     if (type === 'all') {
@@ -395,7 +477,6 @@ export class CommunicationRepository implements ICommunicationRepository {
         UserModel.find().select('_id firstName lastName email').lean(),
         FacultyModel.find().select('_id firstName lastName email').lean()
       ]);
-
       const allUsers = [
         ...students.map((user) => ({
           _id: user._id.toString(),
@@ -410,7 +491,6 @@ export class CommunicationRepository implements ICommunicationRepository {
           role: 'faculty' as UserRole
         }))
       ];
-
       if (search) {
         const searchLower = search.toLowerCase();
         const filteredUsers = allUsers.filter(user =>

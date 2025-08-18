@@ -13,6 +13,7 @@ const UniversitySessionsDashboard = () => {
   const { styles } = usePreferences();
   const {
     sessions,
+    watchedCount,
     filters,
     setFilters,
     searchTerm,
@@ -51,7 +52,7 @@ const UniversitySessionsDashboard = () => {
 
   // Fix the syntax error and add debugging
   const uniqueInstructors = [...new Set((sessions as Session[]).map(s => s.instructor).filter(Boolean))] as string[];
-  const sessionStats = calculateSessionStats(sessions, userAccess.watchedSessions);
+  const sessionStats = { ...calculateSessionStats(sessions, userAccess.watchedSessions), watchedCount };
 
   // Debug logging to see what data we're getting
   console.log('Sessions data:', sessions);

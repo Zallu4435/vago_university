@@ -33,14 +33,12 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   const user = useSelector((state: RootState) => state.auth.user);
   const status = (session.status || '').toLowerCase();
 
-  // Handle both old and new data structures
   const start = session.startTime ? new Date(session.startTime) : null;
   const dateStr = start ? start.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '';
   const timeStr = start ? start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '';
   const avatar = (backendSession.instructorAvatar as string) || '👤';
   const tags = (session.tags as string[]) || [];
 
-  // Create a compatible styles object for sessionUtils
   const sessionStyles = {
     status: styles.status,
     badgeBackground: styles.badgeBackground || styles.backgroundSecondary,
@@ -57,6 +55,22 @@ export const SessionCard: React.FC<SessionCardProps> = ({
     backgroundSecondary: styles.backgroundSecondary,
     accent: styles.accent
   };
+
+  const getFrontendStatus = (backendStatus: string): string => {
+    switch ((backendStatus || '').toLowerCase()) {
+      case 'ongoing':
+        return 'live';
+      case 'scheduled':
+        return 'upcoming';
+      case 'ended':
+        return 'completed';
+      default:
+        return (backendStatus || '').toLowerCase();
+    }
+  };
+  const frontendStatus = getFrontendStatus(session.status);
+  const hasRecording = session.hasRecording ?? false;
+  const isEnrolled = session.isEnrolled ?? userAccess.isEnrolled;
 
   return (
     <div className={`${styles.card.background} rounded-xl sm:rounded-2xl ${styles.cardShadow || ''} ${styles.cardBorder || ''} ${styles.cardHover || styles.card.hover} overflow-hidden ${session.isLive ? `${styles.status.error} bg-gradient-to-r ${styles.backgroundSecondary}` : ''}`}>
@@ -104,7 +118,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
               ))}
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              {session.status === 'completed' && session.hasRecording && (session.isEnrolled || userAccess.isEnrolled) && (
+              {frontendStatus === 'completed' && hasRecording && isEnrolled && (
                 <button
                   onClick={() => onToggleWatched(session.id || '')}
                   className={`flex items-center gap-2 text-sm font-medium ${styles.textSecondary} hover:${styles.status.success} transition-colors`}
@@ -153,10 +167,20 @@ export const SessionCard: React.FC<SessionCardProps> = ({
             </div>
           </div>
         )}
-        {backendSession.joinUrl && !['ended', 'completed'].includes(status) && (
+        {backendSession.joinUrl && (backendSession.status === 'Ongoing' || session.status === 'live' || session.isLive) && (
           <div className="mt-4 flex justify-center">
             <button
               onClick={() => {
+                // Additional validation before joining
+                if (backendSession.status === 'Ended' || backendSession.status === 'Cancelled') {
+                  alert('Cannot join session: Session has ended or been cancelled');
+                  return;
+                }
+                if (backendSession.status !== 'Ongoing' && session.status !== 'live' && !session.isLive) {
+                  alert('Cannot join session: Session is not live');
+                  return;
+                }
+                
                 navigate(`/faculty/video-conference/${backendSession.id || backendSession._id}`, {
                   state: {
                     session: backendSession,
@@ -165,9 +189,9 @@ export const SessionCard: React.FC<SessionCardProps> = ({
                   },
                 });
               }}
-              className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition duration-200 text-base"
+              className="inline-block bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-200 text-lg"
             >
-              Join Session
+              Join Live Session
             </button>
           </div>
         )}

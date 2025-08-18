@@ -55,9 +55,7 @@ export interface GetAllAdminsRequestDTO {
   search?: string;
 }
 
-export interface GetUserGroupsRequestDTO {
-  search?: string;
-}
+
 
 export interface FetchUsersRequestDTO {
   type: 'all' | 'students' | 'faculty' | 'staff';

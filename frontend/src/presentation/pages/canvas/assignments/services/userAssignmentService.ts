@@ -9,7 +9,7 @@ export const userAssignmentService = {
       return response.data.data;
     } catch (error) {
       console.error('Error in getAssignments:', error);
-      throw error;
+      throw error;  
     }
   },
 
@@ -67,18 +67,6 @@ export const userAssignmentService = {
   getAssignmentStatus: async (assignmentId: string) => {
     const response = await httpClient.get(`/assignments/${assignmentId}/status`);
     return response.data;
-  },
-
-  getFileDownloadUrl: async (fileUrl: string, fileName: string) => {
-    try {
-      const response = await httpClient.get('/assignments/download-file', {
-        params: { fileUrl, fileName }
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Service: Error getting download URL:', error);
-      throw error;
-    }
   },
 
   downloadReferenceFile: async (fileUrl: string, fileName: string) => {

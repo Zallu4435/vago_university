@@ -6,7 +6,6 @@ import {
   IDeleteMessageUseCase,
   IGetMessageDetailsUseCase,
   IGetAllAdminsUseCase,
-  IGetUserGroupsUseCase,
   IFetchUsersUseCase,
 } from "../../../application/communication/useCases/CommunicationUseCases";
 import {
@@ -17,7 +16,6 @@ import {
   DeleteMessageRequestDTO,
   GetMessageDetailsRequestDTO,
   GetAllAdminsRequestDTO,
-  GetUserGroupsRequestDTO,
   FetchUsersRequestDTO,
 } from "../../../domain/communication/dtos/CommunicationRequestDTOs";
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, ICommunicationController } from "../IHttp";
@@ -34,7 +32,6 @@ export class CommunicationController implements ICommunicationController {
     private deleteMessageUseCase: IDeleteMessageUseCase,
     private getMessageDetailsUseCase: IGetMessageDetailsUseCase,
     private getAllAdminsUseCase: IGetAllAdminsUseCase,
-    private getUserGroupsUseCase: IGetUserGroupsUseCase,
     private fetchUsersUseCase: IFetchUsersUseCase
   ) {
     this.httpErrors = new HttpErrors();
@@ -88,33 +85,54 @@ export class CommunicationController implements ICommunicationController {
   }
 
   async sendMessage(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { subject, message, to } = httpRequest.body || {};
-    const { userId, collection: role } = httpRequest.user || {};
-    if (!userId || !role) {
-      return this.httpErrors.error_401();
+    try {
+      const { subject, message, to } = httpRequest.body || {};
+      
+      // Parse the 'to' field if it's a JSON string
+      let parsedTo = to;
+      if (typeof to === 'string') {
+        try {
+          parsedTo = JSON.parse(to);
+        } catch (error) {
+          return this.httpErrors.error_400();
+        }
+      }
+      
+      const { userId, collection: role } = httpRequest.user || {};
+      
+      if (!userId || !role) {
+        return this.httpErrors.error_401();
+      }
+      
+      const attachments = (httpRequest.files || []).map((file) => ({
+        filename: file.filename,
+        path: file.path,
+        contentType: file.mimetype,
+        size: file.size,
+      }));
+      
+      const sendMessageRequestDTO: SendMessageRequestDTO = {
+        senderId: userId,
+        senderRole: role,
+        subject,
+        content: message,
+        to: parsedTo,
+        attachments,
+      };
+      
+      const response = await this.sendMessageUseCase.execute(sendMessageRequestDTO);
+      
+      if (!response.success) {
+        return this.httpErrors.error_400();
+      }
+      if ('error' in response.data) {
+        return this.httpErrors.error_400();
+      }
+      
+      return this.httpSuccess.success_201(response.data);
+    } catch (error) {
+      return this.httpErrors.error_500();
     }
-    const attachments = (httpRequest.files || []).map((file) => ({
-      filename: file.filename,
-      path: file.path,
-      contentType: file.mimetype,
-      size: file.size,
-    }));
-    const sendMessageRequestDTO: SendMessageRequestDTO = {
-      senderId: userId,
-      senderRole: role,
-      subject,
-      content: message,
-      to,
-      attachments,
-    };
-    const response = await this.sendMessageUseCase.execute(sendMessageRequestDTO);
-    if (!response.success) {
-      return this.httpErrors.error_400();
-    }
-    if ('error' in response.data) {
-      return this.httpErrors.error_400();
-    }
-    return this.httpSuccess.success_201(response.data);
   }
 
   async markMessageAsRead(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -178,63 +196,42 @@ export class CommunicationController implements ICommunicationController {
   }
 
   async getAllAdmins(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { search = "" } = httpRequest.query || {};
-    const getAllAdminsRequestDTO: GetAllAdminsRequestDTO = {
-      search: String(search),
-    };
-    const response = await this.getAllAdminsUseCase.execute(getAllAdminsRequestDTO);
-    if (!response.success) {
-      return this.httpErrors.error_400();
+    try {
+      const { search = "" } = httpRequest.query || {};
+      const getAllAdminsRequestDTO: GetAllAdminsRequestDTO = {
+        search: String(search),
+      };
+      
+      const response = await this.getAllAdminsUseCase.execute(getAllAdminsRequestDTO);
+      
+      if (!response.success) {
+        return this.httpErrors.error_400();
+      }
+      if ('error' in response.data) {
+        return this.httpErrors.error_400();
+      }
+      
+      return this.httpSuccess.success_200(response.data);
+    } catch (error) {
+      return this.httpErrors.error_500();
     }
-    if ('error' in response.data) {
-      return this.httpErrors.error_400();
-    }
-    return this.httpSuccess.success_200(response.data);
   }
 
-  async getUserGroups(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { search = "" } = httpRequest.query || {};
-    const getUserGroupsRequestDTO: GetUserGroupsRequestDTO = {
-      search: String(search),
-    };
-    const response = await this.getUserGroupsUseCase.execute(getUserGroupsRequestDTO);
-    if (!response.success) {
-      return this.httpErrors.error_400();
-    }
-    if ('error' in response.data) {
-      return this.httpErrors.error_400();
-    }
-    return this.httpSuccess.success_200(response.data);
-  }
+
 
   async fetchUsers(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { type, search = "" } = httpRequest.query || {};
+    const { search = "" } = httpRequest.query || {};
     const { userId } = httpRequest.user || {};
     if (!userId) {
       return this.httpErrors.error_401();
     }
-    // Map frontend types to backend types
-    let backendType: "all" | "students" | "faculty" | "staff";
-    switch (type) {
-      case 'individual_students':
-      case 'all_students':
-        backendType = 'students';
-        break;
-      case 'individual_faculty':
-      case 'all_faculty':
-        backendType = 'faculty';
-        break;
-      case 'all_users':
-        backendType = 'all';
-        break;
-      default:
-        backendType = 'all';
-    }
+    
     const fetchUsersRequestDTO: FetchUsersRequestDTO = {
-      type: backendType,
+      type: "all",
       search: String(search),
       requesterId: userId,
     };
+    
     const response = await this.fetchUsersUseCase.execute(fetchUsersRequestDTO);
     if (!response.success) {
       return this.httpErrors.error_400();
@@ -242,6 +239,7 @@ export class CommunicationController implements ICommunicationController {
     if ('error' in response.data) {
       return this.httpErrors.error_400();
     }
+    
     return this.httpSuccess.success_200(response.data);
   }
 
@@ -297,8 +295,20 @@ export class CommunicationController implements ICommunicationController {
     if (!userId || role !== 'admin') {
       return this.httpErrors.error_403();
     }
+    
     // Parse the to parameter if it's a string
-    const recipients = typeof to === 'string' ? JSON.parse(to) : to;
+    let recipients;
+    try {
+      if (typeof to === 'string') {
+        recipients = JSON.parse(to);
+      } else {
+        recipients = to;
+      }
+    } catch (error) {
+      console.error('[sendAdminMessage] Error parsing to field:', error);
+      return this.httpErrors.error_400();
+    }
+    
     // Get attachments from files
     const attachments = (httpRequest.files || []).map((file) => ({
       filename: file.filename,
@@ -306,6 +316,7 @@ export class CommunicationController implements ICommunicationController {
       contentType: file.mimetype,
       size: file.size,
     }));
+    
     const sendMessageRequestDTO: SendMessageRequestDTO = {
       senderId: userId,
       senderRole: role,
@@ -314,6 +325,7 @@ export class CommunicationController implements ICommunicationController {
       to: recipients,
       attachments,
     };
+    
     const response = await this.sendMessageUseCase.execute(sendMessageRequestDTO);
     if (!response.success) {
       return this.httpErrors.error_400();

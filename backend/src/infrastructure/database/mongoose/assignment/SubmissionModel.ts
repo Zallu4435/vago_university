@@ -5,10 +5,11 @@ export interface ISubmissionDocument extends Document {
   studentId: string;
   studentName: string;
   submittedDate: Date;
-  status: 'pending' | 'reviewed' | 'late';
+  status: 'pending' | 'reviewed' | 'late' | 'needs_correction';
   marks?: number;
   feedback?: string;
   isLate: boolean;
+  reviewedAt: Date | null;
   files: Array<{
     fileName: string;
     fileUrl: string;
@@ -36,7 +37,7 @@ const SubmissionSchema = new Schema<ISubmissionDocument>({
   },
   status: {
     type: String,
-    enum: ['pending', 'reviewed', 'late'],
+    enum: ['pending', 'reviewed', 'late', 'needs_correction'],
     default: 'pending'
   },
   marks: {
@@ -49,6 +50,10 @@ const SubmissionSchema = new Schema<ISubmissionDocument>({
   isLate: {
     type: Boolean,
     default: false
+  },
+  reviewedAt: {
+    type: Date,
+    default: null
   },
   files: [{
     fileName: {

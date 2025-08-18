@@ -5,7 +5,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { Session as BaseSession } from '../../../../application/hooks/useSessionManagement';
 import SessionAttendanceViewModal from './SessionAttendanceViewModal'
 
-// Extended Session type with additional properties
 interface Session extends BaseSession {
   name?: string;
   date?: string;

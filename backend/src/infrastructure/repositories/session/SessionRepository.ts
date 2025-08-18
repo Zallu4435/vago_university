@@ -4,28 +4,8 @@ import { VideoSessionModel } from '../../database/mongoose/models/session.model'
 import { User } from '../../database/mongoose/auth/user.model';
 
 export class SessionRepository implements ISessionRepository {
-  async create(session: VideoSession): Promise<VideoSession> {
-    const doc = await VideoSessionModel.create({
-      title: session.title,
-      hostId: session.hostId,
-      participants: session.participants,
-      startTime: session.startTime,
-      endTime: session.endTime,
-      status: session.status,
-      description: session.description,
-      instructor: session.instructor,
-      course: session.course,
-      duration: session.duration,
-      maxAttendees: session.maxAttendees,
-      tags: session.tags,
-      difficulty: session.difficulty,
-      isLive: session.isLive,
-      hasRecording: session.hasRecording,
-      recordingUrl: session.recordingUrl,
-      attendees: session.attendees,
-      attendeeList: session.attendeeList,
-      joinUrl: session.joinUrl,
-    });
+  async create(sessionData: Partial<VideoSession>): Promise<VideoSession> {
+    const doc = await VideoSessionModel.create(sessionData);
     return doc.toObject() as VideoSession;
   }
 
@@ -103,8 +83,6 @@ export class SessionRepository implements ISessionRepository {
   }
 
   async getUserSessions(params: { search?: string; status?: string; instructor?: string; course?: string; userId?: string } = {}): Promise<VideoSession[]> {
-    // For user sessions, we can use the same query logic but return only essential fields
-    // This method could be optimized further if needed
     const sessions = await this.getAll(params);
     return sessions;
   }

@@ -5,6 +5,18 @@ import { formatDate } from '../utils/dateUtils';
 export const RECIPIENT_TYPES = ['All', 'All Students', 'All Faculty', 'All Students and Faculty'];
 export const STATUSES = ['All', 'Sent', 'Failed'];
 
+function getDisplayRecipientName(notification: Notification) {
+  if (
+    notification.createdBy === "system" &&
+    typeof notification.recipientName === "string" &&
+    /^User [a-f0-9]{24}$/.test(notification.recipientName)
+  ) {
+    const userId = notification.recipientName.split(" ")[1];
+    return `User ${userId.slice(0, 6)}...`;
+  }
+  return notification.recipientName;
+}
+
 export const notificationColumns = [
   {
     header: 'Notification',
@@ -30,7 +42,7 @@ export const notificationColumns = [
     render: (notification: Notification) => (
       <div className="text-sm text-gray-300">
         {notification.recipientType === 'individual'
-          ? notification.recipientName || 'N/A'
+          ? getDisplayRecipientName(notification) || 'N/A'
           : notification.recipientType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
       </div>
     ),
@@ -38,12 +50,20 @@ export const notificationColumns = [
   {
     header: 'Created By',
     key: 'createdBy',
-    render: (notification: Notification) => (
-      <div className="flex items-center text-gray-300">
-        <User size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{notification.createdBy}</span>
-      </div>
-    ),
+    render: (notification: Notification) => {
+      let displayName = notification.createdBy;
+      if (notification.createdBy === 'system') {
+        displayName = 'System';
+      } else {
+        displayName = 'Admin'
+      }
+      return (
+        <div className="flex items-center text-gray-300">
+          <User size={14} className="text-purple-400 mr-2" />
+          <span className="text-sm">{displayName}</span>
+        </div>
+      );
+    },
   },
   {
     header: 'Created At',

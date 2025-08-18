@@ -8,12 +8,8 @@ import {
   IGetSubmissionsUseCase,
   IGetSubmissionByIdUseCase,
   IReviewSubmissionUseCase,
-  IDownloadSubmissionUseCase,
-  IDownloadFileUseCase,
-  IDownloadSubmissionFileUseCase,
   IGetAnalyticsUseCase
 } from '../../../application/assignments/useCases/AssignmentUseCases';
-import { AssignmentFile } from '../../../domain/assignments/assignmenttypes';
 
 
 export class AssignmentController implements IAssignmentController {
@@ -29,9 +25,6 @@ export class AssignmentController implements IAssignmentController {
     private getSubmissionsUseCase: IGetSubmissionsUseCase,
     private getSubmissionByIdUseCase: IGetSubmissionByIdUseCase,
     private reviewSubmissionUseCase: IReviewSubmissionUseCase,
-    private downloadSubmissionUseCase: IDownloadSubmissionUseCase,
-    private downloadFileUseCase: IDownloadFileUseCase,
-    private downloadSubmissionFileUseCase: IDownloadSubmissionFileUseCase,
     private getAnalyticsUseCase: IGetAnalyticsUseCase
   ) {
     this.httpSuccess = new HttpSuccess();
@@ -102,12 +95,16 @@ export class AssignmentController implements IAssignmentController {
 
   async getSubmissions(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { assignmentId } = httpRequest.params;
-    const { page, limit } = httpRequest.query;
+    const { page, limit, search, status } = httpRequest.query;
+
     const result = await this.getSubmissionsUseCase.execute({
       assignmentId,
       page: page ? parseInt(page as string) : undefined,
-      limit: limit ? parseInt(limit as string) : undefined
+      limit: limit ? parseInt(limit as string) : undefined,
+      search: search as string,
+      status: status as 'pending' | 'reviewed' | 'late' | 'needs_correction',
     });
+
     if (!result.success) {
       return this.httpErrors.error_400();
     }
@@ -128,7 +125,7 @@ export class AssignmentController implements IAssignmentController {
 
   async reviewSubmission(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { assignmentId, submissionId } = httpRequest.params;
-    console.log(httpRequest.body, 'httpRequest.body');  
+    console.log(httpRequest.body, 'httpRequest.body');
     console.log(assignmentId, 'assignmentId');
     console.log(submissionId, 'submissionId');
     const { marks, feedback, status, isLate } = httpRequest.body;
@@ -155,122 +152,11 @@ export class AssignmentController implements IAssignmentController {
     return this.httpSuccess.success_200(result.data);
   }
 
-  async downloadSubmission(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { assignmentId, submissionId } = httpRequest.params;
-    const result = await this.downloadSubmissionUseCase.execute({
-      assignmentId,
-      submissionId
-    });
-    if (!result.success) {
-      return this.httpErrors.error_400();
-    }
-    return {
-      statusCode: 200,
-      body: { data: result.data },
-      headers: {
-        'Content-Type': 'application/octet-stream',
-        'Content-Disposition': 'attachment'
-      }
-    } as IHttpResponse;
-  }
-
-  async downloadFile(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { fileUrl, fileName } = httpRequest.query;
-    
-    const result = await this.downloadFileUseCase.execute({
-      fileUrl: fileUrl as string,
-      fileName: fileName as string
-    });
-    
-    if (!result.success) {
-      return this.httpErrors.error_400();
-    }
-    
-    if ('error' in result.data) {
-      return this.httpErrors.error_400();
-    }
-    
-    const { buffer, contentType, fileName: cleanFileName } = result.data;
-    const contentDisposition = `attachment; filename="${cleanFileName}"`;
-    
-    return {
-      statusCode: 200,
-      body: { data: buffer },
-      headers: {
-        'Content-Type': contentType,
-        'Content-Disposition': contentDisposition
-      }
-    } as IHttpResponse;
-  }
-
-  async downloadSubmissionFile(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { fileUrl, fileName } = httpRequest.query;
-    
-    const result = await this.downloadSubmissionFileUseCase.execute({
-      fileUrl: fileUrl as string,
-      fileName: fileName as string
-    });
-    
-    if (!result.success) {
-      return this.httpErrors.error_400();
-    }
-    
-    if ('error' in result.data) {
-      return this.httpErrors.error_400();
-    }
-    
-    const { buffer, contentType, fileName: cleanFileName } = result.data;
-    const contentDisposition = `attachment; filename="${cleanFileName}"`;
-    
-    return {
-      statusCode: 200,
-      body: { data: buffer },
-      headers: {
-        'Content-Type': contentType,
-        'Content-Disposition': contentDisposition
-      }
-    } as IHttpResponse;
-  }
-
   async getAnalytics(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const result = await this.getAnalyticsUseCase.execute();
     if (!result.success) {
       return this.httpErrors.error_400();
     }
     return this.httpSuccess.success_200(result.data);
-  }
-
-  async viewAssignmentFile(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const { id } = httpRequest.params;
-    const { fileName } = httpRequest.query;
-    const result = await this.getAssignmentByIdUseCase.execute({ id });
-    if (!result.success || 'error' in result.data) {
-      return this.httpErrors.error_404('Assignment not found');
-    }
-    const assignment = result.data.assignment;
-    if (!assignment) {
-      return this.httpErrors.error_404('Assignment not found');
-    }
-    const file = assignment.files.find((f: AssignmentFile) => f.fileName === fileName as string);
-    if (!file) {
-      return this.httpErrors.error_404('File not found');
-    }
-    const response = await fetch(file.fileUrl, {
-      headers: { 'User-Agent': 'Mozilla/5.0' }
-    });
-    if (!response.ok) {
-      return this.httpErrors.error_404('Failed to fetch file from Cloudinary');
-    }
-    const pdfBuffer = await response.arrayBuffer();
-    return {
-      statusCode: 200,
-      body: {
-        data: {
-          pdfData: Buffer.from(pdfBuffer).toString('base64'),
-          fileName: file.fileName,
-          contentType: 'application/pdf'
-        }
-      }
-    };
   }
 } 

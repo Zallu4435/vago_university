@@ -61,6 +61,25 @@ export const setupSessionSocketHandlers = (io: Server) => {
 
     socket.on('join-room', async (sessionId: string, user: SessionUser) => {
       try {
+        // Check session status before allowing join
+        const session = await VideoSessionModel.findById(sessionId);
+        if (!session) {
+          socket.emit('error', { message: 'Session not found' });
+          return;
+        }
+
+        // Check if session is ended or cancelled
+        if (session.status === 'Ended' || session.status === 'Cancelled') {
+          socket.emit('error', { message: 'Cannot join session: Session has ended or been cancelled' });
+          return;
+        }
+
+        // Only allow joining if session is live (ongoing)
+        if (session.status !== 'Ongoing') {
+          socket.emit('error', { message: 'Cannot join session: Session is not live' });
+          return;
+        }
+
         currentUserId = user.userId;
         currentSessionId = sessionId;
         socket.userId = currentUserId;

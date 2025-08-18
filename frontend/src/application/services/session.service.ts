@@ -32,8 +32,8 @@ export interface VideoSession {
 
 export interface CreateVideoSessionPayload {
   title: string;
-  hostId?: string; // Optional since it will be set automatically by the backend
-  startTime: string; // ISO string
+  hostId?: string;
+  startTime: string;
   description?: string;
   instructor?: string;
   course?: string;
@@ -83,7 +83,7 @@ class SessionService {
       : '';
     try {
       const response = await httpClient.get<SessionResponse>(`/faculty/sessions/video-sessions${queryString}`);
-      return response.data.data.map((s: VideoSession) => ({ ...s, id: s._id }));
+      return response.data.data;
     } catch (error: unknown) {
       if (isAxiosErrorWithApiError(error)) {
         throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to get sessions');
@@ -106,8 +106,6 @@ class SessionService {
   }
 
   async updateSession(id: string, data: Partial<CreateVideoSessionPayload>) {
-    console.log('Updating session with id:', id);
-    console.log('Update data:', data);
     try {
       const response = await httpClient.put(`/faculty/sessions/video-sessions/${id}`, data);
       return response.data;

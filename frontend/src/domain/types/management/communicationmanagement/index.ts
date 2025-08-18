@@ -2,19 +2,13 @@ export interface Message {
   id: string;
   subject: string;
   content: string;
-  sender: {
+  sender?: {
     id: string;
     name: string;
     email: string;
     role: string;
   };
-  recipients: Array<{
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    status: 'read' | 'unread';
-  }>;
+  recipients: string;
   attachments: Array<{
     id: string;
     name: string;
@@ -63,8 +57,6 @@ export interface MessageColumn {
   width?: string;
 }
 
-// Communication management types
-
 export type RecipientType = '' | 'all_students' | 'all_faculty' | 'all_users' | 'individual_students' | 'individual_faculty';
 
 export interface User {
@@ -78,7 +70,6 @@ export interface ComposeMessageForm {
   to: { value: string; label: string }[];
   subject: string;
   message: string;
-  attachments: File[];
   isAdmin?: boolean;
 }
 
@@ -91,5 +82,4 @@ export interface ComposeMessageModalProps {
   fetchUsers: (type: RecipientType, search?: string) => Promise<User[]>;
 }
 
-// Utility type for compatibility with code expecting fetchedUsers?.users
 export type UserArrayWithUsers = User[] & { users?: User[] }; 

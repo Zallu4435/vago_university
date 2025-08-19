@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { profileService } from '../services/profile.service';
-import { PasswordChangeData, ProfileData } from '../../domain/types/profile';
+import { PasswordChangeData, ProfileData } from '../../domain/types/settings/user';
 
 export const useProfileManagement = () => {
   const queryClient = useQueryClient();
@@ -11,7 +11,6 @@ export const useProfileManagement = () => {
   const { data: profile, isLoading, error } = useQuery<ProfileData, Error>({
     queryKey: ['profile'],
     queryFn: () => {
-      console.log('Fetching profile from backend...');
       return profileService.getProfile().then((data) => {
         return data;
       });
@@ -38,7 +37,6 @@ export const useProfileManagement = () => {
       toast.success('Password changed successfully');
     },
     onError: (error: Error) => {
-      console.log('Password change error:', error);
       toast.error(error.message || 'Failed to change password');
     },
   });

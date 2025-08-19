@@ -78,7 +78,6 @@ export abstract class BaseRepository<
       });
       
       await notification.save();
-      console.log(`Approval notification sent for ${entityType} request ${requestId} to user ${userId}`);
     } catch (error) {
       console.error(`Failed to send approval notification for ${entityType} request ${requestId}:`, error);
     }
@@ -99,10 +98,9 @@ export abstract class BaseRepository<
       });
       
       await notification.save();
-      console.log(`Rejection notification sent for ${entityType} request ${requestId} to user ${userId}`);
     } catch (error) {
       console.error(`Failed to send rejection notification for ${entityType} request ${requestId}:`, error);
-      // Don't throw error to avoid breaking the main operation
+
     }
   }
 }

@@ -1,31 +1,32 @@
+import { JoinRequestFormValues } from "../../../validation/user/JoinRequestSchema";
+
 export interface Game {
-    date?: string;
-    description?: string;
+  date?: string;
+  description?: string;
 }
 
 export interface Sport {
-    id: string;
-    title: string;
-    type: string;
-    icon?: string;
-    color?: string;
-    division?: string;
-    headCoach?: string;
-    homeGames?: number | string[];
-    record?: string;
-    upcomingGames?: (string | Game)[];
-    participants?: number;
-    createdAt?: string;
-    updatedAt?: string;
-    userRequestStatus?: string;
+  id: string;
+  title: string;
+  type: string;
+  icon?: string;
+  color?: string;
+  division?: string;
+  headCoach?: string;
+  homeGames?: number | string[];
+  record?: string;
+  upcomingGames?: (string | Game)[];
+  participants?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  userRequestStatus?: string;
 }
 
 export interface SportsData {
-    sports: Sport[];
-    totalItems: number;
+  sports: Sport[];
+  totalItems: number;
 }
 
-// JoinRequest type moved from useCampusLife.ts
 export interface JoinRequest {
   reason: string;
   additionalInfo: string;
@@ -80,11 +81,10 @@ export interface ClubsSectionProps {
 
 
 export interface CampusLifeTabsProps {
-    activeTab: string;
-    setActiveTab: (tab: string) => void;
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
 }
 
-// Add missing types based on service usage
 export interface CampusLifeResponse {
   events: Event[];
   sports: Sport[];
@@ -121,4 +121,11 @@ export interface Club {
   about?: string;
   upcomingEvents?: (string | ClubUpcomingEvent)[];
   userRequestStatus?: string;
+}
+
+export interface JoinRequestFormProps {
+  onSubmit: (data: JoinRequestFormValues) => void;
+  onCancel: () => void;
+  isLoading: boolean;
+  title: string;
 }

@@ -1,6 +1,5 @@
 import Logger from './shared/utils/logger';
 
-
 Logger.error('This is an error message');
 Logger.warn('This is a warning message');
 Logger.info('This is an info message');

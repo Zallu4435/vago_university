@@ -9,10 +9,7 @@ import {
   ICON_OPTIONS,
   COLOR_OPTIONS,
   DEFAULT_TEAM_FORM_VALUES,
-  PARTICLE_COUNT,
-  PARTICLE_SIZE_RANGE,
-  PARTICLE_ANIMATION_RANGE,
-  PARTICLE_DELAY_RANGE,
+  ghostParticles,
 } from '../../../../../shared/constants/sportManagementConstants';
 import { teamSchema } from '../../../../../domain/validation/management/teamSchema';
 
@@ -73,17 +70,6 @@ const AddTeamModal: React.FC<AddTeamModalProps> = ({
       reset(DEFAULT_TEAM_FORM_VALUES as any);
     }
   }, [isOpen, initialData, isEditing, reset]);
-
-  // Particle effect
-  const ghostParticles = Array(PARTICLE_COUNT)
-    .fill(0)
-    .map((_) => ({
-      size: Math.random() * (PARTICLE_SIZE_RANGE.max - PARTICLE_SIZE_RANGE.min) + PARTICLE_SIZE_RANGE.min,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * (PARTICLE_ANIMATION_RANGE.max - PARTICLE_ANIMATION_RANGE.min) + PARTICLE_ANIMATION_RANGE.min,
-      animDelay: Math.random() * PARTICLE_DELAY_RANGE.max,
-    }));
 
   if (!isOpen) return null;
 

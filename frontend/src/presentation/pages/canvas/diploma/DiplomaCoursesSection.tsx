@@ -7,43 +7,9 @@ import { usePreferences } from '../../../../application/context/PreferencesConte
 import { DiplomaCard } from './components/DiplomaCard';
 import { ChapterItem } from './components/ChapterItem';
 import { useDiplomaManagement } from '../../../../application/hooks/useDiplomaManagement';
-import { ViewMode } from '../../../../domain/types/canvas/diploma';
+import { BackendChapter, BackendCourse, ViewMode } from '../../../../domain/types/canvas/diploma';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 import { Chapter, DiplomaCourse } from '../../../../domain/types/canvas/diploma';
-
-// Define backend types for mapping
-interface BackendChapter {
-  _id?: string;
-  id?: string;
-  title: string;
-  description?: string;
-  type?: string;
-  duration?: string;
-  videoUrl?: string;
-  notes?: string;
-  order?: number;
-  isCompleted?: boolean;
-  isBookmarked?: boolean;
-}
-
-interface BackendCourse {
-  _id?: string;
-  id?: string;
-  title: string;
-  description: string;
-  category?: string;
-  duration?: string;
-  instructor?: string;
-  department?: string;
-  chapters?: BackendChapter[];
-  videos?: BackendChapter[];
-  videoCount?: number;
-  completedVideoCount?: number;
-  status?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  isEnrolled?: boolean;
-}
 
 export const DiplomaCoursesSection = () => {
   const { styles } = usePreferences();
@@ -136,16 +102,13 @@ export const DiplomaCoursesSection = () => {
     isEnrolled: course.isEnrolled,
   });
 
-  console.log(bookmarkedChapters, 'bookmarkedChapters')
   const handleStartCourse = (courseId: string) => {
-    console.log('[handleStartCourse] courseId:', courseId);
     handleViewCourse(courseId);
     setCurrentView('details');
   };
 
   const handleViewDetails = (course: DiplomaCourse) => {
     const courseId = (course as { _id?: string; id?: string })._id || course.id;
-    console.log('[handleViewDetails] courseId:', courseId);
     handleViewCourse(courseId);
     setCurrentView('details');
   };
@@ -153,7 +116,6 @@ export const DiplomaCoursesSection = () => {
   const renderCoursesList = () => (
     <div className={`min-h-screen ${styles.background}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        {/* Header */}
         <div className="text-center mb-8 sm:mb-12">
           <div className={`inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 ${styles.accent} rounded-2xl mb-4 sm:mb-6`}>
             <FiAward className={`w-6 h-6 sm:w-8 sm:h-8 ${styles.textPrimary}`} />
@@ -166,8 +128,6 @@ export const DiplomaCoursesSection = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {courses.map((course, index) => {
             const mappedCourse = mapBackendCourseToUICourse(course);
-            console.log('Mapped course data:', mappedCourse);
-            console.log('Original backend course:', course);
             return (
               <DiplomaCard
                 key={course._id}
@@ -242,7 +202,7 @@ export const DiplomaCoursesSection = () => {
                   <ChapterItem
                     key={chapterId}
                     chapter={chapter}
-                    courseId={selectedCourse._id}
+                    courseId={selectedCourse._id || selectedCourse.id}
                     styles={styles}
                     isFirst={isFirst}
                     isPrevCompleted={prevCompleted}
@@ -254,7 +214,7 @@ export const DiplomaCoursesSection = () => {
                     }}
                     onBookmark={() => {
                       if (selectedCourse) {
-                        toggleBookmark({ courseId: selectedCourse._id, chapterId: String(chapterId) });
+                        toggleBookmark({ courseId: selectedCourse._id || selectedCourse.id, chapterId: String(chapterId) });
                       }
                     }}
                   />
@@ -285,13 +245,12 @@ export const DiplomaCoursesSection = () => {
                     className={`px-3 sm:px-4 py-2 rounded-lg font-semibold transition-colors mr-0 sm:mr-2 ${bookmarkedChapters.has(String(modalVideo._id || modalVideo.id)) ? 'bg-yellow-200 text-yellow-800' : 'bg-gray-200 text-gray-700'}`}
                     onClick={() => {
                       if (selectedCourse && modalVideo) {
-                        toggleBookmark({ courseId: selectedCourse._id, chapterId: String(modalVideo._id || modalVideo.id) });
+                        toggleBookmark({ courseId: selectedCourse._id || selectedCourse.id, chapterId: String(modalVideo._id || modalVideo.id) });
                       }
                     }}
                   >
                     {bookmarkedChapters.has(String(modalVideo._id || modalVideo.id)) ? 'Bookmarked' : 'Bookmark'}
                   </button>
-                  {/* Completed/Mark as Completed button */}
                   {completedChapters.has(String(modalVideo._id || modalVideo.id)) ? (
                     <span className="px-3 sm:px-4 py-2 rounded-lg bg-green-100 text-green-700 font-semibold">Completed</span>
                   ) : (
@@ -299,7 +258,7 @@ export const DiplomaCoursesSection = () => {
                       className={`bg-green-600 hover:bg-green-700 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold transition-colors`}
                       onClick={() => {
                         if (selectedCourse && modalVideo) {
-                          markChapterComplete({ courseId: selectedCourse._id, chapterId: modalVideo._id || modalVideo.id });
+                          markChapterComplete({ courseId: selectedCourse._id || selectedCourse.id, chapterId: modalVideo._id || modalVideo.id });
                           setVideoModalOpen(false);
                           setCurrentView('details');
                         }

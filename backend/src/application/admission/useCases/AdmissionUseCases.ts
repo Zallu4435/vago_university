@@ -111,7 +111,7 @@ export class SaveSectionUseCase {
             data: mapToIAdmissionDraft(draft),
         };
     }
-} 
+}
 
 export class ProcessPaymentUseCase {
     constructor(private admissionsRepository: IAdmissionsRepository) { }

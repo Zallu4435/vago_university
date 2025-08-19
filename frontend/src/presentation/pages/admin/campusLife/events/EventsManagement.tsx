@@ -27,7 +27,7 @@ import {
 } from '../../../../../domain/types/management/eventmanagement';
 import {
   adaptToEventRequestDetails
-} from '../../../../../domain/types/eventTypeAdapter';
+} from '../../../../../domain/adapters/eventTypeAdapter';
 import {
   EVENT_TYPES,
   EVENT_STATUSES,
@@ -149,9 +149,7 @@ const AdminEventsManagement: React.FC = () => {
 
   const handleViewRequest = async (request: EventRequest) => {
     try {
-      console.log('Fetching details for request:', request);
       const details = await getEventRequestDetails(request.requestedId);
-      console.log('Received details:', details);
       setSelectedRequest(details);
       setShowRequestDetailsModal(true);
     } catch (error) {

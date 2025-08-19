@@ -5,7 +5,7 @@ import { ChatHeader } from './components/ChatHeader';
 import { ChatMessage } from './components/ChatMessage';
 import { ChatInput } from './components/ChatInput';
 import { TypingIndicator } from './components/TypingIndicator';
-import { Chat, Message, User } from './types/ChatTypes';
+import { Chat, Message, User } from '../../../../domain/types/canvas/chat';
 import { getStyles } from './utils/chatUtils';
 import { FiPlus, FiUser, FiArrowLeft, FiUsers, FiMessageSquare } from 'react-icons/fi';
 import { useSelector } from 'react-redux';
@@ -259,10 +259,8 @@ export const ChatComponent: React.FC = () => {
         files.forEach(file => formData.append('files', file));
         if (message.trim()) formData.append('content', message.trim());
         if (replyTo) formData.append('replyTo', JSON.stringify(replyTo));
-        console.log('[ChatComponent] Sending file message:', { chatId: selectedChatId, files, message, replyTo });
         await chatMutations.sendFile.mutateAsync({ chatId: selectedChatId, formData, file: files[0] });
       } else {
-        console.log('[ChatComponent] Sending text message:', { chatId: selectedChatId, content: message });
         await chatMutations.sendMessage.mutateAsync({ chatId: selectedChatId, content: message, type: 'text' });
       }
       setReplyToMessage(null);
@@ -403,8 +401,6 @@ export const ChatComponent: React.FC = () => {
         scrollRef.current.scrollTop = newScrollHeight - scrollState.oldScrollHeight;
         scrollState.oldScrollHeight = 0;
       }
-      // Log when chat UI updates with new messages
-      console.log('[ChatComponent] UI updated with messages:', allMessages);
     }
   }, [allMessages]);
 
@@ -454,7 +450,6 @@ export const ChatComponent: React.FC = () => {
 
     const handleNewMessage = (message: Message) => {
       const normalizedMessage = { ...message, id: message.id || message._id };
-      console.log('[Socket.IO] Received real-time message:', normalizedMessage);
       
       if (normalizedMessage.chatId === selectedChatId && normalizedMessage.id) {
         const validMessage: Message = {
@@ -466,11 +461,9 @@ export const ChatComponent: React.FC = () => {
           if (idx !== -1) {
             const updated = [...prev];
             updated[idx] = validMessage;
-            console.log('[Socket.IO] Updated allMessages (replaced):', updated);
             return updated;
           }
           const updated = [...prev, validMessage];
-          console.log('[Socket.IO] Updated allMessages (appended):', updated);
           return updated;
         });
         if (normalizedMessage.senderId !== currentUser.id) {
@@ -481,22 +474,18 @@ export const ChatComponent: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['chats'] });
     };
 
-    const handleChatUpdate = (updatedChat: Chat) => {
-      console.log('[Socket.IO] Received chat update:', updatedChat);
+    const handleChatUpdate = () => {
       queryClient.invalidateQueries({ queryKey: ['chats'] });
     };
 
     socketRef.current.on('message', handleNewMessage);
     socketRef.current.on('chat', handleChatUpdate);
 
-    // Log join/leave events
-    console.log('[Socket.IO] Joining chat room:', selectedChatId);
     socketRef.current.emit('joinChat', { chatId: selectedChatId });
 
     return () => {
       socketRef.current?.off('message', handleNewMessage);
       socketRef.current?.off('chat', handleChatUpdate);
-      console.log('[Socket.IO] Leaving chat room:', selectedChatId);
       socketRef.current?.emit('leaveChat', { chatId: selectedChatId });
     };
   }, [selectedChatId, currentUser?.id, socketRef.current]);
@@ -518,21 +507,14 @@ export const ChatComponent: React.FC = () => {
     setHasMoreMessages(true);
   };
 
-  useEffect(() => {
-    // Don't check for token existence since we're using cookies
-    console.log('[Socket.IO] Attempting to connect with cookies');
-    
+  useEffect(() => {    
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-    const socketUrl = apiBaseUrl.replace('/api', '') + '/chat';
-    console.log('[Socket.IO] Attempting to connect to:', socketUrl);
-    
-    // Log document cookie for debugging
-    console.log('[Socket.IO] Document cookies:', document.cookie);
+    const socketUrl = apiBaseUrl.replace('/api', '') + '/chat';    
     
     const socket = io(socketUrl, {
       path: '/socket.io',
       transports: ['websocket', 'polling'],
-      withCredentials: true, // This ensures cookies are sent with the request
+      withCredentials: true, 
     });
     socketRef.current = socket;
 
@@ -542,7 +524,6 @@ export const ChatComponent: React.FC = () => {
     });
     socket.on('connect', () => {
       setSocketError(null);
-      console.log('[Socket.IO] Connected:', socket.id);
       if (socket.connected) {
         console.log('Socket is connected (checked in code)!');
       }
@@ -553,7 +534,6 @@ export const ChatComponent: React.FC = () => {
         console.log('Socket is NOT connected (checked in code)!');
       }
     });
-    // Log all socket events for debugging
     socket.onAny((event, ...args) => {
       console.log(`[Socket.IO] Event: ${event}`, ...args);
     });
@@ -561,14 +541,12 @@ export const ChatComponent: React.FC = () => {
     return () => {
       socket.disconnect();
       socketRef.current = null;
-      console.log('[Socket.IO] Disconnected and cleaned up');
     };
-  }, []); // Remove token dependency
+  }, []); 
 
 
   useEffect(() => {
     if (!socketRef.current) return;
-    console.log('Attaching userStatus listener for user', currentUserId);
     const handleUserStatus = (data: { userId: string; status: 'online' | 'offline' }) => {
       setOnlineUsers(prev => {
         const newSet = new Set(prev);
@@ -577,7 +555,6 @@ export const ChatComponent: React.FC = () => {
         } else {
           newSet.delete(data.userId);
         }
-        console.log(`[Socket.IO] Received userStatus: ${data.status} for user ${data.userId}. Online users:`, Array.from(newSet));
         return newSet;
       });
     };

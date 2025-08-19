@@ -9,16 +9,12 @@ export const Education: React.FC = () => {
   return (
     <div className="min-h-screen flex pt-16 flex-col bg-gradient-to-b from-cyan-50 via-white to-cyan-50">
 
-      {/* Main content container */}
       <main className="flex-1 relative pb-8 sm:pb-12 lg:pb-20">
-        {/* Subtle background pattern */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-b from-cyan-50/30 via-white to-cyan-50/30" />
         </div>
 
-        {/* Content sections */}
         <div className="relative space-y-4 sm:space-y-6 lg:space-y-8">
-          {/* Colleges Section */}
           <section
             id="colleges"
             data-animate
@@ -31,7 +27,6 @@ export const Education: React.FC = () => {
             </div>
           </section>
 
-          {/* Academic Calendar Section */}
           <section
             id="academic-calendar"
             data-animate
@@ -44,7 +39,6 @@ export const Education: React.FC = () => {
             </div>
           </section>
 
-          {/* Need Help Section */}
           <section
             id="need-help"
             data-animate

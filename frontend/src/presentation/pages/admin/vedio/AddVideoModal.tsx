@@ -89,11 +89,6 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
   };
 
   const handleFormSubmit = async (data: VideoFormInputs) => {
-    console.log('[AddVideoModal] handleFormSubmit', {
-      isEdit: !!selectedVideo,
-      hasFile: !!selectedFile,
-      data
-    });
     if (!selectedVideo && !selectedFile) {
       setError('root', {
         type: 'manual',
@@ -110,7 +105,6 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
     formData.append('module', moduleNumber.toString());
     formData.append('status', data.status);
     formData.append('description', data.description);
-    // Only send duration for creates; for updates, let backend keep existing
     if (!selectedVideo) {
       formData.append('duration', '0:00');
     }
@@ -129,7 +123,6 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
         status: data.status,
         description: data.description,
       };
-      console.log('[AddVideoModal] update without file payload', updateData);
       
       try {
         await onSave(updateData);
@@ -146,7 +139,6 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
 
     if (selectedVideo && selectedFile) {
       formData.append('id', selectedVideo.id);
-      console.log('[AddVideoModal] update with file keys', Array.from(formData.keys()));
     }
 
     try {
@@ -187,7 +179,6 @@ const AddVideoModal: React.FC<AddVideoModalProps> = ({
 
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <form onSubmit={handleSubmit(handleFormSubmit)}>
-            {/* Root error display */}
             {errors.root && (
               <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-4">
                 <p className="text-red-400 text-sm">{errors.root.message}</p>

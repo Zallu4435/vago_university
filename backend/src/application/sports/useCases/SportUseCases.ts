@@ -88,7 +88,6 @@ export class CreateSportUseCase {
   constructor(private sportsRepository: ISportsRepository) { }
 
   async execute(params: CreateSportRequestDTO): Promise<CreateSportResponseDTO> {
-    // Normalize status to enum value to match CreateSportData
     const normalizedParams = {
       ...params,
       status: (params.status && Object.values(SportStatus).includes(params.status as SportStatus))
@@ -119,7 +118,6 @@ export class UpdateSportUseCase {
       throw new Error("Invalid sport ID");
     }
     const { id, ...updateData } = params;
-    // Normalize status to lowercase if provided
     if (updateData.status) {
       updateData.status = updateData.status.toLowerCase() as SportStatus;
     }

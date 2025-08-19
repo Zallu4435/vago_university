@@ -3,13 +3,7 @@ import { usePreferences } from '../../../../application/context/PreferencesConte
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { joinRequestSchema, JoinRequestFormValues } from '../../../../domain/validation/user/JoinRequestSchema';
-
-interface JoinRequestFormProps {
-  onSubmit: (data: JoinRequestFormValues) => void;
-  onCancel: () => void;
-  isLoading: boolean;
-  title: string;
-}
+import { JoinRequestFormProps } from '../../../../domain/types/user/campus-life';
 
 export default function JoinRequestForm({ onSubmit, onCancel, isLoading, title }: JoinRequestFormProps) {
   const { styles, theme } = usePreferences();

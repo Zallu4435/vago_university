@@ -22,7 +22,6 @@ interface EducationProps {
 }
 
 const DepartmentEducation: React.FC<EducationProps> = ({ education, currentDepartment }) => {
-  console.log(currentDepartment, "mskoomokmkomm")
   return (
     <section
       id="education"

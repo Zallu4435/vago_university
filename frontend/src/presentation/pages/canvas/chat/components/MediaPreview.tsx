@@ -1,72 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { FiX, FiRotateCcw, FiEdit3, FiType, FiSquare, FiSmile, FiDownload, FiPlus } from 'react-icons/fi';
-
-interface Attachment {
-  url: string;
-  name: string;
-  type: 'image' | 'video' | 'audio' | 'document';
-}
-
-interface Message {
-  attachments?: Attachment[];
-}
-
-interface MediaPreviewProps {
-  message: Message;
-  onClose: () => void;
-  styles?: unknown;
-  onAddMore?: () => void;
-  onRemoveMedia?: (index: number) => void;
-  onSendMedia?: (media: { url: string; name: string; type: string; caption: string }[]) => void;
-}
-
-type Tool = 'none' | 'rotate' | 'draw' | 'text' | 'rect' | 'blur' | 'emoji' | 'crop';
-
-interface TextElement {
-  id: string;
-  x: number;
-  y: number;
-  text: string;
-  color: string;
-  fontSize: number;
-  background: string;
-  isEditing: boolean;
-}
-
-interface RectElement {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  color: string;
-  thickness: number;
-  fill: boolean;
-}
-
-interface BlurArea {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-interface EmojiElement {
-  id: string;
-  x: number;
-  y: number;
-  emoji: string;
-  size: number;
-}
-
-interface CropArea {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
+import { BlurArea, CropArea, EmojiElement, MediaPreviewProps, Message, RectElement, TextElement, Tool } from '../../../../../domain/types/canvas/chat';
 
 export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, onAddMore, onRemoveMedia, onSendMedia }) => {
   const [caption, setCaption] = useState('');
@@ -111,7 +46,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
     };
     document.addEventListener('mousedown', handleClickOutside);
     
-    // Prevent background scrolling
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
@@ -125,13 +59,25 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
     };
   }, [onClose]);
 
-  // Mock data for demonstration
   const mockMessage: Message = {
+    id: 'mock-message-1',
+    chatId: 'mock-chat-1',
+    senderId: 'mock-sender-1',
+    senderName: 'Mock User',
+    content: '',
+    type: 'text',
+    status: 'delivered',
+    reactions: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
     attachments: [
       {
+        id: 'mock-1',
         url: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=600&fit=crop',
         name: 'cyborg-woman.jpg',
-        type: 'image'
+        type: 'image',
+        size: 1024,
+        mimeType: 'image/jpeg'
       }
     ]
   };
@@ -169,7 +115,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
     if (onSendMedia) {
       onSendMedia(attachments.map((att, idx) => ({ ...att, caption: captions[idx] || '' })));
     } else {
-      console.log('Sending media with captions:', captions);
+      console.error('Sending media with captions:', captions);
     }
   };
 
@@ -626,7 +572,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
   const modalContent = (
     <div className="fixed inset-0 bg-white/10 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4">
       <div ref={modalRef} className="w-full max-w-4xl h-[80vh] md:h-[80vh] mx-auto bg-black rounded-lg shadow-lg flex flex-col overflow-hidden relative">
-        {/* Main close button at top-left */}
         <button
           onClick={onClose}
           className="absolute top-2 md:top-4 left-2 md:left-4 z-50 bg-white/90 hover:bg-white text-black rounded-full p-1.5 md:p-2 shadow-lg transition-colors flex items-center justify-center"
@@ -636,11 +581,9 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
           <FiX className="w-4 h-4 md:w-6 md:h-6" />
         </button>
 
-        {/* Top toolbar */}
         <div className="flex items-center justify-between px-2 md:px-3 py-1 md:py-2 bg-gray-900">
           <div />
           <div className="flex items-center space-x-0.5 md:space-x-1">
-            {/* Rotate */}
             <button
               className={`text-white p-1.5 md:p-2 rounded ${isImage ? (currentTool === 'rotate' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
               onClick={handleRotate}
@@ -649,7 +592,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
               <FiRotateCcw className="w-4 h-4 md:w-6 md:h-6" />
             </button>
             
-            {/* Draw/Pen */}
             <button
               className={`text-white p-1.5 md:p-2 rounded ${isImage ? (currentTool === 'draw' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
               onClick={() => {
@@ -661,7 +603,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
               <FiEdit3 className="w-4 h-4 md:w-6 md:h-6" />
             </button>
             
-            {/* Text */}
             <button
               className={`text-white p-1.5 md:p-2 rounded ${isImage ? (currentTool === 'text' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
               onClick={() => {
@@ -673,7 +614,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
               <FiType className="w-4 h-4 md:w-6 md:h-6" />
             </button>
             
-            {/* Rectangle */}
             <button
               className={`text-white p-1.5 md:p-2 rounded ${isImage ? (currentTool === 'rect' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
               onClick={() => {
@@ -685,7 +625,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
               <FiSquare className="w-4 h-4 md:w-6 md:h-6" />
             </button>
             
-            {/* Mosaic/Blur */}
             <button
               className={`text-white p-1.5 md:p-2 rounded ${isImage ? (currentTool === 'blur' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
               onClick={() => {
@@ -707,7 +646,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
               </svg>
             </button>
             
-            {/* Emoji */}
             <button
               className={`text-white p-1.5 md:p-2 rounded ${isImage ? (currentTool === 'emoji' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
               onClick={() => {
@@ -719,7 +657,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
               <FiSmile className="w-4 h-4 md:w-6 md:h-6" />
             </button>
             
-            {/* Crop */}
             <button
               className={`text-white p-1.5 md:p-2 rounded ${isImage ? (currentTool === 'crop' ? 'bg-gray-700' : '') : 'opacity-50 pointer-events-none'}`}
               onClick={() => {
@@ -734,23 +671,19 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
               </svg>
             </button>
             
-            {/* Quality/HD */}
             <button className="text-white p-1.5 md:p-2" title="HD Quality">
               <div className="border border-white rounded px-1 text-xs font-bold">
                 HD
               </div>
             </button>
             
-            {/* Download */}
             <button className="text-white p-1.5 md:p-2" title="Download">
               <FiDownload className="w-4 h-4 md:w-6 md:h-6" />
             </button>
           </div>
         </div>
 
-        {/* Main content area with carousel arrows */}
         <div className="flex-1 flex flex-col items-center justify-center bg-black relative">
-          {/* Tool palette just above image */}
           {isImage && currentTool !== 'none' && (
             <div className="mb-2 md:mb-4">{renderToolPalette()}</div>
           )}
@@ -795,7 +728,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
                   />
                 )}
                 
-                {/* Text elements overlay */}
                 {(textElements[currentMediaIndex] || []).map(textEl => (
                   <div
                     key={textEl.id}
@@ -846,7 +778,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
                   </div>
                 ))}
                 
-                {/* Emoji elements overlay */}
                 {(emojiElements[currentMediaIndex] || []).map(emojiEl => (
                   <div
                     key={emojiEl.id}
@@ -862,7 +793,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
                   </div>
                 ))}
                 
-                {/* Crop overlay */}
                 {cropArea && currentTool === 'crop' && (
                   <div
                     className="absolute border-2 border-white z-25"
@@ -878,7 +808,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
                   </div>
                 )}
                 
-                {/* Emoji picker */}
                 {showEmojiPicker && (
                   <div className="absolute top-12 md:top-16 left-1/2 -translate-x-1/2 z-40 bg-black/90 p-2 md:p-4 rounded-lg shadow-lg">
                     <div className="grid grid-cols-4 md:grid-cols-6 gap-1 md:gap-2 mb-2">
@@ -937,11 +866,8 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
           </div>
         </div>
 
-        {/* Bottom section */}
         <div className="bg-gray-900">
-          {/* Media thumbnails at bottom */}
           <div className="flex items-center justify-center py-1 md:py-2 space-x-1 md:space-x-2">
-            {/* Thumbnails for all attachments */}
             {attachments.map((att, idx) => (
               <div
                 key={idx}
@@ -962,7 +888,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
                     {att.type.charAt(0).toUpperCase()}
                   </div>
                 )}
-                {/* Remove icon at top-right of thumbnail */}
                 {attachments.length > 1 && (
                   <button
                     className="absolute top-0.5 md:top-1 right-0.5 md:right-1 bg-white text-black rounded-full p-0.5 shadow hover:bg-red-500 hover:text-white z-20 border border-gray-300"
@@ -978,7 +903,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
               </div>
             ))}
             
-            {/* Add more button */}
             {onAddMore && (
               <div
                 className="w-8 h-8 md:w-12 md:h-12 bg-gray-700 rounded-lg flex items-center justify-center border border-gray-600 cursor-pointer hover:bg-gray-600 transition-colors"
@@ -990,7 +914,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
             )}
           </div>
 
-          {/* Caption input and send */}
           <div className="px-2 md:px-4 pb-2 md:pb-4 flex items-end space-x-2 md:space-x-3">
             <div className="flex-1 bg-gray-800 rounded-full px-3 md:px-4 py-1.5 md:py-2 flex items-center">
               <input
@@ -1010,7 +933,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
               </button>
             </div>
             
-            {/* Send button - Green circle with arrow */}
             <button
               onClick={handleSend}
               className="bg-green-500 hover:bg-green-600 rounded-full p-2 md:p-3 transition-colors shadow-lg"
@@ -1023,7 +945,6 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({ message, onClose, on
           </div>
         </div>
         
-        {/* Current tool indicator */}
         {currentTool !== 'none' && (
           <div className="absolute bottom-16 md:bottom-20 left-2 md:left-4 bg-black/70 text-white px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs md:text-sm z-30">
             {currentTool === 'draw' && (isEraser ? 'Eraser' : 'Draw')}

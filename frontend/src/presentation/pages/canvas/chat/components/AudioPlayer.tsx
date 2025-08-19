@@ -1,10 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FiPlay, FiPause, FiMic } from 'react-icons/fi';
 import WaveSurfer from 'wavesurfer.js';
-
-interface AudioPlayerProps {
-  src: string;
-}
+import { AudioPlayerProps } from '../../../../../domain/types/canvas/chat';
 
 const AudioPlayer: React.FC<AudioPlayerProps> = ({ src }) => {
   const waveformRef = useRef<HTMLDivElement>(null);
@@ -13,7 +10,6 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ src }) => {
   const [, setDuration] = useState(0);
   const [current, setCurrent] = useState(0);
 
-  // Helper to initialize WaveSurfer
   const initWaveSurfer = () => {
     if (waveformRef.current) {
       if (wavesurfer.current) {
@@ -50,14 +46,11 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ src }) => {
 
   useEffect(() => {
     initWaveSurfer();
-    // Clean up on unmount
     return () => {
       wavesurfer.current && wavesurfer.current.destroy();
     };
-    // eslint-disable-next-line
   }, [src]);
 
-  // Optional: Handle resizing
   useEffect(() => {
     const handleResize = () => {
       if (wavesurfer.current) {

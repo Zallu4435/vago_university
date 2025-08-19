@@ -1,20 +1,6 @@
 import { useState, useRef } from 'react';
 import { FaTimes, FaUpload, FaCheck, FaSearchPlus, FaSearchMinus, FaUndo, FaRedo } from 'react-icons/fa';
-
-interface ImageCropperProps {
-  selectedImage: string;
-  cropData: {
-    x: number;
-    y: number;
-    size: number;
-    scale: number;
-    rotate: number;
-  };
-  onCropChange: (data: { x: number; y: number; size: number; scale: number; rotate: number }) => void;
-  onCropApply: (file: File) => void;
-  onCancel: () => void;
-  onChooseDifferent: () => void;
-}
+import { ImageCropperProps } from '../../../../domain/types/settings/user';
 
 export const ImageCropper = ({
   selectedImage,
@@ -256,7 +242,6 @@ export const ImageCropper = ({
                 draggable={false}
               />
 
-              {/* Crop Overlay */}
               <div
                 className="absolute border-3 border-blue-500 rounded-full shadow-xl cursor-move select-none"
                 style={{
@@ -271,7 +256,6 @@ export const ImageCropper = ({
                 <div className="absolute inset-0 bg-blue-500/20 rounded-full"></div>
                 <div className="absolute inset-1 border-2 border-blue-400/60 rounded-full border-dashed"></div>
 
-                {/* Resize Handle */}
                 <div
                   className="absolute -bottom-2 -right-2 w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg cursor-se-resize hover:bg-blue-600 transition-colors hover:scale-110"
                   onMouseDown={(e) => {
@@ -281,7 +265,6 @@ export const ImageCropper = ({
                 />
               </div>
 
-              {/* Dark overlay outside crop area */}
               <div
                 className="absolute inset-0 pointer-events-none"
                 style={{

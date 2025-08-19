@@ -9,20 +9,12 @@ import SiteSectionViewModal from './SiteSectionViewModal';
 import { useSiteManagement, SiteSectionKey } from '../../../../application/hooks/useSiteManagement';
 import { SiteSection } from '../../../../application/services/siteManagement.service';
 import { toast } from 'react-hot-toast';
-import { SECTIONS, columnsMap } from '../../../../shared/constants/siteManagementConstants';
+import { SECTIONS, columnsMap, filterOptions } from '../../../../shared/constants/siteManagementConstants';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import EmptyState from '../../../../shared/components/EmptyState';
-import type { ColumnConfig } from '../../../components/admin/management/ApplicationsTable';
-
-type FormData = {
-  title: string;
-  description: string;
-  image?: string;
-  link?: string;
-  category?: string;
-};
-
+import { ColumnConfig } from '../../../../domain/types/management';
+import { FormData } from '../../../../domain/types/management/sitemanagement';
 
 const convertToTableData = (sections: SiteSection[]) => {
   return sections.map(section => ({
@@ -30,7 +22,6 @@ const convertToTableData = (sections: SiteSection[]) => {
     _id: section.id
   }));
 };
-
 
 const SiteManagement = () => {
   const [selected, setSelected] = React.useState<SiteSection | null>(null);
@@ -89,31 +80,6 @@ const SiteManagement = () => {
   const section = SECTIONS.find(s => s.key === activeTab)!;
 
   const tableData = convertToTableData(sections || []);
-
-  const filterOptions: { [key: string]: string[] } = {
-    category: [
-      'All Categories',
-      'Events',
-      'News',
-      'Research',
-      'Education',
-      'Student Life',
-      'Facilities',
-      'Awards',
-      'Technology',
-      'Business',
-      'Health Services',
-      'Financial Services',
-      'Academic Affairs',
-      'Student Services',
-      'Finance',
-      'Human Resources',
-      'IT Services',
-      'Facilities Management',
-      'Research & Development',
-      'External Relations'
-    ],
-  };
 
   const handleDateFilterChange = (field: 'startDate' | 'endDate', value: string) => {
     setDateFilters(prev => ({

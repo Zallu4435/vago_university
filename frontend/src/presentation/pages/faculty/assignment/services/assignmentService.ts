@@ -1,5 +1,5 @@
+import { Assignment, NewAssignment } from '../../../../../domain/types/faculty/assignment';
 import httpClient from '../../../../../frameworks/api/httpClient';
-import { Assignment, NewAssignment } from '../types';
 import { isAxiosErrorWithApiError } from '../../../../../shared/types/apiError';
 
 export const assignmentService = {
@@ -27,14 +27,7 @@ export const assignmentService = {
     formData.append('maxMarks', assignment.maxMarks);
     formData.append('description', assignment.description);
     
-    console.log('Files to upload:', assignment.files);
-    
-    assignment.files.forEach((file, index) => {
-      console.log(`File ${index + 1}:`, {
-        name: file.name,
-        type: file.type,
-        size: file.size
-      });
+    assignment.files.forEach((file) => {
       formData.append(`files`, file);
     });
 
@@ -117,35 +110,19 @@ export const assignmentService = {
 
   getFileDownloadUrl: async (fileUrl: string, fileName: string) => {
     try {
-      console.log('Service: Getting download URL for file:', fileName);
       const response = await httpClient.get('/faculty/assignments/download-submission-file', {
         params: { fileUrl, fileName },
         responseType: 'blob'
       });
-      console.log('Service: Download response received:', {
-        status: response.status,
-        statusText: response.statusText,
-        dataType: typeof response.data,
-        dataSize: response.data instanceof Blob ? response.data.size : 'N/A'
-      });
       return response.data;
     } catch (error) {
-      console.error('Service: Error getting download URL:', error);
       throw error;
     }
   },
 
   downloadSubmissionFile: async (fileUrl: string, fileName: string) => {
     try {
-      console.log('=== SERVICE: DOWNLOAD SUBMISSION FILE STARTED ===');
-      console.log('Service: File URL:', fileUrl);
-      console.log('Service: File Name:', fileName);
-      
       const blob = await assignmentService.getFileDownloadUrl(fileUrl, fileName);
-      console.log('Service: File blob received:', {
-        size: blob instanceof Blob ? blob.size : 'N/A',
-        type: blob instanceof Blob ? blob.type : 'N/A'
-      });
       
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -153,27 +130,16 @@ export const assignmentService = {
       link.download = fileName;
       link.style.display = 'none';
       
-      console.log('📎 Download link properties:', {
-        href: link.href,
-        download: link.download
-      });
-      
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
       setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-      
-      console.log('Service: File download triggered successfully');
-      console.log('=== SERVICE: DOWNLOAD SUBMISSION FILE COMPLETED ===');
       return blob;
     } catch (error: unknown) {
-      console.error('=== SERVICE: DOWNLOAD SUBMISSION FILE ERROR ===');
       if (isAxiosErrorWithApiError(error)) {
-        console.error('Service: Error downloading submission file:', error.response?.data?.error || error.message);
         throw new Error(error.response?.data?.error || 'Error downloading submission file');
       }
-      console.error('Service: Error downloading submission file:', error);
       throw new Error('Error downloading submission file');
     }
   },

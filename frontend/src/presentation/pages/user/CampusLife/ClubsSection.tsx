@@ -175,7 +175,6 @@ export default function ClubsSection({ searchTerm, typeFilter, statusFilter, onF
                           className="py-2 px-3 rounded-full border border-slate-200 bg-white text-sm"
                           value={typeFilter}
                           onChange={e => {
-                            console.log('onFilterChange (type)', { search: searchTerm, type: e.target.value, status: statusFilter });
                             onFilterChange({ search: searchTerm, type: e.target.value, status: statusFilter });
                           }}
                         >
@@ -188,7 +187,6 @@ export default function ClubsSection({ searchTerm, typeFilter, statusFilter, onF
                           className="py-2 px-3 rounded-full border border-slate-200 bg-white text-sm"
                           value={statusFilter}
                           onChange={e => {
-                            console.log('onFilterChange (status)', { search: searchTerm, type: typeFilter, status: e.target.value });
                             onFilterChange({ search: searchTerm, type: typeFilter, status: e.target.value });
                           }}
                         >
@@ -217,7 +215,6 @@ export default function ClubsSection({ searchTerm, typeFilter, statusFilter, onF
                           className="py-2 px-3 rounded-full border border-slate-200 bg-white text-sm"
                           value={typeFilter}
                           onChange={e => {
-                            console.log('onFilterChange (type)', { search: searchTerm, type: e.target.value, status: statusFilter });
                             onFilterChange({ search: searchTerm, type: e.target.value, status: statusFilter });
                           }}
                         >
@@ -230,7 +227,6 @@ export default function ClubsSection({ searchTerm, typeFilter, statusFilter, onF
                           className="py-2 px-3 rounded-full border border-slate-200 bg-white text-sm"
                           value={statusFilter}
                           onChange={e => {
-                            console.log('onFilterChange (status)', { search: searchTerm, type: typeFilter, status: e.target.value });
                             onFilterChange({ search: searchTerm, type: typeFilter, status: e.target.value });
                           }}
                         >

@@ -5,7 +5,6 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   AddEventModalProps,
-  ParticleConfig
 } from '../../../../../domain/types/management/eventmanagement';
 import {
   TIMEFRAME_OPTIONS,
@@ -13,6 +12,7 @@ import {
   EVENT_TYPE_OPTIONS,
   EVENT_ICONS,
   EVENT_COLORS,
+  ghostParticles,
 } from '../../../../../shared/constants/eventManagementConstants';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { eventSchema } from '../../../../../domain/validation/management/eventSchema';
@@ -107,20 +107,8 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
       participants: 0,
       status: 'upcoming',
     };
-
-    console.log(eventData, "eventData ")
     onSubmit(eventData);
   };
-
-  const ghostParticles: ParticleConfig[] = Array(30)
-    .fill(0)
-    .map((_) => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
 
   if (!isOpen) return null;
 

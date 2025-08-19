@@ -9,14 +9,7 @@ import { formatDateTime } from '../../../../shared/utils/dateUtils';
 import { financialService } from '../../../../application/services/financialService';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-
-import { Charge, Payment } from '../../../../domain/types/user/financial';
-
-interface FinancialState {
-  info: Charge[];
-  history: Payment[];
-  financialAidStatus: string;
-}
+import { Charge, FinancialState, Payment } from '../../../../domain/types/user/financial';
 
 export default function Financial() {
   const { styles, theme } = usePreferences();

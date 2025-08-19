@@ -16,14 +16,12 @@ const ConfirmAdmission = () => {
   const [admissionDetails, setAdmissionDetails] = useState<ConfirmAdmissionDetails | null>(null);
 
   useEffect(() => {
-    // Validate parameters
     if (!id || !token || (action !== 'accept' && action !== 'reject')) {
       setError('Invalid confirmation link');
       setIsLoading(false);
       return;
     }
 
-    // Fetch admission details to show the user what they're confirming
     const fetchAdmissionDetails = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/admin/admissions/${id}/token`, {
@@ -54,7 +52,6 @@ const ConfirmAdmission = () => {
   const handleConfirmation = async () => {
     setIsLoading(true);
     try {
-      // Use the correct endpoint structure matching the backend
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/admin/admissions/${id}/confirm/${action}`, null, {
         params: { token }
       });
@@ -66,7 +63,6 @@ const ConfirmAdmission = () => {
       }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        // Handle specific error cases from the backend
         if (err.response?.status === 400) {
           if (err.response.data.error === 'Token is required') {
             setError('Invalid confirmation link: Token is missing');
@@ -76,7 +72,6 @@ const ConfirmAdmission = () => {
             setError(err.response.data.error || 'Invalid request');
           }
         } else if (err.response?.data?.message) {
-          // Handle other backend errors
           setError(err.response.data.message);
         } else {
           setError('An error occurred during confirmation. Please try again later.');

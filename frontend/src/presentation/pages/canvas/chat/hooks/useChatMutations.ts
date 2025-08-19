@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { chatService } from '../services/chatService';
 import { toast } from 'react-hot-toast';
-import { Message } from '../types/ChatTypes';
+import { Message } from '../../../../../domain/types/canvas/chat';
 
 export const useChatMutations = (chatId?: string, currentUserId?: string) => {
   const queryClient = useQueryClient();
@@ -10,7 +10,6 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
     if (!chatId || !currentUserId) throw new Error('chatId and currentUserId are required');
   };
 
-  // Group mutations
   const addGroupMember = useMutation({
     mutationFn: async (userId: string) => {
       requireIds();
@@ -96,7 +95,6 @@ export const useChatMutations = (chatId?: string, currentUserId?: string) => {
     }
   });
 
-  // Message mutations
   const sendMessage = useMutation({
     mutationFn: async (params: { chatId: string; content: string; type?: string }) =>
       chatService.sendMessage(params.chatId, params.content, params.type as 'text' | 'image' | 'file' | 'audio' | 'video' | undefined),

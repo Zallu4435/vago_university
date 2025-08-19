@@ -5,6 +5,7 @@ import { chargeSchema, ChargeFormDataRaw } from '../../../../domain/validation/m
 import { FiX as X, FiDollarSign, FiCalendar, FiFileText } from 'react-icons/fi';
 import { AddChargeModalProps, ChargeFormData } from '../../../../domain/types/management/financialmanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
+import { ghostParticles } from '../../../../shared/constants/paymentManagementConstants';
 
 
 const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubmit, initialValues }) => {
@@ -68,17 +69,6 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ isOpen, onClose, onSubm
   };
 
   usePreventBodyScroll(isOpen);
-
-  // Particle effect
-  const ghostParticles = Array(30)
-    .fill(0)
-    .map((_) => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
 
   if (!isOpen) return null;
 

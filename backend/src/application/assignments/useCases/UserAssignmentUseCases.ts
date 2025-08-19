@@ -11,14 +11,10 @@ import {
   GetUserAssignmentResponseDTO,
   SubmitUserAssignmentResponseDTO,
   GetUserAssignmentStatusResponseDTO,
-  GetUserAssignmentFeedbackResponseDTO
+  GetUserAssignmentFeedbackResponseDTO,
+  ResponseDTO
 } from '../../../domain/assignments/dtos/UserAssignmentResponseDTOs';
 import { AssignmentErrorType } from '../../../domain/assignments/enums/AssignmentErrorType';
- 
-interface ResponseDTO<T> {
-  data: T | { error: string };
-  success: boolean;
-}
 
 export interface IGetUserAssignmentsUseCase {
   execute(params: GetUserAssignmentsRequestDTO): Promise<ResponseDTO<GetUserAssignmentsResponseDTO>>;
@@ -175,7 +171,11 @@ export class SubmitUserAssignmentUseCase implements ISubmitUserAssignmentUseCase
       if (!params.file) {
         return { data: { error: AssignmentErrorType.FileRequired }, success: false };
       }
-    const { submission } = await this.userAssignmentRepository.submitAssignment(params.assignmentId, [params.file], params.studentId);
+    const assignmentFile = {
+      fileName: params.file.originalname,
+      fileUrl: params.file.path || '',
+    };
+    const { submission } = await this.userAssignmentRepository.submitAssignment(params.assignmentId, [assignmentFile], params.studentId);
     if (!submission) {
       return { data: { error: 'Submission failed' }, success: false };
     }

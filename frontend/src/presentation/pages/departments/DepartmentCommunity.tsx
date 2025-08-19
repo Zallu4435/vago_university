@@ -6,70 +6,13 @@ import DepartmentCommunityAbout from '../../components/departments/community/Dep
 import DepartmentCommunityMain from '../../components/departments/community/DepartmentCommunityMain';
 import DepartmentCommunitySupport from '../../components/departments/community/DepartmentCommunitySupport';
 import DepartmentCommunityEmergency from '../../components/departments/community/DepartmentCommunityEmergency';
-
-interface CommunityEvent {
-  date: string;
-  title: string;
-  description: string;
-}
-
-interface CommunityAspect {
-  title: string;
-  description: string;
-  icon: React.ElementType;
-}
-
-interface SupportResource {
-  title: string;
-  description: string;
-  icon: React.ElementType;
-}
-
-interface EmergencyContact {
-  title: string;
-  phone: string;
-  email: string;
-}
-
-interface DepartmentData {
-  poster: {
-    title: string;
-    subtitle: string;
-  };
-  about: {
-    title: string;
-    description: string;
-  };
-  community: {
-    title: string;
-    studentLife: {
-      description: string;
-      aspects: CommunityAspect[];
-    };
-    events: {
-      title: string;
-      list: CommunityEvent[];
-    };
-  };
-  supportWellness: {
-    title: string;
-    resources: SupportResource[];
-  };
-  emergencyContact: {
-    title: string;
-    contacts: EmergencyContact[];
-  };
-}
-
-interface DepartmentDataMap {
-  [key: string]: DepartmentData;
-}
+import { DepartmentCommunityDataMap } from '../../../domain/types/department';
 
 const DepartmentCommunity: React.FC = () => {
   const [currentDepartment] = useState<string>('computer-science');
   const isVisible = useSectionAnimation();
 
-  const departmentData: DepartmentDataMap = {
+  const departmentData: DepartmentCommunityDataMap = {
     'computer-science': {
       poster: {
         title: 'Join Our Community',

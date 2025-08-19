@@ -227,7 +227,7 @@ export class NotificationRepository implements INotificationRepository {
                 createdBy: notification.createdBy,
                 createdAt: typeof notification.createdAt === 'string' ? notification.createdAt : notification.createdAt.toISOString(),
                 status: notification.status,
-                isRead: false, // This will be calculated in use case
+                isRead: false, 
                 readBy: notification.readBy || [],
             },
         };

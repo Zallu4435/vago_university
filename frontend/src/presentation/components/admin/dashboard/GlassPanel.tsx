@@ -1,10 +1,5 @@
 import React from 'react';
-
-interface GlassPanelProps {
-  title: string;
-  icon: React.ElementType;
-  children: React.ReactNode;
-}
+import { GlassPanelProps } from '../../../../domain/types/dashboard/admin';
 
 const GlassPanel: React.FC<GlassPanelProps> = ({ title, icon: Icon, children }) => (
   <div className="group relative">

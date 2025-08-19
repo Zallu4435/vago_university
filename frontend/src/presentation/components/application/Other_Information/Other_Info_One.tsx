@@ -19,7 +19,6 @@ const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
   });
 
   const handleAddCondition = (condition: HealthCondition) => {
-    console.log('Other_Info_One: Adding condition:', condition);
     if (conditions.length < 3) {
       append(condition);
       setShowModal(false);
@@ -30,7 +29,6 @@ const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
 
   const handleEditCondition = (condition: HealthCondition, index?: number) => {
     if (index !== undefined && index >= 0) {
-      console.log('Other_Info_One: Updating condition at index:', index, condition);
       update(index, condition);
       const details = (conditions as unknown as HealthCondition[])
         .map((c, i) => (i === index ? condition : c))
@@ -44,7 +42,6 @@ const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
   };
 
   const handleRemoveCondition = (index: number) => {
-    console.log('Other_Info_One: Removing condition at index:', index);
     remove(index);
     const details = (conditions as unknown as HealthCondition[])
       .filter((_, i) => i !== index)
@@ -54,7 +51,6 @@ const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
   };
 
   const handleEditClick = (index: number) => {
-    console.log('Other_Info_One: Editing condition at index:', index, 'condition:', conditions[index]);
     setEditIndex(index);
     setEditCondition(conditions[index] as unknown as HealthCondition);
     setShowModal(true);
@@ -77,16 +73,7 @@ const Other_Info_One: React.FC<OtherInfoOneProps> = ({ onNext }) => {
   };
 
   const handleNext = async () => {
-    console.log('Other_Info_One: Current values before validation:', {
-      hasHealthSupport: watch('health.hasHealthSupport'),
-      medicalConditions: watch('health.medicalConditions'),
-      conditions: watch('health.conditions')
-    });
     const isValid = await trigger('health', { shouldFocus: true });
-    console.log('Other_Info_One: Validation result:', {
-      isValid,
-      errors: errors.health ? JSON.stringify(errors.health, null, 2) : 'No errors'
-    });
     if (isValid) {
       onNext();
     }

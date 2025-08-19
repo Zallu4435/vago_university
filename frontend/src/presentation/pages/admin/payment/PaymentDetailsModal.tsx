@@ -9,58 +9,8 @@ import {
   IoDownloadOutline as Download,
 } from 'react-icons/io5';
 import { PaymentDetailsModalProps } from '../../../../domain/types/management/financialmanagement';
-
-const StatusBadge = ({ status }: { status: string }) => {
-  const statusConfig = {
-    completed: {
-      bg: 'bg-green-600/30',
-      text: 'text-green-100',
-      border: 'border-green-500/50',
-    },
-    pending: {
-      bg: 'bg-yellow-600/30',
-      text: 'text-yellow-100',
-      border: 'border-yellow-500/50',
-    },
-    failed: {
-      bg: 'bg-red-600/30',
-      text: 'text-red-100',
-      border: 'border-red-500/50',
-    },
-  };
-
-  const config = statusConfig[status?.toLowerCase() as keyof typeof statusConfig] || statusConfig.pending;
-
-  return (
-    <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.bg} ${config.text} ${config.border}`}
-    >
-      {status?.charAt(0)?.toUpperCase() + status?.slice(1)}
-    </span>
-  );
-};
-
-const InfoCard = ({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?: number | string; className?: string }>; label: string; value: string }) => (
-  <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
-    <div className="flex items-center mb-2">
-      <Icon size={18} className="text-purple-400" />
-      <span className="ml-2 text-sm font-medium text-gray-300">{label}</span>
-    </div>
-    <p className="text-white font-semibold">{value || 'N/A'}</p>
-  </div>
-);
-
-const formatDate = (dateString: string): string => {
-  if (!dateString) return 'N/A';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
+import { InfoCard, StatusBadge } from '../../../../shared/constants/paymentManagementConstants';
+import { formatDateTime } from '../../../../shared/utils/dateUtils';
 
 const PaymentDetailsModal: React.FC<PaymentDetailsModalProps> = ({ isOpen, onClose, payment }) => {
 
@@ -99,7 +49,7 @@ const PaymentDetailsModal: React.FC<PaymentDetailsModalProps> = ({ isOpen, onClo
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             <InfoCard icon={User} label="Student ID" value={payment.studentId ?? 'N/A'} />
-            <InfoCard icon={Calendar} label="Date" value={formatDate(payment.date)} />
+            <InfoCard icon={Calendar} label="Date" value={formatDateTime(payment.date)} />
             <InfoCard icon={DollarSign} label="Amount" value={`$${payment.amount?.toFixed(2)}`} />
             <InfoCard icon={CreditCard} label="Method" value={payment.method} />
             <InfoCard icon={FileText} label="Description" value={payment.description} />

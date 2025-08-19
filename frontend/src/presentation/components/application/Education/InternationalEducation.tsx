@@ -9,8 +9,6 @@ export const InternationalEducation: React.FC = () => {
   const [step, setStep] = useState(1);
 
   const handleNext = async () => {
-    console.log('InternationalEducation: handleNext called');
-    // Validate only the school-related fields and subjects
     const fieldsToValidate = [
       'international.schoolName',
       'international.country',
@@ -22,21 +20,16 @@ export const InternationalEducation: React.FC = () => {
       'international.subjects',
     ];
     const isValid = await trigger(fieldsToValidate, { shouldFocus: true });
-    console.log('InternationalEducation: Validation result:', { isValid, errors: JSON.stringify(errors, null, 2) });
     if (isValid) {
-      console.log('InternationalEducation: Advancing to step 2');
       setStep(2);
     }
   };
 
   const handleBack = () => {
-    console.log('InternationalEducation: handleBack called, returning to step 1');
     setStep(1);
   };
 
   const onSubmit = () => {
-    console.log('InternationalEducation: onSubmit called');
-    // Submission handled by parent Education component
   };
 
   return (

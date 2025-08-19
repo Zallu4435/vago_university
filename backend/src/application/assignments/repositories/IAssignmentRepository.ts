@@ -1,4 +1,4 @@
-import { Assignment, IAssignment } from "../../../domain/assignments/entities/Assignment";
+import { IAssignment } from "../../../domain/assignments/entities/Assignment";
 import { IAssignmentDocument } from "../../../infrastructure/database/mongoose/assignment/AssignmentModel";
 import { ISubmissionDocument } from "../../../infrastructure/database/mongoose/assignment/SubmissionModel";
  

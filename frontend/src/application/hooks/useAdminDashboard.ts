@@ -3,14 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import {
   adminDashboardService,
-  DashboardData,
-  DashboardMetrics,
-  UserGrowthData,
-  RevenueData,
-  PerformanceData,
-  ActivityItem,
-  SystemAlert
 } from '../services/adminDashboard.service';
+import { ActivityItem, DashboardData, DashboardMetrics, PerformanceData, RevenueData, SystemAlert, UserGrowthData } from '../../domain/types/dashboard/admin';
 
 export const useAdminDashboard = () => {
   const queryClient = useQueryClient();

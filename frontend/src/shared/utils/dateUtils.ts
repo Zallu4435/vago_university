@@ -22,7 +22,7 @@ export const formatDateTime = (dateString: string): string => {
 
 export const formatRelativeTime = (dateString: string): string => {
   if (!dateString) return 'N/A';
-  
+
   const now = new Date();
   const date = new Date(dateString);
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
@@ -48,4 +48,12 @@ export const formatRelativeTime = (dateString: string): string => {
     const years = Math.floor(diffInSeconds / 31536000);
     return `${years}y ago`;
   }
+};
+
+export const formatTime = (timestamp: string): string => {
+  return new Date(timestamp).toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
 };

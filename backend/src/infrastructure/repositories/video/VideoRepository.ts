@@ -16,7 +16,6 @@ export class VideoRepository implements IVideoRepository {
         return videos.map((video) => ({
             ...video,
             _id: video._id.toString(),
-            // Handle both populated and unpopulated diplomaId
             diplomaId: video.diplomaId && typeof video.diplomaId === 'object' && 'title' in video.diplomaId 
                 ? video.diplomaId as unknown as IRepoDiploma
                 : video.diplomaId?.toString() || '',
@@ -61,7 +60,6 @@ export class VideoRepository implements IVideoRepository {
     }
 
     async updateVideo(id: string, video): Promise<IRepoVideo | null> {
-        console.log('🗄️ [Repo] updateVideo called', { id, updateKeys: Object.keys(video || {}) });
         const updated = await VideoModel.findByIdAndUpdate(
             id,
             { $set: { ...video, updatedAt: new Date() } },
@@ -87,11 +85,9 @@ export class VideoRepository implements IVideoRepository {
     }
     
     async addVideoToDiploma(diplomaId: string, videoId: string) {
-        console.log('🗄️ [Repo] addVideoToDiploma', { diplomaId, videoId });
         await DiplomaModel.findByIdAndUpdate(diplomaId, { $addToSet: { videoIds: videoId } });
     }
     async removeVideoFromDiploma(diplomaId: string, videoId: string) {
-        console.log('🗄️ [Repo] removeVideoFromDiploma', { diplomaId, videoId });
         await DiplomaModel.findByIdAndUpdate(diplomaId, { $pull: { videoIds: videoId } });
     }
 } 

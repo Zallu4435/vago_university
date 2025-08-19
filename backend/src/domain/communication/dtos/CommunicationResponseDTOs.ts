@@ -1,4 +1,4 @@
-import { Message, UserInfo } from "../entities/Communication";
+import { UserInfo } from "../entities/Communication";
 
 export interface MessageSummaryDTO {
   _id: string;
@@ -90,7 +90,7 @@ export interface AdminSentMessageResponseDTO {
   _id: string;
   subject: string;
   content: string;
-  recipients: string; // String for admin sent messages (e.g., "All Students", "Multiple Students", "email@example.com")
+  recipients: string; 
   recipientCount: number;
   isBroadcast: boolean;
   attachments?: Array<{
@@ -107,8 +107,6 @@ export interface GetAllAdminsResponseDTO {
   admins: UserInfo[];
 }
 
-
-
 export interface FetchUsersResponseDTO {
   users: Array<{
     id: string;
@@ -116,3 +114,8 @@ export interface FetchUsersResponseDTO {
     name: string;
   }>;
 } 
+
+export interface ResponseDTO<T> {
+  success: boolean;
+  data: T | { error: string };
+}

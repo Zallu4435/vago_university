@@ -2,14 +2,10 @@ import React from 'react';
 import { FiDollarSign, FiX, FiFileText } from 'react-icons/fi';
 import { ChargeDetailsModalProps } from '../../../../domain/types/management/financialmanagement';
 import ReactDOM from 'react-dom';
+import { formattedDate } from '../../../../shared/constants/paymentManagementConstants';
 
 const ChargeDetailsModal: React.FC<ChargeDetailsModalProps> = ({ charge, isOpen, onClose }) => {
   if (!isOpen) return null;
-
-  const formattedDate = (date: string) => {
-    const dateObj = new Date(date);
-    return `${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
-  };
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-[10000] flex items-center justify-center p-4">

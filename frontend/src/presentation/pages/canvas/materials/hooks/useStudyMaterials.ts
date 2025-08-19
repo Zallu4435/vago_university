@@ -9,10 +9,8 @@ export const useStudyMaterials = (filters: GetMaterialsFilters = {}) => {
   const { data: materialsData, isLoading: isLoadingMaterials, error: materialsError } = useQuery({
     queryKey: ['materials', filters],
     queryFn: async () => {
-      console.log('Fetching materials with filters:', filters);
       try {
         const response = await userMaterialService.getMaterials(filters);
-        console.log('Materials response:', response);
         return response;
       } catch (error) {
         console.error('Error fetching materials:', error);

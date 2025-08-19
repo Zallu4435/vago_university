@@ -5,29 +5,20 @@ import {
   GetCalendarDaysRequestDTO,
   GetUserInfoRequestDTO,
 } from "../../../domain/student/dtos/StudentDashboardRequestDTOs";
-
 import {
   GetDeadlinesResponseDTO,
   GetClassesResponseDTO,
   GetCalendarDaysResponseDTO,
   NewEventDTO as BaseNewEventDTO,
   GetUserInfoResponseDTO,
+  ResponseDTO
 } from "../../../domain/student/dtos/StudentDashboardResponseDTOs";
-
 import { IStudentDashboardRepository } from "../repositories/IStudentDashboardRepository";
 import { IAssignmentDocument } from "../../../infrastructure/database/mongoose/assignment/AssignmentModel";
 import { IVideoSession } from "../../../infrastructure/database/mongoose/models/session.model";
 import { Event } from "../../../domain/events/entities/EventTypes";
-import { Sport } from "../../../domain/sports/entities/Sport";
 import { Club } from "../../../domain/clubs/entities/ClubTypes";
-import { Notification } from "../../../domain/notifications/entities/NotificationTypes";
-import { IMessage } from "../../../infrastructure/database/mongoose/models/communication.model";
 
-// Type definitions for repository return types
-interface AnnouncementData {
-  latestMessage: IMessage | null;
-  latestNotification: Notification | null;
-}
 
 interface CalendarData {
   events: Event[];
@@ -35,41 +26,6 @@ interface CalendarData {
   clubs: Club[];
 }
 
-interface NewEventsData {
-  latestEvent: Event | null;
-  latestSport: Sport | null;
-  latestClub: Club | null;
-}
-
-// Type definitions for mapped objects
-interface MappedEvent {
-  _id: string;
-  title: string;
-  date: string;
-  location: string;
-  description: string;
-}
-
-interface MappedSport {
-  _id: string;
-  title: string;
-  date: string;
-  location: string;
-  description: string;
-}
-
-interface MappedClub {
-  _id: string;
-  name: string;
-  date: Date;
-  location: string;
-  description: string;
-}
-
-interface ResponseDTO<T> {
-  data: T | { error: string };
-  success: boolean;
-}
 
 export interface IGetAnnouncementsUseCase {
   execute(params: GetAnnouncementsRequestDTO): Promise<ResponseDTO<{ title: string; date: Date }[]>>;

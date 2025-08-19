@@ -159,11 +159,9 @@ const HelpSupportPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Fixed Header */}
       <div className="fixed top-0 left-0 right-0 z-[9999] bg-white border-b border-slate-200 shadow-sm">
         <div className="max-w-full mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Left Section - Back Button and Title */}
             <div className="flex items-center space-x-6">
               <button
                 onClick={handleBackToDashboard}
@@ -217,7 +215,6 @@ const HelpSupportPage = () => {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 py-8">
-          {/* Contact Methods */}
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-slate-800 mb-6">Get Immediate Help</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -237,7 +234,6 @@ const HelpSupportPage = () => {
             </div>
           </div>
 
-          {/* Quick Links */}
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-slate-800 mb-6">Quick Access</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -251,11 +247,9 @@ const HelpSupportPage = () => {
             </div>
           </div>
 
-          {/* FAQ Section */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
             <h2 className="text-2xl font-bold text-slate-800 mb-6">Frequently Asked Questions</h2>
             
-            {/* Category Filter */}
             <div className="flex flex-wrap gap-2 mb-6">
               {supportCategories.map((category) => (
                 <button
@@ -273,7 +267,6 @@ const HelpSupportPage = () => {
               ))}
             </div>
 
-            {/* FAQ Items */}
             <div className="space-y-4">
               {filteredFAQs.length > 0 ? (
                 filteredFAQs.map((faq, index) => (
@@ -301,7 +294,6 @@ const HelpSupportPage = () => {
             </div>
           </div>
 
-          {/* Emergency Contact */}
           <div className="mt-8 bg-red-50 border border-red-200 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-3">
               <FaExclamationTriangle className="text-red-600 text-xl" />

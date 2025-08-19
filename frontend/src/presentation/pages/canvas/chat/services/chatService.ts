@@ -1,5 +1,5 @@
+import { Chat, Message, PaginatedResponse, User } from '../../../../../domain/types/canvas/chat';
 import httpClient from '../../../../../frameworks/api/httpClient';
-import { Chat, Message, User, PaginatedResponse } from '../types/ChatTypes';
 import { isAxiosErrorWithApiError } from '../../../../../shared/types/apiError';
 
 class ChatService {

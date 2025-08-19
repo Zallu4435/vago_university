@@ -13,7 +13,6 @@ export default function Communication() {
     <div className={`min-h-screen flex flex-col relative overflow-hidden ${styles.background}`}>
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
         <div className={`group relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} hover:${styles.card.hover} transition-all duration-300`}>
           <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
           <div className="relative z-10 p-4 sm:p-6">

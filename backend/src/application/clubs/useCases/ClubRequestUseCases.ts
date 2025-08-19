@@ -11,42 +11,7 @@ import {
 } from "../../../domain/clubs/dtos/ClubRequestResponseDTOs";
 import { IClubsRepository } from "../repositories/IClubsRepository";
 import { GetClubRequestsRequest } from "../../../domain/clubs/entities/Club";
-
-interface PopulatedClubRequest {
-  _id: string;
-  status: string;
-  createdAt: Date;
-  updatedAt: Date;
-  whyJoin: string;
-  additionalInfo?: string;
-  clubId: {
-    _id: string;
-    name: string;
-    type: string;
-    about?: string;
-    nextMeeting?: string;
-    enteredMembers?: number;
-  };
-  userId?: {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-}
-
-interface PopulatedClubRequestSummary {
-  _id: string;
-  clubId?: {
-    name: string;
-    type: string;
-  };
-  userId?: {
-    email: string;
-  };
-  createdAt?: Date;
-  status?: string;
-}
+import { PopulatedClubRequest, PopulatedClubRequestSummary } from "../../../domain/clubs/entities/ClubRequest";
 
 export interface IGetClubRequestsUseCase {
   execute(params: GetClubRequestsRequestDTO): Promise<GetClubRequestsResponseDTO>;

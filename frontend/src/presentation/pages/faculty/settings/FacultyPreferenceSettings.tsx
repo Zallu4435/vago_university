@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaCog, FaBell, FaGlobe, FaPalette, FaClock, FaLanguage } from 'react-icons/fa';
 import { FiToggleLeft, FiToggleRight } from 'react-icons/fi';
 
 export default function FacultyPreferenceSettings() {
   const [preferences, setPreferences] = useState({
-    // Notification Preferences
     emailNotifications: true,
     pushNotifications: true,
     assignmentAlerts: true,
@@ -12,43 +11,53 @@ export default function FacultyPreferenceSettings() {
     gradeDeadlines: true,
     systemAnnouncements: false,
     
-    // Display Preferences
     theme: 'light',
     language: 'en',
     timezone: 'UTC',
     dateFormat: 'MM/DD/YYYY',
     timeFormat: '12h',
     
-    // Teaching Preferences
     officeHours: '9:00 AM - 5:00 PM',
     consultationMode: 'email',
     autoAttendance: true,
     gradeVisibility: 'immediate',
     
-    // Privacy Preferences
     profileVisibility: 'department',
     contactVisibility: 'students',
     availabilityStatus: true
   });
 
+  const [toast, setToast] = useState<{ message: string } | null>(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 2500);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
+  const showSuccessToast = (message = 'Preferences updated') => {
+    setToast({ message });
+  };
+
   const handleToggle = (key: string) => {
-    setPreferences(prev => ({
-      ...prev,
-      [key]: !prev[key as keyof typeof prev]
-    }));
+    setPreferences(prev => {
+      const next = { ...prev, [key]: !prev[key as keyof typeof prev] };
+      return next;
+    });
+    showSuccessToast();
   };
 
   const handleSelect = (key: string, value: string) => {
-    setPreferences(prev => ({
-      ...prev,
-      [key]: value
-    }));
+    setPreferences(prev => {
+      const next = { ...prev, [key]: value };
+      return next;
+    });
+    showSuccessToast();
   };
 
   return (
     <div className="flex-1 p-8">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm h-full overflow-hidden">
-        {/* Header */}
         <div className="bg-gradient-to-r from-purple-50 to-slate-50 p-6 border-b border-slate-200">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center shadow-sm">
@@ -62,7 +71,6 @@ export default function FacultyPreferenceSettings() {
         </div>
 
         <div className="p-6 space-y-6">
-          {/* Notification Preferences */}
           <div className="bg-white rounded-xl border border-slate-200 p-6">
             <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
               <div className="w-6 h-6 bg-purple-500 rounded-lg flex items-center justify-center mr-3">
@@ -152,7 +160,6 @@ export default function FacultyPreferenceSettings() {
             </div>
           </div>
 
-          {/* Display Preferences */}
           <div className="bg-white rounded-xl border border-slate-200 p-6">
             <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
               <div className="w-6 h-6 bg-purple-500 rounded-lg flex items-center justify-center mr-3">
@@ -230,7 +237,6 @@ export default function FacultyPreferenceSettings() {
             </div>
           </div>
 
-          {/* Teaching Preferences */}
           <div className="bg-white rounded-xl border border-slate-200 p-6">
             <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
               <div className="w-6 h-6 bg-purple-500 rounded-lg flex items-center justify-center mr-3">
@@ -304,7 +310,6 @@ export default function FacultyPreferenceSettings() {
             </div>
           </div>
 
-          {/* Privacy Preferences */}
           <div className="bg-white rounded-xl border border-slate-200 p-6">
             <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
               <div className="w-6 h-6 bg-purple-500 rounded-lg flex items-center justify-center mr-3">
@@ -364,6 +369,15 @@ export default function FacultyPreferenceSettings() {
           </div>
         </div>
       </div>
+
+      {toast && (
+        <div className="fixed top-4 right-4 p-4 rounded-lg border shadow-lg z-50 bg-green-50 border-green-200 text-green-800">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium">{toast.message}</p>
+            <button onClick={() => setToast(null)} className="ml-4 text-green-700 hover:text-green-900">✕</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

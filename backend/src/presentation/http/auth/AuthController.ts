@@ -105,7 +105,6 @@ export class AuthController implements IAuthController {
         }
       }
     ];
-    console.log('🔄 New access token set in cookies');
     return response;
   }
 
@@ -164,14 +163,12 @@ export class AuthController implements IAuthController {
       for (const file of files) {
         if (file.fieldname === 'cv') {
           cvUrl = file.path;
-          console.log('CV file found:', file.path);
         } else if (file.fieldname === 'certificates') {
           certificatesUrl.push(file.path);
-          console.log('Certificate file found:', file.path);
         }
       }
     } else {
-      console.log('No files uploaded or invalid file structure');
+      console.error('No files uploaded or invalid file structure');
     }
 
     try {

@@ -1,28 +1,11 @@
 import React from 'react';
 import { FiUsers} from 'react-icons/fi';
-import { Chat, Message, Styles, User, PaginatedResponse } from '../types/ChatTypes';
 import { formatChatTime } from '../utils/chatUtils';
+import { ChatListProps, Message } from '../../../../../domain/types/canvas/chat';
 
-interface ChatListProps {
-  chats: Chat[];
-  styles: Styles;
-  selectedChatId: string;
-  onChatSelect: (chatId: string) => void;
-  onScroll: (e: React.UIEvent<HTMLDivElement>) => void;
-  onSearch: (query: string) => Promise<PaginatedResponse<User>>;
-  onNewChat: () => void;
-  onCreateGroup: () => void;
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
-  setChats: React.Dispatch<React.SetStateAction<Chat[]>>;
-  onUserSelect: (user: User) => void;
-  currentUserId: string | undefined;
-}
-
-// Helper function to format message content based on type
 const formatLastMessage = (message: Message): string => {
   if (!message) return '';
   
-  // Check if message has attachments
   if (message.attachments && message.attachments.length > 0) {
     const attachment = message.attachments[0];
     switch (attachment.type) {
@@ -41,7 +24,6 @@ const formatLastMessage = (message: Message): string => {
     }
   }
   
-  // Check message type
   switch (message.type) {
     case 'audio':
       return '🎵 Audio';

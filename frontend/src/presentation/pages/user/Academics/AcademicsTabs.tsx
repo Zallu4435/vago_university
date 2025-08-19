@@ -1,9 +1,5 @@
 import { usePreferences } from "../../../../application/context/PreferencesContext";
-import { AcademicsTabsProps } from "../../../../domain/types/user/academics";
-
-interface AcademicsTabsWithDisabledProps extends AcademicsTabsProps {
-  disabledTabs?: string[];
-}
+import { AcademicsTabsWithDisabledProps } from "../../../../domain/types/user/academics";
 
 export default function AcademicsTabs({ activeSubTab, setActiveSubTab, disabledTabs = [] }: AcademicsTabsWithDisabledProps) {
   const tabs = ['Course Registration', 'Academic Records', 'Degree Audit'];
@@ -12,7 +8,6 @@ export default function AcademicsTabs({ activeSubTab, setActiveSubTab, disabledT
   return (
     <div className="container mx-auto px-3 sm:px-4 md:px-4 mt-4 sm:mt-6">
       <div className={`relative overflow-hidden rounded-xl sm:rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
-        {/* Background glow */}
         <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-xl sm:rounded-2xl blur transition-all duration-300`}></div>
 
         <div className="relative z-10 flex flex-col sm:flex-row">

@@ -193,7 +193,6 @@ const FacultyManagement: React.FC = () => {
 
 
   const handleBlock = (faculty: Faculty) => {
-    console.log(faculty, "ohoshdsodhsodh")
     blockFaculty.mutate(faculty._id);
     setShowBlockWarning(false);
     setFacultyToBlock(null);

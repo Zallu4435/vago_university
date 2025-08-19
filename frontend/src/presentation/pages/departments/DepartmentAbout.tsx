@@ -4,41 +4,13 @@ import DepartmentPoster from '../../components/departments/common/DepartmentPost
 import DepartmentAboutMain from '../../components/departments/about/DepartmentAboutMain';
 import DepartmentAboutManagement from '../../components/departments/about/DepartmentAboutManagement';
 import DepartmentAboutAlumni from '../../components/departments/about/DepartmentAboutAlumni';
-
-interface DepartmentData {
-  poster: {
-    title: string;
-    subtitle: string;
-  };
-  about: {
-    title: string;
-    description: string;
-  };
-  deanWelcome: {
-    title: string;
-    content: string;
-    linkText: string;
-  };
-  management: Array<{
-    name: string;
-    title: string;
-  }>;
-  alumni: Array<{
-    name: string;
-    title: string;
-    company: string;
-  }>;
-}
-
-interface DepartmentDataMap {
-  [key: string]: DepartmentData;
-}
+import { DepartmentAboutDataMap } from '../../../domain/types/department';
 
 const DepartmentAbout: React.FC = () => {
   const [currentDepartment] = useState<string>('computer-science');
   const isVisible = useSectionAnimation();
 
-  const departmentData: DepartmentDataMap = {
+  const departmentData: DepartmentAboutDataMap = {
     'computer-science': {
       poster: {
         title: 'Unleashing Potential',

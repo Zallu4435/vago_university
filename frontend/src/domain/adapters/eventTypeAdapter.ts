@@ -1,4 +1,4 @@
-import { Event as ManagementEvent, EventRequest as ManagementEventRequest, EventRequestDetails, EventStatus } from './management/eventmanagement';
+import { Event as ManagementEvent, EventRequest as ManagementEventRequest, EventRequestDetails, EventStatus } from '../types/management/eventmanagement';
 
 
 export function adaptDomainEventToManagement(event: any): ManagementEvent {
@@ -33,7 +33,6 @@ export function adaptManagementEventRequestToDomain(request: ManagementEventRequ
   };
 }
 
-// Type guards
 export function isManagementEvent(item: ManagementEvent | ManagementEventRequest): item is ManagementEvent {
   return (item as ManagementEvent).title !== undefined;
 }
@@ -42,13 +41,12 @@ export function isManagementEventRequest(item: ManagementEvent | ManagementEvent
   return (item as ManagementEventRequest).eventName !== undefined;
 }
 
-// Adapter for EventRequestDetails modal
 export function adaptToEventRequestDetails(request: ManagementEventRequest): EventRequestDetails {
   return {
     id: request.id || request._id || '',
     status: request.status as EventStatus,
     createdAt: request.requestedAt,
-    updatedAt: request.requestedAt, // Use requestedAt as fallback
+    updatedAt: request.requestedAt, 
     description: request.description || '',
     additionalInfo: request.description,
     eventName: request.eventName,

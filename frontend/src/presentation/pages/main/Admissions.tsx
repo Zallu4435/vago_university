@@ -8,16 +8,12 @@ export const Admissions: React.FC = () => {
   const isVisible = useSectionAnimation();
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-cyan-50 mt-16 via-white to-cyan-50">
-      {/* Main content container */}
       <main className="flex-1 relative pb-8 sm:pb-12 md:pb-16">
-        {/* Subtle background pattern */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-b from-cyan-50/30 via-white to-cyan-50/30" />
         </div>
 
-        {/* Content sections */}
         <div className="relative space-y-6 sm:space-y-8">
-          {/* Programmes Section */}
           <section
             id="programmes"
             data-animate
@@ -30,7 +26,6 @@ export const Admissions: React.FC = () => {
             </div>
           </section>
 
-          {/* Scholarships Section */}
           <section
             id="scholarships"
             data-animate
@@ -43,7 +38,6 @@ export const Admissions: React.FC = () => {
             </div>
           </section>
 
-          {/* Apply Section */}
           <section
             id="apply"
             data-animate

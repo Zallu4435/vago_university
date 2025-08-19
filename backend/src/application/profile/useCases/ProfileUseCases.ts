@@ -9,15 +9,11 @@ import {
     UpdateProfileResponseDTO,
     ChangePasswordResponseDTO,
     UpdateProfilePictureResponseDTO,
+    ResponseDTO
 } from "../../../domain/profile/dtos/ProfileResponseDTOs";
 import { ProfileErrorType } from "../../../domain/profile/enums/ProfileErrorType";
 import { IProfileRepository } from "../repositories/IProfileRepository";
 import bcrypt from "bcryptjs";
-
-interface ResponseDTO<T> {
-    data: T | { error: string };
-    success: boolean;
-}
 
 export interface IGetProfileUseCase {
     execute(params: GetProfileRequestDTO): Promise<ResponseDTO<ProfileResponseDTO>>;

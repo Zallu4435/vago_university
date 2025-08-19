@@ -1,37 +1,12 @@
 import React from 'react';
-
-interface ColumnConfig<T> {
-  header: string;
-  key: keyof T | string;
-  render?: (item: T) => React.ReactNode;
-  width?: string;
-}
-
-interface ActionConfig<T> {
-  icon: React.ReactNode | ((item: T) => React.ReactNode);
-  label: string | ((item: T) => string);
-  onClick: (item: T) => void;
-  color: 'blue' | 'green' | 'red' | 'yellow';
-  disabled?: boolean | ((item: T) => boolean);
-}
-
-interface ApplicationsTableProps<T> {
-  data: T[];
-  columns: ColumnConfig<T>[];
-  actions?: ActionConfig<T>[];
-  formatDate?: (date: string) => string;
-}
-
-export type { ColumnConfig };
+import { ActionConfig, ApplicationsTableProps } from '../../../../domain/types/management';
 
 const ApplicationsTable = <T extends { _id?: string; id?: string }>({
   data,
   columns,
   actions = [],
 }: ApplicationsTableProps<T>) => {
-  console.log('data', data)
-  console.log('column', columns)
-  console.log(actions)
+
   return (
     <div className="overflow-hidden rounded-lg backdrop-blur-sm border border-purple-500/20">
       <div className="overflow-x-auto">
@@ -115,9 +90,8 @@ const ActionButton = ({ icon, label, onClick, color, disabled }: ActionConfig<an
 
   return (
     <button
-      className={`p-1.5 border backdrop-blur-sm rounded-md focus:outline-none focus:ring-2 transition-all duration-300 hover:shadow-lg hover:shadow-${color}-500/20 ${colors[color]} ${
-        resolvedDisabled ? 'opacity-50 cursor-not-allowed' : ''
-      }`}
+      className={`p-1.5 border backdrop-blur-sm rounded-md focus:outline-none focus:ring-2 transition-all duration-300 hover:shadow-lg hover:shadow-${color}-500/20 ${colors[color]} ${resolvedDisabled ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
       onClick={onClick}
       disabled={resolvedDisabled}
       title={resolvedLabel}

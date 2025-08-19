@@ -105,9 +105,7 @@ export class CampusLifeController implements ICampusLifeController {
     return this.httpSuccess.success_200(result.data);
   }
 
-  async getClubs(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    console.log(httpRequest.query, "httpRequest.query")
-    
+  async getClubs(httpRequest: IHttpRequest): Promise<IHttpResponse> {    
     const { search = "", type, status = "all" } = httpRequest.query;
     if (!httpRequest.user) {
       return this.httpErrors.error_401();

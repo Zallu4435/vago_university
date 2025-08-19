@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { universitySessionService, UniversitySession } from '../services/universitySession.service';
+import { universitySessionService } from '../services/universitySession.service';
+import { UniversitySession } from '../../domain/types/canvas/session';
 
 export const useUniversitySessionManagement = (initialFilters = { status: 'all', instructor: 'all' }, initialSearchTerm = '') => {
   const queryClient = useQueryClient();

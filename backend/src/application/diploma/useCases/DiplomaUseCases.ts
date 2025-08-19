@@ -1,15 +1,9 @@
 import { IDiplomaRepository } from "../repositories/IDiplomaRepository";
 import { GetDiplomasRequestDTO, GetDiplomaByIdRequestDTO, CreateDiplomaRequestDTO, UpdateDiplomaRequestDTO, DeleteDiplomaRequestDTO, EnrollStudentRequestDTO, UnenrollStudentRequestDTO } from "../../../domain/diploma/dtos/DiplomaRequestDTOs";
-import { GetDiplomasResponseDTO, GetDiplomaByIdResponseDTO, CreateDiplomaResponseDTO, UpdateDiplomaResponseDTO, EnrollStudentResponseDTO, UnenrollStudentResponseDTO, DiplomaSummaryDTO } from "../../../domain/diploma/dtos/DiplomaResponseDTOs";
+import { GetDiplomasResponseDTO, GetDiplomaByIdResponseDTO, CreateDiplomaResponseDTO, UpdateDiplomaResponseDTO, EnrollStudentResponseDTO, UnenrollStudentResponseDTO, DiplomaSummaryDTO, ResponseDTO } from "../../../domain/diploma/dtos/DiplomaResponseDTOs";
 import { Diploma } from "../../../domain/diploma/entities/Diploma";
 import { DiplomaNotFoundError, InvalidDiplomaStatusError } from "../../../domain/diploma/errors/DiplomaErrors";
-import mongoose from "mongoose";
 import { DiplomaDocument } from "../../../domain/diploma/entities/diplomatypes";
-
-interface ResponseDTO<T> {
-  data: T;
-  success: boolean;
-}
 
 export interface IGetDiplomasUseCase {
   execute(params: GetDiplomasRequestDTO): Promise<ResponseDTO<GetDiplomasResponseDTO>>;
@@ -56,6 +50,11 @@ function mapDiplomaToSummaryDTO(diploma): DiplomaSummaryDTO {
   };
 }
 
+// Helper function to validate MongoDB ObjectId
+function isValidObjectId(id: string): boolean {
+  return typeof id === 'string' && /^[a-fA-F0-9]{24}$/.test(id);
+}
+
 export class GetDiplomasUseCase implements IGetDiplomasUseCase {
   constructor(private readonly diplomaRepository: IDiplomaRepository) { }
 
@@ -82,7 +81,7 @@ export class GetDiplomaByIdUseCase implements IGetDiplomaByIdUseCase {
   constructor(private readonly diplomaRepository: IDiplomaRepository) { }
 
   async execute(params: GetDiplomaByIdRequestDTO): Promise<ResponseDTO<GetDiplomaByIdResponseDTO>> {
-    if (!mongoose.isValidObjectId(params.id)) {
+    if (!isValidObjectId(params.id)) {
       throw new InvalidDiplomaStatusError("Invalid diploma ID");
     }
     const diplomaDoc = await this.diplomaRepository.getDiplomaById(params.id);
@@ -142,7 +141,7 @@ export class UpdateDiplomaUseCase implements IUpdateDiplomaUseCase {
   constructor(private readonly diplomaRepository: IDiplomaRepository) { }
 
   async execute(params: UpdateDiplomaRequestDTO): Promise<ResponseDTO<UpdateDiplomaResponseDTO>> {
-    if (!mongoose.isValidObjectId(params.id)) {
+    if (!isValidObjectId(params.id)) {
       throw new InvalidDiplomaStatusError("Invalid diploma ID");
     }
     const existingDiploma = await this.diplomaRepository.getDiplomaById(params.id);
@@ -175,7 +174,7 @@ export class DeleteDiplomaUseCase implements IDeleteDiplomaUseCase {
   constructor(private readonly diplomaRepository: IDiplomaRepository) { }
 
   async execute(params: DeleteDiplomaRequestDTO): Promise<ResponseDTO<{ message: string }>> {
-    if (!mongoose.isValidObjectId(params.id)) {
+    if (!isValidObjectId(params.id)) {
       throw new InvalidDiplomaStatusError("Invalid diploma ID");
     }
     await this.diplomaRepository.deleteDiploma(params.id);

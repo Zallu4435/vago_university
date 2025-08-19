@@ -4,6 +4,7 @@ import { IoCloseOutline as X } from 'react-icons/io5';
 import { useVideoManagement } from '../../../../application/hooks/useVideoManagement';
 import { Video, VideoPreviewModalProps } from '../../../../domain/types/management/videomanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
+import { ghostParticles } from '../../../../shared/constants/videoManagementConstants';
 
 const VideoPreviewModal: React.FC<VideoPreviewModalProps> = ({ isOpen, onClose, video }) => {
   const [fetchedVideo, setFetchedVideo] = useState<Video | null>(null);
@@ -34,16 +35,6 @@ const VideoPreviewModal: React.FC<VideoPreviewModalProps> = ({ isOpen, onClose, 
       setError(null);
     }
   }, [isOpen, video?._id, fetchVideoById]);
-
-  const ghostParticles = Array(30)
-    .fill(0)
-    .map((_) => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
 
   if (!isOpen || !video) return null;
 

@@ -52,29 +52,6 @@ export class ClubsRepository extends BaseRepository<Club, CreateClubRequest, Upd
     return { clubs, totalItems, totalPages, currentPage: page };
   }
 
-  // async getClubById(id: string) {
-  //   const club = await ClubModel.findById(id).lean();
-  //   return { club };
-  // }
-
-  // async createClub(params: CreateClubRequest) {
-  //   const club = await ClubModel.create({ ...params, status: params.status?.toLowerCase() || "active" });
-  //   return { club };
-  // }
-
-  // async updateClub(params: UpdateClubRequest) {
-  //   const club = await ClubModel.findByIdAndUpdate(
-  //     params.id,
-  //     { $set: { ...params, updatedAt: new Date() } },
-  //     { new: true }
-  //   ).lean();
-  //   return { club };
-  // }
-
-  // async deleteClub(params: DeleteClubRequest): Promise<void> {
-  //   await ClubModel.findByIdAndDelete(params.id);
-  // }
-
   async getClubRequests(params: GetClubRequestsRequest) {
     const { page, limit, status, type, startDate, endDate, search } = params;
     const query: ClubFilter = {};
@@ -143,7 +120,6 @@ export class ClubsRepository extends BaseRepository<Club, CreateClubRequest, Upd
       );
     }
 
-    // Send approval notification
     if (clubRequest && clubRequest.userId) {
       const userId = typeof clubRequest.userId === 'string' ? clubRequest.userId : clubRequest.userId._id.toString();
       const clubTitle = typeof clubRequest.clubId === 'string' ? 'a club' : clubRequest.clubId.name || 'a club';
@@ -159,7 +135,6 @@ export class ClubsRepository extends BaseRepository<Club, CreateClubRequest, Upd
       { runValidators: true }
     );
 
-    // Send rejection notification
     const clubRequest = await ClubRequestModel.findById(params.id);
     if (clubRequest && clubRequest.userId) {
       const userId = typeof clubRequest.userId === 'string' ? clubRequest.userId : clubRequest.userId._id.toString();

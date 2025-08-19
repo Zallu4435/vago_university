@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiDollarSign, FiX, FiFileText, FiSearch } from 'react-icons/fi';
+import { FiDollarSign, FiX, FiSearch } from 'react-icons/fi';
 import { Charge, ViewChargesModalProps } from '../../../../domain/types/management/financialmanagement';
 import ReactDOM from 'react-dom';
 import ChargeDetailsModal from './ChargeDetailsModal';
@@ -7,6 +7,7 @@ import { useChargesManagement } from '../../../../application/hooks/useFinancial
 import WarningModal from '../../../components/common/WarningModal';
 import AddChargeModal from './AddChargeModal';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
+import { getChargeColumns, ghostParticles } from '../../../../shared/constants/paymentManagementConstants';
 
 const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) => {
   usePreventBodyScroll(isOpen);
@@ -43,17 +44,6 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
     };
   }, [isOpen]);
 
-  // Particle effect
-  const ghostParticles = Array(30)
-    .fill(0)
-    .map((_) => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
-
   const handleView = (charge: Charge) => {
     setSelectedCharge(charge);
     setIsDetailsModalOpen(true);
@@ -89,65 +79,7 @@ const ViewChargesModal: React.FC<ViewChargesModalProps> = ({ isOpen, onClose }) 
     setWarningModalOpen(false);
   };
 
-  const columns = [
-    {
-      header: 'Title',
-      key: 'title',
-      render: (charge: Charge) => (
-        <div className="flex items-center text-purple-100">
-          <FiFileText size={14} className="text-purple-400 mr-2" />
-          <span className="text-sm">{charge.title}</span>
-        </div>
-      ),
-    },
-    {
-      header: 'Amount',
-      key: 'amount',
-      render: (charge: Charge) => (
-        <div className="flex items-center text-purple-100">
-          <FiDollarSign size={14} className="text-purple-400 mr-2" />
-          <span className="text-sm">${charge.amount.toFixed(2)}</span>
-        </div>
-      ),
-    },
-    {
-      header: 'Term',
-      key: 'term',
-      render: (charge: Charge) => (
-        <div className="flex items-center text-purple-100">
-          <FiFileText size={14} className="text-purple-400 mr-2" />
-          <span className="text-sm">{charge.term}</span>
-        </div>
-      ),
-    },
-    {
-      header: 'Due Date',
-      key: 'dueDate',
-      render: (charge: Charge) => (
-        <div className="flex items-center text-purple-100">
-          <FiFileText size={14} className="text-purple-400 mr-2" />
-          <span className="text-sm">{new Date(charge.dueDate).toLocaleDateString()}</span>
-        </div>
-      ),
-    },
-    {
-      header: 'Actions',
-      key: 'actions',
-      render: (charge: Charge) => (
-        <div className="flex items-center gap-3">
-          <button title="View" onClick={() => handleView(charge)} className="p-1 hover:bg-purple-500/20 rounded-full">
-            <FiSearch size={18} className="text-purple-400" />
-          </button>
-          <button title="Edit" onClick={() => handleEdit(charge)} className="p-1 hover:bg-purple-500/20 rounded-full">
-            <FiFileText size={18} className="text-purple-400" />
-          </button>
-          <button title="Delete" onClick={() => handleDelete(charge)} className="p-1 hover:bg-red-500/20 rounded-full">
-            <FiX size={18} className="text-red-400" />
-          </button>
-        </div>
-      ),
-    },
-  ];
+  const columns = getChargeColumns(handleView, handleEdit, handleDelete);
 
   if (!isOpen) return null;
 

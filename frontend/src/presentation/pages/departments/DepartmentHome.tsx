@@ -19,85 +19,21 @@ import DepartmentStats from '../../components/departments/home/DepartmentStats';
 import DepartmentSpotlight from '../../components/departments/home/DepartmentSpotlight';
 import DepartmentEvents from '../../components/departments/home/DepartmentEvents';
 import DepartmentHero from '../../components/departments/home/DepartmentHero';
-
-interface DepartmentData {
-  poster: {
-    title: string;
-    subtitle: string;
-    description: string;
-    ctaText: string;
-  };
-  inMemoriam: {
-    title: string;
-    content: string;
-    linkText: string;
-  };
-  spotlight: Array<{
-    image: string;
-    title: string;
-    date: string;
-    description: string;
-    category: string;
-    readTime: string;
-  }>;
-  education: {
-    title: string;
-    undergraduate: {
-      title: string;
-      content: string;
-      features: string[];
-      image: string;
-    };
-    graduate: {
-      title: string;
-      content: string;
-      features: string[];
-      status: string;
-    };
-  };
-  byTheNumbers: {
-    title: string;
-    stats: Array<{
-      value: string;
-      label: string;
-      icon: React.ElementType;
-    }>;
-  };
-  events: Array<{
-    date: string;
-    month: string;
-    title: string;
-    description: string;
-    type: string;
-    attendees: string;
-  }>;
-}
-
-interface DepartmentDataMap {
-  [key: string]: DepartmentData;
-}
+import { DepartmentDataMap } from '../../../domain/types/department';
 
 const DepartmentHome: React.FC = () => {
   const location = useLocation();
   const [currentDepartment, setCurrentDepartment] = useState<string>('computer-science');
   const isVisible = useSectionAnimation();
 
-  // Set current department based on URL path
   useEffect(() => {
     const pathSegments = location.pathname.split('/');
-    const departmentFromPath = pathSegments[2]; // /departments/business -> business
-    
-    console.log('URL Path:', location.pathname);
-    console.log('Path Segments:', pathSegments);
-    console.log('Department from path:', departmentFromPath);
-    console.log('Available departments:', Object.keys(departmentData));
+    const departmentFromPath = pathSegments[2]; 
     
     if (departmentFromPath && departmentData[departmentFromPath]) {
-      console.log('Setting department to:', departmentFromPath);
       setCurrentDepartment(departmentFromPath);
     } else {
-      console.log('Department not found, defaulting to computer-science');
-      setCurrentDepartment('computer-science'); // default fallback
+      setCurrentDepartment('computer-science');
     }
   }, [location.pathname]);
 
@@ -288,19 +224,14 @@ const DepartmentHome: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-cyan-50 via-white to-cyan-50 overflow-hidden">
 
       <div className="relative">
-        {/* Hero Section */}
         <DepartmentHero poster={data.poster} currentDepartment={currentDepartment} isVisible={isVisible} />
 
-        {/* Spotlight Section */}
         <DepartmentSpotlight spotlight={data.spotlight} />
 
-        {/* Education Section */}
         <DepartmentEducation education={data.education} currentDepartment={currentDepartment} />
 
-        {/* Statistics Section */}
         <DepartmentStats statsData={data.byTheNumbers} />
 
-        {/* Events Section */}
         <DepartmentEvents events={data.events} />
       </div>
 

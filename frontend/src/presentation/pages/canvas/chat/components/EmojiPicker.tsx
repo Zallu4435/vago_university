@@ -1,14 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Styles } from '../types/ChatTypes';
 import { FiX, FiClock, FiSmile, FiHeart, FiSun, FiCoffee, FiZap, FiFlag } from 'react-icons/fi';
-
-interface EmojiPickerProps {
-  styles: Styles;
-  show: boolean;
-  onEmojiSelect: (emoji: string) => void;
-  onClose: () => void;
-  position?: 'top' | 'bottom';
-}
+import { EmojiPickerProps } from '../../../../../domain/types/canvas/chat';
 
 const EMOJI_CATEGORIES = {
   recent: {
@@ -141,7 +133,6 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
   }, [show, onClose]);
 
   const handleEmojiSelect = (emoji: string) => {
-    // Add to recent emojis
     setRecentEmojis(prev => {
       const filtered = prev.filter(e => e !== emoji);
       return [emoji, ...filtered].slice(0, 20); 
@@ -160,7 +151,6 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
       return EMOJI_CATEGORIES[selectedCategory].emojis;
     }
     
-    // Search across all categories
     return Object.values(EMOJI_CATEGORIES)
       .flatMap(category => category.emojis)
       .filter(emoji => {

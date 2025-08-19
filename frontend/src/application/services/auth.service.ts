@@ -1,12 +1,7 @@
 import httpClient from '../../frameworks/api/httpClient';
-import { LoginResponse } from '../../domain/types/auth/Login';
+import { ApiResponseWrapper, LoginResponse } from '../../domain/types/auth/Login';
 import { RegisterResponse } from '../../domain/types/auth/Register';
 import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
-
-interface ApiResponseWrapper<T> {
-  data: T;
-}
-
 
 class AuthService {
   async registerUser(data: {

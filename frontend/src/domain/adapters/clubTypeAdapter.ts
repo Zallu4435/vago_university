@@ -1,7 +1,6 @@
-import { Club as DomainClub, ClubRequest as DomainClubRequest } from './club';
-import { Club as ManagementClub, ClubRequest as ManagementClubRequest } from './management/clubmanagement';
+import { Club as DomainClub, ClubRequest as DomainClubRequest } from '../types/management/clubmanagement';
+import { Club as ManagementClub, ClubRequest as ManagementClubRequest } from '../types/management/clubmanagement';
 
-// Type adapters to convert between domain and management types
 export function adaptDomainClubToManagement(club: DomainClub): ManagementClub {
   return {
     ...club,
@@ -34,7 +33,6 @@ export function adaptManagementClubRequestToDomain(request: ManagementClubReques
   };
 }
 
-// Type guards
 export function isDomainClub(item: DomainClub | DomainClubRequest): item is DomainClub {
   return (item as DomainClub).createdBy !== undefined;
 }
@@ -43,14 +41,13 @@ export function isDomainClubRequest(item: DomainClub | DomainClubRequest): item 
   return (item as DomainClubRequest).requestedId !== undefined;
 }
 
-// Adapter for ClubRequestDetails modal
 export function adaptToClubRequestDetails(request: DomainClubRequest) {
   return {
     clubRequest: {
       id: request.requestedId || request._id || '',
       status: request.status,
       createdAt: request.createdAt,
-      updatedAt: request.createdAt, // Use createdAt as fallback
+      updatedAt: request.createdAt,
       whyJoin: request.about || '',
       additionalInfo: request.about,
       club: {

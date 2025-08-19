@@ -12,7 +12,7 @@ import AddChargeModal from './AddChargeModal';
 import ViewChargesModal from './ViewChargesModal';
 import PaymentDetailsModal from './PaymentDetailsModal';
 import { Payment, FinancialAidApplication, ScholarshipApplication, Filters } from '../../../../domain/types/management/financialmanagement';
-import { STATUSES, TERMS, paymentColumns } from '../../../../shared/constants/paymentManagementConstants';
+import { STATUSES, TERMS, computeDateRange, paymentColumns } from '../../../../shared/constants/paymentManagementConstants';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import EmptyState from '../../../../shared/components/EmptyState';
@@ -111,29 +111,6 @@ const PaymentManagement: React.FC = () => {
     } catch (err) {
       console.error('Failed to fetch charges:', err);
     }
-  };
-
-  const computeDateRange = (range: string) => {
-    const today = new Date();
-    let startDate = '';
-    let endDate = '';
-    if (range === 'last_week') {
-      const lastWeek = new Date(today);
-      lastWeek.setDate(today.getDate() - 7);
-      startDate = lastWeek.toISOString().slice(0, 10);
-      endDate = today.toISOString().slice(0, 10);
-    } else if (range === 'last_month') {
-      const lastMonth = new Date(today);
-      lastMonth.setMonth(today.getMonth() - 1);
-      startDate = lastMonth.toISOString().slice(0, 10);
-      endDate = today.toISOString().slice(0, 10);
-    } else if (range === 'last_3_months') {
-      const last3Months = new Date(today);
-      last3Months.setMonth(today.getMonth() - 3);
-      startDate = last3Months.toISOString().slice(0, 10);
-      endDate = today.toISOString().slice(0, 10);
-    }
-    return { startDate, endDate };
   };
 
   const debouncedFilterChange = useCallback(

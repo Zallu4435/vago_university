@@ -278,7 +278,6 @@ import { StudentFinancialInfo } from '../../domain/types/user/financial';
     async getPaymentDetails(paymentId: string): Promise<Payment> {
       try {
         const response = await httpClient.get(`${this.adminBaseUrl}/payments/${paymentId}`);
-        console.log(response.data.data.payment, "response.data.data.paymentresponse.data.data.payment")
         return response.data.data.payment;
       } catch (error: unknown) {
         if (isAxiosErrorWithApiError(error)) {

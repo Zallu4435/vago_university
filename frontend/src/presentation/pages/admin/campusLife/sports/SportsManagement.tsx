@@ -33,36 +33,11 @@ import {
   DIVISIONS,
   getTeamColumns,
   getPlayerRequestColumns,
+  resetFilters,
+  formatDateRangeValue,
+  getFilterOptions
 } from '../../../../../shared/constants/sportManagementConstants';
-// Filter utility functions
-const resetFilters = () => ({
-  sportType: 'all',
-  category: 'all',
-  division: 'all',
-  coach: 'all',
-  dateRange: 'all',
-  status: 'all',
-});
 
-const formatDateRangeValue = (value: string) => value;
-
-const getFilterOptions = (activeTab: 'teams' | 'requests') => {
-  if (activeTab === 'teams') {
-    return {
-      sportType: SPORT_TYPES,
-      category: TEAM_CATEGORIES,
-      division: DIVISIONS,
-      coach: COACHES,
-      dateRange: ['all', 'today', 'week', 'month', 'year'],
-    };
-  } else {
-    return {
-      status: ['all', 'pending', 'approved', 'rejected'],
-      sportType: SPORT_TYPES,
-      dateRange: ['all', 'today', 'week', 'month', 'year'],
-    };
-  }
-};
 
 const AdminSportsManagement: React.FC = () => {
   const {

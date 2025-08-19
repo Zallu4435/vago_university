@@ -1,35 +1,8 @@
 import React from 'react';
 import { IoCloseOutline as X, IoCreateOutline as Edit, IoPeopleOutline as Users, IoPersonOutline as User, IoTrophyOutline as Trophy, IoCalendarOutline as Calendar, IoInformationCircleOutline as Info, IoBusinessOutline as Building } from 'react-icons/io5';
-import { TeamDetailsModalProps, StatusBadgeProps, InfoCardProps } from '../../../../../domain/types/management/sportmanagement';
+import { TeamDetailsModalProps } from '../../../../../domain/types/management/sportmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
-
-const StatusBadge = ({ status }: StatusBadgeProps) => {
-  const statusConfig = {
-    active: { bg: 'bg-green-600/30', text: 'text-green-100', border: 'border-green-500/50' },
-    pending: { bg: 'bg-yellow-600/30', text: 'text-yellow-100', border: 'border-yellow-500/50' },
-    rejected: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },
-  };
-
-  const config = statusConfig[status?.toLowerCase() as keyof typeof statusConfig] || statusConfig.pending;
-
-  return (
-    <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.bg} ${config.text} ${config.border}`}
-    >
-      {status?.charAt(0).toUpperCase() + status?.slice(1)}
-    </span>
-  );
-};
-
-const InfoCard = ({ icon: Icon, label, value }: InfoCardProps) => (
-  <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
-    <div className="flex items-center mb-2">
-      <Icon size={18} className="text-purple-300" />
-      <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
-    </div>
-    <p className="text-white font-semibold">{value}</p>
-  </div>
-);
+import { getOrganizerIcon, ghostParticles, InfoCard, StatusBadge } from '../../../../../shared/constants/sportManagementConstants';
 
 const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, team, onEdit }) => {
 
@@ -37,26 +10,7 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
 
   if (!isOpen || !team) return null;
 
-
-  const getOrganizerIcon = (type: string) => {
-    switch (type?.toLowerCase()) {
-      case 'student': return Users;
-      case 'club': return Building;
-      default: return User;
-    }
-  };
-
   const OrganizerIcon = getOrganizerIcon(team.organizerType);
-
-  const ghostParticles = Array(30)
-    .fill(0)
-    .map((_) => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">

@@ -1,4 +1,3 @@
-
 export interface IFile {
     fieldname: string;
     originalname: string;

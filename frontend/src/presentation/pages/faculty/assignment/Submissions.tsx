@@ -2,8 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { FaSearch, FaDownload, FaEye, FaCheck, FaClock, FaExclamationTriangle, FaUsers, FaFileAlt, FaCode, FaCalculator, FaFlask, FaLanguage, FaHistory, FaGlobe, FaBook } from 'react-icons/fa';
 import ReviewModal from './ReviewModal';
-import { Assignment, Submission } from './types/index';
 import { assignmentService } from './services/assignmentService';
+import { Submission, SubmissionsProps } from '../../../../domain/types/faculty/assignment';
+import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../../shared/components/ErrorMessage';
 
 const extractFileInfo = (file: string | { fileName: string; fileUrl: string; fileSize: number }) => {
   if (typeof file === 'string') {
@@ -30,40 +32,25 @@ const getSubjectIcon = (subject: string) => {
   return subjectIcons[subject] || subjectIcons.default;
 };
 
-interface SubmissionsProps {
-  assignment: Assignment;
-  submissions: Submission[];
-  onReview: (submissionId: string, reviewData: {
-    marks: number;
-    feedback: string;
-    status: 'reviewed' | 'pending' | 'needs_correction';
-    isLate: boolean;
-  }) => void;
-  onDownload: (submissionId: string) => void;
-  setShowReviewModal: (show: boolean) => void;
-  isLoading?: boolean;
-  isReviewing?: boolean;
-}
-
 export default function Submissions({
   assignment,
   onReview,
   setShowReviewModal,
   isReviewing
 }: SubmissionsProps) {
-  console.log('Submissions assignment prop:', assignment);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'reviewed' | 'late' | 'needs_correction'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-    }, 500); 
+    }, 500);
 
     return () => {
       clearTimeout(handler);
@@ -72,16 +59,19 @@ export default function Submissions({
 
   const fetchSubmissions = useCallback(async () => {
     if (!assignment?.id) return;
-    
+
     setIsLoading(true);
+    setError(null);
     try {
       const data = await assignmentService.getSubmissions(assignment.id!, {
         search: debouncedSearchTerm,
         status: filterStatus !== 'all' ? filterStatus : undefined,
       });
       setSubmissions((data?.submissions) || []);
-    } catch (error) {
+    } catch (err) {
       setSubmissions([]);
+      const message = err instanceof Error ? err.message : 'Failed to fetch submissions.';
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -160,9 +150,6 @@ export default function Submissions({
 
   const handleDownloadSubmission = async (fileUrl: string, fileName: string) => {
     try {
-      console.log('=== FACULTY SUBMISSION DOWNLOAD STARTED ===');
-      console.log('📁 File details:', { fileUrl, fileName });
-
       let actualFileName = fileName;
       if (fileUrl.includes('.png') || fileUrl.includes('.jpg') || fileUrl.includes('.jpeg')) {
         const urlParts = fileUrl.split('.');
@@ -172,21 +159,16 @@ export default function Submissions({
         }
       }
 
-      // Always call backend for download
       await assignmentService.downloadSubmissionFile(fileUrl, actualFileName);
 
-      console.log('✅ Faculty submission download triggered successfully');
-      console.log('=== FACULTY SUBMISSION DOWNLOAD COMPLETED ===');
     } catch (error) {
       console.error('❌ Error downloading faculty submission:', error);
       alert('Failed to download the submission. Please try again or contact support.');
-      console.log('=== FACULTY SUBMISSION DOWNLOAD FAILED ===');
     }
   };
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* Enhanced Assignment Header */}
       <div className="relative">
         <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-pink-500/10"></div>
@@ -237,7 +219,6 @@ export default function Submissions({
         </div>
       </div>
 
-      {/* Enhanced Search and Filters */}
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-6">
         <div className="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
           <div className="flex-1 relative group">
@@ -273,8 +254,8 @@ export default function Submissions({
             <button
               onClick={() => setViewMode('grid')}
               className={`px-4 py-2 rounded-xl transition-all font-medium ${viewMode === 'grid'
-                  ? 'bg-white shadow-md text-pink-600'
-                  : 'text-gray-600 hover:text-pink-600'
+                ? 'bg-white shadow-md text-pink-600'
+                : 'text-gray-600 hover:text-pink-600'
                 }`}
             >
               Grid
@@ -282,8 +263,8 @@ export default function Submissions({
             <button
               onClick={() => setViewMode('table')}
               className={`px-4 py-2 rounded-xl transition-all font-medium ${viewMode === 'table'
-                  ? 'bg-white shadow-md text-pink-600'
-                  : 'text-gray-600 hover:text-pink-600'
+                ? 'bg-white shadow-md text-pink-600'
+                : 'text-gray-600 hover:text-pink-600'
                 }`}
             >
               Table
@@ -300,24 +281,8 @@ export default function Submissions({
         )}
       </div>
 
-      {/* Enhanced Submissions Display */}
-      {isLoading && (
-        <div className="text-center py-8 animate-fadeIn">
-          <span className="text-pink-600 font-medium">Loading submissions...</span>
-        </div>
-      )}
-      {submissions.length === 0 && !isLoading && (
-        <div className="text-center py-16 animate-fadeIn">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-pink-50 rounded-full mb-4">
-            <FaSearch size={32} className="text-gray-400" />
-          </div>
-          <h3 className="text-2xl font-semibold text-pink-800 mb-2">No Submissions Found</h3>
-          <p className="text-pink-500 max-w-md mx-auto">
-            Try adjusting your search or filter criteria to find the submissions you're looking for.
-          </p>
-        </div>
-      )}
-
+      {isLoading && <LoadingSpinner />}
+      {error && !isLoading && <ErrorMessage message={error} />}
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {submissions.map((submission, index) => {
@@ -390,18 +355,12 @@ export default function Submissions({
                       </div>
                       <button
                         onClick={() => {
-                          console.log('Download button clicked for submission:', submission.id);
-                          console.log('Submission files:', submission.files);
-                          console.log('Submission fileName:', submission.fileName);
-
                           if (!submission.files || submission.files.length === 0) {
                             console.error('❌ No files found in submission');
                             alert('No files found in this submission');
                             return;
                           }
-
                           const fileInfo = extractFileInfo(submission.files[0]);
-                          console.log('Calling handleDownloadSubmission with:', fileInfo);
                           handleDownloadSubmission(fileInfo.fileUrl, fileInfo.fileName);
                         }}
                         className="p-2 text-gray-500 hover:text-indigo-600 transition-colors"
@@ -431,7 +390,6 @@ export default function Submissions({
             <table className="w-full">
               <thead className="bg-gradient-to-r from-purple-50 to-pink-50">
                 <tr>
-                  {/* No select all checkbox */}
                   <th className="px-8 py-6 text-left text-sm font-bold text-gray-900 uppercase tracking-wider">Student</th>
                   <th className="px-8 py-6 text-left text-sm font-bold text-gray-900 uppercase tracking-wider">Submitted</th>
                   <th className="px-8 py-6 text-left text-sm font-bold text-gray-900 uppercase tracking-wider">Status</th>
@@ -443,7 +401,6 @@ export default function Submissions({
                   const statusConfig = getStatusConfig(submission.status);
                   return (
                     <tr key={submission.id} className="hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all animate-fadeInUp" style={{ animationDelay: `${index * 0.05}s` }}>
-                      {/* No per-row selection checkbox */}
                       <td className="px-8 py-6">
                         <div className="flex items-center space-x-4">
                           <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-12 w-12 rounded-2xl flex items-center justify-center text-white text-sm font-bold shadow-lg">
@@ -495,18 +452,12 @@ export default function Submissions({
                           </button>
                           <button
                             onClick={() => {
-                              console.log('🔍 Download button clicked for submission:', submission.id);
-                              console.log('📁 Submission files:', submission.files);
-                              console.log('📄 Submission fileName:', submission.fileName);
-
                               if (!submission.files || submission.files.length === 0) {
                                 console.error('❌ No files found in submission');
                                 alert('No files found in this submission');
                                 return;
                               }
-
                               const fileInfo = extractFileInfo(submission.files[0]);
-                              console.log('Calling handleDownloadSubmission with:', fileInfo);
                               handleDownloadSubmission(fileInfo.fileUrl, fileInfo.fileName);
                             }}
                             className="p-3 bg-green-50 text-green-600 hover:bg-green-100 rounded-xl transition-all border border-green-200 hover:border-green-300 hover:scale-110 transform shadow-lg"

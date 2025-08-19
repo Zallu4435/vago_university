@@ -128,7 +128,6 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </div>
 
-        {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center">
           {isAuthenticated && (
             <div className="relative mr-3" ref={dropdownRef}>
@@ -188,7 +187,6 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div 
           ref={mobileMenuRef}

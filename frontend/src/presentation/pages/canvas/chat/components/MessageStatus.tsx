@@ -1,9 +1,6 @@
 import React from 'react';
 import { FiCheck, FiCheckCircle } from 'react-icons/fi';
-
-interface MessageStatusProps {
-  status: 'sending' | 'delivered' | 'read';
-}
+import { MessageStatusProps } from '../../../../../domain/types/canvas/chat';
 
 export const MessageStatus: React.FC<MessageStatusProps> = ({ status }) => {
   switch (status) {

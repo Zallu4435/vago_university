@@ -5,7 +5,6 @@ import { GradeModal } from './GradeModal';
 import { userAssignmentService } from '../services/userAssignmentService';
 import { AssignmentCardProps } from '../../../../../domain/types/canvas/assignment';
 
-
 export const AssignmentCard: React.FC<AssignmentCardProps> = ({
   assignment,
   styles,

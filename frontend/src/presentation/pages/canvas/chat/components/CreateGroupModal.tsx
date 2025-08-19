@@ -1,26 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { FiX, FiUser, FiCheck, FiMessageSquare, FiUsers, FiImage, FiLock, FiCamera, FiArrowLeft } from 'react-icons/fi';
-import { User, PaginatedResponse } from '../types/ChatTypes';
-
-interface CreateGroupModalProps {
-  onClose: () => void;
-  onCreateGroup: (params: {
-    name: string;
-    description?: string;
-    participants: string[];
-    settings?: {
-      onlyAdminsCanPost?: boolean;
-      onlyAdminsCanAddMembers?: boolean;
-      onlyAdminsCanChangeInfo?: boolean;
-      onlyAdminsCanPinMessages?: boolean;
-      onlyAdminsCanSendMedia?: boolean;
-      onlyAdminsCanSendLinks?: boolean;
-    };
-    avatar?: File;
-  }) => void;
-  onSearch: (query: string) => Promise<PaginatedResponse<User>>;
-}
+import { CreateGroupModalProps, User } from '../../../../../domain/types/canvas/chat';
 
 const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   onClose,
@@ -28,14 +9,12 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   onSearch
 }) => {
   useEffect(() => {
-    // Prevent body scrolling when modal is open
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
     
     return () => {
-      // Restore body scrolling when modal is closed
       document.body.style.overflow = originalStyle;
       document.body.style.position = '';
       document.body.style.width = '';

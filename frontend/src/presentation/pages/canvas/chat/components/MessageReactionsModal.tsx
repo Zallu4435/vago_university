@@ -1,23 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { FiX } from 'react-icons/fi';
-
-interface Reaction {
-  emoji: string;
-  userId: string;
-  userName: string;
-}
-
-interface MessageReactionsModalProps {
-  isVisible: boolean;
-  onClose: () => void;
-  reactions: Reaction[];
-  currentUserId: string;
-  onAddReaction: (emoji: string) => void;
-  onRemoveReaction: (emoji: string) => void;
-  position?: { x: number; y: number };
-}
-
+import { MessageReactionsModalProps, Reaction } from '../../../../../domain/types/canvas/chat';
 
 export const MessageReactionsModal: React.FC<MessageReactionsModalProps> = ({
   isVisible,
@@ -46,9 +30,8 @@ export const MessageReactionsModal: React.FC<MessageReactionsModalProps> = ({
     if (isVisible) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleEscape);
-      
-      // Prevent background scrolling on mobile only
-      const isMobile = window.innerWidth < 768; // md breakpoint
+
+      const isMobile = window.innerWidth < 768;
       if (isMobile) {
         const originalOverflow = window.getComputedStyle(document.body).overflow;
         const originalPosition = window.getComputedStyle(document.body).position;
@@ -56,7 +39,7 @@ export const MessageReactionsModal: React.FC<MessageReactionsModalProps> = ({
         document.body.style.overflow = 'hidden';
         document.body.style.position = 'fixed';
         document.body.style.width = '100%';
-        
+
         return () => {
           document.removeEventListener('mousedown', handleClickOutside);
           document.removeEventListener('keydown', handleEscape);
@@ -95,13 +78,11 @@ export const MessageReactionsModal: React.FC<MessageReactionsModalProps> = ({
 
   const modalContent = (
     <>
-      {/* Mobile: Portal with backdrop */}
       <div className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div
           ref={modalRef}
           className="bg-white dark:bg-[#2a3942] rounded-lg shadow-xl w-full max-w-sm mx-4 overflow-hidden border border-gray-200 dark:border-gray-600 max-h-[80vh]"
         >
-          {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-600">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Reactions
@@ -114,16 +95,14 @@ export const MessageReactionsModal: React.FC<MessageReactionsModalProps> = ({
             </button>
           </div>
 
-          {/* Tabs */}
           {totalReactions > 0 && (
             <div className="flex border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 overflow-x-auto">
               <button
                 onClick={() => setActiveTab('all')}
-                className={`flex-shrink-0 px-4 py-3 text-sm font-medium transition-colors ${
-                  activeTab === 'all'
+                className={`flex-shrink-0 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'all'
                     ? 'text-green-600 border-b-2 border-green-600 bg-green-50 dark:bg-green-900/20'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                }`}
+                  }`}
               >
                 All {totalReactions}
               </button>
@@ -131,11 +110,10 @@ export const MessageReactionsModal: React.FC<MessageReactionsModalProps> = ({
                 <button
                   key={emoji}
                   onClick={() => setActiveTab(emoji)}
-                  className={`flex-shrink-0 flex items-center gap-1 px-4 py-3 text-sm font-medium transition-colors ${
-                    activeTab === emoji
+                  className={`flex-shrink-0 flex items-center gap-1 px-4 py-3 text-sm font-medium transition-colors ${activeTab === emoji
                       ? 'text-green-600 border-b-2 border-green-600 bg-green-50 dark:bg-green-900/20'
                       : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}
+                    }`}
                 >
                   <span className="text-base">{emoji}</span>
                   <span>{groupedReactions[emoji].length}</span>
@@ -144,7 +122,6 @@ export const MessageReactionsModal: React.FC<MessageReactionsModalProps> = ({
             </div>
           )}
 
-          {/* Reactions List */}
           <div className="h-80 overflow-y-auto">
             {totalReactions === 0 ? (
               <div className="p-6 text-center text-gray-500 dark:text-gray-400">
@@ -188,7 +165,6 @@ export const MessageReactionsModal: React.FC<MessageReactionsModalProps> = ({
         </div>
       </div>
 
-      {/* Desktop: Normal positioned modal */}
       <div className="hidden md:block">
         <div
           ref={modalRef}
@@ -200,7 +176,6 @@ export const MessageReactionsModal: React.FC<MessageReactionsModalProps> = ({
             zIndex: 1000
           }}
         >
-          {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-600">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Reactions
@@ -213,16 +188,14 @@ export const MessageReactionsModal: React.FC<MessageReactionsModalProps> = ({
             </button>
           </div>
 
-          {/* Tabs */}
           {totalReactions > 0 && (
             <div className="flex border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
               <button
                 onClick={() => setActiveTab('all')}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                  activeTab === 'all'
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'all'
                     ? 'text-green-600 border-b-2 border-green-600 bg-green-50 dark:bg-green-900/20'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                }`}
+                  }`}
               >
                 All {totalReactions}
               </button>
@@ -230,11 +203,10 @@ export const MessageReactionsModal: React.FC<MessageReactionsModalProps> = ({
                 <button
                   key={emoji}
                   onClick={() => setActiveTab(emoji)}
-                  className={`flex items-center gap-1 px-4 py-3 text-sm font-medium transition-colors ${
-                    activeTab === emoji
+                  className={`flex items-center gap-1 px-4 py-3 text-sm font-medium transition-colors ${activeTab === emoji
                       ? 'text-green-600 border-b-2 border-green-600 bg-green-50 dark:bg-green-900/20'
                       : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}
+                    }`}
                 >
                   <span className="text-base">{emoji}</span>
                   <span>{groupedReactions[emoji].length}</span>
@@ -243,7 +215,6 @@ export const MessageReactionsModal: React.FC<MessageReactionsModalProps> = ({
             </div>
           )}
 
-          {/* Reactions List */}
           <div className="h-80 overflow-y-auto">
             {totalReactions === 0 ? (
               <div className="p-6 text-center text-gray-500 dark:text-gray-400">

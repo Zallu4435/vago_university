@@ -9,12 +9,12 @@ import { debounce } from 'lodash';
 import CourseDetails from './CourseDetails';
 import CourseForm from './CourseForm';
 import EnrollmentRequestDetails from './EnrollmentRequestDetails';
-import { Course as ManagementCourse, EnrollmentRequest } from '../../../../domain/types/management/coursemanagement';
-import { 
+import { Course as ManagementCourse, EnrollmentRequest, Course } from '../../../../domain/types/management/coursemanagement';
+import {
   adaptDomainCourseToManagement, 
   adaptDomainEnrollmentRequestToManagement,
   adaptToCourseRequestDetails
-} from '../../../../domain/types/courseTypeAdapter';
+} from '../../../../domain/adapters/courseTypeAdapter';
 import { SPECIALIZATIONS, FACULTIES, TERMS, REQUEST_STATUSES, courseColumns, enrollmentRequestColumns } from '../../../../shared/constants/courseManagementConstants';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
@@ -74,6 +74,7 @@ const AdminCourseManagement: React.FC = () => {
     handleViewRequest,
   } = useCourseManagement(debouncedSearchTerm);
 
+  const coursesArray = courses as unknown as Course[];
 
   const handleSaveCourse = async (formData: Partial<ManagementCourse>) => {
     try {
@@ -271,21 +272,21 @@ const AdminCourseManagement: React.FC = () => {
             {
               icon: <FiBookOpen />,
               title: 'Total Courses',
-              value: courses?.length?.toString() || '0',
+              value: coursesArray?.length?.toString() || '0',
               change: '+5.2%',
               isPositive: true,
             },
             {
               icon: <FiClipboard />,
               title: 'Active Courses',
-              value: courses?.filter((c) => (c).currentEnrollment > 0).length?.toString() || '0',
+              value: coursesArray?.filter((c: ManagementCourse) => c.currentEnrollment > 0).length?.toString() || '0',
               change: '+2.1%',
               isPositive: true,
             },
             {
               icon: <FiBarChart2 />,
               title: 'Enrollment Rate',
-              value: `${((courses?.reduce((acc: number, c) => acc + c.currentEnrollment, 0) / courses?.reduce((acc: number, c) => acc + c.maxEnrollment, 0)) * 100 || 0).toFixed(2)}%`,
+              value: `${((coursesArray?.reduce((acc: number, c: ManagementCourse) => acc + c.currentEnrollment, 0) / coursesArray?.reduce((acc: number, c: ManagementCourse) => acc + c.maxEnrollment, 0)) * 100 || 0).toFixed(2)}%`,
               change: '+3.8%',
               isPositive: true,
             },
@@ -337,17 +338,17 @@ const AdminCourseManagement: React.FC = () => {
                   <div className="flex justify-center items-center py-8">
                     <LoadingSpinner />
                   </div>
-                ) : courses.length > 0 ? (
+                ) : coursesArray.length > 0 ? (
                   <>
                     <ApplicationsTable
-                      data={courses.map(adaptDomainCourseToManagement)}
+                                              data={coursesArray.map(adaptDomainCourseToManagement)}
                       columns={courseColumns}
                       actions={courseActions}
                     />
                     <Pagination
                       page={page}
                       totalPages={totalPages || 1}
-                      itemsCount={courses.length}
+                                              itemsCount={coursesArray.length}
                       itemName="courses"
                       onPageChange={(newPage) => setPage(newPage)}
                       onFirstPage={() => setPage(1)}
@@ -395,7 +396,7 @@ const AdminCourseManagement: React.FC = () => {
                 </div>
               )}
 
-              {activeTab === 'courses' && courses.length === 0 && (
+              {activeTab === 'courses' && coursesArray.length === 0 && (
                 <EmptyState
                   icon={<FiBookOpen size={32} className="text-purple-400" />}
                   title="No Courses Found"
@@ -426,7 +427,7 @@ const AdminCourseManagement: React.FC = () => {
           onClose={() => {
             setShowCourseDetail(false);
           }}
-          course={adaptDomainCourseToManagement(courseDetails)}
+          course={adaptDomainCourseToManagement(courseDetails as unknown as Course)}
           isLoading={isLoadingCourseDetails}
         />
       )}

@@ -2,7 +2,6 @@ import React from 'react';
 import { FaVideo, FaUsers } from 'react-icons/fa';
 import { TopBarProps } from '../../../domain/types/videoConference';
 
-
 export const TopBar: React.FC<TopBarProps> = ({ sessionName, meetingTimer }) => (
   <div className="fixed top-0 left-0 right-0 bg-white/10 backdrop-blur-lg border-b border-white/20 px-2 sm:px-6 py-3 sm:py-4 z-20">
     <div className="flex items-center justify-between max-w-6xl mx-auto flex-nowrap gap-2 sm:gap-4">

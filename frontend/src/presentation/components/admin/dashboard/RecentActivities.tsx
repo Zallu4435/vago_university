@@ -1,18 +1,6 @@
 import React from 'react';
 import { formatRelativeTime } from '../../../../shared/utils/dateUtils';
-
-interface ActivityItem {
-  id: string;
-  action: string;
-  user: string;
-  time: string;
-  avatar: string;
-  type: 'success' | 'warning' | 'info' | 'default';
-}
-
-interface RecentActivitiesProps {
-  activitiesData: ActivityItem[];
-}
+import { ActivityItem, RecentActivitiesProps } from '../../../../domain/types/dashboard/admin';
 
 const EnhancedActivityItem = ({ action, user, time, avatar, type = "default" }: Pick<ActivityItem, 'action' | 'user' | 'time' | 'avatar' | 'type'>) => {
   const getTypeColor = (type: string) => {

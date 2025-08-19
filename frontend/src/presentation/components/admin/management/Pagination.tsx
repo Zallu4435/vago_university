@@ -1,49 +1,33 @@
 import React from 'react';
 import { FiArrowLeft, FiArrowRight, FiChevronsLeft, FiChevronsRight } from 'react-icons/fi';
-
-type PaginationProps = {
-  page?: number;
-  totalPages?: number;
-  itemsCount?: number;
-  itemName?: string;
-  onPageChange?: (newPage: number) => void;
-  onFirstPage?: () => void;
-  onLastPage?: () => void;
-  maxDots?: number;
-  showMobileDots?: boolean;
-  containerClass?: string;
-  buttonClass?: string;
-  activeButtonClass?: string;
-  disabledButtonClass?: string;
-  defaultButtonClass?: string;
-};
+import { PaginationProps } from '../../../../domain/types/management';
 
 const Pagination: React.FC<PaginationProps> = ({
-  page = 1, 
-  totalPages = 1, 
-  itemsCount = 0, 
-  itemName = 'items', 
-  onPageChange = () => {},
-  onFirstPage = () => {},
-  onLastPage = () => {}, 
-  maxDots = 5, 
-  showMobileDots = false, 
-  containerClass = '', 
-  buttonClass = '', 
-  activeButtonClass = 'bg-gradient-to-br from-purple-600 to-purple-900 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)] border border-purple-400/20', 
-  disabledButtonClass = 'bg-gray-800/30 text-gray-500 cursor-not-allowed', 
-  defaultButtonClass = 'bg-gray-800/50 hover:bg-purple-900/30 text-gray-300 hover:text-purple-300 hover:border-purple-500/50 border border-gray-700/50 hover:shadow-[0_0_12px_rgba(168,85,247,0.3)]', 
+  page = 1,
+  totalPages = 1,
+  itemsCount = 0,
+  itemName = 'items',
+  onPageChange = () => { },
+  onFirstPage = () => { },
+  onLastPage = () => { },
+  maxDots = 5,
+  showMobileDots = false,
+  containerClass = '',
+  buttonClass = '',
+  activeButtonClass = 'bg-gradient-to-br from-purple-600 to-purple-900 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)] border border-purple-400/20',
+  disabledButtonClass = 'bg-gray-800/30 text-gray-500 cursor-not-allowed',
+  defaultButtonClass = 'bg-gray-800/50 hover:bg-purple-900/30 text-gray-300 hover:text-purple-300 hover:border-purple-500/50 border border-gray-700/50 hover:shadow-[0_0_12px_rgba(168,85,247,0.3)]',
 }) => {
   const getPageDots = () => {
     const dots = [];
-    
+
     if (totalPages <= maxDots) {
       for (let i = 1; i <= totalPages; i++) {
         dots.push(i);
       }
     } else {
       dots.push(1);
-      
+
       if (page <= 3) {
         dots.push(2, 3, 4);
       } else if (page >= totalPages - 2) {
@@ -51,12 +35,12 @@ const Pagination: React.FC<PaginationProps> = ({
       } else {
         dots.push(page - 1, page, page + 1);
       }
-      
+
       dots.push(totalPages);
-      
+
       return [...new Set(dots)].sort((a, b) => a - b);
     }
-    
+
     return dots;
   };
 
@@ -98,11 +82,11 @@ const Pagination: React.FC<PaginationProps> = ({
   return (
     <div className={`mt-8 px-2 relative ${containerClass}`}>
       <div className="absolute inset-0 backdrop-blur-sm rounded-xl bg-purple-900/5 -z-10"></div>
-      
+
       <div className="flex flex-col sm:flex-row items-center justify-between py-4 px-6 relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {ghostParticles.map((particle, i) => (
-            <div 
+            <div
               key={i}
               className="absolute w-1 h-1 bg-purple-400/40 rounded-full blur-sm"
               style={{
@@ -117,7 +101,7 @@ const Pagination: React.FC<PaginationProps> = ({
             />
           ))}
         </div>
-        
+
         <div className="py-2 px-4 bg-gray-800/50 backdrop-blur-sm rounded-lg border border-purple-500/20 mb-4 sm:mb-0">
           <p className="text-gray-300">
             Showing <span className="font-medium text-purple-300">{itemsCount}</span> {itemName}
@@ -133,7 +117,7 @@ const Pagination: React.FC<PaginationProps> = ({
           >
             <FiChevronsLeft size={18} />
           </button>
-          
+
           <button
             onClick={handlePrevPage}
             disabled={page === 1}
@@ -160,7 +144,7 @@ const Pagination: React.FC<PaginationProps> = ({
                   </React.Fragment>
                 );
               }
-              
+
               return (
                 <button
                   key={pageNumber}
@@ -172,11 +156,11 @@ const Pagination: React.FC<PaginationProps> = ({
               );
             })}
           </div>
-          
+
           <div className={`${showMobileDots ? 'hidden' : 'sm:hidden'} px-4 py-2 bg-gray-800/50 rounded-lg border border-purple-500/20 text-purple-300 font-medium`}>
             {page} / {totalPages}
           </div>
-          
+
           <button
             onClick={handleNextPage}
             disabled={page === totalPages}
@@ -186,7 +170,7 @@ const Pagination: React.FC<PaginationProps> = ({
             <span>Next</span>
             <FiArrowRight size={16} className="ml-1" />
           </button>
-          
+
           <button
             onClick={handleLastPage}
             disabled={page === totalPages}
@@ -197,7 +181,7 @@ const Pagination: React.FC<PaginationProps> = ({
           </button>
         </div>
       </div>
-      
+
       <style dangerouslySetInnerHTML={{
         __html: `
           @keyframes floatParticle {

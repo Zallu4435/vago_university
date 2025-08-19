@@ -1,5 +1,10 @@
 import React from 'react';
-import { Event, EventRequest } from '../../domain/types/management/eventmanagement';
+import { Event, EventRequest, ParticleConfig, EventDetailsStatusBadgeProps, EventDetailsInfoCardProps, EventRequestDetailsStatusBadgeProps, EventRequestDetailsInfoCardProps } from '../../domain/types/management/eventmanagement';
+import {
+  IoBusinessOutline as Building,
+  IoPersonOutline as User,
+  IoPeopleOutline as Users,
+} from 'react-icons/io5'
 
 export const EVENT_TYPES = ['All', 'Workshop', 'Seminar', 'Fest', 'Competition', 'Exhibition'] as const;
 export const EVENT_STATUSES = ['All', 'Upcoming', 'Completed', 'Cancelled'] as const;
@@ -108,73 +113,73 @@ export const getEventColumns = (
   GraduationCap: React.ComponentType<{ size?: number | string; className?: string }>,
   User: React.ComponentType<{ size?: number | string; className?: string }>,
 ) => [
-  {
-    header: 'Event',
-    key: 'title',
-    render: (event: Event) => (
-      <div>
-        <p className="font-medium text-gray-200">{event.title}</p>
-        <p className="text-xs text-gray-400">ID: {event.id?.slice(0, 7)}</p>
-      </div>
-    ),
-    width: '20%',
-  },
-  {
-    header: 'Organizer Type',
-    key: 'organizerType',
-    render: (event: Event) => (
-      <div className="flex items-center text-gray-300">
-        {event.organizerType?.toLowerCase() === 'department' ? (
-          <Building size={14} className="text-purple-400 mr-2" />
-        ) : event.organizerType?.toLowerCase() === 'club' ? (
-          <GraduationCap size={14} className="text-purple-400 mr-2" />
-        ) : (
-          <User size={14} className="text-purple-400 mr-2" />
-        )}
+    {
+      header: 'Event',
+      key: 'title',
+      render: (event: Event) => (
         <div>
-          <p className="text-sm capitalize">{event.organizerType}</p>
+          <p className="font-medium text-gray-200">{event.title}</p>
+          <p className="text-xs text-gray-400">ID: {event.id?.slice(0, 7)}</p>
         </div>
-      </div>
-    ),
-  },
-  {
-    header: 'Type',
-    key: 'eventType',
-    render: (event: Event) => (
-      <div className="text-sm text-gray-300 capitalize">{event.eventType}</div>
-    ),
-  },
-  {
-    header: 'Venue',
-    key: 'location',
-    render: (event: Event) => (
-      <div className="flex items-center text-gray-300">
-        <MapPin size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{event.location}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Status',
-    key: 'status',
-    render: (event: Event) => (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${event.status === 'upcoming'
+      ),
+      width: '20%',
+    },
+    {
+      header: 'Organizer Type',
+      key: 'organizerType',
+      render: (event: Event) => (
+        <div className="flex items-center text-gray-300">
+          {event.organizerType?.toLowerCase() === 'department' ? (
+            <Building size={14} className="text-purple-400 mr-2" />
+          ) : event.organizerType?.toLowerCase() === 'club' ? (
+            <GraduationCap size={14} className="text-purple-400 mr-2" />
+          ) : (
+            <User size={14} className="text-purple-400 mr-2" />
+          )}
+          <div>
+            <p className="text-sm capitalize">{event.organizerType}</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: 'Type',
+      key: 'eventType',
+      render: (event: Event) => (
+        <div className="text-sm text-gray-300 capitalize">{event.eventType}</div>
+      ),
+    },
+    {
+      header: 'Venue',
+      key: 'location',
+      render: (event: Event) => (
+        <div className="flex items-center text-gray-300">
+          <MapPin size={14} className="text-purple-400 mr-2" />
+          <span className="text-sm">{event.location}</span>
+        </div>
+      ),
+    },
+    {
+      header: 'Status',
+      key: 'status',
+      render: (event: Event) => (
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${event.status === 'upcoming'
             ? 'bg-blue-900/30 text-blue-400 border-blue-500/30'
             : event.status === 'completed'
               ? 'bg-green-900/30 text-green-400 border-green-500/30'
               : 'bg-red-900/30 text-red-400 border-red-500/30'
-          }`}
-      >
-        <span
-          className="h-1.5 w-1.5 rounded-full mr-1.5"
-          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
-        ></span>
-        {event.status?.charAt(0).toUpperCase() + event.status?.slice(1)}
-      </span>
-    ),
-  },
-];
+            }`}
+        >
+          <span
+            className="h-1.5 w-1.5 rounded-full mr-1.5"
+            style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
+          ></span>
+          {event.status?.charAt(0).toUpperCase() + event.status?.slice(1)}
+        </span>
+      ),
+    },
+  ];
 
 export const getEventRequestColumns = (
   Calendar: React.ComponentType<{ size?: number | string; className?: string }>,
@@ -183,71 +188,149 @@ export const getEventRequestColumns = (
   User: React.ComponentType<{ size?: number | string; className?: string }>,
   formatDate: (date: string) => string
 ) => [
-  {
-    header: 'Request',
-    key: 'eventName',
-    render: (request: EventRequest) => (
-      <div>
-        <p className="font-medium text-gray-200">{request.eventName}</p>
-        <p className="text-xs text-gray-400">ID: {request.eventId?.slice(0, 7)}</p>
-      </div>
-    ),
-    width: '20%',
-  },
-  {
-    header: 'Requested By',
-    key: 'requestedBy',
-    render: (request: EventRequest) => (
-      <div className="flex items-center text-gray-300">
-        {request.requesterType?.toLowerCase() === 'department' ? (
-          <Building size={14} className="text-purple-400 mr-2" />
-        ) : request.requesterType?.toLowerCase() === 'club' ? (
-          <GraduationCap size={14} className="text-purple-400 mr-2" />
-        ) : (
-          <User size={14} className="text-purple-400 mr-2" />
-        )}
+    {
+      header: 'Request',
+      key: 'eventName',
+      render: (request: EventRequest) => (
         <div>
-          <p className="text-sm">{request.requestedBy}</p>
-          <p className="text-xs text-gray-400 capitalize">{request?.requesterType}</p>
+          <p className="font-medium text-gray-200">{request.eventName}</p>
+          <p className="text-xs text-gray-400">ID: {request.eventId?.slice(0, 7)}</p>
         </div>
-      </div>
-    ),
-  },
-  {
-    header: 'Type',
-    key: 'type',
-    render: (request: EventRequest) => (
-      <div className="text-sm text-gray-300 capitalize">{request.type}</div>
-    ),
-  },
-  {
-    header: 'Proposed Date',
-    key: 'proposedDate',
-    render: (request: EventRequest) => (
-      <div className="flex items-center text-gray-300">
-        <Calendar size={14} className="text-purple-400 mr-2" />
-        <span className="text-sm">{formatDate(request.proposedDate)}</span>
-      </div>
-    ),
-  },
-  {
-    header: 'Status',
-    key: 'status',
-    render: (request: EventRequest) => (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${request.status === 'pending'
+      ),
+      width: '20%',
+    },
+    {
+      header: 'Requested By',
+      key: 'requestedBy',
+      render: (request: EventRequest) => (
+        <div className="flex items-center text-gray-300">
+          {request.requesterType?.toLowerCase() === 'department' ? (
+            <Building size={14} className="text-purple-400 mr-2" />
+          ) : request.requesterType?.toLowerCase() === 'club' ? (
+            <GraduationCap size={14} className="text-purple-400 mr-2" />
+          ) : (
+            <User size={14} className="text-purple-400 mr-2" />
+          )}
+          <div>
+            <p className="text-sm">{request.requestedBy}</p>
+            <p className="text-xs text-gray-400 capitalize">{request?.requesterType}</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: 'Type',
+      key: 'type',
+      render: (request: EventRequest) => (
+        <div className="text-sm text-gray-300 capitalize">{request.type}</div>
+      ),
+    },
+    {
+      header: 'Proposed Date',
+      key: 'proposedDate',
+      render: (request: EventRequest) => (
+        <div className="flex items-center text-gray-300">
+          <Calendar size={14} className="text-purple-400 mr-2" />
+          <span className="text-sm">{formatDate(request.proposedDate)}</span>
+        </div>
+      ),
+    },
+    {
+      header: 'Status',
+      key: 'status',
+      render: (request: EventRequest) => (
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${request.status === 'pending'
             ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
             : request.status === 'approved'
               ? 'bg-green-900/30 text-green-400 border-green-500/30'
               : 'bg-red-900/30 text-red-400 border-red-500/30'
-          }`}
-      >
-        <span
-          className="h-1.5 w-1.5 rounded-full mr-1.5"
-          style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
-        ></span>
-        {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-      </span>
-    ),
-  },
-]; 
+            }`}
+        >
+          <span
+            className="h-1.5 w-1.5 rounded-full mr-1.5"
+            style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
+          ></span>
+          {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+        </span>
+      ),
+    },
+  ];
+
+export const ghostParticles: ParticleConfig[] = Array(30)
+  .fill(0)
+  .map((_) => ({
+    size: Math.random() * 10 + 5,
+    top: Math.random() * 100,
+    left: Math.random() * 100,
+    animDuration: Math.random() * 10 + 15,
+    animDelay: Math.random() * 5,
+  }));
+
+
+export const getOrganizerIcon = (type: string | undefined) => {
+  switch (type) {
+    case 'department': return Building;
+    case 'club': return Users;
+    default: return User;
+  }
+};
+
+export const StatusBadge: React.FC<EventDetailsStatusBadgeProps> = ({ status }) => {
+  const statusConfig: Record<string, { bg: string; text: string; border: string }> = {
+    upcoming: { bg: 'bg-blue-600/30', text: 'text-blue-100', border: 'border-blue-500/50' },
+    completed: { bg: 'bg-green-600/30', text: 'text-green-100', border: 'border-green-500/50' },
+    cancelled: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },
+    pending: { bg: 'bg-yellow-600/30', text: 'text-yellow-100', border: 'border-yellow-500/50' },
+    approved: { bg: 'bg-green-600/30', text: 'text-green-100', border: 'border-green-500/50' },
+    rejected: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },
+  };
+
+  const config = statusConfig[status.toLowerCase()] || statusConfig.pending;
+
+  return (
+    <span
+      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.bg} ${config.text} ${config.border}`}
+    >
+      {status.charAt(0).toUpperCase() + status.slice(1)}
+    </span>
+  );
+};
+
+export const InfoCard: React.FC<EventDetailsInfoCardProps> = ({ icon: Icon, label, value }) => (
+  <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-4 shadow-sm">
+    <div className="flex items-center mb-2">
+      <Icon size={18} className="text-purple-300" />
+      <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
+    </div>
+    <p className="text-white font-semibold">{value || 'N/A'}</p>
+  </div>
+);
+
+export const RequestStatusBadge: React.FC<EventRequestDetailsStatusBadgeProps> = ({ status }) => {
+  const statusConfig: Record<string, { bg: string; text: string; border: string }> = {
+    pending: { bg: 'bg-yellow-600/30', text: 'text-yellow-100', border: 'border-yellow-500/50' },
+    approved: { bg: 'bg-green-600/30', text: 'text-green-100', border: 'border-green-500/50' },
+    rejected: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },
+  };
+
+  const config = statusConfig[status?.toLowerCase()] || statusConfig.pending;
+
+  return (
+    <span
+      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.bg} ${config.text} ${config.border}`}
+    >
+      {status?.charAt(0)?.toUpperCase() + status?.slice(1)}
+    </span>
+  );
+};
+
+export const RequestInfoCard: React.FC<EventRequestDetailsInfoCardProps> = ({ icon: Icon, label, value }) => (
+  <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-4 shadow-sm">
+    <div className="flex items-center mb-2">
+      <Icon size={18} className="text-purple-300" />
+      <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
+    </div>
+    <p className="text-white font-semibold">{value || 'N/A'}</p>
+  </div>
+);

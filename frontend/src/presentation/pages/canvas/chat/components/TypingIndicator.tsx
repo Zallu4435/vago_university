@@ -1,9 +1,5 @@
 import React from 'react';
-import { Styles } from '../types/ChatTypes';
-
-interface TypingIndicatorProps {
-  styles: Styles;
-}
+import { TypingIndicatorProps } from '../../../../../domain/types/canvas/chat';
 
 export const TypingIndicator: React.FC<TypingIndicatorProps> = ({ styles }) => (
   <div className="flex justify-start mb-4">

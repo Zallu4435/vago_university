@@ -39,14 +39,12 @@ const LoginPage = () => {
     setLoginError('');
     mutation.mutate(data, {
       onSuccess: (response) => {
-        console.log('Login response:', response);
         dispatch(setAuth({
           user: response.user,
           collection: response.collection
         }));
 
         toast.success('Login successful!');
-        console.log('Navigating to:', response.collection);
         switch (response.collection) {
           case 'register':
             navigate('/admission');

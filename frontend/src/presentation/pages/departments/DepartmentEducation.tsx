@@ -3,35 +3,14 @@ import { useSectionAnimation } from '../../../shared/hooks/useSectionAnimation';
 import { useLocation } from 'react-router-dom';
 import DepartmentPoster from '../../components/departments/common/DepartmentPoster';
 import DepartmentEducationProgrammes from '../../components/departments/education/DepartmentEducationProgrammes';
-
-interface Programme {
-  title: string;
-  description: string;
-  status: string;
-  image: string;
-}
-
-interface DepartmentData {
-  poster: {
-    title: string;
-    subtitle: string;
-  };
-  programmes: {
-    title: string;
-    list: Programme[];
-  };
-}
-
-interface DepartmentDataMap {
-  [key: string]: DepartmentData;
-}
+import { DepartmentEducationDataMap } from '../../../domain/types/department';
 
 const DepartmentProgrammes: React.FC = () => {
   const location = useLocation();
   const [currentDepartment, setCurrentDepartment] = useState<string>('computer-science');
   const isVisible = useSectionAnimation();
 
-  const departmentData: DepartmentDataMap = {
+  const departmentData: DepartmentEducationDataMap = {
     'computer-science': {
       poster: {
         title: 'Explore Our Programmes',
@@ -116,7 +95,6 @@ const DepartmentProgrammes: React.FC = () => {
 
   const data = departmentData[currentDepartment] || departmentData['computer-science'];
 
-  console.log(currentDepartment);
   return (
     <div className="min-h-screen bg-gradient-to-b from-cyan-50 via-white to-cyan-50">
       <DepartmentPoster poster={data.poster} isVisible={isVisible} />

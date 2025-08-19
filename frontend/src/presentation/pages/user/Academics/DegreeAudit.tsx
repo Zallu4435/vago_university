@@ -7,7 +7,6 @@ export default function DegreeAudit({ programInfo, progressInfo, requirementsInf
 
   return (
     <div className="container mx-auto px-4 mt-6">
-      {/* Header Section */}
       <div className={`relative overflow-hidden rounded-t-2xl shadow-xl bg-gradient-to-r ${styles.accent} group`}>
         <div className={`absolute inset-0 bg-gradient-to-r ${styles.orb.primary}`}></div>
         <div className={`absolute -top-8 -left-8 w-48 h-48 rounded-full bg-gradient-to-br ${styles.orb.primary} blur-3xl animate-pulse`}></div>
@@ -34,7 +33,6 @@ export default function DegreeAudit({ programInfo, progressInfo, requirementsInf
         </div>
       </div>
 
-      {/* Content Section */}
       <div className={`relative overflow-hidden rounded-b-2xl shadow-xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
         <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
         <div className="relative z-10 p-6">

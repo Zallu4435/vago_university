@@ -14,7 +14,7 @@ export async function expressAdapter(
     req.body,
     req.query,
     req.params,
-    req.user ? { ...req.user, id: req.user.userId } : undefined, 
+    req.user ? { ...req.user, id: req.user.userId } : undefined,
     req.file,
     files,
     req.cookies,
@@ -24,27 +24,24 @@ export async function expressAdapter(
   try {
     const response = await handler(httpRequest);
 
-    // Set cookies if present
     if (response.cookies) {
       for (const cookie of response.cookies) {
         res.cookie(cookie.name, cookie.value, cookie.options);
       }
     }
 
-    // Set custom headers if present
     if (response.headers) {
       for (const [key, value] of Object.entries(response.headers)) {
         res.setHeader(key, value as string);
       }
     }
 
-    // Handle file downloads (binary data)
     if (response.body && response.body.data && Buffer.isBuffer(response.body.data)) {
       res.status(response.statusCode).send(response.body.data);
     } else {
       res.status(response.statusCode).json(response.body);
     }
   } catch (error) {
-    next(error); // Let errors propagate to the global error handler
+    next(error);
   }
 }

@@ -15,41 +15,10 @@ import {
   FaUser
 } from 'react-icons/fa';
 import { useSessionManagement } from '../../../../application/hooks/useSessionManagement';
-import type { Session } from '../../../../application/hooks/useSessionManagement';
-
-interface AttendanceInterval {
-  joinedAt: string;
-  leftAt?: string;
-}
-
-interface AttendanceUser {
-  id: number;
-  username: string;
-  email: string;
-  intervals: AttendanceInterval[];
-  status?: string;
-}
-
-interface StudentAttendanceData {
-  studentId: string;
-  studentName: string;
-  studentEmail: string;
-  totalSessions: number;
-  totalTimeSpent: number;
-  averageAttendance: number;
-  approvedSessions: number;
-  declinedSessions: number;
-  pendingSessions: number;
-  sessionDetails: Array<{
-    sessionId: string;
-    sessionTitle: string;
-    sessionDate: string;
-    timeSpent: number;
-    attendancePercentage: number;
-    status: string;
-    intervals: AttendanceInterval[];
-  }>;
-}
+import { AttendanceInterval, AttendanceUser, Session, StudentAttendanceData } from '../../../../domain/types/faculty/attendence';
+import { VideoSession } from '../../../../application/services/session.service';
+import { formatTime } from '../../../../shared/utils/dateUtils';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
 const AttendanceSummaryPage = () => {
   const {
@@ -78,7 +47,7 @@ const AttendanceSummaryPage = () => {
 
   React.useEffect(() => {
     if (!selectedSessionId && sessions && sessions.length > 0) {
-      const first = sessions[0] as any;
+      const first = sessions[0];
       const firstId = first?._id ?? first?.id;
       if (firstId) setSelectedSessionId(firstId);
     }
@@ -86,9 +55,9 @@ const AttendanceSummaryPage = () => {
 
   const { data: currentAttendanceData = [] } = useSessionAttendance(selectedSessionId, { search: debouncedSearchTerm });
 
-  const currentSession = sessions.find((s: any) => (s?._id ?? s?.id) === selectedSessionId) as Session | undefined;
+  const currentSession = sessions.find((s: VideoSession) => (s?._id ?? s?.id) === selectedSessionId) as Session | undefined;
 
-  const sessionAttendanceQueries: { sessionId: string, query: ReturnType<typeof useSessionAttendance> }[] = sessions.map((session: any) => {
+  const sessionAttendanceQueries: { sessionId: string, query: ReturnType<typeof useSessionAttendance> }[] = sessions.map((session: VideoSession) => {
     const sid = session?._id ?? session?.id;
     return {
       sessionId: sid,
@@ -134,21 +103,13 @@ const AttendanceSummaryPage = () => {
     return `${seconds}s`;
   };
 
-  const formatTime = (timestamp: string): string => {
-    return new Date(timestamp).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  };
-
   const calculateAttendancePercentage = (
     totalTimeMs: number,
     session?: Session
   ): number => {
     if (!session || !session.duration) return 0;
     const sessionDurationMs = session.duration
-      ? session.duration * 60 * 1000
+      ? Number(session.duration) * 60 * 1000
       : 2 * 60 * 60 * 1000;
     return Math.round((totalTimeMs / sessionDurationMs) * 100);
   };
@@ -226,7 +187,7 @@ const AttendanceSummaryPage = () => {
     const studentMap = new Map<string, StudentAttendanceData>();
 
     sessionAttendanceQueries.forEach(({ sessionId, query }) => {
-      const session = sessions.find((s: Session) => s._id === sessionId);
+      const session = sessions.find((s: VideoSession) => s._id === sessionId);
       if (!session || !query.data) return;
 
       const attendanceData = query.data as AttendanceUser[];
@@ -234,7 +195,7 @@ const AttendanceSummaryPage = () => {
       attendanceData.forEach((user: AttendanceUser) => {
         const studentId = user.id.toString();
         const totalTime = calculateTotalTime(user.intervals, session?.endTime);
-        const attendancePercentage = calculateAttendancePercentage(totalTime, session);
+        const attendancePercentage = calculateAttendancePercentage(totalTime, session as Session);
 
         if (!studentMap.has(studentId)) {
           studentMap.set(studentId, {
@@ -298,15 +259,10 @@ const AttendanceSummaryPage = () => {
     setViewMode('students');
   };
 
-  if (isLoadingSessions || isLoadingAttendanceAllSessions) {
-    return <div className="p-8 text-center text-gray-500">Loading...</div>;
-  }
-
   if (viewMode === 'details' && selectedStudent) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-8 px-2 sm:px-6">
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Header */}
           <div className="flex flex-col items-center justify-center gap-4">
             <div className="inline-flex items-center space-x-3 bg-white/95 backdrop-blur-xl rounded-3xl px-8 py-6 shadow-2xl border border-pink-100">
               <button
@@ -337,7 +293,6 @@ const AttendanceSummaryPage = () => {
             </div>
           </div>
 
-          {/* Student Summary Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6">
               <div className="flex items-center justify-between">
@@ -377,7 +332,6 @@ const AttendanceSummaryPage = () => {
             </div>
           </div>
 
-          {/* Session Details Table */}
           <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 overflow-hidden">
             <div className="p-6 border-b border-pink-100">
               <div className="flex items-center gap-2">
@@ -435,7 +389,6 @@ const AttendanceSummaryPage = () => {
           </div>
         </div>
 
-        {/* Session Intervals Modal */}
         {selectedSessionForIntervals && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-2xl border border-pink-100">
@@ -503,7 +456,6 @@ const AttendanceSummaryPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-8 px-2 sm:px-6">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
         <div className="flex flex-col items-center justify-center gap-4">
           <div className="inline-flex items-center space-x-3 bg-white/95 backdrop-blur-xl rounded-3xl px-8 py-6 shadow-2xl border border-pink-100">
             <div className="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
@@ -516,7 +468,6 @@ const AttendanceSummaryPage = () => {
           </div>
         </div>
 
-        {/* Summary Statistics */}
         {summaryStats && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6">
@@ -558,7 +509,6 @@ const AttendanceSummaryPage = () => {
           </div>
         )}
 
-        {/* Search Section */}
         <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             <div className="flex-1">
@@ -577,7 +527,6 @@ const AttendanceSummaryPage = () => {
           </div>
         </div>
 
-        {/* Students List */}
         <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 overflow-hidden">
           <div className="p-6 border-b border-pink-100">
             <div className="flex items-center gap-2">
@@ -587,83 +536,90 @@ const AttendanceSummaryPage = () => {
             </div>
           </div>
 
-          {filteredStudents.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gradient-to-r from-purple-50 to-pink-50">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sessions</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Average Attendance</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approved Sessions</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Time</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-pink-100">
-                  {filteredStudents.map((student) => (
-                    <tr key={student.studentId} className="hover:bg-pink-50 transition-colors cursor-pointer" onClick={() => handleStudentClick(student)}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-medium text-sm">{student.studentName.charAt(0).toUpperCase()}</span>
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{student.studentName}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{student.studentEmail}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{student.totalSessions}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAttendanceColor(student.averageAttendance)}`}>{student.averageAttendance}%</span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{student.approvedSessions}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <FaStopwatch className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm font-medium text-gray-900">{formatDuration(student.totalTimeSpent)}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStudentClick(student);
-                          }}
-                          className="px-3 py-1 bg-pink-50 text-pink-700 rounded-lg text-xs font-medium hover:bg-pink-100 transition-colors flex items-center gap-1"
-                        >
-                          <FaEye className="w-3 h-3" />
-                          View Details
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <div className="relative">
+            {(isLoadingSessions || isLoadingAttendanceAllSessions) && (
+              <LoadingSpinner />
+            )}
+            <div className={(isLoadingSessions || isLoadingAttendanceAllSessions) ? 'pointer-events-none opacity-50' : ''}>
+              {filteredStudents.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gradient-to-r from-purple-50 to-pink-50">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sessions</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Average Attendance</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approved Sessions</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Time</th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-pink-100">
+                      {filteredStudents.map((student) => (
+                        <tr key={student.studentId} className="hover:bg-pink-50 transition-colors cursor-pointer" onClick={() => handleStudentClick(student)}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <span className="text-white font-medium text-sm">{student.studentName.charAt(0).toUpperCase()}</span>
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">{student.studentName}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-500">{student.studentEmail}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{student.totalSessions}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAttendanceColor(student.averageAttendance)}`}>{student.averageAttendance}%</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{student.approvedSessions}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-2">
+                              <FaStopwatch className="w-4 h-4 text-gray-400" />
+                              <span className="text-sm font-medium text-gray-900">{formatDuration(student.totalTimeSpent)}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStudentClick(student);
+                              }}
+                              className="px-3 py-1 bg-pink-50 text-pink-700 rounded-lg text-xs font-medium hover:bg-pink-100 transition-colors flex items-center gap-1"
+                            >
+                              <FaEye className="w-3 h-3" />
+                              View Details
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="p-12 text-center">
+                  <div className="text-pink-200 mb-4">
+                    <FaUsers className="w-12 h-12 mx-auto" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Students Found</h3>
+                  <p className="text-gray-500 mb-4">No students match your search criteria.</p>
+                  <button
+                    onClick={clearFilters}
+                    className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
+                  >
+                    Clear Search
+                  </button>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="p-12 text-center">
-              <div className="text-pink-200 mb-4">
-                <FaUsers className="w-12 h-12 mx-auto" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Students Found</h3>
-              <p className="text-gray-500 mb-4">No students match your search criteria.</p>
-              <button
-                onClick={clearFilters}
-                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
-              >
-                Clear Search
-              </button>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

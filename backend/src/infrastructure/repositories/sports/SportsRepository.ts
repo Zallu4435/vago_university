@@ -45,26 +45,6 @@ export class SportsRepository extends BaseRepository<Sport, Record<string, unkno
     return { sports: sports as unknown as SportDocument[], totalItems, totalPages, currentPage: page };
   }
 
-  // async getSportById(id: string) {
-  //   return await TeamModel.findById(id).lean();
-  // }
-
-  // async createSport(params: CreateSportData) {
-  //   return await TeamModel.create({ ...params, status: params.status?.toLowerCase() || "active" });
-  // }
-
-  // async updateSport(params: UpdateSportData) {
-  //   return await TeamModel.findByIdAndUpdate(
-  //     params.id,
-  //     { $set: { ...params, updatedAt: new Date() } },
-  //     { new: true }
-  //   ).lean();
-  // }
-
-  // async deleteSport(id: string): Promise<void> {
-  //   await TeamModel.findByIdAndDelete(id);
-  // }
-
   async getSportRequests(page: number, limit: number, status: string, type: string, startDate: string, endDate: string, search: string) {
     const query: SportFilter = {};
     if (status && status.toLowerCase() !== "all") {
@@ -124,7 +104,6 @@ export class SportsRepository extends BaseRepository<Sport, Record<string, unkno
       { runValidators: true }
     );
 
-    // Send approval notification
     const sportRequest = await SportRequestModel.findById(id);
     if (sportRequest && sportRequest.userId) {
       const userId = typeof sportRequest.userId === 'string' ? sportRequest.userId : sportRequest.userId._id.toString();
@@ -141,7 +120,6 @@ export class SportsRepository extends BaseRepository<Sport, Record<string, unkno
       { runValidators: true }
     );
 
-    // Send rejection notification
     const sportRequest = await SportRequestModel.findById(id);
     if (sportRequest && sportRequest.userId) {
       const userId = typeof sportRequest.userId === 'string' ? sportRequest.userId : sportRequest.userId._id.toString();

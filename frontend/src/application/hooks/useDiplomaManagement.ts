@@ -2,12 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { diplomaService } from '../services/diploma.service';
-
-interface Filters {
-  category: string;
-  status: string;
-  dateRange: string;
-}
+import { Filters } from '../../domain/types/management/diplomamanagement';
 
 export const useDiplomaManagement = () => {
   const queryClient = useQueryClient();
@@ -68,7 +63,6 @@ export const useDiplomaManagement = () => {
   const { data: selectedCourse, isLoading: isLoadingCourse } = useQuery({
     queryKey: ['diploma-course', selectedCourseId],
     queryFn: () => {
-      console.log('[useQuery] Fetching course for selectedCourseId:', selectedCourseId);
       if (!selectedCourseId) throw new Error('No course ID provided');
       return diplomaService.getDiplomaCourseById(selectedCourseId);
     },
@@ -140,7 +134,6 @@ export const useDiplomaManagement = () => {
   });
 
   const handleViewCourse = (courseId: string) => {
-    console.log('[handleViewCourse] Setting selectedCourseId:', courseId);
     setSelectedCourseId(courseId);
   };
 

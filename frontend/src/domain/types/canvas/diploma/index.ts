@@ -27,6 +27,7 @@ export interface Chapter {
 
 export interface DiplomaCourse {
   id: string;
+  _id?: string;
   title: string;
   description: string;
   chapters: Chapter[];
@@ -55,3 +56,38 @@ export interface VideoPlayerProps {
 }
 
 export type ViewMode = 'grid' | 'table' | 'courses' | 'details';
+
+export type ChapterType = 'video' | 'interactive' | 'quiz' | 'project';
+
+export interface BackendChapter {
+  _id?: string;
+  id?: string;
+  title: string;
+  description?: string;
+  type?: string;
+  duration?: string;
+  videoUrl?: string;
+  notes?: string;
+  order?: number;
+  isCompleted?: boolean;
+  isBookmarked?: boolean;
+}
+
+export interface BackendCourse {
+  _id?: string;
+  id?: string;
+  title: string;
+  description: string;
+  category?: string;
+  duration?: string;
+  instructor?: string;
+  department?: string;
+  chapters?: BackendChapter[];
+  videos?: BackendChapter[];
+  videoCount?: number;
+  completedVideoCount?: number;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  isEnrolled?: boolean;
+}

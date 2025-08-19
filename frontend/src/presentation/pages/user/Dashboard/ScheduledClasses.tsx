@@ -1,18 +1,6 @@
 import { FaThLarge } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
-
-interface Class {
-  id: string;
-  title: string;
-  faculty: string;
-  schedule: string;
-  cousre: string;
-  description: string;
-}
-
-interface ScheduledClassesProps {
-  classes: Class[];
-}
+import { Class, ScheduledClassesProps } from '../../../../domain/types/dashboard/user';
 
 export default function ScheduledClasses({ classes }: ScheduledClassesProps) {
   const { styles, theme } = usePreferences();

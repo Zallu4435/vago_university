@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { IoCloseOutline as X, IoSearchOutline as Search, IoMailOutline as Mail } from 'react-icons/io5';
 import { RecipientType, User, ComposeMessageModalProps, UserArrayWithUsers } from '../../../../domain/types/management/communicationmanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
-import { RECIPIENT_TYPES } from '../../../../shared/constants/communicationManagementConstants';
+import { ghostParticles, RECIPIENT_TYPES } from '../../../../shared/constants/communicationManagementConstants';
 import { toast } from 'react-hot-toast';
 
 const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
@@ -60,8 +60,6 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
     }, 300);
   };
 
-
-
   const handleCancel = () => {
     setRecipientType('');
     onCancel();
@@ -97,16 +95,6 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
       loadUsers(type);
     }
   };
-
-  const ghostParticles = Array(30)
-    .fill(0)
-    .map((_) => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
 
   if (!isOpen) return null;
 

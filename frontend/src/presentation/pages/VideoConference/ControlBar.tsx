@@ -129,7 +129,6 @@ export const ControlBar: React.FC<ControlBarProps> = ({
       )}
 
       <div className="fixed bottom-0 left-0 right-0 bg-white/10 backdrop-blur-lg border-t border-white/20 px-6 py-4 z-50">
-        {/* Reactions popover for mobile - shown above control bar */}
         {isMobile && showReactions && (
           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 bg-white rounded-xl shadow-2xl p-4 min-w-[300px] z-50 reactions-modal">
 
@@ -148,8 +147,6 @@ export const ControlBar: React.FC<ControlBarProps> = ({
         )}
 
         <div className="flex items-center justify-center max-w-6xl mx-auto">
-          {/* Center - Main Controls */}
-          {/* On mobile only (< 640px), center the main 3 controls, put ellipsis to the right */}
           {isMobile ? (
             <div className="flex items-center gap-3 relative">
               <button
@@ -176,7 +173,6 @@ export const ControlBar: React.FC<ControlBarProps> = ({
               >
                 <FaPhoneSlash className="w-5 h-5" />
               </button>
-              {/* More button */}
               <button
                 onClick={() => setShowMore((v) => !v)}
                 className={`p-4 rounded-full transition-all duration-200 transform hover:scale-105 active:scale-95 more-button shadow-lg ${showMore
@@ -189,7 +185,6 @@ export const ControlBar: React.FC<ControlBarProps> = ({
               </button>
             </div>
           ) : (
-            // All other breakpoints (640px and above): full layout with all controls
             <div className="flex items-center gap-3">
               <button
                 onClick={onToggleMic}

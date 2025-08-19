@@ -2,37 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { diplomaBackendService } from '../services/diplomaBackend.service';
 import { toast } from 'react-hot-toast';
+import { DiplomaForHook, VideoForHook } from '../../domain/types/management/videomanagement';
 
-interface VideoForHook {
-  id: string;
-  title: string;
-  duration: string;
-  uploadedAt: string;
-  module: number;
-  status: "Published" | "Draft";
-  diplomaId: string;
-  description: string;
-  videoUrl: string;
-  createdAt?: string;
-  updatedAt?: string;
-  diploma?: {
-    id: string;
-    title: string;
-    category: string;
-  };
-}
-
-interface DiplomaForHook {
-  id: string;
-  title: string;
-  category: string;
-  videoIds: string[];
-}
 
 export const useVideoManagement = (page: number, itemsPerPage: number, filters: { status: string; category: string; dateRange: string; startDate?: string; endDate?: string }, searchQuery: string, activeTab: string) => {
   const queryClient = useQueryClient();
 
-  // Fetch diplomas
   const { data: diplomasData, isLoading: isLoadingDiplomas } = useQuery<{ diplomas: DiplomaForHook[] }, Error>({
     queryKey: ['diplomas'],
     queryFn: async () => {
@@ -41,14 +16,13 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
     },
   });
 
-  // Fetch videos
   const { data: videosData, isLoading: isLoadingVideos } = useQuery<{ videos: VideoForHook[]; totalPages: number }, Error>({
     queryKey: ['videos', page, filters, searchQuery, activeTab],
     queryFn: () => diplomaBackendService.getVideos(
       filters.category || '', 
       page, 
       itemsPerPage, 
-      filters.status || undefined, // Use normalized status from filters
+      filters.status || undefined,
       searchQuery || undefined,
       filters.dateRange || undefined,
       filters.startDate,
@@ -79,7 +53,6 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
     },
   });
 
-  // Update video mutation
   const updateVideoMutation = useMutation({
     mutationFn: ({ videoId, videoData }: { videoId: string; videoData: Partial<VideoForHook> | FormData }) =>
       diplomaBackendService.updateVideo(videoId, videoData),
@@ -92,7 +65,6 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
     },
   });
 
-  // Delete video mutation
   const deleteVideoMutation = useMutation({
     mutationFn: (videoId: string) => diplomaBackendService.deleteVideo(videoId),
     onSuccess: () => {
@@ -105,22 +77,17 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
     },
   });
 
-  // Handle video save (create or update)
   const handleSaveVideo = async (videoData: FormData | Partial<VideoForHook>): Promise<void> => {
     try {
       if (videoData instanceof FormData) {
-        // Check if this is an update (has videoId) or create
         const videoId = videoData.get('videoId') || videoData.get('id');
         
         if (videoId) {
-          // This is an update with FormData (has new file)
-          console.log('Updating video with new file:', videoId);
           await updateVideoMutation.mutateAsync({ 
             videoId: videoId.toString(), 
             videoData 
           });
         } else {
-          // This is a new video creation
           const category = videoData.get('category');
           if (!category) {
             throw new Error('Please select a category for the new video');
@@ -131,11 +98,9 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
           });
         }
       } else {
-        // This is an update without new file (plain object)
         if (!videoData.id) {
           throw new Error('Video ID is required for updates');
         }
-        console.log('Updating video without new file:', videoData.id, videoData);
         await updateVideoMutation.mutateAsync({ 
           videoId: videoData.id, 
           videoData 
@@ -147,7 +112,6 @@ export const useVideoManagement = (page: number, itemsPerPage: number, filters: 
     }
   };
 
-  // Handle video delete
   const handleDeleteVideo = (video: VideoForHook) => {
     deleteVideoMutation.mutate(video.id);
   };

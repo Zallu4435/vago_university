@@ -1,19 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { FiSmile, FiCornerUpLeft, FiShare2, FiEdit2, FiTrash2, FiInfo, FiDownload, FiPaperclip, FiStar } from 'react-icons/fi';
-import { Message } from '../types/ChatTypes';
-
-interface MessageDropdownProps {
-  message: Message;
-  currentUserId: string;
-  isVisible: boolean;
-  onClose: () => void;
-  onReact: () => void;
-  onReply: () => void;
-  onForward: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-  onShowDeleteOptions: () => void;
-}
+import { MessageDropdownProps } from '../../../../../domain/types/canvas/chat';
 
 export const MessageDropdown: React.FC<MessageDropdownProps> = ({
   message,

@@ -1,20 +1,11 @@
 import { useState } from 'react';
 import { useCommunicationManagement } from '../../../../application/hooks/useCommunication';
 import { FaTrash, FaEnvelopeOpen } from 'react-icons/fa';
-import PropTypes from 'prop-types';
 import WarningModal from '../../../components/common/WarningModal';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../appStore/store';
-import { Message } from '../../../../domain/types/user/communication';
-
-type Recipient = {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  status: string;
-};
+import { Message, Recipient } from '../../../../domain/types/user/communication';
 
 export default function InboxSection() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
@@ -34,10 +25,8 @@ export default function InboxSection() {
     
     setSelectedMessage(message);
     if (isCurrentUserUnread) {
-      console.log('Calling handleViewMessage for message:', message.id);
       handleViewMessage(message);
     } else {
-      console.log('Message already read by current user, not calling handleViewMessage');
     }
   };
 
@@ -67,7 +56,6 @@ export default function InboxSection() {
 
   return (
     <div className="relative">
-      {/* Header */}
       <div className={`relative overflow-hidden rounded-t-2xl shadow-xl bg-gradient-to-r ${styles.accent} group mb-6`}>
         <div className={`absolute inset-0 bg-gradient-to-r ${styles.orb.primary}`}></div>
         <div className={`absolute -top-8 -left-8 w-48 h-48 rounded-full bg-gradient-to-br ${styles.orb.primary} blur-3xl animate-pulse`}></div>
@@ -142,7 +130,6 @@ export default function InboxSection() {
           </div>
         </div>
 
-        {/* Message Details */}
         <div className={`lg:col-span-2 relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
           <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
           <div className="relative z-10 p-4 sm:p-6">
@@ -188,31 +175,3 @@ export default function InboxSection() {
     </div>
   );
 }
-
-InboxSection.propTypes = {
-  messages: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      subject: PropTypes.string.isRequired,
-      content: PropTypes.string.isRequired,
-      sender: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        name: PropTypes.string.isRequired,
-        email: PropTypes.string.isRequired,
-        role: PropTypes.string.isRequired,
-      }).isRequired,
-      recipients: PropTypes.arrayOf(
-        PropTypes.shape({
-          id: PropTypes.string.isRequired,
-          name: PropTypes.string.isRequired,
-          email: PropTypes.string.isRequired,
-          role: PropTypes.string.isRequired,
-          status: PropTypes.oneOf(['read', 'unread']).isRequired,
-        })
-      ).isRequired,
-      isBroadcast: PropTypes.bool.isRequired,
-      createdAt: PropTypes.string.isRequired,
-      updatedAt: PropTypes.string.isRequired,
-    })
-  ),
-};

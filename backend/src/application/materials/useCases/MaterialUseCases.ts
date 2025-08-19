@@ -187,7 +187,6 @@ export class GetMaterialByIdUseCase {
 export class CreateMaterialUseCase {
   constructor(private repo: IMaterialsRepository) { }
   async execute(params: CreateMaterialRequestDTO): Promise<CreateMaterialResponseDTO> {
-    // Business logic/validation
     const material = Material.create(params);
     const dbResult = await this.repo.create(material.props);
     return { material: toMaterialProps(dbResult) };
@@ -199,27 +198,16 @@ export class UpdateMaterialUseCase {
   async execute(params: UpdateMaterialRequestDTO): Promise<UpdateMaterialResponseDTO | null> {
     if (!params.id) throw new MaterialValidationError('Material ID is required');
 
-    // First, get the existing material
     const existingMaterial = await this.repo.findById(params.id);
     if (!existingMaterial) throw new MaterialNotFoundError(params.id);
 
-    // Create updated material using the entity's update method
     const existingProps = toMaterialProps(existingMaterial);
-    console.log('=== UPDATE MATERIAL USE CASE DEBUG ===');
-    console.log('Existing props:', existingProps);
-    console.log('Update params:', params);
 
-    // Create updated material using the entity's update method
     const { id, ...updateData } = params;
     const updatedMaterial = Material.update(existingProps, updateData);
-    console.log('Updated material props:', updatedMaterial.props);
-    console.log('About to update in DB: id =', params.id, 'data =', updatedMaterial.props);
-    // Update in database
     const dbResult = await this.repo.update(params.id, updatedMaterial.props);
-    console.log('DB update result:', dbResult);
     if (!dbResult) throw new MaterialNotFoundError(params.id);
 
-    console.log('=== UPDATE MATERIAL USE CASE DEBUG END ===');
     return { material: toMaterialProps(dbResult) };
   }
 }

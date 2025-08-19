@@ -53,13 +53,11 @@ export class EventsRepository extends BaseRepository<EventDocument, CreateEventD
 
       query.date = { $gte: calculatedStartDate.toISOString().split('T')[0] };
     } else if (startDate || endDate) {
-      // Custom date range
       query.date = {};
       if (startDate) query.date.$gte = new Date(startDate).toISOString().split('T')[0];
       if (endDate) query.date.$lte = new Date(endDate).toISOString().split('T')[0];
     }
 
-    // Search functionality
     if (search && search.trim()) {
       query.$or = [
         { title: { $regex: search.trim(), $options: "i" } },
@@ -79,30 +77,6 @@ export class EventsRepository extends BaseRepository<EventDocument, CreateEventD
     const totalPages = Math.ceil(totalItems / limit);
     return { events, totalItems, totalPages, currentPage: page };
   }
-
-  // async getEventById(id: string) {
-  //   return await CampusEventModel.findById(id).lean();
-  // }
-
-  // async createEvent(event: Event) {
-  //   return await CampusEventModel.create(event);
-  // }
-
-  // async updateEvent(event: Event) {
-  //   const eventData = Object.fromEntries(
-  //     Object.entries(event).filter(([key]) => key !== '_id' && key !== 'id')
-  //   );
-
-  //   return await CampusEventModel.findByIdAndUpdate(
-  //     event.id,
-  //     { $set: eventData },
-  //     { new: true }
-  //   ).lean();
-  // }
-
-  // async deleteEvent(id: string) {
-  //   await CampusEventModel.findByIdAndDelete(id);
-  // }
 
   async getEventRequests(
     page: number, limit: number, status: string, startDate: string, endDate: string, type: string, search: string, organizerType: string, dateRange: string

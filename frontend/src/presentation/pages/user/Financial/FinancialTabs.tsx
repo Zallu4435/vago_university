@@ -1,10 +1,5 @@
-import PropTypes from 'prop-types';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
-import type { FinancialTabsProps } from '../../../../domain/types/user/financial';
-
-interface FinancialTabsWithDisabledProps extends FinancialTabsProps {
-  disabledTabs?: string[];
-}
+import { FinancialTabsWithDisabledProps } from '../../../../domain/types/user/financial';
 
 export default function FinancialTabs({ activeTab, setActiveTab, disabledTabs = [] }: FinancialTabsWithDisabledProps) {
   const tabs = ['Fees and Payments', 'Financial Aid', 'Scholarships'];
@@ -43,8 +38,3 @@ export default function FinancialTabs({ activeTab, setActiveTab, disabledTabs = 
     </div>
   );
 }
-
-FinancialTabs.propTypes = {
-  activeTab: PropTypes.string.isRequired,
-  setActiveTab: PropTypes.func.isRequired,
-};

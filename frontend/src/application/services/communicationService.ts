@@ -100,17 +100,10 @@ export class CommunicationService {
 
   async markAsRead(messageId: string, isAdmin: boolean = false): Promise<void> {
     try {
-      console.log('=== CommunicationService markAsRead DEBUG ===');
-      console.log('MessageId:', messageId);
-      console.log('IsAdmin:', isAdmin);
-
       const baseUrl = this.getBaseUrl(isAdmin);
       const endpoint = `${baseUrl}/messages/${messageId}/read`;
-      console.log('Calling endpoint:', endpoint);
 
       await httpClient.put(endpoint);
-      console.log('Mark as read API call successful');
-      console.log('================================');
     } catch (error) {
       console.error('Mark as read API call failed:', error);
       throw new Error('Failed to mark message as read');

@@ -1,17 +1,9 @@
 import React, { useState } from 'react';
 import { FiX, FiEdit2, FiTrash2, FiUsers, FiBell, FiBellOff } from 'react-icons/fi';
-import { Chat, Styles } from '../types/ChatTypes';
 import { useChatMutations } from '../hooks/useChatMutations';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../../appStore/store';
-
-interface ChatInfoProps {
-  chat: Chat;
-  styles: Styles;
-  onClose: () => void;
-  onDeleteChat: (chatId: string) => void;
-  onAddMembers: (chatId: string) => void;
-}
+import { ChatInfoProps } from '../../../../../domain/types/canvas/chat';
 
 export const ChatInfo: React.FC<ChatInfoProps> = ({
   chat,
@@ -34,7 +26,6 @@ export const ChatInfo: React.FC<ChatInfoProps> = ({
 
   const handleToggleMute = () => {
     setIsMuted(!isMuted);
-    // TODO: Implement mute functionality
   };
 
   return (

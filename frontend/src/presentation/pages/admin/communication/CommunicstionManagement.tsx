@@ -18,35 +18,8 @@ import WarningModal from '../../../components/common/WarningModal';
 import ComposeMessageModal from './ComposeMessageModal';
 import MessageDetailsModal from './MessageDetailsModal';
 import debounce from 'lodash/debounce';
-import { Message } from '../../../../domain/types/management/communicationmanagement';
+import { Message, TransformedMessage } from '../../../../domain/types/management/communicationmanagement';
 import { STATUSES, USER_GROUPS, inboxColumns, sentColumns } from '../../../../shared/constants/communicationManagementConstants';
-
-type TransformedMessage = {
-  id: string;
-  subject: string;
-  content: string;
-  sender?: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-  };
-  recipients: string;
-  attachments: Array<{
-    id: string;
-    name: string;
-    url: string;
-    size: number;
-    type: string;
-  }>;
-  isBroadcast: boolean;
-  createdAt: string;
-  updatedAt: string;
-  status: 'read' | 'unread' | 'delivered' | 'opened';
-  recipientsCount: number;
-  date?: string;
-  time?: string;
-};
 
 const CommunicationManagement: React.FC = () => {
   const {

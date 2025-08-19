@@ -1,4 +1,22 @@
+
 import { ThemeStyles } from '../../config/types';
+
+export interface Styles {
+    status: { warning: string; error: string; info: string; success: string };
+    badgeBackground: string;
+    button: { secondary: string };
+    textSecondary: string;
+    success: string;
+    error: string;
+    info: string;
+    border: string;
+    cardHover: string;
+    cardShadow: string;
+    card: { background: string };
+    icon: { secondary: string };
+    backgroundSecondary: string;
+    accent: string;
+}
 
 export interface Session {
     id?: string;
@@ -34,7 +52,7 @@ export interface Faculty {
     firstName: string;
     lastName: string;
 
-  }
+}
 
 export interface UserAccess {
     isEnrolled: boolean;
@@ -63,7 +81,7 @@ export interface SessionCardProps {
     userAccess: UserAccess;
     styles: ThemeStyles;
     onToggleWatched: (sessionId: string) => void;
-    onToggleLike?: (sessionId: string) => void; // Made optional since we removed like functionality
+    onToggleLike?: (sessionId: string) => void;
 }
 
 export interface SessionFiltersProps {
@@ -87,11 +105,29 @@ export interface SessionHeaderProps {
 export interface SessionStatsProps {
     stats: SessionStats;
     styles: ThemeStyles;
-} 
+}
 
 
 export interface BackendSession {
     startTime: string;
     joinUrl?: string;
     [key: string]: unknown;
-  }
+}
+
+export interface UniversitySession {
+    id: string;
+    title: string;
+    status: string;
+    description?: string;
+    instructor?: string;
+    course?: string;
+    duration?: number;
+    tags?: string[];
+    difficulty?: 'beginner' | 'intermediate' | 'advanced';
+    hasRecording?: boolean;
+    startTime: string;
+    joinUrl?: string;
+    isLive?: boolean;
+    isEnrolled?: boolean;
+    userAttendanceStatus?: string;
+}

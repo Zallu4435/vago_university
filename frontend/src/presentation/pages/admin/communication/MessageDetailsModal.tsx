@@ -8,6 +8,7 @@ import {
 import WarningModal from '../../../components/common/WarningModal';
 import { MessageDetailsModalProps } from '../../../../domain/types/management/communicationmanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
+import { ghostParticles } from '../../../../shared/constants/communicationManagementConstants';
 
 const MessageDetailsModal: React.FC<MessageDetailsModalProps> = ({
   message,
@@ -32,21 +33,9 @@ const MessageDetailsModal: React.FC<MessageDetailsModalProps> = ({
     setShowDeleteWarning(false);
   };
 
-  // Particle effect
-  const ghostParticles = Array(30)
-    .fill(0)
-    .map((_) => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
-
   return (
     <>
       <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        {/* Background particles */}
         {ghostParticles.map((particle, i) => (
           <div
             key={i}
@@ -62,16 +51,12 @@ const MessageDetailsModal: React.FC<MessageDetailsModalProps> = ({
           />
         ))}
 
-        {/* Main Modal Container */}
         <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-2xl max-h-[90vh] rounded-2xl border border-purple-600/30 shadow-2xl overflow-hidden relative">
-          {/* Inner glow effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
 
-          {/* Corner decorations */}
           <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
           <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
 
-          {/* Header Section */}
           <div className="bg-gradient-to-r from-purple-900 to-gray-900 p-6 text-white">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
@@ -95,7 +80,6 @@ const MessageDetailsModal: React.FC<MessageDetailsModalProps> = ({
             </div>
           </div>
 
-          {/* Content Section */}
           <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
             <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -150,7 +134,6 @@ const MessageDetailsModal: React.FC<MessageDetailsModalProps> = ({
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="border-t border-purple-600/30 bg-gray-900/80 p-6">
               <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
                 {messageType === 'inbox' && (

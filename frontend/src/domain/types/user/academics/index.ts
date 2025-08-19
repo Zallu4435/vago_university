@@ -1,62 +1,63 @@
 export interface AcademicsTabsProps {
-    activeSubTab: string;
-    setActiveSubTab: (tab: string) => void;
+  activeSubTab: string;
+  setActiveSubTab: (tab: string) => void;
 }
 
 export interface StudentInfo {
-    credits: number;
-    pendingCredits: number;
+  credits: number;
+  pendingCredits: number;
 }
 
 export interface Course {
-    id: string;
-    _id: string;
-    joined: boolean;
-    title: string;
-    specialization: string;
-    faculty: string;
-    credits: number;
-    schedule: string;
-    maxEnrollment: number;
-    currentEnrollment: number;
-    description?: string;
-    prerequisites?: string[];
+  id: string;
+  _id: string;
+  joined: boolean;
+  title: string;
+  specialization: string;
+  faculty: string;
+  credits: number;
+  schedule: string;
+  maxEnrollment: number;
+  currentEnrollment: number;
+  description?: string;
+  prerequisites?: string[];
 }
 
 export interface CourseRegistrationProps {
-    studentInfo: StudentInfo;
-    courses: Course[];
-    enrolledCredits: number;
-    waitlistedCredits: number;
+  studentInfo: StudentInfo;
+  courses: Course[];
+  enrolledCredits: number;
+  waitlistedCredits: number;
 }
 
 export interface CourseDetails {
-    title: string;
-    specialization: string;
-    faculty: string;
-    credits: number;
-    schedule: string;
-    maxEnrollment: number;
-    currentEnrollment: number;
-    description?: string;
-    prerequisites?: string[];
-    joined: boolean;
+  title: string;
+  specialization: string;
+  faculty: string;
+  credits: number;
+  schedule: string;
+  maxEnrollment: number;
+  currentEnrollment: number;
+  description?: string;
+  prerequisites?: string[];
+  joined: boolean;
 }
 
 export interface CourseDetailsModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onConfirm: (enrollmentData: { reason: string }) => void;
-    course: CourseDetails;
-    isEnrolling: boolean;
-} 
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: (enrollmentData: { reason: string }) => void;
+  course: CourseDetails;
+  isEnrolling: boolean;
+}
 
 export interface StudentInfo {
-  name: string;
-  id: string;
-  major: string;
-  academicStanding: string;
-  advisor: string;
+  name?: string;
+  id?: string;
+  major?: string;
+  email?: string;
+  academicStanding?: string;
+  advisor?: string;
 }
 
 export interface GradeInfo {
@@ -98,4 +99,25 @@ export interface EnrollmentData {
   term: string;
   section: string;
   reason: string;
-} 
+}
+
+interface AcademicTerm {
+  id: string;
+  term: string;
+  credits: number;
+  gpa: string;
+}
+
+export interface AcademicRecordsProps {
+  studentInfo: StudentInfo;
+  gradeInfo: GradeInfo;
+  academicHistory: AcademicTerm[];
+}
+
+export interface AcademicsTabsWithDisabledProps extends AcademicsTabsProps {
+  disabledTabs?: string[];
+}
+
+export interface QueryOptions {
+  enabled?: boolean;
+}

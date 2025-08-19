@@ -21,7 +21,6 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
-      {/* Black background overlay */}
       <div className="fixed inset-0 bg-black bg-opacity-90"></div>
       <div className="relative z-10 w-full max-w-full sm:max-w-md">
         <div className={`${styles.card.background} p-4 sm:p-8 rounded-xl sm:rounded-3xl shadow-2xl border-2 border-gray-800 w-full`}>

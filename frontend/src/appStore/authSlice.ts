@@ -5,12 +5,16 @@ interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
   collection: 'register' | 'admin' | 'user' | 'faculty' | null;
+  error?: string | null;
+  loading?: boolean;
 }
 
 const initialState: AuthState = {
   isAuthenticated: false,
   user: null,
   collection: null,
+  error: null,
+  loading: false,
 };
 
 const authSlice = createSlice({

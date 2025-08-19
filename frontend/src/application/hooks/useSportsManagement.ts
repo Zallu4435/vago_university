@@ -211,7 +211,6 @@ export const useSportsManagement = () => {
     setSelectedRequestId(requestId);
   };
 
-  console.log(teamDetails, "teamDetails");
 
   return {
     teams: teamsData?.data || [],

@@ -198,11 +198,9 @@ const UniversityDashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex relative">
-      {/* Fixed Header */}
       <div className="fixed top-0 left-0 right-0 z-[9999] bg-white border-b border-slate-200 shadow-sm">
         <div className="max-w-full mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Left Section - Back Button and Title */}
             <div className="flex items-center space-x-6">
               <button
                 onClick={handleBackToDashboard}
@@ -225,7 +223,6 @@ const UniversityDashboard = () => {
               </div>
             </div>
 
-            {/* Right Section - User Info */}
             <div className="flex items-center">
               <div className="px-3 py-1.5 bg-sky-50 rounded-lg text-sm text-sky-700 font-medium border border-sky-200">
                 {user?.firstName || 'User'}
@@ -235,7 +232,6 @@ const UniversityDashboard = () => {
         </div>
       </div>
 
-      {/* Main Content with top padding for fixed header */}
       <div className="pt-16 flex w-full min-h-screen">
         <Sidebar 
           activeTab={activeTab} 

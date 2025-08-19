@@ -1,4 +1,4 @@
-import { AssignmentFile, SubmissionFile, SubmissionStatus } from '../assignmenttypes';
+import { SubmissionFile } from '../assignmenttypes';
 
 export interface AssignmentDTO {
   _id: string;
@@ -77,4 +77,9 @@ export interface AnalyticsResponseDTO {
     averageScore: number;
     submissionsCount: number;
   }>;
-} 
+}
+
+export interface ResponseDTO<T> {
+  data: T | { error: string };
+  success: boolean;
+}

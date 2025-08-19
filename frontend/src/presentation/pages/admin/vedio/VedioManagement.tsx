@@ -61,7 +61,6 @@ const VideoManagementPage = () => {
         : '',
   };
 
-
   const {
     diplomasData,
     videosData,

@@ -1,5 +1,5 @@
 import { FiVideo } from 'react-icons/fi';
-import { Diploma, Video } from '../../domain/types/diploma';
+import { Diploma, Video } from '../../domain/types/management/videomanagement';
 
 export const ITEMS_PER_PAGE = 10;
 
@@ -23,4 +23,14 @@ export const getTabs = (filteredVideos: Video[], activeTab: string) => [
     icon: <FiVideo size={16} />,
     active: activeTab === 'drafts',
   },
-]; 
+];
+
+export const ghostParticles = Array(30)
+  .fill(0)
+  .map((_) => ({
+    size: Math.random() * 10 + 5,
+    top: Math.random() * 100,
+    left: Math.random() * 100,
+    animDuration: Math.random() * 10 + 15,
+    animDelay: Math.random() * 5,
+  }));

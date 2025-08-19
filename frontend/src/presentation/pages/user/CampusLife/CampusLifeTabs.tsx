@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import { CampusLifeTabsProps } from '../../../../domain/types/user/campus-life';
 
@@ -35,8 +34,3 @@ export default function CampusLifeTabs({ activeTab, setActiveTab }: CampusLifeTa
     </div>
   );
 }
-
-CampusLifeTabs.propTypes = {
-  activeTab: PropTypes.string.isRequired,
-  setActiveTab: PropTypes.func.isRequired,
-};

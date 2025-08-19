@@ -1,21 +1,5 @@
 import React from 'react';
-
-interface Alert {
-  id: string;
-  title: string;
-  message: string;
-  type: string;
-}
-
-interface SystemAlertsProps {
-  alertsData: Alert[];
-  getAlertIcon: (type: string) => React.ReactNode;
-  getAlertBgColor: (type: string) => string;
-  getAlertBorderColor: (type: string) => string;
-  getAlertTextColor: (type: string) => string;
-  getAlertSubtextColor: (type: string) => string;
-  dismissAlert: (id: string) => void;
-}
+import { SystemAlertsProps } from '../../../../domain/types/dashboard/admin';
 
 const SystemAlerts: React.FC<SystemAlertsProps> = ({ alertsData, getAlertIcon, getAlertBgColor, getAlertBorderColor, getAlertTextColor, getAlertSubtextColor, dismissAlert }) => (
   <div className="space-y-4">

@@ -1,23 +1,6 @@
 import React, { useState } from 'react';
 import { FaTimes, FaStar, FaCheck, FaClock, FaExclamationTriangle } from 'react-icons/fa';
-
-interface ReviewModalProps {
-  submission: {
-    id: string;
-    studentName: string;
-    studentId: string;
-    submittedDate: string;
-    status: 'reviewed' | 'pending' | 'needs_correction';
-    marks: number | null;
-    feedback: string;
-    isLate: boolean;
-    fileName: string;
-    fileSize: string;
-  };
-  saveReview: (submissionId: string, reviewData: { marks: number; feedback: string; status: 'reviewed' | 'pending' | 'needs_correction'; isLate: boolean }) => void;
-  onClose: () => void;
-  isLoading?: boolean;
-}
+import { ReviewModalProps } from '../../../../domain/types/faculty/assignment';
 
 export default function ReviewModal({ submission, saveReview, onClose, isLoading = false }: ReviewModalProps) {
   const [marks, setMarks] = useState(submission.marks?.toString() || '');
@@ -96,9 +79,7 @@ export default function ReviewModal({ submission, saveReview, onClose, isLoading
             </div>
           </div>
 
-          {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            {/* Student Info */}
             <div className="bg-gray-50/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-100/50 shadow-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -134,7 +115,6 @@ export default function ReviewModal({ submission, saveReview, onClose, isLoading
               )}
             </div>
 
-            {/* File Info */}
             <div className="bg-gray-50/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-100/50 shadow-lg">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gradient-to-r from-gray-400 to-gray-600 rounded-xl flex items-center justify-center text-white">
@@ -147,9 +127,7 @@ export default function ReviewModal({ submission, saveReview, onClose, isLoading
               </div>
             </div>
 
-            {/* Review Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Marks Input */}
               <div>
                 <label htmlFor="marks" className="block text-sm font-medium text-gray-700 mb-2">
                   Marks
@@ -172,7 +150,6 @@ export default function ReviewModal({ submission, saveReview, onClose, isLoading
                 )}
               </div>
 
-              {/* Status Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Status
@@ -200,7 +177,6 @@ export default function ReviewModal({ submission, saveReview, onClose, isLoading
                 </div>
               </div>
 
-              {/* Late Status */}
               <div className="relative group animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Late Submission
@@ -220,7 +196,6 @@ export default function ReviewModal({ submission, saveReview, onClose, isLoading
                 </div>
               </div>
 
-              {/* Feedback Input */}
               <div>
                 <label htmlFor="feedback" className="block text-sm font-medium text-gray-700 mb-2">
                   Feedback
@@ -240,7 +215,6 @@ export default function ReviewModal({ submission, saveReview, onClose, isLoading
             </form>
           </div>
 
-          {/* Footer */}
           <div className="bg-gray-50/80 backdrop-blur-sm p-6 rounded-b-3xl border-t border-gray-100/50">
             <div className="flex justify-end space-x-3">
               <button

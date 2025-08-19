@@ -1,36 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { sessionService, CreateVideoSessionPayload, UpdateVideoSessionPayload, Attendee } from '../services/session.service';
-
-export interface Session {
-  _id: string;
-  id?: string;
-  title: string;
-  name?: string;
-  hostId?: string;
-  status?: string;
-  startTime: string;
-  endTime?: string;
-  description?: string;
-  instructor?: string;
-  course?: string;
-  duration?: number;
-  maxAttendees?: number;
-  tags?: string[];
-  difficulty?: 'beginner' | 'intermediate' | 'advanced';
-  isLive?: boolean;
-  hasRecording?: boolean;
-  recordingUrl?: string;
-  attendees?: number;
-  attendeeList?: Attendee[];
-}
+import { sessionService, CreateVideoSessionPayload, UpdateVideoSessionPayload, VideoSession } from '../services/session.service';
 
 export type { UpdateVideoSessionPayload };
 
 export const useSessionManagement = (options?: { loadSessions?: boolean }) => {
   const queryClient = useQueryClient();
   const loadSessions = options?.loadSessions !== false;
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [selectedSession, setSelectedSession] = useState<VideoSession | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -57,7 +34,7 @@ export const useSessionManagement = (options?: { loadSessions?: boolean }) => {
   };
 
   const backendStatus = getBackendStatus(filterStatus);
-  const { data: sessions = [], isLoading: isLoadingSessions, error: sessionsError } = useQuery<Session[]>({
+  const { data: sessions = [], isLoading: isLoadingSessions, error: sessionsError } = useQuery<VideoSession[]>({
     queryKey: ['sessions', debouncedSearchTerm, backendStatus, filterCourse],
     queryFn: () => sessionService.getSessions({
       search: debouncedSearchTerm,
@@ -112,9 +89,13 @@ export const useSessionManagement = (options?: { loadSessions?: boolean }) => {
     }
   }, [createSessionMutation]);
 
-  const handleUpdateSession = useCallback(async (id: string, data: Partial<Session>) => {
+  const handleUpdateSession = useCallback(async (id: string, data: Partial<VideoSession>) => {
     try {
-      await updateSessionMutation.mutateAsync({ id, data });
+      const updateData = {
+        ...data,
+        duration: typeof data.duration === 'string' ? parseInt(data.duration) || 0 : data.duration
+      };
+      await updateSessionMutation.mutateAsync({ id, data: updateData });
       return { success: true };
     } catch (error) {
       console.error('Error updating session:', error);
@@ -225,7 +206,7 @@ export const useSessionManagement = (options?: { loadSessions?: boolean }) => {
     useSessionAttendance,
     getSessionAttendance,
     updateAttendanceStatus,
-    // Add filter state and setters
+
     searchTerm,
     setSearchTerm,
     filterStatus,

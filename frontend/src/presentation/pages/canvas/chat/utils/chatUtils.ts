@@ -1,4 +1,5 @@
-import { Message, Styles } from '../types/ChatTypes';
+import { Message, Styles } from "../../../../../domain/types/canvas/chat";
+import { FiUsers, FiLock, FiMessageSquare } from 'react-icons/fi';
 
 export const getStyles = (isDarkMode: boolean): Styles => ({
   background: () => isDarkMode ? 'bg-gray-900' : 'bg-white',
@@ -35,27 +36,22 @@ export const formatMessageTime = (date: string | Date): string => {
   const now = new Date();
   const diffInDays = Math.floor((now.getTime() - messageDate.getTime()) / (1000 * 60 * 60 * 24));
 
-  // Today
   if (diffInDays === 0) {
     return messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
-  
-  // Yesterday
+
   if (diffInDays === 1) {
     return 'Yesterday';
   }
-  
-  // This week
+
   if (diffInDays < 7) {
     return messageDate.toLocaleDateString([], { weekday: 'long' });
   }
-  
-  // This year
+
   if (messageDate.getFullYear() === now.getFullYear()) {
     return messageDate.toLocaleDateString([], { day: 'numeric', month: 'short' });
   }
-  
-  // Older
+
   return messageDate.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
@@ -64,35 +60,57 @@ export const formatChatTime = (date: string | Date): string => {
   const now = new Date();
   const diffInDays = Math.floor((now.getTime() - messageDate.getTime()) / (1000 * 60 * 60 * 24));
 
-  // Today
   if (diffInDays === 0) {
     return messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
-  
-  // Yesterday
+
   if (diffInDays === 1) {
     return 'Yesterday';
   }
-  
-  // This week
+
   if (diffInDays < 7) {
     return messageDate.toLocaleDateString([], { weekday: 'short' });
   }
-  
-  // This year
+
   if (messageDate.getFullYear() === now.getFullYear()) {
     return messageDate.toLocaleDateString([], { day: 'numeric', month: 'short' });
   }
-  
-  // Older
+
   return messageDate.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
 export const shouldShowDateHeader = (currentMessage: Message, previousMessage?: Message): boolean => {
   if (!previousMessage) return true;
-  
+
   const currentDate = new Date(currentMessage.time || '');
   const previousDate = new Date(previousMessage.time || '');
-  
+
   return currentDate.toDateString() !== previousDate.toDateString();
-}; 
+};
+
+
+export const formatMessageTimeOnly = (date: string | Date): string => {
+  const messageDate = new Date(date);
+  return messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+export const settingsConfig = [
+  {
+    key: 'onlyAdminsCanPost',
+    icon: FiMessageSquare,
+    label: 'Only admins can send messages',
+    description: 'Restrict messaging to administrators only'
+  },
+  {
+    key: 'onlyAdminsCanAddMembers',
+    icon: FiUsers,
+    label: 'Only admins can add members',
+    description: 'Control who can invite new members'
+  },
+  {
+    key: 'onlyAdminsCanChangeInfo',
+    icon: FiLock,
+    label: 'Only admins can change info',
+    description: 'Restrict group information editing'
+  }
+];

@@ -1,8 +1,7 @@
 import React from 'react';
 import { FiLock, FiCheckCircle, FiBookmark, FiPlay } from 'react-icons/fi';
 import { getChapterTypeIcon } from '../utils/diplomaUtils';
-import { ChapterItemProps } from '../../../../../domain/types/canvas/diploma';
-import { ChapterType } from '../../../../../domain/types/diploma';
+import { ChapterItemProps, ChapterType } from '../../../../../domain/types/canvas/diploma';
 
 export const ChapterItem: React.FC<ChapterItemProps> = ({
   chapter,
@@ -27,7 +26,6 @@ export const ChapterItem: React.FC<ChapterItemProps> = ({
     >
       <div className="p-5">
         <div className="flex items-start gap-4">
-          {/* Chapter status icon */}
           <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
             isCompleted 
               ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' 
@@ -44,7 +42,6 @@ export const ChapterItem: React.FC<ChapterItemProps> = ({
             )}
           </div>
 
-          {/* Chapter content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-3 mb-2">
               <h4 className={`font-semibold text-lg leading-tight ${
@@ -55,7 +52,6 @@ export const ChapterItem: React.FC<ChapterItemProps> = ({
                 {chapter.title}
               </h4>
               
-              {/* Status badge */}
               {isCompleted && (
                 <span className="flex-shrink-0 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium rounded-full">
                   Completed
@@ -67,7 +63,6 @@ export const ChapterItem: React.FC<ChapterItemProps> = ({
               {chapter.description}
             </p>
             
-            {/* Chapter meta info */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                 {chapter.type && (
@@ -78,7 +73,6 @@ export const ChapterItem: React.FC<ChapterItemProps> = ({
                 )}
               </div>
               
-              {/* Bookmark button */}
               {isAccessible && (
                 <button
                   onClick={(e) => {

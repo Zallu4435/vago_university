@@ -52,7 +52,6 @@ export default function ForgotPasswordModal() {
         className="bg-white rounded-xl shadow-xl border border-cyan-100 max-w-lg w-full max-h-[90vh] overflow-y-auto transform transition-all animate-in slide-in-from-bottom-4 duration-500"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="sticky top-0 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 z-10">
           <div className="flex items-center justify-between p-6">
             <div className="flex items-center gap-4">
@@ -79,9 +78,7 @@ export default function ForgotPasswordModal() {
           </div>
         </div>
 
-        {/* Content */}
         <div className="p-8">
-          {/* Selection Screen */}
           {currentMethod === 'selection' && (
             <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
               <div className="text-center mb-12">
@@ -151,10 +148,8 @@ export default function ForgotPasswordModal() {
             </div>
           )}
 
-          {/* Mobile OTP Screen */}
           {currentMethod === 'mobile' && <MobileOTPComponent onBack={handleBack as () => void} onClose={handleClose as () => void} />}
 
-          {/* Email OTP Screen */}
           {currentMethod === 'email' && (
             <EmailOTPComponent onBack={handleBack as () => void} onClose={handleClose as () => void} onVerified={handleVerified as (email: string) => void} />
           )}

@@ -35,7 +35,6 @@ export class AdmissionController implements IAdmissionController {
   async createApplication(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     if (!httpRequest.user) return this.httpErrors.error_401();
     const { userId: registerId } = httpRequest.user;
-    console.log(registerId, "registerId");
     const { userId } = httpRequest.body || {};
     if (!userId || userId !== registerId) return this.httpErrors.error_400();
     const result = await this.createApplicationUseCase.execute({ userId });
@@ -44,8 +43,6 @@ export class AdmissionController implements IAdmissionController {
 
   async getApplication(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     if (!httpRequest.user) return this.httpErrors.error_401();
-    console.log(httpRequest.user, "httpRequest.user");
-    console.log(httpRequest.params, "httpRequest.params");
     const { userId: registerId } = httpRequest.user;
     const { userId } = httpRequest.params || {};
     if (userId !== registerId) return this.httpErrors.error_403();

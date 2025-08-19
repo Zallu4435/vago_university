@@ -34,3 +34,8 @@ export interface GetCompletedChaptersResponseDTO {
 export interface GetBookmarkedChaptersResponseDTO {
   chapters: string[];
 } 
+
+export interface ResponseDTO<T> {
+  data: T;
+  success: boolean;
+}

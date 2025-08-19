@@ -2,8 +2,6 @@ import { Diploma } from '../../domain/types/management/diplomamanagement';
 import { Video } from '../../domain/types/management/videomanagement';
 import httpClient from '../../frameworks/api/httpClient';
 
-
-
 export const diplomaBackendService = {
     async getDiplomas(params: {
         page: number;
@@ -33,8 +31,6 @@ export const diplomaBackendService = {
         if (startDate) params.startDate = startDate;
         if (endDate) params.endDate = endDate;
 
-        console.log('getVideos params:', params); // Debugging log
-
         const response = await httpClient.get('/admin/vedio/videos', { params });
         return {
             videos: response.data.data.data,
@@ -55,7 +51,7 @@ export const diplomaBackendService = {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
-            timeout: 60000, // 1 minute timeout for video uploads
+            timeout: 60000, 
         });
         return response.data.data.video;
     },
@@ -67,13 +63,9 @@ export const diplomaBackendService = {
                 
         const isFormData = videoData instanceof FormData;
         
-        if (!isFormData) {
-            console.log('[diplomaBackendService] updateVideo plain payload', videoData);
-        }
         if (isFormData) {
             const keys: string[] = [];
             (videoData as FormData).forEach((_, key) => keys.push(key));
-            console.log('[diplomaBackendService] updateVideo FormData keys', keys);
         }
         
         const config = isFormData ? {

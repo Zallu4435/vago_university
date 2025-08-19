@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { academicService } from '../services/academicService';
-import type { StudentInfo, GradeInfo, Course, AcademicHistory, ProgramInfo, ProgressInfo, RequirementsInfo, EnrollmentData } from '../../domain/types/user/academics';
+import type { StudentInfo, GradeInfo, Course, AcademicHistory, ProgramInfo, ProgressInfo, RequirementsInfo, EnrollmentData, QueryOptions } from '../../domain/types/user/academics';
 
-interface QueryOptions {
-  enabled?: boolean;
-}
 
 export const useStudentInfo = (options?: QueryOptions) => {
   return useQuery<StudentInfo>({

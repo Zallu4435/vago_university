@@ -7,7 +7,7 @@ export interface SectionField {
 }
 
 export interface Section {
-  key: string; // SiteSectionKey, but keep as string for generality
+  key: string;
   label: string;
   icon: React.ReactNode;
   fields: SectionField[];
@@ -26,4 +26,12 @@ export interface SiteSectionViewModalProps {
   fields: SectionField[];
   data: Record<string, unknown>;
   onClose: () => void;
-} 
+}
+
+export type FormData = {
+  title: string;
+  description: string;
+  image?: string;
+  link?: string;
+  category?: string;
+};

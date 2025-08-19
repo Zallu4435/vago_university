@@ -1,4 +1,3 @@
-// src/application/services/event.service.ts
 import { EventApiResponse, EventRequest, EventApiResponseSingle, EventRequestApiResponseSingle, Event, EventServiceResponse, EventRequestsServiceResponse, EventRequestsApiResponse } from '../../domain/types/management/eventmanagement';
 import httpClient from '../../frameworks/api/httpClient';
 import { isAxiosErrorWithApiError } from '../../shared/types/apiError';

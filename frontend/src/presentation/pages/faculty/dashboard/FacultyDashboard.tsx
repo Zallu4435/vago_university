@@ -8,50 +8,8 @@ import {
 } from 'react-icons/hi';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Pie, Cell } from 'recharts';
 import { useFacultyDashboard } from '../../../../application/hooks/useFacultyDashboard';
+import { StatsCardProps, ChartCardProps, ActionCardProps, InfoCardProps, StatusCardProps, ToastProps } from '../../../../domain/types/dashboard/faculty';
 
-
-interface StatsCardProps {
-  title: string;
-  value: string | number;
-  trend?: number;
-  icon: React.ComponentType<{ className?: string }>;
-  color?: 'blue' | 'green' | 'orange' | 'red';
-}
-
-interface ChartCardProps {
-  title: React.ReactNode;
-  children: React.ReactNode;
-  className?: string;
-}
-
-interface ActionCardProps {
-  title: string;
-  description: string;
-  icon: React.ComponentType<{ className?: string }>;
-  onClick: () => void;
-  color?: 'blue' | 'green' | 'orange' | 'red';
-}
-
-interface InfoCardProps {
-  title: React.ReactNode;
-  children: React.ReactNode;
-  expandable?: boolean;
-}
-
-interface StatusCardProps {
-  title: string;
-  status: 'success' | 'warning' | 'error' | 'info';
-  message: string;
-  timestamp: string;
-}
-
-interface ToastProps {
-  message: string;
-  type?: 'success' | 'error' | 'warning' | 'info';
-  onClose: () => void;
-}
-
-// Reusable Card Components
 const StatsCard: React.FC<StatsCardProps> = ({ title, value, trend, icon: Icon, color = 'blue' }) => {
   const colorClasses: Record<string, string> = {
     blue: 'bg-blue-50 text-blue-600 border-blue-200',
@@ -207,7 +165,6 @@ const Toast: React.FC<ToastProps> = ({ message, type = 'success', onClose }) => 
   );
 };
 
-// Main Dashboard Component
 const FacultyDashboard: React.FC = () => {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' | 'info' } | null>(null);
   const navigate = useNavigate();
@@ -230,17 +187,14 @@ const FacultyDashboard: React.FC = () => {
     try {
       switch (action) {
         case 'Session Start':
-          // Navigate to sessions page
           navigate('/faculty/sessions');
           break;
 
         case 'Assignment Creation':
-          // Navigate to assignments page
           navigate('/faculty/assignments');
           break;
 
         case 'Attendance Management':
-          // Navigate to attendance page
           navigate('/faculty/attendance');
           break;
 
@@ -256,7 +210,6 @@ const FacultyDashboard: React.FC = () => {
     }
   };
 
-  // Show error state
   if (hasError) {
     return (
       <div className="bg-gray-50 min-h-screen flex items-center justify-center">
@@ -277,11 +230,9 @@ const FacultyDashboard: React.FC = () => {
 
   return (
     <div className="bg-gradient-to-br from-purple-50 via-white to-pink-50 min-h-screen">
-      {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading ? (
           <div className="space-y-6">
-            {/* Loading Skeletons */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[...Array(4)]?.map((_, i) => (
                 <LoadingSkeleton key={i} className="h-32 rounded-3xl" />
@@ -295,7 +246,6 @@ const FacultyDashboard: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-8">
-            {/* Top Row - Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100">
                 <StatsCard
@@ -323,7 +273,6 @@ const FacultyDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Second Row - Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100">
                 <ChartCard title={<span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent text-lg font-semibold">Weekly Attendance Trend</span>}>
@@ -385,7 +334,6 @@ const FacultyDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Third Row - Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <ActionCard
                 title="Start Session"
@@ -417,7 +365,6 @@ const FacultyDashboard: React.FC = () => {
               />
             </div>
 
-            {/* Fourth Row - Recent Activity */}
             <div className="grid grid-cols-1 gap-6">
               <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100">
                 <InfoCard title={<span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent text-lg font-semibold">Recent Activity</span>} expandable={true}>
@@ -439,7 +386,6 @@ const FacultyDashboard: React.FC = () => {
         )}
       </div>
 
-      {/* Toast Notification */}
       {toast && (
         <Toast
           message={toast.message}

@@ -1,22 +1,6 @@
+import { DocumentUploadResult, DocumentViewResult, MultipleDocumentUploadResult } from "../../domain/types/application";
 import httpClient from "../../frameworks/api/httpClient";
 import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
-
-export interface DocumentUploadResult {
-  url: string;
-  publicId: string;
-  fileName: string;
-  fileType: string;
-}
-
-export interface MultipleDocumentUploadResult {
-  documents: DocumentUploadResult[];
-}
-
-export interface DocumentViewResult {
-  pdfData: string;
-  fileName: string;
-  fileType: string;
-}
 
 class DocumentUploadService {
   private baseUrl = '/admission';
@@ -32,10 +16,7 @@ class DocumentUploadService {
       formData.append('applicationId', applicationId);
       formData.append('documentType', documentType);
 
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-      }
-
+      
       const response = await httpClient.post(`${this.baseUrl}/documents/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',

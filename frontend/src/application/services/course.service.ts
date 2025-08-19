@@ -8,7 +8,7 @@ import {
   EnrollmentRequest,
   EnrollmentRequestsResponse,
   EnrollmentRequestDetailsResponse,
-} from "../../domain/types/course";
+} from "../../domain/types/management/coursemanagement";
 import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 
 class CourseService {
@@ -41,7 +41,6 @@ class CourseService {
       const response = await httpClient.get<CourseDetailsResponse>(
         `/admin/courses/${courseId}`
       );
-      console.log("Course details response:", response.data);
       return response.data.data;
     } catch (error: unknown) {
       if (isAxiosErrorWithApiError(error)) {

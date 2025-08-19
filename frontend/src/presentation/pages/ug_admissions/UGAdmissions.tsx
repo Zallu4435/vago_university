@@ -8,15 +8,12 @@ export const UGAdmissions: React.FC = () => {
   const isVisible = useSectionAnimation();
   return (
     <div className="min-h-screen flex flex-col pt-16 bg-gradient-to-b from-cyan-50 via-white to-cyan-50">
-      {/* Background Gradient Overlay */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-50/30 to-transparent" />
       </div>
 
-      {/* Main content container */}
       <main className="flex-1 relative z-10 pb-8 sm:pb-12 lg:pb-20">
         <div className="relative space-y-4 sm:space-y-6 lg:space-y-8">
-          {/* Section 1 */}
           <section
             id="admissions-assessment"
             data-animate
@@ -29,7 +26,6 @@ export const UGAdmissions: React.FC = () => {
             </div>
           </section>
 
-          {/* Section 2 */}
           <section
             id="admission-categories"
             data-animate
@@ -42,7 +38,6 @@ export const UGAdmissions: React.FC = () => {
             </div>
           </section>
 
-          {/* Section 3 */}
           <section
             id="application-process"
             data-animate

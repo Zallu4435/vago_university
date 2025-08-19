@@ -1,17 +1,6 @@
 import { FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
-
-interface EventItem {
-  id: string;
-  title: string;
-  date: string;
-  location: string;
-  description: string;
-}
-
-interface NewEventsProps {
-  events?: EventItem[];
-}
+import { EventItem, NewEventsProps } from '../../../../domain/types/dashboard/user';
 
 const mockEvents: EventItem[] = [
   {

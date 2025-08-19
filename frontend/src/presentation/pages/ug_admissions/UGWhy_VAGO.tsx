@@ -7,15 +7,12 @@ export const UGWhy_VAGO: React.FC = () => {
   const isVisible = useSectionAnimation();
   return (
     <div className="min-h-screen flex flex-col pt-16 bg-gradient-to-b from-cyan-50 via-white to-cyan-50">
-      {/* Background Gradient Overlay */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-cyan-50/30 via-white to-cyan-50/30" />
       </div>
 
-      {/* Main content container */}
       <main className="flex-1 relative z-10 pb-20 w-full">
         <div className="relative space-y-8 w-full sm:max-w-6xl mx-auto">
-          {/* Section 1 */}
           <section
             id="nus-education-framework"
             data-animate
@@ -28,7 +25,6 @@ export const UGWhy_VAGO: React.FC = () => {
             </div>
           </section>
 
-          {/* Section 2 */}
           <section
             id="graduation-support"
             data-animate
@@ -41,7 +37,6 @@ export const UGWhy_VAGO: React.FC = () => {
             </div>
           </section>
 
-          {/* Section 3 */}
           <section
             id="student-testimonials"
             data-animate

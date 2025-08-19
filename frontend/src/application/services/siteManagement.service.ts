@@ -62,7 +62,6 @@ function isUndefinedOrNull(value: unknown): value is undefined | null {
 }
 
 class SiteManagementService {
-  // Get all sections by type
   async getSections(
     sectionKey: 'highlights' | 'vagoNow' | 'leadership', 
     limit?: number, 
@@ -87,13 +86,11 @@ class SiteManagementService {
     return response.data.data.sections;
   }
 
-  // Get section by ID
   async getSectionById(id: string): Promise<SiteSection> {
     const response = await httpClient.get<SiteSectionResponse>(`/admin/site-sections/${id}`);
     return response.data.data.section;
   }
 
-  // Create new section
   async createSection(data: CreateSiteSectionData): Promise<SiteSection> {
     let payload: CreateSiteSectionData | FormData;
     let headers: RequestHeaders = {};
@@ -116,11 +113,9 @@ class SiteManagementService {
     }
     
     const response = await httpClient.post<SiteSectionResponse>('/admin/site-sections', payload, { headers });
-    console.log(response, "popopopopop")
     return response.data.data.section;
   }
 
-  // Update section
   async updateSection(id: string, data: UpdateSiteSectionData): Promise<SiteSection> {
     let payload: UpdateSiteSectionData | FormData;
     let headers: RequestHeaders = {};
@@ -143,11 +138,9 @@ class SiteManagementService {
     }
     
     const response = await httpClient.put<SiteSectionResponse>(`/admin/site-sections/${id}`, payload, { headers });
-    console.log(response, "pl[k[akof[kdf")
     return response.data.data.section;
   }
 
-  // Delete section
   async deleteSection(id: string): Promise<void> {
     await httpClient.delete(`/admin/site-sections/${id}`);
   }

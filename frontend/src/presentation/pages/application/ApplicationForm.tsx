@@ -50,7 +50,6 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
   const educationFormRef = useRef<{ trigger: () => Promise<boolean> }>(null);
   const achievementsFormRef = useRef<{ trigger: () => Promise<boolean>; getValues: () => { questions: { 1: string; 2: string; 3: string; 4: string; 5: string; }; hasNoAchievements: boolean; achievements?: any[] } }>(null);
 
-  // Type adapter to convert between AchievementSection and component format
   const adaptAchievementsData = (data: AchievementSection | undefined) => {
     if (!data) return undefined;
     return {
@@ -72,7 +71,6 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
   const dispatch = useDispatch();
   const [applicationId, setApplicationId] = useState<string | undefined>(undefined);
 
-  // Guard: Wait for user and userId to be available
   if (!user || !user.id) {
     return <LoadingSpinner />;
   }
@@ -153,7 +151,6 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onLogout }) =>
         setValue('applicationId', fetchedData.applicationId, { shouldValidate: false });
       } else {
         try {
-          console.log(user?.id, "user?.id");
           const response = await createApplication(user?.id || '');
           setApplicationId(response.applicationId);
           setValue('applicationId', response.applicationId, { shouldValidate: false });

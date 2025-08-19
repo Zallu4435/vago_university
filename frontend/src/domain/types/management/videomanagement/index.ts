@@ -1,5 +1,3 @@
-// Video management types
-
 export interface Video {
   id: string;
   title: string;
@@ -62,7 +60,6 @@ export interface AddVideoModalProps {
   diplomas: { id: string; title: string; category: string }[];
 }
 
-// VideoFormInputs is inferred from zod schema, but define it for type sharing
 export interface VideoFormInputs {
   title: string;
   category: string;
@@ -70,4 +67,30 @@ export interface VideoFormInputs {
   order?: string;
   description: string;
   status: 'Draft' | 'Published';
-} 
+}
+
+export interface VideoForHook {
+  id: string;
+  title: string;
+  duration: string;
+  uploadedAt: string;
+  module: number;
+  status: "Published" | "Draft";
+  diplomaId: string;
+  description: string;
+  videoUrl: string;
+  createdAt?: string;
+  updatedAt?: string;
+  diploma?: {
+    id: string;
+    title: string;
+    category: string;
+  };
+}
+
+export interface DiplomaForHook {
+  id: string;
+  title: string;
+  category: string;
+  videoIds: string[];
+}

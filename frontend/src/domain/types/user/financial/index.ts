@@ -66,3 +66,18 @@ export interface ApplicationForm {
   type: ApplicationType;
   documents: Document[];
 }
+
+export interface ExtendedCharge extends Charge {
+  paidAt?: string;
+  method?: string;
+}
+
+export interface FinancialState {
+  info: Charge[];
+  history: Payment[];
+  financialAidStatus: string;
+}
+
+export interface FinancialTabsWithDisabledProps extends FinancialTabsProps {
+  disabledTabs?: string[];
+}

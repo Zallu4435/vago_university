@@ -1,16 +1,6 @@
 import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { LuTrendingUp } from 'react-icons/lu';
-
-interface Stat {
-  title: string;
-  value: number;
-  icon: React.ReactNode;
-}
-
-interface StatsSectionProps {
-  stats: Stat[];
-}
+import { Stat, StatsSectionProps } from '../../../../domain/types/dashboard/faculty';
 
 export default function StatsSection({ stats }: StatsSectionProps) {
   const [animatedStats, setAnimatedStats] = useState([0, 0, 0]);
@@ -66,13 +56,3 @@ export default function StatsSection({ stats }: StatsSectionProps) {
     </div>
   );
 }
-
-StatsSection.propTypes = {
-  stats: PropTypes.arrayOf(
-    PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      value: PropTypes.number.isRequired,
-      icon: PropTypes.element.isRequired,
-    })
-  ).isRequired,
-};

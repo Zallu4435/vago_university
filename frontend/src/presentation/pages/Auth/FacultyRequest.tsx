@@ -49,7 +49,6 @@ export default function FacultyRequestForm() {
     }
   };
 
-  // Success message component
   const SuccessMessage = () => (
     <div className="bg-green-50 border border-green-200 rounded-lg p-4 sm:p-6 flex flex-col items-center text-center max-w-lg mx-auto">
       <FaCheckCircle className="text-green-500 w-12 h-12 sm:w-16 sm:h-16 mb-3 sm:mb-4" />
@@ -59,7 +58,6 @@ export default function FacultyRequestForm() {
     </div>
   );
 
-  // Main form component
   const FormComponent = () => (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
       {error && (
@@ -69,7 +67,6 @@ export default function FacultyRequestForm() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-        {/* Full Name */}
         <div>
           <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
             Full Name <span className="text-red-500">*</span>
@@ -88,7 +85,6 @@ export default function FacultyRequestForm() {
           )}
         </div>
 
-        {/* Email */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email Address <span className="text-red-500">*</span>
@@ -107,7 +103,6 @@ export default function FacultyRequestForm() {
           )}
         </div>
 
-        {/* Phone */}
         <div>
           <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
             Phone Number <span className="text-red-500">*</span>
@@ -126,7 +121,6 @@ export default function FacultyRequestForm() {
           )}
         </div>
 
-        {/* Department */}
         <div>
           <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-1">
             Department <span className="text-red-500">*</span>
@@ -147,7 +141,6 @@ export default function FacultyRequestForm() {
           )}
         </div>
 
-        {/* Qualification */}
         <div>
           <label htmlFor="qualification" className="block text-sm font-medium text-gray-700 mb-1">
             Highest Qualification <span className="text-red-500">*</span>
@@ -170,7 +163,6 @@ export default function FacultyRequestForm() {
           )}
         </div>
 
-        {/* Experience */}
         <div>
           <label htmlFor="experience" className="block text-sm font-medium text-gray-700 mb-1">
             Years of Experience <span className="text-red-500">*</span>
@@ -194,7 +186,6 @@ export default function FacultyRequestForm() {
         </div>
       </div>
 
-      {/* About Me */}
       <div>
         <label htmlFor="aboutMe" className="block text-sm font-medium text-gray-700 mb-1">
           About Me / Additional Information
@@ -208,9 +199,7 @@ export default function FacultyRequestForm() {
         ></textarea>
       </div>
 
-      {/* File uploads */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-        {/* CV Upload */}
         <div>
           <label htmlFor="cv" className="block text-sm font-medium text-gray-700 mb-1">
             Upload CV <span className="text-red-500">*</span> <span className="text-gray-500 text-xs">(PDF, DOC, max 5MB)</span>
@@ -238,7 +227,6 @@ export default function FacultyRequestForm() {
           )}
         </div>
 
-        {/* Certificates Upload */}
         <div>
           <label htmlFor="certificates" className="block text-sm font-medium text-gray-700 mb-1">
             Upload Certificates <span className="text-gray-500 text-xs">(PDF, JPG, PNG, max 5MB)</span>
@@ -265,7 +253,6 @@ export default function FacultyRequestForm() {
         </div>
       </div>
 
-      {/* Terms and Conditions */}
       <div className="flex items-start">
         <div className="flex items-center h-5">
           <input
@@ -285,7 +272,6 @@ export default function FacultyRequestForm() {
         </div>
       </div>
 
-      {/* Submit Button */}
       <div className="flex justify-center">
         <button
           type="submit"

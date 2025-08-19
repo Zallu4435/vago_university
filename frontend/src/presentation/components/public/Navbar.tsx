@@ -19,10 +19,8 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // Get the current department from the URL for department layout
   const currentDepartment = location.pathname.split('/')[2] || 'computer-science';
 
-  // Search function with debouncing
   const performSearchWithDelay = (query: string) => {
     if (!query.trim()) {
       setSearchResults([]);
@@ -33,7 +31,6 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
 
     setIsSearching(true);
     
-    // Simulate API delay for better UX
     setTimeout(() => {
       const results = performSearch(query);
       const suggestions = getSearchSuggestions(query);
@@ -45,14 +42,12 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
     }, 300);
   };
 
-  // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
     performSearchWithDelay(query);
   };
 
-  // Handle search result click
   const handleResultClick = (result: SearchResult) => {
     setSearchQuery('');
     setSearchResults([]);
@@ -61,7 +56,6 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
     navigate(result.url);
   };
 
-  // Handle search form submit
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchResults.length > 0) {
@@ -69,13 +63,11 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
     }
   };
 
-  // Handle suggestion click
   const handleSuggestionClick = (suggestion: string) => {
     setSearchQuery(suggestion);
     performSearchWithDelay(suggestion);
   };
 
-  // Close search results when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -92,12 +84,10 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
     };
   }, []);
 
-  // Close mobile menu when clicking on a link
   const handleMobileLinkClick = () => {
     setMobileMenuOpen(false);
   };
 
-  // Get type color for search results
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'scholarship': return 'text-green-600 bg-green-50';
@@ -116,7 +106,6 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
     }
   };
 
-  // Define the links based on layout type
   let links;
   if (layoutType === 'ug') {
     links = [
@@ -149,7 +138,6 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
   return (
     <nav className="fixed top-[70px] sm:top-[80px] md:top-[90px] left-0 right-0 z-40 bg-white shadow border-t-4 border-cyan-300">
       <div className="flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-        {/* Mobile Search - Left Side */}
         <div className="md:hidden flex items-center flex-1 mr-4" ref={searchRef}>
           <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-xs">
             <input
@@ -170,7 +158,6 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
               )}
             </button>
             
-            {/* Mobile Search Results */}
             {showSearchResults && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-cyan-200 rounded-lg shadow-lg max-h-64 overflow-y-auto z-50">
                 {/* Search Suggestions */}
@@ -191,7 +178,6 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
                   </div>
                 )}
                 
-                {/* Search Results */}
                 {searchResults.length > 0 && (
                   <div>
                     <div className="p-2 border-b border-gray-100">
@@ -226,7 +212,6 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
                   </div>
                 )}
                 
-                {/* No Results */}
                 {searchResults.length === 0 && searchSuggestions.length === 0 && searchQuery.trim() && (
                   <div className="p-4 text-center text-gray-500 text-sm">
                     No results found for "{searchQuery}"
@@ -237,7 +222,6 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
           </form>
         </div>
 
-        {/* Desktop Navigation */}
         <div className="hidden md:flex flex-1 justify-center">
           <ul className="flex gap-6 lg:gap-10 list-none">
             {links.map((link) => {
@@ -264,7 +248,6 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
           </ul>
         </div>
 
-        {/* Desktop Search */}
         <div className="hidden md:flex items-center ml-4 lg:ml-8" ref={searchRef}>
           <form onSubmit={handleSearchSubmit} className="relative">
             <input
@@ -285,10 +268,8 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
               )}
             </button>
             
-            {/* Desktop Search Results */}
             {showSearchResults && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-cyan-200 rounded-lg shadow-lg max-h-80 overflow-y-auto z-50 min-w-96">
-                {/* Search Suggestions */}
                 {searchSuggestions.length > 0 && (
                   <div className="p-3 border-b border-gray-100">
                     <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
@@ -308,7 +289,6 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
                   </div>
                 )}
                 
-                {/* Search Results */}
                 {searchResults.length > 0 && (
                   <div>
                     <div className="p-3 border-b border-gray-100">
@@ -348,7 +328,6 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
                   </div>
                 )}
                 
-                {/* No Results */}
                 {searchResults.length === 0 && searchSuggestions.length === 0 && searchQuery.trim() && (
                   <div className="p-6 text-center text-gray-500">
                     <div className="text-lg mb-2">🔍</div>
@@ -361,7 +340,6 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
           </form>
         </div>
 
-        {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -377,14 +355,12 @@ export const Navbar: React.FC<NavbarProps> = ({ layoutType = 'public' }) => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div 
           ref={mobileMenuRef}
           className="md:hidden bg-white border-t border-cyan-200 shadow-lg"
         >
           <div className="px-4 py-3">
-            {/* Mobile Navigation Links */}
             <ul className="space-y-2">
               {links.map((link) => {
                 const isActive =

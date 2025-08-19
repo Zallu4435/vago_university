@@ -27,7 +27,6 @@ export const SessionFilters: React.FC<Omit<SessionFiltersProps, 'filters' | 'onF
       </div>
       
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
-        {/* Search bar left-aligned */}
         <div className="w-full sm:max-w-md">
           <div className="relative">
             <FiSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 ${styles.icon.secondary}`} />

@@ -3,12 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { enquiryService } from '../services/enquiry.service';
 import { 
-  CreateEnquiryData
+  CreateEnquiryData,
+  Filters
 } from '../../domain/types/management/enquirymanagement';
-
-interface Filters {
-  status: string;
-}
 
 export const useEnquiryManagement = () => {
   const queryClient = useQueryClient();
@@ -29,10 +26,8 @@ export const useEnquiryManagement = () => {
     queryFn: () => {
       const status = filters.status !== 'All Statuses' ? filters.status : undefined;
       let { startDate, endDate } = customDateRange;
-      // Ensure ISO format if present
       startDate = startDate ? new Date(startDate).toISOString() : '';
       endDate = endDate ? new Date(endDate).toISOString() : '';
-      console.log('ENQUIRY QUERY PARAMS', { page, limit, status, searchQuery, startDate, endDate });
       return enquiryService.getEnquiries(
         page,
         limit,

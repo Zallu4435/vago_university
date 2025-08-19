@@ -8,7 +8,6 @@ import {
   GetSubmissionsRequestDTO,
   GetSubmissionByIdRequestDTO,
   ReviewSubmissionRequestDTO,
-  DownloadSubmissionRequestDTO,
 } from '../../../domain/assignments/dtos/AssignmentRequestDTOs';
 import {
   GetAssignmentsResponseDTO,
@@ -18,15 +17,11 @@ import {
   GetSubmissionsResponseDTO,
   GetSubmissionResponseDTO,
   ReviewSubmissionResponseDTO,
-  AnalyticsResponseDTO
+  AnalyticsResponseDTO,
+  ResponseDTO
 } from '../../../domain/assignments/dtos/AssignmentResponseDTOs';
 import { AssignmentStatus, IAssignment } from '../../../domain/assignments/entities/Assignment';
 import { AssignmentErrorType } from "../../../domain/assignments/enums/AssignmentErrorType";
-
-interface ResponseDTO<T> {
-  data: T | { error: string };
-  success: boolean;
-}
 
 export interface IGetAssignmentsUseCase {
   execute(params: GetAssignmentsRequestDTO): Promise<ResponseDTO<GetAssignmentsResponseDTO>>;

@@ -1,5 +1,5 @@
-import { Course as DomainCourse, EnrollmentRequest as DomainEnrollmentRequest } from './course';
-import { Course as ManagementCourse, EnrollmentRequest as ManagementEnrollmentRequest, CourseRequestDetails, StatusType } from './management/coursemanagement';
+import { Course as DomainCourse, EnrollmentRequest as DomainEnrollmentRequest } from '../types/management/coursemanagement';
+import { Course as ManagementCourse, EnrollmentRequest as ManagementEnrollmentRequest, CourseRequestDetails, StatusType } from '../types/management/coursemanagement';
 
 export function adaptDomainCourseToManagement(course: DomainCourse): ManagementCourse & { id: string } {
   return {
@@ -33,7 +33,6 @@ export function adaptManagementEnrollmentRequestToDomain(request: ManagementEnro
   };
 }
 
-// Type guards
 export function isDomainCourse(item: DomainCourse | DomainEnrollmentRequest): item is DomainCourse {
   return (item as DomainCourse).title !== undefined;
 }
@@ -42,11 +41,8 @@ export function isDomainEnrollmentRequest(item: DomainCourse | DomainEnrollmentR
   return (item as DomainEnrollmentRequest).studentName !== undefined;
 }
 
-// Adapter for CourseRequestDetails modal
 export function adaptToCourseRequestDetails(request: any): CourseRequestDetails {
-  // Handle the backend response structure: { data: { courseRequest: {...} } }
   if (request && typeof request === 'object') {
-    // If request has courseRequest property (backend response)
     if ('courseRequest' in request) {
       const courseRequest = request.courseRequest;
       return {
@@ -72,7 +68,6 @@ export function adaptToCourseRequestDetails(request: any): CourseRequestDetails 
       };
     }
     
-    // If request is already the courseRequest object
     if ('course' in request && 'user' in request) {
       return {
         id: request.id || '',
@@ -98,7 +93,6 @@ export function adaptToCourseRequestDetails(request: any): CourseRequestDetails 
     }
   }
   
-  // Fallback for old structure (DomainEnrollmentRequest)
   return {
     id: request.id || request._id || '',
     status: request.status as StatusType,

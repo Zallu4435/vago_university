@@ -100,7 +100,6 @@ export class CreateCourseUseCase implements ICreateCourseUseCase {
 
   async execute(params: CreateCourseRequestDTO): Promise<{ success: boolean; data: CreateCourseResponseDTO }> {
     const newCourse = await this.courseRepository.createCourse(params);
-    console.log(newCourse)
     return {
       success: true,
       data: {

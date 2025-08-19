@@ -1,5 +1,4 @@
-// src/application/services/faculty.service.ts
-import { Faculty, FacultyApiResponse, FacultyApprovalData } from '../../domain/types/management/facultyManagement';
+import { DocumentUploadResult, DocumentViewResult, Faculty, FacultyApiResponse, FacultyApprovalData, MultipleDocumentUploadResult } from '../../domain/types/management/facultyManagement';
 import httpClient from '../../frameworks/api/httpClient';
 import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 
@@ -53,16 +52,12 @@ class FacultyService {
 
   async getFacultyDocument(facultyId: string, type: string, documentUrl: string) {
     try {
-      console.log('Fetching faculty document with ID:', facultyId, 'type:', type);
-      console.log('Using URL:', `/faculty/${facultyId}/documents?type=${type}&documentUrl=${encodeURIComponent(documentUrl)}`);
-
       const response = await httpClient.get(`/admin/faculty/${facultyId}/documents?type=${type}&documentUrl=${encodeURIComponent(documentUrl)}`, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
-      console.log('Faculty document fetch response:', response.data);
       return response.data.data;
     } catch (error: unknown) {
       if (isAxiosErrorWithApiError(error)) {
@@ -157,22 +152,6 @@ class FacultyService {
 
 export const facultyService = new FacultyService();
 
-export interface DocumentUploadResult {
-  url: string;
-  publicId: string;
-  fileName: string;
-  fileType: string;
-}
-
-export interface MultipleDocumentUploadResult {
-  documents: DocumentUploadResult[];
-}
-
-export interface DocumentViewResult {
-  pdfData: string;
-  fileName: string;
-  fileType: string;
-}
 
 class DocumentUploadService {
   private baseUrl = '/admission';
@@ -187,11 +166,7 @@ class DocumentUploadService {
       formData.append('file', file);
       formData.append('applicationId', applicationId);
       formData.append('documentType', documentType);
-
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-      }
-
+      
       const response = await httpClient.post(`${this.baseUrl}/documents/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',

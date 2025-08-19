@@ -1,21 +1,19 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../appStore/store';
-import { Theme } from '../../../domain/types/theme';
+import { ThemeType } from '../../../domain/types/config/types';
 import { setTheme } from '../../../appStore/theme.slice';
 
 const ThemeSwitcher: React.FC = () => {
   const dispatch = useDispatch();
   const currentTheme = useSelector((state: RootState) => state.theme.theme);
 
-  const themes: { id: Theme; label: string }[] = [
+  const themes: { id: ThemeType; label: string }[] = [
     { id: 'light', label: 'Light' },
     { id: 'dark', label: 'Dark' },
-    { id: 'sepia', label: 'Sepia' },
-    { id: 'high-contrast', label: 'High Contrast' },
   ];
 
-  const handleThemeChange = (theme: Theme) => {
+  const handleThemeChange = (theme: ThemeType) => {
     dispatch(setTheme(theme));
   };
 

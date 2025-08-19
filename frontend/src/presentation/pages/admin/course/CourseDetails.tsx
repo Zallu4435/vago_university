@@ -1,26 +1,17 @@
 import React from 'react';
 import { FiXCircle, FiBook, FiBriefcase, FiUser, FiHash, FiClock, FiUsers, FiCalendar } from 'react-icons/fi';
-import { CourseDetailsProps, InfoCardProps } from '../../../../domain/types/management/coursemanagement';
+import { CourseDetailsProps } from '../../../../domain/types/management/coursemanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate } from '../../../../shared/utils/dateUtils';
+import { ghostParticles, InfoCard } from '../../../../shared/constants/courseManagementConstants';
 
 const CourseDetails: React.FC<CourseDetailsProps> = ({ isOpen, onClose, course }) => {
   usePreventBodyScroll(isOpen);
-  console.log(course, "course");
+
   if (!isOpen || !course) return null;
 
   const enrollmentPercentage = (course.currentEnrollment / course.maxEnrollment) * 100;
   const availableSpots = course.maxEnrollment - course.currentEnrollment;
-
-  const ghostParticles = Array(30)
-    .fill(0)
-    .map((_) => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -42,7 +33,6 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ isOpen, onClose, course }
       <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 w-full max-w-4xl max-h-[90vh] rounded-2xl border border-purple-600/30 shadow-2xl overflow-hidden relative">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-purple-600/5 pointer-events-none" />
 
-        {/* Corner decorations */}
         <div className="absolute top-0 left-0 w-20 h-20 bg-purple-500/10 rounded-br-full" />
         <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/10 rounded-tl-full" />
 
@@ -215,17 +205,5 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ isOpen, onClose, course }
     </div>
   );
 };
-
-const InfoCard: React.FC<InfoCardProps> = ({ icon, label, value }) => (
-  <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
-    <div className="flex items-center mb-2">
-      <div className="text-purple-300">
-        {typeof icon === 'function' ? React.createElement(icon, { size: 18 }) : icon}
-      </div>
-      <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
-    </div>
-    <p className="text-white font-semibold">{value}</p>
-  </div>
-);
 
 export default CourseDetails;

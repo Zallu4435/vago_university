@@ -364,7 +364,6 @@ export class FinancialRepository implements IFinancialRepository {
         } catch (error) {
             console.error('[FinancialRepository] Error during payment processing:', error);
             await StudentFinancialInfoModel.findByIdAndDelete(transactionLock._id);
-            console.log(`[FinancialRepository] Removed transaction lock ${transactionLock._id} due to error`);
             throw error;
         }
     }
@@ -489,7 +488,6 @@ export class FinancialRepository implements IFinancialRepository {
 
     async hasPendingPayment(studentId: string): Promise<boolean> {
         const pending = await PaymentModel.exists({ studentId, status: 'Pending' });
-        console.log(pending, "sonsoosndonson")
         return !!pending;
     }
 

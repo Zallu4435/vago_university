@@ -19,7 +19,6 @@ const MobileOTPComponent = ({ onClose }: MobileOTPComponentProps) => {
     setTimeout(() => {
       setStep('otp');
       setLoading(false);
-      console.log('OTP sent to:', phoneNumber);
     }, 2000);
   };
 

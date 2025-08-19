@@ -12,58 +12,8 @@ import {
   IoClose as Cancel,
 } from 'react-icons/io5';
 import { EnquiryDetailsModalProps } from '../../../../domain/types/management/enquirymanagement';
-
-const StatusBadge = ({ status }: { status: string }) => {
-  const statusConfig: Record<string, { bg: string; text: string; border: string }> = {
-    pending: {
-      bg: 'bg-yellow-600/30',
-      text: 'text-yellow-100',
-      border: 'border-yellow-500/50',
-    },
-    in_progress: {
-      bg: 'bg-blue-600/30',
-      text: 'text-blue-100',
-      border: 'border-blue-500/50',
-    },
-    resolved: {
-      bg: 'bg-green-600/30',
-      text: 'text-green-100',
-      border: 'border-green-500/50',
-    },
-  };
-
-  const config = statusConfig[status?.toLowerCase()] || statusConfig.pending;
-
-  return (
-    <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.bg} ${config.text} ${config.border}`}
-    >
-      {status?.replace('_', ' ').charAt(0)?.toUpperCase() + status?.replace('_', ' ').slice(1)}
-    </span>
-  );
-};
-
-const InfoCard = ({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?: number | string; className?: string }>; label: string; value: string }) => (
-  <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
-    <div className="flex items-center mb-2">
-      <Icon size={18} className="text-purple-400" />
-      <span className="ml-2 text-sm font-medium text-gray-300">{label}</span>
-    </div>
-    <p className="text-white font-semibold">{value || 'N/A'}</p>
-  </div>
-);
-
-const formatDate = (dateString: string): string => {
-  if (!dateString) return 'N/A';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
+import { InfoCard, StatusBadge, statusOptions } from '../../../../shared/constants/enquiryManagementConstants';
+import { formatDateTime } from '../../../../shared/utils/dateUtils';
 
 const EnquiryDetailsModal: React.FC<EnquiryDetailsModalProps> = ({ isOpen, onClose, enquiry, onUpdateStatus }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -98,12 +48,6 @@ const EnquiryDetailsModal: React.FC<EnquiryDetailsModalProps> = ({ isOpen, onClo
       setIsUpdating(false);
     }
   };
-
-  const statusOptions = [
-    { value: 'pending', label: 'Pending', color: 'text-yellow-400' },
-    { value: 'in_progress', label: 'In Progress', color: 'text-blue-400' },
-    { value: 'resolved', label: 'Resolved', color: 'text-green-400' },
-  ];
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -150,8 +94,8 @@ const EnquiryDetailsModal: React.FC<EnquiryDetailsModalProps> = ({ isOpen, onClo
             <InfoCard icon={User} label="Name" value={enquiry.name} />
             <InfoCard icon={Mail} label="Email" value={enquiry.email} />
             <InfoCard icon={FileText} label="Subject" value={enquiry.subject} />
-            <InfoCard icon={Clock} label="Created At" value={formatDate(enquiry.createdAt)} />
-            <InfoCard icon={Calendar} label="Updated At" value={formatDate(enquiry.updatedAt)} />
+            <InfoCard icon={Clock} label="Created At" value={formatDateTime(enquiry.createdAt)} />
+            <InfoCard icon={Calendar} label="Updated At" value={formatDateTime(enquiry.updatedAt)} />
           </div>
 
           <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">

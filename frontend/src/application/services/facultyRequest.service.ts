@@ -1,11 +1,7 @@
 import httpClient from '../../frameworks/api/httpClient';
 import { FacultyRequestFormData } from '../../domain/validation/facultyRequestSchema';
 import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
-
-interface FacultyRequestResponse {
-  message: string;
-  requestId: string;
-}
+import { FacultyRequestResponse } from '../../domain/types/management/facultyManagement';
 
 class FacultyRequestService {
   async submitRequest(data: FacultyRequestFormData): Promise<FacultyRequestResponse> {

@@ -1,11 +1,6 @@
-import { FormData } from '../../domain/types/application';
+import { ApplicationResponse, FormData } from '../../domain/types/application';
 import httpClient from '../../frameworks/api/httpClient';
 
-interface ApplicationResponse {
-  data: {
-    draft: FormData | null;
-  };
-}
 
 export const applicationController = {
   async createApplication(userId: string): Promise<{ applicationId: string }> {

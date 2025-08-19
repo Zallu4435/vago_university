@@ -78,13 +78,12 @@ export const facultyColumns: ColumnConfig<Faculty>[] = [
     key: 'status',
     render: (faculty: Faculty) => (
       <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          faculty.status.toLowerCase() === 'approved'
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${faculty.status.toLowerCase() === 'approved'
             ? 'bg-green-900/30 text-green-400 border-green-500/30'
             : faculty.status.toLowerCase() === 'rejected'
-            ? 'bg-red-900/30 text-red-400 border-red-500/30'
-            : 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
-        }`}
+              ? 'bg-red-900/30 text-red-400 border-red-500/30'
+              : 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
+          }`}
         role="status"
       >
         <span
@@ -95,4 +94,14 @@ export const facultyColumns: ColumnConfig<Faculty>[] = [
       </span>
     ),
   },
-]; 
+];
+
+export const ghostParticles = Array(30)
+  .fill(0)
+  .map((_) => ({
+    size: Math.random() * 10 + 5,
+    top: Math.random() * 100,
+    left: Math.random() * 100,
+    animDuration: Math.random() * 10 + 15,
+    animDelay: Math.random() * 5,
+  }));

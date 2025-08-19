@@ -9,65 +9,15 @@ import {
   IoHeartOutline as Heart,
   IoDocumentTextOutline as DocumentText,
   IoSparklesOutline as Sparkles,
-  IoStarOutline as Star,
   IoTimeOutline as Clock,
 } from 'react-icons/io5';
-import { 
-  StatusType,
+import {
   ClubRequestDetailsModalProps,
-  ClubRequestDetailsStatusBadgeProps,
-  ClubRequestDetailsInfoCardProps,
-  ParticleConfig
 } from '../../../../../domain/types/management/clubmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { formatDateTime } from '../../../../../shared/utils/dateUtils';
+import { RequestStatusBadge, RequestInfoCard, ghostParticles, } from '../../../../../shared/constants/clubManagementConstants';
 
-const StatusBadge: React.FC<ClubRequestDetailsStatusBadgeProps> = ({ status }) => {
-  const statusConfig: Record<StatusType, { bg: string; text: string; border: string }> = {
-    pending: {
-      bg: 'bg-yellow-600/30',
-      text: 'text-yellow-100',
-      border: 'border-yellow-500/50',
-    },
-    approved: {
-      bg: 'bg-green-600/30',
-      text: 'text-green-100',
-      border: 'border-green-500/50',
-    },
-    rejected: {
-      bg: 'bg-red-600/30',
-      text: 'text-red-100',
-      border: 'border-red-500/50',
-    },
-  };
-
-  const config = statusConfig[status] || statusConfig.pending;
-
-  return (
-    <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.bg} ${config.text} ${config.border}`}
-    >
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </span>
-  );
-};
-
-const InfoCard: React.FC<ClubRequestDetailsInfoCardProps> = ({ icon: Icon, label, value, highlight = false }) => {
-  return (
-    <div
-      className={`bg-gray-800/80 border border-purple-500/30 rounded-lg p-4 shadow-sm ${
-        highlight ? 'ring-2 ring-purple-500/20 shadow-lg' : ''
-      }`}
-    >
-      <div className="flex items-center mb-2">
-        <Icon size={18} className="text-purple-300" />
-        <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
-        {highlight && <Star size={14} className="ml-auto text-purple-300" />}
-      </div>
-      <p className="text-white font-semibold">{value || 'N/A'}</p>
-    </div>
-  );
-};
 
 const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
   isOpen,
@@ -82,16 +32,6 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
 
   const { clubRequest } = request;
   const { club, user } = clubRequest;
-
-  const ghostParticles: ParticleConfig[] = Array(30)
-    .fill(0)
-    .map((_) => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -129,7 +69,7 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
                 <h2 className="text-2xl font-bold text-purple-100">{club.name}</h2>
                 <p className="text-sm text-purple-300">Request ID: {clubRequest.id}</p>
                 <div className="flex items-center mt-2">
-                  <StatusBadge status={clubRequest.status} />
+                  <RequestStatusBadge status={clubRequest.status} />
                 </div>
               </div>
             </div>
@@ -144,21 +84,21 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
 
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            <InfoCard
+            <RequestInfoCard
               icon={User}
               label="Requested By"
               value={user?.name || 'Unknown'}
               highlight={true}
             />
-            <InfoCard icon={Mail} label="Contact Email" value={user?.email || 'N/A'} />
-            <InfoCard icon={IdCard} label="Club ID" value={club.id} />
-            <InfoCard icon={Info} label="Club Type" value={club.type} />
-            <InfoCard
+            <RequestInfoCard icon={Mail} label="Contact Email" value={user?.email || 'N/A'} />
+            <RequestInfoCard icon={IdCard} label="Club ID" value={club.id} />
+            <RequestInfoCard icon={Info} label="Club Type" value={club.type} />
+            <RequestInfoCard
               icon={Users}
               label="Members"
               value={`${club.enteredMembers} Members`}
             />
-            <InfoCard
+            <RequestInfoCard
               icon={Clock}
               label="Last Updated"
               value={formatDateTime(clubRequest.updatedAt)}
@@ -211,12 +151,12 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
                   <h3 className="ml-3 text-lg font-semibold text-purple-100">Requester Information</h3>
                 </div>
                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <InfoCard
+                  <RequestInfoCard
                     icon={User}
                     label="Full Name"
                     value={user.name || 'N/A'}
                   />
-                  <InfoCard
+                  <RequestInfoCard
                     icon={Mail}
                     label="Email Address"
                     value={user.email}

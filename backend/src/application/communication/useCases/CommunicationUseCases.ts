@@ -19,13 +19,9 @@ import {
   AdminSentMessageResponseDTO,
   GetAllAdminsResponseDTO,
   FetchUsersResponseDTO,
+  ResponseDTO
 } from "../../../domain/communication/dtos/CommunicationResponseDTOs";
 import { UserRole } from '../../../domain/communication/entities/Communication';
-
-export interface ResponseDTO<T> {
-  success: boolean;
-  data: T | { error: string };
-}
 
 
 export interface IGetInboxMessagesUseCase {

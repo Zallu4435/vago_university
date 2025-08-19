@@ -23,3 +23,8 @@ export interface ProfileResponseDTO {
   export interface UpdateProfilePictureResponseDTO {
     profilePicture: string;
   }
+
+  export interface ResponseDTO<T> {
+    data: T | { error: string };
+    success: boolean;
+}

@@ -3,13 +3,11 @@ import httpClient from '../../../../../frameworks/api/httpClient';
 export const userAssignmentService = {
   getAssignments: async (params?: { status?: string; page?: number; limit?: number; subject?: string; search?: string; sortBy?: string }) => {
     try {
-
       const response = await httpClient.get('/assignments', { params });
-
       return response.data.data;
     } catch (error) {
       console.error('Error in getAssignments:', error);
-      throw error;  
+      throw error;
     }
   },
 
@@ -19,16 +17,6 @@ export const userAssignmentService = {
   },
 
   submitAssignment: async (assignmentId: string, file: File) => {
-    console.log('=== FRONTEND SERVICE: SUBMIT ASSIGNMENT STARTED ===');
-    console.log('Service: Assignment ID:', assignmentId);
-    console.log('Service: File object:', file);
-    console.log('Service: File info:', {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-      lastModified: file.lastModified
-    });
-
     if (!file || file.size === 0) {
       console.error('Service: Invalid file - file is null or has zero size');
       throw new Error('Invalid file');
@@ -36,10 +24,6 @@ export const userAssignmentService = {
 
     const formData = new FormData();
     formData.append('file', file);
-
-    for (let [key, value] of formData.entries()) {
-      console.log(`  ${key}:`, value);
-    }
 
     try {
       const response = await httpClient.post(

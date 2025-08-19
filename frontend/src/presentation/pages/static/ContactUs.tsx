@@ -130,7 +130,6 @@ const ContactUs = () => {
             </div>
           </div>
 
-          {/* Right Section - Contact Form */}
           <div className="lg:w-3/5 p-6 sm:p-8">
             <h3 className="text-xl sm:text-2xl font-semibold text-cyan-800 mb-4 sm:mb-6">Send us a Message</h3>
             {submitSuccess && (

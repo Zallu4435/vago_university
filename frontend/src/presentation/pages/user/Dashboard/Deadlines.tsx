@@ -1,15 +1,6 @@
 import { FaCalendarAlt, FaClock, FaExclamationTriangle } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
-
-interface Deadline {
-  title: string;
-  date: string;
-  urgent?: boolean;
-}
-
-interface DeadlinesProps {
-  deadlines: Deadline[];
-}
+import { Deadline, DeadlinesProps } from '../../../../domain/types/dashboard/user';
 
 export default function Deadlines({ deadlines }: DeadlinesProps) {
   const { styles, theme } = usePreferences();

@@ -13,11 +13,10 @@ export interface LoginResponse {
   };
   collection: 'register' | 'admin' | 'user' | 'faculty';
 }
-// domain/types/user.ts (extend if needed)
 export interface User {
   id: string;
   email: string;
-  role: string; // e.g., 'admin', 'student'
+  role: string; 
   firstName: string;
   lastName: string;
   profilePicture?: string;
@@ -28,4 +27,8 @@ export interface UserApiResponse {
   totalUsers: number;
   totalPages: number;
   currentPage: number;
+}
+
+export interface ApiResponseWrapper<T> {
+  data: T;
 }

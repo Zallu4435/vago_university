@@ -1,15 +1,5 @@
-import PropTypes from 'prop-types';
 import { LuFileText, LuBookOpen, LuSquareCheck } from 'react-icons/lu';
-
-interface Activity {
-  action: string;
-  course: string;
-  time: string;
-}
-
-interface RecentActivitiesProps {
-  activities: Activity[];
-}
+import { RecentActivitiesProps, Activity } from '../../../../domain/types/dashboard/faculty';
 
 export default function RecentActivities({ activities }: RecentActivitiesProps) {
   const getActivityIcon = (index: number) => {
@@ -43,13 +33,3 @@ export default function RecentActivities({ activities }: RecentActivitiesProps) 
     </div>
   );
 }
-
-RecentActivities.propTypes = {
-  activities: PropTypes.arrayOf(
-    PropTypes.shape({
-      action: PropTypes.string.isRequired,
-      course: PropTypes.string.isRequired,
-      time: PropTypes.string.isRequired,
-    })
-  ).isRequired,
-};

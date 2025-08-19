@@ -65,14 +65,6 @@ export class CommunicationRepository implements ICommunicationRepository {
       .limit(limit)
       .lean();
     
-    if (process.env.NODE_ENV === 'development' && messages.length > 0) {
-      console.log('[getSentMessages] First message from DB:', {
-        _id: messages[0]._id,
-        hasRecipients: !!messages[0].recipients,
-        recipientsLength: messages[0].recipients?.length
-      });
-    }
-    
     const totalItems = await this.messageModel.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
 
@@ -91,27 +83,8 @@ export class CommunicationRepository implements ICommunicationRepository {
       }
       const result = { ...msg, recipientType };
       
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[getSentMessages] Transformed message ${msg._id}:`, {
-          hasRecipients: !!result.recipients,
-          recipientsLength: result.recipients?.length,
-          recipientType: result.recipientType
-        });
-      }
-      
       return result;
     });
-
-    if (process.env.NODE_ENV === 'development') {
-      if (messagesWithRecipientType.length > 0) {
-        console.log('[getSentMessages] Final message structure:', {
-          _id: messagesWithRecipientType[0]._id,
-          hasRecipients: !!messagesWithRecipientType[0].recipients,
-          recipientsLength: messagesWithRecipientType[0].recipients?.length,
-          recipientType: messagesWithRecipientType[0].recipientType
-        });
-      }
-    }
     
     return { messages: messagesWithRecipientType, totalItems, totalPages, page, limit, userId, search };
   }
@@ -293,7 +266,6 @@ export class CommunicationRepository implements ICommunicationRepository {
   }
 
   async findUserById(userId: string, role: string): Promise<UserInfo | null> {
-    console.log('[findUserById] Looking for userId:', userId, 'role:', role);
     try {
       let user = null;
       if (role === 'admin') {

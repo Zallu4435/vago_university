@@ -1,13 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-
-interface DeleteMessageModalProps {
-  isVisible: boolean;
-  isSentMessage: boolean;
-  onClose: () => void;
-  onDeleteForMe: () => void;
-  onDeleteForEveryone?: () => void;
-}
+import { DeleteMessageModalProps } from '../../../../../domain/types/canvas/chat';
 
 export const DeleteMessageModal: React.FC<DeleteMessageModalProps> = ({
   isVisible,
@@ -43,7 +36,6 @@ export const DeleteMessageModal: React.FC<DeleteMessageModalProps> = ({
 
   if (!isVisible) return null;
 
-  // Create portal to render modal at the top of DOM
   const modalContent = (
     <div className="fixed inset-0 bg-white/10 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
       <div ref={modalRef} className="bg-white dark:bg-[#202c33] rounded-lg p-4 md:p-6 max-w-sm w-full mx-2 md:mx-4 shadow-xl">
@@ -80,6 +72,5 @@ export const DeleteMessageModal: React.FC<DeleteMessageModalProps> = ({
     </div>
   );
 
-  // Use portal to render at the top of DOM tree
   return createPortal(modalContent, document.body);
 };

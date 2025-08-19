@@ -11,7 +11,8 @@ import {
     GetVideosResponseDTO,
     GetVideoByIdResponseDTO,
     CreateVideoResponseDTO,
-    UpdateVideoResponseDTO
+    UpdateVideoResponseDTO,
+    ResponseDTO
 } from '../../../domain/video/dtos/VideoResponseDTOs';
 import mongoose from "mongoose";
 import { cloudinary } from '../../../config/cloudinary.config';
@@ -21,11 +22,6 @@ import {
     InvalidDiplomaIdError,
     DomainError
 } from '../../../domain/video/errors/VideoErrors';
-
-interface ResponseDTO<T> {
-    data: T | { error: string };
-    success: boolean;
-}
 
 export interface IGetVideosUseCase {
     execute(params: GetVideosRequestDTO): Promise<ResponseDTO<GetVideosResponseDTO>>;
@@ -51,21 +47,17 @@ export class GetVideosUseCase implements IGetVideosUseCase {
     constructor(private videoRepository: IVideoRepository) { }
 
     async execute(params: GetVideosRequestDTO): Promise<ResponseDTO<GetVideosResponseDTO>> {
-        // Validation
         if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
             throw new DomainError("Invalid page or limit parameters");
         }
 
-        // Build query object
         const query = await this.buildQuery(params);
 
-        // Get data from repository
         const [videos, totalItems] = await Promise.all([
             this.videoRepository.findVideos(query, params.page, params.limit),
             this.videoRepository.countVideos(query)
         ]);
 
-        // Map and transform data
         const mappedVideos = this.mapVideosToDTO(videos);
         const totalPages = Math.ceil(totalItems / params.limit);
 
@@ -83,7 +75,6 @@ export class GetVideosUseCase implements IGetVideosUseCase {
         const { category, status, dateRange, startDate, endDate, search } = params;
         let query: VideoFilter = {};
 
-        // Handle category filter
         if (category && category !== 'all') {
             const diploma = await this.videoRepository.findDiplomaByCategory(category);
             if (!diploma) {
@@ -92,17 +83,14 @@ export class GetVideosUseCase implements IGetVideosUseCase {
             query.diplomaId = diploma._id;
         }
 
-        // Handle status filter
         if (status && status !== 'all') {
             query.status = status;
         }
 
-        // Handle date range filter
         if (dateRange && dateRange !== 'all') {
             query.uploadedAt = this.buildDateRangeQuery(dateRange, startDate, endDate);
         }
 
-        // Handle search filter
         if (search && search.trim()) {
             query.$or = [
                 { title: { $regex: search.trim(), $options: 'i' } },
@@ -187,23 +175,19 @@ export class GetVideoByIdUseCase implements IGetVideoByIdUseCase {
         let diplomaInfo = undefined;
         let diplomaId = video.diplomaId;
         
-        // Handle populated diplomaId object
         if (diplomaId && typeof diplomaId === 'object' && diplomaId !== null) {
-            // If it's a populated object, extract the _id
             if ('_id' in diplomaId) {
                 diplomaId = (diplomaId as IRepoDiploma)._id?.toString() || '';
             } else {
                 diplomaId = '';
             }
         } else if (diplomaId && diplomaId !== null) {
-            // If it's already a string, use it as is
             diplomaId = diplomaId.toString();
         } else {
             diplomaId = '';
         }
         
         if (diplomaId && diplomaId !== '') {
-            // Since we already have the populated data, we can construct diplomaInfo directly
             if (video.diplomaId && typeof video.diplomaId === 'object' && '_id' in video.diplomaId) {
                 const populatedDiploma = video.diplomaId as IRepoDiploma;
                 diplomaInfo = {
@@ -212,7 +196,6 @@ export class GetVideoByIdUseCase implements IGetVideoByIdUseCase {
                     category: populatedDiploma.category || ''
                 };
             } else {
-                // Fallback to fetching diploma data
                 const diploma = await this.videoRepository.findDiplomaById(diplomaId);
                 if (diploma) {
                     diplomaInfo = {
@@ -295,16 +278,7 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
     constructor(private videoRepository: IVideoRepository) { }
 
     async execute(params: UpdateVideoRequestDTO): Promise<ResponseDTO<UpdateVideoResponseDTO>> {
-        console.log('🎬 [UseCase] UpdateVideoUseCase.execute params', {
-            id: params.id,
-            title: !!params.title,
-            duration: !!params.duration,
-            module: params.module,
-            status: params.status,
-            hasVideoFile: !!params.videoFile,
-            hasVideoUrl: !!params.videoUrl,
-            category: params.category
-        });
+
         if (!mongoose.isValidObjectId(params.id)) {
             throw new InvalidVideoIdError();
         }
@@ -312,14 +286,9 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
         if (!existingVideo) {
             throw new VideoNotFoundError();
         }
-        console.log('📼 [UseCase] Existing video loaded', {
-            id: existingVideo._id || existingVideo.id,
-            currentDiplomaId: typeof existingVideo.diplomaId === 'string' ? existingVideo.diplomaId : existingVideo.diplomaId?._id,
-        });
-        // Prepare update payload
+  
         let updateData = { ...params };
 
-        // Resolve current and possibly new diploma IDs
         const oldDiplomaId = (existingVideo.diplomaId && typeof existingVideo.diplomaId === 'object' && existingVideo.diplomaId !== null && '_id' in existingVideo.diplomaId)
             ? existingVideo.diplomaId._id?.toString() || ''
             : (existingVideo.diplomaId?.toString() || '');
@@ -337,10 +306,8 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
                 categoryChanged = true;
             }
             updateData.diplomaId = newDiplomaId;
-            console.log('🏷️ [UseCase] Category provided', { category: params.category, newDiplomaId, oldDiplomaId, categoryChanged });
         }
 
-        // The repository update does not accept `category`; remove it from payload
         if ('category' in updateData) {
             delete updateData.category;
         }
@@ -376,22 +343,17 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
                 updateData.videoUrl = existingVideo.videoUrl;
             }
         }
-        console.log('🛠️ [UseCase] Calling repository.updateVideo with fields', Object.keys(updateData));
         const updated = await this.videoRepository.updateVideo(params.id, { ...updateData });
         if (!updated) {
             throw new VideoNotFoundError();
         }
 
-        // If category changed, move the video reference between diplomas
         if (categoryChanged && newDiplomaId) {
             try {
                 if (oldDiplomaId) {
-                    console.log('🔁 [UseCase] Removing video from old diploma array', { oldDiplomaId, videoId: params.id });
                     await this.videoRepository.removeVideoFromDiploma(oldDiplomaId, params.id);
                 }
-                console.log('🔁 [UseCase] Adding video to new diploma array', { newDiplomaId, videoId: params.id });
                 await this.videoRepository.addVideoToDiploma(newDiplomaId, params.id);
-                console.log('✅ [UseCase] Moved video between diplomas successfully');
             } catch (err) {
                 console.error('⚠️ [UseCase] Failed to move video between diploma arrays', err);
             }

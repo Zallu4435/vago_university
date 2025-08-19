@@ -35,3 +35,8 @@ export interface UnenrollStudentResponseDTO {
   success: boolean;
   message: string;
 } 
+
+export interface ResponseDTO<T> {
+  data: T;
+  success: boolean;
+}

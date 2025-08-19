@@ -1,33 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FiX, FiUser, FiEdit2, FiUsers, FiLock, FiMessageSquare, FiTrash2, FiLogOut, FiBell, FiBellOff, FiPlus, FiArrowRight } from 'react-icons/fi';
-import { Chat, User } from '../types/ChatTypes';
 import { useChatQueries } from '../hooks/useChatQueries';
 import { useChatMutations } from '../hooks/useChatMutations';
 import { toast } from 'react-hot-toast';
-
-interface GroupSettingsModalProps {
-  onClose: () => void;
-  chat: Chat;
-  currentUser: User;
-  onUpdateGroup: (updates: {
-    name?: string;
-    description?: string;
-    settings?: {
-      onlyAdminsCanPost?: boolean;
-      onlyAdminsCanAddMembers?: boolean;
-      onlyAdminsCanChangeInfo?: boolean;
-      onlyAdminsCanPinMessages?: boolean;
-      onlyAdminsCanSendMedia?: boolean;
-      onlyAdminsCanSendLinks?: boolean;
-    };
-  }) => void;
-  onAddMembers: () => void;
-  onRemoveMember: (userId: string) => void;
-  onMakeAdmin: (userId: string) => void;
-  onRemoveAdmin: (userId: string) => void;
-  onLeaveGroup: () => void;
-  onDeleteGroup: () => void;
-}
+import { GroupSettingsModalProps, User, Chat, GroupSettingKey, SettingConfig } from '../../../../../domain/types/canvas/chat';
+import { settingsConfig } from '../utils/chatUtils';
 
 const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
   onClose,
@@ -55,13 +32,10 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
 
   const group = chatDetails || chat;
 
-  console.log(group, "groi[")
-
-
   if (isLoadingChatDetails || !group || !group.participants) return <div>Loading...</div>;
 
   const participantIds = (group?.participants ?? []).map((p) => p.id);
-  const filteredSearchResults = searchUsers?.items?.filter((user) => !participantIds.includes(user.id)) || [];
+  const filteredSearchResults = searchUsers?.items?.filter((user: User) => !participantIds.includes(user.id)) || [];
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
@@ -106,27 +80,6 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
 
   const firstAdmin = Array.isArray(group.admins) && group.admins.length > 0 ? group.admins[0] : undefined;
 
-  const settingsConfig = [
-    {
-      key: 'onlyAdminsCanPost',
-      icon: FiMessageSquare,
-      label: 'Only admins can send messages',
-      description: 'Restrict messaging to administrators only'
-    },
-    {
-      key: 'onlyAdminsCanAddMembers',
-      icon: FiUsers,
-      label: 'Only admins can add members',
-      description: 'Control who can invite new members'
-    },
-    {
-      key: 'onlyAdminsCanChangeInfo',
-      icon: FiLock,
-      label: 'Only admins can change info',
-      description: 'Restrict group information editing'
-    }
-  ];
-
 
   const handleSaveName = () => {
     if (newName.trim() && newName !== group.name) {
@@ -142,14 +95,22 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
     setIsEditingDescription(false);
   };
 
-  // Log group.settings on render
-  useEffect(() => {
-    console.log('GroupSettingsModal: group.settings on render:', group.settings);
-  }, [group.settings]);
+  const handleSettingToggle = (settingKey: GroupSettingKey, currentValue: boolean) => {
+    if (!firstAdmin) return;
+    
+    const updates: Partial<Chat['settings']> = { [settingKey]: !currentValue };
+    updateGroupSettings.mutate(updates, {
+      onSuccess: () => {
+        toast.success('Group settings updated successfully');
+      },
+      onError: (error) => {
+        console.error('updateGroupSettings error:', error);
+      }
+    });
+  };
 
   return (
     <div className="relative h-full w-full flex flex-col bg-white dark:bg-[#1f2937] border-l border-gray-200 dark:border-gray-700 overflow-x-visible">
-      {/* Header: always visible */}
       <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 dark:border-gray-700">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Group Settings</h2>
@@ -164,9 +125,7 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
           <FiX size={20} className="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200" />
         </button>
       </div>
-      {/* Main content area: relative for overlay */}
       <div className="relative flex-1 h-0 min-h-0">
-        {/* Add Members Search Bar and Results (slide in from right, above settings) */}
         <div
           className={`absolute inset-0 right-0 bg-white dark:bg-[#1f2937] z-20 transition-transform duration-300 ${showMemberSearch ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}
         >
@@ -190,7 +149,7 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
             {searchQuery ? (
               filteredSearchResults.length > 0 ? (
                 <div className="space-y-2">
-                  {filteredSearchResults.map(user => (
+                  {filteredSearchResults.map((user: User) => (
                     <button
                       key={user.id}
                       onClick={() => handleUserSelect(user)}
@@ -244,12 +203,10 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
             )}
           </div>
         </div>
-        {/* Group settings content (dimmed when search is open) */}
+
         <div className={`absolute inset-0 w-full h-full overflow-y-auto px-6 py-4 space-y-8 transition-all duration-300 ${showMemberSearch ? 'opacity-50 pointer-events-none' : ''}`}
              style={{ maxHeight: '100%' }}>
-          {/* Group Info Section */}
           <div className="space-y-6">
-            {/* Group Name */}
             <div className="rounded-xl p-4 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between mb-3">
                 <label className="flex items-center space-x-2">
@@ -295,7 +252,6 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
               )}
             </div>
 
-            {/* Description */}
             <div className="rounded-xl p-4 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between mb-3">
                 <label className="flex items-center space-x-2">
@@ -341,7 +297,6 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
             </div>
           </div>
 
-          {/* Participants Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center space-x-2">
@@ -360,7 +315,7 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
             </div>
 
             <div className="space-y-2 max-h-60 overflow-y-auto">
-              {group.participants.map((participant) => (
+              {group.participants.map((participant: User) => (
                 <div
                   key={participant.id}
                   className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 group"
@@ -434,45 +389,20 @@ const GroupSettingsModal: React.FC<GroupSettingsModalProps> = ({
               <span>Permissions</span>
             </h3>
             <div className="space-y-3">
-              {settingsConfig.map((setting) => {
+              {(settingsConfig as SettingConfig[]).map((setting) => {
                 const IconComponent = setting.icon;
-                const checked = !!group.settings?.[setting.key as keyof typeof group.settings];
+                const checked = !!group.settings?.[setting.key];
                 return (
                   <div
                     key={setting.key}
                     className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 group cursor-pointer"
                     style={{ userSelect: 'none', opacity: !firstAdmin ? 0.5 : 1 }}
-                    onClick={() => {
-                      if (!firstAdmin) return;
-                      console.log('Toggling setting:', setting.key, 'from', checked, 'to', !checked);
-                      updateGroupSettings.mutate(
-                        { [setting.key]: !checked },
-                        {
-                          onSuccess: (data) => {
-                            console.log('updateGroupSettings success:', data);
-                          },
-                          onError: (error) => {
-                            console.error('updateGroupSettings error:', error);
-                          }
-                        }
-                      );
-                    }}
+                    onClick={() => handleSettingToggle(setting.key, checked)}
                     tabIndex={0}
                     onKeyDown={e => {
                       if (!firstAdmin) return;
                       if (e.key === 'Enter' || e.key === ' ') {
-                        console.log('Toggling setting (keyboard):', setting.key, 'from', checked, 'to', !checked);
-                        updateGroupSettings.mutate(
-                          { [setting.key]: !checked },
-                          {
-                            onSuccess: (data) => {
-                              console.log('updateGroupSettings success:', data);
-                            },
-                            onError: (error) => {
-                              console.error('updateGroupSettings error:', error);
-                            }
-                          }
-                        );
+                        handleSettingToggle(setting.key, checked);
                       }
                     }}
                     role="button"

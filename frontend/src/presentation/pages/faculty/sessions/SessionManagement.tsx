@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { FaSearch, FaPlus, FaEdit, FaTrash, FaClock, FaCheck, FaPlay } from 'react-icons/fa';
 import { FaCheckCircle, FaSpinner, FaPlayCircle } from 'react-icons/fa';
 import CreateSessionModal from './CreateSessionModal';
-import { Session } from './types';
 import { useSessionManagement } from '../../../../application/hooks/useSessionManagement';
 import SessionDetailsModal from './SessionDetailsModal';
 import WarningModal from '../../../components/common/WarningModal';
 import { sessionService } from '../../../../application/services/session.service';
+import { VideoSession } from '../../../../application/services/session.service';
 
 export default function SessionManagement() {
   const {
@@ -27,7 +27,7 @@ export default function SessionManagement() {
   } = useSessionManagement();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [selectedSession, setSelectedSession] = useState<VideoSession | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<any>(null);
@@ -56,8 +56,6 @@ export default function SessionManagement() {
 
   const handleViewSession = async (session: any) => {
     try {
-      console.log('Session object:', session);
-      console.log('Session ID:', session.id);
       if (!session.id) {
         console.error('Session ID is undefined');
         return;
@@ -151,10 +149,8 @@ export default function SessionManagement() {
           </button>
         </div>
 
-        {/* Filters */}
         <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6">
           <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
-            {/* Search */}
             <div className="flex-1 relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity pointer-events-none"></div>
               <div className="relative bg-white rounded-2xl border-2 border-gray-100 focus-within:border-pink-300 transition-all">
@@ -182,7 +178,6 @@ export default function SessionManagement() {
                 <option value="completed">Completed</option>
               </select>
             </div>
-            {/* Course Filter */}
             <div className="relative group w-full md:w-auto">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity pointer-events-none"></div>
               <select
@@ -200,7 +195,6 @@ export default function SessionManagement() {
           </div>
         </div>
 
-        {/* Table Section */}
         <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 overflow-x-auto">
           <table className="w-full min-w-[900px]">
             <thead className="bg-gradient-to-r from-purple-50 to-pink-50 sticky top-0 z-10">
@@ -214,7 +208,7 @@ export default function SessionManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-pink-50">
-              {sessions.map((session, index: number) => {
+              {sessions.map((session: VideoSession, index: number) => {
                 const statusConfig = getStatusConfig(session.status as 'live' | 'upcoming' | 'completed');
                 return (
                   <tr key={session._id || session.id} className={`hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-pink-50/50 transition-all ${index % 2 === 0 ? 'bg-white' : 'bg-pink-50'} animate-fadeInUp`} style={{ animationDelay: `${index * 0.05}s` }}>
@@ -290,7 +284,6 @@ export default function SessionManagement() {
           </table>
         </div>
 
-        {/* Empty State */}
         {sessions.length === 0 && (
           <div className="text-center py-16 animate-fadeIn">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-pink-50 rounded-full mb-4">
@@ -304,7 +297,6 @@ export default function SessionManagement() {
         )}
       </div>
 
-      {/* Modals */}
       {showCreateModal && (
         <CreateSessionModal
           setShowCreateModal={setShowCreateModal}

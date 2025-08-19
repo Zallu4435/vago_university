@@ -22,7 +22,6 @@ const HealthConditionForm: React.FC<HealthConditionFormProps> = ({ onAddConditio
   const { handleSubmit, reset, formState: { errors } } = methods;
 
   useEffect(() => {
-    console.log('HealthConditionForm: useEffect - condition:', condition, 'index:', index);
     if (isEditing) {
       reset({ condition: condition.condition, details: condition.details });
     } else {
@@ -31,7 +30,6 @@ const HealthConditionForm: React.FC<HealthConditionFormProps> = ({ onAddConditio
   }, [condition, index, isEditing, reset]);
 
   const onSubmit = (data: HealthCondition) => {
-    console.log('HealthConditionForm: Submitting condition:', data, { isEditing, index });
     onAddCondition(data, isEditing ? index : undefined);
     reset({ condition: '', details: '' });
     onClose();

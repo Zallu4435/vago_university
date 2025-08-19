@@ -2,15 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { diplomaBackendService } from '../../application/services/diplomaBackend.service';
-import { Diploma } from '../../domain/types/management/diplomamanagement';
-
-type Filters = {
-  category: string;
-  status: string;
-  dateRange: string;
-  startDate?: string;
-  endDate?: string;
-};
+import { Diploma, Filters } from '../../domain/types/management/diplomamanagement';
 
 export const useAdminDiplomaManagement = (searchTerm?: string, filters?: Filters) => {
   const queryClient = useQueryClient();

@@ -1,3 +1,5 @@
+import { IconType } from 'react-icons';
+
 export interface Course {
   id?: string;
   _id?: string;
@@ -91,9 +93,54 @@ export interface StatusBadgeProps {
   status: StatusType;
 }
 
-// InfoCardProps already exists, but in EnrollmentRequestDetails it uses icon: IconType and value: string | number
-// Let's update InfoCardProps to be compatible with both usages
-import { IconType } from 'react-icons';
+export interface CourseApiResponse {
+  data: {
+    courses: Course[];
+  };
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+}
+
+export interface CourseApiWrapper {
+  data: CourseApiResponse;
+}
+
+export interface CourseDetails {
+  id: string;
+  title: string;
+  specialization: string;
+  faculty: string;
+  credits: number;
+  schedule: string;
+  maxEnrollment: number;
+  currentEnrollment: number;
+  description?: string;
+  prerequisites?: string[];
+  term?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CourseDetailsResponse {
+  data: {
+    course: CourseDetails;
+  };
+}
+
+export interface EnrollmentRequestsResponse {
+  data: {
+    data: EnrollmentRequest[];
+    totalPages: number;
+  };
+}
+
+export interface EnrollmentRequestDetailsResponse {
+  data: {
+    courseRequest: EnrollmentRequest;
+  };
+}
+
 export interface InfoCardProps {
   icon: React.ReactNode | IconType;
   label: string;
@@ -117,4 +164,16 @@ export interface CourseFormProps {
   specializations: string[];
   faculties: string[];
   terms: string[];
-} 
+}
+
+export interface Filters {
+  specialization: string;
+  faculty: string;
+  term: string;
+}
+
+export interface RequestFilters {
+  status: string;
+  specialization: string;
+  term: string;
+}

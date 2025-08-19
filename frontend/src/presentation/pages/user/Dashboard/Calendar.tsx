@@ -1,44 +1,20 @@
 import { FaCalendarAlt, FaArrowRight } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
-
-interface CalendarDayEntry {
-  type: string;
-  title: string;
-  date: string;
-}
-
-interface CalendarProps {
-  calendarDays: Record<number, CalendarDayEntry[]>;
-}
-
-interface LegendProps {
-  color: string;
-  label: string;
-  styles: {
-    card: {
-      background: string;
-      border: string;
-    };
-    textSecondary: string;
-  };
-}
+import { CalendarProps, LegendProps } from '../../../../domain/types/dashboard/user';
 
 export default function Calendar({ calendarDays }: CalendarProps) {
   const { styles, theme } = usePreferences();
 
-  // Get current month/year
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfWeek = new Date(year, month, 1).getDay();
 
-  // Build days array for grid
   const days: (number | null)[] = [];
   for (let i = 0; i < firstDayOfWeek; i++) days.push(null);
   for (let d = 1; d <= daysInMonth; d++) days.push(d);
 
-  // Color map for types
   const typeColor: Record<string, string> = {
     event: styles.status.info,
     sport: styles.status.warning,
@@ -97,7 +73,6 @@ export default function Calendar({ calendarDays }: CalendarProps) {
                 className={`group/day relative py-1.5 sm:py-2 rounded-lg ${styles.card.background} cursor-pointer transition-all duration-300 border ${styles.card.border} shadow-sm hover:shadow-md transform hover:scale-105 ${isToday ? `ring-2 ring-${styles.icon.primary.replace('text-', '')}` : ''}`}
               >
                 <span className={`text-xs sm:text-sm ${styles.textPrimary} ${isToday ? 'font-bold' : ''} relative z-10`}>{day}</span>
-                {/* Markers for each type */}
                 <div className="flex justify-center gap-0.5 mt-1">
                   {entries.map((entry, i) => (
                     <span
@@ -107,7 +82,6 @@ export default function Calendar({ calendarDays }: CalendarProps) {
                     ></span>
                   ))}
                 </div>
-                {/* Tooltip with event/sport/club titles */}
                 {entries.length > 0 && (
                   <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 hidden group-hover/day:block z-20 bg-white dark:bg-gray-900 text-xs rounded shadow-lg px-2 py-1 border border-gray-200 dark:border-gray-700">
                     {entries.map((entry, i) => (

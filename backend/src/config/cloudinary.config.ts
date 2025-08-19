@@ -27,7 +27,6 @@ const facultyStorage = new CloudinaryStorage({
     resource_type: ((req: Request, file: Express.Multer.File) => {
       const ext = file.originalname.split('.').pop()?.toLowerCase();
       const type = (['pdf', 'doc', 'docx'].includes(ext)) ? 'raw' : 'image';
-      console.log('[Cloudinary] resource_type:', type, 'for', file.originalname);
       return type;
     }) as ResourceTypeCallback,
     public_id: ((req: Request, file: Express.Multer.File) => {
@@ -35,7 +34,6 @@ const facultyStorage = new CloudinaryStorage({
       const originalName = file.originalname.split('.')[0];
       const fieldName = file.fieldname; // 'cv' or 'certificates'
       const id = `faculty_${fieldName}_${timestamp}_${originalName}`;
-      console.log('[Cloudinary] public_id:', id);
       return id;
     }) as PublicIdCallback
   } as CloudinaryStorageParams,
@@ -87,14 +85,6 @@ const assignmentSubmissionStorage = new CloudinaryStorage({
   params: ((req: Request, file: Express.Multer.File) => {
     const ext = file.originalname.split('.').pop()?.toLowerCase();
     
-    console.log('=== CLOUDINARY STORAGE PARAMS ===');
-    console.log('File extension:', ext);
-    console.log('File details:', {
-      originalname: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size
-    });
-    
     const params: CloudinaryStorageParams = {
       folder: () => 'assignment-submissions',
       allowed_formats: () => ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'],
@@ -107,10 +97,7 @@ const assignmentSubmissionStorage = new CloudinaryStorage({
         return undefined;
       }) as TransformationCallback,
     };
-    
-    console.log('Cloudinary params:', params);
-    console.log('=== CLOUDINARY STORAGE PARAMS END ===');
-    
+
     return params;
   }) as ParamsCallback,
 });
@@ -170,7 +157,7 @@ const siteSectionImageStorage = new CloudinaryStorage({
 
 const siteSectionImageUpload = multer({
   storage: siteSectionImageStorage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 5 * 1024 * 1024 }, 
   fileFilter: (req, file, cb) => {
     const allowedMimeTypes = [
       'image/jpeg',
@@ -186,7 +173,6 @@ const siteSectionImageUpload = multer({
   },
 });
 
-// Multer instances
 const facultyUpload = multer({
   storage: facultyStorage,
   limits: { fileSize: 10 * 1024 * 1024 },
@@ -203,10 +189,6 @@ const assignmentUpload = multer({
   storage: assignmentStorage,
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    console.log('Validating assignment file:', {
-      originalname: file.originalname,
-      mimetype: file.mimetype
-    });
 
     const allowedMimeTypes = [
       'application/pdf',
@@ -232,26 +214,6 @@ const assignmentSubmissionUpload = multer({
     files: 1 
   },
   fileFilter: (req, file, cb) => {
-    console.log('=== ASSIGNMENT SUBMISSION UPLOAD VALIDATION ===');
-    console.log('Complete file object:', JSON.stringify(file, null, 2));
-    console.log('File details:', {
-      originalname: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size,
-      fieldname: file.fieldname,
-      buffer: file.buffer ? `Buffer present (${file.buffer.length} bytes)` : 'No buffer',
-      stream: file.stream ? 'Stream present' : 'No stream',
-      encoding: file.encoding,
-      destination: file.destination,
-      filename: file.filename,
-      path: file.path
-    });
-
-    // Log all properties of the file object
-    console.log('All file properties:', Object.keys(file));
-    console.log('File size type:', typeof file.size);
-    console.log('File size value:', file.size);
-
     const allowedMimeTypes = [
       'application/pdf',
       'application/msword',
@@ -268,11 +230,7 @@ const assignmentSubmissionUpload = multer({
       'application/x-zip-compressed'
     ];
 
-    console.log('Checking if mimetype is allowed:', file.mimetype);
-    console.log('Allowed MIME types:', allowedMimeTypes);
-
     if (allowedMimeTypes.includes(file.mimetype)) {
-      console.log('✅ MIME type validation passed');
       cb(null, true);
     } else {
       console.error('❌ Invalid file format:', file.mimetype);
@@ -290,16 +248,6 @@ const materialUpload = multer({
   storage: materialStorage,
   limits: { fileSize: 20 * 1024 * 1024 }, 
   fileFilter: (req, file, cb) => {
-    console.log('=== MATERIAL UPLOAD DEBUG ===');
-    console.log('Request body:', req.body);
-    console.log('File fieldname:', file.fieldname);
-    console.log('File details:', {
-      originalname: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size
-    });
-    console.log('=== MATERIAL UPLOAD DEBUG END ===');
-    
     const ext = file.originalname.split('.').pop()?.toLowerCase();
     const allowedMimeTypes = [
       'application/pdf',
@@ -329,11 +277,7 @@ const admissionDocumentUpload = multer({
   storage: admissionDocumentStorage,
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    console.log('[AdmissionDocumentUpload] Validating file:', {
-      originalname: file.originalname,
-      mimetype: file.mimetype
-    });
-    
+  
     const allowedMimeTypes = [
       'application/pdf',
       'application/msword',
@@ -386,7 +330,6 @@ const contentVideoUpload = multer({
 });
 
 const contentVideoUploadWithErrorHandling = (req: Request, res: Response, next: NextFunction) => {
-  console.log('☁️ [CLOUDINARY] contentVideoUploadWithErrorHandling middleware triggered');
   req.setTimeout(60000);
   res.setTimeout(60000);
 
@@ -394,7 +337,6 @@ const contentVideoUploadWithErrorHandling = (req: Request, res: Response, next: 
   const hasFile = req.headers['content-type']?.includes('multipart/form-data');
   
   if (isUpdateRequest && !hasFile) {
-    console.log('☁️ [CLOUDINARY] Update request with no file, skipping upload middleware');
     return next();
   }
 
@@ -444,7 +386,6 @@ const contentVideoUploadWithErrorHandling = (req: Request, res: Response, next: 
         message: 'File is either missing size information or too large.'
       });
     }
-    console.log('☁️ [CLOUDINARY] Video file passed upload middleware validation');
     next();
   });
 };

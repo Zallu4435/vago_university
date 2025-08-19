@@ -37,7 +37,7 @@ const EmailOTPComponent = ({ onClose, onVerified }: EmailOTPComponentProps) => {
     try {
       await authService.sendEmailOtp(email);
       setStep('otp');
-      setTimer(30); // Start 30-second timer
+      setTimer(30);
     } catch (err: unknown) {
       let errorMsg = 'Failed to send OTP';
       if (err instanceof Error) {

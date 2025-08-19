@@ -181,8 +181,6 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               <button
                 type="submit"
                 onClick={() => {
-                  console.log('Approve button clicked!');
-                  console.log('Current form data:', formData);
                 }}
                 className="px-5 py-2.5 rounded-lg text-white flex items-center space-x-2
                            bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600

@@ -125,9 +125,7 @@ export class AssignmentController implements IAssignmentController {
 
   async reviewSubmission(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { assignmentId, submissionId } = httpRequest.params;
-    console.log(httpRequest.body, 'httpRequest.body');
-    console.log(assignmentId, 'assignmentId');
-    console.log(submissionId, 'submissionId');
+    
     const { marks, feedback, status, isLate } = httpRequest.body;
     if (!submissionId || submissionId === 'undefined') {
       return this.httpErrors.error_400();

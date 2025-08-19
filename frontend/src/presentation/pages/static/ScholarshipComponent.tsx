@@ -598,7 +598,6 @@ export default function ScholarshipComponent() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-cyan-50 via-white to-cyan-50">
-      {/* Header */}
       <div 
         className="relative text-white py-6 sm:py-8 md:py-10 px-4 sm:px-6 md:px-8 overflow-hidden"
         style={{
@@ -608,11 +607,9 @@ export default function ScholarshipComponent() {
           backgroundRepeat: 'no-repeat'
         }}
       >
-        {/* Enhanced overlay with multiple layers */}
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/90 via-blue-600/85 to-cyan-700/90"></div>
         <div className="absolute inset-0 bg-black/20"></div>
         
-        {/* Decorative elements */}
         <div className="absolute top-0 left-0 w-full h-full">
           <div className="absolute top-2 left-2 w-8 h-8 border-2 border-cyan-300/30 rounded-full"></div>
           <div className="absolute top-4 right-4 w-6 h-6 border-2 border-cyan-200/40 rounded-full"></div>
@@ -621,14 +618,12 @@ export default function ScholarshipComponent() {
         </div>
         
         <div className="relative z-10 max-w-6xl mx-auto">
-          {/* Badge/Icon */}
           <div className="flex justify-center sm:justify-start mb-2">
             <div className="bg-white/20 backdrop-blur-sm rounded-full p-2 border border-white/30">
               <FaGraduationCap className="text-lg sm:text-xl text-white" />
             </div>
           </div>
           
-          {/* Main heading with enhanced styling */}
           <div className="text-center sm:text-left">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-3 drop-shadow-2xl leading-tight">
               <span className="bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent">
@@ -638,7 +633,6 @@ export default function ScholarshipComponent() {
               <span className="text-white">SCHOLARSHIPS</span>
             </h1>
             
-            {/* Subtitle with enhanced styling */}
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-1 sm:gap-3 mb-4">
               <div className="w-8 h-0.5 bg-gradient-to-r from-cyan-300 to-blue-300 rounded-full"></div>
               <p className="text-cyan-100 text-sm sm:text-base md:text-lg font-medium drop-shadow-lg">
@@ -647,7 +641,6 @@ export default function ScholarshipComponent() {
               <div className="w-8 h-0.5 bg-gradient-to-r from-blue-300 to-cyan-300 rounded-full"></div>
             </div>
             
-            {/* Call to action button */}
             <div className="flex justify-center sm:justify-start">
               <button className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-4 py-2 rounded-full border border-white/30 font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center gap-2 text-sm">
                 <FaRocket className="text-xs" />
@@ -656,7 +649,6 @@ export default function ScholarshipComponent() {
             </div>
           </div>
           
-          {/* Stats or highlights */}
           <div className="mt-4 sm:mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3 border border-white/20 text-center">
               <div className="text-lg sm:text-xl font-bold text-white mb-1">100%</div>
@@ -675,7 +667,6 @@ export default function ScholarshipComponent() {
       </div>
 
       <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8 p-4 sm:p-6 lg:p-8">
-        {/* Mobile Menu Toggle */}
         <div className="lg:hidden">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -686,7 +677,6 @@ export default function ScholarshipComponent() {
           </button>
         </div>
 
-        {/* Sidebar Navigation */}
         <div className={`lg:w-80 bg-gradient-to-b from-cyan-50 to-white border border-cyan-100 rounded-xl shadow-md backdrop-blur-sm h-fit ${
           isMobileMenuOpen ? 'block' : 'hidden lg:block'
         }`}>
@@ -714,7 +704,6 @@ export default function ScholarshipComponent() {
           </nav>
         </div>
 
-        {/* Main Content */}
         <div className="flex-1">
           <div className="bg-white/80 rounded-xl shadow-lg border border-cyan-100 backdrop-blur-sm p-4 sm:p-6 lg:p-8">
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-cyan-800 mb-4 sm:mb-6 lg:mb-8 flex items-center gap-2 sm:gap-3">
@@ -722,7 +711,6 @@ export default function ScholarshipComponent() {
               <span className="break-words">{currentContent.title}</span>
             </h2>
 
-            {/* Info Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
               <div className="bg-white/80 rounded-xl p-4 sm:p-6 border border-cyan-100 shadow-md transform hover:-translate-y-1 transition-all duration-300">
                 <div className="flex items-center gap-2 text-cyan-800 font-semibold mb-2">
@@ -751,7 +739,6 @@ export default function ScholarshipComponent() {
               </div>
             </div>
 
-            {/* Description */}
             <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl border border-cyan-100 shadow-md backdrop-blur-sm">
               <p className="text-cyan-700 leading-relaxed mb-3 sm:mb-4 text-sm sm:text-base">
                 {activeNavItem === 'Scholarships for Freshman (Our Citizen)'
@@ -771,7 +758,6 @@ export default function ScholarshipComponent() {
               </p>
             </div>
 
-            {/* Expand All Button */}
             <div className="flex justify-end mb-4 sm:mb-6">
               <button
                 onClick={() => {
@@ -789,7 +775,6 @@ export default function ScholarshipComponent() {
               </button>
             </div>
 
-            {/* Expandable Sections */}
             <div className="space-y-3 sm:space-y-4">
               {currentContent.sections.map((section) => {
                 const Icon = section.icon;
@@ -829,7 +814,6 @@ export default function ScholarshipComponent() {
               })}
             </div>
 
-            {/* Apply Button */}
             <div className="mt-6 sm:mt-8 text-center">
               <button className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2 sm:gap-3 mx-auto">
                 <FaPaperPlane className="text-sm sm:text-base" />

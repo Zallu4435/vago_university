@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { FaFilter } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
-import { UserAccess } from '../../../../domain/types/canvas/session';
+import { Session, UserAccess } from '../../../../domain/types/canvas/session';
 import { SessionStats } from './components/SessionStats';
 import { SessionFilters } from './components/SessionFilters';
 import { SessionCard } from './components/SessionCard';
 import { calculateSessionStats } from './utils/sessionUtils';
 import { useUniversitySessionManagement } from '../../../../application/hooks/useUniversitySessionManagement';
-import { Session } from '../../faculty/sessions/types';
 
 const UniversitySessionsDashboard = () => {
   const { styles } = usePreferences();
@@ -50,19 +49,12 @@ const UniversitySessionsDashboard = () => {
     }));
   };
 
-  // Fix the syntax error and add debugging
   const uniqueInstructors = [...new Set((sessions as Session[]).map(s => s.instructor).filter(Boolean))] as string[];
   const sessionStats = { ...calculateSessionStats(sessions, userAccess.watchedSessions), watchedCount };
-
-  // Debug logging to see what data we're getting
-  console.log('Sessions data:', sessions);
-  console.log('Session stats:', sessionStats);
-  console.log('User access:', userAccess);
 
   return (
     <div className={`min-h-screen ${styles.background}`}>
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Show loading state */}
         {isLoading && (
           <div className={`${styles.card.background} rounded-2xl shadow-lg border ${styles.border} text-center py-8 mb-6`}>
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -70,7 +62,6 @@ const UniversitySessionsDashboard = () => {
           </div>
         )}
 
-        {/* Show error state */}
         {error && (
           <div className={`${styles.card.background} rounded-2xl shadow-lg border ${styles.border} text-center py-8 mb-6`}>
             <div className={`w-16 h-16 ${styles.status.error} rounded-full flex items-center justify-center mx-auto mb-4`}>
@@ -81,7 +72,6 @@ const UniversitySessionsDashboard = () => {
           </div>
         )}
 
-        {/* Show stats only when data is loaded */}
         {!isLoading && !error && (
           <SessionStats stats={sessionStats} styles={styles} />
         )}

@@ -1,5 +1,3 @@
-// Notification Management Types
-
 export interface Notification {
   _id: string;
   title: string;
@@ -66,4 +64,11 @@ export interface NotificationApiResponse {
   totalPages: number;
   currentPage: number;
   totalItems: number;
+}
+
+export interface Filters {
+  recipientType: string;
+  status: string;
+  dateRange: string;
+  search?: string;
 }

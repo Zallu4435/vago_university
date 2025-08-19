@@ -102,7 +102,6 @@ export default function FacultyNotificationSettings() {
   return (
     <div className="flex-1 p-8">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm h-full overflow-hidden">
-        {/* Header */}
         <div className="bg-gradient-to-r from-purple-50 to-slate-50 p-6 border-b border-slate-200">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center shadow-sm">
@@ -115,7 +114,6 @@ export default function FacultyNotificationSettings() {
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="px-6 py-4 border-b border-slate-200">
           <div className="flex space-x-2">
             <button
@@ -148,7 +146,6 @@ export default function FacultyNotificationSettings() {
           </div>
         </div>
 
-        {/* Content */}
         <div className="p-6">
           {activeTab === 'preferences' ? (
             <div className="space-y-6">
@@ -339,7 +336,6 @@ export default function FacultyNotificationSettings() {
             </div>
           ) : (
             <div className="space-y-4">
-              {/* Notifications Header */}
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="text-lg font-semibold text-slate-800">Recent Notifications</h3>
@@ -355,7 +351,6 @@ export default function FacultyNotificationSettings() {
                 )}
               </div>
 
-              {/* Notifications List */}
               <div
                 className="space-y-3 max-h-96 overflow-y-auto"
                 ref={scrollRef}

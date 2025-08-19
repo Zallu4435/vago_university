@@ -1,10 +1,5 @@
-import PropTypes from 'prop-types';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
-
-type CommunicationTabsProps = {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-};
+import { CommunicationTabsProps } from '../../../../domain/types/user/communication';
 
 export default function CommunicationTabs({ activeTab, setActiveTab }: CommunicationTabsProps) {
   const tabs = ['Inbox', 'Sent'];
@@ -12,7 +7,6 @@ export default function CommunicationTabs({ activeTab, setActiveTab }: Communica
 
   return (
     <div className={`relative overflow-hidden rounded-2xl shadow-xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
-      {/* Background glow */}
       <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl blur transition-all duration-300`}></div>
 
       <div className="relative z-10 flex flex-col sm:flex-row">
@@ -41,8 +35,3 @@ export default function CommunicationTabs({ activeTab, setActiveTab }: Communica
     </div>
   );
 }
-
-CommunicationTabs.propTypes = {
-  activeTab: PropTypes.string.isRequired,
-  setActiveTab: PropTypes.func.isRequired,
-};

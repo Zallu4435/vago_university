@@ -83,3 +83,30 @@ export interface ComposeMessageModalProps {
 }
 
 export type UserArrayWithUsers = User[] & { users?: User[] }; 
+
+export type TransformedMessage = {
+  id: string;
+  subject: string;
+  content: string;
+  sender?: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
+  recipients: string;
+  attachments: Array<{
+    id: string;
+    name: string;
+    url: string;
+    size: number;
+    type: string;
+  }>;
+  isBroadcast: boolean;
+  createdAt: string;
+  updatedAt: string;
+  status: 'read' | 'unread' | 'delivered' | 'opened';
+  recipientsCount: number;
+  date?: string;
+  time?: string;
+};

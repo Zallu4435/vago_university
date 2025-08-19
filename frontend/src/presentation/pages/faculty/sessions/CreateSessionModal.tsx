@@ -2,15 +2,9 @@ import { useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Session } from './types';
 import { SessionFormData, sessionSchema } from '../../../../domain/validation/management/sessionSchema';
-
-interface CreateSessionModalProps {
-  setShowCreateModal: (show: boolean) => void;
-  createSession?: (session: Session) => void;
-  editSession?: (session: Session) => void;
-  sessionToEdit?: Session | null;
-}
+import { CreateSessionModalProps } from '../../../../domain/types/faculty/session';
+import { VideoSession } from '../../../../application/services/session.service';
 
 export default function CreateSessionModal({ setShowCreateModal, createSession, editSession, sessionToEdit }: CreateSessionModalProps) {
   const isEditMode = !!sessionToEdit;
@@ -78,15 +72,13 @@ export default function CreateSessionModal({ setShowCreateModal, createSession, 
     const startTime = new Date(`${data.date}T${data.time}`).toISOString();
     const maxAttendeesNum = parseInt(data.maxAttendees);
 
-    const sessionPayload: Session = {
-      id: sessionToEdit?.id || Date.now(),
+    const sessionPayload: VideoSession = {
+      id: sessionToEdit?.id || Date.now().toString(),
       title: data.title,
       instructor: data.instructor,
       course: data.course,
-      date: data.date,
-      time: data.time,
       startTime,
-      duration: data.duration,
+      duration: data.duration ? Number(data.duration) : undefined,
       maxAttendees: maxAttendeesNum,
       description: data.description || '',
       tags: data.tags ? data.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
@@ -97,6 +89,11 @@ export default function CreateSessionModal({ setShowCreateModal, createSession, 
       recordingUrl: sessionToEdit?.recordingUrl,
       attendees: sessionToEdit?.attendees || 0,
       attendeeList: sessionToEdit?.attendeeList || [],
+      _id: sessionToEdit?._id.toString() || Date.now().toString(),
+      endTime: sessionToEdit?.endTime,
+      hostId: sessionToEdit?.hostId,
+      createdAt: sessionToEdit?.createdAt,
+      updatedAt: sessionToEdit?.updatedAt,
     };
 
     if (isEditMode && editSession) {
@@ -116,7 +113,6 @@ export default function CreateSessionModal({ setShowCreateModal, createSession, 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 w-full max-w-2xl max-h-[90vh] flex flex-col mx-4">
-        {/* Header */}
         <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 rounded-t-3xl flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
@@ -132,9 +128,7 @@ export default function CreateSessionModal({ setShowCreateModal, createSession, 
           </div>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
-          {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             <div className="relative group animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
@@ -277,7 +271,6 @@ export default function CreateSessionModal({ setShowCreateModal, createSession, 
             </div>
           </div>
 
-          {/* Footer */}
           <div className="bg-gray-50/80 backdrop-blur-sm p-6 rounded-b-3xl border-t border-gray-100/50 flex-shrink-0">
             <div className="flex justify-end space-x-3">
               <button

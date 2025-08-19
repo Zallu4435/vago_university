@@ -18,7 +18,7 @@ export interface Event {
   registrationRequired: boolean;
   createdAt: string;
   organizer: string;
-  // Additional properties for modal display
+
   _id?: string;
   _title?: string;
   _date?: string;
@@ -54,7 +54,7 @@ export interface EventRequest {
   requestedAt: string;
   description: string;
   expectedParticipants: number;
-  // Additional properties for modal display
+
   _id?: string;
   _title?: string;
   _date?: string;
@@ -95,7 +95,6 @@ export interface EventRequestsApiResponse {
   };
 }
 
-// New type for event service response
 export interface EventServiceResponse {
   events: Event[];
   totalPages: number;
@@ -103,7 +102,6 @@ export interface EventServiceResponse {
   totalItems: number;
 }
 
-// New type for event requests service response
 export interface EventRequestsServiceResponse {
   eventRequests: EventRequest[];
   totalPages: number;
@@ -111,7 +109,6 @@ export interface EventRequestsServiceResponse {
   totalItems: number;
 }
 
-// API Response wrappers for single items
 export interface EventApiResponseSingle {
   data: {
     event: Event;
@@ -124,12 +121,10 @@ export interface EventRequestApiResponseSingle {
   };
 }
 
-// Event Status Types
 export type EventStatus = 'upcoming' | 'completed' | 'cancelled' | 'pending' | 'approved' | 'rejected';
 export type EventType = 'academic' | 'cultural' | 'sports' | 'social' | 'workshop' | 'conference' | 'seminar';
 export type OrganizerType = 'department' | 'club' | 'student' | 'faculty' | 'admin';
 
-// Event Management Modal Types
 export interface EventDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -147,7 +142,6 @@ export interface EventDetailsInfoCardProps {
   value: string;
 }
 
-// Event Form Types
 export interface EventFormData {
   title: string;
   date: string;
@@ -175,7 +169,6 @@ export interface AddEventModalProps {
   isEditing?: boolean;
 }
 
-// Event Action Types
 export interface EventAction {
   id: string;
   type: 'event' | 'request';
@@ -190,7 +183,6 @@ export interface EventActionConfig {
   disabled?: boolean | ((item: Event | EventRequest) => boolean);
 }
 
-// Event Column Types
 export interface EventColumn {
   header: string;
   key: string;
@@ -198,7 +190,6 @@ export interface EventColumn {
   width?: string;
 }
 
-// Event Filter Types
 export interface EventFilters {
   status?: EventStatus;
   type?: EventType;
@@ -210,7 +201,6 @@ export interface EventFilters {
   search?: string;
 }
 
-// Events Management Types
 export interface Filters {
   [key: string]: string;
   eventType: string;
@@ -224,7 +214,6 @@ export interface ItemToAction {
   action: 'delete' | 'reject' | 'approve';
 }
 
-// Event Request Details Types
 export interface EventRequestDetails {
   id: string;
   status: EventStatus;
@@ -292,7 +281,6 @@ export interface EventRequestDetailsInfoCardProps {
   highlight?: boolean;
 }
 
-// Particle Animation Types
 export interface ParticleConfig {
   size: number;
   top: number;
@@ -301,7 +289,6 @@ export interface ParticleConfig {
   animDelay: number;
 }
 
-// Event Statistics Types
 export interface EventStats {
   totalEvents: number;
   upcomingEvents: number;
@@ -311,7 +298,6 @@ export interface EventStats {
   averageParticipants: number;
 }
 
-// Event Registration Types
 export interface EventRegistration {
   id: string;
   eventId: string;
@@ -329,7 +315,6 @@ export interface EventRegistrationProps {
   userEmail: string;
 }
 
-// Form Option Types
 export interface TimeframeOption {
   value: string;
   label: string;
@@ -356,3 +341,10 @@ export interface IconOption {
 export interface ColorOption {
   color: string;
 } 
+
+export interface Filters {
+  eventType: string;
+  dateRange: string;
+  status: string;
+  organizerType: string;
+}

@@ -28,7 +28,6 @@ class ApplicationService {
   async getApplicationById(userId: string): Promise<FormData | null> {
     try {
       const response = await applicationController.getApplicationById(userId);
-      console.log(response, "popopopo")
       return response?.data?.draft
     } catch (error: unknown) {
       if (isAxiosErrorWithApiError(error)) {

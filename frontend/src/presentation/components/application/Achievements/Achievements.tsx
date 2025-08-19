@@ -57,14 +57,12 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getVal
         hasNoAchievements: !!initialData.hasNoAchievements,
         questions: initialData.questions || { 1: '', 2: '', 3: '', 4: '', 5: '' }
       }, { keepDirty: false });
-      console.log('Achievements: Initialized with data:', initialData);
     }
   }, [initialData, reset]);
 
   useImperativeHandle(ref, () => ({
     trigger: async () => {
       const isValid = await trigger(['questions', 'achievements', 'hasNoAchievements'], { shouldFocus: true });
-      console.log('Achievements: trigger called. isValid:', isValid, 'Current achievements:', achievementData.achievements);
       if (isValid) {
         methods.clearErrors();
       }
@@ -76,7 +74,6 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getVal
   const handleAnswerChange = (questionId: number, value: string) => {
     const maxLength = questions.find(q => q.id === questionId)?.maxLength || 1000;
     if (value.length <= maxLength) {
-      console.log('Achievements: handleAnswerChange', { questionId, value });
       setValue('questions', { ...achievementData.questions, [questionId]: value }, { shouldValidate: false, shouldDirty: true });
     }
   };
@@ -91,7 +88,6 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getVal
 
   const handleRemoveAchievement = (index: number) => {
     const newAchievements = (achievementData.achievements || []).filter((_, i) => i !== index);
-    console.log('Removing achievement at index', index, 'New achievements:', newAchievements);
     setValue('achievements', newAchievements, { shouldValidate: false });
   };
 
@@ -216,19 +212,16 @@ export const Achievements = forwardRef<{ trigger: () => Promise<boolean>, getVal
           }}
           onSubmit={async () => {
             const isValid = await trigger(['achievements'], { shouldFocus: true });
-            console.log('AchievementModal: Validation result', { isValid, errors, newAchievement });
             if (!isValid) {
               return;
             }
 
             const currentAchievements = [...(achievementData.achievements || [])];
-            console.log('Adding/editing achievement:', newAchievement, 'at index', editingIndex);
             if (editingIndex !== null && editingIndex !== undefined) {
               currentAchievements[editingIndex] = newAchievement;
             } else if (currentAchievements.length < 4) {
               currentAchievements.push(newAchievement);
             }
-            console.log('Updated achievements array:', currentAchievements);
             setValue('achievements', currentAchievements, { shouldValidate: false });
             setShowModal(false);
             resetModalFields();

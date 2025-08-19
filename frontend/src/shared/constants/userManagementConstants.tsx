@@ -1,4 +1,5 @@
-import { FiUser, FiMail, FiBook} from 'react-icons/fi';
+import { FiUser, FiMail, FiBook, FiClock, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import { FaHandHoldingUsd } from 'react-icons/fa';
 import { User } from '../../domain/types/management/usermanagement';
 
 export const PROGRAMS = [
@@ -57,16 +58,54 @@ export const userColumns = [
       </div>
     ),
   },
-  // The following columns should be injected with functions from the component
   {
     header: 'Applied On',
     key: 'createdAt',
-    render: undefined, // Replace in component with a function using formatDate
+    render: undefined,
   },
   {
     header: 'Status',
     key: 'status',
-    render: undefined, // Replace in component with a function rendering status
+    render: undefined,
   },
 ];
 
+export const StatusBadge = ({ status }: { status: string }) => {
+  const statusConfig = {
+    pending: {
+      icon: <FiClock size={14} className="mr-1" />,
+      bgColor: 'bg-yellow-100',
+      textColor: 'text-yellow-800',
+      label: 'Pending',
+    },
+    approved: {
+      icon: <FiCheckCircle size={14} className="mr-1" />,
+      bgColor: 'bg-green-100',
+      textColor: 'text-green-800',
+      label: 'Approved',
+    },
+    rejected: {
+      icon: <FiXCircle size={14} className="mr-1" />,
+      bgColor: 'bg-red-100',
+      textColor: 'text-red-800',
+      label: 'Rejected',
+    },
+    offered: {
+      icon: <FaHandHoldingUsd size={14} className="mr-1" />,
+      bgColor: 'bg-blue-100',
+      textColor: 'text-blue-800',
+      label: 'Offered',
+    },
+  };
+
+  const { icon, bgColor, textColor, label } = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
+
+  return (
+    <span
+      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${bgColor} ${textColor} shadow-sm`}
+    >
+      {icon}
+      {label}
+    </span>
+  );
+};

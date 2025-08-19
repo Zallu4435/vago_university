@@ -88,12 +88,6 @@ import {
           const { id } = httpRequest.params;
           const { title, duration, module, status, description, videoUrl, category } = httpRequest.body;
           const videoFile = httpRequest.file;
-          console.log('🎯 [Controller] updateVideo called', {
-            id,
-            hasFile: !!videoFile,
-            bodyKeys: Object.keys(httpRequest.body || {}),
-            contentType: httpRequest.headers?.['content-type']
-          });
           if (!id) {
               return this.httpErrors.error_400();
           }
@@ -108,14 +102,6 @@ import {
               category,
               videoFile
           };
-          console.log('🧾 [Controller] updateVideo requestDTO', {
-            id: requestDTO.id,
-            module: requestDTO.module,
-            status: requestDTO.status,
-            hasVideoFile: !!requestDTO.videoFile,
-            hasVideoUrl: !!requestDTO.videoUrl,
-            category: requestDTO.category
-          });
           const result = await this.updateVideoUseCase.execute(requestDTO);
           if (!result.success) {
               return this.httpErrors.error_400();

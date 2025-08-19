@@ -43,7 +43,6 @@ export const DiplomaCard: React.FC<DiplomaCardProps> = ({
       onClick={() => onViewDetails(course)}
       aria-label={`View details for ${course.title}`}
     >
-      {/* Card Header with Icon */}
       <div className="relative p-6 pb-4">
         <div className="flex items-center justify-between mb-4">
           <div className={`w-14 h-14 rounded-xl ${styles.accent} flex items-center justify-center ${styles.textPrimary} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
@@ -58,7 +57,6 @@ export const DiplomaCard: React.FC<DiplomaCardProps> = ({
           </span>
         </div>
         
-        {/* Course Title and Description */}
         <h3 className={`text-xl font-bold ${styles.textPrimary} mb-3 group-hover:${styles.accent} transition-colors duration-300 line-clamp-2`}>
           {course.title}
         </h3>
@@ -66,7 +64,6 @@ export const DiplomaCard: React.FC<DiplomaCardProps> = ({
           {course.description}
         </p>
         
-        {/* Course Meta Information */}
         <div className="flex flex-wrap items-center gap-3 text-xs mb-4">
           {displayInstructor && (
             <div className="flex items-center gap-1.5">
@@ -80,7 +77,6 @@ export const DiplomaCard: React.FC<DiplomaCardProps> = ({
           </div>
         </div>
 
-        {/* Video Count and Progress Section */}
         {validTotalVideos > 0 && (
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
@@ -92,7 +88,6 @@ export const DiplomaCard: React.FC<DiplomaCardProps> = ({
               </span>
             </div>
             
-            {/* Progress Bar */}
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
               <div
                 className={`h-2.5 rounded-full transition-all duration-1000 ease-out ${progressColor} shadow-sm`}
@@ -102,7 +97,6 @@ export const DiplomaCard: React.FC<DiplomaCardProps> = ({
           </div>
         )}
 
-        {/* Course Stats */}
         <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
           <span className="font-medium">
             {validTotalVideos} {validTotalVideos === 1 ? 'video' : 'videos'}
@@ -113,7 +107,6 @@ export const DiplomaCard: React.FC<DiplomaCardProps> = ({
         </div>
       </div>
 
-      {/* Action Button */}
       <div className="px-6 pb-6">
         <button
           className={`w-full py-3.5 px-6 rounded-xl font-semibold transition-all duration-300 text-sm ${

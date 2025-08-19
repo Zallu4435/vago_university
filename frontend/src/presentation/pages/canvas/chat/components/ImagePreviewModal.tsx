@@ -1,11 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { FiX } from 'react-icons/fi';
-
-interface ImagePreviewModalProps {
-  imageUrl: string;
-  onClose: () => void;
-}
+import { ImagePreviewModalProps } from '../../../../../domain/types/canvas/chat';
 
 export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({ imageUrl, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -26,7 +22,6 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({ imageUrl, 
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleEscape);
 
-    // Prevent background scrolling
     const originalOverflow = window.getComputedStyle(document.body).overflow;
     const originalPosition = window.getComputedStyle(document.body).position;
     const originalWidth = window.getComputedStyle(document.body).width;

@@ -52,12 +52,10 @@ export const useUserAssignments = () => {
     }
   });
 
-  // Handle file selection
   const handleFileSelect = useCallback((assignmentId: string, file: File) => {
     setSelectedFile(prev => ({ ...prev, [assignmentId]: file }));
   }, []);
 
-  // Handle assignment submission
   const handleSubmit = useCallback(async (assignmentId: string) => {
     const file = selectedFile[assignmentId];
     if (!file) {
@@ -79,7 +77,6 @@ export const useUserAssignments = () => {
     }
   }, [selectedFile, submitAssignmentMutation]);
 
-  // Get assignment status
   const getAssignmentStatus = useCallback(async (assignmentId: string) => {
     try {
       const status = await userAssignmentService.getAssignmentStatus(assignmentId);
@@ -90,7 +87,6 @@ export const useUserAssignments = () => {
     }
   }, []);
 
-  // Get assignment feedback
   const getAssignmentFeedback = useCallback(async (assignmentId: string) => {
     try {
       const feedback = await userAssignmentService.getAssignmentFeedback(assignmentId);
@@ -102,19 +98,16 @@ export const useUserAssignments = () => {
   }, []);
 
   return {
-    // State
     assignments: assignments || [],
     selectedFile,
     error,
     isLoading: isLoadingAssignments || submitAssignmentMutation.isPending,
 
-    // Handlers for UI
     handleFileSelect,
     handleSubmit,
     getAssignmentStatus,
     getAssignmentFeedback,
 
-    // Filter/search/sort/page state and setters
     searchTerm,
     setSearchTerm,
     filterStatus,
@@ -125,7 +118,6 @@ export const useUserAssignments = () => {
     setCurrentPage,
     itemsPerPage,
 
-    // Mutations
     isSubmitting: submitAssignmentMutation.isPending
   };
 }; 

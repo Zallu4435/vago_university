@@ -16,36 +16,20 @@ import AddClubModal from './AddClubModal';
 import ClubDetailsModal from './ClubDetailsModal';
 import ClubRequestDetailsModal from './ClubRequestDetailsModal';
 import { useClubManagement } from '../../../../../application/hooks/useClubManagement';
-import { Club, ClubRequest } from '../../../../../domain/types/club';
-import { ClubActionConfig, ClubFormData } from '../../../../../domain/types/management/clubmanagement';
+import { Club, ClubRequest } from '../../../../../domain/types/management/clubmanagement';
+import { ClubActionConfig, ClubFormData, ItemAction } from '../../../../../domain/types/management/clubmanagement';
 import { 
   adaptDomainClubToManagement, 
   adaptDomainClubRequestToManagement,
   adaptToClubRequestDetails,
   isDomainClub,
   isDomainClubRequest 
-} from '../../../../../domain/types/clubTypeAdapter';
-import { CATEGORIES, CLUB_STATUSES, REQUEST_STATUSES, DATE_RANGES, ICONS, COLORS, clubColumns, clubRequestColumns } from '../../../../../shared/constants/clubManagementConstants';
+} from '../../../../../domain/adapters/clubTypeAdapter';
+import { CATEGORIES, CLUB_STATUSES, REQUEST_STATUSES, DATE_RANGES, ICONS, COLORS, clubColumns, clubRequestColumns, isAxiosErrorWithApiError } from '../../../../../shared/constants/clubManagementConstants';
 import LoadingSpinner from '../../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../../shared/components/ErrorMessage';
-import { AxiosError } from 'axios';
 import { ClubRequestDetails } from '../../../../../domain/types/management/clubmanagement';
 
-interface ApiErrorResponse {
-  error?: string;
-  message?: string;
-  [key: string]: unknown;
-}
-
-interface ItemAction {
-  id: string;
-  type: 'club' | 'request';
-  action: 'delete' | 'reject' | 'approve';
-}
-
-function isAxiosErrorWithApiError(error: unknown): error is AxiosError<ApiErrorResponse> {
-  return (error as AxiosError).isAxiosError !== undefined;
-}
 
 const AdminClubManagement: React.FC = () => {
   const {
@@ -488,7 +472,7 @@ const AdminClubManagement: React.FC = () => {
                 role: selectedClub.role,
                 nextMeeting: selectedClub.nextMeeting,
                 about: selectedClub.about,
-                createdBy: selectedClub.createdBy || '',
+                createdBy: isClub(selectedClub) ? selectedClub.createdBy || '' : selectedClub.requestedBy || '',
                 upcomingEvents: selectedClub.upcomingEvents,
               }
             : undefined

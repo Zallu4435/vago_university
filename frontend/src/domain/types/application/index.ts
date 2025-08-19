@@ -1,3 +1,6 @@
+import { getThemeStyles } from "../../../frameworks/config/themeConfig";
+import { ThemeType } from "../config/types";
+
 export interface PersonalInfo {
     salutation: string;
     fullName: string;
@@ -287,14 +290,14 @@ export interface StepIndicatorProps {
 }
 
 export interface OtherInfoProps {
-    initialData?: unknown; 
-    onSave: (data: unknown) => void; 
+    initialData?: unknown;
+    onSave: (data: unknown) => void;
 }
 
 export interface ProgrammeModalProps {
     showModal: boolean;
     onClose: () => void;
-    onSubmit: (data: unknown) => void; 
+    onSubmit: (data: unknown) => void;
     choices: { programme: string; preferredMajor: string }[];
 }
 
@@ -320,14 +323,62 @@ export interface AchievementQuestionsProps {
 }
 
 export interface PaymentResult {
-  paymentId: string;
-  status: string;
-  message?: string;
-  clientSecret?: string;
-  stripePaymentIntentId?: string;
+    paymentId: string;
+    status: string;
+    message?: string;
+    clientSecret?: string;
+    stripePaymentIntentId?: string;
 }
 
 export interface SubmissionResult {
-  message: string;
-  admission: unknown;
-} 
+    message: string;
+    admission: unknown;
+}
+
+export interface AdmissionFormContextType {
+    formData: FormData;
+    updateFormData: (data: Partial<FormData>) => void;
+}
+
+export interface ApplicationIdContextType {
+    applicationId: string | null;
+    setApplicationId: (id: string) => void;
+    resetApplicationId: () => void;
+}
+
+export interface ApplicationIdProviderProps {
+    children: React.ReactNode;
+}
+
+export interface PreferencesContextType {
+    theme: ThemeType;
+    setTheme: (theme: ThemeType) => void;
+    fontSize: number;
+    setFontSize: (size: number) => void;
+    resetPreferences: () => void;
+    styles: ReturnType<typeof getThemeStyles>;
+}
+
+export interface ApplicationResponse {
+    data: {
+        draft: FormData | null;
+    };
+}
+
+
+export interface DocumentUploadResult {
+    url: string;
+    publicId: string;
+    fileName: string;
+    fileType: string;
+}
+
+export interface MultipleDocumentUploadResult {
+    documents: DocumentUploadResult[];
+}
+
+export interface DocumentViewResult {
+    pdfData: string;
+    fileName: string;
+    fileType: string;
+}

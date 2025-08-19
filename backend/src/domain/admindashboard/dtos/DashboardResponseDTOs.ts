@@ -25,4 +25,9 @@ export interface DismissAlertResponseDTO {
 export interface MarkActivityAsReadResponseDTO {
   success: boolean;
   message: string;
-} 
+}
+
+export interface ResponseDTO<T> {
+  data: T | { error: string };
+  success: boolean;
+}

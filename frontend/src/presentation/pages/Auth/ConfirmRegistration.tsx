@@ -17,9 +17,7 @@ const ConfirmRegistration = () => {
         if (!token) {
           throw new Error('Invalid confirmation link: Token is missing');
         }
-
-        console.log('Confirming registration with token:', token);
-        
+                
         const response = await authService.confirmRegistration(token);
         setStatus('success');
         setMessage(response.message || 'Email confirmed successfully. You can now log in.');

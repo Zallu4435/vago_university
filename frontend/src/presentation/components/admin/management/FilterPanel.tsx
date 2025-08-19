@@ -5,28 +5,7 @@ import {
   FiX,
   FiCalendar,
 } from 'react-icons/fi';
-
-interface Filters {
-  [key: string]: string | undefined;
-}
-
-interface FilterPanelProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  filterOpen: boolean;
-  setFilterOpen: (open: boolean) => void;
-  filters: Filters;
-  filterOptions: {
-    [key: string]: string[];
-  };
-  debouncedFilterChange: (field: string, value: string) => void;
-  customDateRange?: {
-    startDate: string;
-    endDate: string;
-  };
-  handleCustomDateChange?: (field: 'startDate' | 'endDate', value: string) => void;
-  handleResetFilters: () => void;
-}
+import { FilterPanelProps } from '../../../../domain/types/management';
 
 const FilterPanel: React.FC<FilterPanelProps> = ({
   filterOpen,

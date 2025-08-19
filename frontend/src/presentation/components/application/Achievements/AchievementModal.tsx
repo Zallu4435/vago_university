@@ -27,11 +27,10 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({
 
   const handleSubmit = async () => {
     const isValid = await trigger(['newAchievement'], { shouldFocus: true });
-    console.log('AchievementModal: Validation result', { isValid, errors, newAchievement });
     if (isValid) {
       onSubmit();
     } else {
-      console.log('AchievementModal: Validation errors', {
+      console.error('AchievementModal: Validation errors', {
         achievementErrors: errors.newAchievement,
         referenceErrors: getNestedError(errors, 'newAchievement.reference'),
       });

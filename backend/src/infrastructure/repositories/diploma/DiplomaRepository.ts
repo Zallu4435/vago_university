@@ -42,7 +42,6 @@ export class DiplomaRepository implements IDiplomaRepository {
       if (dateRange === 'custom' && startDate && endDate) {
         startDate = new Date(startDate);
         endDate = new Date(endDate);
-        // Set endDate to end of day
         endDate.setHours(23, 59, 59, 999);
       } else {
         endDate = now;

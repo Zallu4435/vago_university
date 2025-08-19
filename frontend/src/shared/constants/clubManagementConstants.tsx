@@ -1,9 +1,22 @@
 import {
   IoBusinessOutline as Building,
   IoPersonOutline as User,
+  IoStarOutline as Star,
 } from 'react-icons/io5';
-import { Club, ClubRequest, ClubColumn } from '../../domain/types/management/clubmanagement';
+import {
+  Club,
+  ClubRequest,
+  ClubColumn,
+  StatusBadgeProps,
+  InfoCardProps,
+  ApiErrorResponse,
+  ClubRequestDetailsStatusBadgeProps,
+  ClubRequestDetailsInfoCardProps,
+  StatusType,
+  ParticleConfig
+} from '../../domain/types/management/clubmanagement';
 import { formatDate } from '../utils/dateUtils';
+import { AxiosError } from 'axios';
 
 export const CATEGORIES = ['All', 'Tech', 'Cultural', 'Sports', 'Arts', 'Academic'];
 export const CLUB_STATUSES = ['All', 'Active', 'Inactive'];
@@ -92,8 +105,8 @@ export const clubColumns: ClubColumn[] = [
       return (
         <span
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${club.status.toLowerCase() === 'active'
-              ? 'bg-green-900/30 text-green-400 border-green-500/30'
-              : 'bg-red-900/30 text-red-400 border-red-500/30'
+            ? 'bg-green-900/30 text-green-400 border-green-500/30'
+            : 'bg-red-900/30 text-red-400 border-red-500/30'
             }`}
         >
           <span
@@ -163,10 +176,10 @@ export const clubRequestColumns: ClubColumn[] = [
       return (
         <span
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${request.status.toLowerCase() === 'pending'
-              ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
-              : request.status.toLowerCase() === 'approved'
-                ? 'bg-green-900/30 text-green-400 border-green-500/30'
-                : 'bg-red-900/30 text-red-400 border-red-500/30'
+            ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
+            : request.status.toLowerCase() === 'approved'
+              ? 'bg-green-900/30 text-green-400 border-green-500/30'
+              : 'bg-red-900/30 text-red-400 border-red-500/30'
             }`}
         >
           <span
@@ -178,4 +191,118 @@ export const clubRequestColumns: ClubColumn[] = [
       );
     },
   },
-]; 
+];
+
+
+
+export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
+  const statusConfig: Record<string, { bg: string; text: string; border: string }> = {
+    active: {
+      bg: 'bg-green-600/30',
+      text: 'text-green-100',
+      border: 'border-green-500/50',
+    },
+    inactive: {
+      bg: 'bg-red-600/30',
+      text: 'text-red-100',
+      border: 'border-red-500/50',
+    },
+    pending: {
+      bg: 'bg-yellow-600/30',
+      text: 'text-yellow-100',
+      border: 'border-yellow-500/50',
+    },
+    approved: {
+      bg: 'bg-green-600/30',
+      text: 'text-green-100',
+      border: 'border-green-500/50',
+    },
+    rejected: {
+      bg: 'bg-red-600/30',
+      text: 'text-red-100',
+      border: 'border-red-500/50',
+    },
+  };
+
+  const config = statusConfig[status?.toLowerCase()] || statusConfig.pending;
+
+  return (
+    <span
+      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.bg} ${config.text} ${config.border}`}
+    >
+      {status?.charAt(0).toUpperCase() + status?.slice(1)}
+    </span>
+  );
+};
+
+export const InfoCard: React.FC<InfoCardProps> = ({ icon: Icon, label, value }) => (
+  <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
+    <div className="flex items-center mb-2">
+      <Icon size={18} className="text-purple-300" />
+      <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
+    </div>
+    <p className="text-white font-semibold">{value || 'N/A'}</p>
+  </div>
+);
+
+
+export function isAxiosErrorWithApiError(error: unknown): error is AxiosError<ApiErrorResponse> {
+  return (error as AxiosError).isAxiosError !== undefined;
+}
+
+
+export const RequestStatusBadge: React.FC<ClubRequestDetailsStatusBadgeProps> = ({ status }) => {
+  const statusConfig: Record<StatusType, { bg: string; text: string; border: string }> = {
+    pending: {
+      bg: 'bg-yellow-600/30',
+      text: 'text-yellow-100',
+      border: 'border-yellow-500/50',
+    },
+    approved: {
+      bg: 'bg-green-600/30',
+      text: 'text-green-100',
+      border: 'border-green-500/50',
+    },
+    rejected: {
+      bg: 'bg-red-600/30',
+      text: 'text-red-100',
+      border: 'border-red-500/50',
+    },
+  };
+
+  const config = statusConfig[status] || statusConfig.pending;
+
+  return (
+    <span
+      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.bg} ${config.text} ${config.border}`}
+    >
+      {status.charAt(0).toUpperCase() + status.slice(1)}
+    </span>
+  );
+};
+
+export const RequestInfoCard: React.FC<ClubRequestDetailsInfoCardProps> = ({ icon: Icon, label, value, highlight = false }) => {
+  return (
+    <div
+      className={`bg-gray-800/80 border border-purple-500/30 rounded-lg p-4 shadow-sm ${highlight ? 'ring-2 ring-purple-500/20 shadow-lg' : ''
+        }`}
+    >
+      <div className="flex items-center mb-2">
+        <Icon size={18} className="text-purple-300" />
+        <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
+        {highlight && <Star size={14} className="ml-auto text-purple-300" />}
+      </div>
+      <p className="text-white font-semibold">{value || 'N/A'}</p>
+    </div>
+  );
+};
+
+export const ghostParticles: ParticleConfig[] = Array(30)
+  .fill(0)
+  .map((_) => ({
+    size: Math.random() * 10 + 5,
+    top: Math.random() * 100,
+    left: Math.random() * 100,
+    animDuration: Math.random() * 10 + 15,
+    animDelay: Math.random() * 5,
+  }));

@@ -5,6 +5,7 @@ import { CourseFormProps } from '../../../../domain/types/management/coursemanag
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { courseSchema, CourseFormData } from '../../../../domain/validation/management/courseSchema';
+import { ghostParticles } from '../../../../shared/constants/courseManagementConstants';
 
 const CourseForm: React.FC<CourseFormProps> = ({
   isOpen,
@@ -66,22 +67,6 @@ const CourseForm: React.FC<CourseFormProps> = ({
   };
 
   if (!isOpen) return null;
-
-  const ghostParticles: {
-    size: number;
-    top: number;
-    left: number;
-    animDuration: number;
-    animDelay: number;
-  }[] = Array(30)
-    .fill(0)
-    .map((_) => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">

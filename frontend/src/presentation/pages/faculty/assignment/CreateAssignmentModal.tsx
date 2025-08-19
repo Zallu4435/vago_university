@@ -1,20 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FaUpload, FaTimes, FaFile } from 'react-icons/fa';
 import { FiEye } from 'react-icons/fi';
-import { NewAssignment, Assignment } from './types/index';
 import httpClient from '../../../../frameworks/api/httpClient';
-
-interface CreateAssignmentModalProps {
-  newAssignment: NewAssignment;
-  setNewAssignment: (assignment: NewAssignment) => void;
-  setShowCreateModal: (show: boolean) => void;
-  onSubmit: (assignment: NewAssignment) => Promise<{ success: boolean; error?: string }>;
-  isLoading: boolean;
-  selectedAssignment: Assignment | null;
-  onUpdate?: (id: string, data: Partial<Omit<Assignment, 'files'>> & { files?: File[] }) => Promise<{ success: boolean; error?: string }>;
-  setActiveTab: (tab: string) => void;
-  setSelectedAssignment: (assignment: Assignment | null) => void;
-}
+import { CreateAssignmentModalProps } from '../../../../domain/types/faculty/assignment';
 
 export default function CreateAssignmentModal({
   newAssignment,
@@ -28,13 +16,11 @@ export default function CreateAssignmentModal({
   setSelectedAssignment
 }: CreateAssignmentModalProps) {
 
-  console.log(selectedAssignment, "selectedassoignment")
   const [error, setError] = useState('');
   const [existingFiles, setExistingFiles] = useState<Array<{ fileName: string; fileUrl: string; fileSize: number; _id: string }>>([]);
 
   useEffect(() => {
     if (selectedAssignment) {
-      // Format the date to YYYY-MM-DD for the input
       const formattedDate = new Date(selectedAssignment.dueDate).toISOString().split('T')[0];
 
       setNewAssignment({
@@ -43,9 +29,9 @@ export default function CreateAssignmentModal({
         dueDate: formattedDate,
         maxMarks: selectedAssignment.maxMarks.toString(),
         description: selectedAssignment.description,
-        files: [] // We'll handle existing files separately
+        files: [] 
       });
-      // Set existing files
+
       if (selectedAssignment.files && Array.isArray(selectedAssignment.files)) {
         setExistingFiles(selectedAssignment.files.map((file) => {
           if (typeof file === 'string') {
@@ -131,7 +117,6 @@ export default function CreateAssignmentModal({
         setError(result.error || 'Failed to update assignment');
       }
     } else {
-      // Create new assignment
       const result = await onSubmit(newAssignment);
       if (result.success) {
         setShowCreateModal(false);
@@ -151,17 +136,14 @@ export default function CreateAssignmentModal({
     setError('');
   };
 
-  // Handler to view assignment file as PDF in a new tab
   const handleViewAssignmentFile = async (fileUrl: string, fileName: string) => {
     if (!fileName || !selectedAssignment?._id) return;
     try {
-      // Call the backend to get the base64 PDF data
       const response = await httpClient.get(`/faculty/assignments/${selectedAssignment._id}/files/view`, {
         params: { fileName },
       });
       const pdfData = response.data.data.pdfData;
       if (pdfData) {
-        // Decode base64 and open as PDF
         const byteCharacters = atob(pdfData);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -173,11 +155,9 @@ export default function CreateAssignmentModal({
         window.open(url, '_blank', 'noopener,noreferrer');
         setTimeout(() => window.URL.revokeObjectURL(url), 1000);
       } else {
-        // Fallback: open the direct URL
         window.open(fileUrl, '_blank', 'noopener,noreferrer');
       }
     } catch (error) {
-      // Fallback: open the direct URL
       window.open(fileUrl, '_blank', 'noopener,noreferrer');
     }
   };
@@ -185,7 +165,6 @@ export default function CreateAssignmentModal({
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 w-full max-w-2xl max-h-[90vh] flex flex-col mx-4">
-        {/* Header */}
         <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 rounded-t-3xl">
           <div className="flex items-center justify-between">
             <div>
@@ -206,7 +185,6 @@ export default function CreateAssignmentModal({
           </div>
         </div>
 
-        {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm animate-fadeInUp">
@@ -282,7 +260,6 @@ export default function CreateAssignmentModal({
           <div className="space-y-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">Reference Materials</label>
 
-            {/* Existing Files */}
             {existingFiles.length > 0 && (
               <div className="mb-4">
                 <h4 className="text-sm font-medium text-gray-700 mb-2">Current Files:</h4>
@@ -310,7 +287,6 @@ export default function CreateAssignmentModal({
               </div>
             )}
 
-            {/* File Upload Area */}
             <div
               className="relative border-2 border-dashed border-pink-300 rounded-2xl p-6 text-center transition-all bg-pink-50/80 hover:bg-pink-100/80"
               onDragOver={handleDragOver}
@@ -342,7 +318,6 @@ export default function CreateAssignmentModal({
           </div>
         </div>
 
-        {/* Footer */}
         <div className="p-6 border-t border-gray-100">
           <div className="flex justify-end space-x-3">
             <button

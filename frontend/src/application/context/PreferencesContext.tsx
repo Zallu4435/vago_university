@@ -1,15 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getThemeStyles } from '../../frameworks/config/themeConfig';
 import { ThemeType } from '../../domain/types/config/types';
-
-interface PreferencesContextType {
-  theme: ThemeType;
-  setTheme: (theme: ThemeType) => void;
-  fontSize: number;
-  setFontSize: (size: number) => void;
-  resetPreferences: () => void;
-  styles: ReturnType<typeof getThemeStyles>;
-}
+import { PreferencesContextType } from '../../domain/types/application';
 
 const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);
 

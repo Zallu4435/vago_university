@@ -1,42 +1,5 @@
+import { AssignmentPerformanceData, DashboardStats, FacultyDashboardData, RecentActivity, SessionDistributionData, WeeklyAttendanceData } from "../../domain/types/dashboard/faculty";
 import httpClient from "../../frameworks/api/httpClient";
-
-export interface DashboardStats {
-  totalSessions: number;
-  totalAssignments: number;
-  totalAttendance: number;
-}
-
-export interface WeeklyAttendanceData {
-  day: string;
-  attendance: number;
-}
-
-export interface AssignmentPerformanceData {
-  assignment: string;
-  score: number;
-  submissions: number;
-}
-
-export interface SessionDistributionData {
-  name: string;
-  value: number;
-  color: string;
-}
-
-export interface RecentActivity {
-  id: string;
-  type: 'attendance' | 'assignment' | 'announcement' | 'system';
-  message: string;
-  time: string;
-}
-
-export interface FacultyDashboardData {
-  stats: DashboardStats;
-  weeklyAttendance: WeeklyAttendanceData[];
-  assignmentPerformance: AssignmentPerformanceData[];
-  sessionDistribution: SessionDistributionData[];
-  recentActivities: RecentActivity[];
-}
 
 class FacultyDashboardService {
   async getDashboardStats(): Promise<DashboardStats> {

@@ -98,18 +98,15 @@ export class CreateVideoSessionUseCase implements ICreateVideoSessionUseCase {
 export class JoinVideoSessionUseCase {
     constructor(private sessionRepository: ISessionRepository) {}
     async execute(params: JoinVideoSessionRequestDTO): Promise<JoinVideoSessionResponseDTO> {
-        // First get the session to check its status
         const session = await this.sessionRepository.getById(params.sessionId);
         if (!session) {
             throw new Error('Session not found');
         }
         
-        // Check if session is ended or cancelled
         if (session.status === VideoSessionStatus.Ended || session.status === VideoSessionStatus.Cancelled) {
             throw new Error('Cannot join session: Session has ended or been cancelled');
         }
         
-        // Only allow joining if session is live (ongoing)
         if (session.status !== VideoSessionStatus.Ongoing) {
             throw new Error('Cannot join session: Session is not live');
         }
@@ -166,7 +163,6 @@ export class GetAllVideoSessionsUseCase {
     async execute(params: { search?: string; status?: string; instructor?: string; course?: string } = {}): Promise<SessionListResponseDTO[]> {
         const sessions = await this.sessionRepository.getAll(params);
         
-        // Map to minimal DTO for table display
         return sessions.map(session => ({
             id: session._id || session.id,
             title: session.title,
@@ -185,7 +181,7 @@ export class GetUserSessionsUseCase {
     async execute(params: { search?: string; status?: string; instructor?: string; course?: string; userId?: string } = {}): Promise<{ sessions: SessionListResponseDTO[], watchedCount: number }> {
         const sessions = await this.sessionRepository.getUserSessions(params);
         const userId = params.userId;
-        // Count sessions where userId is in participants or attendance
+
         const watchedCount = sessions.filter(session =>
             (Array.isArray(session.participants) && session.participants.includes(userId)) ||
             (Array.isArray(session.attendance) && session.attendance.some(a => a.userId === userId))
@@ -216,7 +212,6 @@ export class UpdateVideoSessionStatusUseCase {
             return null;
         }
         
-        // Generate join URL when session becomes live
         if (status === VideoSessionStatus.Ongoing && !session.joinUrl) {
             let sessionIdStr = session.id;
             if (!sessionIdStr && session._id) {
@@ -229,13 +224,11 @@ export class UpdateVideoSessionStatusUseCase {
             }
         }
         
-        // Remove join URL when session ends
         if (status === VideoSessionStatus.Ended && session.joinUrl) {
             session.joinUrl = undefined;
             await this.sessionRepository.update(sessionId, { joinUrl: undefined });
         }
         
-        // Determine appropriate message based on status
         let message = '';
         switch (status) {
             case VideoSessionStatus.Ongoing:

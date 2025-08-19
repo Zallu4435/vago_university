@@ -2,14 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { clubService } from '../services/club.service';
-import { Club, ClubRequestsResponse } from '../../domain/types/club';
-
-interface Filters {
-  [key: string]: string;
-  category: string;
-  status: string;
-  dateRange: string;
-}
+import { Club, ClubRequestsResponse, Filters } from '../../domain/types/management/clubmanagement';
 
 export const useClubManagement = () => {
   const queryClient = useQueryClient();
@@ -217,8 +210,6 @@ export const useClubManagement = () => {
       toast.error(error.message || 'Failed to reject club request');
     },
   });
-
-  console.log(getClubDetails, " getClubDetails")
 
 
   return {

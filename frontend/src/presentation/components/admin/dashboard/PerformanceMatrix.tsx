@@ -1,8 +1,5 @@
 import React from 'react';
-
-interface PerformanceMatrixProps {
-  performanceData: Array<{ name: string; value: number; color: string }>;
-}
+import { PerformanceMatrixProps } from '../../../../domain/types/dashboard/admin';
 
 const PerformanceMatrix: React.FC<PerformanceMatrixProps> = ({ performanceData }) => (
   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 p-2">

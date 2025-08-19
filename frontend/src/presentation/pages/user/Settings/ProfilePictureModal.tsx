@@ -1,13 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { FaTimes, FaUpload, FaEdit, FaImage, FaUserAlt, FaCamera } from 'react-icons/fa';
 import { ImageCropper } from './ImageCropper';
-
-interface ProfilePictureModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  currentImage: string | null;
-  onImageUpdate: (imageData: string) => void;
-}
+import { ProfilePictureModalProps } from '../../../../domain/types/settings/user';
 
 export const ProfilePictureModal = ({
   isOpen,

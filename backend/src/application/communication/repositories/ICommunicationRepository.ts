@@ -40,7 +40,6 @@ export interface ICommunicationRepository {
   getAllAdmins(search?: string): Promise<UserInfo[]>;
   fetchUsers(type: string, search?: string): Promise<UserInfo[]>;
 
-  // Helper methods
   findUserById(userId: string, role: string): Promise<UserInfo | null>;
   findMessageById(messageId: string): Promise<Message | null>;
   createMessage(message: Message): Promise<void>;

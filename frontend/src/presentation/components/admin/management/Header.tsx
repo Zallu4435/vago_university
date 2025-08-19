@@ -1,46 +1,7 @@
 import React, { useState } from 'react';
 import { FiSearch, FiFilter, FiChevronUp, FiChevronDown, FiX } from 'react-icons/fi';
 import FilterPanel from './FilterPanel';
-
-interface Stat {
-  icon: React.ReactNode;
-  title: string;
-  value: string | number;
-  change: string;
-  isPositive: boolean;
-}
-
-interface Tab {
-  label: string;
-  icon: React.ReactNode;
-  active: boolean;
-}
-
-interface Filters {
-  [key: string]: string | undefined;
-}
-
-interface HeaderProps {
-  title?: string;
-  subtitle?: string;
-  stats?: Stat[];
-  tabs?: Tab[];
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  searchPlaceholder?: string;
-  filters?: Filters;
-  filterOptions?: {
-    [key: string]: string[];
-  };
-  debouncedFilterChange: (field: string, value: string) => void;
-  customDateRange?: {
-    startDate: string;
-    endDate: string;
-  };
-  handleCustomDateChange?: (field: 'startDate' | 'endDate', value: string) => void;
-  handleResetFilters: () => void;
-  onTabClick?: (index: number) => void;
-}
+import { HeaderProps } from '../../../../domain/types/management';
 
 const Header: React.FC<HeaderProps> = ({
   title = "Management Dashboard",
@@ -257,11 +218,10 @@ interface TabButtonProps {
 
 const TabButton: React.FC<TabButtonProps> = ({ label, active, icon, onClick }) => (
   <button
-    className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg transition-all duration-300 ${
-      active
+    className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg transition-all duration-300 ${active
         ? 'bg-purple-600/30 text-white font-medium shadow-lg border border-purple-500/50 backdrop-blur-sm'
         : 'text-purple-300 hover:bg-gray-800/60 hover:border-purple-500/30 hover:border backdrop-blur-sm'
-    }`}
+      }`}
     onClick={onClick}
     role="tab"
     aria-selected={active}

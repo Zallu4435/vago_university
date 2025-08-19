@@ -20,7 +20,6 @@ export default function FacultySidebar({ activeTab, setActiveTab, onLogout, user
   return (
     <div className="w-72 p-6 bg-slate-50">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm h-full flex flex-col">
-        {/* Header */}
         <div className="p-6 text-center border-b border-slate-200">
           <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-purple-500 flex items-center justify-center shadow-sm">
             <FaChalkboardTeacher className="w-8 h-8 text-white" />
@@ -28,7 +27,6 @@ export default function FacultySidebar({ activeTab, setActiveTab, onLogout, user
           <h2 className="text-lg font-bold text-slate-800 mb-1">Faculty Portal</h2>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 p-4">
           <ul className="space-y-2">
             {sidebarItems.map((item) => {
@@ -58,7 +56,6 @@ export default function FacultySidebar({ activeTab, setActiveTab, onLogout, user
           </ul>
         </nav>
 
-        {/* User Section */}
         <div className="p-4 border-t border-slate-200">
           <div className="flex items-center mb-4 p-3 bg-slate-50 rounded-lg">
             <div className="w-10 h-10 rounded-lg bg-purple-100 border border-purple-200 flex items-center justify-center mr-3 shadow-sm">

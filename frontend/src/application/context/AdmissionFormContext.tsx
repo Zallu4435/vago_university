@@ -1,10 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { FormData } from '../../domain/types/application';
-
-interface AdmissionFormContextType {
-  formData: FormData;
-  updateFormData: (data: Partial<FormData>) => void;
-}
+import { AdmissionFormContextType, FormData } from '../../domain/types/application';
 
 const AdmissionFormContext = createContext<AdmissionFormContextType | undefined>(undefined);
 

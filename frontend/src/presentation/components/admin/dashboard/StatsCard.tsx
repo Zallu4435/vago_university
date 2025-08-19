@@ -1,27 +1,13 @@
 import React from 'react';
-
-interface StatsCardProps {
-  title: string;
-  value: string | number;
-  subtitle: string;
-  trend: string;
-  icon: React.ElementType;
-  bgGradient: string;
-  iconBg: string;
-  trendUp: boolean;
-  delay?: number;
-  loading?: boolean;
-}
+import { StatsCardProps } from '../../../../domain/types/dashboard/admin';
 
 const StatsCard: React.FC<StatsCardProps> = ({ title, value, subtitle, trend, icon: Icon, bgGradient, iconBg, trendUp, delay = 0, loading }) => (
   <div
     className="group relative"
     style={{ animationDelay: `${delay}ms` }}
   >
-    {/* Ghost orb background */}
     <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-2xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
     <div className={`${bgGradient} rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden backdrop-blur-xl`}>
-      {/* Animated background orbs */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-500 blur-xl"></div>
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-12 -translate-x-12 group-hover:scale-125 transition-transform duration-700 blur-xl"></div>

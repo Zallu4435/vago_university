@@ -7,7 +7,7 @@ async function cleanupOldDrafts() {
     await mongoose.connect(config.database.mongoUri);
 
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const result = await AdmissionDraft.deleteMany({
+    await AdmissionDraft.deleteMany({
       createdAt: { $lt: oneDayAgo },
     });
 

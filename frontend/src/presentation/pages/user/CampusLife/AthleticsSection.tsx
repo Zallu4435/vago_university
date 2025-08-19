@@ -370,7 +370,6 @@ export default function AthleticsSection({ statusFilter, searchTerm, onFilterCha
         </div>
       )}
 
-      {/* Mobile Overlay for Sport Details */}
       {ReactDOM.createPortal(
         <div
           className={`fixed inset-0 z-[9999] ${styles.card.background} transition-transform duration-700 transform sm:hidden flex flex-col

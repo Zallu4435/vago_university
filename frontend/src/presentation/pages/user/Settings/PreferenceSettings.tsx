@@ -10,21 +10,8 @@ import {
   FiGlobe,
   FiSave
 } from 'react-icons/fi';
-import { IconType } from 'react-icons';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
-
-interface Theme {
-  id: string;
-  name: string;
-  icon: IconType;
-  description: string;
-  colors: {
-    primary: string;
-    secondary: string;
-    text: string;
-    border: string;
-  };
-}
+import { Theme } from '../../../../domain/types/settings/user';
 
 export default function PreferenceSettings() {
   const { theme: currentTheme, fontSize: currentFontSize, setTheme, setFontSize, resetPreferences } = usePreferences();

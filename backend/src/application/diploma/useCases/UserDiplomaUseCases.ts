@@ -15,16 +15,11 @@ import {
   MarkChapterCompleteResponseDTO,
   ToggleBookmarkResponseDTO,
   GetCompletedChaptersResponseDTO,
-  GetBookmarkedChaptersResponseDTO
+  GetBookmarkedChaptersResponseDTO,
+  ResponseDTO
 } from "../../../domain/diploma/dtos/UserDiplomaResponseDTOs";
 import { DiplomaNotFoundError, InvalidDiplomaStatusError } from "../../../domain/diploma/errors/DiplomaErrors";
-import mongoose from "mongoose";
  
-interface ResponseDTO<T> {
-  data: T;
-  success: boolean;
-}
-
 export interface IGetUserDiplomasUseCase {
   execute(params: GetUserDiplomasRequestDTO): Promise<ResponseDTO<GetUserDiplomasResponseDTO>>;
 }
@@ -55,6 +50,10 @@ export interface IGetCompletedChaptersUseCase {
 
 export interface IGetBookmarkedChaptersUseCase {
   execute(userId: string, courseId: string): Promise<ResponseDTO<GetBookmarkedChaptersResponseDTO>>;
+}
+
+function isValidObjectId(id: string): boolean {
+  return typeof id === 'string' && /^[a-fA-F0-9]{24}$/.test(id);
 }
 
 export class GetUserDiplomasUseCase implements IGetUserDiplomasUseCase {
@@ -89,7 +88,7 @@ export class GetUserDiplomaByIdUseCase implements IGetUserDiplomaByIdUseCase {
   constructor(private readonly userDiplomaRepository: IUserDiplomaRepository) {}
 
   async execute(params: GetUserDiplomaByIdRequestDTO): Promise<ResponseDTO<GetUserDiplomaByIdResponseDTO>> {
-    if (!mongoose.isValidObjectId(params.id)) {
+    if (!isValidObjectId(params.id)) {
       throw new InvalidDiplomaStatusError("Invalid diploma ID");
     }
     const diploma = await this.userDiplomaRepository.getUserDiplomaById(params.id);
@@ -107,7 +106,7 @@ export class GetUserDiplomaChapterUseCase implements IGetUserDiplomaChapterUseCa
   constructor(private readonly userDiplomaRepository: IUserDiplomaRepository) {}
 
   async execute(params: GetUserDiplomaChapterRequestDTO): Promise<ResponseDTO<GetUserDiplomaChapterResponseDTO>> {
-    if (!mongoose.isValidObjectId(params.courseId) || !mongoose.isValidObjectId(params.chapterId)) {
+    if (!isValidObjectId(params.courseId) || !isValidObjectId(params.chapterId)) {
       throw new InvalidDiplomaStatusError("Invalid course or chapter ID");
     }
     const chapter = await this.userDiplomaRepository.getUserDiplomaChapter(params.courseId, params.chapterId);
@@ -125,7 +124,7 @@ export class UpdateVideoProgressUseCase implements IUpdateVideoProgressUseCase {
   constructor(private readonly userDiplomaRepository: IUserDiplomaRepository) {}
 
   async execute(params: UpdateVideoProgressRequestDTO): Promise<ResponseDTO<UpdateVideoProgressResponseDTO>> {
-    if (!mongoose.isValidObjectId(params.courseId) || !mongoose.isValidObjectId(params.chapterId)) {
+    if (!isValidObjectId(params.courseId) || !isValidObjectId(params.chapterId)) {
       throw new InvalidDiplomaStatusError("Invalid course or chapter ID");
     }
     if (typeof params.progress !== 'number' || params.progress < 0 || params.progress > 100) {
@@ -146,10 +145,10 @@ export class MarkChapterCompleteUseCase implements IMarkChapterCompleteUseCase {
   constructor(private readonly userDiplomaRepository: IUserDiplomaRepository) {}
 
   async execute(params: MarkChapterCompleteRequestDTO): Promise<ResponseDTO<MarkChapterCompleteResponseDTO>> {
-    if (!mongoose.isValidObjectId(params.courseId) || !mongoose.isValidObjectId(params.chapterId)) {
+    if (!isValidObjectId(params.courseId) || !isValidObjectId(params.chapterId)) {
       throw new InvalidDiplomaStatusError("Invalid course or chapter ID");
     }
-    const userProgress = await this.userDiplomaRepository.markChapterComplete(params.userId, params.courseId, params.chapterId);
+    await this.userDiplomaRepository.markChapterComplete(params.userId, params.courseId, params.chapterId);
     return {
       success: true,
       data: {
@@ -164,7 +163,7 @@ export class ToggleBookmarkUseCase implements IToggleBookmarkUseCase {
   constructor(private readonly userDiplomaRepository: IUserDiplomaRepository) {}
 
   async execute(params: ToggleBookmarkRequestDTO): Promise<ResponseDTO<ToggleBookmarkResponseDTO>> {
-    if (!mongoose.isValidObjectId(params.courseId) || !mongoose.isValidObjectId(params.chapterId)) {
+    if (!isValidObjectId(params.courseId) || !isValidObjectId(params.chapterId)) {
       throw new InvalidDiplomaStatusError("Invalid course or chapter ID");
     }
     const userProgress = await this.userDiplomaRepository.toggleBookmark(params.userId, params.courseId, params.chapterId);
@@ -182,11 +181,10 @@ export class GetCompletedChaptersUseCase implements IGetCompletedChaptersUseCase
   constructor(private readonly userDiplomaRepository: IUserDiplomaRepository) {}
 
   async execute(userId: string, courseId: string): Promise<ResponseDTO<GetCompletedChaptersResponseDTO>> {
-    if (!mongoose.isValidObjectId(courseId)) {
+    if (!isValidObjectId(courseId)) {
       throw new InvalidDiplomaStatusError("Invalid course ID");
     }
     const completedChapters = await this.userDiplomaRepository.getCompletedChapters(userId, courseId);
-    // Repository already returns an array of chapterId strings; avoid remapping
     return {
       success: true,
       data: { chapters: completedChapters }
@@ -198,11 +196,10 @@ export class GetBookmarkedChaptersUseCase implements IGetBookmarkedChaptersUseCa
   constructor(private readonly userDiplomaRepository: IUserDiplomaRepository) {}
 
   async execute(userId: string, courseId: string): Promise<ResponseDTO<GetBookmarkedChaptersResponseDTO>> {
-    if (!mongoose.isValidObjectId(courseId)) {
+    if (!isValidObjectId(courseId)) {
       throw new InvalidDiplomaStatusError("Invalid course ID");
     }
     const bookmarkedChapters = await this.userDiplomaRepository.getBookmarkedChapters(userId, courseId);
-    // Repository already returns an array of chapterId strings; avoid remapping
     return {
       success: true,
       data: { chapters: bookmarkedChapters }

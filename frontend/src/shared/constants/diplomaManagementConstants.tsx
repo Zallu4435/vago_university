@@ -69,3 +69,12 @@ export const diplomaColumns = [
         ),
     },
 ];
+
+
+export const ghostParticles = Array(20).fill(0).map((_) => ({
+    size: Math.random() * 8 + 4,
+    top: Math.random() * 100,
+    left: Math.random() * 100,
+    animDuration: Math.random() * 10 + 10,
+    animDelay: Math.random() * 5,
+}));

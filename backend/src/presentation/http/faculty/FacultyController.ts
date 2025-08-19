@@ -162,7 +162,6 @@ export class FacultyController implements IFacultyController {
 
   async blockFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
-    console.log('BlockFaculty Controller called with id:', id);
     if (!id) {
       return this.httpErrors.error_400();
     }

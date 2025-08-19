@@ -5,29 +5,10 @@ import {
   FaLock, 
   FaPlay, 
 } from 'react-icons/fa';
-import { Session, SessionStats } from '../../../../../domain/types/canvas/session';
-
-interface Styles {
-  status: { warning: string; error: string; info: string; success: string };
-  badgeBackground: string;
-  button: { secondary: string };
-  textSecondary: string;
-  success: string;
-  error: string;
-  info: string;
-  border: string;
-  cardHover: string;
-  cardShadow: string;
-  card: { background: string };
-  icon: { secondary: string };
-  backgroundSecondary: string;
-  accent: string;
-}
+import { Session, SessionStats, Styles } from '../../../../../domain/types/canvas/session';
 
 export const getStatusBadge = (status: string, styles: Styles, isLive?: boolean): React.JSX.Element => {
-  // Map backend statuses to frontend display
   const getDisplayStatus = (backendStatus: string, isLive?: boolean): { text: string; color: string } => {
-    // If isLive is true, always show as Live regardless of status
     if (isLive === true) {
       return { text: 'Live', color: styles.status.error };
     }
@@ -98,9 +79,7 @@ export const getActionButton = (session: Session, userAccess: { isEnrolled: bool
     );
   }
 
-  // Map backend statuses to frontend actions, but prioritize isLive field
   const getSessionStatus = (backendStatus: string, isLive?: boolean): string => {
-    // If isLive is true, always treat as live
     if (isLive === true) {
       return 'live';
     }
@@ -141,14 +120,13 @@ export const getActionButton = (session: Session, userAccess: { isEnrolled: bool
         </span>
       );
     case 'upcoming':
-      return <></>; // Don't show duplicate status text
+      return <></>; 
     default:
       return <></>;
   }
 };
 
 export const calculateSessionStats = (sessions: Session[], watchedSessions: string[]): SessionStats => {
-  // Map backend statuses to frontend statuses
   const getFrontendStatus = (backendStatus: string): string => {
     switch (backendStatus?.toLowerCase()) {
       case 'ongoing':
@@ -164,19 +142,10 @@ export const calculateSessionStats = (sessions: Session[], watchedSessions: stri
     }
   };
 
-  // Count sessions by mapped status, but prioritize isLive field for live sessions
   const liveCount = sessions.filter(s => s.isLive === true).length;
   const upcomingCount = sessions.filter(s => getFrontendStatus(s.status) === 'upcoming' && !s.isLive).length;
   const completedCount = sessions.filter(s => getFrontendStatus(s.status) === 'completed').length;
   const watchedCount = watchedSessions.length;
-
-  console.log('Backend sessions statuses:', sessions.map(s => ({ 
-    id: s.id, 
-    status: s.status, 
-    isLive: s.isLive,
-    mappedStatus: getFrontendStatus(s.status) 
-  })));
-  console.log('Calculated stats:', { liveCount, upcomingCount, completedCount, watchedCount });
 
   return {
     liveCount,

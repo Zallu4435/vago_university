@@ -2,25 +2,10 @@ import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { FaClock, FaUsers, FaEye, FaFileAlt, FaCalendarAlt, FaFilter, FaSearch, FaChevronDown, FaTimes } from 'react-icons/fa';
 import { useSessionManagement } from '../../../../application/hooks/useSessionManagement';
 import { useQueryClient } from '@tanstack/react-query';
-import type { Session as BaseSession } from '../../../../application/hooks/useSessionManagement';
 import SessionAttendanceViewModal from './SessionAttendanceViewModal'
-
-interface Session extends BaseSession {
-  name?: string;
-  date?: string;
-}
-
-interface AttendanceInterval {
-  joinedAt: string;
-  leftAt?: string;
-}
-interface AttendanceUser {
-  id: number;
-  username: string;
-  email: string;
-  intervals: AttendanceInterval[];
-  status?: string;
-}
+import { Session, AttendanceInterval, AttendanceUser } from '../../../../domain/types/faculty/attendence';
+import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../../shared/components/ErrorMessage';
 
 const SessionAttendancePage = () => {
   const queryClient = useQueryClient();
@@ -28,6 +13,7 @@ const SessionAttendancePage = () => {
   const {
     sessions,
     isLoading: isLoadingSessions,
+    error,
     useSessionAttendance,
     updateAttendanceStatus
   } = useSessionManagement();
@@ -45,8 +31,8 @@ const SessionAttendancePage = () => {
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   React.useEffect(() => {
-    if (!selectedSessionId && sessions && sessions.length > 0) {
-      const list = sessions as any[];
+    if (!selectedSessionId && Array.isArray(sessions) && sessions.length > 0) {
+      const list = sessions;
       const withAttendees = list.find((s) => (s?.attendees ?? 0) > 0);
       const ongoing = list.find((s) => s?.status === 'Ongoing');
       const ended = list.find((s) => s?.status === 'Ended');
@@ -77,7 +63,9 @@ const SessionAttendancePage = () => {
     };
   }, []);
 
-  const currentSession = sessions.find((s: any) => (s?._id ?? s?.id) === selectedSessionId) as Session | undefined;
+  const sessionList = Array.isArray(sessions) ? sessions : [];
+
+  const currentSession = sessionList.find((s) => (s?._id ?? s?.id) === selectedSessionId) as Session | undefined;
 
   const calculateTotalTime = (
     intervals: AttendanceInterval[],
@@ -132,7 +120,7 @@ const SessionAttendancePage = () => {
   ): number => {
     if (!session || !session.duration) return 0;
     const sessionDurationMs = session.duration
-      ? session.duration * 60 * 1000
+      ? Number(session.duration) * 60 * 1000
       : 2 * 60 * 60 * 1000;
     return Math.round((totalTimeMs / sessionDurationMs) * 100);
   };
@@ -155,8 +143,8 @@ const SessionAttendancePage = () => {
   }, [currentAttendanceData, currentSession]);
 
   const filteredSessions = useMemo(() => {
-    if (!dateRange.start && !dateRange.end) return sessions;
-    return sessions.filter((session) => {
+    if (!dateRange.start && !dateRange.end) return sessionList;
+    return sessionList.filter((session) => {
       const sessionDate = new Date(session.startTime);
       const startDate = dateRange.start ? new Date(dateRange.start) : null;
       const endDate = dateRange.end ? new Date(dateRange.end) : null;
@@ -260,8 +248,9 @@ const SessionAttendancePage = () => {
     return 'bg-gray-100 text-gray-700 hover:bg-gray-200';
   };
 
-  if (isLoadingSessions || isLoadingAttendance) {
-    return <div className="p-8 text-center text-gray-500">Loading...</div>;
+  if (error) {
+    const msg = error instanceof Error ? error.message : 'Failed to load sessions';
+    return <ErrorMessage message={msg} />;
   }
 
   if (!selectedSessionId) {
@@ -316,7 +305,6 @@ const SessionAttendancePage = () => {
           </div>
         </div>
 
-        {/* Filters Section */}
         <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             <div className="flex-1">
@@ -347,7 +335,6 @@ const SessionAttendancePage = () => {
               </select>
             </div>
 
-            {/* Search */}
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Search Students
@@ -371,7 +358,6 @@ const SessionAttendancePage = () => {
               </div>
             </div>
 
-            {/* Filter Toggle */}
             <div className="flex items-end">
               <button
                 onClick={() => setShowFilters(!showFilters)}
@@ -384,7 +370,6 @@ const SessionAttendancePage = () => {
             </div>
           </div>
 
-          {/* Advanced Filters */}
           {showFilters && (
             <div className="mt-6 pt-6 border-t border-pink-100">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -405,7 +390,6 @@ const SessionAttendancePage = () => {
                   </select>
                 </div>
 
-                {/* Decision Filter */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Decision Status
@@ -422,7 +406,6 @@ const SessionAttendancePage = () => {
                   </select>
                 </div>
 
-                {/* Date Range */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Date Range
@@ -444,7 +427,6 @@ const SessionAttendancePage = () => {
                 </div>
               </div>
 
-              {/* Filter Actions */}
               <div className="mt-4 flex justify-end gap-2">
                 <button
                   onClick={() => refetchAttendance && refetchAttendance()}
@@ -466,7 +448,6 @@ const SessionAttendancePage = () => {
           )}
         </div>
 
-        {/* Attendance Table */}
         <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-pink-100 overflow-hidden">
           <div className="p-6 border-b border-pink-100">
             <div className="flex items-center justify-between">
@@ -483,124 +464,130 @@ const SessionAttendancePage = () => {
             </div>
           </div>
 
-          {processedAttendance.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gradient-to-r from-purple-50 to-pink-50">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      User
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Time Spent
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Sessions
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Faculty Decision
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-pink-100">
-                  {processedAttendance.map((user: AttendanceUser & { totalTime: number; formattedTime: string; attendancePercentage: number; sessionData: Session, status?: string }) => (
-                    <tr key={user.id} className="hover:bg-pink-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-medium text-sm">
-                              {user.username.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {user.username}
+          <div className="relative">
+            {(isLoadingSessions || isLoadingAttendance) && (
+                <LoadingSpinner />
+            )}
+            <div className={(isLoadingSessions || isLoadingAttendance) ? 'pointer-events-none opacity-50' : ''}>
+              {processedAttendance.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gradient-to-r from-purple-50 to-pink-50">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          User
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Email
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Time Spent
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Sessions
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Faculty Decision
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-pink-100">
+                      {processedAttendance.map((user: AttendanceUser & { totalTime: number; formattedTime: string; attendancePercentage: number; sessionData: Session, status?: string }) => (
+                        <tr key={user.id} className="hover:bg-pink-50 transition-colors">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <span className="text-white font-medium text-sm">
+                                  {user.username.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {user.username}
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{user.email}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <FaClock className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm font-medium text-gray-900">
-                            {user.formattedTime}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {user.intervals.length} session{user.intervals.length !== 1 ? 's' : ''}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {user.status === 'approved' || user.status === 'approve' ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white">Approved</span>
-                          ) : user.status === 'declined' || user.status === 'decline' ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-red-500 to-pink-600 text-white">Declined</span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-yellow-500 to-orange-600 text-white">Not updated</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleAttendanceDecision(user.id.toString(), 'approve')}
-                            className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${getDecisionButtonStyle('approve', attendanceDecisions.get(user.id.toString()) || '', user.status)}`}
-                          >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => handleAttendanceDecision(user.id.toString(), 'decline')}
-                            className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${getDecisionButtonStyle('decline', attendanceDecisions.get(user.id.toString()) || '', user.status)}`}
-                          >
-                            Decline
-                          </button>
-                          <button
-                            onClick={() => handleViewIntervals(user)}
-                            className="px-3 py-1 bg-pink-50 text-pink-700 rounded-lg text-xs font-medium hover:bg-pink-100 transition-colors flex items-center gap-1"
-                          >
-                            <FaEye className="w-3 h-3" />
-                            View Details
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-500">{user.email}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-2">
+                              <FaClock className="w-4 h-4 text-gray-400" />
+                              <span className="text-sm font-medium text-gray-900">
+                                {user.formattedTime}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {user.intervals.length} session{user.intervals.length !== 1 ? 's' : ''}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {user.status === 'approved' || user.status === 'approve' ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white">Approved</span>
+                              ) : user.status === 'declined' || user.status === 'decline' ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-red-500 to-pink-600 text-white">Declined</span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-yellow-500 to-orange-600 text-white">Not updated</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleAttendanceDecision(user.id.toString(), 'approve')}
+                                className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${getDecisionButtonStyle('approve', attendanceDecisions.get(user.id.toString()) || '', user.status)}`}
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => handleAttendanceDecision(user.id.toString(), 'decline')}
+                                className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${getDecisionButtonStyle('decline', attendanceDecisions.get(user.id.toString()) || '', user.status)}`}
+                              >
+                                Decline
+                              </button>
+                              <button
+                                onClick={() => handleViewIntervals(user)}
+                                className="px-3 py-1 bg-pink-50 text-pink-700 rounded-lg text-xs font-medium hover:bg-pink-100 transition-colors flex items-center gap-1"
+                              >
+                                <FaEye className="w-3 h-3" />
+                                View Details
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="p-12 text-center">
+                  <div className="text-pink-200 mb-4">
+                    <FaUsers className="w-12 h-12 mx-auto" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Students Found</h3>
+                  <p className="text-gray-500 mb-4">
+                    No students match your current filter criteria or this session has no attendees.
+                  </p>
+                  <button
+                    onClick={clearFilters}
+                    className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="p-12 text-center">
-              <div className="text-pink-200 mb-4">
-                <FaUsers className="w-12 h-12 mx-auto" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Students Found</h3>
-              <p className="text-gray-500 mb-4">
-                No students match your current filter criteria or this session has no attendees.
-              </p>
-              <button
-                onClick={clearFilters}
-                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
-              >
-                Clear Filters
-              </button>
-            </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Interval Details Modal */}
       <SessionAttendanceViewModal
         selectedUser={selectedUser}
         currentSession={currentSession}

@@ -1,13 +1,6 @@
-// application/contexts/ApplicationIdContext.tsx
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { generateUUID } from '../../frameworks/utils/uuid';
-
-interface ApplicationIdContextType {
-  applicationId: string | null;
-  setApplicationId: (id: string) => void;
-  resetApplicationId: () => void;
-}
+import { ApplicationIdContextType, ApplicationIdProviderProps } from '../../domain/types/application';
 
 const ApplicationIdContext = createContext<ApplicationIdContextType | undefined>(undefined);
 
@@ -19,15 +12,10 @@ export const useApplicationId = () => {
   return context;
 };
 
-interface ApplicationIdProviderProps {
-  children: React.ReactNode;
-}
-
 export const ApplicationIdProvider: React.FC<ApplicationIdProviderProps> = ({ children }) => {
   const [applicationId, setApplicationIdState] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if there's an applicationId in localStorage
     const storedApplicationId = localStorage.getItem('applicationId');
     
     if (storedApplicationId) {

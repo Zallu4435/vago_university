@@ -1,5 +1,7 @@
 import { FiBook, FiBriefcase, FiUser, FiHash, FiClock, FiUsers } from 'react-icons/fi';
-import { Course, EnrollmentRequest } from '../../domain/types/management/coursemanagement';
+import { Course, EnrollmentRequest, InfoCardProps, StatusBadgeProps } from '../../domain/types/management/coursemanagement';
+import React from 'react';
+import { IconType } from 'react-icons';
 
 export const SPECIALIZATIONS = [
   'All Specializations',
@@ -121,13 +123,12 @@ export const enrollmentRequestColumns = [
     key: 'status',
     render: (request: EnrollmentRequest) => (
       <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          request.status === 'Pending'
-            ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
-            : request.status === 'Approved'
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${request.status === 'Pending'
+          ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
+          : request.status === 'Approved'
             ? 'bg-green-900/30 text-green-400 border-green-500/30'
             : 'bg-red-900/30 text-red-400 border-red-500/30'
-        }`}
+          }`}
       >
         <span
           className="h-1.5 w-1.5 rounded-full mr-1.5"
@@ -137,4 +138,57 @@ export const enrollmentRequestColumns = [
       </span>
     ),
   },
-]; 
+];
+
+export const ghostParticles = Array(30)
+  .fill(0)
+  .map((_) => ({
+    size: Math.random() * 10 + 5,
+    top: Math.random() * 100,
+    left: Math.random() * 100,
+    animDuration: Math.random() * 10 + 15,
+    animDelay: Math.random() * 5,
+  }));
+
+export const InfoCard: React.FC<InfoCardProps> = ({ icon, label, value }) => (
+  <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
+    <div className="flex items-center mb-2">
+      <div className="text-purple-300">
+        {typeof icon === 'function' ? React.createElement(icon, { size: 18 }) : icon}
+      </div>
+      <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
+    </div>
+    <p className="text-white font-semibold">{value}</p>
+  </div>
+);
+
+export const RequestStatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
+  const statusConfig = {
+    pending: { bg: 'bg-yellow-600/30', text: 'text-yellow-100', border: 'border-yellow-500/50' },
+    approved: { bg: 'bg-green-600/30', text: 'text-green-100', border: 'border-green-500/50' },
+    rejected: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },
+  };
+
+  const config = statusConfig[status];
+
+  return (
+    <span
+      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config?.bg} ${config?.text} ${config?.border}`}
+    >
+      {status?.charAt(0).toUpperCase() + status?.slice(1)}
+    </span>
+  );
+};
+
+export const RequestInfoCard: React.FC<InfoCardProps> = ({ icon, label, value }) => {
+  const Icon = icon as IconType;
+  return (
+    <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
+      <div className="flex items-center mb-2">
+        <Icon size={18} className="text-purple-300" />
+        <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
+      </div>
+      <p className="text-white font-semibold">{value}</p>
+    </div>
+  );
+};

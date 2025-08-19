@@ -159,9 +159,57 @@ export interface ClubRequestDetailsStatusBadgeProps {
   status: StatusType;
 }
 
+export interface ClubApiResponse {
+  data: {
+    clubs: Club[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+export interface ClubResponse {
+  data: {
+    club: Club;
+  };
+}
+
+export interface ClubRequestResponse {
+  data: {
+    clubRequest: ClubRequest;
+  };
+}
+
+export interface ClubRequestsResponse {
+  clubRequests: ClubRequest[];
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+}
+
 export interface ClubRequestDetailsInfoCardProps {
   icon: React.ComponentType<{ size?: number | string; className?: string }>;
   label: string;
   value: string;
   highlight?: boolean;
+}
+
+
+export interface ApiErrorResponse {
+  error?: string;
+  message?: string;
+  [key: string]: unknown;
+}
+
+export interface ItemAction {
+  id: string;
+  type: 'club' | 'request';
+  action: 'delete' | 'reject' | 'approve';
+}
+
+export interface Filters {
+  [key: string]: string;
+  category: string;
+  status: string;
+  dateRange: string;
 } 

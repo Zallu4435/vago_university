@@ -2,27 +2,13 @@ import React from 'react';
 import { FiXCircle, FiBook, FiBriefcase, FiDollarSign, FiClock, FiUsers, FiCalendar } from 'react-icons/fi';
 import { DiplomaDetailsProps, InfoCardProps } from '../../../../domain/types/management/diplomamanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
+import { ghostParticles } from '../../../../shared/constants/diplomaManagementConstants';
+import { formatDate } from '../../../../shared/utils/dateUtils';
 
 const DiplomaDetails: React.FC<DiplomaDetailsProps> = ({ isOpen, onClose, diploma, isLoading }) => {
   usePreventBodyScroll(isOpen);
 
   if (!isOpen || isLoading) return null;
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  const ghostParticles = Array(20).fill(0).map((_) => ({
-    size: Math.random() * 8 + 4,
-    top: Math.random() * 100,
-    left: Math.random() * 100,
-    animDuration: Math.random() * 10 + 10,
-    animDelay: Math.random() * 5,
-  }));
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">

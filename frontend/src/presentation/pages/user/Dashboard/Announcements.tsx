@@ -1,18 +1,9 @@
 import { FaBell, FaArrowRight } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
-
-interface Announcement {
-  title: string;
-  date: string;
-}
-
-interface AnnouncementsProps {
-  announcements: Announcement[];
-}
+import { Announcement, AnnouncementsProps } from '../../../../domain/types/dashboard/user';
 
 export default function Announcements({ announcements }: AnnouncementsProps) {
   const { styles, theme } = usePreferences();
-
 
   return (
     <div className={`relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-xl ${styles.backgroundSecondary} group hover:shadow-2xl transition-all duration-500`}>

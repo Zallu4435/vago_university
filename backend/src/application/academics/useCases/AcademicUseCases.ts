@@ -19,6 +19,7 @@ import {
   DropCourseResponseDTO,
   RequestTranscriptRequestDTO,
   RequestTranscriptResponseDTO,
+  ResponseDTO
 } from "../../../domain/academics/dtos/AcademicDTOs";
 import { IAcademicRepository } from "../repositories/IAcademicRepository";
 import {
@@ -28,10 +29,6 @@ import {
   StudentInfoResult,
 } from "../../../domain/academics/entities/Academic";
 
-interface ResponseDTO<T> {
-  data: T | { error: string };
-  success: boolean;
-}
 
 export interface IGetStudentInfoUseCase {
   execute(input: GetStudentInfoRequestDTO): Promise<ResponseDTO<GetStudentInfoResponseDTO>>;

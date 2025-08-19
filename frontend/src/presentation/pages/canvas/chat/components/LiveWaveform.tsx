@@ -1,15 +1,10 @@
 import React, { useEffect, useRef } from 'react';
+import { LiveWaveformProps } from '../../../../../domain/types/canvas/chat';
 
-// Extend Window interface to include webkitAudioContext
 declare global {
   interface Window {
     webkitAudioContext: typeof AudioContext;
   }
-}
-
-interface LiveWaveformProps {
-  stream: MediaStream | null;
-  isRecording: boolean;
 }
 
 const LiveWaveform: React.FC<LiveWaveformProps> = ({ stream, isRecording }) => {

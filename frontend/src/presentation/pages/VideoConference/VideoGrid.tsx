@@ -2,7 +2,6 @@ import React, { useRef, useEffect } from 'react';
 import { FaMicrophoneSlash, FaHandPaper, FaUserTie, FaChalkboardTeacher } from 'react-icons/fa';
 import { VideoGridProps } from '../../../domain/types/videoConference';
 
-
 const getOptimalLayout = (participantCount: number, screenWidth: number) => {
 
   if (screenWidth < 768) {
@@ -155,7 +154,6 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
                 min-h-[100px] min-w-[140px] w-full h-full
               `}
             >
-              {/* Video/Avatar */}
               <div className="absolute inset-0 flex items-center justify-center">
                 {participant.videoOn ? (
                   (participant.id === localParticipantId && localStream) || participant.mediaStream ? (
@@ -168,9 +166,7 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center relative">
-                      {/* Simulated video feed */}
                       <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse" />
-                      {/* Video overlay effects */}
                       <div className="absolute inset-0 bg-black bg-opacity-10" />
                     </div>
                   )
@@ -202,7 +198,6 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
                 )}
               </div>
 
-              {/* Audio/Hand Status */}
               <div className="absolute top-2 right-2 flex gap-1">
                 {!participant.audioOn && (
                   <div className="bg-red-500 p-1.5 rounded-full shadow-md">
@@ -216,14 +211,12 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
                 )}
               </div>
 
-              {/* Reaction */}
               {participant.reaction && (
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl sm:text-4xl animate-bounce z-10">
                   {participant.reaction}
                 </div>
               )}
 
-              {/* Name Bar - Only show when video is on */}
               {participant.videoOn && (
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
                   <div className="flex items-center justify-between">
@@ -241,7 +234,6 @@ export const VideoGrid: React.FC<VideoGridProps> = ({
                 </div>
               )}
 
-              {/* Connection quality indicator */}
               <div className="absolute bottom-2 right-2">
                 <div className="flex gap-0.5">
                   <div className="w-1 h-2 bg-green-400 rounded-sm"></div>

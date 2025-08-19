@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 import { SiteSectionFormProps, SectionField } from '../../../../domain/types/management/sitemanagement';
+import { ghostParticles } from '../../../../shared/constants/siteManagementConstants';
 
 const createSchema = (fields: SectionField[]) => {
   const schemaObject: Record<string, unknown> = {};
@@ -57,16 +58,6 @@ const SiteSectionForm: React.FC<SiteSectionFormProps> = ({ fields, initialData, 
       console.error('Form submission error:', error);
     }
   };
-
-  const ghostParticles = Array(30)
-    .fill(0)
-    .map((_) => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">

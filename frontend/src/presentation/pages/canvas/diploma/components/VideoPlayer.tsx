@@ -10,7 +10,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 }) => {
   return (
     <div className={`relative ${styles.backgroundSecondary} rounded-2xl overflow-hidden aspect-video w-full max-w-4xl mx-auto mb-6 group`}>
-      {/* Video placeholder */}
       <div className={`absolute inset-0 ${styles.background} flex items-center justify-center`}>
         <div className="text-center">
           <div 
@@ -33,11 +32,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         </div>
       </div>
 
-      {/* Video controls overlay */}
       <div className={`absolute bottom-0 left-0 right-0 ${styles.backgroundSecondary} bg-opacity-90 p-4 sm:p-6 transition-opacity duration-300 ${
         isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
       }`}>
-        {/* Progress bar */}
         <div className={`w-full ${styles.progress?.background || 'bg-gray-200'} rounded-full h-2 mb-4`}>
           <div
             className={`h-2 rounded-full ${styles.progress?.fill || 'bg-blue-500'} transition-all duration-300 shadow-lg`}
@@ -45,7 +42,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           />
         </div>
 
-        {/* Control buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center space-x-4">
             <button 

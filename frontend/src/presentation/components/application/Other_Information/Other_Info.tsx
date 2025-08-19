@@ -61,7 +61,6 @@ const Other_Info: React.FC<OtherInfoProps> = ({ initialData, onSave }) => {
   const handleNext = async () => {
     const fieldToValidate = step === 1 ? 'health' : 'legal';
     const isValid = await trigger(fieldToValidate, { shouldFocus: true });
-    console.log('Other_Info: Validation result:', { isValid, errors: JSON.stringify(errors, null, 2) });
     if (isValid) {
       setStep(Math.min(step + 1, totalSteps));
     }
@@ -72,7 +71,6 @@ const Other_Info: React.FC<OtherInfoProps> = ({ initialData, onSave }) => {
   };
 
   const onSubmit = (data: OtherInformationFormData) => {
-    console.log('Other_Info: Saving data:', data);
     onSave(data);
   };
 

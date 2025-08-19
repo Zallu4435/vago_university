@@ -38,3 +38,8 @@ export interface CreateVideoResponseDTO {
 export interface UpdateVideoResponseDTO {
     video: IVideo;
 } 
+
+export interface ResponseDTO<T> {
+    data: T | { error: string };
+    success: boolean;
+}

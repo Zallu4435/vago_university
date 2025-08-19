@@ -12,42 +12,13 @@ import {
   IoMailOutline as Mail,
   IoIdCardOutline as IdCard,
 } from 'react-icons/io5';
-import { 
-  TeamRequestDetailsModalProps, 
-  TeamRequestDetailsStatusBadgeProps, 
-  TeamRequestDetailsInfoCardProps,
-  SportStatus, 
+import {
+  TeamRequestDetailsModalProps,
+  SportStatus,
 } from '../../../../../domain/types/management/sportmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate, formatDateTime } from '../../../../../shared/utils/dateUtils';
-
-const StatusBadge: React.FC<TeamRequestDetailsStatusBadgeProps> = ({ status }) => {
-  const statusConfig = {
-    pending: { bg: 'bg-yellow-600/30', text: 'text-yellow-100', border: 'border-yellow-500/50' },
-    approved: { bg: 'bg-green-600/30', text: 'text-green-100', border: 'border-green-500/50' },
-    rejected: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },
-  };
-
-  const config = statusConfig[status as keyof typeof statusConfig];
-
-  return (
-    <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config?.bg} ${config?.text} ${config?.border}`}
-    >
-      {status?.charAt(0).toUpperCase() + status?.slice(1)}
-    </span>
-  );
-};
-
-const InfoCard: React.FC<TeamRequestDetailsInfoCardProps> = ({ icon: Icon, label, value }) => (
-  <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
-    <div className="flex items-center mb-2">
-      <Icon size={18} className="text-purple-300" />
-      <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
-    </div>
-    <p className="text-white font-semibold">{value}</p>
-  </div>
-);
+import { RequestStatusBadge, RequestInfoCard } from '../../../../../shared/constants/sportManagementConstants';
 
 const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
   isOpen,
@@ -109,7 +80,7 @@ const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
                 <h2 className="text-2xl font-bold text-purple-100">{sport.title}</h2>
                 <p className="text-sm text-purple-300">Request ID: {request.sportRequest.id}</p>
                 <div className="flex items-center mt-2">
-                  <StatusBadge status={request.sportRequest.status as SportStatus} />
+                  <RequestStatusBadge status={request.sportRequest.status as SportStatus} />
                 </div>
               </div>
             </div>
@@ -124,7 +95,7 @@ const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
 
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
-                         <StatusBadge status={request.sportRequest.status as SportStatus} />
+            <RequestStatusBadge status={request.sportRequest.status as SportStatus} />
             <div className="flex items-center space-x-6 text-sm text-purple-300">
               <div className="flex items-center space-x-2">
                 <Calendar size={16} className="text-purple-400" />
@@ -138,14 +109,14 @@ const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            <InfoCard icon={User} label="Requested By" value={user.name} />
-            <InfoCard icon={Mail} label="Contact Email" value={user.email} />
-            <InfoCard icon={Trophy} label="Sport Type" value={sport.type} />
-            <InfoCard icon={User} label="Coach" value={sport.headCoach} />
-            <InfoCard icon={IdCard} label="Team ID" value={sport.id} />
-            <InfoCard icon={Calendar} label="Last Updated" value={formatDateTime(request.sportRequest.updatedAt)} />
-            <InfoCard icon={Users} label="Player Count" value={sport.playerCount} />
-            <InfoCard icon={Trophy} label="Division" value={sport.division} />
+            <RequestInfoCard icon={User} label="Requested By" value={user.name} />
+            <RequestInfoCard icon={Mail} label="Contact Email" value={user.email} />
+            <RequestInfoCard icon={Trophy} label="Sport Type" value={sport.type} />
+            <RequestInfoCard icon={User} label="Coach" value={sport.headCoach} />
+            <RequestInfoCard icon={IdCard} label="Team ID" value={sport.id} />
+            <RequestInfoCard icon={Calendar} label="Last Updated" value={formatDateTime(request.sportRequest.updatedAt)} />
+            <RequestInfoCard icon={Users} label="Player Count" value={sport.playerCount} />
+            <RequestInfoCard icon={Trophy} label="Division" value={sport.division} />
           </div>
 
           <div className="mb-8">

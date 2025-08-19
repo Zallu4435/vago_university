@@ -1,52 +1,5 @@
+import { Announcement, CalendarDayEntry, ClassInfo, Deadline, NewEvent, StudentDashboardData } from "../../domain/types/dashboard/user";
 import httpClient from "../../frameworks/api/httpClient";
-
-export interface Announcement {
-  title: string;
-  date: string;
-}
-
-export interface Deadline {
-  title: string;
-  date: string;
-  urgent?: boolean;
-}
-
-export interface ClassInfo {
-  id: string;
-  title: string;
-  faculty: string;
-  schedule: string;
-  cousre: string;
-  description: string;
-}
-
-export interface OnlineTopic {
-  title: string;
-  votes: number;
-  voted: boolean;
-}
-
-export interface NewEvent {
-  id: string;
-  title: string;
-  date: string;
-  location: string;
-  description: string;
-}
-
-export interface CalendarDayEntry {
-  type: string;
-  title: string;
-  date: string;
-}
-
-export interface StudentDashboardData {
-  announcements: Announcement[];
-  deadlines: Deadline[];
-  classes: ClassInfo[];
-  newEvents: NewEvent[];
-  calendarDays: Record<number, CalendarDayEntry[]>;
-}
 
 class StudentDashboardService {
   async getAnnouncements(): Promise<Announcement[]> {

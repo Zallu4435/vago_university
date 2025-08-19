@@ -13,13 +13,10 @@ import {
   GetFacultyCoursePerformanceResponseDTO,
   GetFacultySessionDistributionResponseDTO,
   GetFacultyRecentActivitiesResponseDTO,
+  ResponseDTO
 } from "../../../../domain/faculty/dashboard/dtos/FacultyDashboardResponseDTOs";
 import { IFacultyDashboardRepository } from "../repositories/IFacultyDashboardRepository";
 
-interface ResponseDTO<T> {
-  data: T | { error: string };
-  success: boolean;
-}
 
 export interface IGetFacultyDashboardStatsUseCase {
   execute(params: GetFacultyDashboardStatsRequestDTO): Promise<ResponseDTO<GetFacultyDashboardStatsResponseDTO>>;

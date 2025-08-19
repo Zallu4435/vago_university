@@ -5,42 +5,7 @@ import DepartmentPoster from '../../components/departments/common/DepartmentPost
 import DepartmentEntrepreneurWhatWeDo from '../../components/departments/entrepreneur/DepartmentEntrepreneurWhatWeDo';
 import DepartmentEntrepreneurHowWeDoIt from '../../components/departments/entrepreneur/DepartmentEntrepreneurHowWeDoIt';
 import DepartmentEntrepreneurAlumni from '../../components/departments/entrepreneur/DepartmentEntrepreneurAlumni';
-
-interface AlumniTestimonial {
-  name: string;
-  title: string;
-  company: string;
-  testimonial: string;
-}
-
-interface HowWeDoItAspect {
-  title: string;
-  description: string;
-  icon: React.ElementType;
-}
-
-interface EntrepreneurshipData {
-  poster: {
-    title: string;
-    subtitle: string;
-  };
-  whatWeDo: {
-    title: string;
-    description: string;
-  };
-  howWeDoIt: {
-    title: string;
-    aspects: HowWeDoItAspect[];
-  };
-  alumni: {
-    title: string;
-    testimonials: AlumniTestimonial[];
-  };
-}
-
-interface EntrepreneurshipDataMap {
-  [key: string]: EntrepreneurshipData;
-}
+import { EntrepreneurshipDataMap } from '../../../domain/types/department';
 
 const Entrepreneurship: React.FC = () => {
   const [currentDepartment] = useState<string>('computer-science');

@@ -7,19 +7,9 @@ import {
   CourseApiResponse,
   CourseDetails,
   EnrollmentRequest,
-} from "../../domain/types/course";
-
-interface Filters {
-  specialization: string;
-  faculty: string;
-  term: string;
-}
-
-interface RequestFilters {
-  status: string;
-  specialization: string;
-  term: string;
-}
+  Filters,
+  RequestFilters,
+} from "../../domain/types/management/coursemanagement";
 
 export const useCourseManagement = (searchQuery: string = "") => {
   const queryClient = useQueryClient();
@@ -182,17 +172,14 @@ export const useCourseManagement = (searchQuery: string = "") => {
   };
 
   const handleViewCourse = (courseId: string) => {
-    console.log("Viewing course:", courseId);
     setSelectedCourseId(courseId);
   };
 
   const handleEditCourse = (courseId: string) => {
-    console.log("Editing course:", courseId);
     setSelectedCourseId(courseId);
   };
 
   const handleViewRequest = (requestId: string) => {
-    console.log("Viewing request:", requestId);
     setSelectedRequestId(requestId);
   };
 

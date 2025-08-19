@@ -82,7 +82,7 @@ httpClient.interceptors.response.use(
   },
   async (error) => {
     if (error.response?.status === 401) {
-      console.log('🔒 Received 401 Unauthorized from backend');
+      console.error('🔒 Received 401 Unauthorized from backend');
     }
     if (error.message === 'Network Error') {
       const now = Date.now();
@@ -97,7 +97,6 @@ httpClient.interceptors.response.use(
       console.error(`⚠️ Network error #${networkErrorCount}/${MAX_NETWORK_ERRORS}`);
 
       if (networkErrorCount >= MAX_NETWORK_ERRORS) {
-        console.log('🚫 Too many network errors - skipping refresh attempts');
         shouldAttemptRefresh = false;
         import('react-hot-toast').then((toast) => {
           toast.default.error('Network connectivity issues detected. Please check your connection.');
@@ -118,10 +117,7 @@ httpClient.interceptors.response.use(
 
     if (error.response?.status === 401) {
       unauthorizedCount++;
-      console.log(`⚠️ Unauthorized error #${unauthorizedCount}/${MAX_UNAUTHORIZED_COUNT}`);
-
       if (unauthorizedCount >= MAX_UNAUTHORIZED_COUNT) {
-        console.log('🚫 Too many unauthorized errors - logging out');
         store.dispatch(logout());
         shouldAttemptRefresh = false;
         return Promise.reject(error);
@@ -152,14 +148,10 @@ httpClient.interceptors.response.use(
       lastRefreshAttempt = now;
 
       try {
-        console.log('📤 Sending refresh token request...');
         const state = store.getState();
         const userId = state.auth.user?.id;
-        console.log('🔄 App.tsx: userId:', userId);
         if (!userId) {
-          console.log('No userId found in Redux, logging out user.');
           try {
-            console.log('Calling backend logout API from httpClient...');
             await httpClient.post('/auth/logout');
           } catch (logoutErr) {
             console.error('Logout API error (from httpClient):', logoutErr);
@@ -169,7 +161,6 @@ httpClient.interceptors.response.use(
           return Promise.reject(error);
         }
         const response = await httpClient.post('/auth/refresh-token', { userId });
-        console.log('✅ Token refreshed, updating auth state');
 
         networkErrorCount = 0;
         unauthorizedCount = 0;
@@ -180,7 +171,6 @@ httpClient.interceptors.response.use(
           collection: response.data.data.collection
         }));
 
-        console.log('✅ Processing queue');
         processQueue();
         return httpClient(originalRequest);
       } catch (refreshError: unknown) {
@@ -197,8 +187,6 @@ httpClient.interceptors.response.use(
         }
 
         if (refreshError && typeof refreshError === 'object' && 'response' in refreshError && refreshError.response && typeof refreshError.response === 'object' && 'status' in refreshError.response && refreshError.response.status === 401) {
-          console.log('🚫 Refresh token expired or invalid');
-          console.log('🚪 Logging out user due to invalid refresh token');
           shouldAttemptRefresh = false;
           store.dispatch(logout());
           processQueue(refreshError);
@@ -207,7 +195,7 @@ httpClient.interceptors.response.use(
 
         console.error('❌ Token refresh failed:', refreshError);
         if (refreshError && typeof refreshError === 'object' && 'message' in refreshError) {
-          console.log('⚠️ Refresh token request failed:', refreshError.message);
+          console.error('⚠️ Refresh token request failed:', refreshError.message);
         }
         processQueue(refreshError);
         return Promise.reject(refreshError);

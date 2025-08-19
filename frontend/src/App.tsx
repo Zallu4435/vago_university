@@ -87,7 +87,6 @@ const App: React.FC = () => {
     (async () => {
       try {
         const response = await httpClient.get('/auth/me');
-        console.log('🔄 App.tsx: response:', response);
         if (response.data && response.data.user && response.data.collection) {
           dispatch(setAuth({ user: response.data.user, collection: response.data.collection }));
         }

@@ -15,6 +15,7 @@ import {
   GetRevenueDataResponseDTO,
   GetRecentActivitiesResponseDTO,
   GetSystemAlertsResponseDTO,
+  ResponseDTO
 } from "../../../domain/admindashboard/dtos/DashboardResponseDTOs";
 import { IDashboardRepository } from "../repositories/IDashboardRepository";
 import { 
@@ -37,10 +38,6 @@ import {
   DashboardAlertsError,
 } from '../../../domain/admindashboard/errors/DashboardErrors';
 
-interface ResponseDTO<T> {
-  data: T | { error: string };
-  success: boolean;
-}
 
 export interface IGetDashboardDataUseCase {
   execute(params: GetDashboardDataRequestDTO): Promise<ResponseDTO<GetDashboardDataResponseDTO>>;
@@ -103,7 +100,6 @@ export class GetDashboardMetricsUseCase implements IGetDashboardMetricsUseCase {
     if (!raw || !Array.isArray(raw.completedPayments)) {
       throw new DashboardMetricsError();
     }
-    console.log(raw);
     const totalRevenue = raw.completedPayments[0]?.total || 0;
     const metrics = {
       totalUsers: raw.totalUsers + raw.totalFaculty,

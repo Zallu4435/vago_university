@@ -132,7 +132,6 @@ export class GetFacultyUseCase implements IGetFacultyUseCase {
                     break;
                 case "custom":
                     if (startDate && endDate) {
-                        console.log('Processing custom date range:', { startDate, endDate });
                         const startDateTime = new Date(startDate);
                         const endDateTime = new Date(endDate);
 

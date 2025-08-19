@@ -1,25 +1,6 @@
 import { toast } from 'react-hot-toast';
-import { Chat, Message, User } from '../types/ChatTypes';
 import { RefObject } from 'react';
-
-interface ChatMutations {
-  markMessagesAsRead: { mutateAsync: (chatId: string) => Promise<void> };
-  editMessage: { mutateAsync: (params: { chatId: string; messageId: string; newContent: string }) => Promise<void> };
-  deleteMessage: { mutateAsync: (params: { chatId: string; messageId: string; deleteForEveryone: boolean }) => Promise<void> };
-  addReaction: { mutateAsync: (params: { messageId: string; emoji: string; userId: string }) => Promise<void> };
-  removeReaction: { mutateAsync: (params: { messageId: string; userId: string }) => Promise<void> };
-  updateGroupSettings: { mutateAsync: (params: { chatId: string; updates: { name?: string; description?: string; settings?: { onlyAdminsCanPost?: boolean; onlyAdminsCanAddMembers?: boolean; onlyAdminsCanChangeInfo?: boolean; onlyAdminsCanPinMessages?: boolean; onlyAdminsCanSendMedia?: boolean; onlyAdminsCanSendLinks?: boolean; } } }) => Promise<void> };
-  addGroupMember: { mutateAsync: (params: { userId: string }) => Promise<void> };
-  removeGroupMember: { mutateAsync: (params: { userId: string }) => Promise<Chat> };
-  updateGroupAdmin: { mutateAsync: (params: { userId: string; isAdmin: boolean }) => Promise<void> };
-  leaveGroup: { mutateAsync: () => Promise<void> };
-  deleteChat: { mutateAsync: (params: { chatId: string }) => Promise<void> };
-  blockChat: { mutateAsync: (params: { chatId: string }) => Promise<void> };
-  clearChat: { mutateAsync: (params: { chatId: string }) => Promise<void> };
-  createChat: { mutateAsync: (params: { creatorId: string; participantId: string; type: string; name: string; avatar: string }) => Promise<Chat> };
-  sendFile: { mutateAsync: (params: { chatId: string; formData: FormData; file: File }) => Promise<void> };
-  sendMessage: { mutateAsync: (params: { chatId: string; content: string; type: string }) => Promise<void> };
-}
+import { Chat, ChatMutations, Message, User } from '../../../../../domain/types/canvas/chat';
 
 export const handleScroll = (
   e: React.UIEvent<HTMLDivElement>,
@@ -67,7 +48,6 @@ export const handleChatSelect = async (
   scrollToBottom: (scrollRef: React.RefObject<HTMLDivElement>) => void,
   scrollRef: React.RefObject<HTMLDivElement>
 ) => {
-    console.log(chatId, "id from the chathanders ")
   setSelectedChatId(chatId);
   setAllMessages([]);
   setMessagesPage(1);
@@ -238,7 +218,7 @@ export const handleTyping = (
 
 export const handleCameraSelect = () => {
   navigator.mediaDevices.getUserMedia({ video: true })
-    .then(stream => { console.log('Camera access granted'); stream.getTracks().forEach(track => track.stop()); })
+    .then(stream => stream.getTracks().forEach(track => track.stop()))
     .catch(error => console.error('Error accessing camera:', error));
 };
 

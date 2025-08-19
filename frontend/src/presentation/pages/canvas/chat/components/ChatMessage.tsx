@@ -1,6 +1,5 @@
 import React, { useState, useRef, ForwardedRef } from 'react';
-import { Message, Styles } from '../types/ChatTypes';
-import { formatMessageTime, shouldShowDateHeader } from '../utils/chatUtils';
+import { formatMessageTime, formatMessageTimeOnly, shouldShowDateHeader } from '../utils/chatUtils';
 import { FiCheck, FiShare2, FiCornerUpLeft, FiSmile, FiFile, FiChevronDown } from 'react-icons/fi';
 import { EmojiPicker } from './EmojiPicker';
 import { MessageDropdown } from './MessageDropdown';
@@ -9,25 +8,7 @@ import { MessageReactionsModal } from './MessageReactionsModal';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import { useChatMutations } from '../hooks/useChatMutations';
 import AudioPlayer from './AudioPlayer';
-
-
-const formatMessageTimeOnly = (date: string | Date): string => {
-  const messageDate = new Date(date);
-  return messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-};
-
-interface ChatMessageProps {
-  message: Message;
-  currentUserId: string;
-  previousMessage?: Message;
-  onReply: (message: Message) => void;
-  onForward: (messageId: string) => void;
-  onDelete: (messageId: string, deleteForEveryone: boolean) => void;
-  onEdit: (messageId: string, newContent: string) => void;
-  onReaction: (messageId: string, emoji: string) => void;
-  onRemoveReaction: (messageId: string, emoji: string) => void;
-  styles: Styles;
-}
+import { ChatMessageProps } from '../../../../../domain/types/canvas/chat';
 
 const ChatMessageComponent = ({
   message,
@@ -345,7 +326,7 @@ const ChatMessageComponent = ({
                         <FiFile className="w-6 h-6 text-gray-500 dark:text-gray-400" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{attachment.name}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{(attachment.size / 1024).toFixed(1)} KB</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{(attachment.size ? (attachment.size / 1024).toFixed(1) : '0')} KB</p>
                         </div>
                         <a
                           href={attachment.url}
@@ -364,7 +345,7 @@ const ChatMessageComponent = ({
                         <FiFile className="w-6 h-6 text-gray-500 dark:text-gray-400" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{attachment.name}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{(attachment.size / 1024).toFixed(1)} KB</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{(attachment.size ? (attachment.size / 1024).toFixed(1) : '0')} KB</p>
                         </div>
                         <a
                           href={attachment.url}
@@ -558,9 +539,12 @@ const ChatMessageComponent = ({
         onClose={() => setShowReactionsModal(false)}
         reactions={
           (message.reactions || []).map(reaction => ({
+            id: reaction.id || `reaction-${reaction.emoji}-${reaction.userId}`,
             emoji: reaction.emoji,
             userId: reaction.userId,
-            userName: `User ${reaction.userId.slice(-4)}`
+            userName: `User ${reaction.userId.slice(-4)}`,
+            createdAt: reaction.createdAt || new Date().toISOString(),
+            count: 1
           }))
         }
         currentUserId={currentUserId}

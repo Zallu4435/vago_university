@@ -189,7 +189,7 @@ export class AuthRepository implements IAuthRepository {
     }
 
     async resetPassword(email: string, newPassword: string) {
-        const userResult = await this.findUserByEmailAcrossCollections(email); // `email` comes from verified token in Use Case
+        const userResult = await this.findUserByEmailAcrossCollections(email); 
 
         if (!userResult) {
             throw new UserNotFoundError();
@@ -206,7 +206,6 @@ export class AuthRepository implements IAuthRepository {
             default: throw new Error("Invalid user collection type.");
         }
 
-        // Update the password in the database
         await Model.updateOne({ email: email }, { password: newPassword });
 
         return {

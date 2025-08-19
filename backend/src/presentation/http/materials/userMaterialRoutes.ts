@@ -49,7 +49,6 @@ userMaterialRoutes.get('/:id/download-file', authMiddleware, async (req: Request
 
     const response = await fetch(fileUrl);
     if (!response.ok) {
-      console.log('[DownloadFile] Failed to fetch file', { fileUrl, status: response.status });
       res.status(500).send('Failed to fetch file');
       return;
     }

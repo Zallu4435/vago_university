@@ -4,13 +4,8 @@ import { toast } from 'react-hot-toast';
 import { usePaymentsManagement } from '../../../../application/hooks/useFinancial';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import PaymentReceiptModal from './PaymentReceiptModal';
-import type { Charge, Payment, FeesPaymentsSectionProps } from '../../../../domain/types/user/financial';
+import type { Payment, FeesPaymentsSectionProps, ExtendedCharge } from '../../../../domain/types/user/financial';
 import { financialService } from '../../../../application/services/financialService';
-
-interface ExtendedCharge extends Charge {
-  paidAt?: string;
-  method?: string;
-}
 
 export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPaymentSuccess }: FeesPaymentsSectionProps) {
   const { createPayment, loading, error } = usePaymentsManagement();
@@ -128,8 +123,6 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
         chargeId: selectedCharge.id,
       };
 
-      console.log('Initiating payment:', payment);
-
       createPayment(payment, {
         onSuccess: (response) => {
           if (response && typeof response === 'object' && 'error' in response) {
@@ -192,7 +185,6 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
             const rzp = new (window as Window & typeof globalThis).Razorpay(options);
             rzp.on('payment.failed', async (...args: unknown[]) => {
               const rzpResponse = args[0] as { error: { description: string } };
-              // Clear pending payment on failure
               try {
                 await financialService.clearPendingPayment();
               } catch (error) {

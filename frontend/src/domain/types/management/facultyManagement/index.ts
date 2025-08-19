@@ -38,7 +38,7 @@ export interface FacultyDetailsModalProps {
   onClose: () => void;
   faculty: Faculty;
   onBlockToggle?: (facultyId: string, blocked: boolean) => void;
-} 
+}
 
 export interface FacultyApiResponse {
   data: {
@@ -47,4 +47,26 @@ export interface FacultyApiResponse {
     currentPage: number;
     totalItems: number;
   };
+}
+
+export interface DocumentUploadResult {
+  url: string;
+  publicId: string;
+  fileName: string;
+  fileType: string;
+}
+
+export interface MultipleDocumentUploadResult {
+  documents: DocumentUploadResult[];
+}
+
+export interface DocumentViewResult {
+  pdfData: string;
+  fileName: string;
+  fileType: string;
+}
+
+export interface FacultyRequestResponse {
+  message: string;
+  requestId: string;
 }

@@ -4,7 +4,6 @@ import { communicationService } from '../../../../application/services/communica
 import { FaTimes, FaPaperPlane } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 
-
 const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
   isOpen,
   onClose,
@@ -116,31 +115,24 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
 
   if (!isOpen) return null;
 
-
-
   return (
     <div className="fixed inset-0 z-[9999] overflow-y-auto">
-      {/* Backdrop */}
       <div
         className={`fixed inset-0 bg-gradient-to-br from-black/20 via-black/40 to-black/60 backdrop-blur-sm transition-opacity duration-300 ${isAnimating ? 'opacity-100' : 'opacity-0'
           }`}
         onClick={handleClose}
       />
 
-      {/* Modal Container */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div
           className={`relative w-full max-w-2xl transform transition-all duration-300 ${isAnimating ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'
             }`}
         >
-          {/* Main Modal */}
           <div className={`relative overflow-hidden rounded-3xl shadow-2xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
-            {/* Background glow */}
             <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-3xl blur transition-all duration-300`}></div>
             <div className={`absolute -top-16 -left-16 w-64 h-64 rounded-full bg-gradient-to-br ${styles.orb.primary} blur-3xl animate-pulse`}></div>
             <div className={`absolute -bottom-16 -right-16 w-48 h-48 rounded-full bg-gradient-to-br ${styles.orb.secondary} blur-2xl animate-pulse delay-700`}></div>
 
-            {/* Header */}
             <div className={`relative bg-gradient-to-r ${styles.accent} px-6 sm:px-8 py-5 text-white overflow-hidden`}>
               <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent"></div>
               <div className="relative z-10 flex items-center justify-between">
@@ -168,7 +160,6 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
               </div>
             </div>
 
-            {/* Content */}
             <div className="relative z-10 p-6 sm:p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>

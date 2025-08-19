@@ -11,45 +11,10 @@ import {
   IoDocumentTextOutline as DocumentText,
   IoMailOutline as Mail,
 } from 'react-icons/io5';
-import { IconType } from 'react-icons';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
-import {
-  StatusBadgeProps,
-  InfoCardProps,
-  CourseRequestDetailsModalProps,
-} from '../../../../domain/types/management/coursemanagement';
+import { CourseRequestDetailsModalProps } from '../../../../domain/types/management/coursemanagement';
 import { formatDate, formatDateTime } from '../../../../shared/utils/dateUtils';
-
-const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
-  const statusConfig = {
-    pending: { bg: 'bg-yellow-600/30', text: 'text-yellow-100', border: 'border-yellow-500/50' },
-    approved: { bg: 'bg-green-600/30', text: 'text-green-100', border: 'border-green-500/50' },
-    rejected: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },
-  };
-
-  const config = statusConfig[status];
-
-  return (
-    <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config?.bg} ${config?.text} ${config?.border}`}
-    >
-      {status?.charAt(0).toUpperCase() + status?.slice(1)}
-    </span>
-  );
-};
-
-const InfoCard: React.FC<InfoCardProps> = ({ icon, label, value }) => {
-  const Icon = icon as IconType;
-  return (
-    <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
-      <div className="flex items-center mb-2">
-        <Icon size={18} className="text-purple-300" />
-        <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
-      </div>
-      <p className="text-white font-semibold">{value}</p>
-    </div>
-  );
-};
+import { ghostParticles, RequestInfoCard, RequestStatusBadge } from '../../../../shared/constants/courseManagementConstants';
 
 const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
   isOpen,
@@ -60,21 +25,9 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
 }) => {
   usePreventBodyScroll(isOpen);
 
-  console.log("request", request);
-
   if (!isOpen || !request) return null;
 
   const { course, user } = request;
-
-  const ghostParticles = Array(30)
-    .fill(0)
-    .map((_) => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -112,7 +65,7 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
                 <h2 className="text-2xl font-bold text-purple-100">{course?.title}</h2>
                 <p className="text-sm text-purple-300">Request ID: {request?.id}</p>
                 <div className="flex items-center mt-2">
-                  <StatusBadge status={request?.status} />
+                  <RequestStatusBadge status={request?.status} />
                 </div>
               </div>
             </div>
@@ -127,7 +80,7 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
 
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 space-y-6 custom-scrollbar">
           <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
-            <StatusBadge status={request?.status} />
+            <RequestStatusBadge status={request?.status} />
             <div className="flex items-center space-x-6 text-sm text-purple-300">
               <div className="flex items-center space-x-2">
                 <Calendar size={16} className="text-purple-400" />
@@ -141,14 +94,14 @@ const CourseRequestDetailsModal: React.FC<CourseRequestDetailsModalProps> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            <InfoCard icon={User} label="Requested By" value={user?.name || 'Unknown'} />
-            <InfoCard icon={Mail} label="Contact Email" value={user?.email || 'N/A'} />
-            <InfoCard icon={Info} label="Specialization" value={course?.specialization} />
-            <InfoCard icon={User} label="Faculty" value={course?.faculty} />
-            <InfoCard icon={Calendar} label="Term" value={course?.term} />
-            <InfoCard icon={Calendar} label="Last Updated" value={formatDateTime(request.updatedAt)} />
-            <InfoCard icon={Book} label="Credits" value={course?.credits} />
-            <InfoCard icon={Info} label="Course ID" value={course?.id} />
+            <RequestInfoCard icon={User} label="Requested By" value={user?.name || 'Unknown'} />
+            <RequestInfoCard icon={Mail} label="Contact Email" value={user?.email || 'N/A'} />
+            <RequestInfoCard icon={Info} label="Specialization" value={course?.specialization} />
+            <RequestInfoCard icon={User} label="Faculty" value={course?.faculty} />
+            <RequestInfoCard icon={Calendar} label="Term" value={course?.term} />
+            <RequestInfoCard icon={Calendar} label="Last Updated" value={formatDateTime(request.updatedAt)} />
+            <RequestInfoCard icon={Book} label="Credits" value={course?.credits} />
+            <RequestInfoCard icon={Info} label="Course ID" value={course?.id} />
           </div>
 
           <div className="mb-8">

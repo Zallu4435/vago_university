@@ -19,6 +19,8 @@ import ErrorMessage from '../../../../shared/components/ErrorMessage';
 
 const ITEMS_PER_PAGE = 10;
 
+type MaterialFormData = Partial<Material> | FormData;
+
 const MaterialManagement: React.FC = () => {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
@@ -120,7 +122,7 @@ const MaterialManagement: React.FC = () => {
 
   const handleSaveMaterial = async (formData: Partial<Material>) => {
     try {
-      let dataToSend = formData;
+      let dataToSend: MaterialFormData = formData;
       if (formData.file && formData.file instanceof File) {
         const fd = new FormData();
         Object.entries(formData).forEach(([key, value]) => {
@@ -134,12 +136,12 @@ const MaterialManagement: React.FC = () => {
             }
           }
         });
-        dataToSend = fd as any;
+        dataToSend = fd;
       }
       if (editingMaterial) {
-        await updateMaterial({ id: editingMaterial.id, data: dataToSend });
+        await updateMaterial({ id: editingMaterial.id, data: dataToSend as Partial<Material> });
       } else {
-        await createMaterial(dataToSend as any);
+        await createMaterial(dataToSend as Omit<Material, "_id" | "uploadedAt" | "views" | "downloads" | "rating">);
       }
       setShowMaterialModal(false);
       setEditingMaterial(null);

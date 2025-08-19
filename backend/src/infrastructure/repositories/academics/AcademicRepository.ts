@@ -150,11 +150,10 @@ export class AcademicRepository implements IAcademicRepository {
       requestedAt: new Date()
     }).save();
 
-    // plugin runs here → every ObjectId already stringified
     const o = doc.toObject({ getters: true });
     return {
       ...o,
-      requestedAt: (o.requestedAt as Date).toISOString()   // fix the Date → string mismatch
+      requestedAt: (o.requestedAt as Date).toISOString()   
     } as WithStringId<IEnrollmentDocument>;
   }
 
@@ -191,16 +190,15 @@ export class AcademicRepository implements IAcademicRepository {
       deliveryMethod: request.deliveryMethod,
       address: request.address,
       email: request.email,
-      requestedAt: new Date(),                     // store as Date
+      requestedAt: new Date(),                    
       estimatedDelivery: request.estimatedDelivery
     }).save();
 
-    // plugin turns every ObjectId into string
     const o = doc.toObject({ getters: true });
 
     return {
       ...o,
-      requestedAt: (o.requestedAt as unknown as Date).toISOString()  // Date ➝ ISO string
+      requestedAt: (o.requestedAt as unknown as Date).toISOString()  
     } as WithStringId<ITranscriptRequestDocument>;
   }
 }

@@ -55,7 +55,6 @@ class SportsService {
       if (search && search.trim() !== '') params.search = search;
 
       const response = await httpClient.get<SportsApiResponse<PlayerRequest>>('/admin/sport-requests', { params });
-      console.log(response.data, "hushuoshduohsu")
       return response.data.data;
     } catch (error: unknown) {
       if (isAxiosErrorWithApiError(error)) {

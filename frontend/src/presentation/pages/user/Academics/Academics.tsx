@@ -11,7 +11,6 @@ export default function Academics() {
   const [activeSubTab, setActiveSubTab] = useState('Course Registration');
   const { styles } = usePreferences();
 
-  // Fetch data
   const { data: studentInfo, isLoading: isLoadingStudentInfo, error: studentInfoError } = useStudentInfo({});
   const { data: courses, isLoading: isLoadingCourses, error: coursesError } = useCourses({
     enabled: activeSubTab === 'Course Registration',
@@ -75,7 +74,6 @@ export default function Academics() {
               ) : <LoadingSpinner />
             )
           )}
-          {/* Academic Records and Degree Audit tabs are disabled */}
         </main>
       </div>
     </div>

@@ -2,20 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FiSmile, FiPaperclip, FiX, FiCornerUpLeft, FiSend, FiMic } from 'react-icons/fi';
 import { EmojiPicker } from './EmojiPicker';
 import { AttachmentMenu } from './AttachmentMenu';
-import { Styles, Message } from '../types/ChatTypes';
 import { MediaPreview } from './MediaPreview';
 import LiveWaveform from './LiveWaveform';
-
-
-interface ChatInputProps {
-  onSendMessage: (message: string, file?: File, replyTo?: Message) => void;
-  onTyping: (isTyping: boolean) => void;
-  styles: Styles;
-  replyToMessage?: Message | null;
-  onCancelReply?: () => void;
-  selectedChatId: string | null;
-  currentUserId: string;
-}
+import { ChatInputProps } from '../../../../../domain/types/canvas/chat';
 
 export const ChatInput: React.FC<ChatInputProps & { disabled?: boolean }> = ({
   onSendMessage,
@@ -44,7 +33,6 @@ export const ChatInput: React.FC<ChatInputProps & { disabled?: boolean }> = ({
   const recordingInterval = useRef<NodeJS.Timeout | null>(null);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
 
-  // Removed unused useChatMutations since we're using onSendMessage prop instead
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -223,7 +211,19 @@ export const ChatInput: React.FC<ChatInputProps & { disabled?: boolean }> = ({
 
       {showMediaPreview && selectedFiles.length > 0 && (
         <MediaPreview
-          message={{ attachments: selectedFiles.map((file, idx) => ({ url: previewUrls[idx], name: file.name, type: file.type.startsWith('image/') ? 'image' : 'video' })) }}
+          message={{ 
+            id: 'temp',
+            chatId: selectedChatId || 'temp',
+            senderId: 'temp',
+            senderName: 'You',
+            content: '',
+            type: 'text',
+            status: 'sending',
+            reactions: [],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            attachments: selectedFiles.map((file, idx) => ({ url: previewUrls[idx], name: file.name, type: file.type.startsWith('image/') ? 'image' : 'video' }))
+          }}
           onClose={handleCloseMediaPreview}
           styles={styles}
           onAddMore={handleAddMoreFiles}

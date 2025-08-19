@@ -56,7 +56,6 @@ export interface IConfirmRegistrationUseCase {
 }
 
 
-// --- RegisterUseCase ---
 export class RegisterUseCase implements IRegisterUseCase {
   constructor(
     private authRepository: IAuthRepository,

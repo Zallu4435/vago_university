@@ -1,5 +1,3 @@
-
-
 export interface Message {
     id: string;
     user: string;
@@ -72,3 +70,8 @@ export interface TopBarProps {
     sessionName: string;
     meetingTimer: string;
 }
+
+export interface ReactionsPanelProps {
+    reactions: { [participantId: string]: string };
+    onRemoveReaction: (participantId: string) => void;
+  }

@@ -1,64 +1,6 @@
+import { ActivityItem, ApiResponse, DashboardData, DashboardMetrics, PerformanceData, RevenueData, SystemAlert, UserGrowthData } from '../../domain/types/dashboard/admin';
 import httpClient from '../../frameworks/api/httpClient';
 import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
-
-export interface DashboardMetrics {
-  totalUsers: number;
-  totalRevenue: number;
-  activeCourses: number;
-  pendingApprovals: number;
-}
-
-export interface UserGrowthData {
-  month: string;
-  users: number;
-  target: number;
-}
-
-export interface RevenueData {
-  month: string;
-  tuition: number;
-  fees: number;
-  other: number;
-}
-
-export interface PerformanceData {
-  name: string;
-  value: number;
-  color: string;
-}
-
-export interface ActivityItem {
-  id: string;
-  action: string;
-  user: string;
-  time: string;
-  avatar: string;
-  type: 'success' | 'warning' | 'info' | 'default';
-}
-
-export interface SystemAlert {
-  id: string;
-  title: string;
-  message: string;
-  type: 'success' | 'warning' | 'error' | 'info';
-  priority: 'low' | 'medium' | 'high';
-  timestamp: string;
-}
-
-export interface DashboardData {
-  metrics: DashboardMetrics;
-  userGrowth: UserGrowthData[];
-  revenue: RevenueData[];
-  performance: PerformanceData[];
-  activities: ActivityItem[];
-  alerts: SystemAlert[];
-}
-
-export interface ApiResponse<T> {
-  data: T;
-  message?: string;
-  success?: boolean;
-}
 
 class AdminDashboardService {
   async getDashboardData(): Promise<DashboardData> {

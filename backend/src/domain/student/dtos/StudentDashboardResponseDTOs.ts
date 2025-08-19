@@ -1,4 +1,3 @@
-
 export interface AnnouncementDTO {
   id: string;
   title: string;
@@ -67,4 +66,9 @@ export interface GetUserInfoResponseDTO {
   email: string;
   profilePicture?: string;
   course?: string;
+}
+
+export interface ResponseDTO<T> {
+  data: T | { error: string };
+  success: boolean;
 }

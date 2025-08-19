@@ -563,7 +563,6 @@ export const VideoConferencePage: React.FC = () => {
       
       <TopBar sessionName={session?.name || "Video Conference"} meetingTimer={meetingTimer} />
 
-      {/* Connection Status */}
       {!mediaReady && (
         <div className="absolute top-20 left-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm z-50">
           Setting up media...
@@ -618,7 +617,6 @@ export const VideoConferencePage: React.FC = () => {
           </button>
         )}
 
-        {/* Others Modal */}
         {othersOpen && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-40 p-4">
             <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden">
@@ -695,7 +693,6 @@ export const VideoConferencePage: React.FC = () => {
         handRaised={handRaised}
       />
 
-      {/* CSS for reaction animation */}
       <style>{`
         @keyframes reaction-flow {
           0% {

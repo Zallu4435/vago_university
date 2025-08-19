@@ -41,10 +41,8 @@ export const Education = forwardRef<EducationRef, EducationProps>(({ initialData
   const methods = useFormContext();
   const { control, formState: { errors }, setValue, trigger, watch, getValues } = methods;
 
-  // Watch studentType to conditionally render sub-components
   const studentType = watch('studentType');
 
-  // Initialize form with initialData
   useEffect(() => {
     if (initialData) {
       setValue('studentType', initialData.studentType || '');
@@ -63,19 +61,15 @@ export const Education = forwardRef<EducationRef, EducationProps>(({ initialData
     }
   }, [initialData, setValue]);
 
-  // Expose trigger method to parent via ref
   useImperativeHandle(ref, () => ({
     trigger: async () => {
       try {
         const currentValues = getValues();
-        // First check if studentType is selected
         if (!currentValues.studentType) {
           return false;
         }
-        // Validate the form
         const isValid = await trigger();
         
-        // If valid, structure the data properly under education field
         if (isValid) {
           const educationData = {
             studentType: currentValues.studentType,
@@ -83,11 +77,9 @@ export const Education = forwardRef<EducationRef, EducationProps>(({ initialData
             transfer: currentValues.transfer,
             international: currentValues.international,
           };
-          // Update the education field in the form
           setValue('education', educationData, { shouldValidate: false });
         }
         
-        // Do not call onSave here; let parent handle backend update
         return isValid;
       } catch (error) {
         console.error('Education: Validation error:', error);
@@ -97,17 +89,11 @@ export const Education = forwardRef<EducationRef, EducationProps>(({ initialData
   }));
 
 const handleStudentTypeChange = (value: string) => {
-  console.log('Education: studentType changed to:', value);
-
-  // Clear all student type data first
   setValue('local', undefined);
   setValue('transfer', undefined);
   setValue('international', undefined);
-
-  // Then set the new student type
   setValue('studentType', value, { shouldValidate: true });
-}; // ← FIXED!
-
+};
 
   return (
     <ErrorBoundary>

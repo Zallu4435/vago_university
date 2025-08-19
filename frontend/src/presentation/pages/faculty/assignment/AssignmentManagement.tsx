@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import AssignmentList from './AssignmentList';
 import Submissions from './Submissions';
-import Analytics from './components/Analytics';
+import Analytics from './Analytics';
 import CreateAssignmentModal from './CreateAssignmentModal';
 import { useAssignmentManagement } from './hooks/useAssignmentManagement';
-import { NewAssignment, Submission } from './types/index';
 import { assignmentService } from './services/assignmentService';
+import { NewAssignment, Submission } from '../../../../domain/types/faculty/assignment';
 
 export default function AssignmentManagement() {
     const [activeTab, setActiveTab] = useState('all-assignments');
@@ -61,7 +61,6 @@ export default function AssignmentManagement() {
 
     const handleDownload = async (submissionId: string) => {
         if (!selectedAssignment) return;
-        // Find the submission and download its files
         const submission = submissions?.find((s: Submission) => s._id === submissionId);
         if (submission?.files && submission.files.length > 0) {
             for (const file of submission.files) {
@@ -93,7 +92,6 @@ export default function AssignmentManagement() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-8 px-2 sm:px-6">
             <div className="max-w-7xl mx-auto space-y-8">
-                {/* Header Section */}
                 <div className="flex flex-col items-center justify-center gap-4">
                     <div className="inline-flex items-center space-x-3 bg-white/95 backdrop-blur-xl rounded-3xl px-8 py-6 shadow-2xl border border-pink-100">
                         <div className="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
@@ -188,7 +186,6 @@ export default function AssignmentManagement() {
 
             </div>
 
-            {/* Create Assignment Modal */}
             {showCreateModal && (
                 <div className="fixed inset-0 z-[9999] animate-fadeIn">
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>

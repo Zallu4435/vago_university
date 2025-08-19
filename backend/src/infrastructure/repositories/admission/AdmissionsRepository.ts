@@ -248,19 +248,14 @@ export class AdmissionsRepository implements IAdmissionsRepository {
     }
 
     async getDocumentByKey(params: { userId: string; documentKey: string }) {
-        console.log('[getDocumentByKey] userId:', params.userId, 'documentKey:', params.documentKey);
         const draft = await AdmissionDraftModel.findOne({ registerId: params.userId }).lean();
-        console.log('[getDocumentByKey] fetched draft:', draft);
         if (!draft || !draft.documents) {
-            console.log('[getDocumentByKey] No draft or no documents field');
             return null;
         }
-        console.log('[getDocumentByKey] documents field:', draft.documents);
         const docsArray = Array.isArray(draft.documents.documents)
             ? draft.documents.documents
             : [];
         const found = docsArray.find((doc) => doc.id === params.documentKey);
-        console.log('[getDocumentByKey] found document:', found);
         return found || null;
     }
 }

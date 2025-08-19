@@ -60,4 +60,9 @@ export interface GetFacultyRecentActivitiesResponseDTO {
   recentActivities: RecentActivityResponseDTO[];
 }
 
+export interface ResponseDTO<T> {
+  data: T | { error: string };
+  success: boolean;
+}
+
  

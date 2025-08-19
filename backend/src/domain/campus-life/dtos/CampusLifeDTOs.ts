@@ -1,4 +1,4 @@
-import { CampusEvent, Sport, Club, JoinRequest } from "../entities/CampusLife";
+import { CampusEvent, Sport, Club } from "../entities/CampusLife";
 
 export interface GetCampusLifeOverviewRequestDTO {}
 
@@ -107,4 +107,9 @@ export interface JoinEventResponseDTO {
   requestId: string;
   status: 'pending' | 'approved' | 'rejected';
   message: string;
+}
+
+export interface ResponseDTO<T> {
+  success: boolean;
+  data: T | { error: string };
 }

@@ -16,31 +16,11 @@ import {
   ENQUIRY_ACTIONS,
   ENQUIRY_STATS,
   ENQUIRY_TABS,
+  getDateRangeFromKeyword,
 } from '../../../../shared/constants/enquiryManagementConstants';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import EmptyState from '../../../../shared/components/EmptyState';
-
-function getDateRangeFromKeyword(keyword: string): { startDate: string; endDate: string } {
-  const now = new Date();
-  let startDate = '';
-  let endDate = now.toISOString();
-  switch (keyword) {
-    case 'last_week':
-      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      break;
-    case 'last_month':
-      startDate = new Date(new Date().setMonth(now.getMonth() - 1)).toISOString();
-      break;
-    case 'last_3_months':
-      startDate = new Date(new Date().setMonth(now.getMonth() - 3)).toISOString();
-      break;
-    default:
-      startDate = '';
-      endDate = '';
-  }
-  return { startDate, endDate };
-}
 
 const EnquiryManagement: React.FC = () => {
   const {

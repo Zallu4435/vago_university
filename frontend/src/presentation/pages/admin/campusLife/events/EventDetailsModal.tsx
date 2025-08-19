@@ -5,52 +5,17 @@ import {
   IoTimeOutline as Clock, 
   IoLocationOutline as MapPin, 
   IoPeopleOutline as Users, 
-  IoPersonOutline as User, 
   IoTrophyOutline as Trophy,
   IoSparklesOutline as Sparkles,
   IoTicketOutline as Ticket,
   IoInformationCircleOutline as Info,
-  IoBusinessOutline as Building
 } from 'react-icons/io5';
 import { 
   Event, 
   EventDetailsModalProps,
-  EventDetailsStatusBadgeProps,
-  EventDetailsInfoCardProps,
-  ParticleConfig
 } from '../../../../../domain/types/management/eventmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
-
-const StatusBadge: React.FC<EventDetailsStatusBadgeProps> = ({ status }) => {
-  const statusConfig: Record<string, { bg: string; text: string; border: string }> = {
-    upcoming: { bg: 'bg-blue-600/30', text: 'text-blue-100', border: 'border-blue-500/50' },
-    completed: { bg: 'bg-green-600/30', text: 'text-green-100', border: 'border-green-500/50' },
-    cancelled: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },
-    pending: { bg: 'bg-yellow-600/30', text: 'text-yellow-100', border: 'border-yellow-500/50' },
-    approved: { bg: 'bg-green-600/30', text: 'text-green-100', border: 'border-green-500/50' },
-    rejected: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },
-  };
-
-  const config = statusConfig[status.toLowerCase()] || statusConfig.pending;
-
-  return (
-    <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.bg} ${config.text} ${config.border}`}
-    >
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </span>
-  );
-};
-
-const InfoCard: React.FC<EventDetailsInfoCardProps> = ({ icon: Icon, label, value }) => (
-  <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-4 shadow-sm">
-    <div className="flex items-center mb-2">
-      <Icon size={18} className="text-purple-300" />
-      <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
-    </div>
-    <p className="text-white font-semibold">{value || 'N/A'}</p>
-  </div>
-);
+import { ghostParticles, InfoCard, getOrganizerIcon, StatusBadge } from '../../../../../shared/constants/eventManagementConstants';
 
 const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
   isOpen,
@@ -62,27 +27,8 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
 
   if (!isOpen || !event) return null;
 
-  const getOrganizerIcon = (type: string | undefined) => {
-    switch (type) {
-      case 'department': return Building;
-      case 'club': return Users;
-      default: return User;
-    }
-  };
-
   const OrganizerIcon = getOrganizerIcon('_organizerType' in event ? event._organizerType : 'default');
-
-  const ghostParticles: ParticleConfig[] = Array(30)
-    .fill(0)
-    .map((_) => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
-
-    console.log(event, "plpopopopopopo")
+  
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       {ghostParticles.map((particle, i) => (

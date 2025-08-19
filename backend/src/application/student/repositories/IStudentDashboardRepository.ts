@@ -3,7 +3,6 @@ import { IMessage } from "../../../infrastructure/database/mongoose/models/commu
 import { IAssignmentDocument } from "../../../infrastructure/database/mongoose/assignment/AssignmentModel";
 import { IVideoSession } from "../../../infrastructure/database/mongoose/models/session.model";
 import { Event } from "../../../domain/events/entities/EventTypes";
-import { Sport } from "../../../domain/sports/entities/Sport";
 import { Club } from "../../../domain/clubs/entities/ClubTypes";
 
 export type LeanMessage = Omit<IMessage, keyof Document>;

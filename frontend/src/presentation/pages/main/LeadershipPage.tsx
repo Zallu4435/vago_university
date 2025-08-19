@@ -4,6 +4,8 @@ import { FaArrowLeft, FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
 import { useLeadership, useLeadershipCategories } from '../../../application/hooks/useSiteSections';
 import { SiteSection } from '../../../application/services/siteSections.service';
 import SiteSectionModal from '../../components/public/SiteSectionModal';
+import LoadingSpinner from '../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../shared/components/ErrorMessage';
 
 export const LeadershipPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,30 +56,7 @@ export const LeadershipPage: React.FC = () => {
     }, 0);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-cyan-50 via-white to-cyan-50 pt-20">
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading leadership information...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-cyan-50 via-white to-cyan-50 pt-20">
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="text-center">
-            <p className="text-red-600">Failed to load leadership information. Please try again later.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const errorMessage = error instanceof Error ? error.message : (error ? 'Failed to load leadership information. Please try again later.' : null);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cyan-50 via-white to-cyan-50">
@@ -102,7 +81,6 @@ export const LeadershipPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Search and Filter Bar */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -147,9 +125,12 @@ export const LeadershipPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        {!leadership || leadership.length === 0 ? (
+        {errorMessage ? (
+          <ErrorMessage message={errorMessage} />
+        ) : isLoading ? (
+          <div className="py-12"><LoadingSpinner /></div>
+        ) : !leadership || leadership.length === 0 ? (
           <div className="text-center py-12">
             <FaSearch className="text-6xl text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-600 mb-2">No leadership found</h3>
@@ -193,7 +174,6 @@ export const LeadershipPage: React.FC = () => {
         )}
       </div>
 
-      {/* Modal */}
       <SiteSectionModal
         item={selectedLeader}
         isOpen={isModalOpen}

@@ -3,6 +3,7 @@ import { FiX, FiUser, FiMail, FiBook, FiAward, FiClock, FiFileText, FiDownload, 
 import { facultyService } from '../../../../application/services/faculty.service';
 import { FacultyDetailsModalProps } from '../../../../domain/types/management/facultyManagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
+import { ghostParticles } from '../../../../shared/constants/facultyManagementConstants';
 
 const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClose, faculty, onBlockToggle }) => {
 
@@ -89,16 +90,6 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
     }
   };
 
-  const ghostParticles = Array(30)
-    .fill(0)
-    .map((_) => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
-
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       {ghostParticles.map((particle, i) => (
@@ -150,11 +141,6 @@ const FacultyDetailsModal: React.FC<FacultyDetailsModalProps> = ({ isOpen, onClo
               {typeof faculty.blocked === 'boolean' && onBlockToggle && (
                 <button
                   onClick={() => {
-                    console.log('Block button clicked:', {
-                      facultyId: faculty._id,
-                      currentBlockedStatus: faculty.blocked,
-                      facultyStatus: faculty.status
-                    });
                     onBlockToggle(faculty._id, faculty.blocked ?? false);
                   }}
                   disabled={faculty.status?.toLowerCase() !== 'approved'}

@@ -16,15 +16,7 @@ export const Other_Info_Two: React.FC<OtherInfoTwoProps> = ({ onBack, onNext }) 
   };
 
   const handleNext = async () => {
-    console.log('Other_Info_Two: Current values before validation:', {
-      hasCriminalRecord: watch('legal.hasCriminalRecord'),
-      criminalRecord: watch('legal.criminalRecord'),
-    });
     const isValid = await trigger('legal', { shouldFocus: true });
-    console.log('Other_Info_Two: Validation result:', { 
-      isValid, 
-      errors: errors.legal ? JSON.stringify(errors.legal, null, 2) : 'No errors' 
-    });
     if (isValid) {
       onNext();
     }

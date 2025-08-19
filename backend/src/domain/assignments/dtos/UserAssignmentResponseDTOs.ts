@@ -60,3 +60,8 @@ export interface GetUserAssignmentFeedbackResponseDTO {
   score: number;
   reviewedAt: Date;
 } 
+
+export interface ResponseDTO<T> {
+  data: T | { error: string };
+  success: boolean;
+}

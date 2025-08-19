@@ -14,7 +14,6 @@ import {
 } from "../../../domain/clubs/dtos/ClubResponseDTOs";
 import { UpdateClubRequest } from "../../../domain/clubs/entities/Club";
 import { IClubsRepository } from "../repositories/IClubsRepository";
-import mongoose from "mongoose";
 
 export interface IGetClubsUseCase {
   execute(dto: GetClubsRequestDTO): Promise<GetClubsResponseDTO>;
@@ -36,6 +35,9 @@ export interface IDeleteClubUseCase {
   execute(dto: DeleteClubRequestDTO): Promise<{ message: string }>;
 }
 
+function isValidObjectId(id: string): boolean {
+  return typeof id === 'string' && /^[a-fA-F0-9]{24}$/.test(id);
+}
 
 export class GetClubsUseCase implements IGetClubsUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
@@ -75,7 +77,7 @@ export class GetClubByIdUseCase implements IGetClubByIdUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(dto: GetClubByIdRequestDTO): Promise<GetClubByIdResponseDTO> {
-    if (!mongoose.isValidObjectId(dto.id)) {
+    if (!isValidObjectId(dto.id)) {
       throw new Error("Invalid club ID");
     }
     const club = await this.clubsRepository.getById(dto.id);
@@ -101,7 +103,7 @@ export class UpdateClubUseCase implements IUpdateClubUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(dto: UpdateClubRequestDTO): Promise<UpdateClubResponseDTO> {
-    if (!mongoose.isValidObjectId(dto.id)) {
+    if (!isValidObjectId(dto.id)) {
       throw new Error("Invalid club ID");
     }
     const { id, ...updateData } = dto;
@@ -119,7 +121,7 @@ export class DeleteClubUseCase implements IDeleteClubUseCase {
   constructor(private clubsRepository: IClubsRepository) { }
 
   async execute(dto: DeleteClubRequestDTO): Promise<{ message: string }> {
-    if (!mongoose.isValidObjectId(dto.id)) {
+    if (!isValidObjectId(dto.id)) {
       throw new Error("Invalid club ID");
     }
     await this.clubsRepository.deleteById(dto.id);

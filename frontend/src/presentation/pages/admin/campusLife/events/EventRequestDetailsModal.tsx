@@ -16,39 +16,10 @@ import {
 } from 'react-icons/io5';
 import { 
   EventRequestDetailsModalProps,
-  EventRequestDetailsStatusBadgeProps,
-  EventRequestDetailsInfoCardProps,
 } from '../../../../../domain/types/management/eventmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate, formatDateTime } from '../../../../../shared/utils/dateUtils';
-
-const StatusBadge: React.FC<EventRequestDetailsStatusBadgeProps> = ({ status }) => {
-  const statusConfig: Record<string, { bg: string; text: string; border: string }> = {
-    pending: { bg: 'bg-yellow-600/30', text: 'text-yellow-100', border: 'border-yellow-500/50' },
-    approved: { bg: 'bg-green-600/30', text: 'text-green-100', border: 'border-green-500/50' },
-    rejected: { bg: 'bg-red-600/30', text: 'text-red-100', border: 'border-red-500/50' },
-  };
-
-  const config = statusConfig[status?.toLowerCase()] || statusConfig.pending;
-
-  return (
-    <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.bg} ${config.text} ${config.border}`}
-    >
-      {status?.charAt(0)?.toUpperCase() + status?.slice(1)}
-    </span>
-  );
-};
-
-const InfoCard: React.FC<EventRequestDetailsInfoCardProps> = ({ icon: Icon, label, value }) => (
-  <div className="bg-gray-800/80 border border-purple-500/30 rounded-lg p-4 shadow-sm">
-    <div className="flex items-center mb-2">
-      <Icon size={18} className="text-purple-300" />
-      <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
-    </div>
-    <p className="text-white font-semibold">{value || 'N/A'}</p>
-  </div>
-);
+import { RequestStatusBadge, RequestInfoCard } from '../../../../../shared/constants/eventManagementConstants';
 
 const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
   isOpen,
@@ -73,7 +44,7 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
               <h2 className="text-xl font-bold text-purple-100">{request.event?.title || request.eventName}</h2>
               <p className="text-xs text-purple-300 mt-1">Request ID: {request.id}</p>
               <div className="flex items-center mt-1 space-x-2">
-                <StatusBadge status={request.status} />
+                <RequestStatusBadge status={request.status} />
               </div>
             </div>
           </div>
@@ -86,14 +57,14 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
         </div>
         <div className="p-6 max-h-[70vh] overflow-y-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <InfoCard icon={User} label="Requested By" value={request.user?.name || request.requestedBy} />
-            <InfoCard icon={Mail} label="Email" value={request.user?.email || 'N/A'} />
-            <InfoCard icon={MapPin} label="Venue" value={request.event?.location || request.proposedVenue || 'N/A'} />
-            <InfoCard icon={Calendar} label="Event Date" value={request.event?.date ? formatDate(request.event.date) : (request.proposedDate ? formatDate(request.proposedDate) : 'N/A')} />
-            <InfoCard icon={Clock} label="Requested At" value={formatDateTime(request.createdAt || request.requestedAt || '')} />
-            <InfoCard icon={Users} label="Expected Participants" value={request.expectedParticipants?.toString() || 'N/A'} />
-            <InfoCard icon={DocumentText} label="Type" value={request.type || 'N/A'} />
-            <InfoCard icon={Info} label="Status" value={request.status} />
+            <RequestInfoCard icon={User} label="Requested By" value={request.user?.name || request.requestedBy} />
+            <RequestInfoCard icon={Mail} label="Email" value={request.user?.email || 'N/A'} />
+            <RequestInfoCard icon={MapPin} label="Venue" value={request.event?.location || request.proposedVenue || 'N/A'} />
+            <RequestInfoCard icon={Calendar} label="Event Date" value={request.event?.date ? formatDate(request.event.date) : (request.proposedDate ? formatDate(request.proposedDate) : 'N/A')} />
+            <RequestInfoCard icon={Clock} label="Requested At" value={formatDateTime(request.createdAt || request.requestedAt || '')} />
+            <RequestInfoCard icon={Users} label="Expected Participants" value={request.expectedParticipants?.toString() || 'N/A'} />
+            <RequestInfoCard icon={DocumentText} label="Type" value={request.type || 'N/A'} />
+            <RequestInfoCard icon={Info} label="Status" value={request.status} />
           </div>
 
           <div className="mb-6">

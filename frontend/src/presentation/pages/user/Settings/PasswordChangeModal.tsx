@@ -1,15 +1,6 @@
 import { useState, useEffect } from "react";
 import { FaCheck, FaEye, FaEyeSlash, FaShieldAlt, FaTimes } from "react-icons/fa";
-
-interface PasswordChangeModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onPasswordChange: (passwords: {
-    currentPassword: string;
-    newPassword: string;
-    confirmPassword: string;
-  }) => void;
-}
+import { PasswordChangeModalProps } from "../../../../domain/types/settings/user";
 
 export const PasswordChangeModal = ({
   isOpen,

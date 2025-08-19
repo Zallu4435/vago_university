@@ -1,14 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { FiImage, FiCamera, FiFile, FiMapPin } from 'react-icons/fi';
-import { Styles } from '../types/ChatTypes';
-
-interface AttachmentMenuProps {
-  styles: Styles;
-  showAttachmentMenu: boolean;
-  onFileSelect: () => void;
-  onCameraSelect: () => void;
-  onClose: () => void;
-}
+import { AttachmentMenuProps } from '../../../../../domain/types/canvas/chat';
 
 export const AttachmentMenu: React.FC<AttachmentMenuProps> = ({
   styles,

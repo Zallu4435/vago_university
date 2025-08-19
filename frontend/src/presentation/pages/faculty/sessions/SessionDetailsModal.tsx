@@ -3,11 +3,7 @@ import { FaCheck, FaChalkboardTeacher, FaBook, FaCalendarAlt, FaHourglassHalf, F
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { RootState } from '../../../../appStore/store';
-
-interface SessionDetailsModalProps {
-  session: any;
-  onClose: () => void;
-}
+import { SessionDetailsModalProps } from '../../../../domain/types/faculty/attendence';
 
 const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({ session, onClose }) => {
   const [copied, setCopied] = useState(false);

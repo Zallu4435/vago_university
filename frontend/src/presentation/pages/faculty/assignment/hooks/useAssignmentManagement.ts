@@ -1,16 +1,14 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { assignmentService } from '../services/assignmentService';
-import { Assignment, NewAssignment, Submission } from '../types/index';
+import { Assignment, NewAssignment, Submission } from '../../../../../domain/types/faculty/assignment';
 
-// Accept search/filter as arguments
 export const useAssignmentManagement = ({ searchTerm, filterStatus, filterSubject }: { searchTerm: string, filterStatus: string, filterSubject: string }) => {
     const queryClient = useQueryClient();
     const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
     const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
     const [showAnalytics, setShowAnalytics] = useState(false);
 
-    // Queries
     const { data: assignments, isLoading: isLoadingAssignments, error: assignmentsError } = useQuery({
         queryKey: ['assignments', searchTerm, filterStatus, filterSubject],
         queryFn: () => assignmentService.getAssignments({
@@ -32,7 +30,6 @@ export const useAssignmentManagement = ({ searchTerm, filterStatus, filterSubjec
         enabled: showAnalytics
     });
 
-    // Mutations
     const createAssignmentMutation = useMutation({
         mutationFn: assignmentService.createAssignment,
         onSuccess: () => {
@@ -117,7 +114,6 @@ export const useAssignmentManagement = ({ searchTerm, filterStatus, filterSubjec
 
 
     return {
-        // State
         assignments: assignments?.assignments || [],
         submissions: submissions?.submissions || [],
         analytics,
@@ -126,19 +122,16 @@ export const useAssignmentManagement = ({ searchTerm, filterStatus, filterSubjec
         showAnalytics,
         isLoading: isLoadingAssignments || isLoadingSubmissions || (showAnalytics && isLoadingAnalytics),
         error: assignmentsError,
-        // Setters
+
         setSelectedAssignment,
         setSelectedSubmission,
         setShowAnalytics,
-        // Remove search/filter state from here
 
-        // Handlers
         handleCreateAssignment,
         handleUpdateAssignment,
         handleDeleteAssignment,
         handleReviewSubmission,
 
-        // Mutations state
         isCreating: createAssignmentMutation.isPending,
         isUpdating: updateAssignmentMutation.isPending,
         isDeleting: deleteAssignmentMutation.isPending,

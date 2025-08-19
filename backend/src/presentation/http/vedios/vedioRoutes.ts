@@ -34,7 +34,6 @@ router.put(
     authMiddleware,
     contentVideoUploadWithErrorHandling,
     (req: Request, res: Response, next: NextFunction) => {
-        console.log('🎬 [ROUTE] PUT /videos/:id - Video update route hit');
         expressAdapter(req, res, next, videoController.updateVideo.bind(videoController));
     }
 );

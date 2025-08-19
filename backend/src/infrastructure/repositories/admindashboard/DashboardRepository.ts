@@ -15,7 +15,6 @@ import { CampusEventModel } from '../../database/mongoose/models/events/CampusEv
 import { ClubModel } from '../../database/mongoose/models/clubs/ClubModel';
 import { PerformanceRawData, RecentAdmissionRaw, RecentPaymentRaw, RecentEnquiryRaw, RecentNotificationRaw } from '../../../domain/admindashboard/entities/AdminDashboardTypes';
 
-// Type for converting ObjectIds to strings
 type WithStringId<T> = Omit<T, "_id"> & { _id: string };
 type WithStringIdArray<T> = WithStringId<T>[];
 

@@ -6,7 +6,6 @@ export default function AcademicInfo({ major = 'Computer Science', academicStand
 
   return (
     <div className={`relative overflow-hidden border-b ${styles.borderSecondary}`}>
-      {/* Background layers */}
       <div className={`absolute inset-0 bg-gradient-to-br ${styles.accentSecondary} backdrop-blur-md`}></div>
       <div className={`absolute inset-0 bg-gradient-to-r ${styles.orb.secondary}`}></div>
       <div className={`absolute -top-4 sm:-top-8 -left-4 sm:-left-8 w-24 h-24 sm:w-48 sm:h-48 rounded-full bg-gradient-to-br ${styles.orb.primary} blur-2xl sm:blur-3xl animate-pulse`}></div>
@@ -14,11 +13,9 @@ export default function AcademicInfo({ major = 'Computer Science', academicStand
 
       <div className="w-full sm:px-4 md:px-4 py-4 sm:py-6 relative z-10">
         <div className={`group relative overflow-hidden rounded-xl sm:rounded-2xl shadow-xl ${styles.card.background} hover:${styles.card.hover} transition-all duration-300 border ${styles.border}`}>
-          {/* Background glow */}
           <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-xl sm:rounded-2xl blur transition-all duration-300`}></div>
 
           <div className="relative z-10 p-4 sm:p-5 md:p-6">
-            {/* Enhanced header */}
             <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-4">
               <div className="relative">
                 <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br ${styles.accent} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
@@ -35,7 +32,6 @@ export default function AcademicInfo({ major = 'Computer Science', academicStand
               </div>
             </div>
 
-            {/* Content */}
             <p className={`${styles.textSecondary} text-xs sm:text-sm md:text-sm`}>
               <span className="font-medium">Current Major:</span> {major} |{' '}
               <span className="font-medium">Academic Standing:</span> {academicStanding} |{' '}

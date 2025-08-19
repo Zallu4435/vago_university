@@ -2,20 +2,9 @@ import { useState, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { communicationService } from '../../application/services/communicationService';
 import debounce from 'lodash/debounce';
-import { Message, MessageForm } from '../../domain/types/user/communication';
+import { Message, MessageForm, UseCommunicationManagementProps } from '../../domain/types/user/communication';
+import { RecipientType, User } from '../../domain/types/management/communicationmanagement';
 
-interface UseCommunicationManagementProps {
-  isAdmin?: boolean;
-}
-
-type RecipientType = '' | 'all_students' | 'all_faculty' | 'all_users' | 'individual_students' | 'individual_faculty';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-}
 
 export const useCommunicationManagement = ({ isAdmin = false }: UseCommunicationManagementProps = {}) => {
   const [page, setPage] = useState(1);
@@ -127,18 +116,6 @@ export const useCommunicationManagement = ({ isAdmin = false }: UseCommunication
 
   const mapMessage = (msg: any) => {
     try {
-
-      if (process.env.NODE_ENV === 'development') {
-        console.log('mapMessage input:', {
-          _id: msg._id,
-          id: msg.id,
-          hasSender: !!msg.sender,
-          senderId: msg.sender?._id || msg.sender?.id,
-          recipientsType: typeof msg.recipients,
-          recipientsLength: Array.isArray(msg.recipients) ? msg.recipients.length : 'N/A'
-        });
-
-      }
 
       const messageId = msg._id || msg.id || msg._id?.toString() || msg.id?.toString();
 

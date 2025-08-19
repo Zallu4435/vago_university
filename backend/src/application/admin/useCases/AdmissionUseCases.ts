@@ -15,6 +15,7 @@ import {
     RejectAdmissionResponseDTO,
     DeleteAdmissionResponseDTO,
     ConfirmAdmissionOfferResponseDTO,
+    ResponseDTO
 } from "../../../domain/admin/dtos/AdmissionResponseDTOs";
 import { IAdmissionRepository } from "../repositories/IAdmissionRepository";
 import { IEmailService } from "../../auth/service/IEmailService";
@@ -24,15 +25,9 @@ import {
     AdminRegisterUserNotFoundError,
     AdminTokenExpiredError,
     AdminInvalidTokenError,
-
 } from '../../../domain/admin/errors/AdminAdmissionErrors';
 import { AdminAdmissionStatus } from "../../../domain/admin/entities/AdminAdmissionTypes";
 import { User } from "../../../domain/auth/entities/Auth";
-
-interface ResponseDTO<T> {
-    data: T | { error: string };
-    success: boolean;
-}
 
 export interface IGetAdmissionsUseCase {
     execute(params: GetAdmissionsRequestDTO): Promise<ResponseDTO<GetAdmissionsResponseDTO>>;
@@ -70,17 +65,14 @@ export class GetAdmissionsUseCase implements IGetAdmissionsUseCase {
     constructor(private repo: IAdmissionRepository) { }
 
     async execute(p: GetAdmissionsRequestDTO): Promise<ResponseDTO<GetAdmissionsResponseDTO>> {
-        /* ---------- build filter ---------- */
         const filter: Record<string, unknown> = {};
 
-        // status
         if (p.status && !p.status.startsWith("all")) {
             filter.status = p.status === "approved"
                 ? { $in: ["approved", "offered"] }
                 : p.status;
         }
 
-        // program
         if (p.program && !p.program.startsWith("all")) {
             const prog = p.program
                 .toLowerCase()
@@ -92,7 +84,6 @@ export class GetAdmissionsUseCase implements IGetAdmissionsUseCase {
             };
         }
 
-        // date range
         if (p.dateRange && !p.dateRange.startsWith("all")) {
             const now = new Date();
             const days = { last_week: 7, last_month: 30, last_3_months: 90 }[p.dateRange];
@@ -106,7 +97,6 @@ export class GetAdmissionsUseCase implements IGetAdmissionsUseCase {
             }
         }
 
-        // text search
         if (p.search?.trim()) {
             const q = p.search.trim();
             filter.$or = [
@@ -115,7 +105,6 @@ export class GetAdmissionsUseCase implements IGetAdmissionsUseCase {
             ];
         }
 
-        /* ---------- paging ---------- */
         const skip = (p.page - 1) * p.limit;
         const proj = {
             _id: 1,
@@ -126,13 +115,11 @@ export class GetAdmissionsUseCase implements IGetAdmissionsUseCase {
             choiceOfStudy: 1,
         };
 
-        /* ---------- query db ---------- */
         const [rawAdmissions, total] = await Promise.all([
             this.repo.find(filter, proj, skip, p.limit),
             this.repo.count(filter),
         ]);
 
-        /* ---------- enrich & map ---------- */
         const admissions = await Promise.all(
             rawAdmissions.map(async (a) => {
                 const email = a.personal?.emailAddress;

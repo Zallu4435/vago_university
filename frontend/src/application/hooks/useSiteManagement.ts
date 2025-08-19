@@ -39,7 +39,6 @@ export const useSiteManagement = (
   const createSection = useMutation({
     mutationFn: (data: CreateSiteSectionData) => siteManagementService.createSection(data),
     onSuccess: (data) => {
-      console.log(data, "kaojspaijsoiajs")
       queryClient.invalidateQueries({ queryKey: ['site-sections', data.sectionKey] });
       toast.success(`${data.sectionKey === 'highlights' ? 'Highlight' : data.sectionKey === 'vagoNow' ? 'VAGO Now' : 'Leadership'} created successfully`);
     },
@@ -50,9 +49,7 @@ export const useSiteManagement = (
     mutationFn: ({ id, data }: { id: string; data: UpdateSiteSectionData }) => 
       siteManagementService.updateSection(id, data),
     onSuccess: (data) => {
-  
-      console.log('[updateSection onSuccess] sectionKey:', data.sectionKey);
-      const key = data.sectionKey || activeTab;
+        const key = data.sectionKey || activeTab;
       queryClient.setQueryData(['site-sections', key, page], (oldSections: SiteSection[] | undefined) => {
         if (!oldSections) return oldSections;
         return oldSections.map(section => section.id === data.id ? { ...data, sectionKey: key } : section);
@@ -81,14 +78,11 @@ export const useSiteManagement = (
   const createLeadership = (data: Omit<CreateSiteSectionData, 'sectionKey'>) => 
     createSection.mutateAsync({ ...data, sectionKey: 'leadership' });
 
-  // Handler functions
   const handleViewSection = (sectionId: string) => {
-    console.log("Viewing section:", sectionId);
     setSelectedId(sectionId);
   };
 
   const handleEditSection = (sectionId: string) => {
-    console.log("Editing section:", sectionId);
     setSelectedId(sectionId);
   };
 
@@ -99,21 +93,21 @@ export const useSiteManagement = (
     setPage,
     selectedId,
     setSelectedId,
-    sections, // Single sections array for current tab
-    selectedSection, // Individual section data
+    sections, 
+    selectedSection, 
     isLoading,
     isLoadingSection,
     error,
     sectionError,
-    // Unified CRUD
+
     createSection,
     updateSection,
     deleteSection,
-    // Convenience methods
+
     createHighlight,
     createVagoNow,
     createLeadership,
-    // Handler functions
+
     handleViewSection,
     handleEditSection,
   };

@@ -5,6 +5,7 @@ import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScr
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { diplomaSchema, DiplomaFormData } from '../../../../domain/validation/management/diplomaSchema';
+import { ghostParticles } from '../../../../shared/constants/diplomaManagementConstants';
 
 const DiplomaForm: React.FC<DiplomaFormProps> = ({
   isOpen,
@@ -63,14 +64,6 @@ const DiplomaForm: React.FC<DiplomaFormProps> = ({
   };
 
   if (!isOpen) return null;
-
-  const ghostParticles = Array(20).fill(0).map((_) => ({
-    size: Math.random() * 8 + 4,
-    top: Math.random() * 100,
-    left: Math.random() * 100,
-    animDuration: Math.random() * 10 + 10,
-    animDelay: Math.random() * 5,
-  }));
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">

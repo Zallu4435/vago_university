@@ -1,15 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Theme } from '../domain/types/theme';
+import { ThemeType } from '../domain/types/config/types';
 
-const getInitialTheme = (): Theme => {
+const getInitialTheme = (): ThemeType => {
     const savedTheme = localStorage.getItem('theme');
     return savedTheme && ['light', 'dark', 'sepia', 'high-contrast'].includes(savedTheme)
-        ? (savedTheme as Theme)
+        ? (savedTheme as ThemeType)
         : 'light';
 };
 
 interface ThemeState {
-    theme: Theme;
+    theme: ThemeType;
 }
 
 const initialState: ThemeState = {
@@ -20,7 +20,7 @@ const themeSlice = createSlice({
     name: 'theme',
     initialState,
     reducers: {
-        setTheme: (state, action: PayloadAction<Theme>) => {
+        setTheme: (state, action: PayloadAction<ThemeType>) => {
             state.theme = action.payload;
             localStorage.setItem('theme', action.payload);
         }

@@ -4,15 +4,8 @@ import { toast } from 'react-hot-toast';
 import { notificationService } from '../services/notification.service';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../appStore/store';
-import { User } from '../../domain/types/userTypes';
-import { Notification } from '../../domain/types/management/notificationmanagement';
-
-interface Filters {
-  recipientType: string;
-  status: string;
-  dateRange: string;
-  search?: string;
-}
+import { Filters, Notification } from '../../domain/types/management/notificationmanagement';
+import { User } from '../../domain/types/auth/Login';
 
 export const useNotificationManagement = () => {
   const queryClient = useQueryClient();

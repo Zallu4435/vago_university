@@ -1,6 +1,5 @@
-// src/application/services/club.service.ts
 import httpClient from '../../frameworks/api/httpClient';
-import { Club, ClubRequest, ClubApiResponse, ClubResponse, ClubRequestResponse } from '../../domain/types/club';
+import { Club, ClubRequest, ClubApiResponse, ClubResponse, ClubRequestResponse } from '../../domain/types/management/clubmanagement';
 import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 
 class ClubService {
@@ -28,7 +27,6 @@ class ClubService {
   async getClubDetails(id: string): Promise<Club> {
     try {
       const response = await httpClient.get<ClubResponse>(`/admin/clubs/${id}`);
-      console.log(response.data, "[md[lsmsl[ms[lms[ldm")
       return response.data.data.club;
     } catch (error: unknown) {
       if (isAxiosErrorWithApiError(error)) {
@@ -80,9 +78,9 @@ class ClubService {
     status?: string,
     dateRange?: string,
     search?: string
-  ): Promise<ClubApiResponse['data']> {
+  ): Promise<{ clubRequests: ClubRequest[]; totalItems: number; totalPages: number; currentPage: number }> {
     try {
-      const response = await httpClient.get<ClubApiResponse>('/admin/club-requests', {
+      const response = await httpClient.get<{ data: { clubRequests: ClubRequest[]; totalItems: number; totalPages: number; currentPage: number } }>('/admin/club-requests', {
         params: { page, limit, category, status, dateRange, search },
       });
       return response.data.data;

@@ -4,7 +4,7 @@ import { FaCamera, FaUser, FaShieldAlt, FaPhone, FaEnvelope, FaIdCard, FaUserAlt
 import { FiX, FiEdit, FiSave } from 'react-icons/fi';
 import { ProfilePictureModal } from './ProfilePictureModal';
 import { PasswordChangeModal } from './PasswordChangeModal';
-import { ProfileData, PasswordChangeData } from '../../../../domain/types/profile';
+import { ProfileData, PasswordChangeData } from '../../../../domain/types/settings/user';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 
@@ -240,11 +240,9 @@ export default function ProfileSettings() {
     );
   }
 
-  // Main profile view
   return (
     <div className="flex-1 p-8">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm h-full overflow-hidden">
-        {/* Header */}
         <div className="bg-gradient-to-r from-sky-50 to-slate-50 p-6 border-b border-slate-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -263,7 +261,6 @@ export default function ProfileSettings() {
         </div>
 
         <div className="p-6 space-y-6">
-          {/* Profile Card */}
           <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 hover:shadow-sm transition-all duration-200">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
@@ -314,7 +311,6 @@ export default function ProfileSettings() {
             </div>
           </div>
 
-          {/* Form Section */}
           <div className="bg-slate-50 rounded-xl border border-slate-200 p-6">
             <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
               <div className="w-6 h-6 bg-sky-500 rounded-lg flex items-center justify-center mr-3">
@@ -386,7 +382,6 @@ export default function ProfileSettings() {
               </div>
             </div>
 
-            {/* Password Section */}
             <div className="border-t border-slate-200 pt-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
@@ -408,7 +403,6 @@ export default function ProfileSettings() {
               </div>
             </div>
 
-            {/* Save Button */}
             {isEditing && (
               <div className="flex justify-end pt-6 border-t border-slate-200">
                 <button
@@ -424,7 +418,6 @@ export default function ProfileSettings() {
         </div>
       </div>
 
-      {/* Modals */}
       <ProfilePictureModal
         isOpen={showProfileModal}
         onClose={() => setShowProfileModal(false)}

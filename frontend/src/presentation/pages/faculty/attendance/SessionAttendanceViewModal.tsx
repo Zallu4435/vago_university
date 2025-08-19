@@ -1,33 +1,6 @@
 import React from 'react';
 import { FaCheck, FaTimes, FaExclamationTriangle, FaClock } from 'react-icons/fa';
-
-interface AttendanceInterval {
-  joinedAt: string;
-  leftAt?: string;
-}
-
-interface AttendanceUser {
-  id: number;
-  username: string;
-  email: string;
-  intervals: AttendanceInterval[];
-  attendancePercentage: number;
-}
-
-interface Session {
-  endTime?: string;
-}
-
-interface SessionAttendanceViewModalProps {
-  selectedUser: AttendanceUser | null;
-  currentSession: Session | undefined;
-  attendanceDecisions: Map<string, string>;
-  closeIntervalModal: () => void;
-  formatDuration: (ms: number) => string;
-  calculateTotalTime: (intervals: AttendanceInterval[], sessionEndTime?: string) => number;
-  formatTime: (timestamp: string) => string;
-  getAttendanceRecommendation: (percentage: number) => string;
-}
+import { AttendanceInterval, SessionAttendanceViewModalProps } from '../../../../domain/types/faculty/attendence';
 
 const getStatusBadge = (status: string | undefined) => {
   switch (status) {
@@ -73,7 +46,7 @@ const SessionAttendanceViewModal: React.FC<SessionAttendanceViewModalProps> = ({
   if (!selectedUser) return null;
 
   const decision = attendanceDecisions.get(selectedUser.id.toString());
-  const recommendation = getAttendanceRecommendation(selectedUser.attendancePercentage);
+  const recommendation = getAttendanceRecommendation(selectedUser.attendancePercentage ?? 0);
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
@@ -85,7 +58,7 @@ const SessionAttendanceViewModal: React.FC<SessionAttendanceViewModalProps> = ({
               Session Details for {selectedUser.username}
             </h3>
             <div className="flex items-center gap-3 mt-2">
-              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold shadow ${getAttendanceColor(selectedUser.attendancePercentage)}`}>
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold shadow ${getAttendanceColor(selectedUser.attendancePercentage ?? 0)}`}>
                 <FaClock className="w-3 h-3 mr-1" />
                 {selectedUser.attendancePercentage}% Attendance
               </span>

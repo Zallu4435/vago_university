@@ -1,5 +1,5 @@
 import httpClient from '../../frameworks/api/httpClient';
-import { ProfileData, PasswordChangeData } from '../../domain/types/profile';
+import { ProfileData, PasswordChangeData } from '../../domain/types/settings/user';
 import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 
 class ProfileService {

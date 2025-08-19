@@ -1,41 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { studentDashboardService, Announcement, Deadline, ClassInfo, NewEvent, CalendarDayEntry } from '../services/studentDashboardService';
+import { studentDashboardService } from '../services/studentDashboardService';
+import { StudentDashboardData, StudentInfo } from '../../domain/types/dashboard/user';
 
-interface StudentInfo {
-  name: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  course?: string;
-  profilePicture?: string;
-}
-
-type StudentDashboardData = {
-  announcements: Announcement[];
-  deadlines: Deadline[];
-  classes: ClassInfo[];
-  newEvents: NewEvent[];
-  calendarDays: Record<number, CalendarDayEntry[]>;
-  isLoading: boolean;
-  isLoadingAnnouncements: boolean;
-  isLoadingDeadlines: boolean;
-  isLoadingClasses: boolean;
-  isLoadingNewEvents: boolean;
-  isLoadingCalendarDays: boolean;
-  hasError: boolean;
-  dashboardError: unknown;
-  announcementsError: unknown;
-  deadlinesError: unknown;
-  classesError: unknown;
-  newEventsError: unknown;
-  calendarDaysError: unknown;
-  refetchDashboard: () => Promise<void>;
-  refetchAnnouncements: () => Promise<void>;
-  refetchDeadlines: () => Promise<void>;
-  refetchClasses: () => Promise<void>;
-  refetchNewEvents: () => Promise<void>;
-  refetchCalendarDays: () => Promise<void>;
-};
 
 export const useStudentDashboard = (): StudentDashboardData & {
   studentInfo?: StudentInfo;
@@ -56,7 +22,6 @@ export const useStudentDashboard = (): StudentDashboardData & {
 
   const dashboard: Partial<StudentDashboardData> = data || {};
 
-  // Helper to wrap refetch to always return Promise<void>
   const safeRefetch = () => refetch().then(() => {});
 
   return {

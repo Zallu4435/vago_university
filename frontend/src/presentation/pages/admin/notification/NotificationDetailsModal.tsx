@@ -1,68 +1,15 @@
 import React from 'react';
 import { IoCloseOutline as X, IoCalendarOutline as Calendar, IoPersonOutline as User, IoInformationCircleOutline as Info } from 'react-icons/io5';
-import { NotificationDetailsModalProps, StatusBadgeProps, InfoCardProps } from '../../../../domain/types/management/notificationmanagement';
+import { NotificationDetailsModalProps } from '../../../../domain/types/management/notificationmanagement';
 import { usePreventBodyScroll } from '../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate } from '../../../../shared/utils/dateUtils';
-
-const StatusBadge = ({ status }: StatusBadgeProps) => {
-  const statusConfig = {
-    sent: {
-      bg: 'bg-green-600/30',
-      text: 'text-green-100',
-      border: 'border-green-500/50',
-    },
-    failed: {
-      bg: 'bg-red-600/30',
-      text: 'text-red-100',
-      border: 'border-red-500/50',
-    },
-    pending: {
-      bg: 'bg-yellow-600/30',
-      text: 'text-yellow-100',
-      border: 'border-yellow-500/50',
-    },
-  };
-
-  const config = statusConfig[status?.toLowerCase() as keyof typeof statusConfig] || statusConfig.pending;
-
-  return (
-    <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.bg} ${config.text} ${config.border}`}
-    >
-      <span
-        className="h-1.5 w-1.5 rounded-full mr-1.5"
-        style={{ boxShadow: `0 0 8px currentColor`, backgroundColor: 'currentColor' }}
-      ></span>
-      {status?.charAt(0).toUpperCase() + status?.slice(1)}
-    </span>
-  );
-};
-
-const InfoCard = ({ icon: Icon, label, value }: InfoCardProps) => (
-  <div className="bg-gray-800/80 border border-purple-600/30 rounded-lg p-4 shadow-sm">
-    <div className="flex items-center mb-2">
-      <Icon size={18} className="text-purple-300" />
-      <span className="ml-2 text-sm font-medium text-purple-300">{label}</span>
-    </div>
-    <p className="text-white font-semibold">{value || 'N/A'}</p>
-  </div>
-);
+import { InfoCard, StatusBadge, ghostParticles } from "../../../../shared/constants/materialManagementConstants"
 
 const NotificationDetailsModal: React.FC<NotificationDetailsModalProps> = ({ isOpen, onClose, notification }) => {
   
   usePreventBodyScroll(isOpen);
 
   if (!isOpen || !notification) return null;
-
-  const ghostParticles = Array(30)
-    .fill(0)
-    .map((_) => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">

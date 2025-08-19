@@ -1,4 +1,3 @@
-// frontend/src/application/services/user.service.ts
 import { AdmissionApiResponse, AdmissionDetails, AdmissionDetailsResponse } from '../../domain/types/management/usermanagement';
 import httpClient from '../../frameworks/api/httpClient';
 import { isAxiosErrorWithApiError } from '../../shared/types/apiError';

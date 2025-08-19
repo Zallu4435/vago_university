@@ -94,4 +94,39 @@ export const columnsMap: Record<SiteSectionKey, unknown[]> = {
   highlights: createColumns('highlights'),
   vagoNow: createColumns('vagoNow'),
   leadership: createColumns('leadership'),
-}; 
+};
+
+export const filterOptions: { [key: string]: string[] } = {
+  category: [
+    'All Categories',
+    'Events',
+    'News',
+    'Research',
+    'Education',
+    'Student Life',
+    'Facilities',
+    'Awards',
+    'Technology',
+    'Business',
+    'Health Services',
+    'Financial Services',
+    'Academic Affairs',
+    'Student Services',
+    'Finance',
+    'Human Resources',
+    'IT Services',
+    'Facilities Management',
+    'Research & Development',
+    'External Relations'
+  ],
+};
+
+export const ghostParticles = Array(30)
+  .fill(0)
+  .map((_) => ({
+    size: Math.random() * 10 + 5,
+    top: Math.random() * 100,
+    left: Math.random() * 100,
+    animDuration: Math.random() * 10 + 15,
+    animDelay: Math.random() * 5,
+  }));

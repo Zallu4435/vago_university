@@ -1,9 +1,5 @@
 import React, { useEffect } from 'react';
-
-interface ReactionsPanelProps {
-  reactions: { [participantId: string]: string };
-  onRemoveReaction: (participantId: string) => void;
-}
+import { ReactionsPanelProps } from '../../../domain/types/videoConference';
 
 export const ReactionsPanel: React.FC<ReactionsPanelProps> = ({ reactions, onRemoveReaction }) => {
   useEffect(() => {

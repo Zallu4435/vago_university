@@ -7,23 +7,28 @@ import FacultySidebar from './FacultySidebar';
 import ProfileSettings from '../../user/Settings/ProfileSettings';
 import FacultyPreferenceSettings from './FacultyPreferenceSettings';
 import FacultyNotificationSettings from './FacultyNotificationSettings';
+import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
+import ErrorMessage from '../../../../shared/components/ErrorMessage';
 
 export default function FacultySettings() {
   const [activeTab, setActiveTab] = useState('profile');
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
+  const authError = useSelector((state: RootState) => state.auth?.error);
+  const isAuthLoading = useSelector((state: RootState) => state.auth?.loading);
 
-  // Early return if user is not available
+  if (isAuthLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (authError) {
+    const msg = typeof authError === 'string' ? authError : 'Failed to load user';
+    return <ErrorMessage message={msg} />;
+  }
+
   if (!user) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading user data...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   const handleLogout = () => {
@@ -104,11 +109,9 @@ export default function FacultySettings() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex relative">
-      {/* Fixed Header */}
       <div className="fixed top-0 left-0 right-0 z-[9999] bg-white border-b border-slate-200 shadow-sm">
         <div className="max-w-full mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Left Section - Back Button and Title */}
             <div className="flex items-center space-x-6">
               <button
                 onClick={handleBackToDashboard}
@@ -119,12 +122,10 @@ export default function FacultySettings() {
               <div className="h-6 w-px bg-slate-200"></div>
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                  {/* Faculty Icon */}
                 </div>
                 <h1 className="text-xl font-bold text-slate-800">Faculty Settings</h1>
               </div>
             </div>
-            {/* Right Section - User Info */}
             <div className="flex items-center">
               <div className="px-3 py-1.5 bg-purple-50 rounded-lg text-sm text-purple-700 font-medium border border-purple-200">
                 {user?.firstName || 'Faculty'}
@@ -133,7 +134,6 @@ export default function FacultySettings() {
           </div>
         </div>
       </div>
-      {/* Main Content with top padding for fixed header */}
       <div className="pt-16 flex w-full min-h-screen">
         <FacultySidebar
           activeTab={activeTab}

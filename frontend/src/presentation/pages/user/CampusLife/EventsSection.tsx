@@ -40,7 +40,7 @@ export default function EventsSection({ searchTerm, statusFilter, onFilterChange
 
   useEffect(() => {
     if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
-    
+
     if (searchInput !== searchTerm) {
       setIsSearching(true);
       debounceTimeout.current = setTimeout(() => {
@@ -50,7 +50,7 @@ export default function EventsSection({ searchTerm, statusFilter, onFilterChange
     } else {
       setIsSearching(false);
     }
-    
+
     return () => {
       if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
     };
@@ -84,13 +84,11 @@ export default function EventsSection({ searchTerm, statusFilter, onFilterChange
           additionalInfo: data.additionalInfo ?? '',
         },
       });
-      
-      // Show success toast
+
       toast.success('Successfully registered for event!');
-      
-      // Close the form
+
       setShowJoinForm(false);
-      
+
     } catch (error) {
       // Show error toast
       let errorMsg = 'Failed to register for event';
@@ -106,7 +104,7 @@ export default function EventsSection({ searchTerm, statusFilter, onFilterChange
       } else if (typeof error === 'string') {
         errorMsg = error;
       }
-      
+
       toast.error(errorMsg);
       console.error('Failed to submit join request:', error);
     }

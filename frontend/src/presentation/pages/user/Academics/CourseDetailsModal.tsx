@@ -4,7 +4,6 @@ import { usePreferences } from '../../../../application/context/PreferencesConte
 import type { CourseDetailsModalProps } from '../../../../domain/types/user/academics';
 
 export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course, isEnrolling }: CourseDetailsModalProps) {
-  console.log('CourseDetailsModal props:', { isOpen, course });
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [enrollmentData, setEnrollmentData] = useState({ reason: '' });
@@ -59,27 +58,22 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
 
   return (
     <div className="fixed inset-0 z-[9999] overflow-y-auto">
-      {/* Backdrop */}
       <div
         className={`fixed inset-0 bg-gradient-to-br from-black/20 via-black/40 to-black/60 backdrop-blur-sm transition-opacity duration-300 ${isAnimating ? 'opacity-100' : 'opacity-0'
           }`}
         onClick={handleClose}
       />
 
-      {/* Modal Container */}
       <div className="flex min-h-full items-center justify-center p-2 sm:p-4">
         <div
           className={`relative w-full max-w-lg transform transition-all duration-300 ${isAnimating ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'
             }`}
         >
-          {/* Main Modal */}
           <div className={`relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl ${styles.card.background} border ${styles.border} group hover:${styles.card.hover} transition-all duration-500`}>
-            {/* Background glow */}
             <div className={`absolute -inset-0.5 bg-gradient-to-r ${styles.orb.secondary} rounded-2xl sm:rounded-3xl blur transition-all duration-300`}></div>
             <div className={`absolute -top-16 -left-16 w-48 sm:w-64 h-48 sm:h-64 rounded-full bg-gradient-to-br ${styles.orb.primary} blur-2xl sm:blur-3xl animate-pulse`}></div>
             <div className={`absolute -bottom-16 -right-16 w-32 sm:w-48 h-32 sm:h-48 rounded-full bg-gradient-to-br ${styles.orb.secondary} blur-xl sm:blur-2xl animate-pulse delay-700`}></div>
 
-            {/* Header */}
             <div className={`relative bg-gradient-to-r ${styles.accent} px-4 sm:px-8 py-4 sm:py-6 text-white overflow-hidden`}>
               <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent"></div>
               <div className="relative z-10 flex items-start justify-between">
@@ -115,11 +109,8 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
               </div>
             </div>
 
-            {/* Content */}
             <div className="relative z-10 p-4 sm:p-8">
-              {/* Only show enrollment actions if not read-only */}
               {!isReadOnly && !showConfirmation ? (
-                // Course Details View
                 <div className="space-y-4 sm:space-y-6">
                   <div className="grid grid-cols-2 gap-4 sm:gap-6">
                     <div className="space-y-1">
@@ -188,7 +179,6 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
                     </div>
                   )}
 
-                  {/* Action Buttons */}
                   <div className="flex space-x-3 sm:space-x-4 pt-4 sm:pt-6 border-t border-amber-100/50">
                     <button
                       onClick={handleClose}
@@ -221,7 +211,6 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
                   </div>
                 </div>
               ) : isReadOnly ? (
-                // Read-only mode: just show course details, no actions
                 <div className="space-y-4 sm:space-y-6">
                   <div className="grid grid-cols-2 gap-4 sm:gap-6">
                     <div className="space-y-1">
@@ -290,7 +279,6 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
                     </div>
                   )}
 
-                  {/* Only show close button at the bottom */}
                   <div className="flex justify-end pt-4 sm:pt-6 border-t border-amber-100/50">
                     <button
                       onClick={handleClose}
@@ -301,7 +289,6 @@ export default function CourseDetailsModal({ isOpen, onClose, onConfirm, course,
                   </div>
                 </div>
               ) : (
-                // Confirmation View
                 <div className="space-y-4 sm:space-y-6">
                   <div className="text-center">
                     <div className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r ${styles.accent} rounded-full flex items-center justify-center mx-auto shadow-lg`}>

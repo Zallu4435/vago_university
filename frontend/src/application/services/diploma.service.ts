@@ -6,7 +6,7 @@ import {
   ChapterResponse,
   CompletedChaptersResponse,
   BookmarkedChaptersResponse
-} from '../../domain/types/diploma';
+} from '../../domain/types/management/diplomamanagement';
 import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 
 
@@ -42,7 +42,6 @@ class DiplomaService {
     async getDiplomaCourseById(id: string) {
         try {
             const response = await httpClient.get<DiplomaCourseResponse>(`/diploma-courses/${id}`);
-            console.log('[DiplomaService] getDiplomaCourseById response:', response.data);
             return response.data.data;
         } catch (error: unknown) {
             if (isAxiosErrorWithApiError(error)) {
@@ -55,7 +54,6 @@ class DiplomaService {
     async getChapterById(courseId: string, chapterId: string): Promise<Chapter> {
         try {
             const response = await httpClient.get<ChapterResponse>(`/diploma-courses/${courseId}/chapters/${chapterId}`);
-            console.log(response.data, "oooooooooooooooooooooooooooooooooomb")
             return response.data.data.chapter;
         } catch (error: unknown) {
             if (isAxiosErrorWithApiError(error)) {

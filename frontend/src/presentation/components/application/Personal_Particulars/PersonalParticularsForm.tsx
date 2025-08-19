@@ -65,14 +65,12 @@ export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = (
   React.useImperativeHandle(triggerValidation as React.Ref<{ trigger: () => Promise<boolean>; getValues: () => PersonalFormData }>, () => ({
     trigger: async () => {
       const isValid = await trigger();
-      console.log('Trigger validation result:', { isValid, errors });
       return isValid;
     },
     getValues: () => methods.getValues(),
   }), [trigger, errors, methods]);
 
   useEffect(() => {
-    console.log('PersonalParticularsForm: Received initialData:', initialData);
     reset(initialData || defaultValues, {
       keepDirty: false, 
       keepErrors: false, 

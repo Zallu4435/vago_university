@@ -45,4 +45,6 @@ export interface ReplyModalProps {
   onSend: (enquiryId: string, replyMessage: string) => Promise<void>;
 }
 
-// Add more enquiry management related types/interfaces here as needed 
+export interface Filters {
+  status: string;
+}

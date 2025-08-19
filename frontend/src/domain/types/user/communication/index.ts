@@ -66,3 +66,31 @@ export interface User {
     email: string;
     role: string;
   }
+
+  export type Recipient = {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    status: string;
+  };
+
+  export type CommunicationTabsProps = {
+    activeTab: string;
+    setActiveTab: (tab: string) => void;
+  };
+  
+
+  export interface UseCommunicationManagementProps {
+    isAdmin?: boolean;
+  }
+  
+ export type RecipientType = '' | 'all_students' | 'all_faculty' | 'all_users' | 'individual_students' | 'individual_faculty';
+  
+  export interface User {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  }
+  

@@ -20,13 +20,9 @@ import {
   JoinClubResponseDTO,
   JoinSportResponseDTO,
   JoinEventResponseDTO,
+  ResponseDTO
 } from "../../../domain/campus-life/dtos/CampusLifeDTOs";
-import { ClubStatus } from "../../../domain/campus-life/entities/CampusLife";
-
-export interface ResponseDTO<T> {
-  success: boolean;
-  data: T | { error: string };
-}
+import { CampusEvent, Sport, Club, ClubStatus, SportType } from "../../../domain/campus-life/entities/CampusLife";
 
 export interface IGetCampusLifeOverviewUseCase {
   execute(params: GetCampusLifeOverviewRequestDTO): Promise<ResponseDTO<CampusLifeOverviewResponseDTO>>;
@@ -68,14 +64,12 @@ export interface IJoinEventUseCase {
   execute(params: JoinEventRequestDTO): Promise<ResponseDTO<JoinEventResponseDTO>>;
 }
 
+
 export class GetCampusLifeOverviewUseCase implements IGetCampusLifeOverviewUseCase {
   constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetCampusLifeOverviewRequestDTO): Promise<ResponseDTO<CampusLifeOverviewResponseDTO>> {
     const { events, sports, clubs } = await this.campusLifeRepository.getCampusLifeOverview(params);
-    const CampusEvent = require("../../../domain/campus-life/entities/CampusLife").CampusEvent;
-    const Sport = require("../../../domain/campus-life/entities/CampusLife").Sport;
-    const Club = require("../../../domain/campus-life/entities/CampusLife").Club;
     return {
       success: true,
       data: {
@@ -90,7 +84,7 @@ export class GetCampusLifeOverviewUseCase implements IGetCampusLifeOverviewUseCa
           e.icon,
           e.color,
           e.description,
-          e.fullTime,
+          String(e.fullTime), 
           e.additionalInfo,
           e.requirements,
           e.createdAt.toISOString(),
@@ -99,7 +93,7 @@ export class GetCampusLifeOverviewUseCase implements IGetCampusLifeOverviewUseCa
         sports: sports.map((s) => new Sport(
           s._id.toString(),
           s.title,
-          s.type,
+          s.type as SportType,
           [],
           s.icon,
           s.color,
@@ -142,7 +136,6 @@ export class GetEventsUseCase implements IGetEventsUseCase {
       return { success: false, data: { error: "Invalid status; must be 'upcoming', 'past', or 'all'" } };
     }
     const { events: rawEvents, requests, totalItems, totalPages, currentPage } = await this.campusLifeRepository.getEvents(params);
-    const CampusEvent = require("../../../domain/campus-life/entities/CampusLife").CampusEvent;
     return {
       success: true,
       data: {
@@ -159,12 +152,12 @@ export class GetEventsUseCase implements IGetEventsUseCase {
             e.icon,
             e.color,
             e.description,
-            e.fullTime,
+            String(e.fullTime), 
             e.additionalInfo,
             e.requirements,
             e.createdAt.toISOString(),
             e.updatedAt.toISOString(),
-            req ? req.status : null
+            req ? req.status as 'pending' | 'approved' | 'rejected' : null
           );
         }),
         totalItems,
@@ -183,7 +176,6 @@ export class GetEventByIdUseCase implements IGetEventByIdUseCase {
     if (!rawEvent) {
       return { success: false, data: { error: "Event not found" } };
     }
-    const CampusEvent = require("../../../domain/campus-life/entities/CampusLife").CampusEvent;
     return {
       success: true,
       data: {
@@ -198,7 +190,7 @@ export class GetEventByIdUseCase implements IGetEventByIdUseCase {
           rawEvent.icon,
           rawEvent.color,
           rawEvent.description,
-          rawEvent.fullTime,
+          String(rawEvent.fullTime), 
           rawEvent.additionalInfo,
           rawEvent.requirements,
           rawEvent.createdAt.toString(),
@@ -217,7 +209,6 @@ export class GetSportsUseCase implements IGetSportsUseCase {
       return { success: false, data: { error: "Invalid type; must be 'VARSITY SPORTS' or 'INTRAMURAL SPORTS'" } };
     }
     const { sports, requests, totalItems } = await this.campusLifeRepository.getSports(params);
-    const Sport = require("../../../domain/campus-life/entities/CampusLife").Sport;
     return {
       success: true,
       data: {
@@ -226,7 +217,7 @@ export class GetSportsUseCase implements IGetSportsUseCase {
           return new Sport(
             s._id.toString(),
             s.title,
-            s.type,
+            s.type as SportType,
             [],
             s.icon,
             s.color,
@@ -237,7 +228,7 @@ export class GetSportsUseCase implements IGetSportsUseCase {
             [],
             s.createdAt.toISOString(),
             s.updatedAt.toISOString(),
-            req ? req.status : null
+            req ? req.status as 'pending' | 'approved' | 'rejected' : null
           );
         }),
         totalItems
@@ -254,14 +245,13 @@ export class GetSportByIdUseCase implements IGetSportByIdUseCase {
     if (!sport) {
       return { success: false, data: { error: "Sport not found" } };
     }
-    const Sport = require("../../../domain/campus-life/entities/CampusLife").Sport;
     return {
       success: true,
       data: {
         sport: new Sport(
           sport._id.toString(),
           sport.title,
-          sport.type,
+          sport.type as SportType,
           [],
           sport.icon,
           sport.color,
@@ -286,7 +276,6 @@ export class GetClubsUseCase implements IGetClubsUseCase {
       return { success: false, data: { error: "Invalid status; must be 'active', 'inactive', or 'all'" } };
     }
     const { clubs, requests, totalItems } = await this.campusLifeRepository.getClubs(params);
-    const Club = require("../../../domain/campus-life/entities/CampusLife").Club;
     return {
       success: true,
       data: {
@@ -306,7 +295,7 @@ export class GetClubsUseCase implements IGetClubsUseCase {
             c.upcomingEvents || [],
             c.createdAt.toISOString(),
             c.updatedAt.toISOString(),
-            req ? req.status : null
+            req ? req.status as 'pending' | 'approved' | 'rejected' : null
           );
         }),
         totalItems
@@ -323,7 +312,6 @@ export class GetClubByIdUseCase implements IGetClubByIdUseCase {
     if (!club) {
       return { success: false, data: { error: "Club not found" } };
     }
-    const Club = require("../../../domain/campus-life/entities/CampusLife").Club;
     return {
       success: true,
       data: {

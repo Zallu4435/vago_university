@@ -5,6 +5,7 @@ import { IoCloseOutline as X, IoAdd, IoTrash } from 'react-icons/io5';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { AddClubModalProps } from '../../../../../domain/types/management/clubmanagement';
 import { clubSchema, ClubFormData } from '../../../../../domain/validation/management/clubSchema';
+import { ghostParticles } from '../../../../../shared/constants/clubManagementConstants';
 
 const AddClubModal: React.FC<AddClubModalProps> = ({
   isOpen,
@@ -91,16 +92,6 @@ const AddClubModal: React.FC<AddClubModalProps> = ({
   }, [isOpen, initialData, isEditing, reset]);
 
   usePreventBodyScroll(isOpen);
-
-  const ghostParticles = Array(30)
-    .fill(0)
-    .map(() => ({
-      size: Math.random() * 10 + 5,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      animDuration: Math.random() * 10 + 15,
-      animDelay: Math.random() * 5,
-    }));
 
   if (!isOpen) return null;
 

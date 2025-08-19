@@ -1,23 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FiMoreVertical, FiPhone, FiVideo, FiSettings, FiUser, FiUsers, FiArrowLeft } from 'react-icons/fi';
-import { Chat, Styles } from '../types/ChatTypes';
-
-interface ChatHeaderProps {
-  chat: Chat;
-  styles: Styles;
-  onInfoClick: () => void;
-  onSettingsClick: () => void;
-  isDarkMode: boolean;
-  onToggleTheme: () => void;
-  onDeleteChat: () => void;
-  onBlock: () => void;
-  onClearChat: () => void;
-  currentUserId: string;
-  isBlockedByMe: boolean;
-  isBlockedMe: boolean;
-  onBack?: () => void;
-  onlineUsers: Set<string>;
-}
+import { ChatHeaderProps } from '../../../../../domain/types/canvas/chat';
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
   chat,
@@ -59,7 +42,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   return (
     <div className="flex items-center justify-between p-3 md:p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#202c33]">
       <div className="flex items-center space-x-2 md:space-x-3 min-w-0 flex-1">
-        {/* Back button for mobile */}
         {onBack && (
           <button
             onClick={onBack}

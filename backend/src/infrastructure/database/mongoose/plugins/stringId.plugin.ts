@@ -1,11 +1,9 @@
-// src/infrastructure/database/mongoose/plugins/stringId.plugin.ts
 import mongoose, { Schema } from "mongoose";
 
 function stringifyIds(obj): void {
   if (obj == null || typeof obj !== "object") return;
 
   if (obj instanceof mongoose.Types.ObjectId) {
-    // replace ObjectId instance with its string value
     (obj as unknown as any) = obj.toString();
     return;
   }

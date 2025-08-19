@@ -1,4 +1,4 @@
-import { SiteSectionModel } from '../../database/mongoose/models/site-management/SiteSectionModel';
+import { SiteSectionModel } from '../../database/mongoose/site-management/SiteSectionModel';
 import { ISiteSectionRepository } from '../../../application/site-management/repositories/ISiteSectionRepository';
 import { CreateSiteSectionRequest, DeleteSiteSectionRequest, UpdateSiteSectionRequest } from '../../../domain/site-management/entities/SiteSection';
 import { SiteSectionFilter } from '../../../domain/site-management/entities/SiteSectionTypes';

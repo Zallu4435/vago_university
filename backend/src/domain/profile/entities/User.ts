@@ -66,3 +66,30 @@ export class User {
     this._profilePicture = profilePicture;
   }
 }
+
+export type ProfileUser = {
+  _id: unknown;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  profilePicture?: string;
+  passwordChangedAt?: Date;
+} | null;
+
+export type GetProfileResult = {
+  user: ProfileUser;
+  isFaculty: boolean;
+};
+
+export type SaveableProfileUser = ({
+  _id: unknown;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  profilePicture?: string;
+  passwordChangedAt?: Date;
+  password?: string;
+  save: () => Promise<SaveableProfileUser>;
+} | null);

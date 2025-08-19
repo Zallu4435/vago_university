@@ -1,25 +1,8 @@
-import { NotificationModel } from "../../database/mongoose/models/notification.model";
+import { NotificationModel } from "../../database/mongoose/notification/notification.model";
 import { User as UserModel } from "../../database/mongoose/auth/user.model";
 import { Faculty as FacultyModel } from "../../database/mongoose/auth/faculty.model";
 import { INotificationRepository } from "../../../application/notifications/repositories/INotificationRepository";
 import { NotificationFilter, NotificationProps, NotificationRecipientType } from "../../../domain/notifications/entities/NotificationTypes";
-import {
-    CreateNotificationRequestDTO,
-    GetAllNotificationsRequestDTO,
-    GetIndividualNotificationRequestDTO,
-    DeleteNotificationRequestDTO,
-    MarkNotificationAsReadRequestDTO,
-    MarkAllNotificationsAsReadRequestDTO,
-} from "../../../domain/notifications/dtos/NotificationRequestDTOs";
-import {
-    CreateNotificationResponseDTO,
-    GetAllNotificationsResponseDTO,
-    GetIndividualNotificationResponseDTO,
-    DeleteNotificationResponseDTO,
-    NotificationResponseDTO,
-    MarkNotificationAsReadResponseDTO,
-    MarkAllNotificationsAsReadResponseDTO,
-} from "../../../domain/notifications/dtos/NotificationResponseDTOs";
 
 export class NotificationRepository implements INotificationRepository {
     async create(data: NotificationProps) {
@@ -39,7 +22,6 @@ export class NotificationRepository implements INotificationRepository {
     }
 
     async find(filter, options: { skip?: number; limit?: number; sort? } = {}) {
-        // Add search support
         if (filter.search) {
             const searchRegex = new RegExp(filter.search, 'i');
             const searchFilter = {
@@ -110,14 +92,14 @@ export class NotificationRepository implements INotificationRepository {
         );
     }
 
-    async createNotification(params: CreateNotificationRequestDTO): Promise<CreateNotificationResponseDTO> {
+    async createNotification(title: string, message: string, recipientType: string, recipientId: string, recipientName: string, createdBy: string, createdAt: Date, status: string, readBy: string[]) {
         const notification = new NotificationModel({
-            title: params.title,
-            message: params.message,
-            recipientType: params.recipientType,
-            recipientId: params.recipientId,
-            recipientName: params.recipientName,
-            createdBy: params.createdBy,
+            title: title,
+            message: message,
+            recipientType: recipientType,
+            recipientId: recipientId,
+            recipientName: recipientName,
+            createdBy: createdBy,
             createdAt: new Date(),
             status: "sent",
             readBy: [],
@@ -127,31 +109,29 @@ export class NotificationRepository implements INotificationRepository {
         return { notificationId: notification._id.toString() };
     }
 
-    async getAllNotifications(params: GetAllNotificationsRequestDTO): Promise<GetAllNotificationsResponseDTO> {
-        const { userId, collection, page = 1, limit = 10, recipientType, status, dateRange, isRead, search } = params;
-
+    async getAllNotifications(recipientType: string, recipientId: string, page: number, limit: number, status: string, dateRange: string, search: string, isRead: boolean) {
         const query: NotificationFilter = {};
 
-        if (userId && collection !== "admin") {
+        if (recipientId && recipientType !== "admin") {
             const validRecipientTypes = ["all", "all_students_and_faculty"];
             
-            if (collection === "user") {
+            if (recipientType === "user") {
                 validRecipientTypes.push("all_students", "individual");
-            } else if (collection === "faculty") {
+            } else if (recipientType === "faculty") {
                 validRecipientTypes.push("all_faculty", "individual");
             }
 
             query.$or = [
-                { recipientType: NotificationRecipientType.INDIVIDUAL, recipientId: userId },
+                { recipientType: NotificationRecipientType.INDIVIDUAL, recipientId: recipientId },
                 { recipientType: { $in: validRecipientTypes } },
             ];
         }
 
-        if (isRead !== undefined && userId) {
+        if (isRead !== undefined && recipientId) {
             if (isRead) {
-                query.readBy = userId;
+                query.readBy = recipientId;
             } else {
-                query.readBy = { $ne: userId };
+                query.readBy = { $ne: recipientId };
             }
         }
 
@@ -188,7 +168,7 @@ export class NotificationRepository implements INotificationRepository {
         const totalItems = await NotificationModel.countDocuments({ ...query, ...searchFilter });
         const totalPages = Math.ceil(totalItems / limit);
 
-        const notificationResponse: NotificationResponseDTO[] = notifications.map((n) => ({
+        const notificationResponse = notifications.map((n) => ({
             _id: n._id.toString(),
             title: n.title,
             message: n.message,
@@ -198,7 +178,7 @@ export class NotificationRepository implements INotificationRepository {
             createdBy: n.createdBy,
             createdAt: typeof n.createdAt === 'string' ? n.createdAt : n.createdAt.toISOString(),
             status: n.status,
-            isRead: n.readBy && n.readBy.includes(userId),
+            isRead: n.readBy && n.readBy.includes(recipientId),
             readBy: n.readBy || [],
         }));
 
@@ -210,8 +190,8 @@ export class NotificationRepository implements INotificationRepository {
         };
     }
 
-    async getIndividualNotification(params: GetIndividualNotificationRequestDTO): Promise<GetIndividualNotificationResponseDTO> {
-        const notification = await NotificationModel.findById(params.notificationId).lean();
+    async getIndividualNotification(notificationId: string) {
+        const notification = await NotificationModel.findById(notificationId).lean();
         if (!notification) {
             throw new Error("Notification not found");
         }
@@ -233,52 +213,51 @@ export class NotificationRepository implements INotificationRepository {
         };
     }
 
-    async deleteNotification(params: DeleteNotificationRequestDTO): Promise<DeleteNotificationResponseDTO> {
-        const notification = await NotificationModel.findById(params.notificationId);
+    async deleteNotification(notificationId: string) {
+        const notification = await NotificationModel.findById(notificationId);
         if (!notification) {
             throw new Error("Notification not found");
         }
 
-        await NotificationModel.findByIdAndDelete(params.notificationId);
+        await NotificationModel.findByIdAndDelete(notificationId);
         return { message: "Notification deleted successfully" };
     }
 
-    async markNotificationAsRead(params: MarkNotificationAsReadRequestDTO): Promise<MarkNotificationAsReadResponseDTO> {
-        const notification = await NotificationModel.findById(params.notificationId);
+    async markNotificationAsRead(notificationId: string, recipientId: string) {
+        const notification = await NotificationModel.findById(notificationId);
         if (!notification) {
             throw new Error("Notification not found");
         }
 
-        if (!notification.readBy.includes(params.authenticatedUserId)) {
-            notification.readBy.push(params.authenticatedUserId);
+        if (!notification.readBy.includes(recipientId)) {
+            notification.readBy.push(recipientId);
             await notification.save();
         }
 
         return { success: true, message: "Notification marked as read" };
     }
 
-    async markAllNotificationsAsRead(params: MarkAllNotificationsAsReadRequestDTO): Promise<MarkAllNotificationsAsReadResponseDTO> {
-        const { authenticatedUserId, collection } = params;
+    async markAllNotificationsAsRead(recipientType: string, recipientId: string) {
 
         const query: NotificationFilter = {};
-        if (collection !== "admin") {
+        if (recipientType !== "admin") {
             const validRecipientTypes = ["all", "all_students_and_faculty"];
             
-            if (collection === "user") {
+            if (recipientType === "user") {
                 validRecipientTypes.push("all_students", "individual");
-            } else if (collection === "faculty") {
+            } else if (recipientType === "faculty") {
                 validRecipientTypes.push("all_faculty", "individual");
             }
 
             query.$or = [
-                { recipientType: NotificationRecipientType.INDIVIDUAL, recipientId: authenticatedUserId },
+                { recipientType: NotificationRecipientType.INDIVIDUAL, recipientId: recipientId },
                 { recipientType: { $in: validRecipientTypes } },
             ];
         }
 
         const result = await NotificationModel.updateMany(
-            { ...query, readBy: { $ne: authenticatedUserId } },
-            { $push: { readBy: authenticatedUserId } }
+            { ...query, readBy: { $ne: recipientId } },
+            { $push: { readBy: recipientId } }
         );
 
         return {

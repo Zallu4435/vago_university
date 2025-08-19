@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { ICourseDocument, IEnrollmentDocument } from "../../../../../domain/courses/entities/coursetypes";
+import { ICourseDocument, IEnrollmentDocument } from "../../../../domain/courses/entities/coursetypes";
 
 const CourseSchema = new Schema(
   {

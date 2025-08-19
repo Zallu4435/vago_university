@@ -2,7 +2,7 @@ import { IAdmissionRepository } from "../../../application/admin/repositories/IA
 import { Admission as AdmissionModel } from '../../database/mongoose/admission/AdmissionModel'
 import { Register } from "../../database/mongoose/auth/register.model";
 import { User as UserModel } from "../../database/mongoose/auth/user.model";
-import { ProgramModel } from "../../database/mongoose/models/studentProgram.model";
+import { ProgramModel } from "../../database/mongoose/academic/studentProgram.model";
 import { AdminAdmission, FullAdmissionDetails } from "../../../domain/admin/entities/AdminAdmissionTypes";
 import { AdmissionErrorType } from "../../../domain/admin/enums/AdmissionErrorType";
 import { User } from "../../../domain/auth/entities/Auth";

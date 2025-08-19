@@ -192,7 +192,7 @@ export class SocketService {
       const socketId = this.userSockets.get(userId);
 
       if (socketId) {
-        response.data.forEach((chat) => {
+        response.chats.forEach((chat) => {
           this.chatNamespace.sockets.get(socketId)?.join(chat.id);
         });
       }

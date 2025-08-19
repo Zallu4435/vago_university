@@ -84,8 +84,12 @@ export class CommunicationService {
       });
 
       return response.data;
-    } catch (error: any) {
-      throw new Error(`Failed to send message: ${error.response?.status} - ${error.response?.data?.message || error.message}`);
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+        throw new Error(`Failed to send message: ${err.response?.status} - ${err.response?.data?.message || err.message}`);
+      }
+      throw new Error('Failed to send message');
     }
   }
 
@@ -114,11 +118,14 @@ export class CommunicationService {
     try {
       const response = await httpClient.get(`${this.userBaseUrl}/all-admins`);
       return response.data.data.admins;
-    } catch (error: any) {
-      throw new Error(`Failed to fetch admins: ${error.response?.status} - ${error.response?.data?.message || error.message}`);
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+        throw new Error(`Failed to fetch admins: ${err.response?.status} - ${err.response?.data?.message || err.message}`);
+      }
+      throw new Error('Failed to fetch admins');
     }
   }
-
 
 
   async markMessageAsRead(messageId: string): Promise<void> {

@@ -1,7 +1,7 @@
 import { ICampusLifeRepository } from "../../../application/campus-life/repositories/ICampusLifeRepository";
-import { CampusEventModel, EventRequestModel } from "../../../infrastructure/database/mongoose/models/events/CampusEventModel";
-import { TeamModel, SportRequestModel } from "../../../infrastructure/database/mongoose/models/sports.model";
-import { ClubModel, ClubRequestModel } from "../../../infrastructure/database/mongoose/models/clubs/ClubModel";
+import { CampusEventModel, EventRequestModel } from "../../../infrastructure/database/mongoose/events/CampusEventModel";
+import { TeamModel, SportRequestModel } from "../../database/mongoose/sport/sports.model";
+import { ClubModel, ClubRequestModel } from "../../database/mongoose/clubs/ClubModel";
 import { CampusEventFilter, CampusLifeOverviewRequest, ClubFilter, ClubsRequest, EventsRequest, JoinClubRequest, JoinEventRequest, JoinSportRequest, RawCampusEvent, RawClub, RawSport, SportFilter, SportsRequest, RawJoinRequest } from "../../../domain/campus-life/entities/CampusLife";
 type WithStringId<T> = Omit<T, "_id"> & { _id: string };
 type WithStringIdArray<T> = WithStringId<T>[];

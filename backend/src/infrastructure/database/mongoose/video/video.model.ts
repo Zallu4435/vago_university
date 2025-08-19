@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { VideoStatus } from '../../../../domain/video/enums/VideoStatus';
 import { IVideoBase } from '../../../../domain/video/entities/VideoTypes';
 
@@ -54,12 +54,10 @@ const videoSchema = new Schema<IVideoDocument>(
     }
 );
 
-// Add indexes for better query performance
 videoSchema.index({ diplomaId: 1, module: 1 });
 videoSchema.index({ status: 1 });
 videoSchema.index({ uploadedAt: -1 });
 
-// Add validation methods
 videoSchema.pre('save', function(next) {
     if (this.isModified('module') && this.module < 1) {
         next(new Error('Module number must be at least 1'));

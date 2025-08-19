@@ -1,13 +1,5 @@
 import { NotificationProps } from "../../../domain/notifications/entities/NotificationTypes";
 import {
-    CreateNotificationRequestDTO,
-    GetAllNotificationsRequestDTO,
-    GetIndividualNotificationRequestDTO,
-    DeleteNotificationRequestDTO,
-    MarkNotificationAsReadRequestDTO,
-    MarkAllNotificationsAsReadRequestDTO,
-} from "../../../domain/notifications/dtos/NotificationRequestDTOs";
-import {
     CreateNotificationResponseDTO,
     GetAllNotificationsResponseDTO,
     GetIndividualNotificationResponseDTO,
@@ -17,12 +9,12 @@ import {
 } from "../../../domain/notifications/dtos/NotificationResponseDTOs";
 
 export interface INotificationRepository {
-    createNotification(params: CreateNotificationRequestDTO): Promise<CreateNotificationResponseDTO>;
-    getAllNotifications(params: GetAllNotificationsRequestDTO): Promise<GetAllNotificationsResponseDTO>;
-    getIndividualNotification(params: GetIndividualNotificationRequestDTO): Promise<GetIndividualNotificationResponseDTO>;
-    deleteNotification(params: DeleteNotificationRequestDTO): Promise<DeleteNotificationResponseDTO>;
-    markNotificationAsRead(params: MarkNotificationAsReadRequestDTO): Promise<MarkNotificationAsReadResponseDTO>;
-    markAllNotificationsAsRead(params: MarkAllNotificationsAsReadRequestDTO): Promise<MarkAllNotificationsAsReadResponseDTO>;
+    createNotification(title: string, message: string, recipientType: string, recipientId: string, recipientName: string, createdBy: string, createdAt: Date, status: string, readBy: string[]): Promise<CreateNotificationResponseDTO>;
+    getAllNotifications(recipientType: string, recipientId: string, page: number, limit: number, status: string, dateRange: string, search: string, isRead: boolean): Promise<GetAllNotificationsResponseDTO>;
+    getIndividualNotification(notificationId: string): Promise<GetIndividualNotificationResponseDTO>;
+    deleteNotification(notificationId: string): Promise<DeleteNotificationResponseDTO>;
+    markNotificationAsRead(notificationId: string, recipientId: string): Promise<MarkNotificationAsReadResponseDTO>;
+    markAllNotificationsAsRead(recipientType: string, recipientId: string): Promise<MarkAllNotificationsAsReadResponseDTO>;
     
     create(data: NotificationProps);
     find(filter, options?: { skip?: number; limit?: number; sort? });

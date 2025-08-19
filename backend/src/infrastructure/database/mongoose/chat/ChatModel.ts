@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { ChatType } from "../../../../../domain/chat/entities/Chat";
+import { ChatType } from "../../../../domain/chat/entities/Chat";
 
 export interface IChat extends Document {
   type: ChatType;

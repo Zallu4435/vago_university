@@ -1,5 +1,5 @@
 import { ISportsRepository } from "../../../application/sports/repositories/ISportsRepository";
-import { TeamModel, SportRequestModel } from "../../../infrastructure/database/mongoose/models/sports.model";
+import { TeamModel, SportRequestModel } from "../../database/mongoose/sport/sports.model";
 import { User as UserModel } from "../../database/mongoose/auth/user.model";
 import { Sport, SportDocument, SportFilter } from "../../../domain/sports/entities/SportTypes";
 import { BaseRepository } from "../../../application/repositories/BaseRepository";

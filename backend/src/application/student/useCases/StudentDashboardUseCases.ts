@@ -15,7 +15,7 @@ import {
 } from "../../../domain/student/dtos/StudentDashboardResponseDTOs";
 import { IStudentDashboardRepository } from "../repositories/IStudentDashboardRepository";
 import { IAssignmentDocument } from "../../../infrastructure/database/mongoose/assignment/AssignmentModel";
-import { IVideoSession } from "../../../infrastructure/database/mongoose/models/session.model";
+import { IVideoSession } from "../../../infrastructure/database/mongoose/session/session.model";
 import { Event } from "../../../domain/events/entities/EventTypes";
 import { Club } from "../../../domain/clubs/entities/ClubTypes";
 

@@ -16,14 +16,15 @@ import {
   IUserDocument,
 } from "../../../domain/academics/entities/Academic";
 import { User as UserModel } from '../../database/mongoose/auth/user.model';
-import { ProgramModel } from '../../../infrastructure/database/mongoose/models/studentProgram.model';
-import { EnrollmentModel } from '../../../infrastructure/database/mongoose/models/courses/CourseModel';
-import { GradeModel } from '../../../infrastructure/database/mongoose/models/grade.model';
-import { CourseModel } from '../../../infrastructure/database/mongoose/models/courses/CourseModel';
-import { AcademicHistoryModel } from '../../../infrastructure/database/mongoose/models/academicHistory.model';
-import { ProgressModel } from '../../../infrastructure/database/mongoose/models/progress.model';
-import { RequirementsModel } from '../../../infrastructure/database/mongoose/models/requirement.model';
-import { TranscriptRequestModel } from '../../../infrastructure/database/mongoose/models/transcript.model';
+import { ProgramModel } from '../../database/mongoose/academic/studentProgram.model';
+import { EnrollmentModel } from '../../database/mongoose/courses/CourseModel';
+import { GradeModel } from '../../database/mongoose/academic/grade.model';
+import { CourseModel } from '../../database/mongoose/courses/CourseModel';
+import { AcademicHistoryModel } from '../../database/mongoose/academic/academicHistory.model';
+import { v4 as uuidv4 } from 'uuid';
+import { ProgressModel } from '../../database/mongoose/academic/progress.model';
+import { RequirementsModel } from '../../database/mongoose/academic/requirement.model';
+import { TranscriptRequestModel } from '../../database/mongoose/academic/transcript.model';
 type WithStringId<T> = Omit<T, "_id"> & { _id: string };
 
 
@@ -109,13 +110,13 @@ export class AcademicRepository implements IAcademicRepository {
   }
 
   async findProgressByUserId(userId: string) {
-    return await ProgressModel.findOne({ userId })
+    return await ProgressModel.findOne({ studentId: userId })
       .select('overallProgress totalCredits completedCredits remainingCredits estimatedGraduation')
       .lean<WithStringId<IProgressDocument>>({ getters: true });
   }
 
   async findRequirementsByUserId(userId: string) {
-    return await RequirementsModel.findOne({ userId })
+    return await RequirementsModel.findOne({ studentId: userId })
       .select('core elective general')
       .lean<WithStringId<IRequirementDocument>>({ getters: true });
   }
@@ -186,10 +187,11 @@ export class AcademicRepository implements IAcademicRepository {
   ): Promise<WithStringId<ITranscriptRequestDocument>> {
     const doc = await new TranscriptRequestModel({
       _id: new mongoose.Types.ObjectId(),
-      userId: request.userId,
+      studentId: request.userId,
       deliveryMethod: request.deliveryMethod,
       address: request.address,
       email: request.email,
+      requestId: uuidv4(),
       requestedAt: new Date(),                    
       estimatedDelivery: request.estimatedDelivery
     }).save();

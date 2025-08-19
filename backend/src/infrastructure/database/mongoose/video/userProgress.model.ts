@@ -52,7 +52,6 @@ const userProgressSchema = new Schema<IUserProgress>(
   }
 );
 
-// Compound index for efficient queries
 userProgressSchema.index({ userId: 1, courseId: 1, chapterId: 1 }, { unique: true });
 
 export const UserProgress = mongoose.model<IUserProgress>("UserProgress", userProgressSchema); 

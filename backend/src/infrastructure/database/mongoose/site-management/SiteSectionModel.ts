@@ -1,5 +1,5 @@
-import mongoose, { Schema, Document, model } from "mongoose";
-import { SiteSectionKey, ISiteSectionDocument } from '../../../../../domain/site-management/entities/SiteSectionTypes';
+import { Schema, model } from "mongoose";
+import { ISiteSectionDocument, SiteSectionKey } from "../../../../domain/site-management/entities/SiteSectionTypes";
 
 const SiteSectionSchema = new Schema<ISiteSectionDocument>(
   {

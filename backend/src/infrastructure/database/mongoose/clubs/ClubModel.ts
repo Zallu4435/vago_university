@@ -4,7 +4,7 @@ import {
   ClubRequest, 
   ClubStatus, 
   ClubRequestStatus 
-} from "../../../../../domain/clubs/entities/ClubTypes";
+} from "../../../../domain/clubs/entities/ClubTypes";
 
 const clubSchema = new Schema<Club>({
   name: { type: String, required: true, trim: true },

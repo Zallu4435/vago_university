@@ -13,15 +13,6 @@ export interface ITranscriptRequest extends Document {
   updatedAt: Date;
 }
 
-export interface ITranscriptRequestInput {
-  userId?: string;
-  deliveryMethod: string;
-  address?: string;
-  email?: string;
-  requestedAt?: string;
-  estimatedDelivery: string;
-}
-
 const TranscriptRequestSchema = new Schema<ITranscriptRequest>({
   studentId: { type: Schema.Types.ObjectId, required: true, ref: 'User', index: true },
   deliveryMethod: { type: String, enum: ['electronic', 'mail'], required: true },
@@ -32,3 +23,5 @@ const TranscriptRequestSchema = new Schema<ITranscriptRequest>({
 }, { timestamps: true });
 
 export const TranscriptRequestModel = mongoose.model<ITranscriptRequest>('TranscriptRequest', TranscriptRequestSchema);
+
+

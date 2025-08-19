@@ -8,20 +8,12 @@ import {
   GetFacultySessionDistributionRequestDTO,
   GetFacultyRecentActivitiesRequestDTO,
 } from "../../../domain/faculty/dashboard/dtos/FacultyDashboardRequestDTOs";
-import {
-  GetFacultyDashboardStatsResponseDTO,
-  GetFacultyDashboardDataResponseDTO,
-  GetFacultyWeeklyAttendanceResponseDTO,
-  GetFacultyCoursePerformanceResponseDTO,
-  GetFacultySessionDistributionResponseDTO,
-  GetFacultyRecentActivitiesResponseDTO,
-} from "../../../domain/faculty/dashboard/dtos/FacultyDashboardResponseDTOs";
-import { VideoSessionModel } from "../../database/mongoose/models/session.model";
-import { CourseModel } from "../../database/mongoose/models/courses/CourseModel";
+import { VideoSessionModel } from "../../database/mongoose/session/session.model";
+import { CourseModel } from "../../database/mongoose/courses/CourseModel";
 import { AssignmentModel } from "../../database/mongoose/assignment/AssignmentModel";
 
 export class FacultyDashboardRepository implements IFacultyDashboardRepository {
-  async getDashboardStats(params: GetFacultyDashboardStatsRequestDTO): Promise<GetFacultyDashboardStatsResponseDTO> {
+  async getDashboardStats(params: GetFacultyDashboardStatsRequestDTO) {
     if (!mongoose.isValidObjectId(params.facultyId)) {
       throw new Error("Invalid faculty ID");
     }
@@ -58,7 +50,7 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
     };
   }
 
-  async getDashboardData(params: GetFacultyDashboardDataRequestDTO): Promise<GetFacultyDashboardDataResponseDTO> {
+  async getDashboardData(params: GetFacultyDashboardDataRequestDTO) {
     const [stats, weeklyAttendance, assignmentPerformance, sessionDistribution, recentActivities] = await Promise.all([
       this.getDashboardStats(params),
       this.getWeeklyAttendance(params),
@@ -78,7 +70,7 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
     };
   }
 
-  async getWeeklyAttendance(params: GetFacultyWeeklyAttendanceRequestDTO): Promise<GetFacultyWeeklyAttendanceResponseDTO> {
+  async getWeeklyAttendance(params: GetFacultyWeeklyAttendanceRequestDTO) {
     if (!mongoose.isValidObjectId(params.facultyId)) {
       throw new Error("Invalid faculty ID");
     }
@@ -127,7 +119,7 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
     return { weeklyAttendance: weeklyData };
   }
 
-  async getAssignmentPerformance(params: GetFacultyCoursePerformanceRequestDTO): Promise<GetFacultyCoursePerformanceResponseDTO> {
+  async getAssignmentPerformance(params: GetFacultyCoursePerformanceRequestDTO) {
     if (!mongoose.isValidObjectId(params.facultyId)) {
       throw new Error("Invalid faculty ID");
     }
@@ -230,7 +222,7 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
     };
   }
 
-  async getSessionDistribution(params: GetFacultySessionDistributionRequestDTO): Promise<GetFacultySessionDistributionResponseDTO> {
+  async getSessionDistribution(params: GetFacultySessionDistributionRequestDTO) {
     if (!mongoose.isValidObjectId(params.facultyId)) {
       throw new Error("Invalid faculty ID");
     }
@@ -260,7 +252,7 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
     return { sessionDistribution };
   }
 
-  async getRecentActivities(params: GetFacultyRecentActivitiesRequestDTO): Promise<GetFacultyRecentActivitiesResponseDTO> {
+  async getRecentActivities(params: GetFacultyRecentActivitiesRequestDTO) {
     if (!mongoose.isValidObjectId(params.facultyId)) {
       throw new Error("Invalid faculty ID");
     }

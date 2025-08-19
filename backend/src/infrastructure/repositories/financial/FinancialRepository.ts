@@ -1,30 +1,12 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
-import { v2 as cloudinary } from "cloudinary";
-import { StudentFinancialInfoModel, ChargeModel, PaymentModel } from "../../database/mongoose/models/financial.model"
-import { ProgramModel } from "../../database/mongoose/models/studentProgram.model";
-import { FinancialErrorType } from "../../../domain/financial/enums/FinancialErrorType";
-import {
-    GetStudentFinancialInfoRequestDTO,
-    GetAllPaymentsRequestDTO,
-    GetOnePaymentRequestDTO,
-    MakePaymentRequestDTO,
-    GetAllChargesRequestDTO,
-    UpdateChargeRequestDTO,
-    DeleteChargeRequestDTO,
-} from "../../../domain/financial/dtos/FinancialRequestDTOs";
-import {
-    GetStudentFinancialInfoResponseDTO,
-    GetAllPaymentsResponseDTO,
-    GetOnePaymentResponseDTO,
-    MakePaymentResponseDTO,
-    GetAllChargesResponseDTO,
-    UpdateChargeResponseDTO,
-    DeleteChargeResponseDTO,
-} from "../../../domain/financial/dtos/FinancialResponseDTOs";
-import { IFinancialRepository } from "../../../application/financial/repositories/IFinancialRepository";
 import mongoose from 'mongoose';
-import { ChargeFilter } from "../../../domain/financial/entities/Charge";
+import { v2 as cloudinary } from "cloudinary";
+import { StudentFinancialInfoModel, ChargeModel, PaymentModel } from "../../database/mongoose/financial/financial.model"
+import { ProgramModel } from "../../database/mongoose/academic/studentProgram.model";
+import { FinancialErrorType } from "../../../domain/financial/enums/FinancialErrorType";
+import { IFinancialRepository } from "../../../application/financial/repositories/IFinancialRepository";
+import { Charge, ChargeFilter } from "../../../domain/financial/entities/Charge";
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID!,
@@ -38,9 +20,9 @@ cloudinary.config({
 });
 
 export class FinancialRepository implements IFinancialRepository {
-    async getStudentFinancialInfo(params: GetStudentFinancialInfoRequestDTO): Promise<GetStudentFinancialInfoResponseDTO> {
+    async getStudentFinancialInfo(studentId: string) {
         try {
-            const studentProgram = await ProgramModel.findOne({ studentId: params.studentId }).lean();
+            const studentProgram = await ProgramModel.findOne({ studentId: studentId }).lean();
 
             if (!studentProgram) {
                 return {
@@ -64,7 +46,7 @@ export class FinancialRepository implements IFinancialRepository {
             });
 
             const studentFinancialInfo = await StudentFinancialInfoModel.find({
-                studentId: params.studentId
+                studentId: studentId
             }).populate('paymentId').lean();
 
             const formattedCharges = applicableCharges.map((charge) => {
@@ -77,7 +59,7 @@ export class FinancialRepository implements IFinancialRepository {
 
                 return {
                     id: charge._id.toString(),
-                    studentId: params.studentId,
+                    studentId: studentId,
                     chargeId: charge._id.toString(),
                     amount: charge.amount,
                     paymentDueDate: charge.dueDate.toISOString(),
@@ -117,32 +99,32 @@ export class FinancialRepository implements IFinancialRepository {
         }
     }
 
-    async getAllPayments(params: GetAllPaymentsRequestDTO): Promise<GetAllPaymentsResponseDTO> {
+    async getAllPayments(startDate: string, endDate: string, status: string, studentId: string, page: number, limit: number) {
         const query: ChargeFilter = {};
-        if (params.startDate && params.endDate) {
-            query.date = { $gte: new Date(params.startDate), $lte: new Date(params.endDate) };
-        } else if (params.startDate) {
-            query.date = { $gte: new Date(params.startDate) };
-        } else if (params.endDate) {
-            query.date = { $lte: new Date(params.endDate) };
+        if (startDate && endDate) {
+            query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+        } else if (startDate) {
+            query.date = { $gte: new Date(startDate) };
+        } else if (endDate) {
+            query.date = { $lte: new Date(endDate) };
         }
-        if (params.status) query.status = params.status;
-        if (params.studentId) {
-            if (mongoose.Types.ObjectId.isValid(params.studentId)) {
-                query.studentId = params.studentId;
+        if (status) query.status = status;
+        if (studentId) {
+            if (mongoose.Types.ObjectId.isValid(studentId)) {
+                query.studentId = studentId;
             } else {
-                return { data: [], totalPages: 1, totalPayments: 0, currentPage: params.page };
+                return { data: [], totalPages: 1, totalPayments: 0, currentPage: page };
             }
         }
 
         const total = await PaymentModel.countDocuments(query);
         const payments = await PaymentModel.find(query)
             .sort({ date: -1 })
-            .skip((params.page - 1) * params.limit)
-            .limit(params.limit)
+            .skip((page - 1) * limit)
+            .limit(limit)
             .lean();
 
-        const totalPages = Math.ceil(total / params.limit);
+        const totalPages = Math.ceil(total / limit);
 
         return {
             data: payments.map((payment) => ({
@@ -158,12 +140,12 @@ export class FinancialRepository implements IFinancialRepository {
             })),
             totalPayments: total,
             totalPages,
-            currentPage: params.page,
+            currentPage: page,
         };
     }
 
-    async getOnePayment(params: GetOnePaymentRequestDTO): Promise<GetOnePaymentResponseDTO> {
-        const payment = await PaymentModel.findById(params.paymentId).lean();
+    async getOnePayment(paymentId: string) {
+        const payment = await PaymentModel.findById(paymentId).lean();
         if (!payment) {
             throw new Error(FinancialErrorType.PaymentNotFound);
         }
@@ -183,19 +165,19 @@ export class FinancialRepository implements IFinancialRepository {
         };
     }
 
-    async makePayment(params: MakePaymentRequestDTO): Promise<MakePaymentResponseDTO> {
-        if (!params.chargeId) {
+    async makePayment(studentId: string, chargeId: string, amount: number, term: string, method: string, razorpayPaymentId: string, razorpayOrderId: string, razorpaySignature: string) {
+        if (!chargeId) {
             throw new Error('Charge ID is required for payment');
         }
 
-        const charge = await ChargeModel.findById(params.chargeId).lean();
+        const charge = await ChargeModel.findById(chargeId).lean();
         if (!charge) {
-            throw new Error(`Charge with ID ${params.chargeId} not found`);
+            throw new Error(`Charge with ID ${chargeId} not found`);
         }
 
         const existingPending = await StudentFinancialInfoModel.findOne({
-            studentId: params.studentId,
-            chargeId: params.chargeId,
+            studentId: studentId,
+            chargeId: chargeId,
             status: "Pending",
             paymentId: { $exists: false }
         }).lean();
@@ -214,8 +196,8 @@ export class FinancialRepository implements IFinancialRepository {
         }
 
         const existingPaid = await StudentFinancialInfoModel.findOne({
-            studentId: params.studentId,
-            chargeId: params.chargeId,
+            studentId: studentId,
+            chargeId: chargeId,
             status: "Paid"
         }).lean();
 
@@ -224,39 +206,39 @@ export class FinancialRepository implements IFinancialRepository {
         }
 
         const transactionLock = new StudentFinancialInfoModel({
-            studentId: params.studentId,
+            studentId: studentId,
             chargeId: charge._id,
-            amount: params.amount,
+            amount: amount,
             status: "Pending",
-            term: params.term,
+            term: term,
             issuedAt: new Date(),
             paymentDueDate: charge.dueDate,
-            method: params.method
+            method: method
         });
 
         await transactionLock.save();
 
         try {
-            if (params.method === "Razorpay") {
-                if (params.razorpayPaymentId && params.razorpayOrderId && params.razorpaySignature) {
+            if (method === "Razorpay") {
+                if (razorpayPaymentId && razorpayOrderId && razorpaySignature) {
                     const generatedSignature = crypto
                         .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
-                        .update(`${params.razorpayOrderId}|${params.razorpayPaymentId}`)
+                        .update(`${razorpayOrderId}|${razorpayPaymentId}`)
                         .digest("hex");
 
-                    if (generatedSignature !== params.razorpaySignature) {
+                    if (generatedSignature !== razorpaySignature) {
                         throw new Error(FinancialErrorType.InvalidPaymentSignature);
                     }
 
                     const payment = await PaymentModel.findOneAndUpdate(
-                        { "metadata.razorpayOrderId": params.razorpayOrderId, studentId: params.studentId },
+                        { "metadata.razorpayOrderId": razorpayOrderId, studentId: studentId },
                         {
                             $set: {
-                                "metadata.razorpayPaymentId": params.razorpayPaymentId,
-                                "metadata.razorpaySignature": params.razorpaySignature,
+                                "metadata.razorpayPaymentId": razorpayPaymentId,
+                                "metadata.razorpaySignature": razorpaySignature,
                                 status: "Completed",
                                 date: new Date(),
-                                description: `Payment for ${params.term}`,
+                                description: `Payment for ${term}`,
                             },
                         },
                         { new: true }
@@ -286,25 +268,25 @@ export class FinancialRepository implements IFinancialRepository {
                         metadata: payment.metadata,
                     };
                 } else {
-                    const shortStudentId = params.studentId.slice(-6);
+                    const shortStudentId = studentId.slice(-6);
                     const shortReceipt = `r_${shortStudentId}_${Date.now()}`;
                     const order = await razorpay.orders.create({
-                        amount: params.amount * 100,
+                        amount: amount * 100,
                         currency: "INR",
                         receipt: shortReceipt,
                     });
 
                     const payment = new PaymentModel({
-                        studentId: params.studentId,
-                        amount: params.amount,
-                        method: params.method,
-                        term: params.term,
+                        studentId: studentId,
+                        amount: amount,
+                        method: method,
+                        term: term,
                         date: new Date(),
-                        description: `Payment for ${params.term}`,
+                        description: `Payment for ${term}`,
                         status: "Pending",
                         metadata: {
                             razorpayOrderId: order.id,
-                            chargeId: params.chargeId,
+                            chargeId: chargeId,
                             transactionLockId: transactionLock._id
                         },
                     });
@@ -328,14 +310,14 @@ export class FinancialRepository implements IFinancialRepository {
                 }
             } else {
                 const payment = new PaymentModel({
-                    studentId: params.studentId,
+                    studentId: studentId,
                     date: new Date(),
-                    description: `Payment for ${params.term}`,
-                    method: params.method,
-                    amount: params.amount,
+                    description: `Payment for ${term}`,
+                    method: method,
+                    amount: amount,
                     status: "Completed",
                     metadata: {
-                        chargeId: params.chargeId,
+                        chargeId: chargeId,
                         transactionLockId: transactionLock._id
                     },
                 });
@@ -415,14 +397,14 @@ export class FinancialRepository implements IFinancialRepository {
         };
     }
 
-    async getAllCharges(params: GetAllChargesRequestDTO): Promise<GetAllChargesResponseDTO> {
+    async getAllCharges(term: string, status: string, search: string, page: number, limit: number) {
         const query: ChargeFilter = {};
 
-        if (params.term && params.term !== 'All Terms') query.term = params.term;
-        if (params.status && params.status !== 'All Statuses') query.status = params.status;
+        if (term && term !== 'All Terms') query.term = term;
+        if (status && status !== 'All Statuses') query.status = status;
 
-        if (params.search && params.search.trim()) {
-            const searchRegex = new RegExp(params.search.trim(), 'i');
+        if (search && search.trim()) {
+            const searchRegex = new RegExp(search.trim(), 'i');
             query.$or = [
                 { title: searchRegex },
                 { description: searchRegex },
@@ -434,8 +416,8 @@ export class FinancialRepository implements IFinancialRepository {
         const total = await ChargeModel.countDocuments(query);
         const charges = await ChargeModel.find(query)
             .sort({ createdAt: -1 })
-            .skip((params.page - 1) * params.limit)
-            .limit(params.limit)
+            .skip((page - 1) * limit)
+            .limit(limit)
             .lean();
 
         return {
@@ -456,10 +438,9 @@ export class FinancialRepository implements IFinancialRepository {
         };
     }
 
-    async updateCharge(params: UpdateChargeRequestDTO): Promise<UpdateChargeResponseDTO> {
-        const { id, ...updateFields } = params;
+    async updateCharge(chargeId: string, updateFields: Partial<Charge>) {
         const updated = await ChargeModel.findByIdAndUpdate(
-            id,
+            chargeId,
             { $set: updateFields },
             { new: true }
         ).lean();
@@ -481,8 +462,8 @@ export class FinancialRepository implements IFinancialRepository {
         };
     }
 
-    async deleteCharge(params: DeleteChargeRequestDTO): Promise<DeleteChargeResponseDTO> {
-        const deleted = await ChargeModel.findByIdAndDelete(params.id);
+    async deleteCharge(chargeId: string) {
+        const deleted = await ChargeModel.findByIdAndDelete(chargeId);
         return { success: !!deleted };
     }
 

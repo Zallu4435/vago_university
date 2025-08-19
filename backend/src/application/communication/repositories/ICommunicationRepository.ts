@@ -1,5 +1,5 @@
 import { Message, UserInfo } from "../../../domain/communication/entities/Communication";
-import { IMessage } from "../../../infrastructure/database/mongoose/models/communication.model";
+import { IMessage } from "../../../infrastructure/database/mongoose/communication/communication.model";
 
 export interface ICommunicationRepository {
   getInboxMessages(userId: string, page: number, limit: number, search?: string, status?: string): Promise<{

@@ -35,7 +35,7 @@ export class GetProfileUseCase implements IGetProfileUseCase {
     constructor(private profileRepository: IProfileRepository) { }
 
     async execute(params: GetProfileRequestDTO): Promise<ResponseDTO<ProfileResponseDTO>> {
-        const { user, isFaculty } = await this.profileRepository.getProfile(params);
+        const { user, isFaculty } = await this.profileRepository.getProfile(params.userId);
         if (!user) {
             return { data: { error: ProfileErrorType.UserNotFound }, success: false };
         }
@@ -59,7 +59,7 @@ export class UpdateProfileUseCase implements IUpdateProfileUseCase {
     constructor(private profileRepository: IProfileRepository) { }
 
     async execute(params: UpdateProfileRequestDTO): Promise<ResponseDTO<UpdateProfileResponseDTO>> {
-        const { user, isFaculty } = await this.profileRepository.updateProfile(params);
+        const { user, isFaculty } = await this.profileRepository.updateProfile(params.userId);
         if (!user) {
             return { data: { error: ProfileErrorType.UserNotFound }, success: false };
         }
@@ -94,7 +94,7 @@ export class ChangePasswordUseCase implements IChangePasswordUseCase {
         if (params.newPassword !== params.confirmPassword) {
             return { data: { error: ProfileErrorType.PasswordsDoNotMatch }, success: false };
         }
-        let user = await this.profileRepository.changePassword(params);
+        let user = await this.profileRepository.changePassword(params.userId);
         if (!user) {
             return { data: { error: ProfileErrorType.UserNotFound }, success: false };
         }
@@ -112,7 +112,7 @@ export class UpdateProfilePictureUseCase implements IUpdateProfilePictureUseCase
     constructor(private profileRepository: IProfileRepository) { }
 
     async execute(params: UpdateProfilePictureRequestDTO): Promise<ResponseDTO<UpdateProfilePictureResponseDTO>> {
-        let user = await this.profileRepository.updateProfilePicture(params);
+        let user = await this.profileRepository.updateProfilePicture(params.userId);
         if (!user) {
             return { data: { error: ProfileErrorType.UserNotFound }, success: false };
         }

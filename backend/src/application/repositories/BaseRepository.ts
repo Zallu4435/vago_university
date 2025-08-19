@@ -1,6 +1,6 @@
 import { FilterQuery, UpdateQuery } from 'mongoose';
 import { IBaseRepository } from '../../application/repositories/IBaseRepository';
-import { NotificationModel } from '../../infrastructure/database/mongoose/models/notification.model';
+import { NotificationModel } from '../../infrastructure/database/mongoose/notification/notification.model';
 
 export abstract class BaseRepository<
   TSchema,

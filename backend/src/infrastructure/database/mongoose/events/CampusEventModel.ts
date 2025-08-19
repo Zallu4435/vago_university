@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, models } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { 
   OrganizerType, 
   EventType, 
@@ -7,7 +7,7 @@ import {
   Event,
   EventRequest,
   EventRequestStatus
-} from "../../../../../domain/events/entities/EventTypes";
+} from "../../../../domain/events/entities/EventTypes";
 
 const campusEventSchema = new Schema<Event>(
   {

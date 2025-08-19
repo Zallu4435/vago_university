@@ -1,10 +1,11 @@
 import { IAssignmentRepository } from '../../../application/assignments/repositories/IAssignmentRepository';
 import { AssignmentModel } from '../../database/mongoose/assignment/AssignmentModel';
 import { SubmissionModel } from '../../database/mongoose/assignment/SubmissionModel';
-import { Assignment, AssignmentFilter, IAssignment } from '../../../domain/assignments/entities/Assignment';
+import { Assignment, AssignmentFilter, IAssignment, SubmissionFilter, SubmissionSort } from '../../../domain/assignments/entities/Assignment';
+
 
 export class AssignmentRepository implements IAssignmentRepository {
-  async findAssignmentsRaw(query, skip: number, limit: number) {
+  async findAssignmentsRaw(query: AssignmentFilter, skip: number, limit: number) {
     return AssignmentModel.find(query)
       .skip(skip)
       .limit(limit)
@@ -72,7 +73,7 @@ export class AssignmentRepository implements IAssignmentRepository {
   async getSubmissions(assignmentId: string, page: number, limit: number, search?: string, status?: string) {
     const skip = (page - 1) * limit;
     
-    const filterQuery: any = { assignmentId };
+    const filterQuery: SubmissionFilter = { assignmentId };
     
     if (status) {
       filterQuery.status = status;
@@ -87,7 +88,7 @@ export class AssignmentRepository implements IAssignmentRepository {
       ];
     }
     
-    const sortQuery: any = { submittedDate: -1 };
+    const sortQuery: SubmissionSort = { submittedDate: -1 };
     
     const [submissions, total] = await Promise.all([
       SubmissionModel.find(filterQuery)

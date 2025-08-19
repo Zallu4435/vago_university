@@ -23,37 +23,59 @@ import {
   ReplyToMessageUseCase,
   DeleteChatUseCase,
   BlockChatUseCase,
-  ClearChatUseCase
+  ClearChatUseCase,
+  ISendMessageUseCase,
+  ISearchChatsUseCase,
+  ISearchUsersUseCase,
+  IDeleteMessageUseCase,
+  IGetChatsUseCase,
+  IMarkMessagesAsReadUseCase,
+  IAddReactionUseCase,
+  IRemoveReactionUseCase,
+  IGetChatDetailsUseCase,
+  ICreateChatUseCase,
+  ICreateGroupChatUseCase,
+  IAddGroupMemberUseCase,
+  IRemoveGroupMemberUseCase,
+  IUpdateGroupAdminUseCase,
+  IUpdateGroupSettingsUseCase,
+  IUpdateGroupInfoUseCase,
+  ILeaveGroupUseCase,
+  IEditMessageUseCase,
+  IReplyToMessageUseCase,
+  IDeleteChatUseCase,
+  IBlockChatUseCase,
+  IClearChatUseCase,
+  IGetChatMessagesUseCase,
 } from "../../../application/chat/useCases/ChatUseCases";
 import { FileUploadService } from '../../services/upload/FileUploadService';
 
 export const getChatComposer = () => {
   const chatRepository = new ChatRepository();
   
-  const getChatsUseCase = new GetChatsUseCase(chatRepository);
-  const searchChatsUseCase = new SearchChatsUseCase(chatRepository);
-  const getChatMessagesUseCase = new GetChatMessagesUseCase(chatRepository);
-  const sendMessageUseCase = new SendMessageUseCase(chatRepository);
-  const markMessagesAsReadUseCase = new MarkMessagesAsReadUseCase(chatRepository);
-  const addReactionUseCase = new AddReactionUseCase(chatRepository);
-  const removeReactionUseCase = new RemoveReactionUseCase(chatRepository);
-  const getChatDetailsUseCase = new GetChatDetailsUseCase(chatRepository);
-  const searchUsersUseCase = new SearchUsersUseCase(chatRepository);
-  const createChatUseCase = new CreateChatUseCase(chatRepository);
-  const createGroupChatUseCase = new CreateGroupChatUseCase(chatRepository);
-  const addGroupMemberUseCase = new AddGroupMemberUseCase(chatRepository);
-  const removeGroupMemberUseCase = new RemoveGroupMemberUseCase(chatRepository);
-  const updateGroupAdminUseCase = new UpdateGroupAdminUseCase(chatRepository);
-  const updateGroupSettingsUseCase = new UpdateGroupSettingsUseCase(chatRepository);
-  const updateGroupInfoUseCase = new UpdateGroupInfoUseCase(chatRepository);
-  const leaveGroupUseCase = new LeaveGroupUseCase(chatRepository);
-  const editMessageUseCase = new EditMessageUseCase(chatRepository);
-  const deleteMessageUseCase = new DeleteMessageUseCase(chatRepository);
-  const replyToMessageUseCase = new ReplyToMessageUseCase(chatRepository);
-  const deleteChatUseCase = new DeleteChatUseCase(chatRepository);
-  const blockChatUseCase = new BlockChatUseCase(chatRepository);
-  const clearChatUseCase = new ClearChatUseCase(chatRepository);
-  const fileUploadService = new FileUploadService();
+  const getChatsUseCase: IGetChatsUseCase = new GetChatsUseCase(chatRepository);
+  const searchChatsUseCase: ISearchChatsUseCase = new SearchChatsUseCase(chatRepository);
+  const getChatMessagesUseCase: IGetChatMessagesUseCase = new GetChatMessagesUseCase(chatRepository);
+  const sendMessageUseCase: ISendMessageUseCase = new SendMessageUseCase(chatRepository);
+  const markMessagesAsReadUseCase: IMarkMessagesAsReadUseCase = new MarkMessagesAsReadUseCase(chatRepository);
+  const addReactionUseCase: IAddReactionUseCase = new AddReactionUseCase(chatRepository);
+  const removeReactionUseCase: IRemoveReactionUseCase = new RemoveReactionUseCase(chatRepository);
+  const getChatDetailsUseCase: IGetChatDetailsUseCase = new GetChatDetailsUseCase(chatRepository);
+  const searchUsersUseCase: ISearchUsersUseCase = new SearchUsersUseCase(chatRepository);
+  const createChatUseCase: ICreateChatUseCase = new CreateChatUseCase(chatRepository);
+  const createGroupChatUseCase: ICreateGroupChatUseCase = new CreateGroupChatUseCase(chatRepository);
+  const addGroupMemberUseCase: IAddGroupMemberUseCase = new AddGroupMemberUseCase(chatRepository);
+  const removeGroupMemberUseCase: IRemoveGroupMemberUseCase = new RemoveGroupMemberUseCase(chatRepository);
+  const updateGroupAdminUseCase: IUpdateGroupAdminUseCase = new UpdateGroupAdminUseCase(chatRepository);
+  const updateGroupSettingsUseCase: IUpdateGroupSettingsUseCase = new UpdateGroupSettingsUseCase(chatRepository);
+  const updateGroupInfoUseCase: IUpdateGroupInfoUseCase = new UpdateGroupInfoUseCase(chatRepository);
+  const leaveGroupUseCase: ILeaveGroupUseCase = new LeaveGroupUseCase(chatRepository);
+  const editMessageUseCase: IEditMessageUseCase = new EditMessageUseCase(chatRepository);
+  const deleteMessageUseCase: IDeleteMessageUseCase = new DeleteMessageUseCase(chatRepository);
+  const replyToMessageUseCase: IReplyToMessageUseCase = new ReplyToMessageUseCase(chatRepository);
+  const deleteChatUseCase: IDeleteChatUseCase = new DeleteChatUseCase(chatRepository);
+  const blockChatUseCase: IBlockChatUseCase = new BlockChatUseCase(chatRepository);
+  const clearChatUseCase: IClearChatUseCase = new ClearChatUseCase(chatRepository);
 
   return new ChatController(
     getChatsUseCase,
@@ -75,7 +97,6 @@ export const getChatComposer = () => {
     leaveGroupUseCase,
     editMessageUseCase,
     deleteMessageUseCase,
-    fileUploadService,
     replyToMessageUseCase,
     deleteChatUseCase,
     blockChatUseCase,

@@ -1,6 +1,6 @@
 import { ICommunicationRepository } from '../../../application/communication/repositories/ICommunicationRepository';
 import { Message, UserInfo, MessageStatus, UserRole, CommunicationFilter, GetAdminQuery, GetUserQuery } from "../../../domain/communication/entities/Communication";
-import { MessageModel, IMessage } from '../../../infrastructure/database/mongoose/models/communication.model';
+import { MessageModel, IMessage } from '../../database/mongoose/communication/communication.model';
 import { User as UserModel } from '../../database/mongoose/auth/user.model';
 import { Admin as AdminModel } from '../../database/mongoose/auth/admin.model';
 import { Faculty as FacultyModel } from '../../database/mongoose/auth/faculty.model';
@@ -102,7 +102,7 @@ export class CommunicationRepository implements ICommunicationRepository {
         throw new Error('Sender not found');
       }
       
-      let recipients: UserInfo[] = [];
+      let recipients: UserInfo[] = [];  
       
       if (!Array.isArray(to)) {
         throw new Error('Invalid recipients format');
@@ -156,7 +156,7 @@ export class CommunicationRepository implements ICommunicationRepository {
       for (const recipient of to) {
         if (recipient.value === 'all_students' || recipient.value === 'all-students') {
           const users = await UserModel.find({}).select('_id firstName lastName email').lean();
-          recipients = users.map((user: any) => ({
+          recipients = users.map((user) => ({
             _id: user._id.toString(),
             name: `${user.firstName} ${user.lastName}`,
             email: user.email,
@@ -405,7 +405,7 @@ export class CommunicationRepository implements ICommunicationRepository {
 
   async findUsersByType(type: string, search?: string, requesterId?: string): Promise<UserInfo[]> {
     if (type === 'students' || type === 'all_students') {
-      const query: any = {};
+      const query: CommunicationFilter = {};
       if (search) {
         query.$or = [
           { firstName: { $regex: search, $options: "i" } },
@@ -425,7 +425,7 @@ export class CommunicationRepository implements ICommunicationRepository {
     }
 
     if (type === 'faculty' || type === 'all_faculty') {
-      const query: any = {};
+      const query: CommunicationFilter = {};
       if (search) {
         query.$or = [
           { firstName: { $regex: search, $options: "i" } },

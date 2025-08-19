@@ -1,28 +1,28 @@
-import { IHttpRequest, IHttpResponse } from "../../http/IHttp";
+import { IHttpRequest, IHttpResponse, HttpSuccess, HttpErrors } from "../IHttp";
 import {
-  GetChatsUseCase,
-  SearchChatsUseCase,
-  GetChatMessagesUseCase,
-  SendMessageUseCase,
-  MarkMessagesAsReadUseCase,
-  AddReactionUseCase,
-  RemoveReactionUseCase,
-  GetChatDetailsUseCase,
-  SearchUsersUseCase,
-  CreateChatUseCase,
-  CreateGroupChatUseCase,
-  AddGroupMemberUseCase,
-  RemoveGroupMemberUseCase,
-  UpdateGroupAdminUseCase,
-  UpdateGroupSettingsUseCase,
-  UpdateGroupInfoUseCase,
-  LeaveGroupUseCase,
-    EditMessageUseCase,
-  DeleteMessageUseCase,
-  ReplyToMessageUseCase,
-  DeleteChatUseCase,
-  BlockChatUseCase,
-  ClearChatUseCase
+    IGetChatsUseCase,
+    IGetChatMessagesUseCase,
+    IMarkMessagesAsReadUseCase,
+    IAddReactionUseCase,
+    IRemoveReactionUseCase,
+    IGetChatDetailsUseCase,
+    ICreateChatUseCase,
+    ICreateGroupChatUseCase,
+    IAddGroupMemberUseCase,
+    IRemoveGroupMemberUseCase,
+    IUpdateGroupAdminUseCase,
+    IUpdateGroupSettingsUseCase,
+    IUpdateGroupInfoUseCase,
+    ILeaveGroupUseCase,
+    IEditMessageUseCase,
+    IReplyToMessageUseCase,
+    IDeleteChatUseCase,
+    IBlockChatUseCase,
+    IClearChatUseCase,
+    ISendMessageUseCase,
+    ISearchChatsUseCase,
+    ISearchUsersUseCase,
+    IDeleteMessageUseCase
 } from "../../../application/chat/useCases/ChatUseCases";
 import { GetChatsRequestDTO, SearchChatsRequestDTO, GetChatMessagesRequestDTO, SendMessageRequestDTO, MarkMessagesAsReadRequestDTO, AddReactionRequestDTO, RemoveReactionRequestDTO, SearchUsersRequestDTO, CreateChatRequestDTO, CreateGroupChatRequestDTO, AddGroupMemberRequestDTO, RemoveGroupMemberRequestDTO, UpdateGroupAdminRequestDTO, UpdateGroupSettingsRequestDTO, UpdateGroupInfoRequestDTO, LeaveGroupRequestDTO, EditMessageRequestDTO, DeleteMessageRequestDTO, ReplyToMessageRequestDTO } from "../../../domain/chat/dtos/ChatRequestDTOs";
 import { FileUploadService } from "../../../infrastructure/services/upload/FileUploadService";
@@ -32,293 +32,183 @@ import { socketService } from '../../../app';
 
 export class ChatController {
   constructor(
-    private getChatsUseCase: GetChatsUseCase,
-    private searchChatsUseCase: SearchChatsUseCase,
-    private getChatMessagesUseCase: GetChatMessagesUseCase,
-    private sendMessageUseCase: SendMessageUseCase,
-    private markMessagesAsReadUseCase: MarkMessagesAsReadUseCase,
-    private addReactionUseCase: AddReactionUseCase,
-    private removeReactionUseCase: RemoveReactionUseCase,
-    private getChatDetailsUseCase: GetChatDetailsUseCase,
-    private searchUsersUseCase: SearchUsersUseCase,
-    private createChatUseCase: CreateChatUseCase,
-    private createGroupChatUseCase: CreateGroupChatUseCase,
-    private addGroupMemberUseCase: AddGroupMemberUseCase,
-    private removeGroupMemberUseCase: RemoveGroupMemberUseCase,
-    private updateGroupAdminUseCase: UpdateGroupAdminUseCase,
-    private updateGroupSettingsUseCase: UpdateGroupSettingsUseCase,
-    private updateGroupInfoUseCase: UpdateGroupInfoUseCase,
-    private leaveGroupUseCase: LeaveGroupUseCase,
-    private editMessageUseCase: EditMessageUseCase,
-    private deleteMessageUseCase: DeleteMessageUseCase,
-    private fileUploadService: FileUploadService,
-    private replyToMessageUseCase: ReplyToMessageUseCase,
-    private deleteChatUseCase: DeleteChatUseCase,
-    private blockChatUseCase: BlockChatUseCase,
-    private clearChatUseCase: ClearChatUseCase
-  ) {}
+    private getChatsUseCase: IGetChatsUseCase,
+    private searchChatsUseCase: ISearchChatsUseCase,
+    private getChatMessagesUseCase: IGetChatMessagesUseCase,
+    private sendMessageUseCase: ISendMessageUseCase,
+    private markMessagesAsReadUseCase: IMarkMessagesAsReadUseCase,
+    private addReactionUseCase: IAddReactionUseCase,
+    private removeReactionUseCase: IRemoveReactionUseCase,
+    private getChatDetailsUseCase: IGetChatDetailsUseCase,
+    private searchUsersUseCase: ISearchUsersUseCase,
+    private createChatUseCase: ICreateChatUseCase,
+    private createGroupChatUseCase: ICreateGroupChatUseCase,
+    private addGroupMemberUseCase: IAddGroupMemberUseCase,
+    private removeGroupMemberUseCase: IRemoveGroupMemberUseCase,
+    private updateGroupAdminUseCase: IUpdateGroupAdminUseCase,
+    private updateGroupSettingsUseCase: IUpdateGroupSettingsUseCase,
+    private updateGroupInfoUseCase: IUpdateGroupInfoUseCase,
+    private leaveGroupUseCase: ILeaveGroupUseCase,
+    private editMessageUseCase: IEditMessageUseCase,
+    private deleteMessageUseCase: IDeleteMessageUseCase,
+    private replyToMessageUseCase: IReplyToMessageUseCase,
+    private deleteChatUseCase: IDeleteChatUseCase,
+    private blockChatUseCase: IBlockChatUseCase,
+    private clearChatUseCase: IClearChatUseCase
+  ) {
+    this.httpSuccess = new HttpSuccess();
+    this.httpErrors = new HttpErrors();
+  }
+
+  private httpSuccess: HttpSuccess;
+  private httpErrors: HttpErrors;
 
   async getChats(req: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      if (!req.user?.userId) {
-        return {
-          statusCode: 401,
-          body: { error: "User not authenticated" }
-        };
-      }
-
-      const params: GetChatsRequestDTO = {
-        userId: req.user.userId,
-        page: parseInt(req.query?.page as string) || 1,
-        limit: parseInt(req.query?.limit as string) || 10,
-      };
-
-      const result = await this.getChatsUseCase.execute(params);
-      return {
-        statusCode: 200,
-        body: {
-          data: result
-        }
-      };
-    } catch (error) {
-      if (error.message === "User not found") {
-        return {
-          statusCode: 404,
-          body: { error: "User not found" }
-        };
-      }
-
-      if (error.name === "ValidationError") {
-        return {
-          statusCode: 400,
-          body: { error: "Invalid request parameters" }
-        };
-      }
-
-      return {
-        statusCode: 500,
-        body: { 
-          error: "Failed to fetch chats",
-          details: error.message 
-        }
-      };
+    if (!req.user?.userId) {
+      return this.httpErrors.error_401("User not authenticated");
     }
+    const params: GetChatsRequestDTO = {
+      userId: req.user.userId,
+      page: parseInt(req.query?.page as string) || 1,
+      limit: parseInt(req.query?.limit as string) || 10,
+    };
+    const result = await this.getChatsUseCase.execute(params);
+    return this.httpSuccess.success_200(result);
   }
 
   async searchChats(req: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      if (!req.user?.userId) {
-        return {
-          statusCode: 401,
-          body: { error: "User not authenticated" }
-        };
-      }
-
-      const params: SearchChatsRequestDTO = {
-        userId: req.user.userId,
-        query: req.query?.query as string,
-        page: parseInt(req.query?.page as string) || 1,
-        limit: parseInt(req.query?.limit as string) || 10,
-      };
-
-      const result = await this.searchChatsUseCase.execute(params);
-      return {
-        statusCode: 200,
-        body: {
-          data: result
-        }
-      };
-    } catch (error) {
-      return {
-        statusCode: 500,
-        body: { 
-          error: "Failed to search chats",
-          details: error.message 
-        }
-      };
+    if (!req.user?.userId) {
+      return this.httpErrors.error_401("User not authenticated");
     }
+    const params: SearchChatsRequestDTO = {
+      userId: req.user.userId,
+      query: req.query?.query as string,
+      page: parseInt(req.query?.page as string) || 1,
+      limit: parseInt(req.query?.limit as string) || 10,
+    };
+    const result = await this.searchChatsUseCase.execute(params);
+    return this.httpSuccess.success_200(result);
   }
 
   async getChatMessages(req: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      const { chatId } = req.params;
-      const userId = req.user?.userId;
-      if (!chatId || !userId) {
-        return {
-          statusCode: 400,
-          body: { error: "Chat ID and user ID are required" }
-        };
-      }
-      const params: GetChatMessagesRequestDTO = {
-        chatId,
-        userId,
-        page: parseInt(req.query?.page as string) || 1,
-        limit: parseInt(req.query?.limit as string) || 20,
-        before: req.query?.before as string
-      };
-      const result = await this.getChatMessagesUseCase.execute(params);
-      return {
-        statusCode: 200,
-        body: {
-          data: {
-            messages: result.data,
-            pagination: {
-              totalItems: result.totalItems,
-              totalPages: result.totalPages,
-              currentPage: result.currentPage,
-              hasMore: result.hasMore,
-              oldestMessageTimestamp: result.oldestMessageTimestamp
-            }
-          }
-        }
-      };
-    } catch (error) {
-      return {
-        statusCode: 500,
-        body: { 
-          error: "Failed to fetch messages",
-          details: error instanceof Error ? error.message : 'Internal server error'
-        }
-      };
+    const { chatId } = req.params;
+    const userId = req.user?.userId;
+    if (!chatId || !userId) {
+      return this.httpErrors.error_400("Chat ID and user ID are required");
     }
+    const params: GetChatMessagesRequestDTO = {
+      chatId,
+      userId,
+      page: parseInt(req.query?.page as string) || 1,
+      limit: parseInt(req.query?.limit as string) || 20,
+      before: req.query?.before as string
+    };
+    const result = await this.getChatMessagesUseCase.execute(params);
+    return this.httpSuccess.success_200({
+      messages: result.data,
+      pagination: {
+        totalItems: result.totalItems,
+        totalPages: result.totalPages,
+        currentPage: result.currentPage,
+        hasMore: result.hasMore,
+        oldestMessageTimestamp: result.oldestMessageTimestamp
+      }
+    });
   }
 
   async sendMessage(req: IHttpRequest): Promise<IHttpResponse> {
-    try {
-      if (!req.user?.userId) {
-        return {
-          statusCode: 401,
-          body: { error: "User not authenticated" }
-        };
-      }
-
-      const { chatId } = req.params;
-      if (!chatId) {
-        return {
-          statusCode: 400,
-          body: { error: "Chat ID is required" }
-        };
-      }
-
-      let attachments = [];
-      if (req.files && Array.isArray(req.files)) {
-        for (const file of req.files) {
-          try {
-            let attachmentType = 'file';
-            let url = FileUploadService.getFileUrl(file.filename);
-
-            if (file.mimetype.startsWith('image/')) {
-              attachmentType = 'image';
-              // Upload image to Cloudinary
-              const result = await cloudinary.uploader.upload(file.path, {
-                folder: 'message-attachments',
-                resource_type: 'image',
-                use_filename: true,
-                unique_filename: false,
-                overwrite: false
-              });
-              url = result.secure_url;
-            } else if (file.mimetype.startsWith('audio/')) {
-              attachmentType = 'audio';
-              // Upload audio to Cloudinary (resource_type: 'video' for audio)
-              const result = await cloudinary.uploader.upload(file.path, {
-                folder: 'message-attachments',
-                resource_type: 'video',
-                use_filename: true,
-                unique_filename: false,
-                overwrite: false
-              });
-              url = result.secure_url;
-            } else if (file.mimetype.startsWith('video/')) {
-              attachmentType = 'video';
-              // Upload video to Cloudinary
-              const result = await cloudinary.uploader.upload(file.path, {
-                folder: 'message-attachments',
-                resource_type: 'video',
-                use_filename: true,
-                unique_filename: false,
-                overwrite: false
-              });
-              url = result.secure_url;
-            } else if ([
-              'application/pdf',
-              'application/msword',
-              'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-              'text/plain'
-            ].includes(file.mimetype)) {
-              attachmentType = 'document';
-            }
-
-            attachments.push({
-              type: attachmentType,
-              url,
-              name: file.originalname,
-              size: file.size,
-              mimetype: file.mimetype,
-            });
-          } catch (uploadErr) {
-            // handle error
-          }
-        }
-      }
-
-      const messageContent = req.body.text || req.body.content || '';
-      if (!messageContent && attachments.length === 0) {
-        return {
-          statusCode: 400,
-          body: { error: "Message content or file is required" }
-        };
-      }
-
-      const params: SendMessageRequestDTO = {
-        chatId,
-        senderId: req.user.userId,
-        content: messageContent,
-        type: attachments?.length ? (attachments[0].type === MessageType.Image ? MessageType.Image : MessageType.File) : MessageType.Text,
-        attachments,
-      };
-
-      await this.sendMessageUseCase.execute(params);
-      // Fetch the most recent message (should be the one just saved)
-      const messagesResult = await this.getChatMessagesUseCase.execute({
-        chatId,
-        userId: req.user.userId,
-        page: 1,
-        limit: 1,
-      });
-      const savedMessage = messagesResult.data && messagesResult.data.length > 0 ? messagesResult.data[0] : null;
-      if (savedMessage) {
-        socketService.handleNewMessage(savedMessage);
-      }
-      return {
-        statusCode: 201,
-        body: { data: { message: "Message sent successfully" } }
-      };
-    } catch (error) {
-      return {
-        statusCode: 500,
-        body: { 
-          error: "Failed to send message",
-          details: error instanceof Error ? error.message : 'Internal server error'
-        }
-      };
+    if (!req.user?.userId) {
+      return this.httpErrors.error_401("User not authenticated");
     }
+    const { chatId } = req.params;
+    if (!chatId) {
+      return this.httpErrors.error_400("Chat ID is required");
+    }
+    let attachments = [] as Array<{ type: string; url: string; name: string; size: number; mimetype: string }>;
+    if (req.files && Array.isArray(req.files)) {
+      for (const file of req.files) {
+        let attachmentType = 'file';
+        let url = FileUploadService.getFileUrl(file.filename);
+        if (file.mimetype.startsWith('image/')) {
+          attachmentType = 'image';
+          const result = await cloudinary.uploader.upload(file.path, {
+            folder: 'message-attachments',
+            resource_type: 'image',
+            use_filename: true,
+            unique_filename: false,
+            overwrite: false
+          });
+          url = result.secure_url;
+        } else if (file.mimetype.startsWith('audio/')) {
+          attachmentType = 'audio';
+          const result = await cloudinary.uploader.upload(file.path, {
+            folder: 'message-attachments',
+            resource_type: 'video',
+            use_filename: true,
+            unique_filename: false,
+            overwrite: false
+          });
+          url = result.secure_url;
+        } else if (file.mimetype.startsWith('video/')) {
+          attachmentType = 'video';
+          const result = await cloudinary.uploader.upload(file.path, {
+            folder: 'message-attachments',
+            resource_type: 'video',
+            use_filename: true,
+            unique_filename: false,
+            overwrite: false
+          });
+          url = result.secure_url;
+        } else if ([
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'text/plain'
+        ].includes(file.mimetype)) {
+          attachmentType = 'document';
+        }
+        attachments.push({
+          type: attachmentType,
+          url,
+          name: file.originalname,
+          size: file.size,
+          mimetype: file.mimetype,
+        });
+      }
+    }
+    const messageContent = req.body.text || req.body.content || '';
+    if (!messageContent && attachments.length === 0) {
+      return this.httpErrors.error_400("Message content or file is required");
+    }
+    const params: SendMessageRequestDTO = {
+      chatId,
+      senderId: req.user.userId,
+      content: messageContent,
+      type: attachments?.length ? (attachments[0].type === MessageType.Image ? MessageType.Image : MessageType.File) : MessageType.Text,
+      attachments,
+    };
+    await this.sendMessageUseCase.execute(params);
+    const messagesResult = await this.getChatMessagesUseCase.execute({
+      chatId,
+      userId: req.user.userId,
+      page: 1,
+      limit: 1,
+    });
+    const savedMessage = messagesResult.data && messagesResult.data.length > 0 ? messagesResult.data[0] : null;
+    if (savedMessage) {
+      socketService.handleNewMessage(savedMessage);
+    }
+    return this.httpSuccess.success_201({ message: "Message sent successfully" });
   }
 
   async markMessagesAsRead(req: IHttpRequest): Promise<IHttpResponse> {
     if (!req.user?.userId) {
-      return {
-        statusCode: 401,
-        body: { error: 'Unauthorized' }
-      };
+      return this.httpErrors.error_401();
     }
 
     const { chatId } = req.params;
     if (!chatId) {
-      return {
-        statusCode: 400,
-        body: { error: 'Chat ID is required' }
-      };
+      return this.httpErrors.error_400('Chat ID is required');
     }
 
     const params: MarkMessagesAsReadRequestDTO = {
@@ -328,34 +218,22 @@ export class ChatController {
 
     await this.markMessagesAsReadUseCase.execute(params);
 
-    return {
-      statusCode: 200,
-      body: { data: { message: 'Messages marked as read' } }
-    };
+    return this.httpSuccess.success_200({ message: 'Messages marked as read' });
   }
 
   async addReaction(req: IHttpRequest): Promise<IHttpResponse> {
     if (!req.user?.userId) {
-      return {
-        statusCode: 401,
-        body: { error: "User not authenticated" }
-      };
+      return this.httpErrors.error_401("User not authenticated");
     }
 
     const { messageId } = req.params;
     if (!messageId) {
-      return {
-        statusCode: 400,
-        body: { error: "Message ID is required" }
-      };
+      return this.httpErrors.error_400("Message ID is required");
     }
 
     const { emoji } = req.body;
     if (!emoji) {
-      return {
-        statusCode: 400,
-        body: { error: "Emoji is required" }
-      };
+      return this.httpErrors.error_400("Emoji is required");
     }
 
     const params: AddReactionRequestDTO = {
@@ -365,31 +243,21 @@ export class ChatController {
     };
 
     await this.addReactionUseCase.execute(params);
-    // Fetch the updated message and emit to the chat room
     const updatedMessage = await require('../../../infrastructure/database/mongoose/models/chat/MessageModel').MessageModel.findById(messageId).lean();
     if (updatedMessage) {
       socketService.handleNewMessage(updatedMessage);
     }
-    return {
-      statusCode: 200,
-      body: { data: { message: "Reaction added successfully" } }
-    };
+    return this.httpSuccess.success_200({ message: "Reaction added successfully" });
   }
 
   async removeReaction(req: IHttpRequest): Promise<IHttpResponse> {
     if (!req.user?.userId) {
-      return {
-        statusCode: 401,
-        body: { error: "User not authenticated" }
-      };
+      return this.httpErrors.error_401("User not authenticated");
     }
 
     const { messageId } = req.params;
     if (!messageId) {
-      return {
-        statusCode: 400,
-        body: { error: "Message ID is required" }
-      };
+      return this.httpErrors.error_400("Message ID is required");
     }
 
     const params: RemoveReactionRequestDTO = {
@@ -398,47 +266,31 @@ export class ChatController {
     };
 
     await this.removeReactionUseCase.execute(params);
-    // Fetch the updated message and emit to the chat room
     const updatedMessage = await require('../../../infrastructure/database/mongoose/models/chat/MessageModel').MessageModel.findById(messageId).lean();
     if (updatedMessage) {
       socketService.handleNewMessage(updatedMessage);
     }
-    return {
-      statusCode: 200,
-      body: { data: { message: "Reaction removed successfully" } }
-    };
+    return this.httpSuccess.success_200({ message: "Reaction removed successfully" });
   }
 
   async getChatDetails(req: IHttpRequest): Promise<IHttpResponse> {
     const { chatId } = req.params;
     const userId = req.user?.userId;
     if (!chatId || !userId) {
-      return {
-        statusCode: 400,
-        body: { error: "Chat ID and user ID are required" }
-      };
+      return this.httpErrors.error_400("Chat ID and user ID are required");
     }
 
     const result = await this.getChatDetailsUseCase.execute(chatId, userId);
     if (!result) {
-      return {
-        statusCode: 404,
-        body: { error: "Chat not found" }
-      };
+      return this.httpErrors.error_404("Chat not found");
     }
 
-    return {
-      statusCode: 200,
-      body: { data: result }
-    };
+    return this.httpSuccess.success_200(result);
   }
 
   async searchUsers(req: IHttpRequest): Promise<IHttpResponse> {
     if (!req.user?.userId) {
-      return {
-        statusCode: 401,
-        body: { error: "User not authenticated" }
-      };
+      return this.httpErrors.error_401("User not authenticated");
     }
 
     const params: SearchUsersRequestDTO = {
@@ -449,21 +301,13 @@ export class ChatController {
     };
 
     const result = await this.searchUsersUseCase.execute(params);
-      
-    return {
-      statusCode: 200,
-      body: {
-        data: result
-      }
-    };
+
+    return this.httpSuccess.success_200(result);
   }
 
   async createChat(req: IHttpRequest): Promise<IHttpResponse> {
     if (!req.user?.userId) {
-      return {
-        statusCode: 401,
-        body: { error: "User not authenticated" }
-      };
+      return this.httpErrors.error_401("User not authenticated");
     }
 
     const params: CreateChatRequestDTO = {
@@ -475,26 +319,20 @@ export class ChatController {
     };
 
     const result = await this.createChatUseCase.execute(params);
-    return {
-      statusCode: 201,
-      body: { data: result }
-    };
+    return this.httpSuccess.success_201(result);
   }
 
   async createGroupChat(req: IHttpRequest): Promise<IHttpResponse> {
     if (!req.user?.userId) {
-      return {
-        statusCode: 401,
-        body: { error: "User not authenticated" }
-      };
+      return this.httpErrors.error_401("User not authenticated");
     }
 
     let { name, description, participants, settings } = req.body;
     if (typeof participants === 'string') {
-      try { participants = JSON.parse(participants); } catch {}
+      participants = JSON.parse(participants);
     }
     if (typeof settings === 'string') {
-      try { settings = JSON.parse(settings); } catch {}
+      settings = JSON.parse(settings);
     }
     const params = {
       name,
@@ -509,28 +347,19 @@ export class ChatController {
     }
 
     const result = await this.createGroupChatUseCase.execute(params);
-    
-    return {
-      statusCode: 201,
-      body: { data: result }
-    };
+
+    return this.httpSuccess.success_201(result);
   }
 
   async addGroupMember(req: IHttpRequest): Promise<IHttpResponse> {
     if (!req.user?.userId) {
-      return {
-        statusCode: 401,
-        body: { error: "User not authenticated" }
-      };
+      return this.httpErrors.error_401("User not authenticated");
     }
 
     const { chatId } = req.params;
     const { userId, addedBy } = req.body;
     if (!chatId || !userId) {
-      return {
-        statusCode: 400,
-        body: { error: "Chat ID and user ID are required" }
-      };
+      return this.httpErrors.error_400("Chat ID and user ID are required");
     }
 
     const params: AddGroupMemberRequestDTO = {
@@ -540,28 +369,19 @@ export class ChatController {
     };
 
     await this.addGroupMemberUseCase.execute(params);
-    
+
     const updatedChat = await this.getChatDetailsUseCase.execute(chatId, req.user.userId);
-    return {
-      statusCode: 200,
-      body: { data: updatedChat }
-    };
+    return this.httpSuccess.success_200(updatedChat);
   }
 
   async removeGroupMember(req: IHttpRequest): Promise<IHttpResponse> {
     if (!req.user?.userId) {
-      return {
-        statusCode: 401,
-        body: { error: "User not authenticated" }
-      };
+      return this.httpErrors.error_401("User not authenticated");
     }
 
     const { chatId, userId } = req.params;
     if (!chatId || !userId) {
-      return {
-        statusCode: 400,
-        body: { error: "Chat ID and user ID are required" }
-      };
+      return this.httpErrors.error_400("Chat ID and user ID are required");
     }
 
     const params: RemoveGroupMemberRequestDTO = {
@@ -571,29 +391,20 @@ export class ChatController {
     };
 
     await this.removeGroupMemberUseCase.execute(params);
-    
+
     const updatedChat = await this.getChatDetailsUseCase.execute(chatId, req.user.userId);
-    return {
-      statusCode: 200,
-      body: { data: updatedChat }
-    };
+    return this.httpSuccess.success_200(updatedChat);
   }
 
   async updateGroupAdmin(req: IHttpRequest): Promise<IHttpResponse> {
     if (!req.user?.userId) {
-      return {
-        statusCode: 401,
-        body: { error: "User not authenticated" }
-      };
+      return this.httpErrors.error_401("User not authenticated");
     }
 
     const { chatId, userId } = req.params;
     const { isAdmin } = req.body;
     if (!chatId || !userId || typeof isAdmin !== 'boolean') {
-      return {
-        statusCode: 400,
-        body: { error: "Chat ID, user ID, and isAdmin flag are required" }
-      };
+      return this.httpErrors.error_400("Chat ID, user ID, and isAdmin flag are required");
     }
 
     const params: UpdateGroupAdminRequestDTO = {
@@ -604,28 +415,19 @@ export class ChatController {
     };
 
     await this.updateGroupAdminUseCase.execute(params);
-    
-    return {
-      statusCode: 200,
-      body: { data: { message: "Admin status updated successfully" } }
-    };
+
+    return this.httpSuccess.success_200({ message: "Admin status updated successfully" });
   }
 
   async updateGroupSettings(req: IHttpRequest): Promise<IHttpResponse> {
     if (!req.user?.userId) {
-      return {
-        statusCode: 401,
-        body: { error: "User not authenticated" }
-      };
+      return this.httpErrors.error_401("User not authenticated");
     }
 
     const { chatId } = req.params;
     const { settings } = req.body;
     if (!chatId || !settings) {
-      return {
-        statusCode: 400,
-        body: { error: "Chat ID and settings are required" }
-      };
+      return this.httpErrors.error_400("Chat ID and settings are required");
     }
 
     const params: UpdateGroupSettingsRequestDTO = {
@@ -635,28 +437,19 @@ export class ChatController {
     };
 
     await this.updateGroupSettingsUseCase.execute(params);
-    
-    return {
-      statusCode: 200,
-      body: { data: { message: "Group settings updated successfully" } }
-    };
+
+    return this.httpSuccess.success_200({ message: "Group settings updated successfully" });
   }
 
   async updateGroupInfo(req: IHttpRequest): Promise<IHttpResponse> {
     if (!req.user?.userId) {
-      return {
-        statusCode: 401,
-        body: { error: "User not authenticated" }
-      };
+      return this.httpErrors.error_401("User not authenticated");
     }
 
     const { chatId } = req.params;
     const { name, description, avatar } = req.body;
     if (!chatId || (!name && !description && !avatar)) {
-      return {
-        statusCode: 400,
-        body: { error: "Chat ID and at least one field to update are required" }
-      };
+      return this.httpErrors.error_400("Chat ID and at least one field to update are required");
     }
 
     const params: UpdateGroupInfoRequestDTO = {
@@ -668,27 +461,18 @@ export class ChatController {
     };
 
     await this.updateGroupInfoUseCase.execute(params);
-    
-    return {
-      statusCode: 200,
-      body: { data: { message: "Group info updated successfully" } }
-    };
+
+    return this.httpSuccess.success_200({ message: "Group info updated successfully" });
   }
 
   async leaveGroup(req: IHttpRequest): Promise<IHttpResponse> {
     if (!req.user?.userId) {
-      return {
-        statusCode: 401,
-        body: { error: "User not authenticated" }
-      };
+      return this.httpErrors.error_401("User not authenticated");
     }
 
     const { chatId } = req.params;
     if (!chatId) {
-      return {
-        statusCode: 400,
-        body: { error: "Chat ID is required" }
-      };
+      return this.httpErrors.error_400("Chat ID is required");
     }
 
     const params: LeaveGroupRequestDTO = {
@@ -697,11 +481,8 @@ export class ChatController {
     };
 
     await this.leaveGroupUseCase.execute(params);
-    
-    return {
-      statusCode: 200,
-      body: { data: { message: "Successfully left the group" } }
-    };
+
+    return this.httpSuccess.success_200({ message: "Successfully left the group" });
   }
 
   async editMessage(req: IHttpRequest): Promise<IHttpResponse> {
@@ -716,68 +497,43 @@ export class ChatController {
       userId
     });
 
-    // Fetch the updated message and emit to the chat room
     const updatedMessage = await require('../../../infrastructure/database/mongoose/models/chat/MessageModel').MessageModel.findById(messageId).lean();
     if (updatedMessage) {
       socketService.handleNewMessage(updatedMessage);
     }
 
-    return {
-      statusCode: 200,
-      body: { data: { message: 'Message edited successfully' } }
-    };
+    return this.httpSuccess.success_200({ message: 'Message edited successfully' });
   }
 
   async deleteMessage(req: IHttpRequest): Promise<IHttpResponse> {
     const { chatId, messageId } = req.params;
     const { deleteForEveryone } = req.body;
     const userId = req.user.userId;
-    try {
-      await this.deleteMessageUseCase.execute({
-        messageId,
-        userId,
-        deleteForEveryone
-      });
-      // Fetch the updated (deleted) message and emit to the chat room
-      const updatedMessage = await require('../../../infrastructure/database/mongoose/models/chat/MessageModel').MessageModel.findById(messageId).lean();
-      if (updatedMessage) {
-        socketService.handleNewMessage(updatedMessage);
-      }
-      return {
-        statusCode: 200,
-        body: { data: { message: 'Message deleted successfully' } }
-      };
-    } catch (error) {
-      console.error('[ChatController] Error in deleteMessage:', error, '\nParams:', { chatId, messageId, userId, deleteForEveryone });
-      return {
-        statusCode: error.statusCode || 500,
-        body: { error: error.message }
-      };
+    await this.deleteMessageUseCase.execute({
+      messageId,
+      userId,
+      deleteForEveryone
+    });
+    const updatedMessage = await require('../../../infrastructure/database/mongoose/models/chat/MessageModel').MessageModel.findById(messageId).lean();
+    if (updatedMessage) {
+      socketService.handleNewMessage(updatedMessage);
     }
+    return this.httpSuccess.success_200({ message: 'Message deleted successfully' });
   }
 
   async replyToMessage(req: IHttpRequest): Promise<IHttpResponse> {
     if (!req.user?.userId) {
-      return {
-        statusCode: 401,
-        body: { error: "User not authenticated" }
-      };
+      return this.httpErrors.error_401("User not authenticated");
     }
 
     const { chatId, messageId } = req.params;
     if (!chatId || !messageId) {
-      return {
-        statusCode: 400,
-        body: { error: "Chat ID and Message ID are required" }
-      };
+      return this.httpErrors.error_400("Chat ID and Message ID are required");
     }
 
     const { content } = req.body;
     if (!content) {
-      return {
-        statusCode: 400,
-        body: { error: "Content is required" }
-      };
+      return this.httpErrors.error_400("Content is required");
     }
 
     const params: ReplyToMessageRequestDTO = {
@@ -788,21 +544,17 @@ export class ChatController {
     };
 
     await this.replyToMessageUseCase.execute(params);
-    
-    return {
-      statusCode: 200,
-      body: { data: { message: "Reply sent successfully" } }
-    };
+
+    return this.httpSuccess.success_200({ message: "Reply sent successfully" });
   }
 
   async deleteChat(req: IHttpRequest): Promise<IHttpResponse> {
     const { chatId } = req.params;
     const userId = req.user?.userId;
     if (!chatId || !userId) {
-      return { statusCode: 400, body: { error: 'Chat ID and user ID are required' } };
+      return this.httpErrors.error_400('Chat ID and user ID are required');
     }
     await this.deleteChatUseCase.execute({ chatId, userId });
-    // Fetch the updated chat and emit to the chat room
     const updatedChat = await this.getChatDetailsUseCase.execute(chatId, userId);
     if (updatedChat) {
       socketService.handleUpdatedChat(updatedChat);
@@ -814,10 +566,9 @@ export class ChatController {
     const { chatId } = req.params;
     const userId = req.user?.userId;
     if (!chatId || !userId) {
-      return { statusCode: 400, body: { error: 'Chat ID and user ID are required' } };
+      return this.httpErrors.error_400('Chat ID and user ID are required');
     }
     await this.blockChatUseCase.execute({ chatId, userId });
-    // Fetch the updated chat and emit to the chat room
     const updatedChat = await this.getChatDetailsUseCase.execute(chatId, userId);
     if (updatedChat) {
       socketService.handleUpdatedChat(updatedChat);
@@ -829,7 +580,7 @@ export class ChatController {
     const { chatId } = req.params;
     const userId = req.user?.userId;
     if (!chatId || !userId) {
-      return { statusCode: 400, body: { error: 'Chat ID and user ID are required' } };
+      return this.httpErrors.error_400('Chat ID and user ID are required');
     }
     await this.clearChatUseCase.execute({ chatId, userId });
     return { statusCode: 204, body: {} };

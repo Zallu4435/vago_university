@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { config } from "./config/config";
-import { AdmissionDraft } from "./infrastructure/database/mongoose/models/admissionDraft.model";
+import { AdmissionDraft } from "./infrastructure/database/mongoose/admission/AdmissionDraftModel";
 
 async function cleanupOldDrafts() {
   try {

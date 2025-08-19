@@ -1,7 +1,7 @@
 import { IDiplomaRepository } from "../../../application/diploma/repositories/IDiplomaRepository";
 import { Diploma } from "../../../domain/diploma/entities/Diploma";
 import { EnrollStudent, UnenrollStudent, DiplomaDocument } from "../../../domain/diploma/entities/diplomatypes";
-import { Diploma as DiplomaModel } from "../../../infrastructure/database/mongoose/models/diploma.model";
+import { Diploma as DiplomaModel } from "../../database/mongoose/diploma/diploma.model";
 import mongoose from "mongoose";
 import { DiplomaFilter } from "../../../domain/diploma/entities/diplomatypes";
 

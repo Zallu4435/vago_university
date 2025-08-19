@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { MessageType, MessageStatus } from "../../../../../domain/chat/entities/Message";
+import { MessageType, MessageStatus } from "../../../../domain/chat/entities/Message";
 
 export interface IMessage extends Document {
   chatId: string;

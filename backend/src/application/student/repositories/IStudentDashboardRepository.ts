@@ -1,7 +1,7 @@
 import { Notification } from "../../../domain/notifications/entities/NotificationTypes";
-import { IMessage } from "../../../infrastructure/database/mongoose/models/communication.model";
+import { IMessage } from "../../../infrastructure/database/mongoose/communication/communication.model";
 import { IAssignmentDocument } from "../../../infrastructure/database/mongoose/assignment/AssignmentModel";
-import { IVideoSession } from "../../../infrastructure/database/mongoose/models/session.model";
+import { IVideoSession } from "../../../infrastructure/database/mongoose/session/session.model";
 import { Event } from "../../../domain/events/entities/EventTypes";
 import { Club } from "../../../domain/clubs/entities/ClubTypes";
 

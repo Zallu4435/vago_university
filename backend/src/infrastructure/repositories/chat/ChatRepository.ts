@@ -1,333 +1,145 @@
-import {
-  GetChatsRequestDTO,
-  SearchChatsRequestDTO,
-  GetChatMessagesRequestDTO,
-  SendMessageRequestDTO,
-  MarkMessagesAsReadRequestDTO,
-  AddReactionRequestDTO,
-  RemoveReactionRequestDTO,
-  SearchUsersRequestDTO,
-  CreateChatRequestDTO,
-  CreateGroupChatRequestDTO,
-  AddGroupMemberRequestDTO,
-  RemoveGroupMemberRequestDTO,
-  UpdateGroupAdminRequestDTO,
-  UpdateGroupSettingsRequestDTO,
-  UpdateGroupInfoRequestDTO,
-  EditMessageRequestDTO,
-  DeleteMessageRequestDTO,
-  ReplyToMessageRequestDTO,
-  DeleteChatRequestDTO,
-  BlockChatRequestDTO,
-  ClearChatRequestDTO
-} from "../../../domain/chat/dtos/ChatRequestDTOs";
-import {
-  GetChatsResponseDTO,
-  GetChatMessagesResponseDTO,
-  ChatDetailsResponseDTO,
-  ChatSummaryDTO,
-  MessageDTO,
-  SearchUsersResponseDTO,
-} from "../../../domain/chat/dtos/ChatResponseDTOs";
 import { IChatRepository } from "../../../application/chat/repositories/IChatRepository";
-import { ChatModel } from "../../../infrastructure/database/mongoose/models/chat/ChatModel";
-import { MessageModel } from "../../../infrastructure/database/mongoose/models/chat/MessageModel";
+import { ChatModel } from "../../database/mongoose/chat/ChatModel";
+import { MessageModel } from "../../database/mongoose/chat/MessageModel";
 import { User as UserModel } from "../../database/mongoose/auth/user.model";
 import { Faculty as FacultyModel } from "../../database/mongoose/auth/faculty.model";
-import { MessageStatus } from "../../../domain/chat/entities/Message";
-import { MessageType } from "../../../domain/chat/entities/MessageType";
+import { MessageStatus, MessageType } from "../../../domain/chat/entities/Message";
 import { ChatFilter, ChatType } from "../../../domain/chat/entities/Chat";
 
-
 export class ChatRepository implements IChatRepository {
-  async getChats(params: GetChatsRequestDTO): Promise<GetChatsResponseDTO> {
-    try {
-      const { userId, page, limit } = params;
-      const skip = (page - 1) * limit;
+  async getChats(params: { userId: string; page: number; limit: number }) {
+    const { userId, page, limit } = params;
+    const skip = (page - 1) * limit;
 
-      const user = await UserModel.findById(userId);
-      if (!user) {
-        throw new Error("User not found");
-      }
-
-      const chats = await ChatModel.find({ participants: userId })
-        .sort({ updatedAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean();
-
-      const totalItems = await ChatModel.countDocuments({ participants: userId });
-      const totalPages = Math.ceil(totalItems / limit);
-
-      const mappedChats: ChatSummaryDTO[] = await Promise.all(
-        chats.map(async (chat) => {
-          const unreadCount = await MessageModel.countDocuments({
-            chatId: chat._id.toString(),
-            senderId: { $ne: userId },
-            status: MessageStatus.Sent,
-          });
-
-          const lastMessage = await MessageModel.findOne({
-            chatId: chat._id.toString(),
-            deletedFor: { $ne: userId }
-          })
-            .sort({ createdAt: -1 })
-            .lean();
-
-          const participantUsers = await UserModel.find({ _id: { $in: chat.participants } })
-            .select("firstName lastName email profilePicture")
-            .lean();
-
-          return {
-            id: chat._id.toString(),
-            type: chat.type,
-            name: chat.name,
-            avatar: chat.avatar,
-            lastMessage: lastMessage
-              ? {
-                id: lastMessage._id.toString(),
-                content: lastMessage.content,
-                type: lastMessage.type,
-                senderId: lastMessage.senderId,
-                status: lastMessage.status,
-                attachments: lastMessage.attachments,
-                createdAt: lastMessage.createdAt,
-              }
-              : undefined,
-            participants: participantUsers.map(user => ({
-              id: user._id.toString(),
-              firstName: user.firstName,
-              lastName: user.lastName,
-              email: user.email,
-              avatar: user.profilePicture,
-              isOnline: false
-            })),
-            admins: chat.admins,
-            unreadCount,
-            updatedAt: chat.updatedAt,
-          };
-        })
-      );
-
-      const result = {
-        data: mappedChats,
-        totalItems,
-        totalPages,
-        currentPage: page,
-      };
-      return result;
-    } catch (error) {
-      console.error("Error in getChats repository:", error);
-      throw error;
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      throw new Error("User not found");
     }
+
+    const chats = await ChatModel.find({ participants: userId })
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const totalItems = await ChatModel.countDocuments({ participants: userId });
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return { chats, totalItems, totalPages, currentPage: page };
   }
 
-  async searchChats(params: SearchChatsRequestDTO): Promise<GetChatsResponseDTO> {
-    try {
-      const { userId, query, page, limit } = params;
-      const skip = (page - 1) * limit;
+  async searchChats(params: { userId: string; query: string; page: number; limit: number }) {
+    const { userId, query, page, limit } = params;
+    const skip = (page - 1) * limit;
 
-      const userSearchQuery = {
-        _id: { $ne: userId },
+    const userSearchQuery = {
+      _id: { $ne: userId },
+      $or: [
+        { firstName: { $regex: query, $options: 'i' } },
+        { lastName: { $regex: query, $options: 'i' } },
+        { email: { $regex: query, $options: 'i' } }
+      ]
+    };
+
+    const users = await UserModel.find(userSearchQuery).select('_id firstName lastName email profilePicture').lean();
+    const matchingUserIds = users.map(user => user._id.toString());
+
+    let searchQuery: ChatFilter = {
+      participants: {
+        $in: [userId, ...matchingUserIds]
+      }
+    };
+
+    if (query && typeof query === 'string' && query.trim().length > 0) {
+      searchQuery = {
+        ...searchQuery,
         $or: [
-          { firstName: { $regex: query, $options: 'i' } },
-          { lastName: { $regex: query, $options: 'i' } },
-          { email: { $regex: query, $options: 'i' } }
+          { name: { $regex: query.trim(), $options: "i" } },
+          { "lastMessage.content": { $regex: query.trim(), $options: "i" } }
         ]
       };
-
-      const users = await UserModel.find(userSearchQuery).select('_id firstName lastName email profilePicture').lean();
-      const matchingUserIds = users.map(user => user._id.toString());
-
-      let searchQuery: ChatFilter = {
-        participants: {
-          $in: [userId, ...matchingUserIds]
-        }
-      };
-
-      if (query && typeof query === 'string' && query.trim().length > 0) {
-        searchQuery = {
-          ...searchQuery,
-          $or: [
-            { name: { $regex: query.trim(), $options: "i" } },
-            { "lastMessage.content": { $regex: query.trim(), $options: "i" } }
-          ]
-        };
-      }
-
-      const chats = await ChatModel.find(searchQuery)
-        .sort({ updatedAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean();
-
-      if (chats.length === 0 && matchingUserIds.length > 0) {
-        const newChats = matchingUserIds.map(userId => ({
-          id: `new_${userId}`,
-          type: 'direct',
-          name: '',
-          avatar: '',
-          lastMessage: null,
-          participants: [{
-            id: params.userId,
-            firstName: '',
-            lastName: '',
-            email: '',
-            avatar: '',
-            isOnline: false
-          }, {
-            id: userId,
-            firstName: '',
-            lastName: '',
-            email: '',
-            avatar: '',
-            isOnline: false
-          }],
-          unreadCount: 0,
-          updatedAt: new Date()
-        }));
-
-        return {
-          data: newChats,
-          totalItems: newChats.length,
-          totalPages: 1,
-          currentPage: page,
-        };
-      }
-
-      const totalItems = await ChatModel.countDocuments(searchQuery);
-      const totalPages = Math.ceil(totalItems / limit);
-
-      const mappedChats: ChatSummaryDTO[] = await Promise.all(
-        chats.map(async (chat) => {
-          const unreadCount = await MessageModel.countDocuments({
-            chatId: chat._id.toString(),
-            senderId: { $ne: userId },
-            status: MessageStatus.Sent,
-          });
-
-          const lastMessage = await MessageModel.findOne({
-            chatId: chat._id.toString(),
-            deletedFor: { $ne: userId }
-          })
-            .sort({ createdAt: -1 })
-            .lean();
-
-          const participantUsers = await UserModel.find({ _id: { $in: chat.participants } })
-            .select("firstName lastName email profilePicture")
-            .lean();
-
-          return {
-            id: chat._id.toString(),
-            type: chat.type,
-            name: chat.name,
-            avatar: chat.avatar,
-            lastMessage: lastMessage
-              ? {
-                id: lastMessage._id.toString(),
-                content: lastMessage.content,
-                type: lastMessage.type,
-                senderId: lastMessage.senderId,
-                status: lastMessage.status,
-                attachments: lastMessage.attachments,
-                createdAt: lastMessage.createdAt,
-              }
-              : undefined,
-            participants: participantUsers.map(user => ({
-              id: user._id.toString(),
-              firstName: user.firstName,
-              lastName: user.lastName,
-              email: user.email,
-              avatar: user.profilePicture,
-              isOnline: false
-            })),
-            unreadCount,
-            updatedAt: chat.updatedAt,
-          };
-        })
-      );
-
-      return {
-        data: mappedChats,
-        totalItems,
-        totalPages,
-        currentPage: page,
-      };
-    } catch (error) {
-      console.error('Error in searchChats repository:', error);
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack
-      });
-      throw error;
     }
+
+    const chats = await ChatModel.find(searchQuery)
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const totalItems = await ChatModel.countDocuments(searchQuery);
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return { chats, totalItems, totalPages, currentPage: page, matchingUserIds };
   }
 
-  async getChatMessages(params: GetChatMessagesRequestDTO): Promise<GetChatMessagesResponseDTO> {
-    try {
-      const { chatId, userId, page = 1, limit = 20, before } = params;
-      const skip = (page - 1) * limit;
+  async getChatMessages(params: { chatId: string; userId: string; page: number; limit: number; before?: string }) {
+    const { chatId, userId, page = 1, limit = 20, before } = params;
+    const skip = (page - 1) * limit;
 
-      const query: ChatFilter = {
-        chatId,
-        $or: [
-          { deletedFor: { $exists: false } },
-          { deletedFor: { $ne: userId } }
-        ]
-      };
+    const query: ChatFilter = {
+      chatId,
+      $or: [
+        { deletedFor: { $exists: false } },
+        { deletedFor: { $ne: userId } }
+      ]
+    };
 
-      if (before) {
-        query.createdAt = { $lt: new Date(before) };
-      }
-
-      const messages = await MessageModel.find(query)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean();
-
-      const totalItems = await MessageModel.countDocuments(query);
-      const totalPages = Math.ceil(totalItems / limit);
-
-      const mappedMessages: MessageDTO[] = messages
-        .reverse()
-        .map((message) => ({
-          id: message._id.toString(),
-          chatId: message.chatId,
-          senderId: message.senderId,
-          content: message.content,
-          type: message.type,
-          status: message.status,
-          reactions: message.reactions || [],
-          attachments: message.attachments || [],
-          replyTo: message.replyTo,
-          forwardedFrom: message.forwardedFrom,
-          createdAt: message.createdAt,
-          updatedAt: message.updatedAt,
-          isDeleted: message.isDeleted || false,
-          deletedForEveryone: message.deletedForEveryone || false,
-          deletedFor: message.deletedFor || [],
-        }));
-
-      const oldestMessageTimestamp = messages.length > 0
-        ? messages[messages.length - 1].createdAt
-        : null;
-
-      return {
-        data: mappedMessages,
-        totalItems,
-        totalPages,
-        currentPage: page,
-        hasMore: skip + messages.length < totalItems,
-        oldestMessageTimestamp: oldestMessageTimestamp?.toISOString() || null
-      };
-    } catch (error) {
-      console.error('Error in getChatMessages repository:', error);
-      throw error;
+    if (before) {
+      query.createdAt = { $lt: new Date(before) };
     }
+
+    const messages = await MessageModel.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const totalItems = await MessageModel.countDocuments(query);
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return { messages, totalItems, totalPages, currentPage: page };
   }
 
-  async sendMessage(params: SendMessageRequestDTO): Promise<void> {
+  async getUnreadCountForChat(params: { chatId: string; userId: string }) {
+    const { chatId, userId } = params;
+    return MessageModel.countDocuments({
+      chatId,
+      senderId: { $ne: userId },
+      status: MessageStatus.Sent,
+    });
+  }
+
+  async getLastMessageForChat(params: { chatId: string; userId: string }) {
+    const { chatId, userId } = params;
+    const last = await MessageModel.findOne({ chatId, deletedFor: { $ne: userId } })
+      .sort({ createdAt: -1 })
+      .lean();
+    if (!last) return null;
+    return {
+      id: last._id.toString(),
+      content: last.content,
+      type: last.type,
+      senderId: last.senderId,
+      status: last.status,
+      attachments: last.attachments,
+      createdAt: last.createdAt,
+    };
+  }
+
+  async getUsersByIds(ids: string[]) {
+    const users = await UserModel.find({ _id: { $in: ids } })
+      .select("firstName lastName email profilePicture")
+      .lean();
+    return users.map(u => ({
+      id: u._id.toString(),
+      firstName: u.firstName,
+      lastName: u.lastName,
+      email: u.email,
+      avatar: u.profilePicture,
+    }));
+  }
+
+  async sendMessage(params: { chatId: string; senderId: string; content: string; type: MessageType; attachments?: Array<{ type: MessageType; url: string; name?: string; size?: number; mimetype?: string }> }) {
     const { chatId, senderId, content, type, attachments } = params;
     const chat = await ChatModel.findById(chatId);
     if (!chat) throw new Error('Chat not found');
@@ -359,7 +171,7 @@ export class ChatRepository implements IChatRepository {
     });
   }
 
-  async markMessagesAsRead(params: MarkMessagesAsReadRequestDTO): Promise<void> {
+  async markMessagesAsRead(params: { chatId: string; userId: string }) {
     const { chatId, userId } = params;
 
     await MessageModel.updateMany(
@@ -375,7 +187,7 @@ export class ChatRepository implements IChatRepository {
     );
   }
 
-  async addReaction(params: AddReactionRequestDTO): Promise<void> {
+  async addReaction(params: { messageId: string; userId: string; emoji: string }) {
     const { messageId, userId, emoji } = params;
 
     await MessageModel.findByIdAndUpdate(
@@ -394,7 +206,7 @@ export class ChatRepository implements IChatRepository {
     );
   }
 
-  async removeReaction(params: RemoveReactionRequestDTO): Promise<void> {
+  async removeReaction(params: { messageId: string; userId: string }) {
     const { messageId, userId } = params;
 
     await MessageModel.findByIdAndUpdate(
@@ -409,7 +221,7 @@ export class ChatRepository implements IChatRepository {
     );
   }
 
-  async getChatDetails(chatId: string, userId: string): Promise<ChatDetailsResponseDTO | null> {
+  async getChatDetails(chatId: string, userId: string) {
     const chat = await ChatModel.findById(chatId).lean();
     if (!chat) {
       return null;
@@ -439,51 +251,14 @@ export class ChatRepository implements IChatRepository {
     });
 
     return {
-      chat: {
-        id: chat._id.toString(),
-        participants: participants.map((user) => ({
-          id: user._id.toString(),
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          avatar: user.profilePicture,
-          isOnline: false
-        })),
-        lastMessage: chat.lastMessage,
-        updatedAt: chat.updatedAt,
-        type: chat.type,
-        name: chat.name,
-        avatar: chat.avatar,
-        description: chat.description,
-        admins: chat.admins,
-        settings: chat.settings,
-        blockedUsers: chat.blockedUsers,
-        unreadCount,
-      },
-      messages: messages.map((message) => ({
-        id: message._id.toString(),
-        chatId: message.chatId,
-        senderId: message.senderId,
-        content: message.content,
-        type: message.type,
-        status: message.status,
-        reactions: message.reactions,
-        attachments: message.attachments,
-        createdAt: message.createdAt,
-        updatedAt: message.updatedAt,
-      })),
-      participants: participants.map((user) => ({
-        id: user._id.toString(),
-        name: `${user.firstName} ${user.lastName}`,
-        avatar: user.profilePicture,
-        status: 'online',
-        isAdmin: chat.admins?.includes(user._id.toString()) || false,
-      })),
-      settings: chat.settings,
+      chat,
+      messages,
+      participants,
+      unreadCount,
     };
   }
 
-  async searchUsers(params: SearchUsersRequestDTO): Promise<SearchUsersResponseDTO> {
+  async searchUsers(params: { userId: string; query: string; page: number; limit: number }) {
     const { query, page = 1, limit = 20, userId } = params;
     const skip = (page - 1) * limit;
 
@@ -517,7 +292,7 @@ export class ChatRepository implements IChatRepository {
       lastName: user.lastName,
       email: user.email,
       avatar: user.profilePicture,
-      type: 'user'
+      type: 'user' as const
     }));
 
     return {
@@ -528,9 +303,8 @@ export class ChatRepository implements IChatRepository {
     };
   }
 
-  async createChat(params: CreateChatRequestDTO): Promise<ChatSummaryDTO> {
-    try {
-      const { creatorId, participantId, type, name, avatar } = params;
+  async createChat(params: { creatorId: string; participantId: string; type: string; name?: string; avatar?: string }) {
+    const { creatorId, participantId, type, name, avatar } = params;
 
       if (type === 'direct') {
         const existingChat = await ChatModel.findOne({
@@ -579,38 +353,33 @@ export class ChatRepository implements IChatRepository {
         updatedAt: new Date()
       });
 
-      return {
-        id: chat._id.toString(),
-        type: chat.type,
-        name: chat.name || '',
-        avatar: chat.avatar || '',
-        participants: [{
-          id: creatorId,
-          firstName: creator.firstName,
-          lastName: creator.lastName,
-          email: creator.email,
-          avatar: creator.profilePicture,
-          isOnline: false
-        }, {
-          id: participantId,
-          firstName: participant.firstName,
-          lastName: participant.lastName,
-          email: participant.email,
-          avatar: participant.profilePicture,
-          isOnline: false
-        }],
-        unreadCount: 0,
-        updatedAt: chat.updatedAt
-      };
-    } catch (error) {
-      console.error('Error in createChat repository:', error);
-      throw error;
-    }
+    return {
+      id: chat._id.toString(),
+      type: chat.type,
+      name: chat.name || '',
+      avatar: chat.avatar || '',
+      participants: [{
+        id: creatorId,
+        firstName: creator.firstName,
+        lastName: creator.lastName,
+        email: creator.email,
+        avatar: creator.profilePicture,
+        isOnline: false
+      }, {
+        id: participantId,
+        firstName: participant.firstName,
+        lastName: participant.lastName,
+        email: participant.email,
+        avatar: participant.profilePicture,
+        isOnline: false
+      }],
+      unreadCount: 0,
+      updatedAt: chat.updatedAt
+    };
   }
 
-  async editMessage(params: EditMessageRequestDTO): Promise<void> {
-    try {
-      const { chatId, messageId, content, userId } = params;
+  async editMessage(params: { chatId: string; messageId: string; content: string; userId: string }) {
+    const { chatId, messageId, content, userId } = params;
 
       const message = await MessageModel.findOne({ _id: messageId, chatId });
       if (!message) {
@@ -634,15 +403,10 @@ export class ChatRepository implements IChatRepository {
           }
         });
       }
-    } catch (error) {
-      console.error('Error in editMessage repository:', error);
-      throw error;
-    }
   }
 
-  async deleteMessage(params: DeleteMessageRequestDTO): Promise<void> {
-    try {
-      const { messageId, userId, deleteForEveryone } = params;
+  async deleteMessage(params: { messageId: string; userId: string; deleteForEveryone?: boolean }) {
+    const { messageId, userId, deleteForEveryone } = params;
       const message = await MessageModel.findOne({ _id: messageId });
       if (!message) {
         console.error('[deleteMessage] Message not found:', messageId);
@@ -675,78 +439,59 @@ export class ChatRepository implements IChatRepository {
           }
         });
       }
-    } catch (error) {
-      console.error('Error in deleteMessage repository:', error, '\nParams:', params);
-      throw error;
-    }
   }
 
-  async updateMessageStatus(messageId: string, status: MessageStatus): Promise<void> {
-    try {
-      await MessageModel.findByIdAndUpdate(messageId, {
-        status,
-        updatedAt: new Date()
-      });
-    } catch (error) {
-      console.error('Error in updateMessageStatus repository:', error);
-      throw error;
-    }
+  async updateMessageStatus(messageId: string, status: MessageStatus) {
+    await MessageModel.findByIdAndUpdate(messageId, {
+      status,
+      updatedAt: new Date()
+    });
   }
 
-  async addGroupMember(params: AddGroupMemberRequestDTO): Promise<void> {
+  async addGroupMember(params: { chatId: string; userId: string; addedBy: string }) {
     const { chatId, userId, addedBy } = params;
-    try {
-      const chat = await ChatModel.findById(chatId);
-      if (!chat) throw new Error('Chat not found');
+    const chat = await ChatModel.findById(chatId);
+    if (!chat) throw new Error('Chat not found');
 
-      if (chat.type !== ChatType.Group) {
-        throw new Error('Can only add members to group chats');
-      }
-
-      if (chat.settings.onlyAdminsCanAddMembers && !chat.admins.includes(addedBy)) {
-        throw new Error('Only admins can add members');
-      }
-
-      if (chat.participants.includes(userId)) {
-        throw new Error('User is already a member');
-      }
-
-      await ChatModel.findByIdAndUpdate(chatId, {
-        $addToSet: { participants: userId }
-      });
-    } catch (error) {
-      console.error('Error in addGroupMember repository:', error);
-      throw error;
+    if (chat.type !== ChatType.Group) {
+      throw new Error('Can only add members to group chats');
     }
+
+    if (chat.settings.onlyAdminsCanAddMembers && !chat.admins.includes(addedBy)) {
+      throw new Error('Only admins can add members');
+    }
+
+    if (chat.participants.includes(userId)) {
+      throw new Error('User is already a member');
+    }
+
+    await ChatModel.findByIdAndUpdate(chatId, {
+      $addToSet: { participants: userId }
+    });
   }
 
-  async removeGroupMember(params: RemoveGroupMemberRequestDTO): Promise<void> {
+  async removeGroupMember(params: { chatId: string; userId: string; removedBy: string }) {
     const { chatId, userId, removedBy } = params;
-    try {
-      const chat = await ChatModel.findById(chatId);
-      if (!chat) throw new Error('Chat not found');
+    const chat = await ChatModel.findById(chatId);
+    if (!chat) throw new Error('Chat not found');
 
-      if (chat.type !== ChatType.Group) {
-        throw new Error('Can only remove members from group chats');
-      }
-
-      if (!chat.admins.includes(removedBy)) {
-        throw new Error('Only admins can remove members');
-      }
-
-      await ChatModel.findByIdAndUpdate(chatId, {
-        $pull: {
-          participants: userId,
-          admins: userId
-        }
-      });
-    } catch (error) {
-      console.error('Error in removeGroupMember repository:', error);
-      throw error;
+    if (chat.type !== ChatType.Group) {
+      throw new Error('Can only remove members from group chats');
     }
+
+    if (!chat.admins.includes(removedBy)) {
+      throw new Error('Only admins can remove members');
+    }
+
+    await ChatModel.findByIdAndUpdate(chatId, {
+      $pull: {
+        participants: userId,
+        admins: userId
+      }
+    });
   }
 
-  async updateGroupSettings(params: UpdateGroupSettingsRequestDTO): Promise<void> {
+  async updateGroupSettings(params: { chatId: string; settings: Record<string, unknown>; updatedBy: string }) {
     try {
       const { chatId, settings, updatedBy } = params;
       const chat = await ChatModel.findById(chatId);
@@ -763,7 +508,7 @@ export class ChatRepository implements IChatRepository {
       const updateQuery: { [key: string]: boolean } = {};
       for (const key in settings) {
         if (Object.prototype.hasOwnProperty.call(settings, key)) {
-          updateQuery[`settings.${key}`] = settings[key as keyof typeof settings];
+          updateQuery[`settings.${key}`] = Boolean((settings as Record<string, unknown>)[key]);
         }
       }
 
@@ -774,201 +519,171 @@ export class ChatRepository implements IChatRepository {
     }
   }
 
-  async forwardMessage(messageId: string, targetChatId: string, forwardedBy: string): Promise<void> {
-    try {
-      const message = await MessageModel.findById(messageId);
-      if (!message) throw new Error('Message not found');
+  async forwardMessage(messageId: string, targetChatId: string, forwardedBy: string) {
+    const message = await MessageModel.findById(messageId);
+    if (!message) throw new Error('Message not found');
 
-      const newMessage = await MessageModel.create({
-        chatId: targetChatId,
-        senderId: forwardedBy,
-        content: message.content,
-        type: message.type,
-        status: MessageStatus.Sent,
-        attachments: message.attachments,
-        forwardedFrom: {
-          messageId: message._id.toString(),
-          chatId: message.chatId,
-          senderId: message.senderId
-        }
-      });
-
-      await ChatModel.findByIdAndUpdate(targetChatId, {
-        lastMessage: {
-          id: newMessage._id.toString(),
-          content: newMessage.content,
-          type: newMessage.type,
-          senderId: newMessage.senderId,
-          status: newMessage.status,
-          attachments: newMessage.attachments,
-          createdAt: newMessage.createdAt
-        },
-        updatedAt: new Date()
-      });
-    } catch (error) {
-      console.error('Error in forwardMessage repository:', error);
-      throw error;
-    }
-  }
-
-  async replyToMessage(params: ReplyToMessageRequestDTO): Promise<void> {
-    try {
-      const { chatId, messageId, content, userId } = params;
-
-      const originalMessage = await MessageModel.findById(messageId);
-      if (!originalMessage) {
-        throw new Error('Original message not found');
+    const newMessage = await MessageModel.create({
+      chatId: targetChatId,
+      senderId: forwardedBy,
+      content: message.content,
+      type: message.type,
+      status: MessageStatus.Sent,
+      attachments: message.attachments,
+      forwardedFrom: {
+        messageId: message._id.toString(),
+        chatId: message.chatId,
+        senderId: message.senderId
       }
+    });
 
-      const newMessage = await MessageModel.create({
-        chatId,
-        senderId: userId,
-        content,
-        type: MessageType.Text,
-        status: MessageStatus.Sent,
-        replyTo: {
-          messageId: originalMessage._id.toString(),
-          content: originalMessage.content,
-          senderId: originalMessage.senderId,
-          type: originalMessage.type
-        }
-      });
-
-      await ChatModel.findByIdAndUpdate(chatId, {
-        lastMessage: {
-          id: newMessage._id.toString(),
-          content: newMessage.content,
-          type: newMessage.type,
-          senderId: newMessage.senderId,
-          status: newMessage.status,
-          attachments: newMessage.attachments,
-          createdAt: newMessage.createdAt
-        },
-        updatedAt: new Date()
-      });
-    } catch (error) {
-      console.error('Error in replyToMessage repository:', error);
-      throw error;
-    }
+    await ChatModel.findByIdAndUpdate(targetChatId, {
+      lastMessage: {
+        id: newMessage._id.toString(),
+        content: newMessage.content,
+        type: newMessage.type,
+        senderId: newMessage.senderId,
+        status: newMessage.status,
+        attachments: newMessage.attachments,
+        createdAt: newMessage.createdAt
+      },
+      updatedAt: new Date()
+    });
   }
 
-  async createGroupChat(params: CreateGroupChatRequestDTO): Promise<ChatSummaryDTO> {
-    try {
-      const { creatorId, name, participants, description, settings } = params;
+  async replyToMessage(params: { chatId: string; messageId: string; content: string; userId: string }) {
+    const { chatId, messageId, content, userId } = params;
 
-      const [userCreator, facultyCreator] = await Promise.all([
-        UserModel.findById(creatorId),
-        FacultyModel.findById(creatorId)
-      ]);
+    const originalMessage = await MessageModel.findById(messageId);
+    if (!originalMessage) {
+      throw new Error('Original message not found');
+    }
 
-      const creator = userCreator || facultyCreator;
-      if (!creator) {
-        throw new Error('Creator not found');
+    const newMessage = await MessageModel.create({
+      chatId,
+      senderId: userId,
+      content,
+      type: MessageType.Text,
+      status: MessageStatus.Sent,
+      replyTo: {
+        messageId: originalMessage._id.toString(),
+        content: originalMessage.content,
+        senderId: originalMessage.senderId,
+        type: originalMessage.type
       }
+    });
 
-      const [userParticipants, facultyParticipants] = await Promise.all([
-        UserModel.find({ _id: { $in: participants } }),
-        FacultyModel.find({ _id: { $in: participants } })
-      ]);
+    await ChatModel.findByIdAndUpdate(chatId, {
+      lastMessage: {
+        id: newMessage._id.toString(),
+        content: newMessage.content,
+        type: newMessage.type,
+        senderId: newMessage.senderId,
+        status: newMessage.status,
+        attachments: newMessage.attachments,
+        createdAt: newMessage.createdAt
+      },
+      updatedAt: new Date()
+    });
+  }
 
-      const allParticipants = [...userParticipants, ...facultyParticipants];
-      if (allParticipants.length !== participants.length) {
-        throw new Error('One or more participants not found');
+  async createGroupChat(params: { name: string; description?: string; participants: string[]; creatorId: string; settings?: Record<string, unknown>; avatar?: string }) {
+    const { creatorId, name, participants, description, settings } = params;
+
+    const [userCreator, facultyCreator] = await Promise.all([
+      UserModel.findById(creatorId),
+      FacultyModel.findById(creatorId)
+    ]);
+
+    const creator = userCreator || facultyCreator;
+    if (!creator) {
+      throw new Error('Creator not found');
+    }
+
+    const [userParticipants, facultyParticipants] = await Promise.all([
+      UserModel.find({ _id: { $in: participants } }),
+      FacultyModel.find({ _id: { $in: participants } })
+    ]);
+
+    const allParticipants = [...userParticipants, ...facultyParticipants];
+    if (allParticipants.length !== participants.length) {
+      throw new Error('One or more participants not found');
+    }
+
+    const finalParticipants = [...new Set([...participants, creatorId])];
+
+    const chat = await ChatModel.create({
+      type: 'group',
+      name,
+      description,
+      participants: finalParticipants,
+      createdBy: creatorId,
+      admins: [creatorId],
+      avatar: params.avatar,
+      settings: {
+        onlyAdminsCanPost: (settings as any)?.onlyAdminsCanPost || false,
+        onlyAdminsCanAddMembers: (settings as any)?.onlyAdminsCanAddMembers || false,
+        onlyAdminsCanChangeInfo: (settings as any)?.onlyAdminsCanChangeInfo || false
+      },
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    return {
+      id: chat._id.toString(),
+      type: chat.type,
+      name: chat.name,
+      avatar: chat.avatar || '',
+      participants: allParticipants.map(participant => ({
+        id: participant._id.toString(),
+        firstName: participant.firstName,
+        lastName: participant.lastName,
+        email: participant.email,
+        avatar: participant.profilePicture,
+        isOnline: false
+      })),
+      unreadCount: 0,
+      updatedAt: chat.updatedAt
+    };
+  }
+
+  async updateGroupAdmin(params: { chatId: string; userId: string; isAdmin: boolean; updatedBy: string }) {
+    const { chatId, userId, isAdmin, updatedBy } = params;
+    const chat = await ChatModel.findById(chatId);
+    if (!chat) throw new Error('Chat not found');
+    if (chat.type !== ChatType.Group) throw new Error('Can only update admins for group chats');
+    if (!chat.admins.includes(updatedBy)) throw new Error('Only admins can update admin status');
+    if (isAdmin) {
+      await ChatModel.findByIdAndUpdate(chatId, { $addToSet: { admins: userId } });
+    } else {
+      await ChatModel.findByIdAndUpdate(chatId, { $pull: { admins: userId } });
+    }
+  }
+
+  async updateGroupInfo(params: { chatId: string; name?: string; description?: string; avatar?: string; updatedBy: string }) {
+    const { chatId, name, description, avatar, updatedBy } = params;
+    const chat = await ChatModel.findById(chatId);
+    if (!chat) throw new Error('Chat not found');
+    if (chat.type !== ChatType.Group) throw new Error('Can only update info for group chats');
+    if (!chat.admins.includes(updatedBy)) throw new Error('Only admins can update group info');
+    const update: Record<string, string | undefined> = {};
+    if (name !== undefined) update.name = name;
+    if (description !== undefined) update.description = description;
+    if (avatar !== undefined) update.avatar = avatar;
+    await ChatModel.findByIdAndUpdate(chatId, { $set: update });
+  }
+
+  async leaveGroup(params: { chatId: string; userId: string }) {
+    const { chatId, userId } = params;
+    await ChatModel.findByIdAndUpdate(chatId, {
+      $pull: {
+        participants: userId,
+        admins: userId
       }
-
-      const finalParticipants = [...new Set([...participants, creatorId])];
-
-      const chat = await ChatModel.create({
-        type: 'group',
-        name,
-        description,
-        participants: finalParticipants,
-        createdBy: creatorId,
-        admins: [creatorId],
-        avatar: params.avatar,
-        settings: {
-          onlyAdminsCanPost: settings?.onlyAdminsCanPost || false,
-          onlyAdminsCanAddMembers: settings?.onlyAdminsCanAddMembers || false,
-          onlyAdminsCanChangeInfo: settings?.onlyAdminsCanChangeInfo || false
-        },
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
-
-      return {
-        id: chat._id.toString(),
-        type: chat.type,
-        name: chat.name,
-        avatar: chat.avatar || '',
-        participants: allParticipants.map(participant => ({
-          id: participant._id.toString(),
-          firstName: participant.firstName,
-          lastName: participant.lastName,
-          email: participant.email,
-          avatar: participant.profilePicture,
-          isOnline: false
-        })),
-        unreadCount: 0,
-        updatedAt: chat.updatedAt
-      };
-    } catch (error) {
-      console.error('Error in createGroupChat repository:', error);
-      throw error;
-    }
+    });
   }
 
-  async updateGroupAdmin(params: UpdateGroupAdminRequestDTO): Promise<void> {
-    try {
-      const { chatId, userId, isAdmin, updatedBy } = params;
-      const chat = await ChatModel.findById(chatId);
-      if (!chat) throw new Error('Chat not found');
-      if (chat.type !== ChatType.Group) throw new Error('Can only update admins for group chats');
-      if (!chat.admins.includes(updatedBy)) throw new Error('Only admins can update admin status');
-      if (isAdmin) {
-        await ChatModel.findByIdAndUpdate(chatId, { $addToSet: { admins: userId } });
-      } else {
-        await ChatModel.findByIdAndUpdate(chatId, { $pull: { admins: userId } });
-      }
-    } catch (error) {
-      console.error('Error in updateGroupAdmin repository:', error, 'Params:', params);
-      throw error;
-    }
-  }
-
-  async updateGroupInfo(params: UpdateGroupInfoRequestDTO): Promise<void> {
-    try {
-      const { chatId, name, description, avatar, updatedBy } = params;
-      const chat = await ChatModel.findById(chatId);
-      if (!chat) throw new Error('Chat not found');
-      if (chat.type !== ChatType.Group) throw new Error('Can only update info for group chats');
-      if (!chat.admins.includes(updatedBy)) throw new Error('Only admins can update group info');
-      const update: Record<string, string | undefined> = {};
-      if (name !== undefined) update.name = name;
-      if (description !== undefined) update.description = description;
-      if (avatar !== undefined) update.avatar = avatar;
-      await ChatModel.findByIdAndUpdate(chatId, { $set: update });
-    } catch (error) {
-      console.error('Error in updateGroupInfo repository:', error, 'Params:', params);
-      throw error;
-    }
-  }
-
-  async leaveGroup(params: { chatId: string; userId: string }): Promise<void> {
-    try {
-      const { chatId, userId } = params;
-      await ChatModel.findByIdAndUpdate(chatId, {
-        $pull: {
-          participants: userId,
-          admins: userId
-        }
-      });
-    } catch (error) {
-      console.error('Error in leaveGroup repository:', error);
-      throw error;
-    }
-  }
-
-  async deleteChat(params: DeleteChatRequestDTO): Promise<void> {
+  async deleteChat(params: { chatId: string; userId: string }) {
     const { chatId, userId } = params;
     const chat = await ChatModel.findById(chatId);
     if (!chat) throw new Error('Chat not found');
@@ -977,7 +692,7 @@ export class ChatRepository implements IChatRepository {
     await MessageModel.deleteMany({ chatId });
   }
 
-  async blockChat(params: BlockChatRequestDTO): Promise<void> {
+  async blockChat(params: { chatId: string; userId: string }) {
     const { chatId, userId } = params;
     const chat = await ChatModel.findById(chatId);
     if (!chat) throw new Error('Chat not found');
@@ -996,11 +711,10 @@ export class ChatRepository implements IChatRepository {
         }
       }
     } else {
-      // For group, keep previous logic (if needed)
     }
   }
 
-  async clearChat(params: ClearChatRequestDTO): Promise<void> {
+  async clearChat(params: { chatId: string; userId: string }) {
     const { chatId, userId } = params;
     await MessageModel.updateMany(
       { chatId },

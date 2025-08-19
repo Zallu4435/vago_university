@@ -1,6 +1,6 @@
 import { EnquiryProps } from "../../../domain/enquiry/entities/EnquiryTypes";
 import { IEnquiryRepository } from "../../../application/enquiry/repositories/IEnquiryRepository";
-import { Enquiry as EnquiryModel } from "../../database/mongoose/models/enquiry.model";
+import { Enquiry as EnquiryModel } from "../../database/mongoose/enquiry/enquiry.model";
 
 export class EnquiryRepository implements IEnquiryRepository {
   async create(data: EnquiryProps) {

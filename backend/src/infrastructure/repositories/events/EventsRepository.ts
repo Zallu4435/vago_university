@@ -2,7 +2,7 @@ import { IEventsRepository } from "../../../application/events/repositories/IEve
 import {
   CampusEventModel,
   EventRequestModel,
-} from "../../../infrastructure/database/mongoose/models/events/CampusEventModel";
+} from "../../../infrastructure/database/mongoose/events/CampusEventModel";
 import { EventRequestStatus, Event as EventSchema } from "../../../domain/events/entities/EventTypes";
 import { EventDocument, EventFilter, CreateEventDto, UpdateEventDto } from "../../../domain/events/entities/Event";
 import { BaseRepository } from "../../../application/repositories/BaseRepository";

@@ -1,4 +1,4 @@
-import { SiteSectionModel } from '../../database/mongoose/models/site-management/SiteSectionModel';
+import { SiteSectionModel } from '../../database/mongoose/site-management/SiteSectionModel';
 import { IUserSiteSectionRepository } from '../../../application/site-management/repositories/IUserSiteSectionRepository';
 
 export class UserSiteSectionRepository implements IUserSiteSectionRepository {

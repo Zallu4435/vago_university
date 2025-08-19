@@ -21,7 +21,7 @@ import {
 import { IAdmissionsRepository } from "../../../application/admission/repositories/IAdmissionsRepository";
 import { AdmissionDraft as AdmissionDraftModel } from "../../database/mongoose/admission/AdmissionDraftModel";
 import { Admission as AdmissionModel } from "../../database/mongoose/admission/AdmissionModel";
-import { PaymentModel } from "../../database/mongoose/models/financial.model";
+import { PaymentModel } from "../../database/mongoose/financial/financial.model";
 import { DocumentUploadService } from '../../services/admission/DocumentUploadService';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2025-04-30.basil" });

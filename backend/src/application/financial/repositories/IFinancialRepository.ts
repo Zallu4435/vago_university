@@ -1,16 +1,4 @@
 import {
-    GetStudentFinancialInfoRequestDTO,
-    GetAllPaymentsRequestDTO,
-    GetOnePaymentRequestDTO,
-    MakePaymentRequestDTO,
-    UploadDocumentRequestDTO,
-    GetPaymentReceiptRequestDTO,
-    CreateChargeRequestDTO,
-    GetAllChargesRequestDTO,
-    UpdateChargeRequestDTO,
-    DeleteChargeRequestDTO,
-} from "../../../domain/financial/dtos/FinancialRequestDTOs";
-import {
     GetStudentFinancialInfoResponseDTO,
     GetAllPaymentsResponseDTO,
     GetOnePaymentResponseDTO,
@@ -22,18 +10,19 @@ import {
     UpdateChargeResponseDTO,
     DeleteChargeResponseDTO,
 } from "../../../domain/financial/dtos/FinancialResponseDTOs";
+import { Charge, CreateChargeParams, UploadDocumentParams } from "../../../domain/financial/entities/Charge";
 
 export interface IFinancialRepository {
-    getStudentFinancialInfo(params: GetStudentFinancialInfoRequestDTO): Promise<GetStudentFinancialInfoResponseDTO>;
-    getAllPayments(params: GetAllPaymentsRequestDTO): Promise<GetAllPaymentsResponseDTO>;
-    getOnePayment(params: GetOnePaymentRequestDTO): Promise<GetOnePaymentResponseDTO>;
-    makePayment(params: MakePaymentRequestDTO): Promise<MakePaymentResponseDTO>;
-    uploadDocument(params: UploadDocumentRequestDTO): Promise<UploadDocumentResponseDTO>;
-    getPaymentReceipt(params: GetPaymentReceiptRequestDTO): Promise<GetPaymentReceiptResponseDTO>;
-    createCharge(params: CreateChargeRequestDTO): Promise<CreateChargeResponseDTO>;
-    getAllCharges(params: GetAllChargesRequestDTO): Promise<GetAllChargesResponseDTO>;
-    updateCharge(params: UpdateChargeRequestDTO): Promise<UpdateChargeResponseDTO>;
-    deleteCharge(params: DeleteChargeRequestDTO): Promise<DeleteChargeResponseDTO>;
+    getStudentFinancialInfo(studentId: string): Promise<GetStudentFinancialInfoResponseDTO>;
+    getAllPayments(startDate: string, endDate: string, status: string, studentId: string, page: number, limit: number): Promise<GetAllPaymentsResponseDTO>;
+    getOnePayment(paymentId: string): Promise<GetOnePaymentResponseDTO>;
+    makePayment(studentId: string, chargeId: string, amount: number, term: string, method: string, razorpayPaymentId: string, razorpayOrderId: string, razorpaySignature: string): Promise<MakePaymentResponseDTO>;
+    uploadDocument(params: UploadDocumentParams): Promise<UploadDocumentResponseDTO>;
+    getPaymentReceipt(paymentId: string): Promise<GetPaymentReceiptResponseDTO>;
+    createCharge(params: CreateChargeParams): Promise<CreateChargeResponseDTO>;
+    getAllCharges(term: string, status: string, search: string, page: number, limit: number): Promise<GetAllChargesResponseDTO>;
+    updateCharge(chargeId: string, updateFields: Partial<Charge>): Promise<UpdateChargeResponseDTO>;
+    deleteCharge(chargeId: string): Promise<DeleteChargeResponseDTO>;
     hasPendingPayment(studentId: string): Promise<boolean>;
     clearPendingPayment(studentId: string): Promise<boolean>;
 }

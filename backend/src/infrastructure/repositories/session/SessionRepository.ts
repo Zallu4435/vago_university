@@ -1,6 +1,6 @@
 import { ISessionRepository } from '../../../application/session/repositories/ISessionRepository';
 import { PaymentFilter, VideoSession, VideoSessionFilter } from '../../../domain/session/entities/VideoSession';
-import { VideoSessionModel } from '../../database/mongoose/models/session.model';
+import { VideoSessionModel } from '../../database/mongoose/session/session.model';
 import { User } from '../../database/mongoose/auth/user.model';
 
 export class SessionRepository implements ISessionRepository {

@@ -18,7 +18,7 @@ import {
 } from "../../../domain/faculty/dtos/FacultyResponseDTOs";
 import { IFacultyRepository } from "../../../application/faculty/repositories/IFacultyRepository";
 import { Faculty as FacultyModel } from "../../database/mongoose/auth/faculty.model";
-import { FacultyRegister } from "../../database/mongoose/models/facultyRegister.model";
+import { FacultyRegister } from "../../database/mongoose/auth/facultyRegister.model";
 import { FacultyStatus } from "../../../domain/faculty/FacultyTypes";
 
 

@@ -1,16 +1,11 @@
-import {
-    GetProfileRequestDTO,
-    UpdateProfileRequestDTO,
-    ChangePasswordRequestDTO,
-    UpdateProfilePictureRequestDTO,
-} from "../../../domain/profile/dtos/ProfileRequestDTOs";
+import { GetProfileResult, ProfileUser, SaveableProfileUser } from "../../../domain/profile/entities/User";
 
 export interface IProfileRepository {
-    getProfile(params: GetProfileRequestDTO);
-    updateProfile(params: UpdateProfileRequestDTO);
-    changePassword(params: ChangePasswordRequestDTO);
-    updateProfilePicture(params: UpdateProfilePictureRequestDTO);
-    findUserByEmail(email: string);
-    findFacultyByEmail(email: string);
-    saveUser(user);
+    getProfile(userId: string): Promise<GetProfileResult>;
+    updateProfile(userId: string): Promise<{ user: SaveableProfileUser; isFaculty: boolean }>;
+    changePassword(userId: string): Promise<SaveableProfileUser>;
+    updateProfilePicture(userId: string): Promise<SaveableProfileUser>;
+    findUserByEmail(email: string): Promise<ProfileUser>;
+    findFacultyByEmail(email: string): Promise<ProfileUser>;
+    saveUser<T extends { save: () => Promise<T> }>(user: T): Promise<T>;
 }

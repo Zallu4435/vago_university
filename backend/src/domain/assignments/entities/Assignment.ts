@@ -172,7 +172,7 @@ export class Assignment implements IAssignment {
     maxMarks?: number;
     description?: string;
     files?: AssignmentFile[];
-    status?:AssignmentStatus;
+    status?: AssignmentStatus;
   }): void {
     if (props.title !== undefined) this.title = props.title;
     if (props.subject !== undefined) this.subject = props.subject;
@@ -181,7 +181,7 @@ export class Assignment implements IAssignment {
     if (props.description !== undefined) this.description = props.description;
     if (props.files !== undefined) this.files = props.files;
     if (props.status !== undefined) this.status = props.status;
-    
+
     this.updatedAt = new Date();
   }
 
@@ -217,3 +217,18 @@ export interface UserAssignmentFilter {
   [key: string]: unknown;
 }
 
+
+export type SubmissionFilterOrClause =
+  | { studentName: RegExp }
+  | { feedback: RegExp }
+  | { 'files.fileName': RegExp };
+
+export type SubmissionFilter = {
+  assignmentId: string;
+  status?: string;
+  $or?: SubmissionFilterOrClause[];
+};
+
+export type SubmissionSort = {
+  submittedDate?: 1 | -1;
+};

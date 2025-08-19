@@ -35,7 +35,6 @@ const enquirySchema = new Schema<IEnquiry>(
   }
 );
 
-// Indexes for better query performance
 enquirySchema.index({ status: 1 });
 enquirySchema.index({ createdAt: -1 });
 enquirySchema.index({ email: 1 });

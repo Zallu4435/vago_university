@@ -36,16 +36,23 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
           
           setAdmins(transformedAdmins);
           setError(null);
-        } catch (err: any) {
+        } catch (err: unknown) {
           let errorMessage = 'Failed to load admins. Please try again.';
-          if (err.response?.status === 403) {
-            errorMessage = 'Access forbidden. You may not have permission to view admins.';
-          } else if (err.response?.status === 401) {
-            errorMessage = 'Authentication required. Please log in again.';
-          } else if (err.response?.status === 500) {
-            errorMessage = 'Server error. Please try again later.';
+          if (
+            err &&
+            typeof err === 'object' &&
+            'response' in err &&
+            (err as { response?: { status?: number } }).response
+          ) {
+            const status = (err as { response?: { status?: number } }).response?.status;
+            if (status === 403) {
+              errorMessage = 'Access forbidden. You may not have permission to view admins.';
+            } else if (status === 401) {
+              errorMessage = 'Authentication required. Please log in again.';
+            } else if (status === 500) {
+              errorMessage = 'Server error. Please try again later.';
+            }
           }
-          
           setError(errorMessage);
         } finally {
           setIsLoadingAdmins(false);
@@ -108,7 +115,7 @@ const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
       setRecipients([]);
       setError(null);
       handleClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       setError('Failed to send message. Please try again.');
     }
   };

@@ -1,5 +1,5 @@
 import { ICoursesRepository } from "../../../application/courses/repositories/ICoursesRepository";
-import { CourseModel, EnrollmentModel } from "../../../infrastructure/database/mongoose/models/courses/CourseModel";
+import { CourseModel, EnrollmentModel } from "../../database/mongoose/courses/CourseModel";
 import mongoose from "mongoose";
 import {
   GetEnrollmentsRequest,

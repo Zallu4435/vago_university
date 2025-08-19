@@ -236,7 +236,6 @@ export interface CourseFilter {
   [key: string]: unknown;
 }
 
-// Filter type for findAcademicHistory
 export interface AcademicHistoryFilter {
   userId?: string;
   term?: { $gte?: string; $lte?: string };
@@ -244,4 +243,13 @@ export interface AcademicHistoryFilter {
   gpa?: number;
   id?: string;
   [key: string]: unknown;
+}
+
+export interface ITranscriptRequestInput {
+  userId?: string;
+  deliveryMethod: string;
+  address?: string;
+  email?: string;
+  requestedAt?: string;
+  estimatedDelivery: string;
 }

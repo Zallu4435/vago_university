@@ -87,3 +87,8 @@ export interface DocumentDTO {
   export interface DeleteChargeResponseDTO {
     success: boolean;
   }
+
+  export interface ResponseDTO<T> {
+    data: T | { error: string };
+    success: boolean;
+}

@@ -1,7 +1,7 @@
 import { IUserDiplomaRepository } from "../../../application/diploma/repositories/IUserDiplomaRepository";
-import { Diploma as DiplomaModel } from "../../../infrastructure/database/mongoose/models/diploma.model";
-import { UserProgress } from "../../../infrastructure/database/mongoose/models/userProgress.model";
-import { Video } from "../../../infrastructure/database/mongoose/models/video.model";
+import { Diploma as DiplomaModel } from "../../database/mongoose/diploma/diploma.model";
+import { UserProgress } from "../../database/mongoose/video/userProgress.model";
+import { Video } from "../../database/mongoose/video/video.model";
 import { VideoStatus } from "../../../domain/video/enums/VideoStatus";
 import { DiplomaFilter } from "../../../domain/diploma/entities/diplomatypes";
 

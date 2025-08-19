@@ -106,7 +106,7 @@ const PaymentSchema = new mongoose.Schema<Payment>(
       default: 'Pending',
     },
     receiptUrl: { type: String },
-    metadata: { type: mongoose.Schema.Types.Mixed }, // Flexible field for Razorpay, Stripe, etc.
+    metadata: { type: mongoose.Schema.Types.Mixed }, 
   },
   { timestamps: true }
 );

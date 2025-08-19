@@ -127,8 +127,8 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
             }
 
             try {
-                const results = await Promise.all(
-                    batches.map(async (batch, index) => {
+                await Promise.all(
+                    batches.map(async (batch) => {
                         const result = await getMessaging().sendEachForMulticast({
                             notification: { title, body: message },
                             data: { notificationId: params.id },

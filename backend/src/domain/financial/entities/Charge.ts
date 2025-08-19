@@ -64,3 +64,19 @@ export interface ChargeFilter {
   _id?: string | { $in: string[] };
   [key: string]: unknown;
 }
+
+
+export type CreateChargeParams = {
+  title: string;
+  description: string;
+  amount: number;
+  term: string;
+  dueDate: Date;
+  applicableFor: string;
+  createdBy: string;
+};
+
+export type UploadDocumentParams = {
+  file: Express.Multer.File;
+  type: string;
+};

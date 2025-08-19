@@ -13,7 +13,7 @@ import { Register } from "../../database/mongoose/auth/register.model";
 import { Admin } from "../../database/mongoose/auth/admin.model";
 import { User as UserModel } from "../../database/mongoose/auth/user.model";
 import { Faculty as FacultyModel } from "../../database/mongoose/auth/faculty.model";
-import { FacultyRegister } from "../../database/mongoose/models/facultyRegister.model";
+import { FacultyRegister } from "../../database/mongoose/auth/facultyRegister.model";
 import { Admission } from "../../database/mongoose/admission/AdmissionModel";
 
 export class AuthRepository implements IAuthRepository {

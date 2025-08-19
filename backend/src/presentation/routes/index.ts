@@ -95,7 +95,4 @@ router.use("/enquiries", enquiryRoutes);
 
 router.use("/student/dashboard", studentDashboardRoutes);
 
-
-
-
 export default router;

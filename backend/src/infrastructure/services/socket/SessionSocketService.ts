@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import { VideoSessionModel } from '../../database/mongoose/models/session.model';
+import { VideoSessionModel } from '../../database/mongoose/session/session.model';
 
 interface SessionParticipant {
   userId: string;

@@ -1,30 +1,24 @@
 import { User } from "../../database/mongoose/auth/user.model";
 import { Faculty } from "../../database/mongoose/auth/faculty.model";
-import {
-    GetProfileRequestDTO,
-    UpdateProfileRequestDTO,
-    ChangePasswordRequestDTO,
-    UpdateProfilePictureRequestDTO,
-} from "../../../domain/profile/dtos/ProfileRequestDTOs";
 import { IProfileRepository } from "../../../application/profile/repositories/IProfileRepository";
 
 export class ProfileRepository implements IProfileRepository {
-    async getProfile(params: GetProfileRequestDTO) {
-        let user = await User.findById(params.userId).select("firstName lastName email phone profilePicture passwordChangedAt");
+    async getProfile(userId: string) {
+        let user = await User.findById(userId).select("firstName lastName email phone profilePicture passwordChangedAt");
         let isFaculty = false;
         if (!user) {
-            const faculty = await Faculty.findById(params.userId).select("firstName lastName email phone profilePicture passwordChangedAt");
+            const faculty = await Faculty.findById(userId).select("firstName lastName email phone profilePicture passwordChangedAt");
             user = faculty;
             isFaculty = true;
         }
         return { user, isFaculty };
-    }
+    } 
 
-    async updateProfile(params: UpdateProfileRequestDTO) {
-        let user = await User.findById(params.userId);
+    async updateProfile(userId: string) {
+        let user = await User.findById(userId);
         let isFaculty = false;
         if (!user) {
-            const faculty = await Faculty.findById(params.userId);
+            const faculty = await Faculty.findById(userId);
             user = faculty;
             isFaculty = true;
         }
@@ -45,19 +39,19 @@ export class ProfileRepository implements IProfileRepository {
         return await user.save();
     }
 
-    async changePassword(params: ChangePasswordRequestDTO) {
-        let user = await User.findById(params.userId);
+    async changePassword(userId: string) {
+        let user = await User.findById(userId);
         if (!user) {
-            const faculty = await Faculty.findById(params.userId);
+            const faculty = await Faculty.findById(userId);
             user = faculty;
         }
         return user;
     }
 
-    async updateProfilePicture(params: UpdateProfilePictureRequestDTO) {
-        let user = await User.findById(params.userId);
+    async updateProfilePicture(userId: string) {
+        let user = await User.findById(userId);
         if (!user) {
-            const faculty = await Faculty.findById(params.userId);
+            const faculty = await Faculty.findById(userId);
             user = faculty;
         }
         return user;

@@ -1,6 +1,6 @@
 import { IRepoDiploma, IRepoVideo, IVideoRepository } from '../../../application/video/repositories/IVideoRepository';
-import { Video as VideoModel } from '../../database/mongoose/models/video.model';
-import { Diploma as DiplomaModel } from '../../database/mongoose/models/diploma.model';
+import { Video as VideoModel } from '../../database/mongoose/video/video.model';
+import { Diploma as DiplomaModel } from '../../database/mongoose/diploma/diploma.model';
 type WithStringId<T> = Omit<T, "_id"> & { _id: string };
 
 

@@ -9,7 +9,7 @@ import {
   ClubFilter,
 } from "../../../domain/clubs/entities/Club";
 import { IClubsRepository } from "../../../application/clubs/repositories/IClubsRepository";
-import { ClubModel, ClubRequestModel } from "../../../infrastructure/database/mongoose/models/clubs/ClubModel";
+import { ClubModel, ClubRequestModel } from "../../database/mongoose/clubs/ClubModel";
 import { BaseRepository } from "../../../application/repositories/BaseRepository";
 import { Club } from "../../../domain/clubs/entities/ClubTypes";
 import mongoose from "mongoose";

@@ -8,9 +8,9 @@ import {
   IEnrollmentDocument,
   ITranscriptRequestDocument,
   IProgramDocument,
-  Enrollment
+  Enrollment,
+  ITranscriptRequestInput
 } from "../../../domain/academics/entities/Academic";
-import { ITranscriptRequestInput } from "../../../infrastructure/database/mongoose/models/transcript.model";
 
 export interface IAcademicRepository {
   findStudentById(userId: string): Promise<StudentInfoResult | null>;

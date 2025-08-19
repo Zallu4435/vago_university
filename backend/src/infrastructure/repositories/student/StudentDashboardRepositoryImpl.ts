@@ -1,21 +1,20 @@
 import { IStudentDashboardRepository, StudentAnnouncementResult, LeanMessage } from '../../../application/student/repositories/IStudentDashboardRepository';
 import { AssignmentModel } from '../../database/mongoose/assignment/AssignmentModel';
-import { CampusEventModel } from '../../database/mongoose/models/events/CampusEventModel';
-import { TeamModel } from '../../database/mongoose/models/sports.model';
-import { ClubModel } from '../../database/mongoose/models/clubs/ClubModel';
-import { NotificationModel } from '../../database/mongoose/models/notification.model';
-import { VideoSessionModel } from '../../database/mongoose/models/session.model';
+import { CampusEventModel } from '../../database/mongoose/events/CampusEventModel';
+import { TeamModel } from '../../database/mongoose/sport/sports.model';
+import { ClubModel } from '../../database/mongoose/clubs/ClubModel';
+import { NotificationModel } from '../../database/mongoose/notification/notification.model';
+import { VideoSessionModel } from '../../database/mongoose/session/session.model';
 import { User as UserModel } from '../../database/mongoose/auth/user.model';
-import { ProgramModel } from '../../database/mongoose/models/studentProgram.model';
-import { MessageModel } from '../../database/mongoose/models/communication.model';
+import { ProgramModel } from '../../database/mongoose/academic/studentProgram.model';
+import { MessageModel } from '../../database/mongoose/communication/communication.model';
 import { Event } from '../../../domain/events/entities/EventTypes';
-import { Sport } from '../../../domain/sports/entities/Sport';
 import { Club } from '../../../domain/clubs/entities/ClubTypes';
 
 export class StudentDashboardRepository implements IStudentDashboardRepository {
 
   async getAnnouncements(): Promise<StudentAnnouncementResult> {
-    const latestMessage = await (MessageModel as import("mongoose").Model<import("../../database/mongoose/models/communication.model").IMessage>).findOne({
+    const latestMessage = await (MessageModel as import("mongoose").Model<import("../../database/mongoose/communication/communication.model").IMessage>).findOne({
       isBroadcast: true
     }).sort({ createdAt: -1 }).lean() as unknown as LeanMessage | null;
 

@@ -16,6 +16,7 @@ import {
 } from 'react-icons/io5';
 import { 
   EventRequestDetailsModalProps,
+  EventStatus,
 } from '../../../../../domain/types/management/eventmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { formatDate, formatDateTime } from '../../../../../shared/utils/dateUtils';
@@ -29,7 +30,7 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
   onReject,
 }) => {
   usePreventBodyScroll(isOpen);
-
+  
   if (!isOpen || !request) return null;
 
   return (
@@ -44,7 +45,7 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
               <h2 className="text-xl font-bold text-purple-100">{request.event?.title || request.eventName}</h2>
               <p className="text-xs text-purple-300 mt-1">Request ID: {request.id}</p>
               <div className="flex items-center mt-1 space-x-2">
-                <RequestStatusBadge status={request.status} />
+                <RequestStatusBadge status={request.status as EventStatus} />
               </div>
             </div>
           </div>
@@ -57,7 +58,7 @@ const EventRequestDetailsModal: React.FC<EventRequestDetailsModalProps> = ({
         </div>
         <div className="p-6 max-h-[70vh] overflow-y-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <RequestInfoCard icon={User} label="Requested By" value={request.user?.name || request.requestedBy} />
+            <RequestInfoCard icon={User} label="Requested By" value={request.user?.name || request.requestedBy || 'N/A'} />
             <RequestInfoCard icon={Mail} label="Email" value={request.user?.email || 'N/A'} />
             <RequestInfoCard icon={MapPin} label="Venue" value={request.event?.location || request.proposedVenue || 'N/A'} />
             <RequestInfoCard icon={Calendar} label="Event Date" value={request.event?.date ? formatDate(request.event.date) : (request.proposedDate ? formatDate(request.proposedDate) : 'N/A')} />

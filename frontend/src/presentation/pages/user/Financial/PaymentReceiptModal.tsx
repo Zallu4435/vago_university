@@ -6,7 +6,7 @@ import type { PaymentReceiptModalProps } from '../../../../domain/types/user/fin
 import { formatDate } from '../../canvas/materials/utils/materialUtils';
 
 export default function PaymentReceiptModal({ payment, isOpen, onClose }: PaymentReceiptModalProps) {
-    const { styles } = usePreferences();
+    const { styles, theme } = usePreferences();
 
     useEffect(() => {
         if (isOpen) {
@@ -195,13 +195,11 @@ Thank you for your payment!
                     </button>
                 </div>
 
-                {/* Modal Body */}
                 <div className="p-6">
                     <div className="space-y-6">
-                        {/* Receipt Details */}
-                        <div className={`p-6 rounded-xl border ${styles.border} bg-gradient-to-br from-gray-50 to-gray-100 shadow-sm`}>
+                        <div className={`p-6 rounded-xl border ${styles.border} ${styles.card.background} shadow-sm`}>
                             <div className="space-y-4">
-                                <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                                <div className={`flex justify-between items-center py-3 border-b ${styles.border}`}>
                                     <span className={`text-sm font-semibold ${styles.textSecondary} uppercase tracking-wide`}>
                                         Date
                                     </span>
@@ -210,7 +208,7 @@ Thank you for your payment!
                                     </span>
                                 </div>
 
-                                <div className="flex justify-between items-start py-3 border-b border-gray-200">
+                                <div className={`flex justify-between items-start py-3 border-b ${styles.border}`}>
                                     <span className={`text-sm font-semibold ${styles.textSecondary} uppercase tracking-wide`}>
                                         Description
                                     </span>
@@ -219,7 +217,7 @@ Thank you for your payment!
                                     </span>
                                 </div>
 
-                                <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                                <div className={`flex justify-between items-center py-3 border-b ${styles.border}`}>
                                     <span className={`text-sm font-semibold ${styles.textSecondary} uppercase tracking-wide`}>
                                         Payment Method
                                     </span>
@@ -228,27 +226,17 @@ Thank you for your payment!
                                     </span>
                                 </div>
 
-                                <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                                <div className={`flex justify-between items-center py-3 border-b ${styles.border}`}>
                                     <span className={`text-sm font-semibold ${styles.textSecondary} uppercase tracking-wide`}>
                                         Amount
                                     </span>
-                                    <span className="text-2xl font-bold text-green-600">
-                                        ${formatAmount(payment.amount)}
-                                    </span>
-                                </div>
-
-                                <div className="flex justify-between items-center py-3">
-                                    <span className={`text-sm font-semibold ${styles.textSecondary} uppercase tracking-wide`}>
-                                        Payment ID
-                                    </span>
-                                    <span className={`text-sm font-medium ${styles.textPrimary} font-mono bg-white px-3 py-1 rounded-md border`}>
-                                        {payment.id || 'N/A'}
+                                    <span className="text-2xl font-bold" style={{ color: theme === 'dark' ? '#34D399' : '#059669' }}>
+                                        ₹{formatAmount(payment.amount)}
                                     </span>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Action Buttons */}
                         <div className="flex gap-4">
                             <button
                                 onClick={handleDownloadReceipt}
@@ -267,7 +255,6 @@ Thank you for your payment!
                             </button>
                         </div>
 
-                        {/* Close Button */}
                         <button
                             onClick={onClose}
                             className={`w-full px-6 py-3 border-2 ${styles.border} ${styles.textPrimary} rounded-xl font-semibold transition-all duration-300 hover:bg-gray-50 hover:border-gray-300 text-sm`}
@@ -277,8 +264,7 @@ Thank you for your payment!
                     </div>
                 </div>
 
-                {/* Footer */}
-                <div className={`px-6 py-4 border-t ${styles.border} bg-gradient-to-r from-gray-50 to-gray-100 text-center`}>
+                <div className={`px-6 py-4 border-t ${styles.border} ${styles.card.background} text-center`}>
                     <p className={`text-xs ${styles.textSecondary} italic`}>
                         Thank you for your payment!
                     </p>

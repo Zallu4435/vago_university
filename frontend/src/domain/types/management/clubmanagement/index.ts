@@ -127,7 +127,7 @@ export type StatusType = 'pending' | 'approved' | 'rejected';
 export interface ClubRequestDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  request: ClubRequestDetails | null;
+  request: ClubRequestDetails | ClubRequest | null;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
 }

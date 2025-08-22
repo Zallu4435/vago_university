@@ -10,7 +10,8 @@ import {
   ParamsCallback,
   Request,
   Response,
-  NextFunction
+  NextFunction,
+  FolderCallback
 } from './cloudinary.types';
 
 cloudinary.config({
@@ -82,30 +83,40 @@ const assignmentStorage = new CloudinaryStorage({
 
 const assignmentSubmissionStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: ((req: Request, file: Express.Multer.File) => {
-    const ext = file.originalname.split('.').pop()?.toLowerCase();
-    
-    const params: CloudinaryStorageParams = {
-      folder: () => 'assignment-submissions',
-      allowed_formats: () => ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'],
-      resource_type: () => 'auto',
-      transformation: ((req: Request, file: Express.Multer.File) => {
-        const ext = file.originalname.split('.').pop()?.toLowerCase();
-        if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'].includes(ext)) {
-          return [{ quality: 'auto' }];
-        }
-        return undefined;
-      }) as TransformationCallback,
-    };
-
-    return params;
-  }) as ParamsCallback,
+  params: {
+    folder: () => 'assignment-submissions',
+    allowed_formats: () => ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'],
+    resource_type: ((req: Request, file: Express.Multer.File) => {
+      const ext = file.originalname.split('.').pop()?.toLowerCase();
+      console.log('🔍 Determining resource_type for extension:', ext);
+      
+      if (['pdf', 'doc', 'docx', 'txt'].includes(ext)) {
+        console.log('📄 Document detected, using resource_type: raw');
+        return 'raw';
+      }
+      console.log('🖼️ Image detected, using resource_type: image');
+      return 'image';
+    }) as ResourceTypeCallback,
+    transformation: ((req: Request, file: Express.Multer.File) => {
+      const ext = file.originalname.split('.').pop()?.toLowerCase();
+      if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'].includes(ext)) {
+        return [{ quality: 'auto' }];
+      }
+      return undefined;
+    }) as TransformationCallback,
+  } as CloudinaryStorageParams,
 });
 
 const materialStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: () => 'materials',
+    folder: ((req: Request, file: Express.Multer.File) => {
+      // Create separate folders for materials and thumbnails
+      if (file.fieldname === 'thumbnail') {
+        return 'materials/thumbnails';
+      }
+      return 'materials/files';
+    }) as FolderCallback,
     allowed_formats: () => ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
     resource_type: ((req: Request, file: Express.Multer.File) => {
       const ext = file.originalname.split('.').pop()?.toLowerCase();
@@ -119,6 +130,18 @@ const materialStorage = new CloudinaryStorage({
       }
       return undefined;
     }) as TransformationCallback,
+    public_id: ((req: Request, file: Express.Multer.File) => {
+      const timestamp = Date.now();
+      const originalName = file.originalname.split('.')[0];
+      const fieldName = file.fieldname;
+      const ext = file.originalname.split('.').pop()?.toLowerCase();
+      
+      // Create unique names for both files and thumbnails
+      if (fieldName === 'thumbnail') {
+        return `material_thumbnail_${timestamp}_${originalName}`;
+      }
+      return `material_file_${timestamp}_${originalName}`;
+    }) as PublicIdCallback
   } as CloudinaryStorageParams,
 });
 
@@ -214,6 +237,13 @@ const assignmentSubmissionUpload = multer({
     files: 1 
   },
   fileFilter: (req, file, cb) => {
+    console.log('🔍 File filter checking file:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+      fieldname: file.fieldname
+    });
+    
     const allowedMimeTypes = [
       'application/pdf',
       'application/msword',
@@ -231,6 +261,7 @@ const assignmentSubmissionUpload = multer({
     ];
 
     if (allowedMimeTypes.includes(file.mimetype)) {
+      console.log('✅ File format accepted:', file.mimetype);
       cb(null, true);
     } else {
       console.error('❌ Invalid file format:', file.mimetype);

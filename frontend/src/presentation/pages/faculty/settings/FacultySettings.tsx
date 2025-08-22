@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { logout } from '../../../../appStore/authSlice';
 import FacultySidebar from './FacultySidebar';
 import ProfileSettings from '../../user/Settings/ProfileSettings';
-import FacultyPreferenceSettings from './FacultyPreferenceSettings';
 import FacultyNotificationSettings from './FacultyNotificationSettings';
 import LoadingSpinner from '../../../../shared/components/LoadingSpinner';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
@@ -44,8 +43,6 @@ export default function FacultySettings() {
     switch (activeTab) {
       case 'profile':
         return <ProfileSettings />;
-      case 'preferences':
-        return <FacultyPreferenceSettings />;
       case 'notifications':
         return <FacultyNotificationSettings />;
       case 'financial':

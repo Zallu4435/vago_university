@@ -74,6 +74,9 @@ const StudyMaterialsPage: React.FC = () => {
 
   const filteredMaterials = materials;
 
+  console.log(materials, 'materials');
+  console.log(filteredMaterials, 'filteredMaterials');
+
   return (
     <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
       <div className={`hidden sm:block relative overflow-hidden rounded-xl sm:rounded-2xl shadow-xl bg-gradient-to-r ${styles.accent} group mb-4 sm:mb-6`}>

@@ -48,7 +48,7 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
     return { assignment, submission };
   }
 
-  async submitAssignment(assignmentId: string, files, studentId: string) {
+  async submitAssignment(assignmentId: string, files: Array<{ originalname: string; path: string; size: number }>, studentId: string) {
     const student = await mongoose.model('User').findOne({ _id: studentId });
     const existingSubmission = await SubmissionModel.findOne({ assignmentId, studentId });
     let submission;
@@ -62,7 +62,7 @@ export class UserAssignmentRepository implements IUserAssignmentRepository {
             fileSize: file.size
           })),
           submittedDate: new Date(),
-          status: existingSubmission.status,
+          status: 'pending',
           isLate: false,
           marks: undefined,
           feedback: undefined,

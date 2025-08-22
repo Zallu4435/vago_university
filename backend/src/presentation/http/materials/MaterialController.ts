@@ -1,29 +1,6 @@
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IMaterialController } from '../IHttp';
 import { IGetMaterialByIdUseCase, ICreateMaterialUseCase, IUpdateMaterialUseCase, IDeleteMaterialUseCase, IGetMaterialsUseCase } from '../../../application/materials/useCases/MaterialUseCases';
-
-// File upload types for clean architecture
-interface UploadedFile {
-  fieldname: string;
-  originalname: string;
-  path: string;
-  mimetype: string;
-  size: number;
-}
-
-interface MaterialUpdateData {
-  id: string;
-  title?: string;
-  description?: string;
-  subject?: string;
-  course?: string;
-  semester?: string;
-  tags?: string[];
-  isNewMaterial?: boolean;
-  isRestricted?: boolean;
-  fileUrl?: string;
-  thumbnailUrl?: string;
-  [key: string]: unknown;
-}
+import { MaterialUpdateData, UploadedFile } from '../../../domain/materials/entities/MaterialTypes';
 
 export class MaterialController implements IMaterialController {
   private httpErrors: HttpErrors;
@@ -82,55 +59,62 @@ export class MaterialController implements IMaterialController {
       ...httpRequest.body,
       isNewMaterial: httpRequest.body.isNew === 'true',
       uploadedBy: httpRequest.body.uploadedBy || 'default-user',
-      tags: typeof httpRequest.body.tags === 'string' ? [httpRequest.body.tags] : httpRequest.body.tags,
+      tags: typeof httpRequest.body.tags === 'string' ? [httpRequest.body.tags] : [httpRequest.body.tags],
       isRestricted: httpRequest.body.isRestricted === 'true',
       fileUrl: file.path,
       thumbnailUrl: thumbnail?.path || file.path
     };
-    
+        
     const result = await this.createMaterialUseCase.execute(materialData);
     return this.httpSuccess.success_201(result);
   }
 
   async updateMaterial(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-      const { id } = httpRequest.params;
-      if (!id || !httpRequest.body) {
-        return this.httpErrors.error_400();
-      }
+    const { id } = httpRequest.params;
+    if (!id || !httpRequest.body) {
+      return this.httpErrors.error_400();
+    }
     
     let file: UploadedFile | undefined, thumbnail: UploadedFile | undefined;
     const files = httpRequest.files as UploadedFile[] | { [fieldname: string]: UploadedFile[] };
-    if (Array.isArray(files)) {
-      file = files.find((f) => f.fieldname === 'file');
-      thumbnail = files.find((f) => f.fieldname === 'thumbnail');
-    } else if (files) {
-      file = files.file?.[0];
-      thumbnail = files.thumbnail?.[0];
+    
+    if (files) {
+      if (Array.isArray(files)) {
+        file = files.find((f) => f.fieldname === 'file');
+        thumbnail = files.find((f) => f.fieldname === 'thumbnail');
+      } else {
+        file = files.file?.[0];
+        thumbnail = files.thumbnail?.[0];
+      }
     }
     
     const updateData: MaterialUpdateData = {
       id,
-          ...httpRequest.body,
+      ...httpRequest.body,
       ...(httpRequest.body.isNew !== undefined && { isNewMaterial: httpRequest.body.isNew === 'true' }),
-      ...(httpRequest.body.tags && { tags: typeof httpRequest.body.tags === 'string' ? [httpRequest.body.tags] : httpRequest.body.tags }),
+      ...(httpRequest.body.tags && { tags: typeof httpRequest.body.tags === 'string' ? [httpRequest.body.tags] : [httpRequest.body.tags] }),
       ...(httpRequest.body.isRestricted !== undefined && { isRestricted: httpRequest.body.isRestricted === true || httpRequest.body.isRestricted === 'true' })
     };
     
     if (file?.path) {
-      console.error('[MaterialController] Updating material with new fileUrl:', file.path);
       updateData.fileUrl = file.path;
+    }
+    else if (httpRequest.body.fileUrl) {
+      updateData.fileUrl = httpRequest.body.fileUrl;
     }
     
     if (thumbnail?.path) {
-      console.error('[MaterialController] Updating material with new thumbnailUrl:', thumbnail.path);
       updateData.thumbnailUrl = thumbnail.path;
     }
-    
+    else if (httpRequest.body.thumbnailUrl) {
+      updateData.thumbnailUrl = httpRequest.body.thumbnailUrl;
+    }
+        
     const result = await this.updateMaterialUseCase.execute(updateData);
-      if (!result) {
-        return this.httpErrors.error_404();
-      }
-      return this.httpSuccess.success_200(result);
+    if (!result) {
+      return this.httpErrors.error_404();
+    }
+    return this.httpSuccess.success_200(result);
   }
 
   async deleteMaterial(httpRequest: IHttpRequest): Promise<IHttpResponse> {

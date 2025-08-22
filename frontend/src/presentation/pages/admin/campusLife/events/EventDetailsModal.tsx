@@ -11,7 +11,6 @@ import {
   IoInformationCircleOutline as Info,
 } from 'react-icons/io5';
 import { 
-  Event, 
   EventDetailsModalProps,
 } from '../../../../../domain/types/management/eventmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
@@ -21,7 +20,6 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
   isOpen,
   onClose,
   event,
-  onEdit,
 }) => {
   usePreventBodyScroll(isOpen);
 
@@ -116,24 +114,13 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
           </div>
 
           <div className="border-t border-purple-500/30 bg-gray-900/80 p-6">
-            <div className="flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4">
+            <div className="flex justify-end">
               <button
                 onClick={onClose}
                 className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-gray-500/50"
               >
                 Close
               </button>
-              {'_title' in event && onEdit && (
-                <button
-                  onClick={() => {
-                    onClose();
-                    onEdit(event as Event);
-                  }}
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-blue-500/50"
-                >
-                  Edit Event
-                </button>
-              )}
             </div>
           </div>
         </div>

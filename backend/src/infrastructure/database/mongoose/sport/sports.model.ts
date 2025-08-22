@@ -36,6 +36,7 @@ const teamSchema = new Schema<Sport>({
   },
   upcomingGames: [
     {
+      _id: false,
       date: { type: String, required: true, minlength: 10 },
       description: { type: String, required: true, minlength: 5 },
     },

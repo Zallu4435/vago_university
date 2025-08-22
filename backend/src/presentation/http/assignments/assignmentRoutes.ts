@@ -7,6 +7,10 @@ import { assignmentUpload } from '../../../config/cloudinary.config';
 const assignmentController = getAssignmentComposer();
 const router = Router();
 
+router.get('/analytics', authMiddleware, (req, res, next) => {
+    expressAdapter(req, res, next, assignmentController.getAnalytics.bind(assignmentController));
+});
+
 router.get('/download-submission-file', authMiddleware, async (req, res) => {
     try {
         const { fileUrl, fileName } = req.query;
@@ -27,15 +31,23 @@ router.get('/download-submission-file', authMiddleware, async (req, res) => {
         cleanFileName = cleanFileName.replace(/[^a-zA-Z0-9._-]/g, '');
         cleanFileName = cleanFileName.replace(/"/g, '');
 
-        const response = {
-            success: true,
-            fileUrl: fileUrl,
-            fileName: cleanFileName,
-            message: 'Use window.open to download the file directly',
-            directDownload: true
-        };
+        const fetch = require('node-fetch');
+        const response = await fetch(fileUrl);
+        
+        if (!response.ok) {
+            console.error('❌ Error: Failed to fetch file from URL');
+            console.error('Response status:', response.status);
+            console.error('Response status text:', response.statusText);
+            res.status(500).send('Failed to fetch file');
+            return;
+        }
 
-        res.json(response);
+        const contentType = response.headers.get('content-type') || 'application/octet-stream';
+        const contentDisposition = `attachment; filename="${cleanFileName}"`;
+
+        res.setHeader('Content-Disposition', contentDisposition);
+        res.setHeader('Content-Type', contentType);
+        response.body.pipe(res);
         
     } catch (err) {
         if (err instanceof Error) {
@@ -84,9 +96,6 @@ router.put('/:assignmentId/submissions/:submissionId/review', authMiddleware, (r
     expressAdapter(req, res, next, assignmentController.reviewSubmission.bind(assignmentController));
 });
 
-router.get('/analytics', authMiddleware, (req, res, next) => {
-    expressAdapter(req, res, next, assignmentController.getAnalytics.bind(assignmentController));
-});
 
 
 

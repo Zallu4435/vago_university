@@ -299,7 +299,7 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
                               </p>
                             </div>
                             <div className={`text-right ${styles.textPrimary} font-bold text-base`}>
-                              ${charge.amount?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}
+                              ₹{charge.amount?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}
                             </div>
                           </div>
                         </div>
@@ -308,7 +308,7 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
                         <div className="flex justify-between items-center">
                           <span className="font-semibold text-base">Total Pending</span>
                           <span className="font-bold text-base">
-                            ${pendingCharges.reduce((sum: number, charge: ExtendedCharge) => sum + (charge.amount || 0), 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                            ₹{pendingCharges.reduce((sum: number, charge: ExtendedCharge) => sum + (charge.amount || 0), 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                           </span>
                         </div>
                       </div>
@@ -357,7 +357,7 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
                                 </p>
                               </div>
                               <div className={`text-right ${styles.textPrimary} font-bold text-base`}>
-                                ${charge.amount?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}
+                                ₹{charge.amount?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}
                               </div>
                             </div>
                           </div>
@@ -366,7 +366,7 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
                           <div className="flex justify-between items-center">
                             <span className="font-semibold text-base">Total Paid</span>
                             <span className="font-bold text-base">
-                              ${paidCharges.reduce((sum: number, charge: ExtendedCharge) => sum + (charge.amount || 0), 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                              ₹{paidCharges.reduce((sum: number, charge: ExtendedCharge) => sum + (charge.amount || 0), 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                             </span>
                           </div>
                         </div>
@@ -411,10 +411,10 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
                       </div>
                       <div>
                         <label className={`block text-sm font-medium ${styles.textPrimary} mb-1`}>
-                          Payment Amount ($)
+                          Payment Amount (₹)
                         </label>
                         <div className={`block w-full px-4 py-2 ${styles.input.background} border ${styles.input.border} rounded-full text-sm sm:text-base ${styles.textSecondary} bg-gray-100`}>
-                          ${paymentAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                          ₹{paymentAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                         </div>
                         <p className={`text-xs ${styles.textSecondary} mt-1`}>
                           Amount is based on the selected charge
@@ -506,7 +506,7 @@ export default function FeesPaymentsSection({ studentInfo, paymentHistory, onPay
                                   {payment.method || 'N/A'}
                                 </td>
                                 <td className={`py-2 px-2 sm:px-4 text-right ${styles.textPrimary} font-medium`}>
-                                  ${payment.amount?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}
+                                  ₹{payment.amount?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}
                                 </td>
                                 <td className="py-2 px-2 sm:px-4 text-center">
                                   <button

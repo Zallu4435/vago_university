@@ -40,10 +40,12 @@ const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({ session, onCl
     { label: 'Attendees', value: session.attendees, icon: <FaListOl className="text-purple-500" /> },
     { label: 'Difficulty', value: session.difficulty, icon: <FaTag className="text-purple-500" /> },
     { label: 'Tags', value: Array.isArray(session.tags) ? session.tags.join(', ') : '', icon: <FaTag className="text-purple-500" /> },
-    { label: 'Description', value: session.description, icon: <FaInfoCircle className="text-purple-500" /> },
-    { label: 'Is Live', value: session.isLive ? 'Yes' : 'No', icon: <FaPlay className="text-purple-500" /> },
+    { label: 'Description', value: session.description, icon: <FaInfoCircle className="text-purple-500" />, fullWidth: true },
+    { label: 'Is Live', value: (session.status === 'live' || session.status === 'Ongoing' || session.isLive) ? 'Yes' : 'No', icon: <FaPlay className="text-purple-500" /> },
     { label: 'Has Recording', value: session.hasRecording ? 'Yes' : 'No', icon: <FaVideo className="text-purple-500" /> },
-    ...(session.joinUrl && (session.status === 'live' || session.status === 'Ongoing') ? [{ label: 'Join URL', value: session.joinUrl, icon: <FaLink className="text-purple-500" />, isUrl: true }] : []),
+    ...(session.joinUrl && (session.status === 'live' || session.status === 'Ongoing')
+      ? [{ label: 'Join URL', value: session.joinUrl, icon: <FaLink className="text-purple-500" />, isUrl: true, fullWidth: true }]
+      : []),
   ];
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/10">
@@ -60,24 +62,29 @@ const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({ session, onCl
         <div className="p-8 flex flex-col gap-6 overflow-y-auto max-h-[90vh]">
           <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500 text-center tracking-tight mb-2">Session Details</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {details.map(({ label, value, icon, isUrl }) => (
+            {details.map(({ label, value, icon, isUrl, fullWidth }) => (
               value !== undefined && value !== '' && (
-                <div key={label} className="flex items-start gap-3 bg-purple-50 rounded-xl p-4 shadow-sm border border-purple-100">
+                <div
+                  key={label}
+                  className={`flex items-start gap-3 bg-purple-50 rounded-xl p-4 shadow-sm border border-purple-100 ${fullWidth ? 'sm:col-span-2' : ''}`}
+                >
                   <div className="mt-1">{icon}</div>
                   <div className="flex-1">
                     <div className="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-1">{label}</div>
-                    <div className="text-base text-gray-900 break-words">{value}</div>
+                    <div className={`text-base text-gray-900 ${isUrl ? 'break-all' : 'break-words'} ${label === 'Description' ? 'whitespace-pre-wrap' : ''}`}>
+                      {value}
+                    </div>
                     {isUrl && (
-                      <div className="mt-2 flex gap-2">
+                      <div className="mt-2 flex flex-wrap gap-2">
                         <button
-                          onClick={() => copyToClipboard(value)}
+                          onClick={() => copyToClipboard(value as string)}
                           className="inline-flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-lg text-sm hover:bg-purple-200 transition-colors"
                         >
                           <FaCopy size={12} />
                           {copied ? 'Copied!' : 'Copy URL'}
                         </button>
                         <button
-                          onClick={() => window.open(value, '_blank')}
+                          onClick={() => window.open(value as string, '_blank')}
                           className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm hover:bg-green-200 transition-colors"
                         >
                           <FaPlay size={12} />
@@ -107,7 +114,6 @@ const SessionDetailsModal: React.FC<SessionDetailsModalProps> = ({ session, onCl
             <div className="mt-6 flex justify-center">
               <button
                 onClick={() => {
-                  // Additional check to ensure session is live before joining
                   if (session.status === 'Ended' || session.status === 'Cancelled') {
                     alert('Cannot join session: Session has ended or been cancelled');
                     return;

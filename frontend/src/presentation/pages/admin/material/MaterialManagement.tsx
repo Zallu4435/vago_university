@@ -122,12 +122,24 @@ const MaterialManagement: React.FC = () => {
 
   const handleSaveMaterial = async (formData: Partial<Material>) => {
     try {
+      console.log('[MaterialManagement] Form data received:', formData);
       let dataToSend: MaterialFormData = formData;
-      if (formData.file && formData.file instanceof File) {
+      
+      // Check if there are any file changes (new files uploaded)
+      const hasFileChange = formData.file && formData.file instanceof File;
+      const hasThumbnailChange = (formData as any).thumbnail && (formData as any).thumbnail instanceof File;
+      
+      console.log('[MaterialManagement] File changes detected:', { hasFileChange, hasThumbnailChange });
+      
+      if (hasFileChange || hasThumbnailChange) {
         const fd = new FormData();
         Object.entries(formData).forEach(([key, value]) => {
           if (key === 'file' && value instanceof File) {
             fd.append('file', value);
+            console.log('[MaterialManagement] Appending file:', value.name);
+          } else if (key === 'thumbnail' && value instanceof File) {
+            fd.append('thumbnail', value);
+            console.log('[MaterialManagement] Appending thumbnail:', value.name);
           } else if (value !== undefined && value !== null) {
             if (Array.isArray(value)) {
               value.forEach((v) => fd.append(key, v));
@@ -137,7 +149,11 @@ const MaterialManagement: React.FC = () => {
           }
         });
         dataToSend = fd;
+        console.log('[MaterialManagement] FormData created:', Array.from(fd.entries()));
+      } else {
+        console.log('[MaterialManagement] No file changes, sending JSON data');
       }
+      
       if (editingMaterial) {
         await updateMaterial({ id: editingMaterial.id, data: dataToSend as Partial<Material> });
       } else {

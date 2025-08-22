@@ -94,6 +94,7 @@ export default function Submissions({
   }) => {
     await onReview(submissionId, reviewData);
     setSelectedSubmission(null);
+    fetchSubmissions();
     setShowReviewModal(false);
   };
 
@@ -314,7 +315,7 @@ export default function Submissions({
                     <h3 className="font-bold text-pink-800 text-xl mb-1 group-hover:text-pink-600 transition-colors">
                       {submission.studentName}
                     </h3>
-                    <p className="text-pink-600 font-medium text-sm mb-2">{submission.studentId}</p>
+                    <p className="text-pink-600 font-medium text-sm mb-2">{submission.studentId.slice(0, 7)}</p>
 
                     <div className="flex items-center space-x-3">
                       <span className="text-sm text-gray-600">

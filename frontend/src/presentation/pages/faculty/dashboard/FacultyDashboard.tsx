@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   HiX, HiUsers, HiDocumentText,
   HiTrendingUp, HiPlay, HiPlus,
-  HiDownload, HiClock, HiCheckCircle, HiExclamationCircle,
+  HiClock, HiCheckCircle, HiExclamationCircle,
   HiChevronRight
 } from 'react-icons/hi';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Pie, Cell } from 'recharts';
@@ -130,14 +130,12 @@ const StatusCard: React.FC<StatusCardProps> = ({ title, status, message, timesta
   );
 };
 
-// Loading Skeleton Component
 const LoadingSkeleton: React.FC<{ className?: string }> = ({ className = '' }) => {
   return (
     <div className={`animate-pulse bg-gray-200 rounded ${className}`}></div>
   );
 };
 
-// Toast Notification Component
 const Toast: React.FC<ToastProps> = ({ message, type = 'success', onClose }) => {
   const typeColors: Record<string, string> = {
     success: 'bg-green-50 border-green-200 text-green-800',
@@ -334,7 +332,7 @@ const FacultyDashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <ActionCard
                 title="Start Session"
                 description="Begin a new teaching session"
@@ -355,13 +353,6 @@ const FacultyDashboard: React.FC = () => {
                 icon={HiUsers}
                 onClick={() => handleAction('Attendance Management')}
                 color="orange"
-              />
-              <ActionCard
-                title="Export Reports"
-                description="Download attendance and performance reports"
-                icon={HiDownload}
-                onClick={() => handleAction('Report Export')}
-                color="red"
               />
             </div>
 

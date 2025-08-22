@@ -19,7 +19,7 @@ export default function FacultyPreferenceSettings() {
     
     officeHours: '9:00 AM - 5:00 PM',
     consultationMode: 'email',
-    autoAttendance: true,
+    autoAttendance: true, 
     gradeVisibility: 'immediate',
     
     profileVisibility: 'department',

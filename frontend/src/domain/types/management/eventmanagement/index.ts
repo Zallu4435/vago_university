@@ -1,4 +1,3 @@
-// Event Management Types
 export interface Event {
   id: string;
   title: string;
@@ -42,18 +41,35 @@ export interface Event {
 
 export interface EventRequest {
   id: string;
-  requestedId: string; 
+  requestedId?: string; 
   eventId?: string;
-  eventName: string;
-  requestedBy: string;
-  requesterType: string;
-  type: string;
-  proposedDate: string;
-  proposedVenue: string;
+  eventName?: string;
+  requestedBy?: string;
+  requesterType?: string;
+  type?: string;
+  proposedDate?: string;
+  proposedVenue?: string;
   status: string;
-  requestedAt: string;
+  requestedAt?: string;
   description: string;
-  expectedParticipants: number;
+  expectedParticipants?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  whyJoin?: string;
+  additionalInfo?: string;
+  
+  event?: {
+    id: string;
+    title: string;
+    description: string;
+    date: string;
+    location: string;
+  };
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 
   _id?: string;
   _title?: string;
@@ -265,7 +281,7 @@ export interface EventRequestDetails {
 export interface EventRequestDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  request: EventRequestDetails | null;
+  request: EventRequest | null;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
 }

@@ -13,6 +13,7 @@ import {
 } from 'react-icons/io5';
 import {
   ClubRequestDetailsModalProps,
+  StatusType,
 } from '../../../../../domain/types/management/clubmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { formatDateTime } from '../../../../../shared/utils/dateUtils';
@@ -23,15 +24,16 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
   isOpen,
   onClose,
   request,
-  onApprove,
-  onReject,
 }) => {
-  usePreventBodyScroll(isOpen);
+  usePreventBodyScroll(isOpen); 
+
+  console.log(request, "request")
 
   if (!isOpen || !request) return null;
 
-  const { clubRequest } = request;
-  const { club, user } = clubRequest;
+  const clubRequest = 'clubRequest' in request ? request.clubRequest : request;
+  const club = 'club' in clubRequest ? clubRequest.club : clubRequest;
+  const user = 'user' in clubRequest ? clubRequest.user : { name: clubRequest.requestedBy, email: clubRequest.requestedBy };
 
   return (
     <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -69,7 +71,7 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
                 <h2 className="text-2xl font-bold text-purple-100">{club.name}</h2>
                 <p className="text-sm text-purple-300">Request ID: {clubRequest.id}</p>
                 <div className="flex items-center mt-2">
-                  <RequestStatusBadge status={clubRequest.status} />
+                  <RequestStatusBadge status={clubRequest.status as StatusType} />
                 </div>
               </div>
             </div>
@@ -91,17 +93,17 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
               highlight={true}
             />
             <RequestInfoCard icon={Mail} label="Contact Email" value={user?.email || 'N/A'} />
-            <RequestInfoCard icon={IdCard} label="Club ID" value={club.id} />
+            <RequestInfoCard icon={IdCard} label="Club ID" value={club.id || ''} />
             <RequestInfoCard icon={Info} label="Club Type" value={club.type} />
             <RequestInfoCard
               icon={Users}
               label="Members"
-              value={`${club.enteredMembers} Members`}
+              value={`${('enteredMembers' in club ? club.enteredMembers : 0)} Members`}
             />
             <RequestInfoCard
               icon={Clock}
               label="Last Updated"
-              value={formatDateTime(clubRequest.updatedAt)}
+              value={formatDateTime('updatedAt' in clubRequest ? clubRequest.updatedAt : clubRequest.createdAt)}
             />
           </div>
 
@@ -174,22 +176,6 @@ const ClubRequestDetailsModal: React.FC<ClubRequestDetailsModalProps> = ({
               >
                 Close
               </button>
-              {onApprove && clubRequest.status === 'pending' && (
-                <button
-                  onClick={() => onApprove(clubRequest.id)}
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-blue-500/50"
-                >
-                  Approve
-                </button>
-              )}
-              {onReject && clubRequest.status === 'pending' && (
-                <button
-                  onClick={() => onReject(clubRequest.id)}
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-blue-500/50"
-                >
-                  Reject
-                </button>
-              )}
             </div>
           </div>
         </div>

@@ -13,7 +13,7 @@ export interface CloudinaryTransformation {
 }
 
 export interface CloudinaryStorageParams {
-  folder?: OptionCallback<string>;
+  folder?: FolderCallback;
   allowed_formats?: OptionCallback<string[]>;
   resource_type?: OptionCallback<string>;
   transformation?: OptionCallback<CloudinaryTransformation[]>;
@@ -24,6 +24,7 @@ export interface CloudinaryStorageParams {
 export type ResourceTypeCallback = OptionCallback<string>;
 export type TransformationCallback = OptionCallback<CloudinaryTransformation[]>;
 export type PublicIdCallback = OptionCallback<string>;
+export type FolderCallback = OptionCallback<string>;
 export type ParamsCallback = OptionCallback<CloudinaryStorageParams>;
 
 export interface AdmissionDocumentRequestBody {

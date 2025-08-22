@@ -65,7 +65,7 @@ export const ProfilePictureModal = ({
   };
 
   const handleCropApply = (croppedImageData: string) => {
-    onImageUpdate(croppedImageData);
+    onImageUpdate(croppedImageData as unknown as File);
     onClose();
     resetModal();
   };

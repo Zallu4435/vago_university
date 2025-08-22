@@ -63,7 +63,7 @@ export const useSportsManagement = () => {
         limit,
         filters.sportType !== 'all' ? filters.sportType : undefined,
         filters.status !== 'all' ? filters.status : undefined,
-        undefined, // coach
+        undefined,
         dateRange,
         searchTerm && searchTerm.trim() !== '' ? searchTerm : undefined
       );
@@ -142,7 +142,9 @@ export const useSportsManagement = () => {
   const { mutateAsync: approvePlayerRequest } = useMutation({
     mutationFn: (id: string) => sportsService.approvePlayerRequest(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['playerRequests', 'teams'] });
+      queryClient.invalidateQueries({ queryKey: ['playerRequests'] });
+      queryClient.invalidateQueries({ queryKey: ['teams'] });
+      queryClient.invalidateQueries({ queryKey: ['requestDetails'] });
       toast.success('Player request approved successfully');
     },
     onError: (error: Error) => {
@@ -154,6 +156,7 @@ export const useSportsManagement = () => {
     mutationFn: (id: string) => sportsService.rejectPlayerRequest(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['playerRequests'] });
+      queryClient.invalidateQueries({ queryKey: ['requestDetails'] });
       toast.success('Player request rejected successfully');
     },
     onError: (error: Error) => {

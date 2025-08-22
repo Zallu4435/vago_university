@@ -1,28 +1,28 @@
-import { FieldErrors } from 'react-hook-form';
+import { FieldErrors, FieldValues } from 'react-hook-form';
 
-export const getNestedError = (
-  errors: FieldErrors<any>,
+export const getNestedError = <T extends FieldValues = FieldValues>(
+  errors: FieldErrors<T>,
   path: string
 ): string | undefined => {
   const keys = path.split('.');
-  let current: any = errors;
+  let current: unknown = errors;
   
   for (const key of keys) {
     if (!current || typeof current !== 'object') {
       return undefined;
     }
-    current = current[key];
+    current = (current as Record<string, unknown>)[key];
   }
   
   if (current && typeof current === 'object' && 'message' in current) {
-    return current.message;
+    return (current as { message: string }).message;
   }
   
   return undefined;
 };
 
-export const getArrayError = (
-  errors: FieldErrors<any>,
+export const getArrayError = <T extends FieldValues = FieldValues>(
+  errors: FieldErrors<T>,
   path: string,
   index: number
 ): string | undefined => {
@@ -30,8 +30,8 @@ export const getArrayError = (
   return getNestedError(errors, arrayPath);
 };
 
-export const getNestedObjectError = (
-  errors: FieldErrors<any>,
+export const getNestedObjectError = <T extends FieldValues = FieldValues>(
+  errors: FieldErrors<T>,
   path: string,
   field: string
 ): string | undefined => {

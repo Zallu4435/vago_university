@@ -26,9 +26,6 @@ import {
   ItemToAction,
 } from '../../../../../domain/types/management/eventmanagement';
 import {
-  adaptToEventRequestDetails
-} from '../../../../../domain/adapters/eventTypeAdapter';
-import {
   EVENT_TYPES,
   EVENT_STATUSES,
   REQUEST_STATUSES,
@@ -149,7 +146,7 @@ const AdminEventsManagement: React.FC = () => {
 
   const handleViewRequest = async (request: EventRequest) => {
     try {
-      const details = await getEventRequestDetails(request.requestedId);
+      const details = await getEventRequestDetails(request.requestedId || '');
       setSelectedRequest(details);
       setShowRequestDetailsModal(true);
     } catch (error) {
@@ -240,7 +237,7 @@ const AdminEventsManagement: React.FC = () => {
       icon: <Edit size={16} />,
       label: 'Approve Request',
       onClick: (request: EventRequest) => {
-        setItemToAction({ id: request.requestedId, type: 'eventRequest', action: 'approve' });
+        setItemToAction({ id: request.requestedId || '', type: 'eventRequest', action: 'approve' });
         setShowWarningModal(true);
       },
       color: 'green' as const,
@@ -250,7 +247,7 @@ const AdminEventsManagement: React.FC = () => {
       icon: <Trash2 size={16} />,
       label: 'Reject Request',
       onClick: (request: EventRequest) => {
-        setItemToAction({ id: request.requestedId, type: 'eventRequest', action: 'reject' });
+        setItemToAction({ id: request.requestedId || '', type: 'eventRequest', action: 'reject' });
         setShowWarningModal(true);
       },
       color: 'red' as const,
@@ -462,7 +459,7 @@ const AdminEventsManagement: React.FC = () => {
           setShowRequestDetailsModal(false);
           setSelectedRequest(null);
         }}
-        request={selectedRequest ? adaptToEventRequestDetails(selectedRequest) : null}
+        request={selectedRequest}
         onApprove={(id) => {
           setItemToAction({ id, type: 'eventRequest', action: 'approve' });
           setShowWarningModal(true);

@@ -34,7 +34,7 @@ export class FinancialRepository implements IFinancialRepository {
             const allCharges = await ChargeModel.find({}).lean();
 
             const applicableCharges = allCharges.filter((charge) => {
-                if (charge.applicableFor === "All Students") {
+                if (charge.applicableFor === "All Students" || charge.applicableFor === "all_students") {
                     return true;
                 }
 

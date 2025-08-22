@@ -80,3 +80,26 @@ export interface MaterialSortOptions {
   createdAt?: 1 | -1;
   [key: string]: 1 | -1 | undefined;
 } 
+
+export interface UploadedFile {
+  fieldname: string;
+  originalname: string;
+  path: string;
+  mimetype: string;
+  size: number;
+}
+
+export interface MaterialUpdateData {
+  id: string;
+  title?: string;
+  description?: string;
+  subject?: string;
+  course?: string;
+  semester?: string;
+  tags?: string[];
+  isNewMaterial?: boolean;
+  isRestricted?: boolean;
+  fileUrl?: string;
+  thumbnailUrl?: string;
+  [key: string]: unknown;
+}

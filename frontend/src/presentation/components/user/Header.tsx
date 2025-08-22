@@ -4,18 +4,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { usePreferences } from '../../../application/context/PreferencesContext';
 import { useNotificationManagement } from '../../../application/hooks/useNotificationManagement';
 import NotificationModal from '../common/NotificationModal';
+import { DropdownAction, HeaderProps, searchableItems } from '../../../shared/utils/header.tsx';
+import type { SearchResult } from '../../../shared/utils/header.tsx';
 
-interface HeaderProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  mobileMenuOpen: boolean;
-  setMobileMenuOpen: (open: boolean) => void;
-  onLogout: () => void;
-  userName?: string;
-  profilePicture?: string;
-}
-
-type DropdownAction = 'settings' | 'help' | 'logout';
 
 export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, userName, profilePicture }: HeaderProps) {
   const dashboardTabs = ['Dashboard', 'Academics', 'Financial', 'Communication', 'Campus Life'];
@@ -24,12 +15,18 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
   const navigate = useNavigate();
   const { styles, theme } = usePreferences();
   const { notifications } = useNotificationManagement();
-  
+
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
+  const [focusedResultIndex, setFocusedResultIndex] = useState(-1);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const isCanvas = location.pathname.includes('/canvas');
   const tabs = isCanvas ? canvasTabs : dashboardTabs;
@@ -59,6 +56,54 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
     }
   };
 
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim().length > 0) {
+      const filtered = searchableItems.filter(item =>
+        item.title.toLowerCase().includes(query.toLowerCase()) ||
+        item.category.toLowerCase().includes(query.toLowerCase())
+      );
+      setSearchResults(filtered);
+      setIsSearchDropdownOpen(true);
+      setFocusedResultIndex(-1);
+    } else {
+      setSearchResults([]);
+      setIsSearchDropdownOpen(false);
+    }
+  };
+
+  const handleSearchResultSelect = (result: SearchResult) => {
+    navigate(result.path);
+    setSearchQuery('');
+    setSearchResults([]);
+    setIsSearchDropdownOpen(false);
+    setFocusedResultIndex(-1);
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setFocusedResultIndex(prev =>
+        prev < searchResults.length - 1 ? prev + 1 : 0
+      );
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setFocusedResultIndex(prev =>
+        prev > 0 ? prev - 1 : searchResults.length - 1
+      );
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (focusedResultIndex >= 0 && searchResults[focusedResultIndex]) {
+        handleSearchResultSelect(searchResults[focusedResultIndex]);
+      }
+    } else if (e.key === 'Escape') {
+      setIsSearchDropdownOpen(false);
+      setSearchQuery('');
+      setSearchResults([]);
+      setFocusedResultIndex(-1);
+    }
+  };
+
   const toggleProfileDropdown = () => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
   };
@@ -73,8 +118,6 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
     }
     setIsProfileDropdownOpen(false);
   };
-
-
 
   const handlePortalToggle = () => {
     if (isCanvas) {
@@ -95,6 +138,15 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
         setIsProfileDropdownOpen(false);
       }
 
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setIsSearchDropdownOpen(false);
+        setSearchQuery('');
+        setSearchResults([]);
+        setFocusedResultIndex(-1);
+      }
 
       if (
         mobileMenuOpen &&
@@ -172,19 +224,69 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <div className="relative group">
+            <div className="relative group" ref={searchRef}>
               <div className={`absolute -inset-1 bg-gradient-to-r ${styles.orb.primary} rounded-full blur opacity-25 group-hover:opacity-75 transition-opacity duration-300`}></div>
               <div className={`relative ${styles.card.background} backdrop-blur-xl rounded-full px-6 py-3 shadow-lg border ${styles.border}`}>
                 <div className="flex items-center space-x-3">
                   <FaSearch className={`${styles.icon.primary} group-hover:scale-110 transition-transform duration-200`} size={18} />
                   <input
+                    ref={searchInputRef}
                     type="text"
                     placeholder="Search anything..."
+                    value={searchQuery}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    onKeyDown={handleSearchKeyDown}
+                    onFocus={() => {
+                      if (searchQuery.trim().length > 0 && searchResults.length > 0) {
+                        setIsSearchDropdownOpen(true);
+                      }
+                    }}
                     className={`bg-transparent ${styles.textPrimary} placeholder-${styles.textSecondary.replace('text-', '')} focus:outline-none w-64 font-medium`}
                     aria-label="Search"
                   />
                 </div>
               </div>
+
+              {/* Search Results Dropdown */}
+              {isSearchDropdownOpen && (
+                <div className={`absolute top-full left-0 right-0 mt-2 ${styles.card.background} backdrop-blur-xl rounded-2xl shadow-2xl z-50 border ${styles.border} max-h-96 overflow-y-auto`}>
+                  <div className={`absolute inset-0 bg-gradient-to-br ${styles.backgroundSecondary} opacity-50`}></div>
+                  <div className="relative z-10 p-2">
+                    {searchResults.length > 0 ? (
+                      searchResults.map((result, index) => (
+                        <button
+                          key={result.id}
+                          onClick={() => handleSearchResultSelect(result)}
+                          className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${index === focusedResultIndex
+                              ? `${styles.button.primary} shadow-lg`
+                              : `${styles.textPrimary} ${styles.card.hover}`
+                            }`}
+                          onMouseEnter={() => setFocusedResultIndex(index)}
+                        >
+                          <div className={`p-2 rounded-lg ${styles.button.secondary} group-hover:scale-110 transition-transform duration-200`}>
+                            {result.icon}
+                          </div>
+                          <div className="flex-1 text-left">
+                            <div className="font-medium">{result.title}</div>
+                            <div className={`text-sm ${styles.textSecondary}`}>{result.category}</div>
+                          </div>
+                          <div className={`w-2 h-2 bg-gradient-to-br ${styles.accent} rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-200`}></div>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="flex items-center justify-center px-4 py-8">
+                        <div className="text-center">
+                          <div className={`w-12 h-12 mx-auto mb-3 rounded-full ${styles.button.secondary} flex items-center justify-center`}>
+                            <FaSearch className={`${styles.icon.primary} opacity-50`} size={20} />
+                          </div>
+                          <p className={`${styles.textSecondary} font-medium`}>No results found</p>
+                          <p className={`${styles.textSecondary} text-sm mt-1`}>Try searching with different keywords</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="relative group">
@@ -230,7 +332,7 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
                 <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${styles.orb.primary} opacity-0 group-hover:opacity-10 transition-all duration-300`}></div>
               </button>
 
-              <NotificationModal 
+              <NotificationModal
                 isOpen={isNotificationOpen}
                 onClose={() => setIsNotificationOpen(false)}
               />
@@ -430,11 +532,10 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
                           }
                         }
                       }}
-                      className={`relative px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
-                        isActive
+                      className={`relative px-4 py-2 rounded-xl font-medium transition-all duration-300 ${isActive
                           ? `${styles.button.primary} shadow-lg transform scale-105`
                           : `${styles.textPrimary} ${styles.card.hover}`
-                      }`}
+                        }`}
                     >
                       {isActive && (
                         <div className={`absolute -inset-1 bg-gradient-to-r ${styles.orb.primary} rounded-xl blur opacity-75`}></div>
@@ -463,11 +564,63 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
                       <input
                         type="text"
                         placeholder="Search anything..."
+                        value={searchQuery}
+                        onChange={(e) => handleSearchChange(e.target.value)}
+                        onKeyDown={handleSearchKeyDown}
+                        onFocus={() => {
+                          if (searchQuery.trim().length > 0 && searchResults.length > 0) {
+                            setIsSearchDropdownOpen(true);
+                          }
+                        }}
                         className={`bg-transparent ${styles.textPrimary} placeholder-${styles.textSecondary.replace('text-', '')} focus:outline-none w-full font-medium`}
                         aria-label="Search"
                       />
                     </div>
                   </div>
+
+                  {/* Mobile Search Results Dropdown */}
+                  {isSearchDropdownOpen && (
+                    <div className={`absolute top-full left-0 right-0 mt-2 ${styles.card.background} backdrop-blur-xl rounded-2xl shadow-2xl z-50 border ${styles.border} max-h-96 overflow-y-auto`}>
+                      <div className={`absolute inset-0 bg-gradient-to-br ${styles.backgroundSecondary} opacity-50`}></div>
+                      <div className="relative z-10 p-2">
+                        {searchResults.length > 0 ? (
+                          searchResults.map((result, index) => (
+                            <button
+                              key={result.id}
+                              onClick={() => {
+                                handleSearchResultSelect(result);
+                                setMobileMenuOpen(false);
+                              }}
+                              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${index === focusedResultIndex
+                                  ? `${styles.button.primary} shadow-lg`
+                                  : `${styles.textPrimary} ${styles.card.hover}`
+                                }`}
+                              onMouseEnter={() => setFocusedResultIndex(index)}
+                            >
+                              <div className={`p-2 rounded-lg ${styles.button.secondary} group-hover:scale-110 transition-transform duration-200`}>
+                                {result.icon}
+                              </div>
+                              <div className="flex-1 text-left">
+                                <div className="font-medium">{result.title}</div>
+                                <div className={`text-sm ${styles.textSecondary}`}>{result.category}</div>
+                              </div>
+                              <div className={`w-2 h-2 bg-gradient-to-br ${styles.accent} rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-200`}></div>
+                            </button>
+                          ))
+                        ) : (
+                          <div className="flex items-center justify-center px-4 py-8">
+                            <div className="text-center">
+                              <div className={`w-12 h-12 mx-auto mb-3 rounded-full ${styles.button.secondary} flex items-center justify-center`}>
+                                <FaSearch className={`${styles.icon.primary} opacity-50`} size={20} />
+                              </div>
+                              <p className={`${styles.textSecondary} font-medium`}>No results found</p>
+                              <p className={`${styles.textSecondary} text-sm mt-1`}>Try searching with different keywords</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -527,11 +680,10 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onLogout, us
                           }
                         }
                       }}
-                      className={`w-full text-left px-5 py-3 rounded-xl font-medium transition-all duration-300 ${
-                        isActive
+                      className={`w-full text-left px-5 py-3 rounded-xl font-medium transition-all duration-300 ${isActive
                           ? `${styles.button.primary} shadow-lg transform scale-105`
                           : `${styles.textPrimary} ${styles.card.hover}`
-                      }`}
+                        }`}
                     >
                       {isActive && (
                         <div className={`absolute -inset-1 bg-gradient-to-r ${styles.orb.primary} rounded-xl blur opacity-75`}></div>

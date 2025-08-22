@@ -120,11 +120,11 @@ class ClubService {
       return response.data.data.clubRequest;
     } catch (error: unknown) {
       if (isAxiosErrorWithApiError(error)) {
-        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch event request details');
+        throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to fetch club request details');
       }
-      throw new Error('Failed to fetch event request details');
+      throw new Error('Failed to fetch club request details');
     }
   }
 }
 
-export const clubService = new ClubService();
+export const clubService = new ClubService(); 

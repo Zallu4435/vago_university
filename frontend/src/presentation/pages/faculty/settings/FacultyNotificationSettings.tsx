@@ -1,31 +1,11 @@
-import { useState, useRef, useCallback } from 'react';
-import { FaBell, FaCog, FaCheck } from 'react-icons/fa';
+import { useRef, useCallback } from 'react';
+import { FaBell, FaCheck } from 'react-icons/fa';
 import { useNotificationManagement } from '../../../../application/hooks/useNotificationManagement';
 
 export default function FacultyNotificationSettings() {
   const { notifications, markAsRead, markAllAsRead, fetchNextPage, hasMore, isLoadingMore } = useNotificationManagement();
-  const [activeTab, setActiveTab] = useState<'preferences' | 'notifications'>('preferences');
-  const [preferences, setPreferences] = useState({
-    emailNotifications: true,
-    pushNotifications: true,
-    assignmentAlerts: true,
-    classReminders: true,
-    gradeDeadlines: true,
-    systemAnnouncements: false,
-    studentSubmissions: true,
-    attendanceAlerts: true,
-    meetingReminders: true,
-    deadlineWarnings: true
-  });
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
-
-  const handleToggle = (key: string) => {
-    setPreferences(prev => ({
-      ...prev,
-      [key]: !prev[key as keyof typeof prev]
-    }));
-  };
 
   const handleMarkAllAsRead = async () => {
     if (unreadCount === 0) return;
@@ -115,226 +95,29 @@ export default function FacultyNotificationSettings() {
         </div>
 
         <div className="px-6 py-4 border-b border-slate-200">
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setActiveTab('preferences')}
-              className={`px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                activeTab === 'preferences'
-                  ? 'bg-purple-500 text-white shadow-lg'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <FaCog className="inline mr-2" />
-              Preferences
-            </button>
-            <button
-              onClick={() => setActiveTab('notifications')}
-              className={`px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center ${
-                activeTab === 'notifications'
-                  ? 'bg-purple-500 text-white shadow-lg'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <FaBell className="inline mr-2" />
-              Notifications
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-slate-700 font-semibold">
+              <FaBell className="inline" />
+              <span>Notifications</span>
               {unreadCount > 0 && (
                 <span className="ml-2 px-2 py-1 text-xs rounded-full bg-red-100 text-red-700">
                   {unreadCount}
                 </span>
               )}
-            </button>
+            </div>
+            {unreadCount > 0 && (
+              <button
+                onClick={handleMarkAllAsRead}
+                className="px-3 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm font-medium"
+              >
+                Mark All as Read
+              </button>
+            )}
           </div>
         </div>
 
         <div className="p-6">
-          {activeTab === 'preferences' ? (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-4">Notification Channels</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-slate-800">Email Notifications</p>
-                      <p className="text-sm text-slate-500">Receive notifications via email</p>
-                    </div>
-                    <button
-                      onClick={() => handleToggle('emailNotifications')}
-                      className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                        preferences.emailNotifications ? 'bg-purple-500' : 'bg-slate-300'
-                      }`}
-                    >
-                      <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
-                        preferences.emailNotifications ? 'translate-x-6' : 'translate-x-1'
-                      }`} />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-slate-800">Push Notifications</p>
-                      <p className="text-sm text-slate-500">Receive real-time browser notifications</p>
-                    </div>
-                    <button
-                      onClick={() => handleToggle('pushNotifications')}
-                      className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                        preferences.pushNotifications ? 'bg-purple-500' : 'bg-slate-300'
-                      }`}
-                    >
-                      <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
-                        preferences.pushNotifications ? 'translate-x-6' : 'translate-x-1'
-                      }`} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-4">Academic Notifications</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-slate-800">Assignment Alerts</p>
-                      <p className="text-sm text-slate-500">Get notified when students submit assignments</p>
-                    </div>
-                    <button
-                      onClick={() => handleToggle('assignmentAlerts')}
-                      className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                        preferences.assignmentAlerts ? 'bg-purple-500' : 'bg-slate-300'
-                      }`}
-                    >
-                      <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
-                        preferences.assignmentAlerts ? 'translate-x-6' : 'translate-x-1'
-                      }`} />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-slate-800">Class Reminders</p>
-                      <p className="text-sm text-slate-500">Reminders for upcoming classes</p>
-                    </div>
-                    <button
-                      onClick={() => handleToggle('classReminders')}
-                      className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                        preferences.classReminders ? 'bg-purple-500' : 'bg-slate-300'
-                      }`}
-                    >
-                      <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
-                        preferences.classReminders ? 'translate-x-6' : 'translate-x-1'
-                      }`} />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-slate-800">Grade Submission Deadlines</p>
-                      <p className="text-sm text-slate-500">Reminders for grade submission deadlines</p>
-                    </div>
-                    <button
-                      onClick={() => handleToggle('gradeDeadlines')}
-                      className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                        preferences.gradeDeadlines ? 'bg-purple-500' : 'bg-slate-300'
-                      }`}
-                    >
-                      <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
-                        preferences.gradeDeadlines ? 'translate-x-6' : 'translate-x-1'
-                      }`} />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-slate-800">Student Submissions</p>
-                      <p className="text-sm text-slate-500">Notifications for new student submissions</p>
-                    </div>
-                    <button
-                      onClick={() => handleToggle('studentSubmissions')}
-                      className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                        preferences.studentSubmissions ? 'bg-purple-500' : 'bg-slate-300'
-                      }`}
-                    >
-                      <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
-                        preferences.studentSubmissions ? 'translate-x-6' : 'translate-x-1'
-                      }`} />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-slate-800">Attendance Alerts</p>
-                      <p className="text-sm text-slate-500">Notifications about attendance issues</p>
-                    </div>
-                    <button
-                      onClick={() => handleToggle('attendanceAlerts')}
-                      className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                        preferences.attendanceAlerts ? 'bg-purple-500' : 'bg-slate-300'
-                      }`}
-                    >
-                      <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
-                        preferences.attendanceAlerts ? 'translate-x-6' : 'translate-x-1'
-                      }`} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-4">System Notifications</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-slate-800">System Announcements</p>
-                      <p className="text-sm text-slate-500">Important system-wide announcements</p>
-                    </div>
-                    <button
-                      onClick={() => handleToggle('systemAnnouncements')}
-                      className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                        preferences.systemAnnouncements ? 'bg-purple-500' : 'bg-slate-300'
-                      }`}
-                    >
-                      <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
-                        preferences.systemAnnouncements ? 'translate-x-6' : 'translate-x-1'
-                      }`} />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-slate-800">Meeting Reminders</p>
-                      <p className="text-sm text-slate-500">Reminders for scheduled meetings</p>
-                    </div>
-                    <button
-                      onClick={() => handleToggle('meetingReminders')}
-                      className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                        preferences.meetingReminders ? 'bg-purple-500' : 'bg-slate-300'
-                      }`}
-                    >
-                      <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
-                        preferences.meetingReminders ? 'translate-x-6' : 'translate-x-1'
-                      }`} />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-slate-800">Deadline Warnings</p>
-                      <p className="text-sm text-slate-500">Warnings for approaching deadlines</p>
-                    </div>
-                    <button
-                      onClick={() => handleToggle('deadlineWarnings')}
-                      className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                        preferences.deadlineWarnings ? 'bg-purple-500' : 'bg-slate-300'
-                      }`}
-                    >
-                      <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
-                        preferences.deadlineWarnings ? 'translate-x-6' : 'translate-x-1'
-                      }`} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
+          {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <div>
@@ -369,16 +152,14 @@ export default function FacultyNotificationSettings() {
                     {notifications.map((notification) => (
                       <div
                         key={notification._id}
-                        className={`p-4 rounded-lg border transition-all duration-200 ${
-                          !notification.isRead
+                        className={`p-4 rounded-lg border transition-all duration-200 ${!notification.isRead
                             ? 'bg-purple-50 border-purple-200'
                             : 'bg-slate-50 border-slate-200'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-start space-x-3">
-                          <div className={`flex-shrink-0 w-10 h-10 rounded-lg ${
-                            !notification.isRead ? 'bg-purple-100' : 'bg-slate-100'
-                          } flex items-center justify-center`}>
+                          <div className={`flex-shrink-0 w-10 h-10 rounded-lg ${!notification.isRead ? 'bg-purple-100' : 'bg-slate-100'
+                            } flex items-center justify-center`}>
                             <div className={!notification.isRead ? 'text-purple-600' : 'text-slate-500'}>
                               {getNotificationIcon(notification.type || 'default')}
                             </div>
@@ -423,7 +204,7 @@ export default function FacultyNotificationSettings() {
                 )}
               </div>
             </div>
-          )}
+          }
         </div>
       </div>
     </div>

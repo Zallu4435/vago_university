@@ -1,10 +1,10 @@
 import React from 'react';
-import { IoCloseOutline as X, IoCreateOutline as Edit, IoPeopleOutline as Users, IoPersonOutline as User, IoTrophyOutline as Trophy, IoCalendarOutline as Calendar, IoInformationCircleOutline as Info, IoBusinessOutline as Building } from 'react-icons/io5';
+import { IoCloseOutline as X, IoPeopleOutline as Users, IoPersonOutline as User, IoTrophyOutline as Trophy, IoCalendarOutline as Calendar, IoInformationCircleOutline as Info, IoBusinessOutline as Building } from 'react-icons/io5';
 import { TeamDetailsModalProps } from '../../../../../domain/types/management/sportmanagement';
 import { usePreventBodyScroll } from '../../../../../shared/hooks/usePreventBodyScroll';
 import { getOrganizerIcon, ghostParticles, InfoCard, StatusBadge } from '../../../../../shared/constants/sportManagementConstants';
 
-const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, team, onEdit }) => {
+const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, team }) => {
 
   usePreventBodyScroll(isOpen);
 
@@ -52,20 +52,12 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => onEdit(team)}
-                className="p-2 hover:bg-purple-500/20 rounded-full transition-colors"
-              >
-                <Edit size={24} className="text-purple-300" />
-              </button>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-purple-500/20 rounded-full transition-colors"
-              >
-                <X size={24} className="text-purple-300" />
-              </button>
-            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-purple-500/20 rounded-full transition-colors"
+            >
+              <X size={24} className="text-purple-300" />
+            </button>
           </div>
         </div>
 
@@ -119,8 +111,8 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
                 </div>
                 <div className="p-6">
                   <ul className="space-y-4">
-                    {team.upcomingGames.map((game) => (
-                      <li key={game._id} className="flex items-center space-x-4 text-purple-200">
+                    {team.upcomingGames.map((game, index) => (
+                      <li key={index} className="flex items-center space-x-4 text-purple-200">
                         <span className="text-sm font-medium text-purple-300">{new Date(game.date).toLocaleString()}</span>
                         <span className="text-sm">{game.description}</span>
                       </li>
@@ -138,15 +130,6 @@ const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ isOpen, onClose, te
                 className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-gray-500/50"
               >
                 Close
-              </button>
-              <button
-                onClick={() => {
-                  onClose();
-                  onEdit(team);
-                }}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-blue-500/50"
-              >
-                Edit Team
               </button>
             </div>
           </div>

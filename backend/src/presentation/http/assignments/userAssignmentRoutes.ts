@@ -3,7 +3,6 @@ import { getUserAssignmentComposer } from '../../../infrastructure/services/assi
 import { assignmentSubmissionUpload, cloudinary } from '../../../config/cloudinary.config';
 import { authMiddleware } from '../../../shared/middlewares/authMiddleware';
 import { expressAdapter } from '../../adapters/ExpressAdapter';
-import multer from 'multer';
 const fetch = require('node-fetch');
 
 const router = Router();
@@ -65,39 +64,8 @@ router.get('/:id', authMiddleware, (req, res, next) => {
   expressAdapter(req, res, next, userAssignmentController.getAssignmentById.bind(userAssignmentController));
 });
 
-router.post('/:id/submit', authMiddleware, (req: Request, res: Response, next: NextFunction) => {
-  assignmentSubmissionUpload.single('file')(req, res, (err) => {
-    if (err instanceof multer.MulterError) {
-      if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({
-          success: false,
-          message: 'File size too large. Maximum size is 10MB'
-        });
-      }
-      return res.status(400).json({
-        success: false,
-        message: err.message
-      });
-    }
-    
-    if (err) {
-      console.error('Route: Non-multer error occurred:', err);
-      return res.status(400).json({
-        success: false,
-        message: err.message
-      });
-    }
-
-    if (!req.file) {
-      console.error('Route: No file was uploaded');
-      return res.status(400).json({
-        success: false,
-        message: 'No file uploaded'
-      });
-    }
-
-    expressAdapter(req, res, next, userAssignmentController.submitAssignment.bind(userAssignmentController));
-  });
+router.post('/:id/submit', authMiddleware, assignmentSubmissionUpload.single('file'), (req: Request, res: Response, next: NextFunction) => {
+  expressAdapter(req, res, next, userAssignmentController.submitAssignment.bind(userAssignmentController));
 });
 
 router.get('/:id/status', authMiddleware, (req, res, next) => {

@@ -86,12 +86,20 @@ const MaterialForm: React.FC<MaterialFormProps> = ({ isOpen, onClose, onSubmit, 
 
   const handleFormSubmit = (data: MaterialFormData) => {
     const { file, thumbnail, ...restData } = data;
-    const formData: Partial<Material> = {
+    const formData: Partial<Material> & { file?: File; thumbnail?: File } = {
       ...restData,
-      fileUrl: fileName ? `/files/${fileName}` : initialData?.fileUrl,
-      thumbnailUrl: thumbnailName ? `/thumbnails/${thumbnailName}` : initialData?.thumbnailUrl,
       file: file as File | undefined,
+      thumbnail: thumbnail as File | undefined,
     };
+    
+    if (!file || !(file instanceof File)) {
+      formData.fileUrl = initialData?.fileUrl;
+    }
+    
+    if (!thumbnail || !(thumbnail instanceof File)) {
+      formData.thumbnailUrl = initialData?.thumbnailUrl;
+    }
+    
     onSubmit(formData);
     reset();
     onClose();

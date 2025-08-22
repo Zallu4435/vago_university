@@ -43,7 +43,8 @@ export const Payment: React.FC<PaymentProps> = ({
         paymentDetails: {
           amount: 1000.00,
           currency: 'INR',
-          paymentMethod: selectedMethod,
+          method: selectedMethod,
+          paymentMethodId: paymentDetails?.paymentMethodId,
           customerEmail: (formData as { personalInfo?: { email?: string } }).personalInfo?.email || '',
           customerName: `${(formData as { personalInfo?: { firstName?: string; lastName?: string } }).personalInfo?.firstName || ''} ${(formData as { personalInfo?: { firstName?: string; lastName?: string } }).personalInfo?.lastName || ''}`.trim(),
           customerPhone: (formData as { personalInfo?: { phone?: string } }).personalInfo?.phone || '',

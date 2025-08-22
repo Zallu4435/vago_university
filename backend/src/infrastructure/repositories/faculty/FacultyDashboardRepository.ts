@@ -127,12 +127,12 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
     const assignmentPerformance = await AssignmentModel.aggregate([
       {
         $match: {
-          status: { $in: ['published', 'active'] }
+          status: { $in: ['published'] },
         }
       },
       {
         $lookup: {
-          from: 'usersubmissions',
+          from: 'submissions',
           localField: '_id',
           foreignField: 'assignmentId',
           as: 'submissions'
@@ -144,7 +144,7 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
           averageScore: {
             $cond: {
               if: { $gt: [{ $size: '$submissions' }, 0] },
-              then: { $avg: '$submissions.score' },
+              then: { $avg: '$submissions.marks' },
               else: 0
             }
           }
@@ -170,7 +170,7 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
       const allAssignmentData = await AssignmentModel.aggregate([
         {
           $lookup: {
-            from: 'usersubmissions',
+            from: 'submissions',
             localField: '_id',
             foreignField: 'assignmentId',
             as: 'submissions'
@@ -182,7 +182,7 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
             averageScore: {
               $cond: {
                 if: { $gt: [{ $size: '$submissions' }, 0] },
-                then: { $avg: '$submissions.score' },
+                then: { $avg: '$submissions.marks' },
                 else: 0
               }
             }
@@ -203,7 +203,7 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
           $limit: 5
         }
       ]);
-
+      
       return {
         assignmentPerformance: allAssignmentData.map(item => ({
           assignment: `${item.assignment} (${item.status})`,

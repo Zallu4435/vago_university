@@ -131,7 +131,8 @@ export const useApplicationForm = () => {
     mutationFn: async ({ applicationId, paymentDetails }: { applicationId: string, paymentDetails: {
       amount: number;
       currency: string;
-      paymentMethod: string;
+      method: string;
+      paymentMethodId?: string;
       customerEmail: string;
       customerName: string;
       customerPhone: string;
@@ -142,7 +143,7 @@ export const useApplicationForm = () => {
         const err = error as Error & { response?: { status?: number } };
         if (err.message.includes('token') || err.response?.status === 401) {
           throw new Error('Your session has expired. Please log in again.');
-        }
+        } 
         throw error;
       }
     },

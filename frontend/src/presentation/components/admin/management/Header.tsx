@@ -95,6 +95,11 @@ const Header: React.FC<HeaderProps> = ({
                   placeholder={searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                    }
+                  }}
                   className="w-full sm:w-64 pl-10 pr-4 py-2.5 bg-gray-800/60 backdrop-blur-sm border border-purple-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-white placeholder-purple-300 shadow-lg transition-all duration-300"
                   aria-label="Search"
                 />

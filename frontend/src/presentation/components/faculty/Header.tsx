@@ -1,25 +1,23 @@
 import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
-import { LuBell, LuLogOut, LuSearch, LuMoon, LuSun, LuUser } from 'react-icons/lu';
+import { LuBell, LuLogOut, LuSearch, LuMoon, LuSun, LuUser, LuUsers, LuBookOpen, LuCalendar, LuX } from 'react-icons/lu';
 import NotificationModal from '../common/NotificationModal';
 import { useNotificationManagement } from '../../../application/hooks/useNotificationManagement';
+import { HeaderProps, SearchResult, facultySearchItems } from '../../../shared/utils/facultyHeader';
 
-interface HeaderProps {
-  currentDate: string;
-  facultyName: string;
-  onLogout: () => void;
-}
 
 export default function Header({ currentDate, facultyName, onLogout }: HeaderProps) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [focusedResultIndex, setFocusedResultIndex] = useState(-1);
   const [time, setTime] = useState(new Date());
   const navigate = useNavigate();
   
-  // Get notifications data
   const { notifications } = useNotificationManagement();
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -32,9 +30,66 @@ export default function Header({ currentDate, facultyName, onLogout }: HeaderPro
     return name.split(' ').map((n: string) => n[0]).join('').toUpperCase();
   };
 
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim().length > 0) {
+      const filtered = facultySearchItems.filter(item =>
+        item.title.toLowerCase().includes(query.toLowerCase()) ||
+        item.description.toLowerCase().includes(query.toLowerCase()) ||
+        item.category.toLowerCase().includes(query.toLowerCase())
+      );
+      setSearchResults(filtered);
+      setShowSearchResults(true);
+      setFocusedResultIndex(-1);
+    } else {
+      setSearchResults([]);
+      setShowSearchResults(false);
+    }
+  };
+
+  const handleSearchResultSelect = (result: SearchResult) => {
+    navigate(result.path);
+    setSearchQuery('');
+    setSearchResults([]);
+    setShowSearchResults(false);
+    setFocusedResultIndex(-1);
+    setSearchFocused(false);
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setFocusedResultIndex(prev =>
+        prev < searchResults.length - 1 ? prev + 1 : 0
+      );
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setFocusedResultIndex(prev =>
+        prev > 0 ? prev - 1 : searchResults.length - 1
+      );
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (focusedResultIndex >= 0 && searchResults[focusedResultIndex]) {
+        handleSearchResultSelect(searchResults[focusedResultIndex]);
+      }
+    } else if (e.key === 'Escape') {
+      setShowSearchResults(false);
+      setSearchQuery('');
+      setSearchResults([]);
+      setFocusedResultIndex(-1);
+      setSearchFocused(false);
+    }
+  };
+
+  const handleSearchBlur = () => {
+    setTimeout(() => {
+      setSearchFocused(false);
+      setShowSearchResults(false);
+    }, 200);
+  };
+
   return (
     <header className="bg-white/80 backdrop-blur-xl h-20 px-8 flex justify-between items-center shadow-lg shadow-indigo-100/50 fixed top-0 left-72 w-[calc(100%-18rem)] z-50 border-b border-white/20">
-      {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 opacity-60"></div>
       
       <div className="relative z-10 flex items-center space-x-6">
@@ -56,27 +111,89 @@ export default function Header({ currentDate, facultyName, onLogout }: HeaderPro
       </div>
 
       <div className="relative z-10 flex items-center space-x-4">
-        {/* Search Bar */}
         <div className="relative">
           <div className="relative">
             <input
               type="text"
-              placeholder="Search anything..."
+              placeholder="Search faculty features..."
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
               onFocus={() => setSearchFocused(true)}
-              onBlur={() => setSearchFocused(false)}
+              onBlur={handleSearchBlur}
+              onKeyDown={handleSearchKeyDown}
               className="bg-white/90 backdrop-blur-sm rounded-full pl-12 pr-6 py-3 w-80 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all duration-200 text-gray-700 placeholder-gray-400 shadow-lg border border-white/50"
             />
             <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
               <LuSearch size={18} className={`transition-colors duration-200 ${searchFocused ? 'text-indigo-500' : 'text-gray-400'}`} />
             </div>
-            {searchFocused && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-4">
-                <p className="text-sm text-gray-500">Popular searches</p>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {['Students', 'Attendance', 'Grades', 'Assignments'].map((term) => (
-                    <span key={term} className="px-3 py-1 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full text-sm text-indigo-700 cursor-pointer hover:from-indigo-200 hover:to-purple-200 transition-colors">
-                      {term}
-                    </span>
+
+            {/* Search Results Dropdown */}
+            {showSearchResults && searchResults.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 max-h-96 overflow-y-auto z-50">
+                <div className="p-2">
+                  {searchResults.map((result, index) => (
+                    <button
+                      key={result.id}
+                      onClick={() => handleSearchResultSelect(result)}
+                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${index === focusedResultIndex
+                          ? 'bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200'
+                          : 'hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50'
+                        }`}
+                      onMouseEnter={() => setFocusedResultIndex(index)}
+                    >
+                      <div className={`p-2 rounded-lg ${index === focusedResultIndex
+                          ? 'bg-indigo-100 text-indigo-600'
+                          : 'bg-gray-100 text-gray-600 group-hover:bg-indigo-100 group-hover:text-indigo-600'
+                        } transition-all duration-200`}>
+                        {result.icon}
+                      </div>
+                      <div className="flex-1 text-left">
+                        <div className="font-medium text-gray-800">{result.title}</div>
+                        <div className="text-sm text-gray-500">{result.description}</div>
+                        <div className="text-xs text-indigo-600 font-medium mt-1">{result.category}</div>
+                      </div>
+                      <div className="w-2 h-2 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-200"></div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* No Results */}
+            {showSearchResults && searchQuery.trim().length > 0 && searchResults.length === 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-4 z-50">
+                <div className="text-center">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center">
+                    <LuSearch className="text-gray-400" size={20} />
+                  </div>
+                  <p className="text-gray-500 font-medium">No results found</p>
+                  <p className="text-gray-400 text-sm mt-1">Try searching with different keywords</p>
+                </div>
+              </div>
+            )}
+
+            {/* Quick Actions */}
+            {searchFocused && searchQuery.trim().length === 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-4 z-50">
+                <p className="text-sm text-gray-500 mb-3">Quick Actions</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { icon: <LuUsers className="w-4 h-4" />, label: 'Attendance', path: '/faculty/attendance' },
+                    { icon: <LuBookOpen className="w-4 h-4" />, label: 'Assignments', path: '/faculty/assignments' },
+                    { icon: <LuCalendar className="w-4 h-4" />, label: 'Sessions', path: '/faculty/sessions' },
+                    { icon: <LuX className="w-4 h-4" />, label: 'Reports', path: '/faculty/reports' }
+                  ].map((item) => (
+                    <button
+                      key={item.label}
+                      onClick={() => {
+                        navigate(item.path);
+                        setSearchFocused(false);
+                      }}
+                      className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg text-sm text-indigo-700 hover:from-indigo-100 hover:to-purple-100 transition-all duration-200"
+                    >
+                      {item.icon}
+                      <span className="font-medium">{item.label}</span>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -84,7 +201,6 @@ export default function Header({ currentDate, facultyName, onLogout }: HeaderPro
           </div>
         </div>
 
-        {/* Theme Toggle */}
         <div className="relative">
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
@@ -98,7 +214,6 @@ export default function Header({ currentDate, facultyName, onLogout }: HeaderPro
           </button>
         </div>
 
-        {/* Notifications */}
         <div className="relative">
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
@@ -118,7 +233,6 @@ export default function Header({ currentDate, facultyName, onLogout }: HeaderPro
           />
         </div>
 
-        {/* Profile Menu */}
         <div className="relative">
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
@@ -153,7 +267,6 @@ export default function Header({ currentDate, facultyName, onLogout }: HeaderPro
               <div className="p-2">
                 {[
                   { icon: <LuUser size={16} />, label: 'My Profile', color: 'text-indigo-600', action: () => navigate('/faculty/settings') },
-                  // { icon: <LuSettings size={16} />, label: 'Account Settings', color: 'text-purple-600', action: () => navigate('/faculty/settings') },
                 ].map((item, index) => (
                   <button
                     key={index}
@@ -182,9 +295,3 @@ export default function Header({ currentDate, facultyName, onLogout }: HeaderPro
     </header>
   );
 }
-
-Header.propTypes = {
-  currentDate: PropTypes.string.isRequired,
-  facultyName: PropTypes.string.isRequired,
-  onLogout: PropTypes.func.isRequired,
-};

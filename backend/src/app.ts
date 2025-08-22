@@ -53,16 +53,8 @@ const io = new SocketIOServer(httpServer, {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Health check endpoint for Docker
-app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime()
-  });
-});
-
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/files", express.static(path.join(__dirname, "uploads")));
+app.use("/thumbnails", express.static(path.join(__dirname, "uploads")));
 
 Logger.info('Initializing Socket.IO services...');
 import { SocketService } from "./infrastructure/services/socket/SocketService";

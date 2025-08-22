@@ -38,11 +38,20 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
     return (
         <div className={`group rounded-xl sm:rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 ${styles.card.border} overflow-hidden transform hover:-translate-y-1 flex flex-col h-[500px] sm:h-[600px] w-full ${styles.card.background} ${styles.card.hover}`}>
             <div className="relative h-36 sm:h-48 aspect-w-16 aspect-h-9 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                <img
-                    src={materialData.thumbnailUrl}
-                    alt={materialData.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
+                {materialData.thumbnailUrl ? (
+                    <img
+                        src={materialData.thumbnailUrl || ''}
+                        alt={materialData.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+                        <div className="flex items-center gap-2 text-slate-500">
+                            {React.createElement(getFileIcon(materialData.type), { className: 'w-5 h-5' })}
+                            <span className="text-xs font-medium">No preview</span>
+                        </div>
+                    </div>
+                )}
                 <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex items-center space-x-1.5 sm:space-x-2">
                     {(materialData.isNewMaterial || materialData.isNew) && (
                         <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-lg animate-pulse">

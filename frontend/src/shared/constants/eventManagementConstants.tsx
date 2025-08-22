@@ -231,7 +231,7 @@ export const getEventRequestColumns = (
       render: (request: EventRequest) => (
         <div className="flex items-center text-gray-300">
           <Calendar size={14} className="text-purple-400 mr-2" />
-          <span className="text-sm">{formatDate(request.proposedDate)}</span>
+          <span className="text-sm">{formatDate(request.proposedDate || '')}</span>
         </div>
       ),
     },

@@ -92,7 +92,6 @@ export const useEventManagement = () => {
     mutationFn: (data: Omit<Event, 'id' | 'participants'>) => eventService.createEvent(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
-      toast.success('Event created successfully');
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to create event');
@@ -104,7 +103,6 @@ export const useEventManagement = () => {
       eventService.updateEvent(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
-      toast.success('Event updated successfully');
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to update event');
@@ -196,7 +194,7 @@ export const useEventManagement = () => {
       }); 
     }
   };
-
+  console.log(getEventRequestDetails, 'getEventRequestDetails');  
   return {
     events: eventsData?.events || [],
     eventRequests: (eventRequestsData?.eventRequests || []).map((req: EventRequest) => ({ ...req, id: req.id })),

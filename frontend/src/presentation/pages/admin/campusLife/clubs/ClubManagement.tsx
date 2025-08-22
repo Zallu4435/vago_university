@@ -21,7 +21,6 @@ import { ClubActionConfig, ClubFormData, ItemAction } from '../../../../../domai
 import { 
   adaptDomainClubToManagement, 
   adaptDomainClubRequestToManagement,
-  adaptToClubRequestDetails,
   isDomainClub,
   isDomainClubRequest 
 } from '../../../../../domain/adapters/clubTypeAdapter';
@@ -62,7 +61,7 @@ const AdminClubManagement: React.FC = () => {
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [itemToAction, setItemToAction] = useState<ItemAction | null>(null);
   const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<ClubRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<ClubRequestDetails | ClubRequest | null>(null);
 
   const [searchInput, setSearchInput] = useState(searchQuery);
   React.useEffect(() => {
@@ -500,7 +499,7 @@ const AdminClubManagement: React.FC = () => {
           setShowRequestDetailsModal(false);
           setSelectedRequest(null);
         }}
-        request={selectedRequest ? (adaptToClubRequestDetails(selectedRequest) as ClubRequestDetails) : null}
+        request={selectedRequest}
         onApprove={(id) => handleApproveRequest(id)}
         onReject={(id) => handleRejectRequest(id)}
       />

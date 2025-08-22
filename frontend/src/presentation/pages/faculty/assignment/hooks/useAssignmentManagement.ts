@@ -63,14 +63,9 @@ export const useAssignmentManagement = ({ searchTerm, filterStatus, filterSubjec
                 status: 'reviewed' | 'pending' | 'needs_correction';
                 isLate: boolean;
             };
-        }) => assignmentService.reviewSubmission(assignmentId, submissionId, reviewData),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['submissions'] });
-            queryClient.invalidateQueries({ queryKey: ['assignments'] });
-        }
+        }) => assignmentService.reviewSubmission(assignmentId, submissionId, reviewData)
     });
 
-    // Handlers
     const handleCreateAssignment = useCallback(async (data: NewAssignment) => {
         try {
             await createAssignmentMutation.mutateAsync(data);

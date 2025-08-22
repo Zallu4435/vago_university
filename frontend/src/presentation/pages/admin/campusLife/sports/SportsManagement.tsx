@@ -121,18 +121,20 @@ const AdminSportsManagement: React.FC = () => {
   };
 
   const handleViewTeamClick = (team: Team) => {
-    handleViewTeam(team.id);
+    handleViewTeam(team.id || '');
     setShowTeamDetailsModal(true);
   };
 
   const handleEditTeamClick = (team: Team) => {
-    handleEditTeam(team.id);
+    handleEditTeam(team.id || '');
     setIsEditing(true);
     setShowAddTeamModal(true);
   };
 
   const handleSaveTeam = async (data: TeamFormData) => {
     try {
+      console.log('Original form data:', data);
+      
       const teamData = {
         title: data.title,
         type: data.type,
@@ -145,21 +147,24 @@ const AdminSportsManagement: React.FC = () => {
         headCoach: data.headCoach,
         homeGames: data.homeGames,
         record: data.record,
-        upcomingGames: data.upcomingGames?.map(game => ({ ...game, _id: Math.random().toString() })) || [],
+        upcomingGames: data.upcomingGames?.map(game => ({ 
+          date: game.date, 
+          description: game.description 
+        })) || [],
         playerCount: data.participants || 0,
         createdAt: new Date().toISOString(),
         logo: '',
         name: data.title,
-        _id: '',
-        id: '',
         status: data.status,
         participants: data.participants || 0,
         formedOn: new Date().toISOString(),
         description: `Team: ${data.title}`,
       };
+      
+      console.log('Team data being sent:', teamData);
 
       if (isEditing && teamDetails) {
-        await updateTeam({ id: teamDetails._id, data: teamData });
+        await updateTeam({ id: teamDetails._id || '', data: teamData });
       } else {
         await createTeam(teamData);
       }
@@ -240,7 +245,7 @@ const AdminSportsManagement: React.FC = () => {
     {
       icon: <Trash2 size={16} />,
       label: 'Delete Team',
-      onClick: (team: Team) => handleDeleteItem(team.id),
+      onClick: (team: Team) => handleDeleteItem(team.id || ''),
       color: 'red' as const,
     },
   ];
@@ -496,43 +501,43 @@ const AdminSportsManagement: React.FC = () => {
         }}
         request={requestDetails ? {
           data: {
-            id: requestDetails.playerRequest.requestId,
-            status: requestDetails.playerRequest.status,
-            createdAt: requestDetails.playerRequest.requestedAt,
-            updatedAt: requestDetails.playerRequest.requestedAt,
-            description: `Request to join ${requestDetails.playerRequest.teamName}`,
-            additionalInfo: '',
+            id: requestDetails.sportRequest.id,
+            status: requestDetails.sportRequest.status,
+            createdAt: requestDetails.sportRequest.createdAt,
+            updatedAt: requestDetails.sportRequest.updatedAt,
+            description: `Request to join ${requestDetails.sportRequest.sport.title}`,
+            additionalInfo: requestDetails.sportRequest.additionalInfo || '',
             sport: {
-              id: requestDetails.playerRequest.requestId,
-              name: requestDetails.playerRequest.teamName,
-              type: requestDetails.playerRequest.type,
-              description: `Team: ${requestDetails.playerRequest.teamName}`,
-              expectedParticipants: 1,
+              id: requestDetails.sportRequest.sport.id,
+              name: requestDetails.sportRequest.sport.title,
+              type: requestDetails.sportRequest.sport.type,
+              description: `Team: ${requestDetails.sportRequest.sport.title}`,
+              expectedParticipants: requestDetails.sportRequest.sport.playerCount,
             },
             user: {
-              name: requestDetails.playerRequest.requestedBy,
-              email: requestDetails.playerRequest.requestedBy,
+              name: requestDetails.sportRequest.user.name,
+              email: requestDetails.sportRequest.user.email,
             },
           },
           sportRequest: {
-            id: requestDetails.playerRequest.requestId,
-            status: requestDetails.playerRequest.status,
-            createdAt: requestDetails.playerRequest.requestedAt,
-            updatedAt: requestDetails.playerRequest.requestedAt,
-            whyJoin: `Requesting to join ${requestDetails.playerRequest.teamName}`,
-            additionalInfo: '',
+            id: requestDetails.sportRequest.id,
+            status: requestDetails.sportRequest.status,
+            createdAt: requestDetails.sportRequest.createdAt,
+            updatedAt: requestDetails.sportRequest.updatedAt,
+            whyJoin: requestDetails.sportRequest.whyJoin,
+            additionalInfo: requestDetails.sportRequest.additionalInfo,
             sport: {
-              id: requestDetails.playerRequest.requestId,
-              title: requestDetails.playerRequest.teamName,
-              type: requestDetails.playerRequest.type,
-              headCoach: 'N/A',
-              playerCount: 1,
-              division: 'N/A',
+              id: requestDetails.sportRequest.sport.id,
+              title: requestDetails.sportRequest.sport.title,
+              type: requestDetails.sportRequest.sport.type,
+              headCoach: requestDetails.sportRequest.sport.headCoach,
+              playerCount: requestDetails.sportRequest.sport.playerCount,
+              division: requestDetails.sportRequest.sport.division,
             },
             user: {
-              id: requestDetails.playerRequest.requestId,
-              name: requestDetails.playerRequest.requestedBy,
-              email: requestDetails.playerRequest.requestedBy,
+              id: requestDetails.sportRequest.user.id,
+              name: requestDetails.sportRequest.user.name,
+              email: requestDetails.sportRequest.user.email,
             },
           },
         } : null}

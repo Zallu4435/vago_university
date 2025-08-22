@@ -52,7 +52,8 @@ export const applicationController = {
     paymentDetails: {
       amount: number;
       currency: string;
-      paymentMethod: string;
+      method: string;
+      paymentMethodId?: string;
       customerEmail: string;
       customerName: string;
       customerPhone: string;

@@ -117,7 +117,8 @@ class ApplicationService {
   async processPayment(applicationId: string, paymentDetails: {
     amount: number;
     currency: string;
-    paymentMethod: string;
+    method: string;
+    paymentMethodId?: string;
     customerEmail: string;
     customerName: string;
     customerPhone: string;

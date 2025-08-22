@@ -159,7 +159,6 @@ export const useClubManagement = () => {
     mutationFn: (data: Omit<Club, 'id' | 'members'>) => clubService.createClub(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clubs'] });
-      toast.success('Club created successfully');
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to create club');
@@ -171,7 +170,6 @@ export const useClubManagement = () => {
       clubService.updateClub(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clubs'] });
-      toast.success('Club updated successfully');
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to update club');
@@ -200,7 +198,7 @@ export const useClubManagement = () => {
     },
   });
 
-  const { mutateAsync: rejectClubRequest } = useMutation({
+  const { mutateAsync: rejectClubRequest } = useMutation<void, Error, string>({
     mutationFn: (id: string) => clubService.rejectClubRequest(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clubRequests'] });
@@ -211,13 +209,12 @@ export const useClubManagement = () => {
     },
   });
 
-
   return {
     clubs: clubsData?.clubs || [],
     clubRequests: clubRequestsData?.clubRequests || [],
     totalPages:
       activeTab === 'clubs'
-        ? clubsData?.totalPages || 0
+        ? clubsData?.totalPages || 0  
         : activeTab === 'requests'
           ? clubRequestsData?.totalPages || 0
           : 0,

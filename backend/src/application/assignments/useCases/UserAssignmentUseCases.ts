@@ -171,11 +171,12 @@ export class SubmitUserAssignmentUseCase implements ISubmitUserAssignmentUseCase
       if (!params.file) {
         return { data: { error: AssignmentErrorType.FileRequired }, success: false };
       }
-    const assignmentFile = {
-      fileName: params.file.originalname,
-      fileUrl: params.file.path || '',
-    };
-    const { submission } = await this.userAssignmentRepository.submitAssignment(params.assignmentId, [assignmentFile], params.studentId);
+    // Pass the actual Multer file so repository can read originalname, path and size
+    const { submission } = await this.userAssignmentRepository.submitAssignment(
+      params.assignmentId,
+      [params.file],
+      params.studentId
+    );
     if (!submission) {
       return { data: { error: 'Submission failed' }, success: false };
     }

@@ -5,8 +5,6 @@ import {
   IoPeopleOutline as Users,
   IoPersonOutline as User,
   IoTrophyOutline as Trophy,
-  IoCheckmarkCircleOutline as Check,
-  IoCloseCircleOutline as Reject,
   IoHeartOutline as Heart,
   IoDocumentTextOutline as DocumentText,
   IoMailOutline as Mail,
@@ -24,8 +22,6 @@ const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
   isOpen,
   onClose,
   request,
-  onApprove,
-  onReject,
 }) => {
   usePreventBodyScroll(isOpen);
 
@@ -178,36 +174,6 @@ const TeamRequestDetailsModal: React.FC<TeamRequestDetailsModalProps> = ({
               >
                 Close
               </button>
-              {request.sportRequest.status === 'pending' && (
-                <>
-                  <button
-                    onClick={() => onApprove?.(request.sportRequest.id)}
-                    className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-green-500/50 flex items-center space-x-2"
-                  >
-                    <Check size={18} />
-                    <span>Approve Request</span>
-                  </button>
-                  <button
-                    onClick={() => onReject?.(request.sportRequest.id)}
-                    className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors border border-red-500/50 flex items-center space-x-2"
-                  >
-                    <Reject size={18} />
-                    <span>Reject Request</span>
-                  </button>
-                </>
-              )}
-              {request.sportRequest.status === 'approved' && (
-                <div className="flex items-center space-x-2 px-4 py-2 bg-green-600/30 border border-green-500/50 rounded-lg">
-                  <Check size={18} className="text-green-100" />
-                  <span className="text-green-100 font-semibold">Request Approved</span>
-                </div>
-              )}
-              {request.sportRequest.status === 'rejected' && (
-                <div className="flex items-center space-x-2 px-4 py-2 bg-red-600/30 border border-red-500/50 rounded-lg">
-                  <Reject size={18} className="text-red-100" />
-                  <span className="text-red-100 font-semibold">Request Rejected</span>
-                </div>
-              )}
             </div>
           </div>
         </div>

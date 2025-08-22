@@ -1,8 +1,7 @@
 import React from 'react';
 
-// Sport Management Types
 export interface Team {
-  id: string;
+  id?: string;
   title: string;
   type: string;
   headCoach: string;
@@ -22,9 +21,8 @@ export interface Team {
   participants: number;
   formedOn: string;
   description: string;
-  upcomingGames: { date: string; description: string; _id: string }[];
-  // Additional properties for modal display
-  _id: string;
+  upcomingGames: { date: string; description: string }[];
+  _id?: string;
   _title?: string;
   _type?: string;
   _headCoach?: string;
@@ -357,7 +355,6 @@ export interface SportsApiResponse<T = unknown> {
   };
 }
 
-// API Response wrappers for single items
 export interface TeamApiResponseSingle {
   data: {
     sport: Team;
@@ -366,12 +363,32 @@ export interface TeamApiResponseSingle {
 
 export interface PlayerRequestApiResponseSingle {
   data: {
-    playerRequest: PlayerRequest;
+    sportRequest: {
+      id: string;
+      status: string;
+      createdAt: string;
+      updatedAt: string;
+      whyJoin: string;
+      additionalInfo?: string;
+      sport: {
+        id: string;
+        title: string;
+        type: string;
+        headCoach: string;
+        playerCount: number;
+        division: string;
+      };
+      user: {
+        id: string;
+        name: string;
+        email: string;
+      };
+    };
   };
 }
 
 export interface Team {
-  _id: string;
+  _id?: string;
   title: string;
   type: string;
   headCoach: string;
@@ -387,7 +404,7 @@ export interface Team {
   division: string;
   homeGames: number;
   record: string;
-  upcomingGames: { date: string; description: string; _id: string }[];
+  upcomingGames: { date: string; description: string }[];
 }
 
 export interface TeamRequest {

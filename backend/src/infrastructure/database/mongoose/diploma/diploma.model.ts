@@ -38,7 +38,7 @@ const diplomaSchema = new Schema<IDiploma>(
     },
     thumbnail: {
       type: String,
-      required: true,
+      required: false,
     },
     duration: {
       type: String,

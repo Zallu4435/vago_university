@@ -12,6 +12,7 @@ import {
 } from 'react-icons/fi';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
 import { Theme } from '../../../../domain/types/settings/user';
+import { toast } from 'react-hot-toast';
 
 export default function PreferenceSettings() {
   const { theme: currentTheme, fontSize: currentFontSize, setTheme, setFontSize, resetPreferences } = usePreferences();
@@ -29,6 +30,7 @@ export default function PreferenceSettings() {
   const handleSave = () => {
     setTheme(previewTheme);
     setFontSize(previewFontSize);
+    toast.success('Preferences saved!');
   };
 
   const handleReset = () => {

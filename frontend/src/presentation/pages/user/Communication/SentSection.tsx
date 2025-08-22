@@ -4,7 +4,7 @@ import ComposeMessageModal from './ComposeMessageModal';
 import WarningModal from '../../../components/common/WarningModal';
 import { FaPaperPlane, FaTrash, FaPlus } from 'react-icons/fa';
 import { usePreferences } from '../../../../application/context/PreferencesContext';
-import { Message } from '../../../../domain/types/user/communication';
+import { Message, Recipient } from '../../../../domain/types/user/communication';
 
 export default function SentSection() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
@@ -102,9 +102,9 @@ export default function SentSection() {
                   </button>
                 </div>
                 <div className="mt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs">
-                  <span className={`truncate ${styles.textSecondary}`}>To: {message?.recipients}</span>
+                  <span className={`truncate ${styles.textSecondary}`}>To: {message?.recipients?.map((r: Recipient) => r.name).join(', ')}</span>
                   <span className={`mt-1 sm:mt-0 ${styles.textSecondary}`}>{new Date(message?.createdAt).toLocaleDateString()}</span>
-                </div>
+                </div>  
               </div>
             ))}
             {sentMessages.length === 0 && (

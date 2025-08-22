@@ -79,12 +79,16 @@ export const ImageCropper = ({
       canvas.toBlob(
         (blob) => {
           if (blob) {
-            const file = new File([blob], 'profile-picture.jpg', { type: 'image/jpeg' });
+            const timestamp = Date.now();
+            const file = new File([blob], `profile-picture-${timestamp}.jpg`, { 
+              type: 'image/jpeg',
+              lastModified: Date.now()
+            });
             onCropApply(file);
           }
         },
         'image/jpeg',
-        0.9
+        0.95 
       );
     }
   };

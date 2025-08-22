@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '../../base/Input';
 import { Button } from '../../base/Button';
 import { Textarea } from '../../base/Textarea';
-import { HealthCondition, HealthConditionSchema } from '../../../../domain/validation/OtherInfoSchema';
+import { HealthCondition, HealthConditionSchema } from '../../../../domain/validation/user/OtherInfoSchema';
 import { HealthConditionFormProps } from '../../../../domain/types/application';
 
 

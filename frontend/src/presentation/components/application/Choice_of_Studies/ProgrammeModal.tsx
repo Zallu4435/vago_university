@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../../base/Button';
 import { Select } from '../../base/Select';
 import { programmeOptions } from './options';
-import { createProgrammeChoiceSchema, ProgrammeChoiceFormData } from '../../../../domain/validation/ChoiceOfStudySchema';
+import { createProgrammeChoiceSchema, ProgrammeChoiceFormData } from '../../../../domain/validation/user/ChoiceOfStudySchema';
 import type { ProgrammeModalProps } from '../../../../domain/types/application';
 
 export const ProgrammeModal: React.FC<ProgrammeModalProps> = ({

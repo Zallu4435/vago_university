@@ -62,5 +62,5 @@ export interface ProfilePictureModalProps {
     isOpen: boolean;
     onClose: () => void;
     currentImage: string | null;
-    onImageUpdate: (imageData: string) => void;
+    onImageUpdate: (file: File) => void;
 }

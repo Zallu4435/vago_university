@@ -3,7 +3,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Other_Info_One from './Other_Info_One';
 import Other_Info_Two from './Other_Info_Two';
-import { OtherInformationFormData, OtherInformationSchema, OtherInformationSection } from '../../../../domain/validation/OtherInfoSchema';
+import { OtherInformationFormData, OtherInformationSchema, OtherInformationSection } from '../../../../domain/validation/user/OtherInfoSchema';
 import type { StepIndicatorProps, OtherInfoProps } from '../../../../domain/types/application';
 
 const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }) => (

@@ -32,7 +32,7 @@ const facultyStorage = new CloudinaryStorage({
     public_id: ((req: Request, file: Express.Multer.File) => {
       const timestamp = Date.now();
       const originalName = file.originalname.split('.')[0];
-      const fieldName = file.fieldname; // 'cv' or 'certificates'
+      const fieldName = file.fieldname; 
       const id = `faculty_${fieldName}_${timestamp}_${originalName}`;
       return id;
     }) as PublicIdCallback

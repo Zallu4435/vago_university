@@ -3,7 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '../../base/Input';
 import { Button } from '../../base/Button';
-import { subjectSchema } from '../../../../domain/validation/EducationSchema';
+import { subjectSchema } from '../../../../domain/validation/user/EducationSchema';
 import { getNestedError } from '../../../../shared/utils/formErrors'; // Add this import
 
 interface SubjectModalProps {

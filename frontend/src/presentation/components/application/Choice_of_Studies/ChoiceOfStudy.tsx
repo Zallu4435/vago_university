@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../../base/Button';
 import { ProgrammeModal } from './ProgrammeModal';
 import type { ChoiceOfStudyProps, ChoiceOfStudyRef, ProgrammeChoice } from '../../../../domain/types/application';
-import { ChoiceOfStudyFormData, ProgrammeChoiceFormData, choiceOfStudyFormSchema } from '../../../../domain/validation/ChoiceOfStudySchema';
+import { ChoiceOfStudyFormData, ProgrammeChoiceFormData, choiceOfStudyFormSchema } from '../../../../domain/validation/user/ChoiceOfStudySchema';
 
 export const ChoiceOfStudy = forwardRef<ChoiceOfStudyRef, ChoiceOfStudyProps>(
   ({ initialData }, ref) => {

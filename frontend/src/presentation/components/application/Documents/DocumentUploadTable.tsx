@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { DocumentUpload } from '../../../../domain/validation/DocumentSchema';
+import { DocumentUpload } from '../../../../domain/validation/user/DocumentSchema';
 
 interface DocumentUploadTableProps {
   documents: DocumentUpload[];

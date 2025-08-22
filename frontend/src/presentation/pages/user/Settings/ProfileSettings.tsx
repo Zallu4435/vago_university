@@ -94,13 +94,13 @@ export default function ProfileSettings() {
     setShowPasswordModal(false);
   };
 
-  const handleProfilePictureUpdate = async (imageData: string) => {
-    const response = await fetch(imageData);
-    const blob = await response.blob();
-    const file = new File([blob], 'profile-picture.jpg', { type: 'image/jpeg' });
-    
-    await updateProfilePicture(file);
-    setShowProfileModal(false);
+  const handleProfilePictureUpdate = async (file: File) => {
+    try {
+      await updateProfilePicture(file);
+      setShowProfileModal(false);
+    } catch (error) {
+      console.error('Failed to update profile picture:', error);
+    }
   };
 
   if (isLoading) {

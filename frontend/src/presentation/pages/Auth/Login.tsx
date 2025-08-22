@@ -6,7 +6,7 @@ import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { useDispatch } from 'react-redux';
 import { Input } from '../../components/base/Input';
 import { Button } from '../../components/base/Button';
-import { loginSchema } from '../../../domain/validation/login';
+import { loginSchema } from '../../../domain/validation/authentication/login';
 import { useLoginUser } from '../../../application/hooks/useAuthQueries';
 import { useAnimation } from '../../../shared/hooks/useAnimation';
 import { setAuth } from '../../../appStore/authSlice';

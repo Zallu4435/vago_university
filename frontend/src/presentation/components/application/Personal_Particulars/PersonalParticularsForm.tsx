@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { PersonalParticularsFormProps, PersonalInfo } from '../../../../domain/types/application';
 import { PersonalSection } from './PersonalSection';
 import { AlternativeContactSection } from './AlternativeContactSection';
-import { personalFormSchema, PersonalFormData } from '../../../../domain/validation/PersonalFormSchema';
+import { personalFormSchema, PersonalFormData } from '../../../../domain/validation/user/PersonalFormSchema';
 
 
 export const PersonalParticularsForm: React.FC<PersonalParticularsFormProps> = ({

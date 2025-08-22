@@ -3,7 +3,7 @@ import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '../../base/Input';
 import { Select } from '../../base/Select';
 import { PhoneInput } from '../../base/PhoneInput';
-import { PersonalFormData } from '../../../../domain/validation/PersonalFormSchema';
+import { PersonalFormData } from '../../../../domain/validation/user/PersonalFormSchema';
 import { mainFields } from './options';
 
 export const PersonalSection: React.FC = () => {

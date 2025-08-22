@@ -6,7 +6,7 @@ import { FaRegCheckCircle, FaRegIdCard, FaShieldAlt } from 'react-icons/fa';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { Input } from '../../components/base/Input';
 import { Button } from '../../components/base/Button';
-import { registerSchema } from '../../../domain/validation/register';
+import { registerSchema } from '../../../domain/validation/authentication/register';
 import { useRegisterUser } from '../../../application/hooks/useAuthQueries';
 import { usePasswordStrength } from '../../../shared/hooks/usePasswordStrength';
 import { useAnimation } from '../../../shared/hooks/useAnimation';

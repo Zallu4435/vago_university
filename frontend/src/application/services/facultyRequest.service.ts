@@ -1,5 +1,5 @@
 import httpClient from '../../frameworks/api/httpClient';
-import { FacultyRequestFormData } from '../../domain/validation/facultyRequestSchema';
+import { FacultyRequestFormData } from '../../domain/validation/authentication/facultyRequestSchema';
 import { isAxiosErrorWithApiError } from '../../shared/types/apiError';
 import { FacultyRequestResponse } from '../../domain/types/management/facultyManagement';
 

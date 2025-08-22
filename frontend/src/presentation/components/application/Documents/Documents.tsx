@@ -3,7 +3,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DocumentInstructions } from './DocumentInstructions';
 import { DocumentUploadTable } from './DocumentUploadTable';
-import { DocumentUpload, DocumentUploadSectionFormData, DocumentUploadSectionSchema } from '../../../../domain/validation/DocumentSchema';
+import { DocumentUpload, DocumentUploadSectionFormData, DocumentUploadSectionSchema } from '../../../../domain/validation/user/DocumentSchema';
 import { DocumentUploadSection } from '../../../../domain/types/application';
 import { toast } from 'react-hot-toast';
 import { documentUploadService } from '../../../../application/services/documentUploadService';

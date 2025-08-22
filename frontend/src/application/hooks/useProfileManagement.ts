@@ -10,13 +10,11 @@ export const useProfileManagement = () => {
 
   const { data: profile, isLoading, error } = useQuery<ProfileData, Error>({
     queryKey: ['profile'],
-    queryFn: () => {
-      return profileService.getProfile().then((data) => {
-        return data;
-      });
-    },
-    staleTime: 5 * 60 * 1000, 
-    refetchOnWindowFocus: false, 
+    queryFn: () => profileService.getProfile(),
+    staleTime: 30 * 1000, 
+    gcTime: 60 * 60 * 1000, 
+    refetchOnWindowFocus: true, 
+    refetchOnMount: true, 
   });
 
   const { mutateAsync: updateProfile } = useMutation({
@@ -47,10 +45,12 @@ export const useProfileManagement = () => {
       queryClient.setQueryData(['profile'], (oldData: ProfileData | undefined) =>
         oldData ? { ...oldData, profilePicture: url } : oldData
       );
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
       toast.success('Profile picture updated successfully');
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to update profile picture');
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
   });
 

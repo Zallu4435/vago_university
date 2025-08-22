@@ -6,7 +6,7 @@ import { questions } from './options';
 import { AchievementList } from './AchievementList';
 import { AchievementModal } from './AchievementModal';
 import type { Achievement } from '../../../../domain/types/application';
-import { AchievementSectionSchema, type AchievementFormData } from '../../../../domain/validation/AchievementSchema';
+import { AchievementSectionSchema, type AchievementFormData } from '../../../../domain/validation/user/AchievementSchema';
 
 interface AchievementsProps {
   initialData?: AchievementFormData;

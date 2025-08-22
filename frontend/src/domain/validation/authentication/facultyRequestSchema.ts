@@ -1,16 +1,24 @@
-// src/domain/validation/facultyRequestSchema.ts
 import { z } from 'zod';
+
+const namePattern = /^[a-zA-Z\s-']+$/;
+const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const phonePattern = /^\+?[\d-\s()]{10,}$/;
 
 export const facultyRequestSchema = z.object({
   fullName: z.string()
     .min(2, 'Full name must be at least 2 characters')
-    .max(100, 'Full name must be less than 100 characters'),
+    .max(100, 'Full name must be less than 100 characters')
+    .regex(namePattern, 'Name can only contain letters, spaces, hyphens, and apostrophes')
+    .refine((value) => !value.match(/[\p{Emoji}]/u), 'Name cannot contain emojis'),
   
   email: z.string()
-    .email('Please enter a valid email address'),
+    .email('Please enter a valid email address')
+    .regex(emailPattern, 'Please enter a valid email address')
+    .min(5, 'Email must be at least 5 characters')
+    .max(100, 'Email cannot exceed 100 characters'),
   
   phone: z.string()
-    .regex(/^\d{10,}$/, 'Please enter a valid phone number'),
+    .regex(phonePattern, 'Please enter a valid phone number with optional country code'),
   
   department: z.string()
     .min(1, 'Please select a department'),

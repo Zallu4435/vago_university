@@ -1,6 +1,6 @@
 import React, { forwardRef, useImperativeHandle, useEffect } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
-import { EducationFormData } from '../../../../domain/validation/EducationSchema';
+import { EducationFormData } from '../../../../domain/validation/user/EducationSchema';
 import { LocalEducation } from './LocalEducation';
 import { TransferEducation } from './TransferEducation';
 import { InternationalEducation } from './InternationalEducation';

@@ -2,22 +2,13 @@ import { useState } from 'react';
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { Input } from '../../components/base/Input';
 import { Button } from '../../components/base/Button';
 import { Textarea } from '../../components/base/Textarea';
 import { useSectionAnimation } from '../../../shared/hooks/useSectionAnimation';
-
-const contactFormSchema = z.object({
-  name: z.string().min(1, 'Name is required').min(2, 'Name must be at least 2 characters'),
-  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
-  subject: z.string().min(1, 'Subject is required').min(5, 'Subject must be at least 5 characters'),
-  message: z.string().min(1, 'Message is required').min(10, 'Message must be at least 10 characters'),
-});
-
-type ContactFormData = z.infer<typeof contactFormSchema>;
+import { ContactFormData, contactFormSchema } from '../../../domain/validation/authentication/contactUs';
 
 const ContactUs = () => {
   const isVisible = useSectionAnimation();

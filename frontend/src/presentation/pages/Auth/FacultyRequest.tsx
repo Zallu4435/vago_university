@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FaCheckCircle, FaUpload, FaSpinner } from 'react-icons/fa';
-import { facultyRequestSchema, type FacultyRequestFormData } from '../../../domain/validation/facultyRequestSchema';
+import { facultyRequestSchema, type FacultyRequestFormData } from '../../../domain/validation/authentication/facultyRequestSchema';
 import { facultyRequestService } from '../../../application/services/facultyRequest.service';
 import { Link } from 'react-router-dom';
 import type { FacultyRequestError } from '../../../domain/types/auth/FacultyRequest';

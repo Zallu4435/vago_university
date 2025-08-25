@@ -40,7 +40,7 @@ function isValidObjectId(id: string): boolean {
 }
 
 export class GetClubsUseCase implements IGetClubsUseCase {
-  constructor(private clubsRepository: IClubsRepository) { }
+  constructor(private _clubsRepository: IClubsRepository) { }
 
   async execute(dto: GetClubsRequestDTO): Promise<GetClubsResponseDTO> {
     if (isNaN(dto.page) || dto.page < 1 || isNaN(dto.limit) || dto.limit < 1) {
@@ -52,7 +52,7 @@ export class GetClubsUseCase implements IGetClubsUseCase {
     if (dto.endDate && isNaN(dto.endDate.getTime())) {
       throw new Error("Invalid endDate format");
     }
-    const { clubs, totalItems, totalPages, currentPage } = await this.clubsRepository.getClubs(dto);
+    const { clubs, totalItems, totalPages, currentPage } = await this._clubsRepository.getClubs(dto);
     const mappedClubs: ClubSummaryDTO[] = clubs.map((club) => ({
       id: club._id.toString(),
       name: club.name,
@@ -74,13 +74,13 @@ export class GetClubsUseCase implements IGetClubsUseCase {
 }
 
 export class GetClubByIdUseCase implements IGetClubByIdUseCase {
-  constructor(private clubsRepository: IClubsRepository) { }
+  constructor(private _clubsRepository: IClubsRepository) { }
 
   async execute(dto: GetClubByIdRequestDTO): Promise<GetClubByIdResponseDTO> {
     if (!isValidObjectId(dto.id)) {
       throw new Error("Invalid club ID");
     }
-    const club = await this.clubsRepository.getById(dto.id);
+    const club = await this._clubsRepository.getById(dto.id);
     if (!club) {
       throw new Error("Club not found!");
     }
@@ -89,10 +89,10 @@ export class GetClubByIdUseCase implements IGetClubByIdUseCase {
 }
 
 export class CreateClubUseCase implements ICreateClubUseCase {
-  constructor(private clubsRepository: IClubsRepository) { }
+  constructor(private _clubsRepository: IClubsRepository) { }
 
   async execute(dto: CreateClubRequestDTO): Promise<CreateClubResponseDTO> {
-    const newClub = await this.clubsRepository.create(dto);
+    const newClub = await this._clubsRepository.create(dto);
     return {
       club: newClub
     };
@@ -100,14 +100,14 @@ export class CreateClubUseCase implements ICreateClubUseCase {
 }
 
 export class UpdateClubUseCase implements IUpdateClubUseCase {
-  constructor(private clubsRepository: IClubsRepository) { }
+  constructor(private _clubsRepository: IClubsRepository) { }
 
   async execute(dto: UpdateClubRequestDTO): Promise<UpdateClubResponseDTO> {
     if (!isValidObjectId(dto.id)) {
       throw new Error("Invalid club ID");
     }
     const { id, ...updateData } = dto;
-    const updatedClub = await this.clubsRepository.updateById(id, updateData as UpdateClubRequest);
+    const updatedClub = await this._clubsRepository.updateById(id, updateData as UpdateClubRequest);
     if (!updatedClub) {
       throw new Error("Club not found!");
     }
@@ -118,13 +118,13 @@ export class UpdateClubUseCase implements IUpdateClubUseCase {
 }
 
 export class DeleteClubUseCase implements IDeleteClubUseCase {
-  constructor(private clubsRepository: IClubsRepository) { }
+  constructor(private _clubsRepository: IClubsRepository) { }
 
   async execute(dto: DeleteClubRequestDTO): Promise<{ message: string }> {
     if (!isValidObjectId(dto.id)) {
       throw new Error("Invalid club ID");
     }
-    await this.clubsRepository.deleteById(dto.id);
+    await this._clubsRepository.deleteById(dto.id);
     return { message: "Club deleted successfully" };
   }
 }

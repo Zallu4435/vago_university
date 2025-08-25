@@ -33,36 +33,14 @@ export interface IUnenrollStudentUseCase {
   execute(params: UnenrollStudentRequestDTO): Promise<ResponseDTO<UnenrollStudentResponseDTO>>;
 }
 
-function mapDiplomaToSummaryDTO(diploma): DiplomaSummaryDTO {
-  return {
-    id: diploma._id?.toString() || diploma.id,
-    title: diploma.title,
-    description: diploma.description,
-    price: diploma.price,
-    category: diploma.category,
-    thumbnail: diploma.thumbnail,
-    duration: diploma.duration,
-    prerequisites: diploma.prerequisites,
-    status: diploma.status,
-    createdAt: diploma.createdAt?.toISOString?.() || diploma.createdAt,
-    updatedAt: diploma.updatedAt?.toISOString?.() || diploma.updatedAt,
-    videoIds: (diploma.videoIds || []).map((id) => id.toString()),
-  };
-}
-
-// Helper function to validate MongoDB ObjectId
-function isValidObjectId(id: string): boolean {
-  return typeof id === 'string' && /^[a-fA-F0-9]{24}$/.test(id);
-}
-
 export class GetDiplomasUseCase implements IGetDiplomasUseCase {
-  constructor(private readonly diplomaRepository: IDiplomaRepository) { }
+  constructor(private readonly _diplomaRepository: IDiplomaRepository) { }
 
   async execute(params: GetDiplomasRequestDTO): Promise<ResponseDTO<GetDiplomasResponseDTO>> {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
       throw new Error("Invalid page or limit parameters");
     }
-    const { diplomas, totalItems } = await this.diplomaRepository.getDiplomas(params.page, params.limit, params.department, params.category, params.status, params.instructor, params.dateRange, params.search, params.startDate, params.endDate);
+    const { diplomas, totalItems } = await this._diplomaRepository.getDiplomas(params.page, params.limit, params.department, params.category, params.status, params.instructor, params.dateRange, params.search, params.startDate, params.endDate);
     const totalPages = Math.ceil(totalItems / params.limit);
     const mappedDiplomas: DiplomaSummaryDTO[] = diplomas.map(mapDiplomaToSummaryDTO);
     return {
@@ -78,13 +56,13 @@ export class GetDiplomasUseCase implements IGetDiplomasUseCase {
 }
 
 export class GetDiplomaByIdUseCase implements IGetDiplomaByIdUseCase {
-  constructor(private readonly diplomaRepository: IDiplomaRepository) { }
+  constructor(private readonly _diplomaRepository: IDiplomaRepository) { }
 
   async execute(params: GetDiplomaByIdRequestDTO): Promise<ResponseDTO<GetDiplomaByIdResponseDTO>> {
     if (!isValidObjectId(params.id)) {
       throw new InvalidDiplomaStatusError("Invalid diploma ID");
     }
-    const diplomaDoc = await this.diplomaRepository.getDiplomaById(params.id);
+    const diplomaDoc = await this._diplomaRepository.getDiplomaById(params.id);
     if (!diplomaDoc) {
       throw new DiplomaNotFoundError(params.id);
     }
@@ -111,10 +89,10 @@ export class GetDiplomaByIdUseCase implements IGetDiplomaByIdUseCase {
 }
 
 export class CreateDiplomaUseCase implements ICreateDiplomaUseCase {
-  constructor(private readonly diplomaRepository: IDiplomaRepository) { }
+  constructor(private readonly _diplomaRepository: IDiplomaRepository) { }
 
   async execute(params: CreateDiplomaRequestDTO): Promise<ResponseDTO<CreateDiplomaResponseDTO>> {
-    const diplomaDoc: DiplomaDocument = await this.diplomaRepository.createDiploma(params);
+    const diplomaDoc: DiplomaDocument = await this._diplomaRepository.createDiploma(params);
     return {
       success: true,
       data: {
@@ -138,16 +116,16 @@ export class CreateDiplomaUseCase implements ICreateDiplomaUseCase {
 }
 
 export class UpdateDiplomaUseCase implements IUpdateDiplomaUseCase {
-  constructor(private readonly diplomaRepository: IDiplomaRepository) { }
+  constructor(private readonly _diplomaRepository: IDiplomaRepository) { }
 
   async execute(params: UpdateDiplomaRequestDTO): Promise<ResponseDTO<UpdateDiplomaResponseDTO>> {
     if (!isValidObjectId(params.id)) {
       throw new InvalidDiplomaStatusError("Invalid diploma ID");
     }
-    const existingDiploma = await this.diplomaRepository.getDiplomaById(params.id);
+    const existingDiploma = await this._diplomaRepository.getDiplomaById(params.id);
     if (!existingDiploma) throw new DiplomaNotFoundError(params.id);
     const updatedDiploma = { ...existingDiploma, ...params };
-    const diplomaDoc: DiplomaDocument = await this.diplomaRepository.updateDiploma(updatedDiploma);
+    const diplomaDoc: DiplomaDocument = await this._diplomaRepository.updateDiploma(updatedDiploma);
     return {
       success: true,
       data: {
@@ -171,22 +149,22 @@ export class UpdateDiplomaUseCase implements IUpdateDiplomaUseCase {
 }
 
 export class DeleteDiplomaUseCase implements IDeleteDiplomaUseCase {
-  constructor(private readonly diplomaRepository: IDiplomaRepository) { }
+  constructor(private readonly _diplomaRepository: IDiplomaRepository) { }
 
   async execute(params: DeleteDiplomaRequestDTO): Promise<ResponseDTO<{ message: string }>> {
     if (!isValidObjectId(params.id)) {
       throw new InvalidDiplomaStatusError("Invalid diploma ID");
     }
-    await this.diplomaRepository.deleteDiploma(params.id);
+    await this._diplomaRepository.deleteDiploma(params.id);
     return { success: true, data: { message: "Diploma deleted successfully" } };
   }
 }
 
 export class EnrollStudentUseCase implements IEnrollStudentUseCase {
-  constructor(private readonly diplomaRepository: IDiplomaRepository) { }
+  constructor(private readonly _diplomaRepository: IDiplomaRepository) { }
 
   async execute(params: EnrollStudentRequestDTO): Promise<ResponseDTO<EnrollStudentResponseDTO>> {
-    const result = await this.diplomaRepository.enrollStudent(params);
+    const result = await this._diplomaRepository.enrollStudent(params);
     if (!result) {
       throw new DiplomaNotFoundError(params.diplomaId);
     }
@@ -195,13 +173,35 @@ export class EnrollStudentUseCase implements IEnrollStudentUseCase {
 }
 
 export class UnenrollStudentUseCase implements IUnenrollStudentUseCase {
-  constructor(private readonly diplomaRepository: IDiplomaRepository) { }
+  constructor(private readonly _diplomaRepository: IDiplomaRepository) { }
 
   async execute(params: UnenrollStudentRequestDTO): Promise<ResponseDTO<UnenrollStudentResponseDTO>> {
-    const result = await this.diplomaRepository.unenrollStudent(params);
+    const result = await this._diplomaRepository.unenrollStudent(params);
     if (!result) {
       throw new DiplomaNotFoundError(params.diplomaId);
     }
     return { success: true, data: { success: true, message: "Student unenrolled successfully" } };
   }
 } 
+
+
+function mapDiplomaToSummaryDTO(diploma): DiplomaSummaryDTO {
+  return {
+    id: diploma._id?.toString() || diploma.id,
+    title: diploma.title,
+    description: diploma.description,
+    price: diploma.price,
+    category: diploma.category,
+    thumbnail: diploma.thumbnail,
+    duration: diploma.duration,
+    prerequisites: diploma.prerequisites,
+    status: diploma.status,
+    createdAt: diploma.createdAt?.toISOString?.() || diploma.createdAt,
+    updatedAt: diploma.updatedAt?.toISOString?.() || diploma.updatedAt,
+    videoIds: (diploma.videoIds || []).map((id) => id.toString()),
+  };
+}
+
+function isValidObjectId(id: string): boolean {
+  return typeof id === 'string' && /^[a-fA-F0-9]{24}$/.test(id);
+}

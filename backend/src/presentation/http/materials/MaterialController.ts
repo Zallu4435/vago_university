@@ -55,11 +55,25 @@ export class MaterialController implements IMaterialController {
       return this.httpErrors.error_400();
     }
     
+    let processedTags: string[] = [];
+    if (httpRequest.body.tags) {
+      if (typeof httpRequest.body.tags === 'string') {
+        try {
+          const parsed = JSON.parse(httpRequest.body.tags);
+          processedTags = Array.isArray(parsed) ? parsed : [httpRequest.body.tags];
+        } catch {
+          processedTags = httpRequest.body.tags.split(',').map(tag => tag.trim()).filter(Boolean);
+        }
+      } else if (Array.isArray(httpRequest.body.tags)) {
+        processedTags = httpRequest.body.tags;
+      }
+    }
+    
     const materialData = {
       ...httpRequest.body,
       isNewMaterial: httpRequest.body.isNew === 'true',
       uploadedBy: httpRequest.body.uploadedBy || 'default-user',
-      tags: typeof httpRequest.body.tags === 'string' ? [httpRequest.body.tags] : [httpRequest.body.tags],
+      tags: processedTags,
       isRestricted: httpRequest.body.isRestricted === 'true',
       fileUrl: file.path,
       thumbnailUrl: thumbnail?.path || file.path
@@ -88,11 +102,25 @@ export class MaterialController implements IMaterialController {
       }
     }
     
+    let processedTags: string[] | undefined;
+    if (httpRequest.body.tags) {
+      if (typeof httpRequest.body.tags === 'string') {
+        try {
+          const parsed = JSON.parse(httpRequest.body.tags);
+          processedTags = Array.isArray(parsed) ? parsed : [httpRequest.body.tags];
+        } catch {
+          processedTags = httpRequest.body.tags.split(',').map(tag => tag.trim()).filter(Boolean);
+        }
+      } else if (Array.isArray(httpRequest.body.tags)) {
+        processedTags = httpRequest.body.tags;
+      }
+    }
+    
     const updateData: MaterialUpdateData = {
       id,
       ...httpRequest.body,
       ...(httpRequest.body.isNew !== undefined && { isNewMaterial: httpRequest.body.isNew === 'true' }),
-      ...(httpRequest.body.tags && { tags: typeof httpRequest.body.tags === 'string' ? [httpRequest.body.tags] : [httpRequest.body.tags] }),
+      ...(processedTags && { tags: processedTags }),
       ...(httpRequest.body.isRestricted !== undefined && { isRestricted: httpRequest.body.isRestricted === true || httpRequest.body.isRestricted === 'true' })
     };
     

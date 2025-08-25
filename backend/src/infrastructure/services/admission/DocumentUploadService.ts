@@ -23,7 +23,7 @@ const cloudinaryStorage = new CloudinaryStorage({
 export const admissionDocumentUpload = multer({
   storage: cloudinaryStorage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: 10 * 1024 * 1024, 
   },
   fileFilter: (req, file, cb) => {
     if (file.mimetype === 'application/pdf') {

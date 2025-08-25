@@ -71,10 +71,10 @@ export interface IRequestTranscriptUseCase {
 }
 
 export class GetStudentInfoUseCase implements IGetStudentInfoUseCase {
-  constructor(private academicRepository: IAcademicRepository) { }
+  constructor(private _academicRepository: IAcademicRepository) { }
 
   async execute(input: GetStudentInfoRequestDTO): Promise<ResponseDTO<GetStudentInfoResponseDTO>> {
-    const result: StudentInfoResult | null = await this.academicRepository.findStudentById(input.userId);
+    const result: StudentInfoResult | null = await this._academicRepository.findStudentById(input.userId);
     if (!result) {
       return { data: { error: "Student not found" }, success: false };
     }
@@ -84,7 +84,7 @@ export class GetStudentInfoUseCase implements IGetStudentInfoUseCase {
         pendingEnrollments
           .filter((enrollment: IEnrollmentDocument) => Boolean(enrollment.courseId))
           .map(async (enrollment: IEnrollmentDocument) => {
-            const course = await this.academicRepository.findCourseById(enrollment.courseId);
+            const course = await this._academicRepository.findCourseById(enrollment.courseId);
             return course?.credits ?? 0;
           })
       )
@@ -109,10 +109,10 @@ export class GetStudentInfoUseCase implements IGetStudentInfoUseCase {
 }
 
 export class GetGradeInfoUseCase implements IGetGradeInfoUseCase {
-  constructor(private academicRepository: IAcademicRepository) { }
+  constructor(private _academicRepository: IAcademicRepository) { }
 
   async execute(input: GetGradeInfoRequestDTO): Promise<ResponseDTO<GetGradeInfoResponseDTO>> {
-    const grade = await this.academicRepository.findGradeByUserId(input.userId);
+    const grade = await this._academicRepository.findGradeByUserId(input.userId);
     if (!grade) {
       return { data: { error: "Grade information not found" }, success: false };
     }
@@ -128,16 +128,16 @@ export class GetGradeInfoUseCase implements IGetGradeInfoUseCase {
 }
 
 export class GetCoursesUseCase implements IGetCoursesUseCase {
-  constructor(private academicRepository: IAcademicRepository) { }
+  constructor(private _academicRepository: IAcademicRepository) { }
 
   async execute(input: GetCoursesRequestDTO & { userId?: string }): Promise<ResponseDTO<GetCoursesResponseDTO>> {
     const { search, page = 1, limit = 5, userId } = input;
-    const courses = await this.academicRepository.findAllCourses(search, page, limit);
+    const courses = await this._academicRepository.findAllCourses(search, page, limit);
     let mappedCourses;
     if (userId) {
       mappedCourses = await Promise.all(
         courses.map(async (course: ICourseDocument) => {
-          const enrollment = await this.academicRepository.findEnrollment(userId, course._id.toString());
+          const enrollment = await this._academicRepository.findEnrollment(userId, course._id.toString());
           return {
             id: course._id?.toString() || '',
             title: course.title,
@@ -183,10 +183,10 @@ export class GetCoursesUseCase implements IGetCoursesUseCase {
 }
 
 export class GetAcademicHistoryUseCase implements IGetAcademicHistoryUseCase {
-  constructor(private academicRepository: IAcademicRepository) { }
+  constructor(private _academicRepository: IAcademicRepository) { }
 
   async execute(input: GetAcademicHistoryRequestDTO): Promise<ResponseDTO<GetAcademicHistoryResponseDTO>> {
-    const history = await this.academicRepository.findAcademicHistory(input.userId, input.startTerm, input.endTerm);
+    const history = await this._academicRepository.findAcademicHistory(input.userId, input.startTerm, input.endTerm);
     const response: GetAcademicHistoryResponseDTO = {
       history: history.map((record) => ({
         term: record.term,
@@ -200,10 +200,10 @@ export class GetAcademicHistoryUseCase implements IGetAcademicHistoryUseCase {
 }
 
 export class GetProgramInfoUseCase implements IGetProgramInfoUseCase {
-  constructor(private academicRepository: IAcademicRepository) { }
+  constructor(private _academicRepository: IAcademicRepository) { }
 
   async execute(input: GetProgramInfoRequestDTO): Promise<ResponseDTO<GetProgramInfoResponseDTO>> {
-    const program = await this.academicRepository.findProgramByUserId(input.userId);
+    const program = await this._academicRepository.findProgramByUserId(input.userId);
     if (!program) {
       return { data: { error: "Program information not found" }, success: false };
     }
@@ -216,10 +216,10 @@ export class GetProgramInfoUseCase implements IGetProgramInfoUseCase {
 }
 
 export class GetProgressInfoUseCase implements IGetProgressInfoUseCase {
-  constructor(private academicRepository: IAcademicRepository) { }
+  constructor(private _academicRepository: IAcademicRepository) { }
 
   async execute(input: GetProgressInfoRequestDTO): Promise<ResponseDTO<GetProgressInfoResponseDTO>> {
-    const progress = await this.academicRepository.findProgressByUserId(input.userId);
+    const progress = await this._academicRepository.findProgressByUserId(input.userId);
     if (!progress) {
       return { data: { error: "Progress information not found" }, success: false };
     }
@@ -235,10 +235,10 @@ export class GetProgressInfoUseCase implements IGetProgressInfoUseCase {
 }
 
 export class GetRequirementsInfoUseCase implements IGetRequirementsInfoUseCase {
-  constructor(private academicRepository: IAcademicRepository) { }
+  constructor(private _academicRepository: IAcademicRepository) { }
 
   async execute(input: GetRequirementsInfoRequestDTO): Promise<ResponseDTO<GetRequirementsInfoResponseDTO>> {
-    const requirements = await this.academicRepository.findRequirementsByUserId(input.userId);
+    const requirements = await this._academicRepository.findRequirementsByUserId(input.userId);
     if (!requirements) {
       return { data: { error: "Requirements information not found" }, success: false };
     }
@@ -252,15 +252,15 @@ export class GetRequirementsInfoUseCase implements IGetRequirementsInfoUseCase {
 }
 
 export class RegisterCourseUseCase implements IRegisterCourseUseCase {
-  constructor(private academicRepository: IAcademicRepository) { }
+  constructor(private _academicRepository: IAcademicRepository) { }
 
   async execute(input: RegisterCourseRequestDTO): Promise<ResponseDTO<RegisterCourseResponseDTO>> {
-    const course = await this.academicRepository.findCourseById(input.courseId);
+    const course = await this._academicRepository.findCourseById(input.courseId);
     if (!course) {
       return { data: { error: "Course not found" }, success: false };
     }
 
-    const existingEnrollment = await this.academicRepository.findEnrollment(input.studentId, input.courseId);
+    const existingEnrollment = await this._academicRepository.findEnrollment(input.studentId, input.courseId);
     if (existingEnrollment) {
       return {
         data: { error: "Already enrolled in this course" },
@@ -268,7 +268,7 @@ export class RegisterCourseUseCase implements IRegisterCourseUseCase {
       };
     }
 
-    const enrollment = await this.academicRepository.createEnrollment({
+    const enrollment = await this._academicRepository.createEnrollment({
       id: '',
       studentId: input.studentId,
       courseId: input.courseId,
@@ -277,7 +277,7 @@ export class RegisterCourseUseCase implements IRegisterCourseUseCase {
       requestedAt: new Date().toISOString()
     });
 
-    await this.academicRepository.updateCourseEnrollment(input.courseId, 1);
+    await this._academicRepository.updateCourseEnrollment(input.courseId, 1);
 
     const response: RegisterCourseResponseDTO = {
       success: true,
@@ -290,20 +290,20 @@ export class RegisterCourseUseCase implements IRegisterCourseUseCase {
 }
 
 export class DropCourseUseCase implements IDropCourseUseCase {
-  constructor(private academicRepository: IAcademicRepository) { }
+  constructor(private _academicRepository: IAcademicRepository) { }
 
   async execute(input: DropCourseRequestDTO): Promise<ResponseDTO<DropCourseResponseDTO>> {
-    const enrollment = await this.academicRepository.findEnrollment(input.studentId, input.courseId);
+    const enrollment = await this._academicRepository.findEnrollment(input.studentId, input.courseId);
     if (!enrollment) {
       return { data: { error: "Not enrolled in this course" }, success: false };
     }
 
-    const success = await this.academicRepository.deleteEnrollment(input.studentId, input.courseId);
+    const success = await this._academicRepository.deleteEnrollment(input.studentId, input.courseId);
     if (!success) {
       return { data: { error: "Failed to drop course" }, success: false };
     }
 
-    await this.academicRepository.updateCourseEnrollment(input.courseId, -1);
+    await this._academicRepository.updateCourseEnrollment(input.courseId, -1);
 
     const response: DropCourseResponseDTO = {
       success: true,
@@ -315,10 +315,10 @@ export class DropCourseUseCase implements IDropCourseUseCase {
 }
 
 export class RequestTranscriptUseCase implements IRequestTranscriptUseCase {
-  constructor(private academicRepository: IAcademicRepository) { }
+  constructor(private _academicRepository: IAcademicRepository) { }
 
   async execute(input: RequestTranscriptRequestDTO): Promise<ResponseDTO<RequestTranscriptResponseDTO>> {
-    const request = await this.academicRepository.createTranscriptRequest({
+    const request = await this._academicRepository.createTranscriptRequest({
       userId: input.studentId,
       deliveryMethod: input.deliveryMethod,
       requestedAt: new Date().toISOString(),

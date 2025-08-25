@@ -68,13 +68,13 @@ export class GetSportsUseCase {
 }
 
 export class GetSportByIdUseCase {
-  constructor(private sportsRepository: ISportsRepository) { }
+  constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: GetSportByIdRequestDTO): Promise<GetSportByIdResponseDTO> {
     if (!params.id || typeof params.id !== 'string') {
       throw new Error("Invalid sport ID");
     }
-    const sport = await this.sportsRepository.getById(params.id);
+    const sport = await this._sportsRepository.getById(params.id);
     if (!sport) {
       throw new Error("Sport not found");
     }
@@ -85,7 +85,7 @@ export class GetSportByIdUseCase {
 }
 
 export class CreateSportUseCase {
-  constructor(private sportsRepository: ISportsRepository) { }
+  constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: CreateSportRequestDTO): Promise<CreateSportResponseDTO> {
     const normalizedParams = {
@@ -105,13 +105,13 @@ export class CreateSportUseCase {
       upcomingGames: params.upcomingGames ?? [],
       participants: params.participants ?? 0,
     };
-    const newSport = await this.sportsRepository.create(normalizedParams);
+    const newSport = await this._sportsRepository.create(normalizedParams);
     return { sport: newSport as unknown as Sport };
   }
 }
 
 export class UpdateSportUseCase {
-  constructor(private sportsRepository: ISportsRepository) { }
+  constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: UpdateSportRequestDTO): Promise<UpdateSportResponseDTO> {
     if (!params.id || typeof params.id !== 'string') {
@@ -121,7 +121,7 @@ export class UpdateSportUseCase {
     if (updateData.status) {
       updateData.status = updateData.status.toLowerCase() as SportStatus;
     }
-    const updatedSport = await this.sportsRepository.updateById(id, { ...updateData, id });
+    const updatedSport = await this._sportsRepository.updateById(id, { ...updateData, id });
     if (!updatedSport) {
       throw new Error("Sport not found");
     }
@@ -130,13 +130,13 @@ export class UpdateSportUseCase {
 }
 
 export class DeleteSportUseCase {
-  constructor(private sportsRepository: ISportsRepository) { }
+  constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: DeleteSportRequestDTO): Promise<{ message: string }> {
     if (!params.id || typeof params.id !== 'string') {
       throw new Error("Invalid sport ID");
     }
-    await this.sportsRepository.deleteById(params.id);
+    await this._sportsRepository.deleteById(params.id);
     return { message: "Sport deleted successfully" };
   }
 } 

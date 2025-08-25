@@ -26,7 +26,7 @@ export interface IDeleteEventUseCase {
 }
 
 export class GetEventsUseCase implements IGetEventsUseCase {
-  constructor(private eventsRepository: IEventsRepository) { }
+  constructor(private _eventsRepository: IEventsRepository) { }
 
   async execute(params: GetEventsRequestDTO): Promise<GetEventsResponseDTO> {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
@@ -38,7 +38,7 @@ export class GetEventsUseCase implements IGetEventsUseCase {
     if (params.endDate && isNaN(params.endDate.getTime())) {
       throw new Error("Invalid endDate format");
     }
-    const result: PaginatedResponse<EventSummary> = await this.eventsRepository.getEvents(
+    const result: PaginatedResponse<EventSummary> = await this._eventsRepository.getEvents(
       params.page,
       params.limit,
       params.type,
@@ -68,13 +68,13 @@ export class GetEventsUseCase implements IGetEventsUseCase {
 }
 
 export class GetEventByIdUseCase implements IGetEventByIdUseCase {
-  constructor(private eventsRepository: IEventsRepository) { }
+  constructor(private _eventsRepository: IEventsRepository) { }
 
   async execute(params: GetEventByIdRequestDTO): Promise<GetEventByIdResponseDTO> {
     if (!params.id) {
       throw new InvalidEventIdError(params.id);
     }
-    const event: EventDocument | null = await this.eventsRepository.getById(params.id);
+    const event: EventDocument | null = await this._eventsRepository.getById(params.id);
     if (!event) {
       throw new EventNotFoundError(params.id);
     }
@@ -105,7 +105,7 @@ export class GetEventByIdUseCase implements IGetEventByIdUseCase {
 }
 
 export class CreateEventUseCase implements ICreateEventUseCase {
-  constructor(private eventsRepository: IEventsRepository) { }
+  constructor(private _eventsRepository: IEventsRepository) { }
 
   async execute(params: CreateEventRequestDTO): Promise<CreateEventResponseDTO> {
     const mappedParams = {
@@ -116,7 +116,7 @@ export class CreateEventUseCase implements ICreateEventUseCase {
     };
     const event = Event.create(mapCreateEventDTOToEventProps(mappedParams));
     const eventObj = event.toPersistence();
-    const newEvent: EventDocument = await this.eventsRepository.create(eventObj);
+    const newEvent: EventDocument = await this._eventsRepository.create(eventObj);
     return {
       event: new Event({
         id: newEvent._id.toString(),
@@ -144,7 +144,7 @@ export class CreateEventUseCase implements ICreateEventUseCase {
 }
 
 export class UpdateEventUseCase implements IUpdateEventUseCase {
-  constructor(private eventsRepository: IEventsRepository) { }
+  constructor(private _eventsRepository: IEventsRepository) { }
 
   async execute(params: UpdateEventRequestDTO): Promise<UpdateEventResponseDTO> {
     if (!params.id) {
@@ -158,7 +158,7 @@ export class UpdateEventUseCase implements IUpdateEventUseCase {
     };
     const event = Event.create(mapUpdateEventDTOToEventProps(mappedParams));
     const eventObj = event.toPersistence();
-    const updatedEvent: EventDocument | null = await this.eventsRepository.updateById(params.id, eventObj);
+    const updatedEvent: EventDocument | null = await this._eventsRepository.updateById(params.id, eventObj);
     if (!updatedEvent) {
       throw new EventNotFoundError(params.id);
     }
@@ -189,14 +189,14 @@ export class UpdateEventUseCase implements IUpdateEventUseCase {
 }
 
 export class DeleteEventUseCase implements IDeleteEventUseCase {
-  constructor(private eventsRepository: IEventsRepository) { }
+  constructor(private _eventsRepository: IEventsRepository) { }
 
   async execute(params: DeleteEventRequestDTO): Promise<{ message: string }> {
     if (!params.id) {
       throw new InvalidEventIdError(params.id);
     }
 
-    await this.eventsRepository.deleteById(params.id);
+    await this._eventsRepository.deleteById(params.id);
     return { message: "Event deleted successfully" };
   }
 }

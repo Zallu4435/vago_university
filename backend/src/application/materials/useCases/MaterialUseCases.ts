@@ -50,7 +50,7 @@ function toMaterialProps(raw): MaterialProps {
 }
 
 export class GetMaterialsUseCase {
-  constructor(private repo: IMaterialsRepository) { }
+  constructor(private _repo: IMaterialsRepository) { }
   async execute(params: GetMaterialsRequestDTO): Promise<GetMaterialsResponseDTO> {
     const filter: MaterialFilter = {};
     
@@ -163,8 +163,8 @@ export class GetMaterialsUseCase {
 
     const skip = (params.page - 1) * params.limit;
     const sort = { uploadedAt: -1 };
-    const materials = await this.repo.find(filter, { skip, limit: params.limit, sort });
-    const total = await this.repo.count(filter);
+    const materials = await this._repo.find(filter, { skip, limit: params.limit, sort });
+    const total = await this._repo.count(filter);
     const totalPages = Math.ceil(total / params.limit);
 
     return {
@@ -175,37 +175,37 @@ export class GetMaterialsUseCase {
 }
 
 export class GetMaterialByIdUseCase {
-  constructor(private repo: IMaterialsRepository) { }
+  constructor(private _repo: IMaterialsRepository) { }
   async execute(params: GetMaterialByIdRequestDTO): Promise<GetMaterialByIdResponseDTO | null> {
     if (!params.id) throw new MaterialValidationError('Material ID is required');
-    const material = await this.repo.findById(params.id);
+    const material = await this._repo.findById(params.id);
     if (!material) throw new MaterialNotFoundError(params.id);
     return { material: toMaterialProps(material) };
   }
 }
 
 export class CreateMaterialUseCase {
-  constructor(private repo: IMaterialsRepository) { }
+  constructor(private _repo: IMaterialsRepository) { }
   async execute(params: CreateMaterialRequestDTO): Promise<CreateMaterialResponseDTO> {
     const material = Material.create(params);
-    const dbResult = await this.repo.create(material.props);
+    const dbResult = await this._repo.create(material.props);
     return { material: toMaterialProps(dbResult) };
   }
 }
 
 export class UpdateMaterialUseCase {
-  constructor(private repo: IMaterialsRepository) { }
+  constructor(private _repo: IMaterialsRepository) { }
   async execute(params: UpdateMaterialRequestDTO): Promise<UpdateMaterialResponseDTO | null> {
     if (!params.id) throw new MaterialValidationError('Material ID is required');
 
-    const existingMaterial = await this.repo.findById(params.id);
+    const existingMaterial = await this._repo.findById(params.id);
     if (!existingMaterial) throw new MaterialNotFoundError(params.id);
 
     const existingProps = toMaterialProps(existingMaterial);
 
     const { id, ...updateData } = params;
     const updatedMaterial = Material.update(existingProps, updateData);
-    const dbResult = await this.repo.update(params.id, updatedMaterial.props);
+    const dbResult = await this._repo.update(params.id, updatedMaterial.props);
     if (!dbResult) throw new MaterialNotFoundError(params.id);
 
     return { material: toMaterialProps(dbResult) };
@@ -213,11 +213,11 @@ export class UpdateMaterialUseCase {
 }
 
 export class DeleteMaterialUseCase {
-  constructor(private repo: IMaterialsRepository) { }
+  constructor(private _repo: IMaterialsRepository) { }
   async execute(params: DeleteMaterialRequestDTO): Promise<void> {
-    if (!params.id) throw new MaterialValidationError('Material ID is required');
-    const material = await this.repo.findById(params.id);
+    if (!params.id) throw new Error('Material ID is required');
+    const material = await this._repo.findById(params.id);
     if (!material) throw new MaterialNotFoundError(params.id);
-    await this.repo.delete(params.id);
+    await this._repo.delete(params.id);
   }
 } 

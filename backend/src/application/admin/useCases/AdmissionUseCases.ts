@@ -62,7 +62,7 @@ export interface IBlockAdmissionUseCase {
 }
 
 export class GetAdmissionsUseCase implements IGetAdmissionsUseCase {
-    constructor(private repo: IAdmissionRepository) { }
+    constructor(private _repo: IAdmissionRepository) { }
 
     async execute(p: GetAdmissionsRequestDTO): Promise<ResponseDTO<GetAdmissionsResponseDTO>> {
         const filter: Record<string, unknown> = {};
@@ -116,14 +116,14 @@ export class GetAdmissionsUseCase implements IGetAdmissionsUseCase {
         };
 
         const [rawAdmissions, total] = await Promise.all([
-            this.repo.find(filter, proj, skip, p.limit),
-            this.repo.count(filter),
+            this._repo.find(filter, proj, skip, p.limit),
+            this._repo.count(filter),
         ]);
 
         const admissions = await Promise.all(
             rawAdmissions.map(async (a) => {
                 const email = a.personal?.emailAddress;
-                const user = email ? await this.repo.findUserByEmail(email) : null;
+                const user = email ? await this._repo.findUserByEmail(email) : null;
                 return {
                     _id: a._id.toString(),
                     fullName: a.personal?.fullName ?? "N/A",
@@ -150,16 +150,16 @@ export class GetAdmissionsUseCase implements IGetAdmissionsUseCase {
 
 
 export class GetAdmissionByIdUseCase implements IGetAdmissionByIdUseCase {
-    constructor(private admissionRepository: IAdmissionRepository) { }
+    constructor(private _admissionRepository: IAdmissionRepository) { }
 
     async execute(params: GetAdmissionByIdRequestDTO): Promise<ResponseDTO<GetAdmissionByIdResponseDTO>> {
-        const admission = await this.admissionRepository.getAdmissionById(params.id);
+        const admission = await this._admissionRepository.getAdmissionById(params.id);
         if (!admission) {
             throw new AdminAdmissionNotFoundError();
         }
         let blocked = false;
         if (admission.personal?.emailAddress) {
-            const user = await this.admissionRepository.findUserByEmail(admission.personal.emailAddress);
+            const user = await this._admissionRepository.findUserByEmail(admission.personal.emailAddress);
             blocked = user?.blocked ?? false;
         }
         return { data: { ...admission, blocked }, success: true };
@@ -167,10 +167,10 @@ export class GetAdmissionByIdUseCase implements IGetAdmissionByIdUseCase {
 }
 
 export class GetAdmissionByTokenUseCase implements IGetAdmissionByTokenUseCase {
-    constructor(private admissionRepository: IAdmissionRepository) { }
+    constructor(private _admissionRepository: IAdmissionRepository) { }
 
     async execute(params: GetAdmissionByTokenRequestDTO): Promise<ResponseDTO<GetAdmissionByTokenResponseDTO>> {
-        const admission = await this.admissionRepository.getAdmissionByToken(params.admissionId, params.token);
+        const admission = await this._admissionRepository.getAdmissionByToken(params.admissionId, params.token);
         if (!admission) {
             throw new AdminAdmissionNotFoundError();
         }
@@ -189,13 +189,13 @@ export class GetAdmissionByTokenUseCase implements IGetAdmissionByTokenUseCase {
 
 export class ApproveAdmissionUseCase implements IApproveAdmissionUseCase {
     constructor(
-        private admissionRepository: IAdmissionRepository,
-        private emailService: IEmailService,
-        private config
+        private _admissionRepository: IAdmissionRepository,
+        private _emailService: IEmailService,
+        private _config
     ) { }
 
     async execute(params: ApproveAdmissionRequestDTO): Promise<ResponseDTO<ApproveAdmissionResponseDTO>> {
-        const admission = await this.admissionRepository.findAdmissionById(params.id);
+        const admission = await this._admissionRepository.findAdmissionById(params.id);
         if (!admission) throw new AdminAdmissionNotFoundError();
         if (admission.status !== "pending") throw new AdminAdmissionAlreadyProcessedError();
 
@@ -204,12 +204,12 @@ export class ApproveAdmissionUseCase implements IApproveAdmissionUseCase {
         admission.tokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
         admission.status = "offered";
 
-        await this.admissionRepository.saveAdmission(admission);
+        await this._admissionRepository.saveAdmission(admission);
 
-        const acceptUrl = `${this.config.frontendUrl}/confirm-admission/${params.id}/accept?token=${confirmationToken}`;
-        const rejectUrl = `${this.config.frontendUrl}/confirm-admission/${params.id}/reject?token=${confirmationToken}`;
+        const acceptUrl = `${this._config.frontendUrl}/confirm-admission/${params.id}/accept?token=${confirmationToken}`;
+        const rejectUrl = `${this._config.frontendUrl}/confirm-admission/${params.id}/reject?token=${confirmationToken}`;
 
-        await this.emailService.sendAdmissionOfferEmail({
+        await this._emailService.sendAdmissionOfferEmail({
             to: admission.personal.emailAddress,
             name: admission.personal.fullName,
             programDetails: params.additionalInfo?.programDetails || "",
@@ -230,17 +230,17 @@ export class ApproveAdmissionUseCase implements IApproveAdmissionUseCase {
 }
 
 export class RejectAdmissionUseCase implements IRejectAdmissionUseCase {
-    constructor(private admissionRepository: IAdmissionRepository) { }
+    constructor(private _admissionRepository: IAdmissionRepository) { }
 
     async execute(params: RejectAdmissionRequestDTO): Promise<ResponseDTO<RejectAdmissionResponseDTO>> {
-        const admission = await this.admissionRepository.findAdmissionById(params.id);
+        const admission = await this._admissionRepository.findAdmissionById(params.id);
         if (!admission) throw new AdminAdmissionNotFoundError();
         if (admission.status !== "pending") throw new AdminAdmissionAlreadyProcessedError();
 
         admission.status = "rejected";
         admission.rejectedBy = "admin";
 
-        await this.admissionRepository.saveAdmission(admission);
+        await this._admissionRepository.saveAdmission(admission);
 
         return { data: { message: "Admission rejected" }, success: true };
     }
@@ -259,10 +259,10 @@ export class DeleteAdmissionUseCase implements IDeleteAdmissionUseCase {
 }
 
 export class ConfirmAdmissionOfferUseCase implements IConfirmAdmissionOfferUseCase {
-    constructor(private admissionRepository: IAdmissionRepository) { }
+    constructor(private _admissionRepository: IAdmissionRepository) { }
 
     async execute(params: ConfirmAdmissionOfferRequestDTO): Promise<ResponseDTO<ConfirmAdmissionOfferResponseDTO>> {
-        const result = await this.admissionRepository.confirmAdmissionOffer(params.admissionId, params.token, params.action);
+        const result = await this._admissionRepository.confirmAdmissionOffer(params.admissionId, params.token, params.action);
         if (!result) {
             throw new AdminAdmissionNotFoundError();
         }
@@ -271,19 +271,19 @@ export class ConfirmAdmissionOfferUseCase implements IConfirmAdmissionOfferUseCa
 }
 
 export class BlockAdmissionUseCase implements IBlockAdmissionUseCase {
-    constructor(private admissionRepository: IAdmissionRepository) { }
+    constructor(private _admissionRepository: IAdmissionRepository) { }
 
     async execute(params: { id: string }): Promise<ResponseDTO<{ message: string }>> {
-        const admission = await this.admissionRepository.findAdmissionById(params.id);
+        const admission = await this._admissionRepository.findAdmissionById(params.id);
         if (!admission) {
             throw new AdminAdmissionNotFoundError();
         }
-        const user = await this.admissionRepository.findUserByEmail(admission.personal.emailAddress);
+        const user = await this._admissionRepository.findUserByEmail(admission.personal.emailAddress);
         if (!user) {
             throw new AdminRegisterUserNotFoundError();
         }
         user.blocked = !user.blocked;
-        await this.admissionRepository.saveUser(user);
+        await this._admissionRepository.saveUser(user);
         return {
             data: { message: user.blocked ? 'User blocked' : 'User unblocked' },
             success: true,

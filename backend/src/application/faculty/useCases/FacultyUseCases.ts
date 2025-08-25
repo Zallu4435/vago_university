@@ -102,7 +102,7 @@ function mapFacultyToDTO(f): FacultyResponseDTO {
 } 
 
 export class GetFacultyUseCase implements IGetFacultyUseCase {
-    constructor(private facultyRepository: IFacultyRepository) { }
+    constructor(private _facultyRepository: IFacultyRepository) { }
 
     async execute(params: GetFacultyRequestDTO): Promise<ResponseDTO<GetFacultyResponseDTO>> {
         const { page = 1, limit = 5, status = "all", department = "all_departments", dateRange = "all", search, startDate, endDate } = params;
@@ -161,12 +161,12 @@ export class GetFacultyUseCase implements IGetFacultyUseCase {
         }
 
         const skip = (page - 1) * limit;
-        const faculty = await this.facultyRepository.findFaculty(query, {
+        const faculty = await this._facultyRepository.findFaculty(query, {
             skip,
             limit,
             select: "fullName email phone department qualification experience aboutMe cvUrl certificatesUrl createdAt status",
         });
-        const totalFaculty = await this.facultyRepository.countFaculty(query);
+        const totalFaculty = await this._facultyRepository.countFaculty(query);
         const totalPages = Math.ceil(totalFaculty / limit);
         const facultyResponse: FacultyResponseDTO[] = (faculty || []).map(mapFacultyToDTO);
         return {
@@ -182,13 +182,13 @@ export class GetFacultyUseCase implements IGetFacultyUseCase {
 }
 
 export class GetFacultyByIdUseCase implements IGetFacultyByIdUseCase {
-    constructor(private facultyRepository: IFacultyRepository) { }
+    constructor(private _facultyRepository: IFacultyRepository) { }
 
     async execute(params: GetFacultyByIdRequestDTO): Promise<ResponseDTO<GetFacultyByIdResponseDTO>> {
         if (!mongoose.Types.ObjectId.isValid(params.id)) {
             throw new InvalidFacultyIdError();
         }
-        const faculty = await this.facultyRepository.getFacultyById(params);
+        const faculty = await this._facultyRepository.getFacultyById(params.id);
         if (!faculty) {
             throw new FacultyNotFoundError();
         }
@@ -200,7 +200,7 @@ export class GetFacultyByIdUseCase implements IGetFacultyByIdUseCase {
 }
 
 export class GetFacultyByTokenUseCase implements IGetFacultyByTokenUseCase {
-    constructor(private facultyRepository: IFacultyRepository) { }
+    constructor(private _facultyRepository: IFacultyRepository) { }
 
     async execute(params: GetFacultyByTokenRequestDTO): Promise<ResponseDTO<GetFacultyByTokenResponseDTO>> {
         // Validation
@@ -210,7 +210,7 @@ export class GetFacultyByTokenUseCase implements IGetFacultyByTokenUseCase {
         if (!params.token) {
             throw new InvalidTokenError();
         }
-        const faculty = await this.facultyRepository.getFacultyByToken(params);
+        const faculty = await this._facultyRepository.getFacultyByToken(params.token);
         if (!faculty) {
             throw new FacultyNotFoundError();
         }
@@ -222,7 +222,7 @@ export class GetFacultyByTokenUseCase implements IGetFacultyByTokenUseCase {
 }
 
 export class ApproveFacultyUseCase implements IApproveFacultyUseCase {
-    constructor(private facultyRepository: IFacultyRepository) { }
+    constructor(private _facultyRepository: IFacultyRepository) { }
 
     private generateConfirmationToken(): string {
         return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -236,7 +236,7 @@ export class ApproveFacultyUseCase implements IApproveFacultyUseCase {
             throw new MissingRequiredFieldsError();
         }
 
-        const faculty = await this.facultyRepository.getFacultyById({ id: params.id });
+        const faculty = await this._facultyRepository.getFacultyById(params.id);
         if (!faculty) {
             throw new FacultyNotFoundError();
         }
@@ -247,7 +247,7 @@ export class ApproveFacultyUseCase implements IApproveFacultyUseCase {
         const confirmationToken = this.generateConfirmationToken();
         const tokenExpiry = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
 
-        await this.facultyRepository.approveFaculty({
+        await this._facultyRepository.approveFaculty({
             id: params.id,
             additionalInfo: {
                 ...params.additionalInfo,
@@ -280,45 +280,45 @@ export class ApproveFacultyUseCase implements IApproveFacultyUseCase {
 }
 
 export class RejectFacultyUseCase implements IRejectFacultyUseCase {
-    constructor(private facultyRepository: IFacultyRepository) { }
+    constructor(private _facultyRepository: IFacultyRepository) { }
 
     async execute(params: RejectFacultyRequestDTO): Promise<ResponseDTO<RejectFacultyResponseDTO>> {
         if (!params.id || !mongoose.isValidObjectId(params.id)) {
             throw new InvalidFacultyIdError();
         }
-        const faculty = await this.facultyRepository.getFacultyById({ id: params.id });
+        const faculty = await this._facultyRepository.getFacultyById(params.id);
         if (!faculty) {
             throw new FacultyNotFoundError();
         }
         if (faculty.status !== "pending") {
             throw new FacultyAlreadyProcessedError();
         }
-        await this.facultyRepository.rejectFaculty(params);
+        await this._facultyRepository.rejectFaculty(params.id);
         return { data: { message: "Faculty registration rejected" }, success: true };
     }
 }
 
 export class DeleteFacultyUseCase implements IDeleteFacultyUseCase {
-    constructor(private facultyRepository: IFacultyRepository) { }
+    constructor(private _facultyRepository: IFacultyRepository) { }
 
     async execute(params: DeleteFacultyRequestDTO): Promise<ResponseDTO<DeleteFacultyResponseDTO>> {
         if (!params.id || !mongoose.isValidObjectId(params.id)) {
             throw new InvalidFacultyIdError();
         }
-        const faculty = await this.facultyRepository.getFacultyById({ id: params.id });
+        const faculty = await this._facultyRepository.getFacultyById(params.id);
         if (!faculty) {
             throw new FacultyNotFoundError();
         }
         if (faculty.status !== "pending") {
             throw new FacultyAlreadyProcessedError();
         }
-        await this.facultyRepository.deleteFaculty(params);
+        await this._facultyRepository.deleteFaculty(params.id);
         return { data: { message: "Faculty registration deleted" }, success: true };
     }
 }
 
 export class ConfirmFacultyOfferUseCase implements IConfirmFacultyOfferUseCase {
-    constructor(private facultyRepository: IFacultyRepository) { }
+    constructor(private _facultyRepository: IFacultyRepository) { }
 
     async execute(params: ConfirmFacultyOfferRequestDTO): Promise<ResponseDTO<ConfirmFacultyOfferResponseDTO>> {
         // Validation
@@ -331,7 +331,7 @@ export class ConfirmFacultyOfferUseCase implements IConfirmFacultyOfferUseCase {
         if (params.action !== "accept" && params.action !== "reject") {
             throw new InvalidActionError();
         }
-        const faculty = await this.facultyRepository.getFacultyById({ id: params.facultyId });
+        const faculty = await this._facultyRepository.getFacultyById(params.facultyId);
         if (!faculty) {
             throw new FacultyNotFoundError();
         }
@@ -362,7 +362,7 @@ export class ConfirmFacultyOfferUseCase implements IConfirmFacultyOfferUseCase {
                 additionalInstructions: "Please log in and change your temporary password as soon as possible for security purposes.",
             });
         }
-        await this.facultyRepository.confirmFacultyOffer(params);
+        await this._facultyRepository.confirmFacultyOffer({ id: params.facultyId, action: params.action });
         return {
             data: {
                 message: params.action === "accept"
@@ -375,7 +375,7 @@ export class ConfirmFacultyOfferUseCase implements IConfirmFacultyOfferUseCase {
 }
 
 export class DownloadCertificateUseCase implements IDownloadCertificateUseCase {
-    constructor(private facultyRepository: IFacultyRepository) { }
+    constructor(private _facultyRepository: IFacultyRepository) { }
 
     async execute(params: DownloadCertificateRequestDTO): Promise<ResponseDTO<DownloadCertificateResponseDTO>> {
         if (!params.facultyId || !mongoose.isValidObjectId(params.facultyId)) {
@@ -388,12 +388,12 @@ export class DownloadCertificateUseCase implements IDownloadCertificateUseCase {
             throw new InvalidCertificateUrlError();
         }
         if (!params.type || !["cv", "certificate"].includes(params.type.toLowerCase())) {
-            throw new InvalidDocumentTypeError();
+            throw new InvalidCertificateUrlError();
         }
         if (!params.requestingUserId) {
             throw new AuthenticationRequiredError();
         }
-        const faculty = await this.facultyRepository.getFacultyById({ id: params.facultyId });
+        const faculty = await this._facultyRepository.getFacultyById(params.facultyId);
         if (!faculty) {
             throw new FacultyNotFoundError();
         }
@@ -423,10 +423,10 @@ export class DownloadCertificateUseCase implements IDownloadCertificateUseCase {
 }
 
 export class BlockFacultyUseCase implements IBlockFacultyUseCase {
-    constructor(private facultyRepository: IFacultyRepository) { }
+    constructor(private _facultyRepository: IFacultyRepository) { }
 
     async execute(params: { id: string }): Promise<ResponseDTO<{ message: string }>> {
-        const result = await this.facultyRepository.blockFaculty(params.id);
+        const result = await this._facultyRepository.blockFaculty(params.id);
         return { data: result, success: true };
     }
 }

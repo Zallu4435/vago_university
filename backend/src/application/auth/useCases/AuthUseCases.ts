@@ -103,12 +103,12 @@ export class RegisterUseCase implements IRegisterUseCase {
 
 export class LoginUseCase implements ILoginUseCase {
   constructor(
-    private authRepository: IAuthRepository,
-    private jwtService: IJwtService
+    private _authRepository: IAuthRepository,
+    private _jwtService: IJwtService
   ) { }
 
   async execute(params: LoginRequestDTO & { userAgent: string; ipAddress: string }): Promise<LoginResponseDTO & { sessionId: string }> {
-    const resultFromRepo = await this.authRepository.login(params.email);
+    const resultFromRepo = await this._authRepository.login(params.email);
 
     const user = resultFromRepo.user;
     const collection = resultFromRepo.collection;
@@ -128,21 +128,21 @@ export class LoginUseCase implements ILoginUseCase {
       collection 
     };
 
-    const accessToken = this.jwtService.generateAccessToken(tokenPayload);
+    const accessToken = this._jwtService.generateAccessToken(tokenPayload);
     let sessionId: string;
     let refreshToken: string;
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
-    const existingSession = await this.authRepository.findSessionByUserIdAndDevice(user.id, params.userAgent, params.ipAddress);
+    const existingSession = await this._authRepository.findSessionByUserIdAndDevice(user.id, params.userAgent, params.ipAddress);
     if (existingSession) {
       sessionId = existingSession.sessionId;
-      refreshToken = this.jwtService.generateRefreshToken({ ...tokenPayload, sessionId });
-      await this.authRepository.updateSessionRefreshToken(sessionId, refreshToken, expiresAt, now);
+      refreshToken = this._jwtService.generateRefreshToken({ ...tokenPayload, sessionId });
+      await this._authRepository.updateSessionRefreshToken(sessionId, refreshToken, expiresAt, now);
     } else {
       sessionId = uuidv4();
-      refreshToken = this.jwtService.generateRefreshToken({ ...tokenPayload, sessionId });
-      await this.authRepository.createRefreshSession({
+      refreshToken = this._jwtService.generateRefreshToken({ ...tokenPayload, sessionId });
+      await this._authRepository.createRefreshSession({
         userId: user.id,
         sessionId,
         refreshToken,
@@ -174,29 +174,29 @@ export class LoginUseCase implements ILoginUseCase {
 
 export class RefreshTokenUseCase implements IRefreshTokenUseCase {
   constructor(
-    private authRepository: IAuthRepository,
-    private jwtService: IJwtService
+    private _authRepository: IAuthRepository,
+    private _jwtService: IJwtService
   ) { }
 
   async execute(params: { refreshToken: string }): Promise<RefreshTokenResponseDTO> {
     let decoded;
     try {
-      decoded = this.jwtService.verifyToken<{ userId: string; email: string; collection: string; sessionId: string }>(params.refreshToken, { isRefreshToken: true });
+      decoded = this._jwtService.verifyToken<{ userId: string; email: string; collection: string; sessionId: string }>(params.refreshToken, { isRefreshToken: true });
     } catch (err) {
       throw new InvalidTokenError('Invalid or expired refresh token');
     }
     const { userId, email, collection, sessionId } = decoded;
-    const session = await this.authRepository.findSessionBySessionIdAndUserId(sessionId, userId);
+    const session = await this._authRepository.findSessionBySessionIdAndUserId(sessionId, userId);
     if (!session || session.refreshToken !== params.refreshToken) {
       throw new InvalidTokenError('Session not found or refresh token mismatch');
     }
-    const newRefreshToken = this.jwtService.generateRefreshToken({ userId, email, collection, sessionId });
+    const newRefreshToken = this._jwtService.generateRefreshToken({ userId, email, collection, sessionId });
     const newExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     const newLastUsedAt = new Date();
-    await this.authRepository.updateSessionRefreshToken(sessionId, newRefreshToken, newExpiresAt, newLastUsedAt);
+    await this._authRepository.updateSessionRefreshToken(sessionId, newRefreshToken, newExpiresAt, newLastUsedAt);
     const tokenPayload = { userId, email, collection };
-    const accessToken = this.jwtService.generateAccessToken(tokenPayload);
-    const resultFromRepo = await this.authRepository.refreshToken(userId, collection);
+    const accessToken = this._jwtService.generateAccessToken(tokenPayload);
+    const resultFromRepo = await this._authRepository.refreshToken(userId, collection);
     return {
       accessToken,
       user: {
@@ -212,27 +212,27 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
 }
 
 export class LogoutUseCase implements ILogoutUseCase {
-  constructor(private authRepository: IAuthRepository) { }
+  constructor(private _authRepository: IAuthRepository) { }
 
   async execute(params: { sessionId: string }): Promise<LogoutResponseDTO> {
-    await this.authRepository.deleteSessionBySessionId(params.sessionId);
+    await this._authRepository.deleteSessionBySessionId(params.sessionId);
     return { message: 'Logged out successfully' };
   }
 }
 
 export class LogoutAllUseCase {
-  constructor(private authRepository: IAuthRepository) { }
+  constructor(private _authRepository: IAuthRepository) { }
 
   async execute(params: { userId: string }): Promise<{ message: string }> {
-    await this.authRepository.deleteAllSessionsByUserId(params.userId);
+    await this._authRepository.deleteAllSessionsByUserId(params.userId);
     return { message: 'Logged out from all devices' };
   }
 }
 
 export class RegisterFacultyUseCase implements IRegisterFacultyUseCase {
   constructor(
-    private authRepository: IAuthRepository,
-    private jwtService: IJwtService
+    private _authRepository: IAuthRepository,
+    private _jwtService: IJwtService
   ) { }
 
   async execute(params: RegisterFacultyRequestDTO): Promise<RegisterFacultyResponseDTO> {
@@ -248,9 +248,9 @@ export class RegisterFacultyUseCase implements IRegisterFacultyUseCase {
       certificatesUrl: params.certificatesUrl
     });
 
-    const resultFromRepo = await this.authRepository.registerFaculty(registerFacultyRequest);
+    const resultFromRepo = await this._authRepository.registerFaculty(registerFacultyRequest);
 
-    const token = this.jwtService.generateToken(
+    const token = this._jwtService.generateToken(
       { userId: resultFromRepo.user.id, email: resultFromRepo.user.email, collection: resultFromRepo.collection },
       "1h"
     );
@@ -265,18 +265,18 @@ export class RegisterFacultyUseCase implements IRegisterFacultyUseCase {
 
 export class SendEmailOtpUseCase implements ISendEmailOtpUseCase {
   constructor(
-    private authRepository: IAuthRepository,
-    private otpService: IOtpService,
-    private emailService: IEmailService
+    private _authRepository: IAuthRepository,
+    private _otpService: IOtpService,
+    private _emailService: IEmailService
   ) { }
 
   async execute(params: SendEmailOtpRequestDTO): Promise<SendEmailOtpResponseDTO> {
-    await this.authRepository.sendEmailOtp(params.email);
+    await this._authRepository.sendEmailOtp(params.email);
 
-    const otp = this.otpService.generateOtp();
-    this.otpService.storeOtp(params.email, otp);
+    const otp = this._otpService.generateOtp();
+    this._otpService.storeOtp(params.email, otp);
 
-    await this.emailService.sendPasswordResetOtpEmail({
+    await this._emailService.sendPasswordResetOtpEmail({
       to: params.email,
       name: "User",
       otp,
@@ -288,14 +288,14 @@ export class SendEmailOtpUseCase implements ISendEmailOtpUseCase {
 
 export class VerifyEmailOtpUseCase implements IVerifyEmailOtpUseCase {
   constructor(
-    private otpService: IOtpService,
-    private jwtService: IJwtService
+    private _otpService: IOtpService,
+    private _jwtService: IJwtService
   ) { }
 
   async execute(params: VerifyEmailOtpRequestDTO): Promise<VerifyEmailOtpResponseDTO> {
-    this.otpService.verifyOtp(params.email, params.otp);
+    this._otpService.verifyOtp(params.email, params.otp);
 
-    const resetToken = this.jwtService.generateToken(
+    const resetToken = this._jwtService.generateToken(
       { email: params.email, type: "password-reset" },
       "15m"
     );
@@ -306,22 +306,22 @@ export class VerifyEmailOtpUseCase implements IVerifyEmailOtpUseCase {
 
 export class ResetPasswordUseCase implements IResetPasswordUseCase {
   constructor(
-    private authRepository: IAuthRepository,
-    private jwtService: IJwtService
+    private _authRepository: IAuthRepository,
+    private _jwtService: IJwtService
   ) { }
 
   async execute(params: ResetPasswordRequestDTO): Promise<ResetPasswordResponseDTO> {
     let payload: { email: string; type: string };
-    payload = this.jwtService.verifyToken(params.resetToken);
+    payload = this._jwtService.verifyToken(params.resetToken);
     if (payload.type !== "password-reset") {
       throw new InvalidTokenError("Invalid token type for password reset.");
     }
 
     const hashedPassword = await bcrypt.hash(params.newPassword, 10);
 
-    const resultFromRepo = await this.authRepository.resetPassword(payload.email, hashedPassword);
+    const resultFromRepo = await this._authRepository.resetPassword(payload.email, hashedPassword);
 
-    const token = this.jwtService.generateToken(
+    const token = this._jwtService.generateToken(
       { userId: resultFromRepo.user.id, email: resultFromRepo.user.email, collection: resultFromRepo.collection },
       "1h"
     );
@@ -336,15 +336,15 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
 
 export class ConfirmRegistrationUseCase implements IConfirmRegistrationUseCase {
   constructor(
-    private authRepository: IAuthRepository,
-    private jwtService: IJwtService
+    private _authRepository: IAuthRepository,
+    private _jwtService: IJwtService
   ) { }
 
   async execute(token: string): Promise<{ message: string }> {
     let payload: { email: string };
-    payload = this.jwtService.verifyToken(token);
+    payload = this._jwtService.verifyToken(token);
 
-    const result = await this.authRepository.confirmRegistration(payload.email);
+    const result = await this._authRepository.confirmRegistration(payload.email);
 
     return { message: result.message };
   }

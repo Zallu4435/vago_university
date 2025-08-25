@@ -66,10 +66,10 @@ export interface IJoinEventUseCase {
 
 
 export class GetCampusLifeOverviewUseCase implements IGetCampusLifeOverviewUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
+  constructor(private readonly _campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetCampusLifeOverviewRequestDTO): Promise<ResponseDTO<CampusLifeOverviewResponseDTO>> {
-    const { events, sports, clubs } = await this.campusLifeRepository.getCampusLifeOverview(params);
+    const { events, sports, clubs } = await this._campusLifeRepository.getCampusLifeOverview(params);
     return {
       success: true,
       data: {
@@ -126,7 +126,7 @@ export class GetCampusLifeOverviewUseCase implements IGetCampusLifeOverviewUseCa
 }
 
 export class GetEventsUseCase implements IGetEventsUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
+  constructor(private readonly _campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetEventsRequestDTO): Promise<ResponseDTO<GetEventsResponseDTO>> {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
@@ -135,7 +135,7 @@ export class GetEventsUseCase implements IGetEventsUseCase {
     if (params.status && !['upcoming', 'past', 'all'].includes(params.status)) {
       return { success: false, data: { error: "Invalid status; must be 'upcoming', 'past', or 'all'" } };
     }
-    const { events: rawEvents, requests, totalItems, totalPages, currentPage } = await this.campusLifeRepository.getEvents(params);
+    const { events: rawEvents, requests, totalItems, totalPages, currentPage } = await this._campusLifeRepository.getEvents(params);
     return {
       success: true,
       data: {
@@ -169,10 +169,10 @@ export class GetEventsUseCase implements IGetEventsUseCase {
 }
 
 export class GetEventByIdUseCase implements IGetEventByIdUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
+  constructor(private readonly _campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetEventByIdRequestDTO): Promise<ResponseDTO<GetEventByIdResponseDTO>> {
-    const rawEvent = await this.campusLifeRepository.getEventById(params.eventId);
+    const rawEvent = await this._campusLifeRepository.getEventById(params.eventId);
     if (!rawEvent) {
       return { success: false, data: { error: "Event not found" } };
     }
@@ -202,13 +202,13 @@ export class GetEventByIdUseCase implements IGetEventByIdUseCase {
 }
 
 export class GetSportsUseCase implements IGetSportsUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
+  constructor(private readonly _campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetSportsRequestDTO): Promise<ResponseDTO<GetSportsResponseDTO>> {
     if (params.type && !['VARSITY SPORTS', 'INTRAMURAL SPORTS'].includes(params.type)) {
       return { success: false, data: { error: "Invalid type; must be 'VARSITY SPORTS' or 'INTRAMURAL SPORTS'" } };
     }
-    const { sports, requests, totalItems } = await this.campusLifeRepository.getSports(params);
+    const { sports, requests, totalItems } = await this._campusLifeRepository.getSports(params);
     return {
       success: true,
       data: {
@@ -238,10 +238,10 @@ export class GetSportsUseCase implements IGetSportsUseCase {
 }
 
 export class GetSportByIdUseCase implements IGetSportByIdUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
+  constructor(private readonly _campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetSportByIdRequestDTO): Promise<ResponseDTO<GetSportByIdResponseDTO>> {
-    const sport = await this.campusLifeRepository.getSportById(params.sportId);
+    const sport = await this._campusLifeRepository.getSportById(params.sportId);
     if (!sport) {
       return { success: false, data: { error: "Sport not found" } };
     }
@@ -269,13 +269,13 @@ export class GetSportByIdUseCase implements IGetSportByIdUseCase {
 }
 
 export class GetClubsUseCase implements IGetClubsUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
+  constructor(private readonly _campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetClubsRequestDTO): Promise<ResponseDTO<GetClubsResponseDTO>> {
     if (params.status && !['active', 'inactive', 'all'].includes(params.status)) {
       return { success: false, data: { error: "Invalid status; must be 'active', 'inactive', or 'all'" } };
     }
-    const { clubs, requests, totalItems } = await this.campusLifeRepository.getClubs(params);
+    const { clubs, requests, totalItems } = await this._campusLifeRepository.getClubs(params);
     return {
       success: true,
       data: {
@@ -305,10 +305,10 @@ export class GetClubsUseCase implements IGetClubsUseCase {
 }
 
 export class GetClubByIdUseCase implements IGetClubByIdUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
+  constructor(private readonly _campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: GetClubByIdRequestDTO): Promise<ResponseDTO<GetClubByIdResponseDTO>> {
-    const club = await this.campusLifeRepository.getClubById(params.clubId);
+    const club = await this._campusLifeRepository.getClubById(params.clubId);
     if (!club) {
       return { success: false, data: { error: "Club not found" } };
     }
@@ -336,13 +336,13 @@ export class GetClubByIdUseCase implements IGetClubByIdUseCase {
 }
 
 export class JoinClubUseCase implements IJoinClubUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
+  constructor(private readonly _campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: JoinClubRequestDTO): Promise<ResponseDTO<JoinClubResponseDTO>> {
     if (!params.reason) {
       return { success: false, data: { error: "Reason is required" } };
     }
-    const newRequest = await this.campusLifeRepository.joinClub(params);
+    const newRequest = await this._campusLifeRepository.joinClub(params);
     return {
       success: true,
       data: {
@@ -355,13 +355,13 @@ export class JoinClubUseCase implements IJoinClubUseCase {
 }
 
 export class JoinSportUseCase implements IJoinSportUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
+  constructor(private readonly _campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: JoinSportRequestDTO): Promise<ResponseDTO<JoinSportResponseDTO>> {
     if (!params.reason) {
       return { success: false, data: { error: "Reason is required" } };
     }
-    const newRequest = await this.campusLifeRepository.joinSport(params);
+    const newRequest = await this._campusLifeRepository.joinSport(params);
     return {
       success: true,
       data: {
@@ -374,13 +374,13 @@ export class JoinSportUseCase implements IJoinSportUseCase {
 }
 
 export class JoinEventUseCase implements IJoinEventUseCase {
-  constructor(private readonly campusLifeRepository: ICampusLifeRepository) { }
+  constructor(private readonly _campusLifeRepository: ICampusLifeRepository) { }
 
   async execute(params: JoinEventRequestDTO): Promise<ResponseDTO<JoinEventResponseDTO>> {
     if (!params.reason) {
       return { success: false, data: { error: "Reason is required" } };
     }
-    const newRequest = await this.campusLifeRepository.joinEvent(params);
+    const newRequest = await this._campusLifeRepository.joinEvent(params);
     return {
       success: true,
       data: {

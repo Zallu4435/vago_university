@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../appStore/store';
 import { logout } from '../../appStore/authSlice';
@@ -9,9 +9,35 @@ import Header from '../components/faculty/Header';
 export default function FacultyLayout() {
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
   
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const pathToTabMap: { [key: string]: string } = {
+      '/faculty': 'Dashboard',
+      '/faculty/sessions': 'My Sessions',
+      '/faculty/assignments': 'Assignments',
+      '/faculty/attendance': 'Attendance',
+      '/faculty/attendance-summary': 'Attendance Summary',
+      '/faculty/settings': 'Settings',
+      '/faculty/attendance/summary': 'Attendance Summary',
+      '/faculty/assignments/grading': 'Assignments',
+      '/faculty/sessions/records': 'My Sessions',
+      '/faculty/students': 'Dashboard',
+      '/faculty/students/progress': 'Dashboard',
+      '/faculty/courses': 'Dashboard',
+      '/faculty/courses/materials': 'Dashboard',
+      '/faculty/reports': 'Dashboard',
+      '/faculty/grades': 'Dashboard'
+    };
+
+    const currentTab = pathToTabMap[location.pathname];
+    if (currentTab && currentTab !== activeTab) {
+      setActiveTab(currentTab);
+    }
+  }, [location.pathname, activeTab]);
 
   const user = useSelector((state: RootState) => state.auth.user);
   const fullName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim();
@@ -46,7 +72,7 @@ export default function FacultyLayout() {
         />
         <div className={`flex-1 transition-all duration-300 ease-in-out ${collapsed ? 'ml-20' : 'ml-72'} overflow-hidden`}>
           <div className="sticky top-0 z-50">
-            <Header currentDate={currentDate} facultyName={fullName} onLogout={handleLogout} />
+            <Header currentDate={currentDate} facultyName={fullName} onLogout={handleLogout} setActiveTab={setActiveTab} />
           </div>
           <main className="h-[calc(100vh-70px)] overflow-auto mt-20">
             <Outlet context={{ activeTab, setActiveTab }} />

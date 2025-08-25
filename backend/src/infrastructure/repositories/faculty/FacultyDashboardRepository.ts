@@ -1,25 +1,17 @@
 import mongoose from "mongoose";
 import { IFacultyDashboardRepository } from "../../../application/faculty/dashboard/repositories/IFacultyDashboardRepository";
-import {
-  GetFacultyDashboardStatsRequestDTO,
-  GetFacultyDashboardDataRequestDTO,
-  GetFacultyWeeklyAttendanceRequestDTO,
-  GetFacultyCoursePerformanceRequestDTO,
-  GetFacultySessionDistributionRequestDTO,
-  GetFacultyRecentActivitiesRequestDTO,
-} from "../../../domain/faculty/dashboard/dtos/FacultyDashboardRequestDTOs";
 import { VideoSessionModel } from "../../database/mongoose/session/session.model";
 import { CourseModel } from "../../database/mongoose/courses/CourseModel";
 import { AssignmentModel } from "../../database/mongoose/assignment/AssignmentModel";
 
 export class FacultyDashboardRepository implements IFacultyDashboardRepository {
-  async getDashboardStats(params: GetFacultyDashboardStatsRequestDTO) {
-    if (!mongoose.isValidObjectId(params.facultyId)) {
+  async getDashboardStats(facultyId: string) {
+    if (!mongoose.isValidObjectId(facultyId)) {
       throw new Error("Invalid faculty ID");
     }
 
     const totalSessions = await VideoSessionModel.countDocuments({
-      hostId: params.facultyId
+      hostId: facultyId
     });
 
     const totalAssignments = await AssignmentModel.countDocuments();
@@ -27,7 +19,7 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
     const totalAttendance = await VideoSessionModel.aggregate([
       {
         $match: {
-          hostId: params.facultyId
+          hostId: facultyId
         }
       },
       {
@@ -50,13 +42,13 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
     };
   }
 
-  async getDashboardData(params: GetFacultyDashboardDataRequestDTO) {
+  async getDashboardData(facultyId: string) {
     const [stats, weeklyAttendance, assignmentPerformance, sessionDistribution, recentActivities] = await Promise.all([
-      this.getDashboardStats(params),
-      this.getWeeklyAttendance(params),
-      this.getAssignmentPerformance(params),
-      this.getSessionDistribution(params),
-      this.getRecentActivities(params)
+      this.getDashboardStats(facultyId),
+      this.getWeeklyAttendance(facultyId),
+      this.getAssignmentPerformance(facultyId),
+      this.getSessionDistribution(facultyId),
+      this.getRecentActivities(facultyId)
     ]);
 
     return {
@@ -70,8 +62,8 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
     };
   }
 
-  async getWeeklyAttendance(params: GetFacultyWeeklyAttendanceRequestDTO) {
-    if (!mongoose.isValidObjectId(params.facultyId)) {
+  async getWeeklyAttendance(facultyId: string) {
+    if (!mongoose.isValidObjectId(facultyId)) {
       throw new Error("Invalid faculty ID");
     }
 
@@ -87,7 +79,7 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
       dayEnd.setHours(23, 59, 59, 999);
 
       const daySessions = await VideoSessionModel.find({
-        hostId: params.facultyId,
+        hostId: facultyId,
         startTime: { $gte: dayStart, $lte: dayEnd }
       }).lean();
 
@@ -119,8 +111,8 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
     return { weeklyAttendance: weeklyData };
   }
 
-  async getAssignmentPerformance(params: GetFacultyCoursePerformanceRequestDTO) {
-    if (!mongoose.isValidObjectId(params.facultyId)) {
+  async getAssignmentPerformance(facultyId: string) {
+    if (!mongoose.isValidObjectId(facultyId)) {
       throw new Error("Invalid faculty ID");
     }
 
@@ -222,15 +214,15 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
     };
   }
 
-  async getSessionDistribution(params: GetFacultySessionDistributionRequestDTO) {
-    if (!mongoose.isValidObjectId(params.facultyId)) {
+  async getSessionDistribution(facultyId: string) {
+    if (!mongoose.isValidObjectId(facultyId)) {
       throw new Error("Invalid faculty ID");
     }
 
     const sessionTypes = await VideoSessionModel.aggregate([
       {
         $match: {
-          hostId: params.facultyId
+          hostId: facultyId
         }
       },
       {
@@ -252,14 +244,14 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
     return { sessionDistribution };
   }
 
-  async getRecentActivities(params: GetFacultyRecentActivitiesRequestDTO) {
-    if (!mongoose.isValidObjectId(params.facultyId)) {
+  async getRecentActivities(facultyId: string) {
+    if (!mongoose.isValidObjectId(facultyId)) {
       throw new Error("Invalid faculty ID");
     }
 
     const recentActivities = [];
 
-    const recentSessions = await VideoSessionModel.find({ hostId: params.facultyId })
+    const recentSessions = await VideoSessionModel.find({ hostId: facultyId })
       .sort({ createdAt: -1 })
       .limit(10)
       .lean();
@@ -286,7 +278,7 @@ export class FacultyDashboardRepository implements IFacultyDashboardRepository {
       });
     });
 
-    const recentCourses = await CourseModel.find({ faculty: params.facultyId })
+    const recentCourses = await CourseModel.find({ faculty: facultyId })
       .sort({ updatedAt: -1 })
       .limit(5)
       .lean();

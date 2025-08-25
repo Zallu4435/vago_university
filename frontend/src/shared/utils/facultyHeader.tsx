@@ -127,4 +127,5 @@ export interface HeaderProps {
     currentDate: string;
     facultyName: string;
     onLogout: () => void;
+    setActiveTab?: (tab: string) => void;
 }

@@ -54,7 +54,7 @@ export interface IRecordAttendanceLeaveUseCase {
 }
 
 export class CreateVideoSessionUseCase implements ICreateVideoSessionUseCase {
-    constructor(private sessionRepository: ISessionRepository) {}
+    constructor(private _sessionRepository: ISessionRepository) {}
     async execute(params: CreateVideoSessionRequestDTO): Promise<CreateVideoSessionResponseDTO> {
         let startTime: Date;
         if (params.date && params.time) {
@@ -90,15 +90,15 @@ export class CreateVideoSessionUseCase implements ICreateVideoSessionUseCase {
             attendeeList: params.attendeeList
         };
 
-        const created = await this.sessionRepository.create(sessionData);
+        const created = await this._sessionRepository.create(sessionData);
         return { session: created as VideoSessionResponseDTO };
     }
 }
 
 export class JoinVideoSessionUseCase {
-    constructor(private sessionRepository: ISessionRepository) {}
+    constructor(private _sessionRepository: ISessionRepository) {}
     async execute(params: JoinVideoSessionRequestDTO): Promise<JoinVideoSessionResponseDTO> {
-        const session = await this.sessionRepository.getById(params.sessionId);
+        const session = await this._sessionRepository.getById(params.sessionId);
         if (!session) {
             throw new Error('Session not found');
         }
@@ -111,21 +111,21 @@ export class JoinVideoSessionUseCase {
             throw new Error('Cannot join session: Session is not live');
         }
         
-        const joinedSession = await this.sessionRepository.join(params.sessionId, params.participantId);
+        const joinedSession = await this._sessionRepository.join(params.sessionId, params.participantId);
         return { session: joinedSession as VideoSessionResponseDTO };
     }
 }
 
 export class GetVideoSessionUseCase {
-    constructor(private sessionRepository: ISessionRepository) {}
+    constructor(private _sessionRepository: ISessionRepository) {}
     async execute(sessionId: string): Promise<VideoSessionResponseDTO | null> {
-        const session = await this.sessionRepository.getById(sessionId);
+        const session = await this._sessionRepository.getById(sessionId);
         return session ? (session as VideoSessionResponseDTO) : null;
     }
 }
 
 export class UpdateVideoSessionUseCase {
-    constructor(private sessionRepository: ISessionRepository) {}
+    constructor(private _sessionRepository: ISessionRepository) {}
     async execute(params: UpdateVideoSessionRequestDTO): Promise<UpdateVideoSessionResponseDTO | null> {
         let updateData = { ...params.data };
         if (updateData.status && typeof updateData.status === 'string') {
@@ -145,23 +145,23 @@ export class UpdateVideoSessionUseCase {
         if (updateData.endTime && typeof updateData.endTime === 'string') {
             updateData.endTime = new Date(updateData.endTime);
         }
-        const session = await this.sessionRepository.update(params.sessionId, updateData as Partial<VideoSession>);
+        const session = await this._sessionRepository.update(params.sessionId, updateData as Partial<VideoSession>);
         return session ? { session: session as VideoSessionResponseDTO } : null;
     }
 }
 
 export class DeleteVideoSessionUseCase {
-    constructor(private sessionRepository: ISessionRepository) {}
+    constructor(private _sessionRepository: ISessionRepository) {}
     async execute(params: DeleteVideoSessionRequestDTO): Promise<DeleteVideoSessionResponseDTO> {
-        await this.sessionRepository.delete(params.sessionId);
+        await this._sessionRepository.delete(params.sessionId);
         return { message: 'Session deleted successfully' };
     }
 }
 
 export class GetAllVideoSessionsUseCase {
-    constructor(private sessionRepository: ISessionRepository) {}
+    constructor(private _sessionRepository: ISessionRepository) {}
     async execute(params: { search?: string; status?: string; instructor?: string; course?: string } = {}): Promise<SessionListResponseDTO[]> {
-        const sessions = await this.sessionRepository.getAll(params);
+        const sessions = await this._sessionRepository.getAll(params);
         
         return sessions.map(session => ({
             id: session._id || session.id,
@@ -177,9 +177,9 @@ export class GetAllVideoSessionsUseCase {
 }
 
 export class GetUserSessionsUseCase {
-    constructor(private sessionRepository: ISessionRepository) {}
+    constructor(private _sessionRepository: ISessionRepository) {}
     async execute(params: { search?: string; status?: string; instructor?: string; course?: string; userId?: string } = {}): Promise<{ sessions: SessionListResponseDTO[], watchedCount: number }> {
-        const sessions = await this.sessionRepository.getUserSessions(params);
+        const sessions = await this._sessionRepository.getUserSessions(params);
         const userId = params.userId;
 
         const watchedCount = sessions.filter(session =>
@@ -204,9 +204,9 @@ export class GetUserSessionsUseCase {
 }
 
 export class UpdateVideoSessionStatusUseCase {
-    constructor(private sessionRepository: ISessionRepository) {}
+    constructor(private _sessionRepository: ISessionRepository) {}
     async execute(sessionId: string, status: VideoSessionStatus): Promise<UpdateVideoSessionStatusResponseDTO | null> {
-        const session = await this.sessionRepository.update(sessionId, { status });
+        const session = await this._sessionRepository.update(sessionId, { status });
         
         if (!session) {
             return null;
@@ -220,13 +220,13 @@ export class UpdateVideoSessionStatusUseCase {
             if (sessionIdStr) {
                 const joinUrl = `${config.frontendUrl}/faculty/video-conference/${sessionIdStr}`;
                 session.joinUrl = joinUrl;
-                await this.sessionRepository.update(sessionIdStr, { joinUrl });
+                await this._sessionRepository.update(sessionIdStr, { joinUrl });
             }
         }
         
         if (status === VideoSessionStatus.Ended && session.joinUrl) {
             session.joinUrl = undefined;
-            await this.sessionRepository.update(sessionId, { joinUrl: undefined });
+            await this._sessionRepository.update(sessionId, { joinUrl: undefined });
         }
         
         let message = '';
@@ -256,29 +256,29 @@ export class UpdateVideoSessionStatusUseCase {
 }
 
 export class GetSessionAttendanceUseCase {
-    constructor(private sessionRepository: ISessionRepository) {}
+    constructor(private _sessionRepository: ISessionRepository) {}
     async execute(sessionId: string, filters = {}) {
-        return this.sessionRepository.getSessionAttendance(sessionId, filters);
+        return this._sessionRepository.getSessionAttendance(sessionId, filters);
     }
 }
 
 export class UpdateAttendanceStatusUseCase {
-    constructor(private sessionRepository: ISessionRepository) {}
+    constructor(private _sessionRepository: ISessionRepository) {}
     async execute(sessionId: string, userId: string, status: string, name: string): Promise<void> {
-        await this.sessionRepository.updateAttendanceStatus(sessionId, userId, status, name);
+        await this._sessionRepository.updateAttendanceStatus(sessionId, userId, status, name);
     }
 }
 
 export class RecordAttendanceJoinUseCase {
-    constructor(private sessionRepository: ISessionRepository) {}
+    constructor(private _sessionRepository: ISessionRepository) {}
     async execute(sessionId: string, userId: string): Promise<void> {
-        await this.sessionRepository.recordAttendanceJoin(sessionId, userId);
+        await this._sessionRepository.recordAttendanceJoin(sessionId, userId);
     }
 }
 
 export class RecordAttendanceLeaveUseCase {
-    constructor(private sessionRepository: ISessionRepository) {}
+    constructor(private _sessionRepository: ISessionRepository) {}
     async execute(sessionId: string, userId: string): Promise<void> {
-        await this.sessionRepository.recordAttendanceLeave(sessionId, userId);
+        await this._sessionRepository.recordAttendanceLeave(sessionId, userId);
     }
 } 

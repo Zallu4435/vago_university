@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { FinancialErrorType } from "../../../domain/financial/enums/FinancialErrorType";
 import {
     GetStudentFinancialInfoRequestDTO,
@@ -79,80 +78,80 @@ export interface IClearPendingPaymentUseCase {
 
 
 export class GetStudentFinancialInfoUseCase implements IGetStudentFinancialInfoUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
+    constructor(private _financialRepository: IFinancialRepository) { }
 
     async execute(params: GetStudentFinancialInfoRequestDTO): Promise<ResponseDTO<GetStudentFinancialInfoResponseDTO>> {
-        if (!mongoose.Types.ObjectId.isValid(params.studentId)) {
+        if (!params.studentId) {
             return { data: { error: FinancialErrorType.InvalidStudentId }, success: false };
         }
-        const result = await this.financialRepository.getStudentFinancialInfo(params.studentId);
+        const result = await this._financialRepository.getStudentFinancialInfo(params.studentId);
         return { data: result, success: true };
     }
 }
 
 export class GetAllPaymentsUseCase implements IGetAllPaymentsUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
+    constructor(private _financialRepository: IFinancialRepository) { }
 
     async execute(params: GetAllPaymentsRequestDTO): Promise<ResponseDTO<GetAllPaymentsResponseDTO>> {
-        const result = await this.financialRepository.getAllPayments(params.startDate, params.endDate, params.status, params.studentId, params.page, params.limit);
+        const result = await this._financialRepository.getAllPayments(params.startDate, params.endDate, params.status, params.studentId, params.page, params.limit);
         return { data: result, success: true };
     }
 }
 
 export class GetOnePaymentUseCase implements IGetOnePaymentUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
+    constructor(private _financialRepository: IFinancialRepository) { }
 
     async execute(params: GetOnePaymentRequestDTO): Promise<ResponseDTO<GetOnePaymentResponseDTO>> {
-        if (!mongoose.Types.ObjectId.isValid(params.paymentId)) {
+        if (!params.paymentId) {
             return { data: { error: FinancialErrorType.InvalidPaymentId }, success: false };
         }
-        const result = await this.financialRepository.getOnePayment(params.paymentId);
+        const result = await this._financialRepository.getOnePayment(params.paymentId);
         return { data: result, success: true };
     }
 }
 
 export class MakePaymentUseCase implements IMakePaymentUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
+    constructor(private _financialRepository: IFinancialRepository) { }
 
     async execute(params: MakePaymentRequestDTO): Promise<ResponseDTO<MakePaymentResponseDTO>> {
-        if (!mongoose.Types.ObjectId.isValid(params.studentId)) {
+        if (!params.studentId) {
             return { data: { error: FinancialErrorType.InvalidStudentId }, success: false };
         }
         if (params.amount <= 0) {
             return { data: { error: FinancialErrorType.InvalidAmount }, success: false };
         }
-        const result = await this.financialRepository.makePayment(params.studentId, params.chargeId, params.amount, params.term, params.method, params.razorpayPaymentId, params.razorpayOrderId, params.razorpaySignature);
+        const result = await this._financialRepository.makePayment(params.studentId, params.chargeId, params.amount, params.term, params.method, params.razorpayPaymentId, params.razorpayOrderId, params.razorpaySignature);
         return { data: result, success: true };
     }
 }
 
 export class UploadDocumentUseCase implements IUploadDocumentUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
+    constructor(private _financialRepository: IFinancialRepository) { }
 
     async execute(params: UploadDocumentRequestDTO): Promise<ResponseDTO<UploadDocumentResponseDTO>> {
         if (!params.file) {
             return { data: { error: FinancialErrorType.FileRequired }, success: false };
         }
         const repoParams: UploadDocumentParams = { file: params.file, type: params.type };
-        const result = await this.financialRepository.uploadDocument(repoParams);
+        const result = await this._financialRepository.uploadDocument(repoParams);
         return { data: result, success: true };
     }
 }
 
 export class GetPaymentReceiptUseCase implements IGetPaymentReceiptUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
+    constructor(private _financialRepository: IFinancialRepository) { }
 
     async execute(params: GetPaymentReceiptRequestDTO): Promise<ResponseDTO<GetPaymentReceiptResponseDTO>> {
-        if (!mongoose.Types.ObjectId.isValid(params.studentId) || !mongoose.Types.ObjectId.isValid(params.paymentId)) {
+        if (!params.studentId || !params.paymentId) {
             return { data: { error: FinancialErrorType.InvalidId }, success: false };
         }
-        const result = await this.financialRepository.getPaymentReceipt(params.paymentId);
+        const result = await this._financialRepository.getPaymentReceipt(params.paymentId);
         return { data: result, success: true };
     }
 }
 
 export class CreateChargeUseCase implements ICreateChargeUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
+    constructor(private _financialRepository: IFinancialRepository) { }
 
     async execute(params: CreateChargeRequestDTO): Promise<ResponseDTO<CreateChargeResponseDTO>> {
         if (params.amount <= 0) {
@@ -170,16 +169,16 @@ export class CreateChargeUseCase implements ICreateChargeUseCase {
             applicableFor: params.applicableFor,
             createdBy: params.createdBy,
         };
-        const result = await this.financialRepository.createCharge(repoParams);
+        const result = await this._financialRepository.createCharge(repoParams);
         return { data: result, success: true };
     }
 }
 
 export class UpdateChargeUseCase implements IUpdateChargeUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
+    constructor(private _financialRepository: IFinancialRepository) { }
 
     async execute(params: UpdateChargeRequestDTO): Promise<ResponseDTO<UpdateChargeResponseDTO>> {
-        if (!mongoose.Types.ObjectId.isValid(params.id)) {
+        if (!params.id) {
             return { data: { error: FinancialErrorType.InvalidChargeId }, success: false };
         }
         if (params.data.amount <= 0) {
@@ -192,51 +191,51 @@ export class UpdateChargeUseCase implements IUpdateChargeUseCase {
         if (updateFields.dueDate) {
             updateFields.dueDate = new Date(updateFields.dueDate);
         }
-        const result = await this.financialRepository.updateCharge(params.id, updateFields);
+        const result = await this._financialRepository.updateCharge(params.id, updateFields);
         return { data: result, success: true };
     }
 }
 
 export class DeleteChargeUseCase implements IDeleteChargeUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
+    constructor(private _financialRepository: IFinancialRepository) { }
 
     async execute(params: DeleteChargeRequestDTO): Promise<ResponseDTO<DeleteChargeResponseDTO>> {
-        if (!mongoose.Types.ObjectId.isValid(params.id)) {
+        if (!params.id) {
             return { data: { error: FinancialErrorType.InvalidChargeId }, success: false };
         }
-        const result = await this.financialRepository.deleteCharge(params.id);
+        const result = await this._financialRepository.deleteCharge(params.id);
         return { data: result, success: true };
     }
 }
 
 export class GetAllChargesUseCase implements IGetAllChargesUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
+    constructor(private _financialRepository: IFinancialRepository) { }
 
     async execute(params: GetAllChargesRequestDTO): Promise<ResponseDTO<GetAllChargesResponseDTO>> {
-        const result = await this.financialRepository.getAllCharges(params.term, params.status, params.search, params.page, params.limit);
+        const result = await this._financialRepository.getAllCharges(params.term, params.status, params.search, params.page, params.limit);
         return { data: result, success: true };
     }
 }
 
 export class CheckPendingPaymentUseCase implements ICheckPendingPaymentUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
+    constructor(private _financialRepository: IFinancialRepository) { }
     async execute(studentId: string): Promise<ResponseDTO<{ hasPending: boolean }>> {
-        if (!mongoose.Types.ObjectId.isValid(studentId)) {
+        if (!studentId) {
             return { data: { error: FinancialErrorType.InvalidStudentId }, success: false };
         }
-        const hasPending = await this.financialRepository.hasPendingPayment(studentId);
+        const hasPending = await this._financialRepository.hasPendingPayment(studentId);
         return { data: { hasPending }, success: true };
     }
 }
 
 export class ClearPendingPaymentUseCase implements IClearPendingPaymentUseCase {
-    constructor(private financialRepository: IFinancialRepository) { }
+    constructor(private _financialRepository: IFinancialRepository) { }
 
     async execute(studentId: string): Promise<ResponseDTO<{ success: boolean }>> {
-        if (!mongoose.Types.ObjectId.isValid(studentId)) {
+        if (!studentId) {
             return { data: { error: FinancialErrorType.InvalidStudentId }, success: false };
         }
-        const result = await this.financialRepository.clearPendingPayment(studentId);
+        const result = await this._financialRepository.clearPendingPayment(studentId);
         return { data: { success: result }, success: true };
     }
 }

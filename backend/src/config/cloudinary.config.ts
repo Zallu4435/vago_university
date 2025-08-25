@@ -111,7 +111,6 @@ const materialStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: ((req: Request, file: Express.Multer.File) => {
-      // Create separate folders for materials and thumbnails
       if (file.fieldname === 'thumbnail') {
         return 'materials/thumbnails';
       }
@@ -136,7 +135,6 @@ const materialStorage = new CloudinaryStorage({
       const fieldName = file.fieldname;
       const ext = file.originalname.split('.').pop()?.toLowerCase();
       
-      // Create unique names for both files and thumbnails
       if (fieldName === 'thumbnail') {
         return `material_thumbnail_${timestamp}_${originalName}`;
       }

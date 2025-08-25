@@ -11,7 +11,6 @@ import {
   GetSportRequestDetailsResponseDTO,
   JoinSportResponseDTO,
 } from "../../../domain/sports/dtos/SportResponseDTOs";
-import mongoose from "mongoose";
 
 
 export interface IGetSportRequestsUseCase {
@@ -35,13 +34,13 @@ export interface IJoinSportUseCase {
 }
 
 export class GetSportRequestsUseCase {
-  constructor(private sportsRepository: ISportsRepository) { }
+  constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: GetSportRequestsRequestDTO): Promise<GetSportRequestsResponseDTO> {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
       throw new Error("Invalid page or limit parameters");
     }
-    const { requests, totalItems, totalPages, currentPage } = await this.sportsRepository.getSportRequests(params.page, params.limit, params.status, params.type, params.startDate, params.endDate, params.search);
+    const { requests, totalItems, totalPages, currentPage } = await this._sportsRepository.getSportRequests(params.page, params.limit, params.status, params.type, params.startDate, params.endDate, params.search);
     const mappedRequests = requests.map((request) => ({
       sportName: typeof request.sportId === 'object' && request.sportId?.title ? request.sportId.title : "Unknown Sport",
       requestId: request._id?.toString() || "",
@@ -61,51 +60,51 @@ export class GetSportRequestsUseCase {
 }
 
 export class ApproveSportRequestUseCase {
-  constructor(private sportsRepository: ISportsRepository) { }
+  constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: ApproveSportRequestRequestDTO): Promise<{ message: string }> {
-    if (!mongoose.isValidObjectId(params.id)) {
-      throw new Error("Invalid sport request ID");
+    if (!params.id) {
+      throw new Error("Sport request ID is required");
     }
-    const sportRequest = await this.sportsRepository.getSportRequestDetails(params.id);
+    const sportRequest = await this._sportsRepository.getSportRequestDetails(params.id);
     if (!sportRequest) {
       throw new Error("Sport request not found");
     }
     if (sportRequest.status !== "pending") {
       throw new Error("Sport request is not in pending status");
     }
-    await this.sportsRepository.approveSportRequest(params.id);
+    await this._sportsRepository.approveSportRequest(params.id);
     return { message: "Sport request approved successfully" };
   }
 }
 
 export class RejectSportRequestUseCase {
-  constructor(private sportsRepository: ISportsRepository) { }
+  constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: RejectSportRequestRequestDTO): Promise<{ message: string }> {
-    if (!mongoose.isValidObjectId(params.id)) {
-      throw new Error("Invalid sport request ID");
+    if (!params.id) {
+      throw new Error("Sport request ID is required");
     }
-    const sportRequest = await this.sportsRepository.getSportRequestDetails(params.id);
+    const sportRequest = await this._sportsRepository.getSportRequestDetails(params.id);
     if (!sportRequest) {
       throw new Error("Sport request not found");
     }
     if (sportRequest.status !== "pending") {
       throw new Error("Sport request is not in pending status");
     }
-    await this.sportsRepository.rejectSportRequest(params.id);
+    await this._sportsRepository.rejectSportRequest(params.id);
     return { message: "Sport request rejected successfully" };
   }
 }
 
 export class GetSportRequestDetailsUseCase {
-  constructor(private sportsRepository: ISportsRepository) { }
+  constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: GetSportRequestDetailsRequestDTO): Promise<GetSportRequestDetailsResponseDTO> {
-    if (!mongoose.isValidObjectId(params.id)) {
-      throw new Error("Invalid sport request ID");
+    if (!params.id) {
+      throw new Error("Sport request ID is required");
     }
-    const sportRequest = await this.sportsRepository.getSportRequestDetails(params.id);
+    const sportRequest = await this._sportsRepository.getSportRequestDetails(params.id);
     if (!sportRequest) {
       throw new Error("Sport request not found");
     }
@@ -142,13 +141,13 @@ export class GetSportRequestDetailsUseCase {
 }
 
 export class JoinSportUseCase {
-  constructor(private sportsRepository: ISportsRepository) { }
+  constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: JoinSportRequestDTO): Promise<JoinSportResponseDTO> {
-    if (!mongoose.isValidObjectId(params.sportId)) {
-      throw new Error("Invalid sport ID");
+    if (!params.sportId) {
+      throw new Error("Sport ID is required");
     }
-    const joinResult = await this.sportsRepository.joinSport(params.sportId);
+    const joinResult = await this._sportsRepository.joinSport(params.sportId);
     return {
       requestId: joinResult._id?.toString() || "",
       status: joinResult.status,

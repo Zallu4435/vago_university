@@ -33,10 +33,10 @@ export interface IGetCourseRequestDetailsUseCase {
 }
 
 export class GetEnrollmentsUseCase implements IGetEnrollmentsUseCase {
-  constructor(private readonly courseRepository: ICoursesRepository) {}
+  constructor(private readonly _courseRepository: ICoursesRepository) {}
 
   async execute(params: GetEnrollmentsRequestDTO): Promise<{ success: boolean; data: GetEnrollmentsResponseDTO }> {
-    const { enrollments, totalItems, page, limit } = await this.courseRepository.getEnrollments(params);
+    const { enrollments, totalItems, page, limit } = await this._courseRepository.getEnrollments(params);
     const mappedEnrollments: SimplifiedEnrollmentDTO[] = enrollments.map((enrollment: PopulatedEnrollment) => ({
       id: enrollment._id.toString(),
       studentName: enrollment.studentId?.email || "Unknown",
@@ -62,31 +62,31 @@ export class GetEnrollmentsUseCase implements IGetEnrollmentsUseCase {
 }
 
 export class ApproveEnrollmentUseCase implements IApproveEnrollmentUseCase {
-  constructor(private readonly courseRepository: ICoursesRepository) {}
+  constructor(private readonly _courseRepository: ICoursesRepository) {}
 
   async execute(params: ApproveEnrollmentRequestDTO): Promise<{ success: boolean; data: void }> {
-    await this.courseRepository.approveEnrollment(params);
+    await this._courseRepository.approveEnrollment(params);
     return { success: true, data: undefined };
   }
 }
 
 export class RejectEnrollmentUseCase implements IRejectEnrollmentUseCase {
-  constructor(private readonly courseRepository: ICoursesRepository) {}
+  constructor(private readonly _courseRepository: ICoursesRepository) {}
 
   async execute(params: RejectEnrollmentRequestDTO): Promise<{ success: boolean; data: void }> {
-    await this.courseRepository.rejectEnrollment(params);
+    await this._courseRepository.rejectEnrollment(params);
     return { success: true, data: undefined };
   }
 }
 
 export class GetCourseRequestDetailsUseCase implements IGetCourseRequestDetailsUseCase {
-  constructor(private readonly courseRepository: ICoursesRepository) {}
+  constructor(private readonly _courseRepository: ICoursesRepository) {}
 
   async execute(params: GetCourseRequestDetailsRequestDTO): Promise<{ success: boolean; data: GetCourseRequestDetailsResponseDTO | null }> {
     if (!params.id) {
       throw new InvalidEnrollmentIdError();
     }
-    const enrollment: PopulatedEnrollment = await this.courseRepository.getCourseRequestDetails(params);
+    const enrollment: PopulatedEnrollment = await this._courseRepository.getCourseRequestDetails(params);
     if (!enrollment) {
       throw new EnrollmentNotFoundError(params.id);
     }

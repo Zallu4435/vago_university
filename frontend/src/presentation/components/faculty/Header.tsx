@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LuBell, LuLogOut, LuSearch, LuMoon, LuSun, LuUser, LuUsers, LuBookOpen, LuCalendar, LuX } from 'react-icons/lu';
+import { LuBell, LuLogOut, LuSearch, LuUser, LuUsers, LuBookOpen, LuCalendar, LuX } from 'react-icons/lu';
 import NotificationModal from '../common/NotificationModal';
 import { useNotificationManagement } from '../../../application/hooks/useNotificationManagement';
 import { HeaderProps, SearchResult, facultySearchItems } from '../../../shared/utils/facultyHeader';
 
-
-export default function Header({ currentDate, facultyName, onLogout }: HeaderProps) {
+export default function Header({ currentDate, facultyName, onLogout, setActiveTab }: HeaderProps) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
@@ -48,6 +46,32 @@ export default function Header({ currentDate, facultyName, onLogout }: HeaderPro
   };
 
   const handleSearchResultSelect = (result: SearchResult) => {
+    // Update sidebar active tab based on the destination
+    if (setActiveTab) {
+      const pathToTabMap: { [key: string]: string } = {
+        '/faculty': 'Dashboard',
+        '/faculty/sessions': 'My Sessions',
+        '/faculty/assignments': 'Assignments',
+        '/faculty/attendance': 'Attendance',
+        '/faculty/attendance-summary': 'Attendance Summary',
+        '/faculty/settings': 'Settings',
+        '/faculty/attendance/summary': 'Attendance Summary',
+        '/faculty/assignments/grading': 'Assignments',
+        '/faculty/sessions/records': 'My Sessions',
+        '/faculty/students': 'Dashboard',
+        '/faculty/students/progress': 'Dashboard',
+        '/faculty/courses': 'Dashboard',
+        '/faculty/courses/materials': 'Dashboard',
+        '/faculty/reports': 'Dashboard',
+        '/faculty/grades': 'Dashboard'
+      };
+      
+      const targetTab = pathToTabMap[result.path];
+      if (targetTab) {
+        setActiveTab(targetTab);
+      }
+    }
+    
     navigate(result.path);
     setSearchQuery('');
     setSearchResults([]);
@@ -110,110 +134,98 @@ export default function Header({ currentDate, facultyName, onLogout }: HeaderPro
         </div>
       </div>
 
-      <div className="relative z-10 flex items-center space-x-4">
-        <div className="relative">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search faculty features..."
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              onFocus={() => setSearchFocused(true)}
-              onBlur={handleSearchBlur}
-              onKeyDown={handleSearchKeyDown}
-              className="bg-white/90 backdrop-blur-sm rounded-full pl-12 pr-6 py-3 w-80 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all duration-200 text-gray-700 placeholder-gray-400 shadow-lg border border-white/50"
-            />
-            <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-              <LuSearch size={18} className={`transition-colors duration-200 ${searchFocused ? 'text-indigo-500' : 'text-gray-400'}`} />
-            </div>
-
-            {/* Search Results Dropdown */}
-            {showSearchResults && searchResults.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 max-h-96 overflow-y-auto z-50">
-                <div className="p-2">
-                  {searchResults.map((result, index) => (
-                    <button
-                      key={result.id}
-                      onClick={() => handleSearchResultSelect(result)}
-                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${index === focusedResultIndex
-                          ? 'bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200'
-                          : 'hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50'
-                        }`}
-                      onMouseEnter={() => setFocusedResultIndex(index)}
-                    >
-                      <div className={`p-2 rounded-lg ${index === focusedResultIndex
-                          ? 'bg-indigo-100 text-indigo-600'
-                          : 'bg-gray-100 text-gray-600 group-hover:bg-indigo-100 group-hover:text-indigo-600'
-                        } transition-all duration-200`}>
-                        {result.icon}
-                      </div>
-                      <div className="flex-1 text-left">
-                        <div className="font-medium text-gray-800">{result.title}</div>
-                        <div className="text-sm text-gray-500">{result.description}</div>
-                        <div className="text-xs text-indigo-600 font-medium mt-1">{result.category}</div>
-                      </div>
-                      <div className="w-2 h-2 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-200"></div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* No Results */}
-            {showSearchResults && searchQuery.trim().length > 0 && searchResults.length === 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-4 z-50">
-                <div className="text-center">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center">
-                    <LuSearch className="text-gray-400" size={20} />
-                  </div>
-                  <p className="text-gray-500 font-medium">No results found</p>
-                  <p className="text-gray-400 text-sm mt-1">Try searching with different keywords</p>
-                </div>
-              </div>
-            )}
-
-            {/* Quick Actions */}
-            {searchFocused && searchQuery.trim().length === 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-4 z-50">
-                <p className="text-sm text-gray-500 mb-3">Quick Actions</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { icon: <LuUsers className="w-4 h-4" />, label: 'Attendance', path: '/faculty/attendance' },
-                    { icon: <LuBookOpen className="w-4 h-4" />, label: 'Assignments', path: '/faculty/assignments' },
-                    { icon: <LuCalendar className="w-4 h-4" />, label: 'Sessions', path: '/faculty/sessions' },
-                    { icon: <LuX className="w-4 h-4" />, label: 'Reports', path: '/faculty/reports' }
-                  ].map((item) => (
-                    <button
-                      key={item.label}
-                      onClick={() => {
-                        navigate(item.path);
-                        setSearchFocused(false);
-                      }}
-                      className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg text-sm text-indigo-700 hover:from-indigo-100 hover:to-purple-100 transition-all duration-200"
-                    >
-                      {item.icon}
-                      <span className="font-medium">{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+      <div className="relative z-10 flex-1 flex justify-center max-w-2xl mx-8">
+        <div className="relative w-full max-w-md">
+          <input
+            type="text"
+            placeholder="Search faculty features..."
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={handleSearchBlur}
+            onKeyDown={handleSearchKeyDown}
+            className="bg-white/90 backdrop-blur-sm rounded-full pl-12 pr-6 py-3 w-full focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all duration-200 text-gray-700 placeholder-gray-400 shadow-lg border border-white/50"
+          />
+          <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+            <LuSearch size={18} className={`transition-colors duration-200 ${searchFocused ? 'text-indigo-500' : 'text-gray-400'}`} />
           </div>
-        </div>
 
-        <div className="relative">
-          <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className="bg-white/90 backdrop-blur-sm p-3 rounded-full hover:bg-white transition-all duration-200 shadow-lg border border-white/50"
-          >
-            {isDarkMode ? (
-              <LuSun size={20} className="text-yellow-500" />
-            ) : (
-              <LuMoon size={20} className="text-indigo-600" />
-            )}
-          </button>
-        </div>
+          {/* Search Results Dropdown */}
+          {showSearchResults && searchResults.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 max-h-96 overflow-y-auto z-50">
+              <div className="p-2">
+                {searchResults.map((result, index) => (
+                  <button
+                    key={result.id}
+                    onClick={() => handleSearchResultSelect(result)}
+                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${index === focusedResultIndex
+                        ? 'bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200'
+                        : 'hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50'
+                      }`}
+                    onMouseEnter={() => setFocusedResultIndex(index)}
+                  >
+                    <div className={`p-2 rounded-lg ${index === focusedResultIndex
+                        ? 'bg-indigo-100 text-indigo-600'
+                        : 'bg-gray-100 text-gray-600 group-hover:bg-indigo-100 group-hover:text-indigo-600'
+                      } transition-all duration-200`}>
+                      {result.icon}
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="font-medium text-gray-800">{result.title}</div>
+                      <div className="text-sm text-gray-500">{result.description}</div>
+                      <div className="text-xs text-indigo-600 font-medium mt-1">{result.category}</div>
+                    </div>
+                    <div className="w-2 h-2 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
+          {/* No Results */}
+          {showSearchResults && searchQuery.trim().length > 0 && searchResults.length === 0 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-4 z-50">
+              <div className="text-center">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center">
+                  <LuSearch className="text-gray-400" size={20} />
+                </div>
+                <p className="text-gray-500 font-medium">No results found</p>
+                <p className="text-gray-400 text-sm mt-1">Try searching with different keywords</p>
+              </div>
+            </div>
+          )}
+
+          {/* Quick Actions */}
+          {searchFocused && searchQuery.trim().length === 0 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-4 z-50">
+              <p className="text-sm text-gray-500 mb-3">Quick Actions</p>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { icon: <LuUsers className="w-4 h-4" />, label: 'Attendance', path: '/faculty/attendance' },
+                  { icon: <LuBookOpen className="w-4 h-4" />, label: 'Assignments', path: '/faculty/assignments' },
+                  { icon: <LuCalendar className="w-4 h-4" />, label: 'Sessions', path: '/faculty/sessions' },
+                  { icon: <LuX className="w-4 h-4" />, label: 'Reports', path: '/faculty/reports' }
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => {
+                      navigate(item.path);
+                      setSearchFocused(false);
+                    }}
+                    className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg text-sm text-indigo-700 hover:from-indigo-100 hover:to-purple-100 transition-all duration-200"
+                  >
+                    {item.icon}
+                    <span className="font-medium">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Right Section - Notifications and Profile */}
+      <div className="relative z-10 flex items-center space-x-4">
         <div className="relative">
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
@@ -221,7 +233,7 @@ export default function Header({ currentDate, facultyName, onLogout }: HeaderPro
           >
             <LuBell size={20} className="text-pink-600" />
             {unreadCount > 0 && (
-              <span className={`absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 ${isDarkMode ? 'text-white' : 'text-black'} text-xs rounded-full h-6 w-6 flex items-center justify-center shadow-lg`}>
+              <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-black text-xs rounded-full h-6 w-6 flex items-center justify-center shadow-lg">
                 {unreadCount}
               </span>
             )}

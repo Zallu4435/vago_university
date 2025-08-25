@@ -44,7 +44,7 @@ export interface IDeleteVideoUseCase {
 }
 
 export class GetVideosUseCase implements IGetVideosUseCase {
-    constructor(private videoRepository: IVideoRepository) { }
+    constructor(private _videoRepository: IVideoRepository) { }
 
     async execute(params: GetVideosRequestDTO): Promise<ResponseDTO<GetVideosResponseDTO>> {
         if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
@@ -54,8 +54,8 @@ export class GetVideosUseCase implements IGetVideosUseCase {
         const query = await this.buildQuery(params);
 
         const [videos, totalItems] = await Promise.all([
-            this.videoRepository.findVideos(query, params.page, params.limit),
-            this.videoRepository.countVideos(query)
+            this._videoRepository.findVideos(query, params.page, params.limit),
+            this._videoRepository.countVideos(query)
         ]);
 
         const mappedVideos = this.mapVideosToDTO(videos);
@@ -76,7 +76,7 @@ export class GetVideosUseCase implements IGetVideosUseCase {
         let query: VideoFilter = {};
 
         if (category && category !== 'all') {
-            const diploma = await this.videoRepository.findDiplomaByCategory(category);
+            const diploma = await this._videoRepository.findDiplomaByCategory(category);
             if (!diploma) {
                 throw new InvalidDiplomaIdError();
             }
@@ -162,13 +162,13 @@ export class GetVideosUseCase implements IGetVideosUseCase {
 
 
 export class GetVideoByIdUseCase implements IGetVideoByIdUseCase {
-    constructor(private videoRepository: IVideoRepository) { }
+    constructor(private _videoRepository: IVideoRepository) { }
 
     async execute(params: GetVideoByIdRequestDTO): Promise<ResponseDTO<GetVideoByIdResponseDTO>> {
         if (!mongoose.isValidObjectId(params.id)) {
             throw new InvalidVideoIdError();
         }
-        const video = await this.videoRepository.getVideoById(params.id);
+        const video = await this._videoRepository.getVideoById(params.id);
         if (!video) {
             throw new VideoNotFoundError();
         }
@@ -196,7 +196,7 @@ export class GetVideoByIdUseCase implements IGetVideoByIdUseCase {
                     category: populatedDiploma.category || ''
                 };
             } else {
-                const diploma = await this.videoRepository.findDiplomaById(diplomaId);
+                const diploma = await this._videoRepository.findDiplomaById(diplomaId);
                 if (diploma) {
                     diplomaInfo = {
                         id: diploma._id.toString(),
@@ -225,7 +225,7 @@ export class GetVideoByIdUseCase implements IGetVideoByIdUseCase {
 }
 
 export class CreateVideoUseCase implements ICreateVideoUseCase {
-    constructor(private videoRepository: IVideoRepository) { }
+    constructor(private _videoRepository: IVideoRepository) { }
 
     async execute(params: CreateVideoRequestDTO): Promise<ResponseDTO<CreateVideoResponseDTO>> {
         if (!params.category) {
@@ -234,7 +234,7 @@ export class CreateVideoUseCase implements ICreateVideoUseCase {
         if (!params.description || params.description.trim() === '') {
             throw new DomainError('Description is required');
         }
-        const diploma = await this.videoRepository.findDiplomaByCategory(params.category);
+        const diploma = await this._videoRepository.findDiplomaByCategory(params.category);
         if (!diploma) {
             throw new InvalidDiplomaIdError();
         }
@@ -257,8 +257,8 @@ export class CreateVideoUseCase implements ICreateVideoUseCase {
             uploadedAt: new Date(),
             videoUrl
         };
-        const created = await this.videoRepository.createVideo(videoData);
-        await this.videoRepository.addVideoToDiploma(diploma._id, created._id);
+        const created = await this._videoRepository.createVideo(videoData);
+        await this._videoRepository.addVideoToDiploma(diploma._id, created._id);
         const videoEntity = new Video({
             id: created._id?.toString() || created.id,
             title: created.title,
@@ -275,14 +275,14 @@ export class CreateVideoUseCase implements ICreateVideoUseCase {
 }
 
 export class UpdateVideoUseCase implements IUpdateVideoUseCase {
-    constructor(private videoRepository: IVideoRepository) { }
+    constructor(private _videoRepository: IVideoRepository) { }
 
     async execute(params: UpdateVideoRequestDTO): Promise<ResponseDTO<UpdateVideoResponseDTO>> {
 
         if (!mongoose.isValidObjectId(params.id)) {
             throw new InvalidVideoIdError();
         }
-        const existingVideo = await this.videoRepository.getVideoById(params.id);
+        const existingVideo = await this._videoRepository.getVideoById(params.id);
         if (!existingVideo) {
             throw new VideoNotFoundError();
         }
@@ -297,7 +297,7 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
         let newDiplomaId: string | undefined = undefined;
 
         if (params.category && params.category.trim()) {
-            const newDiploma = await this.videoRepository.findDiplomaByCategory(params.category);
+            const newDiploma = await this._videoRepository.findDiplomaByCategory(params.category);
             if (!newDiploma) {
                 throw new InvalidDiplomaIdError();
             }
@@ -343,7 +343,7 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
                 updateData.videoUrl = existingVideo.videoUrl;
             }
         }
-        const updated = await this.videoRepository.updateVideo(params.id, { ...updateData });
+        const updated = await this._videoRepository.updateVideo(params.id, { ...updateData });
         if (!updated) {
             throw new VideoNotFoundError();
         }
@@ -351,9 +351,9 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
         if (categoryChanged && newDiplomaId) {
             try {
                 if (oldDiplomaId) {
-                    await this.videoRepository.removeVideoFromDiploma(oldDiplomaId, params.id);
+                    await this._videoRepository.removeVideoFromDiploma(oldDiplomaId, params.id);
                 }
-                await this.videoRepository.addVideoToDiploma(newDiplomaId, params.id);
+                await this._videoRepository.addVideoToDiploma(newDiplomaId, params.id);
             } catch (err) {
                 console.error('⚠️ [UseCase] Failed to move video between diploma arrays', err);
             }
@@ -374,13 +374,13 @@ export class UpdateVideoUseCase implements IUpdateVideoUseCase {
 }
 
 export class DeleteVideoUseCase implements IDeleteVideoUseCase {
-    constructor(private videoRepository: IVideoRepository) { }
+    constructor(private _videoRepository: IVideoRepository) { }
 
     async execute(params: DeleteVideoRequestDTO): Promise<ResponseDTO<{ message: string }>> {
         if (!mongoose.isValidObjectId(params.id)) {
             throw new InvalidVideoIdError();
         }
-        const video = await this.videoRepository.getVideoById(params.id);
+        const video = await this._videoRepository.getVideoById(params.id);
         if (!video) {
             throw new VideoNotFoundError();
         }
@@ -394,8 +394,8 @@ export class DeleteVideoUseCase implements IDeleteVideoUseCase {
             }
         }
         const diplomaId = typeof video.diplomaId === 'string' ? video.diplomaId : video.diplomaId?._id?.toString() || '';
-        await this.videoRepository.removeVideoFromDiploma(diplomaId, video.id);
-        await this.videoRepository.deleteVideo(params.id);
+        await this._videoRepository.removeVideoFromDiploma(diplomaId, video.id);
+        await this._videoRepository.deleteVideo(params.id);
         return { data: { message: "Video deleted successfully" }, success: true };
     }
 } 

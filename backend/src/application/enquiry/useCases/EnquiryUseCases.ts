@@ -66,7 +66,7 @@ export interface ISendEnquiryReplyUseCase {
 }
 
 export class CreateEnquiryUseCase implements ICreateEnquiryUseCase {
-  constructor(private enquiryRepository: IEnquiryRepository) {}
+  constructor(private _enquiryRepository: IEnquiryRepository) {}
 
   async execute(params: CreateEnquiryRequestDTO): Promise<CreateEnquiryResponseDTO> {
     if (!emailRegex.test(params.email)) {
@@ -78,7 +78,7 @@ export class CreateEnquiryUseCase implements ICreateEnquiryUseCase {
       status: EnquiryStatus.PENDING,
     });
     
-    const dbResult = await this.enquiryRepository.create(enquiry.props);
+    const dbResult = await this._enquiryRepository.create(enquiry.props);
     
     return {
       enquiry: toEnquiryProps(dbResult),
@@ -87,7 +87,7 @@ export class CreateEnquiryUseCase implements ICreateEnquiryUseCase {
 }
 
 export class GetEnquiriesUseCase implements IGetEnquiriesUseCase {
-  constructor(private enquiryRepository: IEnquiryRepository) {}
+  constructor(private _enquiryRepository: IEnquiryRepository) {}
 
   async execute(params: GetEnquiriesRequestDTO): Promise<GetEnquiriesResponseDTO> {
     const { page = 1, limit = 10, status, startDate, endDate, search } = params;
@@ -123,8 +123,8 @@ export class GetEnquiriesUseCase implements IGetEnquiriesUseCase {
     }
 
     const sort = { createdAt: -1 };
-    const enquiries = await this.enquiryRepository.find(filter, { skip, limit, sort });
-    const total = await this.enquiryRepository.count(filter);
+    const enquiries = await this._enquiryRepository.find(filter, { skip, limit, sort });
+    const total = await this._enquiryRepository.count(filter);
     const totalPages = Math.ceil(total / limit);
 
     return {
@@ -138,14 +138,14 @@ export class GetEnquiriesUseCase implements IGetEnquiriesUseCase {
 }
 
 export class GetEnquiryByIdUseCase implements IGetEnquiryByIdUseCase {
-  constructor(private enquiryRepository: IEnquiryRepository) {}
+  constructor(private _enquiryRepository: IEnquiryRepository) {}
 
   async execute(params: GetEnquiryByIdRequestDTO): Promise<GetEnquiryByIdResponseDTO> {
     if (!params.id) {
       throw new InvalidEnquiryIdError();
     }
 
-    const enquiry = await this.enquiryRepository.findById(params.id);
+    const enquiry = await this._enquiryRepository.findById(params.id);
     if (!enquiry) {
       throw new EnquiryNotFoundError(params.id);
     }
@@ -157,14 +157,14 @@ export class GetEnquiryByIdUseCase implements IGetEnquiryByIdUseCase {
 }
 
 export class UpdateEnquiryStatusUseCase implements IUpdateEnquiryStatusUseCase {
-  constructor(private enquiryRepository: IEnquiryRepository) {}
+  constructor(private _enquiryRepository: IEnquiryRepository) {}
 
   async execute(params: UpdateEnquiryStatusRequestDTO): Promise<UpdateEnquiryStatusResponseDTO> {
     if (!params.id) {
       throw new InvalidEnquiryIdError();
     }
 
-    const existingEnquiry = await this.enquiryRepository.findById(params.id);
+    const existingEnquiry = await this._enquiryRepository.findById(params.id);
     if (!existingEnquiry) {
       throw new EnquiryNotFoundError(params.id);
     }
@@ -172,7 +172,7 @@ export class UpdateEnquiryStatusUseCase implements IUpdateEnquiryStatusUseCase {
     const existingProps = toEnquiryProps(existingEnquiry);
     const updatedEnquiry = Enquiry.update(existingProps, { status: params.status });
     
-    const dbResult = await this.enquiryRepository.update(params.id, updatedEnquiry.props);
+    const dbResult = await this._enquiryRepository.update(params.id, updatedEnquiry.props);
     if (!dbResult) {
       throw new EnquiryNotFoundError(params.id);
     }
@@ -184,19 +184,19 @@ export class UpdateEnquiryStatusUseCase implements IUpdateEnquiryStatusUseCase {
 }
 
 export class DeleteEnquiryUseCase implements IDeleteEnquiryUseCase {
-  constructor(private enquiryRepository: IEnquiryRepository) {}
+  constructor(private _enquiryRepository: IEnquiryRepository) {}
 
   async execute(params: DeleteEnquiryRequestDTO): Promise<DeleteEnquiryResponseDTO> {
     if (!params.id) {
       throw new InvalidEnquiryIdError();
     }
 
-    const enquiry = await this.enquiryRepository.findById(params.id);
+    const enquiry = await this._enquiryRepository.findById(params.id);
     if (!enquiry) {
       throw new EnquiryNotFoundError(params.id);
     }
 
-    await this.enquiryRepository.delete(params.id);
+    await this._enquiryRepository.delete(params.id);
 
     return {
       success: true,
@@ -207,8 +207,8 @@ export class DeleteEnquiryUseCase implements IDeleteEnquiryUseCase {
 
 export class SendEnquiryReplyUseCase implements ISendEnquiryReplyUseCase {
   constructor(
-    private enquiryRepository: IEnquiryRepository,
-    private emailService: IEmailService
+    private _enquiryRepository: IEnquiryRepository,
+    private _emailService: IEmailService
   ) {}
 
   async execute(params: SendEnquiryReplyRequestDTO): Promise<SendEnquiryReplyResponseDTO> {
@@ -220,13 +220,13 @@ export class SendEnquiryReplyUseCase implements ISendEnquiryReplyUseCase {
       throw new EnquiryValidationError("replyMessage", "Reply message is required");
     }
 
-    const enquiry = await this.enquiryRepository.findById(params.id);
+    const enquiry = await this._enquiryRepository.findById(params.id);
     if (!enquiry) {
       throw new EnquiryNotFoundError(params.id);
     }
 
     try {
-      await this.emailService.sendEnquiryReplyEmail({
+      await this._emailService.sendEnquiryReplyEmail({
         to: enquiry.email,
         name: enquiry.name,
         originalSubject: enquiry.subject,

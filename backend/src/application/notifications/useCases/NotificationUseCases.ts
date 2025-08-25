@@ -51,7 +51,7 @@ export interface IMarkAllNotificationsAsReadUseCase {
 }
 
 export class CreateNotificationUseCase implements ICreateNotificationUseCase {
-    constructor(private notificationRepository: INotificationRepository) { }
+    constructor(private _notificationRepository: INotificationRepository) { }
 
     async execute(params: CreateNotificationRequestDTO): Promise<CreateNotificationResponseDTO> {
         const notification = Notification.create({
@@ -60,7 +60,7 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
         });
 
         try {
-            const dbResult = await this.notificationRepository.create(notification.props);
+            const dbResult = await this._notificationRepository.create(notification.props);
             const notificationId = dbResult._id.toString();
 
             try {
@@ -69,9 +69,9 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
                     id: notificationId
                 });
 
-                await this.notificationRepository.update(notificationId, { status: NotificationStatus.SENT });
+                await this._notificationRepository.update(notificationId, { status: NotificationStatus.SENT });
             } catch (error) {
-                await this.notificationRepository.update(notificationId, { status: NotificationStatus.FAILED });
+                await this._notificationRepository.update(notificationId, { status: NotificationStatus.FAILED });
                 throw error;
             }
 
@@ -95,7 +95,7 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
                 console.error('[Backend] Failed to send individual notification:', error);
                 if (error.code === 'messaging/invalid-registration-token' ||
                     error.code === 'messaging/registration-token-not-registered') {
-                    await this.notificationRepository.removeToken(recipientId);
+                    await this._notificationRepository.removeToken(recipientId);
                 }
                 throw error;
             }
@@ -104,10 +104,10 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
             let faculty = [];
 
             if ([NotificationRecipientType.ALL_STUDENTS, NotificationRecipientType.ALL, NotificationRecipientType.ALL_STUDENTS_AND_FACULTY].includes(recipientType)) {
-                students = await this.notificationRepository.findUsersByCollection("user");
+                students = await this._notificationRepository.findUsersByCollection("user");
             }
             if ([NotificationRecipientType.ALL_FACULTY, NotificationRecipientType.ALL, NotificationRecipientType.ALL_STUDENTS_AND_FACULTY].includes(recipientType)) {
-                faculty = await this.notificationRepository.findFacultyByCollection("faculty");
+                faculty = await this._notificationRepository.findFacultyByCollection("faculty");
             }
 
             const studentTokens = students.flatMap((user) => user.fcmTokens || []);
@@ -146,7 +146,7 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
                                 if (response.error.code === 'messaging/invalid-registration-token' ||
                                     response.error.code === 'messaging/registration-token-not-registered') {
                                     const token = batch[idx];
-                                    await this.notificationRepository.removeToken(token);
+                                    await this._notificationRepository.removeToken(token);
                                 }
                             }
                         });
@@ -162,7 +162,7 @@ export class CreateNotificationUseCase implements ICreateNotificationUseCase {
 }
 
 export class GetAllNotificationsUseCase implements IGetAllNotificationsUseCase {
-    constructor(private notificationRepository: INotificationRepository) { }
+    constructor(private _notificationRepository: INotificationRepository) { }
 
     async execute(params: GetAllNotificationsRequestDTO): Promise<GetAllNotificationsResponseDTO> {
         const { userId, collection, page = 1, limit = 10, recipientType, status, dateRange, isRead, search } = params;
@@ -241,8 +241,8 @@ export class GetAllNotificationsUseCase implements IGetAllNotificationsUseCase {
         const skip = (page - 1) * limit;
         const sort = { createdAt: -1 };
 
-        const notifications = await this.notificationRepository.find(filter, { skip, limit, sort });
-        const totalItems = await this.notificationRepository.count(filter);
+        const notifications = await this._notificationRepository.find(filter, { skip, limit, sort });
+        const totalItems = await this._notificationRepository.count(filter);
         const totalPages = Math.ceil(totalItems / limit);
 
         const notificationResponse = notifications.map((n) => ({
@@ -269,14 +269,14 @@ export class GetAllNotificationsUseCase implements IGetAllNotificationsUseCase {
 }
 
 export class GetIndividualNotificationUseCase implements IGetIndividualNotificationUseCase {
-    constructor(private notificationRepository: INotificationRepository) { }
+    constructor(private _notificationRepository: INotificationRepository) { }
 
     async execute(params: GetIndividualNotificationRequestDTO): Promise<GetIndividualNotificationResponseDTO> {
         if (!params.notificationId) {
             throw new InvalidNotificationIdError();
         }
 
-        const notification = await this.notificationRepository.findById(params.notificationId);
+        const notification = await this._notificationRepository.findById(params.notificationId);
         if (!notification) {
             throw new NotificationNotFoundError(params.notificationId);
         }
@@ -300,38 +300,38 @@ export class GetIndividualNotificationUseCase implements IGetIndividualNotificat
 }
 
 export class DeleteNotificationUseCase implements IDeleteNotificationUseCase {
-    constructor(private notificationRepository: INotificationRepository) { }
+    constructor(private _notificationRepository: INotificationRepository) { }
 
     async execute(params: DeleteNotificationRequestDTO): Promise<DeleteNotificationResponseDTO> {
         if (!params.notificationId) {
             throw new InvalidNotificationIdError();
         }
 
-        const notification = await this.notificationRepository.findById(params.notificationId);
+        const notification = await this._notificationRepository.findById(params.notificationId);
         if (!notification) {
             throw new NotificationNotFoundError(params.notificationId);
         }
 
-        await this.notificationRepository.delete(params.notificationId);
+        await this._notificationRepository.delete(params.notificationId);
 
         return { message: "Notification deleted successfully" };
     }
 }
 
 export class MarkNotificationAsReadUseCase implements IMarkNotificationAsReadUseCase {
-    constructor(private notificationRepository: INotificationRepository) { }
+    constructor(private _notificationRepository: INotificationRepository) { }
 
     async execute(params: MarkNotificationAsReadRequestDTO): Promise<MarkNotificationAsReadResponseDTO> {
         if (!params.notificationId) {
             throw new InvalidNotificationIdError();
         }
 
-        const notification = await this.notificationRepository.findById(params.notificationId);
+        const notification = await this._notificationRepository.findById(params.notificationId);
         if (!notification) {
             throw new NotificationNotFoundError(params.notificationId);
         }
 
-        const updatedNotification = await this.notificationRepository.update(params.notificationId, {
+        const updatedNotification = await this._notificationRepository.update(params.notificationId, {
             readBy: [...(notification.readBy || []), params.authenticatedUserId]
         });
 
@@ -344,7 +344,7 @@ export class MarkNotificationAsReadUseCase implements IMarkNotificationAsReadUse
 }
 
 export class MarkAllNotificationsAsReadUseCase implements IMarkAllNotificationsAsReadUseCase {
-    constructor(private notificationRepository: INotificationRepository) { }
+    constructor(private _notificationRepository: INotificationRepository) { }
 
     async execute(params: MarkAllNotificationsAsReadRequestDTO): Promise<MarkAllNotificationsAsReadResponseDTO> {
         const { authenticatedUserId, collection } = params;
@@ -367,11 +367,11 @@ export class MarkAllNotificationsAsReadUseCase implements IMarkAllNotificationsA
 
         filter.readBy = { $ne: authenticatedUserId };
 
-        const countBefore = await this.notificationRepository.count(filter);
+        const countBefore = await this._notificationRepository.count(filter);
 
-        const notifications = await this.notificationRepository.find(filter);
+        const notifications = await this._notificationRepository.find(filter);
         for (const notification of notifications) {
-            await this.notificationRepository.update(notification._id.toString(), {
+            await this._notificationRepository.update(notification._id.toString(), {
                 readBy: [...(notification.readBy || []), authenticatedUserId]
             });
         }

@@ -7,7 +7,7 @@ export const materialSchema = z.object({
   course: z.string().min(1, 'Course is required'),
   semester: z.string().min(1, 'Semester is required'),
   type: z.enum(['pdf', 'video']),
-  file: z.unknown().optional(), 
+  file: z.unknown(), 
   thumbnail: z.unknown().optional(),
   tags: z.array(z.string()).min(1, 'At least one tag is required'),
   difficulty: z.enum(['Beginner', 'Intermediate', 'Advanced']),

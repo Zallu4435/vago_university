@@ -129,16 +129,16 @@ export interface IDeleteMessageUseCase {
 }
 
 export class GetChatsUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: GetChatsRequestDTO): Promise<GetChatsResponseDTO> {
     const { userId, page, limit } = params;
-    const { chats, totalItems, totalPages, currentPage } = await this.chatRepository.getChats({ userId, page, limit });
+    const { chats, totalItems, totalPages, currentPage } = await this._chatRepository.getChats({ userId, page, limit });
 
     const data = await Promise.all(chats.map(async (chat: RepositoryChat) => {
-      const unreadCount = await this.chatRepository.getUnreadCountForChat({ chatId: chat._id.toString(), userId });
-      const lastMessage = await this.chatRepository.getLastMessageForChat({ chatId: chat._id.toString(), userId });
-      const participantUsers = await this.chatRepository.getUsersByIds(chat.participants.map((p: RepositoryObjectIdLike) => p.toString()));
+      const unreadCount = await this._chatRepository.getUnreadCountForChat({ chatId: chat._id.toString(), userId });
+      const lastMessage = await this._chatRepository.getLastMessageForChat({ chatId: chat._id.toString(), userId });
+      const participantUsers = await this._chatRepository.getUsersByIds(chat.participants.map((p: RepositoryObjectIdLike) => p.toString()));
 
       return {
         id: toId(chat._id),
@@ -165,11 +165,11 @@ export class GetChatsUseCase {
 }
 
 export class SearchChatsUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: SearchChatsRequestDTO): Promise<GetChatsResponseDTO> {
     const { userId, query, page, limit } = params;
-    const { chats, totalItems, totalPages, currentPage, matchingUserIds } = await this.chatRepository.searchChats({ userId, query, page, limit });
+    const { chats, totalItems, totalPages, currentPage, matchingUserIds } = await this._chatRepository.searchChats({ userId, query, page, limit });
 
     if (chats.length === 0 && matchingUserIds.length > 0) {
       const newChats: ChatSummaryDTO[] = matchingUserIds.map((matchedId) => ({
@@ -189,9 +189,9 @@ export class SearchChatsUseCase {
     }
 
     const data = await Promise.all(chats.map(async (chat: RepositoryChat) => {
-      const unreadCount = await this.chatRepository.getUnreadCountForChat({ chatId: chat._id.toString(), userId });
-      const lastMessage = await this.chatRepository.getLastMessageForChat({ chatId: chat._id.toString(), userId });
-      const participantUsers = await this.chatRepository.getUsersByIds(chat.participants.map((p: RepositoryObjectIdLike) => p.toString()));
+      const unreadCount = await this._chatRepository.getUnreadCountForChat({ chatId: chat._id.toString(), userId });
+      const lastMessage = await this._chatRepository.getLastMessageForChat({ chatId: chat._id.toString(), userId });
+      const participantUsers = await this._chatRepository.getUsersByIds(chat.participants.map((p: RepositoryObjectIdLike) => p.toString()));
 
       return {
         id: toId(chat._id),
@@ -217,14 +217,14 @@ export class SearchChatsUseCase {
 }
 
 export class GetChatMessagesUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: GetChatMessagesRequestDTO): Promise<GetChatMessagesResponseDTO> {
     const { chatId, userId, before } = params;
     const page = params.page ?? 1;
     const limit = params.limit ?? 20;
 
-    const { messages, totalItems, totalPages, currentPage } = await this.chatRepository.getChatMessages({ chatId, userId, page, limit, before });
+    const { messages, totalItems, totalPages, currentPage } = await this._chatRepository.getChatMessages({ chatId, userId, page, limit, before });
 
     const mapped = messages
       .slice() 
@@ -270,44 +270,44 @@ export class GetChatMessagesUseCase {
 }
 
 export class SendMessageUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: SendMessageRequestDTO): Promise<void> {
     const { chatId, senderId, content, attachments } = params;
     const type = params.type as unknown as MessageType;
-    return this.chatRepository.sendMessage({ chatId, senderId, content, type, attachments });
+    return this._chatRepository.sendMessage({ chatId, senderId, content, type, attachments });
   }
 }
 
 export class MarkMessagesAsReadUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: MarkMessagesAsReadRequestDTO): Promise<void> {
-    return this.chatRepository.markMessagesAsRead(params);
+    return this._chatRepository.markMessagesAsRead(params);
   }
 }
 
 export class AddReactionUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: AddReactionRequestDTO): Promise<void> {
-    return this.chatRepository.addReaction(params);
+    return this._chatRepository.addReaction(params);
   }
 }
 
 export class RemoveReactionUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: RemoveReactionRequestDTO): Promise<void> {
-    return this.chatRepository.removeReaction(params);
+    return this._chatRepository.removeReaction(params);
   }
 }
 
 export class GetChatDetailsUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(chatId: string, userId: string): Promise<ChatDetailsResponseDTO | null> {
-    const raw = await this.chatRepository.getChatDetails(chatId, userId);
+    const raw = await this._chatRepository.getChatDetails(chatId, userId);
     if (!raw) return null;
 
     const { chat, messages, participants, unreadCount } = raw;
@@ -370,121 +370,121 @@ export class GetChatDetailsUseCase {
 }
 
 export class SearchUsersUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: SearchUsersRequestDTO): Promise<SearchUsersResponseDTO> {
-    return this.chatRepository.searchUsers(params);
+    return this._chatRepository.searchUsers(params);
   }
 }
 
 export class CreateChatUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: CreateChatRequestDTO): Promise<ChatSummaryDTO> {
-    return this.chatRepository.createChat(params);
+    return this._chatRepository.createChat(params);
   }
 }
 
 export class CreateGroupChatUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: CreateGroupChatRequestDTO): Promise<ChatSummaryDTO> {
-    return this.chatRepository.createGroupChat(params);
+    return this._chatRepository.createGroupChat(params);
   }
 }
 
 export class AddGroupMemberUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: AddGroupMemberRequestDTO): Promise<void> {
-    return this.chatRepository.addGroupMember(params);
+    return this._chatRepository.addGroupMember(params);
   }
 }
 
 export class RemoveGroupMemberUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: RemoveGroupMemberRequestDTO): Promise<void> {
-    return this.chatRepository.removeGroupMember(params);
+    return this._chatRepository.removeGroupMember(params);
   }
 }
 
 export class UpdateGroupAdminUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: UpdateGroupAdminRequestDTO): Promise<void> {
-    return this.chatRepository.updateGroupAdmin(params);
+    return this._chatRepository.updateGroupAdmin(params);
   }
 }
 
 export class UpdateGroupSettingsUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: UpdateGroupSettingsRequestDTO): Promise<void> {
-    return this.chatRepository.updateGroupSettings(params);
+    return this._chatRepository.updateGroupSettings(params);
   }
 }
 
 export class UpdateGroupInfoUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: UpdateGroupInfoRequestDTO): Promise<void> {
-    return this.chatRepository.updateGroupInfo(params);
+    return this._chatRepository.updateGroupInfo(params);
   }
 }
 
 export class LeaveGroupUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: LeaveGroupRequestDTO): Promise<void> {
-    return this.chatRepository.leaveGroup(params);
+    return this._chatRepository.leaveGroup(params);
   }
 }
 
 export class EditMessageUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: EditMessageRequestDTO): Promise<void> {
-    return this.chatRepository.editMessage(params);
+    return this._chatRepository.editMessage(params);
   }
 }
 
 export class DeleteMessageUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: DeleteMessageRequestDTO): Promise<void> {
-    return this.chatRepository.deleteMessage(params);
+    return this._chatRepository.deleteMessage(params);
   }
 }
 
 export class ReplyToMessageUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: ReplyToMessageRequestDTO): Promise<void> {
-    return this.chatRepository.replyToMessage(params);
+    return this._chatRepository.replyToMessage(params);
   }
 }
 
 export class DeleteChatUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: DeleteChatRequestDTO): Promise<void> {
-    return this.chatRepository.deleteChat(params);
+    return this._chatRepository.deleteChat(params);
   }
 }
 
 export class BlockChatUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: BlockChatRequestDTO): Promise<void> {
-    return this.chatRepository.blockChat(params);
+    return this._chatRepository.blockChat(params);
   }
 }
 
 export class ClearChatUseCase {
-  constructor(private chatRepository: IChatRepository) { }
+  constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: ClearChatRequestDTO): Promise<void> {
-    return this.chatRepository.clearChat(params);
+    return this._chatRepository.clearChat(params);
   }
 } 

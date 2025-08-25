@@ -73,10 +73,10 @@ export interface IRefreshDashboardUseCase {
 
 
 export class GetDashboardDataUseCase implements IGetDashboardDataUseCase {
-  constructor(private dashboardRepository: IDashboardRepository) {}
+  constructor(private _dashboardRepository: IDashboardRepository) {}
 
   async execute(): Promise<ResponseDTO<GetDashboardDataResponseDTO>> {
-    const raw: any = await this.dashboardRepository.getDashboardData();
+    const raw: any = await this._dashboardRepository.getDashboardData();
     if (!raw || !raw.metricsRaw || !raw.userGrowthRaw || !raw.revenueRaw || !raw.performanceRaw || !raw.activitiesRaw || !raw.alertsRaw) {
       throw new DashboardDataNotFoundError();
     } 
@@ -93,10 +93,10 @@ export class GetDashboardDataUseCase implements IGetDashboardDataUseCase {
 } 
 
 export class GetDashboardMetricsUseCase implements IGetDashboardMetricsUseCase {
-  constructor(private dashboardRepository: IDashboardRepository) {}
+  constructor(private _dashboardRepository: IDashboardRepository) {}
 
   async execute(): Promise<ResponseDTO<GetDashboardMetricsResponseDTO>> {
-    const raw: DashboardMetricsRaw = await this.dashboardRepository.getDashboardMetrics();
+    const raw: DashboardMetricsRaw = await this._dashboardRepository.getDashboardMetrics();
     if (!raw || !Array.isArray(raw.completedPayments)) {
       throw new DashboardMetricsError();
     }
@@ -112,10 +112,10 @@ export class GetDashboardMetricsUseCase implements IGetDashboardMetricsUseCase {
 }
 
 export class GetUserGrowthDataUseCase implements IGetUserGrowthDataUseCase {
-  constructor(private dashboardRepository: IDashboardRepository) {}
+  constructor(private _dashboardRepository: IDashboardRepository) {}
 
   async execute(): Promise<ResponseDTO<GetUserGrowthDataResponseDTO>> {
-    const raw: UserGrowthDataRaw[] = await this.dashboardRepository.getUserGrowthData();
+    const raw: UserGrowthDataRaw[] = await this._dashboardRepository.getUserGrowthData();
     if (!raw || raw.length === 0) {
       throw new DashboardUserGrowthError();
     }
@@ -135,10 +135,10 @@ export class GetUserGrowthDataUseCase implements IGetUserGrowthDataUseCase {
 }
 
 export class GetRevenueDataUseCase implements IGetRevenueDataUseCase {
-  constructor(private dashboardRepository: IDashboardRepository) {}
+  constructor(private _dashboardRepository: IDashboardRepository) {}
 
   async execute(): Promise<ResponseDTO<GetRevenueDataResponseDTO>> {
-    const raw: RevenueDataRaw[] = await this.dashboardRepository.getRevenueData();
+    const raw: RevenueDataRaw[] = await this._dashboardRepository.getRevenueData();
     if (!raw || raw.length === 0) {
       throw new DashboardRevenueError();
     }
@@ -161,10 +161,10 @@ export class GetRevenueDataUseCase implements IGetRevenueDataUseCase {
 }
 
 export class GetPerformanceDataUseCase implements IGetPerformanceDataUseCase {
-  constructor(private dashboardRepository: IDashboardRepository) {}
+  constructor(private _dashboardRepository: IDashboardRepository) {}
 
   async execute(): Promise<ResponseDTO<PerformanceData[]>> {
-    const raw: PerformanceRawData = await this.dashboardRepository.getPerformanceData();
+    const raw: PerformanceRawData = await this._dashboardRepository.getPerformanceData();
     if (!raw) {
       throw new DashboardPerformanceError();
     } 
@@ -188,10 +188,10 @@ export class GetPerformanceDataUseCase implements IGetPerformanceDataUseCase {
 }
 
 export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
-  constructor(private dashboardRepository: IDashboardRepository) {}
+  constructor(private _dashboardRepository: IDashboardRepository) {}
 
   async execute(): Promise<ResponseDTO<GetRecentActivitiesResponseDTO>> {
-    const raw: ActivityItemRaw = await this.dashboardRepository.getRecentActivities();
+    const raw: ActivityItemRaw = await this._dashboardRepository.getRecentActivities();
     if (!raw || !raw.recentAdmissions || !raw.recentPayments || !raw.recentEnquiries || !raw.recentNotifications) {
       throw new DashboardActivitiesError();
     }
@@ -256,10 +256,10 @@ export class GetRecentActivitiesUseCase implements IGetRecentActivitiesUseCase {
 }
 
 export class GetSystemAlertsUseCase implements IGetSystemAlertsUseCase {
-  constructor(private dashboardRepository: IDashboardRepository) {}
+  constructor(private _dashboardRepository: IDashboardRepository) {}
 
   async execute(): Promise<ResponseDTO<GetSystemAlertsResponseDTO>> {
-    const raw: SystemAlertRaw = await this.dashboardRepository.getSystemAlerts();
+    const raw: SystemAlertRaw = await this._dashboardRepository.getSystemAlerts();
     if (!raw) {
       throw new DashboardAlertsError();
     }
@@ -314,10 +314,10 @@ export class GetSystemAlertsUseCase implements IGetSystemAlertsUseCase {
 }
 
 export class RefreshDashboardUseCase implements IRefreshDashboardUseCase {
-  constructor(private dashboardRepository: IDashboardRepository) {}
+  constructor(private _dashboardRepository: IDashboardRepository) {}
 
   async execute(): Promise<ResponseDTO<DashboardDataRaw>> {
-    const raw = await this.dashboardRepository.refreshDashboard();
+    const raw = await this._dashboardRepository.refreshDashboard();
     if (!raw) {
       throw new DashboardDataNotFoundError();
     }

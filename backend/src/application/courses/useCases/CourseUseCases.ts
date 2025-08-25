@@ -37,10 +37,10 @@ export interface IDeleteCourseUseCase {
 }
  
 export class GetCoursesUseCase implements IGetCoursesUseCase {
-  constructor(private readonly courseRepository: ICoursesRepository) {}
+  constructor(private readonly _courseRepository: ICoursesRepository) {}
 
   async execute(params: GetCoursesRequestDTO): Promise<{ success: boolean; data: GetCoursesResponseDTO }> {
-    const { courses, totalItems, page, limit } = await this.courseRepository.getCourses(params);
+    const { courses, totalItems, page, limit } = await this._courseRepository.getCourses(params);
     const mappedCourses: CourseSummaryDTO[] = courses.map((course) => ({
       id: course._id.toString(),
       title: course.title,
@@ -64,13 +64,13 @@ export class GetCoursesUseCase implements IGetCoursesUseCase {
 }
 
 export class GetCourseByIdUseCase implements IGetCourseByIdUseCase {
-  constructor(private readonly courseRepository: ICoursesRepository) {}
+  constructor(private readonly _courseRepository: ICoursesRepository) {}
 
   async execute(params: GetCourseByIdRequestDTO): Promise<{ success: boolean; data: GetCourseByIdResponseDTO }> {
     if (!params.id) {
       throw new InvalidCourseIdError();
     }
-    const course = await this.courseRepository.getCourseById(params.id);
+    const course = await this._courseRepository.getCourseById(params.id);
     if (!course) {
       throw new CourseNotFoundError(params.id);
     }
@@ -96,10 +96,10 @@ export class GetCourseByIdUseCase implements IGetCourseByIdUseCase {
 }
 
 export class CreateCourseUseCase implements ICreateCourseUseCase {
-  constructor(private readonly courseRepository: ICoursesRepository) {}
+  constructor(private readonly _courseRepository: ICoursesRepository) {}
 
   async execute(params: CreateCourseRequestDTO): Promise<{ success: boolean; data: CreateCourseResponseDTO }> {
-    const newCourse = await this.courseRepository.createCourse(params);
+    const newCourse = await this._courseRepository.createCourse(params);
     return {
       success: true,
       data: {
@@ -122,13 +122,13 @@ export class CreateCourseUseCase implements ICreateCourseUseCase {
 }
 
 export class UpdateCourseUseCase implements IUpdateCourseUseCase {
-  constructor(private readonly courseRepository: ICoursesRepository) {}
+  constructor(private readonly _courseRepository: ICoursesRepository) {}
 
   async execute(params: UpdateCourseRequestDTO): Promise<{ success: boolean; data: UpdateCourseResponseDTO }> {
     if (!params.id) {
       throw new InvalidCourseIdError();
     }
-    const updatedCourse = await this.courseRepository.updateCourse(params);
+    const updatedCourse = await this._courseRepository.updateCourse(params);
     if (!updatedCourse) {
       throw new CourseNotFoundError(params.id);
     }
@@ -154,13 +154,13 @@ export class UpdateCourseUseCase implements IUpdateCourseUseCase {
 }
 
 export class DeleteCourseUseCase implements IDeleteCourseUseCase {
-  constructor(private readonly courseRepository: ICoursesRepository) {}
+  constructor(private readonly _courseRepository: ICoursesRepository) {}
 
   async execute(params: DeleteCourseRequestDTO): Promise<{ success: boolean; data: void }> {
     if (!params.id) {
       throw new InvalidCourseIdError();
     }
-    await this.courseRepository.deleteCourse(params);
+    await this._courseRepository.deleteCourse(params);
     return { success: true, data: undefined };
   }
 }

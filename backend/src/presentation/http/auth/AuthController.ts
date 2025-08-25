@@ -70,7 +70,7 @@ export class AuthController implements IAuthController {
           secure: process.env.NODE_ENV === 'production',
           sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
           path: '/',
-          maxAge: 10 * 60 * 1000 // 10 minutes
+          maxAge: 10 * 60 * 1000 
         }
       }
     ];
@@ -130,21 +130,24 @@ export class AuthController implements IAuthController {
 
   async logoutAll(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const accessToken = httpRequest.cookies?.access_token;
-    if (!accessToken) {
-      return this.httpErrors.error_401('No access token provided');
-    }
-    let decoded;
-    try {
-      decoded = this.loginUseCase['jwtService'].verifyToken(accessToken);
-    } catch (err) {
-      return this.httpErrors.error_401('Invalid access token');
-    }
-    const userId = decoded.userId;
-    await this.logoutAllUseCase.execute({ userId });
     const response = this.httpSuccess.success_200({ message: 'Logged out from all devices' });
     response.cookies = [
       { name: 'access_token', value: '', options: { httpOnly: true, path: '/', maxAge: 0 } }
     ];
+    
+    if (!accessToken) {
+      return response;
+    }
+    
+    let decoded;
+    try {
+      decoded = this.loginUseCase['jwtService'].verifyToken(accessToken);
+    } catch (err) {
+      return response; // Return success even if token is invalid
+    }
+    
+    const userId = decoded.userId;
+    await this.logoutAllUseCase.execute({ userId });
     return response;
   }
 

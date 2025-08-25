@@ -6,22 +6,8 @@ export interface IGetUserSiteSectionsUseCase {
   execute(params: GetUserSiteSectionsRequestDTO): Promise<{ success: boolean; data: GetUserSiteSectionsResponseDTO }>;
 }
 
-function toUserDTO(doc): UserSiteSectionDTO {
-  return {
-    id: doc._id.toString(),
-    sectionKey: doc.sectionKey,
-    title: doc.title,
-    description: doc.description,
-    image: doc.image || '',
-    link: doc.link || '',
-    category: doc.category,
-    createdAt: doc.createdAt?.toISOString() || new Date().toISOString(),
-    updatedAt: doc.updatedAt?.toISOString() || new Date().toISOString(),
-  };
-}
-
 export class GetUserSiteSectionsUseCase implements IGetUserSiteSectionsUseCase {
-  constructor(private readonly userSiteSectionRepository: IUserSiteSectionRepository) { }
+  constructor(private readonly _userSiteSectionRepository: IUserSiteSectionRepository) { }
 
   async execute(params: GetUserSiteSectionsRequestDTO): Promise<{ success: boolean; data: GetUserSiteSectionsResponseDTO }> {
     const { sectionKey, page = 1, limit = 10, search, category } = params;
@@ -38,8 +24,8 @@ export class GetUserSiteSectionsUseCase implements IGetUserSiteSectionsUseCase {
     }
     const skip = (page - 1) * limit;
     const [docs, total] = await Promise.all([
-      this.userSiteSectionRepository.findSectionsRaw(query, skip, limit),
-      this.userSiteSectionRepository.countSectionsRaw(query),
+      this._userSiteSectionRepository.findSectionsRaw(query, skip, limit),
+      this._userSiteSectionRepository.countSectionsRaw(query),
     ]);
     return {
       success: true,
@@ -53,3 +39,17 @@ export class GetUserSiteSectionsUseCase implements IGetUserSiteSectionsUseCase {
     };
   }
 } 
+
+function toUserDTO(doc): UserSiteSectionDTO {
+  return {
+    id: doc._id.toString(),
+    sectionKey: doc.sectionKey,
+    title: doc.title,
+    description: doc.description,
+    image: doc.image || '',
+    link: doc.link || '',
+    category: doc.category,
+    createdAt: doc.createdAt?.toISOString() || new Date().toISOString(),
+    updatedAt: doc.updatedAt?.toISOString() || new Date().toISOString(),
+  };
+}

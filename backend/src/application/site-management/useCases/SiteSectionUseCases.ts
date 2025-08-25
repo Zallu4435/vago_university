@@ -15,7 +15,7 @@ import { CreateSiteSectionRequest, DeleteSiteSectionRequest, SiteSectionFilter, 
 import { InvalidSectionKeyError, InvalidHighlightError, InvalidVagoNowError, InvalidLeadershipError } from '../../../domain/site-management/errors/SiteSectionErrors';
  
 export class GetSiteSectionsUseCase {
-  constructor(private readonly siteSectionRepository: ISiteSectionRepository) {}
+  constructor(private readonly _siteSectionRepository: ISiteSectionRepository) {}
 
   async execute(params: GetSiteSectionsRequestDTO): Promise<{ success: boolean; data: GetSiteSectionsResponseDTO }> {
     const { sectionKey, page = 1, limit = 10, search, category, dateRange, startDate, endDate, status } = params;
@@ -85,7 +85,7 @@ export class GetSiteSectionsUseCase {
     }
     
     const skip = (page - 1) * limit;
-    const allDocs = await this.siteSectionRepository.getSections(query);
+    const allDocs = await this._siteSectionRepository.getSections(query);
     
     const sortedDocs = allDocs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     
@@ -105,10 +105,10 @@ export class GetSiteSectionsUseCase {
 }
 
 export class GetSiteSectionByIdUseCase {
-  constructor(private readonly siteSectionRepository: ISiteSectionRepository) {}
+  constructor(private readonly _siteSectionRepository: ISiteSectionRepository) {}
 
   async execute(params: GetSiteSectionByIdRequestDTO): Promise<{ success: boolean; data: GetSiteSectionByIdResponseDTO | null }> {
-    const doc = await this.siteSectionRepository.getSectionById(params.id);
+    const doc = await this._siteSectionRepository.getSectionById(params.id);
     return doc ? { success: true, data: { section: SiteSectionUseCaseMapper.toDTO(doc) } } : { success: false, data: null };
   }
 }
@@ -133,19 +133,19 @@ export class CreateSiteSectionUseCase {
 }
 
 export class UpdateSiteSectionUseCase {
-  constructor(private readonly siteSectionRepository: ISiteSectionRepository) {}
+  constructor(private readonly _siteSectionRepository: ISiteSectionRepository) {}
 
   async execute(params: UpdateSiteSectionRequestDTO): Promise<{ success: boolean; data: UpdateSiteSectionResponseDTO | null }> {
-    const doc = await this.siteSectionRepository.updateSection(params as UpdateSiteSectionRequest);
+    const doc = await this._siteSectionRepository.updateSection(params as UpdateSiteSectionRequest);
     return doc ? { success: true, data: { section: SiteSectionUseCaseMapper.toDTO(doc) } } : { success: false, data: null };
   }
 }
 
 export class DeleteSiteSectionUseCase {
-  constructor(private readonly siteSectionRepository: ISiteSectionRepository) {}
+  constructor(private readonly _siteSectionRepository: ISiteSectionRepository) {}
 
   async execute(params: DeleteSiteSectionRequestDTO): Promise<{ success: boolean; data: void }> {
-    await this.siteSectionRepository.deleteSection(params as DeleteSiteSectionRequest);
+    await this._siteSectionRepository.deleteSection(params as DeleteSiteSectionRequest);
     return { success: true, data: undefined };
   }
 }

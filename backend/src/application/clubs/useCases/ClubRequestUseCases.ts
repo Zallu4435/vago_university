@@ -31,7 +31,7 @@ export interface IGetClubRequestDetailsUseCase {
 
 
 export class GetClubRequestsUseCase implements IGetClubRequestsUseCase {
-  constructor(private clubsRepository: IClubsRepository) { }
+  constructor(private _clubsRepository: IClubsRepository) { }
 
   async execute(params: GetClubRequestsRequestDTO): Promise<GetClubRequestsResponseDTO> {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
@@ -48,7 +48,7 @@ export class GetClubRequestsUseCase implements IGetClubRequestsUseCase {
       params.search
     );
 
-    const { rawRequests, totalItems, totalPages, currentPage } = await this.clubsRepository.getClubRequests(repositoryRequest);
+    const { rawRequests, totalItems, totalPages, currentPage } = await this._clubsRepository.getClubRequests(repositoryRequest);
     const mappedRequests: SimplifiedClubRequestDTO[] = (rawRequests as unknown as PopulatedClubRequestSummary[]).map((req: PopulatedClubRequestSummary) => ({
       clubName: req.clubId?.name || "Unknown Club",
       requestedId: req._id.toString(),
@@ -67,13 +67,13 @@ export class GetClubRequestsUseCase implements IGetClubRequestsUseCase {
 }
 
 export class ApproveClubRequestUseCase implements IApproveClubRequestUseCase {
-  constructor(private clubsRepository: IClubsRepository) { }
+  constructor(private _clubsRepository: IClubsRepository) { }
 
   async execute(params: ApproveClubRequestRequestDTO): Promise<{ message: string }> {
     if (!params.id || params.id.trim() === "") {
       throw new Error("Invalid club request ID");
     }
-    const response: { clubRequest: PopulatedClubRequest } | null = await this.clubsRepository.getClubRequestDetails({ id: params.id }) as unknown as { clubRequest: PopulatedClubRequest } | null;
+    const response: { clubRequest: PopulatedClubRequest } | null = await this._clubsRepository.getClubRequestDetails({ id: params.id }) as unknown as { clubRequest: PopulatedClubRequest } | null;
     if (!response || !response.clubRequest) {
       throw new Error("Club request not found");
     }
@@ -81,19 +81,19 @@ export class ApproveClubRequestUseCase implements IApproveClubRequestUseCase {
     if (clubRequest.status !== "pending") {
       throw new Error("Club request is not in pending status");
     }
-    await this.clubsRepository.approveClubRequest(params);
+    await this._clubsRepository.approveClubRequest(params);
     return { message: "Club request approved successfully" };
   }
 }
 
 export class RejectClubRequestUseCase implements IRejectClubRequestUseCase {
-  constructor(private clubsRepository: IClubsRepository) { }
+  constructor(private _clubsRepository: IClubsRepository) { }
 
   async execute(params: RejectClubRequestRequestDTO): Promise<{ message: string }> {
     if (!params.id || params.id.trim() === "") {
       throw new Error("Invalid club request ID");
     }
-    const response: { clubRequest: PopulatedClubRequest } | null = await this.clubsRepository.getClubRequestDetails({ id: params.id }) as unknown as { clubRequest: PopulatedClubRequest } | null;
+    const response: { clubRequest: PopulatedClubRequest } | null = await this._clubsRepository.getClubRequestDetails({ id: params.id }) as unknown as { clubRequest: PopulatedClubRequest } | null;
     if (!response || !response.clubRequest) {
       throw new Error("Club request not found");
     }
@@ -101,19 +101,19 @@ export class RejectClubRequestUseCase implements IRejectClubRequestUseCase {
     if (clubRequest.status !== "pending") {
       throw new Error("Club request is not in pending status");
     }
-    await this.clubsRepository.rejectClubRequest(params);
+    await this._clubsRepository.rejectClubRequest(params);
     return { message: "Club request rejected successfully" };
   }
 }
 
 export class GetClubRequestDetailsUseCase implements IGetClubRequestDetailsUseCase {
-  constructor(private clubsRepository: IClubsRepository) { }
+  constructor(private _clubsRepository: IClubsRepository) { }
 
   async execute(params: GetClubRequestDetailsRequestDTO): Promise<GetClubRequestDetailsResponseDTO> {
     if (!params.id || params.id.trim() === "") {
       throw new Error("Invalid club request ID");
     }
-    const response: { clubRequest: PopulatedClubRequest } | null = await this.clubsRepository.getClubRequestDetails(params) as unknown as { clubRequest: PopulatedClubRequest } | null;
+    const response: { clubRequest: PopulatedClubRequest } | null = await this._clubsRepository.getClubRequestDetails(params) as unknown as { clubRequest: PopulatedClubRequest } | null;
     if (!response || !response.clubRequest) {
       throw new Error("Club request not found");
     }

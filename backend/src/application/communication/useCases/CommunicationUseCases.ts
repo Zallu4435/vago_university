@@ -59,7 +59,7 @@ export interface IFetchUsersUseCase {
 }
  
 export class GetInboxMessagesUseCase implements IGetInboxMessagesUseCase {
-  constructor(private readonly repository: ICommunicationRepository) { }
+  constructor(private readonly _repository: ICommunicationRepository) { }
 
   async execute(params: GetInboxMessagesRequestDTO): Promise<ResponseDTO<GetInboxMessagesResponseDTO>> {
     if (!params.userId || params.userId.trim() === "") {
@@ -68,7 +68,7 @@ export class GetInboxMessagesUseCase implements IGetInboxMessagesUseCase {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
       return { success: false, data: { error: "Invalid page or limit parameters" } };
     }
-    const { messages, totalItems, totalPages, page, limit, userId } = await this.repository.getInboxMessages(params.userId, params.page, params.limit, params.search, params.status);
+    const { messages, totalItems, totalPages, page, limit, userId } = await this._repository.getInboxMessages(params.userId, params.page, params.limit, params.search, params.status);
     const mappedMessages = messages.map((message) => mapMessageToDTO(message, false));
     return {
       success: true,
@@ -86,7 +86,7 @@ export class GetInboxMessagesUseCase implements IGetInboxMessagesUseCase {
 }
 
 export class GetSentMessagesUseCase implements IGetSentMessagesUseCase {
-  constructor(private readonly repository: ICommunicationRepository) { }
+  constructor(private readonly _repository: ICommunicationRepository) { }
 
   async execute(params: GetSentMessagesRequestDTO): Promise<ResponseDTO<GetSentMessagesResponseDTO>> {
     if (!params.userId || params.userId.trim() === "") {
@@ -95,7 +95,7 @@ export class GetSentMessagesUseCase implements IGetSentMessagesUseCase {
     if (isNaN(params.page) || params.page < 1 || isNaN(params.limit) || params.limit < 1) {
       return { success: false, data: { error: "Invalid page or limit parameters" } };
     }
-    const { messages, totalItems, totalPages, page, limit, userId } = await this.repository.getSentMessages(params.userId, params.page, params.limit, params.search, params.status);
+    const { messages, totalItems, totalPages, page, limit, userId } = await this._repository.getSentMessages(params.userId, params.page, params.limit, params.search, params.status);
     
     if (!messages || !Array.isArray(messages)) {
       console.error('Repository returned invalid messages:', messages);
@@ -130,7 +130,7 @@ export class GetSentMessagesUseCase implements IGetSentMessagesUseCase {
 }
 
 export class SendMessageUseCase implements ISendMessageUseCase {
-  constructor(private readonly repository: ICommunicationRepository) { }
+  constructor(private readonly _repository: ICommunicationRepository) { }
 
   async execute(params: SendMessageRequestDTO): Promise<ResponseDTO<SendMessageResponseDTO>> {
     try {
@@ -144,7 +144,7 @@ export class SendMessageUseCase implements ISendMessageUseCase {
       let sentMessage;
 
       if (params.senderRole === 'user') {
-        sentMessage = await this.repository.sendUserMessage(
+        sentMessage = await this._repository.sendUserMessage(
           params.senderId,
           params.senderRole,
           params.to,
@@ -153,7 +153,7 @@ export class SendMessageUseCase implements ISendMessageUseCase {
           params.attachments
         );
       } else {
-        sentMessage = await this.repository.sendMessage(
+        sentMessage = await this._repository.sendMessage(
       params.senderId,
       params.senderRole,
       params.to,
@@ -176,37 +176,37 @@ export class SendMessageUseCase implements ISendMessageUseCase {
 }
 
 export class MarkMessageAsReadUseCase implements IMarkMessageAsReadUseCase {
-  constructor(private readonly repository: ICommunicationRepository) { }
+  constructor(private readonly _repository: ICommunicationRepository) { }
 
   async execute(params: MarkMessageAsReadRequestDTO): Promise<ResponseDTO<MarkMessageAsReadResponseDTO>> {
     if (!params.messageId || params.messageId.trim() === "" || !params.userId || params.userId.trim() === "") {
       return { success: false, data: { error: "Invalid message ID or user ID" } };
     }
-    await this.repository.markMessageAsRead(params.messageId, params.userId);
+    await this._repository.markMessageAsRead(params.messageId, params.userId);
     return { success: true, data: { success: true, message: "Message marked as read" } };
   }
 }
 
 export class DeleteMessageUseCase implements IDeleteMessageUseCase {
-  constructor(private readonly repository: ICommunicationRepository) { }
+  constructor(private readonly _repository: ICommunicationRepository) { }
 
   async execute(params: DeleteMessageRequestDTO): Promise<ResponseDTO<DeleteMessageResponseDTO>> {
     if (!params.messageId || params.messageId.trim() === "" || !params.userId || params.userId.trim() === "") {
       return { success: false, data: { error: "Invalid message ID or user ID" } };
     }
-    await this.repository.deleteMessage(params.messageId, params.userId);
+    await this._repository.deleteMessage(params.messageId, params.userId);
     return { success: true, data: { success: true, message: "Message deleted successfully" } };
   }
 }
 
 export class GetMessageDetailsUseCase implements IGetMessageDetailsUseCase {
-  constructor(private readonly repository: ICommunicationRepository) { }
+  constructor(private readonly _repository: ICommunicationRepository) { }
 
   async execute(params: GetMessageDetailsRequestDTO): Promise<ResponseDTO<GetMessageDetailsResponseDTO>> {
     if (!params.messageId || params.messageId.trim() === "") {
       return { success: false, data: { error: "Invalid message ID" } };
     }
-    const message = await this.repository.getMessageDetails(params.messageId);
+    const message = await this._repository.getMessageDetails(params.messageId);
     if (!message) {
       return { success: false, data: { error: "Message not found" } };
     }
@@ -216,11 +216,11 @@ export class GetMessageDetailsUseCase implements IGetMessageDetailsUseCase {
 
 
 export class GetAllAdminsUseCase implements IGetAllAdminsUseCase {
-  constructor(private readonly repository: ICommunicationRepository) { }
+  constructor(private readonly _repository: ICommunicationRepository) { }
 
   async execute(params: GetAllAdminsRequestDTO): Promise<ResponseDTO<GetAllAdminsResponseDTO>> {
     try {
-    const admins = await this.repository.getAllAdmins(params.search);
+    const admins = await this._repository.getAllAdmins(params.search);
       return { success: true, data: { admins } };
     } catch (error) {
       throw error;
@@ -229,10 +229,10 @@ export class GetAllAdminsUseCase implements IGetAllAdminsUseCase {
 }
 
 export class FetchUsersUseCase implements IFetchUsersUseCase {
-  constructor(private readonly repository: ICommunicationRepository) { }
+  constructor(private readonly _repository: ICommunicationRepository) { }
 
   async execute(params: FetchUsersRequestDTO): Promise<ResponseDTO<FetchUsersResponseDTO>> {
-    const users = await this.repository.fetchUsers(params.type, params.search);
+    const users = await this._repository.fetchUsers(params.type, params.search);
     const mappedUsers = users.map((user) => ({
       id: user._id,  
       email: user.email,

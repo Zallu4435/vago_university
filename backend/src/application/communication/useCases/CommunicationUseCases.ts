@@ -22,41 +22,18 @@ import {
   ResponseDTO
 } from "../../../domain/communication/dtos/CommunicationResponseDTOs";
 import { UserRole } from '../../../domain/communication/entities/Communication';
+import {
+  IGetInboxMessagesUseCase,
+  IGetSentMessagesUseCase,
+  ISendMessageUseCase,
+  IMarkMessageAsReadUseCase,
+  IDeleteMessageUseCase,
+  IGetMessageDetailsUseCase,
+  IGetAllAdminsUseCase,
+  IFetchUsersUseCase
+} from "./ICommunicationUseCases";
 
 
-export interface IGetInboxMessagesUseCase {
-  execute(params: GetInboxMessagesRequestDTO): Promise<ResponseDTO<GetInboxMessagesResponseDTO>>;
-}
-
-export interface IGetSentMessagesUseCase {
-  execute(params: GetSentMessagesRequestDTO): Promise<ResponseDTO<GetSentMessagesResponseDTO>>;
-}
-
-export interface ISendMessageUseCase {
-  execute(params: SendMessageRequestDTO): Promise<ResponseDTO<SendMessageResponseDTO>>;
-}
-
-export interface IMarkMessageAsReadUseCase {
-  execute(params: MarkMessageAsReadRequestDTO): Promise<ResponseDTO<MarkMessageAsReadResponseDTO>>;
-}
-
-export interface IDeleteMessageUseCase {
-  execute(params: DeleteMessageRequestDTO): Promise<ResponseDTO<DeleteMessageResponseDTO>>;
-}
-
-export interface IGetMessageDetailsUseCase {
-  execute(params: GetMessageDetailsRequestDTO): Promise<ResponseDTO<GetMessageDetailsResponseDTO>>;
-}
-
-
-
-export interface IGetAllAdminsUseCase {
-  execute(params: GetAllAdminsRequestDTO): Promise<ResponseDTO<GetAllAdminsResponseDTO>>;
-}
-
-export interface IFetchUsersUseCase {
-  execute(params: FetchUsersRequestDTO): Promise<ResponseDTO<FetchUsersResponseDTO>>;
-}
  
 export class GetInboxMessagesUseCase implements IGetInboxMessagesUseCase {
   constructor(private readonly _repository: ICommunicationRepository) { }

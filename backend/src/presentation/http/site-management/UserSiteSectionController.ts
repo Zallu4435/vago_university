@@ -1,11 +1,11 @@
 import { IHttpRequest, IHttpResponse } from "../IHttp";
-import { IGetUserSiteSectionsUseCase } from "../../../application/site-management/useCases/UserSiteSectionUseCases";
+import { IGetUserSiteSectionsUseCase } from "../../../application/site-management/useCases/IUserSiteSectionUseCases";
 import { GetUserSiteSectionsRequestDTO } from "../../../domain/site-management/dtos/UserSiteSectionDTOs";
 import { SiteSectionKey } from "../../../domain/site-management/entities/SiteSectionTypes";
 
 export class UserSiteSectionController {
   constructor(
-    private readonly getUserSiteSectionsUseCase: IGetUserSiteSectionsUseCase
+    private readonly _getUserSiteSectionsUseCase: IGetUserSiteSectionsUseCase
   ) { }
 
   async getSections(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -61,7 +61,7 @@ export class UserSiteSectionController {
       category: category as string,
     };
 
-    const result = await this.getUserSiteSectionsUseCase.execute(params);
+    const result = await this._getUserSiteSectionsUseCase.execute(params);
     if (!result.success) {
       return {
         statusCode: 400,

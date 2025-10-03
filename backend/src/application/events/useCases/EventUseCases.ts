@@ -4,26 +4,13 @@ import { IEventsRepository } from "../repositories/IEventsRepository";
 import { Event, PaginatedResponse, EventSummary, EventDocument } from "../../../domain/events/entities/Event";
 import { InvalidEventIdError, EventNotFoundError } from "../../../domain/events/errors/EventErrors";
 import { OrganizerType, EventType, Timeframe, EventStatus } from "../../../domain/events/entities/EventTypes";
-
-export interface IGetEventsUseCase {
-  execute(params: GetEventsRequestDTO): Promise<GetEventsResponseDTO>;
-}
-
-export interface IGetEventByIdUseCase {
-  execute(params: GetEventByIdRequestDTO): Promise<GetEventByIdResponseDTO>;
-}
-
-export interface ICreateEventUseCase {
-  execute(params: CreateEventRequestDTO): Promise<CreateEventResponseDTO>;
-}
-
-export interface IUpdateEventUseCase {
-  execute(params: UpdateEventRequestDTO): Promise<UpdateEventResponseDTO>;
-}
-
-export interface IDeleteEventUseCase {
-  execute(params: DeleteEventRequestDTO): Promise<{ message: string }>;
-}
+import {
+  IGetEventsUseCase,
+  IGetEventByIdUseCase,
+  ICreateEventUseCase,
+  IUpdateEventUseCase,
+  IDeleteEventUseCase
+} from "./IEventUseCases";
 
 export class GetEventsUseCase implements IGetEventsUseCase {
   constructor(private _eventsRepository: IEventsRepository) { }

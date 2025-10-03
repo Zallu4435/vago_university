@@ -6,13 +6,15 @@ import {
   DeleteNotificationUseCase,
   MarkNotificationAsReadUseCase,
   MarkAllNotificationsAsReadUseCase,
+} from '../../../application/notifications/useCases/NotificationUseCases';
+import {
   ICreateNotificationUseCase,
   IGetAllNotificationsUseCase,
   IGetIndividualNotificationUseCase,
   IDeleteNotificationUseCase,
   IMarkNotificationAsReadUseCase,
   IMarkAllNotificationsAsReadUseCase,
-} from '../../../application/notifications/useCases/NotificationUseCases';
+} from '../../../application/notifications/useCases/INotificationUseCases';
 import { NotificationRepository } from '../../repositories/notifications/NotificationRepository';
 import { NotificationController } from '../../../presentation/http/notifications/NotificationController';
 import { INotificationController } from '../../../presentation/http/IHttp';

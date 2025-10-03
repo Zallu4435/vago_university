@@ -10,34 +10,34 @@ import {
   IConfirmFacultyOfferUseCase,
   IDownloadCertificateUseCase,
   IBlockFacultyUseCase,
-} from "../../../application/faculty/useCases/FacultyUseCases";
+} from "../../../application/faculty/useCases/IFacultyUseCases";
 import { FacultyStatus } from "../../../domain/faculty/FacultyTypes";
 
 export class FacultyController implements IFacultyController {
-  private httpErrors: HttpErrors;
-  private httpSuccess: HttpSuccess;
+  private _httpErrors: HttpErrors;
+  private _httpSuccess: HttpSuccess;
 
   constructor(
-    private getFacultyUseCase: IGetFacultyUseCase,
-    private getFacultyByIdUseCase: IGetFacultyByIdUseCase,
-    private getFacultyByTokenUseCase: IGetFacultyByTokenUseCase,
-    private approveFacultyUseCase: IApproveFacultyUseCase,
-    private rejectFacultyUseCase: IRejectFacultyUseCase,
-    private deleteFacultyUseCase: IDeleteFacultyUseCase,
-    private confirmFacultyOfferUseCase: IConfirmFacultyOfferUseCase,
-    private downloadCertificateUseCase: IDownloadCertificateUseCase,
-    private blockFacultyUseCase: IBlockFacultyUseCase
+    private _getFacultyUseCase: IGetFacultyUseCase,
+    private _getFacultyByIdUseCase: IGetFacultyByIdUseCase,
+    private _getFacultyByTokenUseCase: IGetFacultyByTokenUseCase,
+    private _approveFacultyUseCase: IApproveFacultyUseCase,
+    private _rejectFacultyUseCase: IRejectFacultyUseCase,
+    private _deleteFacultyUseCase: IDeleteFacultyUseCase,
+    private _confirmFacultyOfferUseCase: IConfirmFacultyOfferUseCase,
+    private _downloadCertificateUseCase: IDownloadCertificateUseCase,
+    private _blockFacultyUseCase: IBlockFacultyUseCase
   ) {
-    this.httpErrors = new HttpErrors();
-    this.httpSuccess = new HttpSuccess();
+    this._httpErrors = new HttpErrors();
+    this._httpSuccess = new HttpSuccess();
   }
 
   async getFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { page = "1", limit = "5", status = "all", department = "all_departments", dateRange = "all", search, startDate, endDate } = httpRequest.query || {};
     if (isNaN(Number(page)) || isNaN(Number(limit)) || Number(page) < 1 || Number(limit) < 1) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const response = await this.getFacultyUseCase.execute({
+    const response = await this._getFacultyUseCase.execute({
       page: Number(page),
       limit: Number(limit),
       status: status as FacultyStatus,
@@ -48,97 +48,97 @@ export class FacultyController implements IFacultyController {
       endDate: endDate ? String(endDate) : undefined,
     });
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async getFacultyById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const response = await this.getFacultyByIdUseCase.execute({ id });
+    const response = await this._getFacultyByIdUseCase.execute({ id });
     if (!response.success) {
-      return this.httpErrors.error_404();
+      return this._httpErrors.error_404();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async getFacultyByToken(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     const { token } = httpRequest.query || {};
     if (!id || !token || typeof token !== "string") {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const response = await this.getFacultyByTokenUseCase.execute({
+    const response = await this._getFacultyByTokenUseCase.execute({
       facultyId: id,
       token,
     });
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async approveFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     const { department, position, startDate, salary, benefits, additionalNotes } = httpRequest.body || {};
     if (!id || !department || !startDate) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const response = await this.approveFacultyUseCase.execute({
+    const response = await this._approveFacultyUseCase.execute({
       id,
       additionalInfo: { department, position, startDate, salary, benefits, additionalNotes },
     });
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async rejectFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const response = await this.rejectFacultyUseCase.execute({ id });
+    const response = await this._rejectFacultyUseCase.execute({ id });
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async deleteFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const response = await this.deleteFacultyUseCase.execute({ id });
+    const response = await this._deleteFacultyUseCase.execute({ id });
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async confirmFacultyOffer(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id, action } = httpRequest.params || {};
     const { token } = httpRequest.query || {};
     if (!id || !action || !token || typeof token !== "string") {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     if (action !== "accept" && action !== "reject") {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const response = await this.confirmFacultyOfferUseCase.execute({
+    const response = await this._confirmFacultyOfferUseCase.execute({
       facultyId: id,
       token,
       action: action as "accept" | "reject",
     });
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async downloadCertificate(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -146,43 +146,43 @@ export class FacultyController implements IFacultyController {
     const { url, type } = httpRequest.query || {};
     const requestingUserId = httpRequest.user?.id;
     if (!facultyId || !url || typeof url !== "string" || !type || !requestingUserId) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const response = await this.downloadCertificateUseCase.execute({
+    const response = await this._downloadCertificateUseCase.execute({
       facultyId,
       certificateUrl: url as string,
       requestingUserId,
       type: String(type),
     });
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async blockFaculty(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const response = await this.blockFacultyUseCase.execute({ id });
+    const response = await this._blockFacultyUseCase.execute({ id });
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async serveDocument(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     try {
       if (!httpRequest.user) {
-        return this.httpErrors.error_401();
+        return this._httpErrors.error_401();
       }
 
       const { facultyId } = httpRequest.params || {};
       const { type, documentUrl } = httpRequest.query || {};
 
       if (!facultyId || !type || !documentUrl) {
-        return this.httpErrors.error_400();
+        return this._httpErrors.error_400();
       }
 
       const urlParts = (documentUrl as string).split('/');
@@ -198,7 +198,7 @@ export class FacultyController implements IFacultyController {
       const response = await fetch(signedUrl);
 
       if (!response.ok) {
-        return this.httpErrors.error_404();
+        return this._httpErrors.error_404();
       }
 
       const pdfBuffer = await response.arrayBuffer();
@@ -215,7 +215,7 @@ export class FacultyController implements IFacultyController {
       };
       return result_response;
     } catch (error) {
-      return this.httpErrors.error_500();
+      return this._httpErrors.error_500();
     }
   }
 }

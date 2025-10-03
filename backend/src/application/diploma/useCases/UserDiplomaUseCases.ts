@@ -19,39 +19,17 @@ import {
   ResponseDTO
 } from "../../../domain/diploma/dtos/UserDiplomaResponseDTOs";
 import { DiplomaNotFoundError, InvalidDiplomaStatusError } from "../../../domain/diploma/errors/DiplomaErrors";
+import {
+  IGetUserDiplomasUseCase,
+  IGetUserDiplomaByIdUseCase,
+  IGetUserDiplomaChapterUseCase,
+  IUpdateVideoProgressUseCase,
+  IMarkChapterCompleteUseCase,
+  IToggleBookmarkUseCase,
+  IGetCompletedChaptersUseCase,
+  IGetBookmarkedChaptersUseCase
+} from './IUserDiplomaUseCases';
  
-export interface IGetUserDiplomasUseCase {
-  execute(params: GetUserDiplomasRequestDTO): Promise<ResponseDTO<GetUserDiplomasResponseDTO>>;
-}
-
-export interface IGetUserDiplomaByIdUseCase {
-  execute(params: GetUserDiplomaByIdRequestDTO): Promise<ResponseDTO<GetUserDiplomaByIdResponseDTO>>;
-}
-
-export interface IGetUserDiplomaChapterUseCase {
-  execute(params: GetUserDiplomaChapterRequestDTO): Promise<ResponseDTO<GetUserDiplomaChapterResponseDTO>>;
-}
-
-export interface IUpdateVideoProgressUseCase {
-  execute(params: UpdateVideoProgressRequestDTO): Promise<ResponseDTO<UpdateVideoProgressResponseDTO>>;
-}
-
-export interface IMarkChapterCompleteUseCase {
-  execute(params: MarkChapterCompleteRequestDTO): Promise<ResponseDTO<MarkChapterCompleteResponseDTO>>;
-}
-
-export interface IToggleBookmarkUseCase {
-  execute(params: ToggleBookmarkRequestDTO): Promise<ResponseDTO<ToggleBookmarkResponseDTO>>;
-}
-
-export interface IGetCompletedChaptersUseCase {
-  execute(userId: string, courseId: string): Promise<ResponseDTO<GetCompletedChaptersResponseDTO>>;
-}
-
-export interface IGetBookmarkedChaptersUseCase {
-  execute(userId: string, courseId: string): Promise<ResponseDTO<GetBookmarkedChaptersResponseDTO>>;
-}
-
 function isValidObjectId(id: string): boolean {
   return typeof id === 'string' && /^[a-fA-F0-9]{24}$/.test(id);
 }

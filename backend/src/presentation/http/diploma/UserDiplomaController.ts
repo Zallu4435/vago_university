@@ -7,30 +7,30 @@ import {
   IToggleBookmarkUseCase,
   IGetCompletedChaptersUseCase,
   IGetBookmarkedChaptersUseCase
-} from "../../../application/diploma/useCases/UserDiplomaUseCases";
+} from "../../../application/diploma/useCases/IUserDiplomaUseCases";
 import { IUserDiplomaController, IHttpRequest, IHttpResponse, HttpSuccess, HttpErrors } from "../IHttp";
 
 export class UserDiplomaController implements IUserDiplomaController {
-  private httpSuccess: HttpSuccess;
-  private httpErrors: HttpErrors;
+  private _httpSuccess: HttpSuccess;
+  private _httpErrors: HttpErrors;
 
   constructor(
-    private readonly getUserDiplomasUseCase: IGetUserDiplomasUseCase,
-    private readonly getUserDiplomaByIdUseCase: IGetUserDiplomaByIdUseCase,
-    private readonly getUserDiplomaChapterUseCase: IGetUserDiplomaChapterUseCase,
-    private readonly updateVideoProgressUseCase: IUpdateVideoProgressUseCase,
-    private readonly markChapterCompleteUseCase: IMarkChapterCompleteUseCase,
-    private readonly toggleBookmarkUseCase: IToggleBookmarkUseCase,
-    private readonly getCompletedChaptersUseCase: IGetCompletedChaptersUseCase,
-    private readonly getBookmarkedChaptersUseCase: IGetBookmarkedChaptersUseCase
+    private readonly _getUserDiplomasUseCase: IGetUserDiplomasUseCase,
+    private readonly _getUserDiplomaByIdUseCase: IGetUserDiplomaByIdUseCase,
+    private readonly _getUserDiplomaChapterUseCase: IGetUserDiplomaChapterUseCase,
+    private readonly _updateVideoProgressUseCase: IUpdateVideoProgressUseCase,
+    private readonly _markChapterCompleteUseCase: IMarkChapterCompleteUseCase,
+    private readonly _toggleBookmarkUseCase: IToggleBookmarkUseCase,
+    private readonly _getCompletedChaptersUseCase: IGetCompletedChaptersUseCase,
+    private readonly _getBookmarkedChaptersUseCase: IGetBookmarkedChaptersUseCase
   ) {
-    this.httpSuccess = new HttpSuccess();
-    this.httpErrors = new HttpErrors();
+    this._httpSuccess = new HttpSuccess();
+    this._httpErrors = new HttpErrors();
   }
 
   async getUserDiplomas(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     if (!httpRequest.user) {
-      return this.httpErrors.error_401();
+      return this._httpErrors.error_401();
     }
 
     const { id } = httpRequest.user;
@@ -42,10 +42,10 @@ export class UserDiplomaController implements IUserDiplomaController {
       Number(page) < 1 ||
       Number(limit) < 1
     ) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const result = await this.getUserDiplomasUseCase.execute({
+    const result = await this._getUserDiplomasUseCase.execute({
       userId: id,
       page: Number(page),
       limit: Number(limit),
@@ -55,47 +55,47 @@ export class UserDiplomaController implements IUserDiplomaController {
     });
 
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async getUserDiplomaById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params;
 
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const result = await this.getUserDiplomaByIdUseCase.execute({ id });
+    const result = await this._getUserDiplomaByIdUseCase.execute({ id });
 
     if (!result.success) {
-      return this.httpErrors.error_404();
+      return this._httpErrors.error_404();
     }
 
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async getUserDiplomaChapter(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { courseId, chapterId } = httpRequest.params;
 
     if (!courseId || !chapterId) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const result = await this.getUserDiplomaChapterUseCase.execute({ courseId, chapterId });
+    const result = await this._getUserDiplomaChapterUseCase.execute({ courseId, chapterId });
 
     if (!result.success) {
-      return this.httpErrors.error_404();
+      return this._httpErrors.error_404();
     }
 
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async updateVideoProgress(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     if (!httpRequest.user) {
-      return this.httpErrors.error_401();
+      return this._httpErrors.error_401();
     }
 
     const { id } = httpRequest.user;
@@ -103,10 +103,10 @@ export class UserDiplomaController implements IUserDiplomaController {
     const { progress } = httpRequest.body;
 
     if (!courseId || !chapterId || typeof progress !== 'number') {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const result = await this.updateVideoProgressUseCase.execute({
+    const result = await this._updateVideoProgressUseCase.execute({
       userId: id,
       courseId,
       chapterId,
@@ -114,101 +114,101 @@ export class UserDiplomaController implements IUserDiplomaController {
     });
 
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async markChapterComplete(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     if (!httpRequest.user) {
-      return this.httpErrors.error_401();
+      return this._httpErrors.error_401();
     }
 
     const { id } = httpRequest.user;
     const { courseId, chapterId } = httpRequest.params;
 
     if (!courseId || !chapterId) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const result = await this.markChapterCompleteUseCase.execute({
+    const result = await this._markChapterCompleteUseCase.execute({
       userId: id,
       courseId,
       chapterId
     });
 
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async toggleBookmark(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     if (!httpRequest.user) {
-      return this.httpErrors.error_401();
+      return this._httpErrors.error_401();
     }
 
     const { id } = httpRequest.user;
     const { courseId, chapterId } = httpRequest.params;
 
     if (!courseId || !chapterId) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const result = await this.toggleBookmarkUseCase.execute({
+    const result = await this._toggleBookmarkUseCase.execute({
       userId: id,
       courseId,
       chapterId
     });
 
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async getCompletedChapters(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     if (!httpRequest.user) {
-      return this.httpErrors.error_401();
+      return this._httpErrors.error_401();
     }
 
     const { id } = httpRequest.user;
     const { courseId } = httpRequest.params;
 
     if (!courseId) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const result = await this.getCompletedChaptersUseCase.execute(id, courseId);
+    const result = await this._getCompletedChaptersUseCase.execute(id, courseId);
 
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async getBookmarkedChapters(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     if (!httpRequest.user) {
-      return this.httpErrors.error_401();
+      return this._httpErrors.error_401();
     }
 
     const { id } = httpRequest.user;
     const { courseId } = httpRequest.params;
 
     if (!courseId) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const result = await this.getBookmarkedChaptersUseCase.execute(id, courseId);
+    const result = await this._getBookmarkedChaptersUseCase.execute(id, courseId);
 
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 } 

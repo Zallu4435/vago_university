@@ -4,52 +4,16 @@ import { GetMaterialsResponseDTO, GetMaterialByIdResponseDTO, CreateMaterialResp
 import { Material, MaterialProps } from '../../../domain/materials/entities/Material';
 import { MaterialFilter } from '../../../domain/materials/entities/MaterialTypes';
 import { MaterialNotFoundError, MaterialValidationError } from '../../../domain/materials/errors/MaterialErrors';
+import {
+  IGetMaterialsUseCase,
+  IGetMaterialByIdUseCase,
+  ICreateMaterialUseCase,
+  IUpdateMaterialUseCase,
+  IDeleteMaterialUseCase
+} from './IMaterialUseCases';
 
-export interface IGetMaterialsUseCase {
-  execute(params: GetMaterialsRequestDTO): Promise<GetMaterialsResponseDTO>;
-}
 
-export interface IGetMaterialByIdUseCase {
-  execute(params: GetMaterialByIdRequestDTO): Promise<GetMaterialByIdResponseDTO>;
-}
-
-export interface ICreateMaterialUseCase {
-  execute(params: CreateMaterialRequestDTO): Promise<CreateMaterialResponseDTO>;
-}
-
-export interface IUpdateMaterialUseCase {
-  execute(params: UpdateMaterialRequestDTO): Promise<UpdateMaterialResponseDTO>;
-}
-
-export interface IDeleteMaterialUseCase {
-  execute(params: DeleteMaterialRequestDTO): Promise<void>;
-}
-
-function toMaterialProps(raw): MaterialProps {
-  return {
-    id: raw._id?.toString() ?? raw.id,
-    title: raw.title,
-    description: raw.description,
-    subject: raw.subject,
-    course: raw.course,
-    semester: raw.semester,
-    type: raw.type,
-    fileUrl: raw.fileUrl,
-    thumbnailUrl: raw.thumbnailUrl,
-    tags: raw.tags,
-    difficulty: raw.difficulty,
-    estimatedTime: raw.estimatedTime,
-    isNewMaterial: raw.isNewMaterial,
-    isRestricted: raw.isRestricted,
-    uploadedBy: raw.uploadedBy,
-    uploadedAt: raw.uploadedAt,
-    views: raw.views,
-    downloads: raw.downloads,
-    rating: raw.rating,
-  };
-}
-
-export class GetMaterialsUseCase {
+export class GetMaterialsUseCase implements IGetMaterialsUseCase {
   constructor(private _repo: IMaterialsRepository) { }
   async execute(params: GetMaterialsRequestDTO): Promise<GetMaterialsResponseDTO> {
     const filter: MaterialFilter = {};
@@ -174,7 +138,7 @@ export class GetMaterialsUseCase {
   }
 }
 
-export class GetMaterialByIdUseCase {
+export class GetMaterialByIdUseCase implements IGetMaterialByIdUseCase {
   constructor(private _repo: IMaterialsRepository) { }
   async execute(params: GetMaterialByIdRequestDTO): Promise<GetMaterialByIdResponseDTO | null> {
     if (!params.id) throw new MaterialValidationError('Material ID is required');
@@ -184,7 +148,7 @@ export class GetMaterialByIdUseCase {
   }
 }
 
-export class CreateMaterialUseCase {
+export class CreateMaterialUseCase implements ICreateMaterialUseCase {
   constructor(private _repo: IMaterialsRepository) { }
   async execute(params: CreateMaterialRequestDTO): Promise<CreateMaterialResponseDTO> {
     const material = Material.create(params);
@@ -193,7 +157,7 @@ export class CreateMaterialUseCase {
   }
 }
 
-export class UpdateMaterialUseCase {
+export class UpdateMaterialUseCase implements IUpdateMaterialUseCase {
   constructor(private _repo: IMaterialsRepository) { }
   async execute(params: UpdateMaterialRequestDTO): Promise<UpdateMaterialResponseDTO | null> {
     if (!params.id) throw new MaterialValidationError('Material ID is required');
@@ -212,7 +176,7 @@ export class UpdateMaterialUseCase {
   }
 }
 
-export class DeleteMaterialUseCase {
+export class DeleteMaterialUseCase implements IDeleteMaterialUseCase {
   constructor(private _repo: IMaterialsRepository) { }
   async execute(params: DeleteMaterialRequestDTO): Promise<void> {
     if (!params.id) throw new Error('Material ID is required');
@@ -221,3 +185,28 @@ export class DeleteMaterialUseCase {
     await this._repo.delete(params.id);
   }
 } 
+
+
+function toMaterialProps(raw): MaterialProps {
+  return {
+    id: raw._id?.toString() ?? raw.id,
+    title: raw.title,
+    description: raw.description,
+    subject: raw.subject,
+    course: raw.course,
+    semester: raw.semester,
+    type: raw.type,
+    fileUrl: raw.fileUrl,
+    thumbnailUrl: raw.thumbnailUrl,
+    tags: raw.tags,
+    difficulty: raw.difficulty,
+    estimatedTime: raw.estimatedTime,
+    isNewMaterial: raw.isNewMaterial,
+    isRestricted: raw.isRestricted,
+    uploadedBy: raw.uploadedBy,
+    uploadedAt: raw.uploadedAt,
+    views: raw.views,
+    downloads: raw.downloads,
+    rating: raw.rating,
+  };
+}

@@ -4,34 +4,16 @@ import { GetDiplomasResponseDTO, GetDiplomaByIdResponseDTO, CreateDiplomaRespons
 import { Diploma } from "../../../domain/diploma/entities/Diploma";
 import { DiplomaNotFoundError, InvalidDiplomaStatusError } from "../../../domain/diploma/errors/DiplomaErrors";
 import { DiplomaDocument } from "../../../domain/diploma/entities/diplomatypes";
+import {
+  IGetDiplomasUseCase,
+  IGetDiplomaByIdUseCase,
+  ICreateDiplomaUseCase,
+  IUpdateDiplomaUseCase,
+  IDeleteDiplomaUseCase,
+  IEnrollStudentUseCase,
+  IUnenrollStudentUseCase
+} from "./IDiplomaUseCases";
 
-export interface IGetDiplomasUseCase {
-  execute(params: GetDiplomasRequestDTO): Promise<ResponseDTO<GetDiplomasResponseDTO>>;
-}
- 
-export interface IGetDiplomaByIdUseCase {
-  execute(params: GetDiplomaByIdRequestDTO): Promise<ResponseDTO<GetDiplomaByIdResponseDTO>>;
-}
-
-export interface ICreateDiplomaUseCase {
-  execute(params: CreateDiplomaRequestDTO): Promise<ResponseDTO<CreateDiplomaResponseDTO>>;
-}
-
-export interface IUpdateDiplomaUseCase {
-  execute(params: UpdateDiplomaRequestDTO): Promise<ResponseDTO<UpdateDiplomaResponseDTO>>;
-}
-
-export interface IDeleteDiplomaUseCase {
-  execute(params: DeleteDiplomaRequestDTO): Promise<ResponseDTO<{ message: string }>>;
-}
-
-export interface IEnrollStudentUseCase {
-  execute(params: EnrollStudentRequestDTO): Promise<ResponseDTO<EnrollStudentResponseDTO>>;
-}
-
-export interface IUnenrollStudentUseCase {
-  execute(params: UnenrollStudentRequestDTO): Promise<ResponseDTO<UnenrollStudentResponseDTO>>;
-}
 
 export class GetDiplomasUseCase implements IGetDiplomasUseCase {
   constructor(private readonly _diplomaRepository: IDiplomaRepository) { }

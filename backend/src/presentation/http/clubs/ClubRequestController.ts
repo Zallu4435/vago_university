@@ -3,7 +3,7 @@ import {
   IApproveClubRequestUseCase,
   IRejectClubRequestUseCase,
   IGetClubRequestDetailsUseCase
-} from "../../../application/clubs/useCases/ClubRequestUseCases";
+} from "../../../application/clubs/useCases/IClubRequestUseCases";
 import {
   GetClubRequestsRequestDTO,
   ApproveClubRequestRequestDTO,
@@ -13,17 +13,17 @@ import {
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IClubRequestController } from "../IHttp";
 
 export class ClubRequestController implements IClubRequestController {
-  private httpErrors: HttpErrors;
-  private httpSuccess: HttpSuccess;
+  private _httpErrors: HttpErrors;
+  private _httpSuccess: HttpSuccess;
 
   constructor(
-    private getClubRequestsUseCase: IGetClubRequestsUseCase,
-    private approveClubRequestUseCase: IApproveClubRequestUseCase,
-    private rejectClubRequestUseCase: IRejectClubRequestUseCase,
-    private getClubRequestDetailsUseCase: IGetClubRequestDetailsUseCase
+    private _getClubRequestsUseCase: IGetClubRequestsUseCase,
+    private _approveClubRequestUseCase: IApproveClubRequestUseCase,
+    private _rejectClubRequestUseCase: IRejectClubRequestUseCase,
+    private _getClubRequestDetailsUseCase: IGetClubRequestDetailsUseCase
   ) {
-    this.httpErrors = new HttpErrors();
-    this.httpSuccess = new HttpSuccess();
+    this._httpErrors = new HttpErrors();
+    this._httpSuccess = new HttpSuccess();
   }
 
   async getClubRequests(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -37,37 +37,37 @@ export class ClubRequestController implements IClubRequestController {
       endDate: endDate ? new Date(endDate) : undefined,
       search: search ? String(search) : undefined,
     };
-    const response = await this.getClubRequestsUseCase.execute(getClubRequestsRequestDTO);
-    return this.httpSuccess.success_200(response);
+    const response = await this._getClubRequestsUseCase.execute(getClubRequestsRequestDTO);
+    return this._httpSuccess.success_200(response);
   }
 
   async approveClubRequest(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     const approveClubRequestRequestDTO: ApproveClubRequestRequestDTO = { id };
-    const response = await this.approveClubRequestUseCase.execute(approveClubRequestRequestDTO);
-    return this.httpSuccess.success_200(response);
+    const response = await this._approveClubRequestUseCase.execute(approveClubRequestRequestDTO);
+    return this._httpSuccess.success_200(response);
   }
 
   async rejectClubRequest(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     const rejectClubRequestRequestDTO: RejectClubRequestRequestDTO = { id };
-    const response = await this.rejectClubRequestUseCase.execute(rejectClubRequestRequestDTO);
-    return this.httpSuccess.success_200(response);
+    const response = await this._rejectClubRequestUseCase.execute(rejectClubRequestRequestDTO);
+    return this._httpSuccess.success_200(response);
   }
 
   async getClubRequestDetails(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     const getClubRequestDetailsRequestDTO: GetClubRequestDetailsRequestDTO = { id };
-    const response = await this.getClubRequestDetailsUseCase.execute(getClubRequestDetailsRequestDTO);
-    return this.httpSuccess.success_200(response);
+    const response = await this._getClubRequestDetailsUseCase.execute(getClubRequestDetailsRequestDTO);
+    return this._httpSuccess.success_200(response);
   }
 }

@@ -23,7 +23,9 @@ import {
   ReplyToMessageUseCase,
   DeleteChatUseCase,
   BlockChatUseCase,
-  ClearChatUseCase,
+  ClearChatUseCase
+} from "../../../application/chat/useCases/ChatUseCases";
+import {
   ISendMessageUseCase,
   ISearchChatsUseCase,
   ISearchUsersUseCase,
@@ -47,8 +49,7 @@ import {
   IBlockChatUseCase,
   IClearChatUseCase,
   IGetChatMessagesUseCase,
-} from "../../../application/chat/useCases/ChatUseCases";
-import { FileUploadService } from '../../services/upload/FileUploadService';
+} from "../../../application/chat/useCases/IChatUseCases";
 
 export const getChatComposer = () => {
   const chatRepository = new ChatRepository();

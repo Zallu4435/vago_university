@@ -8,7 +8,9 @@ import {
     ISendEmailOtpUseCase,
     IVerifyEmailOtpUseCase,
     IResetPasswordUseCase,
-    IConfirmRegistrationUseCase,
+    IConfirmRegistrationUseCase
+} from '../../../application/auth/useCases/IAuthUseCases';
+import {
     LogoutAllUseCase,
     RegisterUseCase,
     LoginUseCase,
@@ -18,7 +20,7 @@ import {
     SendEmailOtpUseCase,
     VerifyEmailOtpUseCase,
     ResetPasswordUseCase,
-    ConfirmRegistrationUseCase,
+    ConfirmRegistrationUseCase
 } from '../../../application/auth/useCases/AuthUseCases';
 import { AuthRepository } from '../../../infrastructure/repositories/auth/AuthRepository';
 import { AuthController } from '../../../presentation/http/auth/AuthController';

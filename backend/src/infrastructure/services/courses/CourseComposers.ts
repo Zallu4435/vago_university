@@ -1,5 +1,6 @@
 import { ICoursesRepository } from "../../../application/courses/repositories/ICoursesRepository";
-import { GetCoursesUseCase, GetCourseByIdUseCase, CreateCourseUseCase, UpdateCourseUseCase, DeleteCourseUseCase, IGetCourseByIdUseCase, IGetCoursesUseCase, ICreateCourseUseCase, IUpdateCourseUseCase, IDeleteCourseUseCase } from "../../../application/courses/useCases/CourseUseCases";
+import { GetCoursesUseCase, GetCourseByIdUseCase, CreateCourseUseCase, UpdateCourseUseCase, DeleteCourseUseCase } from "../../../application/courses/useCases/CourseUseCases";
+import { IGetCourseByIdUseCase, IGetCoursesUseCase, ICreateCourseUseCase, IUpdateCourseUseCase, IDeleteCourseUseCase } from "../../../application/courses/useCases/ICourseUseCases";
 import { CourseController } from "../../../presentation/http/courses/CourseController";
 import { CoursesRepository } from "../../repositories/courses/CourseRepository";
 import { ICourseController } from "../../../presentation/http/IHttp";

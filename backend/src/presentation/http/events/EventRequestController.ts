@@ -1,19 +1,19 @@
-import { IGetEventRequestsUseCase, IApproveEventRequestUseCase, IRejectEventRequestUseCase, IGetEventRequestDetailsUseCase } from "../../../application/events/useCases/EventRequestUseCases";
+import { IGetEventRequestsUseCase, IApproveEventRequestUseCase, IRejectEventRequestUseCase, IGetEventRequestDetailsUseCase } from "../../../application/events/useCases/IEventRequestUseCases";
 import { GetEventRequestsRequestDTO, ApproveEventRequestRequestDTO, RejectEventRequestRequestDTO, GetEventRequestDetailsRequestDTO } from "../../../domain/events/dtos/EventRequestRequestDTOs";
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IEventRequestController } from "../IHttp";
 
 export class EventRequestController implements IEventRequestController {
-  private httpErrors: HttpErrors;
-  private httpSuccess: HttpSuccess;
+  private _httpErrors: HttpErrors;
+  private _httpSuccess: HttpSuccess;
 
   constructor(
-    private getEventRequestsUseCase: IGetEventRequestsUseCase,
-    private approveEventRequestUseCase: IApproveEventRequestUseCase,
-    private rejectEventRequestUseCase: IRejectEventRequestUseCase,
-    private getEventRequestDetailsUseCase: IGetEventRequestDetailsUseCase
+    private _getEventRequestsUseCase: IGetEventRequestsUseCase,
+    private _approveEventRequestUseCase: IApproveEventRequestUseCase,
+    private _rejectEventRequestUseCase: IRejectEventRequestUseCase,
+    private _getEventRequestDetailsUseCase: IGetEventRequestDetailsUseCase
   ) {
-    this.httpErrors = new HttpErrors();
-    this.httpSuccess = new HttpSuccess();
+    this._httpErrors = new HttpErrors();
+    this._httpSuccess = new HttpSuccess();
   }
 
   async getEventRequests(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -43,8 +43,8 @@ export class EventRequestController implements IEventRequestController {
     
     console.log('Event request controller received parameters:', getEventRequestsRequestDTO);
     
-    const response = await this.getEventRequestsUseCase.execute(getEventRequestsRequestDTO);
-    return this.httpSuccess.success_200({
+    const response = await this._getEventRequestsUseCase.execute(getEventRequestsRequestDTO);
+    return this._httpSuccess.success_200({
       eventRequests: response.data,
       totalItems: response.totalItems,
       totalPages: response.totalPages,
@@ -55,30 +55,30 @@ export class EventRequestController implements IEventRequestController {
   async approveEventRequest(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     const approveEventRequestRequestDTO: ApproveEventRequestRequestDTO = { id };
-    const response = await this.approveEventRequestUseCase.execute(approveEventRequestRequestDTO);
-    return this.httpSuccess.success_200(response);
+    const response = await this._approveEventRequestUseCase.execute(approveEventRequestRequestDTO);
+    return this._httpSuccess.success_200(response);
   }
 
   async rejectEventRequest(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     const rejectEventRequestRequestDTO: RejectEventRequestRequestDTO = { id };
-    const response = await this.rejectEventRequestUseCase.execute(rejectEventRequestRequestDTO);
-    return this.httpSuccess.success_200(response);
+    const response = await this._rejectEventRequestUseCase.execute(rejectEventRequestRequestDTO);
+    return this._httpSuccess.success_200(response);
   }
 
   async getEventRequestDetails(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     const getEventRequestDetailsRequestDTO: GetEventRequestDetailsRequestDTO = { id };
-    const response = await this.getEventRequestDetailsUseCase.execute(getEventRequestDetailsRequestDTO);
-    return this.httpSuccess.success_200(response);
+    const response = await this._getEventRequestDetailsUseCase.execute(getEventRequestDetailsRequestDTO);
+    return this._httpSuccess.success_200(response);
   }
 }

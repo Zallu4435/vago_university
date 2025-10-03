@@ -5,13 +5,15 @@ import {
   GetUserAssignmentByIdUseCase,
   SubmitUserAssignmentUseCase,
   GetUserAssignmentStatusUseCase,
-  GetUserAssignmentFeedbackUseCase,
+  GetUserAssignmentFeedbackUseCase
+} from '../../../application/assignments/useCases/UserAssignmentUseCases';
+import {
   IGetUserAssignmentsUseCase,
   IGetUserAssignmentByIdUseCase,
   ISubmitUserAssignmentUseCase,
   IGetUserAssignmentStatusUseCase,
   IGetUserAssignmentFeedbackUseCase
-} from '../../../application/assignments/useCases/UserAssignmentUseCases';
+} from '../../../application/assignments/useCases/IUserAssignmentUseCases';
 import { UserAssignmentController } from '../../../presentation/http/assignments/UserAssignmentController';
 import { IUserAssignmentController } from '../../../presentation/http/IHttp';
 

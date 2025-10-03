@@ -25,6 +25,14 @@ import {
   EnquiryValidationError,
   EnquiryReplyFailedError,
 } from "../../../domain/enquiry/errors/EnquiryErrors";
+import {
+  ICreateEnquiryUseCase,
+  IGetEnquiriesUseCase,
+  IGetEnquiryByIdUseCase,
+  IUpdateEnquiryStatusUseCase,
+  IDeleteEnquiryUseCase,
+  ISendEnquiryReplyUseCase
+} from './IEnquiryUseCases';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
 
@@ -39,30 +47,6 @@ function toEnquiryProps(raw): EnquiryProps {
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
   };
-}
-
-export interface ICreateEnquiryUseCase {
-  execute(params: CreateEnquiryRequestDTO): Promise<CreateEnquiryResponseDTO>;
-}
-
-export interface IGetEnquiriesUseCase {
-  execute(params: GetEnquiriesRequestDTO): Promise<GetEnquiriesResponseDTO>;
-}
-
-export interface IGetEnquiryByIdUseCase {
-  execute(params: GetEnquiryByIdRequestDTO): Promise<GetEnquiryByIdResponseDTO>;
-}
-
-export interface IUpdateEnquiryStatusUseCase {
-  execute(params: UpdateEnquiryStatusRequestDTO): Promise<UpdateEnquiryStatusResponseDTO>;
-}
-
-export interface IDeleteEnquiryUseCase {
-  execute(params: DeleteEnquiryRequestDTO): Promise<DeleteEnquiryResponseDTO>;
-}
-
-export interface ISendEnquiryReplyUseCase {
-  execute(params: SendEnquiryReplyRequestDTO): Promise<SendEnquiryReplyResponseDTO>;
 }
 
 export class CreateEnquiryUseCase implements ICreateEnquiryUseCase {

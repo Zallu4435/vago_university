@@ -15,22 +15,13 @@ import {
 } from "../../../domain/courses/errors/CourseErrors";
 import { EnrollmentStatus } from "../../../domain/courses/entities/coursetypes";
 import { PopulatedEnrollment } from "../../../domain/courses/entities/EnrollmentResponseEntities";
+import {
+  IGetEnrollmentsUseCase,
+  IApproveEnrollmentUseCase,
+  IRejectEnrollmentUseCase,
+  IGetCourseRequestDetailsUseCase
+} from "./IEnrollmentUseCases";
 
-export interface IGetEnrollmentsUseCase {
-  execute(params: GetEnrollmentsRequestDTO): Promise<{ success: boolean; data: GetEnrollmentsResponseDTO }>;
-}
-
-export interface IApproveEnrollmentUseCase {
-  execute(params: ApproveEnrollmentRequestDTO): Promise<{ success: boolean; data: void }>;
-} 
-
-export interface IRejectEnrollmentUseCase {
-  execute(params: RejectEnrollmentRequestDTO): Promise<{ success: boolean; data: void }>;
-}
-
-export interface IGetCourseRequestDetailsUseCase {
-  execute(params: GetCourseRequestDetailsRequestDTO): Promise<{ success: boolean; data: GetCourseRequestDetailsResponseDTO | null }>;
-}
 
 export class GetEnrollmentsUseCase implements IGetEnrollmentsUseCase {
   constructor(private readonly _courseRepository: ICoursesRepository) {}

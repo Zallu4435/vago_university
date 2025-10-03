@@ -8,6 +8,8 @@ import {
     DeleteAdmissionUseCase,
     ConfirmAdmissionOfferUseCase,
     BlockAdmissionUseCase,
+} from '../../../application/admin/useCases/AdmissionUseCases';
+import {
     IGetAdmissionsUseCase,
     IGetAdmissionByIdUseCase,
     IGetAdmissionByTokenUseCase,
@@ -16,7 +18,7 @@ import {
     IDeleteAdmissionUseCase,
     IConfirmAdmissionOfferUseCase,
     IBlockAdmissionUseCase
-} from '../../../application/admin/useCases/AdmissionUseCases';
+} from '../../../application/admin/useCases/IAdmissionUseCases';
 import { AdmissionRepository } from '../../repositories/admin/AdmissionRepository';
 import { AdminAdmissionController } from '../../../presentation/http/admin/AdmissionController';
 import { IAdminAdmissionController } from '../../../presentation/http/IHttp';

@@ -14,22 +14,13 @@ import {
 import { ProfileErrorType } from "../../../domain/profile/enums/ProfileErrorType";
 import { IProfileRepository } from "../repositories/IProfileRepository";
 import bcrypt from "bcryptjs";
+import {
+    IGetProfileUseCase,
+    IUpdateProfileUseCase,
+    IChangePasswordUseCase,
+    IUpdateProfilePictureUseCase
+} from "./IProfileUseCases";
 
-export interface IGetProfileUseCase {
-    execute(params: GetProfileRequestDTO): Promise<ResponseDTO<ProfileResponseDTO>>;
-}
-
-export interface IUpdateProfileUseCase {
-    execute(params: UpdateProfileRequestDTO): Promise<ResponseDTO<UpdateProfileResponseDTO>>;
-}
-
-export interface IChangePasswordUseCase {
-    execute(params: ChangePasswordRequestDTO): Promise<ResponseDTO<ChangePasswordResponseDTO>>;
-}
-
-export interface IUpdateProfilePictureUseCase {
-    execute(params: UpdateProfilePictureRequestDTO): Promise<ResponseDTO<UpdateProfilePictureResponseDTO>>;
-}
 
 export class GetProfileUseCase implements IGetProfileUseCase {
     constructor(private profileRepository: IProfileRepository) { }

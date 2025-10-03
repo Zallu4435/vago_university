@@ -15,27 +15,15 @@ import {
 import { ICoursesRepository } from "../repositories/ICoursesRepository";
 import { Course } from "../../../domain/courses/entities/Course";
 import { CourseNotFoundError, InvalidCourseIdError } from "../../../domain/courses/errors/CourseErrors";
+import {
+  IGetCoursesUseCase,
+  IGetCourseByIdUseCase,
+  ICreateCourseUseCase,
+  IUpdateCourseUseCase,
+  IDeleteCourseUseCase
+} from "./ICourseUseCases";
 
-export interface IGetCoursesUseCase {
-  execute(params: GetCoursesRequestDTO): Promise<{ success: boolean; data: GetCoursesResponseDTO }>;
-}
 
-export interface IGetCourseByIdUseCase {
-  execute(params: GetCourseByIdRequestDTO): Promise<{ success: boolean; data: GetCourseByIdResponseDTO }>; 
-}
-
-export interface ICreateCourseUseCase {
-  execute(params: CreateCourseRequestDTO): Promise<{ success: boolean; data: CreateCourseResponseDTO }>;
-}
-
-export interface IUpdateCourseUseCase {
-  execute(params: UpdateCourseRequestDTO): Promise<{ success: boolean; data: UpdateCourseResponseDTO }>; 
-}
-
-export interface IDeleteCourseUseCase {
-  execute(params: DeleteCourseRequestDTO): Promise<{ success: boolean; data: void }>;
-}
- 
 export class GetCoursesUseCase implements IGetCoursesUseCase {
   constructor(private readonly _courseRepository: ICoursesRepository) {}
 

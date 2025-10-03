@@ -15,26 +15,14 @@ import {
   ResponseDTO
 } from '../../../domain/assignments/dtos/UserAssignmentResponseDTOs';
 import { AssignmentErrorType } from '../../../domain/assignments/enums/AssignmentErrorType';
+import {
+  IGetUserAssignmentsUseCase,
+  IGetUserAssignmentByIdUseCase,
+  ISubmitUserAssignmentUseCase,
+  IGetUserAssignmentStatusUseCase,
+  IGetUserAssignmentFeedbackUseCase
+} from "./IUserAssignmentUseCases";
 
-export interface IGetUserAssignmentsUseCase {
-  execute(params: GetUserAssignmentsRequestDTO): Promise<ResponseDTO<GetUserAssignmentsResponseDTO>>;
-}
-
-export interface IGetUserAssignmentByIdUseCase {
-  execute(params: GetUserAssignmentByIdRequestDTO): Promise<ResponseDTO<GetUserAssignmentResponseDTO>>;
-}
-
-export interface ISubmitUserAssignmentUseCase {
-  execute(params: SubmitUserAssignmentRequestDTO): Promise<ResponseDTO<SubmitUserAssignmentResponseDTO>>;
-}
-
-export interface IGetUserAssignmentStatusUseCase {
-  execute(params: GetUserAssignmentStatusRequestDTO): Promise<ResponseDTO<GetUserAssignmentStatusResponseDTO>>;
-}
-
-export interface IGetUserAssignmentFeedbackUseCase {
-  execute(params: GetUserAssignmentFeedbackRequestDTO): Promise<ResponseDTO<GetUserAssignmentFeedbackResponseDTO>>;
-}
 
 export class GetUserAssignmentsUseCase implements IGetUserAssignmentsUseCase {
   constructor(private userAssignmentRepository: IUserAssignmentRepository) {}

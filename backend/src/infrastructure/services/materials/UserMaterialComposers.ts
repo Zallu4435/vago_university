@@ -1,42 +1,30 @@
 import { UserMaterialController } from '../../../presentation/http/materials/UserMaterialController';
 import { UserMaterialsRepository } from '../../repositories/materials/UserMaterialsRepository';
-import { 
+import { IUserMaterialsRepository } from '../../../application/materials/repositories/IUserMaterialsRepository';
+import {
   GetUserMaterialsUseCase,
   GetUserMaterialByIdUseCase,
   ToggleBookmarkUseCase,
   ToggleLikeUseCase,
   DownloadMaterialUseCase,
+} from '../../../application/materials/useCases/UserMaterialUseCases';
+import {
   IGetUserMaterialsUseCase,
   IGetUserMaterialByIdUseCase,
   IToggleBookmarkUseCase,
   IToggleLikeUseCase,
   IDownloadMaterialUseCase
-} from '../../../application/materials/useCases/UserMaterialUseCases';
+} from '../../../application/materials/useCases/IUserMaterialUseCases';
 
-class GetUserBookmarkedMaterialsUseCase {
-  constructor(private repo) {}
-  async execute(params){
-    return { materials: [], totalPages: 0 };
-  }
-}
-
-class GetUserLikedMaterialsUseCase {
-  constructor(private repo) {}
-  async execute(params){
-    return { materials: [], totalPages: 0 };
-  }
-}
 
 export const makeUserMaterialController = () => {
-  const repository = new UserMaterialsRepository();
-  
+  const repository: IUserMaterialsRepository = new UserMaterialsRepository();
+
   const getMaterialsUseCase: IGetUserMaterialsUseCase = new GetUserMaterialsUseCase(repository);
   const getMaterialByIdUseCase: IGetUserMaterialByIdUseCase = new GetUserMaterialByIdUseCase(repository);
   const toggleBookmarkUseCase: IToggleBookmarkUseCase = new ToggleBookmarkUseCase(repository);
   const toggleLikeUseCase: IToggleLikeUseCase = new ToggleLikeUseCase(repository);
   const downloadMaterialUseCase: IDownloadMaterialUseCase = new DownloadMaterialUseCase(repository);
-  const getBookmarkedMaterialsUseCase = new GetUserBookmarkedMaterialsUseCase(repository);
-  const getLikedMaterialsUseCase = new GetUserLikedMaterialsUseCase(repository);
 
   return new UserMaterialController(
     getMaterialsUseCase,

@@ -12,22 +12,12 @@ import {
 import { IClubsRepository } from "../repositories/IClubsRepository";
 import { GetClubRequestsRequest } from "../../../domain/clubs/entities/Club";
 import { PopulatedClubRequest, PopulatedClubRequestSummary } from "../../../domain/clubs/entities/ClubRequest";
-
-export interface IGetClubRequestsUseCase {
-  execute(params: GetClubRequestsRequestDTO): Promise<GetClubRequestsResponseDTO>;
-}
-
-export interface IApproveClubRequestUseCase {
-  execute(params: ApproveClubRequestRequestDTO): Promise<{ message: string }>;
-}
-
-export interface IRejectClubRequestUseCase {
-  execute(params: RejectClubRequestRequestDTO): Promise<{ message: string }>;
-}
-
-export interface IGetClubRequestDetailsUseCase {
-  execute(params: GetClubRequestDetailsRequestDTO): Promise<GetClubRequestDetailsResponseDTO>;
-}
+import {
+  IGetClubRequestsUseCase,
+  IApproveClubRequestUseCase,
+  IGetClubRequestDetailsUseCase,
+  IRejectClubRequestUseCase
+} from "./IClubRequestUseCases";
 
 
 export class GetClubRequestsUseCase implements IGetClubRequestsUseCase {

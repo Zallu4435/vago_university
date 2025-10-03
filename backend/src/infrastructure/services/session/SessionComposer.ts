@@ -13,6 +13,8 @@ import {
   UpdateAttendanceStatusUseCase,
   RecordAttendanceJoinUseCase,
   RecordAttendanceLeaveUseCase,
+} from '../../../application/session/useCases/VideoSessionUseCases';
+import {
   ICreateVideoSessionUseCase,
   IJoinVideoSessionUseCase,
   IGetVideoSessionUseCase,
@@ -25,7 +27,7 @@ import {
   IUpdateAttendanceStatusUseCase,
   IRecordAttendanceJoinUseCase,
   IRecordAttendanceLeaveUseCase
-} from '../../../application/session/useCases/VideoSessionUseCases';
+} from '../../../application/session/useCases/IVideoSessionUseCases';
 import { VideoSessionController } from '../../../presentation/http/session/VideoSessionController';
 import { IVideoSessionController } from '../../../presentation/http/IHttp';
 

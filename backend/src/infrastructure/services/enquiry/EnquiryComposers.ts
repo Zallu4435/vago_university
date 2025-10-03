@@ -7,6 +7,8 @@ import {
   IUpdateEnquiryStatusUseCase,
   IDeleteEnquiryUseCase,
   ISendEnquiryReplyUseCase,
+} from "../../../application/enquiry/useCases/IEnquiryUseCases";
+import {
   CreateEnquiryUseCase,
   GetEnquiriesUseCase,
   GetEnquiryByIdUseCase,

@@ -1,24 +1,20 @@
-import { IGetEventsUseCase } from "../../../application/events/useCases/EventUseCases";
-import { IGetEventByIdUseCase } from "../../../application/events/useCases/EventUseCases";
-import { ICreateEventUseCase } from "../../../application/events/useCases/EventUseCases";
-import { IUpdateEventUseCase } from "../../../application/events/useCases/EventUseCases";
-import { IDeleteEventUseCase } from "../../../application/events/useCases/EventUseCases";
+import { IGetEventsUseCase, IGetEventByIdUseCase, ICreateEventUseCase, IUpdateEventUseCase, IDeleteEventUseCase } from "../../../application/events/useCases/IEventUseCases";
 import { GetEventsRequestDTO, GetEventByIdRequestDTO, CreateEventRequestDTO, UpdateEventRequestDTO, DeleteEventRequestDTO } from "../../../domain/events/dtos/EventRequestDTOs";
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IEventController } from "../IHttp";
 
 export class EventController implements IEventController {
-  private httpErrors: HttpErrors;
-  private httpSuccess: HttpSuccess;
+  private _httpErrors: HttpErrors;
+  private _httpSuccess: HttpSuccess;
 
   constructor(
-    private getEventsUseCase: IGetEventsUseCase,
-    private getEventByIdUseCase: IGetEventByIdUseCase,
-    private createEventUseCase: ICreateEventUseCase,
-    private updateEventUseCase: IUpdateEventUseCase,
-    private deleteEventUseCase: IDeleteEventUseCase
+    private _getEventsUseCase: IGetEventsUseCase,
+    private _getEventByIdUseCase: IGetEventByIdUseCase,
+    private _createEventUseCase: ICreateEventUseCase,
+    private _updateEventUseCase: IUpdateEventUseCase,
+    private _deleteEventUseCase: IDeleteEventUseCase
   ) {
-    this.httpErrors = new HttpErrors();
-    this.httpSuccess = new HttpSuccess();
+    this._httpErrors = new HttpErrors();
+    this._httpSuccess = new HttpSuccess();
   }
 
   async getEvents(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -46,46 +42,46 @@ export class EventController implements IEventController {
       dateRange: String(dateRange),
     };
         
-    const response = await this.getEventsUseCase.execute(getEventsRequestDTO);
-    return this.httpSuccess.success_200(response);
+    const response = await this._getEventsUseCase.execute(getEventsRequestDTO);
+    return this._httpSuccess.success_200(response);
   }
 
   async getEventById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     const getEventByIdRequestDTO: GetEventByIdRequestDTO = { id };
-    const response = await this.getEventByIdUseCase.execute(getEventByIdRequestDTO);
-    return this.httpSuccess.success_200(response);
+    const response = await this._getEventByIdUseCase.execute(getEventByIdRequestDTO);
+    return this._httpSuccess.success_200(response);
   }
 
   async createEvent(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     if (!httpRequest.body || Object.keys(httpRequest.body).length === 0) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     const createEventRequestDTO: CreateEventRequestDTO = httpRequest.body;
-    const response = await this.createEventUseCase.execute(createEventRequestDTO);
-    return this.httpSuccess.success_201(response);
+    const response = await this._createEventUseCase.execute(createEventRequestDTO);
+    return this._httpSuccess.success_201(response);
   }
 
   async updateEvent(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id || !httpRequest.body || Object.keys(httpRequest.body).length === 0) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     const updateEventRequestDTO: UpdateEventRequestDTO = { id, ...httpRequest.body };
-    const response = await this.updateEventUseCase.execute(updateEventRequestDTO);
-    return this.httpSuccess.success_200(response);
+    const response = await this._updateEventUseCase.execute(updateEventRequestDTO);
+    return this._httpSuccess.success_200(response);
   }
 
   async deleteEvent(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     const deleteEventRequestDTO: DeleteEventRequestDTO = { id };
-    const response = await this.deleteEventUseCase.execute(deleteEventRequestDTO);
-    return this.httpSuccess.success_200(response);
+    const response = await this._deleteEventUseCase.execute(deleteEventRequestDTO);
+    return this._httpSuccess.success_200(response);
   }
 }

@@ -1,10 +1,8 @@
 import { GetUserSiteSectionsRequestDTO, GetUserSiteSectionsResponseDTO, UserSiteSectionDTO } from "../../../domain/site-management/dtos/UserSiteSectionDTOs";
 import { SiteSectionFilter } from "../../../domain/site-management/entities/SiteSectionTypes";
 import { IUserSiteSectionRepository } from "../repositories/IUserSiteSectionRepository";
+import { IGetUserSiteSectionsUseCase } from "./IUserSiteSectionUseCases";
 
-export interface IGetUserSiteSectionsUseCase {
-  execute(params: GetUserSiteSectionsRequestDTO): Promise<{ success: boolean; data: GetUserSiteSectionsResponseDTO }>;
-}
 
 export class GetUserSiteSectionsUseCase implements IGetUserSiteSectionsUseCase {
   constructor(private readonly _userSiteSectionRepository: IUserSiteSectionRepository) { }

@@ -1,5 +1,30 @@
 import { IChatRepository } from "../repositories/IChatRepository";
 import {
+  IGetChatsUseCase,
+  ISearchChatsUseCase,
+  IGetChatMessagesUseCase,
+  IGetChatDetailsUseCase,
+  IMarkMessagesAsReadUseCase,
+  ISendMessageUseCase,
+  IAddReactionUseCase,
+  IRemoveReactionUseCase,
+  ISearchUsersUseCase,
+  ICreateChatUseCase,
+  ICreateGroupChatUseCase,
+  IAddGroupMemberUseCase,
+  IRemoveGroupMemberUseCase,
+  IUpdateGroupAdminUseCase,
+  IUpdateGroupSettingsUseCase,
+  IUpdateGroupInfoUseCase,
+  ILeaveGroupUseCase,
+  IEditMessageUseCase,
+  IDeleteMessageUseCase,
+  IReplyToMessageUseCase,
+  IDeleteChatUseCase,
+  IBlockChatUseCase,
+  IClearChatUseCase
+} from "./IChatUseCases";
+import {
   GetChatsRequestDTO,
   SearchChatsRequestDTO,
   GetChatMessagesRequestDTO,
@@ -36,99 +61,7 @@ import { RepositoryChat, RepositoryMessage, RepositoryObjectIdLike, RepositoryUs
 const toId = (id: RepositoryObjectIdLike): string =>
   typeof id === 'string' ? id : id.toString();
 
-export interface IGetChatsUseCase {
-  execute(params: GetChatsRequestDTO): Promise<GetChatsResponseDTO>;
-}
-
-export interface IGetChatMessagesUseCase {
-  execute(params: GetChatMessagesRequestDTO): Promise<GetChatMessagesResponseDTO>;
-}
-
-export interface IMarkMessagesAsReadUseCase {
-  execute(params: MarkMessagesAsReadRequestDTO): Promise<void>;
-}
-
-export interface IAddReactionUseCase {
-  execute(params: AddReactionRequestDTO): Promise<void>;
-}
-
-export interface IRemoveReactionUseCase {
-  execute(params: RemoveReactionRequestDTO): Promise<void>;
-}
-
-export interface IGetChatDetailsUseCase {
-  execute(chatId: string, userId: string): Promise<ChatDetailsResponseDTO | null>;
-}
-
-export interface ICreateChatUseCase {
-  execute(params: CreateChatRequestDTO): Promise<ChatSummaryDTO>;
-}
-
-export interface ICreateGroupChatUseCase {
-  execute(params: CreateGroupChatRequestDTO): Promise<ChatSummaryDTO>;
-}
-
-export interface IAddGroupMemberUseCase {
-  execute(params: AddGroupMemberRequestDTO): Promise<void>;
-}
-
-export interface IRemoveGroupMemberUseCase {
-  execute(params: RemoveGroupMemberRequestDTO): Promise<void>;
-}
-
-export interface IUpdateGroupAdminUseCase {
-  execute(params: UpdateGroupAdminRequestDTO): Promise<void>;
-}
-
-export interface IUpdateGroupSettingsUseCase {
-  execute(params: UpdateGroupSettingsRequestDTO): Promise<void>;
-}
-
-export interface IUpdateGroupInfoUseCase {
-  execute(params: UpdateGroupInfoRequestDTO): Promise<void>;
-}
-
-export interface ILeaveGroupUseCase {
-  execute(params: LeaveGroupRequestDTO): Promise<void>;
-}
-
-export interface IEditMessageUseCase {
-  execute(params: EditMessageRequestDTO): Promise<void>;
-}
-
-export interface IReplyToMessageUseCase {
-  execute(params: ReplyToMessageRequestDTO): Promise<void>;
-}
-
-export interface IDeleteChatUseCase {
-  execute(params: DeleteChatRequestDTO): Promise<void>;
-}
-
-export interface IBlockChatUseCase {
-  execute(params: BlockChatRequestDTO): Promise<void>;
-}
-
-export interface IClearChatUseCase {
-  execute(params: ClearChatRequestDTO): Promise<void>;
-}
-
-export interface ISendMessageUseCase {
-  execute(params: SendMessageRequestDTO): Promise<void>;
-}
-
-export interface ISearchChatsUseCase {
-  execute(params: SearchChatsRequestDTO): Promise<GetChatsResponseDTO>;
-}
-
-export interface ISearchUsersUseCase {
-  execute(params: SearchUsersRequestDTO): Promise<SearchUsersResponseDTO>;
-}
-
-export interface IDeleteMessageUseCase {
-  execute(params: DeleteMessageRequestDTO): Promise<void>;
-}
-
-export class GetChatsUseCase {
+export class GetChatsUseCase implements IGetChatsUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: GetChatsRequestDTO): Promise<GetChatsResponseDTO> {
@@ -164,7 +97,7 @@ export class GetChatsUseCase {
   }
 }
 
-export class SearchChatsUseCase {
+export class SearchChatsUseCase implements ISearchChatsUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: SearchChatsRequestDTO): Promise<GetChatsResponseDTO> {
@@ -216,7 +149,7 @@ export class SearchChatsUseCase {
   }
 }
 
-export class GetChatMessagesUseCase {
+export class GetChatMessagesUseCase implements IGetChatMessagesUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: GetChatMessagesRequestDTO): Promise<GetChatMessagesResponseDTO> {
@@ -269,7 +202,7 @@ export class GetChatMessagesUseCase {
   }
 }
 
-export class SendMessageUseCase {
+export class SendMessageUseCase implements ISendMessageUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: SendMessageRequestDTO): Promise<void> {
@@ -279,7 +212,7 @@ export class SendMessageUseCase {
   }
 }
 
-export class MarkMessagesAsReadUseCase {
+export class MarkMessagesAsReadUseCase implements IMarkMessagesAsReadUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: MarkMessagesAsReadRequestDTO): Promise<void> {
@@ -287,7 +220,7 @@ export class MarkMessagesAsReadUseCase {
   }
 }
 
-export class AddReactionUseCase {
+export class AddReactionUseCase implements IAddReactionUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: AddReactionRequestDTO): Promise<void> {
@@ -295,7 +228,7 @@ export class AddReactionUseCase {
   }
 }
 
-export class RemoveReactionUseCase {
+export class RemoveReactionUseCase implements IRemoveReactionUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: RemoveReactionRequestDTO): Promise<void> {
@@ -303,7 +236,7 @@ export class RemoveReactionUseCase {
   }
 }
 
-export class GetChatDetailsUseCase {
+export class GetChatDetailsUseCase implements IGetChatDetailsUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(chatId: string, userId: string): Promise<ChatDetailsResponseDTO | null> {
@@ -369,7 +302,7 @@ export class GetChatDetailsUseCase {
   }
 }
 
-export class SearchUsersUseCase {
+export class SearchUsersUseCase implements ISearchUsersUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: SearchUsersRequestDTO): Promise<SearchUsersResponseDTO> {
@@ -377,7 +310,7 @@ export class SearchUsersUseCase {
   }
 }
 
-export class CreateChatUseCase {
+export class CreateChatUseCase implements ICreateChatUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: CreateChatRequestDTO): Promise<ChatSummaryDTO> {
@@ -385,7 +318,7 @@ export class CreateChatUseCase {
   }
 }
 
-export class CreateGroupChatUseCase {
+export class CreateGroupChatUseCase implements ICreateGroupChatUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: CreateGroupChatRequestDTO): Promise<ChatSummaryDTO> {
@@ -393,7 +326,7 @@ export class CreateGroupChatUseCase {
   }
 }
 
-export class AddGroupMemberUseCase {
+export class AddGroupMemberUseCase implements IAddGroupMemberUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: AddGroupMemberRequestDTO): Promise<void> {
@@ -401,7 +334,7 @@ export class AddGroupMemberUseCase {
   }
 }
 
-export class RemoveGroupMemberUseCase {
+export class RemoveGroupMemberUseCase implements IRemoveGroupMemberUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: RemoveGroupMemberRequestDTO): Promise<void> {
@@ -409,7 +342,7 @@ export class RemoveGroupMemberUseCase {
   }
 }
 
-export class UpdateGroupAdminUseCase {
+export class UpdateGroupAdminUseCase implements IUpdateGroupAdminUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: UpdateGroupAdminRequestDTO): Promise<void> {
@@ -417,7 +350,7 @@ export class UpdateGroupAdminUseCase {
   }
 }
 
-export class UpdateGroupSettingsUseCase {
+export class UpdateGroupSettingsUseCase implements IUpdateGroupSettingsUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: UpdateGroupSettingsRequestDTO): Promise<void> {
@@ -425,7 +358,7 @@ export class UpdateGroupSettingsUseCase {
   }
 }
 
-export class UpdateGroupInfoUseCase {
+export class UpdateGroupInfoUseCase implements IUpdateGroupInfoUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: UpdateGroupInfoRequestDTO): Promise<void> {
@@ -433,7 +366,7 @@ export class UpdateGroupInfoUseCase {
   }
 }
 
-export class LeaveGroupUseCase {
+export class LeaveGroupUseCase implements ILeaveGroupUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: LeaveGroupRequestDTO): Promise<void> {
@@ -441,7 +374,7 @@ export class LeaveGroupUseCase {
   }
 }
 
-export class EditMessageUseCase {
+export class EditMessageUseCase implements IEditMessageUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: EditMessageRequestDTO): Promise<void> {
@@ -449,7 +382,7 @@ export class EditMessageUseCase {
   }
 }
 
-export class DeleteMessageUseCase {
+export class DeleteMessageUseCase implements IDeleteMessageUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: DeleteMessageRequestDTO): Promise<void> {
@@ -457,7 +390,7 @@ export class DeleteMessageUseCase {
   }
 }
 
-export class ReplyToMessageUseCase {
+export class ReplyToMessageUseCase implements IReplyToMessageUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: ReplyToMessageRequestDTO): Promise<void> {
@@ -465,7 +398,7 @@ export class ReplyToMessageUseCase {
   }
 }
 
-export class DeleteChatUseCase {
+export class DeleteChatUseCase implements IDeleteChatUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: DeleteChatRequestDTO): Promise<void> {
@@ -473,7 +406,7 @@ export class DeleteChatUseCase {
   }
 }
 
-export class BlockChatUseCase {
+export class BlockChatUseCase implements IBlockChatUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: BlockChatRequestDTO): Promise<void> {
@@ -481,7 +414,7 @@ export class BlockChatUseCase {
   }
 }
 
-export class ClearChatUseCase {
+export class ClearChatUseCase implements IClearChatUseCase {
   constructor(private _chatRepository: IChatRepository) { }
 
   async execute(params: ClearChatRequestDTO): Promise<void> {

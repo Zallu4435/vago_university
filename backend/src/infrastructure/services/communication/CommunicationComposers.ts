@@ -8,6 +8,8 @@ import {
   GetMessageDetailsUseCase,
   GetAllAdminsUseCase,
   FetchUsersUseCase,
+} from "../../../application/communication/useCases/CommunicationUseCases";
+import {
   IGetInboxMessagesUseCase,
   IGetSentMessagesUseCase,
   ISendMessageUseCase,
@@ -16,7 +18,7 @@ import {
   IGetMessageDetailsUseCase,
   IGetAllAdminsUseCase,
   IFetchUsersUseCase,
-} from "../../../application/communication/useCases/CommunicationUseCases";
+} from "../../../application/communication/useCases/ICommunicationUseCases";
 import { CommunicationRepository } from "../../repositories/communication/CommunicationRepository";
 import { CommunicationController } from "../../../presentation/http/communication/CommunicationController";
 import { ICommunicationController } from "../../../presentation/http/IHttp";

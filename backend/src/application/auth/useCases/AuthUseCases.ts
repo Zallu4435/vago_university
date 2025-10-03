@@ -18,42 +18,18 @@ import { IJwtService } from "../../../infrastructure/services/auth/JwtService";
 import { IOtpService } from '../../../infrastructure/services/auth/OtpService';
 import { IEmailService } from "../service/IEmailService";
 import { InvalidCredentialsError, InvalidTokenError, BlockedAccountError } from "../../../domain/auth/errors/AuthErrors";
+import {
+  IRegisterUseCase,
+  ILoginUseCase,
+  IRefreshTokenUseCase,
+  ILogoutUseCase,
+  IRegisterFacultyUseCase,
+  ISendEmailOtpUseCase,
+  IVerifyEmailOtpUseCase,
+  IResetPasswordUseCase,
+  IConfirmRegistrationUseCase
+} from "./IAuthUseCases";
 
-export interface IRegisterUseCase {
-  execute(params: RegisterRequestDTO): Promise<RegisterResponseDTO>;
-}
-
-export interface ILoginUseCase {
-  execute(params: LoginRequestDTO): Promise<LoginResponseDTO>;
-}
-
-export interface IRefreshTokenUseCase {
-  execute(params: RefreshTokenRequestDTO): Promise<RefreshTokenResponseDTO>;
-}
-
-export interface ILogoutUseCase {
-  execute(params: LogoutRequestDTO): Promise<LogoutResponseDTO>;
-}
-
-export interface IRegisterFacultyUseCase {
-  execute(params: RegisterFacultyRequestDTO): Promise<RegisterFacultyResponseDTO>;
-}
-
-export interface ISendEmailOtpUseCase {
-  execute(params: SendEmailOtpRequestDTO): Promise<SendEmailOtpResponseDTO>;
-}
-
-export interface IVerifyEmailOtpUseCase {
-  execute(params: VerifyEmailOtpRequestDTO): Promise<VerifyEmailOtpResponseDTO>;
-}
-
-export interface IResetPasswordUseCase {
-  execute(params: ResetPasswordRequestDTO): Promise<ResetPasswordResponseDTO>;
-}
-
-export interface IConfirmRegistrationUseCase {
-  execute(token: string): Promise<{ message: string }>;
-}
 
 
 export class RegisterUseCase implements IRegisterUseCase {

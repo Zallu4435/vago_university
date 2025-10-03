@@ -4,22 +4,13 @@ import { IEventsRepository } from "../repositories/IEventsRepository";
 import mongoose from "mongoose";
 import { InvalidEventRequestIdError, EventRequestNotFoundError, AssociatedEventNotFoundError, InvalidEventStatusError } from "../../../domain/events/errors/EventErrors";
 import { PaginatedResponse, SimplifiedEventRequest, EventRequestDetails, EventRequestDocument } from "../../../domain/events/entities/Event";
+import {
+  IGetEventRequestsUseCase,
+  IApproveEventRequestUseCase,
+  IRejectEventRequestUseCase,
+  IGetEventRequestDetailsUseCase
+} from "./IEventRequestUseCases";
 
-export interface IGetEventRequestsUseCase {
-  execute(params: GetEventRequestsRequestDTO): Promise<GetEventRequestsResponseDTO>;
-}
-
-export interface IApproveEventRequestUseCase {
-  execute(params: ApproveEventRequestRequestDTO): Promise<{ message: string }>;
-}
-
-export interface IRejectEventRequestUseCase {
-  execute(params: RejectEventRequestRequestDTO): Promise<{ message: string }>;
-}
-
-export interface IGetEventRequestDetailsUseCase {
-  execute(params: GetEventRequestDetailsRequestDTO): Promise<GetEventRequestDetailsResponseDTO>;
-}
 
 export class GetEventRequestsUseCase implements IGetEventRequestsUseCase {
   constructor(private _eventsRepository: IEventsRepository) { }

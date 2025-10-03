@@ -5,12 +5,14 @@ import {
   RejectSportRequestUseCase,
   GetSportRequestDetailsUseCase,
   JoinSportUseCase,
+} from "../../../application/sports/useCases/SportRequestUseCases";
+import {
   IGetSportRequestsUseCase,
   IApproveSportRequestUseCase,
   IRejectSportRequestUseCase,
   IGetSportRequestDetailsUseCase,
   IJoinSportUseCase,
-} from "../../../application/sports/useCases/SportRequestUseCases";
+} from "../../../application/sports/useCases/ISportRequestUseCases";
 import { SportsRepository } from "../../../infrastructure/repositories/sports/SportsRepository";
 import { SportRequestController } from "../../../presentation/http/sports/SportRequestController";
 import { ISportRequestController } from "../../../presentation/http/IHttp";

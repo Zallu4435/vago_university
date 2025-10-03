@@ -13,8 +13,9 @@ import {
 import { ISiteSectionRepository } from "../repositories/ISiteSectionRepository";
 import { CreateSiteSectionRequest, DeleteSiteSectionRequest, SiteSectionFilter, UpdateSiteSectionRequest } from '../../../domain/site-management/entities/SiteSection';
 import { InvalidSectionKeyError, InvalidHighlightError, InvalidVagoNowError, InvalidLeadershipError } from '../../../domain/site-management/errors/SiteSectionErrors';
+import { ICreateSiteSectionUseCase, IDeleteSiteSectionUseCase, IGetSiteSectionByIdUseCase, IGetSiteSectionsUseCase, IUpdateSiteSectionUseCase } from './ISiteSectionUseCases';
  
-export class GetSiteSectionsUseCase {
+export class GetSiteSectionsUseCase implements IGetSiteSectionsUseCase {
   constructor(private readonly _siteSectionRepository: ISiteSectionRepository) {}
 
   async execute(params: GetSiteSectionsRequestDTO): Promise<{ success: boolean; data: GetSiteSectionsResponseDTO }> {
@@ -104,7 +105,7 @@ export class GetSiteSectionsUseCase {
   }
 }
 
-export class GetSiteSectionByIdUseCase {
+export class GetSiteSectionByIdUseCase implements IGetSiteSectionByIdUseCase {
   constructor(private readonly _siteSectionRepository: ISiteSectionRepository) {}
 
   async execute(params: GetSiteSectionByIdRequestDTO): Promise<{ success: boolean; data: GetSiteSectionByIdResponseDTO | null }> {
@@ -113,7 +114,7 @@ export class GetSiteSectionByIdUseCase {
   }
 }
 
-export class CreateSiteSectionUseCase {
+export class CreateSiteSectionUseCase implements ICreateSiteSectionUseCase {
   constructor(private readonly siteSectionRepository: ISiteSectionRepository) {}
 
   async execute(params: CreateSiteSectionRequestDTO): Promise<{ success: boolean; data: CreateSiteSectionResponseDTO }> {
@@ -132,7 +133,7 @@ export class CreateSiteSectionUseCase {
   }
 }
 
-export class UpdateSiteSectionUseCase {
+export class UpdateSiteSectionUseCase implements IUpdateSiteSectionUseCase {
   constructor(private readonly _siteSectionRepository: ISiteSectionRepository) {}
 
   async execute(params: UpdateSiteSectionRequestDTO): Promise<{ success: boolean; data: UpdateSiteSectionResponseDTO | null }> {
@@ -141,7 +142,7 @@ export class UpdateSiteSectionUseCase {
   }
 }
 
-export class DeleteSiteSectionUseCase {
+export class DeleteSiteSectionUseCase implements IDeleteSiteSectionUseCase {
   constructor(private readonly _siteSectionRepository: ISiteSectionRepository) {}
 
   async execute(params: DeleteSiteSectionRequestDTO): Promise<{ success: boolean; data: void }> {

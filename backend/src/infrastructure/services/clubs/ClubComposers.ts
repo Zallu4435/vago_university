@@ -4,13 +4,15 @@ import {
   GetClubByIdUseCase, 
   CreateClubUseCase, 
   UpdateClubUseCase, 
-  DeleteClubUseCase,
+  DeleteClubUseCase
+} from "../../../application/clubs/useCases/ClubUseCases";
+import {
   IGetClubsUseCase,
   IGetClubByIdUseCase,
   ICreateClubUseCase,
   IUpdateClubUseCase,
   IDeleteClubUseCase
-} from "../../../application/clubs/useCases/ClubUseCases";
+} from "../../../application/clubs/useCases/IClubUseCases";
 import { ClubsController } from "../../../presentation/http/clubs/ClubsController";
 import { ClubsRepository } from "../../repositories/clubs/ClubsRepository";
 import { IClubsController } from "../../../presentation/http/IHttp";

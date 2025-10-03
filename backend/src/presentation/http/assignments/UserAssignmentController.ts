@@ -5,29 +5,29 @@ import {
   ISubmitUserAssignmentUseCase,
   IGetUserAssignmentStatusUseCase,
   IGetUserAssignmentFeedbackUseCase
-} from '../../../application/assignments/useCases/UserAssignmentUseCases';
+} from '../../../application/assignments/useCases/IUserAssignmentUseCases';
 import { v2 as cloudinary } from 'cloudinary';
 import { config } from '../../../config/config';
 import { AssignmentStatus } from '../../../domain/assignments/assignmenttypes';
 
 export class UserAssignmentController implements IUserAssignmentController {
-  private httpSuccess: HttpSuccess;
-  private httpErrors: HttpErrors;
+  private _httpSuccess: HttpSuccess;
+  private _httpErrors: HttpErrors;
 
   constructor(
-    private getUserAssignmentsUseCase: IGetUserAssignmentsUseCase,
-    private getUserAssignmentByIdUseCase: IGetUserAssignmentByIdUseCase,
-    private submitUserAssignmentUseCase: ISubmitUserAssignmentUseCase,
-    private getUserAssignmentStatusUseCase: IGetUserAssignmentStatusUseCase,
-    private getUserAssignmentFeedbackUseCase: IGetUserAssignmentFeedbackUseCase
+    private _getUserAssignmentsUseCase: IGetUserAssignmentsUseCase,
+    private _getUserAssignmentByIdUseCase: IGetUserAssignmentByIdUseCase,
+    private _submitUserAssignmentUseCase: ISubmitUserAssignmentUseCase,
+    private _getUserAssignmentStatusUseCase: IGetUserAssignmentStatusUseCase,
+    private _getUserAssignmentFeedbackUseCase: IGetUserAssignmentFeedbackUseCase
   ) {
-    this.httpSuccess = new HttpSuccess();
-    this.httpErrors = new HttpErrors();
+    this._httpSuccess = new HttpSuccess();
+    this._httpErrors = new HttpErrors();
   }
 
   async getAssignments(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { subject, status, page, limit, search, sortBy } = httpRequest.query;
-    const result = await this.getUserAssignmentsUseCase.execute({
+    const result = await this._getUserAssignmentsUseCase.execute({
       subject: subject as string,
       status: status as AssignmentStatus,
       page: page ? parseInt(page as string) : undefined,
@@ -37,27 +37,27 @@ export class UserAssignmentController implements IUserAssignmentController {
       studentId: httpRequest.user?.userId
     });
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async getAssignmentById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params;
-    const result = await this.getUserAssignmentByIdUseCase.execute({ id, studentId: httpRequest.user?.userId });
+    const result = await this._getUserAssignmentByIdUseCase.execute({ id, studentId: httpRequest.user?.userId });
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async downloadAssignmentFile(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { fileUrl, fileName } = httpRequest.query;
     if (!fileUrl || typeof fileUrl !== 'string') {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     if (!fileName || typeof fileName !== 'string') {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     if (fileUrl.includes('cloudinary.com')) {
       const publicId = fileUrl
@@ -70,12 +70,12 @@ export class UserAssignmentController implements IUserAssignmentController {
         sign_url: true,
         api_secret: config.cloudinary.apiSecret,
       });
-      return this.httpSuccess.success_200({
+      return this._httpSuccess.success_200({
         downloadUrl: signedUrl,
         fileName: fileName
       });
     } else {
-      return this.httpSuccess.success_200({
+      return this._httpSuccess.success_200({
         downloadUrl: fileUrl,
         fileName: fileName
       });
@@ -86,40 +86,40 @@ export class UserAssignmentController implements IUserAssignmentController {
     const { id } = httpRequest.params;
     const file = httpRequest.file;
     if (!file) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const result = await this.submitUserAssignmentUseCase.execute({
+    const result = await this._submitUserAssignmentUseCase.execute({
       assignmentId: id,
       file: file,
       studentId: httpRequest.user?.userId
     });
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_201(result.data);
+    return this._httpSuccess.success_201(result.data);
   }
 
   async getAssignmentStatus(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { assignmentId } = httpRequest.params;
-    const result = await this.getUserAssignmentStatusUseCase.execute({
+    const result = await this._getUserAssignmentStatusUseCase.execute({
       assignmentId,
       studentId: httpRequest.user?.userId
     });
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async getAssignmentFeedback(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { assignmentId } = httpRequest.params;
-    const result = await this.getUserAssignmentFeedbackUseCase.execute({
+    const result = await this._getUserAssignmentFeedbackUseCase.execute({
       assignmentId,
       studentId: httpRequest.user?.userId
     });
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 } 

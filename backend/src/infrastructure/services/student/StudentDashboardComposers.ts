@@ -6,13 +6,15 @@ import {
   GetCalendarDaysUseCase,
   GetNewEventsUseCase,
   GetUserInfoForDashboardUseCase,
+} from '../../../application/student/useCases/StudentDashboardUseCases';
+import {
   IGetAnnouncementsUseCase,
   IGetDeadlinesUseCase,
   IGetCalendarDaysUseCase,
   IGetClassesUseCase,
   IGetNewEventsUseCase,
   IGetUserInfoForDashboardUseCase
-} from '../../../application/student/useCases/StudentDashboardUseCases';
+} from '../../../application/student/useCases/IStudentDashboardUseCases';
 import { StudentDashboardRepository } from '../../repositories/student/StudentDashboardRepositoryImpl';
 
 export function getStudentDashboardComposer() {

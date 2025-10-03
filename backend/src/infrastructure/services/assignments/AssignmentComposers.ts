@@ -9,7 +9,9 @@ import {
   IGetSubmissionsUseCase,
   IGetSubmissionByIdUseCase,
   IReviewSubmissionUseCase,
-  IGetAnalyticsUseCase,
+  IGetAnalyticsUseCase
+} from '../../../application/assignments/useCases/IAssignmentUseCases';
+import {
   GetAssignmentsUseCase,
   GetAssignmentByIdUseCase,
   CreateAssignmentUseCase,

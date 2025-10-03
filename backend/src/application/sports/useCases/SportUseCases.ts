@@ -14,28 +14,15 @@ import {
   SportSummaryDTO,
 } from "../../../domain/sports/dtos/SportResponseDTOs";
 import { Sport, SportDocument, SportStatus } from "../../../domain/sports/entities/SportTypes";
+import {
+  IGetSportsUseCase,
+  IGetSportByIdUseCase,
+  ICreateSportUseCase,
+  IUpdateSportUseCase,
+  IDeleteSportUseCase
+} from './ISportUseCases';
 
-export interface IGetSportsUseCase {
-  execute(params: GetSportsRequestDTO): Promise<GetSportsResponseDTO>;
-}
-
-export interface IGetSportByIdUseCase {
-  execute(params: GetSportByIdRequestDTO): Promise<GetSportByIdResponseDTO>;
-}
-
-export interface ICreateSportUseCase {
-  execute(params: CreateSportRequestDTO): Promise<CreateSportResponseDTO>;
-}
-
-export interface IUpdateSportUseCase {
-  execute(params: UpdateSportRequestDTO): Promise<UpdateSportResponseDTO>;
-}
-
-export interface IDeleteSportUseCase {
-  execute(params: DeleteSportRequestDTO): Promise<{ message: string }>;
-}
-
-export class GetSportsUseCase {
+export class GetSportsUseCase implements IGetSportsUseCase {
   constructor(private sportsRepository: ISportsRepository) { }
 
   async execute(params: GetSportsRequestDTO): Promise<GetSportsResponseDTO> {
@@ -67,7 +54,7 @@ export class GetSportsUseCase {
   }
 }
 
-export class GetSportByIdUseCase {
+export class GetSportByIdUseCase implements IGetSportByIdUseCase{
   constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: GetSportByIdRequestDTO): Promise<GetSportByIdResponseDTO> {
@@ -84,7 +71,7 @@ export class GetSportByIdUseCase {
   }
 }
 
-export class CreateSportUseCase {
+export class CreateSportUseCase implements ICreateSportUseCase {
   constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: CreateSportRequestDTO): Promise<CreateSportResponseDTO> {
@@ -110,7 +97,7 @@ export class CreateSportUseCase {
   }
 }
 
-export class UpdateSportUseCase {
+export class UpdateSportUseCase implements IUpdateSportUseCase {
   constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: UpdateSportRequestDTO): Promise<UpdateSportResponseDTO> {
@@ -129,7 +116,7 @@ export class UpdateSportUseCase {
   }
 }
 
-export class DeleteSportUseCase {
+export class DeleteSportUseCase implements IDeleteSportUseCase {
   constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: DeleteSportRequestDTO): Promise<{ message: string }> {

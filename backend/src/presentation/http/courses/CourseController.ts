@@ -1,17 +1,17 @@
 import { IHttpRequest, IHttpResponse, ICourseController, HttpSuccess, HttpErrors } from "../IHttp";
-import { IGetCoursesUseCase, IGetCourseByIdUseCase, ICreateCourseUseCase, IUpdateCourseUseCase, IDeleteCourseUseCase } from "../../../application/courses/useCases/CourseUseCases";
+import { IGetCoursesUseCase, IGetCourseByIdUseCase, ICreateCourseUseCase, IUpdateCourseUseCase, IDeleteCourseUseCase } from "../../../application/courses/useCases/ICourseUseCases";
 import { GetCoursesRequestDTO, GetCourseByIdRequestDTO, CreateCourseRequestDTO, UpdateCourseRequestDTO, DeleteCourseRequestDTO } from "../../../domain/courses/dtos/CourseRequestDTOs";
 
 export class CourseController implements ICourseController {
-  private httpSuccess = new HttpSuccess();
-  private httpErrors = new HttpErrors();
+  private _httpSuccess = new HttpSuccess();
+  private _httpErrors = new HttpErrors();
 
   constructor(
-    private readonly getCoursesUseCase: IGetCoursesUseCase,
-    private readonly getCourseByIdUseCase: IGetCourseByIdUseCase,
-    private readonly createCourseUseCase: ICreateCourseUseCase,
-    private readonly updateCourseUseCase: IUpdateCourseUseCase,
-    private readonly deleteCourseUseCase: IDeleteCourseUseCase
+    private readonly _getCoursesUseCase: IGetCoursesUseCase,
+    private readonly _getCourseByIdUseCase: IGetCourseByIdUseCase,
+    private readonly _createCourseUseCase: ICreateCourseUseCase,
+    private readonly _updateCourseUseCase: IUpdateCourseUseCase,
+    private readonly _deleteCourseUseCase: IDeleteCourseUseCase
   ) { }
 
   async getCourses(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -25,34 +25,34 @@ export class CourseController implements ICourseController {
       faculty: faculty as string,
       term: term as string,
     };
-    const result = await this.getCoursesUseCase.execute(params);
+    const result = await this._getCoursesUseCase.execute(params);
     if (!result.success) {
-      return this.httpErrors.error_400("Failed to get courses");
+      return this._httpErrors.error_400("Failed to get courses");
     }
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async getCourseById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params;
     const params: GetCourseByIdRequestDTO = { id };
-    const result = await this.getCourseByIdUseCase.execute(params);
+    const result = await this._getCourseByIdUseCase.execute(params);
     if (!result.success) {
-      return this.httpErrors.error_400("Failed to get course");
+      return this._httpErrors.error_400("Failed to get course");
     }
     if (!result.data) {
-      return this.httpErrors.error_404("Course not found");
+      return this._httpErrors.error_404("Course not found");
     }
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async createCourse(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { _id: _omitId, id: _omitStringId, ...body } = (httpRequest.body || {}) as Record<string, unknown>;
     const params: CreateCourseRequestDTO = body as CreateCourseRequestDTO;
-    const result = await this.createCourseUseCase.execute(params);
+    const result = await this._createCourseUseCase.execute(params);
     if (!result.success) {
-      return this.httpErrors.error_400("Failed to create course");
+      return this._httpErrors.error_400("Failed to create course");
     }
-    return this.httpSuccess.success_201(result.data);
+    return this._httpSuccess.success_201(result.data);
   }
 
   async updateCourse(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -63,22 +63,22 @@ export class CourseController implements ICourseController {
       id,
       ...body,
     };
-    const result = await this.updateCourseUseCase.execute(params);
+    const result = await this._updateCourseUseCase.execute(params);
     if (!result.success) {
-      return this.httpErrors.error_400("Failed to update course");
+      return this._httpErrors.error_400("Failed to update course");
     }
     if (!result.data) {
-      return this.httpErrors.error_404("Course not found");
+      return this._httpErrors.error_404("Course not found");
     }
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async deleteCourse(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params;
     const params: DeleteCourseRequestDTO = { id };
-    const result = await this.deleteCourseUseCase.execute(params);
+    const result = await this._deleteCourseUseCase.execute(params);
     if (!result.success) {
-      return this.httpErrors.error_400("Failed to delete course");
+      return this._httpErrors.error_400("Failed to delete course");
     }
     return { statusCode: 204, body: { data: null } };
   }

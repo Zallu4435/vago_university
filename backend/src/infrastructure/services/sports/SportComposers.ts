@@ -5,12 +5,14 @@ import {
   CreateSportUseCase,
   UpdateSportUseCase,
   DeleteSportUseCase,
+} from "../../../application/sports/useCases/SportUseCases";
+import {
   IGetSportsUseCase,
   IGetSportByIdUseCase,
   ICreateSportUseCase,
   IUpdateSportUseCase,
   IDeleteSportUseCase,
-} from "../../../application/sports/useCases/SportUseCases";
+} from "../../../application/sports/useCases/ISportUseCases";
 import { SportsRepository } from "../../../infrastructure/repositories/sports/SportsRepository";
 import { SportsController } from "../../../presentation/http/sports/SportsController";
 import { ISportsController } from "../../../presentation/http/IHttp";

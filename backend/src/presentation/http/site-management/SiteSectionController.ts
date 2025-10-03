@@ -1,11 +1,11 @@
 import { IHttpRequest, IHttpResponse } from "../IHttp";
 import {
-  GetSiteSectionsUseCase,
-  GetSiteSectionByIdUseCase,
-  CreateSiteSectionUseCase,
-  UpdateSiteSectionUseCase,
-  DeleteSiteSectionUseCase
-} from "../../../application/site-management/useCases/SiteSectionUseCases";
+  IGetSiteSectionsUseCase,
+  IGetSiteSectionByIdUseCase,
+  ICreateSiteSectionUseCase,
+  IUpdateSiteSectionUseCase,
+  IDeleteSiteSectionUseCase
+} from "../../../application/site-management/useCases/ISiteSectionUseCases";
 import {
   GetSiteSectionsRequestDTO,
   GetSiteSectionByIdRequestDTO,
@@ -16,11 +16,11 @@ import {
 
 export class SiteSectionController {
   constructor(
-    private readonly getSiteSectionsUseCase: GetSiteSectionsUseCase,
-    private readonly getSiteSectionByIdUseCase: GetSiteSectionByIdUseCase,
-    private readonly createSiteSectionUseCase: CreateSiteSectionUseCase,
-    private readonly updateSiteSectionUseCase: UpdateSiteSectionUseCase,
-    private readonly deleteSiteSectionUseCase: DeleteSiteSectionUseCase
+    private readonly _getSiteSectionsUseCase: IGetSiteSectionsUseCase,
+    private readonly _getSiteSectionByIdUseCase: IGetSiteSectionByIdUseCase,
+    private readonly _createSiteSectionUseCase: ICreateSiteSectionUseCase,
+    private readonly _updateSiteSectionUseCase: IUpdateSiteSectionUseCase,
+    private readonly _deleteSiteSectionUseCase: IDeleteSiteSectionUseCase
   ) { }
 
   async getSections(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -60,7 +60,7 @@ export class SiteSectionController {
       endDate: endDate as string,
       status: status as string,
     };
-    const result = await this.getSiteSectionsUseCase.execute(params);
+    const result = await this._getSiteSectionsUseCase.execute(params);
     if (!result.success) {
       return { statusCode: 400, body: { error: "Failed to get site sections" } };
     }
@@ -70,7 +70,7 @@ export class SiteSectionController {
   async getSectionById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params;
     const params: GetSiteSectionByIdRequestDTO = { id };
-    const result = await this.getSiteSectionByIdUseCase.execute(params);
+    const result = await this._getSiteSectionByIdUseCase.execute(params);
     if (!result.success) {
       return { statusCode: 400, body: { error: "Failed to get site section" } };
     }
@@ -87,7 +87,7 @@ export class SiteSectionController {
         params = { ...params, image: httpRequest.file.path };
       }
     }
-    const result = await this.createSiteSectionUseCase.execute(params);
+    const result = await this._createSiteSectionUseCase.execute(params);
     if (!result.success) {
       return { statusCode: 400, body: { error: "Failed to create site section" } };
     }
@@ -103,7 +103,7 @@ export class SiteSectionController {
     if (httpRequest.file) {
       params = { ...params, image: httpRequest.file.path };
     }
-    const result = await this.updateSiteSectionUseCase.execute(params);
+    const result = await this._updateSiteSectionUseCase.execute(params);
     if (!result.success) {
       return { statusCode: 400, body: { error: "Failed to update site section" } };
     }
@@ -116,7 +116,7 @@ export class SiteSectionController {
   async deleteSection(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params;
     const params: DeleteSiteSectionRequestDTO = { id };
-    const result = await this.deleteSiteSectionUseCase.execute(params);
+    const result = await this._deleteSiteSectionUseCase.execute(params);
     if (!result.success) {
       return { statusCode: 400, body: { error: "Failed to delete site section" } };
     }

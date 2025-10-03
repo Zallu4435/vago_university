@@ -28,38 +28,16 @@ import {
 } from '../../../domain/admin/errors/AdminAdmissionErrors';
 import { AdminAdmissionStatus } from "../../../domain/admin/entities/AdminAdmissionTypes";
 import { User } from "../../../domain/auth/entities/Auth";
-
-export interface IGetAdmissionsUseCase {
-    execute(params: GetAdmissionsRequestDTO): Promise<ResponseDTO<GetAdmissionsResponseDTO>>;
-}
-
-export interface IGetAdmissionByIdUseCase {
-    execute(params: GetAdmissionByIdRequestDTO): Promise<ResponseDTO<GetAdmissionByIdResponseDTO>>;
-}
-
-export interface IGetAdmissionByTokenUseCase {
-    execute(params: GetAdmissionByTokenRequestDTO): Promise<ResponseDTO<GetAdmissionByTokenResponseDTO>>;
-}
-
-export interface IApproveAdmissionUseCase {
-    execute(params: ApproveAdmissionRequestDTO): Promise<ResponseDTO<ApproveAdmissionResponseDTO>>;
-}
-
-export interface IRejectAdmissionUseCase {
-    execute(params: RejectAdmissionRequestDTO): Promise<ResponseDTO<RejectAdmissionResponseDTO>>;
-}
-
-export interface IDeleteAdmissionUseCase {
-    execute(params: DeleteAdmissionRequestDTO): Promise<ResponseDTO<DeleteAdmissionResponseDTO>>;
-}
-
-export interface IConfirmAdmissionOfferUseCase {
-    execute(params: ConfirmAdmissionOfferRequestDTO): Promise<ResponseDTO<ConfirmAdmissionOfferResponseDTO>>;
-}
-
-export interface IBlockAdmissionUseCase {
-    execute(params: { id: string }): Promise<ResponseDTO<{ message: string }>>;
-}
+import {
+    IGetAdmissionsUseCase,
+    IGetAdmissionByIdUseCase,
+    IGetAdmissionByTokenUseCase,
+    IApproveAdmissionUseCase,
+    IRejectAdmissionUseCase,
+    IDeleteAdmissionUseCase,
+    IConfirmAdmissionOfferUseCase,
+    IBlockAdmissionUseCase
+} from './IAdmissionUseCases';
 
 export class GetAdmissionsUseCase implements IGetAdmissionsUseCase {
     constructor(private _repo: IAdmissionRepository) { }

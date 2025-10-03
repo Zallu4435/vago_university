@@ -9,28 +9,13 @@ import {
 import { GetUserMaterialsResponseDTO } from '../../../domain/materials/dtos/UserMaterialResponseDTOs';
 import { UserMaterialFilter, MaterialSortOptions } from '../../../domain/materials/entities/MaterialTypes';
 import { MaterialNotFoundError, MaterialValidationError } from '../../../domain/materials/errors/MaterialErrors';
+import { 
+    IDownloadMaterialUseCase,
+    IGetUserMaterialByIdUseCase,
+    IGetUserMaterialsUseCase,
+} from './IUserMaterialUseCases'
 
-export interface IGetUserMaterialsUseCase {
-  execute(params: GetUserMaterialsRequestDTO): Promise<GetUserMaterialsResponseDTO>;
-}
-
-export interface IGetUserMaterialByIdUseCase {
-  execute(params: GetUserMaterialByIdRequestDTO): Promise<GetUserMaterialsResponseDTO>;
-}
-
-export interface IToggleBookmarkUseCase {
-  execute(params: ToggleBookmarkRequestDTO): Promise<void>;
-}
-
-export interface IToggleLikeUseCase {
-  execute(params: ToggleLikeRequestDTO): Promise<void>;
-}
-
-export interface IDownloadMaterialUseCase {
-  execute(params: DownloadMaterialRequestDTO): Promise<string>;
-}
-
-export class GetUserMaterialsUseCase {
+export class GetUserMaterialsUseCase implements IGetUserMaterialsUseCase {
   constructor(private _repo: IUserMaterialsRepository) { }
   async execute(params: GetUserMaterialsRequestDTO): Promise<GetUserMaterialsResponseDTO> {
     const { userId, subject, course, semester, type, difficulty, search, sortBy = 'createdAt', sortOrder = 'desc', page = 1, limit = 10 } = params;
@@ -88,7 +73,7 @@ export class GetUserMaterialsUseCase {
   }
 }
 
-export class GetUserMaterialByIdUseCase {
+export class GetUserMaterialByIdUseCase implements IGetUserMaterialByIdUseCase {
   constructor(private _repo: IUserMaterialsRepository) { }
   async execute(params: GetUserMaterialByIdRequestDTO): Promise<GetUserMaterialsResponseDTO> {
     const { userId, id } = params;
@@ -119,7 +104,7 @@ export class ToggleLikeUseCase {
   }
 }
 
-export class DownloadMaterialUseCase {
+export class DownloadMaterialUseCase implements IDownloadMaterialUseCase {
   constructor(private _repo: IUserMaterialsRepository) { }
   async execute(params: DownloadMaterialRequestDTO): Promise<string> {
     if (!params.id) throw new MaterialValidationError('Material ID is required');

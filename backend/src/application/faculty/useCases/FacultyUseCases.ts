@@ -41,65 +41,19 @@ import {
     InvalidDocumentTypeError,
 } from '../../../domain/faculty/errors/FacultyErrors';
 import { FacultyFilter } from "../../../domain/faculty/entities/Faculty";
+import { 
+    ResponseDTO,
+    IGetFacultyUseCase,
+    IGetFacultyByIdUseCase,
+    IApproveFacultyUseCase,
+    IBlockFacultyUseCase,
+    IConfirmFacultyOfferUseCase,
+    IDeleteFacultyUseCase,
+    IDownloadCertificateUseCase,
+    IGetFacultyByTokenUseCase,
+    IRejectFacultyUseCase
+ } from "./IFacultyUseCases";
 
-interface ResponseDTO<T> {
-    data: T | { error: string };
-    success: boolean;
-}
-
-export interface IGetFacultyUseCase {
-    execute(params: GetFacultyRequestDTO): Promise<ResponseDTO<GetFacultyResponseDTO>>;
-}
-
-export interface IGetFacultyByIdUseCase {
-    execute(params: GetFacultyByIdRequestDTO): Promise<ResponseDTO<GetFacultyByIdResponseDTO>>;
-}
-
-export interface IGetFacultyByTokenUseCase {
-    execute(params: GetFacultyByTokenRequestDTO): Promise<ResponseDTO<GetFacultyByTokenResponseDTO>>;
-}
-
-export interface IApproveFacultyUseCase {
-    execute(params: ApproveFacultyRequestDTO): Promise<ResponseDTO<ApproveFacultyResponseDTO>>;
-}
-
-export interface IRejectFacultyUseCase {
-    execute(params: RejectFacultyRequestDTO): Promise<ResponseDTO<RejectFacultyResponseDTO>>;
-}
-
-export interface IDeleteFacultyUseCase {
-    execute(params: DeleteFacultyRequestDTO): Promise<ResponseDTO<DeleteFacultyResponseDTO>>;
-}
-
-export interface IConfirmFacultyOfferUseCase {
-    execute(params: ConfirmFacultyOfferRequestDTO): Promise<ResponseDTO<ConfirmFacultyOfferResponseDTO>>;
-}
-
-export interface IDownloadCertificateUseCase {
-    execute(params: DownloadCertificateRequestDTO): Promise<ResponseDTO<DownloadCertificateResponseDTO>>;
-}
-
-export interface IBlockFacultyUseCase {
-    execute(params: { id: string }): Promise<ResponseDTO<{ message: string }>>;
-}
-
-function mapFacultyToDTO(f): FacultyResponseDTO {
-    return {
-        _id: f._id.toString(),
-        fullName: f.fullName,
-        email: f.email,
-        phone: f.phone,
-        department: f.department,
-        qualification: f.qualification,
-        experience: f.experience,
-        aboutMe: f.aboutMe,
-        cvUrl: f.cvUrl,
-        certificatesUrl: f.certificatesUrl,
-        createdAt: f.createdAt instanceof Date ? f.createdAt.toISOString() : new Date(f.createdAt).toISOString(),
-        status: f.status,
-        blocked: f.blocked,
-    };
-} 
 
 export class GetFacultyUseCase implements IGetFacultyUseCase {
     constructor(private _facultyRepository: IFacultyRepository) { }
@@ -430,3 +384,21 @@ export class BlockFacultyUseCase implements IBlockFacultyUseCase {
         return { data: result, success: true };
     }
 }
+
+function mapFacultyToDTO(f): FacultyResponseDTO {
+    return {
+        _id: f._id.toString(),
+        fullName: f.fullName,
+        email: f.email,
+        phone: f.phone,
+        department: f.department,
+        qualification: f.qualification,
+        experience: f.experience,
+        aboutMe: f.aboutMe,
+        cvUrl: f.cvUrl,
+        certificatesUrl: f.certificatesUrl,
+        createdAt: f.createdAt instanceof Date ? f.createdAt.toISOString() : new Date(f.createdAt).toISOString(),
+        status: f.status,
+        blocked: f.blocked,
+    };
+} 

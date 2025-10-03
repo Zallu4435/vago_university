@@ -1,6 +1,7 @@
 import { ICourseEnrollmentController } from "../../../presentation/http/IHttp";
 import { EnrollmentController } from "../../../presentation/http/courses/EnrollmentController";
-import { GetEnrollmentsUseCase, ApproveEnrollmentUseCase, RejectEnrollmentUseCase, GetCourseRequestDetailsUseCase, IApproveEnrollmentUseCase, IRejectEnrollmentUseCase, IGetCourseRequestDetailsUseCase, IGetEnrollmentsUseCase } from "../../../application/courses/useCases/EnrollmentUseCases";
+import { GetEnrollmentsUseCase, ApproveEnrollmentUseCase, RejectEnrollmentUseCase, GetCourseRequestDetailsUseCase } from "../../../application/courses/useCases/EnrollmentUseCases";
+import { IApproveEnrollmentUseCase, IRejectEnrollmentUseCase, IGetCourseRequestDetailsUseCase, IGetEnrollmentsUseCase } from "../../../application/courses/useCases/IEnrollmentUseCases";
 import { CoursesRepository } from "../../repositories/courses/CourseRepository";
 
 export function getCourseEnrollmentsComposer(): ICourseEnrollmentController {

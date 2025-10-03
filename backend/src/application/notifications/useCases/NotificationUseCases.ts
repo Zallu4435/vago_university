@@ -24,31 +24,16 @@ import {
     InvalidNotificationIdError,
     NotificationCreationFailedError,
 } from "../../../domain/notifications/errors/NotificationErrors";
+import {
+    ICreateNotificationUseCase,
+    IGetAllNotificationsUseCase,
+    IGetIndividualNotificationUseCase,
+    IDeleteNotificationUseCase,
+    IMarkNotificationAsReadUseCase,
+    IMarkAllNotificationsAsReadUseCase
+} from "./INotificationUseCases";
 
 
-export interface ICreateNotificationUseCase {
-    execute(params: CreateNotificationRequestDTO): Promise<CreateNotificationResponseDTO>;
-}
-
-export interface IGetAllNotificationsUseCase {
-    execute(params: GetAllNotificationsRequestDTO): Promise<GetAllNotificationsResponseDTO>;
-}
-
-export interface IGetIndividualNotificationUseCase {
-    execute(params: GetIndividualNotificationRequestDTO): Promise<GetIndividualNotificationResponseDTO>;
-}
-
-export interface IDeleteNotificationUseCase {
-    execute(params: DeleteNotificationRequestDTO): Promise<DeleteNotificationResponseDTO>;
-}
-
-export interface IMarkNotificationAsReadUseCase {
-    execute(params: MarkNotificationAsReadRequestDTO): Promise<MarkNotificationAsReadResponseDTO>;
-}
-
-export interface IMarkAllNotificationsAsReadUseCase {
-    execute(params: MarkAllNotificationsAsReadRequestDTO): Promise<MarkAllNotificationsAsReadResponseDTO>;
-}
 
 export class CreateNotificationUseCase implements ICreateNotificationUseCase {
     constructor(private _notificationRepository: INotificationRepository) { }

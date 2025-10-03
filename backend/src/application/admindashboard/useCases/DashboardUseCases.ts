@@ -37,39 +37,16 @@ import {
   DashboardActivitiesError,
   DashboardAlertsError,
 } from '../../../domain/admindashboard/errors/DashboardErrors';
-
-
-export interface IGetDashboardDataUseCase {
-  execute(params: GetDashboardDataRequestDTO): Promise<ResponseDTO<GetDashboardDataResponseDTO>>;
-}
-
-export interface IGetDashboardMetricsUseCase {
-  execute(params: GetDashboardMetricsRequestDTO): Promise<ResponseDTO<GetDashboardMetricsResponseDTO>>;
-}
-
-export interface IGetUserGrowthDataUseCase {
-  execute(params: GetUserGrowthDataRequestDTO): Promise<ResponseDTO<GetUserGrowthDataResponseDTO>>;
-}
-
-export interface IGetRevenueDataUseCase {
-  execute(params: GetRevenueDataRequestDTO): Promise<ResponseDTO<GetRevenueDataResponseDTO>>;
-}
-
-export interface IGetPerformanceDataUseCase {
-  execute(params: GetPerformanceDataRequestDTO): Promise<ResponseDTO<PerformanceData[]>>;
-}
-
-export interface IGetRecentActivitiesUseCase {
-  execute(params: GetRecentActivitiesRequestDTO): Promise<ResponseDTO<GetRecentActivitiesResponseDTO>>;
-}
-
-export interface IGetSystemAlertsUseCase {
-  execute(params: GetSystemAlertsRequestDTO): Promise<ResponseDTO<GetSystemAlertsResponseDTO>>;
-}
-
-export interface IRefreshDashboardUseCase {
-  execute(params: RefreshDashboardRequestDTO): Promise<ResponseDTO<DashboardDataRaw>>;
-}
+import {
+  IGetDashboardDataUseCase,
+  IGetDashboardMetricsUseCase,
+  IGetUserGrowthDataUseCase,
+  IGetRevenueDataUseCase,
+  IGetPerformanceDataUseCase,
+  IGetRecentActivitiesUseCase,
+  IGetSystemAlertsUseCase,
+  IRefreshDashboardUseCase
+} from './IDashboardUseCases';
 
 
 export class GetDashboardDataUseCase implements IGetDashboardDataUseCase {

@@ -8,6 +8,8 @@ import {
   IToggleBookmarkUseCase,
   IGetCompletedChaptersUseCase,
   IGetBookmarkedChaptersUseCase,
+} from "../../../application/diploma/useCases/IUserDiplomaUseCases";
+import {
   GetUserDiplomasUseCase,
   GetUserDiplomaByIdUseCase,
   GetUserDiplomaChapterUseCase,

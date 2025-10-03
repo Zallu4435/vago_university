@@ -1,14 +1,16 @@
 import { IClubsRepository } from "../../../application/clubs/repositories/IClubsRepository";
-import { 
-  GetClubRequestsUseCase, 
-  ApproveClubRequestUseCase, 
-  RejectClubRequestUseCase, 
+import {
+  GetClubRequestsUseCase,
+  ApproveClubRequestUseCase,
+  RejectClubRequestUseCase,
   GetClubRequestDetailsUseCase,
-    IGetClubRequestsUseCase,
-    IApproveClubRequestUseCase,
-    IRejectClubRequestUseCase,
-    IGetClubRequestDetailsUseCase
 } from "../../../application/clubs/useCases/ClubRequestUseCases";
+import {
+  IGetClubRequestsUseCase,
+  IApproveClubRequestUseCase,
+  IRejectClubRequestUseCase,
+  IGetClubRequestDetailsUseCase
+} from "../../../application/clubs/useCases/IClubRequestUseCases";
 import { ClubRequestController } from "../../../presentation/http/clubs/ClubRequestController";
 import { ClubsRepository } from "../../repositories/clubs/ClubsRepository";
 import { IClubRequestController } from "../../../presentation/http/IHttp";

@@ -3,7 +3,7 @@ import {
   IUpdateProfileUseCase,
   IChangePasswordUseCase,
   IUpdateProfilePictureUseCase,
-} from '../../../application/profile/useCases/ProfileUseCases';
+} from '../../../application/profile/useCases/IProfileUseCases';
 import {
   GetProfileRequestDTO,
   UpdateProfileRequestDTO,
@@ -13,78 +13,78 @@ import {
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IProfileController } from '../IHttp';
 
 export class ProfileController implements IProfileController {
-  private httpErrors: HttpErrors;
-  private httpSuccess: HttpSuccess;
+  private _httpErrors: HttpErrors;
+  private _httpSuccess: HttpSuccess;
 
   constructor(
-    private getProfileUseCase: IGetProfileUseCase,
-    private updateProfileUseCase: IUpdateProfileUseCase,
-    private changePasswordUseCase: IChangePasswordUseCase,
-    private updateProfilePictureUseCase: IUpdateProfilePictureUseCase
+    private _getProfileUseCase: IGetProfileUseCase,
+    private _updateProfileUseCase: IUpdateProfileUseCase,
+    private _changePasswordUseCase: IChangePasswordUseCase,
+    private _updateProfilePictureUseCase: IUpdateProfilePictureUseCase
   ) {
-    this.httpErrors = new HttpErrors();
-    this.httpSuccess = new HttpSuccess();
+    this._httpErrors = new HttpErrors();
+    this._httpSuccess = new HttpSuccess();
   }
 
   async getProfile(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const userId = httpRequest.user?.userId;
     if (!userId) {
-      return this.httpErrors.error_401();
+      return this._httpErrors.error_401();
     }
     const dto: GetProfileRequestDTO = { userId };
-    const response = await this.getProfileUseCase.execute(dto);
+    const response = await this._getProfileUseCase.execute(dto);
     if (!response.success) {
       const errorMessage = (response.data as { error?: string })?.error || 'Profile not found';
-      return this.httpErrors.error_400(errorMessage);
+      return this._httpErrors.error_400(errorMessage);
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async updateProfile(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const userId = httpRequest.user?.userId;
     if (!userId) {
-      return this.httpErrors.error_401();
+      return this._httpErrors.error_401();
     }
     const { firstName, lastName, phone, email } = httpRequest.body || {};
     const dto: UpdateProfileRequestDTO = { userId, firstName, lastName, phone, email };
-    const response = await this.updateProfileUseCase.execute(dto);
+    const response = await this._updateProfileUseCase.execute(dto);
     if (!response.success) {
       const errorMessage = (response.data as { error?: string })?.error || 'Failed to update profile';
-      return this.httpErrors.error_400(errorMessage);
+      return this._httpErrors.error_400(errorMessage);
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async changePassword(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const userId = httpRequest.user?.userId;
     if (!userId) {
-      return this.httpErrors.error_401();
+      return this._httpErrors.error_401();
     }
     const { currentPassword, newPassword, confirmPassword } = httpRequest.body || {};
     const dto: ChangePasswordRequestDTO = { userId, currentPassword, newPassword, confirmPassword };
-    const response = await this.changePasswordUseCase.execute(dto);
+    const response = await this._changePasswordUseCase.execute(dto);
     if (!response.success) {
       const errorMessage = (response.data as { error?: string })?.error || 'Failed to change password';
-      return this.httpErrors.error_400(errorMessage);
+      return this._httpErrors.error_400(errorMessage);
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async updateProfilePicture(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const userId = httpRequest.user?.userId;
     const file = httpRequest.file;
     if (!userId) {
-      return this.httpErrors.error_401();
+      return this._httpErrors.error_401();
     }
     if (!file) {
-      return this.httpErrors.error_400('Profile picture file is required');
+      return this._httpErrors.error_400('Profile picture file is required');
     }
     const dto: UpdateProfilePictureRequestDTO = { userId, filePath: file.path };
-    const response = await this.updateProfilePictureUseCase.execute(dto);
+    const response = await this._updateProfilePictureUseCase.execute(dto);
     if (!response.success || !('profilePicture' in response.data)) {
       const errorMessage = (response.data as { error?: string })?.error || 'Failed to update profile picture';
-      return this.httpErrors.error_400(errorMessage);
+      return this._httpErrors.error_400(errorMessage);
     }
-    return this.httpSuccess.success_200({ url: (response.data as { profilePicture?: string }).profilePicture });
+    return this._httpSuccess.success_200({ url: (response.data as { profilePicture?: string }).profilePicture });
   }
 }

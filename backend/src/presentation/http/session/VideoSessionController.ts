@@ -12,25 +12,25 @@ import {
   IUpdateAttendanceStatusUseCase,
   IRecordAttendanceJoinUseCase,
   IRecordAttendanceLeaveUseCase
-} from '../../../application/session/useCases/VideoSessionUseCases';
+} from '../../../application/session/useCases/IVideoSessionUseCases';
 
 const httpErrors = new HttpErrors();
 const httpSuccess = new HttpSuccess();
 
 export class VideoSessionController implements IVideoSessionController {
   constructor(
-    private createUseCase: ICreateVideoSessionUseCase,
-    private joinUseCase: IJoinVideoSessionUseCase,
-    private getUseCase: IGetVideoSessionUseCase,
-    private updateUseCase: IUpdateVideoSessionUseCase,
-    private deleteUseCase: IDeleteVideoSessionUseCase,
-    private getAllUseCase: IGetAllVideoSessionsUseCase,
-    private getUserSessionsUseCase: IGetUserSessionsUseCase,
-    private updateStatusUseCase: IUpdateVideoSessionStatusUseCase,
-    private getSessionAttendanceUseCase: IGetSessionAttendanceUseCase,
-    private updateAttendanceStatusUseCase: IUpdateAttendanceStatusUseCase,
-    private recordAttendanceJoinUseCase: IRecordAttendanceJoinUseCase,
-    private recordAttendanceLeaveUseCase: IRecordAttendanceLeaveUseCase
+    private _createUseCase: ICreateVideoSessionUseCase,
+    private _joinUseCase: IJoinVideoSessionUseCase,
+    private _getUseCase: IGetVideoSessionUseCase,
+    private _updateUseCase: IUpdateVideoSessionUseCase,
+    private _deleteUseCase: IDeleteVideoSessionUseCase,
+    private _getAllUseCase: IGetAllVideoSessionsUseCase,
+    private _getUserSessionsUseCase: IGetUserSessionsUseCase,
+    private _updateStatusUseCase: IUpdateVideoSessionStatusUseCase,
+    private _getSessionAttendanceUseCase: IGetSessionAttendanceUseCase,
+    private _updateAttendanceStatusUseCase: IUpdateAttendanceStatusUseCase,
+    private _recordAttendanceJoinUseCase: IRecordAttendanceJoinUseCase,
+    private _recordAttendanceLeaveUseCase: IRecordAttendanceLeaveUseCase
   ) { }
 
   async createSession(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -42,12 +42,12 @@ export class VideoSessionController implements IVideoSessionController {
       ...httpRequest.body,
       hostId: facultyId
     };
-    const result = await this.createUseCase.execute(sessionData);
+    const result = await this._createUseCase.execute(sessionData);
     return httpSuccess.success_201(result);
   }
 
   async joinSession(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const result = await this.joinUseCase.execute({
+    const result = await this._joinUseCase.execute({
       sessionId: httpRequest.params.id,
       participantId: httpRequest.body.participantId,
     });
@@ -55,32 +55,32 @@ export class VideoSessionController implements IVideoSessionController {
   }
 
   async getSession(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const session = await this.getUseCase.execute(httpRequest.params.id);
+    const session = await this._getUseCase.execute(httpRequest.params.id);
     if (!session) return httpErrors.error_404('Session not found');
     return httpSuccess.success_200(session);
   }
 
   async updateSession(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const session = await this.updateUseCase.execute({ sessionId: httpRequest.params.id, data: httpRequest.body });
+    const session = await this._updateUseCase.execute({ sessionId: httpRequest.params.id, data: httpRequest.body });
     if (!session) return httpErrors.error_404('Session not found');
     return httpSuccess.success_200(session);
   }
 
   async deleteSession(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    await this.deleteUseCase.execute({ sessionId: httpRequest.params.id });
+    await this._deleteUseCase.execute({ sessionId: httpRequest.params.id });
     return { statusCode: 204, body: {} };
   }
 
   async getAllSessions(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { search, status, instructor, course } = httpRequest.query;
-    const sessions = await this.getAllUseCase.execute({ search, status, instructor, course });
+    const sessions = await this._getAllUseCase.execute({ search, status, instructor, course });
     return httpSuccess.success_200(sessions);
   }
 
   async getUserSessions(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { search, status, instructor, course } = httpRequest.query;
     const userId = httpRequest.user?.userId;
-    const result = await this.getUserSessionsUseCase.execute({ search, status, instructor, course, userId });
+    const result = await this._getUserSessionsUseCase.execute({ search, status, instructor, course, userId });
     return httpSuccess.success_200(result);
   }
 
@@ -96,14 +96,14 @@ export class VideoSessionController implements IVideoSessionController {
       mappedStatus = 'Ended';
     }
     
-    const session = await this.updateStatusUseCase.execute(httpRequest.params.id, mappedStatus);
+    const session = await this._updateStatusUseCase.execute(httpRequest.params.id, mappedStatus);
     if (!session) return httpErrors.error_404('Session not found');
     return httpSuccess.success_200(session);
   }
 
   async getSessionAttendance(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const sessionId = httpRequest.params.id || httpRequest.params.sessionId;
-    const attendance = await this.getSessionAttendanceUseCase.execute(sessionId, httpRequest.query);
+    const attendance = await this._getSessionAttendanceUseCase.execute(sessionId, httpRequest.query);
     return httpSuccess.success_200(attendance);
   }
 
@@ -111,7 +111,7 @@ export class VideoSessionController implements IVideoSessionController {
     const sessionId = httpRequest.params.id || httpRequest.params.sessionId;
     const userId = httpRequest.params.userId;
     const { status, name } = httpRequest.body;
-    await this.updateAttendanceStatusUseCase.execute(sessionId, userId, status, name);
+    await this._updateAttendanceStatusUseCase.execute(sessionId, userId, status, name);
     return httpSuccess.success_200({ message: 'Attendance status updated' });
   }
 
@@ -121,7 +121,7 @@ export class VideoSessionController implements IVideoSessionController {
     if (!userId) {
       return httpErrors.error_401('User ID not found in request');
     }
-    await this.recordAttendanceJoinUseCase.execute(sessionId, userId);
+    await this._recordAttendanceJoinUseCase.execute(sessionId, userId);
     return httpSuccess.success_200({ message: 'Join recorded' });
   }
 
@@ -131,7 +131,7 @@ export class VideoSessionController implements IVideoSessionController {
     if (!userId) {
       return httpErrors.error_401('User ID not found in request');
     }
-    await this.recordAttendanceLeaveUseCase.execute(sessionId, userId);
+    await this._recordAttendanceLeaveUseCase.execute(sessionId, userId);
     return httpSuccess.success_200({ message: 'Leave recorded' });
   }
 } 

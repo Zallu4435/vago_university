@@ -10,6 +10,8 @@ import {
   JoinClubUseCase,
   JoinSportUseCase,
   JoinEventUseCase,
+} from "../../../application/campus-life/useCases/CampusLifeUseCases";
+import {
   IGetCampusLifeOverviewUseCase,
   IGetEventsUseCase,
   IGetEventByIdUseCase,
@@ -20,7 +22,7 @@ import {
   IJoinClubUseCase,
   IJoinSportUseCase,
   IJoinEventUseCase,
-} from "../../../application/campus-life/useCases/CampusLifeUseCases";
+} from "../../../application/campus-life/useCases/ICampusLifeUseCases";
 import { CampusLifeRepository} from "../../../infrastructure/repositories/campus-life/CampusLifeRepository"; 
 import { CampusLifeController } from "../../../presentation/http/campus-life/CampusLifeController";
 import { ICampusLifeController } from "../../../presentation/http/IHttp";

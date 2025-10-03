@@ -5,15 +5,15 @@ import {
   IToggleBookmarkUseCase,
   IToggleLikeUseCase,
   IDownloadMaterialUseCase
-} from '../../../application/materials/useCases/UserMaterialUseCases';
+} from '../../../application/materials/useCases/IUserMaterialUseCases';
 
 export class UserMaterialController {
   constructor(
-    private getMaterialsUseCase: IGetUserMaterialsUseCase,
-    private getMaterialByIdUseCase: IGetUserMaterialByIdUseCase,
-    private toggleBookmarkUseCase: IToggleBookmarkUseCase,
-    private toggleLikeUseCase: IToggleLikeUseCase,
-    private downloadMaterialUseCase: IDownloadMaterialUseCase
+    private _getMaterialsUseCase: IGetUserMaterialsUseCase,
+    private _getMaterialByIdUseCase: IGetUserMaterialByIdUseCase,
+    private _toggleBookmarkUseCase: IToggleBookmarkUseCase,
+    private _toggleLikeUseCase: IToggleLikeUseCase,
+    private _downloadMaterialUseCase: IDownloadMaterialUseCase
   ) { }
 
   async getMaterials(req: IHttpRequest): Promise<IHttpResponse> {
@@ -34,7 +34,7 @@ export class UserMaterialController {
       limit: Number(query.limit) || 10
     };
 
-    const result = await this.getMaterialsUseCase.execute(params);
+    const result = await this._getMaterialsUseCase.execute(params);
     return { statusCode: 200, body: { data: result } };
   }
 
@@ -42,7 +42,7 @@ export class UserMaterialController {
     const { id } = req.params;
     const { user } = req;
     if (!user) return { statusCode: 401, body: { error: 'Unauthorized' } };
-    const result = await this.getMaterialByIdUseCase.execute({ id, userId: user.userId });
+    const result = await this._getMaterialByIdUseCase.execute({ id, userId: user.userId });
     return { statusCode: 200, body: { data: result } };
   }
 
@@ -50,7 +50,7 @@ export class UserMaterialController {
     const { id } = req.params;
     const { user } = req;
     if (!user) return { statusCode: 401, body: { error: 'Unauthorized' } };
-    await this.toggleBookmarkUseCase.execute({ id, userId: user.userId });
+    await this._toggleBookmarkUseCase.execute({ id, userId: user.userId });
     return { statusCode: 200, body: { data: { message: 'Bookmark toggled' } } };
   }
 
@@ -58,7 +58,7 @@ export class UserMaterialController {
     const { id } = req.params;
     const { user } = req;
     if (!user) return { statusCode: 401, body: { error: 'Unauthorized' } };
-    await this.toggleLikeUseCase.execute({ id, userId: user.userId });
+    await this._toggleLikeUseCase.execute({ id, userId: user.userId });
     return { statusCode: 200, body: { data: { message: 'Like toggled' } } };
   }
 
@@ -66,7 +66,7 @@ export class UserMaterialController {
     const { id } = req.params;
     const { user } = req;
     if (!user) return { statusCode: 401, body: { error: 'Unauthorized' } };
-    const url = await this.downloadMaterialUseCase.execute({ id, userId: user.userId });
+    const url = await this._downloadMaterialUseCase.execute({ id, userId: user.userId });
     return { statusCode: 200, body: { data: { url } } };
   }
 } 

@@ -4,22 +4,22 @@ import {
   ICreateSportUseCase,
   IUpdateSportUseCase,
   IDeleteSportUseCase,
-} from "../../../application/sports/useCases/SportUseCases";
+} from "../../../application/sports/useCases/ISportUseCases";
 import { ISportsController, IHttpRequest, IHttpResponse, HttpSuccess, HttpErrors } from "../IHttp";
 
 export class SportsController implements ISportsController {
-  private httpSuccess: HttpSuccess;
-  private httpErrors: HttpErrors;
+  private _httpSuccess: HttpSuccess;
+  private _httpErrors: HttpErrors;
 
   constructor(
-    private readonly getSportsUseCase: IGetSportsUseCase,
-    private readonly getSportByIdUseCase: IGetSportByIdUseCase,
-    private readonly createSportUseCase: ICreateSportUseCase,
-    private readonly updateSportUseCase: IUpdateSportUseCase,
-    private readonly deleteSportUseCase: IDeleteSportUseCase
+    private readonly _getSportsUseCase: IGetSportsUseCase,
+    private readonly _getSportByIdUseCase: IGetSportByIdUseCase,
+    private readonly _createSportUseCase: ICreateSportUseCase,
+    private readonly _updateSportUseCase: IUpdateSportUseCase,
+    private readonly _deleteSportUseCase: IDeleteSportUseCase
   ) {
-    this.httpSuccess = new HttpSuccess();
-    this.httpErrors = new HttpErrors();
+    this._httpSuccess = new HttpSuccess();
+    this._httpErrors = new HttpErrors();
   }
 
   async getSports(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -31,10 +31,10 @@ export class SportsController implements ISportsController {
       Number(page) < 1 ||
       Number(limit) < 1
     ) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const result = await this.getSportsUseCase.execute({
+    const result = await this._getSportsUseCase.execute({
       page: Number(page),
       limit: Number(limit),
       sportType: String(sportType),
@@ -45,24 +45,24 @@ export class SportsController implements ISportsController {
       search: search ? String(search) : undefined,
     });
 
-    return this.httpSuccess.success_200(result);
+    return this._httpSuccess.success_200(result);
   }
 
   async getSportById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params;
 
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const sport = await this.getSportByIdUseCase.execute({ id });
-    return this.httpSuccess.success_200(sport);
+    const sport = await this._getSportByIdUseCase.execute({ id });
+    return this._httpSuccess.success_200(sport);
   }
 
   async createSport(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const sportData = httpRequest.body;
-    const sport = await this.createSportUseCase.execute(sportData);
-    return this.httpSuccess.success_201(sport);
+    const sport = await this._createSportUseCase.execute(sportData);
+    return this._httpSuccess.success_201(sport);
   }
 
   async updateSport(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -70,21 +70,21 @@ export class SportsController implements ISportsController {
     const sportData = httpRequest.body;
 
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const sport = await this.updateSportUseCase.execute({ id, ...sportData });
-    return this.httpSuccess.success_200(sport);
+    const sport = await this._updateSportUseCase.execute({ id, ...sportData });
+    return this._httpSuccess.success_200(sport);
   }
 
   async deleteSport(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params;
 
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const result = await this.deleteSportUseCase.execute({ id });
-    return this.httpSuccess.success_200(result);
+    const result = await this._deleteSportUseCase.execute({ id });
+    return this._httpSuccess.success_200(result);
   }
 } 

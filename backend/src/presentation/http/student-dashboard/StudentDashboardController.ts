@@ -6,27 +6,27 @@ import {
   IGetClassesUseCase,
   IGetNewEventsUseCase,
   IGetUserInfoForDashboardUseCase
-} from '../../../application/student/useCases/StudentDashboardUseCases';
+} from '../../../application/student/useCases/IStudentDashboardUseCases';
 
 export class StudentDashboardController implements IStudentDashboardController {
-  private httpErrors: HttpErrors;
-  private httpSuccess: HttpSuccess;
+  private _httpErrors: HttpErrors;
+  private _httpSuccess: HttpSuccess;
 
   constructor(
-    private getAnnouncementsUseCase: IGetAnnouncementsUseCase,
-    private getDeadlinesUseCase: IGetDeadlinesUseCase,
-    private getClassesUseCase: IGetClassesUseCase,
-    private getCalendarDaysUseCase: IGetCalendarDaysUseCase,
-    private getNewEventsUseCase: IGetNewEventsUseCase,
-    private getUserInfoForDashboardUseCase: IGetUserInfoForDashboardUseCase
+    private _getAnnouncementsUseCase: IGetAnnouncementsUseCase,
+    private _getDeadlinesUseCase: IGetDeadlinesUseCase,
+    private _getClassesUseCase: IGetClassesUseCase,
+    private _getCalendarDaysUseCase: IGetCalendarDaysUseCase,
+    private _getNewEventsUseCase: IGetNewEventsUseCase,
+    private _getUserInfoForDashboardUseCase: IGetUserInfoForDashboardUseCase
   ) {
-    this.httpErrors = new HttpErrors();
-    this.httpSuccess = new HttpSuccess();
+    this._httpErrors = new HttpErrors();
+    this._httpSuccess = new HttpSuccess();
   }
 
   async getAnnouncements(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { limit, startDate, endDate } = httpRequest.query || {};
-    const response = await this.getAnnouncementsUseCase.execute({
+    const response = await this._getAnnouncementsUseCase.execute({
       studentId: httpRequest.user?.userId,
       limit: limit ? Number(limit) : undefined,
       startDate: startDate ? String(startDate) : undefined,
@@ -34,14 +34,14 @@ export class StudentDashboardController implements IStudentDashboardController {
     });
 
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async getDeadlines(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { startDate, endDate, urgentOnly, courseId } = httpRequest.query || {};
-    const response = await this.getDeadlinesUseCase.execute({
+    const response = await this._getDeadlinesUseCase.execute({
       studentId: httpRequest.user?.userId,
       startDate: startDate ? String(startDate) : undefined,
       endDate: endDate ? String(endDate) : undefined,
@@ -50,37 +50,37 @@ export class StudentDashboardController implements IStudentDashboardController {
     });
 
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async getClasses(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { term, status } = httpRequest.query || {};
-    const response = await this.getClassesUseCase.execute({
+    const response = await this._getClassesUseCase.execute({
       studentId: httpRequest.user?.userId,
       term: term ? String(term) : undefined,
       status: status ? String(status) as 'upcoming' | 'ongoing' | 'completed' : undefined
     });
 
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async getNewEvents(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const studentId = httpRequest.user?.userId;
-    const response = await this.getNewEventsUseCase.execute(studentId);
+    const response = await this._getNewEventsUseCase.execute(studentId);
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async getCalendarDays(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { month, year, types } = httpRequest.query || {};
-    const response = await this.getCalendarDaysUseCase.execute({
+    const response = await this._getCalendarDaysUseCase.execute({
       studentId: httpRequest.user?.userId,
       month: month ? Number(month) : undefined,
       year: year ? Number(year) : undefined,
@@ -88,9 +88,9 @@ export class StudentDashboardController implements IStudentDashboardController {
     });
 
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
 
@@ -98,12 +98,12 @@ export class StudentDashboardController implements IStudentDashboardController {
     const studentId = httpRequest.user?.userId;
     
     if (!studentId) {
-      return this.httpErrors.error_401();
+      return this._httpErrors.error_401();
     }
-    const response = await this.getUserInfoForDashboardUseCase.execute({ studentId });
+    const response = await this._getUserInfoForDashboardUseCase.execute({ studentId });
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 } 

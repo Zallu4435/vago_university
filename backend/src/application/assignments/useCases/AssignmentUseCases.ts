@@ -22,44 +22,18 @@ import {
 } from '../../../domain/assignments/dtos/AssignmentResponseDTOs';
 import { AssignmentStatus, IAssignment } from '../../../domain/assignments/entities/Assignment';
 import { AssignmentErrorType } from "../../../domain/assignments/enums/AssignmentErrorType";
+import {
+  IGetAssignmentsUseCase,
+  IGetAssignmentByIdUseCase,
+  ICreateAssignmentUseCase,
+  IUpdateAssignmentUseCase,
+  IDeleteAssignmentUseCase,
+  IGetSubmissionsUseCase,
+  IGetSubmissionByIdUseCase,
+  IReviewSubmissionUseCase,
+  IGetAnalyticsUseCase
+} from "./IAssignmentUseCases";
 
-export interface IGetAssignmentsUseCase {
-  execute(params: GetAssignmentsRequestDTO): Promise<ResponseDTO<GetAssignmentsResponseDTO>>;
-}
-
-export interface IGetAssignmentByIdUseCase {
-  execute(params: GetAssignmentByIdRequestDTO): Promise<ResponseDTO<GetAssignmentResponseDTO>>;
-}
-
-export interface ICreateAssignmentUseCase {
-  execute(params: CreateAssignmentRequestDTO): Promise<ResponseDTO<CreateAssignmentResponseDTO>>;
-}
-
-export interface IUpdateAssignmentUseCase {
-  execute(params: UpdateAssignmentRequestDTO): Promise<ResponseDTO<UpdateAssignmentResponseDTO>>;
-}
-
-export interface IDeleteAssignmentUseCase {
-  execute(params: DeleteAssignmentRequestDTO): Promise<ResponseDTO<{ message: string }>>;
-}
-
-export interface IGetSubmissionsUseCase {
-  execute(params: GetSubmissionsRequestDTO): Promise<ResponseDTO<GetSubmissionsResponseDTO>>;
-}
-
-export interface IGetSubmissionByIdUseCase {
-  execute(params: GetSubmissionByIdRequestDTO): Promise<ResponseDTO<GetSubmissionResponseDTO>>;
-}
-
-export interface IReviewSubmissionUseCase {
-  execute(params: ReviewSubmissionRequestDTO): Promise<ResponseDTO<ReviewSubmissionResponseDTO>>;
-}
-
-
-
-export interface IGetAnalyticsUseCase {
-  execute(): Promise<ResponseDTO<AnalyticsResponseDTO>>;
-}
 
 export class GetAssignmentsUseCase implements IGetAssignmentsUseCase {
   constructor(private assignmentRepository: IAssignmentRepository) { }

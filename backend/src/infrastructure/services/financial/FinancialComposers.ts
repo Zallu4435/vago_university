@@ -10,6 +10,10 @@ import {
   GetAllChargesUseCase,
   UpdateChargeUseCase,
   DeleteChargeUseCase,
+  CheckPendingPaymentUseCase,
+  ClearPendingPaymentUseCase,
+} from '../../../application/financial/useCases/FinancialUseCases';
+import {
   IGetStudentFinancialInfoUseCase,
   IGetAllPaymentsUseCase,
   IGetOnePaymentUseCase,
@@ -20,11 +24,9 @@ import {
   IGetAllChargesUseCase,
   IUpdateChargeUseCase,
   IDeleteChargeUseCase,
-  CheckPendingPaymentUseCase,
   ICheckPendingPaymentUseCase,
-  ClearPendingPaymentUseCase,
   IClearPendingPaymentUseCase,
-} from '../../../application/financial/useCases/FinancialUseCases';
+} from '../../../application/financial/useCases/IFinancialUseCases';
 import { FinancialRepository } from '../../repositories/financial/FinancialRepository';
 import { FinancialController } from '../../../presentation/http/financial/FinancialController';
 import { IFinancialController } from '../../../presentation/http/IHttp';

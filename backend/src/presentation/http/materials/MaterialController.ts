@@ -1,44 +1,44 @@
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IMaterialController } from '../IHttp';
-import { IGetMaterialByIdUseCase, ICreateMaterialUseCase, IUpdateMaterialUseCase, IDeleteMaterialUseCase, IGetMaterialsUseCase } from '../../../application/materials/useCases/MaterialUseCases';
+import { IGetMaterialByIdUseCase, ICreateMaterialUseCase, IUpdateMaterialUseCase, IDeleteMaterialUseCase, IGetMaterialsUseCase } from '../../../application/materials/useCases/IMaterialUseCases';
 import { MaterialUpdateData, UploadedFile } from '../../../domain/materials/entities/MaterialTypes';
 
 export class MaterialController implements IMaterialController {
-  private httpErrors: HttpErrors;
-  private httpSuccess: HttpSuccess;
+  private _httpErrors: HttpErrors;
+  private _httpSuccess: HttpSuccess;
 
   constructor(
-    private getMaterialsUseCase: IGetMaterialsUseCase,
-    private getMaterialByIdUseCase: IGetMaterialByIdUseCase,
-    private createMaterialUseCase: ICreateMaterialUseCase,
-    private updateMaterialUseCase: IUpdateMaterialUseCase,
-    private deleteMaterialUseCase: IDeleteMaterialUseCase
+    private _getMaterialsUseCase: IGetMaterialsUseCase,
+    private _getMaterialByIdUseCase: IGetMaterialByIdUseCase,
+    private _createMaterialUseCase: ICreateMaterialUseCase,
+    private _updateMaterialUseCase: IUpdateMaterialUseCase,
+    private _deleteMaterialUseCase: IDeleteMaterialUseCase
   ) {
-    this.httpErrors = new HttpErrors();
-    this.httpSuccess = new HttpSuccess();
+    this._httpErrors = new HttpErrors();
+    this._httpSuccess = new HttpSuccess();
   }
 
   async getMaterials(httpRequest: IHttpRequest): Promise<IHttpResponse> {
       const { query } = httpRequest;
       
-      const result = await this.getMaterialsUseCase.execute(query);
-      return this.httpSuccess.success_200(result);
+      const result = await this._getMaterialsUseCase.execute(query);
+      return this._httpSuccess.success_200(result);
   }
 
   async getMaterialById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
       const { id } = httpRequest.params;
       if (!id) {
-        return this.httpErrors.error_400();
+        return this._httpErrors.error_400();
       }
-      const result = await this.getMaterialByIdUseCase.execute({ id });
+      const result = await this._getMaterialByIdUseCase.execute({ id });
       if (!result) {
-        return this.httpErrors.error_404();
+        return this._httpErrors.error_404();
       }
-      return this.httpSuccess.success_200(result);
+      return this._httpSuccess.success_200(result);
   }
 
   async createMaterial(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     if (!httpRequest.body || !httpRequest.files) {
-        return this.httpErrors.error_400();
+        return this._httpErrors.error_400();
       }
     
     let file: UploadedFile | undefined, thumbnail: UploadedFile | undefined;
@@ -52,7 +52,7 @@ export class MaterialController implements IMaterialController {
     }
     
     if (!file) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     
     let processedTags: string[] = [];
@@ -79,14 +79,14 @@ export class MaterialController implements IMaterialController {
       thumbnailUrl: thumbnail?.path || file.path
     };
         
-    const result = await this.createMaterialUseCase.execute(materialData);
-    return this.httpSuccess.success_201(result);
+    const result = await this._createMaterialUseCase.execute(materialData);
+    return this._httpSuccess.success_201(result);
   }
 
   async updateMaterial(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params;
     if (!id || !httpRequest.body) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     
     let file: UploadedFile | undefined, thumbnail: UploadedFile | undefined;
@@ -138,19 +138,19 @@ export class MaterialController implements IMaterialController {
       updateData.thumbnailUrl = httpRequest.body.thumbnailUrl;
     }
         
-    const result = await this.updateMaterialUseCase.execute(updateData);
+    const result = await this._updateMaterialUseCase.execute(updateData);
     if (!result) {
-      return this.httpErrors.error_404();
+      return this._httpErrors.error_404();
     }
-    return this.httpSuccess.success_200(result);
+    return this._httpSuccess.success_200(result);
   }
 
   async deleteMaterial(httpRequest: IHttpRequest): Promise<IHttpResponse> {
       const { id } = httpRequest.params;
       if (!id) {
-        return this.httpErrors.error_400();
+        return this._httpErrors.error_400();
       }
-      await this.deleteMaterialUseCase.execute({ id });
-      return this.httpSuccess.success_200({ message: 'Material deleted successfully' });
+      await this._deleteMaterialUseCase.execute({ id });
+      return this._httpSuccess.success_200({ message: 'Material deleted successfully' });
   }
 } 

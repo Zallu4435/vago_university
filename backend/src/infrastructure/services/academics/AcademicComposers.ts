@@ -9,7 +9,9 @@ import {
   IGetRequirementsInfoUseCase,
   IRegisterCourseUseCase,
   IDropCourseUseCase,
-  IRequestTranscriptUseCase,
+  IRequestTranscriptUseCase
+} from "../../../application/academics/useCases/IAcademicUseCases";
+import {
   GetStudentInfoUseCase,
   GetGradeInfoUseCase,
   GetCoursesUseCase,
@@ -19,7 +21,7 @@ import {
   GetRequirementsInfoUseCase,
   RegisterCourseUseCase,
   DropCourseUseCase,
-  RequestTranscriptUseCase,
+  RequestTranscriptUseCase
 } from "../../../application/academics/useCases/AcademicUseCases";
 import { AcademicRepository } from "../../repositories/academics/AcademicRepository";
 import { IAcademicController } from "../../../presentation/http/IHttp";

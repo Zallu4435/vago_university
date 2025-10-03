@@ -3,12 +3,14 @@ import {
     GetProfileUseCase,
     UpdateProfileUseCase,
     ChangePasswordUseCase,
-    UpdateProfilePictureUseCase,
+    UpdateProfilePictureUseCase
+} from '../../../application/profile/useCases/ProfileUseCases';
+import {
     IGetProfileUseCase,
     IUpdateProfileUseCase,
     IChangePasswordUseCase,
     IUpdateProfilePictureUseCase,
-} from '../../../application/profile/useCases/ProfileUseCases';
+} from '../../../application/profile/useCases/IProfileUseCases';
 import { ProfileRepository } from '../../repositories/profile/ProfileRepository';
 import { ProfileController } from '../../../presentation/http/profile/ProfileController';
 import { IProfileController } from '../../../presentation/http/IHttp';

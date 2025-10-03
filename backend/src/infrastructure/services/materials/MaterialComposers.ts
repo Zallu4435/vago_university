@@ -1,5 +1,6 @@
 import { MaterialsRepository } from '../../repositories/materials/MaterialsRepository';
-import { GetMaterialsUseCase, GetMaterialByIdUseCase, CreateMaterialUseCase, UpdateMaterialUseCase, DeleteMaterialUseCase, IGetMaterialsUseCase, IGetMaterialByIdUseCase, ICreateMaterialUseCase, IUpdateMaterialUseCase, IDeleteMaterialUseCase } from '../../../application/materials/useCases/MaterialUseCases';
+import { GetMaterialsUseCase, GetMaterialByIdUseCase, CreateMaterialUseCase, UpdateMaterialUseCase, DeleteMaterialUseCase } from '../../../application/materials/useCases/MaterialUseCases';
+import { IGetMaterialsUseCase, IGetMaterialByIdUseCase, ICreateMaterialUseCase, IUpdateMaterialUseCase, IDeleteMaterialUseCase } from '../../../application/materials/useCases/IMaterialUseCases';
 import { MaterialController } from '../../../presentation/http/materials/MaterialController';
 
 export class MaterialComposers {

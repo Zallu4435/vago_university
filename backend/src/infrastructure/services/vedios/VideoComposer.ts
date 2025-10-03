@@ -7,6 +7,8 @@ import {
   ICreateVideoUseCase,
   IUpdateVideoUseCase,
   IDeleteVideoUseCase,
+} from '../../../application/video/useCases/IVideoUseCases';
+import {
   GetVideosUseCase, 
   GetVideoByIdUseCase, 
   CreateVideoUseCase, 

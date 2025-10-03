@@ -11,29 +11,16 @@ import {
   GetSportRequestDetailsResponseDTO,
   JoinSportResponseDTO,
 } from "../../../domain/sports/dtos/SportResponseDTOs";
+import {
+  IGetSportRequestsUseCase,
+  IApproveSportRequestUseCase,
+  IRejectSportRequestUseCase,
+  IGetSportRequestDetailsUseCase,
+  IJoinSportUseCase
+} from './ISportRequestUseCases';
 
 
-export interface IGetSportRequestsUseCase {
-  execute(params: GetSportRequestsRequestDTO): Promise<GetSportRequestsResponseDTO>;
-}
-
-export interface IApproveSportRequestUseCase {
-  execute(params: ApproveSportRequestRequestDTO): Promise<{ message: string }>;
-}
-
-export interface IRejectSportRequestUseCase {
-  execute(params: RejectSportRequestRequestDTO): Promise<{ message: string }>;
-}
-
-export interface IGetSportRequestDetailsUseCase {
-  execute(params: GetSportRequestDetailsRequestDTO): Promise<GetSportRequestDetailsResponseDTO>;
-}
-
-export interface IJoinSportUseCase {
-  execute(params: JoinSportRequestDTO): Promise<JoinSportResponseDTO>;
-}
-
-export class GetSportRequestsUseCase {
+export class GetSportRequestsUseCase implements IGetSportRequestsUseCase {
   constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: GetSportRequestsRequestDTO): Promise<GetSportRequestsResponseDTO> {
@@ -59,7 +46,7 @@ export class GetSportRequestsUseCase {
   }
 }
 
-export class ApproveSportRequestUseCase {
+export class ApproveSportRequestUseCase implements IApproveSportRequestUseCase {
   constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: ApproveSportRequestRequestDTO): Promise<{ message: string }> {
@@ -78,7 +65,7 @@ export class ApproveSportRequestUseCase {
   }
 }
 
-export class RejectSportRequestUseCase {
+export class RejectSportRequestUseCase implements IRejectSportRequestUseCase {
   constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: RejectSportRequestRequestDTO): Promise<{ message: string }> {
@@ -97,7 +84,7 @@ export class RejectSportRequestUseCase {
   }
 }
 
-export class GetSportRequestDetailsUseCase {
+export class GetSportRequestDetailsUseCase implements IGetSportRequestDetailsUseCase {
   constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: GetSportRequestDetailsRequestDTO): Promise<GetSportRequestDetailsResponseDTO> {
@@ -140,7 +127,7 @@ export class GetSportRequestDetailsUseCase {
   }
 }
 
-export class JoinSportUseCase {
+export class JoinSportUseCase implements IJoinSportUseCase {
   constructor(private _sportsRepository: ISportsRepository) { }
 
   async execute(params: JoinSportRequestDTO): Promise<JoinSportResponseDTO> {

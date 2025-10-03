@@ -9,6 +9,8 @@ import {
   ConfirmFacultyOfferUseCase,
   DownloadCertificateUseCase,
   BlockFacultyUseCase,
+} from '../../../application/faculty/useCases/FacultyUseCases';
+import {
   IGetFacultyUseCase,
   IGetFacultyByIdUseCase,
   IGetFacultyByTokenUseCase,
@@ -18,7 +20,7 @@ import {
   IConfirmFacultyOfferUseCase,
   IDownloadCertificateUseCase,
   IBlockFacultyUseCase,
-} from '../../../application/faculty/useCases/FacultyUseCases';
+} from '../../../application/faculty/useCases/IFacultyUseCases';
 import { FacultyRepository } from '../../repositories/faculty/FacultyRepository';
 import { FacultyController } from '../../../presentation/http/faculty/FacultyController';
 import { IFacultyController } from '../../../presentation/http/IHttp';

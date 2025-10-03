@@ -6,6 +6,8 @@ import {
   IUpdateDiplomaUseCase,
   IDeleteDiplomaUseCase,
   IEnrollStudentUseCase,
+} from "../../../application/diploma/useCases/IDiplomaUseCases";
+import {
   GetDiplomasUseCase,
   GetDiplomaByIdUseCase,
   CreateDiplomaUseCase,

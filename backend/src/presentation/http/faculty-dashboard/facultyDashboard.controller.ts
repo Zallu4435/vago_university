@@ -1,11 +1,11 @@
 import { IHttpRequest, IHttpResponse, HttpErrors, HttpSuccess, IFacultyDashboardController } from '../IHttp';
 import {
-  GetFacultyDashboardStatsUseCase,
-  GetFacultyDashboardDataUseCase,
-  GetFacultyWeeklyAttendanceUseCase,
-  GetFacultyCoursePerformanceUseCase,
-  GetFacultySessionDistributionUseCase,
-  GetFacultyRecentActivitiesUseCase,
+  IGetFacultyDashboardStatsUseCase,
+  IGetFacultyDashboardDataUseCase,
+  IGetFacultyWeeklyAttendanceUseCase,
+  IGetFacultyCoursePerformanceUseCase,
+  IGetFacultySessionDistributionUseCase,
+  IGetFacultyRecentActivitiesUseCase,
 } from "../../../application/faculty/dashboard/useCases/FacultyDashboardUseCases";
 import {
   GetFacultyDashboardStatsRequestDTO,
@@ -24,7 +24,6 @@ import {
   GetFacultyRecentActivitiesResponseDTO,
 } from "../../../domain/faculty/dashboard/dtos/FacultyDashboardResponseDTOs";
 
-// Error response type for clean architecture
 interface ErrorResponse {
   error: string;
   message?: string;
@@ -32,102 +31,102 @@ interface ErrorResponse {
 }
 
 export class FacultyDashboardController implements IFacultyDashboardController {
-  private httpErrors: HttpErrors;
-  private httpSuccess: HttpSuccess;
+  private _httpErrors: HttpErrors;
+  private _httpSuccess: HttpSuccess;
 
   constructor(
-    private getFacultyDashboardStatsUseCase: GetFacultyDashboardStatsUseCase,
-    private getFacultyDashboardDataUseCase: GetFacultyDashboardDataUseCase,
-    private getFacultyWeeklyAttendanceUseCase: GetFacultyWeeklyAttendanceUseCase,
-    private getFacultyCoursePerformanceUseCase: GetFacultyCoursePerformanceUseCase,
-    private getFacultySessionDistributionUseCase: GetFacultySessionDistributionUseCase,
-    private getFacultyRecentActivitiesUseCase: GetFacultyRecentActivitiesUseCase
+    private _getFacultyDashboardStatsUseCase: IGetFacultyDashboardStatsUseCase,
+    private _getFacultyDashboardDataUseCase: IGetFacultyDashboardDataUseCase,
+    private _getFacultyWeeklyAttendanceUseCase: IGetFacultyWeeklyAttendanceUseCase,
+    private _getFacultyCoursePerformanceUseCase: IGetFacultyCoursePerformanceUseCase,
+    private _getFacultySessionDistributionUseCase: IGetFacultySessionDistributionUseCase,
+    private _getFacultyRecentActivitiesUseCase: IGetFacultyRecentActivitiesUseCase
   ) {
-    this.httpErrors = new HttpErrors();
-    this.httpSuccess = new HttpSuccess();
+    this._httpErrors = new HttpErrors();
+    this._httpSuccess = new HttpSuccess();
   }
 
   async getDashboardStats(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const facultyId = httpRequest.user?.userId || httpRequest.params?.facultyId;
     if (!facultyId) {
-      return this.httpErrors.error_400("Faculty ID is required");
+      return this._httpErrors.error_400("Faculty ID is required");
     }
     const params: GetFacultyDashboardStatsRequestDTO = { facultyId };
-    const result = await this.getFacultyDashboardStatsUseCase.execute(params);
+    const result = await this._getFacultyDashboardStatsUseCase.execute(params);
     if (result.success) {
-      return this.httpSuccess.success_200((result.data as GetFacultyDashboardStatsResponseDTO).stats);
+      return this._httpSuccess.success_200((result.data as GetFacultyDashboardStatsResponseDTO).stats);
     } else {
-      return this.httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch dashboard stats");
+      return this._httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch dashboard stats");
     }
   }
 
   async getDashboardData(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const facultyId = httpRequest.user?.userId || httpRequest.params?.facultyId;
     if (!facultyId) {
-      return this.httpErrors.error_400("Faculty ID is required");
+      return this._httpErrors.error_400("Faculty ID is required");
     }
     const params: GetFacultyDashboardDataRequestDTO = { facultyId };
-    const result = await this.getFacultyDashboardDataUseCase.execute(params);
+    const result = await this._getFacultyDashboardDataUseCase.execute(params);
     if (result.success) {
-      return this.httpSuccess.success_200((result.data as GetFacultyDashboardDataResponseDTO).dashboardData);
+      return this._httpSuccess.success_200((result.data as GetFacultyDashboardDataResponseDTO).dashboardData);
     } else {
-      return this.httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch dashboard data");
+      return this._httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch dashboard data");
     }
   }
 
   async getWeeklyAttendance(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const facultyId = httpRequest.user?.userId || httpRequest.params?.facultyId;
     if (!facultyId) {
-      return this.httpErrors.error_400("Faculty ID is required");
+      return this._httpErrors.error_400("Faculty ID is required");
     }
     const params: GetFacultyWeeklyAttendanceRequestDTO = { facultyId };
-    const result = await this.getFacultyWeeklyAttendanceUseCase.execute(params);
+    const result = await this._getFacultyWeeklyAttendanceUseCase.execute(params);
     if (result.success) {
-      return this.httpSuccess.success_200((result.data as GetFacultyWeeklyAttendanceResponseDTO).weeklyAttendance);
+      return this._httpSuccess.success_200((result.data as GetFacultyWeeklyAttendanceResponseDTO).weeklyAttendance);
     } else {
-      return this.httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch weekly attendance");
+      return this._httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch weekly attendance");
     }
   }
 
   async getCoursePerformance(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const facultyId = httpRequest.user?.userId || httpRequest.params?.facultyId;
     if (!facultyId) {
-      return this.httpErrors.error_400("Faculty ID is required");
+      return this._httpErrors.error_400("Faculty ID is required");
     }
     const params: GetFacultyCoursePerformanceRequestDTO = { facultyId };
-    const result = await this.getFacultyCoursePerformanceUseCase.execute(params);
+    const result = await this._getFacultyCoursePerformanceUseCase.execute(params);
     if (result.success) {
-      return this.httpSuccess.success_200((result.data as GetFacultyCoursePerformanceResponseDTO).assignmentPerformance);
+      return this._httpSuccess.success_200((result.data as GetFacultyCoursePerformanceResponseDTO).assignmentPerformance);
     } else {
-      return this.httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch assignment performance");
+      return this._httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch assignment performance");
     }
   }
 
   async getSessionDistribution(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const facultyId = httpRequest.user?.userId || httpRequest.params?.facultyId;
     if (!facultyId) {
-      return this.httpErrors.error_400("Faculty ID is required");
+      return this._httpErrors.error_400("Faculty ID is required");
     }
     const params: GetFacultySessionDistributionRequestDTO = { facultyId };
-    const result = await this.getFacultySessionDistributionUseCase.execute(params);
+    const result = await this._getFacultySessionDistributionUseCase.execute(params);
     if (result.success) {
-      return this.httpSuccess.success_200((result.data as GetFacultySessionDistributionResponseDTO).sessionDistribution);
+      return this._httpSuccess.success_200((result.data as GetFacultySessionDistributionResponseDTO).sessionDistribution);
     } else {
-      return this.httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch session distribution");
+      return this._httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch session distribution");
     }
   }
 
   async getRecentActivities(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const facultyId = httpRequest.user?.userId || httpRequest.params?.facultyId;
     if (!facultyId) {
-      return this.httpErrors.error_400("Faculty ID is required");
+      return this._httpErrors.error_400("Faculty ID is required");
     }
     const params: GetFacultyRecentActivitiesRequestDTO = { facultyId };
-    const result = await this.getFacultyRecentActivitiesUseCase.execute(params);
+    const result = await this._getFacultyRecentActivitiesUseCase.execute(params);
     if (result.success) {
-      return this.httpSuccess.success_200((result.data as GetFacultyRecentActivitiesResponseDTO).recentActivities);
+      return this._httpSuccess.success_200((result.data as GetFacultyRecentActivitiesResponseDTO).recentActivities);
     } else {
-      return this.httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch recent activities");
+      return this._httpErrors.error_400((result.data as ErrorResponse)?.error || "Failed to fetch recent activities");
     }
   }
 

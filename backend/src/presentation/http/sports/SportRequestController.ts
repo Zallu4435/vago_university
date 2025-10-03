@@ -4,22 +4,22 @@ import {
   IRejectSportRequestUseCase,
   IGetSportRequestDetailsUseCase,
   IJoinSportUseCase,
-} from "../../../application/sports/useCases/SportRequestUseCases";
+} from "../../../application/sports/useCases/ISportRequestUseCases";
 import { ISportRequestController, IHttpRequest, IHttpResponse, HttpSuccess, HttpErrors } from "../IHttp";
 
 export class SportRequestController implements ISportRequestController {
-  private httpSuccess: HttpSuccess;
-  private httpErrors: HttpErrors;
+  private _httpSuccess: HttpSuccess;
+  private _httpErrors: HttpErrors;
 
   constructor(
-    private readonly getSportRequestsUseCase: IGetSportRequestsUseCase,
-    private readonly approveSportRequestUseCase: IApproveSportRequestUseCase,
-    private readonly rejectSportRequestUseCase: IRejectSportRequestUseCase,
-    private readonly getSportRequestDetailsUseCase: IGetSportRequestDetailsUseCase,
-    private readonly joinSportUseCase: IJoinSportUseCase
+    private readonly _getSportRequestsUseCase: IGetSportRequestsUseCase,
+    private readonly _approveSportRequestUseCase: IApproveSportRequestUseCase,
+    private readonly _rejectSportRequestUseCase: IRejectSportRequestUseCase,
+    private readonly _getSportRequestDetailsUseCase: IGetSportRequestDetailsUseCase,
+    private readonly _joinSportUseCase: IJoinSportUseCase
   ) {
-    this.httpSuccess = new HttpSuccess();
-    this.httpErrors = new HttpErrors();
+    this._httpSuccess = new HttpSuccess();
+    this._httpErrors = new HttpErrors();
   }
 
   async getSportRequests(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -39,10 +39,10 @@ export class SportRequestController implements ISportRequestController {
       Number(page) < 1 ||
       Number(limit) < 1
     ) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const result = await this.getSportRequestsUseCase.execute({
+    const result = await this._getSportRequestsUseCase.execute({
       page: Number(page),
       limit: Number(limit),
       status: String(status),
@@ -52,7 +52,7 @@ export class SportRequestController implements ISportRequestController {
       search: search ? String(search) : undefined,
     });
 
-    return this.httpSuccess.success_200({
+    return this._httpSuccess.success_200({
       data: result.data,
       totalPages: result.totalPages,
       totalItems: result.totalItems,
@@ -64,33 +64,33 @@ export class SportRequestController implements ISportRequestController {
     const { id } = httpRequest.params;
 
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const result = await this.approveSportRequestUseCase.execute({ id });
-    return this.httpSuccess.success_200(result);
+    const result = await this._approveSportRequestUseCase.execute({ id });
+    return this._httpSuccess.success_200(result);
   }
 
   async rejectSportRequest(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params;
 
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const result = await this.rejectSportRequestUseCase.execute({ id });
-    return this.httpSuccess.success_200(result);
+    const result = await this._rejectSportRequestUseCase.execute({ id });
+    return this._httpSuccess.success_200(result);
   }
 
   async getSportRequestDetails(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params;
 
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const requestDetails = await this.getSportRequestDetailsUseCase.execute({ id });
-    return this.httpSuccess.success_200(requestDetails);
+    const requestDetails = await this._getSportRequestDetailsUseCase.execute({ id });
+    return this._httpSuccess.success_200(requestDetails);
   }
 
   async joinSport(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -99,24 +99,24 @@ export class SportRequestController implements ISportRequestController {
     const studentId = httpRequest.headers?.user?.id;
 
     if (!sportId) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
     if (!studentId) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
     if (!reason) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
-    const result = await this.joinSportUseCase.execute({
+    const result = await this._joinSportUseCase.execute({
       sportId,
       studentId,
       reason,
       additionalInfo,
     });
 
-    return this.httpSuccess.success_200(result);
+    return this._httpSuccess.success_200(result);
   }
 } 

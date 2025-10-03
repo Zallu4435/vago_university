@@ -10,9 +10,20 @@ import {
 } from "../../../domain/admission/errors/AdmissionErrors";
 import { isValidObjectId } from "mongoose";
 import { IAdmissionDraft, IAdmission } from '../../../domain/admission/entities/AdmissionTypes';
+import {
+    ICreateApplicationUseCase,
+    IGetApplicationUseCase,
+    ISaveSectionUseCase,
+    IProcessPaymentUseCase,
+    IConfirmPaymentUseCase,
+    IFinalizeAdmissionUseCase,
+    IUploadDocumentUseCase,
+    IUploadMultipleDocumentsUseCase,
+    IGetDocumentByKeyUseCase,
+} from './IAdmissionUseCases';
 
 
-export class CreateApplicationUseCase {
+export class CreateApplicationUseCase implements ICreateApplicationUseCase {
     constructor(private _admissionsRepository: IAdmissionsRepository) { }
     async execute(params: CreateApplicationRequestDTO): Promise<CreateApplicationResponseDTO> {
         if (!params.userId || !isValidObjectId(params.userId)) {
@@ -22,7 +33,7 @@ export class CreateApplicationUseCase {
     }
 }
  
-export class GetApplicationUseCase {
+export class GetApplicationUseCase implements IGetApplicationUseCase {
     constructor(private _admissionsRepository: IAdmissionsRepository) { }
     async execute(params: GetApplicationRequestDTO): Promise<GetApplicationResponseDTO> {
         if (!params.userId || !isValidObjectId(params.userId)) {
@@ -35,7 +46,7 @@ export class GetApplicationUseCase {
     }
 }
 
-export class SaveSectionUseCase {
+export class SaveSectionUseCase implements ISaveSectionUseCase {
     constructor(private _admissionsRepository: IAdmissionsRepository) { }
     async execute(params: SaveSectionRequestDTO): Promise<SaveSectionResponseDTO> {
         const validSections = [
@@ -73,7 +84,7 @@ export class SaveSectionUseCase {
     }
 }
 
-export class ProcessPaymentUseCase {
+export class ProcessPaymentUseCase implements IProcessPaymentUseCase {
     constructor(private _admissionsRepository: IAdmissionsRepository) { }
     async execute(params: ProcessPaymentRequestDTO): Promise<ProcessPaymentResponseDTO> {
         if (!params.applicationId || !params.paymentDetails) {
@@ -83,7 +94,7 @@ export class ProcessPaymentUseCase {
     }
 }
 
-export class ConfirmPaymentUseCase {
+export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
     constructor(private _admissionsRepository: IAdmissionsRepository) { }
     async execute(params: ConfirmPaymentRequestDTO): Promise<ConfirmPaymentResponseDTO> {
         if (!params.paymentId || !params.stripePaymentIntentId) {
@@ -93,7 +104,7 @@ export class ConfirmPaymentUseCase {
     }
 }
 
-export class FinalizeAdmissionUseCase {
+export class FinalizeAdmissionUseCase implements IFinalizeAdmissionUseCase {
     constructor(private _admissionsRepository: IAdmissionsRepository) { }
     async execute(params: FinalizeAdmissionRequestDTO): Promise<FinalizeAdmissionResponseDTO> {
         if (!params.applicationId || !params.paymentId) {
@@ -106,7 +117,7 @@ export class FinalizeAdmissionUseCase {
     }
 }
 
-export class UploadDocumentUseCase {
+export class UploadDocumentUseCase implements IUploadDocumentUseCase {
     constructor(private _admissionsRepository: IAdmissionsRepository) { }
     async execute(params: UploadDocumentRequestDTO): Promise<UploadDocumentResponseDTO> {
         if (!params.applicationId || !params.file) {
@@ -116,7 +127,7 @@ export class UploadDocumentUseCase {
     }
 }
 
-export class UploadMultipleDocumentsUseCase {
+export class UploadMultipleDocumentsUseCase implements IUploadMultipleDocumentsUseCase {
     constructor(private _admissionsRepository: IAdmissionsRepository) { }
     async execute(params: UploadMultipleDocumentsRequestDTO): Promise<UploadMultipleDocumentsResponseDTO> {
         if (!params.applicationId || !params.files) {
@@ -126,9 +137,14 @@ export class UploadMultipleDocumentsUseCase {
     }
 }
 
-export class GetDocumentByKeyUseCase {
+export class GetDocumentByKeyUseCase implements IGetDocumentByKeyUseCase {
     constructor(private _admissionsRepository: IAdmissionsRepository) { }
-    async execute(params: { userId: string; documentKey: string }) {
+    async execute(params: { userId: string; documentKey: string }): Promise<{
+        cloudinaryUrl?: string;
+        fileName?: string;
+        fileType?: string;
+        [key: string]: unknown;
+    } | null> {
         return this._admissionsRepository.getDocumentByKey(params);
     }
 }

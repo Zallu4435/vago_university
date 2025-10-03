@@ -14,26 +14,14 @@ import {
 } from "../../../domain/clubs/dtos/ClubResponseDTOs";
 import { UpdateClubRequest } from "../../../domain/clubs/entities/Club";
 import { IClubsRepository } from "../repositories/IClubsRepository";
+import {
+  IGetClubsUseCase,
+  IGetClubByIdUseCase,
+  ICreateClubUseCase,
+  IUpdateClubUseCase,
+  IDeleteClubUseCase
+} from "./IClubUseCases";
 
-export interface IGetClubsUseCase {
-  execute(dto: GetClubsRequestDTO): Promise<GetClubsResponseDTO>;
-}
-
-export interface IGetClubByIdUseCase {
-  execute(dto: GetClubByIdRequestDTO): Promise<GetClubByIdResponseDTO>;
-}
-
-export interface ICreateClubUseCase {
-  execute(dto: CreateClubRequestDTO): Promise<CreateClubResponseDTO>;
-}
-
-export interface IUpdateClubUseCase {
-  execute(dto: UpdateClubRequestDTO): Promise<UpdateClubResponseDTO>;
-}
-
-export interface IDeleteClubUseCase {
-  execute(dto: DeleteClubRequestDTO): Promise<{ message: string }>;
-}
 
 function isValidObjectId(id: string): boolean {
   return typeof id === 'string' && /^[a-fA-F0-9]{24}$/.test(id);

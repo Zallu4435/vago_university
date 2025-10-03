@@ -10,29 +10,29 @@ import {
   IGetAdmissionByTokenUseCase,
   IGetAdmissionsUseCase,
   IRejectAdmissionUseCase
-} from "../../../application/admin/useCases/AdmissionUseCases";
+} from "../../../application/admin/useCases/IAdmissionUseCases";
 
 export class AdminAdmissionController implements IAdminAdmissionController {
-  private httpErrors: HttpErrors;
-  private httpSuccess: HttpSuccess;
+  private _httpErrors: HttpErrors;
+  private _httpSuccess: HttpSuccess;
 
   constructor(
-    private getAdmissionsUseCase: IGetAdmissionsUseCase,
-    private getAdmissionByIdUseCase: IGetAdmissionByIdUseCase,
-    private getAdmissionByTokenUseCase: IGetAdmissionByTokenUseCase,
-    private approveAdmissionUseCase: IApproveAdmissionUseCase,
-    private rejectAdmissionUseCase: IRejectAdmissionUseCase,
-    private deleteAdmissionUseCase: IDeleteAdmissionUseCase,
-    private confirmAdmissionOfferUseCase: IConfirmAdmissionOfferUseCase,
-    private blockAdmissionUseCase: IBlockAdmissionUseCase
+    private _getAdmissionsUseCase: IGetAdmissionsUseCase,
+    private _getAdmissionByIdUseCase: IGetAdmissionByIdUseCase,
+    private _getAdmissionByTokenUseCase: IGetAdmissionByTokenUseCase,
+    private _approveAdmissionUseCase: IApproveAdmissionUseCase,
+    private _rejectAdmissionUseCase: IRejectAdmissionUseCase,
+    private _deleteAdmissionUseCase: IDeleteAdmissionUseCase,
+    private _confirmAdmissionOfferUseCase: IConfirmAdmissionOfferUseCase,
+    private _blockAdmissionUseCase: IBlockAdmissionUseCase
   ) {
-    this.httpErrors = new HttpErrors();
-    this.httpSuccess = new HttpSuccess();
+    this._httpErrors = new HttpErrors();
+    this._httpSuccess = new HttpSuccess();
   }
 
   async getAdmissions(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { page = 1, limit = 5, status = "all", program = "all", dateRange = "all", startDate, endDate, search } = httpRequest.query || {};
-    const response = await this.getAdmissionsUseCase.execute({
+    const response = await this._getAdmissionsUseCase.execute({
       page: Number(page),
       limit: Number(limit),
       status: String(status),
@@ -43,117 +43,117 @@ export class AdminAdmissionController implements IAdminAdmissionController {
       search: search ? String(search) : undefined,
     });
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async getAdmissionById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const response = await this.getAdmissionByIdUseCase.execute({ id });
+    const response = await this._getAdmissionByIdUseCase.execute({ id });
     if (!response.success) {
-      return this.httpErrors.error_404();
+      return this._httpErrors.error_404();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async getAdmissionByToken(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     const { token } = httpRequest.query || {};
     if (!id || !token || typeof token !== "string") {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const response = await this.getAdmissionByTokenUseCase.execute({
+    const response = await this._getAdmissionByTokenUseCase.execute({
       admissionId: id,
       token,
     });
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async approveAdmission(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     const { programDetails, startDate, scholarshipInfo, additionalNotes } = httpRequest.body || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const response = await this.approveAdmissionUseCase.execute({
+    const response = await this._approveAdmissionUseCase.execute({
       id,
       additionalInfo: { programDetails, startDate, scholarshipInfo, additionalNotes },
     });
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async rejectAdmission(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const response = await this.rejectAdmissionUseCase.execute({ id });
+    const response = await this._rejectAdmissionUseCase.execute({ id });
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async deleteAdmission(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const response = await this.deleteAdmissionUseCase.execute({ id });
+    const response = await this._deleteAdmissionUseCase.execute({ id });
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async confirmAdmissionOffer(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id, action } = httpRequest.params || {};
     const { token } = httpRequest.query || {};
     if (!id || !action || !token || typeof token !== "string") {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     if (action !== "accept" && action !== "reject") {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const response = await this.confirmAdmissionOfferUseCase.execute({
+    const response = await this._confirmAdmissionOfferUseCase.execute({
       admissionId: id,
       token,
       action: action as "accept" | "reject",
     });
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 
   async serveDocument(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     if (!httpRequest.user) {
-      return this.httpErrors.error_401();
+      return this._httpErrors.error_401();
     }
 
     if (httpRequest.user.collection !== 'admin') {
-      return this.httpErrors.error_403();
+      return this._httpErrors.error_403();
     }
 
     const { documentId } = httpRequest.params || {};
     const { admissionId } = httpRequest.query || {};
 
     if (!documentId) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
     if (!admissionId) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
 
     const admission = await Admission.findOne({
@@ -162,7 +162,7 @@ export class AdminAdmissionController implements IAdminAdmissionController {
     });
 
     if (!admission) {
-      return this.httpErrors.error_404();
+      return this._httpErrors.error_404();
     }
 
     const docsArray = Array.isArray(admission.documents?.documents) 
@@ -171,19 +171,19 @@ export class AdminAdmissionController implements IAdminAdmissionController {
     const document = docsArray.find((doc) => doc.id === documentId);
 
     if (!document) {
-      return this.httpErrors.error_404();
+      return this._httpErrors.error_404();
     }
 
     const documentUrl = document.cloudinaryUrl || document.url || document.path;
 
     if (!documentUrl) {
-      return this.httpErrors.error_404();
+      return this._httpErrors.error_404();
     }
 
     const response = await fetch(documentUrl);
 
     if (!response.ok) {
-      return this.httpErrors.error_404();
+      return this._httpErrors.error_404();
     }
 
     const pdfBuffer = await response.arrayBuffer();
@@ -205,12 +205,12 @@ export class AdminAdmissionController implements IAdminAdmissionController {
   async blockAdmission(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params || {};
     if (!id) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const response = await this.blockAdmissionUseCase.execute({ id });
+    const response = await this._blockAdmissionUseCase.execute({ id });
     if (!response.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(response.data);
+    return this._httpSuccess.success_200(response.data);
   }
 }

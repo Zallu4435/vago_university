@@ -9,31 +9,31 @@ import {
   IGetSubmissionByIdUseCase,
   IReviewSubmissionUseCase,
   IGetAnalyticsUseCase
-} from '../../../application/assignments/useCases/AssignmentUseCases';
+} from '../../../application/assignments/useCases/IAssignmentUseCases';
 
 
 export class AssignmentController implements IAssignmentController {
-  private httpSuccess: HttpSuccess;
-  private httpErrors: HttpErrors;
+  private _httpSuccess: HttpSuccess;
+  private _httpErrors: HttpErrors;
 
   constructor(
-    private getAssignmentsUseCase: IGetAssignmentsUseCase,
-    private getAssignmentByIdUseCase: IGetAssignmentByIdUseCase,
-    private createAssignmentUseCase: ICreateAssignmentUseCase,
-    private updateAssignmentUseCase: IUpdateAssignmentUseCase,
-    private deleteAssignmentUseCase: IDeleteAssignmentUseCase,
-    private getSubmissionsUseCase: IGetSubmissionsUseCase,
-    private getSubmissionByIdUseCase: IGetSubmissionByIdUseCase,
-    private reviewSubmissionUseCase: IReviewSubmissionUseCase,
-    private getAnalyticsUseCase: IGetAnalyticsUseCase
+    private _getAssignmentsUseCase: IGetAssignmentsUseCase,
+    private _getAssignmentByIdUseCase: IGetAssignmentByIdUseCase,
+    private _createAssignmentUseCase: ICreateAssignmentUseCase,
+    private _updateAssignmentUseCase: IUpdateAssignmentUseCase,
+    private _deleteAssignmentUseCase: IDeleteAssignmentUseCase,
+    private _getSubmissionsUseCase: IGetSubmissionsUseCase,
+    private _getSubmissionByIdUseCase: IGetSubmissionByIdUseCase,
+    private _reviewSubmissionUseCase: IReviewSubmissionUseCase,
+    private _getAnalyticsUseCase: IGetAnalyticsUseCase
   ) {
-    this.httpSuccess = new HttpSuccess();
-    this.httpErrors = new HttpErrors();
+    this._httpSuccess = new HttpSuccess();
+    this._httpErrors = new HttpErrors();
   }
 
   async getAssignments(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { subject, status, page, limit, search } = httpRequest.query;
-    const result = await this.getAssignmentsUseCase.execute({
+    const result = await this._getAssignmentsUseCase.execute({
       subject: subject as string,
       status: status as 'draft' | 'published' | 'closed',
       page: page ? parseInt(page as string) : undefined,
@@ -41,18 +41,18 @@ export class AssignmentController implements IAssignmentController {
       search: search as string,
     });
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async getAssignmentById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params;
-    const result = await this.getAssignmentByIdUseCase.execute({ id });
+    const result = await this._getAssignmentByIdUseCase.execute({ id });
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async createAssignment(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -60,11 +60,11 @@ export class AssignmentController implements IAssignmentController {
       ...httpRequest.body,
       files: httpRequest.files
     };
-    const result = await this.createAssignmentUseCase.execute(assignmentData);
+    const result = await this._createAssignmentUseCase.execute(assignmentData);
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_201(result.data);
+    return this._httpSuccess.success_201(result.data);
   }
 
   async updateAssignment(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -77,27 +77,27 @@ export class AssignmentController implements IAssignmentController {
         fileSize: file.size
       }));
     }
-    const result = await this.updateAssignmentUseCase.execute({ id, ...updateData });
+    const result = await this._updateAssignmentUseCase.execute({ id, ...updateData });
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async deleteAssignment(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { id } = httpRequest.params;
-    const result = await this.deleteAssignmentUseCase.execute({ id });
+    const result = await this._deleteAssignmentUseCase.execute({ id });
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200({ message: "Assignment deleted successfully" });
+    return this._httpSuccess.success_200({ message: "Assignment deleted successfully" });
   }
 
   async getSubmissions(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { assignmentId } = httpRequest.params;
     const { page, limit, search, status } = httpRequest.query;
 
-    const result = await this.getSubmissionsUseCase.execute({
+    const result = await this._getSubmissionsUseCase.execute({
       assignmentId,
       page: page ? parseInt(page as string) : undefined,
       limit: limit ? parseInt(limit as string) : undefined,
@@ -106,21 +106,21 @@ export class AssignmentController implements IAssignmentController {
     });
 
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async getSubmissionById(httpRequest: IHttpRequest): Promise<IHttpResponse> {
     const { assignmentId, submissionId } = httpRequest.params;
-    const result = await this.getSubmissionByIdUseCase.execute({
+    const result = await this._getSubmissionByIdUseCase.execute({
       assignmentId,
       submissionId
     });
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async reviewSubmission(httpRequest: IHttpRequest): Promise<IHttpResponse> {
@@ -128,15 +128,15 @@ export class AssignmentController implements IAssignmentController {
     
     const { marks, feedback, status, isLate } = httpRequest.body;
     if (!submissionId || submissionId === 'undefined') {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     if (!assignmentId) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
     if (marks === undefined || feedback === undefined || status === undefined || isLate === undefined) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    const result = await this.reviewSubmissionUseCase.execute({
+    const result = await this._reviewSubmissionUseCase.execute({
       assignmentId,
       submissionId,
       marks,
@@ -145,16 +145,16 @@ export class AssignmentController implements IAssignmentController {
       isLate
     });
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 
   async getAnalytics(httpRequest: IHttpRequest): Promise<IHttpResponse> {
-    const result = await this.getAnalyticsUseCase.execute();
+    const result = await this._getAnalyticsUseCase.execute();
     if (!result.success) {
-      return this.httpErrors.error_400();
+      return this._httpErrors.error_400();
     }
-    return this.httpSuccess.success_200(result.data);
+    return this._httpSuccess.success_200(result.data);
   }
 } 

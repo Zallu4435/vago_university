@@ -28,47 +28,19 @@ import {
   IEnrollmentDocument,
   StudentInfoResult,
 } from "../../../domain/academics/entities/Academic";
+import {
+  IGetStudentInfoUseCase,
+  IGetGradeInfoUseCase,
+  IGetCoursesUseCase,
+  IGetAcademicHistoryUseCase,
+  IGetProgramInfoUseCase,
+  IGetProgressInfoUseCase,
+  IGetRequirementsInfoUseCase,
+  IRegisterCourseUseCase,
+  IDropCourseUseCase,
+  IRequestTranscriptUseCase
+} from "./IAcademicUseCases";
 
-
-export interface IGetStudentInfoUseCase {
-  execute(input: GetStudentInfoRequestDTO): Promise<ResponseDTO<GetStudentInfoResponseDTO>>;
-}
-
-export interface IGetGradeInfoUseCase {
-  execute(input: GetGradeInfoRequestDTO): Promise<ResponseDTO<GetGradeInfoResponseDTO>>;
-}
-
-export interface IGetCoursesUseCase {
-  execute(input: GetCoursesRequestDTO): Promise<ResponseDTO<GetCoursesResponseDTO>>;
-}
-
-export interface IGetAcademicHistoryUseCase {
-  execute(input: GetAcademicHistoryRequestDTO): Promise<ResponseDTO<GetAcademicHistoryResponseDTO>>;
-}
-
-export interface IGetProgramInfoUseCase {
-  execute(input: GetProgramInfoRequestDTO): Promise<ResponseDTO<GetProgramInfoResponseDTO>>;
-}
-
-export interface IGetProgressInfoUseCase {
-  execute(input: GetProgressInfoRequestDTO): Promise<ResponseDTO<GetProgressInfoResponseDTO>>;
-}
-
-export interface IGetRequirementsInfoUseCase {
-  execute(input: GetRequirementsInfoRequestDTO): Promise<ResponseDTO<GetRequirementsInfoResponseDTO>>;
-}
-
-export interface IRegisterCourseUseCase {
-  execute(input: RegisterCourseRequestDTO): Promise<ResponseDTO<RegisterCourseResponseDTO>>;
-}
-
-export interface IDropCourseUseCase {
-  execute(input: DropCourseRequestDTO): Promise<ResponseDTO<DropCourseResponseDTO>>;
-}
-
-export interface IRequestTranscriptUseCase {
-  execute(input: RequestTranscriptRequestDTO): Promise<ResponseDTO<RequestTranscriptResponseDTO>>;
-}
 
 export class GetStudentInfoUseCase implements IGetStudentInfoUseCase {
   constructor(private _academicRepository: IAcademicRepository) { }
